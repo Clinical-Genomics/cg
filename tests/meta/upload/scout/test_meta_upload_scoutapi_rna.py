@@ -1,23 +1,21 @@
 """Tests for RNA part of the scout upload API"""
 import logging
 from typing import Dict, Generator, List, Set
-from pathlib import Path
 
+import cg.store as Store
 import pytest
 from _pytest.logging import LogCaptureFixture
-
-from sqlalchemy.orm import Query
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
-from cg.constants.sequencing import SequencingMethod
 from cg.constants.scout_upload import ScoutCustomCaseReportTags
+from cg.constants.sequencing import SequencingMethod
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
-from cg.store.models import Family, Sample
-import cg.store as Store
-from tests.store_helpers import StoreHelpers
-from tests.mocks.hk_mock import MockHousekeeperAPI
+from cg.store.models import Analysis, Family, Sample
 from housekeeper.store.models import File
+from sqlalchemy.orm import Session
+from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.store_helpers import StoreHelpers
 
 
 def set_is_tumour_on_case(store: Store, case_id: str, is_tumour: bool):
@@ -541,7 +539,9 @@ def test_add_rna_sample(
 
     # GIVEN an RNA case and the associated RNA samples
     rna_case: Family = rna_store.get_case_by_internal_id(internal_id=rna_case_id)
-    rna_sample_list: List[Sample] = rna_store.get_samples_by_name_pattern(name_pattern="rna")
+    rna_sample_list: List[Sample] = (
+        rna_store._get_query(table=Sample).filter(Sample.internal_id.like("rna")).all()
+    )
 
     # WHEN running the method to create a nested dictionary with the relationships between RNA/DNA samples and DNA cases
     rna_dna_case_map: dict = upload_scout_api.create_rna_dna_sample_case_map(rna_case=rna_case)
@@ -746,7 +746,7 @@ def test_upload_report_to_scout(
     )
 
 
-def test_upload_rna_report_to_dna_case_in_scout(
+def test_upload_rna_report_to_successful_dna_case_in_scout(
     caplog,
     rna_case_id: str,
     rna_store: Store,
@@ -765,7 +765,7 @@ def test_upload_rna_report_to_dna_case_in_scout(
         bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
     )[0]
 
-    # WHEN uploading a report to Scout
+    # WHEN uploading a report to a completed DNA case in Scout
     upload_mip_analysis_scout_api.upload_rna_report_to_dna_case_in_scout(
         dry_run=False,
         rna_case_id=rna_case_id,
@@ -779,7 +779,6 @@ def test_upload_rna_report_to_dna_case_in_scout(
     )
 
     # THEN the api should know that it should find related DNA cases
-
     assert f"Finding DNA cases related to RNA case {rna_case_id}" in caplog.text
 
     # THEN the report should be uploaded to Scout
@@ -787,4 +786,41 @@ def test_upload_rna_report_to_dna_case_in_scout(
         assert (
             f"Uploading {ScoutCustomCaseReportTags.MULTIQC} report to scout for case {case_id}"
             in caplog.text
+        )
+
+
+def test_upload_rna_report_to_not_yet_uploaded_dna_case_in_scout(
+    caplog,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_mip_analysis_scout_api: UploadScoutAPI,
+    mip_rna_analysis_hk_api: MockHousekeeperAPI,
+):
+    """Test that an error is raised when trying to upload an RNA report to a not yet uploaded DNA case."""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an RNA case, and an store with an RNA connected to it
+    upload_mip_analysis_scout_api.status_db: Store = rna_store
+
+    # GIVEN an RNA case with a multiqc-htlml report
+    multiqc_file: File = mip_rna_analysis_hk_api.files(
+        bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
+    )[0]
+
+    # WHEN finding the related DNA case with no successful upload
+    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
+        case_id=rna_case_id
+    )
+    dna_case: Family = rna_store.get_case_by_internal_id(internal_id=list(dna_case_ids)[0])
+    dna_case.analyses[0].uploaded_at = None
+
+    # WHEN trying to upload the report
+    # THEN a CgDataError should be raised
+    with pytest.raises(CgDataError):
+        upload_mip_analysis_scout_api.upload_rna_report_to_dna_case_in_scout(
+            dry_run=False,
+            rna_case_id=rna_case_id,
+            report_type=ScoutCustomCaseReportTags.MULTIQC,
+            report_file=multiqc_file,
         )

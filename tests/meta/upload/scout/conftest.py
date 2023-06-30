@@ -6,9 +6,7 @@ from pathlib import Path
 from typing import Dict, Generator, List
 
 import pytest
-from housekeeper.store.models import Version
-
-from cg.constants import DataDelivery, FileExtensions, Pipeline
+from cg.constants import DataDelivery, Pipeline
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.sequencing import SequencingMethod
 from cg.io.controller import ReadFile
@@ -18,6 +16,7 @@ from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import MipLoadConfig
 from cg.store import Store
 from cg.store.models import Analysis, Family, Sample
+from housekeeper.store.models import Version
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -70,24 +69,6 @@ def fixture_rna_sample_father_id() -> str:
 def fixture_dna_sample_son_id() -> str:
     """Return a son DNA sample id."""
     return "dna_son"
-
-
-@pytest.fixture(name="dna_sample_daughter_id")
-def fixture_dna_sample_daughter_id() -> str:
-    """Return a daughter DNA sample id."""
-    return "dna_daughter"
-
-
-@pytest.fixture(name="dna_sample_mother_id")
-def fixture_dna_sample_mother_id() -> str:
-    """Return a mother DNA sample id."""
-    return "dna_mother"
-
-
-@pytest.fixture(name="dna_sample_father_id")
-def fixture_dna_sample_father_id() -> str:
-    """Return a father DNA sample id."""
-    return "dna_father"
 
 
 @pytest.fixture(name="another_sample_id")
@@ -236,6 +217,8 @@ def fixture_rna_store(
 
     for link in dna_case.links:
         link.sample.internal_id = link.sample.name
+
+    helpers.add_analysis(store=store, case=dna_case, uploaded_at=datetime.now())
 
     store.session.commit()
     return store
@@ -511,12 +494,6 @@ def fixture_rnafusion_analysis_hk_api(
     """Return a housekeeper api populated with some rnafusion analysis files"""
     helpers.ensure_hk_version(housekeeper_api, rnafusion_analysis_hk_bundle_data)
     return housekeeper_api
-
-
-@pytest.fixture(name="mip_file_handler")
-def fixture_mip_file_handler(mip_dna_analysis_hk_version: Version) -> MipConfigBuilder:
-    """Return a MIP confiig builder."""
-    return MipConfigBuilder(hk_version_obj=mip_dna_analysis_hk_version)
 
 
 @pytest.fixture(name="mip_dna_analysis")

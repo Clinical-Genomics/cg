@@ -1,7 +1,7 @@
-pytest>=5.2     # due to pytest-flask, pytest-cov
-pytest-cov
 coveralls
 mock
+pre-commit
+pytest-cov
 pytest-mock
-snapshottest
-docutils
+pytest
+ruff

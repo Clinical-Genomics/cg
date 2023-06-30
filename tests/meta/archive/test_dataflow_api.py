@@ -1,4 +1,3 @@
-import http
 from datetime import datetime, timedelta
 from pathlib import Path
 from unittest import mock

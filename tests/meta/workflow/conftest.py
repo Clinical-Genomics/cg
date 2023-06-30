@@ -6,9 +6,7 @@ from typing import List, Dict
 import pytest
 from cgmodels.cg.constants import Pipeline
 
-from cg.constants.constants import MicrosaltAppTags, MicrosaltQC, SampleType
-from cg.constants.sequencing import SequencingMethod
-from cg.constants.subject import Gender
+from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 
 from cg.meta.compress.compress import CompressAPI
@@ -16,7 +14,6 @@ from cg.models.compression_data import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.store.models import Family, Sample
 from tests.store_helpers import StoreHelpers
-
 from tests.conftest import fixture_base_store
 from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
 from tests.meta.upload.scout.conftest import fixture_another_sample_id
@@ -211,37 +208,21 @@ def qc_microsalt_context(
     return cg_context
 
 
-@pytest.fixture(name="balsamic_sample_data")
-def fixture_balsamic_sample_data(
-    sample_id: str,
-    cust_sample_id: str,
-    another_sample_id: str,
-    fastq_file_l_1_r_1: str,
-    fastq_file_l_2_r_1: str,
-    fastq_file_l_2_r_2: str,
-    bed_file: str,
-) -> Dict[str, dict]:
-    """Balsamic sample data dictionary."""
+@pytest.fixture(name="rnafusion_metrics")
+def fixture_rnafusion_metrics() -> Dict[str, float]:
+    """Return Rnafusion raw analysis metrics dictionary."""
     return {
-        sample_id: {
-            "gender": Gender.FEMALE,
-            "tissue_type": SampleType.TUMOR.value,
-            "concatenated_path": fastq_file_l_1_r_1,
-            "application_type": SequencingMethod.TGS.value,
-            "target_bed": bed_file,
-        },
-        cust_sample_id: {
-            "gender": Gender.FEMALE,
-            "tissue_type": SampleType.NORMAL.value,
-            "concatenated_path": fastq_file_l_2_r_1,
-            "application_type": SequencingMethod.TGS.value,
-            "target_bed": bed_file,
-        },
-        another_sample_id: {
-            "gender": Gender.FEMALE,
-            "tissue_type": SampleType.NORMAL.value,
-            "concatenated_path": fastq_file_l_2_r_2,
-            "application_type": SequencingMethod.TGS.value,
-            "target_bed": bed_file,
-        },
+        "after_filtering_gc_content": 0.516984,
+        "after_filtering_q20_rate": 0.974834,
+        "after_filtering_q30_rate": 0.929476,
+        "after_filtering_read1_mean_length": 99.0,
+        "before_filtering_total_reads": 149984042.0,
+        "bias_5_3": 1.07,
+        "pct_adapter": 12.005654574904709,
+        "pct_mrna_bases": 85.9731,
+        "pct_ribosomal_bases": 0.6581,
+        "pct_surviving": 99.42004630065911,
+        "pct_duplication": 14.8643,
+        "reads_aligned": 72391566.0,
+        "uniquely_mapped_percent": 91.02,
     }

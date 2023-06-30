@@ -5,7 +5,6 @@ from typing import Dict
 
 import pytest
 from _pytest.logging import LogCaptureFixture
-from cgmodels.cg.constants import Pipeline
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters, LoqusdbMipCustomers

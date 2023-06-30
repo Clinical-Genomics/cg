@@ -4,12 +4,7 @@ import pytest
 
 from cg.constants.demultiplexing import BclConverter
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flow_cell import FlowCell
-
-
-@pytest.fixture(name="flow_cell_name")
-def fixture_flow_cell_name(bcl2fastq_flow_cell_full_name: str) -> str:
-    return bcl2fastq_flow_cell_full_name.split("_")[-1][1:]
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 @pytest.fixture(name="demultiplexed_dragen_flow_cell")
@@ -21,7 +16,7 @@ def fixture_demultiplexed_dragen_flow_cell(
 
 @pytest.fixture(name="dragen_demux_results")
 def fixture_dragen_demux_results(
-    demultiplexed_dragen_flow_cell: Path, dragen_flow_cell: FlowCell
+    demultiplexed_dragen_flow_cell: Path, dragen_flow_cell: FlowCellDirectoryData
 ) -> DemuxResults:
     return DemuxResults(
         demux_dir=demultiplexed_dragen_flow_cell,

@@ -1,24 +1,22 @@
 import datetime as dt
 import re
-from typing import List, Optional, Set, Dict
-
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
-from sqlalchemy.util import deprecated
-from sqlalchemy.orm.attributes import InstrumentedAttribute
+from typing import Dict, List, Optional, Set
 
 from cg.constants import (
     CASE_ACTIONS,
     FLOWCELL_STATUS,
     PREP_CATEGORIES,
-    Priority,
     SEX_OPTIONS,
     STATUS_OPTIONS,
     DataDelivery,
     Pipeline,
+    Priority,
 )
-
 from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.util import deprecated
 
 Model = declarative_base()
 
@@ -441,6 +439,11 @@ class Family(Model, PriorityMixin):
         """Extract samples uploaded to Loqusdb."""
         return [link.sample for link in self.links if link.sample.loqusdb_id]
 
+    @property
+    def is_uploaded(self) -> bool:
+        """Returns True if the latest connected analysis has been uploaded."""
+        return self.analyses and self.analyses[0].uploaded_at
+
     def get_delivery_arguments(self) -> Set[str]:
         """Translates the case data_delivery field to pipeline specific arguments."""
         delivery_arguments: Set[str] = set()
@@ -519,6 +522,11 @@ class Flowcell(Model):
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
     samples = orm.relationship("Sample", secondary=flowcell_sample, backref="flowcells")
+    sequencing_metrics = orm.relationship(
+        "SampleLaneSequencingMetrics",
+        back_populates="flowcell",
+        cascade="all, delete, delete-orphan",
+    )
 
     def __str__(self):
         return self.name
@@ -638,6 +646,9 @@ class Sample(Model, PriorityMixin):
     sequenced_at = Column(types.DateTime)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
+    calculated_read_count = Column(types.BigInteger, default=0)
+
+    sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -760,17 +771,30 @@ class User(Model):
         return self.name
 
 
-class SequencingStatistics(Model):
-    __tablename__ = "sequencing_statistics"
+class SampleLaneSequencingMetrics(Model):
+    """Model for storing sequencing metrics per lane and sample."""
+
+    __tablename__ = "sample_lane_sequencing_metrics"
+
     id = Column(types.Integer, primary_key=True)
-    flow_cell_name = Column(types.String(128), nullable=False)
-    sample_internal_id = Column(types.String(128), nullable=False)
-    lane = Column(types.Integer)
-    yield_in_megabases = Column(types.Integer)
-    read_counts = Column(types.Integer)
-    passed_filter_percent = Column(types.Numeric(10, 5))
-    raw_clusters_per_lane_percent = Column(types.Numeric(10, 5))
-    perfect_index_reads_percent = Column(types.Numeric(10, 5))
-    bases_with_q30_percent = Column(types.Numeric(10, 5))
-    lanes_mean_quality_score = Column(types.Numeric(10, 5))
-    started_at = Column(types.DateTime)
+    flow_cell_name = Column(types.String(32), ForeignKey("flowcell.name"), nullable=False)
+    flow_cell_lane_number = Column(types.Integer)
+
+    sample_internal_id = Column(types.String(32), ForeignKey("sample.internal_id"), nullable=False)
+    sample_total_reads_in_lane = Column(types.BigInteger)
+    sample_base_fraction_passing_q30 = Column(types.Numeric(6, 2))
+    sample_base_mean_quality_score = Column(types.Numeric(6, 2))
+
+    created_at = Column(types.DateTime)
+
+    flowcell = orm.relationship(Flowcell, back_populates="sequencing_metrics")
+    sample = orm.relationship(Sample, back_populates="sequencing_metrics")
+
+    __table_args__ = (
+        UniqueConstraint(
+            "flow_cell_name",
+            "sample_internal_id",
+            "flow_cell_lane_number",
+            name="uix_flowcell_sample_lane",
+        ),
+    )

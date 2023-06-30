@@ -26,7 +26,6 @@ from cg.store.models import Customer, ApplicationVersion, Invoice, Sample
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
 from tests.mocks.limsmock import MockLimsAPI
-from cg.constants.sequencing import RecordType
 from cg.constants.invoice import CustomerNames
 from cg.meta.invoice import InvoiceAPI
 
@@ -124,15 +123,11 @@ def fixture_binary_path() -> str:
     return Path("usr", "bin", "binary").as_posix()
 
 
-@pytest.fixture(name="yet_another_flow_cell_id")
-def fixture_yet_another_flow_cell_id() -> str:
-    """Return flow cell id."""
-    return "HJKMYBCXX"
-
-
 @pytest.fixture(name="stats_sample_data")
 def fixture_stats_sample_data(
-    sample_id: str, bcl2fastq_flow_cell_id: str, yet_another_flow_cell_id: str
+    sample_id: str,
+    bcl2fastq_flow_cell_id: str,
+    dragen_flow_cell_id: str,
 ) -> dict:
     return {
         "samples": [
@@ -140,13 +135,13 @@ def fixture_stats_sample_data(
                 "name": sample_id,
                 "index": "ACGTACAT",
                 "flowcell": bcl2fastq_flow_cell_id,
-                "type": Sequencers.HISEQX,
+                "type": Sequencers.NOVASEQ,
             },
             {
                 "name": "ADM1136A3",
                 "index": "ACGTACAT",
-                "flowcell": yet_another_flow_cell_id,
-                "type": Sequencers.HISEQX,
+                "flowcell": dragen_flow_cell_id,
+                "type": Sequencers.NOVASEQ,
             },
         ]
     }
@@ -229,6 +224,7 @@ def fixture_flowcell_store(
         sample.customer = customer
         sample.application_version = application_version
         sample.received_at = dt.datetime.now()
+        sample.sequenced_at = dt.datetime.now()
         base_store.session.add(sample)
     base_store.session.commit()
     yield base_store
@@ -286,7 +282,6 @@ def fixture_invoice_api_pool_generic_customer(
     lims_api: MockLimsAPI,
     helpers: StoreHelpers,
     invoice_id: int = 0,
-    record_type: str = RecordType.Pool,
     customer_id: str = CustomerNames.cust132,
 ) -> InvoiceAPI:
     """Return an InvoiceAPI with a pool."""

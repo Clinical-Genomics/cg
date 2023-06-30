@@ -6,6 +6,7 @@ import click
 from cg.constants.constants import DRY_RUN
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, BclConverter
 from cg.meta.demultiplex.demux_post_processing import (
+    DemuxPostProcessingAPI,
     DemuxPostProcessingNovaseqAPI,
     DemuxPostProcessingHiseqXAPI,
 )
@@ -52,6 +53,16 @@ def finish_flow_cell(
     demux_post_processing_api.set_dry_run(dry_run)
     demux_post_processing_api.finish_flow_cell(
         flow_cell_name=flow_cell_name, force=force, bcl_converter=bcl_converter
+    )
+
+
+@finish_group.command(name="temporary")
+@click.argument("flow-cell-directory-name")
+@click.pass_obj
+def finish_flow_cell_temporary(context: CGConfig, flow_cell_directory_name: str):
+    demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
+    demux_post_processing_api.finish_flow_cell_temp(
+        flow_cell_directory_name=flow_cell_directory_name
     )
 
 

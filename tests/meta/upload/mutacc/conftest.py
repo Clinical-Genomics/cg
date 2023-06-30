@@ -109,7 +109,7 @@ def fixture_scout_export_case_no_causatives(scout_export_case_data: dict) -> Sco
     return ScoutExportCase(**scout_export_case_data)
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def mutacc_upload_api():
     """
     Fixture for a mutacc upload api

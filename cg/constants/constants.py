@@ -2,14 +2,17 @@
 
 import click
 
-from cg.utils.enums import StrEnum
 from cg.utils.date import get_date
+from cg.utils.enums import StrEnum
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
+
+LENGTH_LONG_DATE: int = len("YYYYMMDD")
 
 MAX_ITEMS_TO_RETRIEVE = 50
 
 SCALE_TO_MILLION_READ_PAIRS = 2_000_000
+SCALE_TO_READ_PAIRS = 2
 
 ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
 
@@ -95,6 +98,7 @@ class FileFormat(StrEnum):
     JSON: str = "json"
     YAML: str = "yaml"
     CSV: str = "csv"
+    XML: str = "xml"
 
 
 class GenomeVersion(StrEnum):
@@ -131,6 +135,7 @@ class FileExtensions(StrEnum):
     BED: str = ".bed"
     CRAM: str = ".cram"
     CSV: str = ".csv"
+    FASTQ: str = ".fastq"
     GPG: str = ".gpg"
     GZIP: str = ".gz"
     JSON: str = ".json"
@@ -140,6 +145,8 @@ class FileExtensions(StrEnum):
     TAR: str = ".tar"
     TMP: str = ".tmp"
     VCF: str = ".vcf"
+    XML: str = ".xml"
+    YAML: str = ".yaml"
 
 
 class APIMethods(StrEnum):

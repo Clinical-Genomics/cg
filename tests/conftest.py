@@ -1,5 +1,6 @@
 """Conftest file for pytest fixtures that needs to be shared for multiple tests."""
 import copy
+import gzip
 import http
 import logging
 import os
@@ -21,15 +22,27 @@ from cg.constants.constants import CaseActions, FileFormat
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.subject import Gender
-from cg.io.controller import ReadFile
+from cg.io.controller import ReadFile, WriteFile
+from cg.io.json import read_json, write_json
+from cg.io.yaml import write_yaml
 from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Customer, Family, Organism, User
+from cg.store.models import (
+    Bed,
+    BedVersion,
+    Customer,
+    Family,
+    Organism,
+    Sample,
+    SampleLaneSequencingMetrics,
+)
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -47,25 +60,25 @@ LOG = logging.getLogger(__name__)
 # Timestamp fixture
 
 
-@pytest.fixture(name="old_timestamp")
+@pytest.fixture(name="old_timestamp", scope="session")
 def fixture_old_timestamp() -> datetime:
     """Return a time stamp in date time format."""
     return datetime(1900, 1, 1)
 
 
-@pytest.fixture(name="timestamp")
+@pytest.fixture(name="timestamp", scope="session")
 def fixture_timestamp() -> datetime:
     """Return a time stamp in date time format."""
     return datetime(2020, 5, 1)
 
 
-@pytest.fixture(name="later_timestamp")
+@pytest.fixture(name="later_timestamp", scope="session")
 def fixture_later_timestamp() -> datetime:
     """Return a time stamp in date time format."""
     return datetime(2020, 6, 1)
 
 
-@pytest.fixture(name="future_date")
+@pytest.fixture(name="future_date", scope="session")
 def fixture_future_date() -> datetime:
     """Return a distant date in the future for which no events happen later."""
     return datetime(MAXYEAR, 1, 1, 1, 1, 1)
@@ -77,13 +90,13 @@ def fixture_timestamp_now() -> datetime:
     return datetime.now()
 
 
-@pytest.fixture(name="timestamp_yesterday")
+@pytest.fixture(name="timestamp_yesterday", scope="session")
 def fixture_timestamp_yesterday(timestamp_now: datetime) -> datetime:
     """Return a time stamp of yesterday's date in date time format."""
     return timestamp_now - timedelta(days=1)
 
 
-@pytest.fixture(name="timestamp_in_2_weeks")
+@pytest.fixture(name="timestamp_in_2_weeks", scope="session")
 def fixture_timestamp_in_2_weeks(timestamp_now: datetime) -> datetime:
     """Return a time stamp 14 days ahead in time."""
     return timestamp_now + timedelta(days=14)
@@ -92,79 +105,79 @@ def fixture_timestamp_in_2_weeks(timestamp_now: datetime) -> datetime:
 # Case fixtures
 
 
-@pytest.fixture(name="slurm_account")
+@pytest.fixture(name="slurm_account", scope="session")
 def fixture_slurm_account() -> str:
     """Return a SLURM account."""
     return "super_account"
 
 
-@pytest.fixture(name="user_name")
+@pytest.fixture(name="user_name", scope="session")
 def fixture_user_name() -> str:
     """Return a user name."""
     return "Paul Anderson"
 
 
-@pytest.fixture(name="user_mail")
+@pytest.fixture(name="user_mail", scope="session")
 def fixture_user_mail() -> str:
     """Return a user email."""
     return "paul@magnolia.com"
 
 
-@pytest.fixture(name="email_adress")
+@pytest.fixture(name="email_adress", scope="session")
 def fixture_email_adress() -> str:
     """Return an email adress."""
     return "james.holden@scilifelab.se"
 
 
-@pytest.fixture(name="case_id")
+@pytest.fixture(name="case_id", scope="session")
 def fixture_case_id() -> str:
     """Return a case id."""
     return "yellowhog"
 
 
-@pytest.fixture(name="case_id_does_not_exist")
+@pytest.fixture(name="case_id_does_not_exist", scope="session")
 def fixture_case_id_does_not_exist() -> str:
     """Return a case id that should not exist."""
     return "case_does_not_exist"
 
 
-@pytest.fixture(name="another_case_id")
+@pytest.fixture(name="another_case_id", scope="session")
 def fixture_another_case_id() -> str:
     """Return another case id."""
     return "another_case_id"
 
 
-@pytest.fixture(name="sample_id")
+@pytest.fixture(name="sample_id", scope="session")
 def fixture_sample_id() -> str:
     """Return a sample id."""
     return "ADM1"
 
 
-@pytest.fixture(name="father_sample_id")
+@pytest.fixture(name="father_sample_id", scope="session")
 def fixture_father_sample_id() -> str:
     """Return the sample id of the father."""
     return "ADM2"
 
 
-@pytest.fixture(name="mother_sample_id")
+@pytest.fixture(name="mother_sample_id", scope="session")
 def fixture_mother_sample_id() -> str:
     """Return the mothers sample id."""
     return "ADM3"
 
 
-@pytest.fixture(name="invalid_sample_id")
+@pytest.fixture(name="invalid_sample_id", scope="session")
 def fixture_invalid_sample_id() -> str:
     """Return an invalid sample id."""
     return "invalid-sample-id"
 
 
-@pytest.fixture(name="sample_ids")
+@pytest.fixture(name="sample_ids", scope="session")
 def fixture_sample_ids(sample_id: str, father_sample_id: str, mother_sample_id: str) -> List[str]:
     """Return a list with three samples of a family."""
     return [sample_id, father_sample_id, mother_sample_id]
 
 
-@pytest.fixture(name="sample_name")
+@pytest.fixture(name="sample_name", scope="session")
 def fixture_sample_name() -> str:
     """Returns a sample name."""
     return "a_sample_name"
@@ -176,7 +189,7 @@ def fixture_cust_sample_id() -> str:
     return "child"
 
 
-@pytest.fixture(name="family_name")
+@pytest.fixture(name="family_name", scope="session")
 def fixture_family_name() -> str:
     """Return a case name."""
     return "case"
@@ -188,12 +201,12 @@ def fixture_customer_id() -> str:
     return "cust000"
 
 
-@pytest.fixture(name="sbatch_job_number")
+@pytest.fixture(name="sbatch_job_number", scope="session")
 def fixture_sbatch_job_number() -> int:
     return 123456
 
 
-@pytest.fixture(name="sbatch_process")
+@pytest.fixture(name="sbatch_process", scope="session")
 def fixture_sbatch_process(sbatch_job_number: int) -> ProcessMock:
     """Return a mocked process object."""
     slurm_process = ProcessMock(binary="sbatch")
@@ -464,19 +477,19 @@ def fixture_fixtures_dir() -> Path:
     return Path("tests", "fixtures")
 
 
-@pytest.fixture(name="analysis_dir")
+@pytest.fixture(name="analysis_dir", scope="session")
 def fixture_analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the analysis dir."""
     return Path(fixtures_dir, "analysis")
 
 
-@pytest.fixture(name="microsalt_analysis_dir")
+@pytest.fixture(name="microsalt_analysis_dir", scope="session")
 def fixture_microsalt_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the analysis dir."""
     return Path(analysis_dir, "microsalt")
 
 
-@pytest.fixture(name="apps_dir")
+@pytest.fixture(name="apps_dir", scope="session")
 def fixture_apps_dir(fixtures_dir: Path) -> Path:
     """Return the path to the apps dir."""
     return Path(fixtures_dir, "apps")
@@ -514,11 +527,11 @@ def tmp_file(project_dir) -> Path:
 
 @pytest.fixture(name="non_existing_file_path")
 def fixture_non_existing_file_path(project_dir: Path) -> Path:
-    """Return the path to a non existing file."""
+    """Return the path to a non-existing file."""
     return Path(project_dir, "a_file.txt")
 
 
-@pytest.fixture(name="content")
+@pytest.fixture(name="content", scope="session")
 def fixture_content() -> str:
     """Return some content for a file."""
     return (
@@ -592,12 +605,6 @@ def fixture_balsamic_analysis_dir(analysis_dir: Path) -> Path:
     return Path(analysis_dir, "balsamic")
 
 
-@pytest.fixture(name="balsamic_fastq_dir")
-def fixture_balsamic_fastq_dir(analysis_dir: Path) -> Path:
-    """Return the path to the balsamic fastq directory."""
-    return Path(analysis_dir, "fastq")
-
-
 @pytest.fixture(name="balsamic_wgs_analysis_dir")
 def fixture_balsamic_wgs_analysis_dir(balsamic_analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files."""
@@ -614,6 +621,12 @@ def fixture_mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
 def fixture_rnafusion_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with rnafusion analysis files."""
     return Path(analysis_dir, "rnafusion")
+
+
+@pytest.fixture(name="taxprofiler_analysis_dir")
+def fixture_taxprofiler_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with taxprofiler analysis files."""
+    return Path(analysis_dir, "taxprofiler")
 
 
 @pytest.fixture(name="sample_cram")
@@ -714,134 +727,206 @@ def fixture_compression_object(
 # Demultiplex fixtures
 
 
-@pytest.fixture(name="demultiplex_fixtures")
+@pytest.fixture(name="demultiplex_fixtures", scope="session")
 def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
-    """Return the path to the demultiplex fixtures."""
+    """Return the path to the demultiplex fixture directory."""
     return Path(apps_dir, "demultiplexing")
 
 
-@pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_path")
-def fixture_novaseq_bcl2fastq_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a Novaseq bcl2fastq sample sheet."""
-    return Path(demultiplex_fixtures, "SampleSheetS2_Bcl2Fastq.csv")
-
-
-@pytest.fixture(name="novaseq_dragen_sample_sheet_path")
-def fixture_novaseq_dragen_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a Novaseq dragen sample sheet."""
-    return Path(demultiplex_fixtures, "SampleSheetS2_Dragen.csv")
-
-
-@pytest.fixture(name="raw_lims_sample_dir")
+@pytest.fixture(name="raw_lims_sample_dir", scope="session")
 def fixture_raw_lims_sample_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the raw samples fixtures."""
+    """Return the path to the raw samples fixture directory."""
     return Path(demultiplex_fixtures, "raw_lims_samples")
 
 
-@pytest.fixture(name="demultiplexed_runs")
+@pytest.fixture(name="run_parameters_dir", scope="session")
+def fixture_run_parameters_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to the run parameters fixture directory."""
+    return Path(demultiplex_fixtures, "run_parameters")
+
+
+@pytest.fixture(name="demultiplexed_runs", scope="session")
 def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a dir with flow cells ready for demultiplexing."""
+    """Return the path to the demultiplexed flow cells fixture directory."""
     return Path(demultiplex_fixtures, "demultiplexed-runs")
 
 
-@pytest.fixture(name="flow_cell_runs_dir")
+@pytest.fixture(name="flow_cell_runs_dir", scope="session")
 def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a dir with flow cells ready for demultiplexing."""
+    """Return the path to the sequenced flow cells fixture directory."""
     return Path(demultiplex_fixtures, "flow-cell-runs")
 
 
-@pytest.fixture(name="bcl2fastq_flow_cell_dir")
+@pytest.fixture(name="hiseq_dir", scope="session")
+def fixture_hiseq_dir(flow_cell_runs_dir: Path) -> Path:
+    """Return the path to the hiseq sequencing fixture directory."""
+    return Path(flow_cell_runs_dir, "hiseq")
+
+
+@pytest.fixture(name="novaseq_6000_dir", scope="session")
+def fixture_novaseq_6000_dir(flow_cell_runs_dir: Path) -> Path:
+    """Return the path to the NovaSeq6000 sequencing fixture directory."""
+    return Path(flow_cell_runs_dir, "nova_seq_6000")
+
+
+@pytest.fixture(name="novaseq_x_dir", scope="session")
+def fixture_novaseq_x_dir(flow_cell_runs_dir: Path) -> Path:
+    """Return the path to the NovaSeqX sequencing fixture directory."""
+    return Path(flow_cell_runs_dir, "nova_seq_x")
+
+
+@pytest.fixture(name="bcl2fastq_flow_cell_full_name", scope="session")
+def fixture_flow_cell_full_name() -> str:
+    """Return full flow cell name."""
+    return "201203_A00689_0200_AHVKJCDRXX"
+
+
+@pytest.fixture(name="dragen_flow_cell_full_name", scope="session")
+def fixture_dragen_flow_cell_full_name() -> str:
+    """Return the full name of a dragen flow cell."""
+    return "211101_A00187_0615_AHLG5GDRXY"
+
+
+@pytest.fixture(name="novaseq_x_flow_cell_full_name", scope="session")
+def fixture_novaseq_x_flow_cell_full_name() -> str:
+    """Return the full name of a NovaSeqX flow cell."""
+    return "20230508_LH00188_0003_A22522YLT3"
+
+
+@pytest.fixture(name="bcl2fastq_flow_cell_dir", scope="session")
 def fixture_bcl2fastq_flow_cell_dir(
-    flow_cell_runs_dir: Path, bcl2fastq_flow_cell_full_name: str
+    novaseq_6000_dir: Path, bcl2fastq_flow_cell_full_name: str
 ) -> Path:
     """Return the path to the bcl2fastq flow cell demultiplex fixture directory."""
-    return Path(flow_cell_runs_dir, bcl2fastq_flow_cell_full_name)
+    return Path(novaseq_6000_dir, bcl2fastq_flow_cell_full_name)
 
 
-@pytest.fixture(name="dragen_flow_cell_dir")
-def fixture_dragen_flow_cell_path(
-    flow_cell_runs_dir: Path, dragen_flow_cell_full_name: str
-) -> Path:
+@pytest.fixture(name="dragen_flow_cell_dir", scope="session")
+def fixture_dragen_flow_cell_path(novaseq_6000_dir: Path, dragen_flow_cell_full_name: str) -> Path:
     """Return the path to the dragen flow cell demultiplex fixture directory."""
-    return Path(flow_cell_runs_dir, dragen_flow_cell_full_name)
+    return Path(novaseq_6000_dir, dragen_flow_cell_full_name)
 
 
-@pytest.fixture(name="hiseq_dir")
-def fixture_hiseq_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the hiseq demultiplex fixtures."""
-    return Path(demultiplex_fixtures, "hiseq_run")
+@pytest.fixture(name="novaseq_x_flow_cell_dir", scope="session")
+def fixture_novaseq_x_flow_cell_path(
+    novaseq_x_dir: Path, novaseq_x_flow_cell_full_name: str
+) -> Path:
+    """Return the path to the NovaSeqX flow cell demultiplex fixture directory."""
+    return Path(novaseq_x_dir, novaseq_x_flow_cell_full_name)
 
 
-@pytest.fixture(name="unknown_run_parameters")
-def fixture_unknown_run_parameters(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a file with hiseq run parameters with unknown flow cell."""
-    return Path(demultiplex_fixtures, "unknown_run_parameters.xml")
+@pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_path", scope="session")
+def fixture_novaseq_bcl2fastq_sample_sheet_path(bcl2fastq_flow_cell_dir: Path) -> Path:
+    """Return the path to a NovaSeq6000 Bcl2fastq sample sheet."""
+    return Path(bcl2fastq_flow_cell_dir, "SampleSheet.csv")
 
 
-@pytest.fixture(name="run_parameters_missing_flowcell_type")
-def fixture_run_parameters_missing_flowcell_type(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a file with hiseq run parameters without flow cell."""
-    return Path(demultiplex_fixtures, "runParameters_missing_flowcell_run_field.xml")
+@pytest.fixture(name="novaseq_dragen_sample_sheet_path", scope="session")
+def fixture_novaseq_dragen_sample_sheet_path(dragen_flow_cell_dir: Path) -> Path:
+    """Return the path to a NovaSeq6000 dragen sample sheet."""
+    return Path(dragen_flow_cell_dir, "SampleSheet.csv")
 
 
-@pytest.fixture(name="hiseq_run_parameters")
-def fixture_hiseq_run_parameters(hiseq_dir: Path) -> Path:
-    """Return the path to a file with hiseq run parameters."""
-    return Path(hiseq_dir, "runParameters.xml")
+@pytest.fixture(name="run_parameters_missing_versions_path", scope="session")
+def fixture_run_parameters_missing_versions_path(run_parameters_dir: Path) -> Path:
+    """Return a NovaSeq6000 run parameters file path without software and reagent kit versions."""
+    return Path(run_parameters_dir, "RunParameters_novaseq_no_software_nor_reagent_version.xml")
 
 
-@pytest.fixture(name="novaseq_run_parameters")
-def fixture_novaseq_run_parameters(bcl2fastq_flow_cell_dir: Path) -> Path:
-    """Return the path to a file with novaseq run parameters."""
+@pytest.fixture(name="novaseq_6000_run_parameters_path", scope="session")
+def fixture_novaseq_6000_run_parameters_path(bcl2fastq_flow_cell_dir: Path) -> Path:
+    """Return the path to a file with NovaSeq6000 run parameters."""
     return Path(bcl2fastq_flow_cell_dir, "RunParameters.xml")
 
 
-@pytest.fixture(name="run_parameters_different_index")
-def fixture_run_parameters_different_index(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a file with novaseq run parameters with different index cycles."""
-    return Path(demultiplex_fixtures, "RunParameters_different_index_cycles.xml")
+@pytest.fixture(name="novaseq_x_run_parameters_path", scope="session")
+def fixture_novaseq_x_run_parameters_path(novaseq_x_flow_cell_dir: Path) -> Path:
+    """Return the path to a file with NovaSeqX run parameters."""
+    return Path(novaseq_x_flow_cell_dir, "RunParameters.xml")
 
 
-@pytest.fixture(name="bcl2fastq_flow_cell")
-def fixture_flow_cell(bcl2fastq_flow_cell_dir: str) -> FlowCell:
+@pytest.fixture(name="run_parameters_novaseq_6000_different_index_path", scope="module")
+def fixture_run_parameters_novaseq_6000_different_index_path(run_parameters_dir: Path) -> Path:
+    """Return the path to a NovaSeq6000 run parameters file with different index cycles."""
+    return Path(run_parameters_dir, "RunParameters_novaseq_6000_different_index_cycles.xml")
+
+
+@pytest.fixture(name="run_parameters_novaseq_x_different_index_path", scope="module")
+def fixture_run_parameters_novaseq_x_different_index_path(run_parameters_dir: Path) -> Path:
+    """Return the path to a NovaSeqX run parameters file with different index cycles."""
+    return Path(run_parameters_dir, "RunParameters_novaseq_X_different_index_cycles.xml")
+
+
+@pytest.fixture(name="run_parameters_missing_versions", scope="module")
+def fixture_run_parameters_missing_versions(
+    run_parameters_missing_versions_path: Path,
+) -> RunParametersNovaSeq6000:
+    """Return a NovaSeq6000 run parameters object without software and reagent kit versions."""
+    return RunParametersNovaSeq6000(run_parameters_path=run_parameters_missing_versions_path)
+
+
+@pytest.fixture(name="novaseq_6000_run_parameters", scope="session")
+def fixture_novaseq_6000_run_parameters(
+    novaseq_6000_run_parameters_path: Path,
+) -> RunParametersNovaSeq6000:
+    """Return a NovaSeq6000 run parameters object."""
+    return RunParametersNovaSeq6000(run_parameters_path=novaseq_6000_run_parameters_path)
+
+
+@pytest.fixture(name="novaseq_x_run_parameters", scope="session")
+def fixture_novaseq_x_run_parameters(
+    novaseq_x_run_parameters_path: Path,
+) -> RunParametersNovaSeqX:
+    """Return a NovaSeqX run parameters object."""
+    return RunParametersNovaSeqX(run_parameters_path=novaseq_x_run_parameters_path)
+
+
+@pytest.fixture(name="bcl2fastq_flow_cell", scope="session")
+def fixture_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
+    return FlowCellDirectoryData(
+        flow_cell_path=bcl2fastq_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
+    )
 
 
-@pytest.fixture(name="dragen_flow_cell")
-def fixture_dragen_flow_cell(dragen_flow_cell_dir: str) -> FlowCell:
+@pytest.fixture(name="dragen_flow_cell", scope="session")
+def fixture_dragen_flow_cell(dragen_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a dragen flow cell object with flow cell that is demultiplexed."""
-    return FlowCell(flow_cell_path=dragen_flow_cell_dir)
+    return FlowCellDirectoryData(
+        flow_cell_path=dragen_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
+    )
 
 
-@pytest.fixture(name="bcl2fastq_flow_cell_id")
-def fixture_bcl2fast2_flow_cell_id(bcl2fastq_flow_cell: FlowCell) -> str:
+@pytest.fixture(name="novaseq_x_flow_cell", scope="session")
+def fixture_novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
+    """Create a NovaSeqX flow cell object with flow cell that is demultiplexed."""
+    return FlowCellDirectoryData(
+        flow_cell_path=novaseq_x_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
+    )
+
+
+@pytest.fixture(name="bcl2fastq_flow_cell_id", scope="session")
+def fixture_bcl2fast2_flow_cell_id(bcl2fastq_flow_cell: FlowCellDirectoryData) -> str:
     """Return flow cell id from bcl2fastq flow cell object."""
     return bcl2fastq_flow_cell.id
 
 
-@pytest.fixture(name="dragen_flow_cell_id")
-def fixture_dragen_flow_cell_id(dragen_flow_cell: FlowCell) -> str:
+@pytest.fixture(name="dragen_flow_cell_id", scope="session")
+def fixture_dragen_flow_cell_id(dragen_flow_cell: FlowCellDirectoryData) -> str:
     """Return flow cell id from dragen flow cell object."""
     return dragen_flow_cell.id
 
 
-@pytest.fixture(name="another_flow_cell_id")
-def fixture_another_flow_cell_id() -> str:
-    """Return another flow cell id."""
-    return "HF57HDRXY"
-
-
 @pytest.fixture(name="demultiplexing_delivery_file")
-def fixture_demultiplexing_delivery_file(bcl2fastq_flow_cell: FlowCell) -> Path:
+def fixture_demultiplexing_delivery_file(bcl2fastq_flow_cell: FlowCellDirectoryData) -> Path:
     """Return demultiplexing delivery started file."""
     return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.DELIVERY)
 
 
 @pytest.fixture(name="hiseq_x_tile_dir")
-def fixture_hiseq_x_tile_dir(bcl2fastq_flow_cell: FlowCell) -> Path:
+def fixture_hiseq_x_tile_dir(bcl2fastq_flow_cell: FlowCellDirectoryData) -> Path:
     """Return Hiseq X tile dir."""
-    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
+    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.Hiseq_X_TILE_DIR)
 
 
 @pytest.fixture(name="lims_novaseq_samples_file")
@@ -858,18 +943,6 @@ def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[di
     )
 
 
-@pytest.fixture(name="bcl2fastq_flow_cell_full_name")
-def fixture_flow_cell_full_name() -> str:
-    """Return full flow cell name."""
-    return "201203_A00689_0200_AHVKJCDRXX"
-
-
-@pytest.fixture(name="dragen_flow_cell_full_name")
-def fixture_dragen_flow_cell_full_name() -> str:
-    """Return the full name of a dragen flow cell."""
-    return "211101_A00187_0615_AHLG5GDRXY"
-
-
 @pytest.fixture(name="demultiplexed_flow_cell")
 def fixture_demultiplexed_flow_cell(
     demultiplexed_runs: Path, bcl2fastq_flow_cell_full_name: str
@@ -879,7 +952,7 @@ def fixture_demultiplexed_flow_cell(
 
 @pytest.fixture(name="bcl2fastq_demux_results")
 def fixture_bcl2fastq_demux_results(
-    demultiplexed_flow_cell: Path, bcl2fastq_flow_cell: FlowCell
+    demultiplexed_flow_cell: Path, bcl2fastq_flow_cell: FlowCellDirectoryData
 ) -> DemuxResults:
     return DemuxResults(
         demux_dir=demultiplexed_flow_cell,
@@ -924,7 +997,7 @@ def fixture_bed_file(analysis_dir) -> Path:
 # Helper fixtures
 
 
-@pytest.fixture(name="helpers")
+@pytest.fixture(name="helpers", scope="session")
 def fixture_helpers() -> StoreHelpers:
     """Return a class with helper functions for the stores."""
     return StoreHelpers()
@@ -1168,17 +1241,6 @@ def fixture_collaboration_id() -> str:
     return "hospital_collaboration"
 
 
-@pytest.fixture(name="customer_production")
-def fixture_customer_production(collaboration_id: str, customer_id: str) -> dict:
-    """Return a dictionary with information about the prod customer."""
-    return {
-        "customer_id": customer_id,
-        "name": "Production",
-        "scout_access": True,
-        "collaboration_id": collaboration_id,
-    }
-
-
 @pytest.fixture(name="customer_rare_diseases")
 def fixture_customer_rare_diseases(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Rare Disease customer."""
@@ -1199,60 +1261,16 @@ def fixture_customer_balsamic(collaboration_id: str, customer_id: str) -> Custom
     )
 
 
-@pytest.fixture(name="external_wgs_application_tag")
-def fixture_external_wgs_application_tag() -> str:
-    """Return the external WGS application tag."""
-    return "WGXCUSC000"
-
-
-@pytest.fixture(name="external_wgs_info")
-def fixture_external_wgs_info(external_wgs_application_tag: str) -> dict:
-    """Return a dictionary with information external WGS application."""
-    return {
-        "application_tag": external_wgs_application_tag,
-        "application_type": "wgs",
-        "description": "External WGS",
-        "is_external": True,
-        "target_reads": 10,
-    }
-
-
 @pytest.fixture(name="external_wes_application_tag")
 def fixture_external_wes_application_tag() -> str:
     """Return the external whole exome sequencing application tag."""
     return "EXXCUSR000"
 
 
-@pytest.fixture(name="external_wes_info")
-def fixture_external_wes_info(external_wes_application_tag: str) -> dict:
-    """Return a dictionary with information external WES application."""
-    return {
-        "application_tag": external_wes_application_tag,
-        "application_type": "wes",
-        "description": "External WES",
-        "is_external": True,
-        "target_reads": 10,
-    }
-
-
 @pytest.fixture(name="wgs_application_tag")
 def fixture_wgs_application_tag() -> str:
     """Return the WGS application tag."""
     return "WGSPCFC030"
-
-
-@pytest.fixture(name="wgs_application_info")
-def fixture_wgs_application_info(wgs_application_tag: str) -> dict:
-    """Return a dictionary with information the WGS application."""
-    return {
-        "application_tag": wgs_application_tag,
-        "application_type": "wgs",
-        "description": "WGS, double",
-        "sequencing_depth": 30,
-        "is_external": True,
-        "is_accredited": True,
-        "target_reads": 10,
-    }
 
 
 @pytest.fixture(name="store")
@@ -1521,54 +1539,59 @@ def sample_store(base_store: Store) -> Store:
     return base_store
 
 
-@pytest.fixture(name="trailblazer_api")
+@pytest.fixture(name="trailblazer_api", scope="session")
 def fixture_trailblazer_api() -> MockTB:
     """Return a mock Trailblazer API."""
     return MockTB()
 
 
-@pytest.fixture(name="lims_api")
+@pytest.fixture(name="lims_api", scope="session")
 def fixture_lims_api() -> MockLimsAPI:
     """Return a mock LIMS API."""
     return MockLimsAPI()
 
 
-@pytest.fixture(name="config_root_dir")
-def fixture_config_root_dir(tmpdir_factory) -> Path:
+@pytest.fixture(name="config_root_dir", scope="session")
+def fixture_config_root_dir() -> Path:
     """Return a path to the config root directory."""
     return Path("tests", "fixtures", "data")
 
 
-@pytest.fixture(name="housekeeper_dir")
+@pytest.fixture(name="housekeeper_dir", scope="session")
 def fixture_housekeeper_dir(tmpdir_factory):
     """Return a temporary directory for Housekeeper testing."""
     return tmpdir_factory.mktemp("housekeeper")
 
 
-@pytest.fixture(name="mip_dir")
+@pytest.fixture(name="mip_dir", scope="session")
 def fixture_mip_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for MIP testing."""
     return tmpdir_factory.mktemp("mip")
 
 
-@pytest.fixture(name="fluffy_dir")
+@pytest.fixture(name="fluffy_dir", scope="session")
 def fixture_fluffy_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Fluffy testing."""
     return tmpdir_factory.mktemp("fluffy")
 
 
-@pytest.fixture(name="balsamic_dir")
+@pytest.fixture(name="balsamic_dir", scope="session")
 def fixture_balsamic_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Balsamic testing."""
     return tmpdir_factory.mktemp("balsamic")
 
 
-@pytest.fixture(name="rnafusion_dir")
+@pytest.fixture(name="rnafusion_dir", scope="session")
 def fixture_rnafusion_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("rnafusion")
 
 
-@pytest.fixture(name="cg_dir")
+@pytest.fixture(name="taxprofiler_dir", scope="session")
+def fixture_taxprofiler_dir(tmpdir_factory) -> Path:
+    return tmpdir_factory.mktemp("taxprofiler")
+
+
+@pytest.fixture(name="cg_dir", scope="session")
 def fixture_cg_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for cg testing."""
     return tmpdir_factory.mktemp("cg")
@@ -1584,14 +1607,6 @@ def fixture_swegen_dir(tmpdir_factory, tmp_path) -> Path:
 def fixture_swegen_snv_reference_path(swegen_dir: Path) -> Path:
     """Return a temporary path to a SweGen SNV reference file."""
     mock_file = Path(swegen_dir, "grch37_swegen_10k_snv_-20220101-.vcf.gz")
-    mock_file.touch(exist_ok=True)
-    return mock_file
-
-
-@pytest.fixture(name="swegen_sv_reference")
-def fixture_swegen_sv_reference_path(swegen_dir: Path) -> Path:
-    """Return a temporary path to a SweGen SV reference file."""
-    mock_file = Path(swegen_dir, "grch37_swegen_10k_sv_-20220101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
 
@@ -1634,21 +1649,13 @@ def fixture_outdated_observations_somatic_snv_file_path(observations_dir: Path) 
     return mock_file
 
 
-@pytest.fixture(name="observations_somatic_sv_file_path")
-def fixture_observations_somatic_sv_file_path(observations_dir: Path) -> Path:
-    """Return a temporary path to a cancer somatic SV file."""
-    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_sv_export-20180101-.vcf.gz")
-    mock_file.touch(exist_ok=True)
-    return mock_file
-
-
 @pytest.fixture(name="custom_observations_clinical_snv_file_path")
 def fixture_custom_observations_clinical_snv_file_path(observations_dir: Path) -> Path:
     """Return a custom path for the clinical SNV observations file."""
     return Path(observations_dir, "clinical_snv_export-19990101-.vcf.gz")
 
 
-@pytest.fixture(name="microsalt_dir")
+@pytest.fixture(name="microsalt_dir", scope="session")
 def fixture_microsalt_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Microsalt testing."""
     return tmpdir_factory.mktemp("microsalt")
@@ -1695,6 +1702,7 @@ def fixture_context_config(
     balsamic_dir: Path,
     microsalt_dir: Path,
     rnafusion_dir: Path,
+    taxprofiler_dir: Path,
 ) -> dict:
     """Return a context config."""
     return {
@@ -1753,7 +1761,7 @@ def fixture_context_config(
             "mail_user": "an@email.com",
         },
         "demultiplex": {
-            "run_dir": "tests/fixtures/apps/demultiplexing/flow-cell-runs",
+            "run_dir": "tests/fixtures/apps/demultiplexing/flow-cell-runs/nova_seq_6000",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
             "slurm": {
                 "account": "development",
@@ -1853,6 +1861,10 @@ def fixture_context_config(
             "tower_pipeline": "rnafusion",
         },
         "pdc": {"binary_path": "/bin/dsmc"},
+        "taxprofiler": {
+            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
+            "root": str(taxprofiler_dir),
+        },
         "scout": {
             "binary_path": "echo",
             "config_path": "scout-stage.yaml",
@@ -1871,7 +1883,6 @@ def fixture_context_config(
             "service_account": "SERVICE",
             "service_account_auth_file": "trailblazer-auth.json",
         },
-        "vogue": {"binary_path": "echo", "config_path": "vogue-stage.yaml"},
     }
 
 
@@ -1886,31 +1897,31 @@ def fixture_cg_context(
     return cg_config
 
 
-@pytest.fixture(name="case_id_with_single_sample")
+@pytest.fixture(name="case_id_with_single_sample", scope="session")
 def fixture_case_id_with_single_sample():
     """Return a case id that should only be associated with one sample."""
     return "exhaustedcrocodile"
 
 
-@pytest.fixture(name="case_id_with_multiple_samples")
+@pytest.fixture(name="case_id_with_multiple_samples", scope="session")
 def fixture_case_id_with_multiple_samples():
     """Return a case id that should be associated with multiple samples."""
     return "righteouspanda"
 
 
-@pytest.fixture(name="case_id_without_samples")
+@pytest.fixture(name="case_id_without_samples", scope="session")
 def fixture_case_id_without_samples():
     """Return a case id that should not be associated with any samples."""
     return "confusedtrout"
 
 
-@pytest.fixture(name="sample_id_in_single_case")
+@pytest.fixture(name="sample_id_in_single_case", scope="session")
 def fixture_sample_id_in_single_case():
     """Return a sample id that should be associated with a single case."""
     return "ASM1"
 
 
-@pytest.fixture(name="sample_id_in_multiple_cases")
+@pytest.fixture(name="sample_id_in_multiple_cases", scope="session")
 def fixture_sample_id_in_multiple_cases():
     """Return a sample id that should be associated with multiple cases."""
     return "ASM2"
@@ -2064,5 +2075,297 @@ def fixture_store_with_cases_and_customers(store: Store, helpers: StoreHelpers) 
             action=action.value,
             customer=customer,
         )
+    store.session.commit()
+    yield store
+
+
+# Rnafusion fixtures
+
+
+@pytest.fixture(name="rnafusion_dir")
+def fixture_rnafusion_dir(tmpdir_factory, apps_dir: Path) -> str:
+    """Return the path to the rnafusion apps dir."""
+    rnafusion_dir = tmpdir_factory.mktemp("rnafusion")
+    return Path(rnafusion_dir).absolute().as_posix()
+
+
+@pytest.fixture(name="rnafusion_case_id")
+def fixture_rnafusion_case_id() -> str:
+    """Returns a rnafusion case id."""
+    return "rnafusion_case_enough_reads"
+
+
+@pytest.fixture(name="no_sample_case_id")
+def fixture_no_sample_case_id() -> str:
+    """Returns a case id of a case with no samples."""
+    return "no_sample_case"
+
+
+@pytest.fixture(name="rnafusion_sample_id")
+def fixture_rnafusion_sample_id() -> str:
+    """Returns a rnafusion sample id."""
+    return "sample_rnafusion_case_enough_reads"
+
+
+@pytest.fixture(name="rnafusion_housekeeper_dir")
+def fixture_rnafusion_housekeeper_dir(tmpdir_factory, rnafusion_dir: Path) -> Path:
+    """Return the path to the rnafusion housekeeper bundle dir."""
+    return tmpdir_factory.mktemp("bundles")
+
+
+@pytest.fixture(name="rnafusion_fastq_file_l_1_r_1")
+def fixture_rnafusion_fastq_file_l_1_r_1(rnafusion_housekeeper_dir: Path) -> str:
+    fastq_filename = Path(
+        rnafusion_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz"
+    ).as_posix()
+    with gzip.open(fastq_filename, "wb") as wh:
+        wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
+    return fastq_filename
+
+
+@pytest.fixture(name="rnafusion_fastq_file_l_1_r_2")
+def fixture_rnafusion_fastq_file_l_1_r_2(rnafusion_housekeeper_dir: Path) -> str:
+    fastq_filename = Path(
+        rnafusion_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
+    ).as_posix()
+    with gzip.open(fastq_filename, "wb") as wh:
+        wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
+    return fastq_filename
+
+
+@pytest.fixture(name="rnafusion_mock_fastq_files")
+def fixture_rnafusion_mock_fastq_files(
+    rnafusion_fastq_file_l_1_r_1: Path, rnafusion_fastq_file_l_1_r_2: Path
+) -> List[Path]:
+    """Return list of all mock fastq files to commit to mock housekeeper"""
+    return [rnafusion_fastq_file_l_1_r_1, rnafusion_fastq_file_l_1_r_2]
+
+
+@pytest.fixture(scope="function", name="rnafusion_housekeeper")
+def fixture_rnafusion_housekeeper(
+    housekeeper_api: HousekeeperAPI,
+    helpers: StoreHelpers,
+    rnafusion_mock_fastq_files: List[Path],
+    rnafusion_sample_id: str,
+):
+    """Create populated housekeeper that holds files for all mock samples."""
+
+    bundle_data = {
+        "name": rnafusion_sample_id,
+        "created": datetime.now(),
+        "version": "1.0",
+        "files": [
+            {"path": f, "tags": ["fastq"], "archive": False} for f in rnafusion_mock_fastq_files
+        ],
+    }
+    helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
+    return housekeeper_api
+
+
+@pytest.fixture(scope="function", name="rnafusion_context")
+def fixture_rnafusion_context(
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    rnafusion_housekeeper: HousekeeperAPI,
+    trailblazer_api: MockTB,
+    hermes_api: HermesApi,
+    cg_dir: Path,
+    rnafusion_case_id: str,
+    rnafusion_sample_id: str,
+    no_sample_case_id: str,
+) -> CGConfig:
+    """context to use in cli"""
+    cg_context.housekeeper_api_ = rnafusion_housekeeper
+    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.meta_apis["analysis_api"] = RnafusionAnalysisAPI(config=cg_context)
+    status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+
+    # Create textbook case with enough reads
+    case_enough_reads: Family = helpers.add_case(
+        store=status_db,
+        internal_id=rnafusion_case_id,
+        name=rnafusion_case_id,
+        data_analysis=Pipeline.RNAFUSION,
+    )
+
+    sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=rnafusion_sample_id,
+        sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_enough_reads,
+        sample=sample_rnafusion_case_enough_reads,
+    )
+    return cg_context
+
+
+@pytest.fixture(name="deliverable_data")
+def fixture_deliverables_data(
+    rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_sample_id: str
+) -> dict:
+    return {
+        "files": [
+            {
+                "path": f"{rnafusion_dir}/{rnafusion_case_id}/multiqc/multiqc_report.html",
+                "path_index": "",
+                "step": "report",
+                "tag": ["multiqc-html", "rna"],
+                "id": rnafusion_case_id,
+                "format": "html",
+                "mandatory": True,
+            },
+        ]
+    }
+
+
+@pytest.fixture
+def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case_id: str) -> None:
+    """Create deliverable file with dummy data and files to deliver."""
+    Path.mkdir(
+        Path(rnafusion_dir, rnafusion_case_id),
+        parents=True,
+        exist_ok=True,
+    )
+    Path.mkdir(
+        Path(rnafusion_dir, rnafusion_case_id, "multiqc"),
+        parents=True,
+        exist_ok=True,
+    )
+    for report_entry in deliverable_data["files"]:
+        Path(report_entry["path"]).touch(exist_ok=True)
+    WriteFile.write_file_from_content(
+        content=deliverable_data,
+        file_format=FileFormat.JSON,
+        file_path=Path(rnafusion_dir, rnafusion_case_id, rnafusion_case_id + "_deliverables.yaml"),
+    )
+
+
+@pytest.fixture(name="hermes_deliverables")
+def fixture_hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
+    hermes_output: dict = {"pipeline": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
+    for file_info in deliverable_data["files"]:
+        tags: List[str] = []
+        if "html" in file_info["format"]:
+            tags.append("multiqc-html")
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
+    return hermes_output
+
+
+@pytest.fixture(name="malformed_hermes_deliverables")
+def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
+    malformed_deliverable: dict = hermes_deliverables.copy()
+    malformed_deliverable.pop("pipeline")
+
+    return malformed_deliverable
+
+
+@pytest.fixture(name="rnafusion_multiqc_json_metrics")
+def fixture_rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
+    """Returns the content of a mock Multiqc JSON file."""
+    return read_json(file_path=Path(rnafusion_analysis_dir, "multiqc_data.json"))
+
+
+@pytest.fixture(name="tower_id")
+def fixture_tower_id() -> int:
+    """Returns a NF-Tower ID."""
+    return 123456
+
+
+@pytest.fixture
+def mock_analysis_finish(
+    rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_multiqc_json_metrics: dict, tower_id: int
+) -> None:
+    """Create analysis_finish file for testing."""
+    Path.mkdir(Path(rnafusion_dir, rnafusion_case_id, "pipeline_info"), parents=True, exist_ok=True)
+    Path(rnafusion_dir, rnafusion_case_id, "pipeline_info", "software_versions.yml").touch(
+        exist_ok=True
+    )
+    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
+    Path.mkdir(
+        Path(rnafusion_dir, rnafusion_case_id, "multiqc", "multiqc_data"),
+        parents=True,
+        exist_ok=True,
+    )
+    write_json(
+        content=rnafusion_multiqc_json_metrics,
+        file_path=Path(
+            rnafusion_dir,
+            rnafusion_case_id,
+            "multiqc",
+            "multiqc_data",
+            "multiqc_data",
+        ).with_suffix(FileExtensions.JSON),
+    )
+    write_yaml(
+        content={rnafusion_case_id: [tower_id]},
+        file_path=Path(
+            rnafusion_dir,
+            rnafusion_case_id,
+            "tower_ids",
+        ).with_suffix(FileExtensions.YAML),
+    )
+
+
+@pytest.fixture
+def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
+    """Create samplesheet.csv file for testing"""
+    Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
+    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
+
+
+@pytest.fixture
+def expected_total_reads() -> int:
+    return 1_000_000
+
+
+@pytest.fixture(name="flow_cell_name")
+def fixture_flow_cell_name() -> str:
+    """Return flow cell name."""
+    return "HVKJCDRXX"
+
+
+@pytest.fixture
+def store_with_sequencing_metrics(
+    store: Store, sample_id: str, expected_total_reads: int, flow_cell_name: str
+) -> Generator[Store, None, None]:
+    """Return a store with multiple samples with sample lane sequencing metrics."""
+
+    sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
+        (sample_id, flow_cell_name, 1, expected_total_reads, 90.5, 32),
+        ("sample_2", "flow_cell_2", 2, 2_000_000, 85.5, 30),
+        ("sample_3", "flow_cell_3", 3, 1_500_000, 80.5, 33),
+    ]
+
+    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
+    for (
+        sample_internal_id,
+        flow_cell_name,
+        flow_cell_lane_number,
+        sample_total_reads_in_lane,
+        sample_base_fraction_passing_q30,
+        sample_base_mean_quality_score,
+    ) in sample_sequencing_metrics_details:
+        sequencing_metrics = SampleLaneSequencingMetrics(
+            sample_internal_id=sample_internal_id,
+            flow_cell_name=flow_cell_name,
+            flow_cell_lane_number=flow_cell_lane_number,
+            sample_total_reads_in_lane=sample_total_reads_in_lane,
+            sample_base_fraction_passing_q30=sample_base_fraction_passing_q30,
+            sample_base_mean_quality_score=sample_base_mean_quality_score,
+            created_at=datetime.now(),
+        )
+        sample_lane_sequencing_metrics.append(sequencing_metrics)
+
+    store.session.add_all(sample_lane_sequencing_metrics)
     store.session.commit()
     yield store

@@ -122,8 +122,10 @@ class StoreHelpers:
         valid_from: datetime = datetime.now(),
     ) -> ApplicationVersion:
         """Add an application version to store."""
-        new_record: ApplicationVersion = store.get_application_version_by_application_entry_id(
-            application_entry_id=application.id
+        new_record = (
+            store._get_query(table=ApplicationVersion)
+            .filter(ApplicationVersion.application_id == application.id)
+            .first()
         )
         if not new_record:
             new_record: ApplicationVersion = store.add_application_version(
@@ -197,18 +199,16 @@ class StoreHelpers:
     @staticmethod
     def ensure_bed_version(store: Store, bed_name: str = "dummy_bed") -> BedVersion:
         """Return existing or create and return bed version for tests."""
-        bed: Optional[Bed] = store.get_bed_by_name(bed_name=bed_name)
+        bed: Optional[Bed] = store._get_query(table=Bed).filter(Bed.name == bed_name)
         if not bed:
             bed: Bed = store.add_bed(name=bed_name)
             store.session.add(bed)
 
-        bed_version: Optional[BedVersion] = store.get_latest_bed_version(bed_name=bed_name)
-        if not bed_version:
-            bed_version: BedVersion = store.add_bed_version(
-                bed=bed, version=1, filename="dummy_filename", shortname=bed_name
-            )
-            store.session.add(bed_version)
-            store.session.commit()
+        bed_version: BedVersion = store.add_bed_version(
+            bed=bed, version=1, filename="dummy_filename", shortname=bed_name
+        )
+        store.session.add(bed_version)
+        store.session.commit()
         return bed_version
 
     @staticmethod
@@ -469,9 +469,7 @@ class StoreHelpers:
             tickets=case_info["tickets"],
         )
 
-        case: Family = StoreHelpers.add_case(
-            store, case_obj=case, customer_id=customer_obj.internal_id
-        )
+        case = StoreHelpers.add_case(store, case_obj=case, customer_id=customer_obj.internal_id)
 
         app_tag = app_tag or "WGSPCFC030"
         app_type = case_info.get("application_type", "wgs")
@@ -493,14 +491,8 @@ class StoreHelpers:
             )
             sample_objs[sample_id] = sample_obj
 
-        for sample_data in case_info["samples"]:
-            sample_obj = sample_objs[sample_data["internal_id"]]
-            father = None
-            if sample_data.get(Pedigree.FATHER):
-                father = sample_objs[sample_data[Pedigree.FATHER]]
-            mother = None
-            if sample_data.get(Pedigree.MOTHER):
-                mother = sample_objs[sample_data[Pedigree.MOTHER]]
+            father = sample_objs.get(sample_data.get(Pedigree.FATHER))
+            mother = sample_objs.get(sample_data.get(Pedigree.MOTHER))
             StoreHelpers.add_relationship(
                 store,
                 case=case,

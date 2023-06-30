@@ -18,7 +18,6 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.apps.vogue import VogueAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.store import Store
@@ -169,6 +168,11 @@ class RnafusionConfig(CommonAppConfig):
     tower_pipeline: str
 
 
+class TaxprofilerConfig(CommonAppConfig):
+    root: str
+    binary_path: str
+
+
 class CGStatsConfig(BaseModel):
     binary_path: str
     database: str
@@ -281,8 +285,6 @@ class CGConfig(BaseModel):
     tar: Optional[CommonAppConfig] = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
-    vogue: CommonAppConfig = None
-    vogue_api_: VogueAPI = None
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
@@ -295,6 +297,7 @@ class CGConfig(BaseModel):
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig = None
     rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
+    taxprofiler: TaxprofilerConfig = Field(None, alias="taxprofiler")
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
@@ -317,7 +320,6 @@ class CGConfig(BaseModel):
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
-            "vogue_api_": "vogue_api",
         }
 
     @property
@@ -456,13 +458,4 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating trailblazer api")
             api = TrailblazerAPI(config=self.dict())
             self.trailblazer_api_ = api
-        return api
-
-    @property
-    def vogue_api(self) -> VogueAPI:
-        api = self.__dict__.get("vogue_api_")
-        if api is None:
-            LOG.debug("Instantiating vogue api")
-            api = VogueAPI(config=self.dict())
-            self.vogue_api_ = api
         return api

@@ -1,7 +1,7 @@
 """Tests the findbusinessdata part of the Cg store API."""
 import logging
-from datetime import datetime, timedelta
-from typing import List
+from datetime import datetime
+from typing import List, Optional
 
 import pytest
 from cg.constants import FlowCellStatus
@@ -19,6 +19,7 @@ from cg.store.models import (
     Invoice,
     Pool,
     Sample,
+    SampleLaneSequencingMetrics,
 )
 from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
@@ -82,26 +83,10 @@ def test_get_flow_cell(bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: S
     assert flow_cell.name == bcl2fastq_flow_cell_id
 
 
-def test_get_flow_cell_by_name_pattern(
-    bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: Store
-):
-    """Test returning the latest flow cell from the database by enquiry."""
-
-    # GIVEN a store with two flow cells
-
-    # WHEN fetching the latest flow cell
-    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_name_pattern(
-        name_pattern=bcl2fastq_flow_cell_id[:4]
-    )
-
-    # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cell.name == bcl2fastq_flow_cell_id
-
-
 def test_get_flow_cells_by_case(
     base_store: Store,
     bcl2fastq_flow_cell_id: str,
-    another_flow_cell_id: str,
+    dragen_flow_cell_id: str,
     case: Family,
     helpers: StoreHelpers,
     sample: Sample,
@@ -111,7 +96,7 @@ def test_get_flow_cells_by_case(
     # GIVEN a store with two flow cell
     helpers.add_flowcell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
 
-    helpers.add_flowcell(store=base_store, flow_cell_name=another_flow_cell_id)
+    helpers.add_flowcell(store=base_store, flow_cell_name=dragen_flow_cell_id)
 
     # WHEN fetching the latest flow cell
     flow_cells: List[Flowcell] = base_store.get_flow_cells_by_case(case=case)
@@ -125,7 +110,7 @@ def test_get_flow_cells_by_case(
     assert flow_cells[0].name == bcl2fastq_flow_cell_id
 
 
-def test_get_flow_cells_by_statuses(another_flow_cell_id: str, re_sequenced_sample_store: Store):
+def test_get_flow_cells_by_statuses(dragen_flow_cell_id: str, re_sequenced_sample_store: Store):
     """Test returning the latest flow cell from the database by statuses."""
 
     # GIVEN a store with two flow cells
@@ -140,12 +125,10 @@ def test_get_flow_cells_by_statuses(another_flow_cell_id: str, re_sequenced_samp
         assert flow_cell.status == FlowCellStatus.ON_DISK
 
     # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cells[0].name == another_flow_cell_id
+    assert flow_cells[0].name == dragen_flow_cell_id
 
 
-def test_get_flow_cells_by_statuses_when_multiple_matches(
-    another_flow_cell_id: str, re_sequenced_sample_store: Store
-):
+def test_get_flow_cells_by_statuses_when_multiple_matches(re_sequenced_sample_store: Store):
     """Test returning the latest flow cell from the database by statuses when multiple matches."""
 
     # GIVEN a store with two flow cells
@@ -261,7 +244,7 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
     base_store: Store,
     caplog,
     bcl2fastq_flow_cell_id: str,
-    another_flow_cell_id: str,
+    dragen_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
@@ -278,7 +261,7 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
 
     another_flow_cell = helpers.add_flowcell(
         store=base_store,
-        flow_cell_name=another_flow_cell_id,
+        flow_cell_name=dragen_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.RETRIEVED,
     )
@@ -298,7 +281,7 @@ def test_is_all_flow_cells_on_disk_when_requested(
     base_store: Store,
     caplog,
     bcl2fastq_flow_cell_id: str,
-    another_flow_cell_id: str,
+    dragen_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
@@ -315,7 +298,7 @@ def test_is_all_flow_cells_on_disk_when_requested(
 
     another_flow_cell = helpers.add_flowcell(
         store=base_store,
-        flow_cell_name=another_flow_cell_id,
+        flow_cell_name=dragen_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.REQUESTED,
     )
@@ -337,7 +320,7 @@ def test_is_all_flow_cells_on_disk(
     base_store: Store,
     caplog,
     bcl2fastq_flow_cell_id: str,
-    another_flow_cell_id: str,
+    dragen_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
@@ -349,7 +332,7 @@ def test_is_all_flow_cells_on_disk(
         store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample]
     )
 
-    helpers.add_flowcell(store=base_store, flow_cell_name=another_flow_cell_id)
+    helpers.add_flowcell(store=base_store, flow_cell_name=dragen_flow_cell_id)
 
     # WHEN fetching the latest flow cell
     is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
@@ -450,49 +433,6 @@ def test_get_case_sample_link(
     # THEN the returned family sample has the correct case and sample internal ids
     assert case_sample.family.internal_id == case_id
     assert case_sample.sample.internal_id == sample_id
-
-
-def test_find_single_case_for_sample(
-    sample_id_in_single_case: str, store_with_multiple_cases_and_samples: Store
-):
-    """Test that cases associated with a sample can be found."""
-
-    # GIVEN a database containing a sample associated with a single case
-    sample: Sample = store_with_multiple_cases_and_samples.get_sample_by_internal_id(
-        internal_id=sample_id_in_single_case
-    )
-
-    assert sample
-
-    # WHEN the cases associated with the sample is fetched
-    cases: List[
-        FamilySample
-    ] = store_with_multiple_cases_and_samples.get_case_samples_from_sample_entry_id(
-        sample_entry_id=sample.id
-    ).all()
-
-    # THEN only one case is found
-    assert cases and len(cases) == 1
-
-
-def test_find_multiple_cases_for_sample(
-    sample_id_in_multiple_cases: str, store_with_multiple_cases_and_samples: Store
-):
-    # GIVEN a database containing a sample associated with multiple cases
-    sample: Sample = store_with_multiple_cases_and_samples.get_sample_by_internal_id(
-        internal_id=sample_id_in_multiple_cases
-    )
-    assert sample
-
-    # WHEN the cases associated with the sample is fetched
-    cases: List[
-        FamilySample
-    ] = store_with_multiple_cases_and_samples.get_case_samples_from_sample_entry_id(
-        sample_entry_id=sample.id
-    ).all()
-
-    # THEN multiple cases are found
-    assert cases and len(cases) > 1
 
 
 def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples: Store):
@@ -713,8 +653,6 @@ def test_get_pools_by_order_enquiry(
 
 def test_get_pools_to_render_with(
     store_with_multiple_pools_for_customer: Store,
-    pool_name_1: str,
-    pool_order_1: str,
 ):
     """Test that pools can be fetched from the store by customer id."""
     # GIVEN a database with two pools
@@ -833,30 +771,92 @@ def test_get_cases_not_analysed_by_sample_internal_id_multiple_cases(
         assert any(sample.internal_id == sample_id_in_multiple_cases for sample in case.samples)
 
 
-def test_fetch_cases_newer_than_date_no_cases(store_with_multiple_cases_and_samples: Store):
-    """Test that no cases are returned when there are no cases newer than the given date."""
-    # GIVEN a store with cases older than 7 days
-    older_than_date = datetime.now() - timedelta(days=10)
-    for case in store_with_multiple_cases_and_samples._get_query(table=Family):
-        case.created_at = older_than_date
+def test_get_total_read_counts(
+    store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads: int
+):
+    # GIVEN a store with sequencing metrics
 
-    # WHEN fetching cases newer than 7 days
-    cases = store_with_multiple_cases_and_samples.get_cases_created_within_days(days=7)
+    # WHEN getting total read counts for a sample
+    total_reads_count: int = (
+        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
+            sample_internal_id=sample_id, q30_threshold=0
+        )
+    )
 
-    # THEN no cases should be returned
-    assert len(cases) == 0
+    # THEN assert that the total read count is correct
+    assert total_reads_count == expected_total_reads
 
 
-def test_fetch_cases_newer_than_date_all_cases(store_with_multiple_cases_and_samples: Store):
-    """Test that all cases are returned when all cases newer than the given date."""
-    # GIVEN a store with cases newer than 7 days
-    older_than_date = datetime.now() - timedelta(days=5)
-    all_cases = store_with_multiple_cases_and_samples._get_query(table=Family).all()
-    for case in all_cases:
-        case.created_at = older_than_date
+def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+    store_with_sequencing_metrics: Store, sample_id: str, flow_cell_name: str, lane: int = 1
+):
+    # GIVEN a store with sequencing metrics
 
-    # WHEN fetching cases newer than 7 days
-    cases = store_with_multiple_cases_and_samples.get_cases_created_within_days(days=7)
+    # WHEN getting a metrics entry by flow cell name, sample internal id and lane
+    metrics_entry: SampleLaneSequencingMetrics = store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+        sample_internal_id=sample_id, flow_cell_name=flow_cell_name, lane=lane
+    )
 
-    # THEN all cases should be returned
-    assert len(cases) == len(all_cases)
+    assert metrics_entry is not None
+    assert metrics_entry.flow_cell_name == flow_cell_name
+    assert metrics_entry.flow_cell_lane_number == lane
+    assert metrics_entry.sample_internal_id == sample_id
+
+
+def test_get_number_of_reads_for_sample_passing_q30_threshold(
+    store_with_sequencing_metrics: Store,
+    sample_id: str,
+):
+    # GIVEN a store with sequencing metrics
+    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
+
+    # GIVEN a metric for a specific sample
+    sample_metric: Optional[SampleLaneSequencingMetrics] = metrics.filter(
+        SampleLaneSequencingMetrics.sample_internal_id == sample_id
+    ).first()
+    assert sample_metric
+
+    # GIVEN a Q30 threshold that the sample will pass
+    q30_threshold = int(sample_metric.sample_base_fraction_passing_q30 / 2 * 100)
+
+    # WHEN getting the number of reads for the sample that pass the Q30 threshold
+    number_of_reads: int = (
+        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
+            sample_internal_id=sample_id, q30_threshold=q30_threshold
+        )
+    )
+
+    # THEN assert that the number of reads is an integer
+    assert isinstance(number_of_reads, int)
+
+    # THEN assert that the number of reads is at least the number of reads in the lane for the sample passing the q30
+    assert number_of_reads >= sample_metric.sample_total_reads_in_lane
+
+
+def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
+    store_with_sequencing_metrics: Store, sample_id: str
+):
+    # GIVEN a store with sequencing metrics
+    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
+
+    # GIVEN a metric for a specific sample
+    sample_metrics: List[SampleLaneSequencingMetrics] = metrics.filter(
+        SampleLaneSequencingMetrics.sample_internal_id == sample_id
+    ).all()
+
+    assert sample_metrics
+
+    # GIVEN a Q30 threshold that some of the sample's metrics will not pass
+    q30_values = [int(metric.sample_base_fraction_passing_q30 * 100) for metric in sample_metrics]
+    q30_threshold = sorted(q30_values)[len(q30_values) // 2]  # This is the median
+
+    # WHEN getting the number of reads for the sample that pass the Q30 threshold
+    number_of_reads: int = (
+        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
+            sample_internal_id=sample_id, q30_threshold=q30_threshold
+        )
+    )
+
+    # THEN assert that the number of reads is less than the total number of reads for the sample
+    total_sample_reads = sum([metric.sample_total_reads_in_lane for metric in sample_metrics])
+    assert number_of_reads < total_sample_reads

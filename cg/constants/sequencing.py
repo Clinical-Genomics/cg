@@ -1,4 +1,4 @@
-"""Constants related to all things sequencing"""
+"""Constants related to sequencing."""
 from cg.utils.enums import StrEnum
 
 
@@ -34,6 +34,8 @@ sequencer_types = {
     "A00689": Sequencers.NOVASEQ,
     "A01901": Sequencers.NOVASEQ,
     "LH00188": Sequencers.NOVASEQX,
+    "LH00202": Sequencers.NOVASEQX,
+    "LH00217": Sequencers.NOVASEQX,
 }
 
 FLOWCELL_Q30_THRESHOLD = {
@@ -62,3 +64,8 @@ class Variants(StrEnum):
 class RecordType(StrEnum):
     Sample: str = "Sample"
     Pool: str = "Pool"
+
+
+class SequencingPlatform(StrEnum):
+    ILLUMINA: str = "ILLUMINA"
+    OXFORD_NANOPORE: str = "OXFORD_NANOPORE"

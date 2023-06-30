@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.osticket import MockOsTicket
@@ -5,7 +7,6 @@ from tests.mocks.osticket import MockOsTicket
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.api import FastqSubmitter
 from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
-from cg.meta.orders.fluffy_submitter import FluffySubmitter
 from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
 from cg.meta.orders.microbial_submitter import MicrobialSubmitter
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
@@ -22,21 +23,24 @@ from tests.apps.orderform.conftest import (
     mip_order_to_submit,
     mip_rna_order_to_submit,
     rml_order_to_submit,
+    fixture_rnafusion_order_to_submit,
     sarscov2_order_to_submit,
 )
 
 
 @pytest.fixture(scope="session", name="all_orders_to_submit")
 def fixture_all_orders_to_submit(
-    balsamic_order_to_submit,
-    fastq_order_to_submit,
-    metagenome_order_to_submit,
-    microbial_order_to_submit,
-    mip_order_to_submit,
-    mip_rna_order_to_submit,
-    rml_order_to_submit,
-    sarscov2_order_to_submit,
-):
+    balsamic_order_to_submit: dict,
+    fastq_order_to_submit: dict,
+    metagenome_order_to_submit: dict,
+    microbial_order_to_submit: dict,
+    mip_order_to_submit: dict,
+    mip_rna_order_to_submit: dict,
+    rml_order_to_submit: dict,
+    rnafusion_order_to_submit: dict,
+    sarscov2_order_to_submit: dict,
+) -> dict:
+    """Returns a dict of parsed order for each order type."""
     return {
         OrderType.BALSAMIC: OrderIn.parse_obj(balsamic_order_to_submit, project=OrderType.BALSAMIC),
         OrderType.FASTQ: OrderIn.parse_obj(fastq_order_to_submit, project=OrderType.FASTQ),
@@ -50,6 +54,9 @@ def fixture_all_orders_to_submit(
         OrderType.MIP_DNA: OrderIn.parse_obj(mip_order_to_submit, project=OrderType.MIP_DNA),
         OrderType.MIP_RNA: OrderIn.parse_obj(mip_rna_order_to_submit, project=OrderType.MIP_RNA),
         OrderType.RML: OrderIn.parse_obj(rml_order_to_submit, project=OrderType.RML),
+        OrderType.RNAFUSION: OrderIn.parse_obj(
+            rnafusion_order_to_submit, project=OrderType.RNAFUSION
+        ),
         OrderType.SARS_COV_2: OrderIn.parse_obj(
             sarscov2_order_to_submit, project=OrderType.SARS_COV_2
         ),
@@ -111,14 +118,6 @@ def rml_status_data(rml_order_to_submit):
     project: OrderType = OrderType.RML
     order: OrderIn = OrderIn.parse_obj(obj=rml_order_to_submit, project=project)
     return RmlSubmitter.order_to_status(order=order)
-
-
-@pytest.fixture
-def fluffy_status_data(fluffy_uploaded_json_order):
-    """Parse fluffy order example."""
-    project: OrderType = OrderType.FLUFFY
-    order: OrderIn = OrderIn.parse_obj(obj=fluffy_uploaded_json_order, project=project)
-    return FluffySubmitter.order_to_status(order=order)
 
 
 @pytest.fixture(scope="function")

@@ -1,15 +1,16 @@
 import datetime as dt
 import logging
 import shutil
-from csv import reader
 from pathlib import Path
 from typing import List, Optional
 
 import pandas as pd
 from sqlalchemy.orm import Query
 from cg.constants import Pipeline
-from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.constants.constants import FileFormat
+from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
 from cg.exc import CgError
+from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Family, Flowcell, Sample
@@ -144,13 +145,14 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Returns:
         int: The number of lines before the sample sheet data header
         """
-        with sample_sheet_housekeeper_path.open("r") as read_obj:
-            csv_reader = reader(read_obj)
-            header_line_count: int = 1
-            for line in csv_reader:
-                if SampleSheetHeaderColumnNames.DATA.value in line:
-                    break
-                header_line_count += 1
+        sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=sample_sheet_housekeeper_path
+        )
+        header_line_count: int = 1
+        for line in sample_sheet_content:
+            if SampleSheetNovaSeq6000Sections.Data.HEADER.value in line:
+                break
+            header_line_count += 1
         return header_line_count
 
     def read_sample_sheet_data(self, sample_sheet_housekeeper_path: Path) -> pd.DataFrame:
@@ -317,12 +319,12 @@ class FluffyAnalysisAPI(AnalysisAPI):
         self.process.run_command(command_args, dry_run=dry_run)
 
     def get_cases_to_store(self) -> List[Family]:
-        """Retrieve a list of cases where analysis finished successfully,
-        and is ready to be stored in Housekeeper"""
+        """Return cases where analysis finished successfully,
+        and is ready to be stored in Housekeeper."""
         return [
-            case_object
-            for case_object in self.get_running_cases()
-            if Path(self.get_analysis_finish_path(case_id=case_object.internal_id)).exists()
+            case
+            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
+            if Path(self.get_analysis_finish_path(case_id=case.internal_id)).exists()
         ]
 
     def get_slurm_param_qos(self, case_id):

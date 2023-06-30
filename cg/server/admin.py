@@ -1,6 +1,6 @@
 """Module for Flask-Admin views"""
 from datetime import datetime
-from gettext import ngettext, gettext
+from gettext import gettext
 from typing import List, Union
 
 from cgmodels.cg.constants import Pipeline
@@ -12,7 +12,7 @@ from markupsafe import Markup
 
 from cg.constants.constants import DataDelivery, CaseActions
 from cg.server.ext import db
-from cg.store.models import Family, Sample
+from cg.store.models import Sample
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -294,6 +294,15 @@ class FlowcellView(BaseView):
     column_filters = ["sequencer_type", "sequencer_name", "status"]
     column_searchable_list = ["name"]
 
+    @staticmethod
+    def view_flow_cell_link(unused1, unused2, model, unused3):
+        """column formatter to open this view"""
+        del unused1, unused2, unused3
+        return Markup(
+            "<a href='%s'>%s</a>"
+            % (url_for("flowcell.index_view", search=model.flowcell.name), model.flowcell.name)
+        )
+
 
 class InvoiceView(BaseView):
     """Admin view for Model.Invoice"""
@@ -536,11 +545,15 @@ class UserView(BaseView):
     edit_modal = True
 
 
-class SequencingStatisticsView(BaseView):
-    """Admin view for the Model.SequencingStats."""
+class SampleLaneSequencingMetricsView(BaseView):
+    """Admin view for the Model.SampleLaneSequencingMetrics."""
 
     column_filters = ["sample_internal_id", "flow_cell_name"]
     column_searchable_list = ["sample_internal_id", "flow_cell_name"]
-    column_editable_list = ["read_counts"]
     create_modal = True
     edit_modal = True
+
+    column_formatters = {
+        "flowcell": FlowcellView.view_flow_cell_link,
+        "sample": SampleView.view_sample_link,
+    }

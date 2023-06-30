@@ -17,7 +17,6 @@ from cg.store.models import (
     Flowcell,
     Sample,
 )
-from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
 from cg.utils.date import get_date_days_ago
 
 from cg.store.models import Model as ModelBase
@@ -127,7 +126,7 @@ class BaseHandler:
         filter_case_order_date = None
         if days != 0:
             filter_case_order_date = get_date_days_ago(days_ago=days)
-            filter_functions.append(CaseFilter.GET_NEW_BY_ORDER_DATE)
+            filter_functions.append(CaseFilter.FILTER_NEW_BY_ORDER_DATE)
         if case_action:
             filter_functions.append(CaseFilter.FILTER_BY_ACTION)
         if priority:

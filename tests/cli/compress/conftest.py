@@ -3,7 +3,7 @@
 import datetime as dt
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Generator, List
+from typing import Dict, Any, Generator
 
 import pytest
 from cg.apps.crunchy import CrunchyAPI
@@ -75,12 +75,6 @@ def fixture_real_populated_compress_fastq_api(
     """Return populated Compress API."""
     helpers.ensure_hk_bundle(real_compress_api.hk_api, compress_hk_fastq_bundle)
     return real_compress_api
-
-
-@pytest.fixture(name="samples")
-def fixture_samples() -> List[str]:
-    """Return a list of sample ids."""
-    return ["sample1", "sample2", "sample3"]
 
 
 # Store fixtures
@@ -170,16 +164,6 @@ def fixture_populated_compress_multiple_store(
 # Context fixtures
 @pytest.fixture(name="compress_context")
 def fixture_base_compress_context(
-    compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
-) -> CGConfig:
-    """Return a Compress context."""
-    cg_config_object.meta_apis["compress_api"] = compress_api
-    cg_config_object.status_db_ = store
-    return cg_config_object
-
-
-@pytest.fixture(name="store_fastq_context")
-def fixture_store_fastq_context(
     compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
 ) -> CGConfig:
     """Return a Compress context."""

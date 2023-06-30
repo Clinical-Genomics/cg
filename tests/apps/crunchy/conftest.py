@@ -1,7 +1,7 @@
 """Fixtures for crunchy API."""
 import logging
 from pathlib import Path
-from typing import List, Dict
+from typing import List
 
 import pytest
 
@@ -55,44 +55,3 @@ def fixture_spring_metadata_file(
         content=spring_metadata, file_format=FileFormat.JSON, file_path=metadata_path
     )
     return metadata_path
-
-
-@pytest.fixture(name="fastq_first_file")
-def fixture_fastq_first_file(fastq_first_path: Path) -> Path:
-    """Creates an existing FASTQ path."""
-    fastq_first_path.touch()
-    return fastq_first_path
-
-
-@pytest.fixture(name="fastq_second_file")
-def fixture_fastq_second_file(fastq_second_path: Path) -> Path:
-    """Creates an existing FASTQ path."""
-    fastq_second_path.touch()
-    return fastq_second_path
-
-
-@pytest.fixture(name="spring_file")
-def fixture_spring_file(spring_path: Path) -> Path:
-    """Creates an existing SPRING file."""
-    spring_path.touch()
-    return spring_path
-
-
-@pytest.fixture(name="fastq_paths")
-def fixture_fastq_paths(fastq_first_path: Path, fastq_second_path: Path) -> Dict[str, Path]:
-    """Creates FASTQ paths."""
-    return {
-        "fastq_first_path": fastq_first_path,
-        "fastq_second_path": fastq_second_path,
-    }
-
-
-@pytest.fixture(name="existing_fastq_paths")
-def fixture_existing_fastq_paths(
-    fastq_first_file: Path, fastq_second_file: Path
-) -> Dict[str, Path]:
-    """Creates existing FASTQ paths."""
-    return {
-        "fastq_first_path": fastq_first_file,
-        "fastq_second_path": fastq_second_file,
-    }

@@ -4,30 +4,32 @@ from typing import List
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.lims.samplesheet import (
-    LimsFlowcellSampleBcl2Fastq,
-    LimsFlowcellSampleDragen,
+from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeq6000Dragen,
 )
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
-FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.flowcell_samples"
+FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.get_flow_cell_samples"
 
 
 def test_create_sample_sheet_no_run_parameters(
     cli_runner: testing.CliRunner,
     flow_cell_working_directory_no_run_parameters: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[LimsFlowcellSampleBcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
     caplog,
     mocker,
 ):
     # GIVEN a folder with a non-existing sample sheet
-    flowcell_object: FlowCell = FlowCell(flow_cell_working_directory_no_run_parameters)
-    assert flowcell_object.run_parameters_path.exists() is False
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=flow_cell_working_directory_no_run_parameters
+    )
+    assert flow_cell.run_parameters_path.exists() is False
 
     # GIVEN flow cell samples
     mocker.patch(
@@ -42,7 +44,7 @@ def test_create_sample_sheet_no_run_parameters(
 
     # WHEN running the create sample sheet command
     result: testing.Result = cli_runner.invoke(
-        create_sheet, [flowcell_object.full_name], obj=sample_sheet_context
+        create_sheet, [flow_cell.full_name], obj=sample_sheet_context
     )
 
     # THEN the process exits with a non-zero exit code
@@ -56,11 +58,11 @@ def test_create_bcl2fastq_sample_sheet(
     cli_runner: testing.CliRunner,
     flow_cell_working_directory: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[LimsFlowcellSampleBcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
-    flowcell: FlowCell = FlowCell(flow_cell_working_directory)
+    flowcell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_working_directory)
     assert flowcell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet present
@@ -92,11 +94,13 @@ def test_create_dragen_sample_sheet(
     cli_runner: testing.CliRunner,
     flow_cell_working_directory: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_dragen_samples: List[LimsFlowcellSampleDragen],
+    lims_novaseq_dragen_samples: List[FlowCellSampleNovaSeq6000Dragen],
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
-    flowcell: FlowCell = FlowCell(flow_cell_working_directory, bcl_converter=BclConverter.DRAGEN)
+    flowcell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_working_directory, bcl_converter=BclConverter.DRAGEN
+    )
     assert flowcell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet present

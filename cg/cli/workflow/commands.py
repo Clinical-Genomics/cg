@@ -1,33 +1,30 @@
-from typing import List, Union
-
-import click
 import datetime as dt
 import logging
 import shutil
-
 from pathlib import Path
+from typing import List, Union
 
+import click
+from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
-from cg.exc import FlowCellsNeededError, DecompressionNeededError
+from cg.exc import DecompressionNeededError, FlowCellsNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_pon import BalsamicPonAnalysisAPI
 from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from dateutil.parser import parse as parse_date
-
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", help="Simulate process without executing", is_flag=True
@@ -211,7 +208,7 @@ def past_run_dirs(
         except FileNotFoundError:
             continue
         except Exception as error:
-            LOG.error("Failed to clean directories for case %s - %s", case_id, error)
+            LOG.error(f"Failed to clean directories for case {case_id} - {repr(error)}")
             exit_code = EXIT_FAIL
 
     if exit_code:

@@ -1,7 +1,6 @@
 """Tests for the prepare_fastq_api"""
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store

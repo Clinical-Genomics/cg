@@ -33,7 +33,7 @@ from cg.constants import FlowCellStatus
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.constants.sequencing import Sequencers
 from cg.constants.housekeeper_tags import SequencingFileTag, ALIGNMENT_FILE_TAGS, ScoutTag
-from cg.models.demultiplex.flow_cell import FlowCell as DemultiplexFlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData as DemultiplexFlowCell
 from cg.utils.date import get_timedelta_from_date, get_date_days_ago
 from cg.exc import FlowCellError, HousekeeperBundleVersionMissingError
 from cg.meta.clean.api import CleanAPI
@@ -457,10 +457,25 @@ def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run:
             flow_cell: DemultiplexFlowCell = DemultiplexFlowCell(flow_cell_path=flow_cell_dir)
         except FlowCellError:
             continue
+
+        if not flow_cell.is_demultiplexing_complete:
+            LOG.info(
+                f"Demultiplexing not finished for {flow_cell.id}. Skipping removal of the directory."
+            )
+            continue
+
         samples: List[Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flow_cell.id)
-        are_sequencing_files_in_hk: bool = housekeeper_api.is_fastq_or_spring_in_all_bundles(
-            bundle_names=[sample.internal_id for sample in samples]
-        )
+        try:
+            are_sequencing_files_in_hk: bool = housekeeper_api.is_fastq_or_spring_in_all_bundles(
+                bundle_names=[sample.internal_id for sample in samples]
+            )
+        except HousekeeperBundleVersionMissingError:
+            LOG.info(
+                f"No bundle found for one or more of the samples on flow cell {flow_cell.id}."
+                f" Skipping removal of the directory."
+            )
+            continue
+
         demux_runs_flow_cell: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
             flow_cell_path=flow_cell_dir,
             status_db=status_db,

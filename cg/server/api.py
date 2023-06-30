@@ -1,32 +1,31 @@
-from datetime import datetime, timezone
 import http
-import logging
 import json
+import logging
 import tempfile
+from datetime import datetime
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from cachetools import TTLCache
 
 import requests
-from sqlalchemy.exc import IntegrityError
-from urllib3.exceptions import MaxRetryError, NewConnectionError
-
+from cachetools import TTLCache
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
-from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES, Pipeline
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
 from cg.exc import OrderError, OrderFormError, TicketCreationError
-from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell, Analysis, User
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
+from cg.server.ext import db, lims, osticket
+from cg.store.models import Analysis, Application, Customer, Family, Flowcell, Pool, Sample, User
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from pydantic import ValidationError
 from requests.exceptions import HTTPError
+from sqlalchemy.exc import IntegrityError
+from urllib3.exceptions import MaxRetryError, NewConnectionError
 from werkzeug.utils import secure_filename
 
 LOG = logging.getLogger(__name__)
@@ -41,9 +40,7 @@ def get_certificate_ttl(response_data) -> int:
     """Extract time to live in seconds for certificate from response headers."""
     expires_header = response_data.headers.get("Expires")
     expires = datetime.strptime(expires_header, "%a, %d %b %Y %H:%M:%S %Z")
-    ttl = int((expires - datetime.utcnow()).total_seconds())
-
-    return ttl
+    return int((expires - datetime.utcnow()).total_seconds())
 
 
 def fetch_and_cache_google_oauth2_certificates():
@@ -124,7 +121,7 @@ def before_request():
         LOG.error(message)
         return abort(make_response(jsonify(message=message), http.HTTPStatus.FORBIDDEN))
 
-    g.current_user: User = user
+    g.current_user = user
 
 
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
@@ -183,26 +180,28 @@ def submit_order(order_type):
 
 
 @BLUEPRINT.route("/cases")
-def parse_cases():
-    """Fetch cases."""
-    cases: List[Family] = db.get_cases_created_within_days(days=31)
-    return jsonify(cases=cases, total=len(cases))
+def get_cases():
+    """Return cases with links for a customer from the database."""
+    enquiry: str = request.args.get("enquiry")
+    action: str = request.args.get("action")
+
+    customers: List[Customer] = _get_current_customers()
+    cases: List[Family] = _get_cases(enquiry=enquiry, action=action, customers=customers)
+
+    nr_cases: int = len(cases)
+    cases_with_links: List[dict] = [case.to_dict(links=True) for case in cases]
+    return jsonify(families=cases_with_links, total=nr_cases)
 
 
 def _get_current_customers() -> Optional[List[Customer]]:
     """Return customers if the current user is not an admin."""
-    if not g.current_user.is_admin:
-        return g.current_user.customers
-    return None
+    return g.current_user.customers if not g.current_user.is_admin else None
 
 
 def _get_cases(
-    status: str, enquiry: Optional[str], action: Optional[str], customers: Optional[List[Customer]]
+    enquiry: Optional[str], action: Optional[str], customers: Optional[List[Customer]]
 ) -> List[Family]:
     """Get cases based on the provided filters."""
-    if status == "analysis":
-        return db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
-
     return db.get_cases_by_customers_action_and_case_search(
         case_search=enquiry,
         customers=customers,
@@ -210,21 +209,15 @@ def _get_cases(
     )
 
 
-@BLUEPRINT.route("/families")
-def get_families():
-    """Return cases."""
-    status: str = request.args.get("status")
-    enquiry: str = request.args.get("enquiry")
-    action: str = request.args.get("action")
-
-    customers: List[Customer] = _get_current_customers()
-    cases: List[Family] = _get_cases(
-        status=status, enquiry=enquiry, action=action, customers=customers
-    )
-
-    count = len(cases)
-    case_dicts = [case.to_dict(links=True) for case in cases]
-    return jsonify(families=case_dicts, total=count)
+@BLUEPRINT.route("/cases/<case_id>")
+def parse_case(case_id):
+    """Return a case with links."""
+    case: Family = db.get_case_by_internal_id(internal_id=case_id)
+    if case is None:
+        return abort(http.HTTPStatus.NOT_FOUND)
+    if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
+        return abort(http.HTTPStatus.FORBIDDEN)
+    return jsonify(**case.to_dict(links=True, analyses=True))
 
 
 @BLUEPRINT.route("/families_in_collaboration")
@@ -245,17 +238,6 @@ def parse_families_in_collaboration():
 
     case_dicts = [case.to_dict(links=True) for case in cases]
     return jsonify(families=case_dicts, total=len(cases))
-
-
-@BLUEPRINT.route("/families/<family_id>")
-def parse_family(family_id):
-    """Return a family with links."""
-    case: Family = db.get_case_by_internal_id(internal_id=family_id)
-    if case is None:
-        return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
-        return abort(http.HTTPStatus.FORBIDDEN)
-    return jsonify(**case.to_dict(links=True, analyses=True))
 
 
 @BLUEPRINT.route("/families_in_collaboration/<family_id>")

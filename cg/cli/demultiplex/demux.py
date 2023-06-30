@@ -9,7 +9,7 @@ from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ def demultiplex_all(
             continue
         LOG.info(f"Found directory {sub_dir}")
         try:
-            flow_cell = FlowCell(flow_cell_path=sub_dir, bcl_converter=bcl_converter)
+            flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir, bcl_converter=bcl_converter)
         except FlowCellError:
             continue
 
@@ -51,22 +51,6 @@ def demultiplex_all(
                 f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}",
             )
             continue
-
-        delete_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
-            config=context,
-            demultiplex_base=demultiplex_api.out_dir,
-            dry_run=dry_run,
-            run_path=(flow_cells_directory / sub_dir),
-        )
-
-        delete_demux_api.delete_flow_cell(
-            cg_stats=False,
-            demultiplexing_dir=True,
-            run_dir=False,
-            housekeeper=True,
-            init_files=False,
-            status_db=False,
-        )
 
         slurm_job_id: int = demultiplex_api.start_demultiplexing(flow_cell=flow_cell)
         demultiplex_api.add_to_trailblazer(
@@ -99,25 +83,11 @@ def demultiplex_flow_cell(
     LOG.info(f"setting out dir to {demultiplex_api.out_dir}")
 
     try:
-        flow_cell = FlowCell(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
+        flow_cell = FlowCellDirectoryData(
+            flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
+        )
     except FlowCellError as error:
         raise click.Abort from error
-
-    delete_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
-        config=context,
-        demultiplex_base=demultiplex_api.out_dir,
-        dry_run=dry_run,
-        run_path=flow_cell_directory,
-    )
-
-    delete_demux_api.delete_flow_cell(
-        cg_stats=True,
-        demultiplexing_dir=True,
-        run_dir=False,
-        housekeeper=True,
-        init_files=True,
-        status_db=False,
-    )
 
     if not demultiplex_api.is_demultiplexing_possible(flow_cell=flow_cell) and not dry_run:
         LOG.warning("Can not start demultiplexing!")

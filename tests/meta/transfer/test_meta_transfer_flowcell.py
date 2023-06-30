@@ -38,32 +38,30 @@ def test_add_tags_to_housekeeper(
 
 
 def test_add_flow_cell_to_status_db(
-    transfer_flow_cell_api: Generator[TransferFlowCell, None, None], yet_another_flow_cell_id: str
+    transfer_flow_cell_api: Generator[TransferFlowCell, None, None], bcl2fastq_flow_cell_id: str
 ):
     """Test adding flow cell to Status db."""
     # GIVEN transfer flow cell API
 
     # GIVEN a flow cell that does not exist in status db
     flow_cell: Flowcell = transfer_flow_cell_api.db.get_flow_cell_by_name(
-        flow_cell_name=yet_another_flow_cell_id
+        flow_cell_name=bcl2fastq_flow_cell_id
     )
 
     assert flow_cell is None
 
     # GIVEN a cgstats flow cell
-    cgstats_flow_cell: StatsFlowcell = transfer_flow_cell_api.stats.flowcell(
-        yet_another_flow_cell_id
-    )
+    cgstats_flow_cell: StatsFlowcell = transfer_flow_cell_api.stats.flowcell(bcl2fastq_flow_cell_id)
 
     # WHEN adding flow cell to status db
     added_flow_cell: Flowcell = transfer_flow_cell_api._add_flow_cell_to_status_db(
         cgstats_flow_cell=cgstats_flow_cell,
         flow_cell=flow_cell,
-        flow_cell_id=yet_another_flow_cell_id,
+        flow_cell_id=bcl2fastq_flow_cell_id,
     )
 
     # THEN the flow cell added/returned should have the same id
-    assert added_flow_cell.name == yet_another_flow_cell_id
+    assert added_flow_cell.name == bcl2fastq_flow_cell_id
 
 
 def test_add_flow_cell_to_status_db_existing_flow_cell(
@@ -357,18 +355,16 @@ def test_parse_flow_cell_samples(
     flowcell_store: Store,
     helpers: StoreHelpers,
     transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
-    yet_another_flow_cell_id: str,
+    bcl2fastq_flow_cell_id: str,
 ):
     """Test parsing of flow cell samples."""
 
     # GIVEN a cgstats flow cell
-    cgstats_flow_cell: StatsFlowcell = transfer_flow_cell_api.stats.flowcell(
-        yet_another_flow_cell_id
-    )
+    cgstats_flow_cell: StatsFlowcell = transfer_flow_cell_api.stats.flowcell(bcl2fastq_flow_cell_id)
 
     # GIVEN a flow cell that exist in status db
     flow_cell: Flowcell = helpers.add_flowcell(
-        store=flowcell_store, flow_cell_name=yet_another_flow_cell_id
+        store=flowcell_store, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
     # GIVEN no sample in flow cell
@@ -378,7 +374,7 @@ def test_parse_flow_cell_samples(
     transfer_flow_cell_api._parse_flow_cell_samples(
         cgstats_flow_cell=cgstats_flow_cell,
         flow_cell=flow_cell,
-        flow_cell_id=yet_another_flow_cell_id,
+        flow_cell_id=bcl2fastq_flow_cell_id,
         store=True,
     )
 
@@ -391,21 +387,19 @@ def test_parse_flow_cell_samples_when_no_cgstats_sample(
     flowcell_store: Store,
     helpers: StoreHelpers,
     transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
-    yet_another_flow_cell_id: str,
+    bcl2fastq_flow_cell_id: str,
 ):
     """Test parsing of flow cell samples when no cgstats sample."""
 
     # GIVEN a cgstats flow cell
-    cgstats_flow_cell: StatsFlowcell = transfer_flow_cell_api.stats.flowcell(
-        yet_another_flow_cell_id
-    )
+    cgstats_flow_cell: StatsFlowcell = transfer_flow_cell_api.stats.flowcell(bcl2fastq_flow_cell_id)
 
     # GIVEN a sample name that does not exist in cgstats
     cgstats_flow_cell.samples[0].name = "sample_does_not_exist_in_cgstats"
 
     # GIVEN a flow cell that exist in status db
     flow_cell: Flowcell = helpers.add_flowcell(
-        store=flowcell_store, flow_cell_name=yet_another_flow_cell_id
+        store=flowcell_store, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
     # GIVEN no sample in flow cell
@@ -415,7 +409,7 @@ def test_parse_flow_cell_samples_when_no_cgstats_sample(
     transfer_flow_cell_api._parse_flow_cell_samples(
         cgstats_flow_cell=cgstats_flow_cell,
         flow_cell=flow_cell,
-        flow_cell_id=yet_another_flow_cell_id,
+        flow_cell_id=bcl2fastq_flow_cell_id,
         store=True,
     )
 
@@ -430,13 +424,13 @@ def test_transfer(
     bcl2fastq_demux_results: DemuxResults,
     flowcell_store: Store,
     transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
-    yet_another_flow_cell_id: str,
+    bcl2fastq_flow_cell_id: str,
 ):
     """Test transfer of sequencing files."""
 
     # GIVEN a store with a received but not sequenced sample
     housekeeper_api: HousekeeperAPI = transfer_flow_cell_api.hk
-    assert len(flowcell_store.get_samples()) == 2
+    assert len(flowcell_store._get_query(table=Sample).all()) == 2
     assert flowcell_store._get_query(table=Flowcell).count() == 0
     assert housekeeper_api.bundles().count() == 0
 
@@ -447,15 +441,15 @@ def test_transfer(
         warnings.simplefilter("ignore", category=sa_exc.SAWarning)
         flow_cell = transfer_flow_cell_api.transfer(
             flow_cell_dir=bcl2fastq_demux_results.flow_cell.path,
-            flow_cell_id=yet_another_flow_cell_id,
+            flow_cell_id=bcl2fastq_flow_cell_id,
         )
 
     # THEN it should create a new flow cell record
     assert flowcell_store._get_query(table=Flowcell).count() == 1
     assert flow_cell.status == FlowCellStatus.ON_DISK
     assert isinstance(flow_cell.id, int)
-    assert flow_cell.name == yet_another_flow_cell_id
-    status_sample = flowcell_store.get_samples()[0]
+    assert flow_cell.name == bcl2fastq_flow_cell_id
+    status_sample = flowcell_store._get_query(table=Sample).first()
     assert isinstance(status_sample.sequenced_at, datetime)
 
     # ... and it should store the fastq files and samplesheet for the sample in housekeeper

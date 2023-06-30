@@ -184,10 +184,10 @@
               <br>
               <strong>Förklaringar</strong><br>
               <ins>Läspar</ins>: Antal sekvenseringsläsningar i miljoner läspar.<br>
-              <ins>Mappade sekvenser</ins>: Procent sekvenser som fått en eller flera positioner i det genom som använts som referensgenom.<br>
+              <ins>Mappade sekvenser</ins>: Procent sekvenser som matchar en eller flera positioner i referensgenomet.<br>
               <ins>Medelsekvensdjup</ins>: Medelvärdet av täckningsgraden i baser över en genomisk region.<br>
               <ins>Täckningsgrad</ins>: Andel baser som är sekvenserade med ett djup över en specificerad gräns, t.ex. 100X.<br>
-              <ins>Duplikat</ins>: Sekvenseringsläsningar som är i duplikat och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserad bibliotek eller djup sekvensering.<br>
+              <ins>Duplikat</ins>: Sekvenseringsläsningar som är duplikat (kopior) och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserat bibliotek eller djup sekvensering.<br>
               <br>
               Värdena presenterade för <ins>Täckningsgrad</ins> är efter borttagning av duplikata läsningar.
             </caption>
@@ -204,16 +204,16 @@
               <p>Varianter finns uppladdade i Scout: <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a></p>
               <ul>
                 {% if case.data_analysis.scout_files.snv_vcf != 'N/A' %}
-                  <li><strong>Kliniskt relevanta förvärvade SNVs och INDELs</strong>: <em>{{ case.data_analysis.scout_files.snv_vcf.replace(case.id, case.name) }}</em></li>
+                  <li><strong>Kliniskt relevanta SNVs och INDELs</strong>: <em>{{ case.data_analysis.scout_files.snv_vcf.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.snv_research_vcf != 'N/A' %}
-                  <li><strong>Förvärvade SNVs och INDELs för forskning</strong>: <em>{{ case.data_analysis.scout_files.snv_research_vcf.replace(case.id, case.name) }}</em></li>
+                  <li><strong>SNVs och INDELs för forskning</strong>: <em>{{ case.data_analysis.scout_files.snv_research_vcf.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.sv_vcf != 'N/A' %}
-                  <li><strong>Kliniskt relevanta förvärvade SVs</strong>: <em>{{ case.data_analysis.scout_files.sv_vcf.replace(case.id, case.name) }}</em></li>
+                  <li><strong>Kliniskt relevanta SVs</strong>: <em>{{ case.data_analysis.scout_files.sv_vcf.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.sv_research_vcf != 'N/A' %}
-                  <li><strong>Förvärvade SVs för forskning</strong>: <em>{{ case.data_analysis.scout_files.sv_research_vcf.replace(case.id, case.name) }}</em></li>
+                  <li><strong>SVs för forskning</strong>: <em>{{ case.data_analysis.scout_files.sv_research_vcf.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.vcf_str != 'N/A' %}
                   <li><strong>Kliniskt relevanta STRs</strong>: <em>{{ case.data_analysis.scout_files.vcf_str.replace(case.id, case.name) }}</em></li>

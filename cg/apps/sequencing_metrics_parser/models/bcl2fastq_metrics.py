@@ -9,12 +9,10 @@ class IndexMetric(BaseModel):
     mapping mismatch counts to their frequencies.
 
     Fields:
-    - index_sequence: The specific index sequence this metric pertains to.
     - mismatch_counts: A dictionary mapping mismatch counts (as strings) to their
       respective frequencies.
     """
 
-    index_sequence: str = Field(..., alias="IndexSequence", min_length=1)
     mismatch_counts: Dict[str, int] = Field(..., alias="MismatchCounts")
 
     @validator("mismatch_counts", each_item=True)
@@ -69,15 +67,11 @@ class ConversionResult(BaseModel):
 
     Fields:
     - lane_number: The number of the lane this result pertains to.
-    - total_clusters_raw: The total number of raw clusters in this lane.
-    - total_clusters_pf: The total number of pass-filter (PF) clusters in this lane.
     - yield_: The total yield from this lane.
     - demux_results: A list of demultiplexing results for each sample in this lane.
     """
 
     lane_number: int = Field(..., alias="LaneNumber", gt=0)
-    total_clusters_raw: int = Field(..., alias="TotalClustersRaw", ge=0)
-    total_clusters_pf: int = Field(..., alias="TotalClustersPF", ge=0)
     yield_: int = Field(..., alias="Yield", ge=0)
     demux_results: List[DemuxResult] = Field(..., alias="DemuxResults")
 
@@ -93,20 +87,39 @@ class ReadInfoForLane(BaseModel):
     lane_number: int = Field(..., alias="LaneNumber", gt=0)
 
 
-class Bcl2FastqSequencingMetrics(BaseModel):
+class Bcl2FastqSampleLaneTileMetrics(BaseModel):
     """
-    Represents a comprehensive set of sequencing metrics for a bcl2fastq run.
+    Represents a set of sequencing metrics for a bcl2fastq run per sample, lane and tile on a flow cell.
 
     Fields:
     - flowcell: The identifier for the flowcell used in this run.
-    - run_number: The number of the run.
-    - run_id: The unique identifier for the run.
     - read_infos_for_lanes: A list of basic information for each lane in this run.
     - conversion_results: A list of conversion results for each lane in this run.
     """
 
-    flowcell: str = Field(..., alias="Flowcell", min_length=1)
-    run_number: int = Field(..., alias="RunNumber", gt=0)
-    run_id: str = Field(..., alias="RunId", min_length=1)
+    flow_cell_name: str = Field(..., alias="Flowcell", min_length=1)
     read_infos_for_lanes: List[ReadInfoForLane] = Field(..., alias="ReadInfosForLanes")
     conversion_results: List[ConversionResult] = Field(..., alias="ConversionResults")
+
+
+class Bcl2FastqSampleLaneMetrics(BaseModel):
+    """
+    Aggregated metrics per sample and lane from a bcl2fastq run.
+
+     Attributes:
+     - flow_cell_name (str): Name of the flow cell.
+     - flow_cell_lane_number (int): Lane number within the flow cell.
+     - sample_id (str): Unique identifier of the sample.
+     - sample_total_reads_in_lane (int): Total number of reads for the sample in the lane.
+     - sample_total_yield_in_lane (int): Total yield of bases for the sample in the lane.
+     - sample_total_yield_q30_in_lane (int): Total yield of bases with Q30 quality score in the lane.
+     - sample_total_quality_score_in_lane (int): Sum of quality scores for all bases in the sample reads in the lane.
+    """
+
+    flow_cell_name: str
+    flow_cell_lane_number: int
+    sample_id: str
+    sample_total_reads_in_lane: int
+    sample_total_yield_in_lane: int
+    sample_total_yield_q30_in_lane: int
+    sample_total_quality_score_in_lane: int

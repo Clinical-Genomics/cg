@@ -3,16 +3,16 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Iterable, List, Optional, Set, Tuple, Dict
+from typing import Dict, Iterable, List, Optional, Set, Tuple
 
+from cg.constants import SequencingFileTag
+from cg.exc import HousekeeperBundleVersionMissingError
 from sqlalchemy.orm import Query
+
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
 from housekeeper.store.models import Bundle, File, Version
-
-from cg.constants import SequencingFileTag
-from cg.exc import HousekeeperBundleVersionMissingError
 
 LOG = logging.getLogger(__name__)
 
@@ -93,10 +93,6 @@ class HousekeeperAPI:
 
         return file_obj
 
-    def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:
-        """Check if there are files for a bundle, tags, and/or version."""
-        return any(self.files(bundle=bundle, tags=tags, version=version))
-
     def add_file(self, path, version_obj: Version, tags: list, to_archive: bool = False) -> File:
         """Add a file to the database."""
         if isinstance(tags, str):
@@ -118,7 +114,7 @@ class HousekeeperAPI:
         self,
         *,
         bundle: str = None,
-        tags: List[str] = None,
+        tags: Set[str] = None,
         version: int = None,
         path: str = None,
     ) -> Query:
@@ -238,7 +234,7 @@ class HousekeeperAPI:
 
     def last_version(self, bundle: str) -> Version:
         """Gets the latest version of a bundle."""
-        LOG.info(f"Fetch latest version from bundle {bundle}")
+        LOG.debug(f"Fetch latest version from bundle {bundle}")
         return (
             self._store._get_query(table=Version)
             .join(Version.bundle)
@@ -358,7 +354,7 @@ class HousekeeperAPI:
         bundle_version.included_at = dt.datetime.now()
         self.commit()
 
-    def get_file_from_latest_version(self, bundle_name: str, tags: List[str]) -> Optional[File]:
+    def get_file_from_latest_version(self, bundle_name: str, tags: Set[str]) -> Optional[File]:
         """Return a file in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:

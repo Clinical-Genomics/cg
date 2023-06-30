@@ -1,6 +1,7 @@
 """This module contains constants for the BCLConvert metrics files."""
 
 from enum import Enum
+from pathlib import Path
 
 
 class BclConvertQualityMetricsColumnNames(Enum):
@@ -37,3 +38,10 @@ class BclConvertAdapterMetricsColumnNames(Enum):
     SAMPLE_PROJECT: str = "Sample_Project"
     READ_NUMBER: str = "ReadNumber"
     SAMPLE_BASES: str = "SampleBases"
+
+
+DEMUX_METRICS_FILE_PATH = Path("Unaligned", "Reports", "Demultiplex_Stats.csv")
+QUALITY_METRICS_FILE_PATH = Path("Unaligned", "Reports", "Quality_Metrics.csv")
+ADAPTER_METRICS_FILE_PATH = Path("Unaligned", "Reports", "Adapter_Metrics.csv")
+RUN_INFO_FILE_PATH = Path("Unaligned", "Reports", "RunInfo.xml")
+SAMPLE_SHEET_FILE_PATH = Path("Unaligned", "Reports", "SampleSheet.csv")

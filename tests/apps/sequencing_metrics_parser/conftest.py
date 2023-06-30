@@ -13,66 +13,60 @@ from cg.constants.bcl_convert_metrics import (
     BclConvertDemuxMetricsColumnNames,
     BclConvertAdapterMetricsColumnNames,
 )
-from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
+from cg.store.models import SampleLaneSequencingMetrics
+from datetime import datetime
 
 
-@pytest.fixture(name="bcl_convert_demux_metric_file_path")
-def fixture_bcl_convert_demux_metric_file_path() -> Path:
-    """Return a path to a BCLConvert demux metrics file."""
-    return Path("tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_metrics.csv")
+@pytest.fixture(name="bcl_convert_metrics_dir_path", scope="session")
+def fixture_bcl_convert_metrics_dir_path() -> Path:
+    """Return a path to a BCLConvert metrics directory."""
+    return Path("tests", "fixtures", "apps", "sequencing_metrics_parser")
 
 
-@pytest.fixture(name="bcl_convert_quality_metric_file_path")
-def fixture_bcl_convert_quality_metric_file_path() -> Path:
-    """Return a path to a BCLConvert quality metrics file."""
-    return Path(
-        "tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_quality_metrics.csv"
-    )
-
-
-@pytest.fixture(name="bcl_convert_sample_sheet_file_path")
-def fixture_bcl_convert_sample_sheet_file_path() -> Path:
-    """Return a path to a BCLConvert sample sheet file."""
-    return Path(
-        "tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_sample_sheet.csv"
-    )
-
-
-@pytest.fixture(name="bcl_convert_adapter_metrics_file_path")
-def fixture_bcl_convert_adapter_metrics_file_path() -> Path:
-    """Return a path to a BCLConvert adapter metrics file."""
-    return Path(
-        "tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_adapter_metrics.csv"
-    )
-
-
-@pytest.fixture(name="bcl_convert_run_info_file_path")
-def fixture_bcl_convert_run_info_file_path() -> Path:
-    """Return a path to a BCLConvert run info file."""
-    return Path(
-        "tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_run_info.xml"
-    )
-
-
-@pytest.fixture(name="test_sample_internal_id")
+@pytest.fixture(name="test_sample_internal_id", scope="session")
 def fixture_test_sample_internal_id() -> str:
     """Return a test sample internal id."""
     return "ACC11927A2"
 
 
-@pytest.fixture(name="test_sample_project")
+@pytest.fixture(name="test_sample_project", scope="session")
 def fixture_test_sample_project() -> str:
     """Return a test sample project."""
     return "405887"
 
 
-@pytest.fixture(name="test_lane")
+@pytest.fixture(name="test_lane", scope="session")
 def fixture_test_lane() -> int:
     """Return a test lane."""
     return 1
 
 
-@pytest.fixture(name="bcl_convert_demux_metric_model_with_data")
+@pytest.fixture(name="bcl_convert_reads_for_test_sample", scope="session")
+def fixture_bcl_convert_reads_for_test_sample() -> int:
+    """Return the number of reads for the test sample."""
+    return 15962796
+
+
+@pytest.fixture(name="bcl_convert_test_q30_bases_percent", scope="session")
+def fixture_bcl_convert_test_q30_bases_percent() -> float:
+    """Return the Q30 bases percent for the test sample."""
+    return 0.94
+
+
+@pytest.fixture(name="bcl_convert_test_mean_quality_score_per_lane", scope="session")
+def fixture_bcl_convert_test_mean_quality_score() -> float:
+    """Return the mean quality score for the test sample."""
+    return 36.02
+
+
+@pytest.fixture(name="bcl_convert_test_flow_cell_name", scope="session")
+def fixture_bcl_convert_test_flow_cell_name() -> str:
+    """Return the flow cell name for the test sample."""
+    return "HY7FFDRX2"
+
+
+@pytest.fixture(name="bcl_convert_demux_metric_model_with_data", scope="session")
 def fixture_bcl_convert_demux_metric_model_with_data(
     test_lane,
     test_sample_internal_id,
@@ -93,7 +87,7 @@ def fixture_bcl_convert_demux_metric_model_with_data(
     )
 
 
-@pytest.fixture(name="bcl_convert_adapter_metric_model_with_data")
+@pytest.fixture(name="bcl_convert_adapter_metric_model_with_data", scope="session")
 def fixture_bcl_convert_adapter_metric_model_with_data(
     test_lane, test_sample_internal_id, test_sample_project
 ) -> BclConvertAdapterMetrics:
@@ -109,7 +103,7 @@ def fixture_bcl_convert_adapter_metric_model_with_data(
     )
 
 
-@pytest.fixture(name="bcl_convert_quality_metric_model_with_data")
+@pytest.fixture(name="bcl_convert_quality_metric_model_with_data", scope="session")
 def fixture_bcl_convert_quality_metric_model_with_data(
     test_lane, test_sample_internal_id, test_sample_project
 ) -> BclConvertQualityMetrics:
@@ -128,7 +122,7 @@ def fixture_bcl_convert_quality_metric_model_with_data(
     )
 
 
-@pytest.fixture(name="bcl_convert_sample_sheet_model_with_data")
+@pytest.fixture(name="bcl_convert_sample_sheet_model_with_data", scope="session")
 def fixture_bcl_convert_sample_sheet_model_with_data(
     test_lane,
     test_sample_internal_id,
@@ -137,29 +131,37 @@ def fixture_bcl_convert_sample_sheet_model_with_data(
     """Return a BclConvertSampleSheetData model with data."""
     return BclConvertSampleSheetData(
         **{
-            SampleSheetHeaderColumnNames.FLOW_CELL_ID.value: "HY7FFDRX2",
-            SampleSheetHeaderColumnNames.LANE.value: test_lane,
-            SampleSheetHeaderColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
-            SampleSheetHeaderColumnNames.SAMPLE_NAME.value: "p023BCR",
-            SampleSheetHeaderColumnNames.CONTROL.value: "N",
-            SampleSheetHeaderColumnNames.SAMPLE_PROJECT.value: test_sample_project,
+            SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value: "HY7FFDRX2",
+            SampleSheetNovaSeq6000Sections.Data.LANE.value: test_lane,
+            SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCLCONVERT.value: test_sample_internal_id,
+            SampleSheetNovaSeq6000Sections.Data.SAMPLE_NAME.value: "p023BCR",
+            SampleSheetNovaSeq6000Sections.Data.CONTROL.value: "N",
+            SampleSheetNovaSeq6000Sections.Data.SAMPLE_PROJECT_BCLCONVERT.value: test_sample_project,
         }
     )
 
 
-@pytest.fixture(name="parsed_bcl_convert_metrics")
-def fixture_parsed_bcl_convert_metrics(
-    bcl_convert_quality_metric_file_path,
-    bcl_convert_demux_metric_file_path,
-    bcl_convert_sample_sheet_file_path,
-    bcl_convert_adapter_metrics_file_path,
-    bcl_convert_run_info_file_path,
-) -> BclConvertMetricsParser:
+@pytest.fixture(name="parsed_bcl_convert_metrics", scope="session")
+def fixture_parsed_bcl_convert_metrics(bcl_convert_metrics_dir_path) -> BclConvertMetricsParser:
     """Return an object with parsed BCLConvert metrics."""
-    return BclConvertMetricsParser(
-        bcl_convert_quality_metrics_file_path=bcl_convert_quality_metric_file_path,
-        bcl_convert_demux_metrics_file_path=bcl_convert_demux_metric_file_path,
-        bcl_convert_sample_sheet_file_path=bcl_convert_sample_sheet_file_path,
-        bcl_convert_adapter_metrics_file_path=bcl_convert_adapter_metrics_file_path,
-        bcl_convert_run_info_file_path=bcl_convert_run_info_file_path,
+    return BclConvertMetricsParser(bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path)
+
+
+@pytest.fixture(name="parsed_sequencing_statistics_from_bcl_convert", scope="session")
+def fixture_parsed_sequencing_statistics_from_bcl_convert(
+    test_sample_internal_id: str,
+    test_lane: int,
+    bcl_convert_test_flow_cell_name: str,
+    bcl_convert_reads_for_test_sample: int,
+    bcl_convert_test_mean_quality_score_per_lane: float,
+    bcl_convert_test_q30_bases_percent_per_lane: float,
+) -> SampleLaneSequencingMetrics:
+    return SampleLaneSequencingMetrics(
+        sample_internal_id=test_sample_internal_id,
+        flow_cell_lane_number=test_lane,
+        flow_cell_name=bcl_convert_test_flow_cell_name,
+        sample_total_reads_in_lane=bcl_convert_reads_for_test_sample * 2,
+        sample_base_mean_quality_score=bcl_convert_test_mean_quality_score_per_lane,
+        sample_base_fraction_passing_q30=bcl_convert_test_q30_bases_percent_per_lane,
+        created_at=datetime.now(),
     )
