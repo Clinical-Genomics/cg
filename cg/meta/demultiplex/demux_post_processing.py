@@ -76,12 +76,12 @@ class DemuxPostProcessingAPI:
         """Finalize the flow cell once the temporary demultiplexing process is completed.
 
         This function:
-            1. Parses and validates the flow cell directory data
-            2. Stores the flow cell in the status database
-            3. Stores sequencing metrics in the status database
-            4. Updates sample read counts in the status database
-            5. Stores the flow cell data in the housekeeper database
-            6. Creates a delivery file in the flow cell directory
+            - Parses and validates the flow cell directory data
+            - Stores the flow cell in the status database
+            - Stores sequencing metrics in the status database
+            - Updates sample read counts in the status database
+            - Stores the flow cell data in the housekeeper database
+            - Creates a delivery file in the flow cell directory
 
         Args:
             flow_cell_directory_name (str): The name of the flow cell directory to be finalized.
@@ -146,15 +146,11 @@ class DemuxPostProcessingAPI:
         self, sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics]
     ) -> None:
         for sample_lane_sequencing_metric in sample_lane_sequencing_metrics:
-            existing_metric = (
-                self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-                    flow_cell_name=sample_lane_sequencing_metric.flow_cell_name,
-                    sample_internal_id=sample_lane_sequencing_metric.sample_internal_id,
-                    lane=sample_lane_sequencing_metric.flow_cell_lane_number,
-                )
-            )
-
-            if existing_metric:
+            if self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+                flow_cell_name=sample_lane_sequencing_metric.flow_cell_name,
+                sample_internal_id=sample_lane_sequencing_metric.sample_internal_id,
+                lane=sample_lane_sequencing_metric.flow_cell_lane_number,
+            ):
                 LOG.warning(
                     f"Sample lane sequencing metrics already exists for {sample_lane_sequencing_metric.flow_cell_name}, {sample_lane_sequencing_metric.sample_internal_id} and {sample_lane_sequencing_metric.flow_cell_lane_number}. Skipping."
                 )
@@ -232,9 +228,7 @@ class DemuxPostProcessingAPI:
             flow_cell_directory=flow_cell_directory, sequencer_type=sequencer_type
         )
 
-    def add_sample_fastq_files(
-        self, flow_cell_directory: Path, sequencer_type: Sequencers
-    ) -> None:
+    def add_sample_fastq_files(self, flow_cell_directory: Path, sequencer_type: Sequencers) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
         valid_sample_fastq_paths: List[Path] = self.get_valid_sample_fastq_paths(
             flow_cell_directory
