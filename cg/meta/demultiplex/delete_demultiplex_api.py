@@ -261,7 +261,9 @@ class DeleteDemuxAPI:
             )
             self.delete_flow_cell_cgstats()
             self.delete_flow_cell_housekeeper()
+            self.delete_flow_cell_sample_lane_sequencing_metrics()
             self.delete_flow_cell_in_status_db()
+
         if demultiplexing_dir or run_dir:
             self.delete_flow_cell_hasta(
                 demultiplexing_dir=demultiplexing_dir,
