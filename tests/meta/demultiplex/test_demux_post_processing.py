@@ -820,7 +820,7 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     demux_post_processing_api.status_db.get_sample_by_internal_id = MagicMock()
-    demux_post_processing_api.status_db.get_number_of_reads_for_sample_from_metrics = MagicMock()
+    demux_post_processing_api.status_db.get_number_of_reads_for_sample_passing_q30_threshold = MagicMock()
 
     mock_sample = MagicMock()
     mock_read_count = 1_000
@@ -828,7 +828,7 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
     mock_flow_cell_data.sequencer_type = Sequencers.HISEQGA.value
 
     demux_post_processing_api.status_db.get_sample_by_internal_id.return_value = mock_sample
-    demux_post_processing_api.status_db.get_number_of_reads_for_sample_from_metrics.return_value = (
+    demux_post_processing_api.status_db.get_number_of_reads_for_sample_passing_q30_threshold.return_value = (
         mock_read_count
     )
     demux_post_processing_api.get_sample_ids_from_sample_sheet = MagicMock()

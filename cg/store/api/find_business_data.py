@@ -314,7 +314,7 @@ class FindBusinessDataHandler(BaseHandler):
             name=sample_name,
         ).first()
 
-    def get_number_of_reads_for_sample_from_metrics(
+    def get_number_of_reads_for_sample_passing_q30_threshold(
         self, sample_internal_id: str, q30_threshold: int
     ) -> int:
         """Get number of reads for sample from sample lane sequencing metrics."""

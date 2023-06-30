@@ -22,7 +22,7 @@ from cg.constants.cgstats import STATS_HEADER
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD
+from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.transfer import TransferFlowCell
@@ -182,7 +182,7 @@ class DemuxPostProcessingAPI:
     def update_sample_read_counts(self, flow_cell_data: FlowCellDirectoryData) -> None:
         """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
 
-        q30_threshold: int = FLOWCELL_Q30_THRESHOLD[flow_cell_data.sequencer_type]
+        q30_threshold: int = self.get_q30_threshold(flow_cell_data.sequencer_type)
 
         sample_internal_ids: List[str] = self.get_sample_ids_from_sample_sheet(
             flow_cell_data=flow_cell_data
@@ -192,11 +192,15 @@ class DemuxPostProcessingAPI:
             self.update_single_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold)
         self.status_db.session.commit()
 
+    def get_q30_threshold(self, sequencer_type: Sequencers) -> int:
+        return FLOWCELL_Q30_THRESHOLD[sequencer_type]
+
     def update_single_sample_read_count(self, sample_id: str, q30_threshold: int) -> None:
+        """Update the read count for a sample in status db with all reads exceeding the q30 threshold from the sequencing metrics table."""
         sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
 
         if sample:
-            sample_read_count = self.status_db.get_number_of_reads_for_sample_from_metrics(
+            sample_read_count: int = self.status_db.get_number_of_reads_for_sample_passing_q30_threshold(
                 sample_internal_id=sample_id,
                 q30_threshold=q30_threshold,
             )
