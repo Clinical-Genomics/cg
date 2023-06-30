@@ -1,6 +1,6 @@
 from typing import List
 from cg.store import Store
-from cg.store.models import Flowcell, Family, FamilySample, Sample
+from cg.store.models import Flowcell, Family, FamilySample, Sample, SampleLaneSequencingMetrics
 
 
 def test_delete_flow_cell(bcl2fastq_flow_cell_id: str, populated_flow_cell_store: Store):
@@ -127,3 +127,32 @@ def test_store_api_delete_non_existing_case(
     remaining_cases: List[Family] = store_with_multiple_cases_and_samples.get_cases()
 
     assert len(remaining_cases) == len(existing_cases)
+
+
+def test_delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
+    store_with_sequencing_metrics: Store, flow_cell_name: str
+):
+    """Test function to delete flow cell entries in sample_lane_sequencing_metrics table"""
+
+    # GIVEN a database containing a flow cell
+    metrics: List[
+        SampleLaneSequencingMetrics
+    ] = store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_for_flow_cell(
+        flow_cell_name=flow_cell_name
+    )
+
+    assert metrics
+
+    # WHEN removing flow cell
+    store_with_sequencing_metrics.delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
+        flow_cell_name=metrics[0].flow_cell_name
+    )
+
+    # THEN no entry should be found for the flow cell
+    results: List[
+        SampleLaneSequencingMetrics
+    ] = store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_for_flow_cell(
+        flow_cell_name=metrics[0].flow_cell_name
+    )
+
+    assert not results

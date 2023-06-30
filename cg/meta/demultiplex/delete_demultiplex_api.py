@@ -144,6 +144,19 @@ class DeleteDemuxAPI:
         else:
             delete_flowcell(manager=self.stats_api, flowcell_name=self.flow_cell_name)
 
+    def delete_flow_cell_sample_lane_sequencing_metrics(self) -> None:
+        if self.dry_run:
+            log.info(
+                f"Would delete entries for Flow Cell: {self.flow_cell_name} in the Sample Lane Sequencing Metrics table"
+            )
+        else:
+            log.info(
+                f"Delete entries for Flow Cell: {self.flow_cell_name} in the Sample Lane Sequencing Metrics table"
+            )
+            self.status_db.delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
+                flow_cell_name=self.flow_cell_name
+            )
+
     def _delete_demultiplexing_dir_hasta(self) -> None:
         """delete demultiplexing directory on server"""
         log.info(

@@ -11,7 +11,7 @@ from cg.exc import DeleteDemuxError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.store.api import Store
-from cg.store.models import Sample, Flowcell
+from cg.store.models import Sample, Flowcell, SampleLaneSequencingMetrics
 from tests.store_helpers import StoreHelpers
 
 
@@ -389,3 +389,47 @@ def test_delete_demultiplexing_init_files(
     # THEN the files should no longer exist
 
     assert not any(init_file.exists() for init_file in demultiplexing_init_files)
+
+
+def test_delete_flow_cell_sample_lane_sequencing_metrics(
+    caplog,
+    populated_sample_lane_sequencing_metrics_demultiplex_api: DeleteDemuxAPI,
+    populated_sample_lane_seq_demux_context: CGConfig,
+    flow_cell_name: str,
+):
+    """Test if function to remove objects from sample lane sequencing metrics is working."""
+
+    caplog.set_level(logging.INFO)
+    wipe_demux_api: DeleteDemuxAPI = populated_sample_lane_sequencing_metrics_demultiplex_api
+    wipe_demux_api.set_dry_run(dry_run=False)
+
+    # GIVEN an existing object in cg-stags database
+
+    existing_object: List[
+        SampleLaneSequencingMetrics
+    ] = populated_sample_lane_sequencing_metrics_demultiplex_api.status_db.get_sample_lane_sequencing_metrics_for_flow_cell(
+        flow_cell_name=flow_cell_name
+    )
+
+    assert existing_object
+
+    # WHEN wiping the existence of said object
+
+    wipe_demux_api.delete_flow_cell_sample_lane_sequencing_metrics()
+
+    # THEN the user should be notified that the object was removed
+
+    assert (
+        f"Delete entries for Flow Cell: {flow_cell_name} in the Sample Lane Sequencing Metrics table"
+        in caplog.text
+    )
+
+    # AND the object should no longer exist
+
+    existing_object: List[
+        SampleLaneSequencingMetrics
+    ] = populated_sample_lane_sequencing_metrics_demultiplex_api.status_db.get_sample_lane_sequencing_metrics_for_flow_cell(
+        flow_cell_name=flow_cell_name
+    )
+
+    assert not existing_object
