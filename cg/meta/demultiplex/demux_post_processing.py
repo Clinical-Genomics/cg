@@ -260,7 +260,6 @@ class DemuxPostProcessingAPI:
         flow_cell_name = get_flow_cell_name_from_sample_fastq(sample_fastq_path)
         sample_id = get_sample_id_from_sample_fastq_path(sample_fastq_path)
         lane = get_lane_from_sample_fastq(sample_fastq_path)
-
         q30_threshold: int = self.get_q30_threshold(sequencer_type)
 
         metric = self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(

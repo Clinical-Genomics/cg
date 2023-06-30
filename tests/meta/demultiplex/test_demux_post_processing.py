@@ -704,8 +704,8 @@ def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig, tmpdir
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
-    demux_post_processing_api.get_sample_id_from_sample_fastq_path = MagicMock()
-    demux_post_processing_api.get_sample_id_from_sample_fastq_path.return_value = None
+    get_sample_id_from_sample_fastq_path = MagicMock()
+    get_sample_id_from_sample_fastq_path.return_value = None
 
     demux_post_processing_api.add_file_to_bundle_if_non_existent = MagicMock()
 
