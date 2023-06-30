@@ -71,6 +71,18 @@ def fixture_tmp_flow_cell_run_path(project_dir: Path, bcl2fastq_flow_cell_full_n
     return tmp_flow_cell_run_path
 
 
+@pytest.fixture(name="tmp_flow_cell_run_base_path")
+def fixture_tmp_flow_cell_run_base_path(
+    project_dir: Path, bcl2fastq_flow_cell_full_name: str
+) -> Path:
+    """Flow cell run directory in temporary folder."""
+
+    tmp_flow_cell_run_path: Path = Path(project_dir, "flow_cell_run")
+    tmp_flow_cell_run_path.mkdir(exist_ok=True, parents=True)
+
+    return tmp_flow_cell_run_path
+
+
 @pytest.fixture(name="cgstats_select_project_log_file")
 def fixture_cgstats_select_project_log_file(
     bcl2fastq_flow_cell: FlowCellDirectoryData, flow_cell_project_id: int
@@ -227,58 +239,72 @@ def fixture_populated_wipe_demux_context(
 
 @pytest.fixture(name="active_wipe_demux_context")
 def fixture_active_wipe_demux_context(
-    cg_context: CGConfig, active_flow_cell_store: Store
+    cg_context: CGConfig, active_flow_cell_store: Store, tmp_flow_cell_run_base_path: Path
 ) -> CGConfig:
     """Return a populated context to remove flow cells from using the DeleteDemuxAPI."""
     active_wipe_demux_context = cg_context
     active_wipe_demux_context.status_db_ = active_flow_cell_store
+    active_wipe_demux_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
+    active_wipe_demux_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
     return active_wipe_demux_context
 
 
 @pytest.fixture(name="populated_wipe_demultiplex_api")
 def fixture_populated_wipe_demultiplex_api(
     populated_wipe_demux_context: CGConfig,
-    demultiplexed_flow_cells_working_directory: Path,
-    tmp_flow_cell_run_path: Path,
+    bcl2fastq_flow_cell_id: str,
+    tmp_flow_cell_run_base_path: Path,
 ) -> DeleteDemuxAPI:
     """Return an initialized populated DeleteDemuxAPI."""
+    populated_wipe_demux_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
+    populated_wipe_demux_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
+        parents=True, exist_ok=True
+    )
     return DeleteDemuxAPI(
         config=populated_wipe_demux_context,
-        demultiplex_base=demultiplexed_flow_cells_working_directory,
+        flow_cell_name=bcl2fastq_flow_cell_id,
         dry_run=False,
-        run_path=tmp_flow_cell_run_path,
     )
 
 
 @pytest.fixture(name="active_wipe_demultiplex_api")
 def fixture_active_wipe_demultiplex_api(
     active_wipe_demux_context: CGConfig,
-    demultiplexed_flow_cells_working_directory: Path,
-    bcl2fastq_flow_cell_full_name: str,
+    bcl2fastq_flow_cell_id: str,
+    tmp_flow_cell_run_base_path: Path,
 ) -> DeleteDemuxAPI:
     """Return an instantiated DeleteDemuxAPI with active samples on a flow cell."""
+    active_wipe_demux_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
+    active_wipe_demux_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
+        parents=True, exist_ok=True
+    )
     return DeleteDemuxAPI(
         config=active_wipe_demux_context,
-        demultiplex_base=demultiplexed_flow_cells_working_directory,
+        flow_cell_name=bcl2fastq_flow_cell_id,
         dry_run=False,
-        run_path=Path(bcl2fastq_flow_cell_full_name),
     )
 
 
 @pytest.fixture(name="wipe_demultiplex_api")
 def fixture_wipe_demultiplex_api(
     cg_context: CGConfig,
-    demultiplexed_flow_cells_working_directory: Path,
-    bcl2fastq_flow_cell_full_name: str,
+    bcl2fastq_flow_cell_id: str,
     stats_api: StatsAPI,
+    tmp_flow_cell_run_base_path: Path,
 ) -> DeleteDemuxAPI:
     """Return an initialized DeleteDemuxAPI."""
     cg_context.cg_stats_api_ = stats_api
+    cg_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
+        parents=True, exist_ok=True
+    )
     return DeleteDemuxAPI(
         config=cg_context,
-        demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=False,
-        run_path=Path(bcl2fastq_flow_cell_full_name),
+        flow_cell_name=bcl2fastq_flow_cell_id,
     )
 
 

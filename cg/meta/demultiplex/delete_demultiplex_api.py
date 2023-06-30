@@ -5,7 +5,7 @@ import shutil
 from glob import glob
 from pathlib import Path
 from typing import Iterable, List, Optional
-
+from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.cgstats.stats import StatsAPI
 from cg.constants import SequencingFileTag
@@ -21,30 +21,38 @@ log = logging.getLogger(__name__)
 class DeleteDemuxAPI:
     """Class to handle wiping out a flow cell before restart/start"""
 
-    def __init__(self, config: CGConfig, demultiplex_base: Path, dry_run: bool, run_path: Path):
+    def __init__(self, config: CGConfig, dry_run: bool, flow_cell_name: str):
         self.dry_run: bool = self.set_dry_run(dry_run=dry_run)
-        self.demultiplexing_dir: Path = demultiplex_base
+        self.flow_cell_name = flow_cell_name
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
-        self.run_path: Path = run_path
         self.status_db: Store = config.status_db
+        self.demux_api: DemultiplexingAPI = config.demultiplex_api
         self.stats_api: StatsAPI = config.cg_stats_api
         self.samples_on_flow_cell: List[Sample] = []
+        self.demultiplexing_out_dir: Path = self.get_demultiplexing_out_path()
+        self.run_path: Path = self.get_run_path()
         log.debug("DeleteDemuxAPI: API initiated")
 
-    @property
-    def demultiplexing_path(self) -> Path:
+    def get_demultiplexing_out_path(self) -> Path:
         """Return the demultiplexing directory path for the given run name"""
-        return self.demultiplexing_dir.joinpath(self.run_path.name)
+        return self.get_path_for_flow_cell_name(base_path=self.demux_api.out_dir)
 
-    @property
-    def flow_cell_name(self) -> str:
-        """Parse flow cell name from flowcell run name
+    def get_run_path(self) -> Path:
+        """Return the run path for the given run name"""
+        return self.get_path_for_flow_cell_name(base_path=self.demux_api.run_dir)
 
-        This will assume that the flow cell naming convention is used.
-        Convention is: <date>_<machine>_<run_numbers>_<A|B><flowcell_id>
-        Example: 201203_A00689_0200_AHVKJCDRXX
-        """
-        return self.run_path.name.split("_")[-1][1:]
+    def get_path_for_flow_cell_name(
+        self,
+        base_path: Path,
+    ) -> Path:
+        """Return the path for the given flow cell name"""
+        flow_cell_path = next(base_path.rglob(pattern=f"*{self.flow_cell_name}"), None)
+        if flow_cell_path and flow_cell_path.exists():
+            return flow_cell_path
+        else:
+            raise DeleteDemuxError(
+                f"Could not find directory for {self.flow_cell_name} in {base_path}"
+            )
 
     @property
     def status_db_presence(self) -> bool:
@@ -179,7 +187,7 @@ class DeleteDemuxAPI:
             self._delete_demultiplexing_dir_hasta()
         else:
             log.info(
-                f"DeleteDemuxAPI-Hasta: Skipped demultiplexing directory, or no target: {self.demultiplexing_dir}"
+                f"DeleteDemuxAPI-Hasta: Skipped demultiplexing directory, or no target: {self.demultiplexing_out_dir}"
             )
         if run_dir and self.run_path.exists():
             self._delete_run_dir_hasta()

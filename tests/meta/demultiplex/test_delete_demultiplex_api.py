@@ -18,8 +18,9 @@ from tests.store_helpers import StoreHelpers
 def test_initiate_delete_demux_api(
     caplog,
     cg_context: CGConfig,
-    demultiplexed_flow_cells_working_directory: Path,
-    bcl2fastq_flow_cell_full_name: str,
+    flow_cell_name: str,
+    tmp_flow_cell_run_base_path: Path,
+    bcl2fastq_flow_cell_id: str,
 ):
     """Test to initialize the DeleteDemuxAPI"""
 
@@ -27,30 +28,20 @@ def test_initiate_delete_demux_api(
 
     # GIVEN a correct config
     config = cg_context
-
+    config.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
+    config.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
+        parents=True, exist_ok=True
+    )
     # WHEN initializing the DeleteDemuxAPI
     DeleteDemuxAPI(
         config=config,
-        demultiplex_base=demultiplexed_flow_cells_working_directory,
+        flow_cell_name=bcl2fastq_flow_cell_id,
         dry_run=True,
-        run_path=bcl2fastq_flow_cell_full_name,
     )
 
     # THEN the API should be correctly initialized
     assert "DeleteDemuxAPI: API initiated" in caplog.text
-
-
-def test_flowcell_name(wipe_demultiplex_api: DeleteDemuxAPI, bcl2fastq_flow_cell_id: str):
-    """Test to parse the correct flow cell name from the run name."""
-
-    # GIVEN a DeleteDemuxAPI object with loaded flow cell information
-    name_to_be_generated: str = bcl2fastq_flow_cell_id
-
-    # WHEN the name is generated
-    generated_flow_cell_name = wipe_demultiplex_api.flow_cell_name
-
-    # THEN the parsed name should match the name to be generated
-    assert name_to_be_generated == generated_flow_cell_name
 
 
 def test_get_presence_status_status_db(
@@ -85,20 +76,24 @@ def test_get_presence_status_status_db(
 def test_set_dry_run_delete_demux_api(
     caplog,
     cg_context: CGConfig,
-    demultiplexed_flow_cells_working_directory: Path,
-    bcl2fastq_flow_cell_full_name: str,
+    bcl2fastq_flow_cell_id: str,
     stats_api: StatsAPI,
+    tmp_flow_cell_run_base_path: Path,
 ):
     """Test to test function to set the API to run in dry run mode"""
 
     caplog.set_level(logging.DEBUG)
     cg_context.cg_stats_api_ = stats_api
+    cg_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
+        parents=True, exist_ok=True
+    )
     # WHEN setting the dry_run mode on a DeleteDemuxAPI
     wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
-        demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=True,
-        run_path=bcl2fastq_flow_cell_full_name,
+        flow_cell_name=bcl2fastq_flow_cell_id,
     )
 
     # THEN the dry run parameter should be set to True and it should be logged
@@ -175,8 +170,8 @@ def test_check_active_sample(active_wipe_demultiplex_api: DeleteDemuxAPI):
 def test_delete_flow_cell_housekeeper_only_sample_level(
     caplog,
     cg_context: CGConfig,
-    demultiplexed_flow_cells_working_directory: Path,
-    bcl2fastq_flow_cell_full_name: str,
+    tmp_flow_cell_run_base_path: Path,
+    bcl2fastq_flow_cell_id: str,
     populated_flow_cell_store: Store,
     sample_level_housekeeper_api: HousekeeperAPI,
 ):
@@ -185,16 +180,17 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
     """
 
     caplog.set_level(logging.INFO)
-    cg_context.housekeeper_api_ = sample_level_housekeeper_api
-    cg_context.status_db_ = populated_flow_cell_store
-
+    cg_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
+        parents=True, exist_ok=True
+    )
     # GIVEN a DeleteDemuxAPI with a HousekeeperAPI with no files with flow cell name as a tag
 
     wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
-        demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=False,
-        run_path=Path(bcl2fastq_flow_cell_full_name),
+        flow_cell_name=bcl2fastq_flow_cell_id,
     )
     wipe_demultiplex_api._set_samples_on_flow_cell()
 
