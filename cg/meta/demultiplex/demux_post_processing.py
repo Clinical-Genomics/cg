@@ -200,9 +200,11 @@ class DemuxPostProcessingAPI:
         sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
 
         if sample:
-            sample_read_count: int = self.status_db.get_number_of_reads_for_sample_passing_q30_threshold(
-                sample_internal_id=sample_id,
-                q30_threshold=q30_threshold,
+            sample_read_count: int = (
+                self.status_db.get_number_of_reads_for_sample_passing_q30_threshold(
+                    sample_internal_id=sample_id,
+                    q30_threshold=q30_threshold,
+                )
             )
             LOG.debug(f"Updating sample {sample_id} with read count {sample_read_count}")
             sample.calculated_read_count = sample_read_count

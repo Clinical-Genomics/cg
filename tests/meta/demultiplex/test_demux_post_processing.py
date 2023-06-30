@@ -820,7 +820,9 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     demux_post_processing_api.status_db.get_sample_by_internal_id = MagicMock()
-    demux_post_processing_api.status_db.get_number_of_reads_for_sample_passing_q30_threshold = MagicMock()
+    demux_post_processing_api.status_db.get_number_of_reads_for_sample_passing_q30_threshold = (
+        MagicMock()
+    )
 
     mock_sample = MagicMock()
     mock_read_count = 1_000
