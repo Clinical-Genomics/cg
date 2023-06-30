@@ -1,7 +1,7 @@
 """Tests the findbusinessdata part of the Cg store API."""
 import logging
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 import pytest
 from cg.constants import FlowCellStatus
@@ -801,3 +801,33 @@ def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
     assert metrics_entry.flow_cell_name == flow_cell_name
     assert metrics_entry.flow_cell_lane_number == lane
     assert metrics_entry.sample_internal_id == sample_id
+
+
+def test_get_number_of_reads_for_sample_passing_q30_threshold(
+    store_with_sequencing_metrics: Store,
+    sample_id: str,
+):
+    # GIVEN a store with sequencing metrics
+    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
+
+    # GIVEN a metric for a specific sample
+    sample_metric: Optional[SampleLaneSequencingMetrics] = metrics.filter(
+        SampleLaneSequencingMetrics.sample_internal_id == sample_id
+    ).first()
+    assert sample_metric
+
+    # GIVEN a Q30 threshold that the sample will pass
+    q30_threshold = int(sample_metric.sample_base_fraction_passing_q30 / 2 * 100)
+
+    # WHEN getting the number of reads for the sample that pass the Q30 threshold
+    number_of_reads: int = (
+        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
+            sample_internal_id=sample_id, q30_threshold=q30_threshold
+        )
+    )
+
+    # THEN assert that the number of reads is an integer
+    assert isinstance(number_of_reads, int)
+
+    # THEN assert that the number of reads is at least the number of reads in the lane for the sample passing the q30
+    assert number_of_reads >= sample_metric.sample_total_reads_in_lane
