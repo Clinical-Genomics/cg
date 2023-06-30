@@ -239,7 +239,7 @@ class DemuxPostProcessingAPI:
     def get_valid_sample_fastq_paths(self, flow_cell_directory: Path):
         """Get all valid sample fastq file paths from flow cell directory."""
         fastq_file_paths: List[Path] = self.get_sample_fastq_paths_from_flow_cell(
-            flow_cell_directory
+            flow_cell_directory=flow_cell_directory
         )
         valid_sample_fastq_paths: List[Path] = []
         for fastq_path in fastq_file_paths:
