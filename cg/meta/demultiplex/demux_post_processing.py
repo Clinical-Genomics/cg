@@ -219,16 +219,18 @@ class DemuxPostProcessingAPI:
 
     def add_sample_fastq_files(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
-        fastq_file_paths: List[Path] = self.get_sample_fastq_paths_from_flow_cell(
-            flow_cell_directory=flow_cell_directory
-        )
 
-        for fastq_file_path in fastq_file_paths:
-            sample_id: str = self.get_sample_id_from_sample_fastq_file_path(
-                fastq_file_path=fastq_file_path
+        valid_sample_fastq_paths: List[Path] = self.get_valid_sample_fastq_paths(flow_cell_directory)
+
+        for fastq_file_path in valid_sample_fastq_paths:
+            sample_id = self.get_sample_id_from_sample_fastq_path(fastq_file_path)
+            lane = self.get_lane_from_sample_fastq_name(fastq_file_path.name)
+
+            q30_above_threshold: bool = self.is_q30_above_threshold(
+                flow_cell_id=flow_cell_name, sample_id=sample_id, lane=lane
             )
 
-            if sample_id:
+            if q30_above_threshold:
                 self.add_bundle_and_version_if_non_existent(bundle_name=sample_id)
 
                 self.add_file_to_bundle_if_non_existent(
@@ -236,6 +238,89 @@ class DemuxPostProcessingAPI:
                     bundle_name=sample_id,
                     tag_names=[SequencingFileTag.FASTQ, flow_cell_name],
                 )
+
+    def get_valid_sample_fastq_paths(self, flow_cell_directory: Path):
+
+        fastq_file_paths: List[Path] = self.get_sample_fastq_paths_from_flow_cell(
+            flow_cell_directory
+        )
+
+        valid_sample_fastq_paths: List[Path] = []
+        
+        for fastq_path in fastq_file_paths:
+            
+            try:
+                self.validate_fastq_file_name(fastq_path.name)
+                valid_sample_fastq_paths.append(fastq_path)
+            except ValueError as e:
+                LOG.warning(f"Skipping invalid sample fastq file {fastq_path.name}: {e}")
+
+        return valid_sample_fastq_paths
+
+    def is_q30_above_threshold(self, flow_cell_id: str, sample_id: str, lane: int) -> bool:
+        return True # TODO
+
+    def validate_fastq_file_name(self, sample_fastq_file_name: str) -> None:
+        """
+        Validate each part of the sample fastq file name.
+
+        Pre-condition: The sample fastq file name should be in the format
+        <flow_cell_id>_<sample_id>_<sample_index>_S<set_number>_L<lane_number>_R<read_number>_<segement_number>.fastq.gz
+        """
+        LOG.debug(f"Validating fastq file name {sample_fastq_file_name}")
+
+        pattern = r"^([^_]*)_([^_]*)_([^_]*)_S(\d+)_L(\d+)_R(\d+)_(\d+)\.fastq\.gz$"
+        match = re.fullmatch(pattern, sample_fastq_file_name)
+
+        if not match:
+            raise ValueError(
+                f"Invalid fastq file name {sample_fastq_file_name}. Expected format: <flow_cell_id>_<sample_id>_<sample_index>_S<set_number>_L<lane_number>_R<read_number>_<segement_number>.fastq.gz"
+            )
+
+        (
+            flow_cell_id,
+            sample_id,
+            sample_index,
+            set_number,
+            lane_number,
+            read_number,
+            segment_number,
+        ) = match.groups()
+
+        self.validate_non_empty_string(flow_cell_id, "flow cell ID")
+        self.validate_non_empty_string(sample_id, "sample ID")
+        self.validate_numeric_string(sample_index, "sample index")
+        self.validate_numeric_string(set_number, "set number")
+        self.validate_numeric_string(lane_number, "lane number")
+        self.validate_numeric_string(read_number, "read number")
+        self.validate_numeric_string(segment_number, "segment number")
+
+    def validate_non_empty_string(self, input_string: str, string_name: str) -> None:
+        if not input_string:
+            raise ValueError(f"Invalid {string_name} {input_string} in sample fastq file name.")
+
+    def validate_numeric_string(self, input_string: str, string_name: str) -> None:
+        if not input_string.isdigit():
+            raise ValueError(
+                f"Invalid {string_name} {input_string} in fastq file name. {string_name.capitalize()} should be a digit."
+            )
+
+    def get_sample_id_from_sample_fastq_name(self, sample_fastq_name: str) -> str:
+        """
+        Extract the sample ID from the fastq file name.
+        Pre-condition:
+            - The second part of the sample fastq file name is the sample ID.
+        """
+        return sample_fastq_name.split("_")[1]
+
+    def get_lane_from_sample_fastq_name(self, sample_fastq_name: str) -> int:
+        """
+        Extract the lane number from the fastq file name.
+
+        Pre-condition: 
+            - The third part of the sample fastq file name is the lane number.
+        """
+        return int(sample_fastq_name.split("_")[3])
 
     def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
         """Add sample sheet path to Housekeeper."""
@@ -266,20 +351,19 @@ class DemuxPostProcessingAPI:
             f"Sample sheet not found in given flow cell directory: {flow_cell_directory}"
         )
 
-    def is_valid_sample_fastq_filename(self, fastq_file_name: str) -> bool:
-        """Validate the file name and discard any undetermined fastq files."""
-        return "Undetermined" not in fastq_file_name
-
     def get_sample_fastq_paths_from_flow_cell(self, flow_cell_directory: Path) -> List[Path]:
         fastq_sample_pattern: str = (
             f"Unaligned*/Project_*/Sample_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
         )
         return list(flow_cell_directory.glob(fastq_sample_pattern))
 
-    def get_sample_id_from_sample_fastq_file_path(self, fastq_file_path: Path) -> str:
-        """Extract sample id from fastq file path."""
+    def get_sample_id_from_sample_fastq_path(self, fastq_file_path: Path) -> str:
+        """
+        Extract sample id from fastq file path.
+        Pre-condition: The fastq file path is valid.
+        """
         sample_directory: str = fastq_file_path.parent.name
-        directory_parts: str = sample_directory.split("_")
+        directory_parts: List[str] = sample_directory.split("_")
 
         if len(directory_parts) > 1:
             # The sample id is always the second part of the directory names
