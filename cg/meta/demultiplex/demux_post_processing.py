@@ -106,37 +106,28 @@ class DemuxPostProcessingAPI:
             bcl_converter=bcl_converter,
         )
 
-        self.store_flow_cell_in_status_db(parsed_flow_cell=parsed_flow_cell)
-
-        self.add_sample_lane_sequencing_metrics_for_flow_cell(
-            flow_cell_directory=flow_cell_directory_path, bcl_converter=bcl_converter
-        )
-
+        self.store_flow_cell_in_status_db(parsed_flow_cell)
+        self.add_sample_lane_sequencing_metrics_for_flow_cell(parsed_flow_cell)
         self.update_sample_read_counts(parsed_flow_cell)
-
         self.add_flow_cell_data_to_housekeeper(parsed_flow_cell)
-
-        self.create_delivery_file_in_flow_cell_directory(
-            flow_cell_directory=flow_cell_directory_path
-        )
+        self.create_delivery_file_in_flow_cell_directory(flow_cell_directory_path)
 
     def create_delivery_file_in_flow_cell_directory(self, flow_cell_directory: Path) -> None:
         Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
 
     def add_sample_lane_sequencing_metrics_for_flow_cell(
-        self, flow_cell_directory: Path, bcl_converter: str
+        self, flow_cell: FlowCellDirectoryData
     ) -> None:
         sample_lane_sequencing_metrics: List[
             SampleLaneSequencingMetrics
         ] = create_sample_lane_sequencing_metrics_for_flow_cell(
-            flow_cell_directory=flow_cell_directory,
-            bcl_converter=bcl_converter,
+            flow_cell_directory=flow_cell.path,
+            bcl_converter=flow_cell.bcl_converter,
         )
-
         self.add_single_sequencing_metrics_entry_to_statusdb(sample_lane_sequencing_metrics)
         self.status_db.session.commit()
 
-        LOG.info(f"Added sequencing metrics to status db for: {flow_cell_directory.name}")
+        LOG.info(f"Added sequencing metrics to status db for: {flow_cell.id}")
 
     def add_single_sequencing_metrics_entry_to_statusdb(
         self, sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics]
@@ -224,7 +215,7 @@ class DemuxPostProcessingAPI:
 
         for sample_fastq_path in valid_sample_fastq_paths:
             if self.fastq_should_be_tracked_in_housekeeper(
-                sample_fastq_path, flow_cell.sequencer_type
+                sample_fastq_path=sample_fastq_path, sequencer_type=flow_cell.sequencer_type
             ):
                 self.track_fastq_in_housekeeper(sample_fastq_path)
 
