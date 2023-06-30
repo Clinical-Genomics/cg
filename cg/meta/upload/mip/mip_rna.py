@@ -37,9 +37,4 @@ class MipRNAUploadAPI(UploadAPI):
             except CalledProcessError as error:
                 LOG.error(error)
                 return
-        else:
-            LOG.warning(
-                f"There is nothing to upload to Scout for case {case.internal_id} and "
-                f"the specified data delivery ({case.data_delivery})"
-            )
         self.update_uploaded_at(analysis)
