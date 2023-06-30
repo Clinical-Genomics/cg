@@ -112,13 +112,9 @@ class DemuxPostProcessingAPI:
             flow_cell_directory=flow_cell_directory_path, bcl_converter=bcl_converter
         )
 
-        self.update_sample_read_counts(flow_cell_data=parsed_flow_cell)
+        self.update_sample_read_counts(parsed_flow_cell)
 
-        self.add_flow_cell_data_to_housekeeper(
-            flow_cell_name=parsed_flow_cell.id,
-            flow_cell_directory=flow_cell_directory_path,
-            sequencer_type=parsed_flow_cell.sequencer_type,
-        )
+        self.add_flow_cell_data_to_housekeeper(parsed_flow_cell)
 
         self.create_delivery_file_in_flow_cell_directory(
             flow_cell_directory=flow_cell_directory_path
@@ -211,35 +207,25 @@ class DemuxPostProcessingAPI:
             LOG.debug(f"Updating sample {sample_id} with read count {sample_read_count}")
             sample.calculated_read_count = sample_read_count
 
-    def add_flow_cell_data_to_housekeeper(
-        self, flow_cell_name: str, flow_cell_directory: Path, sequencer_type: Sequencers
-    ) -> None:
-        LOG.info(f"Add flow cell data to Housekeeper for {flow_cell_name}")
+    def add_flow_cell_data_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
+        LOG.info(f"Add flow cell data to Housekeeper for {flow_cell.id}")
 
-        self.add_bundle_and_version_if_non_existent(bundle_name=flow_cell_name)
+        self.add_bundle_and_version_if_non_existent(bundle_name=flow_cell.id)
 
-        tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell_name]
+        tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell.id]
         self.add_tags_if_non_existent(tag_names=tags)
 
-        self.add_sample_sheet(
-            flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
-        )
-        self.add_sample_fastq_files(
-            flow_cell_directory=flow_cell_directory, sequencer_type=sequencer_type
-        )
+        self.add_sample_sheet(flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id)
+        self.add_sample_fastq_files(flow_cell)
 
-    def add_sample_fastq_files(self, flow_cell_directory: Path, sequencer_type: Sequencers) -> None:
+    def add_sample_fastq_files(self, flow_cell: FlowCellDirectoryData) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
-        valid_sample_fastq_paths: List[Path] = self.get_valid_sample_fastq_paths(
-            flow_cell_directory
-        )
-        for sample_fastq_path in valid_sample_fastq_paths:
-            fastq_should_be_tracked: bool = self.fastq_should_be_tracked_in_housekeeper(
-                sample_fastq_path=sample_fastq_path,
-                sequencer_type=sequencer_type,
-            )
+        valid_sample_fastq_paths = self.get_valid_sample_fastq_paths(flow_cell.path)
 
-            if fastq_should_be_tracked:
+        for sample_fastq_path in valid_sample_fastq_paths:
+            if self.fastq_should_be_tracked_in_housekeeper(
+                sample_fastq_path, flow_cell.sequencer_type
+            ):
                 self.track_fastq_in_housekeeper(sample_fastq_path)
 
     def track_fastq_in_housekeeper(self, sample_fastq_path: Path) -> None:
