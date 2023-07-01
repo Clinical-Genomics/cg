@@ -542,7 +542,7 @@ def test_add_flow_cell_data_to_housekeeper(demultiplex_context: CGConfig):
     flow_cell.id = flow_cell_name
 
     # WHEN the flow cell data is added to housekeeper
-    demux_post_processing_api.add_flow_cell_data_to_housekeeper(flow_cell)
+    demux_post_processing_api.store_flow_cell_data_in_housekeeper(flow_cell)
 
     # THEN the bundle and version is added
     demux_post_processing_api.add_bundle_and_version_if_non_existent.assert_called_once_with(
@@ -811,7 +811,7 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
     demux_post_processing_api.get_sample_ids_from_sample_sheet.return_value = [1]
 
     # WHEN calling the method with the flow cell directory
-    demux_post_processing_api.update_sample_read_counts(mock_flow_cell_data)
+    demux_post_processing_api.store_sample_read_counts(mock_flow_cell_data)
 
     # THEN the read count was set on the mock sample
     assert mock_sample.calculated_read_count == mock_read_count

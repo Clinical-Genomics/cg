@@ -94,10 +94,6 @@ class DemuxPostProcessingAPI:
 
         Raises:
             FlowCellError: If the flow cell directory or the data it contains is not valid.
-
-        Note:
-            This method does not return anything but updates the status and housekeeper databases
-            with data from the flow cell directory.
         """
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
@@ -112,18 +108,25 @@ class DemuxPostProcessingAPI:
             bcl_converter=bcl_converter,
         )
 
-        self.store_flow_cell_in_status_db(parsed_flow_cell)
-        self.add_sample_lane_sequencing_metrics_for_flow_cell(parsed_flow_cell)
-        self.update_sample_read_counts(parsed_flow_cell)
-        self.add_flow_cell_data_to_housekeeper(parsed_flow_cell)
+        try:
+            self.store_flow_cell_data(parsed_flow_cell)
+        except Exception as e:
+            LOG.error(f"Failed to store flow cell data: {str(e)}")
+            raise
+
         self.create_delivery_file_in_flow_cell_directory(flow_cell_directory_path)
+
+    def store_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
+        """Store data from the flow cell directory in status db and housekeeper."""
+        self.store_flow_cell_data_in_status_db(parsed_flow_cell)
+        self.store_sequencing_metrics_for_flow_cell(parsed_flow_cell)
+        self.store_sample_read_counts(parsed_flow_cell)
+        self.store_flow_cell_data_in_housekeeper(parsed_flow_cell)
 
     def create_delivery_file_in_flow_cell_directory(self, flow_cell_directory: Path) -> None:
         Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
 
-    def add_sample_lane_sequencing_metrics_for_flow_cell(
-        self, flow_cell: FlowCellDirectoryData
-    ) -> None:
+    def store_sequencing_metrics_for_flow_cell(self, flow_cell: FlowCellDirectoryData) -> None:
         sample_lane_sequencing_metrics: List[
             SampleLaneSequencingMetrics
         ] = create_sample_lane_sequencing_metrics_for_flow_cell(
@@ -174,7 +177,7 @@ class DemuxPostProcessingAPI:
     def is_demultiplexing_complete(self, flow_cell_directory: Path) -> bool:
         return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
 
-    def update_sample_read_counts(self, flow_cell_data: FlowCellDirectoryData) -> None:
+    def store_sample_read_counts(self, flow_cell_data: FlowCellDirectoryData) -> None:
         """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
 
         q30_threshold: int = self.get_q30_threshold(flow_cell_data.sequencer_type)
@@ -204,7 +207,7 @@ class DemuxPostProcessingAPI:
             LOG.debug(f"Updating sample {sample_id} with read count {sample_read_count}")
             sample.calculated_read_count = sample_read_count
 
-    def add_flow_cell_data_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
+    def store_flow_cell_data_in_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
         LOG.info(f"Add flow cell data to Housekeeper for {flow_cell.id}")
 
         self.add_bundle_and_version_if_non_existent(bundle_name=flow_cell.id)
@@ -347,7 +350,7 @@ class DemuxPostProcessingAPI:
             file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
         )
 
-    def store_flow_cell_in_status_db(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
+    def store_flow_cell_data_in_status_db(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Create flow cell from the parsed and validated flow cell data."""
         if not self.status_db.get_flow_cell_by_name(flow_cell_name=parsed_flow_cell.id):
             flow_cell: Flowcell = Flowcell(
@@ -366,17 +369,13 @@ class DemuxPostProcessingAPI:
         self, flow_cell_directory: Path, bcl_converter: str
     ) -> FlowCellDirectoryData:
         """Parse flow cell data from the flow cell directory."""
-        if not self.is_flow_cell_directory_valid(flow_cell_directory=flow_cell_directory):
+
+        if not flow_cell_directory.is_dir():
             raise FlowCellError(f"Flow cell directory not found: {flow_cell_directory}")
 
-        try:
-            flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-                flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
-            )
-            return flow_cell
-        except FlowCellError as error:
-            LOG.error(f"Unable to parse flow cell data from {flow_cell_directory}")
-            raise error
+        return FlowCellDirectoryData(
+            flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
+        )
 
     def get_bcl_converter_name(self, flow_cell_directory: Path) -> str:
         if self.is_bcl2fastq_demux_folder_structure(flow_cell_directory=flow_cell_directory):
