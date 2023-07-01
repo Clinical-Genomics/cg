@@ -13,6 +13,7 @@ from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
     DemuxPostProcessingHiseqXAPI,
 )
+from cg.meta.demultiplex.utils import get_sample_id_from_sample_fastq
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
@@ -768,25 +769,6 @@ def test_get_invalid_flowcell_sample_fastq_file_path(demultiplex_context, tmpdir
     assert invalid_fastq_file not in result
 
 
-def test_get_sample_id_from_sample_fastq_file_path(demultiplex_context: CGConfig, tmpdir_factory):
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    # GIVEN a sample directory and file
-    tmp_dir = Path(tmpdir_factory.mktemp("flow_cell_directory"))
-    sample_id = "sampleid"
-    sample_dir = tmp_dir / f"prefix_{sample_id}"
-    sample_dir.mkdir()
-    sample_file = Path(sample_dir, f"file{FileExtensions.FASTQ}{FileExtensions.GZIP}")
-    sample_file.touch()
-
-    # WHEN we get sample id from sample fastq file path
-    result = demux_post_processing_api.get_sample_id_from_sample_fastq_path(sample_file)
-
-    # THEN we should get the correct sample id
-    assert result == sample_id
-
-
 def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context: CGConfig):
     """Test that samples can be updated with read counts and sequencing date."""
 
@@ -811,7 +793,7 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
     demux_post_processing_api.get_sample_ids_from_sample_sheet.return_value = [1]
 
     # WHEN calling the method with the flow cell directory
-    demux_post_processing_api.store_sample_read_counts(mock_flow_cell_data)
+    demux_post_processing_api.update_sample_read_counts(mock_flow_cell_data)
 
     # THEN the read count was set on the mock sample
     assert mock_sample.calculated_read_count == mock_read_count

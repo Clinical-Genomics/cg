@@ -28,7 +28,7 @@ from cg.meta.demultiplex import files
 from cg.meta.demultiplex.utils import (
     get_flow_cell_name_from_sample_fastq,
     get_lane_from_sample_fastq,
-    get_sample_id_from_sample_fastq_path,
+    get_sample_id_from_sample_fastq,
 )
 from cg.meta.demultiplex.validation import validate_sample_fastq_file_name
 from cg.meta.transfer import TransferFlowCell
@@ -120,7 +120,7 @@ class DemuxPostProcessingAPI:
         """Store data from the flow cell directory in status db and housekeeper."""
         self.store_flow_cell_data_in_status_db(parsed_flow_cell)
         self.store_sequencing_metrics_for_flow_cell(parsed_flow_cell)
-        self.store_sample_read_counts(parsed_flow_cell)
+        self.update_sample_read_counts(parsed_flow_cell)
         self.store_flow_cell_data_in_housekeeper(parsed_flow_cell)
 
     def create_delivery_file_in_flow_cell_directory(self, flow_cell_directory: Path) -> None:
@@ -177,7 +177,7 @@ class DemuxPostProcessingAPI:
     def is_demultiplexing_complete(self, flow_cell_directory: Path) -> bool:
         return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
 
-    def store_sample_read_counts(self, flow_cell_data: FlowCellDirectoryData) -> None:
+    def update_sample_read_counts(self, flow_cell_data: FlowCellDirectoryData) -> None:
         """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
 
         q30_threshold: int = self.get_q30_threshold(flow_cell_data.sequencer_type)
@@ -230,7 +230,7 @@ class DemuxPostProcessingAPI:
 
     def track_fastq_in_housekeeper(self, sample_fastq_path: Path) -> None:
         flow_cell_name = get_flow_cell_name_from_sample_fastq(sample_fastq_path)
-        sample_id = get_sample_id_from_sample_fastq_path(sample_fastq_path)
+        sample_id = get_sample_id_from_sample_fastq(sample_fastq_path)
 
         self.add_bundle_and_version_if_non_existent(bundle_name=sample_id)
         self.add_file_to_bundle_if_non_existent(
@@ -261,7 +261,7 @@ class DemuxPostProcessingAPI:
         Only fastq files that pass the q30 threshold should be tracked.
         """
         flow_cell_name = get_flow_cell_name_from_sample_fastq(sample_fastq_path)
-        sample_id = get_sample_id_from_sample_fastq_path(sample_fastq_path)
+        sample_id = get_sample_id_from_sample_fastq(sample_fastq_path)
         lane = get_lane_from_sample_fastq(sample_fastq_path)
         q30_threshold: int = self.get_q30_threshold(sequencer_type)
 

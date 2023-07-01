@@ -18,20 +18,14 @@ def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
     Pre-condition:
         - The third part of the sample fastq file name is the lane number.
     """
-    return int(sample_fastq_path.name.split("_")[3])
+    lane_part = sample_fastq_path.name.split("_")[3]
+    return int(lane_part[1:])  # Skip the lane indicator 'L'
 
 
-def get_sample_id_from_sample_fastq_path(fastq_file_path: Path) -> str:
+def get_sample_id_from_sample_fastq(sample_fastq: Path) -> str:
     """
     Extract sample id from fastq file path.
     Pre-condition:
-        - The fastq file path exists.
-        - The sample id is the second part of the directory name.
+        - The sample id is the second part of the sample fastq name.
     """
-    sample_directory: str = fastq_file_path.parent.name
-    directory_parts: List[str] = sample_directory.split("_")
-
-    if len(directory_parts) > 1:
-        return directory_parts[1]
-
-    return directory_parts[0]
+    return sample_fastq.name.split("_")[1]
