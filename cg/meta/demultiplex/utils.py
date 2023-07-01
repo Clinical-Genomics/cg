@@ -11,6 +11,7 @@ def get_flow_cell_name_from_sample_fastq(sample_fastq_path: Path) -> str:
     """
     return sample_fastq_path.name.split("_")[0]
 
+
 def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
     """
     Extract the lane number from the sample fastq path.

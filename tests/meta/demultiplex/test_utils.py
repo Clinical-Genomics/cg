@@ -29,7 +29,7 @@ def test_get_sample_id_from_sample_fastq_file_path():
         f"H5CYFDSX7_{sample_id}_S367_L004_R1_001{FileExtensions.FASTQ}{FileExtensions.GZIP}",
     )
 
-    # WHEN we get sample id from sample fastq file path
+    # WHEN we get sample id from the sample fastq file path
     result = get_sample_id_from_sample_fastq(sample_fastq_path)
 
     # THEN we should get the correct sample id
@@ -43,8 +43,8 @@ def test_get_lane_from_sample_fastq_file_path():
         f"H5CYFDSX7_ACC12164A17_S367_L00{lane}_R1_001{FileExtensions.FASTQ}{FileExtensions.GZIP}",
     )
 
-    # WHEN we get sample id from sample fastq file path
+    # WHEN we get lane from the sample fastq file path
     result = get_lane_from_sample_fastq(sample_fastq_path)
 
-    # THEN we should get the correct sample id
+    # THEN we should get the correct lane
     assert result == lane

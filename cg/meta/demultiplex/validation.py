@@ -4,6 +4,7 @@ import re
 
 LOG = logging.getLogger(__name__)
 
+
 def validate_sample_fastq_file_name(sample_fastq_file_name: str) -> None:
     """
     Validate each part of the sample fastq file name.
@@ -46,6 +47,7 @@ def validate_sample_fastq_file_name(sample_fastq_file_name: str) -> None:
 def validate_non_empty_string(input_string: str, string_name: str) -> None:
     if not input_string:
         raise ValueError(f"Invalid {string_name} {input_string} in sample fastq file name.")
+
 
 def validate_numeric_string(input_string: str, string_name: str) -> None:
     if not input_string.isdigit():
