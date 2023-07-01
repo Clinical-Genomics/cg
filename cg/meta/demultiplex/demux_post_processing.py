@@ -133,28 +133,37 @@ class DemuxPostProcessingAPI:
             flow_cell_directory=flow_cell.path,
             bcl_converter=flow_cell.bcl_converter,
         )
-        self.add_single_sequencing_metrics_entry_to_statusdb(sample_lane_sequencing_metrics)
-        self.status_db.session.commit()
+        self.add_sequencing_metrics_to_statusdb(sample_lane_sequencing_metrics)
 
         LOG.info(f"Added sequencing metrics to status db for: {flow_cell.id}")
 
-    def add_single_sequencing_metrics_entry_to_statusdb(
+    def add_sequencing_metrics_to_statusdb(
         self, sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics]
     ) -> None:
-        for sample_lane_sequencing_metric in sample_lane_sequencing_metrics:
-            if self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-                flow_cell_name=sample_lane_sequencing_metric.flow_cell_name,
-                sample_internal_id=sample_lane_sequencing_metric.sample_internal_id,
-                lane=sample_lane_sequencing_metric.flow_cell_lane_number,
-            ):
-                LOG.warning(
-                    f"Sample lane sequencing metrics already exists for {sample_lane_sequencing_metric.flow_cell_name}, {sample_lane_sequencing_metric.sample_internal_id} and {sample_lane_sequencing_metric.flow_cell_lane_number}. Skipping."
-                )
-            else:
-                LOG.debug(
-                    f"Adding Sample lane sequencing metrics for {sample_lane_sequencing_metric.flow_cell_name}, {sample_lane_sequencing_metric.sample_internal_id} and {sample_lane_sequencing_metric.flow_cell_lane_number}."
-                )
-                self.status_db.session.add(sample_lane_sequencing_metric)
+        for metric in sample_lane_sequencing_metrics:
+            if not self.metric_exists_in_status_db(metric):
+                self.add_metric_to_status_db(metric)
+        self.status_db.session.commit()
+
+    def metric_exists_in_status_db(self, metric: SampleLaneSequencingMetrics) -> bool:
+        existing_metrics_entry = (
+            self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+                flow_cell_name=metric.flow_cell_name,
+                sample_internal_id=metric.sample_internal_id,
+                lane=metric.flow_cell_lane_number,
+            )
+        )
+        if existing_metrics_entry:
+            LOG.warning(
+                f"Sample lane sequencing metrics already exist for {metric.flow_cell_name}, {metric.sample_internal_id}, and {metric.flow_cell_lane_number}. Skipping."
+            )
+        return bool(existing_metrics_entry)
+
+    def add_metric_to_status_db(self, metric: SampleLaneSequencingMetrics) -> None:
+        LOG.debug(
+            f"Adding sample lane sequencing metrics for {metric.flow_cell_name}, {metric.sample_internal_id}, and {metric.flow_cell_lane_number}."
+        )
+        self.status_db.session.add(metric)
 
     def get_sample_ids_from_sample_sheet(self, flow_cell_data: FlowCellDirectoryData) -> List[str]:
         samples: List[FlowCellSample] = flow_cell_data.get_sample_sheet().samples
