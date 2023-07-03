@@ -34,11 +34,7 @@ class MipRNAUploadAPI(UploadAPI):
         if DataDelivery.SCOUT in case.data_delivery:
             try:
                 ctx.invoke(upload_rna_to_scout, case_id=case.internal_id)
-                self.update_uploaded_at(analysis)
             except CalledProcessError as error:
                 LOG.error(error)
-        else:
-            LOG.warning(
-                f"There is nothing to upload to Scout for case {case.internal_id} and "
-                f"the specified data delivery ({case.data_delivery})"
-            )
+                return
+        self.update_uploaded_at(analysis)

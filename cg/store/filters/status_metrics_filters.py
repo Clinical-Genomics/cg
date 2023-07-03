@@ -13,6 +13,12 @@ def filter_total_read_count_for_sample(metrics: Query, sample_internal_id: str, 
     return total_reads_query
 
 
+def filter_above_q30_threshold(metrics: Query, q30_threshold: int, **kwargs) -> Query:
+    return metrics.filter(
+        SampleLaneSequencingMetrics.sample_base_fraction_passing_q30 > q30_threshold / 100,
+    )
+
+
 def filter_metrics_for_flow_cell_sample_internal_id_and_lane(
     metrics: Query, flow_cell_name: str, sample_internal_id: str, lane: int, **kwargs
 ) -> Query:
@@ -32,7 +38,10 @@ class SequencingMetricsFilter(Enum):
     FILTER_METRICS_FOR_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE: Callable = (
         filter_metrics_for_flow_cell_sample_internal_id_and_lane
     )
+
     FILTER_METRICS_FOR_FLOW_CELL_NAME: Callable = filter_metrics_for_flow_cell_name
+    FILTER_ABOVE_Q30_THRESHOLD: Callable = filter_above_q30_threshold
+
 
 
 def apply_metrics_filter(
@@ -41,6 +50,7 @@ def apply_metrics_filter(
     sample_internal_id: Optional[str] = None,
     flow_cell_name: Optional[str] = None,
     lane: Optional[int] = None,
+    q30_threshold: Optional[int] = None,
 ) -> Query:
     for filter_function in filter_functions:
         metrics: Query = filter_function(
@@ -48,5 +58,6 @@ def apply_metrics_filter(
             sample_internal_id=sample_internal_id,
             flow_cell_name=flow_cell_name,
             lane=lane,
+            q30_threshold=q30_threshold,
         )
     return metrics
