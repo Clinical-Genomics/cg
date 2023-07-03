@@ -1,9 +1,24 @@
 """Tests for functions related to indexes."""
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Tuple
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.index import *
+from cg.apps.demultiplex.sample_sheet.index import (
+    INDEX_ONE_PAD_SEQUENCE,
+    INDEX_TWO_PAD_SEQUENCE,
+    LONG_INDEX_CYCLE_NR,
+    Index,
+    adapt_indexes_for_sample,
+    get_hamming_distance_for_indexes,
+    get_index_pair,
+    get_indexes_by_lane,
+    get_reagent_kit_version,
+    get_reverse_complement_dna_seq,
+    get_valid_indexes,
+    index_exists,
+    is_reverse_complement,
+    update_barcode_mismatch_values_for_sample,
+)
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeq6000Bcl2Fastq,
     FlowCellSampleNovaSeqX,
