@@ -13,6 +13,7 @@ def test_validate_sample_fastq_with_valid_file():
 
     # THEN no exception should be raised
 
+
 def test_validate_sample_fastq_without_sample_id_in_parent_directory_name():
     # GIVEN a sample fastq file without a sample id in the parent directory name
     sample_fastq = Path("sample_L0002.fastq.gz")
@@ -29,7 +30,9 @@ def test_validate_sample_fastq_without_lane_number():
 
     # WHEN validating the sample fastq file
     # THEN a ValueError should be raised
-    with pytest.raises(ValueError, match="Sample fastq must contain lane number formatted as '_L<lane_number>'."):
+    with pytest.raises(
+        ValueError, match="Sample fastq must contain lane number formatted as '_L<lane_number>'."
+    ):
         validate_sample_fastq_file(sample_fastq)
 
 

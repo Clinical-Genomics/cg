@@ -699,8 +699,7 @@ def test_add_sample_fastq_files(demultiplex_context: CGConfig, bcl2fastq_flow_ce
             flow_cell_name=flow_cell.id,
         )
         demux_post_processing_api.track_fastq_in_housekeeper.assert_any_call(
-            sample_fastq_path=sample_fastq_path,
-            flow_cell_name=flow_cell.id
+            sample_fastq_path=sample_fastq_path, flow_cell_name=flow_cell.id
         )
 
 

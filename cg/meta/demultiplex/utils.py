@@ -31,4 +31,3 @@ def get_sample_id_from_sample_fastq(sample_fastq: Path) -> str:
         return sample_parent_match.group(1)
     else:
         raise ValueError("Parent directory name does not contain 'Sample_<sample_id>'.")
-
