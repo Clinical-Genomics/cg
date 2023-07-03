@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 from typing import Generator
+from unittest.mock import patch
 
 from mock import MagicMock, call
 from cg.constants.constants import FileExtensions
@@ -14,6 +15,8 @@ from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingHiseqXAPI,
 )
 from cg.meta.demultiplex.utils import (
+    get_sample_fastq_paths_from_flow_cell,
+    get_valid_sample_fastq_paths,
     is_bcl2fastq_demux_folder_structure,
 )
 from cg.meta.transfer import TransferFlowCell
@@ -662,39 +665,6 @@ def test_add_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory):
     )
 
 
-def test_add_sample_fastq_files(demultiplex_context: CGConfig, bcl2fastq_flow_cell_full_name: str):
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-    demux_post_processing_api.get_valid_sample_fastq_paths = MagicMock()
-    demux_post_processing_api.fastq_should_be_tracked_in_housekeeper = MagicMock()
-    demux_post_processing_api.track_fastq_in_housekeeper = MagicMock()
-
-    # GIVEN a flow cell directory and its sequencer type
-    flow_cell_directory = Path(bcl2fastq_flow_cell_full_name)
-    flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_directory)
-
-    # Mock the returned sample fastq paths
-    valid_sample_fastq_paths = [
-        Path(flow_cell_directory, "sample1.fastq"),
-        Path(flow_cell_directory, "sample2.fastq"),
-    ]
-    demux_post_processing_api.get_valid_sample_fastq_paths.return_value = valid_sample_fastq_paths
-
-    # WHEN add_sample_fastq_files is called
-    demux_post_processing_api.add_sample_fastq_files(flow_cell)
-
-    # THEN the fastq files are validated and tracked in housekeeper
-    for sample_fastq_path in valid_sample_fastq_paths:
-        demux_post_processing_api.fastq_should_be_tracked_in_housekeeper.assert_any_call(
-            sample_fastq_path=sample_fastq_path,
-            sequencer_type=flow_cell.sequencer_type,
-            flow_cell_name=flow_cell.id,
-        )
-        demux_post_processing_api.track_fastq_in_housekeeper.assert_any_call(
-            sample_fastq_path=sample_fastq_path, flow_cell_name=flow_cell.id
-        )
-
-
 def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
@@ -709,88 +679,6 @@ def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig):
 
     # THEN add_file_if_non_existent was not called
     demux_post_processing_api.add_file_to_bundle_if_non_existent.assert_not_called()
-
-
-def test_get_valid_flowcell_sample_fastq_file_path(demultiplex_context, tmpdir_factory):
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    # GIVEN a flow cell directory
-    flow_cell_dir = Path(tmpdir_factory.mktemp("flow_cell"))
-
-    # GIVEN some files in temporary directory
-    sample_dir = flow_cell_dir / "Unaligned" / "Project_sample" / "Sample_test"
-    sample_dir.mkdir(parents=True)
-    valid_sample_fastq_directory_1 = Path(
-        sample_dir, f"Sample_ABC{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    )
-    valid_sample_fastq_directory_2 = Path(
-        sample_dir, f"Sample_ABC_123{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    )
-    valid_sample_fastq_directory_1.touch()
-    valid_sample_fastq_directory_2.touch()
-
-    # WHEN we get flowcell sample fastq file paths
-    result = demux_post_processing_api.get_sample_fastq_paths_from_flow_cell(
-        flow_cell_directory=flow_cell_dir
-    )
-
-    # THEN we should only get the valid files
-    assert len(result) == 2
-    assert valid_sample_fastq_directory_1 in result
-
-
-def test_get_invalid_flowcell_sample_fastq_file_path(demultiplex_context, tmpdir_factory):
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    # GIVEN a flow cell directory
-    flow_cell_dir = Path(tmpdir_factory.mktemp("flow_cell"))
-
-    # GIVEN some files in temporary directory
-    project_dir = Path(flow_cell_dir, "Unaligned", "Project_sample")
-    project_dir.mkdir(parents=True)
-    invalid_fastq_file = Path(project_dir, f"file{FileExtensions.FASTQ}{FileExtensions.GZIP}")
-    invalid_fastq_file.touch()
-
-    # WHEN we get flowcell sample fastq file paths
-    result = demux_post_processing_api.get_sample_fastq_paths_from_flow_cell(
-        flow_cell_directory=flow_cell_dir
-    )
-
-    # THEN we should not get any files
-    assert len(result) == 0
-    assert invalid_fastq_file not in result
-
-
-def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context: CGConfig):
-    """Test that samples can be updated with read counts and sequencing date."""
-
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    demux_post_processing_api.status_db.get_sample_by_internal_id = MagicMock()
-    demux_post_processing_api.status_db.get_number_of_reads_for_sample_passing_q30_threshold = (
-        MagicMock()
-    )
-
-    mock_sample = MagicMock()
-    mock_read_count = 1_000
-    mock_flow_cell_data = MagicMock()
-    mock_flow_cell_data.sequencer_type = Sequencers.HISEQGA.value
-
-    demux_post_processing_api.status_db.get_sample_by_internal_id.return_value = mock_sample
-    demux_post_processing_api.status_db.get_number_of_reads_for_sample_passing_q30_threshold.return_value = (
-        mock_read_count
-    )
-    demux_post_processing_api.get_sample_ids_from_sample_sheet = MagicMock()
-    demux_post_processing_api.get_sample_ids_from_sample_sheet.return_value = [1]
-
-    # WHEN calling the method with the flow cell directory
-    demux_post_processing_api.update_sample_read_counts(mock_flow_cell_data)
-
-    # THEN the read count was set on the mock sample
-    assert mock_sample.calculated_read_count == mock_read_count
 
 
 def test_add_single_sequencing_metrics_entry_to_statusdb(
@@ -817,3 +705,37 @@ def test_add_single_sequencing_metrics_entry_to_statusdb(
     assert demux_post_processing_api.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
         flow_cell_name=flow_cell_name, sample_internal_id=sample_id, lane=lane
     )
+
+
+def test_update_sample_read_count(demultiplex_context: CGConfig):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN a sample id and a q30 threshold
+    sample_id = "sample_1"
+    q30_threshold = 0
+
+    # GIVEN a sample and a read count
+    sample = MagicMock()
+    read_count = 100
+
+    # GIVEN a mocked status_db
+    status_db = MagicMock()
+    status_db.get_sample_by_internal_id.return_value = sample
+    status_db.get_number_of_reads_for_sample_passing_q30_threshold.return_value = read_count
+    demux_post_processing_api.status_db = status_db
+
+    # WHEN calling update_sample_read_count
+    demux_post_processing_api.update_sample_read_count(sample_id, q30_threshold)
+
+    # THEN get_sample_by_internal_id is called with the correct argument
+    status_db.get_sample_by_internal_id.assert_called_with(internal_id=sample_id)
+
+    # THEN get_number_of_reads_for_sample_passing_q30_threshold is called with the correct arguments
+    status_db.get_number_of_reads_for_sample_passing_q30_threshold.assert_called_with(
+        sample_internal_id=sample_id,
+        q30_threshold=q30_threshold,
+    )
+
+    # THEN the calculated_read_count has been updated with the read count for the sample
+    assert sample.calculated_read_count == read_count

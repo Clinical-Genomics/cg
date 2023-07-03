@@ -23,13 +23,13 @@ from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
-    find_sample_sheet_path,
     get_bcl_converter_name,
     get_lane_from_sample_fastq,
     get_q30_threshold,
-    get_valid_sample_fastq_paths,
     get_sample_id_from_sample_fastq,
     get_sample_ids_from_sample_sheet,
+    get_sample_sheet_path,
+    get_valid_sample_fastq_paths,
     parse_flow_cell_directory_data,
 )
 from cg.meta.transfer import TransferFlowCell
@@ -250,7 +250,7 @@ class DemuxPostProcessingAPI:
     def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
         """Add sample sheet path to Housekeeper."""
 
-        sample_sheet_file_path: Path = find_sample_sheet_path(flow_cell_directory)
+        sample_sheet_file_path: Path = get_sample_sheet_path(flow_cell_directory)
 
         self.add_file_to_bundle_if_non_existent(
             file_path=sample_sheet_file_path,
