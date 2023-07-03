@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from cg.constants.constants import FileExtensions
 from cg.meta.demultiplex.validation import validate_sample_fastq_file
 
 
@@ -20,7 +21,9 @@ def test_validate_sample_fastq_without_sample_id_in_parent_directory_name():
 
     # WHEN validating the sample fastq file
     # THEN a ValueError should be raised
-    with pytest.raises(ValueError, match="Directory name must contain 'Sample_<sample_id>'."):
+    with pytest.raises(
+        ValueError, match="Parent directory name of sample fastq must contain 'Sample_<sample_id>'."
+    ):
         validate_sample_fastq_file(sample_fastq)
 
 
@@ -42,5 +45,7 @@ def test_validate_sample_fastq_without_fastq_file_extension():
 
     # WHEN validating the sample fastq file
     # THEN a ValueError should be raised
-    with pytest.raises(ValueError, match="Sample fastq must end with '.fastq.gz'."):
+    with pytest.raises(
+        ValueError, match=f"Sample fastq must end with {FileExtensions.FASTQ}{FileExtensions.GZIP}."
+    ):
         validate_sample_fastq_file(sample_fastq)
