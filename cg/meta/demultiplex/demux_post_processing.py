@@ -80,7 +80,7 @@ class DemuxPostProcessingAPI:
         LOG.info(f"Flow cell added: {flow_cell}")
 
     def finish_flow_cell_temp(self, flow_cell_directory_name: str) -> None:
-        """Finalize the flow cell once the demultiplexing process is completed.
+        """Store data for the demultiplexed flow cell and mark it as ready for delivery.
 
         This function:
             - Parses and validates the flow cell directory data
