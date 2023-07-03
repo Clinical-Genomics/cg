@@ -1,7 +1,6 @@
 """Post-processing Demultiiplex API."""
 import logging
 import os
-import re
 import shutil
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -19,14 +18,15 @@ from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
 )
 from cg.constants.cgstats import STATS_HEADER
-from cg.constants.constants import FileExtensions
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.demultiplex.utils import (
+    get_bcl_converter_name,
     get_lane_from_sample_fastq,
+    get_sample_fastq_paths_from_flow_cell,
     get_sample_id_from_sample_fastq,
 )
 from cg.meta.demultiplex.validation import validate_sample_fastq_file
@@ -98,9 +98,7 @@ class DemuxPostProcessingAPI:
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
         flow_cell_directory_path: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
-        bcl_converter: str = self.get_bcl_converter_name(
-            flow_cell_directory=flow_cell_directory_path
-        )
+        bcl_converter: str = get_bcl_converter_name(flow_cell_directory_path)
 
         parsed_flow_cell: FlowCellDirectoryData = self.parse_flow_cell_directory_data(
             flow_cell_directory=flow_cell_directory_path,
@@ -252,16 +250,16 @@ class DemuxPostProcessingAPI:
 
     def get_valid_sample_fastq_paths(self, flow_cell_directory: Path):
         """Get all valid sample fastq file paths from flow cell directory."""
-        fastq_file_paths: List[Path] = self.get_sample_fastq_paths_from_flow_cell(
-            flow_cell_directory=flow_cell_directory
-        )
+        fastq_file_paths: List[Path] = get_sample_fastq_paths_from_flow_cell(flow_cell_directory)
         valid_sample_fastq_paths: List[Path] = []
+
         for fastq_path in fastq_file_paths:
             try:
                 validate_sample_fastq_file(fastq_path)
                 valid_sample_fastq_paths.append(fastq_path)
             except ValueError as e:
                 LOG.warning(f"Skipping invalid sample fastq file {fastq_path.name}: {e}")
+
         return valid_sample_fastq_paths
 
     def fastq_should_be_tracked_in_housekeeper(
@@ -318,12 +316,6 @@ class DemuxPostProcessingAPI:
         raise FileNotFoundError(
             f"Sample sheet not found in given flow cell directory: {flow_cell_directory}"
         )
-
-    def get_sample_fastq_paths_from_flow_cell(self, flow_cell_directory: Path) -> List[Path]:
-        fastq_sample_pattern: str = (
-            f"Unaligned*/Project_*/Sample_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-        )
-        return list(flow_cell_directory.glob(fastq_sample_pattern))
 
     def add_bundle_and_version_if_non_existent(self, bundle_name: str) -> None:
         """Add bundle if it does not exist."""
@@ -386,21 +378,6 @@ class DemuxPostProcessingAPI:
         return FlowCellDirectoryData(
             flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
         )
-
-    def get_bcl_converter_name(self, flow_cell_directory: Path) -> str:
-        if self.is_bcl2fastq_demux_folder_structure(flow_cell_directory=flow_cell_directory):
-            LOG.info("Flow cell was demultiplexed with bcl2fastq")
-            return BclConverter.BCL2FASTQ
-        LOG.info("Flow cell was demultiplexed with bcl_converter")
-        return BclConverter.BCLCONVERT
-
-    def is_bcl2fastq_demux_folder_structure(self, flow_cell_directory: Path) -> bool:
-        """Check if flow cell directory is a Bcl2fastq demux folder structure."""
-
-        for folder in flow_cell_directory.glob(pattern="*"):
-            if re.search(DemultiplexingDirsAndFiles.BCL2FASTQ_TILE_DIR_PATTERN.value, str(folder)):
-                return True
-        return False
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):

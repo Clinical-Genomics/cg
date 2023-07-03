@@ -13,7 +13,9 @@ from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
     DemuxPostProcessingHiseqXAPI,
 )
-from cg.meta.demultiplex.utils import get_sample_id_from_sample_fastq
+from cg.meta.demultiplex.utils import (
+    is_bcl2fastq_demux_folder_structure,
+)
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
@@ -491,35 +493,25 @@ def test_finish_all_flowcells(
     assert f"Check demultiplexed flow cell {bcl2fastq_flow_cell.full_name}" in caplog.text
 
 
-def test_is_bcl2fastq_folder_structure(
-    demultiplex_context: CGConfig, bcl2fastq_folder_structure: Path
-):
+def test_is_bcl2fastq_folder_structure(bcl2fastq_folder_structure: Path):
     """Test is_bcl2fastq_demux_folder_structure with a folder structure that follows the bcl2fastq folder structure."""
     # GIVEN a bcl2fastq folder structure
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-    demux_post_processing_api.demux_api.out_dir = bcl2fastq_folder_structure
 
     # WHEN checking if it is a bcl2fastq folder structure
-    is_bcl2fastq_folder_structure = demux_post_processing_api.is_bcl2fastq_demux_folder_structure(
-        flow_cell_directory=bcl2fastq_folder_structure
-    )
+    is_bcl2fastq_folder_structure = is_bcl2fastq_demux_folder_structure(bcl2fastq_folder_structure)
 
     # THEN it should be a bcl2fastq folder structure
     assert is_bcl2fastq_folder_structure is True
 
 
-def test_is_not_bcl2fastq_folder_structure(
-    demultiplex_context: CGConfig, not_bcl2fastq_folder_structure: Path
-):
+def test_is_not_bcl2fastq_folder_structure(not_bcl2fastq_folder_structure: Path):
     """Test is_bcl2fastq_demux_folder_structure with a folder structure that does not follow the bcl2fastq output."""
 
     # GIVEN not a bcl2fastq folder structure
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-    demux_post_processing_api.flow_cell_dir = not_bcl2fastq_folder_structure
 
     # WHEN checking if it is a bcl2fastq folder structure
-    is_bcl2fastq_folder_structure = demux_post_processing_api.is_bcl2fastq_demux_folder_structure(
-        flow_cell_directory=not_bcl2fastq_folder_structure
+    is_bcl2fastq_folder_structure = is_bcl2fastq_demux_folder_structure(
+        not_bcl2fastq_folder_structure
     )
 
     # THEN it should not be a bcl2fastq folder structure
