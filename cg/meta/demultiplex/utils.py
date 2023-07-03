@@ -1,3 +1,5 @@
+import logging
+import os
 import re
 from pathlib import Path
 from typing import List
@@ -6,9 +8,11 @@ from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
-from cg.meta.demultiplex.validation import is_bcl2fastq_demux_folder_structure
+from cg.exc import FlowCellError
+from cg.meta.demultiplex.validation import is_bcl2fastq_demux_folder_structure, is_flow_cell_directory_valid, validate_sample_fastq_file
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
+LOG = logging.getLogger(__name__)
 
 def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
     """
@@ -64,3 +68,47 @@ def get_sample_ids_from_sample_sheet(flow_cell_data: FlowCellDirectoryData) -> L
 
 def get_q30_threshold(sequencer_type: Sequencers) -> int:
     return FLOWCELL_Q30_THRESHOLD[sequencer_type]
+
+def get_valid_sample_fastq_paths(flow_cell_directory: Path):
+    """Get all valid sample fastq file paths from flow cell directory."""
+    fastq_file_paths: List[Path] = get_sample_fastq_paths_from_flow_cell(flow_cell_directory)
+    valid_sample_fastq_paths: List[Path] = []
+
+    for fastq_path in fastq_file_paths:
+        try:
+            validate_sample_fastq_file(fastq_path)
+            valid_sample_fastq_paths.append(fastq_path)
+        except ValueError as e:
+            LOG.warning(f"Skipping invalid sample fastq file {fastq_path.name}: {e}")
+
+    return valid_sample_fastq_paths
+
+
+def find_sample_sheet_path(flow_cell_directory: Path):
+    """
+    Recursively searches for the given sample sheet file in the provided flow cell directory.
+
+    Raises:
+        FileNotFoundError: If the sample sheet file is not found in the flow cell directory.
+    """
+    for directory_path, _, files in os.walk(flow_cell_directory):
+        if DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME in files:
+            LOG.info(f"Found sample sheet in {directory_path}")
+            return Path(directory_path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+
+    raise FileNotFoundError(
+        f"Sample sheet not found in given flow cell directory: {flow_cell_directory}"
+    )
+
+
+def parse_flow_cell_directory_data(
+    flow_cell_directory: Path, bcl_converter: str
+) -> FlowCellDirectoryData:
+    """Parse flow cell data from the flow cell directory."""
+
+    if not is_flow_cell_directory_valid(flow_cell_directory):
+        raise FlowCellError(f"Flow cell directory was not valid: {flow_cell_directory}")
+
+    return FlowCellDirectoryData(
+        flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
+    )

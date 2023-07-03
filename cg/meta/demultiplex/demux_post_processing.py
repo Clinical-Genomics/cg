@@ -1,6 +1,5 @@
 """Post-processing Demultiiplex API."""
 import logging
-import os
 import shutil
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -12,7 +11,6 @@ from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
@@ -20,19 +18,20 @@ from cg.apps.sequencing_metrics_parser.api import (
 from cg.constants.cgstats import STATS_HEADER
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
+from cg.constants.sequencing import Sequencers
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
+    find_sample_sheet_path,
     get_bcl_converter_name,
     get_lane_from_sample_fastq,
     get_q30_threshold,
-    get_sample_fastq_paths_from_flow_cell,
+    get_valid_sample_fastq_paths,
     get_sample_id_from_sample_fastq,
     get_sample_ids_from_sample_sheet,
+    parse_flow_cell_directory_data,
 )
-from cg.meta.demultiplex.validation import is_flow_cell_directory_valid, validate_sample_fastq_file
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
@@ -103,7 +102,7 @@ class DemuxPostProcessingAPI:
         flow_cell_directory_path: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
         bcl_converter: str = get_bcl_converter_name(flow_cell_directory_path)
 
-        parsed_flow_cell: FlowCellDirectoryData = self.parse_flow_cell_directory_data(
+        parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
             flow_cell_directory=flow_cell_directory_path,
             bcl_converter=bcl_converter,
         )
@@ -169,11 +168,11 @@ class DemuxPostProcessingAPI:
         sample_internal_ids: List[str] = get_sample_ids_from_sample_sheet(flow_cell_data)
 
         for sample_id in sample_internal_ids:
-            self.update_single_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold)
+            self.update_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold)
 
         self.status_db.session.commit()
 
-    def update_single_sample_read_count(self, sample_id: str, q30_threshold: int) -> None:
+    def update_sample_read_count(self, sample_id: str, q30_threshold: int) -> None:
         """Update the read count for a sample in status db with all reads exceeding the q30 threshold from the sequencing metrics table."""
         sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
 
@@ -200,7 +199,7 @@ class DemuxPostProcessingAPI:
 
     def add_sample_fastq_files(self, flow_cell: FlowCellDirectoryData) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
-        valid_sample_fastq_paths = self.get_valid_sample_fastq_paths(flow_cell.path)
+        valid_sample_fastq_paths = get_valid_sample_fastq_paths(flow_cell.path)
 
         for sample_fastq_path in valid_sample_fastq_paths:
             if self.fastq_should_be_tracked_in_housekeeper(
@@ -222,20 +221,6 @@ class DemuxPostProcessingAPI:
             tag_names=[SequencingFileTag.FASTQ, flow_cell_name],
         )
 
-    def get_valid_sample_fastq_paths(self, flow_cell_directory: Path):
-        """Get all valid sample fastq file paths from flow cell directory."""
-        fastq_file_paths: List[Path] = get_sample_fastq_paths_from_flow_cell(flow_cell_directory)
-        valid_sample_fastq_paths: List[Path] = []
-
-        for fastq_path in fastq_file_paths:
-            try:
-                validate_sample_fastq_file(fastq_path)
-                valid_sample_fastq_paths.append(fastq_path)
-            except ValueError as e:
-                LOG.warning(f"Skipping invalid sample fastq file {fastq_path.name}: {e}")
-
-        return valid_sample_fastq_paths
-
     def fastq_should_be_tracked_in_housekeeper(
         self, sample_fastq_path: Path, sequencer_type: Sequencers, flow_cell_name: str
     ) -> bool:
@@ -245,7 +230,7 @@ class DemuxPostProcessingAPI:
         """
         sample_id = get_sample_id_from_sample_fastq(sample_fastq_path)
         lane = get_lane_from_sample_fastq(sample_fastq_path)
-        q30_threshold: int = self.get_q30_threshold(sequencer_type)
+        q30_threshold: int = get_q30_threshold(sequencer_type)
 
         metric = self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
             flow_cell_name=flow_cell_name,
@@ -265,30 +250,12 @@ class DemuxPostProcessingAPI:
     def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
         """Add sample sheet path to Housekeeper."""
 
-        sample_sheet_file_path: Path = self.find_sample_sheet_path(
-            flow_cell_directory=flow_cell_directory
-        )
+        sample_sheet_file_path: Path = find_sample_sheet_path(flow_cell_directory)
 
         self.add_file_to_bundle_if_non_existent(
             file_path=sample_sheet_file_path,
             bundle_name=flow_cell_name,
             tag_names=[SequencingFileTag.SAMPLE_SHEET, flow_cell_name],
-        )
-
-    def find_sample_sheet_path(self, flow_cell_directory: Path):
-        """
-        Recursively searches for the given sample sheet file in the provided flow cell directory.
-
-        Raises:
-            FileNotFoundError: If the sample sheet file is not found in the flow cell directory.
-        """
-        for directory_path, _, files in os.walk(flow_cell_directory):
-            if DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME in files:
-                LOG.info(f"Found sample sheet in {directory_path}")
-                return Path(directory_path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
-
-        raise FileNotFoundError(
-            f"Sample sheet not found in given flow cell directory: {flow_cell_directory}"
         )
 
     def add_bundle_and_version_if_non_existent(self, bundle_name: str) -> None:
@@ -340,19 +307,6 @@ class DemuxPostProcessingAPI:
             LOG.info(f"Flow cell added to status db: {parsed_flow_cell.id}.")
         else:
             LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}. Skipping.")
-
-    def parse_flow_cell_directory_data(
-        self, flow_cell_directory: Path, bcl_converter: str
-    ) -> FlowCellDirectoryData:
-        """Parse flow cell data from the flow cell directory."""
-
-        if not is_flow_cell_directory_valid(flow_cell_directory):
-            raise FlowCellError(f"Flow cell directory was not valid: {flow_cell_directory}")
-
-        return FlowCellDirectoryData(
-            flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
-        )
-
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
     """Post demultiplexing API class for Hiseq X flow cell."""
