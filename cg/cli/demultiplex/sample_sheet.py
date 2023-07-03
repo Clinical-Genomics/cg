@@ -96,7 +96,7 @@ def create_sheet(
         sample_sheet_content: List[List[str]] = create_sample_sheet(
             bcl_converter=bcl_converter, flow_cell=flow_cell, lims_samples=lims_samples, force=force
         )
-    except (FileNotFoundError, FileExistsError) as error:
+    except (FileNotFoundError, FileExistsError, FlowCellError) as error:
         raise click.Abort from error
 
     if dry_run:
