@@ -38,7 +38,7 @@ def test_get_valid_indexes():
     assert isinstance(indexes[0], Index)
 
 
-def test_index_exists_existent_index(valid_index: Index):
+def test_index_exists_for_existing_index(valid_index: Index):
     """Test that checking the existence of an existent index returns true."""
     # GIVEN a list of indexes
     indexes: Set[str] = set(index.sequence for index in get_valid_indexes())
@@ -51,7 +51,7 @@ def test_index_exists_existent_index(valid_index: Index):
     assert index_exists(index=existent_index, indexes=indexes)
 
 
-def test_index_exists_non_existent_index():
+def test_index_exists_for_non_existent_index():
     """Test that checking the existence of a non-existent index returns false."""
     # GIVEN a list of indexes
     indexes: Set[str] = set(index.sequence for index in get_valid_indexes())
@@ -162,7 +162,7 @@ def test_adapt_barcode_mismatch_values(
     # WHEN adapting the barcode mismatch values
     update_barcode_mismatch_values_for_sample(
         sample_to_update=novaseq_x_flow_cell_sample_before_adapt_indexes,
-        samples=lims_novaseq_x_samples,
+        samples_to_compare_to=lims_novaseq_x_samples,
     )
 
     # THEN the barcode mismatch values have been updated
@@ -183,7 +183,8 @@ def test_adapt_barcode_mismatch_values_repeated_sample(
 
     # WHEN adapting the barcode mismatch values for the samples
     update_barcode_mismatch_values_for_sample(
-        sample_to_update=novaseq_x_flow_cell_sample_before_adapt_indexes, samples=samples
+        sample_to_update=novaseq_x_flow_cell_sample_before_adapt_indexes,
+        samples_to_compare_to=samples,
     )
 
     # THEN the barcode mismatch values remains being 1 for all samples
