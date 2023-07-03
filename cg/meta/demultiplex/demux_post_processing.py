@@ -202,16 +202,16 @@ class DemuxPostProcessingAPI:
         valid_sample_fastq_paths = get_valid_sample_fastq_paths(flow_cell.path)
 
         for sample_fastq_path in valid_sample_fastq_paths:
-            if self.fastq_should_be_tracked_in_housekeeper(
+            if self.fastq_path_should_be_stored_in_housekeeper(
                 sample_fastq_path=sample_fastq_path,
                 sequencer_type=flow_cell.sequencer_type,
                 flow_cell_name=flow_cell.id,
             ):
-                self.track_fastq_in_housekeeper(
+                self.store_fastq_path_in_housekeeper(
                     sample_fastq_path=sample_fastq_path, flow_cell_name=flow_cell.id
                 )
 
-    def track_fastq_in_housekeeper(self, sample_fastq_path: Path, flow_cell_name: str) -> None:
+    def store_fastq_path_in_housekeeper(self, sample_fastq_path: Path, flow_cell_name: str) -> None:
         sample_id = get_sample_id_from_sample_fastq(sample_fastq_path)
 
         self.add_bundle_and_version_if_non_existent(bundle_name=sample_id)
@@ -221,7 +221,7 @@ class DemuxPostProcessingAPI:
             tag_names=[SequencingFileTag.FASTQ, flow_cell_name],
         )
 
-    def fastq_should_be_tracked_in_housekeeper(
+    def fastq_path_should_be_stored_in_housekeeper(
         self, sample_fastq_path: Path, sequencer_type: Sequencers, flow_cell_name: str
     ) -> bool:
         """
