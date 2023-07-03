@@ -9,10 +9,15 @@ from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.exc import FlowCellError
-from cg.meta.demultiplex.validation import is_bcl2fastq_demux_folder_structure, is_flow_cell_directory_valid, validate_sample_fastq_file
+from cg.meta.demultiplex.validation import (
+    is_bcl2fastq_demux_folder_structure,
+    is_flow_cell_directory_valid,
+    validate_sample_fastq_file,
+)
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
+
 
 def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
     """
@@ -57,6 +62,7 @@ def get_bcl_converter_name(flow_cell_directory: Path) -> str:
         return BclConverter.BCL2FASTQ
     return BclConverter.BCLCONVERT
 
+
 def create_delivery_file_in_flow_cell_directory(flow_cell_directory: Path) -> None:
     Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
 
@@ -66,8 +72,10 @@ def get_sample_ids_from_sample_sheet(flow_cell_data: FlowCellDirectoryData) -> L
     sample_ids_with_indexes: List[str] = [sample.sample_id for sample in samples]
     return [sample_id_index.split("_")[0] for sample_id_index in sample_ids_with_indexes]
 
+
 def get_q30_threshold(sequencer_type: Sequencers) -> int:
     return FLOWCELL_Q30_THRESHOLD[sequencer_type]
+
 
 def get_valid_sample_fastq_paths(flow_cell_directory: Path):
     """Get all valid sample fastq file paths from flow cell directory."""
@@ -109,6 +117,4 @@ def parse_flow_cell_directory_data(
     if not is_flow_cell_directory_valid(flow_cell_directory):
         raise FlowCellError(f"Flow cell directory was not valid: {flow_cell_directory}")
 
-    return FlowCellDirectoryData(
-        flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
-    )
+    return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)

@@ -308,6 +308,7 @@ class DemuxPostProcessingAPI:
         else:
             LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}. Skipping.")
 
+
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
     """Post demultiplexing API class for Hiseq X flow cell."""
 
