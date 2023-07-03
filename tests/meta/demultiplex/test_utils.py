@@ -65,9 +65,7 @@ def test_get_valid_flowcell_sample_fastq_file_path(tmpdir_factory):
     valid_sample_fastq_directory_2.touch()
 
     # WHEN we get flowcell sample fastq file paths
-    result = get_sample_fastq_paths_from_flow_cell(
-        flow_cell_directory=flow_cell_dir
-    )
+    result = get_sample_fastq_paths_from_flow_cell(flow_cell_directory=flow_cell_dir)
 
     # THEN we should only get the valid files
     assert len(result) == 2
@@ -87,9 +85,7 @@ def test_get_invalid_flowcell_sample_fastq_file_path(tmpdir_factory):
     invalid_fastq_file.touch()
 
     # WHEN we get flowcell sample fastq file paths
-    result = get_sample_fastq_paths_from_flow_cell(
-        flow_cell_directory=flow_cell_dir
-    )
+    result = get_sample_fastq_paths_from_flow_cell(flow_cell_directory=flow_cell_dir)
 
     # THEN we should not get any files
     assert len(result) == 0
