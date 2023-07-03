@@ -47,32 +47,56 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
 
+    def get_samples(self, case_id: str) -> List[Sample]:
+        case_id: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        return [link.sample_id for link in case_id.links]
+
+    def get_fastq_files(self, case_id: str, sample_id: str, dry_run: bool = False) -> None:
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        samples: List[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
+        for sample_id in samples:
+            self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_id)
+
     @staticmethod
     def build_sample_sheet_content(
+        self,
         case_id: str,
-        sample_id: str,
+        sample_ids: List[str],
         fastq_r1: List[str],
         fastq_r2: List[str],
         instrument_platform: SequencingPlatform.ILLUMINA,
         fasta: Optional[str] = "",
     ) -> Dict[str, List[str]]:
         """Build sample sheet headers and lists."""
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        samples: List[Sample] = self.get_samples(case_id=case_id)
+        for sample_id in sample_ids:
+            self.get_fastq_files(case_id=case_id, sample_id=sample_id)
         try:
-            TaxprofilerSample(
-                # sample=case_id,
-                sample=sample_id,
-                fastq_r1=fastq_r1,
-                fastq_r2=fastq_r2,
-                instrument_platform=instrument_platform,
-            )
+            for sample_id in samples:
+                TaxprofilerSample(
+                    # sample=case_id,
+                    sample=sample_id,
+                    fastq_r1=fastq_r1,
+                    fastq_r2=fastq_r2,
+                    instrument_platform=instrument_platform,
+                )
         except ValidationError as error:
             LOG.error(error)
             raise ValueError
 
-        # Complete sample lists to the same length as fastq_r1:
-        samples_full_list: List[str] = [sample_id] * len(fastq_r1)
-        instrument_full_list: List[str] = [instrument_platform] * len(fastq_r1)
+        samples_full_list: List[str] = [
+            sample_id.sample_id for _ in range(len(fastq_r1)) for sample_id in samples
+        ]
+        instrument_full_list: List[str] = [
+            instrument_platform.value for _ in range(len(fastq_r1)) for _ in sample_ids
+        ]
         fasta_full_list: List[str] = [fasta] * len(fastq_r1)
+
+        # Complete sample lists to the same length as fastq_r1:
+        # samples_full_list: List[str] = [sample_id] * len(fastq_r1)
+        # instrument_full_list: List[str] = [instrument_platform] * len(fastq_r1)
+        # fasta_full_list: List[str] = [fasta] * len(fastq_r1)
 
         sample_sheet_content: Dict[str, List[str]] = {
             NFX_SAMPLE_HEADER: samples_full_list,
