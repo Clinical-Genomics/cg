@@ -53,7 +53,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
     def get_fastq_files(self, case_id: str, sample_id: str, dry_run: bool = False) -> None:
         case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        samples: List[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
+        samples: List[Sample] = self.get_samples(case_id=case_id)
         for sample_id in samples:
             self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_id)
 
