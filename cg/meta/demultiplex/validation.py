@@ -1,5 +1,6 @@
 from pathlib import Path
 import re
+from cg.constants.constants import FileExtensions
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 
@@ -14,17 +15,28 @@ def validate_sample_fastq_file(sample_fastq: Path) -> None:
     3. The sample fastq file is located in a directory containing the sample id formatted as Sample_<sample_id>
     """
 
-    # Check that file name ends with .fastq.gz
-    if not sample_fastq.name.endswith(".fastq.gz"):
-        raise ValueError("Sample fastq must end with '.fastq.gz'.")
+    if not is_file_path_compressed_fastq(sample_fastq):
+        raise ValueError(f"Sample fastq must end with {FileExtensions.FASTQ}{FileExtensions.GZIP}.")
 
-    # Check that file name contains lane number formatted as _L<lane_number>
-    if not re.search(r"_L\d+", sample_fastq.name):
+    if not is_lane_in_fastq_file_name(sample_fastq):
         raise ValueError("Sample fastq must contain lane number formatted as '_L<lane_number>'.")
 
-    # Check that directory name contains Sample_<sample_id>
-    if not re.search(r"Sample_\w+", sample_fastq.parent.name):
-        raise ValueError("Directory name must contain 'Sample_<sample_id>'.")
+    if not is_sample_id_in_directory_name(sample_fastq.parent):
+        raise ValueError("Parent directory name of sample fastq must contain 'Sample_<sample_id>'.")
+
+
+def is_file_path_compressed_fastq(file_path: Path) -> bool:
+    return file_path.name.endswith(f"{FileExtensions.FASTQ}{FileExtensions.GZIP}")
+
+
+def is_lane_in_fastq_file_name(sample_fastq: Path) -> bool:
+    """Validate that fastq contains lane number formatted as _L<lane_number>"""
+    return bool(re.search(r"_L\d+", sample_fastq.name))
+
+
+def is_sample_id_in_directory_name(directory: Path) -> bool:
+    """Validate that directory name contains the sample id formatted as Sample_<sample_id>"""
+    return bool(re.search(r"Sample_\w+", directory.name))
 
 
 def is_bcl2fastq_demux_folder_structure(flow_cell_directory: Path) -> bool:
