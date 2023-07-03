@@ -1,32 +1,22 @@
 import logging
 import re
 
-
 LOG = logging.getLogger(__name__)
 
 
 def validate_sample_fastq_file_name(sample_fastq_file_name: str) -> None:
-    """
-    Validate each part of the sample fastq file name.
+    LOG.debug(f"Validating sample fastq file name {sample_fastq_file_name}")
 
-    Pre-condition: The sample fastq file name should be in the format
-    <flow_cell_id>_<sample_id>_<sample_index>_S<set_number>_L<lane_number>_R<read_number>_<segement_number>.fastq.gz
-
-    Raises:
-        - ValueError if the sample fastq file name is not in the expected format.
-    """
-    LOG.debug(f"Validating fastq file name {sample_fastq_file_name}")
-
-    pattern = r"^([^_]*)_([^_]*)_([^_]*)_S(\d+)_L(\d+)_R(\d+)_(\d+)\.fastq\.gz$"
+    pattern = r"^(?:([^_]*)_)?([^_]*)_([^_]*)_S(\d+)_L(\d+)_R(\d+)_(\d+)\.fastq\.gz$"
     match = re.fullmatch(pattern, sample_fastq_file_name)
 
     if not match:
         raise ValueError(
-            f"Invalid fastq file name {sample_fastq_file_name}. Expected format: <flow_cell_id>_<sample_id>_<sample_index>_S<set_number>_L<lane_number>_R<read_number>_<segement_number>.fastq.gz"
+            f"Invalid fastq file name {sample_fastq_file_name}. Expected format: [<flow_cell_id>_]<sample_id>_<sample_index>_S<set_number>_L<lane_number>_R<read_number>_<segement_number>.fastq.gz"
         )
 
     (
-        flow_cell_id,
+        optional_flow_cell_id,
         sample_id,
         sample_index,
         set_number,
@@ -35,7 +25,9 @@ def validate_sample_fastq_file_name(sample_fastq_file_name: str) -> None:
         segment_number,
     ) = match.groups()
 
-    validate_non_empty_string(flow_cell_id, "flow cell ID")
+    if optional_flow_cell_id:
+        validate_non_empty_string(optional_flow_cell_id, "flow cell ID")
+
     validate_non_empty_string(sample_id, "sample ID")
     validate_numeric_string(sample_index, "sample index")
     validate_numeric_string(set_number, "set number")

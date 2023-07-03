@@ -26,7 +26,6 @@ from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.demultiplex.utils import (
-    get_flow_cell_name_from_sample_fastq,
     get_lane_from_sample_fastq,
     get_sample_id_from_sample_fastq,
 )
@@ -79,7 +78,7 @@ class DemuxPostProcessingAPI:
         LOG.info(f"Flow cell added: {flow_cell}")
 
     def finish_flow_cell_temp(self, flow_cell_directory_name: str) -> None:
-        """Finalize the flow cell once the temporary demultiplexing process is completed.
+        """Finalize the flow cell once the demultiplexing process is completed.
 
         This function:
             - Parses and validates the flow cell directory data
@@ -233,12 +232,15 @@ class DemuxPostProcessingAPI:
 
         for sample_fastq_path in valid_sample_fastq_paths:
             if self.fastq_should_be_tracked_in_housekeeper(
-                sample_fastq_path=sample_fastq_path, sequencer_type=flow_cell.sequencer_type
+                sample_fastq_path=sample_fastq_path,
+                sequencer_type=flow_cell.sequencer_type,
+                flow_cell_name=flow_cell.id,
             ):
-                self.track_fastq_in_housekeeper(sample_fastq_path)
+                self.track_fastq_in_housekeeper(
+                    sample_fastq_path=sample_fastq_path, flow_cell_name=flow_cell.id
+                )
 
-    def track_fastq_in_housekeeper(self, sample_fastq_path: Path) -> None:
-        flow_cell_name = get_flow_cell_name_from_sample_fastq(sample_fastq_path)
+    def track_fastq_in_housekeeper(self, sample_fastq_path: Path, flow_cell_name: str) -> None:
         sample_id = get_sample_id_from_sample_fastq(sample_fastq_path)
 
         self.add_bundle_and_version_if_non_existent(bundle_name=sample_id)
@@ -263,13 +265,12 @@ class DemuxPostProcessingAPI:
         return valid_sample_fastq_paths
 
     def fastq_should_be_tracked_in_housekeeper(
-        self, sample_fastq_path: Path, sequencer_type: Sequencers
+        self, sample_fastq_path: Path, sequencer_type: Sequencers, flow_cell_name: str
     ) -> bool:
         """
         Check if a sample fastq file should be tracked in Housekeeper.
         Only fastq files that pass the q30 threshold should be tracked.
         """
-        flow_cell_name = get_flow_cell_name_from_sample_fastq(sample_fastq_path)
         sample_id = get_sample_id_from_sample_fastq(sample_fastq_path)
         lane = get_lane_from_sample_fastq(sample_fastq_path)
         q30_threshold: int = self.get_q30_threshold(sequencer_type)

@@ -1,15 +1,5 @@
+import re
 from pathlib import Path
-from typing import List
-
-
-def get_flow_cell_name_from_sample_fastq(sample_fastq_path: Path) -> str:
-    """
-    Extract the flow cell name from the sample fastq path.
-
-    Pre-condition:
-        - The third part of the sample fastq file name is the lane number.
-    """
-    return sample_fastq_path.name.split("_")[0]
 
 
 def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
@@ -17,16 +7,28 @@ def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
     Extract the lane number from the sample fastq path.
 
     Pre-condition:
-        - The third part of the sample fastq file name is the lane number.
+        - The fastq file name is in the format [<flow_cell_id>_]<sample_id>_<sample_index>_S<set_number>_L<lane_number>_R<read_number>_<segement_number>.fastq.gz
     """
-    lane_part = sample_fastq_path.name.split("_")[3]
-    return int(lane_part[1:])  # Skip the lane indicator 'L'
+    pattern = r"_L(\d+)_"
+    lane_match = re.search(pattern, sample_fastq_path.name)
+
+    if lane_match:
+        return int(lane_match.group(1))
+
+    raise ValueError(f"Could not extract lane number from fastq file name {sample_fastq_path.name}")
 
 
 def get_sample_id_from_sample_fastq(sample_fastq: Path) -> str:
     """
     Extract sample id from fastq file path.
+
     Pre-condition:
-        - The sample id is the second part of the sample fastq name.
+        - The fastq file name is in the format [<flow_cell_id>_]<sample_id>_<sample_index>_S<set_number>_L<lane_number>_R<read_number>_<segement_number>.fastq.gz
     """
-    return sample_fastq.name.split("_")[1]
+    pattern = r"^(.*_)?([^_]*_S\d+)_.*$"  # Captures everything before `_S` as a whole (flow cell and sample id)
+    match = re.search(pattern, sample_fastq.name)
+
+    if match:
+        return match.group(2).split("_S")[0]  # Returns only the sample id part
+
+    raise ValueError(f"Could not extract sample id from fastq file name {sample_fastq.name}")

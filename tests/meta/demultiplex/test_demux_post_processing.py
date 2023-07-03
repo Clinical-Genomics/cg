@@ -670,9 +670,7 @@ def test_add_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory):
     )
 
 
-def test_add_sample_fastq_files(
-    demultiplex_context: CGConfig, tmpdir_factory, bcl2fastq_flow_cell_full_name: str
-):
+def test_add_sample_fastq_files(demultiplex_context: CGConfig, bcl2fastq_flow_cell_full_name: str):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
     demux_post_processing_api.get_valid_sample_fastq_paths = MagicMock()
@@ -680,7 +678,7 @@ def test_add_sample_fastq_files(
     demux_post_processing_api.track_fastq_in_housekeeper = MagicMock()
 
     # GIVEN a flow cell directory and its sequencer type
-    flow_cell_directory = Path(tmpdir_factory.mktemp(bcl2fastq_flow_cell_full_name))
+    flow_cell_directory = Path(bcl2fastq_flow_cell_full_name)
     flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_directory)
 
     # Mock the returned sample fastq paths
@@ -696,12 +694,17 @@ def test_add_sample_fastq_files(
     # THEN the fastq files are validated and tracked in housekeeper
     for sample_fastq_path in valid_sample_fastq_paths:
         demux_post_processing_api.fastq_should_be_tracked_in_housekeeper.assert_any_call(
-            sample_fastq_path=sample_fastq_path, sequencer_type=flow_cell.sequencer_type
+            sample_fastq_path=sample_fastq_path,
+            sequencer_type=flow_cell.sequencer_type,
+            flow_cell_name=flow_cell.id,
         )
-        demux_post_processing_api.track_fastq_in_housekeeper.assert_any_call(sample_fastq_path)
+        demux_post_processing_api.track_fastq_in_housekeeper.assert_any_call(
+            sample_fastq_path=sample_fastq_path,
+            flow_cell_name=flow_cell.id
+        )
 
 
-def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig, tmpdir_factory):
+def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
