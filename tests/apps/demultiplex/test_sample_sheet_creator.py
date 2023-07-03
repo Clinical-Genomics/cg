@@ -20,7 +20,7 @@ from cg.exc import SampleSheetError
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
-def test_v2_sample_sheet_bcl2fastq_fails(
+def test_v2_sample_sheet_fails_with_bcl2fastq(
     novaseq_x_flow_cell: FlowCellDirectoryData, lims_novaseq_x_samples: List[FlowCellSampleNovaSeqX]
 ):
     """Test that creating a v2 sample sheet fails if the bcl converter is Bcl2fastq."""
