@@ -212,9 +212,9 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
 def test_delete_flow_cell_housekeeper_flowcell_name(
     caplog,
     cg_context: CGConfig,
-    demultiplexed_flow_cells_working_directory: Path,
+    tmp_flow_cell_run_base_path: Path,
     flow_cell_name_housekeeper_api: HousekeeperAPI,
-    bcl2fastq_flow_cell_full_name: str,
+    bcl2fastq_flow_cell_id: str,
     populated_flow_cell_store: Store,
     tmp_sample_sheet_path: Path,
 ):
@@ -223,16 +223,19 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
     caplog.set_level(logging.INFO)
     cg_context.housekeeper_api_ = flow_cell_name_housekeeper_api
     cg_context.status_db_ = populated_flow_cell_store
-
+    cg_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
+        parents=True, exist_ok=True
+    )
     # GIVEN
 
     sample_sheet_file: Path = tmp_sample_sheet_path
 
     wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
-        demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=False,
-        run_path=Path(bcl2fastq_flow_cell_full_name),
+        flow_cell_name=bcl2fastq_flow_cell_id,
     )
     wipe_demultiplex_api._set_samples_on_flow_cell()
 
