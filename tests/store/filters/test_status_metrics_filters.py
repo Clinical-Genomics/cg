@@ -1,6 +1,7 @@
 from typing import Optional
 from cg.store import Store
 from cg.store.filters.status_metrics_filters import (
+    filter_above_q30_threshold,
     filter_total_read_count_for_sample,
     filter_metrics_for_flow_cell_sample_internal_id_and_lane,
 )
@@ -57,3 +58,29 @@ def test_filter_metrics_for_flow_cell_sample_internal_id_and_lane(
     assert metrics_query[0].flow_cell_name == flow_cell_name
     assert metrics_query[0].sample_internal_id == sample_id
     assert metrics_query[0].flow_cell_lane_number == 1
+
+
+def test_filter_above_q30_threshold(store_with_sequencing_metrics: Store):
+    # GIVEN a Store with sequencing metrics
+    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
+    metric: Optional[SampleLaneSequencingMetrics] = metrics.first()
+    assert metric
+
+    # GIVEN a Q30 threshold that at least one metric will pass
+    q30_threshold = int(metric.sample_base_fraction_passing_q30 / 2 * 100)
+
+    # WHEN filtering metrics above the Q30 threshold
+    filtered_metrics: Query = filter_above_q30_threshold(
+        metrics=metrics,
+        q30_threshold=q30_threshold,
+    )
+
+    # THEN assert that the returned object is a Query
+    assert isinstance(filtered_metrics, Query)
+
+    # THEN assert that the query returns a list of filtered metrics
+    assert filtered_metrics.all()
+
+    # THEN assert that all returned metrics have a sample_base_fraction_passing_q30 greater than the threshold
+    for metric in filtered_metrics.all():
+        assert metric.sample_base_fraction_passing_q30 > q30_threshold / 100
