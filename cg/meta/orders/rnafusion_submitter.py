@@ -9,7 +9,7 @@ from cg.models.orders.samples import Of1508Sample
 class RnafusionSubmitter(CaseSubmitter):
     def validate_order(self, order: OrderIn) -> None:
         """Validates that the order is correct."""
-        CaseSubmitter.validate_order(self, order)
+        CaseSubmitter.validate_order(self=self, order=order)
         self._validate_one_sample_per_case(order.samples)
 
     @staticmethod
