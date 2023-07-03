@@ -105,7 +105,9 @@ class SampleSheetCreator:
         self.remove_unwanted_samples()
         samples_in_lane: List[FlowCellSample]
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
-            LOG.info(f"Adapting index and barcode mismatch values for samples in lane {lane}")
+            LOG.info(
+                f"Adapting index and barcode mismatch values (if applicable) for samples in lane {lane}"
+            )
             adapt_samples(
                 samples=samples_in_lane,
                 run_parameters=self.run_parameters,

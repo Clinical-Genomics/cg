@@ -264,7 +264,7 @@ def test_adapt_indexes_for_sample_no_reverse_complement_no_padding(
     assert sample.index2 == initial_index2
 
 
-def test_get_hamming_distance_index_1_different_lengths():
+def test_get_hamming_distance_index_different_lengths():
     """Test that the hamming distance between indexes with same prefix but different lengths is zero."""
     # GIVEN two index_1 sequences with the same prefixes but different lengths
     sequence_1: str = "GATTACA"
@@ -283,7 +283,7 @@ def test_get_hamming_distance_index_1_different_lengths():
     assert get_hamming_distance_for_indexes(sequence_1=sequence_2, sequence_2=sequence_2) == 0
 
 
-def test_get_hamming_distance_index_1_different_prefixes():
+def test_get_hamming_distance_index_different_prefixes():
     """Test that the hamming distance between indexes with different prefixes is greater than zero."""
     # GIVEN two index_1 sequences with the same suffixes but different prefixes
     sequence_1: str = "GATTACA"

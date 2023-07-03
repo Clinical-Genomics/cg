@@ -78,7 +78,7 @@ def get_reagent_kit_version(reagent_kit_version: str) -> str:
 
 
 def get_index_pair(sample: FlowCellSample) -> Tuple[str, str]:
-    """Returns a sample index separated into index_1 and index_2."""
+    """Returns a sample index separated into index 1 and index 2."""
     if is_dual_index(sample.index):
         index_1, index_2 = sample.index.split("-")
         return index_1.strip(), index_2.strip()
@@ -143,7 +143,7 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
 
 
 def get_hamming_distance_for_indexes(sequence_1: str, sequence_2: str) -> int:
-    """Get the hamming distance between two index 1 sequences.
+    """Get the hamming distance between two index sequences.
     In the case that one sequence is longer than the other, the distance is calculated between
     the shortest sequence and the first segment of equal length of the longest sequence."""
     limit: int = min(len(sequence_1), len(sequence_2))
@@ -154,8 +154,8 @@ def update_barcode_mismatch_values_for_sample(
     sample_to_update: FlowCellSampleNovaSeqX, samples: List[FlowCellSampleNovaSeqX]
 ) -> None:
     """Updates the sample's barcode mismatch values.
-    If a sample index has a hamming distance to any other sample lower than the threshold,
-    the barcode mismatch value for that index is set to zero."""
+    If a sample index has a hamming distance to any other sample lower than the threshold
+    (3 nucleotides), the barcode mismatch value for that index is set to zero."""
     index_1_sample_to_update, index_2_sample_to_update = get_index_pair(sample=sample_to_update)
     for sample in samples:
         if sample_to_update.sample_id == sample.sample_id:
@@ -167,8 +167,7 @@ def update_barcode_mismatch_values_for_sample(
             )
             < MINIMUM_HAMMING_DISTANCE
         ):
-            LOG.debug(f"Turning Barcode mismatch 1 to 0 for sample {sample_to_update.sample_id}")
-            LOG.debug(f"Sample index: {index_1_sample_to_update}. Test index: {index_1}")
+            LOG.debug(f"Turning barcode mismatch 1 to 0 for sample {sample_to_update.sample_id}")
             sample_to_update.barcode_mismatches_1 = 0
         if (
             get_hamming_distance_for_indexes(
@@ -176,8 +175,7 @@ def update_barcode_mismatch_values_for_sample(
             )
             < MINIMUM_HAMMING_DISTANCE
         ):
-            LOG.debug(f"Turning Barcode mismatch 2 to 0 for sample {sample_to_update.sample_id}")
-            LOG.debug(f"Sample index: {index_2_sample_to_update}. Test index: {index_2}")
+            LOG.debug(f"Turning barcode mismatch 2 to 0 for sample {sample_to_update.sample_id}")
             sample_to_update.barcode_mismatches_2 = 0
 
 

@@ -26,7 +26,7 @@ def get_hamming_distance(str_1: str, str_2: str) -> int:
     """Return the hamming distance between two strings.
 
     Raises:
-        KeyError: When the strings have the same length
+        KeyError: When the strings have the same length.
     """
     if len(str_1) != len(str_2):
         raise KeyError("The two strings must have the same length to calculate distance!")
