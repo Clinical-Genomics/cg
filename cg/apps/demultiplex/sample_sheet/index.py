@@ -167,7 +167,9 @@ def update_barcode_mismatch_values_for_sample(
             )
             < MINIMUM_HAMMING_DISTANCE
         ):
-            LOG.debug(f"Turning barcode mismatch 1 to 0 for sample {sample_to_update.sample_id}")
+            LOG.debug(
+                f"Turning barcode mismatch for index 1 to 0 for sample {sample_to_update.sample_id}"
+            )
             sample_to_update.barcode_mismatches_1 = 0
         if (
             get_hamming_distance_for_indexes(
@@ -175,7 +177,9 @@ def update_barcode_mismatch_values_for_sample(
             )
             < MINIMUM_HAMMING_DISTANCE
         ):
-            LOG.debug(f"Turning barcode mismatch 2 to 0 for sample {sample_to_update.sample_id}")
+            LOG.debug(
+                f"Turning barcode mismatch for index 2 to 0 for sample {sample_to_update.sample_id}"
+            )
             sample_to_update.barcode_mismatches_2 = 0
 
 

@@ -16,7 +16,7 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 LOG = logging.getLogger(__name__)
 
 
-def sample_sheet_creator_factory(
+def get_sample_sheet_creator(
     bcl_converter: str,
     flow_cell: FlowCellDirectoryData,
     lims_samples: List[FlowCellSample],
@@ -47,7 +47,7 @@ def create_sample_sheet(
     force: bool = False,
 ) -> List[List[str]]:
     """Create a sample sheet for a flow cell."""
-    sample_sheet_creator = sample_sheet_creator_factory(
+    sample_sheet_creator = get_sample_sheet_creator(
         bcl_converter=bcl_converter,
         flow_cell=flow_cell,
         lims_samples=lims_samples,

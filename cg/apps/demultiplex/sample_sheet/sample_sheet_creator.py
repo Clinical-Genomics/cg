@@ -95,8 +95,8 @@ class SampleSheetCreator:
             )
         return sample_sheet_content
 
-    def construct_sample_sheet(self) -> List[List[str]]:
-        """Construct the sample sheet."""
+    def process_samples_for_sample_sheet(self) -> None:
+        """Add dummy samples, remove unwanted samples and adapt remaining samples."""
         if self.run_parameters.requires_dummy_samples:
             self.add_dummy_samples()
             LOG.info("Created dummy samples for the indexes that are missing")
@@ -112,6 +112,10 @@ class SampleSheetCreator:
                 samples=samples_in_lane,
                 run_parameters=self.run_parameters,
             )
+
+    def construct_sample_sheet(self) -> List[List[str]]:
+        """Construct and validate the sample sheet."""
+        self.process_samples_for_sample_sheet()
         sample_sheet_content: List[List[str]] = self.create_sample_sheet_content()
         if self.force:
             LOG.info("Skipping validation of sample sheet due to force flag")
@@ -132,7 +136,6 @@ class SampleSheetCreatorV1(SampleSheetCreator):
         """Add all dummy samples with non-existing indexes to samples.
 
         Dummy samples are added if there are indexes that are not used by the actual samples.
-        This means that we will add each dummy sample (that is needed) to each lane.
         """
         LOG.info("Adding dummy samples for unused indexes")
         indexes_by_lane: Dict[int, Set[str]] = get_indexes_by_lane(samples=self.lims_samples)

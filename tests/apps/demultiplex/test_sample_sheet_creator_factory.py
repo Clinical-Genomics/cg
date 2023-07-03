@@ -1,6 +1,6 @@
 """Tests for the creation of the sample sheet"""
 from typing import List
-from cg.apps.demultiplex.sample_sheet.create import sample_sheet_creator_factory
+from cg.apps.demultiplex.sample_sheet.create import get_sample_sheet_creator
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreator,
     SampleSheetCreatorV1,
@@ -21,7 +21,7 @@ def test_sample_sheet_creator_factory_novaseq_6000(
     # GIVEN a NovaSeq6000 flow cell and a list of NovaSeq6000 samples
 
     # WHEN defining the sample sheet creator
-    sample_sheet_creator: SampleSheetCreator = sample_sheet_creator_factory(
+    sample_sheet_creator: SampleSheetCreator = get_sample_sheet_creator(
         bcl_converter=bcl2fastq_flow_cell.bcl_converter,
         flow_cell=bcl2fastq_flow_cell,
         lims_samples=lims_novaseq_bcl2fastq_samples,
@@ -40,7 +40,7 @@ def test_sample_sheet_creator_factory_novaseq_x(
     # GIVEN a NovaSeqX flow cell and a list of NovaSeqX samples
 
     # WHEN defining the sample sheet creator
-    sample_sheet_creator: SampleSheetCreator = sample_sheet_creator_factory(
+    sample_sheet_creator: SampleSheetCreator = get_sample_sheet_creator(
         bcl_converter=novaseq_x_flow_cell.bcl_converter,
         flow_cell=novaseq_x_flow_cell,
         lims_samples=lims_novaseq_x_samples,
