@@ -10,6 +10,7 @@ from cg.apps.demultiplex.sample_sheet.index import (
     get_valid_indexes,
     index_exists,
     is_dual_index,
+    is_reverse_complement,
 )
 from cg.apps.demultiplex.sample_sheet.validate import get_samples_by_lane, validate_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
@@ -104,6 +105,7 @@ class SampleSheetCreator:
             LOG.info("Skipped adding dummy samples since they are not needed")
         self.remove_unwanted_samples()
         samples_in_lane: List[FlowCellSample]
+        reverse_complement: bool = is_reverse_complement(run_parameters=self.run_parameters)
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
             LOG.info(
                 f"Adapting index and barcode mismatch values (if applicable) for samples in lane {lane}"
@@ -111,6 +113,7 @@ class SampleSheetCreator:
             adapt_samples(
                 samples=samples_in_lane,
                 run_parameters=self.run_parameters,
+                reverse_complement=reverse_complement,
             )
 
     def construct_sample_sheet(self) -> List[List[str]]:

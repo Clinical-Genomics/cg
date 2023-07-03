@@ -206,10 +206,10 @@ def adapt_indexes_for_sample(
 def adapt_samples(
     samples: List[FlowCellSample],
     run_parameters: RunParameters,
+    reverse_complement: bool,
 ) -> None:
     """Adapt the indexes and updates the barcode mismatch values of the samples."""
     index_cycles: int = run_parameters.index_length
-    reverse_complement: bool = is_reverse_complement(run_parameters=run_parameters)
     for sample in samples:
         if run_parameters.sequencer == Sequencers.NOVASEQX:
             update_barcode_mismatch_values_for_sample(
