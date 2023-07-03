@@ -5,11 +5,10 @@ from pathlib import Path
 def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
     """
     Extract the lane number from the sample fastq path.
-
     Pre-condition:
-        - The fastq file name is in the format [<flow_cell_id>_]<sample_id>_<sample_index>_S<set_number>_L<lane_number>_R<read_number>_<segement_number>.fastq.gz
+        - The fastq file name contains the lane number formatted as _L<lane_number>
     """
-    pattern = r"_L(\d+)_"
+    pattern = r"_L(\d+)"
     lane_match = re.search(pattern, sample_fastq_path.name)
 
     if lane_match:
@@ -23,12 +22,13 @@ def get_sample_id_from_sample_fastq(sample_fastq: Path) -> str:
     Extract sample id from fastq file path.
 
     Pre-condition:
-        - The fastq file name is in the format [<flow_cell_id>_]<sample_id>_<sample_index>_S<set_number>_L<lane_number>_R<read_number>_<segement_number>.fastq.gz
+        - The parent directory name contains the sample id formatted as Sample_<sample_id>
     """
-    pattern = r"^(.*_)?([^_]*_S\d+)_.*$"  # Captures everything before `_S` as a whole (flow cell and sample id)
-    match = re.search(pattern, sample_fastq.name)
 
-    if match:
-        return match.group(2).split("_S")[0]  # Returns only the sample id part
+    sample_parent_match = re.search(r"Sample_(\w+)", sample_fastq.parent.name)
 
-    raise ValueError(f"Could not extract sample id from fastq file name {sample_fastq.name}")
+    if sample_parent_match:
+        return sample_parent_match.group(1)
+    else:
+        raise ValueError("Parent directory name does not contain 'Sample_<sample_id>'.")
+

@@ -22,5 +22,5 @@ def validate_sample_fastq_file(sample_fastq: Path) -> None:
         raise ValueError("Sample fastq must contain lane number formatted as '_L<lane_number>'.")
 
     # Check that directory name contains Sample_<sample_id>
-    if not re.search(r"Sample_\d+", sample_fastq.parent.name):
+    if not re.search(r"Sample_\w+", sample_fastq.parent.name):
         raise ValueError("Directory name must contain 'Sample_<sample_id>'.")
