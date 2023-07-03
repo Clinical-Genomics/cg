@@ -29,7 +29,7 @@ from cg.meta.demultiplex.utils import (
     get_lane_from_sample_fastq,
     get_sample_id_from_sample_fastq,
 )
-from cg.meta.demultiplex.validation import validate_sample_fastq_file_name
+from cg.meta.demultiplex.validation import validate_sample_fastq_file
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
@@ -258,7 +258,7 @@ class DemuxPostProcessingAPI:
         valid_sample_fastq_paths: List[Path] = []
         for fastq_path in fastq_file_paths:
             try:
-                validate_sample_fastq_file_name(fastq_path.name)
+                validate_sample_fastq_file(fastq_path)
                 valid_sample_fastq_paths.append(fastq_path)
             except ValueError as e:
                 LOG.warning(f"Skipping invalid sample fastq file {fastq_path.name}: {e}")
