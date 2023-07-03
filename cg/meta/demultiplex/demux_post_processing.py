@@ -24,12 +24,15 @@ from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.demultiplex.utils import (
+    create_delivery_file_in_flow_cell_directory,
     get_bcl_converter_name,
     get_lane_from_sample_fastq,
+    get_q30_threshold,
     get_sample_fastq_paths_from_flow_cell,
     get_sample_id_from_sample_fastq,
+    get_sample_ids_from_sample_sheet,
 )
-from cg.meta.demultiplex.validation import validate_sample_fastq_file
+from cg.meta.demultiplex.validation import is_flow_cell_directory_valid, validate_sample_fastq_file
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
@@ -111,7 +114,7 @@ class DemuxPostProcessingAPI:
             LOG.error(f"Failed to store flow cell data: {str(e)}")
             raise
 
-        self.create_delivery_file_in_flow_cell_directory(flow_cell_directory_path)
+        create_delivery_file_in_flow_cell_directory(flow_cell_directory_path)
 
     def store_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Store data from the flow cell directory in status db and housekeeper."""
@@ -119,9 +122,6 @@ class DemuxPostProcessingAPI:
         self.store_sequencing_metrics_for_flow_cell(parsed_flow_cell)
         self.update_sample_read_counts(parsed_flow_cell)
         self.store_flow_cell_data_in_housekeeper(parsed_flow_cell)
-
-    def create_delivery_file_in_flow_cell_directory(self, flow_cell_directory: Path) -> None:
-        Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
 
     def store_sequencing_metrics_for_flow_cell(self, flow_cell: FlowCellDirectoryData) -> None:
         sample_lane_sequencing_metrics: List[
@@ -162,42 +162,16 @@ class DemuxPostProcessingAPI:
         )
         self.status_db.session.add(metric)
 
-    def get_sample_ids_from_sample_sheet(self, flow_cell_data: FlowCellDirectoryData) -> List[str]:
-        samples: List[FlowCellSample] = flow_cell_data.get_sample_sheet().samples
-        sample_ids_with_indexes: List[str] = [sample.sample_id for sample in samples]
-        return [sample_id_index.split("_")[0] for sample_id_index in sample_ids_with_indexes]
-
-    def is_flow_cell_directory_valid(self, flow_cell_directory: Path) -> bool:
-        """Validate that the flow cell directory exists and that the demultiplexing is complete."""
-
-        if not flow_cell_directory.exists():
-            LOG.warning(f"Flow cell directory does not exist: {flow_cell_directory}")
-            return False
-
-        if not self.is_demultiplexing_complete(flow_cell_directory=flow_cell_directory):
-            LOG.warning(f"Demultiplexing is not complete for flow cell {flow_cell_directory.name}")
-            return False
-
-        return True
-
-    def is_demultiplexing_complete(self, flow_cell_directory: Path) -> bool:
-        return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
-
     def update_sample_read_counts(self, flow_cell_data: FlowCellDirectoryData) -> None:
         """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
 
-        q30_threshold: int = self.get_q30_threshold(flow_cell_data.sequencer_type)
-
-        sample_internal_ids: List[str] = self.get_sample_ids_from_sample_sheet(
-            flow_cell_data=flow_cell_data
-        )
+        q30_threshold: int = get_q30_threshold(flow_cell_data.sequencer_type)
+        sample_internal_ids: List[str] = get_sample_ids_from_sample_sheet(flow_cell_data)
 
         for sample_id in sample_internal_ids:
             self.update_single_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold)
-        self.status_db.session.commit()
 
-    def get_q30_threshold(self, sequencer_type: Sequencers) -> int:
-        return FLOWCELL_Q30_THRESHOLD[sequencer_type]
+        self.status_db.session.commit()
 
     def update_single_sample_read_count(self, sample_id: str, q30_threshold: int) -> None:
         """Update the read count for a sample in status db with all reads exceeding the q30 threshold from the sequencing metrics table."""
@@ -372,8 +346,8 @@ class DemuxPostProcessingAPI:
     ) -> FlowCellDirectoryData:
         """Parse flow cell data from the flow cell directory."""
 
-        if not flow_cell_directory.is_dir():
-            raise FlowCellError(f"Flow cell directory not found: {flow_cell_directory}")
+        if not is_flow_cell_directory_valid(flow_cell_directory):
+            raise FlowCellError(f"Flow cell directory was not valid: {flow_cell_directory}")
 
         return FlowCellDirectoryData(
             flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter

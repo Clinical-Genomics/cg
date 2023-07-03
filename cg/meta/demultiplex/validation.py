@@ -1,6 +1,7 @@
-import os
 from pathlib import Path
 import re
+
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 
 
 def validate_sample_fastq_file(sample_fastq: Path) -> None:
@@ -24,3 +25,27 @@ def validate_sample_fastq_file(sample_fastq: Path) -> None:
     # Check that directory name contains Sample_<sample_id>
     if not re.search(r"Sample_\w+", sample_fastq.parent.name):
         raise ValueError("Directory name must contain 'Sample_<sample_id>'.")
+
+
+def is_bcl2fastq_demux_folder_structure(flow_cell_directory: Path) -> bool:
+    """Check if flow cell directory is a Bcl2fastq demux folder structure."""
+    for folder in flow_cell_directory.glob(pattern="*"):
+        if re.search(DemultiplexingDirsAndFiles.BCL2FASTQ_TILE_DIR_PATTERN.value, str(folder)):
+            return True
+    return False
+
+
+def is_flow_cell_directory_valid(flow_cell_directory: Path) -> bool:
+    """Validate that the flow cell directory exists and that the demultiplexing is complete."""
+
+    if not flow_cell_directory.is_dir():
+        return False
+
+    if not is_demultiplexing_complete(flow_cell_directory):
+        return False
+
+    return True
+
+
+def is_demultiplexing_complete(flow_cell_directory: Path) -> bool:
+    return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()

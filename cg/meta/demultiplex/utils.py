@@ -1,9 +1,13 @@
 import re
 from pathlib import Path
 from typing import List
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
+from cg.meta.demultiplex.validation import is_bcl2fastq_demux_folder_structure
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
@@ -49,10 +53,14 @@ def get_bcl_converter_name(flow_cell_directory: Path) -> str:
         return BclConverter.BCL2FASTQ
     return BclConverter.BCLCONVERT
 
+def create_delivery_file_in_flow_cell_directory(flow_cell_directory: Path) -> None:
+    Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
 
-def is_bcl2fastq_demux_folder_structure(flow_cell_directory: Path) -> bool:
-    """Check if flow cell directory is a Bcl2fastq demux folder structure."""
-    for folder in flow_cell_directory.glob(pattern="*"):
-        if re.search(DemultiplexingDirsAndFiles.BCL2FASTQ_TILE_DIR_PATTERN.value, str(folder)):
-            return True
-    return False
+
+def get_sample_ids_from_sample_sheet(flow_cell_data: FlowCellDirectoryData) -> List[str]:
+    samples: List[FlowCellSample] = flow_cell_data.get_sample_sheet().samples
+    sample_ids_with_indexes: List[str] = [sample.sample_id for sample in samples]
+    return [sample_id_index.split("_")[0] for sample_id_index in sample_ids_with_indexes]
+
+def get_q30_threshold(sequencer_type: Sequencers) -> int:
+    return FLOWCELL_Q30_THRESHOLD[sequencer_type]
