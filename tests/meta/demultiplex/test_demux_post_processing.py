@@ -491,7 +491,7 @@ def test_add_flow_cell_data_to_housekeeper(demultiplex_context: CGConfig):
 
     demux_post_processing_api.add_bundle_and_version_if_non_existent = MagicMock()
     demux_post_processing_api.add_tags_if_non_existent = MagicMock()
-    demux_post_processing_api.add_sample_sheet = MagicMock()
+    demux_post_processing_api.add_sample_sheet_path_to_housekeeper = MagicMock()
     demux_post_processing_api.add_sample_fastq_files = MagicMock()
 
     flow_cell_name: str = "flow_cell_name"
@@ -515,7 +515,7 @@ def test_add_flow_cell_data_to_housekeeper(demultiplex_context: CGConfig):
     )
 
     # THEN the sample sheet is added
-    demux_post_processing_api.add_sample_sheet.assert_called_once_with(
+    demux_post_processing_api.add_sample_sheet_path_to_housekeeper.assert_called_once_with(
         flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
     )
 
@@ -600,7 +600,7 @@ def test_add_tags_if_all_exist(demultiplex_context: CGConfig):
     demux_post_processing_api.hk_api.add_tag.assert_not_called()
 
 
-def test_add_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory):
+def test_add_existing_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
     demux_post_processing_api.add_file_to_bundle_if_non_existent = MagicMock()
@@ -612,7 +612,7 @@ def test_add_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory):
     flow_cell_name = "flow_cell_name"
 
     # WHEN a sample sheet is added
-    demux_post_processing_api.add_sample_sheet(
+    demux_post_processing_api.add_sample_sheet_path_to_housekeeper(
         flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
     )
 

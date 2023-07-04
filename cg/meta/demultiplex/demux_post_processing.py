@@ -194,7 +194,9 @@ class DemuxPostProcessingAPI:
         tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell.id]
         self.add_tags_if_non_existent(tag_names=tags)
 
-        self.add_sample_sheet(flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id)
+        self.add_sample_sheet_path_to_housekeeper(
+            flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id
+        )
         self.add_sample_fastq_files(flow_cell)
 
     def add_sample_fastq_files(self, flow_cell: FlowCellDirectoryData) -> None:
@@ -247,16 +249,23 @@ class DemuxPostProcessingAPI:
         LOG.warning(f"Flow cell name: {flow_cell_name}, sample id: {sample_id}, lane: {lane} ")
         return False
 
-    def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
+    def add_sample_sheet_path_to_housekeeper(
+        self, flow_cell_directory: Path, flow_cell_name: str
+    ) -> None:
         """Add sample sheet path to Housekeeper."""
 
-        sample_sheet_file_path: Path = get_sample_sheet_path(flow_cell_directory)
+        try:
+            sample_sheet_file_path: Path = get_sample_sheet_path(flow_cell_directory)
 
-        self.add_file_to_bundle_if_non_existent(
-            file_path=sample_sheet_file_path,
-            bundle_name=flow_cell_name,
-            tag_names=[SequencingFileTag.SAMPLE_SHEET, flow_cell_name],
-        )
+            self.add_file_to_bundle_if_non_existent(
+                file_path=sample_sheet_file_path,
+                bundle_name=flow_cell_name,
+                tag_names=[SequencingFileTag.SAMPLE_SHEET, flow_cell_name],
+            )
+        except FileNotFoundError as e:
+            LOG.error(
+                f"Sample sheet for flow cell {flow_cell_name} in {flow_cell_directory} was not found, error: {e}"
+            )
 
     def add_bundle_and_version_if_non_existent(self, bundle_name: str) -> None:
         """Add bundle if it does not exist."""
