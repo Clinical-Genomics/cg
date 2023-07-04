@@ -733,7 +733,7 @@ class Invoice(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     invoiced_at = Column(types.DateTime)
-    comment = Column(types.Text, nullable=False)
+    comment = Column(types.Text)
     discount = Column(types.Integer, default=0)
     excel_kth = Column(types.BLOB)
     excel_ki = Column(types.BLOB)
