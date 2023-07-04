@@ -47,27 +47,27 @@ def test_initiate_delete_demux_api(
 def test_get_presence_status_status_db(
     caplog,
     helpers: StoreHelpers,
-    wipe_demultiplex_api: DeleteDemuxAPI,
+    delete_demultiplex_api: DeleteDemuxAPI,
     bcl2fastq_flow_cell_id: str,
 ):
     """Test to see if the presence of a flow cell is detected in status-db."""
     caplog.set_level(logging.INFO)
     # GIVEN DeleteDemuxAPI objects, one with amd one without a flowcell in status-db
-    wipe_demux_api: DeleteDemuxAPI = wipe_demultiplex_api
+    delete_demux_api: DeleteDemuxAPI = delete_demultiplex_api
 
     # WHEN the flowcell name is parsed and fetching the presence of a flowcell in either context
-    empty_presence: bool = wipe_demux_api.status_db_presence
+    empty_presence: bool = delete_demux_api.status_db_presence
 
     # THEN there should be an appropriate presence in both cases
     assert not empty_presence
 
     # WHEN adding a flowcell into the statusdb and checking its updated presence
     helpers.add_flowcell(
-        store=wipe_demux_api.status_db,
+        store=delete_demux_api.status_db,
         flow_cell_name=bcl2fastq_flow_cell_id,
         sequencer_type="novaseq",
     )
-    populated_presence: bool = wipe_demux_api.status_db_presence
+    populated_presence: bool = delete_demux_api.status_db_presence
 
     # THEN the presence should be updated
     assert populated_presence
@@ -90,24 +90,24 @@ def test_set_dry_run_delete_demux_api(
         parents=True, exist_ok=True
     )
     # WHEN setting the dry_run mode on a DeleteDemuxAPI
-    wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
+    delete_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
         dry_run=True,
         flow_cell_name=bcl2fastq_flow_cell_id,
     )
 
     # THEN the dry run parameter should be set to True and it should be logged
-    assert wipe_demultiplex_api.dry_run
+    assert delete_demultiplex_api.dry_run
     assert f"DeleteDemuxAPI: Setting dry run mode to True" in caplog.text
 
 
 def test_no_active_samples_on_flow_cell(
-    populated_wipe_demultiplex_api: DeleteDemuxAPI, bcl2fastq_flow_cell_id: str
+    populated_delete_demultiplex_api: DeleteDemuxAPI, bcl2fastq_flow_cell_id: str
 ):
     """Test if the function to find no active samples works correctly."""
 
     # GIVEN a flow cell with no active samples related to it
-    store: Store = populated_wipe_demultiplex_api.status_db
+    store: Store = populated_delete_demultiplex_api.status_db
     flow_cell = store.get_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
     samples_on_flow_cell: List[Sample] = flow_cell.samples
 
@@ -117,10 +117,10 @@ def test_no_active_samples_on_flow_cell(
         assert not active
 
     # WHEN checking for active samples on flowcell
-    populated_wipe_demultiplex_api._set_samples_on_flow_cell()
+    populated_delete_demultiplex_api._set_samples_on_flow_cell()
     active_samples_on_flow_cell: Optional[
         List[str]
-    ] = populated_wipe_demultiplex_api.active_samples_on_flow_cell()
+    ] = populated_delete_demultiplex_api.active_samples_on_flow_cell()
 
     # THEN the no samples on the flowcell should be found active
     assert not active_samples_on_flow_cell
@@ -129,7 +129,7 @@ def test_no_active_samples_on_flow_cell(
 def test_active_samples_on_flow_cell(
     active_flow_cell_store: Store,
     bcl2fastq_flow_cell_id: str,
-    active_wipe_demultiplex_api: DeleteDemuxAPI,
+    active_delete_demultiplex_api: DeleteDemuxAPI,
 ):
     """Test if the function to find active samples works correctly."""
     # GIVEN a flow cell with active samples related to it
@@ -143,28 +143,28 @@ def test_active_samples_on_flow_cell(
         assert active
 
     # WHEN checking for active samples on flowcell
-    active_wipe_demultiplex_api._set_samples_on_flow_cell()
+    active_delete_demultiplex_api._set_samples_on_flow_cell()
     active_samples_on_flow_cell: Optional[
         List[str]
-    ] = active_wipe_demultiplex_api.active_samples_on_flow_cell()
+    ] = active_delete_demultiplex_api.active_samples_on_flow_cell()
 
     # THEN there should be active samples found
     assert any(sample.internal_id in active_samples_on_flow_cell for sample in samples_on_flow_cell)
 
 
-def test_check_active_sample(active_wipe_demultiplex_api: DeleteDemuxAPI):
+def test_check_active_sample(active_delete_demultiplex_api: DeleteDemuxAPI):
     """Test that proper exception is raised when active samples are identified"""
 
     # GIVEN a DeleteDemuxAPI and a store with active samples related to it
 
-    wipe_demux_api: DeleteDemuxAPI = active_wipe_demultiplex_api
-    wipe_demux_api.set_dry_run(dry_run=False)
+    delete_demux_api: DeleteDemuxAPI = active_delete_demultiplex_api
+    delete_demux_api.set_dry_run(dry_run=False)
 
     # WHEN checking if there are active samples on flowcell to be deleted
 
     with pytest.raises(DeleteDemuxError):
         # THEN the proper error should be raised
-        wipe_demux_api.check_active_samples()
+        delete_demux_api.check_active_samples()
 
 
 def test_delete_flow_cell_housekeeper_only_sample_level(
@@ -188,22 +188,22 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
     )
     # GIVEN a DeleteDemuxAPI with a HousekeeperAPI with no files with flow cell name as a tag
 
-    wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
+    delete_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
         dry_run=False,
         flow_cell_name=bcl2fastq_flow_cell_id,
     )
-    wipe_demultiplex_api.housekeeper_api = sample_level_housekeeper_api
-    wipe_demultiplex_api._set_samples_on_flow_cell()
+    delete_demultiplex_api.housekeeper_api = sample_level_housekeeper_api
+    delete_demultiplex_api._set_samples_on_flow_cell()
 
     # WHEN wiping files in Housekeeper
 
-    wipe_demultiplex_api.delete_flow_cell_housekeeper()
+    delete_demultiplex_api.delete_flow_cell_housekeeper()
 
     # THEN you should be notified that there are no files on flow cell names
 
     assert (
-        f"Housekeeper: No files found with tag: {wipe_demultiplex_api.flow_cell_name}"
+        f"Housekeeper: No files found with tag: {delete_demultiplex_api.flow_cell_name}"
         in caplog.text
     )
 
@@ -238,22 +238,22 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
 
     sample_sheet_file: Path = tmp_sample_sheet_path
 
-    wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
+    delete_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
         dry_run=False,
         flow_cell_name=bcl2fastq_flow_cell_id,
     )
-    wipe_demultiplex_api.housekeeper_api = flow_cell_name_housekeeper_api
-    wipe_demultiplex_api._set_samples_on_flow_cell()
+    delete_demultiplex_api.housekeeper_api = flow_cell_name_housekeeper_api
+    delete_demultiplex_api._set_samples_on_flow_cell()
 
     # WHEN
 
-    wipe_demultiplex_api.delete_flow_cell_housekeeper()
+    delete_demultiplex_api.delete_flow_cell_housekeeper()
 
     # THEN
 
     assert (
-        f"Housekeeper: No files found with tag: {wipe_demultiplex_api.flow_cell_name}"
+        f"Housekeeper: No files found with tag: {delete_demultiplex_api.flow_cell_name}"
         not in caplog.text
     )
     assert f"Deleted {sample_sheet_file.as_posix()} from housekeeper" in caplog.text
@@ -265,25 +265,25 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
 def test_delete_flow_cell_statusdb(
     caplog,
     bcl2fastq_flow_cell_id: str,
-    populated_wipe_demultiplex_api: DeleteDemuxAPI,
-    populated_wipe_demux_context: CGConfig,
+    populated_delete_demultiplex_api: DeleteDemuxAPI,
+    populated_delete_demux_context: CGConfig,
 ):
     """Test if function to remove flow cell objects from status db is working."""
 
     caplog.set_level(logging.INFO)
 
     # GIVEN a context, with a status db filled with a flow cell object
-    wipe_demux_api: DeleteDemuxAPI = populated_wipe_demultiplex_api
-    wipe_demux_api.set_dry_run(dry_run=False)
-    store = populated_wipe_demux_context.status_db
+    delete_demux_api: DeleteDemuxAPI = populated_delete_demultiplex_api
+    delete_demux_api.set_dry_run(dry_run=False)
+    store = populated_delete_demux_context.status_db
     flow_cell: Flowcell = store.get_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
     assert flow_cell
 
     # WHEN removing the flow cell from the database
-    wipe_demux_api.delete_flow_cell_in_status_db()
+    delete_demux_api.delete_flow_cell_in_status_db()
 
     # THEN the user should be informed that the flow cell was removed
-    assert f"StatusDB: Deleted flowcell {wipe_demux_api.flow_cell_name}" in caplog.text
+    assert f"StatusDB: Deleted flowcell {delete_demux_api.flow_cell_name}" in caplog.text
 
     # AND the flow cell should no longer exist in status db
     flow_cell: Flowcell = store.get_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
@@ -292,44 +292,44 @@ def test_delete_flow_cell_statusdb(
 
 def test_delete_flow_cell_hasta(
     caplog,
-    populated_wipe_demultiplex_api: DeleteDemuxAPI,
+    populated_delete_demultiplex_api: DeleteDemuxAPI,
 ):
     """Test if function to remove files from the file system is working"""
 
     caplog.set_level(logging.INFO)
-    wipe_demux_api: DeleteDemuxAPI = populated_wipe_demultiplex_api
+    delete_demux_api: DeleteDemuxAPI = populated_delete_demultiplex_api
 
-    flow_cell_obj: Flowcell = wipe_demux_api.status_db.get_flow_cell_by_name(
-        wipe_demux_api.flow_cell_name
+    flow_cell_obj: Flowcell = delete_demux_api.status_db.get_flow_cell_by_name(
+        delete_demux_api.flow_cell_name
     )
-    wipe_demux_api.set_dry_run(dry_run=False)
+    delete_demux_api.set_dry_run(dry_run=False)
 
     # GIVEN an existing demultiplexing and run directory of a flow cell, with a status "ondisk"
 
-    assert wipe_demux_api.demultiplexing_out_path.exists()
-    assert wipe_demux_api.run_path.exists()
+    assert delete_demux_api.demultiplexing_out_path.exists()
+    assert delete_demux_api.run_path.exists()
     assert flow_cell_obj.status == "ondisk"
 
     # WHEN removing said files with the DeleteDemuxAPI
 
-    wipe_demux_api.delete_flow_cell_hasta(
+    delete_demux_api.delete_flow_cell_hasta(
         demultiplexing_dir=True,
         run_dir=True,
     )
 
     # THEN the demultiplexing directory should be removed
     assert (
-        f"DeleteDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {wipe_demux_api.demultiplexing_out_path}"
+        f"DeleteDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {delete_demux_api.demultiplexing_out_path}"
         in caplog.text
     )
-    assert wipe_demux_api.demultiplexing_out_path.exists() is False
+    assert delete_demux_api.demultiplexing_out_path.exists() is False
 
     # THEN the run directory should be removed
     assert (
-        f"DeleteDemuxAPI-Hasta: Removing flow cell run directory: {wipe_demux_api.run_path}"
+        f"DeleteDemuxAPI-Hasta: Removing flow cell run directory: {delete_demux_api.run_path}"
         in caplog.text
     )
-    assert wipe_demux_api.run_path.exists() is False
+    assert delete_demux_api.run_path.exists() is False
 
     # THEN the status of the flow cell in statusdb should be set to removed
     assert flow_cell_obj.status == "removed"
@@ -337,20 +337,20 @@ def test_delete_flow_cell_hasta(
 
 def test_delete_flow_cell_cgstats(
     caplog,
-    populated_wipe_demux_context: CGConfig,
-    populated_wipe_demultiplex_api: DeleteDemuxAPI,
+    populated_delete_demux_context: CGConfig,
+    populated_delete_demultiplex_api: DeleteDemuxAPI,
     bcl2fastq_flow_cell_id: str,
 ):
     """Test if function to remove objects from cg-stats is working."""
 
     caplog.set_level(logging.INFO)
-    wipe_demux_api: DeleteDemuxAPI = populated_wipe_demultiplex_api
-    wipe_demux_api.set_dry_run(dry_run=False)
+    delete_demux_api: DeleteDemuxAPI = populated_delete_demultiplex_api
+    delete_demux_api.set_dry_run(dry_run=False)
 
     # GIVEN an existing object in cg-stags database
 
     existing_object: models.Flowcell = (
-        populated_wipe_demux_context.cg_stats_api.query(models.Flowcell)
+        populated_delete_demux_context.cg_stats_api.query(models.Flowcell)
         .filter(models.Flowcell.flowcellname == bcl2fastq_flow_cell_id)
         .first()
     )
@@ -359,7 +359,7 @@ def test_delete_flow_cell_cgstats(
 
     # WHEN wiping the existence of said object
 
-    wipe_demux_api.delete_flow_cell_cgstats()
+    delete_demux_api.delete_flow_cell_cgstats()
 
     # THEN the user should be notified that the object was removed
 
@@ -368,7 +368,7 @@ def test_delete_flow_cell_cgstats(
     # AND the object should no longer exist
 
     existing_object: models.Flowcell = (
-        populated_wipe_demux_context.cg_stats_api.query(models.Flowcell)
+        populated_delete_demux_context.cg_stats_api.query(models.Flowcell)
         .filter(models.Flowcell.flowcellname == bcl2fastq_flow_cell_id)
         .first()
     )
@@ -377,19 +377,19 @@ def test_delete_flow_cell_cgstats(
 
 
 def test_delete_demultiplexing_init_files(
-    caplog, demultiplexing_init_files: List[Path], populated_wipe_demultiplex_api: DeleteDemuxAPI
+    caplog, demultiplexing_init_files: List[Path], populated_delete_demultiplex_api: DeleteDemuxAPI
 ):
     """Test function to remove demultiplexing init files from the filesystem"""
 
     # GIVEN a list of paths to existing demultiplexing init filesystem and a initiated DeleteDemuxAPI
-    wipe_demux_api = populated_wipe_demultiplex_api
-    wipe_demux_api.set_dry_run(dry_run=False)
+    delete_demux_api = populated_delete_demultiplex_api
+    delete_demux_api.set_dry_run(dry_run=False)
 
     assert all(init_file.exists() for init_file in demultiplexing_init_files)
 
     # WHEN wiping the existance of mentioned files
 
-    wipe_demux_api.delete_demux_init_files()
+    delete_demux_api.delete_demux_init_files()
 
     # THEN the files should no longer exist
 

@@ -142,7 +142,7 @@ def delete_flow_cell(
 ):
     """Delete a flow cell. If --status-db is passed then all other options will be treated as True."""
 
-    wipe_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
+    delete_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=context, dry_run=dry_run, flow_cell_name=flow_cell_name
     )
 
@@ -152,7 +152,7 @@ def delete_flow_cell(
         f"Housekeeper={True if status_db else housekeeper}\nInit_files={True if status_db else init_files}\n"
         f"Run-dir={True if status_db else run_dir}\nStatusdb={status_db}"
     ):
-        wipe_demux_api.delete_flow_cell(
+        delete_demux_api.delete_flow_cell(
             cg_stats=cg_stats,
             demultiplexing_dir=demultiplexing_dir,
             housekeeper=housekeeper,
