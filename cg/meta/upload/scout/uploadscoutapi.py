@@ -30,6 +30,7 @@ LOG = logging.getLogger(__name__)
 
 @dataclass
 class RnaDnaBundle:
+    """Contains the id for an RNA sample, the name of its connected DNA sample, and a list of connected DNA cases."""
     rna_sample_id: str
     dna_sample_name: str
     dna_case_ids: List[str]
@@ -374,6 +375,8 @@ class UploadScoutAPI:
         return [self.create_rna_dna_bundle(rna_sample=link.sample) for link in rna_case.links]
 
     def create_rna_dna_bundle(self, rna_sample: Sample) -> RnaDnaBundle:
+        """Creates a bundle containing the given RNA sample id, its related DNA sample name and
+        a list of ids for the DNA cases connected to the DNA sample."""
         if not rna_sample.subject_id:
             raise CgDataError(
                 f"Failed to link RNA sample {rna_sample.internal_id} to dna samples - subject_id field is empty"
@@ -421,6 +424,8 @@ class UploadScoutAPI:
     def filter_cases_related_to_dna_sample(
         list_of_dna_cases: List[Family], collaborators: Set[Customer]
     ) -> List[str]:
+        """Filters the given list of DNA samples and returns a subset of uploaded cases ordered by customers in the
+        specified list of collaborators and within the correct pipeline."""
         filtered_dna_cases: List[str] = []
         for case in list_of_dna_cases:
             if (
