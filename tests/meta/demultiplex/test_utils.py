@@ -16,6 +16,7 @@ from cg.meta.demultiplex.utils import (
     get_sample_id_from_sample_fastq,
     get_sample_ids_from_sample_sheet,
     get_sample_sheet_path,
+    get_valid_sample_fastq_paths,
     parse_flow_cell_directory_data,
 )
 from cg.meta.demultiplex.validation import is_bcl2fastq_demux_folder_structure
@@ -256,3 +257,58 @@ def test_parse_flow_cell_directory_data_valid(mocked_function):
     # THEN the flow cell path and bcl converter should be set
     assert result.path == Path(flow_cell_run_directory)
     assert result.bcl_converter == "dummy_bcl_converter"
+
+
+@patch("cg.meta.demultiplex.utils.get_sample_fastq_paths_from_flow_cell")
+@patch("cg.meta.demultiplex.utils.validate_sample_fastq_file")
+def test_get_valid_sample_fastq_paths_returns_valid_paths(mock_validate, mock_get_paths):
+    # GIVEN a list of sample fastq paths where some are valid and some are not
+    mock_get_paths.return_value = [Path("path1"), Path("path2"), Path("path3")]
+    mock_validate.side_effect = [None, ValueError("Invalid file"), None]
+
+    # WHEN retrieving the valid sample fastq paths
+    result = get_valid_sample_fastq_paths(Path("dummy_path"))
+
+    # THEN only the valid paths should be returned
+    assert set(result) == set([Path("path1"), Path("path3")])
+
+
+@patch("cg.meta.demultiplex.utils.get_sample_fastq_paths_from_flow_cell")
+@patch("cg.meta.demultiplex.utils.validate_sample_fastq_file")
+@patch("cg.meta.demultiplex.utils.LOG")
+def test_get_valid_sample_fastq_paths_logs_warnings_for_invalid_paths(
+    mock_log, mock_validate, mock_get_paths
+):
+    # GIVEN a list of sample fastq paths where some are valid and some are not
+    mock_get_paths.return_value = [Path("path1"), Path("path2")]
+    mock_validate.side_effect = [None, ValueError("Invalid file")]
+
+    # WHEN retrieving the valid sample fastq paths
+    get_valid_sample_fastq_paths(Path("dummy_path"))
+
+    # THEN a warning should be logged for each invalid path
+    warnings = [call.args[0] for call in mock_log.warning.call_args_list]
+
+    # THEN the warning should contain the invalid path
+    assert any("path2" in warning for warning in warnings)
+
+
+@patch("cg.meta.demultiplex.utils.get_sample_fastq_paths_from_flow_cell")
+@patch("cg.meta.demultiplex.utils.validate_sample_fastq_file")
+def test_get_valid_sample_fastq_paths_calls_validate_for_all_paths(mock_validate, mock_get_paths):
+
+    # GIVEN a list of valid sample fastq paths
+    mock_get_paths.return_value = [Path("path1"), Path("path2"), Path("path3")]
+    mock_validate.side_effect = [None, ValueError("Invalid file"), None]
+
+    # GIVEN a flow cell directory path
+    flow_cell_directory_path = Path("dummy_path")
+
+    # WHEN retrieving the valid sample fastq paths
+    get_valid_sample_fastq_paths(flow_cell_directory_path)
+
+    # THEN each path should be validated
+    paths_validated = [call.args[0] for call in mock_validate.call_args_list]
+
+    # THEN all of the valid paths should be returned
+    assert set(paths_validated) == set([Path("path1"), Path("path2"), Path("path3")])
