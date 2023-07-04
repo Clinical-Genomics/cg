@@ -21,7 +21,7 @@ def test__validate_one_sample_per_case_multiple_samples(
     ### THEN an OrderError should be raised
 
     with pytest.raises(OrderError):
-        rnafusion_submitter._validate_one_sample_per_case(order_data.samples)
+        rnafusion_submitter._validate_only_one_sample_per_case(order_data.samples)
 
 
 def test__validate_one_sample_per_case_unique_samples(
@@ -36,6 +36,6 @@ def test__validate_one_sample_per_case_unique_samples(
     rnafusion_submitter: RnafusionSubmitter = RnafusionSubmitter(status=base_store, lims=None)
 
     ### WHEN validating that each case has only one sample
-    rnafusion_submitter._validate_one_sample_per_case(order_data.samples)
+    rnafusion_submitter._validate_only_one_sample_per_case(order_data.samples)
 
     ### THEN no errors should be raised
