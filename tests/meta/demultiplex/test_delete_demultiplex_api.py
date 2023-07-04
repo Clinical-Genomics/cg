@@ -180,6 +180,7 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
     """
 
     caplog.set_level(logging.INFO)
+
     cg_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
     cg_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
@@ -192,6 +193,7 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
         dry_run=False,
         flow_cell_name=bcl2fastq_flow_cell_id,
     )
+    wipe_demultiplex_api.housekeeper_api = sample_level_housekeeper_api
     wipe_demultiplex_api._set_samples_on_flow_cell()
 
     # WHEN wiping files in Housekeeper
@@ -237,6 +239,7 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
         dry_run=False,
         flow_cell_name=bcl2fastq_flow_cell_id,
     )
+    wipe_demultiplex_api.housekeeper_api = flow_cell_name_housekeeper_api
     wipe_demultiplex_api._set_samples_on_flow_cell()
 
     # WHEN
@@ -286,13 +289,12 @@ def test_delete_flow_cell_statusdb(
 def test_delete_flow_cell_hasta(
     caplog,
     populated_wipe_demultiplex_api: DeleteDemuxAPI,
-    tmp_demulitplexing_dir: Path,
-    tmp_flow_cell_run_path: Path,
 ):
     """Test if function to remove files from the file system is working"""
 
     caplog.set_level(logging.INFO)
     wipe_demux_api: DeleteDemuxAPI = populated_wipe_demultiplex_api
+
     flow_cell_obj: Flowcell = wipe_demux_api.status_db.get_flow_cell_by_name(
         wipe_demux_api.flow_cell_name
     )
@@ -300,12 +302,13 @@ def test_delete_flow_cell_hasta(
 
     # GIVEN an existing demultiplexing and run directory of a flow cell, with a status "ondisk"
 
-    assert tmp_demulitplexing_dir.exists()
-    assert tmp_flow_cell_run_path.exists()
+    assert wipe_demux_api.demultiplexing_out_dir.exists()
+    assert wipe_demux_api.run_path.exists()
     assert flow_cell_obj.status == "ondisk"
 
     # WHEN removing said files with the DeleteDemuxAPI
-
+    test = wipe_demux_api.demultiplexing_out_dir
+    test2 = wipe_demux_api.run_path
     wipe_demux_api.delete_flow_cell_hasta(
         demultiplexing_dir=True,
         run_dir=True,
@@ -313,17 +316,17 @@ def test_delete_flow_cell_hasta(
 
     # THEN the demultiplexing directory should be removed
     assert (
-        f"DeleteDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {tmp_demulitplexing_dir.as_posix()}"
+        f"DeleteDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {wipe_demux_api.demultiplexing_out_dir}"
         in caplog.text
     )
-    assert tmp_demulitplexing_dir.exists() is False
+    assert wipe_demux_api.demultiplexing_out_dir.exists() is False
 
     # THEN the run directory should be removed
     assert (
-        f"DeleteDemuxAPI-Hasta: Removing flow cell run directory: {tmp_flow_cell_run_path.as_posix()}"
+        f"DeleteDemuxAPI-Hasta: Removing flow cell run directory: {wipe_demux_api.run_path}"
         in caplog.text
     )
-    assert tmp_flow_cell_run_path.exists() is False
+    assert wipe_demux_api.run_path.exists() is False
 
     # THEN the status of the flow cell in statusdb should be set to removed
     assert flow_cell_obj.status == "removed"

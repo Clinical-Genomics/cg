@@ -108,9 +108,9 @@ class DeleteDemuxAPI:
         """Delete the presence of any spring/fastq files in Housekeeper related to samples on the flow cell"""
 
         tag_combinations: List[List[str]] = [
-            [SequencingFileTag.FASTQ, self.flow_cell_name],
-            [SequencingFileTag.SPRING, self.flow_cell_name],
-            [SequencingFileTag.SPRING_METADATA, self.flow_cell_name],
+            [SequencingFileTag.FASTQ.value, self.flow_cell_name],
+            [SequencingFileTag.SPRING.value, self.flow_cell_name],
+            [SequencingFileTag.SPRING_METADATA.value, self.flow_cell_name],
         ]
         for tags, sample in itertools.product(tag_combinations, self.samples_on_flow_cell):
             self._delete_files_if_related_in_housekeeper_by_tag(sample=sample, tags=tags)
@@ -154,10 +154,13 @@ class DeleteDemuxAPI:
 
     def _delete_demultiplexing_dir_hasta(self) -> None:
         """delete demultiplexing directory on server"""
+        test5 = self.run_path.exists()
         log.info(
-            f"DeleteDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {self.demultiplexing_path}"
+            f"DeleteDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {self.demultiplexing_out_dir}"
         )
-        shutil.rmtree(self.demultiplexing_path, ignore_errors=False)
+        shutil.rmtree(self.demultiplexing_out_dir, ignore_errors=False)
+        test6 = self.run_path.exists()
+        test = self.demultiplexing_out_dir.exists()
 
     def _delete_run_dir_hasta(self) -> None:
         """delete flow cell run directory on server"""
@@ -183,12 +186,14 @@ class DeleteDemuxAPI:
             )
             flow_cell_obj.status = "removed"
             self.status_db.session.commit()
-        if demultiplexing_dir and self.demultiplexing_path.exists():
+
+        if demultiplexing_dir and self.demultiplexing_out_dir.exists():
             self._delete_demultiplexing_dir_hasta()
         else:
             log.info(
                 f"DeleteDemuxAPI-Hasta: Skipped demultiplexing directory, or no target: {self.demultiplexing_out_dir}"
             )
+
         if run_dir and self.run_path.exists():
             self._delete_run_dir_hasta()
         else:

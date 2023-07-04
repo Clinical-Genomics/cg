@@ -83,6 +83,18 @@ def fixture_tmp_flow_cell_run_base_path(
     return tmp_flow_cell_run_path
 
 
+@pytest.fixture(name="tmp_flow_cell_demux_base_path")
+def fixture_tmp_flow_cell_demux_base_path(
+    project_dir: Path, bcl2fastq_flow_cell_full_name: str
+) -> Path:
+    """Flow cell run directory in temporary folder."""
+
+    tmp_flow_cell_run_path: Path = Path(project_dir, "demultiplexing-runs")
+    tmp_flow_cell_run_path.mkdir(exist_ok=True, parents=True)
+
+    return tmp_flow_cell_run_path
+
+
 @pytest.fixture(name="cgstats_select_project_log_file")
 def fixture_cgstats_select_project_log_file(
     bcl2fastq_flow_cell: FlowCellDirectoryData, flow_cell_project_id: int
@@ -254,11 +266,15 @@ def fixture_populated_wipe_demultiplex_api(
     populated_wipe_demux_context: CGConfig,
     bcl2fastq_flow_cell_id: str,
     tmp_flow_cell_run_base_path: Path,
+    tmp_flow_cell_demux_base_path: Path,
 ) -> DeleteDemuxAPI:
     """Return an initialized populated DeleteDemuxAPI."""
     populated_wipe_demux_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    populated_wipe_demux_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    populated_wipe_demux_context.demultiplex_api.out_dir = tmp_flow_cell_demux_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
+        parents=True, exist_ok=True
+    )
+    Path(tmp_flow_cell_demux_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
         parents=True, exist_ok=True
     )
     return DeleteDemuxAPI(
