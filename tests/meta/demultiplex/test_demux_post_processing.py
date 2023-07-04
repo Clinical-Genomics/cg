@@ -7,6 +7,7 @@ from cg.constants.constants import FileExtensions
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
 from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.constants.sequencing import Sequencers
 
 from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
@@ -819,21 +820,24 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     demux_post_processing_api.status_db.get_sample_by_internal_id = MagicMock()
-    demux_post_processing_api.status_db.get_number_of_reads_for_sample_from_metrics = MagicMock()
+    demux_post_processing_api.status_db.get_number_of_reads_for_sample_passing_q30_threshold = (
+        MagicMock()
+    )
 
     mock_sample = MagicMock()
     mock_read_count = 1_000
+    mock_flow_cell_data = MagicMock()
+    mock_flow_cell_data.sequencer_type = Sequencers.HISEQGA.value
 
     demux_post_processing_api.status_db.get_sample_by_internal_id.return_value = mock_sample
-    demux_post_processing_api.status_db.get_number_of_reads_for_sample_from_metrics.return_value = (
+    demux_post_processing_api.status_db.get_number_of_reads_for_sample_passing_q30_threshold.return_value = (
         mock_read_count
     )
+    demux_post_processing_api.get_sample_ids_from_sample_sheet = MagicMock()
+    demux_post_processing_api.get_sample_ids_from_sample_sheet.return_value = [1]
 
-    # GIVEN a list of internal sample IDs
-    sample_ids = ["sample1", "sample2"]
-
-    # WHEN calling the method with the sample IDs
-    demux_post_processing_api.update_sample_read_counts(sample_ids)
+    # WHEN calling the method with the flow cell directory
+    demux_post_processing_api.update_sample_read_counts(mock_flow_cell_data)
 
     # THEN the read count was set on the mock sample
     assert mock_sample.calculated_read_count == mock_read_count
