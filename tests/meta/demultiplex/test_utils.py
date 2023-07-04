@@ -1,10 +1,12 @@
 from pathlib import Path
+from mock import MagicMock, PropertyMock, patch
 
 import pytest
 
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
+from cg.exc import FlowCellError
 from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
     get_bcl_converter_name,
@@ -12,9 +14,12 @@ from cg.meta.demultiplex.utils import (
     get_q30_threshold,
     get_sample_fastq_paths_from_flow_cell,
     get_sample_id_from_sample_fastq,
+    get_sample_ids_from_sample_sheet,
     get_sample_sheet_path,
+    parse_flow_cell_directory_data,
 )
 from cg.meta.demultiplex.validation import is_bcl2fastq_demux_folder_structure
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 def test_get_sample_id_from_sample_fastq_file():
@@ -204,3 +209,50 @@ def test_get_sample_sheet_path_not_found(tmp_path: Path):
     # THEN a FileNotFoundError should be raised
     with pytest.raises(FileNotFoundError):
         get_sample_sheet_path(flow_cell_directory)
+
+
+def test_get_sample_ids_from_sample_sheet():
+    # GIVEN some flow cell samples
+    mock_sample1 = MagicMock()
+    mock_sample1.sample_id = "sample1_index1"
+    mock_sample2 = MagicMock()
+    mock_sample2.sample_id = "sample2_index2"
+    mock_samples = [mock_sample1, mock_sample2]
+
+    # GIVEN a sample sheet with the samples
+    mock_sample_sheet = MagicMock()
+    type(mock_sample_sheet).samples = PropertyMock(return_value=mock_samples)
+
+    # GIVEN a flow cell data with the parsed sample sheet object
+    mock_flow_cell_data = MagicMock()
+    mock_flow_cell_data.get_sample_sheet.return_value = mock_sample_sheet
+
+    # WHEN extracting the sample ids from the sample sheet in the flow cell directory data
+    result = get_sample_ids_from_sample_sheet(mock_flow_cell_data)
+
+    # THEN the sample ids are returned without the index
+    assert result == ["sample1", "sample2"]
+
+
+@patch("cg.meta.demultiplex.utils.is_flow_cell_directory_valid", return_value=False)
+# GIVEN a flow cell directory which is not valid
+# WHEN parsing the flow cell directory data
+# THEN a FlowCellError should be raised
+def test_parse_flow_cell_directory_data_invalid(mocked_function):
+    with pytest.raises(FlowCellError, match="Flow cell directory was not valid"):
+        parse_flow_cell_directory_data(Path("dummy_path"), "dummy_bcl_converter")
+
+
+@patch("cg.meta.demultiplex.utils.is_flow_cell_directory_valid", return_value=True)
+def test_parse_flow_cell_directory_data_valid(mocked_function):
+    # GIVEN a flow cell directory which is valid
+    # WHEN parsing the flow cell directory data
+    flow_cell_run_directory = "20230508_LH00188_0003_A22522YLT3"
+    result = parse_flow_cell_directory_data(Path(flow_cell_run_directory), "dummy_bcl_converter")
+
+    # THEN a FlowCellDirectoryData object should be returned
+    assert isinstance(result, FlowCellDirectoryData)
+
+    # THEN the flow cell path and bcl converter should be set
+    assert result.path == Path(flow_cell_run_directory)
+    assert result.bcl_converter == "dummy_bcl_converter"
