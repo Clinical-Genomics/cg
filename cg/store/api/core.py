@@ -1,6 +1,6 @@
 import logging
-
-import alchy
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 from cg.store.models import Model
 from cg.store.api.delete import DeleteDataHandler
@@ -22,12 +22,26 @@ class CoreHandler(
 ):
     """Aggregating class for the store api handlers."""
 
-    pass
+    def __init__(self, session):
+        DeleteDataHandler(session=session)
+        FindBasicDataHandler(session=session)
+        FindBusinessDataHandler(session=session)
+        StatusHandler(session=session)
 
 
-class Store(alchy.Manager, CoreHandler):
+class Store(CoreHandler):
     uri: str = ""
 
     def __init__(self, uri):
         self.uri = uri
-        super(Store, self).__init__(config=dict(SQLALCHEMY_DATABASE_URI=uri), Model=Model)
+        self.engine = create_engine(uri)
+        self.session = scoped_session(sessionmaker(bind=self.engine))
+        super().__init__(session=self.session)
+
+    def create_all(self):
+        """Create all tables in the database."""
+        Model.metadata.create_all(bind=self.session.get_bind())
+
+    def drop_all(self):
+        """Drop all tables in the database."""
+        Model.metadata.drop_all(bind=self.session.get_bind())

@@ -8,12 +8,10 @@ from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import (
     BalsamicLoadConfig,
     BalsamicUmiLoadConfig,
-    MipLoadConfig,
     RnafusionLoadConfig,
     ScoutLoadConfig,
     ScoutMipIndividual,
 )
-from cg.store import Store
 from cg.store.models import Analysis
 
 RESULT_KEYS = [
@@ -131,7 +129,7 @@ def test_generate_config_adds_sample_paths(
 
 def test_generate_config_adds_case_paths(
     sample_id: str,
-    mip_dna_analysis: Store.Analysis,
+    mip_dna_analysis: Analysis,
     upload_mip_analysis_scout_api: UploadScoutAPI,
 ):
     """Test that generate config adds case file paths"""

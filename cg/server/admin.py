@@ -1,6 +1,6 @@
 """Module for Flask-Admin views"""
 from datetime import datetime
-from gettext import ngettext, gettext
+from gettext import gettext
 from typing import List, Union
 
 from cgmodels.cg.constants import Pipeline
@@ -9,11 +9,10 @@ from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
-from sqlalchemy.orm import Query
 
 from cg.constants.constants import DataDelivery, CaseActions
 from cg.server.ext import db
-from cg.store.models import Family, Sample
+from cg.store.models import Sample
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -82,7 +81,7 @@ class ApplicationView(BaseView):
     ]
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
-    form_excluded_columns = ["category"]
+    form_excluded_columns = ["category", "versions"]
 
     @staticmethod
     def view_application_link(unused1, unused2, model, unused3):
@@ -269,7 +268,7 @@ class FamilyView(BaseView):
                 if family:
                     family.action = action
 
-            db.commit()
+            db.session.commit()
 
             num_families = len(case_entry_ids)
             action_message = (
@@ -294,6 +293,15 @@ class FlowcellView(BaseView):
     column_exclude_list = ["archived_at"]
     column_filters = ["sequencer_type", "sequencer_name", "status"]
     column_searchable_list = ["name"]
+
+    @staticmethod
+    def view_flow_cell_link(unused1, unused2, model, unused3):
+        """column formatter to open this view"""
+        del unused1, unused2, unused3
+        return Markup(
+            "<a href='%s'>%s</a>"
+            % (url_for("flowcell.index_view", search=model.flowcell.name), model.flowcell.name)
+        )
 
 
 class InvoiceView(BaseView):
@@ -535,3 +543,17 @@ class UserView(BaseView):
     column_searchable_list = ["name", "email"]
     create_modal = True
     edit_modal = True
+
+
+class SampleLaneSequencingMetricsView(BaseView):
+    """Admin view for the Model.SampleLaneSequencingMetrics."""
+
+    column_filters = ["sample_internal_id", "flow_cell_name"]
+    column_searchable_list = ["sample_internal_id", "flow_cell_name"]
+    create_modal = True
+    edit_modal = True
+
+    column_formatters = {
+        "flowcell": FlowcellView.view_flow_cell_link,
+        "sample": SampleView.view_sample_link,
+    }

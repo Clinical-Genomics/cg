@@ -1,6 +1,6 @@
 from typing import List, Callable
 from enum import Enum
-from sqlalchemy.orm import Query, join
+from sqlalchemy.orm import Query
 
 
 from cg.constants import REPORT_SUPPORTED_PIPELINES
@@ -25,11 +25,6 @@ def filter_completed_analyses(analyses: Query, **kwargs) -> Query:
     return analyses.filter(Analysis.completed_at.isnot(None))
 
 
-def filter_not_completed_analyses(analyses: Query, **kwargs) -> Query:
-    """Return not completed analyses."""
-    return analyses.filter(Analysis.completed_at.is_(None))
-
-
 def filter_uploaded_analyses(analyses: Query, **kwargs) -> Query:
     """Return analyses that have been already uploaded."""
     return analyses.filter(Analysis.uploaded_at.isnot(None))
@@ -50,11 +45,6 @@ def filter_analyses_without_delivery_report(analyses: Query, **kwargs) -> Query:
     return analyses.filter(Analysis.delivery_report_created_at.is_(None))
 
 
-def filter_analyses_not_uploaded_to_vogue(analyses: Query, **kwargs) -> Query:
-    """Return analyses that have not been uploaded to vogue."""
-    return analyses.filter(Analysis.uploaded_to_vogue_at.is_(None))
-
-
 def filter_report_analyses_by_pipeline(
     analyses: Query, pipeline: Pipeline = None, **kwargs
 ) -> Query:
@@ -64,20 +54,6 @@ def filter_report_analyses_by_pipeline(
         if pipeline
         else analyses.filter(Analysis.pipeline.in_(REPORT_SUPPORTED_PIPELINES))
     )
-
-
-def filter_analyses_completed_before(
-    analyses: Query, completed_at_date: datetime, **kwargs
-) -> Query:
-    """Return a query of analyses completed before a certain date."""
-    return analyses.filter(Analysis.completed_at < completed_at_date)
-
-
-def filter_analyses_completed_after(
-    analyses: Query, completed_at_date: datetime, **kwargs
-) -> Query:
-    """Return a query of analyses completed after a certain date."""
-    return analyses.filter(Analysis.completed_at > completed_at_date)
 
 
 def order_analyses_by_completed_at_asc(analyses: Query, **kwargs) -> Query:
@@ -103,11 +79,6 @@ def filter_analyses_started_before(analyses: Query, started_at_date: datetime, *
 def filter_analyses_by_started_at(analyses: Query, started_at_date: datetime, **kwargs) -> Query:
     """Return a query of analyses started at a certain date."""
     return analyses.filter(Analysis.started_at == started_at_date)
-
-
-def order_analyses_by_started_at_desc(analyses: Query, **kwargs) -> Query:
-    """Return a query of ordered analyses (from old to new) by the started_at field."""
-    return analyses.order_by(Analysis.started_at.desc())
 
 
 def filter_analyses_not_cleaned(analyses: Query, **kwargs) -> Query:
@@ -147,20 +118,15 @@ class AnalysisFilter(Enum):
     FILTER_VALID_IN_PRODUCTION: Callable = filter_valid_analyses_in_production
     FILTER_WITH_PIPELINE: Callable = filter_analyses_with_pipeline
     FILTER_COMPLETED: Callable = filter_completed_analyses
-    FILTER_NOT_COMPLETED: Callable = filter_not_completed_analyses
     FILTER_IS_UPLOADED: Callable = filter_uploaded_analyses
     FILTER_IS_NOT_UPLOADED: Callable = filter_not_uploaded_analyses
     FILTER_WITH_DELIVERY_REPORT: Callable = filter_analyses_with_delivery_report
     FILTER_WITHOUT_DELIVERY_REPORT: Callable = filter_analyses_without_delivery_report
     FILTER_REPORT_BY_PIPELINE: Callable = filter_report_analyses_by_pipeline
     FILTER_BY_CASE_ENTRY_ID: Callable = filter_analyses_by_case_entry_id
-    FILTER_COMPLETED_AT_AFTER: Callable = filter_analyses_completed_after
-    FILTER_COMPLETED_AT_BEFORE: Callable = filter_analyses_completed_before
-    FILTER_NOT_UPLOADED_TO_VOGUE: Callable = filter_analyses_not_uploaded_to_vogue
     FILTER_IS_NOT_CLEANED: Callable = filter_analyses_not_cleaned
     FILTER_STARTED_AT_BEFORE: Callable = filter_analyses_started_before
     FILTER_BY_STARTED_AT: Callable = filter_analyses_by_started_at
     FILTER_CASE_ACTION_IS_NONE: Callable = filter_analysis_case_action_is_none
     ORDER_BY_UPLOADED_AT: Callable = order_analyses_by_uploaded_at_asc
     ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at_asc
-    ORDER_BY_STARTED_AT_DESC: Callable = order_analyses_by_started_at_desc

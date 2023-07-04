@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from cg.cli.workflow.fastq.base import store_fastq_analysis, store_available_fastq_analysis
-from cg.store.models import Family, Sample
+from cg.store.models import Analysis, Family, Sample
 
 
 def test_store_fastq_analysis(caplog, case_id: str, cli_runner, fastq_context):
@@ -16,7 +16,14 @@ def test_store_fastq_analysis(caplog, case_id: str, cli_runner, fastq_context):
     cli_runner.invoke(store_fastq_analysis, [case_id], obj=fastq_context)
 
     # THEN the run command should be reached
-    assert len(fastq_context.status_db.get_analyses_by_case_entry_id(case_entry_id=case_obj.id)) > 0
+    assert (
+        len(
+            fastq_context.status_db._get_query(table=Analysis)
+            .filter(Analysis.family_id == case_obj.id)
+            .all()
+        )
+        > 0
+    )
 
 
 def test_store_available_fastq_analysis(

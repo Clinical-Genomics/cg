@@ -1,4 +1,4 @@
-from alchy import Query
+from sqlalchemy.orm import Query
 from cg.store import Store
 from cg.store.models import Pool
 from cg.store.filters.status_pool_filters import (
@@ -8,18 +8,17 @@ from cg.store.filters.status_pool_filters import (
     filter_pools_is_not_delivered,
     filter_pools_without_invoice_id,
     filter_pools_do_invoice,
-    filter_pools_do_not_invoice,
     filter_pools_by_invoice_id,
     filter_pools_by_order_enquiry,
     filter_pools_by_name_enquiry,
     filter_pools_by_customer_id,
 )
-from tests.store.conftest import StoreConftestFixture
+from tests.store.conftest import StoreConstants
 
 
 def test_filter_pools_is_delivered(
     store_with_a_pool_with_and_without_attributes: Store,
-    name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
+    name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a delivered pool."""
 
@@ -45,7 +44,7 @@ def test_filter_pools_is_delivered(
 
 def test_filter_pools_is_not_delivered(
     store_with_a_pool_with_and_without_attributes: Store,
-    name=StoreConftestFixture.NAME_POOL_WITHOUT_ATTRIBUTES.value,
+    name=StoreConstants.NAME_POOL_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a pool that is not delivered."""
 
@@ -71,7 +70,7 @@ def test_filter_pools_is_not_delivered(
 
 def test_filter_pools_is_received(
     store_with_a_pool_with_and_without_attributes: Store,
-    name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
+    name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a received pool."""
 
@@ -97,7 +96,7 @@ def test_filter_pools_is_received(
 
 def test_filter_pools_is_not_received(
     store_with_a_pool_with_and_without_attributes: Store,
-    name=StoreConftestFixture.NAME_POOL_WITHOUT_ATTRIBUTES.value,
+    name=StoreConstants.NAME_POOL_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a pool that is not received."""
 
@@ -121,35 +120,9 @@ def test_filter_pools_is_not_received(
     assert pools.all()[0].name == name
 
 
-def test_filter_pools_do_not_invoice(
-    store_with_a_pool_with_and_without_attributes: Store,
-    name=StoreConftestFixture.NAME_POOL_WITHOUT_ATTRIBUTES.value,
-):
-    """Test that a pool is returned when there is a pool that should not be invoiced."""
-
-    # GIVEN a pool marked to skip invoicing and one not marked to skip invoicing
-
-    # WHEN getting pools marked to skip invoicing
-    pools: Query = filter_pools_do_not_invoice(
-        pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
-    )
-
-    # ASSERT that the query is a Query
-    assert isinstance(pools, Query)
-
-    # THEN pools should contain the test pool
-    assert pools.all()
-
-    # THEN only one pool should be returned
-    assert len(pools.all()) == 1
-
-    # THEN the pool should have the expected name
-    assert pools.all()[0].name == name
-
-
 def test_filter_pools_do_invoice(
     store_with_a_pool_with_and_without_attributes: Store,
-    name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
+    name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a pool that should be invoiced."""
 
@@ -175,8 +148,8 @@ def test_filter_pools_do_invoice(
 
 def test_filter_pools_by_invoice_id(
     store_with_a_pool_with_and_without_attributes: Store,
-    name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
-    invoice_id=StoreConftestFixture.INVOICE_ID_POOL_WITH_ATTRIBUTES.value,
+    name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
+    invoice_id=StoreConstants.INVOICE_ID_POOL_WITH_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a pool with a specific invoice id."""
 
@@ -203,7 +176,7 @@ def test_filter_pools_by_invoice_id(
 
 def test_filter_pools_without_invoice_id(
     store_with_a_pool_with_and_without_attributes: Store,
-    name=StoreConftestFixture.NAME_POOL_WITHOUT_ATTRIBUTES.value,
+    name=StoreConstants.NAME_POOL_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a pool without invoice id."""
 
@@ -229,7 +202,7 @@ def test_filter_pools_without_invoice_id(
 
 def test_filter_pools_by_name_enquiry(
     store_with_a_pool_with_and_without_attributes: Store,
-    name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
+    name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a pool with a specific name enquiry."""
 
@@ -238,7 +211,7 @@ def test_filter_pools_by_name_enquiry(
     # WHEN getting pools with name enquiry
     pools: Query = filter_pools_by_name_enquiry(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool),
-        name_enquiry=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
+        name_enquiry=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
     )
 
     # THEN a Query is returned
@@ -256,7 +229,7 @@ def test_filter_pools_by_name_enquiry(
 
 def test_filter_pools_by_order_enquiry(
     store_with_a_pool_with_and_without_attributes: Store,
-    name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
+    name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a pool with a specific order enquiry."""
 
@@ -265,7 +238,7 @@ def test_filter_pools_by_order_enquiry(
     # WHEN getting pools with order enquiry
     pools: Query = filter_pools_by_order_enquiry(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool),
-        order_enquiry=StoreConftestFixture.ORDER_POOL_WITH_ATTRIBUTES.value,
+        order_enquiry=StoreConstants.ORDER_POOL_WITH_ATTRIBUTES.value,
     )
 
     # THEN a Query is returned
@@ -283,7 +256,6 @@ def test_filter_pools_by_order_enquiry(
 
 def test_filter_pools_by_customer_id(
     store_with_a_pool_with_and_without_attributes: Store,
-    name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a pool with a specific customer id."""
 

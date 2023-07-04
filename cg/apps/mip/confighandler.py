@@ -23,15 +23,15 @@ class SampleSchema(Schema):
             ]
         ),
     )
-    father = fields.Str(default=RelationshipStatus.HAS_NO_PARENT.value)
-    mother = fields.Str(default=RelationshipStatus.HAS_NO_PARENT.value)
+    father = fields.Str(dump_default=RelationshipStatus.HAS_NO_PARENT.value)
+    mother = fields.Str(dump_default=RelationshipStatus.HAS_NO_PARENT.value)
     phenotype = fields.Str(
         required=True,
         validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
     )
     sex = fields.Str(required=True, validate=validate.OneOf(choices=["female", "male", "unknown"]))
     expected_coverage = fields.Float()
-    capture_kit = fields.Str(default=DEFAULT_CAPTURE_KIT)
+    capture_kit = fields.Str(dump_default=DEFAULT_CAPTURE_KIT)
 
 
 class ConfigSchema(Schema):

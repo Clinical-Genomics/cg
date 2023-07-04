@@ -7,6 +7,8 @@ from typing import List
 from typing_extensions import Literal
 
 from cg.apps.scout.scoutapi import ScoutAPI
+from tests.mocks.process_mock import ProcessMock
+
 
 LOG = logging.getLogger(__name__)
 
@@ -57,6 +59,7 @@ class MockScoutAPI(ScoutAPI):
         self._cases = []
         self._upload_report_success = True
         self._alignment_file_updated = 0
+        self.process = ProcessMock(binary="scout", error=False)
 
     # Mock specific functions
 
@@ -77,10 +80,6 @@ class MockScoutAPI(ScoutAPI):
     def upload(self, data: dict, force: bool = False):
         """Load analysis of a new case into Scout."""
         LOG.debug("Case loaded successfully to Scout")
-
-    def update_alignment_file(self, case_id: str, sample_id: str, alignment_path: Path):
-        """Update alignment file for individual in case"""
-        self._alignment_file_updated += 1
 
     def export_panels(self, panels: List[str], versions=None):
         """Pass through to export of a list of gene panels."""

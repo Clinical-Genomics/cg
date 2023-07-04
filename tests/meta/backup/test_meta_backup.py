@@ -32,9 +32,7 @@ def test_maximum_processing_queue_full(mock_store):
     )
 
     # WHEN there's already a flow cell being retrieved from PDC
-    mock_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.PROCESSING]
-    ).count.return_value = 1
+    mock_store.get_flow_cells_by_statuses.return_value = [[mock.Mock()]]
 
     # THEN this method should return False
     assert backup_api.check_processing() is False
@@ -53,9 +51,7 @@ def test_maximum_processing_queue_not_full(mock_store):
         root_dir=mock.Mock(),
     )
     # WHEN there are no flow cells being retrieved from PDC
-    mock_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.PROCESSING]
-    ).count.return_value = 0
+    mock_store.get_flow_cells_by_statuses().return_value = []
 
     # THEN this method should return True
     assert backup_api.check_processing() is True
@@ -76,9 +72,7 @@ def test_get_first_flow_cell_next_requested(mock_store, mock_flow_cell):
     )
 
     # WHEN a flow cell is requested to be retrieved from PDC
-    mock_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.REQUESTED]
-    ).first.return_value = mock_flow_cell
+    mock_store.get_flow_cells_by_statuses().return_value = [mock_flow_cell]
 
     popped_flow_cell = backup_api.get_first_flow_cell()
 
@@ -100,9 +94,7 @@ def test_get_first_flow_cell_no_flow_cell_requested(mock_store):
     )
 
     # WHEN there are no flow cells requested to be retrieved from PDC
-    mock_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.REQUESTED]
-    ).first.return_value = None
+    mock_store.get_flow_cells_by_statuses.return_value = []
 
     popped_flow_cell = backup_api.get_first_flow_cell()
 
@@ -192,8 +184,6 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     mock_get_archived_encryption_key_path,
     mock_get_archived_flow_cell_path,
     mock_create_rta_complete,
-    mock_check_processing,
-    mock_unlink_files,
     archived_key,
     archived_flow_cell,
     cg_context,
@@ -234,7 +224,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     assert mock_flow_cell.status == "retrieved"
 
     # AND status-db is updated with the new status
-    assert mock_store.commit.called
+    assert mock_store.session.commit.called
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
@@ -257,8 +247,6 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     mock_check_processing,
     mock_get_archived_key,
     mock_get_archived_flow_cell,
-    mock_create_rta_complete,
-    mock_unlink_files,
     archived_key,
     archived_flow_cell,
     cg_context,
@@ -299,7 +287,7 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     assert mock_flow_cell.status == "retrieved"
 
     # AND status-db is updated with the new status
-    assert mock_store.commit.called
+    assert mock_store.session.commit.called
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
@@ -409,7 +397,7 @@ def test_fetch_flow_cell_integration(
     assert mock_flow_cell.status == "retrieved"
 
     # AND status-db is updated with the new status
-    assert mock_store.commit.called
+    assert mock_store.session.commit.called
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0

@@ -7,7 +7,7 @@ from cg.store import Store
 from cg.store.filters.status_application_version_filters import (
     filter_application_versions_by_application_entry_id,
     filter_application_versions_before_valid_from,
-    filter_application_versions_by_version,
+    filter_application_versions_by_application_version_entry_id,
     order_application_versions_by_valid_from_desc,
 )
 from cg.store.models import Application, ApplicationVersion
@@ -17,7 +17,6 @@ from tests.store_helpers import StoreHelpers
 
 def test_filter_application_version_by_application_entry_id_correct_id(
     base_store: Store,
-    helpers: StoreHelpers,
 ):
     """Test that the correct application version is returned when using a correct application entry id."""
     # GIVEN a store with application versions
@@ -46,7 +45,6 @@ def test_filter_application_version_by_application_entry_id_correct_id(
 
 def test_filter_application_version_by_application_entry_id_wrong_id(
     base_store: Store,
-    helpers: StoreHelpers,
     invalid_application_id: int,
 ):
     """Test that an empty query is returned when using an incorrect application id."""
@@ -169,70 +167,6 @@ def test_filter_application_version_before_valid_from_empty_query(
     assert filtered_app_version_query.count() == 0
 
 
-def test_filter_application_version_by_version_correct_version(
-    store_with_different_application_versions: Store,
-):
-    """Test that filtering by a valid version returns an application version with the correct version."""
-    # GIVEN a store with application versions with different versions
-    app_version_query: Query = store_with_different_application_versions._get_query(
-        table=ApplicationVersion
-    ).order_by(ApplicationVersion.version)
-    version_to_filter: int = app_version_query.first().version
-    version_to_exclude: int = app_version_query.offset(1).first().version
-    assert version_to_filter != version_to_exclude
-
-    # WHEN filtering the application version query using the valid version
-    filtered_app_version_query: Query = filter_application_versions_by_version(
-        application_versions=app_version_query,
-        version=version_to_filter,
-    )
-
-    # THEN the filtered query has fewer elements than the unfiltered query
-    assert filtered_app_version_query.count() < app_version_query.count()
-    # THEN the version of all the filtered query entries is equal to the version used to filter
-    versions: List[int] = [
-        application_version.version for application_version in filtered_app_version_query.all()
-    ]
-    assert all(version == version_to_filter for version in versions)
-
-
-def test_filter_application_version_by_version_invalid_version_returns_empty(
-    base_store: Store,
-    invalid_application_version_version: int,
-):
-    """Test that an empty query is returned if a non-existent version is used to filter."""
-    # GIVEN a store with application versions
-    app_version_query: Query = base_store._get_query(
-        table=ApplicationVersion,
-    )
-
-    # WHEN filtering by version using an invalid version
-    filtered_app_version_query: Query = filter_application_versions_by_version(
-        application_versions=app_version_query,
-        version=invalid_application_version_version,
-    )
-
-    # THEN the filtered query is empty
-    assert filtered_app_version_query.count() == 0
-
-
-def test_filter_application_version_by_version_empty_query(store: Store, version: int = 1):
-    """Test that filtering an empty query by version returns an empty query."""
-    # GIVEN a store without any application version
-    app_version_query: Query = store._get_query(table=ApplicationVersion)
-    assert app_version_query.count() == 0
-
-    # WHEN filtering by application id
-    filtered_app_version_query: Query = filter_application_versions_by_version(
-        application_versions=app_version_query,
-        version=version,
-    )
-
-    # THEN the function returns an empty query
-    assert isinstance(filtered_app_version_query, Query)
-    assert filtered_app_version_query.count() == 0
-
-
 def test_order_application_versions_by_valid_from_desc(
     base_store: Store,
 ):
@@ -267,3 +201,48 @@ def test_order_application_versions_by_valid_from_desc_empty_query(store: Store)
     # THEN the function returns an empty query
     assert isinstance(ordered_app_version_query, Query)
     assert ordered_app_version_query.count() == 0
+
+
+def test_filter_application_versions_by_application_version_entry_id_no_match(
+    store_with_different_application_versions: Store,
+):
+    """Test that no application versions are returned when there is no matching application version entry id."""
+    # GIVEN a store containing multiple application versions
+    application_versions_query: Query = store_with_different_application_versions._get_query(
+        table=ApplicationVersion
+    )
+    non_existent_application_version_entry_id = "non_existent_application_version_entry_id"
+
+    # WHEN filtering application versions by a non-matching application version entry id
+    filtered_application_versions: Query = (
+        filter_application_versions_by_application_version_entry_id(
+            application_versions=application_versions_query,
+            application_version_entry_id=non_existent_application_version_entry_id,
+        )
+    )
+
+    # THEN the query should return no application versions
+    assert filtered_application_versions.count() == 0
+
+
+def test_filter_application_versions_by_application_version_entry_id_match(
+    store_with_different_application_versions: Store,
+):
+    """Test that application versions with matching application version entry id are returned."""
+    # GIVEN a store containing multiple application versions
+    application_versions_query: Query = store_with_different_application_versions._get_query(
+        table=ApplicationVersion
+    )
+    existing_application_version_entry_id = application_versions_query.first().id
+
+    # WHEN filtering application versions by a matching application version entry id
+    filtered_application_versions: Query = (
+        filter_application_versions_by_application_version_entry_id(
+            application_versions=application_versions_query,
+            application_version_entry_id=existing_application_version_entry_id,
+        )
+    )
+
+    # THEN the query should return the application version with the matching entry id
+    assert filtered_application_versions.count() == 1
+    assert filtered_application_versions.first().id == existing_application_version_entry_id

@@ -12,12 +12,6 @@
   tag: fusioncatcher-summary
 - format: tsv
   id: CASEID
-  path: PATHTOCASE/pizzly/CASEID.pizzly.txt
-  path_index: ~
-  step: pizzly
-  tag: pizzly
-- format: tsv
-  id: CASEID
   path: PATHTOCASE/starfusion/CASEID.starfusion.fusion_predictions.tsv
   path_index: ~
   step: star-fusion
@@ -28,12 +22,12 @@
   path_index: ~
   step: arriba
   tag: arriba
-- format: tsv
+- format: cram
   id: CASEID
-  path: PATHTOCASE/squid/CASEID.squid.fusions.annotated.txt
+  path: PATHTOCASE/cram_starfusion/CASEID.cram
   path_index: ~
-  step: squid
-  tag: squid
+  step: star-fusion
+  tag: star-fusion-cram
 - format: html
   id: CASEID
   path: PATHTOCASE/fusionreport/CASEID/index.html
@@ -76,3 +70,16 @@
   path_index: ~
   step: software-versions
   tag: software-versions
+- format: json
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_data.json
+  path_index: ~
+  step: multiqc-json
+  tag: multiqc-json
+- format: yml
+  id: CASEID
+  path: PATHTOCASE/CASEID_metrics_deliverables.yaml
+  path_index: ~
+  step: qc-metrics
+  tag: qc-metrics
+

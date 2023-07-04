@@ -1,22 +1,19 @@
 """Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
-from typing import Generator, Optional, Union, Dict, List, Tuple
+from typing import Optional, Union, Dict, List, Tuple
 
-# fixes https://github.com/Clinical-Genomics/servers/issues/30
-import requests_cache
+
 from dateutil.parser import parse as parse_date
-from genologics.entities import Process, Project, Sample, Artifact
+from genologics.entities import Process, Sample, Artifact
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
-from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod
+from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod, LimsArtifactTypes
 from cg.exc import LimsDataError
 
 from .order import OrderHandler
 from ...constants import Priority
-
-requests_cache.install_cache(backend="memory")
 
 SEX_MAP = {"F": "female", "M": "male", "Unknown": "unknown", "unknown": "unknown"}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
@@ -388,3 +385,47 @@ class LimsAPI(Lims, OrderHandler):
     def get_sample_project(self, sample_id: str) -> str:
         """Get the lims-id for the project of the sample"""
         return self.sample(sample_id).get("project").get("id")
+
+    def get_sample_rin(self, sample_id: str) -> float:
+        """Return the sample RIN value."""
+        sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
+        return sample_artifact.udf.get(PROP2UDF["rin"])
+
+    def _get_rna_input_amounts(self, sample_id: str) -> List[Tuple[dt.datetime, float]]:
+        """Return all prep input amounts used for an RNA sample in lims."""
+        step_names_udfs: Dict[str] = MASTER_STEPS_UDFS["rna_prep_step"]
+
+        input_amounts: List[Tuple[dt.datetime, float]] = []
+
+        for process_type in step_names_udfs:
+            artifacts: List[Artifact] = self.get_artifacts(
+                samplelimsid=sample_id, process_type=process_type, type=LimsArtifactTypes.ANALYTE
+            )
+
+            udf_key: str = step_names_udfs[process_type]
+            for artifact in artifacts:
+                input_amounts.append(
+                    (
+                        artifact.parent_process.date_run,
+                        artifact.udf.get(udf_key),
+                    )
+                )
+        return input_amounts
+
+    def _get_last_used_input_amount(
+        self, input_amounts: List[Tuple[dt.datetime, float]]
+    ) -> Optional[float]:
+        """Return the latest used input amount."""
+        sorted_input_amounts: List[Tuple[dt.datetime, float]] = self._sort_by_date_run(
+            input_amounts
+        )
+        if not sorted_input_amounts:
+            return None
+        return sorted_input_amounts[0][1]
+
+    def get_latest_rna_input_amount(self, sample_id: str) -> float:
+        """Return the input amount used in the latest preparation of an RNA sample."""
+        input_amounts: List[Tuple[dt.datetime, float]] = self._get_rna_input_amounts(
+            sample_id=sample_id
+        )
+        return self._get_last_used_input_amount(input_amounts=input_amounts)

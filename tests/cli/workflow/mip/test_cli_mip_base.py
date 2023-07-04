@@ -3,20 +3,18 @@
 import logging
 
 from _pytest.logging import LogCaptureFixture
-from pytest_mock import MockFixture
-
 from cg.cli.workflow.mip_dna.base import start, start_available
 from cg.constants.process import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
-
 from cg.store.models import Family
+from click.testing import CliRunner
+from pytest_mock import MockFixture
 from tests.cli.workflow.mip.conftest import setup_mocks
 
 
 def test_spring_decompression_needed_and_started(
     caplog: LogCaptureFixture,
-    case_obj: Family,
+    case: Family,
     cli_runner: CliRunner,
     mip_dna_context: CGConfig,
     mocker: MockFixture,
@@ -33,10 +31,9 @@ def test_spring_decompression_needed_and_started(
     # GIVEN there is flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=True,
-        case_to_analyze=case_obj,
+        case_to_analyze=case,
         decompress_spring=True,
         has_latest_analysis_started=False,
-        is_dna_only_case=True,
         is_spring_decompression_needed=True,
         mocker=mocker,
     )
@@ -54,7 +51,7 @@ def test_spring_decompression_needed_and_started(
 
 def test_spring_decompression_needed_and_start_failed(
     caplog: LogCaptureFixture,
-    case_obj: Family,
+    case: Family,
     cli_runner: CliRunner,
     mip_dna_context: CGConfig,
     mocker: MockFixture,
@@ -70,10 +67,9 @@ def test_spring_decompression_needed_and_start_failed(
     # GIVEN there is flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=True,
-        case_to_analyze=case_obj,
+        case_to_analyze=case,
         decompress_spring=False,
         has_latest_analysis_started=False,
-        is_dna_only_case=True,
         is_spring_decompression_needed=True,
         mocker=mocker,
     )
@@ -90,7 +86,7 @@ def test_spring_decompression_needed_and_start_failed(
 
 def test_spring_decompression_needed_and_cant_start(
     caplog: LogCaptureFixture,
-    case_obj: Family,
+    case: Family,
     cli_runner: CliRunner,
     mip_dna_context: CGConfig,
     mocker: MockFixture,
@@ -107,10 +103,9 @@ def test_spring_decompression_needed_and_cant_start(
     # GIVEN there is flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=False,
-        case_to_analyze=case_obj,
+        case_to_analyze=case,
         decompress_spring=False,
         has_latest_analysis_started=False,
-        is_dna_only_case=True,
         is_spring_decompression_needed=True,
         is_spring_decompression_running=False,
         mocker=mocker,
@@ -131,7 +126,7 @@ def test_decompression_cant_start_and_is_running(
     cli_runner: CliRunner,
     caplog: LogCaptureFixture,
     mip_dna_context: CGConfig,
-    case_obj: Family,
+    case: Family,
 ):
     """Tests starting the MIP analysis when decompression is needed but can't start"""
     caplog.set_level(logging.INFO)
@@ -145,10 +140,9 @@ def test_decompression_cant_start_and_is_running(
     # GIVEN there is flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=False,
-        case_to_analyze=case_obj,
+        case_to_analyze=case,
         decompress_spring=False,
         has_latest_analysis_started=False,
-        is_dna_only_case=True,
         is_spring_decompression_needed=True,
         is_spring_decompression_running=True,
         mocker=mocker,
@@ -169,7 +163,7 @@ def test_case_needs_to_be_stored(
     cli_runner: CliRunner,
     caplog: LogCaptureFixture,
     mip_dna_context: CGConfig,
-    case_obj: Family,
+    case: Family,
 ):
     """Test starting MIP when files are decompressed but not stored in housekeeper"""
     caplog.set_level(logging.INFO)
@@ -184,17 +178,16 @@ def test_case_needs_to_be_stored(
     # GIVEN there is flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=False,
-        case_to_analyze=case_obj,
+        case_to_analyze=case,
         decompress_spring=False,
         has_latest_analysis_started=False,
-        is_dna_only_case=True,
         is_spring_decompression_needed=False,
         is_spring_decompression_running=False,
         mocker=mocker,
     )
 
     # WHEN MIP analysis is started
-    result = cli_runner.invoke(start, [case_obj.internal_id, "--dry-run"], obj=mip_dna_context)
+    result = cli_runner.invoke(start, [case.internal_id, "--dry-run"], obj=mip_dna_context)
 
     # THEN command should run without errors
     assert result.exit_code == 0

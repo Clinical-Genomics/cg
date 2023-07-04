@@ -46,7 +46,7 @@ class ExcelSample(OrderSample):
     reference_genome: str = Field(None, alias="UDF/Reference Genome Microbial")
     region: str = Field(None, alias="UDF/Region")
     region_code: str = Field(None, alias="UDF/Region Code")
-    require_qcok: bool = Field(None, alias="UDF/Process only if QC OK")
+    require_qc_ok: bool = Field(None, alias="UDF/Process only if QC OK")
     rml_plate_name: str = Field(None, alias="UDF/RML plate name")
     selection_criteria: str = Field(None, alias="UDF/Selection Criteria")
     sex: str = Field(None, alias="UDF/Gender")
@@ -72,6 +72,7 @@ class ExcelSample(OrderSample):
             "MicroSALT",  # OF 1603 (implicit)
             "MIP DNA",  # OF 1508
             "MIP RNA",  # OF 1508
+            "RNAfusion",  # OF 1508
             "SARS-CoV-2",  # OF 2184
             "No analysis",  # OF 1508, 1604, 2184
         ]

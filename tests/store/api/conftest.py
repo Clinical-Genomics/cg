@@ -1,98 +1,16 @@
 import datetime as dt
 import pytest
 
-from typing import Iterable, List
-from cg.constants import Pipeline
+from typing import List
 from cg.constants.constants import PrepCategory
 from cg.constants.priority import PriorityTerms
 from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.store import Store
-from cg.store.api.import_func import (
-    parse_application_versions,
-    parse_applications,
-    versions_are_same,
-)
-from cg.store.api.models import ApplicationSchema, ApplicationVersionSchema
-from tests.store_helpers import StoreHelpers
-from cg.store.models import ApplicationVersion, Pool, Sample, Invoice, Application
 from tests.meta.demultiplex.conftest import fixture_populated_flow_cell_store
+from tests.store_helpers import StoreHelpers
 from cg.constants.invoice import CustomerNames
 from cg.constants.subject import PhenotypeStatus
 from cg.constants import Pipeline
-
-
-class StoreCheckers:
-    @staticmethod
-    def get_versions_from_store(store: Store, application_tag: str) -> List[ApplicationVersion]:
-        """Gets all versions for the specified application"""
-
-        return store.get_application_by_tag(tag=application_tag).versions
-
-    @staticmethod
-    def get_application_from_store(store: Store, application_tag: str) -> Application:
-        """Gets the specified application"""
-
-        return store.get_application_by_tag(tag=application_tag)
-
-    @staticmethod
-    def version_exists_in_store(store: Store, application: ApplicationVersionSchema):
-        """Check if the given raw version exists in the store."""
-        db_versions: List[Application] = StoreCheckers.get_versions_from_store(
-            store=store, application_tag=application.app_tag
-        )
-        return any(
-            versions_are_same(version_obj=db_version, application_version=application)
-            for db_version in db_versions
-        )
-
-    @staticmethod
-    def all_versions_exist_in_store(store: Store, excel_path: str):
-        """Check if all versions in the Excel exists in the store."""
-        applications: Iterable[ApplicationVersionSchema] = parse_application_versions(
-            excel_path=excel_path
-        )
-        return all(
-            StoreCheckers.version_exists_in_store(store=store, application=application)
-            for application in applications
-        )
-
-    @staticmethod
-    def all_applications_exists(store: Store, applications_file: str):
-        """Check if all applications in the Excel exists in the store."""
-        applications: Iterable[ApplicationSchema] = parse_applications(excel_path=applications_file)
-        return all(
-            StoreCheckers.exists_application_in_store(store=store, application_tag=application.tag)
-            for application in applications
-        )
-
-    @staticmethod
-    def exists_application_in_store(store: Store, application_tag: str):
-        """Check if the given raw application exists in the store"""
-        db_application = StoreCheckers.get_application_from_store(
-            store=store, application_tag=application_tag
-        )
-
-        return db_application is not None
-
-
-@pytest.fixture(name="store_checkers")
-def fixture_store_checkers() -> StoreCheckers:
-    return StoreCheckers()
-
-
-@pytest.fixture(name="applications_store")
-def fixture_applications_store(
-    store: Store, application_versions_file: str, helpers: StoreHelpers
-) -> Store:
-    """Return a store populated with applications from excel file"""
-    versions: Iterable[ApplicationVersionSchema] = parse_application_versions(
-        excel_path=application_versions_file
-    )
-
-    for version in versions:
-        helpers.ensure_application(store=store, tag=version.app_tag)
-
-    return store
 
 
 @pytest.fixture(name="microbial_store")
@@ -106,61 +24,6 @@ def fixture_microbial_store(store: Store, helpers: StoreHelpers) -> Store:
 
     for app_tag in microbial_inactive_apptags:
         helpers.ensure_application(store=store, tag=app_tag, prep_category="mic", is_archived=True)
-
-    return store
-
-
-@pytest.fixture(name="microbial_store_dummy_tag")
-def fixture_microbial_store_dummy_tag(microbial_store: Store, helpers: StoreHelpers) -> Store:
-    """Populate a microbial store with a extra dummy app tag"""
-    helpers.ensure_application(
-        store=microbial_store, tag="dummy_tag", prep_category="mic", is_archived=False
-    )
-    return microbial_store
-
-
-@pytest.fixture(name="rml_store")
-def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
-    """Populate a store with microbial application tags"""
-    active_apptags = [
-        "RMLP10R300",
-        "RMLP10S130",
-        "RMLP15R100",
-        "RMLP15R200",
-        "RMLP15R400",
-        "RMLP15R500",
-        "RMLP15R750",
-        "RMLP15R825",
-        "RMLP15S100",
-        "RMLP15S125",
-        "RMLP15S150",
-        "RMLP15S175",
-        "RMLP15S200",
-        "RMLP15S225",
-        "RMLP15S425",
-    ]
-    inactive_apptags = [
-        "RMLP05R800",
-        "RMLP15S250",
-        "RMLP15S275",
-        "RMLP15S300",
-        "RMLP15S325",
-        "RMLP15S350",
-        "RMLP15S375",
-        "RMLP15S400",
-        "RMLP15S450",
-        "RMLP15S475",
-        "RMLP15S500",
-        "RMLS05R200",
-        "RMLCUSR800",
-        "RMLCUSS160",
-    ]
-
-    for app_tag in active_apptags:
-        helpers.ensure_application(store=store, tag=app_tag, prep_category="rml", is_archived=False)
-
-    for app_tag in inactive_apptags:
-        helpers.ensure_application(store=store, tag=app_tag, prep_category="rml", is_archived=True)
 
     return store
 
@@ -182,7 +45,7 @@ def fixture_rml_pool_store(
         invoice_address="skolgatan 15",
         invoice_reference="abc",
     )
-    store.add_commit(new_customer)
+    store.session.add(new_customer)
 
     application = store.add_application(
         tag="RMLP05R800",
@@ -193,7 +56,7 @@ def fixture_rml_pool_store(
         sequencing_depth=0,
         target_reads=800,
     )
-    store.add_commit(application)
+    store.session.add(application)
 
     app_version = store.add_application_version(
         application=application,
@@ -206,7 +69,7 @@ def fixture_rml_pool_store(
             PriorityTerms.RESEARCH: 12,
         },
     )
-    store.add_commit(app_version)
+    store.session.add(app_version)
 
     new_pool = store.add_pool(
         customer=new_customer,
@@ -215,13 +78,13 @@ def fixture_rml_pool_store(
         ordered=dt.datetime.now(),
         application_version=app_version,
     )
-    store.add_commit(new_pool)
+    store.session.add(new_pool)
     new_case = helpers.add_case(
         store=store,
         internal_id=case_id,
         name=PoolSubmitter.create_case_name(ticket=ticket_id, pool_name="Test"),
     )
-    store.add_commit(new_case)
+    store.session.add(new_case)
 
     new_sample = helpers.add_sample(
         store=store,
@@ -231,7 +94,8 @@ def fixture_rml_pool_store(
         customer_id=new_customer.id,
     )
     new_sample.application_version = app_version
-    store.add_commit(new_sample)
+    store.session.add(new_sample)
+    store.session.commit()
 
     helpers.add_relationship(
         store=store,
@@ -245,10 +109,10 @@ def fixture_rml_pool_store(
 @pytest.fixture(name="re_sequenced_sample_store")
 def fixture_re_sequenced_sample_store(
     store: Store,
-    another_flow_cell_id: str,
+    dragen_flow_cell_id: str,
     case_id: str,
     family_name: str,
-    flow_cell_id: str,
+    bcl2fastq_flow_cell_id: str,
     sample_id: str,
     ticket_id: str,
     timestamp_now: dt.datetime,
@@ -277,14 +141,14 @@ def fixture_re_sequenced_sample_store(
 
     helpers.add_flowcell(
         store=re_sequenced_sample_store,
-        flow_cell_id=another_flow_cell_id,
+        flow_cell_name=dragen_flow_cell_id,
         samples=[store_sample],
         date=timestamp_now,
     )
 
     helpers.add_flowcell(
         store=re_sequenced_sample_store,
-        flow_cell_id=flow_cell_id,
+        flow_cell_name=bcl2fastq_flow_cell_id,
         samples=[store_sample],
         date=one_day_ahead_of_now,
     )
@@ -310,12 +174,6 @@ def fixture_max_nr_of_samples() -> int:
 def fixture_expected_number_of_not_archived_applications() -> int:
     """Return the number of expected number of not archived applications"""
     return 4
-
-
-@pytest.fixture(name="EXPECTED_NUMBER_OF_APPLICATIONS_WITH_PREP_CATEGORY")
-def fixture_expected_number_of_applications_with_prep_category() -> int:
-    """Return the number of expected number of applications with prep category"""
-    return 7
 
 
 @pytest.fixture(name="EXPECTED_NUMBER_OF_APPLICATIONS")

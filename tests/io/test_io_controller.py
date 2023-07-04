@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from typing import List
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, WriteFile, ReadStream, WriteStream
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
@@ -54,6 +54,22 @@ def test_get_content_from_file_when_csv(csv_file_path: Path):
 
     # Then assert a list is returned
     assert isinstance(raw_csv_content, list)
+
+
+def test_get_content_from_file_to_dict_when_csv(csv_file_path: Path):
+    """
+    Tests getting content from file using DictReader when in CSV format.
+    """
+    # GIVEN a csv file
+
+    # WHEN reading the csv file
+    raw_csv_content: List[dict] = ReadFile.get_content_from_file(
+        file_format=FileFormat.CSV, file_path=csv_file_path, read_to_dict=True
+    )
+
+    # Then assert a list is returned and that the first element is a dict
+    assert isinstance(raw_csv_content, list)
+    assert isinstance(raw_csv_content[0], dict)
 
 
 def test_get_content_from_stream(yaml_stream: str):

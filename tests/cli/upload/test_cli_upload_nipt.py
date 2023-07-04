@@ -2,7 +2,6 @@
 import datetime
 import logging
 
-import pytest
 from click.testing import CliRunner
 
 from cg.cli.upload.nipt.base import nipt_upload_all, nipt_upload_case
@@ -11,7 +10,6 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.models.cg_config import CGConfig
 from cgmodels.cg.constants import Pipeline
 from cg.store.models import Analysis
-from cg.exc import AnalysisUploadError
 
 NIPT_CASE_SUCCESS = "*** NIPT UPLOAD START ***"
 NIPT_ALL_SUCCESS = "*** NIPT UPLOAD ALL START ***"

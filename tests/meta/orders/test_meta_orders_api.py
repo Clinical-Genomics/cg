@@ -16,8 +16,6 @@ from cg.models.orders.samples import MipDnaSample
 from cg.store import Store
 from cg.store.models import Pool, Sample
 
-PROCESS_LIMS_FUNCTION_OLD = "cg.meta.orders.api.process_lims"
-PROCESS_LIMS_FUNCTION = "cg.meta.orders.lims.process_lims"
 SUBMITTERS = [
     "fastq_submitter",
     "metagenome_submitter",
@@ -50,6 +48,7 @@ def test_too_long_order_name():
         OrderType.MIP_DNA,
         OrderType.MIP_RNA,
         OrderType.RML,
+        OrderType.RNAFUSION,
         OrderType.SARS_COV_2,
     ],
 )
@@ -68,7 +67,7 @@ def test_submit(
     monkeypatch_process_lims(monkeypatch, order_data)
 
     # GIVEN an order and an empty store
-    assert not base_store.get_samples()
+    assert not base_store._get_query(table=Sample).first()
 
     # WHEN submitting the order
 
@@ -103,8 +102,6 @@ def monkeypatch_process_lims(monkeypatch, order_data):
 )
 def test_submit_ticketexception(
     all_orders_to_submit,
-    base_store: Store,
-    monkeypatch,
     orders_api: OrdersAPI,
     order_type: OrderType,
     user_mail: str,
@@ -138,7 +135,6 @@ def test_submit_illegal_sample_customer(
     order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
-    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
@@ -154,11 +150,11 @@ def test_submit_illegal_sample_customer(
         invoice_address="dummy street",
         invoice_reference="dummy nr",
     )
-    sample_store.add_commit(new_customer)
-    existing_sample: Sample = sample_store.get_samples()[0]
+    sample_store.session.add(new_customer)
+    existing_sample: Sample = sample_store._get_query(table=Sample).first()
     existing_sample.customer = new_customer
-    sample_store.add_commit(existing_sample)
-
+    sample_store.session.add(existing_sample)
+    sample_store.session.commit()
     for sample in order_data.samples:
         sample.internal_id = existing_sample.internal_id
 
@@ -193,7 +189,7 @@ def test_submit_scout_legal_sample_customer(
     # GIVEN we have an order with a customer that is in the same customer group as customer
     # that the samples originate from
     collaboration = sample_store.add_collaboration("customer999only", "customer 999 only group")
-    sample_store.add_commit(collaboration)
+    sample_store.session.add(collaboration)
     sample_customer = sample_store.add_customer(
         "customer1",
         "customer 1",
@@ -210,11 +206,11 @@ def test_submit_scout_legal_sample_customer(
     )
     sample_customer.collaborations.append(collaboration)
     order_customer.collaborations.append(collaboration)
-    sample_store.add_commit(sample_customer)
-    sample_store.add_commit(order_customer)
-    existing_sample: Sample = sample_store.get_samples()[0]
+    sample_store.session.add(sample_customer)
+    sample_store.session.add(order_customer)
+    existing_sample: Sample = sample_store._get_query(table=Sample).first()
     existing_sample.customer = sample_customer
-    sample_store.commit()
+    sample_store.session.commit()
     order_data.customer = order_customer.internal_id
 
     for sample in order_data.samples:
@@ -256,7 +252,8 @@ def test_submit_duplicate_sample_case_name(
                 ticket=ticket_id,
             )
             case.customer = customer
-            store.add_commit(case)
+            store.session.add(case)
+        store.session.commit()
         assert store.get_case_by_name_and_customer(customer=customer, case_name=case_id)
 
     monkeypatch_process_lims(monkeypatch, order_data)
@@ -283,7 +280,6 @@ def test_submit_fluffy_duplicate_sample_case_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
@@ -311,7 +307,6 @@ def test_submit_unique_sample_case_name(
     mail_patch,
     orders_api: OrdersAPI,
     mip_order_to_submit: dict,
-    ticket_id: str,
     user_name: str,
     user_mail: str,
     monkeypatch,
@@ -360,7 +355,8 @@ def test_validate_sex_inconsistent_sex(
             gender="male" if sample.sex == "female" else "female",
             customer_id=customer.internal_id,
         )
-        store.add_commit(sample_obj)
+        store.session.add(sample_obj)
+        store.session.commit()
         assert sample_obj.sex != sample.sex
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -389,7 +385,8 @@ def test_validate_sex_consistent_sex(
             gender=sample.sex,
             customer_id=customer.internal_id,
         )
-        store.add_commit(sample_obj)
+        store.session.add(sample_obj)
+        store.session.commit()
         assert sample_obj.sex == sample.sex
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -419,7 +416,8 @@ def test_validate_sex_unknown_existing_sex(
             gender="unknown",
             customer_id=customer.internal_id,
         )
-        store.add_commit(sample_obj)
+        store.session.add(sample_obj)
+        store.session.commit()
         assert sample_obj.sex != sample.sex
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -449,7 +447,8 @@ def test_validate_sex_unknown_new_sex(
             customer_id=customer.internal_id,
         )
         sample.sex = "unknown"
-        store.add_commit(sample_obj)
+        store.session.add(sample_obj)
+        store.session.commit()
 
     for sample in order_data.samples:
         assert sample_obj.sex != sample.sex
@@ -483,14 +482,13 @@ def test_submit_unique_sample_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
     # GIVEN we have an order with a sample that is not existing in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
-    assert not store.get_samples()
+    assert not store._get_query(table=Sample).first()
 
     monkeypatch_process_lims(monkeypatch, order_data)
 
@@ -512,7 +510,6 @@ def test_sarscov2_submit_duplicate_sample_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    sample_store: Store,
     user_mail: str,
     user_name: str,
 ):
@@ -542,7 +539,8 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
             sample_obj = helpers.add_sample(
                 store=store, name=sample_name, customer_id=customer.internal_id
             )
-            store.add_commit(sample_obj)
+            store.session.add(sample_obj)
+            store.session.commit()
 
 
 @patch("cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None)

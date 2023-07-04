@@ -14,7 +14,7 @@ from cg.store.models import Flowcell
 
 
 @pytest.mark.parametrize(
-    "flow_cell_path, result",
+    "bcl2fastq_flow_cell_dir, result",
     [
         ("correct_flow_cell_path", True),
         ("incorrect_flow_cell_path_too_long", False),
@@ -28,12 +28,12 @@ def test_flow_cell_name(
     mock_statusdb: Store,
     mock_hk: HousekeeperAPI,
     mock_tb: TrailblazerAPI,
-    flow_cell_path: Path,
+    bcl2fastq_flow_cell_dir: Path,
     result: bool,
     request,
 ):
     # GIVEN a flow cell
-    flow_cell_path = request.getfixturevalue(flow_cell_path)
+    flow_cell_path = request.getfixturevalue(bcl2fastq_flow_cell_dir)
     mock_hk.files.return_value.count.return_value = 1
     flow_cell_obj = DemultiplexedRunsFlowCell(
         flow_cell_path=flow_cell_path,
@@ -49,10 +49,10 @@ def test_flow_cell_name(
 
 
 @pytest.mark.parametrize(
-    "flow_cell_path, statusdb_return_value, result",
+    "bcl2fastq_flow_cell_dir, statusdb_return_value, result",
     [
         ("correct_flow_cell_path", Flowcell(), True),
-        ("nonexistent_flow_cell_path", None, False),
+        ("non-existent_flow_cell_path", None, False),
     ],
 )
 @mock.patch("cg.apps.tb.api.TrailblazerAPI")
@@ -62,14 +62,14 @@ def test_flow_cell_exists_in_statusdb_(
     mock_statusdb: Store,
     mock_hk: HousekeeperAPI,
     mock_tb: TrailblazerAPI,
-    flow_cell_path: Path,
+    bcl2fastq_flow_cell_dir: Path,
     statusdb_return_value: Optional[Flowcell],
     result: bool,
     request,
 ):
     # GIVEN a flow cell that exists in statusdb
-    flow_cell_path = request.getfixturevalue(flow_cell_path)
-    mock_statusdb.get_flow_cell.return_value = statusdb_return_value
+    flow_cell_path = request.getfixturevalue(bcl2fastq_flow_cell_dir)
+    mock_statusdb.get_flow_cell_by_name.return_value = statusdb_return_value
     mock_hk.files.return_value.count.return_value = 1
     flow_cell_obj = DemultiplexedRunsFlowCell(
         flow_cell_path=flow_cell_path,

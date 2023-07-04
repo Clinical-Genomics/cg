@@ -1,32 +1,30 @@
-from typing import List, Union
-
-import click
 import datetime as dt
 import logging
 import shutil
-
 from pathlib import Path
+from typing import List, Union
 
+import click
+from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
-from cg.exc import FlowCellsNeededError, DecompressionNeededError
+from cg.exc import DecompressionNeededError, FlowCellsNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_pon import BalsamicPonAnalysisAPI
 from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from dateutil.parser import parse as parse_date
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", help="Simulate process without executing", is_flag=True
@@ -53,7 +51,7 @@ def ensure_flow_cells_on_disk(context: CGConfig, case_id: str):
     """Check if flow cells are on disk for given case. If not, request flow cells and raise FlowcellsNeededError."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     status_db: Store = context.status_db
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     if not status_db.is_all_flow_cells_on_disk(case_id=case_id):
         if analysis_api.status_db.is_case_down_sampled(case_id=case_id):
             LOG.debug("All samples have been down sampled. Flow cell check not applicable")
@@ -74,7 +72,7 @@ def ensure_flow_cells_on_disk(context: CGConfig, case_id: str):
 def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
     """Handles cases where decompression is needed before starting analysis."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     is_decompression_running: bool = analysis_api.resolve_decompression(
         case_id=case_id, dry_run=dry_run
     )
@@ -89,7 +87,7 @@ def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
 def link(context: CGConfig, case_id: str, dry_run: bool):
     """Link FASTQ files for all samples in a case."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id)
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     if dry_run:
         return
     analysis_api.link_fastq_files(case_id=case_id)
@@ -105,7 +103,7 @@ def store(context: CGConfig, case_id: str, dry_run: bool):
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     status_db: Store = context.status_db
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
     if dry_run:
         LOG.info("Dry run: Would have stored deliverables for %s", case_id)
@@ -116,7 +114,7 @@ def store(context: CGConfig, case_id: str, dry_run: bool):
         analysis_api.set_statusdb_action(case_id=case_id, action=None)
     except Exception as exception_object:
         housekeeper_api.rollback()
-        status_db.rollback()
+        status_db.session.rollback()
         LOG.error("Error storing deliverables for case %s - %s", case_id, exception_object)
         raise
 
@@ -210,7 +208,7 @@ def past_run_dirs(
         except FileNotFoundError:
             continue
         except Exception as error:
-            LOG.error("Failed to clean directories for case %s - %s", case_id, error)
+            LOG.error(f"Failed to clean directories for case {case_id} - {repr(error)}")
             exit_code = EXIT_FAIL
 
     if exit_code:

@@ -49,9 +49,7 @@ class DeleteDemuxAPI:
     @property
     def status_db_presence(self) -> bool:
         """Update about the presence of given flow cell in status_db"""
-        return bool(
-            self.status_db.query(Flowcell).filter(Flowcell.name == self.flow_cell_name).first()
-        )
+        return bool(self.status_db.get_flow_cell_by_name(flow_cell_name=self.flow_cell_name))
 
     @staticmethod
     def set_dry_run(dry_run: bool) -> bool:
@@ -61,12 +59,8 @@ class DeleteDemuxAPI:
 
     def _set_samples_on_flow_cell(self) -> None:
         """Set a list of samples related to a flow cell in status-db"""
-        self.samples_on_flow_cell: List[Sample] = (
-            self.status_db.query(Flowcell)
-            .filter(Flowcell.name == self.flow_cell_name)
-            .first()
-            .samples
-        )
+        flow_cell = self.status_db.get_flow_cell_by_name(flow_cell_name=self.flow_cell_name)
+        self.samples_on_flow_cell: List[Sample] = flow_cell.samples
 
     def active_samples_on_flow_cell(self) -> Optional[List[str]]:
         """Check if there are any active cases related to samples of a flow cell"""
@@ -90,14 +84,14 @@ class DeleteDemuxAPI:
         else:
             log.info(f"DeleteDemuxAPI-Housekeeper: No files found with tag: {self.flow_cell_name}")
 
-    def _delete_files_if_related_in_housekeeper_by_tag(self, sample: Sample, tag: str):
+    def _delete_files_if_related_in_housekeeper_by_tag(self, sample: Sample, tags: List[str]):
         """Delete any existing fastq related to sample"""
 
         housekeeper_files: Iterable[File] = self.housekeeper_api.files(
-            bundle=sample.internal_id, tags=[tag]
+            bundle=sample.internal_id, tags=tags
         )
         if not housekeeper_files:
-            log.info(f"Could not find {tag} for {sample.internal_id}")
+            log.info(f"Could not find {tags} for {sample.internal_id}")
         else:
             for housekeeper_file in housekeeper_files:
                 self.housekeeper_api.delete_file(file_id=housekeeper_file.id)
@@ -105,9 +99,13 @@ class DeleteDemuxAPI:
     def _delete_fastq_and_spring_housekeeper(self) -> None:
         """Delete the presence of any spring/fastq files in Housekeeper related to samples on the flow cell"""
 
-        tags = [SequencingFileTag.FASTQ, SequencingFileTag.SPRING]
-        for tag, sample in itertools.product(tags, self.samples_on_flow_cell):
-            self._delete_files_if_related_in_housekeeper_by_tag(sample=sample, tag=tag)
+        tag_combinations: List[List[str]] = [
+            [SequencingFileTag.FASTQ, self.flow_cell_name],
+            [SequencingFileTag.SPRING, self.flow_cell_name],
+            [SequencingFileTag.SPRING_METADATA, self.flow_cell_name],
+        ]
+        for tags, sample in itertools.product(tag_combinations, self.samples_on_flow_cell):
+            self._delete_files_if_related_in_housekeeper_by_tag(sample=sample, tags=tags)
 
     def delete_flow_cell_housekeeper(self) -> None:
         """Delete any presence of a flow cell in housekeeper. Including Sample sheets AND fastq-files"""
@@ -172,9 +170,11 @@ class DeleteDemuxAPI:
             )
             return
         if demultiplexing_dir and run_dir and self.status_db_presence:
-            flow_cell_obj: Flowcell = self.status_db.get_flow_cell(self.flow_cell_name)
+            flow_cell_obj: Flowcell = self.status_db.get_flow_cell_by_name(
+                flow_cell_name=self.flow_cell_name
+            )
             flow_cell_obj.status = "removed"
-            self.status_db.commit()
+            self.status_db.session.commit()
         if demultiplexing_dir and self.demultiplexing_path.exists():
             self._delete_demultiplexing_dir_hasta()
         else:

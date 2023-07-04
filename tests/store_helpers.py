@@ -51,7 +51,8 @@ class StoreHelpers:
 
         if not bundle_exists:
             _bundle, _version = store.add_bundle(bundle_data)
-            store.add_commit(_bundle, _version)
+            store.add_commit(_bundle)
+            store.add_commit(_version)
 
         if include:
             store.include(_version)
@@ -121,8 +122,10 @@ class StoreHelpers:
         valid_from: datetime = datetime.now(),
     ) -> ApplicationVersion:
         """Add an application version to store."""
-        new_record: ApplicationVersion = store.get_application_version_by_application_entry_id(
-            application_entry_id=application.id
+        new_record = (
+            store._get_query(table=ApplicationVersion)
+            .filter(ApplicationVersion.application_id == application.id)
+            .first()
         )
         if not new_record:
             new_record: ApplicationVersion = store.add_application_version(
@@ -131,7 +134,8 @@ class StoreHelpers:
                 valid_from=valid_from,
                 prices=prices,
             )
-        store.add_commit(new_record)
+        store.session.add(new_record)
+        store.session.commit()
         return new_record
 
     @staticmethod
@@ -188,23 +192,23 @@ class StoreHelpers:
             min_sequencing_depth=min_sequencing_depth,
             **kwargs,
         )
-        store.add_commit(application)
+        store.session.add(application)
+        store.session.commit()
         return application
 
     @staticmethod
     def ensure_bed_version(store: Store, bed_name: str = "dummy_bed") -> BedVersion:
         """Return existing or create and return bed version for tests."""
-        bed: Optional[Bed] = store.get_bed_by_name(bed_name=bed_name)
+        bed: Optional[Bed] = store._get_query(table=Bed).filter(Bed.name == bed_name)
         if not bed:
             bed: Bed = store.add_bed(name=bed_name)
-            store.add_commit(bed)
+            store.session.add(bed)
 
-        bed_version: Optional[BedVersion] = store.get_latest_bed_version(bed_name=bed_name)
-        if not bed_version:
-            bed_version: BedVersion = store.add_bed_version(
-                bed=bed, version=1, filename="dummy_filename", shortname=bed_name
-            )
-            store.add_commit(bed_version)
+        bed_version: BedVersion = store.add_bed_version(
+            bed=bed, version=1, filename="dummy_filename", shortname=bed_name
+        )
+        store.session.add(bed_version)
+        store.session.commit()
         return bed_version
 
     @staticmethod
@@ -234,7 +238,8 @@ class StoreHelpers:
                 invoice_reference="ABCDEF",
             )
             customer.collaborations.append(collaboration)
-            store.add_commit(customer)
+            store.session.add(customer)
+            store.session.commit()
         return customer
 
     @staticmethod
@@ -281,7 +286,8 @@ class StoreHelpers:
 
         analysis.limitations = "A limitation"
         analysis.family = case
-        store.add_commit(analysis)
+        store.session.add(analysis)
+        store.session.commit()
         return analysis
 
     @staticmethod
@@ -340,7 +346,8 @@ class StoreHelpers:
             else:
                 raise AttributeError(f"Unknown sample attribute/feature: {key}, {value}")
 
-        store.add_commit(sample)
+        store.session.add(sample)
+        store.session.commit()
         return sample
 
     @staticmethod
@@ -359,7 +366,8 @@ class StoreHelpers:
                 date=datetime.now(),
                 genes=1,
             )
-            store.add_commit(panel)
+            store.session.add(panel)
+            store.session.commit()
         return panel
 
     @staticmethod
@@ -405,7 +413,8 @@ class StoreHelpers:
             case_obj.internal_id = internal_id
 
         case_obj.customer = customer
-        store.add_commit(case_obj)
+        store.session.add(case_obj)
+        store.session.commit()
         return case_obj
 
     @staticmethod
@@ -447,7 +456,7 @@ class StoreHelpers:
     ):
         """Load a case with samples and link relations from a dictionary."""
         customer_obj = StoreHelpers.ensure_customer(store)
-        case_obj = store.Family(
+        case = Family(
             name=case_info["name"],
             panels=case_info["panels"],
             internal_id=case_info["internal_id"],
@@ -459,9 +468,7 @@ class StoreHelpers:
             tickets=case_info["tickets"],
         )
 
-        case_obj = StoreHelpers.add_case(
-            store, case_obj=case_obj, customer_id=customer_obj.internal_id
-        )
+        case = StoreHelpers.add_case(store, case_obj=case, customer_id=customer_obj.internal_id)
 
         app_tag = app_tag or "WGSPCFC030"
         app_type = case_info.get("application_type", "wgs")
@@ -483,17 +490,11 @@ class StoreHelpers:
             )
             sample_objs[sample_id] = sample_obj
 
-        for sample_data in case_info["samples"]:
-            sample_obj = sample_objs[sample_data["internal_id"]]
-            father = None
-            if sample_data.get(Pedigree.FATHER):
-                father = sample_objs[sample_data[Pedigree.FATHER]]
-            mother = None
-            if sample_data.get(Pedigree.MOTHER):
-                mother = sample_objs[sample_data[Pedigree.MOTHER]]
+            father = sample_objs.get(sample_data.get(Pedigree.FATHER))
+            mother = sample_objs.get(sample_data.get(Pedigree.MOTHER))
             StoreHelpers.add_relationship(
                 store,
-                case=case_obj,
+                case=case,
                 sample=sample_obj,
                 status=sample_data.get("status", PhenotypeStatus.UNKNOWN),
                 father=father,
@@ -503,10 +504,10 @@ class StoreHelpers:
         StoreHelpers.add_analysis(
             store,
             pipeline=Pipeline.MIP_DNA,
-            case=case_obj,
+            case=case,
             completed_at=completed_at or datetime.now(),
         )
-        return case_obj
+        return case
 
     @staticmethod
     def add_organism(
@@ -531,7 +532,8 @@ class StoreHelpers:
         organism = StoreHelpers.add_organism(
             store, internal_id=organism_id, name=name, reference_genome=reference_genome
         )
-        store.add_commit(organism)
+        store.session.add(organism)
+        store.session.commit()
         return organism
 
     @staticmethod
@@ -582,7 +584,7 @@ class StoreHelpers:
     @staticmethod
     def add_flowcell(
         store: Store,
-        flow_cell_id: str = "flowcell_test",
+        flow_cell_name: str = "flowcell_test",
         archived_at: datetime = None,
         sequencer_type: str = Sequencers.HISEQX,
         samples: List[Sample] = None,
@@ -591,7 +593,7 @@ class StoreHelpers:
     ) -> Flowcell:
         """Utility function to add a flow cell to the store and return an object."""
         flow_cell = store.add_flow_cell(
-            flow_cell_id=flow_cell_id,
+            flow_cell_name=flow_cell_name,
             sequencer_name="dummy_sequencer",
             sequencer_type=sequencer_type,
             date=date,
@@ -602,7 +604,8 @@ class StoreHelpers:
         if status:
             flow_cell.status = status
 
-        store.add_commit(flow_cell)
+        store.session.add(flow_cell)
+        store.session.commit()
         return flow_cell
 
     @staticmethod
@@ -618,7 +621,8 @@ class StoreHelpers:
         link = store.relate_sample(
             sample=sample, family=case, status=status, father=father, mother=mother
         )
-        store.add_commit(link)
+        store.session.add(link)
+        store.session.commit()
         return link
 
     @staticmethod
@@ -631,7 +635,7 @@ class StoreHelpers:
             LOG.warning("Could not find case")
             return None
         case_obj.synopsis = synopsis
-        store.commit()
+        store.session.commit()
         return case_obj
 
     @staticmethod
@@ -646,7 +650,7 @@ class StoreHelpers:
             LOG.warning("Could not find sample")
             return None
         sample_obj.phenotype_groups = phenotype_groups
-        store.commit()
+        store.session.commit()
         return sample_obj
 
     @staticmethod
@@ -661,7 +665,7 @@ class StoreHelpers:
             LOG.warning("Could not find sample")
             return None
         sample_obj.phenotype_terms = phenotype_terms
-        store.commit()
+        store.session.commit()
         return sample_obj
 
     @staticmethod
@@ -674,7 +678,7 @@ class StoreHelpers:
             LOG.warning("Could not find sample")
             return None
         sample_obj.subject_id = subject_id
-        store.commit()
+        store.session.commit()
         return sample_obj
 
     @classmethod
@@ -685,7 +689,8 @@ class StoreHelpers:
             link = base_store.relate_sample(
                 family=case, sample=sample, status=PhenotypeStatus.UNKNOWN
             )
-            base_store.add_commit(link)
+            base_store.session.add(link)
+            base_store.session.commit()
 
     @classmethod
     def add_case_with_samples(
@@ -759,7 +764,8 @@ class StoreHelpers:
             no_invoice=no_invoice,
             invoice_id=invoice_id,
         )
-        store.add_commit(pool)
+        store.session.add(pool)
+        store.session.commit()
         return pool
 
     @classmethod
@@ -775,7 +781,8 @@ class StoreHelpers:
         user: User = store.get_user_by_email(email=email)
         if not user:
             user = store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
-            store.add_commit(user)
+            store.session.add(user)
+            store.session.commit()
         return user
 
     @classmethod
@@ -808,8 +815,8 @@ class StoreHelpers:
                 discount=discount,
                 invoiced_at=invoiced_at,
             )
-            store.add_commit(invoice)
-
+            store.session.add(invoice)
+            store.session.commit()
         return invoice
 
     @classmethod

@@ -36,6 +36,7 @@ class OrderInSample(BaseModel):
     _suitable_project: OrderType = None
     application: constr(max_length=Application.tag.property.columns[0].type.length)
     comment: Optional[constr(max_length=Sample.comment.property.columns[0].type.length)]
+    skip_reception_control: Optional[bool] = None
     data_analysis: Pipeline
     data_delivery: DataDelivery
     name: constr(
@@ -44,7 +45,7 @@ class OrderInSample(BaseModel):
         max_length=Sample.name.property.columns[0].type.length,
     )
     priority: PriorityEnum = PriorityEnum.standard
-    require_qcok: bool = False
+    require_qc_ok: bool = False
     volume: str
 
     @classmethod
@@ -104,7 +105,7 @@ class Of1508Sample(OrderInSample):
     cohorts: Optional[List[str]]
     phenotype_groups: Optional[List[str]]
     phenotype_terms: Optional[List[str]]
-    require_qcok: bool = False
+    require_qc_ok: bool = False
     quantity: Optional[int]
     subject_id: Optional[
         constr(regex=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length)
@@ -158,6 +159,10 @@ class BalsamicUmiSample(Of1508Sample):
 
 class MipRnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_RNA
+
+
+class RnafusionSample(Of1508Sample):
+    _suitable_project = OrderType.RNAFUSION
 
 
 class FastqSample(OrderInSample):

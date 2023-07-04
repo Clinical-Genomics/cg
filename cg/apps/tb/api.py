@@ -9,11 +9,11 @@ from google.auth.crypt import RSASigner
 
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat, APIMethods
+from cg.constants.constants import APIMethods, FileFormat, WorkflowManager
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
 from cg.exc import TrailblazerAPIHTTPError
-from cg.io.controller import ReadStream, APIRequest
+from cg.io.controller import APIRequest, ReadStream
 
 LOG = logging.getLogger(__name__)
 
@@ -27,8 +27,14 @@ class TrailblazerAPI:
         AnalysisStatus.PENDING,
         AnalysisStatus.RUNNING,
         AnalysisStatus.ERROR,
+        AnalysisStatus.QC,
     ]
-    __ONGOING_STATUSES = [AnalysisStatus.PENDING, AnalysisStatus.RUNNING, AnalysisStatus.ERROR]
+    __ONGOING_STATUSES = [
+        AnalysisStatus.PENDING,
+        AnalysisStatus.RUNNING,
+        AnalysisStatus.ERROR,
+        AnalysisStatus.QC,
+    ]
 
     def __init__(self, config: dict):
         self.service_account = config["trailblazer"]["service_account"]
@@ -100,14 +106,6 @@ class TrailblazerAPI:
         if response:
             return TrailblazerAnalysis.parse_obj(response)
 
-    def find_analysis(
-        self, case_id: str, started_at: dt.datetime, status: str
-    ) -> Optional[TrailblazerAnalysis]:
-        request_body = {"case_id": case_id, "started_at": str(started_at), "status": status}
-        response = self.query_trailblazer(command="find-analysis", request_body=request_body)
-        if response:
-            return TrailblazerAnalysis.parse_obj(response)
-
     def get_latest_analysis_status(self, case_id: str) -> Optional[str]:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
         if latest_analysis:
@@ -122,10 +120,8 @@ class TrailblazerAPI:
     def is_latest_analysis_completed(self, case_id: str) -> bool:
         return self.get_latest_analysis_status(case_id=case_id) == AnalysisStatus.COMPLETED
 
-    def delete_analysis(self, analysis_id: str, force: bool = False) -> None:
-        """Raises TrailblazerAPIHTTPError"""
-        request_body = {"analysis_id": analysis_id, "force": force}
-        self.query_trailblazer(command="delete-analysis", request_body=request_body)
+    def is_latest_analysis_qc(self, case_id: str) -> bool:
+        return self.get_latest_analysis_status(case_id=case_id) == AnalysisStatus.QC
 
     def mark_analyses_deleted(self, case_id: str) -> Optional[list]:
         """Mark all analyses for case deleted without removing analysis files"""
@@ -151,6 +147,7 @@ class TrailblazerAPI:
         email: str = None,
         data_analysis: Pipeline = None,
         ticket: str = None,
+        workflow_manager: str = WorkflowManager.Slurm,
     ) -> TrailblazerAnalysis:
         request_body = {
             "case_id": case_id,
@@ -161,6 +158,7 @@ class TrailblazerAPI:
             "priority": slurm_quality_of_service,
             "data_analysis": str(data_analysis).upper(),
             "ticket": ticket,
+            "workflow_manager": workflow_manager,
         }
         LOG.debug("Submitting job to Trailblazer: %s", request_body)
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
@@ -178,11 +176,11 @@ class TrailblazerAPI:
         )
 
     def set_analysis_status(self, case_id: str, status: str) -> datetime:
-        """Set an analysis to failed."""
+        """Set an analysis to a given status."""
         request_body = {"case_id": case_id, "status": status}
 
         LOG.debug(f"Request body: {request_body}")
-        LOG.info(f"Setting analysis status to failed for case {case_id}")
+        LOG.info(f"Setting analysis status to {status} for case {case_id}")
         self.query_trailblazer(
             command="set-analysis-status", request_body=request_body, method=APIMethods.PUT
         )

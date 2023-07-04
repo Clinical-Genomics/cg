@@ -2,7 +2,7 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import requests
 from requests import Response
@@ -124,7 +124,7 @@ class NiptUploadAPI:
 
         if not self.dry_run:
             analysis_obj.uploaded_at = dt.datetime.now()
-            self.status_db.commit()
+            self.status_db.session.commit()
             self.trailblazer_api.set_analysis_uploaded(
                 case_id=case_id, uploaded_at=analysis_obj.uploaded_at
             )
@@ -139,7 +139,7 @@ class NiptUploadAPI:
 
         if not self.dry_run:
             analysis_obj.upload_started_at = dt.datetime.now()
-            self.status_db.commit()
+            self.status_db.session.commit()
 
         return analysis_obj
 

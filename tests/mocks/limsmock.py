@@ -9,6 +9,14 @@ class LimsProject(BaseModel):
     id: str = "1"
 
 
+class MockReagentType:
+    """Mock class for reagent type."""
+
+    def __init__(self, label: str, sequence: str):
+        self.label: str = label
+        self.sequence: str = sequence
+
+
 class LimsSample(BaseModel):
     id: str
     name: str = None
@@ -103,3 +111,11 @@ class MockLimsAPI(LimsAPI):
             if sample.internal_id == lims_id:
                 received_date = sample.received_at
         return received_date
+
+    def get_sample_rin(self, sample_id: str) -> float:
+        """Mock return sample RIN value."""
+        return 10.0
+
+    def get_latest_rna_input_amount(self, sample_id: str) -> float:
+        """Mock return input amount used in the latest preparation of an RNA sample."""
+        return 300.0

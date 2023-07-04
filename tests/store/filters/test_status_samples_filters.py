@@ -1,5 +1,6 @@
-from alchy import Query
-from cg.constants.subject import PhenotypeStatus
+from sqlalchemy.orm import Query
+from typing import Dict, Any
+from cg.constants.subject import PhenotypeStatus, Gender
 from cg.constants.constants import SampleType
 from cg.store import Store
 from cg.store.models import Sample
@@ -10,12 +11,10 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_is_delivered,
     filter_samples_is_not_delivered,
     filter_samples_without_invoice_id,
-    filter_samples_is_down_sampled,
     filter_samples_is_not_down_sampled,
     filter_samples_is_sequenced,
     filter_samples_is_not_sequenced,
     filter_samples_do_invoice,
-    filter_samples_do_not_invoice,
     filter_samples_by_invoice_id,
     filter_samples_by_internal_id,
     filter_samples_by_entry_id,
@@ -27,10 +26,10 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_by_name,
     filter_samples_by_subject_id,
     filter_samples_by_entry_customer_ids,
-    filter_samples_by_name_pattern,
     filter_samples_by_internal_id_pattern,
+    filter_samples_by_identifier_name_and_value,
 )
-from tests.store.conftest import StoreConftestFixture
+from tests.store.conftest import StoreConstants
 
 
 def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, loqusdb_id):
@@ -79,7 +78,6 @@ def test_get_samples_without_loqusdb_id(helpers, store, sample_store, sample_id,
 
 def test_filter_samples_is_delivered(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a delivered sample."""
 
@@ -107,7 +105,6 @@ def test_filter_samples_is_delivered(
 
 def test_filter_samples_is_not_delivered(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not delivered."""
 
@@ -135,8 +132,7 @@ def test_filter_samples_is_not_delivered(
 
 def test_filter_get_samples_by_invoice_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
-    invoice_id=StoreConftestFixture.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
+    invoice_id=StoreConstants.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that has an invoice id."""
 
@@ -165,7 +161,6 @@ def test_filter_get_samples_by_invoice_id(
 
 def test_filter_samples_without_invoice_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that has no invoice id."""
 
@@ -191,37 +186,8 @@ def test_filter_samples_without_invoice_id(
     assert samples.all()[0].invoice_id is None
 
 
-def test_filter_samples_down_sampled(
-    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
-):
-    """Test that a sample is returned when there is a sample that is not down sampled."""
-
-    # GIVEN a store with two samples of which one is not sequenced
-
-    # WHEN getting not sequenced samples
-    samples: Query = filter_samples_is_down_sampled(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-            table=Sample
-        )
-    )
-
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
-
-    # THEN samples should contain the test sample
-    assert samples.all()
-
-    # THEN samples should contain one sample
-    assert len(samples.all()) == 1
-
-    # THEN the sample should have a down sampled to value
-    assert samples.all()[0].downsampled_to is not None
-
-
 def test_filter_samples_not_down_sampled(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not down sampled."""
 
@@ -249,7 +215,6 @@ def test_filter_samples_not_down_sampled(
 
 def test_filter_samples_is_sequenced(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not sequenced."""
 
@@ -277,7 +242,6 @@ def test_filter_samples_is_sequenced(
 
 def test_filter_samples_is_not_sequenced(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not sequenced."""
 
@@ -305,7 +269,6 @@ def test_filter_samples_is_not_sequenced(
 
 def test_filter_samples_do_invoice(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is not a sample that should be invoiced."""
 
@@ -331,37 +294,8 @@ def test_filter_samples_do_invoice(
     assert samples.all()[0].no_invoice is False
 
 
-def test_filter_samples_do_not_invoice(
-    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
-):
-    """Test that a sample is returned when there is not a sample that should be invoiced."""
-
-    # GIVEN a  store with two samples of which one is marked to skip invoicing
-
-    # WHEN getting samples that are marked to skip invoicing
-    samples: Query = filter_samples_do_not_invoice(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-            table=Sample
-        )
-    )
-
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
-
-    # THEN samples should contain the test sample
-    assert samples.all()
-
-    # THEN samples should contain one sample
-    assert len(samples.all()) == 1
-
-    # THEN the sample should have a no invoice indicator that is set to True
-    assert samples.all()[0].no_invoice is True
-
-
 def test_filter_samples_is_received(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is received."""
 
@@ -389,7 +323,6 @@ def test_filter_samples_is_received(
 
 def test_filter_samples_is_not_received(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not received."""
 
@@ -414,7 +347,6 @@ def test_filter_samples_is_not_received(
 
 def test_filter_samples_is_prepared(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is prepared."""
 
@@ -441,7 +373,6 @@ def test_filter_samples_is_prepared(
 
 def test_filter_samples_is_not_prepared(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not prepared."""
 
@@ -466,7 +397,7 @@ def test_filter_samples_is_not_prepared(
 
 def test_filter_get_samples_by_internal_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    sample_internal_id: str = StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
+    sample_internal_id: str = StoreConstants.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample with the given id."""
 
@@ -524,7 +455,7 @@ def test_filter_get_samples_by_entry_id(
 
 def test_filter_get_samples_with_type(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name=StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+    name=StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
     tissue_type: SampleType = SampleType.TUMOR,
 ):
     """Test that a sample is returned when there is a sample with the given type."""
@@ -554,7 +485,7 @@ def test_filter_get_samples_with_type(
 
 def test_filter_get_samples_by_name(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name=StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+    name=StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample with the given type."""
     # GIVEN a store with two samples that have names
@@ -582,7 +513,7 @@ def test_filter_get_samples_by_name(
 
 def test_filter_get_samples_by_subject_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    subject_id: str = StoreConftestFixture.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
+    subject_id: str = StoreConstants.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample with the given subject id."""
     # GIVEN a store with two samples of which one has a subject id
@@ -610,58 +541,32 @@ def test_filter_get_samples_by_subject_id(
 
 def test_filter_get_samples_by_customer_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    customer_id: int = 1,
 ):
     """Test that a sample is returned when there is a sample with the given customer id."""
-    # GIVEN a store with two samples of which one has a customer id
+    # GIVEN a store with samples with different customer ids
+    samples: Query = store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+        table=Sample
+    )
+    customer_id: int = samples.first().customer_id
+    assert customer_id != samples.order_by(Sample.customer_id.desc()).first().customer_id
 
-    # WHEN getting a sample by customer id
-    samples: Query = filter_samples_by_entry_customer_ids(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-            table=Sample
-        ),
+    # WHEN filtering the sample query by customer id
+    filtered_query: Query = filter_samples_by_entry_customer_ids(
+        samples=samples,
         customer_entry_ids=[customer_id],
     )
 
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
+    # THEN the result of the filtering is a query
+    assert isinstance(filtered_query, Query)
 
-    # THEN samples should contain the test sample
-    assert samples.all()
+    # THEN the filtered query is not empty
+    assert filtered_query.all()
 
-    # THEN samples should contain two samples
-    assert len(samples.all()) == 2
+    # THEN the filtered query has fewer elements than the unfiltered query
+    assert filtered_query.count() < samples.count()
 
-    # THEN the sample should have the correct customer id
-    assert samples[0].customer_id == customer_id
-
-
-def test_filter_get_samples_by_name_pattern(
-    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name_pattern: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
-):
-    """Test that a sample is returned when there is a sample with the given name pattern."""
-    # GIVEN a store with two samples of which one has a name name pattern
-
-    # WHEN getting a sample by name pattern
-    samples: Query = filter_samples_by_name_pattern(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-            table=Sample
-        ),
-        name_pattern=name_pattern,
-    )
-
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
-
-    # THEN samples should contain the test sample
-    assert samples.all()
-
-    # THEN samples should contain one sample
-    assert len(samples.all()) == 1
-
-    # THEN the sample should have the correct name
-    assert samples[0].name == name_pattern
+    # THEN a sample in the filtered query should have the correct customer id
+    assert filtered_query.first().customer_id == customer_id
 
 
 def test_filter_get_samples_by_internal_id_pattern(
@@ -689,4 +594,84 @@ def test_filter_get_samples_by_internal_id_pattern(
     assert len(samples.all()) == 1
 
     # THEN the sample should have the correct name
-    assert samples[0].internal_id == StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value
+    assert samples[0].internal_id == StoreConstants.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value
+
+
+def test_filter_samples_by_identifier_name_and_value_unique_sample(
+    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
+):
+    """Test that the function filters correctly for any identifier."""
+    # GIVEN a store with at least two samples
+    sample_query: Query = store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+        table=Sample
+    )
+    assert sample_query.count() > 1
+
+    # GIVEN a sample in store that has all attributes
+    sample: Sample = sample_query.first()
+
+    # WHEN filtering the sample query with every existing attribute of the sample
+    identifiers: Dict[str, Any] = {
+        "age_at_sampling": sample.age_at_sampling,
+        "application_version_id": sample.application_version_id,
+        "capture_kit": sample.capture_kit,
+        "comment": sample.comment,
+        "control": sample.control,
+        "created_at": sample.created_at,
+        "customer_id": sample.customer_id,
+        "delivered_at": sample.delivered_at,
+        "downsampled_to": sample.downsampled_to,
+        "from_sample": sample.from_sample,
+        "id": sample.id,
+        "internal_id": sample.internal_id,
+        "invoice_id": sample.invoice_id,
+        "invoiced_at": sample.invoiced_at,
+        "is_tumour": sample.is_tumour,
+        "loqusdb_id": sample.loqusdb_id,
+        "name": sample.name,
+        "no_invoice": sample.no_invoice,
+        "order": sample.order,
+        "ordered_at": sample.ordered_at,
+        "organism_id": sample.organism_id,
+        "original_ticket": sample.original_ticket,
+        "prepared_at": sample.prepared_at,
+        "priority": sample.priority,
+        "reads": sample.reads,
+        "received_at": sample.received_at,
+        "reference_genome": sample.reference_genome,
+        "sequence_start": sample.sequence_start,
+        "sex": sample.sex,
+        "sequenced_at": sample.sequenced_at,
+        "subject_id": sample.subject_id,
+    }
+    for key, value in identifiers.items():
+        filtered_sample_query: Query = filter_samples_by_identifier_name_and_value(
+            samples=sample_query,
+            identifier_name=key,
+            identifier_value=value,
+        )
+        # THEN the filtered query has at least one element
+        assert filtered_sample_query.count() > 0
+        # THEN the element in the filtered query is the sample for every attribute
+        assert getattr(filtered_sample_query.first(), key) == value
+
+
+def test_filter_samples_by_identifier_name_and_value_two_samples(sample_store: Store):
+    """."""
+    # GIVEN a store with more than 2 samples
+    sample_query: Query = sample_store._get_query(table=Sample)
+    assert sample_query.count() > 2
+
+    # WHEN filtering the females from the sample query using identifiers
+    filtered_query: Query = filter_samples_by_identifier_name_and_value(
+        samples=sample_query,
+        identifier_name="sex",
+        identifier_value=Gender.FEMALE,
+    )
+
+    # THEN the filtered query has at least two elements
+    assert filtered_query.count() > 1
+
+    # THEN all the elements of the filtered query are females
+    for sample in filtered_query:
+        assert sample.sex == Gender.FEMALE

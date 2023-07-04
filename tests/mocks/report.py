@@ -8,7 +8,6 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -95,13 +94,6 @@ class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
         )
 
         return file_path
-
-
-class MockDB(Store):
-    """Mock database"""
-
-    def __init__(self, store):
-        self.store = store
 
 
 class MockChanjo(ChanjoAPI):

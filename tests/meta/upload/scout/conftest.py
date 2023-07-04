@@ -3,12 +3,10 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Generator, List
+from typing import Dict, Generator, List
 
 import pytest
-from housekeeper.store.models import Version
-
-from cg.constants import DataDelivery, FileExtensions, Pipeline
+from cg.constants import DataDelivery, Pipeline
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.sequencing import SequencingMethod
 from cg.io.controller import ReadFile
@@ -17,7 +15,8 @@ from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import MipLoadConfig
 from cg.store import Store
-from cg.store.models import Analysis, Family
+from cg.store.models import Analysis, Family, Sample
+from housekeeper.store.models import Version
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -28,7 +27,6 @@ from tests.mocks.scout import MockScoutAPI
 from tests.store_helpers import StoreHelpers
 
 LOG = logging.getLogger(__name__)
-SNV_FILE_NAME: str = f"snv{FileExtensions.VCF}"
 
 
 @pytest.fixture(name="rna_case_id")
@@ -71,24 +69,6 @@ def fixture_rna_sample_father_id() -> str:
 def fixture_dna_sample_son_id() -> str:
     """Return a son DNA sample id."""
     return "dna_son"
-
-
-@pytest.fixture(name="dna_sample_daughter_id")
-def fixture_dna_sample_daughter_id() -> str:
-    """Return a daughter DNA sample id."""
-    return "dna_daughter"
-
-
-@pytest.fixture(name="dna_sample_mother_id")
-def fixture_dna_sample_mother_id() -> str:
-    """Return a mother DNA sample id."""
-    return "dna_mother"
-
-
-@pytest.fixture(name="dna_sample_father_id")
-def fixture_dna_sample_father_id() -> str:
-    """Return a father DNA sample id."""
-    return "dna_father"
 
 
 @pytest.fixture(name="another_sample_id")
@@ -238,7 +218,9 @@ def fixture_rna_store(
     for link in dna_case.links:
         link.sample.internal_id = link.sample.name
 
-    store.commit()
+    helpers.add_analysis(store=store, case=dna_case, uploaded_at=datetime.now())
+
+    store.session.commit()
     return store
 
 
@@ -258,7 +240,14 @@ def fixture_lims_samples(lims_family: dict) -> List[dict]:
 
 @pytest.fixture(scope="function", name="mip_dna_analysis_hk_bundle_data")
 def fixture_mip_dna_analysis_hk_bundle_data(
-    case_id: str, timestamp: datetime, mip_dna_analysis_dir: Path, sample_id: str
+    case_id: str,
+    timestamp: datetime,
+    mip_dna_analysis_dir: Path,
+    sample_id: str,
+    snv_vcf_file: str,
+    sv_vcf_file: str,
+    snv_research_vcf_file: str,
+    sv_research_vcf_file: str,
 ) -> dict:
     """Return MIP DNA bundle data for Housekeeper."""
     return {
@@ -267,22 +256,22 @@ def fixture_mip_dna_analysis_hk_bundle_data(
         "expires": timestamp,
         "files": [
             {
-                "path": Path(mip_dna_analysis_dir, SNV_FILE_NAME).as_posix(),
+                "path": Path(mip_dna_analysis_dir, snv_vcf_file).as_posix(),
                 "archive": False,
                 "tags": ["vcf-snv-clinical"],
             },
             {
-                "path": Path(mip_dna_analysis_dir, "sv.vcf").as_posix(),
+                "path": Path(mip_dna_analysis_dir, sv_vcf_file).as_posix(),
                 "archive": False,
                 "tags": ["vcf-sv-clinical"],
             },
             {
-                "path": Path(mip_dna_analysis_dir, "snv_research.vcf").as_posix(),
+                "path": Path(mip_dna_analysis_dir, snv_research_vcf_file).as_posix(),
                 "archive": False,
                 "tags": ["vcf-snv-research"],
             },
             {
-                "path": Path(mip_dna_analysis_dir, "sv_research.vcf").as_posix(),
+                "path": Path(mip_dna_analysis_dir, sv_research_vcf_file).as_posix(),
                 "archive": False,
                 "tags": ["vcf-sv-research"],
             },
@@ -337,7 +326,7 @@ def fixture_mip_rna_analysis_hk_bundle_data(
 ) -> dict:
     """Return MIP RNA bundle data for Housekeeper."""
 
-    files: [dict] = [
+    files: List[dict] = [
         {
             "path": Path(mip_dna_analysis_dir, f"{rna_case_id}_report.selected.pdf").as_posix(),
             "archive": False,
@@ -384,7 +373,12 @@ def fixture_mip_rna_analysis_hk_bundle_data(
 
 @pytest.fixture(scope="function", name="balsamic_analysis_hk_bundle_data")
 def fixture_balsamic_analysis_hk_bundle_data(
-    case_id: str, timestamp: datetime, balsamic_wgs_analysis_dir: Path, sample_id: str
+    case_id: str,
+    timestamp: datetime,
+    balsamic_wgs_analysis_dir: Path,
+    sample_id: str,
+    snv_vcf_file: str,
+    sv_vcf_file: str,
 ) -> dict:
     """Return Balsamic bundle data for Housekeeper,"""
     return {
@@ -393,12 +387,12 @@ def fixture_balsamic_analysis_hk_bundle_data(
         "expires": timestamp,
         "files": [
             {
-                "path": Path(balsamic_wgs_analysis_dir, SNV_FILE_NAME).as_posix(),
+                "path": Path(balsamic_wgs_analysis_dir, snv_vcf_file).as_posix(),
                 "archive": False,
                 "tags": ["vcf-snv-clinical"],
             },
             {
-                "path": Path(balsamic_wgs_analysis_dir, "sv.vcf").as_posix(),
+                "path": Path(balsamic_wgs_analysis_dir, sv_vcf_file).as_posix(),
                 "archive": False,
                 "tags": ["vcf-sv-clinical"],
             },
@@ -502,12 +496,6 @@ def fixture_rnafusion_analysis_hk_api(
     return housekeeper_api
 
 
-@pytest.fixture(name="mip_file_handler")
-def fixture_mip_file_handler(mip_dna_analysis_hk_version: Version) -> MipConfigBuilder:
-    """Return a MIP confiig builder."""
-    return MipConfigBuilder(hk_version_obj=mip_dna_analysis_hk_version)
-
-
 @pytest.fixture(name="mip_dna_analysis")
 def fixture_mip_dna_analysis(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers: StoreHelpers
@@ -607,13 +595,13 @@ def fixture_balsamic_config_builder(
 
 @pytest.fixture(name="mip_load_config")
 def fixture_mip_load_config(
-    mip_dna_analysis_dir: Path, case_id: str, customer_id: str
+    mip_dna_analysis_dir: Path, case_id: str, customer_id: str, snv_vcf_file: str
 ) -> MipLoadConfig:
     """Return a valid MIP load_config."""
     return MipLoadConfig(
         owner=customer_id,
         family=case_id,
-        vcf_snv=Path(mip_dna_analysis_dir, SNV_FILE_NAME).as_posix(),
+        vcf_snv=Path(mip_dna_analysis_dir, snv_vcf_file).as_posix(),
         track="rare",
     )
 
@@ -694,6 +682,24 @@ def fixture_upload_balsamic_analysis_scout_api(
         lims_api=lims_api,
         status_db=store,
     )
+
+
+@pytest.fixture(name="rna_dna_sample_case_map")
+def fixture_rna_dna_sample_case_map(
+    rna_sample_son_id: str,
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+) -> Dict[str, List[str]]:
+    """Return a valid RNA-DNA case map."""
+    rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
+
+    # WHEN adding the RNA sample rna_dna_case_map
+    rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]] = {}
+    upload_scout_api._map_dna_samples_related_to_rna_sample(
+        rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_sample_case_map
+    )
+
+    return rna_dna_sample_case_map
 
 
 @pytest.fixture(name="upload_rnafusion_analysis_scout_api")

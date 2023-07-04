@@ -121,6 +121,14 @@ class PedigreeConfigError(CgError):
         self.errors = errors
 
 
+class RunParametersError(CgError):
+    """Raised when something is wrong with the run parameters file."""
+
+
+class SampleSheetError(CgError):
+    """Raised when something is wrong with the sample sheet."""
+
+
 class ScoutUploadError(CgError):
     """Raised when uploading to Scout fails."""
 
@@ -175,3 +183,11 @@ class DdnDataflowAuthenticationError(CgError):
 
 class MissingFilesError(CgError):
     """Exception raised when there are missing files."""
+
+
+class MetricsQCError(CgError):
+    """Exception raised when QC metrics are not met."""
+
+
+class MissingMetrics(CgError):
+    """Exception raised when mandatory metrics are missing."""

@@ -32,7 +32,6 @@ def clean_context(
     helpers: StoreHelpers,
     project_dir: Path,
     timestamp_yesterday: datetime.datetime,
-    timestamp_now: datetime.datetime,
 ) -> CGConfig:
     analysis_api = BalsamicAnalysisAPI(cg_context)
     store = analysis_api.status_db
@@ -70,7 +69,7 @@ def clean_context(
         data_analysis=Pipeline.BALSAMIC,
     )
     case_to_not_clean.action = "running"
-    store.commit()
+    store.session.commit()
 
     sample_case_to_not_clean = helpers.add_sample(
         store,

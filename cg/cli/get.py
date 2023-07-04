@@ -24,24 +24,24 @@ def get(context: click.Context, identifier: Optional[str]):
     """Get information about records in the database."""
     if identifier:
         if re.match(r"^[A-Z]{3}[0-9]{4,5}[A-Z]{1}[1-9]{1,3}$", identifier):
-            context.invoke(sample, sample_ids=[identifier])
+            context.invoke(get_sample, sample_ids=[identifier])
         elif re.match(r"^[a-z]*$", identifier):
             # try case information
-            context.invoke(case, case_ids=[identifier])
+            context.invoke(get_case, case_ids=[identifier])
         elif re.match(r"^[HC][A-Z0-9]{8}$", identifier):
             # try flowcell information
-            context.invoke(flow_cell, flow_cell_id=identifier)
+            context.invoke(get_flow_cell, flow_cell_id=identifier)
         else:
             LOG.error(f"{identifier}: can't predict identifier")
             raise click.Abort
 
 
-@get.command()
+@get.command("sample")
 @click.option("--cases/--no-cases", default=True, help="Display related cases")
 @click.option("-hf", "--hide-flow-cell", is_flag=True, help="Hide related flow cells")
 @click.argument("sample-ids", nargs=-1)
 @click.pass_context
-def sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids: List[str]):
+def get_sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids: List[str]):
     """Get information about a sample."""
     status_db: Store = context.obj.status_db
     for sample_id in sample_ids:
@@ -64,17 +64,17 @@ def sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids
             case_ids: List[str] = [
                 link_obj.family.internal_id for link_obj in existing_sample.links
             ]
-            context.invoke(case, case_ids=case_ids, samples=False)
+            context.invoke(get_case, case_ids=case_ids, samples=False)
         if not hide_flow_cell:
             for sample_flow_cell in existing_sample.flowcells:
                 LOG.debug(f"Get info on flow cell: {sample_flow_cell.name}")
-                context.invoke(flow_cell, flow_cell_id=sample_flow_cell.name, samples=False)
+                context.invoke(get_flow_cell, flow_cell_id=sample_flow_cell.name, samples=False)
 
 
-@get.command()
+@get.command("analysis")
 @click.argument("case-id")
 @click.pass_obj
-def analysis(context: CGConfig, case_id: str):
+def get_analysis(context: CGConfig, case_id: str):
     """Get information about case analysis."""
     status_db: Store = context.status_db
     case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
@@ -92,10 +92,10 @@ def analysis(context: CGConfig, case_id: str):
         click.echo(tabulate([row], headers=ANALYSIS_HEADERS, tablefmt="psql"))
 
 
-@get.command()
+@get.command("relations")
 @click.argument("case-id")
 @click.pass_obj
-def relations(context: CGConfig, case_id: str):
+def get_case_relations(context: CGConfig, case_id: str):
     """Get information about case relations."""
     status_db: Store = context.status_db
     case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
@@ -114,7 +114,7 @@ def relations(context: CGConfig, case_id: str):
         click.echo(tabulate([row], headers=LINK_HEADERS, tablefmt="psql"))
 
 
-@get.command()
+@get.command("case")
 @click.option("-c", "--customer-id", help="internal id for customer to filter by")
 @click.option("-n", "--name", is_flag=True, help="search family by name")
 @click.option("--samples/--no-samples", default=True, help="display related samples")
@@ -122,7 +122,7 @@ def relations(context: CGConfig, case_id: str):
 @click.option("--analyses/--no-analyses", default=True, help="display related analyses")
 @click.argument("case-ids", nargs=-1)
 @click.pass_context
-def case(
+def get_case(
     context: click.Context,
     customer_id: str,
     name: bool,
@@ -162,24 +162,24 @@ def case(
         ]
         click.echo(tabulate([row], headers=FAMILY_HEADERS, tablefmt="psql"))
         if relate:
-            context.invoke(relations, case_id=status_db_case.internal_id)
+            context.invoke(get_case_relations, case_id=status_db_case.internal_id)
         if samples:
             sample_ids: List[str] = [
                 link_obj.sample.internal_id for link_obj in status_db_case.links
             ]
-            context.invoke(sample, sample_ids=sample_ids, cases=False)
+            context.invoke(get_sample, sample_ids=sample_ids, cases=False)
         if analyses:
-            context.invoke(analysis, case_id=status_db_case.internal_id)
+            context.invoke(get_analysis, case_id=status_db_case.internal_id)
 
 
 @get.command("flow-cell")
 @click.option("--samples/--no-samples", default=True, help="Display related samples")
 @click.argument("flow-cell-id")
 @click.pass_context
-def flow_cell(context: click.Context, samples: bool, flow_cell_id: str):
+def get_flow_cell(context: click.Context, samples: bool, flow_cell_id: str):
     """Get information about a flow cell and the samples on it."""
     status_db: Store = context.obj.status_db
-    existing_flow_cell: Flowcell = status_db.get_flow_cell(flow_cell_id=flow_cell_id)
+    existing_flow_cell: Flowcell = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
     if not existing_flow_cell:
         LOG.error(f"{flow_cell_id}: flow cell not found")
         raise click.Abort
@@ -197,6 +197,6 @@ def flow_cell(context: click.Context, samples: bool, flow_cell_id: str):
             sample_obj.internal_id for sample_obj in existing_flow_cell.samples
         ]
         if sample_ids:
-            context.invoke(sample, sample_ids=sample_ids, cases=False)
+            context.invoke(get_sample, sample_ids=sample_ids, cases=False)
         else:
             LOG.warning("No samples found on flow cell")

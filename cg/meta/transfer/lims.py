@@ -21,13 +21,6 @@ class PoolState(Enum):
     DELIVERED = "delivered"
 
 
-class MicrobialState(Enum):
-    RECEIVED = "received"
-    PREPARED = "prepared"
-    SEQUENCED = "sequenced"
-    DELIVERED = "delivered"
-
-
 class IncludeOptions(Enum):
     UNSET = "unset"
     NOTINVOICED = "not-invoiced"
@@ -58,9 +51,6 @@ class TransferLims(object):
             PoolState.DELIVERED: self.lims.get_delivery_date,
         }
 
-    def _get_samples_not_yet_delivered(self):
-        return self.status.get_samples_not_delivered()
-
     def transfer_samples(
         self, status_type: SampleState, include: str = "unset", sample_id: str = None
     ):
@@ -90,7 +80,7 @@ class TransferLims(object):
                 )
 
                 setattr(sample_obj, f"{status_type.value}_at", lims_date)
-                self.status.commit()
+                self.status.session.commit()
             else:
                 LOG.debug(f"no {status_type.value} date found for {sample_obj.internal_id}")
 
@@ -131,7 +121,7 @@ class TransferLims(object):
                     status_date,
                 )
                 setattr(pool_obj, f"{status_type.value}_at", status_date)
-                self.status.commit()
+                self.status.session.commit()
                 break
 
     def _get_samples_in_step(self, status_type) -> List[Sample]:

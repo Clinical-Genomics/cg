@@ -3,16 +3,16 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Iterable, List, Optional, Set, Tuple, Dict
+from typing import Dict, Iterable, List, Optional, Set, Tuple
 
-from alchy import Query
+from cg.constants import SequencingFileTag
+from cg.exc import HousekeeperBundleVersionMissingError
+from sqlalchemy.orm import Query
+
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
 from housekeeper.store.models import Bundle, File, Version
-
-from cg.constants import SequencingFileTag
-from cg.exc import HousekeeperBundleVersionMissingError
 
 LOG = logging.getLogger(__name__)
 
@@ -88,14 +88,10 @@ class HousekeeperAPI:
             Path(file_obj.full_path).unlink()
 
         LOG.info(f"Deleting file {file_id} from housekeeper")
-        file_obj.delete()
-        self._store.commit()
+        self._store.session.delete(file_obj)
+        self.commit()
 
         return file_obj
-
-    def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:
-        """Check if there are files for a bundle, tags, and/or version."""
-        return any(self.files(bundle=bundle, tags=tags, version=version))
 
     def add_file(self, path, version_obj: Version, tags: list, to_archive: bool = False) -> File:
         """Add a file to the database."""
@@ -118,7 +114,7 @@ class HousekeeperAPI:
         self,
         *,
         bundle: str = None,
-        tags: List[str] = None,
+        tags: Set[str] = None,
         version: int = None,
         path: str = None,
     ) -> Query:
@@ -155,7 +151,7 @@ class HousekeeperAPI:
 
     def rollback(self):
         """Wrap method in Housekeeper Store."""
-        return self._store.rollback()
+        return self._store.session.rollback()
 
     def session_no_autoflush(self):
         """Wrap property in Housekeeper Store."""
@@ -238,9 +234,10 @@ class HousekeeperAPI:
 
     def last_version(self, bundle: str) -> Version:
         """Gets the latest version of a bundle."""
-        LOG.info(f"Fetch latest version from bundle {bundle}")
+        LOG.debug(f"Fetch latest version from bundle {bundle}")
         return (
-            self._store.Version.query.join(Version.bundle)
+            self._store._get_query(table=Version)
+            .join(Version.bundle)
             .filter(Bundle.name == bundle)
             .order_by(models.Version.created_at.desc())
             .first()
@@ -296,13 +293,14 @@ class HousekeeperAPI:
         include_version(self.get_root_dir(), version_obj)
         version_obj.included_at = dt.datetime.now()
 
-    def add_commit(self, *args, **kwargs):
+    def add_commit(self, obj):
         """Wrap method in Housekeeper Store."""
-        return self._store.add_commit(*args, **kwargs)
+        self._store.session.add(obj)
+        return self._store.session.commit()
 
     def commit(self):
         """Wrap method in Housekeeper Store."""
-        return self._store.commit()
+        return self._store.session.commit()
 
     def get_root_dir(self) -> str:
         """Returns the root dir of Housekeeper."""
@@ -356,7 +354,7 @@ class HousekeeperAPI:
         bundle_version.included_at = dt.datetime.now()
         self.commit()
 
-    def get_file_from_latest_version(self, bundle_name: str, tags: List[str]) -> Optional[File]:
+    def get_file_from_latest_version(self, bundle_name: str, tags: Set[str]) -> Optional[File]:
         """Return a file in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
@@ -364,9 +362,7 @@ class HousekeeperAPI:
             raise HousekeeperBundleVersionMissingError
         return self.files(version=version.id, tags=tags).first()
 
-    def get_files_from_latest_version(
-        self, bundle_name: str, tags: List[str]
-    ) -> Optional[List[File]]:
+    def get_files_from_latest_version(self, bundle_name: str, tags: List[str]) -> Query:
         """Return files in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:

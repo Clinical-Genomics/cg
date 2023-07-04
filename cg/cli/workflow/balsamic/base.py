@@ -25,6 +25,7 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store
 from pydantic import ValidationError
 
+
 LOG = logging.getLogger(__name__)
 
 
@@ -70,7 +71,7 @@ def config_case(
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     try:
         LOG.info(f"Creating config file for {case_id}.")
-        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.config_case(
             case_id=case_id,
             gender=gender,
@@ -105,7 +106,7 @@ def run(
     """Run balsamic analysis for given CASE ID"""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     try:
-        analysis_api.verify_case_id_in_statusdb(case_id)
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.check_analysis_ongoing(case_id)
         analysis_api.run_analysis(
@@ -136,7 +137,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
 
     try:
-        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
         analysis_api.report_deliver(case_id=case_id, dry_run=dry_run)
@@ -159,7 +160,7 @@ def store_housekeeper(context: CGConfig, case_id: str):
     status_db: Store = context.status_db
 
     try:
-        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
         analysis_api.upload_bundle_housekeeper(case_id=case_id)
@@ -174,7 +175,7 @@ def store_housekeeper(context: CGConfig, case_id: str):
     except Exception as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
         housekeeper_api.rollback()
-        status_db.rollback()
+        status_db.session.rollback()
         raise click.Abort()
 
 

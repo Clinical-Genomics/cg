@@ -23,6 +23,7 @@ from cg.store.models import (
     Pool,
     Sample,
     User,
+    SampleLaneSequencingMetrics,
 )
 
 from . import admin, api, ext, invoices
@@ -34,6 +35,7 @@ def create_app():
     _load_config(app)
     _configure_extensions(app)
     _register_blueprints(app)
+    _register_teardowns(app)
 
     return app
 
@@ -107,6 +109,9 @@ def _register_admin_views():
     ext.admin.add_view(admin.OrganismView(Organism, ext.db.session))
     ext.admin.add_view(admin.PanelView(Panel, ext.db.session))
     ext.admin.add_view(admin.UserView(User, ext.db.session))
+    ext.admin.add_view(
+        admin.SampleLaneSequencingMetricsView(SampleLaneSequencingMetrics, ext.db.session)
+    )
 
     # Business data views
     ext.admin.add_view(admin.FamilyView(Family, ext.db.session))
@@ -117,3 +122,11 @@ def _register_admin_views():
     ext.admin.add_view(admin.AnalysisView(Analysis, ext.db.session))
     ext.admin.add_view(admin.DeliveryView(Delivery, ext.db.session))
     ext.admin.add_view(admin.InvoiceView(Invoice, ext.db.session))
+
+
+def _register_teardowns(app: Flask):
+    """Register teardown functions."""
+
+    @app.teardown_appcontext
+    def remove_database_session(exception=None):
+        ext.db.session.remove()

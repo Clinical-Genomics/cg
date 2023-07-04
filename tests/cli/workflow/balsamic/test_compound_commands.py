@@ -50,7 +50,6 @@ def test_store(
     real_housekeeper_api,
     mock_config,
     mock_deliverable,
-    mock_analysis_finish,
     caplog,
     hermes_deliverables,
     mocker,
@@ -129,13 +128,11 @@ def test_start_available(cli_runner: CliRunner, balsamic_context: CGConfig, capl
 
 
 def test_store_available(
-    tmpdir_factory,
     cli_runner: CliRunner,
     balsamic_context: CGConfig,
     real_housekeeper_api,
     mock_config,
     mock_deliverable,
-    mock_analysis_finish,
     caplog,
     mocker,
     hermes_deliverables,
@@ -166,7 +163,7 @@ def test_store_available(
     # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
     balsamic_context.status_db.get_case_by_internal_id(case_id_success).action = "running"
-    balsamic_context.status_db.commit()
+    balsamic_context.status_db.session.commit()
 
     # THEN command exits with 1 because one of the cases threw errors
     assert result.exit_code == 1

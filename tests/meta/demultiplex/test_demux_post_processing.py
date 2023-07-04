@@ -2,7 +2,13 @@ import logging
 from pathlib import Path
 from typing import Generator
 
+from mock import MagicMock, call
+from cg.constants.constants import FileExtensions
+
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
+from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.constants.sequencing import Sequencers
+
 from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
     DemuxPostProcessingHiseqXAPI,
@@ -10,7 +16,7 @@ from cg.meta.demultiplex.demux_post_processing import (
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 
 
@@ -35,7 +41,7 @@ def test_set_dry_run(
 def test_add_to_cgstats_dry_run(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     caplog.set_level(logging.INFO)
 
@@ -50,7 +56,7 @@ def test_add_to_cgstats_dry_run(
     post_demux_api.set_dry_run(dry_run=True)
 
     # When adding to cgstats
-    post_demux_api.add_to_cgstats(flow_cell_path=flow_cell.path)
+    post_demux_api.add_to_cgstats(flow_cell_path=bcl2fastq_flow_cell.path)
 
     # THEN we should just log and exit
     assert "Dry run will not add flow cell stats" in caplog.text
@@ -59,7 +65,7 @@ def test_add_to_cgstats_dry_run(
 def test_add_to_cgstats(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     caplog.set_level(logging.INFO)
 
@@ -71,16 +77,16 @@ def test_add_to_cgstats(
     )
 
     # When adding to cgstats
-    post_demux_api.add_to_cgstats(flow_cell_path=flow_cell.path)
+    post_demux_api.add_to_cgstats(flow_cell_path=bcl2fastq_flow_cell.path)
 
     # THEN we should run the command
-    assert f"add --machine X -u Unaligned {flow_cell.path}" in caplog.text
+    assert f"add --machine X -u Unaligned {bcl2fastq_flow_cell.path}" in caplog.text
 
 
 def test_cgstats_select_project_dry_run(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     flow_cell_project_id: int,
     cgstats_select_project_log_file: Path,
 ):
@@ -94,7 +100,7 @@ def test_cgstats_select_project_dry_run(
     )
 
     # GIVEN an unaligned project directory
-    Path(flow_cell.path, "Unaligned", f"Project_{flow_cell_project_id}").mkdir(
+    Path(bcl2fastq_flow_cell.path, "Unaligned", f"Project_{flow_cell_project_id}").mkdir(
         parents=True, exist_ok=True
     )
 
@@ -102,7 +108,9 @@ def test_cgstats_select_project_dry_run(
     post_demux_api.set_dry_run(dry_run=True)
 
     # When processing project with cgstats
-    post_demux_api.cgstats_select_project(flow_cell_id=flow_cell.id, flow_cell_path=flow_cell.path)
+    post_demux_api.cgstats_select_project(
+        flow_cell_id=bcl2fastq_flow_cell.id, flow_cell_path=bcl2fastq_flow_cell.path
+    )
 
     # THEN we should just log and exit
     assert "Dry run will not process selected project" in caplog.text
@@ -111,7 +119,7 @@ def test_cgstats_select_project_dry_run(
 def test_cgstats_select_project(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     flow_cell_project_id: int,
     cgstats_select_project_log_file: Path,
 ):
@@ -125,12 +133,14 @@ def test_cgstats_select_project(
     )
 
     # GIVEN an unaligned project directory
-    Path(flow_cell.path, "Unaligned", f"Project_{flow_cell_project_id}").mkdir(
+    Path(bcl2fastq_flow_cell.path, "Unaligned", f"Project_{flow_cell_project_id}").mkdir(
         parents=True, exist_ok=True
     )
 
     # When processing project with cgstats
-    post_demux_api.cgstats_select_project(flow_cell_id=flow_cell.id, flow_cell_path=flow_cell.path)
+    post_demux_api.cgstats_select_project(
+        flow_cell_id=bcl2fastq_flow_cell.id, flow_cell_path=bcl2fastq_flow_cell.path
+    )
 
     # THEN we should have created a stats outfile
     assert cgstats_select_project_log_file.exists()
@@ -139,13 +149,13 @@ def test_cgstats_select_project(
     cgstats_select_project_log_file.unlink()
 
     # THEN we should run the command
-    assert f"select --project {flow_cell_project_id} {flow_cell.id}" in caplog.text
+    assert f"select --project {flow_cell_project_id} {bcl2fastq_flow_cell.id}" in caplog.text
 
 
 def test_cgstats_lanestats_dry_run(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     caplog.set_level(logging.INFO)
 
@@ -160,7 +170,7 @@ def test_cgstats_lanestats_dry_run(
     post_demux_api.set_dry_run(dry_run=True)
 
     # When processing lane stats with cgstats
-    post_demux_api.cgstats_lanestats(flow_cell_path=flow_cell.path)
+    post_demux_api.cgstats_lanestats(flow_cell_path=bcl2fastq_flow_cell.path)
 
     # THEN we should run the command
     assert "Dry run will not add lane stats" in caplog.text
@@ -169,7 +179,7 @@ def test_cgstats_lanestats_dry_run(
 def test_cgstats_lanestats(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     caplog.set_level(logging.INFO)
 
@@ -181,16 +191,16 @@ def test_cgstats_lanestats(
     )
 
     # When processing lane stats with cgstats
-    post_demux_api.cgstats_lanestats(flow_cell_path=flow_cell.path)
+    post_demux_api.cgstats_lanestats(flow_cell_path=bcl2fastq_flow_cell.path)
 
     # THEN we should run the command
-    assert f"lanestats {flow_cell.path}" in caplog.text
+    assert f"lanestats {bcl2fastq_flow_cell.path}" in caplog.text
 
 
 def test_finish_flow_cell_copy_not_completed(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -209,22 +219,22 @@ def test_finish_flow_cell_copy_not_completed(
     # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
-        flow_cell_name=flow_cell.full_name,
-        flow_cell_path=flow_cell.path,
+        flow_cell_name=bcl2fastq_flow_cell.full_name,
+        flow_cell_path=bcl2fastq_flow_cell.path,
     )
 
     # Reinstate
     hiseq_x_copy_complete_file.touch()
 
     # THEN we should log that copy is not complete
-    assert f"{flow_cell.full_name} is not yet completely copied" in caplog.text
+    assert f"{bcl2fastq_flow_cell.full_name} is not yet completely copied" in caplog.text
 
 
 def test_finish_flow_cell_delivery_started(
     caplog,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     caplog.set_level(logging.DEBUG)
 
@@ -241,21 +251,24 @@ def test_finish_flow_cell_delivery_started(
     # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
-        flow_cell_name=flow_cell.full_name,
-        flow_cell_path=flow_cell.path,
+        flow_cell_name=bcl2fastq_flow_cell.full_name,
+        flow_cell_path=bcl2fastq_flow_cell.path,
     )
 
     # Clean up
     demultiplexing_delivery_file.unlink()
 
     # THEN we should log that the delivery has already started
-    assert f"{flow_cell.full_name} copy is complete and delivery has already started" in caplog.text
+    assert (
+        f"{bcl2fastq_flow_cell.full_name} copy is complete and delivery has already started"
+        in caplog.text
+    )
 
 
 def test_finish_flow_cell_delivery_not_hiseq_x(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     hiseq_x_tile_dir: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -274,18 +287,18 @@ def test_finish_flow_cell_delivery_not_hiseq_x(
     # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
-        flow_cell_name=flow_cell.full_name,
-        flow_cell_path=flow_cell.path,
+        flow_cell_name=bcl2fastq_flow_cell.full_name,
+        flow_cell_path=bcl2fastq_flow_cell.path,
     )
 
     # THEN we should log that this is not an Hiseq X flow cell
-    assert f"{flow_cell.full_name} is not an Hiseq X flow cell" in caplog.text
+    assert f"{bcl2fastq_flow_cell.full_name} is not an Hiseq X flow cell" in caplog.text
 
 
 def test_finish_flow_cell_ready(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     flow_cell_project_id: int,
     demultiplexing_delivery_file: Path,
     hiseq_x_tile_dir: Path,
@@ -308,7 +321,7 @@ def test_finish_flow_cell_ready(
 
     # GIVEN an unaligned project directory
     Path(
-        flow_cell.path,
+        bcl2fastq_flow_cell.path,
         DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
         f"Project_{flow_cell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
@@ -316,12 +329,14 @@ def test_finish_flow_cell_ready(
     # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
-        flow_cell_name=flow_cell.full_name,
-        flow_cell_path=flow_cell.path,
+        flow_cell_name=bcl2fastq_flow_cell.full_name,
+        flow_cell_path=bcl2fastq_flow_cell.path,
     )
 
     # THEN we should log that post-processing will begin
-    assert f"{flow_cell.full_name} copy is complete and delivery will start" in caplog.text
+    assert (
+        f"{bcl2fastq_flow_cell.full_name} copy is complete and delivery will start" in caplog.text
+    )
 
 
 def test_post_process_flow_cell_dry_run(
@@ -329,7 +344,7 @@ def test_post_process_flow_cell_dry_run(
     caplog,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     flow_cell_project_id: int,
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
@@ -349,7 +364,7 @@ def test_post_process_flow_cell_dry_run(
 
     # GIVEN an unaligned project directory
     Path(
-        flow_cell.path,
+        bcl2fastq_flow_cell.path,
         DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
         f"Project_{flow_cell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
@@ -373,7 +388,7 @@ def test_post_process_flow_cell(
     cgstats_select_project_log_file: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     flow_cell_project_id: int,
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
@@ -393,7 +408,7 @@ def test_post_process_flow_cell(
 
     # GIVEN an unaligned project directory
     Path(
-        flow_cell.path,
+        bcl2fastq_flow_cell.path,
         DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
         f"Project_{flow_cell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
@@ -409,13 +424,13 @@ def test_post_process_flow_cell(
     demultiplexing_delivery_file.unlink()
 
     # THEN we should also transfer the flow cell
-    assert f"Flow cell added: {flow_cell.id}" in caplog.text
+    assert f"Flow cell added: {bcl2fastq_flow_cell.id}" in caplog.text
 
 
 def test_finish_flow_cell(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -433,22 +448,22 @@ def test_finish_flow_cell(
     # When post-processing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
-        flow_cell_name=flow_cell.full_name,
-        flow_cell_path=flow_cell.path,
+        flow_cell_name=bcl2fastq_flow_cell.full_name,
+        flow_cell_path=bcl2fastq_flow_cell.path,
     )
 
     # Reinstate
     hiseq_x_copy_complete_file.touch()
 
     # THEN we should log that we are checking flow cell
-    assert f"Check demultiplexed flow cell {flow_cell.full_name}" in caplog.text
+    assert f"Check demultiplexed flow cell {bcl2fastq_flow_cell.full_name}" in caplog.text
 
 
 def test_finish_all_flowcells(
     caplog,
     demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -472,4 +487,383 @@ def test_finish_all_flowcells(
     hiseq_x_copy_complete_file.touch()
 
     # THEN we should log that we are checking flow cell
-    assert f"Check demultiplexed flow cell {flow_cell.full_name}" in caplog.text
+    assert f"Check demultiplexed flow cell {bcl2fastq_flow_cell.full_name}" in caplog.text
+
+
+def test_is_bcl2fastq_folder_structure(
+    demultiplex_context: CGConfig, bcl2fastq_folder_structure: Path
+):
+    """Test is_bcl2fastq_demux_folder_structure with a folder structure that follows the bcl2fastq folder structure."""
+    # GIVEN a bcl2fastq folder structure
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+    demux_post_processing_api.demux_api.out_dir = bcl2fastq_folder_structure
+
+    # WHEN checking if it is a bcl2fastq folder structure
+    is_bcl2fastq_folder_structure = demux_post_processing_api.is_bcl2fastq_demux_folder_structure(
+        flow_cell_directory=bcl2fastq_folder_structure
+    )
+
+    # THEN it should be a bcl2fastq folder structure
+    assert is_bcl2fastq_folder_structure is True
+
+
+def test_is_not_bcl2fastq_folder_structure(
+    demultiplex_context: CGConfig, not_bcl2fastq_folder_structure: Path
+):
+    """Test is_bcl2fastq_demux_folder_structure with a folder structure that does not follow the bcl2fastq output."""
+
+    # GIVEN not a bcl2fastq folder structure
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+    demux_post_processing_api.flow_cell_dir = not_bcl2fastq_folder_structure
+
+    # WHEN checking if it is a bcl2fastq folder structure
+    is_bcl2fastq_folder_structure = demux_post_processing_api.is_bcl2fastq_demux_folder_structure(
+        flow_cell_directory=not_bcl2fastq_folder_structure
+    )
+
+    # THEN it should not be a bcl2fastq folder structure
+    assert is_bcl2fastq_folder_structure is False
+
+
+def test_add_flow_cell_data_to_housekeeper(demultiplex_context: CGConfig):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    demux_post_processing_api.add_bundle_and_version_if_non_existent = MagicMock()
+    demux_post_processing_api.add_tags_if_non_existent = MagicMock()
+    demux_post_processing_api.add_sample_sheet = MagicMock()
+    demux_post_processing_api.add_sample_fastq_files = MagicMock()
+
+    flow_cell_name: str = "flow_cell_name"
+    flow_cell_directory: Path = Path("some/path/to/flow/cell/directory")
+
+    # WHEN the flow cell data is added to housekeeper
+    demux_post_processing_api.add_flow_cell_data_to_housekeeper(
+        flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
+    )
+
+    # THEN the bundle and version is added
+    demux_post_processing_api.add_bundle_and_version_if_non_existent.assert_called_once_with(
+        bundle_name=flow_cell_name
+    )
+
+    # THEN the correct tags are added
+    demux_post_processing_api.add_tags_if_non_existent.assert_called_once_with(
+        tag_names=[SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell_name]
+    )
+
+    # THEN the sample sheet is added
+    demux_post_processing_api.add_sample_sheet.assert_called_once_with(
+        flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
+    )
+
+    # THEN the fastq files are added
+    demux_post_processing_api.add_sample_fastq_files.assert_called_once_with(
+        flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
+    )
+
+
+def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    demux_post_processing_api.hk_api.bundle = MagicMock(return_value=None)
+    demux_post_processing_api.hk_api.create_new_bundle_and_version = MagicMock()
+
+    # WHEN adding a bundle and version which does not exist
+    flow_cell_name: str = "flow_cell_name"
+    demux_post_processing_api.add_bundle_and_version_if_non_existent(bundle_name=flow_cell_name)
+
+    # THEN that the expected methods were called with the expected arguments
+    demux_post_processing_api.hk_api.bundle.assert_called_once_with(name=flow_cell_name)
+    demux_post_processing_api.hk_api.create_new_bundle_and_version.assert_called_once_with(
+        name=flow_cell_name
+    )
+
+
+def test_add_bundle_and_version_if_already_exists(demultiplex_context: CGConfig):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    mock_bundle = MagicMock()
+    demux_post_processing_api.hk_api.bundle = MagicMock(return_value=mock_bundle)
+    demux_post_processing_api.hk_api.create_new_bundle_and_version = MagicMock()
+
+    # WHEN adding a bundle and version which already exists
+    flow_cell_name: str = "flow_cell_name"
+    demux_post_processing_api.add_bundle_and_version_if_non_existent(bundle_name=flow_cell_name)
+
+    # THEN the bundle was retrieved
+    demux_post_processing_api.hk_api.bundle.assert_called_once_with(name=flow_cell_name)
+
+    # THEN a new bundle and version was not created
+    demux_post_processing_api.hk_api.create_new_bundle_and_version.assert_not_called()
+
+
+def test_add_tags_if_non_existent(demultiplex_context: CGConfig):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN that the tags do not exist
+    demux_post_processing_api.hk_api.get_tag = MagicMock(return_value=None)
+    demux_post_processing_api.hk_api.add_tag = MagicMock()
+
+    # WHEN adding new tags
+    tag_names = ["tag1", "tag2"]
+    demux_post_processing_api.add_tags_if_non_existent(tag_names=tag_names)
+
+    # THEN the expected housekeeper API methods were called to create the tags
+    demux_post_processing_api.hk_api.get_tag.assert_has_calls(
+        [call(name="tag1"), call(name="tag2")]
+    )
+    demux_post_processing_api.hk_api.add_tag.assert_has_calls(
+        [call(name="tag1"), call(name="tag2")]
+    )
+
+
+def test_add_tags_if_all_exist(demultiplex_context: CGConfig):
+    # Given a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # Mock the methods in the housekeeper API
+    demux_post_processing_api.hk_api.get_tag = MagicMock(return_value=MagicMock())
+    demux_post_processing_api.hk_api.add_tag = MagicMock()
+
+    # Call the add_tags_if_non_existent method with two tag names
+    tag_names = ["tag1", "tag2"]
+    demux_post_processing_api.add_tags_if_non_existent(tag_names=tag_names)
+
+    # Assert that the expected methods were called with the expected arguments
+    demux_post_processing_api.hk_api.get_tag.assert_has_calls(
+        [call(name="tag1"), call(name="tag2")]
+    )
+    demux_post_processing_api.hk_api.add_tag.assert_not_called()
+
+
+def test_add_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+    demux_post_processing_api.add_file_to_bundle_if_non_existent = MagicMock()
+
+    # GIVEN a flow cell directory and name
+    flow_cell_directory: Path = Path(tmpdir_factory.mktemp("flow_cell_directory"))
+    sample_sheet_file = Path(flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+    sample_sheet_file.touch()
+    flow_cell_name = "flow_cell_name"
+
+    # WHEN a sample sheet is added
+    demux_post_processing_api.add_sample_sheet(
+        flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
+    )
+
+    # THEN add_file_if_non_existent was called with expected arguments
+    expected_file_path = Path(
+        flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+    expected_tag_names = [SequencingFileTag.SAMPLE_SHEET, flow_cell_name]
+
+    demux_post_processing_api.add_file_to_bundle_if_non_existent.assert_called_once_with(
+        file_path=expected_file_path,
+        bundle_name=flow_cell_name,
+        tag_names=expected_tag_names,
+    )
+
+
+def test_add_fastq_files_with_sample_id(demultiplex_context: CGConfig, tmpdir_factory):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    demux_post_processing_api.get_sample_fastq_paths_from_flow_cell = MagicMock()
+    demux_post_processing_api.get_sample_id_from_sample_fastq_file_path = MagicMock()
+    demux_post_processing_api.add_file_to_bundle_if_non_existent = MagicMock()
+
+    mock_fastq_paths = [
+        Path(tmpdir_factory.mktemp("first_file.fastq.gz")),
+        Path(tmpdir_factory.mktemp("second_file.fastq.gz")),
+    ]
+    demux_post_processing_api.get_sample_fastq_paths_from_flow_cell.return_value = mock_fastq_paths
+
+    sample_id = "sample1"
+    demux_post_processing_api.get_sample_id_from_sample_fastq_file_path.return_value = sample_id
+
+    # GIVEN a flow cell directory and name
+    flow_cell_directory: Path = Path(tmpdir_factory.mktemp("flow_cell_directory"))
+    flow_cell_name = "flow_cell_name"
+
+    # WHEN add_fastq_files is called
+    demux_post_processing_api.add_sample_fastq_files(
+        flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
+    )
+
+    # THEN add_file_if_non_existent was called with expected arguments for each file
+    expected_calls = [
+        call(
+            file_path=file_path,
+            bundle_name=sample_id,
+            tag_names=[SequencingFileTag.FASTQ, flow_cell_name],
+        )
+        for file_path in mock_fastq_paths
+    ]
+
+    demux_post_processing_api.add_file_to_bundle_if_non_existent.assert_has_calls(expected_calls)
+
+
+def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig, tmpdir_factory):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    demux_post_processing_api.get_sample_id_from_sample_fastq_file_path = MagicMock()
+    demux_post_processing_api.get_sample_id_from_sample_fastq_file_path.return_value = None
+
+    demux_post_processing_api.add_file_to_bundle_if_non_existent = MagicMock()
+
+    flow_cell_directory: Path = Path(tmpdir_factory.mktemp("flow_cell_directory"))
+    flow_cell_name = "flow_cell_name"
+
+    # WHEN add_fastq_files is called
+    demux_post_processing_api.add_sample_fastq_files(
+        flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
+    )
+
+    # THEN add_file_if_non_existent was not called
+    demux_post_processing_api.add_file_to_bundle_if_non_existent.assert_not_called()
+
+
+def test_is_valid_sample_fastq_filename(demultiplex_context: CGConfig):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # WHEN checking a filename containing "Undetermined"
+    file_name = "Undetermined_file.fastq"
+    assert not demux_post_processing_api.is_valid_sample_fastq_filename(file_name)
+
+    # WHEN checking a valid filename
+    file_name = "valid_file.fastq"
+    assert demux_post_processing_api.is_valid_sample_fastq_filename(file_name)
+
+
+def test_get_valid_flowcell_sample_fastq_file_path(demultiplex_context, tmpdir_factory):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN a flow cell directory
+    flow_cell_dir = Path(tmpdir_factory.mktemp("flow_cell"))
+
+    # GIVEN some files in temporary directory
+    sample_dir = flow_cell_dir / "Unaligned" / "Project_sample" / "Sample_test"
+    sample_dir.mkdir(parents=True)
+    valid_sample_fastq_directory_1 = Path(
+        sample_dir, f"Sample_ABC{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    )
+    valid_sample_fastq_directory_2 = Path(
+        sample_dir, f"Sample_ABC_123{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    )
+    valid_sample_fastq_directory_1.touch()
+    valid_sample_fastq_directory_2.touch()
+
+    # WHEN we get flowcell sample fastq file paths
+    result = demux_post_processing_api.get_sample_fastq_paths_from_flow_cell(
+        flow_cell_directory=flow_cell_dir
+    )
+
+    # THEN we should only get the valid files
+    assert len(result) == 2
+    assert valid_sample_fastq_directory_1 in result
+
+
+def test_get_invalid_flowcell_sample_fastq_file_path(demultiplex_context, tmpdir_factory):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN a flow cell directory
+    flow_cell_dir = Path(tmpdir_factory.mktemp("flow_cell"))
+
+    # GIVEN some files in temporary directory
+    project_dir = Path(flow_cell_dir, "Unaligned", "Project_sample")
+    project_dir.mkdir(parents=True)
+    invalid_fastq_file = Path(project_dir, f"file{FileExtensions.FASTQ}{FileExtensions.GZIP}")
+    invalid_fastq_file.touch()
+
+    # WHEN we get flowcell sample fastq file paths
+    result = demux_post_processing_api.get_sample_fastq_paths_from_flow_cell(
+        flow_cell_directory=flow_cell_dir
+    )
+
+    # THEN we should not get any files
+    assert len(result) == 0
+    assert invalid_fastq_file not in result
+
+
+def test_get_sample_id_from_sample_fastq_file_path(demultiplex_context: CGConfig, tmpdir_factory):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN a sample directory and file
+    tmp_dir = Path(tmpdir_factory.mktemp("flow_cell_directory"))
+    sample_id = "sampleid"
+    sample_dir = tmp_dir / f"prefix_{sample_id}"
+    sample_dir.mkdir()
+    sample_file = Path(sample_dir, f"file{FileExtensions.FASTQ}{FileExtensions.GZIP}")
+    sample_file.touch()
+
+    # WHEN we get sample id from sample fastq file path
+    result = demux_post_processing_api.get_sample_id_from_sample_fastq_file_path(sample_file)
+
+    # THEN we should get the correct sample id
+    assert result == sample_id
+
+
+def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context: CGConfig):
+    """Test that samples can be updated with read counts and sequencing date."""
+
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    demux_post_processing_api.status_db.get_sample_by_internal_id = MagicMock()
+    demux_post_processing_api.status_db.get_number_of_reads_for_sample_passing_q30_threshold = (
+        MagicMock()
+    )
+
+    mock_sample = MagicMock()
+    mock_read_count = 1_000
+    mock_flow_cell_data = MagicMock()
+    mock_flow_cell_data.sequencer_type = Sequencers.HISEQGA.value
+
+    demux_post_processing_api.status_db.get_sample_by_internal_id.return_value = mock_sample
+    demux_post_processing_api.status_db.get_number_of_reads_for_sample_passing_q30_threshold.return_value = (
+        mock_read_count
+    )
+    demux_post_processing_api.get_sample_ids_from_sample_sheet = MagicMock()
+    demux_post_processing_api.get_sample_ids_from_sample_sheet.return_value = [1]
+
+    # WHEN calling the method with the flow cell directory
+    demux_post_processing_api.update_sample_read_counts(mock_flow_cell_data)
+
+    # THEN the read count was set on the mock sample
+    assert mock_sample.calculated_read_count == mock_read_count
+
+
+def test_add_single_sequencing_metrics_entry_to_statusdb(
+    store_with_sequencing_metrics: Store,
+    demultiplex_context: CGConfig,
+    flow_cell_name: str,
+    sample_id: str,
+    lane: int = 1,
+):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN a sequencing metrics entry
+    sequencing_metrics_entry = store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+        flow_cell_name=flow_cell_name, sample_internal_id=sample_id, lane=lane
+    )
+
+    # WHEN adding the sequencing metrics entry to the statusdb
+    demux_post_processing_api.add_single_sequencing_metrics_entry_to_statusdb(
+        sample_lane_sequencing_metrics=[sequencing_metrics_entry]
+    )
+
+    # THEN the sequencing metrics entry was added to the statusdb
+    assert demux_post_processing_api.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+        flow_cell_name=flow_cell_name, sample_internal_id=sample_id, lane=lane
+    )

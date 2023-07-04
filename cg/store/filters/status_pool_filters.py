@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import List, Optional, Callable
-from alchy import Query
+from sqlalchemy.orm import Query
 from cg.store.models import Pool, Customer
 
 
@@ -64,11 +64,6 @@ def filter_pools_do_invoice(pools: Query, **kwargs) -> Query:
     return pools.filter(Pool.no_invoice.is_(False))
 
 
-def filter_pools_do_not_invoice(pools: Query, **kwargs) -> Query:
-    """Return pools marked to skip invoicing."""
-    return pools.filter(Pool.no_invoice.is_(True))
-
-
 def filter_pools_by_customer(pools: Query, customer: Customer, **kwargs) -> Query:
     """Return pools by customer id."""
     return pools.filter(Pool.customer == customer)
@@ -113,7 +108,6 @@ class PoolFilter(Enum):
     FILTER_BY_INVOICE_ID: Callable = filter_pools_by_invoice_id
     FILTER_WITHOUT_INVOICE_ID: Callable = filter_pools_without_invoice_id
     FILTER_DO_INVOICE: Callable = filter_pools_do_invoice
-    FILTER_DO_NOT_INVOICE: Callable = filter_pools_do_not_invoice
     FILTER_BY_CUSTOMER_ID: Callable = filter_pools_by_customer_id
     FILTER_BY_NAME_ENQUIRY: Callable = filter_pools_by_name_enquiry
     FILTER_BY_ORDER_ENQUIRY: Callable = filter_pools_by_order_enquiry

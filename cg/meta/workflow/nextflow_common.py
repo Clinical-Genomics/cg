@@ -35,13 +35,18 @@ class NextflowAnalysisAPI:
         return Path(root_dir, case_id)
 
     @classmethod
-    def verify_case_config_file_exists(cls, case_id: str, root_dir: str) -> None:
-        if not Path(cls.get_case_config_path(case_id=case_id, root_dir=root_dir)).exists():
+    def verify_case_config_file_exists(
+        cls, case_id: str, root_dir: str, dry_run: bool = False
+    ) -> None:
+        if (
+            not dry_run
+            and not Path(cls.get_case_config_path(case_id=case_id, root_dir=root_dir)).exists()
+        ):
             raise ValueError(f"No config file found for case {case_id}")
 
     @classmethod
     def get_case_config_path(cls, case_id: str, root_dir: str) -> str:
-        """Generates a path where the Rnafusion sample sheet for the case_id should be located."""
+        """Return a path where the sample sheet for the case_id should be located."""
         return (
             Path((cls.get_case_path(case_id, root_dir)), f"{case_id}_samplesheet.csv")
             .absolute()
@@ -64,15 +69,6 @@ class NextflowAnalysisAPI:
         """Generates a path where the Nextflow configurations should be located."""
         if nextflow_config:
             return Path(nextflow_config).absolute()
-
-    @classmethod
-    def get_case_nextflow_pid_path(cls, case_id: str, root_dir: str) -> Path:
-        """Generates a path where the Nextflow pid file for the case_id should be located."""
-        # If not specified with the NXF_PID_FILE variable, a .nextflow.pid is created in the launch directory when
-        # running nextflow in the background (with the bg option)
-        return Path(
-            (cls.get_case_path(case_id=case_id, root_dir=root_dir)), f"{case_id}_nextflow.pid"
-        )
 
     @classmethod
     def get_software_version_path(cls, case_id: str, root_dir: str) -> Path:
@@ -153,13 +149,13 @@ class NextflowAnalysisAPI:
         )
         run_options: List[str] = build_command_from_dict(
             options=dict(
-                (f"-{arg}", command_args.get(arg, None))
+                (f"-{arg.replace('_', '-')}", command_args.get(arg, None))
                 for arg in (
-                    "work-dir",
+                    "work_dir",
                     "resume",
                     "profile",
-                    "with-tower",
-                    "params-file",
+                    "with_tower",
+                    "params_file",
                 )
             ),
             exclude_true=True,
@@ -193,13 +189,6 @@ class NextflowAnalysisAPI:
         if outdir:
             return outdir
         return Path(cls.get_case_path(case_id, root_dir))
-
-    @classmethod
-    def get_nextflow_stdout_stderr(cls, case_id: str, root_dir: str) -> List[str]:
-        case_path = cls.get_case_path(case_id, root_dir).as_posix()
-        return [
-            f" > {case_path}/{case_id}-stdout.log 2> {case_path}/{case_id}-stdout.err < /dev/null & "
-        ]
 
     @classmethod
     def get_replace_map(cls, case_id: str, root_dir: str) -> dict:

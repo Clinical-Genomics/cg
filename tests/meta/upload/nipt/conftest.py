@@ -5,9 +5,9 @@ from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.stats import StatsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Application, Sample
 from tests.apps.cgstats.conftest import fixture_nipt_stats_api, fixture_stats_api
 from tests.store.api.conftest import fixture_re_sequenced_sample_store
+from cg.store.models import Application
 
 
 @pytest.fixture(name="nipt_upload_api_context")
@@ -36,11 +36,9 @@ def fixture_nipt_upload_api_failed_fc_context(
         .values(readcounts=10)
     )
     stats_api.session.commit()
-    application = (
-        status_db.Sample.query.filter(Sample.internal_id == sample_id)
-        .first()
-        .application_version.application
-    )
+    application = status_db.get_sample_by_internal_id(
+        internal_id=sample_id
+    ).application_version.application
     status_db.session.execute(
         update(Application).where(Application.id == application.id).values({"target_reads": 20})
     )

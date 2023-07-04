@@ -11,7 +11,7 @@ from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
-from cg.constants.constants import AnalysisType
+from cg.constants.constants import AnalysisType, WorkflowManager
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
@@ -67,18 +67,6 @@ class AnalysisAPI(MetaAPI):
         if not Path(self.get_case_config_path(case_id=case_id)).exists():
             raise CgError(f"No config file found for case {case_id}")
 
-    def verify_case_id_in_statusdb(self, case_id: str) -> None:
-        """Passes silently if case exists in StatusDB, raises error if case is missing"""
-
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if not case_obj:
-            LOG.error("Case %s could not be found in StatusDB!", case_id)
-            raise CgError
-        if not case_obj.links:
-            LOG.error("Case %s has no samples in in StatusDB!", case_id)
-            raise CgError
-        LOG.info("Case %s exists in status db", case_id)
-
     def check_analysis_ongoing(self, case_id: str) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
             LOG.warning(f"{case_id} : analysis is still ongoing - skipping")
@@ -99,6 +87,10 @@ class AnalysisAPI(MetaAPI):
         """Get Quality of service (SLURM QOS) for the case."""
         priority: int = self.get_priority_for_case(case_id=case_id)
         return PRIORITY_TO_SLURM_QOS[priority]
+
+    def get_workflow_manager(self) -> str:
+        """Get workflow manager for a given pipeline."""
+        return WorkflowManager.Slurm.value
 
     def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
         """Path to case working directory."""
@@ -132,11 +124,12 @@ class AnalysisAPI(MetaAPI):
         Gets application type for sample. Only application types supported by trailblazer (or other)
         are valid outputs.
         """
-        prep_category: str = sample_obj.application_version.application.prep_category
+        prep_category: str = sample_obj.prep_category
         if prep_category and prep_category.lower() in {
             AnalysisType.TARGETED_GENOME_SEQUENCING,
             AnalysisType.WHOLE_EXOME_SEQUENCING,
             AnalysisType.WHOLE_GENOME_SEQUENCING,
+            AnalysisType.WHOLE_TRANSCRIPTOME_SEQUENCING,
         }:
             return prep_category.lower()
         return AnalysisType.OTHER
@@ -160,7 +153,8 @@ class AnalysisAPI(MetaAPI):
             )
             return
         self.housekeeper_api.include(bundle_version)
-        self.housekeeper_api.add_commit(bundle_object, bundle_version)
+        self.housekeeper_api.add_commit(bundle_object)
+        self.housekeeper_api.add_commit(bundle_version)
         LOG.info(
             f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
         )
@@ -183,7 +177,8 @@ class AnalysisAPI(MetaAPI):
         if dry_run:
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
-        self.status_db.add_commit(new_analysis)
+        self.status_db.session.add(new_analysis)
+        self.status_db.session.commit()
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
@@ -206,6 +201,7 @@ class AnalysisAPI(MetaAPI):
             slurm_quality_of_service=self.get_slurm_qos_for_case(case_id=case_id),
             data_analysis=str(self.pipeline),
             ticket=self.status_db.get_latest_ticket_from_case(case_id),
+            workflow_manager=self.get_workflow_manager(),
         )
 
     def get_hermes_transformed_deliverables(self, case_id: str) -> dict:
@@ -243,7 +239,7 @@ class AnalysisAPI(MetaAPI):
         if action in [None, *CASE_ACTIONS]:
             case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
             case_obj.action = action
-            self.status_db.commit()
+            self.status_db.session.commit()
             LOG.info("Action %s set for case %s", action, case_id)
             return
         LOG.warning(
@@ -261,16 +257,22 @@ class AnalysisAPI(MetaAPI):
             pipeline=self.pipeline, threshold=self.threshold_reads
         )
 
-    def get_running_cases(self) -> List[Family]:
-        return self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
-
     def get_cases_to_store(self) -> List[Family]:
-        """Retrieve a list of cases where analysis finished successfully,
-        and is ready to be stored in Housekeeper"""
+        """Return cases where analysis finished successfully,
+        and is ready to be stored in Housekeeper."""
         return [
-            case_object
-            for case_object in self.get_running_cases()
-            if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
+            case
+            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
+            if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
+        ]
+
+    def get_cases_to_qc(self) -> List[Family]:
+        """Return cases where analysis finished successfully,
+        and is ready for QC metrics checks."""
+        return [
+            case
+            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
+            if self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
 
     def get_sample_fastq_destination_dir(self, case: Family, sample: Sample):
@@ -449,7 +451,7 @@ class AnalysisAPI(MetaAPI):
         LOG.info(f"Adding a cleaned at date for case {case_id}")
         for analysis_obj in analyses:
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
-            self.status_db.commit()
+            self.status_db.session.commit()
 
     def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
         """Remove workflow run directory."""

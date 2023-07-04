@@ -6,7 +6,7 @@ from cg.store import Store
 from cg.store.models import Sample, Analysis
 from cg.constants.invoice import CustomerNames
 from cg.constants import Pipeline
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 def test_dispatch_table_generation(
@@ -150,12 +150,10 @@ def test_call_with_status_db_functions(
     dispatcher = Dispatcher(
         functions=[
             store.get_samples_by_customer_and_subject_id,
-            store.get_samples_by_customer_subject_id_and_is_tumour,
         ],
         input_dict={
             "customer_internal_id": customer_internal_id,
             "subject_id": test_subject,
-            "is_tumour": is_tumour,
         },
     )
     # THEN the dispatcher should return the correct samples

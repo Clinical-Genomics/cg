@@ -143,6 +143,26 @@ SARSCOV2_ANALYSIS_SAMPLE_TAGS = [
     {"fastq"},
 ]
 
+RNAFUSION_ANALYSIS_CASE_TAGS = [
+    {"fusion", "arriba"},
+    {"fusion", "star-fusion"},
+    {"fusion", "fusioncatcher"},
+    {"cram"},
+    {"fusioncatcher-summary"},
+    {"fusioninspector"},
+    {"fusionreport", "research"},
+    {"fusioninspector-html", "research"},
+    {"arriba-visualisation", "research"},
+    {"multiqc-html", "rna"},
+    {"software-versions"},
+    {"qc-metrics"},
+    {"multiqc-json"},
+    {"delivery-report"},
+]
+
+RNAFUSION_ANALYSIS_SAMPLE_TAGS = []
+
+
 PIPELINE_ANALYSIS_TAG_MAP = {
     Pipeline.BALSAMIC: {
         "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
@@ -175,6 +195,10 @@ PIPELINE_ANALYSIS_TAG_MAP = {
     Pipeline.SARS_COV_2: {
         "case_tags": SARSCOV2_ANALYSIS_CASE_TAGS,
         "sample_tags": SARSCOV2_ANALYSIS_SAMPLE_TAGS,
+    },
+    Pipeline.RNAFUSION: {
+        "case_tags": RNAFUSION_ANALYSIS_CASE_TAGS,
+        "sample_tags": RNAFUSION_ANALYSIS_SAMPLE_TAGS,
     },
 }
 

@@ -1,13 +1,11 @@
 """Tests for the compression files module"""
 import logging
 
-import pytest
 
 from cg.meta.compress import files
 from cg.models import CompressionData
 
 
-@pytest.mark.compress_meta
 def test_get_fastq_files(populated_compress_fastq_api, sample):
     """Test get_fastq_files method when there are FASTQ files"""
     compress_api = populated_compress_fastq_api
@@ -24,7 +22,6 @@ def test_get_fastq_files(populated_compress_fastq_api, sample):
     assert isinstance(fastq_dict[run]["compression_data"], CompressionData)
 
 
-@pytest.mark.compress_meta
 def test_get_fastq_files_no_files(compress_api, sample_hk_bundle_no_files, sample, helpers, caplog):
     """Test get_fastq_files method when no FASTQ files are found"""
     caplog.set_level(logging.DEBUG)

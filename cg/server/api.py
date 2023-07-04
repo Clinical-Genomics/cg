@@ -1,35 +1,73 @@
 import http
-import logging
 import json
+import logging
 import tempfile
+from datetime import datetime
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import requests
-from sqlalchemy.exc import IntegrityError
-from urllib3.exceptions import MaxRetryError, NewConnectionError
-
+from cachetools import TTLCache
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
-from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES, Pipeline
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
 from cg.exc import OrderError, OrderFormError, TicketCreationError
-from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell, Analysis
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
+from cg.server.ext import db, lims, osticket
+from cg.store.models import Analysis, Application, Customer, Family, Flowcell, Pool, Sample, User
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from pydantic import ValidationError
 from requests.exceptions import HTTPError
-from sqlalchemy.orm import Query
+from sqlalchemy.exc import IntegrityError
+from urllib3.exceptions import MaxRetryError, NewConnectionError
 from werkzeug.utils import secure_filename
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
+
+cache = TTLCache(maxsize=1, ttl=3600)
+cache_certificates_key = "certs"
+cache[cache_certificates_key] = None
+
+
+def get_certificate_ttl(response_data) -> int:
+    """Extract time to live in seconds for certificate from response headers."""
+    expires_header = response_data.headers.get("Expires")
+    expires = datetime.strptime(expires_header, "%a, %d %b %Y %H:%M:%S %Z")
+    return int((expires - datetime.utcnow()).total_seconds())
+
+
+def fetch_and_cache_google_oauth2_certificates():
+    """Fetch and cache Google OAuth2 certificates."""
+    global cache
+
+    url = "https://www.googleapis.com/oauth2/v1/certs"
+    response = requests.get(url)
+    response.raise_for_status()
+
+    certs = response.json()
+    ttl = get_certificate_ttl(response_data=response)
+
+    cache = TTLCache(maxsize=1, ttl=ttl)
+    cache[cache_certificates_key] = certs
+
+    return certs
+
+
+def get_google_oauth2_certificates():
+    """Get Google OAuth2 certificates from cache or fetch and cache them."""
+    certs = cache.get(cache_certificates_key)
+
+    if not certs:
+        certs = fetch_and_cache_google_oauth2_certificates()
+
+    return certs
 
 
 def is_public(route_function):
@@ -68,17 +106,16 @@ def before_request():
 
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
-        user_data = jwt.decode(
-            jwt_token, certs=requests.get("https://www.googleapis.com/oauth2/v1/certs").json()
-        )
-    except ValueError:
+        user_data = jwt.decode(jwt_token, certs=get_google_oauth2_certificates())
+    except ValueError as e:
+        LOG.error(f"Error occurred while decoding JWT token: {e}")
         return abort(
             make_response(
                 jsonify(message="outdated login certificate"), http.HTTPStatus.UNAUTHORIZED
             )
         )
 
-    user = db.get_user_by_email(user_data["email"])
+    user: User = db.get_user_by_email(user_data["email"])
     if user is None or not user.order_portal_login:
         message = f"{user_data['email']} doesn't have access"
         LOG.error(message)
@@ -143,26 +180,28 @@ def submit_order(order_type):
 
 
 @BLUEPRINT.route("/cases")
-def parse_cases():
-    """Fetch cases."""
-    cases: List[Family] = db.cases(days=31)
-    return jsonify(cases=cases, total=len(cases))
+def get_cases():
+    """Return cases with links for a customer from the database."""
+    enquiry: str = request.args.get("enquiry")
+    action: str = request.args.get("action")
+
+    customers: List[Customer] = _get_current_customers()
+    cases: List[Family] = _get_cases(enquiry=enquiry, action=action, customers=customers)
+
+    nr_cases: int = len(cases)
+    cases_with_links: List[dict] = [case.to_dict(links=True) for case in cases]
+    return jsonify(families=cases_with_links, total=nr_cases)
 
 
 def _get_current_customers() -> Optional[List[Customer]]:
     """Return customers if the current user is not an admin."""
-    if not g.current_user.is_admin:
-        return g.current_user.customers
-    return None
+    return g.current_user.customers if not g.current_user.is_admin else None
 
 
 def _get_cases(
-    status: str, enquiry: Optional[str], action: Optional[str], customers: Optional[List[Customer]]
+    enquiry: Optional[str], action: Optional[str], customers: Optional[List[Customer]]
 ) -> List[Family]:
     """Get cases based on the provided filters."""
-    if status == "analysis":
-        return db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
-
     return db.get_cases_by_customers_action_and_case_search(
         case_search=enquiry,
         customers=customers,
@@ -170,21 +209,15 @@ def _get_cases(
     )
 
 
-@BLUEPRINT.route("/families")
-def get_families():
-    """Return cases."""
-    status: str = request.args.get("status")
-    enquiry: str = request.args.get("enquiry")
-    action: str = request.args.get("action")
-
-    customers: List[Customer] = _get_current_customers()
-    cases: List[Family] = _get_cases(
-        status=status, enquiry=enquiry, action=action, customers=customers
-    )
-
-    count = len(cases)
-    case_dicts = [case.to_dict(links=True) for case in cases]
-    return jsonify(families=case_dicts, total=count)
+@BLUEPRINT.route("/cases/<case_id>")
+def parse_case(case_id):
+    """Return a case with links."""
+    case: Family = db.get_case_by_internal_id(internal_id=case_id)
+    if case is None:
+        return abort(http.HTTPStatus.NOT_FOUND)
+    if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
+        return abort(http.HTTPStatus.FORBIDDEN)
+    return jsonify(**case.to_dict(links=True, analyses=True))
 
 
 @BLUEPRINT.route("/families_in_collaboration")
@@ -205,17 +238,6 @@ def parse_families_in_collaboration():
 
     case_dicts = [case.to_dict(links=True) for case in cases]
     return jsonify(families=case_dicts, total=len(cases))
-
-
-@BLUEPRINT.route("/families/<family_id>")
-def parse_family(family_id):
-    """Return a family with links."""
-    case: Family = db.get_case_by_internal_id(internal_id=family_id)
-    if case is None:
-        return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
-        return abort(http.HTTPStatus.FORBIDDEN)
-    return jsonify(**case.to_dict(links=True, analyses=True))
 
 
 @BLUEPRINT.route("/families_in_collaboration/<family_id>")
@@ -317,9 +339,9 @@ def parse_pool(pool_id):
 @BLUEPRINT.route("/flowcells")
 def parse_flow_cells() -> Any:
     """Return flow cells."""
-    flow_cells: List[Flowcell] = db.get_flow_cell_by_enquiry_and_status(
+    flow_cells: List[Flowcell] = db.get_flow_cell_by_name_pattern_and_status(
         flow_cell_statuses=[request.args.get("status")],
-        flow_cell_id_enquiry=request.args.get("enquiry"),
+        name_pattern=request.args.get("enquiry"),
     )
     parsed_flow_cells: List[Dict] = [flow_cell.to_dict() for flow_cell in flow_cells[:50]]
     return jsonify(flowcells=parsed_flow_cells, total=len(flow_cells))
@@ -328,7 +350,7 @@ def parse_flow_cells() -> Any:
 @BLUEPRINT.route("/flowcells/<flowcell_id>")
 def parse_flow_cell(flowcell_id):
     """Return a single flowcell."""
-    flow_cell: Flowcell = db.get_flow_cell(flowcell_id)
+    flow_cell: Flowcell = db.get_flow_cell_by_name(flow_cell_name=flowcell_id)
     if flow_cell is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     return jsonify(**flow_cell.to_dict(samples=True))
@@ -369,12 +391,16 @@ def parse_options():
     source_groups = {"metagenome": METAGENOME_SOURCES, "analysis": ANALYSIS_SOURCES}
 
     return jsonify(
+        applications=app_tag_groups,
+        beds=[bed.name for bed in db.get_active_beds()],
         customers=[
-            {"text": f"{customer.name} ({customer.internal_id})", "value": customer.internal_id}
+            {
+                "text": f"{customer.name} ({customer.internal_id})",
+                "value": customer.internal_id,
+                "isTrusted": customer.is_trusted,
+            }
             for customer in customers
         ],
-        applications=app_tag_groups,
-        panels=[panel.abbrev for panel in db.get_panels()],
         organisms=[
             {
                 "name": organism.name,
@@ -384,8 +410,8 @@ def parse_options():
             }
             for organism in db.get_all_organisms()
         ],
+        panels=[panel.abbrev for panel in db.get_panels()],
         sources=source_groups,
-        beds=[bed.name for bed in db.get_active_beds()],
     )
 
 

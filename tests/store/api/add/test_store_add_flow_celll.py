@@ -9,7 +9,7 @@ from tests.store_helpers import StoreHelpers
 
 def test_add_flowcell(
     base_store: Store,
-    flow_cell_id: str,
+    bcl2fastq_flow_cell_id: str,
     helpers: StoreHelpers,
     sequencer_name: str,
     timestamp_now: datetime,
@@ -20,7 +20,7 @@ def test_add_flowcell(
 
     # WHEN adding flow cell
     flow_cell: Flowcell = base_store.add_flow_cell(
-        flow_cell_id=flow_cell_id,
+        flow_cell_name=bcl2fastq_flow_cell_id,
         sequencer_name=sequencer_name,
         sequencer_type=Sequencers.NOVASEQ,
         date=timestamp_now,
@@ -36,7 +36,7 @@ def test_add_flowcell(
 
 def test_add_flowcell_status(
     base_store: Store,
-    flow_cell_id: str,
+    bcl2fastq_flow_cell_id: str,
     helpers: StoreHelpers,
     sequencer_name: str,
     timestamp_now: datetime,
@@ -47,7 +47,7 @@ def test_add_flowcell_status(
 
     # WHEN adding flow cell
     flow_cell: Flowcell = base_store.add_flow_cell(
-        flow_cell_id=flow_cell_id,
+        flow_cell_name=bcl2fastq_flow_cell_id,
         sequencer_name=sequencer_name,
         sequencer_type=Sequencers.NOVASEQ,
         date=timestamp_now,

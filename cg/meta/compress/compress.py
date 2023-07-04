@@ -209,9 +209,8 @@ class CompressAPI:
     def delete_fastq_housekeeper(self, hk_fastq_first: File, hk_fastq_second: File) -> None:
         """Delete fastq files from Housekeeper."""
         LOG.info("Deleting FASTQ files from Housekeeper")
-        hk_fastq_first.delete()
-        hk_fastq_second.delete()
-        self.hk_api.commit()
+        self.hk_api.delete_file(file_id=hk_fastq_first.id)
+        self.hk_api.delete_file(file_id=hk_fastq_second.id)
         LOG.debug("FASTQ files deleted from Housekeeper")
 
     # Methods to update housekeeper
@@ -287,8 +286,7 @@ class CompressAPI:
         LOG.info(f"Will remove {fastq_first} and {fastq_second}")
         if self.dry_run:
             return
-        fastq_first.unlink()
-        LOG.debug(f"First FASTQ in pair {fastq_first} removed")
-        fastq_second.unlink()
-        LOG.debug(f"Second FASTQ in pair {fastq_second} removed")
-        LOG.info("FASTQ files removed")
+        for fastq_file in [fastq_first, fastq_second]:
+            if fastq_file.exists():
+                fastq_file.unlink()
+                LOG.debug(f"FASTQ file {fastq_file} removed")

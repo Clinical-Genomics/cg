@@ -3,17 +3,14 @@ import logging
 from pathlib import Path
 from typing import List
 
+from cg.meta.transfer.external_data import ExternalDataAPI
+from cg.store import Store
+from cg.store.models import Sample
+from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
+from housekeeper.store.models import Version
 from tests.cli.workflow.conftest import dna_case
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store.conftest import fixture_sample_obj
-
-from cg.meta.transfer.external_data import ExternalDataAPI
-from cg.models.cg_config import CGConfig
-from cg.store import Store
-from cg.store.models import Family, Sample
-from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
-
-from housekeeper.store.models import Version
 
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_id: str):
@@ -68,14 +65,12 @@ def test_get_destination_path(
 
 def test_transfer_sample_files_from_source(
     caplog,
-    cg_context: CGConfig,
     customer_id: str,
     cust_sample_id: str,
     external_data_api: ExternalDataAPI,
     external_data_directory: Path,
     helpers,
     mocker,
-    sample_store: Store,
     ticket_id: str,
 ):
     caplog.set_level(logging.INFO)
@@ -154,10 +149,10 @@ def test_add_transfer_to_housekeeper(
 ):
     """Test adding samples from a case to Housekeeper"""
     # GIVEN a Store with a DNA case, which is available for analysis
-    cases = external_data_api.status_db.query(Family).filter(Family.internal_id == case_id)
+    case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
     mocker.patch.object(Store, "get_cases_by_ticket_id")
-    Store.get_cases_by_ticket_id.return_value = cases
-    samples = [fam_sample.sample for fam_sample in cases.all()[0].links]
+    Store.get_cases_by_ticket_id.return_value = [case]
+    samples = [fam_sample.sample for fam_sample in case.links]
 
     # GIVEN a list of paths and only two samples being available
     mocker.patch.object(ExternalDataAPI, "get_all_paths")
@@ -203,27 +198,26 @@ def test_add_transfer_to_housekeeper(
 
 
 def test_get_available_samples(
-    analysis_store_trio,
-    customer_id: str,
     external_data_api: ExternalDataAPI,
-    sample_obj: Sample,
+    sample: Sample,
     ticket_id: str,
     tmpdir_factory,
 ):
     # GIVEN one such sample exists
-    tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample_obj.internal_id, numbered=False)).parent
+    tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample.internal_id, numbered=False))
     available_samples = external_data_api.get_available_samples(
-        folder=tmp_dir_path, ticket=ticket_id
+        folder=tmp_dir_path.parent, ticket=ticket_id
     )
     # THEN the function should return a list containing the sample object
-    assert available_samples == [sample_obj]
+    assert available_samples == [sample]
+    tmp_dir_path.rmdir()
 
 
 def test_curate_sample_folder(
-    case_id, customer_id, dna_case, external_data_api: ExternalDataAPI, tmpdir_factory
+    case_id, customer_id, external_data_api: ExternalDataAPI, tmpdir_factory
 ):
-    cases = external_data_api.status_db.query(Family).filter(Family.internal_id == case_id)
-    sample: Sample = cases.first().links[0].sample
+    case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
+    sample: Sample = case.links[0].sample
     tmp_folder = Path(tmpdir_factory.mktemp(sample.name, numbered=False))
     external_data_api.curate_sample_folder(
         cust_name=customer_id, sample_folder=tmp_folder, force=False
@@ -233,8 +227,6 @@ def test_curate_sample_folder(
 
 
 def test_get_available_samples_no_samples_avail(
-    analysis_store_trio,
-    customer_id: str,
     external_data_api: ExternalDataAPI,
     ticket_id: str,
     tmpdir_factory,

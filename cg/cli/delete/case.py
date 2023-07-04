@@ -5,7 +5,7 @@ import logging
 from typing import List
 
 import click
-from cg.cli.get import case as print_case
+from cg.cli.get import get_case as print_case
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.store import Store
 from cg.store.models import Sample, Family
@@ -13,12 +13,12 @@ from cg.store.models import Sample, Family
 LOG = logging.getLogger(__name__)
 
 
-@click.command()
+@click.command("case")
 @click.argument("case_id")
 @DRY_RUN
 @SKIP_CONFIRMATION
 @click.pass_context
-def case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
+def delete_case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
     """Delete case with links and samples.
 
     The command will stop if the case has any analyses made on it.
@@ -54,7 +54,8 @@ def case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
         return
 
     LOG.info(f"Deleting case: {case_id}")
-    status_db.delete_commit(case)
+    status_db.session.delete(case)
+    status_db.session.commit()
 
 
 def _delete_links_and_samples(case_obj: Family, dry_run: bool, status_db: Store, yes: bool):
@@ -70,7 +71,8 @@ def _delete_links_and_samples(case_obj: Family, dry_run: bool, status_db: Store,
             LOG.info("Link: %s was NOT deleted due to --dry-run", case_link)
         else:
             LOG.info("Deleting link: %s", case_link)
-            status_db.delete_commit(case_link)
+            status_db.session.delete(case_link)
+            status_db.session.commit()
 
     for sample in samples_to_delete:
         _delete_sample(dry_run=dry_run, sample=sample, status_db=status_db, yes=yes)
@@ -101,7 +103,7 @@ def _delete_sample(dry_run: bool, sample: Sample, status_db: Store, yes: bool):
         return
 
     LOG.info("Deleting sample: %s", sample)
-    status_db.delete(sample)
+    status_db.session.delete(sample)
 
 
 def _log_sample_process_information(sample: Sample):

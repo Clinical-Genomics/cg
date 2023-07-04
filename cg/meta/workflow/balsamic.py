@@ -25,7 +25,7 @@ from cg.models.balsamic.metrics import (
     BalsamicWGSQCMetrics,
 )
 from cg.models.cg_config import CGConfig
-from cg.store.models import ApplicationVersion, Family, FamilySample, Sample
+from cg.store.models import Family, FamilySample, Sample
 from cg.utils import Process
 from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
 
@@ -463,45 +463,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         config_case.update(self.get_parsed_observation_file_paths(observations))
 
         return config_case
-
-    def build_sample_id_map_string(self, case_id: str) -> str:
-        """Creates sample info string for balsamic with format lims_id:tumor/normal:customer_sample_id"""
-
-        tumor_sample_lims_id = self.get_tumor_sample_name(case_id=case_id)
-        tumor_string = f"{tumor_sample_lims_id}:tumor:{self.status_db.get_sample_by_internal_id(internal_id=tumor_sample_lims_id).name}"
-        normal_sample_lims_id = self.get_normal_sample_name(case_id=case_id)
-        if normal_sample_lims_id:
-            normal_string = f"{normal_sample_lims_id}:normal:{self.status_db.get_sample_by_internal_id(internal_id=normal_sample_lims_id).name}"
-            return ",".join([tumor_string, normal_string])
-        return tumor_string
-
-    def build_case_id_map_string(self, case_id: str) -> Optional[str]:
-        """Creates case info string for balsamic with format panel_shortname:case_name:application_tag."""
-
-        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample: Sample = case.links[0].sample
-        if sample.from_sample:
-            sample: Sample = self.status_db.get_sample_by_internal_id(
-                internal_id=sample.from_sample
-            )
-        capture_kit: Optional[str] = self.lims_api.capture_kit(lims_id=sample.internal_id)
-        if capture_kit:
-            panel_shortname: str = self.status_db.get_bed_version_by_short_name(
-                bed_version_short_name=capture_kit
-            ).shortname
-        elif (
-            self.get_application_type(case.links[0].sample) == AnalysisType.WHOLE_GENOME_SEQUENCING
-        ):
-            panel_shortname: str = "Whole_Genome"
-        else:
-            return
-        application_tag = (
-            self.status_db.query(ApplicationVersion)
-            .filter(ApplicationVersion.id == case.links[0].sample.application_version_id)
-            .first()
-            .application.tag
-        )
-        return f"{panel_shortname}:{case.name}:{application_tag}"
 
     @staticmethod
     def print_sample_params(case_id: str, sample_data: dict) -> None:

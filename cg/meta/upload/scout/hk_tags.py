@@ -33,14 +33,14 @@ class CaseTags(BaseModel):
     )
     peddy_check: Set[str] = Field(None, description="Peddy pedigree check, only for rare disease")
     multiqc_report: Optional[Set[str]] = Field(None, description="MultiQC report")
-    delivery_report: Optional[Set[str]] = Field(None, description="Delivery report for cancer")
+    delivery_report: Optional[Set[str]] = Field(None, description="Delivery report")
     str_catalog: Optional[Set[str]] = Field(
         None, description="Variant catalog used with expansionhunter"
     )
     gene_fusion: Set[str] = Field(
         None, description="Arriba report for RNA fusions containing only clinical fusions"
     )
-    gene_fusion_research: Optional[Set[str]] = Field(
+    gene_fusion_report_research: Optional[Set[str]] = Field(
         None, description="Arriba report for RNA fusions containing all fusions"
     )
     RNAfusion_report: Optional[Set[str]] = Field(
@@ -56,6 +56,12 @@ class CaseTags(BaseModel):
         None, description="RNAfusion inspector report containing all fusions"
     )
     multiqc_rna: Optional[Set[str]] = Field(None, description="MultiQC report for RNA samples")
+    vcf_mei: Optional[Set[str]] = Field(
+        None, description="VCF with mobile element insertions, clinical"
+    )
+    vcf_mei_research: Optional[Set[str]] = Field(
+        None, description="VCF with mobile element insertions, research"
+    )
 
 
 class SampleTags(BaseModel):

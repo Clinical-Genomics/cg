@@ -31,7 +31,7 @@ def add():
     pass
 
 
-@add.command()
+@add.command("customer")
 @click.argument("internal_id")
 @click.argument("name")
 @click.option(
@@ -56,7 +56,7 @@ def add():
     help="Invoice reference (text)",
 )
 @click.pass_obj
-def customer(
+def add_customer(
     context: CGConfig,
     internal_id: str,
     name: str,
@@ -88,12 +88,13 @@ def customer(
     )
     for collaboration in collaborations:
         new_customer.collaborations.append(collaboration)
-    status_db.add_commit(new_customer)
+    status_db.session.add(new_customer)
+    status_db.session.commit()
     message: str = f"customer added: {new_customer.internal_id} ({new_customer.id})"
     LOG.info(message)
 
 
-@add.command()
+@add.command("user")
 @click.option("-a", "--admin", is_flag=True, help="make the user an admin")
 @click.option(
     "-c",
@@ -105,7 +106,7 @@ def customer(
 @click.argument("email")
 @click.argument("name")
 @click.pass_obj
-def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str):
+def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str):
     """Add a new user with an EMAIL (login) and a NAME (full)."""
     status_db: Store = context.status_db
 
@@ -118,11 +119,12 @@ def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str
     new_user: User = status_db.add_user(
         customer=customer_obj, email=email, name=name, is_admin=admin
     )
-    status_db.add_commit(new_user)
+    status_db.session.add(new_user)
+    status_db.session.commit()
     LOG.info(f"User added: {new_user.email} ({new_user.id})")
 
 
-@add.command()
+@add.command("sample")
 @click.option("-l", "--lims", "lims_id", help="LIMS id for the sample")
 @click.option(
     "-d", "--down-sampled", type=int, help="How many reads is the sample down sampled to?"
@@ -146,7 +148,7 @@ def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_obj
-def sample(
+def add_sample(
     context: CGConfig,
     lims_id: Optional[str],
     down_sampled: Optional[int],
@@ -181,11 +183,12 @@ def sample(
         status_db.get_current_application_version_by_tag(tag=application_tag)
     )
     new_record.customer: Customer = customer
-    status_db.add_commit(new_record)
+    status_db.session.add(new_record)
+    status_db.session.commit()
     LOG.info(f"{new_record.internal_id}: new sample added")
 
 
-@add.command()
+@add.command("case")
 @click.option(
     "--priority",
     type=EnumChoice(Priority, use_value=False),
@@ -213,7 +216,7 @@ def sample(
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_obj
-def case(
+def add_case(
     context: CGConfig,
     priority: Priority,
     panel_abbreviations: Tuple[str],
@@ -248,18 +251,19 @@ def case(
     )
 
     new_case.customer: Customer = customer
-    status_db.add_commit(new_case)
+    status_db.session.add(new_case)
+    status_db.session.commit()
     LOG.info(f"{new_case.internal_id}: new case added")
 
 
-@add.command()
+@add.command("relationship")
 @click.option("-m", "--mother-id", help="Sample ID for mother of sample")
 @click.option("-f", "--father-id", help="Sample ID for father of sample")
 @click.option("-s", "--status", type=click.Choice(STATUS_OPTIONS), required=True)
 @click.argument("case-id")
 @click.argument("sample-id")
 @click.pass_obj
-def relationship(
+def link_sample_to_case(
     context: CGConfig,
     mother_id: Optional[str],
     father_id: Optional[str],
@@ -296,11 +300,12 @@ def relationship(
     new_record: FamilySample = status_db.relate_sample(
         family=case_obj, sample=sample, status=status, mother=mother, father=father
     )
-    status_db.add_commit(new_record)
+    status_db.session.add(new_record)
+    status_db.session.commit()
     LOG.info("related %s to %s", case_obj.internal_id, sample.internal_id)
 
 
-@add.command()
+@add.command("external")
 @click.option(
     "-t",
     "--ticket",
@@ -310,7 +315,7 @@ def relationship(
 )
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
-def external(context: CGConfig, ticket: str, dry_run: bool):
+def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_run: bool):
     """Downloads external data from the delivery server and places it in appropriate folder on
     the HPC"""
     external_data_api = ExternalDataAPI(config=context)
@@ -330,7 +335,7 @@ def external(context: CGConfig, ticket: str, dry_run: bool):
     "--force", help="Overwrites any any previous samples in the customer directory", is_flag=True
 )
 @click.pass_obj
-def external_hk(context: CGConfig, ticket: str, dry_run: bool, force):
+def add_external_data_to_hk(context: CGConfig, ticket: str, dry_run: bool, force):
     """Adds external data to Housekeeper"""
     external_data_api = ExternalDataAPI(config=context)
     external_data_api.add_transfer_to_housekeeper(dry_run=dry_run, ticket=ticket, force=force)

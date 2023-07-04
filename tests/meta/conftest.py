@@ -6,7 +6,14 @@ from typing import Generator
 
 import pytest
 
-from cg.apps.cgstats.db import models as stats_models
+from cg.apps.cgstats.db.models import (
+    Datasource,
+    Flowcell,
+    Project,
+    Sample,
+    Supportparams,
+    Unaligned,
+)
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 
@@ -19,7 +26,6 @@ from cg.store.models import Customer, ApplicationVersion, Invoice, Sample
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
 from tests.mocks.limsmock import MockLimsAPI
-from cg.constants.sequencing import RecordType
 from cg.constants.invoice import CustomerNames
 from cg.meta.invoice import InvoiceAPI
 
@@ -117,29 +123,25 @@ def fixture_binary_path() -> str:
     return Path("usr", "bin", "binary").as_posix()
 
 
-@pytest.fixture(name="yet_another_flow_cell_id")
-def fixture_yet_another_flow_cell_id() -> str:
-    """Return flow cell id."""
-    return "HJKMYBCXX"
-
-
 @pytest.fixture(name="stats_sample_data")
 def fixture_stats_sample_data(
-    sample_id: str, flow_cell_id: str, yet_another_flow_cell_id: str
+    sample_id: str,
+    bcl2fastq_flow_cell_id: str,
+    dragen_flow_cell_id: str,
 ) -> dict:
     return {
         "samples": [
             {
                 "name": sample_id,
                 "index": "ACGTACAT",
-                "flowcell": flow_cell_id,
-                "type": Sequencers.HISEQX,
+                "flowcell": bcl2fastq_flow_cell_id,
+                "type": Sequencers.NOVASEQ,
             },
             {
                 "name": "ADM1136A3",
                 "index": "ACGTACAT",
-                "flowcell": yet_another_flow_cell_id,
-                "type": Sequencers.HISEQX,
+                "flowcell": dragen_flow_cell_id,
+                "type": Sequencers.NOVASEQ,
             },
         ]
     }
@@ -169,33 +171,29 @@ def fixture_base_store_stats(
     """Setup CGStats store with sample data."""
     demuxes: dict = {}
     for sample_data in stats_sample_data["samples"]:
-        project: stats_models.Project = store_stats.Project(
-            projectname="test", time=dt.datetime.now()
-        )
-        sample: stats_models.Sample = store_stats.Sample(
+        project: Project = store_stats.Project(projectname="test", time=dt.datetime.now())
+        sample: Sample = store_stats.Sample(
             samplename=sample_data["name"],
             barcode=sample_data["index"],
             limsid=sample_data["name"],
         )
         sample.project = project
-        unaligned: stats_models.Unaligned = store_stats.Unaligned(
-            readcounts=300000000, q30_bases_pct=85
-        )
+        unaligned: Unaligned = store_stats.Unaligned(readcounts=300000000, q30_bases_pct=85)
         unaligned.sample = sample
 
         if sample_data["flowcell"] in demuxes:
             demux = demuxes[sample_data["flowcell"]]
         else:
-            flowcell: stats_models.Flowcell = store_stats.Flowcell(
+            flowcell: Flowcell = store_stats.Flowcell(
                 flowcellname=sample_data["flowcell"],
                 flowcell_pos="A",
                 hiseqtype=sample_data["type"],
                 time=dt.datetime.now(),
             )
-            supportparams: stats_models.Supportparams = store_stats.Supportparams(
+            supportparams: Supportparams = store_stats.Supportparams(
                 document_path="NA" + sample_data["name"], idstring="NA"
             )
-            datasource: stats_models.Datasource = store_stats.Datasource(
+            datasource: Datasource = store_stats.Datasource(
                 document_path="NA" + sample_data["name"], document_type="html"
             )
             datasource.supportparams = supportparams
@@ -226,8 +224,9 @@ def fixture_flowcell_store(
         sample.customer = customer
         sample.application_version = application_version
         sample.received_at = dt.datetime.now()
-        base_store.add(sample)
-    base_store.commit()
+        sample.sequenced_at = dt.datetime.now()
+        base_store.session.add(sample)
+    base_store.session.commit()
     yield base_store
 
 
@@ -267,7 +266,7 @@ def fixture_invoice_api_nipt_customer(
     customer_id: str = CustomerNames.cust032,
 ) -> InvoiceAPI:
     """Return an InvoiceAPI with a pool for NIPT customer."""
-    pool = helpers.ensure_pool(store, customer_id=customer_id)
+    pool = helpers.ensure_pool(store=store, customer_id=customer_id)
     invoice: Invoice = helpers.ensure_invoice(
         store,
         invoice_id=invoice_id,
@@ -283,11 +282,10 @@ def fixture_invoice_api_pool_generic_customer(
     lims_api: MockLimsAPI,
     helpers: StoreHelpers,
     invoice_id: int = 0,
-    record_type: str = RecordType.Pool,
     customer_id: str = CustomerNames.cust132,
 ) -> InvoiceAPI:
     """Return an InvoiceAPI with a pool."""
-    pool = helpers.ensure_pool(store, customer_id=customer_id)
+    pool = helpers.ensure_pool(store=store, customer_id=customer_id)
     invoice: Invoice = helpers.ensure_invoice(
         store,
         invoice_id=invoice_id,

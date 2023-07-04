@@ -1,5 +1,4 @@
-"""Delivery report specific command options"""
-
+"""Delivery report specific command options."""
 import click
 
 from cg.constants import REPORT_SUPPORTED_PIPELINES
