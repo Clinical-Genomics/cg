@@ -18,12 +18,12 @@ class OrderIn(BaseModel):
     ticket: Optional[str]
 
     @classmethod
-    def parse_obj(cls, obj: dict, project: OrderType):
+    def parse_obj(cls, obj: dict, project: OrderType) -> "OrderIn":
         parsed_obj: OrderIn = super().parse_obj(obj)
         parsed_obj.parse_samples(project=project)
         return parsed_obj
 
-    def parse_samples(self, project: OrderType):
+    def parse_samples(self, project: OrderType) -> None:
         """
         Parses samples of by the type given by the project
 
