@@ -97,8 +97,8 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
         # Add values for each sample
         for r1, r2 in zip(fastq_r1, fastq_r2):
-            sample_sheet_content[NFX_SAMPLE_HEADER].append(case_id)
-            sample_sheet_content[TAXPROFILER_RUN_ACCESSION].append(case_id)
+            sample_sheet_content[NFX_SAMPLE_HEADER].append(sample_id)
+            sample_sheet_content[TAXPROFILER_RUN_ACCESSION].append(sample_id)
             sample_sheet_content[TAXPROFILER_INSTRUMENT_PLATFORM].append(instrument_platform)
             sample_sheet_content[NFX_READ1_HEADER].append(r1)
             sample_sheet_content[NFX_READ2_HEADER].append(r2)
