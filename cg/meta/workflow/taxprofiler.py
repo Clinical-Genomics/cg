@@ -110,15 +110,16 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
-            sample_sheet_content = self.build_sample_sheet_content(
-                case_id=case_id,
-                sample_id=sample_id,
-                fastq_r1=fastq_r1,
-                fastq_r2=fastq_r2,
-                instrument_platform=instrument_platform,
-                fasta=fasta,
+            sample_sheet_content.update(
+                self.build_sample_sheet_content(
+                    case_id=case_id,
+                    sample_id=sample_id,
+                    fastq_r1=fastq_r1,
+                    fastq_r2=fastq_r2,
+                    instrument_platform=instrument_platform,
+                    fasta=fasta,
+                )
             )
-
             LOG.info(sample_sheet_content)
             NextflowAnalysisAPI.create_samplesheet_csv(
                 samplesheet_content=sample_sheet_content,
@@ -126,7 +127,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 config_path=NextflowAnalysisAPI.get_case_config_path(
                     case_id=case_id, root_dir=self.root_dir
                 ),
-                append=True,
             )
 
     def config_case(
