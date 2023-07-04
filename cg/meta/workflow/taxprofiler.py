@@ -81,9 +81,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             LOG.error(error)
             raise ValueError
 
-        # Create a list of sample IDs with the same length as fastq_r1
-        sample_ids: List[str] = [sample_id] * len(fastq_r1)
-
         # Create a dictionary to store the sample sheet content
         sample_sheet_content: Dict[str, List[str]] = {
             NFX_SAMPLE_HEADER: [],
@@ -95,9 +92,11 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         }
 
         # Loop through the fastq files and add values for each sample
-        for sample_id, r1, r2 in zip(sample_ids, fastq_r1, fastq_r2):
-            sample_sheet_content[NFX_SAMPLE_HEADER].append(sample_id)
-            sample_sheet_content[TAXPROFILER_RUN_ACCESSION].append(sample_id)
+        for r1, r2 in zip(fastq_r1, fastq_r2):
+            # Create a new sample ID for each iteration
+            sample_ids: List[str] = [sample_id]
+            sample_sheet_content[NFX_SAMPLE_HEADER].extend(sample_ids)
+            sample_sheet_content[TAXPROFILER_RUN_ACCESSION].extend(sample_ids)
             sample_sheet_content[TAXPROFILER_INSTRUMENT_PLATFORM].append(instrument_platform)
             sample_sheet_content[NFX_READ1_HEADER].append(r1)
             sample_sheet_content[NFX_READ2_HEADER].append(r2)
