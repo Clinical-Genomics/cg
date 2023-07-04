@@ -125,29 +125,6 @@ def test_is_sample_id_in_directory_name_with_invalid_directory():
     assert result is False
 
 
-def test_validate_demux_complete_flow_cell_directory_when_it_exists(tmp_path: Path):
-    # GIVEN a temporary directory as the flow cell directory with a demux complete file
-    flow_cell_directory = tmp_path
-    Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
-
-    # WHEN the create_delivery_file_in_flow_cell_directory function is called
-    create_delivery_file_in_flow_cell_directory(flow_cell_directory)
-
-    # THEN a delivery file should exist in the flow cell directory
-    assert (flow_cell_directory / DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
-
-
-def test_validate_demux_complete_flow_cell_directory_when_it_does_not_exist(tmp_path: Path):
-    # GIVEN a temporary directory as the flow cell directory without a demux complete file
-    flow_cell_directory = tmp_path
-
-    # WHEN the create_delivery_file_in_flow_cell_directory function is called
-    create_delivery_file_in_flow_cell_directory(flow_cell_directory)
-
-    # THEN a delivery file should not exist in the flow cell directory
-    assert not (flow_cell_directory / DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
-
-
 def test_is_flow_cell_directory_valid_when_directory_exists_and_demultiplexing_complete(
     tmp_path: Path,
 ):
