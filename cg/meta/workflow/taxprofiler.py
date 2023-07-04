@@ -105,7 +105,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
         for link in case.links:
             # sample_id: str = link.sample.internal_id
-            sample_id: List[str] = self.get_samples(case, link.sample)
+            sample_id: List[str] = self.get_samples(case_id, link.sample)
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
