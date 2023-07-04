@@ -296,7 +296,6 @@ def test_get_valid_sample_fastq_paths_logs_warnings_for_invalid_paths(
 @patch("cg.meta.demultiplex.utils.get_sample_fastq_paths_from_flow_cell")
 @patch("cg.meta.demultiplex.utils.validate_sample_fastq_file")
 def test_get_valid_sample_fastq_paths_calls_validate_for_all_paths(mock_validate, mock_get_paths):
-
     # GIVEN a list of valid sample fastq paths
     mock_get_paths.return_value = [Path("path1"), Path("path2"), Path("path3")]
     mock_validate.side_effect = [None, ValueError("Invalid file"), None]
