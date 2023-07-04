@@ -307,8 +307,7 @@ def test_delete_flow_cell_hasta(
     assert flow_cell_obj.status == "ondisk"
 
     # WHEN removing said files with the DeleteDemuxAPI
-    test = wipe_demux_api.demultiplexing_out_dir
-    test2 = wipe_demux_api.run_path
+
     wipe_demux_api.delete_flow_cell_hasta(
         demultiplexing_dir=True,
         run_dir=True,

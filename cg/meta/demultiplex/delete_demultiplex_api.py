@@ -154,13 +154,11 @@ class DeleteDemuxAPI:
 
     def _delete_demultiplexing_dir_hasta(self) -> None:
         """delete demultiplexing directory on server"""
-        test5 = self.run_path.exists()
+
         log.info(
             f"DeleteDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {self.demultiplexing_out_dir}"
         )
         shutil.rmtree(self.demultiplexing_out_dir, ignore_errors=False)
-        test6 = self.run_path.exists()
-        test = self.demultiplexing_out_dir.exists()
 
     def _delete_run_dir_hasta(self) -> None:
         """delete flow cell run directory on server"""
