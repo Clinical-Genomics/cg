@@ -13,6 +13,7 @@ from cg.constants import (
     Priority,
 )
 from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
+from cg.utils.enums import StrEnum
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.attributes import InstrumentedAttribute
@@ -28,6 +29,11 @@ def to_dict(model_instance):
             for column in model_instance.__table__.columns
             if not isinstance(getattr(model_instance, column.name), InstrumentedAttribute)
         }
+
+
+class DataHandlingProtocol(StrEnum):
+    clinical = "clinical"
+    research = "research"
 
 
 flowcell_sample = Table(
@@ -272,6 +278,7 @@ class Customer(Model):
     return_samples = Column(types.Boolean, nullable=False, default=False)
     scout_access = Column(types.Boolean, nullable=False, default=False)
     uppmax_account = Column(types.String(32))
+    data_handling_protocol = Column(types.Enum(DataHandlingProtocol))
 
     collaborations = orm.relationship("Collaboration", secondary=customer_collaboration)
     delivery_contact_id = Column(ForeignKey("user.id"))
