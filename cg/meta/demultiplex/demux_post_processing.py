@@ -118,11 +118,11 @@ class DemuxPostProcessingAPI:
     def store_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Store data from the flow cell directory in status db and housekeeper."""
         self.store_flow_cell_data_in_status_db(parsed_flow_cell)
-        self.store_sequencing_metrics_for_flow_cell(parsed_flow_cell)
-        self.update_sample_read_counts(parsed_flow_cell)
+        self.store_sequencing_metrics_in_status_db(parsed_flow_cell)
+        self.update_sample_read_counts_in_status_db(parsed_flow_cell)
         self.store_flow_cell_data_in_housekeeper(parsed_flow_cell)
 
-    def store_sequencing_metrics_for_flow_cell(self, flow_cell: FlowCellDirectoryData) -> None:
+    def store_sequencing_metrics_in_status_db(self, flow_cell: FlowCellDirectoryData) -> None:
         sample_lane_sequencing_metrics: List[
             SampleLaneSequencingMetrics
         ] = create_sample_lane_sequencing_metrics_for_flow_cell(
@@ -161,7 +161,7 @@ class DemuxPostProcessingAPI:
         )
         self.status_db.session.add(metric)
 
-    def update_sample_read_counts(self, flow_cell_data: FlowCellDirectoryData) -> None:
+    def update_sample_read_counts_in_status_db(self, flow_cell_data: FlowCellDirectoryData) -> None:
         """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
 
         q30_threshold: int = get_q30_threshold(flow_cell_data.sequencer_type)
