@@ -1,23 +1,13 @@
 import logging
 from pathlib import Path
 from typing import Generator
-from unittest.mock import patch
-
 from mock import MagicMock, call
-from cg.constants.constants import FileExtensions
 
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.constants.sequencing import Sequencers
-
 from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
     DemuxPostProcessingHiseqXAPI,
-)
-from cg.meta.demultiplex.utils import (
-    get_sample_fastq_paths_from_flow_cell,
-    get_valid_sample_fastq_paths,
-    is_bcl2fastq_demux_folder_structure,
 )
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
@@ -396,7 +386,6 @@ def test_post_process_flow_cell(
     demultiplex_context: CGConfig,
     bcl2fastq_flow_cell: FlowCellDirectoryData,
     flow_cell_project_id: int,
-    flowcell_store: Store,
     hiseq_x_tile_dir: Path,
     transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
 ):
@@ -494,31 +483,6 @@ def test_finish_all_flowcells(
 
     # THEN we should log that we are checking flow cell
     assert f"Check demultiplexed flow cell {bcl2fastq_flow_cell.full_name}" in caplog.text
-
-
-def test_is_bcl2fastq_folder_structure(bcl2fastq_folder_structure: Path):
-    """Test is_bcl2fastq_demux_folder_structure with a folder structure that follows the bcl2fastq folder structure."""
-    # GIVEN a bcl2fastq folder structure
-
-    # WHEN checking if it is a bcl2fastq folder structure
-    is_bcl2fastq_folder_structure = is_bcl2fastq_demux_folder_structure(bcl2fastq_folder_structure)
-
-    # THEN it should be a bcl2fastq folder structure
-    assert is_bcl2fastq_folder_structure is True
-
-
-def test_is_not_bcl2fastq_folder_structure(not_bcl2fastq_folder_structure: Path):
-    """Test is_bcl2fastq_demux_folder_structure with a folder structure that does not follow the bcl2fastq output."""
-
-    # GIVEN not a bcl2fastq folder structure
-
-    # WHEN checking if it is a bcl2fastq folder structure
-    is_bcl2fastq_folder_structure = is_bcl2fastq_demux_folder_structure(
-        not_bcl2fastq_folder_structure
-    )
-
-    # THEN it should not be a bcl2fastq folder structure
-    assert is_bcl2fastq_folder_structure is False
 
 
 def test_add_flow_cell_data_to_housekeeper(demultiplex_context: CGConfig):

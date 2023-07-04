@@ -2,7 +2,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 
 from cg.constants.constants import FileExtensions
@@ -92,7 +92,7 @@ def get_valid_sample_fastq_paths(flow_cell_directory: Path):
     return valid_sample_fastq_paths
 
 
-def get_sample_sheet_path(flow_cell_directory: Path):
+def get_sample_sheet_path(flow_cell_directory: Path) -> Optional[Path]:
     """
     Recursively searches for the given sample sheet file in the provided flow cell directory.
 
