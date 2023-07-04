@@ -158,7 +158,7 @@ class DeleteDemuxAPI:
             shutil.rmtree(self.demultiplexing_out_path, ignore_errors=False)
         else:
             LOG.info(
-                f"DeleteDemuxAPI-Hasta: No demultiplexing directory found: {self.demultiplexing_out_path}"
+                f"DeleteDemuxAPI-Hasta: No demultiplexing directory found for {self.flow_cell_name}"
             )
 
     def _delete_run_dir_hasta(self, run_dir: bool) -> None:
@@ -167,7 +167,7 @@ class DeleteDemuxAPI:
             LOG.info(f"DeleteDemuxAPI-Hasta: Removing flow cell run directory: {self.run_path}")
             shutil.rmtree(path=self.run_path, ignore_errors=False)
         else:
-            LOG.info(f"DeleteDemuxAPI-Hasta: No run directory found: {self.run_path}")
+            LOG.info(f"DeleteDemuxAPI-Hasta: No run directory found for {self.flow_cell_name}")
 
     def delete_flow_cell_hasta(
         self,
