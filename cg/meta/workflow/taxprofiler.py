@@ -62,26 +62,12 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     @staticmethod
     def build_sample_sheet_content(
         case_id: str,
-        sample_id: str,
+        sample_ids: List[str],
         fastq_r1: List[str],
         fastq_r2: List[str],
         instrument_platform: SequencingPlatform.ILLUMINA,
         fasta: Optional[str] = "",
     ) -> Dict[str, List[str]]:
-        """Build sample sheet headers and lists."""
-        try:
-            TaxprofilerSample(
-                # sample=case_id,
-                sample=sample_id,
-                fastq_r1=fastq_r1,
-                fastq_r2=fastq_r2,
-                instrument_platform=instrument_platform,
-            )
-        except ValidationError as error:
-            LOG.error(error)
-            raise ValueError
-
-        # Create a dictionary to store the sample sheet content
         sample_sheet_content: Dict[str, List[str]] = {
             NFX_SAMPLE_HEADER: [],
             TAXPROFILER_RUN_ACCESSION: [],
@@ -91,12 +77,21 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             TAXPROFILER_FASTA_HEADER: [],
         }
 
-        # Loop through the fastq files and add values for each sample
-        for r1, r2 in zip(fastq_r1, fastq_r2):
-            # Create a new sample ID for each iteration
-            sample_ids: List[str] = [sample_id]
-            sample_sheet_content[NFX_SAMPLE_HEADER].extend(sample_ids)
-            sample_sheet_content[TAXPROFILER_RUN_ACCESSION].extend(sample_ids)
+        for sample_id, r1, r2 in zip(sample_ids, fastq_r1, fastq_r2):
+            try:
+                TaxprofilerSample(
+                    # sample=case_id,
+                    sample=sample_id,
+                    fastq_r1=r1,
+                    fastq_r2=r2,
+                    instrument_platform=instrument_platform,
+                )
+            except ValidationError as error:
+                LOG.error(error)
+                raise ValueError
+
+            sample_sheet_content[NFX_SAMPLE_HEADER].append(sample_id)
+            sample_sheet_content[TAXPROFILER_RUN_ACCESSION].append(sample_id)
             sample_sheet_content[TAXPROFILER_INSTRUMENT_PLATFORM].append(instrument_platform)
             sample_sheet_content[NFX_READ1_HEADER].append(r1)
             sample_sheet_content[NFX_READ2_HEADER].append(r2)
