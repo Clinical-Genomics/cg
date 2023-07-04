@@ -31,6 +31,7 @@ LOG = logging.getLogger(__name__)
 @dataclass
 class RnaDnaBundle:
     """Contains the id for an RNA sample, the name of its connected DNA sample, and a list of connected DNA cases."""
+
     rna_sample_id: str
     dna_sample_name: str
     dna_case_ids: List[str]
