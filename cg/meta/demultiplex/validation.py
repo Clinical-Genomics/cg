@@ -1,7 +1,7 @@
-from pathlib import Path
 import re
-from cg.constants.constants import FileExtensions
+from pathlib import Path
 
+from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 
 
