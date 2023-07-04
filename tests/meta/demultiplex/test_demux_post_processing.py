@@ -1,4 +1,3 @@
-from datetime import datetime
 import logging
 from pathlib import Path
 from typing import Generator
@@ -8,7 +7,8 @@ from cg.constants.constants import FileExtensions
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
 from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.meta.demultiplex import demux_post_processing
+from cg.constants.sequencing import Sequencers
+
 from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
     DemuxPostProcessingHiseqXAPI,
@@ -544,7 +544,7 @@ def test_add_flow_cell_data_to_housekeeper(demultiplex_context: CGConfig):
 
     # THEN the bundle and version is added
     demux_post_processing_api.add_bundle_and_version_if_non_existent.assert_called_once_with(
-        flow_cell_name=flow_cell_name
+        bundle_name=flow_cell_name
     )
 
     # THEN the correct tags are added
@@ -572,7 +572,7 @@ def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
 
     # WHEN adding a bundle and version which does not exist
     flow_cell_name: str = "flow_cell_name"
-    demux_post_processing_api.add_bundle_and_version_if_non_existent(flow_cell_name=flow_cell_name)
+    demux_post_processing_api.add_bundle_and_version_if_non_existent(bundle_name=flow_cell_name)
 
     # THEN that the expected methods were called with the expected arguments
     demux_post_processing_api.hk_api.bundle.assert_called_once_with(name=flow_cell_name)
@@ -591,7 +591,7 @@ def test_add_bundle_and_version_if_already_exists(demultiplex_context: CGConfig)
 
     # WHEN adding a bundle and version which already exists
     flow_cell_name: str = "flow_cell_name"
-    demux_post_processing_api.add_bundle_and_version_if_non_existent(flow_cell_name=flow_cell_name)
+    demux_post_processing_api.add_bundle_and_version_if_non_existent(bundle_name=flow_cell_name)
 
     # THEN the bundle was retrieved
     demux_post_processing_api.hk_api.bundle.assert_called_once_with(name=flow_cell_name)
@@ -643,10 +643,12 @@ def test_add_tags_if_all_exist(demultiplex_context: CGConfig):
 def test_add_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-    demux_post_processing_api.add_file_if_non_existent = MagicMock()
+    demux_post_processing_api.add_file_to_bundle_if_non_existent = MagicMock()
 
     # GIVEN a flow cell directory and name
     flow_cell_directory: Path = Path(tmpdir_factory.mktemp("flow_cell_directory"))
+    sample_sheet_file = Path(flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+    sample_sheet_file.touch()
     flow_cell_name = "flow_cell_name"
 
     # WHEN a sample sheet is added
@@ -660,9 +662,9 @@ def test_add_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory):
     )
     expected_tag_names = [SequencingFileTag.SAMPLE_SHEET, flow_cell_name]
 
-    demux_post_processing_api.add_file_if_non_existent.assert_called_once_with(
+    demux_post_processing_api.add_file_to_bundle_if_non_existent.assert_called_once_with(
         file_path=expected_file_path,
-        flow_cell_name=flow_cell_name,
+        bundle_name=flow_cell_name,
         tag_names=expected_tag_names,
     )
 
@@ -673,7 +675,7 @@ def test_add_fastq_files_with_sample_id(demultiplex_context: CGConfig, tmpdir_fa
 
     demux_post_processing_api.get_sample_fastq_paths_from_flow_cell = MagicMock()
     demux_post_processing_api.get_sample_id_from_sample_fastq_file_path = MagicMock()
-    demux_post_processing_api.add_file_if_non_existent = MagicMock()
+    demux_post_processing_api.add_file_to_bundle_if_non_existent = MagicMock()
 
     mock_fastq_paths = [
         Path(tmpdir_factory.mktemp("first_file.fastq.gz")),
@@ -697,13 +699,13 @@ def test_add_fastq_files_with_sample_id(demultiplex_context: CGConfig, tmpdir_fa
     expected_calls = [
         call(
             file_path=file_path,
-            flow_cell_name=flow_cell_name,
-            tag_names=[SequencingFileTag.FASTQ, sample_id],
+            bundle_name=sample_id,
+            tag_names=[SequencingFileTag.FASTQ, flow_cell_name],
         )
         for file_path in mock_fastq_paths
     ]
 
-    demux_post_processing_api.add_file_if_non_existent.assert_has_calls(expected_calls)
+    demux_post_processing_api.add_file_to_bundle_if_non_existent.assert_has_calls(expected_calls)
 
 
 def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig, tmpdir_factory):
@@ -713,7 +715,7 @@ def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig, tmpdir
     demux_post_processing_api.get_sample_id_from_sample_fastq_file_path = MagicMock()
     demux_post_processing_api.get_sample_id_from_sample_fastq_file_path.return_value = None
 
-    demux_post_processing_api.add_file_if_non_existent = MagicMock()
+    demux_post_processing_api.add_file_to_bundle_if_non_existent = MagicMock()
 
     flow_cell_directory: Path = Path(tmpdir_factory.mktemp("flow_cell_directory"))
     flow_cell_name = "flow_cell_name"
@@ -724,7 +726,7 @@ def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig, tmpdir
     )
 
     # THEN add_file_if_non_existent was not called
-    demux_post_processing_api.add_file_if_non_existent.assert_not_called()
+    demux_post_processing_api.add_file_to_bundle_if_non_existent.assert_not_called()
 
 
 def test_is_valid_sample_fastq_filename(demultiplex_context: CGConfig):
@@ -818,21 +820,50 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     demux_post_processing_api.status_db.get_sample_by_internal_id = MagicMock()
-    demux_post_processing_api.status_db.get_number_of_reads_for_sample_from_metrics = MagicMock()
+    demux_post_processing_api.status_db.get_number_of_reads_for_sample_passing_q30_threshold = (
+        MagicMock()
+    )
 
     mock_sample = MagicMock()
     mock_read_count = 1_000
+    mock_flow_cell_data = MagicMock()
+    mock_flow_cell_data.sequencer_type = Sequencers.HISEQGA.value
 
     demux_post_processing_api.status_db.get_sample_by_internal_id.return_value = mock_sample
-    demux_post_processing_api.status_db.get_number_of_reads_for_sample_from_metrics.return_value = (
+    demux_post_processing_api.status_db.get_number_of_reads_for_sample_passing_q30_threshold.return_value = (
         mock_read_count
     )
+    demux_post_processing_api.get_sample_ids_from_sample_sheet = MagicMock()
+    demux_post_processing_api.get_sample_ids_from_sample_sheet.return_value = [1]
 
-    # GIVEN a list of internal sample IDs
-    sample_ids = ["sample1", "sample2"]
-
-    # WHEN calling the method with the sample IDs
-    demux_post_processing_api.update_sample_read_counts(sample_ids)
+    # WHEN calling the method with the flow cell directory
+    demux_post_processing_api.update_sample_read_counts(mock_flow_cell_data)
 
     # THEN the read count was set on the mock sample
-    assert mock_sample.reads == mock_read_count
+    assert mock_sample.calculated_read_count == mock_read_count
+
+
+def test_add_single_sequencing_metrics_entry_to_statusdb(
+    store_with_sequencing_metrics: Store,
+    demultiplex_context: CGConfig,
+    flow_cell_name: str,
+    sample_id: str,
+    lane: int = 1,
+):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN a sequencing metrics entry
+    sequencing_metrics_entry = store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+        flow_cell_name=flow_cell_name, sample_internal_id=sample_id, lane=lane
+    )
+
+    # WHEN adding the sequencing metrics entry to the statusdb
+    demux_post_processing_api.add_single_sequencing_metrics_entry_to_statusdb(
+        sample_lane_sequencing_metrics=[sequencing_metrics_entry]
+    )
+
+    # THEN the sequencing metrics entry was added to the statusdb
+    assert demux_post_processing_api.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+        flow_cell_name=flow_cell_name, sample_internal_id=sample_id, lane=lane
+    )

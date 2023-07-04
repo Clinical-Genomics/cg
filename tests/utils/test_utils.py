@@ -1,6 +1,7 @@
 """Tests for the utils module"""
+import pytest
 
-from cg.utils.utils import get_string_from_list_by_pattern
+from cg.utils.utils import get_string_from_list_by_pattern, get_hamming_distance
 
 
 def test_get_string_from_list_by_pattern():
@@ -29,3 +30,36 @@ def test_get_string_from_list_by_pattern_not_found():
 
     # THEN None should be returned
     assert extracted_string is None
+
+
+def test_get_hamming_distance():
+    """Test that getting the hamming distance between two strings works as expected."""
+    # GIVEN two different strings with the same length
+    str_1: str = "1234567"
+    str_2: str = "7654321"
+
+    # WHEN getting the hamming distance between both strings
+
+    # THEN is equal to the number of different characters between the strings
+    assert get_hamming_distance(str_1=str_1, str_2=str_2) == 6
+
+    # WHEN getting the hamming distance between one string and itself
+
+    # THEN is equal to zero
+    assert get_hamming_distance(str_1=str_1, str_2=str_1) == 0
+
+
+def test_get_hamming_distance_different_lengths():
+    """Test that getting the hamming distance between two strings works as expected."""
+    # GIVEN two strings with different lengths
+    str_1: str = "12345678"
+    str_2: str = "123456789"
+
+    # WHEN getting the hamming distance between both strings
+    with pytest.raises(KeyError) as exc_info:
+        # THEN an error is raised
+        get_hamming_distance(str_1=str_1, str_2=str_2)
+        assert (
+            str(exc_info.value)
+            == "The two strings must have the same length to calculate distance!"
+        )
