@@ -61,12 +61,12 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def build_sample_sheet_content(
-            case_id: str,
-            sample_id: str,
-            fastq_r1: List[str],
-            fastq_r2: List[str],
-            instrument_platform: SequencingPlatform.ILLUMINA,
-            fasta: Optional[str] = "",
+        case_id: str,
+        sample_id: str,
+        fastq_r1: List[str],
+        fastq_r2: List[str],
+        instrument_platform: SequencingPlatform.ILLUMINA,
+        fasta: Optional[str] = "",
     ) -> Dict[str, List[str]]:
         """Build sample sheet headers and lists."""
         try:
