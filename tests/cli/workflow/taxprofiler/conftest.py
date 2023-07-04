@@ -18,3 +18,8 @@ def fixture_taxprofiler_context(cg_context: CGConfig) -> CGConfig:
     """Context to use in cli."""
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     return cg_context
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_case_id_existing():
+    return "richurchin"

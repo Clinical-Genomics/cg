@@ -52,8 +52,8 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         return [link.sample_id for link in case_id.links]
 
     def get_fastq_files(self, case_id: str) -> None:
-        case_id = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        for link in case_id.links:
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        for link in case_id.obj:
             self.link_fastq_files_for_sample(
                 case_id=case_id,
                 sample_id=link.sample,
@@ -62,41 +62,38 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     @staticmethod
     def build_sample_sheet_content(
         case_id: str,
-        sample_ids: List[str],
+        sample_id: str,
         fastq_r1: List[str],
         fastq_r2: List[str],
         instrument_platform: SequencingPlatform.ILLUMINA,
         fasta: Optional[str] = "",
     ) -> Dict[str, List[str]]:
+        """Build sample sheet headers and lists."""
+        try:
+            TaxprofilerSample(
+                # sample=case_id,
+                sample=sample_id,
+                fastq_r1=fastq_r1,
+                fastq_r2=fastq_r2,
+                instrument_platform=instrument_platform,
+            )
+        except ValidationError as error:
+            LOG.error(error)
+            raise ValueError
+
+        # Complete sample lists to the same length as fastq_r1:
+        samples_full_list: List[str] = [sample_id] * len(fastq_r1)
+        instrument_full_list: List[str] = [instrument_platform] * len(fastq_r1)
+        fasta_full_list: List[str] = [fasta] * len(fastq_r1)
+
         sample_sheet_content: Dict[str, List[str]] = {
-            NFX_SAMPLE_HEADER: [],
-            TAXPROFILER_RUN_ACCESSION: [],
-            TAXPROFILER_INSTRUMENT_PLATFORM: [],
-            NFX_READ1_HEADER: [],
-            NFX_READ2_HEADER: [],
-            TAXPROFILER_FASTA_HEADER: [],
+            NFX_SAMPLE_HEADER: samples_full_list,
+            TAXPROFILER_RUN_ACCESSION: samples_full_list,
+            TAXPROFILER_INSTRUMENT_PLATFORM: instrument_full_list,
+            NFX_READ1_HEADER: fastq_r1,
+            NFX_READ2_HEADER: fastq_r2,
+            TAXPROFILER_FASTA_HEADER: fasta_full_list,
         }
-
-        for sample_id, r1, r2 in zip(sample_ids, fastq_r1, fastq_r2):
-            try:
-                TaxprofilerSample(
-                    # sample=case_id,
-                    sample=sample_id,
-                    fastq_r1=r1,
-                    fastq_r2=r2,
-                    instrument_platform=instrument_platform,
-                )
-            except ValidationError as error:
-                LOG.error(error)
-                raise ValueError
-
-            sample_sheet_content[NFX_SAMPLE_HEADER].append(sample_id)
-            sample_sheet_content[TAXPROFILER_RUN_ACCESSION].append(sample_id)
-            sample_sheet_content[TAXPROFILER_INSTRUMENT_PLATFORM].append(instrument_platform)
-            sample_sheet_content[NFX_READ1_HEADER].append(r1)
-            sample_sheet_content[NFX_READ2_HEADER].append(r2)
-            sample_sheet_content[TAXPROFILER_FASTA_HEADER].append(fasta)
-
         return sample_sheet_content
 
     def write_sample_sheet(
