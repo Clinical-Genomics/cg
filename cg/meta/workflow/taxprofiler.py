@@ -47,22 +47,20 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
 
-    def get_samples(self, case_id: str) -> List[Sample]:
-        case_id: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        return [link.sample_id for link in case_id.links]
+    def get_samples(self, case_id: str, sample_id: str) -> List[Sample]:
+        """Returns a list of samples to configure
+        If sample_id is specified, will return a list with only this sample_id.
+        Otherwise, returns all samples in given case"""
+        if sample_id:
+            return [self.status_db.get_sample_by_internal_id(internal_id=sample_id)]
 
-    def get_fastq_files(self, case_id: str) -> None:
-        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        for link in case_id.obj:
-            self.link_fastq_files_for_sample(
-                case_id=case_id,
-                sample_id=link.sample,
-            )
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        return [link.sample for link in case_obj.links]
 
     @staticmethod
     def build_sample_sheet_content(
         case_id: str,
-        sample_id: str,
+        sample_id: List[str],
         fastq_r1: List[str],
         fastq_r2: List[str],
         instrument_platform: SequencingPlatform.ILLUMINA,
@@ -106,7 +104,8 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
 
         for link in case.links:
-            sample_id: str = link.sample.internal_id
+            # sample_id: str = link.sample.internal_id
+            sample_id: List[str] = self.get_samples(case, link.sample)
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
