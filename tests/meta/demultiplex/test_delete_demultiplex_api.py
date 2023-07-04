@@ -215,6 +215,7 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
     caplog,
     cg_context: CGConfig,
     tmp_flow_cell_run_base_path: Path,
+    tmp_flow_cell_demux_base_path: Path,
     flow_cell_name_housekeeper_api: HousekeeperAPI,
     bcl2fastq_flow_cell_id: str,
     populated_flow_cell_store: Store,
@@ -226,8 +227,11 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
     cg_context.housekeeper_api_ = flow_cell_name_housekeeper_api
     cg_context.status_db_ = populated_flow_cell_store
     cg_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    cg_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.out_dir = tmp_flow_cell_demux_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
+        parents=True, exist_ok=True
+    )
+    Path(tmp_flow_cell_demux_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
         parents=True, exist_ok=True
     )
     # GIVEN
@@ -302,7 +306,7 @@ def test_delete_flow_cell_hasta(
 
     # GIVEN an existing demultiplexing and run directory of a flow cell, with a status "ondisk"
 
-    assert wipe_demux_api.demultiplexing_out_dir.exists()
+    assert wipe_demux_api.demultiplexing_out_path.exists()
     assert wipe_demux_api.run_path.exists()
     assert flow_cell_obj.status == "ondisk"
 
@@ -315,10 +319,10 @@ def test_delete_flow_cell_hasta(
 
     # THEN the demultiplexing directory should be removed
     assert (
-        f"DeleteDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {wipe_demux_api.demultiplexing_out_dir}"
+        f"DeleteDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {wipe_demux_api.demultiplexing_out_path}"
         in caplog.text
     )
-    assert wipe_demux_api.demultiplexing_out_dir.exists() is False
+    assert wipe_demux_api.demultiplexing_out_path.exists() is False
 
     # THEN the run directory should be removed
     assert (

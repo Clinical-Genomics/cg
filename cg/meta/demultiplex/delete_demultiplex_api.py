@@ -29,7 +29,7 @@ class DeleteDemuxAPI:
         self.demux_api: DemultiplexingAPI = config.demultiplex_api
         self.stats_api: StatsAPI = config.cg_stats_api
         self.samples_on_flow_cell: List[Sample] = []
-        self.demultiplexing_out_dir: Path = self.get_demultiplexing_out_path()
+        self.demultiplexing_out_path: Path = self.get_demultiplexing_out_path()
         self.run_path: Path = self.get_run_path()
         log.debug("DeleteDemuxAPI: API initiated")
 
@@ -156,9 +156,9 @@ class DeleteDemuxAPI:
         """delete demultiplexing directory on server"""
 
         log.info(
-            f"DeleteDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {self.demultiplexing_out_dir}"
+            f"DeleteDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {self.demultiplexing_out_path}"
         )
-        shutil.rmtree(self.demultiplexing_out_dir, ignore_errors=False)
+        shutil.rmtree(self.demultiplexing_out_path, ignore_errors=False)
 
     def _delete_run_dir_hasta(self) -> None:
         """delete flow cell run directory on server"""
@@ -174,7 +174,7 @@ class DeleteDemuxAPI:
         dir set status to removed"""
         if self.dry_run:
             log.info(
-                f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {self.demultiplexing_path}\n"
+                f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {self.demultiplexing_out_path}\n"
                 f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {self.run_path}"
             )
             return
@@ -185,11 +185,11 @@ class DeleteDemuxAPI:
             flow_cell_obj.status = "removed"
             self.status_db.session.commit()
 
-        if demultiplexing_dir and self.demultiplexing_out_dir.exists():
+        if demultiplexing_dir and self.demultiplexing_out_path.exists():
             self._delete_demultiplexing_dir_hasta()
         else:
             log.info(
-                f"DeleteDemuxAPI-Hasta: Skipped demultiplexing directory, or no target: {self.demultiplexing_out_dir}"
+                f"DeleteDemuxAPI-Hasta: Skipped demultiplexing directory, or no target: {self.demultiplexing_out_path}"
             )
 
         if run_dir and self.run_path.exists():
