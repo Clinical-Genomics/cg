@@ -163,7 +163,7 @@ class UploadScoutAPI:
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> Set[str]:
         """Return a set of unique DNA cases related to an RNA case."""
         case: Family = self.status_db.get_case_by_internal_id(case_id)
-        rna_dna_bundles: List[RnaDnaBundle] = self.create_rna_dna_bundles(rna_case=case)
+        rna_dna_bundles: List[RnaDnaBundle] = self.create_rna_dna_bundles(case)
         unique_dna_cases_related_to_rna_case: Set[str] = set()
         for rna_dna_bundle in rna_dna_bundles:
             unique_dna_cases_related_to_rna_case.update(rna_dna_bundle.dna_case_ids)
@@ -281,12 +281,12 @@ class UploadScoutAPI:
                         customer_sample_id=dna_sample_name,
                     )
                     LOG.info(
-                        f"Uploaded RNA coverage bigwig file for {dna_sample_name} in case {dna_case_id}"
+                        f"Uploaded RNA coverage bigwig file for sample {dna_sample_name} in case {dna_case_id}."
                     )
                 else:
                     LOG.warning(
                         f"Upload of RNA coverage bigwig file for sample {dna_sample_name} "
-                        f"in case {dna_case_id} skipped - case has not finished uploading"
+                        f"in case {dna_case_id} skipped - case has not finished uploading."
                     )
         LOG.info("Upload RNA coverage bigwig file finished!")
 
