@@ -252,7 +252,7 @@ def test_get_sample_ids_from_sample_sheet():
 # WHEN parsing the flow cell directory data
 # THEN a FlowCellError should be raised
 def test_parse_flow_cell_directory_data_invalid(mocked_function):
-    with pytest.raises(FlowCellError, match="Flow cell directory was not valid"):
+    with pytest.raises(FlowCellError):
         parse_flow_cell_directory_data(Path("dummy_path"), "dummy_bcl_converter")
 
 

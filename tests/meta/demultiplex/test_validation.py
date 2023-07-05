@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.exc import FlowCellError
 from cg.meta.demultiplex.utils import create_delivery_file_in_flow_cell_directory
 from cg.meta.demultiplex.validation import (
     is_file_path_compressed_fastq,
@@ -133,10 +134,9 @@ def test_is_flow_cell_directory_valid_when_directory_exists_and_demultiplexing_c
     Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
 
     # WHEN validating the flow cell directory
-    result = is_flow_cell_directory_valid(flow_cell_directory)
+    is_flow_cell_directory_valid(flow_cell_directory)
 
-    # THEN it should be valid
-    assert result is True
+    # THEN no exception is raised
 
 
 def test_is_flow_cell_directory_valid_when_directory_exists_but_demultiplexing_not_complete(
@@ -146,10 +146,10 @@ def test_is_flow_cell_directory_valid_when_directory_exists_but_demultiplexing_n
     flow_cell_directory = tmp_path
 
     # WHEN validating the flow cell directory
-    result = is_flow_cell_directory_valid(flow_cell_directory)
-
-    # THEN it should not be valid
-    assert result is False
+    with pytest.raises(
+        FlowCellError
+    ):
+        is_flow_cell_directory_valid(flow_cell_directory)
 
 
 def test_is_flow_cell_directory_valid_when_directory_does_not_exist():
@@ -157,7 +157,7 @@ def test_is_flow_cell_directory_valid_when_directory_does_not_exist():
     flow_cell_directory = Path("non_existent_directory")
 
     # WHEN validating the flow cell directory
-    result = is_flow_cell_directory_valid(flow_cell_directory)
-
-    # THEN it should not be valid
-    assert result is False
+    with pytest.raises(
+        FlowCellError
+    ):
+        is_flow_cell_directory_valid(flow_cell_directory)
