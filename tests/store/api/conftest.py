@@ -173,7 +173,6 @@ def fixture_max_nr_of_cases() -> int:
 
 @pytest.fixture(name="store_failing_sequencing_qc")
 def fixture_store_failing_sequencing_qc(
-    store: Store,
     case_id: str,
     family_name: str,
     bcl2fastq_flow_cell_id: str,
@@ -185,7 +184,6 @@ def fixture_store_failing_sequencing_qc(
     """Populate a store with a Fluffy case, with a sample that has been sequenced on two flow cells."""
     store = Store(uri="sqlite:///")
     store.create_all()
-
     store_case = helpers.add_case(
         store=store,
         internal_id=case_id,

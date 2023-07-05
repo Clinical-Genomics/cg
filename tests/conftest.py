@@ -2286,14 +2286,14 @@ def fixture_expected_average_q30() -> float:
 
 @pytest.fixture
 def store_with_sequencing_metrics(
-    store: Store,
     sample_id: str,
     expected_total_reads: int,
     flow_cell_name: str,
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
-
+    store = Store(uri="sqlite:///")
+    store.create_all()
     sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
         (sample_id, flow_cell_name, 1, expected_total_reads, 90.5, 32),
         ("sample_2", "flow_cell_2", 2, 2_000_000, 85.5, 30),
@@ -2322,4 +2322,5 @@ def store_with_sequencing_metrics(
     store.session.add_all(sample_lane_sequencing_metrics)
     store.session.commit()
 
-    return store
+    yield store
+    store.drop_all()
