@@ -107,54 +107,43 @@ def demultiplex_flow_cell(
 
 
 @click.command(name="delete-flow-cell")
-@click.option("--cg-stats", is_flag=True, help="Delete flow cell in cg-stats")
 @click.option(
-    "-d",
-    "--demultiplex-base",
-    type=click.Path(exists=True),
+    "-f",
+    "--flow-cell-name",
     required=True,
-    help="Is the base of demultiplexing, e.g. '/home/proj/{ENVIRONMENT}/demultiplexed-runs/'",
+    help="The name of the flow cell you want to delete, e.g. HVKJCDRXX",
 )
 @click.option(
     "--demultiplexing-dir", is_flag=True, help="Delete flow cell demultiplexed dir on file system"
 )
-@DRY_RUN
+@click.option("--cg-stats", is_flag=True, help="Delete flow cell in cg-stats")
 @click.option("--housekeeper", is_flag=True, help="Delete flow cell in housekeeper")
 @click.option("--init-files", is_flag=True, help="Delete flow cell init-files")
 @click.option("--run-dir", is_flag=True, help="Delete flow cell run on file system")
-@click.option(
-    "-r",
-    "--run-directory",
-    type=click.Path(exists=False),
-    required=True,
-    help="Is the path to the flow cell run directory name, e.g. '/home/proj/{ENVIRONMENT}/flowcells/novaseq/runs/201203_A00689_0200_AHVKJCDRXX'",
-)
 @click.option(
     "--status-db",
     is_flag=True,
     help="Delete flow cell in status-db, if passed all other entries are also deleted",
 )
 @click.option("--yes", is_flag=True, help="Pass yes to click confirm")
+@DRY_RUN
 @click.pass_obj
 def delete_flow_cell(
     context: CGConfig,
     dry_run: bool,
-    demultiplexing_dir: str,
+    demultiplexing_dir: bool,
     cg_stats: bool,
-    demultiplex_base: bool,
     housekeeper: bool,
     init_files: bool,
     run_dir: bool,
-    run_directory: str,
     status_db: bool,
     yes: bool,
+    flow_cell_name: str,
 ):
     """Delete a flow cell. If --status-db is passed then all other options will be treated as True."""
-    demultiplex_base: Path = Path(demultiplex_base)
-    run_path: Path = Path(run_directory)
 
-    wipe_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
-        config=context, demultiplex_base=demultiplex_base, dry_run=dry_run, run_path=run_path
+    delete_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
+        config=context, dry_run=dry_run, flow_cell_name=flow_cell_name
     )
 
     if yes or click.confirm(
@@ -163,7 +152,7 @@ def delete_flow_cell(
         f"Housekeeper={True if status_db else housekeeper}\nInit_files={True if status_db else init_files}\n"
         f"Run-dir={True if status_db else run_dir}\nStatusdb={status_db}"
     ):
-        wipe_demux_api.delete_flow_cell(
+        delete_demux_api.delete_flow_cell(
             cg_stats=cg_stats,
             demultiplexing_dir=demultiplexing_dir,
             housekeeper=housekeeper,
