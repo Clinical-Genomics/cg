@@ -146,9 +146,7 @@ def test_is_flow_cell_directory_valid_when_directory_exists_but_demultiplexing_n
     flow_cell_directory = tmp_path
 
     # WHEN validating the flow cell directory
-    with pytest.raises(
-        FlowCellError
-    ):
+    with pytest.raises(FlowCellError):
         is_flow_cell_directory_valid(flow_cell_directory)
 
 
@@ -157,7 +155,5 @@ def test_is_flow_cell_directory_valid_when_directory_does_not_exist():
     flow_cell_directory = Path("non_existent_directory")
 
     # WHEN validating the flow cell directory
-    with pytest.raises(
-        FlowCellError
-    ):
+    with pytest.raises(FlowCellError):
         is_flow_cell_directory_valid(flow_cell_directory)
