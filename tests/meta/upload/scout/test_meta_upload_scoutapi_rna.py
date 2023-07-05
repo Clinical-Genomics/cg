@@ -742,7 +742,7 @@ def test_upload_rna_report_to_successful_dna_case_in_scout(
     # THEN the report should be uploaded to Scout
     for case_id in dna_case_ids:
         assert (
-            f"Uploading {ScoutCustomCaseReportTags.MULTIQC} report to scout for case {case_id}"
+            f"Uploading {ScoutCustomCaseReportTags.MULTIQC} report to Scout for case {case_id}"
             in caplog.text
         )
 
