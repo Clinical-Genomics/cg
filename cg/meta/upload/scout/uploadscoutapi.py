@@ -393,7 +393,9 @@ class UploadScoutAPI:
             is_tumour=rna_sample.is_tumour,
         )
 
-        subject_id_dna_samples: List[Sample] = self._get_application_prep_category(subject_id_samples)
+        subject_id_dna_samples: List[Sample] = self._get_application_prep_category(
+            subject_id_samples
+        )
 
         if len(subject_id_dna_samples) != 1:
             raise CgDataError(
