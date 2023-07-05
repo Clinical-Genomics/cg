@@ -77,7 +77,7 @@ class BalsamicReportAPI(ReportAPI):
     ) -> BalsamicTargetedSampleMetadataModel:
         """Returns a report metadata for BALSAMIC TGS analysis."""
         return BalsamicTargetedSampleMetadataModel(
-            bait_set=sample.capture_kit,
+            bait_set=analysis_metadata.config.panel.capture_kit,
             bait_set_version=analysis_metadata.config.panel.capture_kit_version,
             million_read_pairs=million_read_pairs,
             median_target_coverage=sample_metrics.median_target_coverage

@@ -1,4 +1,3 @@
-import os.path
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Union, Optional
@@ -46,12 +45,10 @@ class BalsamicConfigReference(BaseModel):
     Attributes:
         reference_genome: reference genome fasta file
         reference_genome_version: reference genome build version
-        reference_access_date: date the reference was used for the analysis
     """
 
     reference_genome: Path
     reference_genome_version: Union[None, Path, str]
-    reference_access_date: Union[datetime, Path]
 
     @validator("reference_genome_version", always=True)
     def validate_genome_version(cls, value: Path, values: dict) -> str:
@@ -62,34 +59,29 @@ class BalsamicConfigReference(BaseModel):
 
         return str(values["reference_genome"]).split("/")[-3]
 
-    @validator("reference_access_date")
-    def validate_reference_date(cls, value: Path) -> datetime:
-        """Formats the reference date"""
-
-        return datetime.strptime(os.path.basename(value), "%Y-%m-%d %H:%M:%S")
-
 
 class BalsamicConfigPanel(BaseModel):
-    """BALSAMIC attributes of a PANEL BED file if it's provided
+    """Balsamic attributes of a panel BED file
 
     Attributes:
-        capture_kit: string representation of a path to the PANEL BED file
+        capture_kit: string representation of a panel BED filename
         capture_kit_version: capture kit version
-        chrom: list of chromosomes in PANEL BED
+        chrom: list of chromosomes in the panel BED file
     """
 
-    capture_kit: Path
+    capture_kit: Union[str, Path]
     capture_kit_version: Optional[str]
     chrom: List[str]
 
-    @validator("capture_kit_version", always=True)
-    def validate_genome_version(cls, value: Path, values: dict) -> str:
-        """
-        Returns the panel bed version from the capture kit path:
-        /home/proj/stage/cancer/reference/target_capture_bed/production/balsamic/gicfdna_3.1_hg19_design.bed
-        """
+    @validator("capture_kit", pre=True)
+    def validate_capture_kit(cls, capture_kit: Union[str, Path]) -> str:
+        """Return the base name of the provided capture kit path."""
+        return Path(capture_kit).name
 
-        return os.path.basename(values["capture_kit"]).split("_")[-3]
+    @validator("capture_kit_version", always=True)
+    def validate_capture_kit_version(cls, values: dict) -> str:
+        """Return the panel bed version from its filename (e.g. gicfdna_3.1_hg19_design.bed)."""
+        return values["capture_kit"].split("_")[-3]
 
 
 class BalsamicConfigQC(BaseModel):
