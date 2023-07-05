@@ -584,7 +584,6 @@ def test_add_dna_cases_to_dna_sample(
 
     # GIVEN an RNA sample, a DNA sample, and a DNA case
     rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
-    dna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=dna_sample_son_id)
     dna_case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
 
     # WHEN adding creating the RnaDnaBundle
@@ -658,7 +657,7 @@ def test_get_multiqc_html_report(
 ):
     """Test that the multiqc html report is returned."""
 
-    # GIVEN an DNA case with a multiqc-htlml report
+    # GIVEN a DNA case with a multiqc-htlml report
     case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
     multiqc_file: File = mip_dna_analysis_hk_api.files(
         bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
@@ -684,7 +683,7 @@ def test_upload_report_to_scout(
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN an DNA case with a multiqc-htlml report
+    # GIVEN a DNA case with a multiqc-htlml report
     multiqc_file: File = mip_dna_analysis_hk_api.files(
         bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
     )[0]
