@@ -7,7 +7,6 @@ Create Date: 2023-07-04 15:29:48.507215
 """
 import sqlalchemy as sa
 from alembic import op
-
 from cg.store.models import Customer
 
 # revision identifiers, used by Alembic.
@@ -30,7 +29,7 @@ def upgrade():
         table_name="customer",
         column_name="data_archive_location",
         existing_type=sa.String(length=32),
-        nullable=False
+        nullable=False,
     )
 
 
