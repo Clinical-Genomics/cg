@@ -37,7 +37,7 @@ from cg.models.report.metadata import (
 )
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
-from cg.store.models import Family, Sample
+from cg.store.models import Family, Sample, BedVersion
 
 LOG = logging.getLogger(__name__)
 
@@ -62,22 +62,23 @@ class BalsamicReportAPI(ReportAPI):
                 million_read_pairs=million_read_pairs, sample_metrics=sample_metrics
             )
         return self.get_panel_metadata(
-            sample=sample,
             million_read_pairs=million_read_pairs,
             sample_metrics=sample_metrics,
             analysis_metadata=analysis_metadata,
         )
 
-    @staticmethod
     def get_panel_metadata(
-        sample: Sample,
+        self,
         million_read_pairs: float,
         sample_metrics: BalsamicTargetedQCMetrics,
         analysis_metadata: BalsamicAnalysis,
     ) -> BalsamicTargetedSampleMetadataModel:
         """Returns a report metadata for BALSAMIC TGS analysis."""
+        bed_version: BedVersion = self.status_db.get_bed_version_by_file_name(
+            analysis_metadata.config.panel.capture_kit
+        )
         return BalsamicTargetedSampleMetadataModel(
-            bait_set=analysis_metadata.config.panel.capture_kit,
+            bait_set=bed_version.bed_id,
             bait_set_version=analysis_metadata.config.panel.capture_kit_version,
             million_read_pairs=million_read_pairs,
             median_target_coverage=sample_metrics.median_target_coverage

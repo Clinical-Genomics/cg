@@ -82,6 +82,14 @@ class FindBasicDataHandler(BaseHandler):
             valid_from=dt.datetime.now(),
         ).first()
 
+    def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion:
+        """Return bed version with file name."""
+        return apply_bed_version_filter(
+            bed_versions=self._get_query(table=BedVersion),
+            bed_version_file_name=bed_version_file_name,
+            filter_functions=[BedVersionFilter.FILTER_BY_FILE_NAME],
+        ).first()
+
     def get_bed_version_by_short_name(self, bed_version_short_name: str) -> BedVersion:
         """Return bed version with short name."""
         return apply_bed_version_filter(
