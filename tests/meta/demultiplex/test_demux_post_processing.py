@@ -695,7 +695,7 @@ def test_update_sample_read_count(demultiplex_context: CGConfig):
     demux_post_processing_api.update_sample_read_count(sample_id, q30_threshold)
 
     # THEN get_sample_by_internal_id is called with the correct argument
-    status_db.get_sample_by_internal_id.assert_called_with(internal_id=sample_id)
+    status_db.get_sample_by_internal_id.assert_called_with(sample_id)
 
     # THEN get_number_of_reads_for_sample_passing_q30_threshold is called with the correct arguments
     status_db.get_number_of_reads_for_sample_passing_q30_threshold.assert_called_with(

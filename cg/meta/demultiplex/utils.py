@@ -12,6 +12,7 @@ from cg.exc import FlowCellError
 from cg.meta.demultiplex.validation import (
     is_bcl2fastq_demux_folder_structure,
     is_flow_cell_directory_valid,
+    is_valid_sample_id,
     validate_sample_fastq_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -69,8 +70,16 @@ def create_delivery_file_in_flow_cell_directory(flow_cell_directory: Path) -> No
 
 def get_sample_ids_from_sample_sheet(flow_cell_data: FlowCellDirectoryData) -> List[str]:
     samples: List[FlowCellSample] = flow_cell_data.get_sample_sheet().samples
-    sample_ids_with_indexes: List[str] = [sample.sample_id for sample in samples]
-    return [sample_id_index.split("_")[0] for sample_id_index in sample_ids_with_indexes]
+    return get_valid_sample_ids(samples)
+
+
+def get_valid_sample_ids(samples: List[FlowCellSample]) -> List[str]:
+    """Get all valid sample ids from sample sheet."""
+    valid_sample_ids = [
+        sample.sample_id for sample in samples if is_valid_sample_id(sample.sample_id)
+    ]
+    formatted_sample_ids = [sample_id_index.split("_")[0] for sample_id_index in valid_sample_ids]
+    return formatted_sample_ids
 
 
 def get_q30_threshold(sequencer_type: Sequencers) -> int:
