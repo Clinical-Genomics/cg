@@ -1,30 +1,38 @@
 """Post-processing Demultiiplex API."""
 import logging
-import os
-import re
 import shutil
 from contextlib import redirect_stdout
 from pathlib import Path
 from typing import Iterable, List, Optional
 
 from housekeeper.store.models import Version
+from cg.store.models import Sample
 
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
 )
 from cg.constants.cgstats import STATS_HEADER
-from cg.constants.constants import FileExtensions
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
+from cg.constants.sequencing import Sequencers
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
+from cg.meta.demultiplex.utils import (
+    create_delivery_file_in_flow_cell_directory,
+    get_bcl_converter_name,
+    get_lane_from_sample_fastq,
+    get_q30_threshold,
+    get_sample_id_from_sample_fastq,
+    get_sample_ids_from_sample_sheet,
+    get_sample_sheet_path,
+    get_valid_sample_fastq_paths,
+    parse_flow_cell_directory_data,
+)
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
@@ -73,7 +81,7 @@ class DemuxPostProcessingAPI:
         LOG.info(f"Flow cell added: {flow_cell}")
 
     def finish_flow_cell_temp(self, flow_cell_directory_name: str) -> None:
-        """Finalize the flow cell once the temporary demultiplexing process is completed.
+        """Store data for the demultiplexed flow cell and mark it as ready for delivery.
 
         This function:
             - Parses and validates the flow cell directory data
@@ -81,123 +89,93 @@ class DemuxPostProcessingAPI:
             - Stores sequencing metrics in the status database
             - Updates sample read counts in the status database
             - Stores the flow cell data in the housekeeper database
+            - Creates a delivery file in the flow cell directory
 
         Args:
             flow_cell_directory_name (str): The name of the flow cell directory to be finalized.
 
         Raises:
             FlowCellError: If the flow cell directory or the data it contains is not valid.
-
-        Note:
-            This method does not return anything but updates the status and housekeeper databases
-            with data from the flow cell directory.
         """
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
         flow_cell_directory_path: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
-        bcl_converter: str = self.get_bcl_converter_name(
-            flow_cell_directory=flow_cell_directory_path
-        )
+        bcl_converter: str = get_bcl_converter_name(flow_cell_directory_path)
 
-        parsed_flow_cell: FlowCellDirectoryData = self.parse_flow_cell_directory_data(
+        parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
             flow_cell_directory=flow_cell_directory_path,
             bcl_converter=bcl_converter,
         )
 
-        self.store_flow_cell_in_status_db(parsed_flow_cell=parsed_flow_cell)
+        try:
+            self.store_flow_cell_data(parsed_flow_cell)
+        except Exception as e:
+            LOG.error(f"Failed to store flow cell data: {str(e)}")
+            raise
 
-        self.add_flow_cell_data_to_housekeeper(
-            flow_cell_name=parsed_flow_cell.id,
-            flow_cell_directory=flow_cell_directory_path,
-        )
+        create_delivery_file_in_flow_cell_directory(flow_cell_directory_path)
 
-        self.add_sample_lane_sequencing_metrics_for_flow_cell(
-            flow_cell_directory=flow_cell_directory_path, bcl_converter=bcl_converter
-        )
+    def store_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
+        """Store data from the flow cell directory in status db and housekeeper."""
+        self.store_flow_cell_data_in_status_db(parsed_flow_cell)
+        self.store_sequencing_metrics_in_status_db(parsed_flow_cell)
+        self.update_sample_read_counts_in_status_db(parsed_flow_cell)
+        self.store_flow_cell_data_in_housekeeper(parsed_flow_cell)
 
-        self.update_sample_read_counts(flow_cell_data=parsed_flow_cell)
-
-        self.create_delivery_file_in_flow_cell_directory(
-            flow_cell_directory=flow_cell_directory_path
-        )
-
-    def create_delivery_file_in_flow_cell_directory(self, flow_cell_directory: Path) -> None:
-        Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
-
-    def add_sample_lane_sequencing_metrics_for_flow_cell(
-        self, flow_cell_directory: Path, bcl_converter: str
-    ) -> None:
+    def store_sequencing_metrics_in_status_db(self, flow_cell: FlowCellDirectoryData) -> None:
         sample_lane_sequencing_metrics: List[
             SampleLaneSequencingMetrics
         ] = create_sample_lane_sequencing_metrics_for_flow_cell(
-            flow_cell_directory=flow_cell_directory,
-            bcl_converter=bcl_converter,
+            flow_cell_directory=flow_cell.path,
+            bcl_converter=flow_cell.bcl_converter,
         )
+        self.add_sequencing_metrics_to_statusdb(sample_lane_sequencing_metrics)
 
-        self.add_single_sequencing_metrics_entry_to_statusdb(sample_lane_sequencing_metrics)
-        self.status_db.session.commit()
+        LOG.info(f"Added sequencing metrics to status db for: {flow_cell.id}")
 
-        LOG.info(f"Added sequencing metrics to status db for: {flow_cell_directory.name}")
-
-    def add_single_sequencing_metrics_entry_to_statusdb(
+    def add_sequencing_metrics_to_statusdb(
         self, sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics]
     ) -> None:
-        for sample_lane_sequencing_metric in sample_lane_sequencing_metrics:
-            if self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-                flow_cell_name=sample_lane_sequencing_metric.flow_cell_name,
-                sample_internal_id=sample_lane_sequencing_metric.sample_internal_id,
-                lane=sample_lane_sequencing_metric.flow_cell_lane_number,
-            ):
-                LOG.warning(
-                    f"Sample lane sequencing metrics already exists for {sample_lane_sequencing_metric.flow_cell_name}, {sample_lane_sequencing_metric.sample_internal_id} and {sample_lane_sequencing_metric.flow_cell_lane_number}. Skipping."
-                )
-            else:
-                LOG.debug(
-                    f"Adding Sample lane sequencing metrics for {sample_lane_sequencing_metric.flow_cell_name}, {sample_lane_sequencing_metric.sample_internal_id} and {sample_lane_sequencing_metric.flow_cell_lane_number}."
-                )
-                self.status_db.session.add(sample_lane_sequencing_metric)
-
-    def get_sample_ids_from_sample_sheet(self, flow_cell_data: FlowCellDirectoryData) -> List[str]:
-        samples: List[FlowCellSample] = flow_cell_data.get_sample_sheet().samples
-        sample_ids_with_indexes: List[str] = [sample.sample_id for sample in samples]
-        return [sample_id_index.split("_")[0] for sample_id_index in sample_ids_with_indexes]
-
-    def is_flow_cell_directory_valid(self, flow_cell_directory: Path) -> bool:
-        """Validate that the flow cell directory exists and that the demultiplexing is complete."""
-
-        if not flow_cell_directory.exists():
-            LOG.warning(f"Flow cell directory does not exist: {flow_cell_directory}")
-            return False
-
-        if not self.is_demultiplexing_complete(flow_cell_directory=flow_cell_directory):
-            LOG.warning(f"Demultiplexing is not complete for flow cell {flow_cell_directory.name}")
-            return False
-
-        return True
-
-    def is_demultiplexing_complete(self, flow_cell_directory: Path) -> bool:
-        return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
-
-    def update_sample_read_counts(self, flow_cell_data: FlowCellDirectoryData) -> None:
-        """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
-
-        q30_threshold: int = self.get_q30_threshold(flow_cell_data.sequencer_type)
-
-        sample_internal_ids: List[str] = self.get_sample_ids_from_sample_sheet(
-            flow_cell_data=flow_cell_data
-        )
-
-        for sample_id in sample_internal_ids:
-            self.update_single_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold)
+        for metric in sample_lane_sequencing_metrics:
+            if not self.metric_exists_in_status_db(metric):
+                self.add_metric_to_status_db(metric)
         self.status_db.session.commit()
 
-    def get_q30_threshold(self, sequencer_type: Sequencers) -> int:
-        return FLOWCELL_Q30_THRESHOLD[sequencer_type]
+    def metric_exists_in_status_db(self, metric: SampleLaneSequencingMetrics) -> bool:
+        existing_metrics_entry: Optional[
+            SampleLaneSequencingMetrics
+        ] = self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+            flow_cell_name=metric.flow_cell_name,
+            sample_internal_id=metric.sample_internal_id,
+            lane=metric.flow_cell_lane_number,
+        )
+        if existing_metrics_entry:
+            LOG.warning(
+                f"Sample lane sequencing metrics already exist for {metric.flow_cell_name}, {metric.sample_internal_id}, and {metric.flow_cell_lane_number}. Skipping."
+            )
+        return bool(existing_metrics_entry)
 
-    def update_single_sample_read_count(self, sample_id: str, q30_threshold: int) -> None:
+    def add_metric_to_status_db(self, metric: SampleLaneSequencingMetrics) -> None:
+        LOG.debug(
+            f"Adding sample lane sequencing metrics for {metric.flow_cell_name}, {metric.sample_internal_id}, and {metric.flow_cell_lane_number}."
+        )
+        self.status_db.session.add(metric)
+
+    def update_sample_read_counts_in_status_db(self, flow_cell_data: FlowCellDirectoryData) -> None:
+        """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
+
+        q30_threshold: int = get_q30_threshold(flow_cell_data.sequencer_type)
+        sample_internal_ids: List[str] = get_sample_ids_from_sample_sheet(flow_cell_data)
+
+        for sample_id in sample_internal_ids:
+            self.update_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold)
+
+        self.status_db.session.commit()
+
+    def update_sample_read_count(self, sample_id: str, q30_threshold: int) -> None:
         """Update the read count for a sample in status db with all reads exceeding the q30 threshold from the sequencing metrics table."""
-        sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
+        sample: Optional[Sample] = self.status_db.get_sample_by_internal_id(sample_id)
 
         if sample:
             sample_read_count: int = (
@@ -208,93 +186,89 @@ class DemuxPostProcessingAPI:
             )
             LOG.debug(f"Updating sample {sample_id} with read count {sample_read_count}")
             sample.calculated_read_count = sample_read_count
+        else:
+            LOG.warning(f"Cannot find {sample_id} in status_db when adding read counts. Skipping.")
 
-    def add_flow_cell_data_to_housekeeper(
-        self, flow_cell_name: str, flow_cell_directory: Path
-    ) -> None:
-        LOG.info(f"Add flow cell data to Housekeeper for {flow_cell_name}")
+    def store_flow_cell_data_in_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
+        LOG.info(f"Add flow cell data to Housekeeper for {flow_cell.id}")
 
-        self.add_bundle_and_version_if_non_existent(bundle_name=flow_cell_name)
+        self.add_bundle_and_version_if_non_existent(bundle_name=flow_cell.id)
 
-        tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell_name]
+        tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell.id]
         self.add_tags_if_non_existent(tag_names=tags)
 
-        self.add_sample_sheet(
-            flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
+        self.add_sample_sheet_path_to_housekeeper(
+            flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id
         )
-        self.add_sample_fastq_files(
-            flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
-        )
+        self.add_sample_fastq_files_to_housekeeper(flow_cell)
 
-    def add_sample_fastq_files(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
+    def add_sample_fastq_files_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
-        fastq_file_paths: List[Path] = self.get_sample_fastq_paths_from_flow_cell(
-            flow_cell_directory=flow_cell_directory
-        )
+        valid_sample_fastq_paths = get_valid_sample_fastq_paths(flow_cell.path)
 
-        for fastq_file_path in fastq_file_paths:
-            sample_id: str = self.get_sample_id_from_sample_fastq_file_path(
-                fastq_file_path=fastq_file_path
-            )
-
-            if sample_id:
-                self.add_bundle_and_version_if_non_existent(bundle_name=sample_id)
-
-                self.add_file_to_bundle_if_non_existent(
-                    file_path=fastq_file_path,
-                    bundle_name=sample_id,
-                    tag_names=[SequencingFileTag.FASTQ, flow_cell_name],
+        for sample_fastq_path in valid_sample_fastq_paths:
+            if self.fastq_path_should_be_stored_in_housekeeper(
+                sample_fastq_path=sample_fastq_path,
+                sequencer_type=flow_cell.sequencer_type,
+                flow_cell_name=flow_cell.id,
+            ):
+                self.store_fastq_path_in_housekeeper(
+                    sample_fastq_path=sample_fastq_path, flow_cell_name=flow_cell.id
                 )
 
-    def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
+    def store_fastq_path_in_housekeeper(self, sample_fastq_path: Path, flow_cell_name: str) -> None:
+        sample_id = get_sample_id_from_sample_fastq(sample_fastq_path)
+
+        self.add_bundle_and_version_if_non_existent(bundle_name=sample_id)
+        self.add_file_to_bundle_if_non_existent(
+            file_path=sample_fastq_path,
+            bundle_name=sample_id,
+            tag_names=[SequencingFileTag.FASTQ, flow_cell_name],
+        )
+
+    def fastq_path_should_be_stored_in_housekeeper(
+        self, sample_fastq_path: Path, sequencer_type: Sequencers, flow_cell_name: str
+    ) -> bool:
+        """
+        Check if a sample fastq file should be tracked in Housekeeper.
+        Only fastq files that pass the q30 threshold should be tracked.
+        """
+        sample_id = get_sample_id_from_sample_fastq(sample_fastq_path)
+        lane = get_lane_from_sample_fastq(sample_fastq_path)
+        q30_threshold: int = get_q30_threshold(sequencer_type)
+
+        metric = self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+            flow_cell_name=flow_cell_name,
+            sample_internal_id=sample_id,
+            lane=lane,
+        )
+
+        if metric:
+            return metric.sample_base_fraction_passing_q30 >= q30_threshold / 100
+
+        LOG.warning(
+            f"Skipping fastq file {sample_fastq_path.name} as no metrics entry was found in status db."
+        )
+        LOG.warning(f"Flow cell name: {flow_cell_name}, sample id: {sample_id}, lane: {lane} ")
+        return False
+
+    def add_sample_sheet_path_to_housekeeper(
+        self, flow_cell_directory: Path, flow_cell_name: str
+    ) -> None:
         """Add sample sheet path to Housekeeper."""
 
-        sample_sheet_file_path: Path = self.find_sample_sheet_path(
-            flow_cell_directory=flow_cell_directory
-        )
+        try:
+            sample_sheet_file_path: Path = get_sample_sheet_path(flow_cell_directory)
 
-        self.add_file_to_bundle_if_non_existent(
-            file_path=sample_sheet_file_path,
-            bundle_name=flow_cell_name,
-            tag_names=[SequencingFileTag.SAMPLE_SHEET, flow_cell_name],
-        )
-
-    def find_sample_sheet_path(self, flow_cell_directory: Path):
-        """
-        Recursively searches for the given sample sheet file in the provided flow cell directory.
-
-        Raises:
-            FileNotFoundError: If the sample sheet file is not found in the flow cell directory.
-        """
-        for directory_path, _, files in os.walk(flow_cell_directory):
-            if DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME in files:
-                LOG.info(f"Found sample sheet in {directory_path}")
-                return Path(directory_path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
-
-        raise FileNotFoundError(
-            f"Sample sheet not found in given flow cell directory: {flow_cell_directory}"
-        )
-
-    def is_valid_sample_fastq_filename(self, fastq_file_name: str) -> bool:
-        """Validate the file name and discard any undetermined fastq files."""
-        return "Undetermined" not in fastq_file_name
-
-    def get_sample_fastq_paths_from_flow_cell(self, flow_cell_directory: Path) -> List[Path]:
-        fastq_sample_pattern: str = (
-            f"Unaligned*/Project_*/Sample_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-        )
-        return list(flow_cell_directory.glob(fastq_sample_pattern))
-
-    def get_sample_id_from_sample_fastq_file_path(self, fastq_file_path: Path) -> str:
-        """Extract sample id from fastq file path."""
-        sample_directory: str = fastq_file_path.parent.name
-        directory_parts: str = sample_directory.split("_")
-
-        if len(directory_parts) > 1:
-            # The sample id is always the second part of the directory names
-            return directory_parts[1]
-
-        return directory_parts[0]
+            self.add_file_to_bundle_if_non_existent(
+                file_path=sample_sheet_file_path,
+                bundle_name=flow_cell_name,
+                tag_names=[SequencingFileTag.SAMPLE_SHEET, flow_cell_name],
+            )
+        except FileNotFoundError as e:
+            LOG.error(
+                f"Sample sheet for flow cell {flow_cell_name} in {flow_cell_directory} was not found, error: {e}"
+            )
 
     def add_bundle_and_version_if_non_existent(self, bundle_name: str) -> None:
         """Add bundle if it does not exist."""
@@ -331,7 +305,7 @@ class DemuxPostProcessingAPI:
             file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
         )
 
-    def store_flow_cell_in_status_db(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
+    def store_flow_cell_data_in_status_db(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Create flow cell from the parsed and validated flow cell data."""
         if not self.status_db.get_flow_cell_by_name(flow_cell_name=parsed_flow_cell.id):
             flow_cell: Flowcell = Flowcell(
@@ -345,37 +319,6 @@ class DemuxPostProcessingAPI:
             LOG.info(f"Flow cell added to status db: {parsed_flow_cell.id}.")
         else:
             LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}. Skipping.")
-
-    def parse_flow_cell_directory_data(
-        self, flow_cell_directory: Path, bcl_converter: str
-    ) -> FlowCellDirectoryData:
-        """Parse flow cell data from the flow cell directory."""
-        if not self.is_flow_cell_directory_valid(flow_cell_directory=flow_cell_directory):
-            raise FlowCellError(f"Flow cell directory not found: {flow_cell_directory}")
-
-        try:
-            flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-                flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
-            )
-            return flow_cell
-        except FlowCellError as error:
-            LOG.error(f"Unable to parse flow cell data from {flow_cell_directory}")
-            raise error
-
-    def get_bcl_converter_name(self, flow_cell_directory: Path) -> str:
-        if self.is_bcl2fastq_demux_folder_structure(flow_cell_directory=flow_cell_directory):
-            LOG.info("Flow cell was demultiplexed with bcl2fastq")
-            return BclConverter.BCL2FASTQ
-        LOG.info("Flow cell was demultiplexed with bcl_converter")
-        return BclConverter.BCLCONVERT
-
-    def is_bcl2fastq_demux_folder_structure(self, flow_cell_directory: Path) -> bool:
-        """Check if flow cell directory is a Bcl2fastq demux folder structure."""
-
-        for folder in flow_cell_directory.glob(pattern="*"):
-            if re.search(DemultiplexingDirsAndFiles.BCL2FASTQ_TILE_DIR_PATTERN.value, str(folder)):
-                return True
-        return False
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
