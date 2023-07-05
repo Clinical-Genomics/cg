@@ -3,6 +3,7 @@ from cg.store import Store
 from cg.store.filters.status_metrics_filters import (
     filter_total_read_count_for_sample,
     filter_metrics_for_flow_cell_sample_internal_id_and_lane,
+    filter_metrics_by_flow_cell_name,
 )
 from cg.store.models import SampleLaneSequencingMetrics
 from sqlalchemy.orm import Query
@@ -57,3 +58,51 @@ def test_filter_metrics_for_flow_cell_sample_internal_id_and_lane(
     assert metrics_query[0].flow_cell_name == flow_cell_name
     assert metrics_query[0].sample_internal_id == sample_id
     assert metrics_query[0].flow_cell_lane_number == 1
+
+
+def test_filter_metrics_by_flow_cell_name(
+    store_with_sequencing_metrics: Store, flow_cell_name: str
+):
+    # GIVEN a Store with sequencing metrics
+    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
+
+    # WHEN getting metrics for a flow cell name
+    metrics_query: Query = filter_metrics_by_flow_cell_name(
+        metrics=metrics, flow_cell_name=flow_cell_name
+    )
+
+    # THEN assert that the returned object is a Query
+    assert isinstance(metrics_query, Query)
+
+    # THEN assert that the query returns a list of metrics
+    assert metrics_query.all()
+
+    # THEN assert that the query returns the expected number of metrics
+    assert len(metrics_query.all()) == 1
+
+    # THEN assert that the query returns the expected metrics
+    for metric in metrics_query.all():
+        assert metric.flow_cell_name == flow_cell_name
+
+
+def test_filter_metrics_by_sample_internal_id(store_with_sequencing_metrics: Store, sample_id: str):
+    # GIVEN a Store with sequencing metrics
+    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
+
+    # WHEN getting metrics for a sample internal id
+    metrics_query: Query = metrics.filter(
+        SampleLaneSequencingMetrics.sample_internal_id == sample_id
+    )
+
+    # THEN assert that the returned object is a Query
+    assert isinstance(metrics_query, Query)
+
+    # THEN assert that the query returns a list of metrics
+    assert metrics_query.all()
+
+    # THEN assert that the query returns the expected number of metrics
+    assert len(metrics_query.all()) == 1
+
+    # THEN assert that the query returns the expected metrics
+    for metric in metrics_query.all():
+        assert metric.sample_internal_id == sample_id

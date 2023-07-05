@@ -23,11 +23,27 @@ def filter_metrics_for_flow_cell_sample_internal_id_and_lane(
     )
 
 
+def filter_metrics_by_flow_cell_name(metrics: Query, flow_cell_name: str, **kwargs) -> Query:
+    return metrics.filter(
+        SampleLaneSequencingMetrics.flow_cell_name == flow_cell_name,
+    )
+
+
+def filter_metrics_by_sample_internal_id(
+    metrics: Query, sample_internal_id: str, **kwargs
+) -> Query:
+    return metrics.filter(
+        SampleLaneSequencingMetrics.sample_internal_id == sample_internal_id,
+    )
+
+
 class SequencingMetricsFilter(Enum):
     FILTER_TOTAL_READ_COUNT_FOR_SAMPLE: Callable = filter_total_read_count_for_sample
     FILTER_METRICS_FOR_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE: Callable = (
         filter_metrics_for_flow_cell_sample_internal_id_and_lane
     )
+    FILTER_BY_FLOW_CELL_NAME: Callable = filter_metrics_by_flow_cell_name
+    FILTER_BY_SAMPLE_INTERNAL_ID: Callable = filter_metrics_by_sample_internal_id
 
 
 def apply_metrics_filter(

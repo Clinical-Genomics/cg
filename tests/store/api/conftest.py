@@ -154,7 +154,14 @@ def fixture_re_sequenced_sample_store(
     )
 
     helpers.add_relationship(store=re_sequenced_sample_store, case=store_case, sample=store_sample)
-
+    helpers.add_sample_lane_sequencing_metrics(
+        store=re_sequenced_sample_store,
+        sample_internal_id=store_sample.internal_id,
+        flow_cell_name=bcl2fastq_flow_cell_id,
+        flow_cell_lane_number=1,
+        sample_total_reads_in_lane=120000000,
+        sample_base_fraction_passing_q30=0.9,
+    )
     return re_sequenced_sample_store
 
 
@@ -162,6 +169,58 @@ def fixture_re_sequenced_sample_store(
 def fixture_max_nr_of_cases() -> int:
     """Return the number of maximum number of cases"""
     return 50
+
+
+@pytest.fixture(name="store_failing_sequencing_qc")
+def fixture_store_failing_sequencing_qc(
+    store: Store,
+    case_id: str,
+    family_name: str,
+    bcl2fastq_flow_cell_id: str,
+    sample_id: str,
+    ticket_id: str,
+    timestamp_now: dt.datetime,
+    helpers,
+) -> Store:
+    """Populate a store with a Fluffy case, with a sample that has been sequenced on two flow cells."""
+    store = Store(uri="sqlite:///")
+    store.create_all()
+
+    store_case = helpers.add_case(
+        store=store,
+        internal_id=case_id,
+        name=family_name,
+        data_analysis=Pipeline.FLUFFY,
+    )
+
+    store_sample = helpers.add_sample(
+        internal_id=sample_id,
+        is_tumour=False,
+        application_type=PrepCategory.READY_MADE_LIBRARY.value,
+        reads=5,
+        store=store,
+        original_ticket=ticket_id,
+        sequenced_at=timestamp_now,
+    )
+
+    helpers.add_flowcell(
+        store=store,
+        flow_cell_name=bcl2fastq_flow_cell_id,
+        samples=[store_sample],
+        date=timestamp_now,
+    )
+
+    helpers.add_relationship(store=store, case=store_case, sample=store_sample)
+    helpers.add_sample_lane_sequencing_metrics(
+        store=store,
+        sample_internal_id=store_sample.internal_id,
+        flow_cell_name=bcl2fastq_flow_cell_id,
+        flow_cell_lane_number=1,
+        sample_total_reads_in_lane=5,
+        sample_base_fraction_passing_q30=0.3,
+    )
+    yield store
+    store.drop_all()
 
 
 @pytest.fixture(name="max_nr_of_samples")

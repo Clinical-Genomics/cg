@@ -8,11 +8,10 @@ import requests
 from requests import Response
 
 import paramiko
-from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
-from cg.meta.upload.nipt.models import StatinaUploadFiles
+from cg.meta.upload.nipt.models import StatinaUploadFiles, FlowCellQ30AndReads
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Analysis, Flowcell, Family
@@ -39,7 +38,6 @@ class NiptUploadAPI:
         self.sftp_remote_path = config.fluffy.sftp.remote_path
         self.root_dir = Path(config.housekeeper.root)
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
-        self.stats_api: StatsAPI = config.cg_stats_api
         self.status_db: Store = config.status_db
         self.dry_run: bool = False
         self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
@@ -50,18 +48,25 @@ class NiptUploadAPI:
         LOG.info("Set dry run to %s", dry_run)
         self.dry_run = dry_run
 
-    def flowcell_passed_qc_value(self, case_id: str, q30_threshold: float) -> bool:
-        """Check average Q30 and of the latest flow cell related to a case."""
-        latest_flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
-        flow_cell_reads_and_q30_summary: Dict[
-            str, Union[int, float]
-        ] = self.stats_api.flow_cell_reads_and_q30_summary(flow_cell_name=latest_flow_cell.name)
-        return flow_cell_reads_and_q30_summary[
-            "q30"
-        ] >= q30_threshold and flow_cell_reads_and_q30_summary[
-            "reads"
-        ] >= self.status_db.get_ready_made_library_expected_reads(
-            case_id=case_id
+    def flowcell_passed_qc_value(self, case_id: str, q30_threshold: float):
+        """
+        Check the average Q30 and the total number of reads for each sample
+        in the latest flow cell related to a case.
+        """
+        flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
+        flow_cell_summary: FlowCellQ30AndReads = FlowCellQ30AndReads(
+            q30=self.status_db.get_average_passing_q30_for_samples_on_flow_cell(
+                flow_cell_name=flow_cell.name
+            ),
+            reads=self.status_db.get_number_of_reads_for_flow_cell(flow_cell_name=flow_cell.name),
+        )
+        return (
+            True
+            if flow_cell_summary.q30_above_threshold(threshold=q30_threshold)
+            and flow_cell_summary.reads_above_threshold(
+                threshold=self.status_db.get_ready_made_library_expected_reads(case_id=case_id)
+            )
+            else False
         )
 
     def get_housekeeper_results_file(self, case_id: str, tags: Optional[list] = None) -> str:

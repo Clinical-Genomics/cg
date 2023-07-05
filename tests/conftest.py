@@ -2278,10 +2278,20 @@ def fixture_flow_cell_name() -> str:
     return "HVKJCDRXX"
 
 
+@pytest.fixture(name="expected_average_q30")
+def fixture_expected_average_q30() -> float:
+    """Return expected average Q30."""
+    return 90.5
+
+
 @pytest.fixture
 def store_with_sequencing_metrics(
-    store: Store, sample_id: str, expected_total_reads: int, flow_cell_name: str
-) -> Generator[Store, None, None]:
+    store: Store,
+    sample_id: str,
+    expected_total_reads: int,
+    flow_cell_name: str,
+    helpers: StoreHelpers,
+) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
 
     sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
@@ -2299,17 +2309,17 @@ def store_with_sequencing_metrics(
         sample_base_fraction_passing_q30,
         sample_base_mean_quality_score,
     ) in sample_sequencing_metrics_details:
-        sequencing_metrics = SampleLaneSequencingMetrics(
+        helpers.add_sample_lane_sequencing_metrics(
+            store=store,
             sample_internal_id=sample_internal_id,
             flow_cell_name=flow_cell_name,
             flow_cell_lane_number=flow_cell_lane_number,
             sample_total_reads_in_lane=sample_total_reads_in_lane,
             sample_base_fraction_passing_q30=sample_base_fraction_passing_q30,
             sample_base_mean_quality_score=sample_base_mean_quality_score,
-            created_at=datetime.now(),
         )
-        sample_lane_sequencing_metrics.append(sequencing_metrics)
 
     store.session.add_all(sample_lane_sequencing_metrics)
     store.session.commit()
-    yield store
+
+    return store

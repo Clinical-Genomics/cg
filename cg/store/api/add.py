@@ -26,6 +26,7 @@ from cg.store.models import (
     Application,
     User,
     Collaboration,
+    SampleLaneSequencingMetrics,
 )
 
 LOG = logging.getLogger(__name__)
@@ -362,5 +363,15 @@ class AddHandler(BaseHandler):
             name=name,
             reference_genome=reference_genome,
             verified=verified,
+            **kwargs,
+        )
+
+    def add_sample_lane_sequencing_metrics(
+        self, flow_cell_name: str, sample_internal_id: str, **kwargs
+    ) -> SampleLaneSequencingMetrics:
+        """Add a new SampleLaneSequencingMetrics record."""
+        return SampleLaneSequencingMetrics(
+            flow_cell_name=flow_cell_name,
+            sample_internal_id=sample_internal_id,
             **kwargs,
         )

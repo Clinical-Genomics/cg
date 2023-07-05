@@ -29,6 +29,7 @@ from cg.store.models import (
     Pool,
     Sample,
     User,
+    SampleLaneSequencingMetrics,
 )
 
 LOG = logging.getLogger(__name__)
@@ -592,6 +593,9 @@ class StoreHelpers:
         date: datetime = datetime.now(),
     ) -> Flowcell:
         """Utility function to add a flow cell to the store and return an object."""
+        flow_cell = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
+        if flow_cell:
+            return flow_cell
         flow_cell = store.add_flow_cell(
             flow_cell_name=flow_cell_name,
             sequencer_name="dummy_sequencer",
@@ -827,3 +831,23 @@ class StoreHelpers:
         sample = cls.add_sample(store=base_store, internal_id=sample_id)
         cls.add_relationship(store=base_store, sample=sample, case=case)
         return case
+
+    @classmethod
+    def add_sample_lane_sequencing_metrics(
+        cls, store: Store, sample_internal_id: str, flow_cell_name: str, **kwargs
+    ):
+        """Helper function to add a sample lane sequencing metrics associated with a sample with the given ids."""
+
+        sample = cls.add_sample(store=store, internal_id=sample_internal_id)
+        flow_cell = cls.add_flowcell(store=store, flow_cell_name=flow_cell_name)
+
+        metrics: SampleLaneSequencingMetrics = store.add_sample_lane_sequencing_metrics(
+            sample_internal_id=sample.internal_id,
+            flow_cell_name=flow_cell.name,
+            **kwargs,
+        )
+        metrics.sample = sample
+        metrics.flowcell = flow_cell
+        store.session.add(metrics)
+        store.session.commit()
+        return metrics
