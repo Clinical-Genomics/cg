@@ -5,9 +5,7 @@ from typing import Dict, List, Optional, Set, Type
 from cg.apps.demultiplex.sample_sheet.index import (
     Index,
     adapt_samples,
-    get_indexes_by_lane,
     get_valid_indexes,
-    index_exists,
     is_dual_index,
     is_reverse_complement,
 )

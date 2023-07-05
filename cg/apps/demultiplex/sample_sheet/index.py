@@ -24,25 +24,9 @@ REAGENT_KIT_PARAMETER_TO_VERSION: Dict[str, str] = {"1": "1.0", "3": "1.5"}
 SHORT_SAMPLE_INDEX_LENGTH: int = 8
 
 
-def index_exists(index: str, indexes: Set[str]) -> bool:
-    """Determines if an index is already present in the existing indexes."""
-    return any(existing_index.startswith(index) for existing_index in indexes)
-
-
 def is_dual_index(index: str) -> bool:
     """Determines if an index in the raw sample sheet is dual index or not."""
     return "-" in index
-
-
-def get_indexes_by_lane(samples: List[FlowCellSample]) -> Dict[int, Set[str]]:
-    """Group the indexes from samples by lane."""
-    indexes_by_lane = {}
-    for sample in samples:
-        lane: int = sample.lane
-        if lane not in indexes_by_lane:
-            indexes_by_lane[lane] = set()
-        indexes_by_lane[lane].add(sample.index)
-    return indexes_by_lane
 
 
 class Index(BaseModel):

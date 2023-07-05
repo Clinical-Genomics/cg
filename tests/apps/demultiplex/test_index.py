@@ -11,11 +11,9 @@ from cg.apps.demultiplex.sample_sheet.index import (
     adapt_indexes_for_sample,
     get_hamming_distance_for_indexes,
     get_index_pair,
-    get_indexes_by_lane,
     get_reagent_kit_version,
     get_reverse_complement_dna_seq,
     get_valid_indexes,
-    index_exists,
     is_reverse_complement,
     update_barcode_mismatch_values_for_sample,
 )
@@ -36,50 +34,6 @@ def test_get_valid_indexes():
     # THEN assert that the indexes are correct
     assert indexes
     assert isinstance(indexes[0], Index)
-
-
-def test_index_exists_for_existing_index(valid_index: Index):
-    """Test that checking the existence of an existent index returns true."""
-    # GIVEN a list of indexes
-    indexes: Set[str] = set(index.sequence for index in get_valid_indexes())
-    # GIVEN an existent index
-    existent_index: str = valid_index.sequence
-
-    # WHEN testing for the existence of the index
-
-    # THEN the test returns true
-    assert index_exists(index=existent_index, indexes=indexes)
-
-
-def test_index_exists_for_non_existent_index():
-    """Test that checking the existence of a non-existent index returns false."""
-    # GIVEN a list of indexes
-    indexes: Set[str] = set(index.sequence for index in get_valid_indexes())
-    # GIVEN a non-existent index
-    non_existent_index: str = "non-existent-index"
-
-    # WHEN testing for the existence of the index
-
-    # THEN the test returns false
-    assert not index_exists(index=non_existent_index, indexes=indexes)
-
-
-def test_get_indexes_by_lane(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
-    novaseq6000_flow_cell_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
-):
-    """Test that getting indexes by lane groups indexes correctly."""
-    # GIVEN two samples on different lanes
-    assert novaseq6000_flow_cell_sample_1.lane != novaseq6000_flow_cell_sample_2.lane
-
-    # WHEN getting indexes by lane
-    indexes_by_lane: Dict[int, Set[str]] = get_indexes_by_lane(
-        samples=[novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]
-    )
-
-    # THEN the result dictionary has two items
-    assert len(indexes_by_lane.keys()) == 2
-    assert len(indexes_by_lane.values()) == 2
 
 
 def test_get_reagent_kit_version_non_existent_reagent(caplog):
