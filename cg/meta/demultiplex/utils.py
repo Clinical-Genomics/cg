@@ -77,7 +77,7 @@ def get_q30_threshold(sequencer_type: Sequencers) -> int:
     return FLOWCELL_Q30_THRESHOLD[sequencer_type]
 
 
-def get_valid_sample_fastq_paths(flow_cell_directory: Path):
+def get_valid_sample_fastq_paths(flow_cell_directory: Path) -> List[Path]:
     """Get all valid sample fastq file paths from flow cell directory."""
     fastq_file_paths: List[Path] = get_sample_fastq_paths_from_flow_cell(flow_cell_directory)
     valid_sample_fastq_paths: List[Path] = []
@@ -114,7 +114,9 @@ def parse_flow_cell_directory_data(
 ) -> FlowCellDirectoryData:
     """Parse flow cell data from the flow cell directory."""
 
-    if not is_flow_cell_directory_valid(flow_cell_directory):
-        raise FlowCellError(f"Flow cell directory was not valid: {flow_cell_directory}")
+    try:
+        is_flow_cell_directory_valid(flow_cell_directory)
+    except FlowCellError as e:
+        raise FlowCellError(f"Flow cell directory was not valid: {flow_cell_directory}, {e}")
 
     return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)

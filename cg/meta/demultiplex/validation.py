@@ -3,11 +3,12 @@ from pathlib import Path
 
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.exc import FlowCellError
 
 
 def validate_sample_fastq_file(sample_fastq: Path) -> None:
     """
-    This function validates that the sample fastq file name is formatted as expected.
+    Validate that the sample fastq file name is formatted as expected.
 
     Since many different naming conventions are used, these are the only assumptions which can be made:
     1. The sample fastq file name ends with .fastq.gz
@@ -47,16 +48,16 @@ def is_bcl2fastq_demux_folder_structure(flow_cell_directory: Path) -> bool:
     return False
 
 
-def is_flow_cell_directory_valid(flow_cell_directory: Path) -> bool:
+def is_flow_cell_directory_valid(flow_cell_directory: Path) -> None:
     """Validate that the flow cell directory exists and that the demultiplexing is complete."""
 
     if not flow_cell_directory.is_dir():
-        return False
+        raise FlowCellError(f"Flow cell directory {flow_cell_directory} does not exist.")
 
     if not is_demultiplexing_complete(flow_cell_directory):
-        return False
-
-    return True
+        raise FlowCellError(
+            f"Demultiplexing not completed for flow cell directory {flow_cell_directory}."
+        )
 
 
 def is_demultiplexing_complete(flow_cell_directory: Path) -> bool:

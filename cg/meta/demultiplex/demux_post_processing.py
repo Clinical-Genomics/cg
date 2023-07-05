@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Iterable, List, Optional
 
 from housekeeper.store.models import Version
+from build.lib.cg.store.models import Sample
 
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
@@ -142,12 +143,12 @@ class DemuxPostProcessingAPI:
         self.status_db.session.commit()
 
     def metric_exists_in_status_db(self, metric: SampleLaneSequencingMetrics) -> bool:
-        existing_metrics_entry = (
-            self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-                flow_cell_name=metric.flow_cell_name,
-                sample_internal_id=metric.sample_internal_id,
-                lane=metric.flow_cell_lane_number,
-            )
+        existing_metrics_entry: Optional[
+            SampleLaneSequencingMetrics
+        ] = self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+            flow_cell_name=metric.flow_cell_name,
+            sample_internal_id=metric.sample_internal_id,
+            lane=metric.flow_cell_lane_number,
         )
         if existing_metrics_entry:
             LOG.warning(
@@ -174,7 +175,7 @@ class DemuxPostProcessingAPI:
 
     def update_sample_read_count(self, sample_id: str, q30_threshold: int) -> None:
         """Update the read count for a sample in status db with all reads exceeding the q30 threshold from the sequencing metrics table."""
-        sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
+        sample: Optional[Sample] = self.status_db.get_sample_by_internal_id(sample_id)
 
         if sample:
             sample_read_count: int = (
@@ -185,6 +186,8 @@ class DemuxPostProcessingAPI:
             )
             LOG.debug(f"Updating sample {sample_id} with read count {sample_read_count}")
             sample.calculated_read_count = sample_read_count
+        else:
+            LOG.warning(f"Cannot find {sample_id} in status_db when adding read counts. Skipping.")
 
     def store_flow_cell_data_in_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
         LOG.info(f"Add flow cell data to Housekeeper for {flow_cell.id}")
@@ -197,9 +200,9 @@ class DemuxPostProcessingAPI:
         self.add_sample_sheet_path_to_housekeeper(
             flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id
         )
-        self.add_sample_fastq_files(flow_cell)
+        self.add_sample_fastq_files_to_housekeeper(flow_cell)
 
-    def add_sample_fastq_files(self, flow_cell: FlowCellDirectoryData) -> None:
+    def add_sample_fastq_files_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
         valid_sample_fastq_paths = get_valid_sample_fastq_paths(flow_cell.path)
 

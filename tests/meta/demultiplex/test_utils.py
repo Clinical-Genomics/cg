@@ -68,7 +68,7 @@ def test_get_valid_flowcell_sample_fastq_file_path(tmpdir_factory):
     flow_cell_dir = Path(tmpdir_factory.mktemp("flow_cell"))
 
     # GIVEN some files in temporary directory
-    sample_dir = flow_cell_dir / "Unaligned" / "Project_sample" / "Sample_test"
+    sample_dir = Path(flow_cell_dir, "Unaligned", "Project_sample", "Sample_test")
     sample_dir.mkdir(parents=True)
     valid_sample_fastq_directory_1 = Path(
         sample_dir, f"Sample_ABC{FileExtensions.FASTQ}{FileExtensions.GZIP}"
