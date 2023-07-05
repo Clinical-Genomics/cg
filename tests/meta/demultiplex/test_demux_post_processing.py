@@ -520,7 +520,9 @@ def test_add_flow_cell_data_to_housekeeper(demultiplex_context: CGConfig):
     )
 
     # THEN the fastq files are added
-    demux_post_processing_api.add_sample_fastq_files_to_housekeeper.assert_called_once_with(flow_cell)
+    demux_post_processing_api.add_sample_fastq_files_to_housekeeper.assert_called_once_with(
+        flow_cell
+    )
 
 
 def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):

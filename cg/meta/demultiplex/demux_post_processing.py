@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Iterable, List, Optional
 
 from housekeeper.store.models import Version
-from build.lib.cg.store.models import Sample
+from cg.store.models import Sample
 
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
