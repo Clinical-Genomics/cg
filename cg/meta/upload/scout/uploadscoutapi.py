@@ -29,7 +29,7 @@ LOG = logging.getLogger(__name__)
 
 
 @dataclass
-class RnaDnaBundle:
+class RNADNACollection:
     """Contains the id for an RNA sample, the name of its connected DNA sample, and a list of connected DNA cases."""
 
     rna_sample_id: str
@@ -163,10 +163,10 @@ class UploadScoutAPI:
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> Set[str]:
         """Return a set of unique DNA cases related to an RNA case."""
         case: Family = self.status_db.get_case_by_internal_id(case_id)
-        rna_dna_bundles: List[RnaDnaBundle] = self.create_rna_dna_bundles(case)
+        rna_dna_collections: List[RNADNACollection] = self.create_rna_dna_collections(case)
         unique_dna_cases_related_to_rna_case: Set[str] = set()
-        for rna_dna_bundle in rna_dna_bundles:
-            unique_dna_cases_related_to_rna_case.update(rna_dna_bundle.dna_case_ids)
+        for rna_dna_collection in rna_dna_collections:
+            unique_dna_cases_related_to_rna_case.update(rna_dna_collection.dna_case_ids)
         return unique_dna_cases_related_to_rna_case
 
     def upload_fusion_report_to_scout(
@@ -251,10 +251,10 @@ class UploadScoutAPI:
 
         status_db: Store = self.status_db
         rna_case = status_db.get_case_by_internal_id(case_id)
-        rna_dna_bundles: List[RnaDnaBundle] = self.create_rna_dna_bundles(rna_case)
-        for rna_dna_bundle in rna_dna_bundles:
-            rna_sample_id: str = rna_dna_bundle.rna_sample_id
-            dna_sample_name: str = rna_dna_bundle.dna_sample_name
+        rna_dna_collections: List[RNADNACollection] = self.create_rna_dna_collections(rna_case)
+        for rna_dna_collection in rna_dna_collections:
+            rna_sample_id: str = rna_dna_collection.rna_sample_id
+            dna_sample_name: str = rna_dna_collection.dna_sample_name
             rna_coverage_bigwig: Optional[File] = self.get_rna_coverage_bigwig(
                 case_id=case_id, sample_id=rna_sample_id
             )
@@ -265,7 +265,7 @@ class UploadScoutAPI:
                 )
 
             LOG.info(f"RNA coverage bigwig file {rna_coverage_bigwig.path} found.")
-            for dna_case_id in rna_dna_bundle.dna_case_ids:
+            for dna_case_id in rna_dna_collection.dna_case_ids:
                 if self.status_db.get_case_by_internal_id(dna_case_id).is_uploaded:
                     LOG.info(
                         f"Uploading RNA coverage bigwig file for sample {dna_sample_name} "
@@ -296,10 +296,10 @@ class UploadScoutAPI:
         status_db: Store = self.status_db
         rna_case: Family = status_db.get_case_by_internal_id(case_id)
 
-        rna_dna_bundles: List[RnaDnaBundle] = self.create_rna_dna_bundles(rna_case)
-        for rna_dna_bundle in rna_dna_bundles:
-            rna_sample_id: str = rna_dna_bundle.rna_sample_id
-            dna_sample_name: str = rna_dna_bundle.dna_sample_name
+        rna_dna_collections: List[RNADNACollection] = self.create_rna_dna_collections(rna_case)
+        for rna_dna_collection in rna_dna_collections:
+            rna_sample_id: str = rna_dna_collection.rna_sample_id
+            dna_sample_name: str = rna_dna_collection.dna_sample_name
             splice_junctions_bed: Optional[File] = self.get_splice_junctions_bed(
                 case_id=case_id, sample_id=rna_sample_id
             )
@@ -312,7 +312,7 @@ class UploadScoutAPI:
             LOG.info(f"Splice junctions bed file {splice_junctions_bed.path} found")
             dna_sample_id: str
             dna_cases: List[str]
-            for dna_case_id in rna_dna_bundle.dna_case_ids:
+            for dna_case_id in rna_dna_collection.dna_case_ids:
                 if self.status_db.get_case_by_internal_id(internal_id=dna_case_id).is_uploaded:
                     LOG.info(
                         f"Uploading splice junctions bed file for sample {dna_sample_name} "
@@ -373,11 +373,11 @@ class UploadScoutAPI:
 
         return config_builders[analysis.pipeline]
 
-    def create_rna_dna_bundles(self, rna_case: Family) -> List[RnaDnaBundle]:
-        return [self.create_rna_dna_bundle(rna_sample=link.sample) for link in rna_case.links]
+    def create_rna_dna_collections(self, rna_case: Family) -> List[RNADNACollection]:
+        return [self.create_rna_dna_collection(link.sample) for link in rna_case.links]
 
-    def create_rna_dna_bundle(self, rna_sample: Sample) -> RnaDnaBundle:
-        """Creates a bundle containing the given RNA sample id, its related DNA sample name and
+    def create_rna_dna_collection(self, rna_sample: Sample) -> RNADNACollection:
+        """Creates a collection containing the given RNA sample id, its related DNA sample name, and
         a list of ids for the DNA cases connected to the DNA sample."""
         if not rna_sample.subject_id:
             raise CgDataError(
@@ -406,7 +406,7 @@ class UploadScoutAPI:
         dna_cases: List[str] = self._dna_cases_related_to_dna_sample(
             dna_sample=dna_sample, collaborators=collaborators
         )
-        return RnaDnaBundle(
+        return RNADNACollection(
             rna_sample_id=rna_sample.internal_id,
             dna_sample_name=dna_sample.name,
             dna_case_ids=dna_cases,

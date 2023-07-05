@@ -10,7 +10,7 @@ from cg.constants import Pipeline
 from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CgDataError
-from cg.meta.upload.scout.uploadscoutapi import RnaDnaBundle, UploadScoutAPI
+from cg.meta.upload.scout.uploadscoutapi import RNADNACollection, UploadScoutAPI
 from cg.store.models import Family, Sample
 from housekeeper.store.models import File
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -512,21 +512,27 @@ def test_get_application_prep_category(
     assert nr_of_subject_id_dna_samples == 1
 
 
-def test_create_rna_dna_bundles(
+def test_create_rna_dna_collections(
     rna_case_id: str,
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test that the create_rna_dna_bundles returns a list of RnaDnaBundles."""
+    """Test that the create_rna_dna_collections returns a list of RNADNACollections."""
 
     # GIVEN an RNA case with RNA samples that are connected by subject ID to DNA samples in a DNA case
-    rna_case: Family = rna_store.get_case_by_internal_id(internal_id=rna_case_id)
+    rna_case: Family = rna_store.get_case_by_internal_id(rna_case_id)
 
-    # WHEN running the method to create a list of RnaDnaBundles with the relationships between RNA/DNA samples and DNA cases
-    rna_dna_bundles: List[RnaDnaBundle] = upload_scout_api.create_rna_dna_bundles(rna_case=rna_case)
+    # WHEN running the method to create a list of RNADNACollections
+    # with the relationships between RNA/DNA samples and DNA cases
+    rna_dna_collections: List[RNADNACollection] = upload_scout_api.create_rna_dna_collections(
+        rna_case
+    )
 
-    # THEN the output should be list of RnaDnaBundles
-    assert all(isinstance(rna_dna_bundle, RnaDnaBundle) for rna_dna_bundle in rna_dna_bundles)
+    # THEN the output should be a list of RNADNACollections
+    assert all(
+        isinstance(rna_dna_collection, RNADNACollection)
+        for rna_dna_collection in rna_dna_collections
+    )
 
 
 def test_add_rna_sample(
@@ -534,7 +540,7 @@ def test_add_rna_sample(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test that for a given RNA case the RNA samples are added to the rna_dna_bundles."""
+    """Test that for a given RNA case the RNA samples are added to the RNADNACollections."""
 
     # GIVEN an RNA case and the associated RNA samples
     rna_case: Family = rna_store.get_case_by_internal_id(internal_id=rna_case_id)
@@ -542,13 +548,16 @@ def test_add_rna_sample(
         rna_store._get_query(table=Sample).filter(Sample.internal_id.like("rna")).all()
     )
 
-    # WHEN running the method to create a list of RnaDnaBundles with the relationships between RNA/DNA samples and DNA cases
-    rna_dna_bundles: List[RnaDnaBundle] = upload_scout_api.create_rna_dna_bundles(rna_case=rna_case)
+    # WHEN running the method to create a list of RNADNACollections
+    # with the relationships between RNA/DNA samples and DNA cases
+    rna_dna_collections: List[RNADNACollection] = upload_scout_api.create_rna_dna_collections(
+        rna_case
+    )
 
-    # THEN the resulting dictionary should contain all RNA samples in the case
-    for key in rna_sample_list:
-        assert key.internal_id in [
-            rna_dna_bundle.rna_sample_id for rna_dna_bundle in rna_dna_bundles
+    # THEN the resulting RNADNACollections should contain all RNA samples in the case
+    for sample in rna_sample_list:
+        assert sample.internal_id in [
+            rna_dna_collection.rna_sample_id for rna_dna_collection in rna_dna_collections
         ]
 
 
@@ -563,14 +572,14 @@ def test_link_rna_sample_to_dna_sample(
     # GIVEN an RNA sample
     rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
 
-    # WHEN creating an RnaDnaBundle for an RNA sample
-    rna_dna_bundle: RnaDnaBundle = upload_scout_api.create_rna_dna_bundle(rna_sample=rna_sample)
+    # WHEN creating an RNADNACollection for an RNA sample
+    rna_dna_collection: RNADNACollection = upload_scout_api.create_rna_dna_collection(rna_sample)
 
-    # THEN the RnaDnaBundle should contain the RNA sample
-    assert rna_sample_son_id == rna_dna_bundle.rna_sample_id
+    # THEN the RNADNACollection should contain the RNA sample
+    assert rna_sample_son_id == rna_dna_collection.rna_sample_id
 
-    # THEN the RnaDnaBundle should have its dna_sample_id set to the related dna_sample_id
-    assert dna_sample_son_id == rna_dna_bundle.dna_sample_name
+    # THEN the RNADNACollection should have its dna_sample_id set to the related dna_sample_id
+    assert dna_sample_son_id == rna_dna_collection.dna_sample_name
 
 
 def test_add_dna_cases_to_dna_sample(
@@ -580,17 +589,17 @@ def test_add_dna_cases_to_dna_sample(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test for a given RNA sample, the DNA case name matches to the case name of the DNA sample in rna_dna_case_map."""
+    """Test for a given RNA sample, the DNA case name matches to the case name of the DNA sample in the RNADNACollection."""
 
     # GIVEN an RNA sample, a DNA sample, and a DNA case
     rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
     dna_case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
 
-    # WHEN adding creating the RnaDnaBundle
-    rna_dna_bundle: RnaDnaBundle = upload_scout_api.create_rna_dna_bundle(rna_sample=rna_sample)
+    # WHEN adding creating the RNADNACollection
+    rna_dna_collection: RNADNACollection = upload_scout_api.create_rna_dna_collection(rna_sample)
 
     # THEN the DNA cases should contain the DNA_case name associated with the DNA sample
-    assert dna_case.internal_id in rna_dna_bundle.dna_case_ids
+    assert dna_case.internal_id in rna_dna_collection.dna_case_ids
 
 
 def test_map_dna_cases_to_dna_sample_incorrect_pipeline(
@@ -604,14 +613,14 @@ def test_map_dna_cases_to_dna_sample_incorrect_pipeline(
 
     # GIVEN an RNA sample and a DNA sample
 
-    dna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=dna_sample_son_id)
-    dna_case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
-    rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
+    dna_sample: Sample = rna_store.get_sample_by_internal_id(dna_sample_son_id)
+    dna_case: Family = rna_store.get_case_by_internal_id(dna_case_id)
+    rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
 
     # GIVEN that the DNA case has a different pipeline than the expected pipeline
     dna_case.data_analysis = Pipeline.FASTQ
 
-    # WHEN mapping the DNA case name to the DNA sample name in the rna-dna-sample-case map
+    # WHEN mapping the DNA case name to the DNA sample name in the related DNA cases
     related_dna_cases: List[str] = upload_scout_api._dna_cases_related_to_dna_sample(
         dna_sample=dna_sample,
         collaborators=rna_sample.customer.collaborators,
@@ -628,7 +637,7 @@ def test_map_dna_cases_to_dna_sample_incorrect_customer(
     dna_case_id: str,
     rna_sample_son_id: str,
 ):
-    """Test that the DNA case name is not mapped to the DNA sample name in the rna-dna-sample-case map."""
+    """Test that the DNA case name is not mapped to the DNA sample name in the RNADNACollection."""
 
     # GIVEN an RNA sample, a DNA sample, and a rna-dna case map
 
@@ -637,7 +646,7 @@ def test_map_dna_cases_to_dna_sample_incorrect_customer(
     rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
 
     # GIVEN that the DNA case has a different customer than the expected customer
-    dna_case.customer_id: int = 1000
+    dna_case.customer_id = 1000
 
     # WHEN mapping the DNA case name to the DNA sample name in the rna-dna-sample-case map
     dna_cases: List[str] = upload_scout_api._dna_cases_related_to_dna_sample(
