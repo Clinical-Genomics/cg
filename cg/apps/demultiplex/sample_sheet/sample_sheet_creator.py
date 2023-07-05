@@ -2,7 +2,6 @@
 import logging
 from typing import Dict, List, Optional, Set, Type
 
-from cg.apps.demultiplex.sample_sheet.dummy_sample import get_dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import (
     Index,
     adapt_samples,
@@ -46,10 +45,6 @@ class SampleSheetCreator:
     @property
     def valid_indexes(self) -> List[Index]:
         return get_valid_indexes(dual_indexes_only=True)
-
-    def add_dummy_samples(self) -> None:
-        """Add all dummy samples with non-existing indexes to samples if applicable."""
-        raise NotImplementedError("Impossible to add dummy samples in parent class")
 
     def remove_unwanted_samples(self) -> None:
         """Filter out samples with single indexes."""
@@ -98,11 +93,6 @@ class SampleSheetCreator:
 
     def process_samples_for_sample_sheet(self) -> None:
         """Add dummy samples, remove unwanted samples and adapt remaining samples."""
-        if self.run_parameters.requires_dummy_samples:
-            self.add_dummy_samples()
-            LOG.info("Created dummy samples for the indexes that are missing")
-        else:
-            LOG.info("Skipped adding dummy samples since they are not needed")
         self.remove_unwanted_samples()
         samples_in_lane: List[FlowCellSample]
         reverse_complement: bool = is_reverse_complement(run_parameters=self.run_parameters)
@@ -135,29 +125,6 @@ class SampleSheetCreator:
 class SampleSheetCreatorV1(SampleSheetCreator):
     """Create a raw sample sheet for NovaSeq6000 flow cells."""
 
-    def add_dummy_samples(self) -> None:
-        """Add all dummy samples with non-existing indexes to samples.
-
-        Dummy samples are added if there are indexes that are not used by the actual samples.
-        """
-        LOG.info("Adding dummy samples for unused indexes")
-        indexes_by_lane: Dict[int, Set[str]] = get_indexes_by_lane(samples=self.lims_samples)
-        for lane, lane_indexes in indexes_by_lane.items():
-            LOG.debug(f"Add dummy samples for lane {lane}")
-            for index in self.valid_indexes:
-                if index_exists(index=index.sequence, indexes=lane_indexes):
-                    LOG.debug(f"Index {index.sequence} already in use")
-                    continue
-                dummy_flow_cell_sample: FlowCellSample = get_dummy_sample(
-                    flow_cell_id=self.flow_cell_id,
-                    dummy_index=index.sequence,
-                    lane=lane,
-                    name=index.name,
-                    sample_type=self.sample_type,
-                )
-                LOG.debug(f"Adding dummy sample {dummy_flow_cell_sample} to lane {lane}")
-                self.lims_samples.append(dummy_flow_cell_sample)
-
     def get_additional_sections_sample_sheet(self) -> List[List[str]]:
         """Return all sections of the sample sheet that are not the data section."""
         return [
@@ -188,10 +155,6 @@ class SampleSheetCreatorV2(SampleSheetCreator):
         if bcl_converter == BclConverter.BCL2FASTQ:
             raise SampleSheetError(f"Can't use {BclConverter.BCL2FASTQ} with sample sheet v2")
         self.bcl_converter: str = BclConverter.DRAGEN
-
-    def add_dummy_samples(self) -> None:
-        """Return None for sample sheet v2."""
-        return
 
     def get_additional_sections_sample_sheet(self) -> List[List[str]]:
         """Return all sections of the sample sheet that are not the data section."""
