@@ -2281,7 +2281,7 @@ def fixture_flow_cell_name() -> str:
 @pytest.fixture(name="expected_average_q30")
 def fixture_expected_average_q30() -> float:
     """Return expected average Q30."""
-    return 90.5
+    return (85.5 + 80.5) / 2
 
 
 @pytest.fixture
@@ -2298,6 +2298,8 @@ def store_with_sequencing_metrics(
         (sample_id, flow_cell_name, 1, expected_total_reads, 90.5, 32),
         ("sample_2", "flow_cell_2", 2, 2_000_000, 85.5, 30),
         ("sample_3", "flow_cell_3", 3, 1_500_000, 80.5, 33),
+        ("sample_2", "flow_cell_2", 1, 2_000_000, 80.5, 30),
+        ("sample_2", "flow_cell_3", 2, 1_500_000, 80.5, 33),
     ]
 
     sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []

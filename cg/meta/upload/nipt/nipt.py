@@ -58,16 +58,22 @@ class NiptUploadAPI:
             q30=self.status_db.get_average_passing_q30_for_samples_on_flow_cell(
                 flow_cell_name=flow_cell.name
             ),
-            reads=self.status_db.get_number_of_reads_for_flow_cell(flow_cell_name=flow_cell.name),
+            reads=self.status_db.get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
+                flow_cell_name=flow_cell.name
+            ),
         )
-        return (
-            True
-            if flow_cell_summary.q30_above_threshold(threshold=q30_threshold)
-            and flow_cell_summary.reads_above_threshold(
-                threshold=self.status_db.get_ready_made_library_expected_reads(case_id=case_id)
+        if not flow_cell_summary.q30_above_threshold(
+            threshold=q30_threshold
+        ) or not flow_cell_summary.reads_above_threshold(
+            threshold=self.status_db.get_ready_made_library_expected_reads(case_id=case_id)
+        ):
+            LOG.info(
+                f"Flow cell {flow_cell.name} did not pass QC for case {case_id} with Q30: "
+                f"{flow_cell_summary.q30} and reads: {flow_cell_summary.reads}"
             )
-            else False
-        )
+            return False
+        else:
+            return True
 
     def get_housekeeper_results_file(self, case_id: str, tags: Optional[list] = None) -> str:
         """Get the result file for a NIPT analysis from Housekeeper"""

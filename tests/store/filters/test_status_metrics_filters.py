@@ -2,8 +2,8 @@ from typing import Optional
 from cg.store import Store
 from cg.store.filters.status_metrics_filters import (
     filter_total_read_count_for_sample,
-    filter_metrics_for_flow_cell_sample_internal_id_and_lane,
-    filter_metrics_by_flow_cell_name,
+    filter_by_flow_cell_sample_internal_id_and_lane,
+    filter_by_flow_cell_name,
 )
 from cg.store.models import SampleLaneSequencingMetrics
 from sqlalchemy.orm import Query
@@ -38,7 +38,7 @@ def test_filter_metrics_for_flow_cell_sample_internal_id_and_lane(
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
 
     # WHEN getting metrics for a flow cell, sample internal id and lane
-    metrics_query: Query = filter_metrics_for_flow_cell_sample_internal_id_and_lane(
+    metrics_query: Query = filter_by_flow_cell_sample_internal_id_and_lane(
         metrics=metrics,
         flow_cell_name=flow_cell_name,
         sample_internal_id=sample_id,
@@ -67,9 +67,7 @@ def test_filter_metrics_by_flow_cell_name(
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
 
     # WHEN getting metrics for a flow cell name
-    metrics_query: Query = filter_metrics_by_flow_cell_name(
-        metrics=metrics, flow_cell_name=flow_cell_name
-    )
+    metrics_query: Query = filter_by_flow_cell_name(metrics=metrics, flow_cell_name=flow_cell_name)
 
     # THEN assert that the returned object is a Query
     assert isinstance(metrics_query, Query)
