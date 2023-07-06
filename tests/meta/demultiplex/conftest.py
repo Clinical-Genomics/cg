@@ -347,7 +347,7 @@ def tmp_demultiplexing_init_files(
     return demultiplexing_init_files
 
 
-@pytest.fixture(name="bcl2fastq_folder_structure", scope="function")
+@pytest.fixture(name="bcl2fastq_folder_structure", scope="session")
 def fixture_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
     """Return a folder structure that resembles a bcl2fastq run folder."""
     base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "bcl2fastq")))
