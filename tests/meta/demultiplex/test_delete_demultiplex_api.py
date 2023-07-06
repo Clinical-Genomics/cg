@@ -405,9 +405,9 @@ def test_delete_flow_cell_sample_lane_sequencing_metrics(
     """Test removing objects from sample lane sequencing metrics."""
 
     caplog.set_level(logging.INFO)
-    
+
     # GIVEN a delete demultiplex API with a sequencing metric object
-    
+
     wipe_demux_api: DeleteDemuxAPI = populated_sample_lane_sequencing_metrics_demultiplex_api
     wipe_demux_api.set_dry_run(dry_run=False)
     assert wipe_demux_api.status_db.get_sample_lane_sequencing_metrics_for_flow_cell(
@@ -419,7 +419,7 @@ def test_delete_flow_cell_sample_lane_sequencing_metrics(
     wipe_demux_api.delete_flow_cell_sample_lane_sequencing_metrics()
 
     # THEN the object should not exist anymore and the user should be notified
-    
+
     assert not wipe_demux_api.status_db.get_sample_lane_sequencing_metrics_for_flow_cell(
         flow_cell_name=flow_cell_name
     )
