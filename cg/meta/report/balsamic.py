@@ -37,7 +37,7 @@ from cg.models.report.metadata import (
 )
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
-from cg.store.models import Family, Sample, BedVersion
+from cg.store.models import Family, Sample, BedVersion, Bed
 
 LOG = logging.getLogger(__name__)
 
@@ -77,8 +77,9 @@ class BalsamicReportAPI(ReportAPI):
         bed_version: BedVersion = self.status_db.get_bed_version_by_file_name(
             analysis_metadata.config.panel.capture_kit
         )
+        bed: Bed = self.status_db.get_bed_by_id(bed_version.bed_id) if bed_version else None
         return BalsamicTargetedSampleMetadataModel(
-            bait_set=bed_version.bed_id,
+            bait_set=bed.name if bed else None,
             bait_set_version=analysis_metadata.config.panel.capture_kit_version,
             million_read_pairs=million_read_pairs,
             median_target_coverage=sample_metrics.median_target_coverage

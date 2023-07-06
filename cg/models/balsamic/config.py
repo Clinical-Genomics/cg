@@ -79,7 +79,7 @@ class BalsamicConfigPanel(BaseModel):
         return Path(capture_kit).name
 
     @validator("capture_kit_version", always=True)
-    def validate_capture_kit_version(cls, values: dict) -> str:
+    def validate_capture_kit_version(cls, capture_kit_version: Optional[str], values: dict) -> str:
         """Return the panel bed version from its filename (e.g. gicfdna_3.1_hg19_design.bed)."""
         return values["capture_kit"].split("_")[-3]
 
