@@ -48,7 +48,7 @@ class NiptUploadAPI:
         LOG.info("Set dry run to %s", dry_run)
         self.dry_run = dry_run
 
-    def flowcell_passed_qc_value(self, case_id: str, q30_threshold: float):
+    def flowcell_passed_qc_value(self, case_id: str, q30_threshold: float) -> bool:
         """
         Check the average Q30 and the total number of reads for each sample
         in the latest flow cell related to a case.
@@ -72,8 +72,8 @@ class NiptUploadAPI:
                 f"{flow_cell_summary.q30} and reads: {flow_cell_summary.reads}"
             )
             return False
-        else:
-            return True
+
+        return True
 
     def get_housekeeper_results_file(self, case_id: str, tags: Optional[list] = None) -> str:
         """Get the result file for a NIPT analysis from Housekeeper"""

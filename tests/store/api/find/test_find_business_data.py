@@ -1,7 +1,7 @@
 """Tests the findbusinessdata part of the Cg store API."""
 import logging
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 import pytest
 from cg.constants import FlowCellStatus
@@ -787,6 +787,17 @@ def test_get_total_read_counts(
     assert total_reads_count == expected_total_reads
 
 
+def test_get_total_counts_passing_q30(
+    store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads_passing_q30: int)
+    # GIVEN a store with sequencing metrics
+
+
+    total_reads_count_passing_q30 = store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
+        sample_internal_id=sample_id, q30_threshold=0
+    )
+    # THEN assert that the total read count is correct
+    assert total_reads_count_passing_q30 == expected_total_reads_passing_q30
+
 def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
     store_with_sequencing_metrics: Store, sample_id: str, flow_cell_name: str, lane: int = 1
 ):
@@ -803,6 +814,7 @@ def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
     assert metrics_entry.sample_internal_id == sample_id
 
 
+<<<<<<< HEAD
 def test_get_samples_on_flow_cell_from_metrics(
     store_with_sequencing_metrics: Store,
     flow_cell_name: str,
@@ -877,3 +889,62 @@ def test_get_average_passing_q30_for_samples_on_flow_cell(
 
     # THEN assert that the average passing q30 is correct
     assert average_passing_q30 == expected_average_q30
+=======
+def test_get_number_of_reads_for_sample_passing_q30_threshold(
+    store_with_sequencing_metrics: Store,
+    sample_id: str,
+):
+    # GIVEN a store with sequencing metrics
+    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
+
+    # GIVEN a metric for a specific sample
+    sample_metric: Optional[SampleLaneSequencingMetrics] = metrics.filter(
+        SampleLaneSequencingMetrics.sample_internal_id == sample_id
+    ).first()
+    assert sample_metric
+
+    # GIVEN a Q30 threshold that the sample will pass
+    q30_threshold = int(sample_metric.sample_base_fraction_passing_q30 / 2 * 100)
+
+    # WHEN getting the number of reads for the sample that pass the Q30 threshold
+    number_of_reads: int = (
+        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
+            sample_internal_id=sample_id, q30_threshold=q30_threshold
+        )
+    )
+
+    # THEN assert that the number of reads is an integer
+    assert isinstance(number_of_reads, int)
+
+    # THEN assert that the number of reads is at least the number of reads in the lane for the sample passing the q30
+    assert number_of_reads >= sample_metric.sample_total_reads_in_lane
+
+
+def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
+    store_with_sequencing_metrics: Store, sample_id: str
+):
+    # GIVEN a store with sequencing metrics
+    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
+
+    # GIVEN a metric for a specific sample
+    sample_metrics: List[SampleLaneSequencingMetrics] = metrics.filter(
+        SampleLaneSequencingMetrics.sample_internal_id == sample_id
+    ).all()
+
+    assert sample_metrics
+
+    # GIVEN a Q30 threshold that some of the sample's metrics will not pass
+    q30_values = [int(metric.sample_base_fraction_passing_q30 * 100) for metric in sample_metrics]
+    q30_threshold = sorted(q30_values)[len(q30_values) // 2]  # This is the median
+
+    # WHEN getting the number of reads for the sample that pass the Q30 threshold
+    number_of_reads: int = (
+        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
+            sample_internal_id=sample_id, q30_threshold=q30_threshold
+        )
+    )
+
+    # THEN assert that the number of reads is less than the total number of reads for the sample
+    total_sample_reads = sum([metric.sample_total_reads_in_lane for metric in sample_metrics])
+    assert number_of_reads < total_sample_reads
+>>>>>>> master

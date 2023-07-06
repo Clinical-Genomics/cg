@@ -320,8 +320,26 @@ class FindBusinessDataHandler(BaseHandler):
         """Get number of reads for sample from sample lane sequencing metrics."""
         total_reads_query: Query = apply_metrics_filter(
             metrics=self._get_query(table=SampleLaneSequencingMetrics),
-            filter_functions=[SequencingMetricsFilter.FILTER_TOTAL_READ_COUNT_FOR_SAMPLE],
+            filter_functions=[
+                SequencingMetricsFilter.FILTER_TOTAL_READ_COUNT_FOR_SAMPLE,
+            ],
             sample_internal_id=sample_internal_id,
+        )
+        reads_count: Optional[int] = total_reads_query.scalar()
+        return reads_count if reads_count else 0
+
+    def get_number_of_reads_for_sample_passing_q30_threshold(
+        self, sample_internal_id: str, q30_threshold: int
+    ) -> int:
+        """Get number of reads above q30 threshold for sample from sample lane sequencing metrics."""
+        total_reads_query: Query = apply_metrics_filter(
+            metrics=self._get_query(table=SampleLaneSequencingMetrics),
+            filter_functions=[
+                SequencingMetricsFilter.FILTER_TOTAL_READ_COUNT_FOR_SAMPLE,
+                SequencingMetricsFilter.FILTER_ABOVE_Q30_THRESHOLD,
+            ],
+            sample_internal_id=sample_internal_id,
+            q30_threshold=q30_threshold,
         )
         reads_count: Optional[int] = total_reads_query.scalar()
         return reads_count if reads_count else 0
