@@ -18,7 +18,7 @@ depends_on = None
 
 def upgrade():
     op.add_column(
-        table_name="customer", column=sa.column("data_archive_location", sa.String(length=32))
+        table_name="customer", column=sa.column("data_archive_location", sa.String(32))
     )
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
