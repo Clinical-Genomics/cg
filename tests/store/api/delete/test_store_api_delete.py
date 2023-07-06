@@ -149,10 +149,6 @@ def test_delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
     )
 
     # THEN no entry should be found for the flow cell
-    results: List[
-        SampleLaneSequencingMetrics
-    ] = store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_for_flow_cell(
+    assert not store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_for_flow_cell(
         flow_cell_name=metrics[0].flow_cell_name
     )
-
-    assert not results
