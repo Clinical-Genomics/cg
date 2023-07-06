@@ -1,7 +1,7 @@
 import datetime as dt
 import pytest
 
-from typing import List
+from typing import List, Generator
 from cg.constants.constants import PrepCategory
 from cg.constants.priority import PriorityTerms
 from cg.meta.orders.pool_submitter import PoolSubmitter
@@ -180,7 +180,7 @@ def fixture_store_failing_sequencing_qc(
     ticket_id: str,
     timestamp_now: dt.datetime,
     helpers,
-) -> Store:
+) -> Generator[Store, None, None]:
     """Populate a store with a Fluffy case, with a sample that has been sequenced on two flow cells."""
     store = Store(uri="sqlite:///")
     store.create_all()
