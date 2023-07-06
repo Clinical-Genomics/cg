@@ -97,6 +97,20 @@ def test_get_bed_version_query(base_store: Store):
     assert isinstance(bed_version_query, Query)
 
 
+def test_get_bed_version_by_filename(base_store: Store, bed_version_filename: str):
+    """Test function to return the bed version by filename."""
+
+    # GIVEN a store with bed versions records
+
+    # WHEN getting the query for the bed versions
+    bed_version: BedVersion = base_store.get_bed_version_by_filename(
+        bed_version_filename=bed_version_filename
+    )
+
+    # THEN return a bed version with the supplied bed version filename
+    assert bed_version.filename == bed_version_filename
+
+
 def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name: str):
     """Test function to return the bed version by short name."""
 

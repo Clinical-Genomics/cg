@@ -2,7 +2,41 @@ from typing import List
 
 from cg.store import Store
 from cg.store.models import BedVersion
-from cg.store.filters.status_bed_version_filters import get_bed_version_by_short_name
+from cg.store.filters.status_bed_version_filters import (
+    get_bed_version_by_short_name,
+    get_bed_version_by_filename,
+)
+
+
+def test_get_bed_version_by_filename(base_store: Store, bed_version_filename: str):
+    """Test return bed version by filename."""
+    # GIVEN a store containing bed version
+
+    # WHEN retrieving bed versions
+    bed_versions: List[BedVersion] = get_bed_version_by_filename(
+        bed_versions=base_store._get_query(table=BedVersion),
+        bed_version_filename=bed_version_filename,
+    )
+
+    # THEN bed version should be returned
+    assert bed_versions
+
+    # THEN the filename should match the original
+    assert bed_versions[0].filename == bed_version_filename
+
+
+def test_get_bed_version_by_filename_when_no_file(base_store: Store):
+    """Test return bed version by filename when file does not exist."""
+    # GIVEN a store containing bed version
+
+    # WHEN retrieving bed versions
+    bed_versions: List[BedVersion] = get_bed_version_by_filename(
+        bed_versions=base_store._get_query(table=BedVersion),
+        bed_version_filename="does_not_exist",
+    )
+
+    # THEN bed versions should not be returned
+    assert not list(bed_versions)
 
 
 def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name: str):
@@ -22,7 +56,7 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
     assert bed_versions[0].shortname == bed_version_short_name
 
 
-def test_get_bed_version_by_short_name_when_no_name(base_store: Store, bed_version_short_name: str):
+def test_get_bed_version_by_short_name_when_no_name(base_store: Store):
     """Test return bed version by short name when short name does not exist."""
     # GIVEN a store containing bed version
 
