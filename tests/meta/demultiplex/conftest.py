@@ -249,7 +249,6 @@ def fixture_populated_delete_demux_context(
     return populated_delete_demux_context
 
 
-<<<<<<< HEAD
 @pytest.fixture(name="populated_sample_lane_seq_demux_context")
 def fixture_populated_sample_lane_seq_demux_context(
     cg_context: CGConfig,
@@ -263,7 +262,6 @@ def fixture_populated_sample_lane_seq_demux_context(
     populated_wipe_demux_context.cg_stats_api_ = populated_stats_api
     populated_wipe_demux_context.housekeeper_api_ = flow_cell_name_housekeeper_api
     return populated_wipe_demux_context
-
 
 
 @pytest.fixture(name="active_delete_demux_context")
@@ -301,19 +299,15 @@ def fixture_populated_delete_demultiplex_api(
     )
 
 
-
 @pytest.fixture(name="populated_sample_lane_sequencing_metrics_demultiplex_api")
 def fixture_populated_sample_lane_sequencing_metrics_demultiplex_api(
-    populated_sample_lane_seq_demux_context: CGConfig,
-    demultiplexed_flow_cells_working_directory: Path,
-    tmp_flow_cell_run_path: Path,
+    populated_sample_lane_seq_demux_context: CGConfig, bcl2fastq_flow_cell_id
 ) -> DeleteDemuxAPI:
     """Return an initialized populated DeleteDemuxAPI."""
     return DeleteDemuxAPI(
         config=populated_sample_lane_seq_demux_context,
-        demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=False,
-        run_path=tmp_flow_cell_run_path,
+        flow_cell_name=bcl2fastq_flow_cell_id,
     )
 
 
