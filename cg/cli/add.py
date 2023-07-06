@@ -1,26 +1,24 @@
 import logging
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import click
-from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline
+from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline, Priority
 from cg.constants.subject import Gender
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.utils.click.EnumChoice import EnumChoice
 from cg.store.models import (
-    Family,
-    FamilySample,
-    Sample,
-    User,
-    Collaboration,
-    Customer,
     Application,
     ApplicationVersion,
+    Collaboration,
+    Customer,
+    Family,
+    FamilySample,
     Panel,
+    Sample,
+    User,
 )
-
-from cg.constants import Priority
+from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)
 
@@ -55,6 +53,15 @@ def add():
     required=True,
     help="Invoice reference (text)",
 )
+@click.option(
+    "-da",
+    "--data-archive-location",
+    "data_archive_location",
+    help="Specifies where to store data for the customer.",
+    default="PDC",
+    show_default=True,
+    required=False,
+)
 @click.pass_obj
 def add_customer(
     context: CGConfig,
@@ -63,6 +70,7 @@ def add_customer(
     collaboration_internal_ids: Optional[List[str]],
     invoice_address: str,
     invoice_reference: str,
+    data_archive_location: str,
 ):
     """Add a new customer with a unique internal id and name."""
     collaboration_internal_ids = collaboration_internal_ids or []
@@ -85,6 +93,7 @@ def add_customer(
         name=name,
         invoice_address=invoice_address,
         invoice_reference=invoice_reference,
+        data_archive_location=data_archive_location,
     )
     for collaboration in collaborations:
         new_customer.collaborations.append(collaboration)
