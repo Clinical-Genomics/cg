@@ -1,8 +1,37 @@
 from sqlalchemy.orm import Query
 
 from cg.store import Store
-from cg.store.filters.status_bed_filters import get_not_archived_beds, order_beds_by_name
+from cg.store.filters.status_bed_filters import (
+    get_not_archived_beds,
+    order_beds_by_name,
+    get_bed_by_id,
+)
 from cg.store.models import Bed
+
+
+def test_get_bed_by_id(base_store: Store, bed_id: str):
+    """Test return panel bed by id."""
+    # GIVEN a store containing bed
+
+    # WHEN retrieving a bed by id
+    bed: Bed = get_bed_by_id(beds=base_store._get_query(table=Bed), bed_id=bed_id).first()
+
+    # THEN panel bed should be returned
+    assert bed
+
+    # THEN the filename should match the original
+    assert bed.id == bed_id
+
+
+def test_get_bed_by_id_no_id(base_store: Store):
+    """Test return panel bed by id when invalid id."""
+    # GIVEN a store containing bed
+
+    # WHEN retrieving a bed by id
+    bed: Bed = get_bed_by_id(beds=base_store._get_query(table=Bed), bed_id="not_an_id").first()
+
+    # THEN bed should not be returned
+    assert not bed
 
 
 def test_get_beds_by_name(base_store: Store, bed_name: str):

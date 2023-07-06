@@ -12,31 +12,31 @@ def test_get_bed_version_by_filename(base_store: Store, bed_version_filename: st
     """Test return bed version by filename."""
     # GIVEN a store containing bed version
 
-    # WHEN retrieving bed versions
-    bed_versions: List[BedVersion] = get_bed_version_by_filename(
+    # WHEN retrieving bed version
+    bed_version: BedVersion = get_bed_version_by_filename(
         bed_versions=base_store._get_query(table=BedVersion),
         bed_version_filename=bed_version_filename,
-    )
+    ).first()
 
     # THEN bed version should be returned
-    assert bed_versions
+    assert bed_version
 
     # THEN the filename should match the original
-    assert bed_versions[0].filename == bed_version_filename
+    assert bed_version.filename == bed_version_filename
 
 
 def test_get_bed_version_by_filename_when_no_file(base_store: Store):
     """Test return bed version by filename when file does not exist."""
     # GIVEN a store containing bed version
 
-    # WHEN retrieving bed versions
-    bed_versions: List[BedVersion] = get_bed_version_by_filename(
+    # WHEN retrieving bed version
+    bed_version: BedVersion = get_bed_version_by_filename(
         bed_versions=base_store._get_query(table=BedVersion),
         bed_version_filename="does_not_exist",
-    )
+    ).first()
 
-    # THEN bed versions should not be returned
-    assert not list(bed_versions)
+    # THEN bed version should not be returned
+    assert not bed_version
 
 
 def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name: str):

@@ -1232,6 +1232,12 @@ def fixture_apptag_rna() -> str:
     return "RNAPOAR025"
 
 
+@pytest.fixture(name="bed_id")
+def fixture_bed_id() -> int:
+    """Return a bed model id attribute."""
+    return 1
+
+
 @pytest.fixture(name="bed_name")
 def fixture_bed_name() -> str:
     """Return a bed model name attribute."""
@@ -1240,7 +1246,7 @@ def fixture_bed_name() -> str:
 
 @pytest.fixture(name="bed_version_filename")
 def fixture_bed_version_filename(bed_name: str) -> str:
-    """Return a bed version model short name attribute."""
+    """Return a bed version model filename attribute."""
     return f"{bed_name}.bed"
 
 
