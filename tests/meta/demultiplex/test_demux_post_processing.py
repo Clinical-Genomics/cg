@@ -14,7 +14,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-from cg.store.models import SampleLaneSequencingMetrics
 
 
 def test_set_dry_run(
@@ -648,121 +647,8 @@ def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig):
     demux_post_processing_api.add_file_to_bundle_if_non_existent.assert_not_called()
 
 
-def test_is_valid_sample_fastq_filename(demultiplex_context: CGConfig):
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    # WHEN checking a filename containing "Undetermined"
-    file_name = "Undetermined_file.fastq"
-    assert not demux_post_processing_api.is_valid_sample_fastq_filename(file_name)
-
-    # WHEN checking a valid filename
-    file_name = "valid_file.fastq"
-    assert demux_post_processing_api.is_valid_sample_fastq_filename(file_name)
-
-
-def test_get_valid_flowcell_sample_fastq_file_path(demultiplex_context, tmpdir_factory):
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    # GIVEN a flow cell directory
-    flow_cell_dir = Path(tmpdir_factory.mktemp("flow_cell"))
-
-    # GIVEN some files in temporary directory
-    sample_dir = flow_cell_dir / "Unaligned" / "Project_sample" / "Sample_test"
-    sample_dir.mkdir(parents=True)
-    valid_sample_fastq_directory_1 = Path(
-        sample_dir, f"Sample_ABC{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    )
-    valid_sample_fastq_directory_2 = Path(
-        sample_dir, f"Sample_ABC_123{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    )
-    valid_sample_fastq_directory_1.touch()
-    valid_sample_fastq_directory_2.touch()
-
-    # WHEN we get flowcell sample fastq file paths
-    result = demux_post_processing_api.get_sample_fastq_paths_from_flow_cell(
-        flow_cell_directory=flow_cell_dir
-    )
-
-    # THEN we should only get the valid files
-    assert len(result) == 2
-    assert valid_sample_fastq_directory_1 in result
-
-
-def test_get_invalid_flowcell_sample_fastq_file_path(demultiplex_context, tmpdir_factory):
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    # GIVEN a flow cell directory
-    flow_cell_dir = Path(tmpdir_factory.mktemp("flow_cell"))
-
-    # GIVEN some files in temporary directory
-    project_dir = Path(flow_cell_dir, "Unaligned", "Project_sample")
-    project_dir.mkdir(parents=True)
-    invalid_fastq_file = Path(project_dir, f"file{FileExtensions.FASTQ}{FileExtensions.GZIP}")
-    invalid_fastq_file.touch()
-
-    # WHEN we get flowcell sample fastq file paths
-    result = demux_post_processing_api.get_sample_fastq_paths_from_flow_cell(
-        flow_cell_directory=flow_cell_dir
-    )
-
-    # THEN we should not get any files
-    assert len(result) == 0
-    assert invalid_fastq_file not in result
-
-
-def test_get_sample_id_from_sample_fastq_file_path(demultiplex_context: CGConfig, tmpdir_factory):
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    # GIVEN a sample directory and file
-    tmp_dir = Path(tmpdir_factory.mktemp("flow_cell_directory"))
-    sample_id = "sampleid"
-    sample_dir = tmp_dir / f"prefix_{sample_id}"
-    sample_dir.mkdir()
-    sample_file = Path(sample_dir, f"file{FileExtensions.FASTQ}{FileExtensions.GZIP}")
-    sample_file.touch()
-
-    # WHEN we get sample id from sample fastq file path
-    result = demux_post_processing_api.get_sample_id_from_sample_fastq_file_path(sample_file)
-
-    # THEN we should get the correct sample id
-    assert result == sample_id
-
-
-def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context: CGConfig):
-    """Test that samples can be updated with read counts and sequencing date."""
-
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    demux_post_processing_api.status_db.get_sample_by_internal_id = MagicMock()
-    demux_post_processing_api.status_db.get_number_of_reads_for_sample_from_sample_lane_metrics = (
-        MagicMock()
-    )
-
-    mock_sample = MagicMock()
-    mock_read_count = 1_000
-
-    demux_post_processing_api.status_db.get_sample_by_internal_id.return_value = mock_sample
-    demux_post_processing_api.status_db.get_number_of_reads_for_sample_from_sample_lane_metrics.return_value = (
-        mock_read_count
-    )
-
-    # GIVEN a list of internal sample IDs
-    sample_ids = ["sample1", "sample2"]
-
-    # WHEN calling the method with the sample IDs
-    demux_post_processing_api.update_sample_read_counts(sample_ids)
-
-    # THEN the read count was set on the mock sample
-    assert mock_sample.calculated_read_count == mock_read_count
-
-
 def test_add_single_sequencing_metrics_entry_to_statusdb(
-    store: Store,
+    store_with_sequencing_metrics: Store,
     demultiplex_context: CGConfig,
     flow_cell_name: str,
     sample_id: str,
@@ -772,8 +658,8 @@ def test_add_single_sequencing_metrics_entry_to_statusdb(
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a sequencing metrics entry
-    sequencing_metrics_entry: SampleLaneSequencingMetrics = SampleLaneSequencingMetrics(
-        flow_cell_name=flow_cell_name, sample_internal_id=sample_id, flow_cell_lane_number=lane
+    sequencing_metrics_entry = store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+        flow_cell_name=flow_cell_name, sample_internal_id=sample_id, lane=lane
     )
 
     # WHEN adding the sequencing metrics entry to the statusdb

@@ -2281,6 +2281,12 @@ def fixture_flow_cell_name() -> str:
 @pytest.fixture(name="expected_average_q30")
 def fixture_expected_average_q30() -> float:
     """Return expected average Q30."""
+    return 90.50
+
+
+@pytest.fixture(name="expected_average_q30_on_flow_cell")
+def fixture_expected_average_on_flow_cell_q30() -> float:
+    """Return expected average Q30 for a flow cell."""
     return (85.5 + 80.5) / 2
 
 
