@@ -50,5 +50,6 @@ class DeleteDataHandler(BaseHandler):
             SampleLaneSequencingMetrics
         ] = self.get_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
         for metric in metrics:
-            self.session.delete(metric)
+            if metric:
+                self.session.delete(metric)
         self.session.commit()

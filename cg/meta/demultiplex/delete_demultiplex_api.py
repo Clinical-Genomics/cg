@@ -261,6 +261,7 @@ class DeleteDemuxAPI:
         demultiplexing_dir: bool,
         run_dir: bool,
         housekeeper: bool,
+        sample_lane_sequencing_metrics: bool,
         init_files: bool,
         status_db: bool,
     ) -> None:
@@ -287,3 +288,5 @@ class DeleteDemuxAPI:
             self.delete_demux_init_files()
         if housekeeper:
             self.delete_flow_cell_housekeeper()
+        if sample_lane_sequencing_metrics:
+            self.delete_flow_cell_sample_lane_sequencing_metrics()
