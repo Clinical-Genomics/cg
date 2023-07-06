@@ -788,15 +788,18 @@ def test_get_total_read_counts(
 
 
 def test_get_total_counts_passing_q30(
-    store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads_passing_q30: int)
+    store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads_passing_q30: int
+):
     # GIVEN a store with sequencing metrics
 
-
-    total_reads_count_passing_q30 = store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
-        sample_internal_id=sample_id, q30_threshold=0
+    total_reads_count_passing_q30 = (
+        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
+            sample_internal_id=sample_id, q30_threshold=0
+        )
     )
     # THEN assert that the total read count is correct
     assert total_reads_count_passing_q30 == expected_total_reads_passing_q30
+
 
 def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
     store_with_sequencing_metrics: Store, sample_id: str, flow_cell_name: str, lane: int = 1
@@ -814,7 +817,6 @@ def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
     assert metrics_entry.sample_internal_id == sample_id
 
 
-<<<<<<< HEAD
 def test_get_samples_on_flow_cell_from_metrics(
     store_with_sequencing_metrics: Store,
     flow_cell_name: str,
@@ -827,7 +829,7 @@ def test_get_samples_on_flow_cell_from_metrics(
 
     # WHEN getting samples on a flow cell
     samples: List[
-        Sample
+        str
     ] = store_with_sequencing_metrics.get_samples_internal_ids_on_flow_cell_from_sample_lane_metrics(
         flow_cell_name=flow_cell_name
     )
@@ -889,7 +891,8 @@ def test_get_average_passing_q30_for_samples_on_flow_cell(
 
     # THEN assert that the average passing q30 is correct
     assert average_passing_q30 == expected_average_q30
-=======
+
+
 def test_get_number_of_reads_for_sample_passing_q30_threshold(
     store_with_sequencing_metrics: Store,
     sample_id: str,
@@ -947,4 +950,3 @@ def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
     # THEN assert that the number of reads is less than the total number of reads for the sample
     total_sample_reads = sum([metric.sample_total_reads_in_lane for metric in sample_metrics])
     assert number_of_reads < total_sample_reads
->>>>>>> master

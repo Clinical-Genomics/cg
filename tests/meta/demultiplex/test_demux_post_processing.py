@@ -648,7 +648,6 @@ def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig):
     demux_post_processing_api.add_file_to_bundle_if_non_existent.assert_not_called()
 
 
-<<<<<<< HEAD
 def test_is_valid_sample_fastq_filename(demultiplex_context: CGConfig):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
@@ -762,8 +761,6 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
     assert mock_sample.calculated_read_count == mock_read_count
 
 
-=======
->>>>>>> master
 def test_add_single_sequencing_metrics_entry_to_statusdb(
     store: Store,
     demultiplex_context: CGConfig,

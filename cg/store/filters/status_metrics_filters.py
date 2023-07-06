@@ -19,7 +19,7 @@ def filter_above_q30_threshold(metrics: Query, q30_threshold: int, **kwargs) -> 
     )
 
 
-def filter_metrics_for_flow_cell_sample_internal_id_and_lane(
+def filter_by_flow_cell_sample_internal_id_and_lane(
     metrics: Query, flow_cell_name: str, sample_internal_id: str, lane: int, **kwargs
 ) -> Query:
     return metrics.filter(
