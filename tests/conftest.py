@@ -2290,7 +2290,7 @@ def store_with_sequencing_metrics(
     expected_total_reads: int,
     flow_cell_name: str,
     helpers: StoreHelpers,
-) -> Store:
+) -> Generator[Store, None, None]:
     """Return a store with multiple samples with sample lane sequencing metrics."""
     store = Store(uri="sqlite:///")
     store.create_all()
