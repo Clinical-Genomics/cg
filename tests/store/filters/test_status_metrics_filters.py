@@ -73,16 +73,16 @@ def test_filter_metrics_for_flow_cell_name(
         flow_cell_name=flow_cell_name,
     )
 
-    # THEN assert that the returned object is a Query
+    # THEN the returned object is a Query
     assert isinstance(metrics_query, Query)
 
-    # THEN assert that the query returns a list of metrics
+    # THEN the query returns a list of metrics
     assert metrics_query.all()
 
-    # THEN assert that the query returns the expected number of metrics
+    # THEN the query returns the expected number of metrics
     assert len(metrics_query.all()) == 2
 
-    # THEN assert that the query returns the expected metrics
+    # THEN the query returns the expected metrics
     for metric in metrics_query:
         assert metric.flow_cell_name == flow_cell_name
 

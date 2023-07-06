@@ -135,13 +135,9 @@ def test_delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
     """Test function to delete flow cell entries in sample_lane_sequencing_metrics table"""
 
     # GIVEN a database containing a flow cell
-    metrics: List[
-        SampleLaneSequencingMetrics
-    ] = store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_for_flow_cell(
+    assert store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_for_flow_cell(
         flow_cell_name=flow_cell_name
     )
-
-    assert metrics
 
     # WHEN removing flow cell
     store_with_sequencing_metrics.delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
