@@ -691,6 +691,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_sample_lane_sequencing_metrics_for_flow_cell(
         self, flow_cell_name: str
     ) -> List[SampleLaneSequencingMetrics]:
+        """Get sample lane sequencing metrics for a flow cell."""
         return apply_metrics_filter(
             metrics=self._get_query(table=SampleLaneSequencingMetrics),
             filter_functions=[SequencingMetricsFilter.FILTER_METRICS_FOR_FLOW_CELL_NAME],

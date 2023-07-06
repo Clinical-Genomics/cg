@@ -45,6 +45,7 @@ class DeleteDataHandler(BaseHandler):
     def delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
         self, flow_cell_name: str
     ) -> None:
+        """Delete all entries in sample_lane_sequencing_metrics for a flow cell."""
         metrics: List[
             SampleLaneSequencingMetrics
         ] = self.get_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
