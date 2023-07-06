@@ -61,6 +61,10 @@ def test_filter_metrics_for_flow_cell_sample_internal_id_and_lane(
     assert metrics_query[0].flow_cell_lane_number == 1
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> b55c3e5356942110be18c7f5c655a9aa9d364c68
 def test_filter_metrics_for_flow_cell_name(
     store_with_sequencing_metrics: Store, flow_cell_name: str
 ):
@@ -86,7 +90,6 @@ def test_filter_metrics_for_flow_cell_name(
     for metric in metrics_query:
         assert metric.flow_cell_name == flow_cell_name
 
-
 def test_filter_above_q30_threshold(store_with_sequencing_metrics: Store):
     # GIVEN a Store with sequencing metrics
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
@@ -111,3 +114,7 @@ def test_filter_above_q30_threshold(store_with_sequencing_metrics: Store):
     # THEN assert that all returned metrics have a sample_base_fraction_passing_q30 greater than the threshold
     for metric in filtered_metrics.all():
         assert metric.sample_base_fraction_passing_q30 > q30_threshold / 100
+<<<<<<< HEAD
+=======
+
+>>>>>>> b55c3e5356942110be18c7f5c655a9aa9d364c68
