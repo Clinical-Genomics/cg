@@ -2,10 +2,17 @@
 import logging
 from typing import Dict, List, Optional, Set, Type
 
-from cg.apps.demultiplex.sample_sheet import index
 from cg.apps.demultiplex.sample_sheet.dummy_sample import get_dummy_sample
-from cg.apps.demultiplex.sample_sheet.index import Index
-from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
+from cg.apps.demultiplex.sample_sheet.index import (
+    Index,
+    adapt_samples,
+    get_indexes_by_lane,
+    get_valid_indexes,
+    index_exists,
+    is_dual_index,
+    is_reverse_complement,
+)
+from cg.apps.demultiplex.sample_sheet.validate import get_samples_by_lane, validate_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.constants.demultiplexing import (
     BclConverter,
@@ -38,7 +45,7 @@ class SampleSheetCreator:
 
     @property
     def valid_indexes(self) -> List[Index]:
-        return index.get_valid_indexes(dual_indexes_only=True)
+        return get_valid_indexes(dual_indexes_only=True)
 
     def add_dummy_samples(self) -> None:
         """Add all dummy samples with non-existing indexes to samples if applicable."""
@@ -50,7 +57,7 @@ class SampleSheetCreator:
         samples_to_keep = []
         sample: FlowCellSample
         for sample in self.lims_samples:
-            if not index.is_dual_index(sample.index):
+            if not is_dual_index(sample.index):
                 LOG.warning(f"Removing sample {sample} since it does not have dual index")
                 continue
             samples_to_keep.append(sample)
@@ -89,18 +96,29 @@ class SampleSheetCreator:
             )
         return sample_sheet_content
 
-    def construct_sample_sheet(self) -> List[List[str]]:
-        """Construct the sample sheet."""
-        # Create dummy samples for the indexes that are missing
+    def process_samples_for_sample_sheet(self) -> None:
+        """Add dummy samples, remove unwanted samples and adapt remaining samples."""
         if self.run_parameters.requires_dummy_samples:
             self.add_dummy_samples()
+            LOG.info("Created dummy samples for the indexes that are missing")
         else:
-            LOG.info("Skip adding dummy samples since run is not WGS")
+            LOG.info("Skipped adding dummy samples since they are not needed")
         self.remove_unwanted_samples()
-        index.adapt_indexes(
-            samples=self.lims_samples,
-            run_parameters=self.run_parameters,
-        )
+        samples_in_lane: List[FlowCellSample]
+        reverse_complement: bool = is_reverse_complement(run_parameters=self.run_parameters)
+        for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
+            LOG.info(
+                f"Adapting index and barcode mismatch values (if applicable) for samples in lane {lane}"
+            )
+            adapt_samples(
+                samples=samples_in_lane,
+                run_parameters=self.run_parameters,
+                reverse_complement=reverse_complement,
+            )
+
+    def construct_sample_sheet(self) -> List[List[str]]:
+        """Construct and validate the sample sheet."""
+        self.process_samples_for_sample_sheet()
         sample_sheet_content: List[List[str]] = self.create_sample_sheet_content()
         if self.force:
             LOG.info("Skipping validation of sample sheet due to force flag")
@@ -121,21 +139,20 @@ class SampleSheetCreatorV1(SampleSheetCreator):
         """Add all dummy samples with non-existing indexes to samples.
 
         Dummy samples are added if there are indexes that are not used by the actual samples.
-        This means that we will add each dummy sample (that is needed) to each lane.
         """
         LOG.info("Adding dummy samples for unused indexes")
-        indexes_by_lane: Dict[int, Set[str]] = index.get_indexes_by_lane(samples=self.lims_samples)
+        indexes_by_lane: Dict[int, Set[str]] = get_indexes_by_lane(samples=self.lims_samples)
         for lane, lane_indexes in indexes_by_lane.items():
             LOG.debug(f"Add dummy samples for lane {lane}")
-            for index_obj in self.valid_indexes:
-                if index.index_exists(index=index_obj.sequence, indexes=lane_indexes):
-                    LOG.debug(f"Index {index_obj.sequence} already in use")
+            for index in self.valid_indexes:
+                if index_exists(index=index.sequence, indexes=lane_indexes):
+                    LOG.debug(f"Index {index.sequence} already in use")
                     continue
                 dummy_flow_cell_sample: FlowCellSample = get_dummy_sample(
                     flow_cell_id=self.flow_cell_id,
-                    dummy_index=index_obj.sequence,
+                    dummy_index=index.sequence,
                     lane=lane,
-                    name=index_obj.name,
+                    name=index.name,
                     sample_type=self.sample_type,
                 )
                 LOG.debug(f"Adding dummy sample {dummy_flow_cell_sample} to lane {lane}")
