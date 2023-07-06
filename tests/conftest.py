@@ -2284,6 +2284,24 @@ def fixture_expected_average_q30() -> float:
     return (85.5 + 80.5) / 2
 
 
+@pytest.fixture(name="sample_2")
+def fixture_sample_2() -> str:
+    """Return a sample name"""
+    return "sample_2"
+
+
+@pytest.fixture(name="flow_cell_2")
+def fixture_flow_cell_2() -> str:
+    """Return a flow cell name"""
+    return "flow_cell_2"
+
+
+@pytest.fixture(name="expected_total_reads_flow_cell_2")
+def fixture_expected_total_reads_flow_cell_2() -> int:
+    """Return an expected read count"""
+    return 4_000_000
+
+
 @pytest.fixture
 def store_with_sequencing_metrics(
     sample_id: str,

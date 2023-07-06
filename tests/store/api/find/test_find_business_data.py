@@ -827,33 +827,33 @@ def test_get_samples_on_flow_cell_from_metrics(
 
 def test_get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
     store_with_sequencing_metrics: Store,
-    flow_cell_name: str = "flow_cell_2",
-    expected_total_reads: int = 4_000_000,
+    flow_cell_2: str,
+    expected_total_reads_flow_cell_2: int,
 ):
     # GIVEN a store with sequencing metrics
     # WHEN getting total read counts for a flow cell
     reads = (
         store_with_sequencing_metrics.get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
-            flow_cell_name=flow_cell_name
+            flow_cell_name=flow_cell_2
         )
     )
     # THEN assert that the total read count is correct
-    assert reads == expected_total_reads
+    assert reads == expected_total_reads_flow_cell_2
 
 
 def test_get_average_passing_q30_for_sample_from_metrics(
     store_with_sequencing_metrics: Store,
     expected_average_q30: float,
-    sample_internal_id: str = "sample_2",
-    flow_cell_name: str = "flow_cell_2",
+    sample_2: str,
+    flow_cell_2: str,
 ):
     # GIVEN a store with sequencing metrics
 
     # WHEN getting average passing q30 for a sample
     average_passing_q30 = (
         store_with_sequencing_metrics.get_average_passing_q30_for_sample_from_sample_lane_metrics(
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=flow_cell_name,
+            sample_internal_id=sample_2,
+            flow_cell_name=flow_cell_2,
         )
     )
 
