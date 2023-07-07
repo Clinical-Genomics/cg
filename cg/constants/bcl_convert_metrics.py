@@ -41,7 +41,6 @@ class BclConvertAdapterMetricsColumnNames(Enum):
 
 
 DEMUX_METRICS_FILE_NAME = "Demultiplex_Stats.csv"
-DEMUX_METRICS_FILE_NAME = "Quality_Metrics.csv"
-DEMUX_METRICS_FILE_NAME = "Adapter_Metrics.csv"
-RUN_INFO_FILE_PATH = "RunInfo.xml"
-DEMUX_METRICS_FILE_NAME = "SampleSheet.csv"
+QUALITY_METRICS_FILE_NAME = "Quality_Metrics.csv"
+ADAPTER_METRICS_FILE_NAME = "Adapter_Metrics.csv"
+SAMPLE_SHEET_FILE_NAME = "SampleSheet.csv"

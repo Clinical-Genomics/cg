@@ -8,20 +8,19 @@ from cg.io.controller import ReadFile
 from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
 from cg.constants.constants import FileFormat, SCALE_TO_READ_PAIRS
 from cg.constants.bcl_convert_metrics import (
-    DEMUX_METRICS_FILE_PATH,
-    QUALITY_METRICS_FILE_PATH,
-    ADAPTER_METRICS_FILE_PATH,
-    RUN_INFO_FILE_PATH,
-    SAMPLE_SHEET_FILE_PATH,
+    DEMUX_METRICS_FILE_NAME,
+    QUALITY_METRICS_FILE_NAME,
+    ADAPTER_METRICS_FILE_NAME,
+    SAMPLE_SHEET_FILE_NAME,
 )
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertAdapterMetrics,
     BclConvertDemuxMetrics,
     BclConvertQualityMetrics,
-    BclConvertRunInfo,
     BclConvertSampleSheetData,
 )
 from cg.constants.demultiplexing import INDEX_CHECK, UNDETERMINED
+from cg.utils.files import get_file_in_directory
 
 LOG = logging.getLogger(__name__)
 
@@ -34,30 +33,34 @@ class BclConvertMetricsParser:
         """Initialize the class."""
         self.flow_cell_directory: Path = bcl_convert_metrics_dir_path
         self.quality_metrics: List[BclConvertQualityMetrics] = self.parse_metrics_file(
-            metrics_file_path=self.get_path_to_metrics_file(
-                metrics_file_name=QUALITY_METRICS_FILE_PATH
+            metrics_file_path=get_file_in_directory(
+                directory=self.flow_cell_directory, file_name=QUALITY_METRICS_FILE_NAME
             ),
             metrics_model=BclConvertQualityMetrics,
         )
         self.demux_metrics: List[BclConvertDemuxMetrics] = self.parse_metrics_file(
-            metrics_file_path=self.get_path_to_metrics_file(
-                metrics_file_name=DEMUX_METRICS_FILE_PATH
+            metrics_file_path=get_file_in_directory(
+                directory=self.flow_cell_directory, file_name=DEMUX_METRICS_FILE_NAME
             ),
             metrics_model=BclConvertDemuxMetrics,
         )
         self.adapter_metrics: List[BclConvertAdapterMetrics] = self.parse_metrics_file(
-            metrics_file_path=self.get_path_to_metrics_file(
-                metrics_file_name=ADAPTER_METRICS_FILE_PATH
+            metrics_file_path=get_file_in_directory(
+                directory=self.flow_cell_directory, file_name=ADAPTER_METRICS_FILE_NAME
             ),
             metrics_model=BclConvertAdapterMetrics,
         )
-        self.sample_sheet: List[BclConvertSampleSheetData] = self.parse_sample_sheet_file()
-        self.run_info: BclConvertRunInfo = self.parse_run_info_file()
+        self.sample_sheet: List[BclConvertSampleSheetData] = self.parse_sample_sheet_file(
+            sample_sheet_path=get_file_in_directory(
+                directory=self.flow_cell_directory, file_name=SAMPLE_SHEET_FILE_NAME
+            )
+        )
 
     def get_path_to_metrics_file(self, metrics_file_name: str) -> Path:
         """Return path to metrics file."""
-
-        return Path(self.flow_cell_directory, metrics_file_name)
+        return get_file_in_directory(
+            directory=self.flow_cell_directory, file_name=metrics_file_name
+        )
 
     def parse_metrics_file(
         self, metrics_file_path, metrics_model: Callable
@@ -91,23 +94,18 @@ class BclConvertMetricsParser:
             header_line_count += 1
         return header_line_count
 
-    def parse_sample_sheet_file(self) -> List[BclConvertSampleSheetData]:
+    def parse_sample_sheet_file(self, sample_sheet_path: Path) -> List[BclConvertSampleSheetData]:
         """Return sample sheet sample lines."""
-        LOG.info(f"Parsing BCLConvert sample sheet file: {self.sample_sheet_path}")
+        LOG.info(f"Parsing BCLConvert sample sheet file: {sample_sheet_path}")
         header_line_count: int = self.get_nr_of_header_lines_in_sample_sheet()
         sample_sheet_sample_lines: List[BclConvertSampleSheetData] = []
-        with open(self.sample_sheet_path, "r") as sample_sheet_file:
+        with open(sample_sheet_path, "r") as sample_sheet_file:
             for _ in range(header_line_count):
                 next(sample_sheet_file)
             sample_sheet_content = csv.DictReader(sample_sheet_file)
             for line in sample_sheet_content:
                 sample_sheet_sample_lines.append(BclConvertSampleSheetData(**line))
         return sample_sheet_sample_lines
-
-    def parse_run_info_file(self) -> BclConvertRunInfo:
-        LOG.info(f"Parsing Run info XML {self.run_info_path}")
-        parsed_metrics = BclConvertRunInfo(tree=ET.parse(self.run_info_path))
-        return parsed_metrics
 
     def get_sample_internal_ids(self) -> List[str]:
         """Return a list of sample internal ids."""
