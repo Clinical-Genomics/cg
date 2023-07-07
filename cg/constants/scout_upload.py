@@ -46,7 +46,7 @@ BALSAMIC_CASE_TAGS = dict(
 BALSAMIC_UMI_CASE_TAGS = dict(
     sv_vcf={"vcf-sv-clinical"},
     snv_vcf={"vcf-umi-snv-clinical"},
-    multiqc_report={"multiqc-hpytml"},
+    multiqc_report={"multiqc-html"},
     delivery_report={"delivery-report"},
 )
 
