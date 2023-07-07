@@ -1,5 +1,5 @@
 import logging
-from pathlib import Path
+from pathlib import Path    
 from typing import Generator, List
 from mock import MagicMock, call
 
@@ -789,11 +789,6 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     # WHEN post processing the demultiplexed flow cell
     demux_post_processing_api.finish_flow_cell_temp(
         flow_cell_directory_name_demultiplexed_with_bcl2fastq
-    )
-
-    # THEN a flow cell was created in statusdb
-    assert demux_post_processing_api.status_db.get_flow_cell_by_name(
-        flow_cell_name_demultiplexed_with_bcl2fastq
     )
 
     # THEN a flow cell was created in statusdb
