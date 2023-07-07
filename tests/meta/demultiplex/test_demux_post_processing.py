@@ -767,9 +767,8 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
         ).all()
 
     # THEN a deliver file was created in the flow cell directory
-    flow_cell_path = Path(
-        demux_post_processing_api.demux_api.out_dir, flow_cell_name_demultiplexed_with_bcl_convert
+    delivery_path = Path(
+        demux_post_processing_api.demux_api.out_dir, flow_cell_name_demultiplexed_with_bcl_convert, DemultiplexingDirsAndFiles.DELIVERY
     )
 
-    assert DemultiplexingDirsAndFiles.DELIVERY
-
+    delivery_path.exists()
