@@ -329,7 +329,9 @@ class UploadScoutAPI:
         LOG.info(self.rna_splice_junctions_upload_summary(rna_dna_collections))
         LOG.info("Upload splice junctions bed file finished!")
 
-    def rna_splice_junctions_upload_summary(self, rna_dna_collections: List[RNADNACollection]) -> List[str]:
+    def rna_splice_junctions_upload_summary(
+        self, rna_dna_collections: List[RNADNACollection]
+    ) -> List[str]:
         log_statements: List[str] = []
         for rna_dna_collection in rna_dna_collections:
             log_statements.extend(
@@ -338,7 +340,9 @@ class UploadScoutAPI:
             )
         return log_statements
 
-    def rna_bigwig_coverage_upload_summary(self, rna_dna_collections: List[RNADNACollection]) -> List[str]:
+    def rna_bigwig_coverage_upload_summary(
+        self, rna_dna_collections: List[RNADNACollection]
+    ) -> List[str]:
         log_statements: List[str] = []
         for rna_dna_collection in rna_dna_collections:
             log_statements.extend(
@@ -346,7 +350,6 @@ class UploadScoutAPI:
                 for dna_case in rna_dna_collection.dna_case_ids
             )
         return log_statements
-
 
     def upload_rna_junctions_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload RNA junctions splice files to Scout."""
