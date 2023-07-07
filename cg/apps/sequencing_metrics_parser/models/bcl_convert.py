@@ -83,4 +83,3 @@ class BclConvertSampleSheetData(BaseModel):
 
 class CustomConfig(BaseConfig):
     arbitrary_types_allowed = True
-
