@@ -62,6 +62,16 @@ def add():
     show_default=True,
     required=False,
 )
+@click.option(
+    "-ic",
+    "--is-clinical",
+    "is_clinical",
+    help="Flag stating if it is a clinical customer.",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    required=False,
+)
 @click.pass_obj
 def add_customer(
     context: CGConfig,
@@ -71,6 +81,7 @@ def add_customer(
     invoice_address: str,
     invoice_reference: str,
     data_archive_location: str,
+    is_clinical: bool,
 ):
     """Add a new customer with a unique internal id and name."""
     collaboration_internal_ids = collaboration_internal_ids or []
@@ -94,6 +105,7 @@ def add_customer(
         invoice_address=invoice_address,
         invoice_reference=invoice_reference,
         data_archive_location=data_archive_location,
+        is_clinical=is_clinical,
     )
     for collaboration in collaborations:
         new_customer.collaborations.append(collaboration)
