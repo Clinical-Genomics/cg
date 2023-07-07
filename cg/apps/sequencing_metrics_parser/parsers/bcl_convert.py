@@ -79,14 +79,10 @@ class BclConvertMetricsParser:
             parsed_metrics.append(metrics_model(**sample_metrics_dict))
         return parsed_metrics
 
-    def get_nr_of_header_lines_in_sample_sheet(
-        self,
-    ) -> int:
+    def get_nr_of_header_lines_in_sample_sheet(self, sample_sheet_path: Path) -> int:
         """Return the number of header lines in a sample sheet.
         Any lines before and including the line starting with [Data] is considered the header."""
-        sample_sheet_content = ReadFile.get_content_from_file(
-            FileFormat.CSV, self.sample_sheet_path
-        )
+        sample_sheet_content = ReadFile.get_content_from_file(FileFormat.CSV, sample_sheet_path)
         header_line_count: int = 1
         for line in sample_sheet_content:
             if SampleSheetNovaSeq6000Sections.Data.HEADER.value in line:
@@ -97,7 +93,9 @@ class BclConvertMetricsParser:
     def parse_sample_sheet_file(self, sample_sheet_path: Path) -> List[BclConvertSampleSheetData]:
         """Return sample sheet sample lines."""
         LOG.info(f"Parsing BCLConvert sample sheet file: {sample_sheet_path}")
-        header_line_count: int = self.get_nr_of_header_lines_in_sample_sheet()
+        header_line_count: int = self.get_nr_of_header_lines_in_sample_sheet(
+            sample_sheet_path=sample_sheet_path
+        )
         sample_sheet_sample_lines: List[BclConvertSampleSheetData] = []
         with open(sample_sheet_path, "r") as sample_sheet_file:
             for _ in range(header_line_count):
