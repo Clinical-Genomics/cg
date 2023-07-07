@@ -1,8 +1,6 @@
 import logging
 from pathlib import Path
-import shutil
 from typing import Generator, List
-from alchy import Query
 from mock import MagicMock, call
 
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
@@ -11,7 +9,6 @@ from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
     DemuxPostProcessingHiseqXAPI,
 )
-from cg.meta.demultiplex.utils import get_sample_ids_from_sample_sheet
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
@@ -786,7 +783,7 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
-    # GIVEN a directory with a flow cell demultiplexed with BCL Convert
+    # GIVEN a directory with a flow cell demultiplexed with bcl2fastq
     demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_directory
 
     # WHEN post processing the demultiplexed flow cell
