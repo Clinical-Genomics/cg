@@ -30,35 +30,35 @@ class BclConvertMetricsParser:
         bcl_convert_metrics_dir_path: Path,
     ) -> None:
         """Initialize the class."""
-        self.flow_cell_directory: Path = bcl_convert_metrics_dir_path
+        self.bcl_convert_demultiplex_dir: Path = bcl_convert_metrics_dir_path
         self.quality_metrics: List[BclConvertQualityMetrics] = self.parse_metrics_file(
             metrics_file_path=get_file_in_directory(
-                directory=self.flow_cell_directory, file_name=QUALITY_METRICS_FILE_NAME
+                directory=self.bcl_convert_demultiplex_dir, file_name=QUALITY_METRICS_FILE_NAME
             ),
             metrics_model=BclConvertQualityMetrics,
         )
         self.demux_metrics: List[BclConvertDemuxMetrics] = self.parse_metrics_file(
             metrics_file_path=get_file_in_directory(
-                directory=self.flow_cell_directory, file_name=DEMUX_METRICS_FILE_NAME
+                directory=self.bcl_convert_demultiplex_dir, file_name=DEMUX_METRICS_FILE_NAME
             ),
             metrics_model=BclConvertDemuxMetrics,
         )
         self.adapter_metrics: List[BclConvertAdapterMetrics] = self.parse_metrics_file(
             metrics_file_path=get_file_in_directory(
-                directory=self.flow_cell_directory, file_name=ADAPTER_METRICS_FILE_NAME
+                directory=self.bcl_convert_demultiplex_dir, file_name=ADAPTER_METRICS_FILE_NAME
             ),
             metrics_model=BclConvertAdapterMetrics,
         )
         self.sample_sheet: List[BclConvertSampleSheetData] = self.parse_sample_sheet_file(
             sample_sheet_path=get_file_in_directory(
-                directory=self.flow_cell_directory, file_name=SAMPLE_SHEET_FILE_NAME
+                directory=self.bcl_convert_demultiplex_dir, file_name=SAMPLE_SHEET_FILE_NAME
             )
         )
 
     def get_path_to_metrics_file(self, metrics_file_name: str) -> Path:
         """Return path to metrics file."""
         return get_file_in_directory(
-            directory=self.flow_cell_directory, file_name=metrics_file_name
+            directory=self.bcl_convert_demultiplex_dir, file_name=metrics_file_name
         )
 
     def parse_metrics_file(
