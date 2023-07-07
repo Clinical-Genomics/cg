@@ -32,26 +32,32 @@ class BclConvertMetricsParser:
         bcl_convert_metrics_dir_path: Path,
     ) -> None:
         """Initialize the class."""
-        self.quality_metrics_path: Path = Path(
-            bcl_convert_metrics_dir_path, QUALITY_METRICS_FILE_PATH
-        )
-        self.demux_metrics_path: Path = Path(bcl_convert_metrics_dir_path, DEMUX_METRICS_FILE_PATH)
-        self.adapter_metrics_path: Path = Path(
-            bcl_convert_metrics_dir_path, ADAPTER_METRICS_FILE_PATH
-        )
-        self.sample_sheet_path: Path = Path(bcl_convert_metrics_dir_path, SAMPLE_SHEET_FILE_PATH)
-        self.run_info_path: Path = Path(bcl_convert_metrics_dir_path, RUN_INFO_FILE_PATH)
+        self.flow_cell_directory: Path = bcl_convert_metrics_dir_path
         self.quality_metrics: List[BclConvertQualityMetrics] = self.parse_metrics_file(
-            metrics_file_path=self.quality_metrics_path, metrics_model=BclConvertQualityMetrics
+            metrics_file_path=self.get_path_to_metrics_file(
+                metrics_file_name=QUALITY_METRICS_FILE_PATH
+            ),
+            metrics_model=BclConvertQualityMetrics,
         )
         self.demux_metrics: List[BclConvertDemuxMetrics] = self.parse_metrics_file(
-            metrics_file_path=self.demux_metrics_path, metrics_model=BclConvertDemuxMetrics
+            metrics_file_path=self.get_path_to_metrics_file(
+                metrics_file_name=DEMUX_METRICS_FILE_PATH
+            ),
+            metrics_model=BclConvertDemuxMetrics,
         )
         self.adapter_metrics: List[BclConvertAdapterMetrics] = self.parse_metrics_file(
-            metrics_file_path=self.adapter_metrics_path, metrics_model=BclConvertAdapterMetrics
+            metrics_file_path=self.get_path_to_metrics_file(
+                metrics_file_name=ADAPTER_METRICS_FILE_PATH
+            ),
+            metrics_model=BclConvertAdapterMetrics,
         )
         self.sample_sheet: List[BclConvertSampleSheetData] = self.parse_sample_sheet_file()
         self.run_info: BclConvertRunInfo = self.parse_run_info_file()
+
+    def get_path_to_metrics_file(self, metrics_file_name: str) -> Path:
+        """Return path to metrics file."""
+
+        return Path(self.flow_cell_directory, metrics_file_name)
 
     def parse_metrics_file(
         self, metrics_file_path, metrics_model: Callable
