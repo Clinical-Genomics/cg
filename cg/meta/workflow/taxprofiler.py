@@ -95,13 +95,13 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         sample_sheet_content: Dict[str, List[str]] = {}
 
         for link in case.links:
-            sample_id: str = link.sample.internal_id
+            sample_name: str = link.sample.name
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
             sample_content = self.build_sample_sheet_content(
                 case_id=case_id,
-                sample_id=sample_id,
+                sample_id=sample_name,
                 fastq_r1=fastq_r1,
                 fastq_r2=fastq_r2,
                 instrument_platform=instrument_platform,
