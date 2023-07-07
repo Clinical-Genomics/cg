@@ -42,7 +42,6 @@ def fixture_valid_index_() -> Index:
     return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
 
 
-
 @pytest.fixture(name="lims_novaseq_x_samples")
 def fixture_lims_novaseq_x_samples(
     lims_novaseq_samples_raw: List[dict],

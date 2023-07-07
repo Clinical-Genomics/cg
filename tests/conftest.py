@@ -17,7 +17,9 @@ from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleNovaSeq6000Bcl2Fastq, FlowCellSampleNovaSeq6000Dragen)
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeq6000Dragen,
+)
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -25,8 +27,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.api import LimsAPI
 from cg.constants import FileExtensions, Pipeline
 from cg.constants.constants import CaseActions, FileFormat
-from cg.constants.demultiplexing import (BclConverter,
-                                         DemultiplexingDirsAndFiles)
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.subject import Gender
 from cg.io.controller import ReadFile, WriteFile
@@ -39,11 +40,17 @@ from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.models.demultiplex.run_parameters import (RunParametersNovaSeq6000,
-                                                  RunParametersNovaSeqX)
+from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.store import Store
-from cg.store.models import (Bed, BedVersion, Customer, Family, Organism,
-                             Sample, SampleLaneSequencingMetrics)
+from cg.store.models import (
+    Bed,
+    BedVersion,
+    Customer,
+    Family,
+    Organism,
+    Sample,
+    SampleLaneSequencingMetrics,
+)
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI

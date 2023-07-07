@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+
 @pytest.fixture(name="correct_flow_cell_name")
 def fixture_correct_flow_cell_name(bcl2fastq_flow_cell_full_name: str) -> str:
     """Correct flow cell name."""
