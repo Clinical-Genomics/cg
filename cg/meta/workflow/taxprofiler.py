@@ -79,7 +79,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         """Build sample sheet headers and lists."""
         try:
             TaxprofilerSample(
-                # sample=case_id,
                 sample=sample_id,
                 fastq_r1=fastq_r1,
                 fastq_r2=fastq_r2,
