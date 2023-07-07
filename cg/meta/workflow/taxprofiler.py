@@ -93,10 +93,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             TAXPROFILER_FASTA_HEADER: fasta_full_list,
         }
 
-        # Append new values for sample_id to the existing sample_sheet_content
-        for key, value in sample_sheet_content.items():
-            value.append(sample_sheet_content[key][0])
-
         return sample_sheet_content
 
     def write_sample_sheet(
