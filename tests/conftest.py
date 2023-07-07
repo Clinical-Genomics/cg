@@ -990,17 +990,37 @@ def fixture_sample_sheet_context(cg_context: CGConfig, lims_api: LimsAPI) -> CGC
     return cg_context
 
 
+@pytest.fixture
+def bcl_convert_demultiplexed_flow_cell_sample_ids() -> List[str]:
+    """
+    Sample id:s present in sample sheet for dummy flow cell demultiplexed with bclconvert in
+    cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/230504_A00689_0804_BHY7FFDRX2
+    """
+    return ["ACC11927A2", "ACC11927A5"]
+
+
+@pytest.fixture
+def store_with_demultiplexed_samples(
+    store: Store, helpers: StoreHelpers, bcl_convert_demultiplexed_flow_cell_sample_ids: list
+) -> Store:
+    for i, sample_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_ids):
+        helpers.add_sample(store, internal_id=sample_id, name=f"sample_{i}")
+    return store
+
+
 @pytest.fixture(name="demultiplex_context")
 def fixture_demultiplex_context(
     demultiplexing_api: DemultiplexingAPI,
     stats_api: StatsAPI,
     real_housekeeper_api: HousekeeperAPI,
     cg_context: CGConfig,
+    store_with_demultiplexed_samples: Store,
 ) -> CGConfig:
     """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api
     cg_context.cg_stats_api_ = stats_api
     cg_context.housekeeper_api_ = real_housekeeper_api
+    cg_context.status_db_ = store_with_demultiplexed_samples
     return cg_context
 
 
@@ -1008,7 +1028,6 @@ def fixture_demultiplex_context(
 def fixture_demultiplex_configs(
     flow_cell_runs_working_directory: Path,
     demultiplexed_flow_cells_working_directory: Path,
-    demultiplex_fixtures: Path,
 ) -> dict:
     """Return demultiplex configs."""
     demultiplexed_flow_cells_working_directory.mkdir(parents=True, exist_ok=True)
@@ -1037,6 +1056,7 @@ def fixture_populated_stats_api(
 ) -> StatsAPI:
     create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
     return stats_api
+
 
 @pytest.fixture(name="demultiplex_fixtures", scope="session")
 def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
@@ -2636,3 +2656,25 @@ def store_with_sequencing_metrics(
     store.session.add_all(sample_lane_sequencing_metrics)
     store.session.commit()
     yield store
+
+
+@pytest.fixture
+def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
+    return "HY7FFDRX2"
+
+
+@pytest.fixture
+def flow_cell_directory_name_demultiplexed_with_bclconvert(
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
+):
+    return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
+
+
+@pytest.fixture
+def demultiplexed_flow_cells_directory(tmp_path) -> Path:
+    original_dir = Path(
+        Path(__file__).parent, "fixtures", "apps", "demultiplexing", "demultiplexed-runs"
+    )
+    tmp_dir = Path(tmp_path, "tmp_run_dir")
+
+    return Path(shutil.copytree(original_dir, tmp_dir))
