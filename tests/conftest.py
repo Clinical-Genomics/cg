@@ -1038,6 +1038,7 @@ def fixture_populated_stats_api(
     create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
     return stats_api
 
+
 @pytest.fixture(name="demultiplex_fixtures", scope="session")
 def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
     """Return the path to the demultiplex fixture directory."""
