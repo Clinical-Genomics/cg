@@ -47,6 +47,16 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
 
+    def link_fastq_files(
+        self,
+        case_id: str,
+        sample_id: str,
+    ) -> None:
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        samples: List[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
+        for sample_obj in samples:
+            self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
+
     def get_samples(self, case_id: str, sample_id: str) -> List[Sample]:
         """Returns a list of samples to configure
         If sample_id is specified, will return a list with only this sample_id.
@@ -59,6 +69,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def build_sample_sheet_content(
+        self,
         case_id: str,
         sample_id: str,
         fastq_r1: List[str],
@@ -66,18 +77,25 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         instrument_platform: SequencingPlatform.ILLUMINA,
         fasta: Optional[str] = "",
     ) -> Dict[str, List[str]]:
+        self.link_fastq_files(case_id, sample_id)
+
+        samples: List[Sample] = self.get_samples(case_id, sample_id)
+
+        sample_sheet_content: Dict[str, List[str]] = {}
         """Build sample sheet headers and lists."""
-        try:
-            TaxprofilerSample(
-                # sample=case_id,
-                sample=sample_id,
-                fastq_r1=fastq_r1,
-                fastq_r2=fastq_r2,
-                instrument_platform=instrument_platform,
-            )
-        except ValidationError as error:
-            LOG.error(error)
-            raise ValueError
+        for sample_obj in samples:
+            print("Sample obj" + sample_obj)
+            try:
+                TaxprofilerSample(
+                    # sample=case_id,
+                    sample=sample_id,
+                    fastq_r1=fastq_r1,
+                    fastq_r2=fastq_r2,
+                    instrument_platform=instrument_platform,
+                )
+            except ValidationError as error:
+                LOG.error(error)
+                raise ValueError
 
         # Complete sample lists to the same length as fastq_r1:
         samples_full_list: List[str] = [sample_id] * len(fastq_r1)
