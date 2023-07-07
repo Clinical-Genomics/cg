@@ -5,8 +5,11 @@ import os
 
 
 def get_file_in_directory(directory: Path, file_name: str) -> Path:
-    """Get a file in a directory and subdirectories."""
-    """Get a file in a directory and subdirectories."""
+    """Get a file in a directory and subdirectories.
+    Raises:
+        FileNotFoundError: If the file is not found in the directory.
+        FileNotFoundError: If the directory does not exist.
+    """
     if not directory.is_dir() or not directory.exists():
         raise FileNotFoundError(f"Directory {directory} does not exist")
     path_to_file: Optional[Path] = None
