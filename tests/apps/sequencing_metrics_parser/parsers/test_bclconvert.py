@@ -6,7 +6,6 @@ from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertDemuxMetrics,
     BclConvertSampleSheetData,
     BclConvertAdapterMetrics,
-    BclConvertRunInfo,
 )
 from cg.constants.demultiplexing import INDEX_CHECK, UNDETERMINED
 from pathlib import Path
@@ -33,8 +32,6 @@ def test_parse_bcl_convert_metrics(
     assert isinstance(bcl_convert_metrics_parser.sample_sheet[0], BclConvertSampleSheetData)
     assert bcl_convert_metrics_parser.adapter_metrics
     assert isinstance(bcl_convert_metrics_parser.adapter_metrics[0], BclConvertAdapterMetrics)
-    assert bcl_convert_metrics_parser.run_info
-    assert isinstance(bcl_convert_metrics_parser.run_info, BclConvertRunInfo)
 
 
 def test_parse_metrics_files_not_existing():
