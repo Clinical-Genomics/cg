@@ -30,7 +30,8 @@ LOG = logging.getLogger(__name__)
 
 @dataclass
 class RNADNACollection:
-    """Contains the id for an RNA sample, the name of its connected DNA sample, and a list of connected DNA cases."""
+    """Contains the id for an RNA sample, the name of its connected DNA sample,
+    and a list of connected, uploaded DNA cases."""
 
     rna_sample_id: str
     dna_sample_name: str
@@ -266,28 +267,23 @@ class UploadScoutAPI:
 
             LOG.info(f"RNA coverage bigwig file {rna_coverage_bigwig.path} found.")
             for dna_case_id in rna_dna_collection.dna_case_ids:
-                if self.status_db.get_case_by_internal_id(dna_case_id).is_uploaded:
-                    LOG.info(
-                        f"Uploading RNA coverage bigwig file for sample {dna_sample_name} "
-                        f"in case {dna_case_id} in Scout."
-                    )
+                LOG.info(
+                    f"Uploading RNA coverage bigwig file for sample {dna_sample_name} "
+                    f"in case {dna_case_id} in Scout."
+                )
 
-                    if dry_run:
-                        continue
+                if dry_run:
+                    continue
 
-                    self.scout_api.upload_rna_coverage_bigwig(
-                        file_path=rna_coverage_bigwig.full_path,
-                        case_id=dna_case_id,
-                        customer_sample_id=dna_sample_name,
-                    )
-                    LOG.info(
-                        f"Uploaded RNA coverage bigwig file for sample {dna_sample_name} in case {dna_case_id}."
-                    )
-                else:
-                    LOG.warning(
-                        f"Upload of RNA coverage bigwig file for sample {dna_sample_name} "
-                        f"in case {dna_case_id} skipped - case has not finished uploading."
-                    )
+                self.scout_api.upload_rna_coverage_bigwig(
+                    file_path=rna_coverage_bigwig.full_path,
+                    case_id=dna_case_id,
+                    customer_sample_id=dna_sample_name,
+                )
+                LOG.info(
+                    f"Uploaded RNA coverage bigwig file for sample {dna_sample_name} in case {dna_case_id}."
+                )
+        LOG.info(self.rna_bigwig_coverage_upload_summary(rna_dna_collections))
         LOG.info("Upload RNA coverage bigwig file finished!")
 
     def upload_splice_junctions_bed_to_scout(self, dry_run: bool, case_id: str) -> None:
@@ -313,31 +309,44 @@ class UploadScoutAPI:
             dna_sample_id: str
             dna_cases: List[str]
             for dna_case_id in rna_dna_collection.dna_case_ids:
-                if self.status_db.get_case_by_internal_id(internal_id=dna_case_id).is_uploaded:
-                    LOG.info(
-                        f"Uploading splice junctions bed file for sample {dna_sample_name} "
-                        f"in case {dna_case_id} in Scout."
-                    )
+                LOG.info(
+                    f"Uploading splice junctions bed file for sample {dna_sample_name} "
+                    f"in case {dna_case_id} in Scout."
+                )
 
-                    if dry_run:
-                        continue
+                if dry_run:
+                    continue
 
-                    self.scout_api.upload_splice_junctions_bed(
-                        file_path=splice_junctions_bed.full_path,
-                        case_id=dna_case_id,
-                        customer_sample_id=dna_sample_name,
-                    )
-                    LOG.info(
-                        f"Uploaded splice junctions bed file for sample {dna_sample_name} "
-                        f"in case {dna_case_id}."
-                    )
-                else:
-                    LOG.warning(
-                        f"Upload of splice junctions bed file for sample {dna_sample_name} in case {dna_case_id}"
-                        f" skipped - case has not finished uploading."
-                    )
-
+                self.scout_api.upload_splice_junctions_bed(
+                    file_path=splice_junctions_bed.full_path,
+                    case_id=dna_case_id,
+                    customer_sample_id=dna_sample_name,
+                )
+                LOG.info(
+                    f"Uploaded splice junctions bed file for sample {dna_sample_name} "
+                    f"in case {dna_case_id}."
+                )
+        LOG.info(self.rna_splice_junctions_upload_summary(rna_dna_collections))
         LOG.info("Upload splice junctions bed file finished!")
+
+    def rna_splice_junctions_upload_summary(self, rna_dna_collections: List[RNADNACollection]) -> List[str]:
+        log_statements: List[str] = []
+        for rna_dna_collection in rna_dna_collections:
+            log_statements.extend(
+                f"Uploaded splice junctions bed file for sample {rna_dna_collection.dna_sample_name} in case {dna_case}."
+                for dna_case in rna_dna_collection.dna_case_ids
+            )
+        return log_statements
+
+    def rna_bigwig_coverage_upload_summary(self, rna_dna_collections: List[RNADNACollection]) -> List[str]:
+        log_statements: List[str] = []
+        for rna_dna_collection in rna_dna_collections:
+            log_statements.extend(
+                f"Uploaded bigwig coverage file for sample {rna_dna_collection.dna_sample_name} in case {dna_case}."
+                for dna_case in rna_dna_collection.dna_case_ids
+            )
+        return log_statements
+
 
     def upload_rna_junctions_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload RNA junctions splice files to Scout."""
@@ -442,7 +451,7 @@ class UploadScoutAPI:
             ):
                 if not case.is_uploaded:
                     LOG.warning(
-                        f"Will not upload report to DNA case {case.internal_id} since its upload has not finshed."
+                        f"Will not upload report to DNA case {case.internal_id} since its upload has not finished."
                     )
                 filtered_dna_cases.append(case.internal_id)
         return filtered_dna_cases
