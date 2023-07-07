@@ -272,6 +272,7 @@ class Customer(Model):
     return_samples = Column(types.Boolean, nullable=False, default=False)
     scout_access = Column(types.Boolean, nullable=False, default=False)
     uppmax_account = Column(types.String(32))
+    data_archive_location = Column(types.String(32), nullable=False, default="PDC")
 
     collaborations = orm.relationship("Collaboration", secondary=customer_collaboration)
     delivery_contact_id = Column(ForeignKey("user.id"))
