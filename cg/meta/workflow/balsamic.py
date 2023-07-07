@@ -148,30 +148,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return Path(self.get_case_path(case.internal_id), FileFormat.FASTQ)
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        for link in case_obj.links:
-            self.link_fastq_files_for_sample(
-                case_obj=case_obj, sample_obj=link.sample, concatenate=True
-            )
-
-    def get_concatenated_fastq_path(self, link_object: FamilySample) -> Path:
-        """Returns path to the concatenated FASTQ file of a sample"""
-        file_collection: List[dict] = self.gather_file_metadata_for_sample(link_object.sample)
-        fastq_data = file_collection[0]
-        linked_fastq_name = self.fastq_handler.create_fastq_name(
-            lane=fastq_data["lane"],
-            flowcell=fastq_data["flowcell"],
-            sample=link_object.sample.internal_id,
-            read=fastq_data["read"],
-            undetermined=fastq_data["undetermined"],
-        )
-        concatenated_fastq_name: str = self.fastq_handler.get_concatenated_name(linked_fastq_name)
-        return Path(
-            self.root_dir,
-            link_object.family.internal_id,
-            "fastq",
-            concatenated_fastq_name,
-        )
+        """Link fastq files from Housekeeper to the working directory of a case."""
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        for link in case.links:
+            self.link_fastq_files_for_sample(case_obj=case, sample_obj=link.sample)
 
     @staticmethod
     def get_gender(sample_obj: Sample) -> str:
@@ -299,9 +279,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve a valid gender from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
-    def get_verified_samples(self, case_id: str, sample_data: dict) -> Dict[str, str]:
+    def get_verified_samples(self, case_id: str) -> Dict[str, str]:
         """Return a verified tumor and normal sample dictionary."""
-
         tumor_samples: List[Sample] = self.status_db.get_samples_by_type(
             case_id=case_id, sample_type=SampleType.TUMOR
         )
@@ -319,26 +298,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         tumor_sample_id: str = tumor_samples[0].internal_id if tumor_samples else None
         normal_sample_id: str = normal_samples[0].internal_id if normal_samples else None
-        tumor_sample_path: str = (
-            sample_data.get(tumor_sample_id).get("concatenated_path") if tumor_sample_id else None
-        )
-        normal_sample_path: str = (
-            sample_data.get(normal_sample_id).get("concatenated_path") if normal_sample_id else None
-        )
         if normal_sample_id and not tumor_sample_id:
             LOG.warning(
                 f"Only a normal sample was found for case {case_id}. "
                 f"Balsamic analysis will treat it as a tumor sample."
             )
-            tumor_sample_id, tumor_sample_path = normal_sample_id, normal_sample_path
-            normal_sample_id, normal_sample_path = None, None
-
-        return {
-            "tumor_sample_name": tumor_sample_id,
-            "tumor": tumor_sample_path,
-            "normal_sample_name": normal_sample_id,
-            "normal": normal_sample_path,
-        }
+            tumor_sample_id, normal_sample_id = normal_sample_id, None
+        return {"tumor_sample_name": tumor_sample_id, "normal_sample_name": normal_sample_id}
 
     def get_latest_raw_file_data(self, case_id: str, tags: list) -> Union[dict, list]:
         """Retrieves the data of the latest file associated to a specific case ID and a list of tags."""
@@ -484,7 +450,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
         }
-        config_case.update(self.get_verified_samples(case_id=case_id, sample_data=sample_data))
+        config_case.update(self.get_verified_samples(case_id=case_id))
         config_case.update(self.get_parsed_observation_file_paths(observations))
 
         return config_case
@@ -518,7 +484,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             link_object.sample.internal_id: {
                 "gender": self.get_gender(link_object.sample),
                 "tissue_type": self.get_sample_type(link_object.sample).value,
-                "concatenated_path": self.get_concatenated_fastq_path(link_object).as_posix(),
                 "application_type": self.get_application_type(link_object.sample),
                 "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
             }
@@ -577,12 +542,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             {
                 "--analysis-dir": self.root_dir,
                 "--balsamic-cache": self.balsamic_cache,
+                "--fastq-path": self.get_sample_fastq_destination_dir(
+                    self.status_db.get_case_by_internal_id(case_id)
+                ),
                 "--case-id": arguments.get("case_id"),
                 "--gender": arguments.get("gender"),
                 "--analysis-workflow": arguments.get("analysis_workflow"),
                 "--genome-version": arguments.get("genome_version"),
-                "--normal": arguments.get(SampleType.NORMAL.value),
-                "--tumor": arguments.get(SampleType.TUMOR.value),
                 "--panel-bed": arguments.get("panel_bed"),
                 "--pon-cnn": arguments.get("pon_cnn"),
                 "--umi-trim-length": arguments.get("umi_trim_length"),
