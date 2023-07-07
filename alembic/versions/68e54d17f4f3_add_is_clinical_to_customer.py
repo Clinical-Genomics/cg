@@ -18,11 +18,6 @@ depends_on = None
 
 def upgrade():
     op.add_column(table_name="customer", column=sa.Column("is_clinical", sa.BOOLEAN))
-    bind = op.get_bind()
-    session = sa.orm.Session(bind=bind)
-    for customer in session.query(Customer):
-        customer.data_archive_location = False
-    session.commit()
     op.alter_column(
         table_name="customer",
         column_name="is_clinical",
