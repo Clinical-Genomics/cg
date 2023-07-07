@@ -129,9 +129,8 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 fasta=fasta,
             )
 
-            for key, value in sample_content.items():
-                print(f"{key}: {value}")
-                sample_sheet_content.setdefault(key, []).extend(value)
+            for headers, contents in sample_content.items():
+                sample_sheet_content.setdefault(headers, []).extend(contents)
 
             LOG.info(sample_sheet_content)
             NextflowAnalysisAPI.create_samplesheet_csv(
