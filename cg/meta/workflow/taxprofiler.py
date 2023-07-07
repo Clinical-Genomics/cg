@@ -47,26 +47,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
 
-    def link_fastq_files(
-        self,
-        case_id: str,
-        sample_id: str,
-    ) -> None:
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        samples: List[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
-        for sample_obj in samples:
-            self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
-
-    def get_samples(self, case_id: str, sample_id: str) -> List[Sample]:
-        """Returns a list of samples to configure
-        If sample_id is specified, will return a list with only this sample_id.
-        Otherwise, returns all samples in given case"""
-        if sample_id:
-            return [self.status_db.get_sample_by_internal_id(internal_id=sample_id)]
-
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        return [link.sample for link in case_obj.links]
-
     @staticmethod
     def build_sample_sheet_content(
         case_id: str,
