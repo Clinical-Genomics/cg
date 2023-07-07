@@ -58,6 +58,12 @@ def get_sample_fastq_paths_from_flow_cell(flow_cell_directory: Path) -> List[Pat
     return list(flow_cell_directory.glob(fastq_sample_pattern))
 
 
+def get_sequencer_from_flow_cell_directory(flow_cell_directory: Path) -> str:
+    """Get the sequencer from the flow cell directory name."""
+    sequencer: str = flow_cell_directory.name.split("_")[0]
+    return sequencer
+
+
 def get_bcl_converter_name(flow_cell_directory: Path) -> str:
     if is_bcl2fastq_demux_folder_structure(flow_cell_directory=flow_cell_directory):
         return BclConverter.BCL2FASTQ
