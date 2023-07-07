@@ -713,7 +713,7 @@ def test_update_sample_read_count(demultiplex_context: CGConfig):
 
 def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
     demultiplex_context: CGConfig,
-    flow_cell_directory_name_demultiplexed_with_bclconvert: str,
+    flow_cell_directory_name_demultiplexed_with_bcl_convert: str,
     flow_cell_name_demultiplexed_with_bcl_convert: str,
     demultiplexed_flow_cells_directory: Path,
     bcl_convert_demultiplexed_flow_cell_sample_ids: List[str],
@@ -721,12 +721,12 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
-    # GIVEN a directory with a flow cell demultiplexed with bclconvert
+    # GIVEN a directory with a flow cell demultiplexed with BCL Convert
     demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_directory
 
     # WHEN post processing the demultiplexed flow cell
     demux_post_processing_api.finish_flow_cell_temp(
-        flow_cell_directory_name_demultiplexed_with_bclconvert
+        flow_cell_directory_name_demultiplexed_with_bcl_convert
     )
 
     # THEN a flow cell was created in statusdb
@@ -750,23 +750,23 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
         assert sample is not None
         assert sample.calculated_read_count
 
-    # THEN a flow cell bundle was added to housekeeper
+    # THEN a flow cell bundle was added to Housekeeper
     assert demux_post_processing_api.hk_api.bundle(flow_cell_name_demultiplexed_with_bcl_convert)
 
-    # THEN a sample sheet was added to housekeeper
+    # THEN a sample sheet was added to Housekeeper
     assert demux_post_processing_api.hk_api.get_files(
         tags=[SequencingFileTag.SAMPLE_SHEET],
         bundle=flow_cell_name_demultiplexed_with_bcl_convert,
     ).all()
 
-    # THEN sample fastq files were added to housekeeper tagged with FASTQ and the flow cell name
+    # THEN sample fastq files were added to Housekeeper tagged with FASTQ and the flow cell name
     for sample_id in bcl_convert_demultiplexed_flow_cell_sample_ids:
         assert demux_post_processing_api.hk_api.get_files(
             tags=[SequencingFileTag.FASTQ, flow_cell_name_demultiplexed_with_bcl_convert],
             bundle=sample_id,
         ).all()
 
-    # THEN a deliver file was created in the flow cell directory
+    # THEN a delivery file was created in the flow cell directory
     delivery_path = Path(
         demux_post_processing_api.demux_api.out_dir,
         flow_cell_name_demultiplexed_with_bcl_convert,

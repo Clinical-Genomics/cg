@@ -993,8 +993,8 @@ def fixture_sample_sheet_context(cg_context: CGConfig, lims_api: LimsAPI) -> CGC
 @pytest.fixture
 def bcl_convert_demultiplexed_flow_cell_sample_ids() -> List[str]:
     """
-    Sample id:s present in sample sheet for dummy flow cell demultiplexed with bclconvert in
-    cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/230504_A00689_0804_BHY7FFDRX2
+    Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
+    cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/230504_A00689_0804_BHY7FFDRX2.
     """
     return ["ACC11927A2", "ACC11927A5"]
 
@@ -2664,7 +2664,7 @@ def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
 
 
 @pytest.fixture
-def flow_cell_directory_name_demultiplexed_with_bclconvert(
+def flow_cell_directory_name_demultiplexed_with_bcl_convert(
     flow_cell_name_demultiplexed_with_bcl_convert: str,
 ):
     return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
