@@ -11,14 +11,12 @@ from cg.constants.bcl_convert_metrics import (
     DEMUX_METRICS_FILE_PATH,
     QUALITY_METRICS_FILE_PATH,
     ADAPTER_METRICS_FILE_PATH,
-    RUN_INFO_FILE_PATH,
     SAMPLE_SHEET_FILE_PATH,
 )
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertAdapterMetrics,
     BclConvertDemuxMetrics,
     BclConvertQualityMetrics,
-    BclConvertRunInfo,
     BclConvertSampleSheetData,
 )
 from cg.constants.demultiplexing import INDEX_CHECK, UNDETERMINED
@@ -40,7 +38,6 @@ class BclConvertMetricsParser:
             bcl_convert_metrics_dir_path, ADAPTER_METRICS_FILE_PATH
         )
         self.sample_sheet_path: Path = Path(bcl_convert_metrics_dir_path, SAMPLE_SHEET_FILE_PATH)
-        self.run_info_path: Path = Path(bcl_convert_metrics_dir_path, RUN_INFO_FILE_PATH)
         self.quality_metrics: List[BclConvertQualityMetrics] = self.parse_metrics_file(
             metrics_file_path=self.quality_metrics_path, metrics_model=BclConvertQualityMetrics
         )
@@ -51,7 +48,6 @@ class BclConvertMetricsParser:
             metrics_file_path=self.adapter_metrics_path, metrics_model=BclConvertAdapterMetrics
         )
         self.sample_sheet: List[BclConvertSampleSheetData] = self.parse_sample_sheet_file()
-        self.run_info: BclConvertRunInfo = self.parse_run_info_file()
 
     def parse_metrics_file(
         self, metrics_file_path, metrics_model: Callable
@@ -97,11 +93,6 @@ class BclConvertMetricsParser:
             for line in sample_sheet_content:
                 sample_sheet_sample_lines.append(BclConvertSampleSheetData(**line))
         return sample_sheet_sample_lines
-
-    def parse_run_info_file(self) -> BclConvertRunInfo:
-        LOG.info(f"Parsing Run info XML {self.run_info_path}")
-        parsed_metrics = BclConvertRunInfo(tree=ET.parse(self.run_info_path))
-        return parsed_metrics
 
     def get_sample_internal_ids(self) -> List[str]:
         """Return a list of sample internal ids."""
