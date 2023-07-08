@@ -747,8 +747,12 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
         assert sample is not None
         assert sample.calculated_read_count
 
-    # THEN a flow cell bundle was added to Housekeeper
+    # THEN a bundle was added to Housekeeper for the flow cell
     assert demux_post_processing_api.hk_api.bundle(flow_cell_name_demultiplexed_with_bcl_convert)
+
+    # THEN a bundle was added to Housekeeper for each sample
+    for sample_id in bcl_convert_demultiplexed_flow_cell_sample_ids:
+        assert demux_post_processing_api.hk_api.bundle(sample_id)
 
     # THEN a sample sheet was added to Housekeeper
     assert demux_post_processing_api.hk_api.get_files(
@@ -812,8 +816,12 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
         assert sample is not None
         assert sample.calculated_read_count
 
-    # THEN a flow cell bundle was added to Housekeeper
+    # THEN a bundle was added to Housekeeper for the flow cell
     assert demux_post_processing_api.hk_api.bundle(flow_cell_name_demultiplexed_with_bcl2fastq)
+
+    # THEN a bundle was added to Housekeeper for each sample
+    for sample_id in bcl2fastq_demultiplexed_flow_cell_sample_ids:
+        assert demux_post_processing_api.hk_api.bundle(sample_id)
 
     # THEN a sample sheet was added to Housekeeper
     assert demux_post_processing_api.hk_api.get_files(
