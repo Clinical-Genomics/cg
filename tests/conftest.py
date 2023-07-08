@@ -1003,7 +1003,7 @@ def bcl_convert_demultiplexed_flow_cell_sample_ids() -> List[str]:
 def bcl2fastq_demultiplexed_flow_cell_sample_ids() -> List[str]:
     """
     Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
-    cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/230504_A00689_0804_BHY7FFDRX2.
+    cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/170407_ST-E00198_0209_BHHKVCALXX.
     """
     return ["SVE2528A1"]
 
