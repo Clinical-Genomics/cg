@@ -1,5 +1,5 @@
 import logging
-from pathlib import Path    
+from pathlib import Path
 from typing import Generator, List
 from mock import MagicMock, call
 
