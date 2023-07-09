@@ -2,7 +2,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.constants.constants import FileExtensions
@@ -39,16 +39,41 @@ def get_sample_id_from_sample_fastq(sample_fastq: Path) -> str:
     """
     Extract sample id from fastq file path.
 
-    Pre-condition:
-        - The parent directory name contains the sample id formatted as Sample_<sample_id>
+    Raises:
+        - ValueError: If the sample id could not be found.
     """
 
+    sample_id_from_directory = get_sample_id_from_parent_directory(sample_fastq)
+
+    if sample_id_from_directory:
+        return sample_id_from_directory
+
+    sample_id_from_fastq_name = get_sample_id_from_fastq_name(sample_fastq)
+
+    if sample_id_from_fastq_name:
+        return sample_id_from_fastq_name
+    
+    raise ValueError(f"Could not extract sample id from fastq file path {sample_fastq}")
+
+
+def get_sample_id_from_fastq_name(sample_fastq: Path) -> Optional[str]:
+    """
+    Extract sample id from fastq file name.
+    """
+
+    parts = sample_fastq.name.split('_')
+    if len(parts) > 0:
+        return parts[1]
+
+
+def get_sample_id_from_parent_directory(sample_fastq: Path) -> Optional[str]:
+    """
+    Extract sample id from parent directory.
+    """
     sample_parent_match = re.search(r"Sample_(\w+)", sample_fastq.parent.name)
 
     if sample_parent_match:
         return sample_parent_match.group(1)
-    else:
-        raise ValueError("Parent directory name does not contain 'Sample_<sample_id>'.")
 
 
 def get_sample_fastq_paths_from_flow_cell(flow_cell_directory: Path) -> List[Path]:
