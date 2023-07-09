@@ -76,8 +76,34 @@ class FlowCellDirectoryData:
 
     @property
     def sample_sheet_path(self) -> Path:
-        """Return sample sheet path."""
-        return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+        """Return sample sheet path.
+        
+        Raises:
+            - FileNotFoundError: if no sample sheet is found in any of the expected locations.
+        """
+        primary_sample_sheet_path: Path = Path(
+            self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        )
+
+        alternative_sample_sheet_path: Path = Path(
+            self.path,
+            DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
+            DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
+        )
+
+        root_sample_sheet_path: Path = Path(
+            self.path,
+            DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
+        )
+
+        if primary_sample_sheet_path.is_file():
+            return primary_sample_sheet_path
+        elif alternative_sample_sheet_path.is_file():
+            return alternative_sample_sheet_path
+        elif root_sample_sheet_path.is_file():
+            return root_sample_sheet_path
+
+        raise FileNotFoundError("No sample sheet found in any of the expected locations.")
 
     @property
     def run_parameters_path(self) -> Path:
@@ -204,21 +230,10 @@ class FlowCellDirectoryData:
 
     def get_sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
-        try:
-            return get_sample_sheet_from_file(
-                infile=self.sample_sheet_path,
-                flow_cell_sample_type=self.sample_type,
-            )
-        except Exception as error:
-            alternative_sample_sheet_path: Path = Path(
-                self.path,
-                DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
-                DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-            )
-            return get_sample_sheet_from_file(
-                infile=alternative_sample_sheet_path,
-                flow_cell_sample_type=self.sample_type,
-            )
+        return get_sample_sheet_from_file(
+            infile=self.sample_sheet_path,
+            flow_cell_sample_type=self.sample_type,
+        )
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done.
