@@ -48,10 +48,10 @@ class BalsamicConfigReference(BaseModel):
     """
 
     reference_genome: Path
-    reference_genome_version: Union[None, Path, str]
+    reference_genome_version: Optional[str]
 
     @validator("reference_genome_version", always=True)
-    def extract_genome_version_from_path(cls, value: Path, values: dict) -> str:
+    def extract_genome_version_from_path(cls, value: Optional[str], values: dict) -> str:
         """
         Returns the genome version from the reference path:
         /home/proj/stage/cancer/balsamic_cache/X.X.X/hg19/genome/human_g1k_v37.fasta
@@ -69,17 +69,19 @@ class BalsamicConfigPanel(BaseModel):
         chrom: list of chromosomes in the panel BED file
     """
 
-    capture_kit: Union[str, Path]
+    capture_kit: str
     capture_kit_version: Optional[str]
     chrom: List[str]
 
     @validator("capture_kit", pre=True)
-    def validate_capture_kit(cls, capture_kit: Union[str, Path]) -> str:
+    def extract_capture_kit_name_from_path(cls, capture_kit: str) -> str:
         """Return the base name of the provided capture kit path."""
         return Path(capture_kit).name
 
     @validator("capture_kit_version", always=True)
-    def validate_capture_kit_version(cls, capture_kit_version: Optional[str], values: dict) -> str:
+    def extract_capture_kit_name_from_name(
+        cls, capture_kit_version: Optional[str], values: dict
+    ) -> str:
         """Return the panel bed version from its filename (e.g. gicfdna_3.1_hg19_design.bed)."""
         return values["capture_kit"].split("_")[-3]
 
