@@ -5,6 +5,7 @@ from cg.store.filters.status_bed_filters import (
     get_not_archived_beds,
     order_beds_by_name,
     get_bed_by_entry_id,
+    get_bed_by_name,
 )
 from cg.store.models import Bed
 
@@ -38,21 +39,29 @@ def test_get_bed_by_entry_id_no_id(base_store: Store):
     assert not bed
 
 
-def test_get_beds_by_name(base_store: Store, bed_name: str):
+def test_get_bed_by_name(base_store: Store, bed_name: str):
     """Test return bed by name."""
     # GIVEN a store containing bed
 
-    # WHEN retrieving a beds by name
-    beds: Query = get_not_archived_beds(beds=base_store._get_query(table=Bed))
+    # WHEN retrieving a bed by name
+    bed: Bed = get_bed_by_name(beds=base_store._get_query(table=Bed), bed_name=bed_name).first()
 
-    # ASSERT that the beds is a query
-    assert isinstance(beds, Query)
+    # THEN panel bed should be returned
+    assert bed
 
-    # THEN beds should be returned
-    assert beds
+    # THEN the name should match the original
+    assert bed.name == bed_name
 
-    # THEN the bed attribute name should match the original
-    assert beds[0].name == bed_name
+
+def test_get_bed_by_name_no_name(base_store: Store):
+    """Test return bed by name when no valid name is provided."""
+    # GIVEN a store containing bed
+
+    # WHEN retrieving a bed by name
+    bed: Bed = get_bed_by_name(beds=base_store._get_query(table=Bed), bed_name="not_a_name").first()
+
+    # THEN panel bed should not be returned
+    assert not bed
 
 
 def test_get_not_archived_beds(base_store: Store):

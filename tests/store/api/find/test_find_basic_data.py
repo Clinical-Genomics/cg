@@ -13,8 +13,8 @@ from cg.store.models import (
 )
 
 
-def test_get_bed_by_bed_id(base_store: Store, entry_id: str):
-    """Test returning panel bed by bed id."""
+def test_get_bed_by_entry_id(base_store: Store, entry_id: int):
+    """Test returning panel bed by entry id."""
 
     # GIVEN a store with bed records
 
@@ -23,6 +23,18 @@ def test_get_bed_by_bed_id(base_store: Store, entry_id: str):
 
     # THEN return a bed with the supplied bed id
     assert bed.id == entry_id
+
+
+def test_get_bed_by_bed_name(base_store: Store, bed_name: str):
+    """Test returning panel bed by name."""
+
+    # GIVEN a store with bed records
+
+    # WHEN getting the query for the bed
+    bed: Bed = base_store.get_bed_by_name(bed_name)
+
+    # THEN return a bed with the supplied bed id
+    assert bed.name == bed_name
 
 
 def test_get_active_beds(base_store: Store):

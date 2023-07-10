@@ -7,8 +7,13 @@ from cg.store.models import Bed
 
 
 def get_bed_by_entry_id(beds: Query, bed_entry_id: int, **kwargs) -> Query:
-    """Return beds by foreign key."""
+    """Return bed by foreign key."""
     return beds.filter(Bed.id == bed_entry_id)
+
+
+def get_bed_by_name(beds: Query, bed_name: str, **kwargs) -> Query:
+    """Return bed by name."""
+    return beds.filter(Bed.name == bed_name)
 
 
 def get_not_archived_beds(beds: Query, **kwargs) -> Query:
@@ -25,6 +30,7 @@ class BedFilter(Enum):
     """Define BED filter functions."""
 
     FILTER_BY_ENTRY_ID: Callable = get_bed_by_entry_id
+    FILTER_BY_NAME: Callable = get_bed_by_name
     FILTER_NOT_ARCHIVED: Callable = get_not_archived_beds
     ORDER_BY_NAME: Callable = order_beds_by_name
 

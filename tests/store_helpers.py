@@ -199,7 +199,7 @@ class StoreHelpers:
     @staticmethod
     def ensure_bed_version(store: Store, bed_name: str = "dummy_bed") -> BedVersion:
         """Return existing or create and return bed version for tests."""
-        bed: Optional[Bed] = store._get_query(table=Bed).filter(Bed.name == bed_name).first()
+        bed: Optional[Bed] = store.get_bed_by_name(bed_name)
         if not bed:
             bed: Bed = store.add_bed(name=bed_name)
             store.session.add(bed)
