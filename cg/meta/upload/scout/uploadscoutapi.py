@@ -283,7 +283,8 @@ class UploadScoutAPI:
                 LOG.info(
                     f"Uploaded RNA coverage bigwig file for sample {dna_sample_name} in case {dna_case_id}."
                 )
-        LOG.info(iter(self.rna_bigwig_coverage_upload_summary(rna_dna_collections)))
+        for upload_statement in self.rna_bigwig_coverage_upload_summary(rna_dna_collections):
+            LOG.info(upload_statement)
         LOG.info("Upload RNA coverage bigwig file finished!")
 
     def upload_splice_junctions_bed_to_scout(self, dry_run: bool, case_id: str) -> None:
@@ -326,7 +327,8 @@ class UploadScoutAPI:
                     f"Uploaded splice junctions bed file for sample {dna_sample_name} "
                     f"in case {dna_case_id}."
                 )
-        LOG.info(iter(self.rna_splice_junctions_upload_summary(rna_dna_collections)))
+        for upload_statement in self.rna_splice_junctions_upload_summary(rna_dna_collections):
+            LOG.info(upload_statement)
         LOG.info("Upload splice junctions bed file finished!")
 
     def rna_splice_junctions_upload_summary(
