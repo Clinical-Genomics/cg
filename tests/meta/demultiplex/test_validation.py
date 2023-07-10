@@ -38,7 +38,7 @@ def test_validate_sample_fastq_without_sample_id_in_parent_directory_name():
     assert not is_valid_fastq
 
 
-def test_validate_sample_fastq_without_lane_number():
+def test_validate_sample_fastq_without_lane_number_in_path():
     # GIVEN a sample fastq file without a lane number
     sample_fastq = Path("Sample_123/sample_id.fastq.gz")
 
@@ -49,8 +49,8 @@ def test_validate_sample_fastq_without_lane_number():
     assert not is_valid_fastq
 
 
-def test_validate_sample_fastq_without_fastq_file_extension():
-    # GIVEN a sample fastq file without a .fastq.gz file extension
+def test_validate_sample_fastq_with_invalid_file_extension():
+    # GIVEN a sample fastq file without a valid file extension
     sample_fastq = Path("Sample_123/123_L0002.fastq")
 
     # WHEN validating the sample fastq file

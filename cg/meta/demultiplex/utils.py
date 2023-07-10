@@ -16,7 +16,7 @@ from cg.meta.demultiplex.validation import (
     is_valid_sample_fastq_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.utils.utils import get_matching_files
+from cg.utils.utils import get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
 
@@ -37,20 +37,18 @@ def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
 
 
 def get_sample_fastqs_from_flow_cell(
-    flow_cell_directory: Path, sample_id: str
+    flow_cell_directory: Path, sample_internal_id: str
 ) -> Optional[List[Path]]:
     """Retrieve sample FastQs from a flow cell directory."""
-    root_pattern = f"{sample_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    unaligned_pattern = (
-        f"Unaligned*/Project_*/Sample_{sample_id}/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    )
+    root_pattern = f"{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    unaligned_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
     for pattern in [root_pattern, unaligned_pattern]:
-        sample_fastqs: List[Path] = get_matching_files(
+        sample_fastqs: List[Path] = get_files_matching_pattern(
             directory=flow_cell_directory, pattern=pattern
         )
         valid_sample_fastqs: List[Path] = get_valid_sample_fastqs(
-            fastq_paths=sample_fastqs, sample_internal_id=sample_id
+            fastq_paths=sample_fastqs, sample_internal_id=sample_internal_id
         )
 
         if valid_sample_fastqs:
@@ -76,7 +74,7 @@ def create_delivery_file_in_flow_cell_directory(flow_cell_directory: Path) -> No
     Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
 
 
-def get_sample_ids_from_sample_sheet(flow_cell_data: FlowCellDirectoryData) -> List[str]:
+def get_sample_internal_ids_from_sample_sheet(flow_cell_data: FlowCellDirectoryData) -> List[str]:
     samples: List[FlowCellSample] = flow_cell_data.get_sample_sheet().samples
     return get_valid_sample_ids(samples)
 

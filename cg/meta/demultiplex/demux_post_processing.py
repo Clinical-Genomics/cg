@@ -28,7 +28,7 @@ from cg.meta.demultiplex.utils import (
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_fastqs_from_flow_cell,
-    get_sample_ids_from_sample_sheet,
+    get_sample_internal_ids_from_sample_sheet,
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
 )
@@ -165,7 +165,7 @@ class DemuxPostProcessingAPI:
         """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
 
         q30_threshold: int = get_q30_threshold(flow_cell_data.sequencer_type)
-        sample_internal_ids: List[str] = get_sample_ids_from_sample_sheet(flow_cell_data)
+        sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(flow_cell_data)
 
         for sample_id in sample_internal_ids:
             self.update_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold)
@@ -204,32 +204,34 @@ class DemuxPostProcessingAPI:
     def add_sample_fastq_files_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
 
-        sample_ids: List[str] = get_sample_ids_from_sample_sheet(flow_cell)
+        sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(flow_cell)
 
-        for sample_id in sample_ids:
-            self.add_bundle_and_version_if_non_existent(sample_id)
+        for sample_internal_id in sample_internal_ids:
+            self.add_bundle_and_version_if_non_existent(sample_internal_id)
 
             sample_fastqs: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
-                flow_cell_directory=flow_cell.path, sample_id=sample_id
+                flow_cell_directory=flow_cell.path, sample_internal_id=sample_internal_id
             )
 
             if not sample_fastqs:
                 LOG.warning(
-                    f"Cannot find fastq files for sample {sample_id} in {flow_cell.path}. Skipping."
+                    f"Cannot find fastq files for sample {sample_internal_id} in {flow_cell.path}. Skipping."
                 )
                 continue
 
             for sample_fastq_path in sample_fastqs:
                 self.store_fastq_path_in_housekeeper(
-                    sample_id=sample_id, sample_fastq_path=sample_fastq_path, flow_cell=flow_cell
+                    sample_internal_id=sample_internal_id,
+                    sample_fastq_path=sample_fastq_path,
+                    flow_cell=flow_cell,
                 )
 
     def store_fastq_path_in_housekeeper(
-        self, sample_id: str, sample_fastq_path: Path, flow_cell: FlowCellDirectoryData
+        self, sample_internal_id: str, sample_fastq_path: Path, flow_cell: FlowCellDirectoryData
     ) -> None:
         sample_fastq_should_be_stored: bool = (
             self.check_if_fastq_path_should_be_stored_in_housekeeper(
-                sample_id=sample_id,
+                sample_id=sample_internal_id,
                 sample_fastq_path=sample_fastq_path,
                 sequencer_type=flow_cell.sequencer_type,
                 flow_cell_name=flow_cell.id,
@@ -239,7 +241,7 @@ class DemuxPostProcessingAPI:
         if sample_fastq_should_be_stored:
             self.add_file_to_bundle_if_non_existent(
                 file_path=sample_fastq_path,
-                bundle_name=sample_id,
+                bundle_name=sample_internal_id,
                 tag_names=[SequencingFileTag.FASTQ, flow_cell.id],
             )
 

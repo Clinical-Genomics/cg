@@ -12,7 +12,7 @@ from cg.meta.demultiplex.utils import (
     get_bcl_converter_name,
     get_lane_from_sample_fastq,
     get_q30_threshold,
-    get_sample_ids_from_sample_sheet,
+    get_sample_internal_ids_from_sample_sheet,
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
 )
@@ -182,7 +182,7 @@ def test_get_sample_ids_from_sample_sheet():
     mock_flow_cell_data.get_sample_sheet.return_value = mock_sample_sheet
 
     # WHEN extracting the sample ids from the sample sheet in the flow cell directory data
-    result = get_sample_ids_from_sample_sheet(mock_flow_cell_data)
+    result = get_sample_internal_ids_from_sample_sheet(mock_flow_cell_data)
 
     # THEN the sample ids are returned without the index
     assert result == ["sample1", "sample2"]

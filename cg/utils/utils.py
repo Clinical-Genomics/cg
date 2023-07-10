@@ -34,6 +34,6 @@ def get_hamming_distance(str_1: str, str_2: str) -> int:
     return sum(n1 != n2 for n1, n2 in zip(str_1, str_2))
 
 
-def get_matching_files(directory: Path, pattern: str) -> List[Path]:
+def get_files_matching_pattern(directory: Path, pattern: str) -> List[Path]:
     """Search for all files in a directory that match a pattern."""
     return list(directory.glob(pattern))
