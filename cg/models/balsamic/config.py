@@ -51,7 +51,7 @@ class BalsamicConfigReference(BaseModel):
     reference_genome_version: Union[None, Path, str]
 
     @validator("reference_genome_version", always=True)
-    def validate_genome_version(cls, value: Path, values: dict) -> str:
+    def extract_genome_version_from_path(cls, value: Path, values: dict) -> str:
         """
         Returns the genome version from the reference path:
         /home/proj/stage/cancer/balsamic_cache/X.X.X/hg19/genome/human_g1k_v37.fasta
