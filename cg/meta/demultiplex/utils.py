@@ -74,7 +74,7 @@ def create_delivery_file_in_flow_cell_directory(flow_cell_directory: Path) -> No
     Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
 
 
-def get_sample_internal_ids_from_sample_sheet(flow_cell_data: FlowCellDirectoryData) -> List[str]:
+def get_sample_internal_ids_from_flow_cell(flow_cell_data: FlowCellDirectoryData) -> List[str]:
     samples: List[FlowCellSample] = flow_cell_data.get_sample_sheet().samples
     return get_valid_sample_ids(samples)
 

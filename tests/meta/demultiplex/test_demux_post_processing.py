@@ -11,7 +11,7 @@ from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
     DemuxPostProcessingHiseqXAPI,
 )
-from cg.meta.demultiplex.utils import get_sample_internal_ids_from_sample_sheet
+from cg.meta.demultiplex.utils import get_sample_internal_ids_from_flow_cell
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
