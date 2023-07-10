@@ -196,7 +196,7 @@ def start(
     run_analysis: bool,
     dry_run: bool,
 ):
-    """Start full workflow for CASE ID"""
+    """Start full workflow for case ID."""
     LOG.info(f"Starting analysis for {case_id}")
     try:
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
