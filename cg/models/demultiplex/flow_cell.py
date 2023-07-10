@@ -96,6 +96,9 @@ class FlowCellDirectoryData:
             if sample_sheet.exists():
                 return sample_sheet
 
+        return root_sample_sheet_path
+    
+
     @property
     def run_parameters_path(self) -> Path:
         """Return path to run parameters file."""
