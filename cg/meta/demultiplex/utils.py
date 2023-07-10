@@ -35,7 +35,6 @@ def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
     raise ValueError(f"Could not extract lane number from fastq file name {sample_fastq_path.name}")
 
 
-
 def get_sample_fastq_path_from_flow_cell(
     flow_cell_directory: Path, sample_id: str
 ) -> Optional[Path]:

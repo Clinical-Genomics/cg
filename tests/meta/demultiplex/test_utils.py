@@ -48,7 +48,6 @@ def test_get_lane_from_sample_fastq_file_path_no_flowcell():
     assert result == lane
 
 
-
 def test_is_bcl2fastq_folder_structure(bcl2fastq_folder_structure: Path):
     # GIVEN a bcl2fastq folder structure
     # WHEN checking if it is a bcl2fastq folder structure
