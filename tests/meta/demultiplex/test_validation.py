@@ -30,7 +30,9 @@ def test_validate_sample_fastq_without_sample_id_in_parent_directory_name():
     sample_fastq = Path("L0002.fastq.gz")
 
     # WHEN validating the sample fastq file
-    is_valid_fastq = is_valid_sample_fastq_file(sample_fastq=sample_fastq, sample_internal_id="sample_id")
+    is_valid_fastq = is_valid_sample_fastq_file(
+        sample_fastq=sample_fastq, sample_internal_id="sample_id"
+    )
 
     # THEN it should not be valid
     assert not is_valid_fastq

@@ -46,7 +46,9 @@ def get_sample_fastqs_from_flow_cell(
     )
 
     for pattern in [root_pattern, unaligned_pattern]:
-        sample_fastqs: List[Path] = get_matching_files(directory=flow_cell_directory, pattern=pattern)
+        sample_fastqs: List[Path] = get_matching_files(
+            directory=flow_cell_directory, pattern=pattern
+        )
         valid_sample_fastqs: List[Path] = get_valid_sample_fastqs(
             fastq_paths=sample_fastqs, sample_internal_id=sample_id
         )

@@ -227,11 +227,13 @@ class DemuxPostProcessingAPI:
     def store_fastq_path_in_housekeeper(
         self, sample_id: str, sample_fastq_path: Path, flow_cell: FlowCellDirectoryData
     ) -> None:
-        sample_fastq_should_be_stored: bool = self.fastq_path_should_be_stored_in_housekeeper(
-            sample_id=sample_id,
-            sample_fastq_path=sample_fastq_path,
-            sequencer_type=flow_cell.sequencer_type,
-            flow_cell_name=flow_cell.id,
+        sample_fastq_should_be_stored: bool = (
+            self.check_if_fastq_path_should_be_stored_in_housekeeper(
+                sample_id=sample_id,
+                sample_fastq_path=sample_fastq_path,
+                sequencer_type=flow_cell.sequencer_type,
+                flow_cell_name=flow_cell.id,
+            )
         )
 
         if sample_fastq_should_be_stored:
@@ -241,7 +243,7 @@ class DemuxPostProcessingAPI:
                 tag_names=[SequencingFileTag.FASTQ, flow_cell.id],
             )
 
-    def fastq_path_should_be_stored_in_housekeeper(
+    def check_if_fastq_path_should_be_stored_in_housekeeper(
         self,
         sample_id: str,
         sample_fastq_path: Path,
