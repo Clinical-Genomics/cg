@@ -76,16 +76,12 @@ class FlowCellDirectoryData:
 
     @property
     def sample_sheet_path(self) -> Path:
-        """Return sample sheet path.
-
-        Raises:
-            - FileNotFoundError: if no sample sheet is found in any of the expected locations.
-        """
+        """Return sample sheet path."""
         primary_sample_sheet_path: Path = Path(
             self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
         )
 
-        alternative_sample_sheet_path: Path = Path(
+        unaligned_sample_sheet_path: Path = Path(
             self.path,
             DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
             DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
@@ -98,14 +94,12 @@ class FlowCellDirectoryData:
 
         if primary_sample_sheet_path.exists():
             return primary_sample_sheet_path
-        elif alternative_sample_sheet_path.exists():
-            return alternative_sample_sheet_path
+        elif unaligned_sample_sheet_path.exists():
+            return unaligned_sample_sheet_path
         elif root_sample_sheet_path.exists():
             return root_sample_sheet_path
 
-        raise FileNotFoundError(
-            f"Could not locate SampleSheet.csv in flow cell directory {self.path}."
-        )
+        return primary_sample_sheet_path
 
     @property
     def run_parameters_path(self) -> Path:
@@ -215,10 +209,7 @@ class FlowCellDirectoryData:
     def sample_sheet_exists(self) -> bool:
         """Check if sample sheet exists."""
         LOG.info("Check if sample sheet exists")
-        try:
-            self.sample_sheet_path
-        except FileNotFoundError:
-            return False
+        return self.sample_sheet_path.exists()
 
     def validate_sample_sheet(self) -> bool:
         """Validate if sample sheet is on correct format."""
