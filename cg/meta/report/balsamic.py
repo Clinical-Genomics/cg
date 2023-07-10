@@ -74,7 +74,7 @@ class BalsamicReportAPI(ReportAPI):
         analysis_metadata: BalsamicAnalysis,
     ) -> BalsamicTargetedSampleMetadataModel:
         """Returns a report metadata for BALSAMIC TGS analysis."""
-        bed_version: BedVersion = self.status_db.get_bed_version_by_filename(
+        bed_version: BedVersion = self.status_db.get_bed_version_by_file_name(
             analysis_metadata.config.panel.capture_kit
         )
         bed: Bed = self.status_db.get_bed_by_entry_id(bed_version.bed_id) if bed_version else None

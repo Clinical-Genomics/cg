@@ -4,35 +4,35 @@ from cg.store import Store
 from cg.store.models import BedVersion
 from cg.store.filters.status_bed_version_filters import (
     get_bed_version_by_short_name,
-    get_bed_version_by_filename,
+    get_bed_version_by_file_name,
 )
 
 
-def test_get_bed_version_by_filename(base_store: Store, bed_version_filename: str):
-    """Test return bed version by filename."""
+def test_get_bed_version_by_file_name(base_store: Store, bed_version_file_name: str):
+    """Test return bed version by file name."""
     # GIVEN a store containing bed version
 
     # WHEN retrieving bed version
-    bed_version: BedVersion = get_bed_version_by_filename(
+    bed_version: BedVersion = get_bed_version_by_file_name(
         bed_versions=base_store._get_query(table=BedVersion),
-        bed_version_filename=bed_version_filename,
+        bed_version_file_name=bed_version_file_name,
     ).first()
 
     # THEN bed version should be returned
     assert bed_version
 
-    # THEN the filename should match the original
-    assert bed_version.filename == bed_version_filename
+    # THEN the file name should match the original
+    assert bed_version.filename == bed_version_file_name
 
 
-def test_get_bed_version_by_filename_when_no_file(base_store: Store):
-    """Test return bed version by filename when file does not exist."""
+def test_get_bed_version_by_file_name_when_no_file(base_store: Store):
+    """Test return bed version by file name when file does not exist."""
     # GIVEN a store containing bed version
 
     # WHEN retrieving bed version
-    bed_version: BedVersion = get_bed_version_by_filename(
+    bed_version: BedVersion = get_bed_version_by_file_name(
         bed_versions=base_store._get_query(table=BedVersion),
-        bed_version_filename="does_not_exist",
+        bed_version_file_name="does_not_exist",
     ).first()
 
     # THEN bed version should not be returned
