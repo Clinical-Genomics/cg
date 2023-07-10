@@ -83,12 +83,3 @@ class BclConvertSampleSheetData(BaseModel):
 
 class CustomConfig(BaseConfig):
     arbitrary_types_allowed = True
-
-
-class BclConvertRunInfo(BaseModel):
-    """Model for the BCL convert run info file."""
-
-    tree: ET.ElementTree
-
-    class Config(CustomConfig):
-        pass
