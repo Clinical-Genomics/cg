@@ -999,8 +999,8 @@ def bcl_convert_demultiplexed_flow_cell_sample_ids() -> List[str]:
     return ["ACC11927A2", "ACC11927A5"]
 
 
-@pytest.fixture
-def bcl2fastq_demultiplexed_flow_cell_sample_ids() -> List[str]:
+@pytest.fixture(name="bcl2fastq_demultiplexed_flow_cell_sample_ids", scope="session")
+def fixture_bcl2fastq_demultiplexed_flow_cell_sample_ids() -> List[str]:
     """
     Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
     cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/170407_ST-E00198_0209_BHHKVCALXX.
@@ -1008,12 +1008,12 @@ def bcl2fastq_demultiplexed_flow_cell_sample_ids() -> List[str]:
     return ["SVE2528A1"]
 
 
-@pytest.fixture
-def flow_cell_name_demultiplexed_with_bcl2fastq() -> str:
+@pytest.fixture(name="flow_cell_name_demultiplexed_with_bcl2fastq", scope="session")
+def fixture_flow_cell_name_demultiplexed_with_bcl2fastq() -> str:
     return "HHKVCALXX"
 
 
-@pytest.fixture
+@pytest.fixture(name="flow_cell_directory_name_demultiplexed_with_bcl2fastq", scope="session")
 def flow_cell_directory_name_demultiplexed_with_bcl2fastq(
     flow_cell_name_demultiplexed_with_bcl2fastq: str,
 ):
