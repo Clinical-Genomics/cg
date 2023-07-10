@@ -6,19 +6,19 @@ from cg.constants.demultiplexing import INDEX_CHECK, DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 
 
-def is_valid_sample_fastq_file(sample_fastq: Path, sample_id: str) -> bool:
+def is_valid_sample_fastq_file(sample_fastq: Path, sample_internal_id: str) -> bool:
     """
     Validate that the sample fastq file name is formatted as expected.
 
     Assumptions:
     1. The sample fastq file name ends with .fastq.gz
     2. The sample fastq file name contains the lane number formatted as _L<lane_number>
-    3. The sample id is present in the parent directory name or in the file name.
+    3. The sample internal id is present in the parent directory name or in the file name.
     """
-    sample_id_in_directory = is_sample_id_in_directory_name(
-        directory=sample_fastq.parent, sample_id=sample_id
+    sample_id_in_directory: bool = is_sample_id_in_directory_name(
+        directory=sample_fastq.parent, sample_internal_id=sample_internal_id
     )
-    sample_id_in_file_name = is_sample_id_in_file_name(sample_fastq, sample_id)
+    sample_id_in_file_name = is_sample_id_in_file_name(sample_fastq, sample_internal_id)
 
     return (
         is_file_path_compressed_fastq(sample_fastq)
@@ -36,14 +36,14 @@ def is_lane_in_fastq_file_name(sample_fastq: Path) -> bool:
     return bool(re.search(r"_L\d+", sample_fastq.name))
 
 
-def is_sample_id_in_directory_name(directory: Path, sample_id: str) -> bool:
-    """Validate that directory name contains the sample id formatted as Sample_<sample_id>"""
-    return bool(re.search(r"Sample_\w+", directory.name))
+def is_sample_id_in_directory_name(directory: Path, sample_internal_id: str) -> bool:
+    """Validate that directory name contains the sample id formatted as Sample_<sample_id>."""
+    return bool(re.search(r"Sample_\w+", directory.name)) and sample_internal_id in directory.name
 
 
-def is_sample_id_in_file_name(sample_fastq: Path, sample_id: str) -> bool:
-    """Validate that file name contains the sample id formatted as <sample_id>"""
-    return sample_id in sample_fastq.name
+def is_sample_id_in_file_name(sample_fastq: Path, sample_internal_id: str) -> bool:
+    """Validate that file name contains the sample id formatted as <sample_id>."""
+    return sample_internal_id in sample_fastq.name
 
 
 def is_bcl2fastq_demux_folder_structure(flow_cell_directory: Path) -> bool:

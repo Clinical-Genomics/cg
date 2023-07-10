@@ -19,7 +19,7 @@ def test_validate_sample_fastq_with_valid_file():
     sample_fastq = Path("Sample_123/sample_L0002.fastq.gz")
 
     # WHEN validating the sample fastq file
-    is_valid = is_valid_sample_fastq_file(sample_fastq=sample_fastq, sample_id="sample")
+    is_valid = is_valid_sample_fastq_file(sample_fastq=sample_fastq, sample_internal_id="sample")
 
     # THEN it should be valid
     assert is_valid
@@ -30,7 +30,7 @@ def test_validate_sample_fastq_without_sample_id_in_parent_directory_name():
     sample_fastq = Path("L0002.fastq.gz")
 
     # WHEN validating the sample fastq file
-    is_valid_fastq = is_valid_sample_fastq_file(sample_fastq=sample_fastq, sample_id="sample_id")
+    is_valid_fastq = is_valid_sample_fastq_file(sample_fastq=sample_fastq, sample_internal_id="sample_id")
 
     # THEN it should not be valid
     assert not is_valid_fastq
@@ -41,7 +41,7 @@ def test_validate_sample_fastq_without_lane_number():
     sample_fastq = Path("Sample_123/sample_id.fastq.gz")
 
     # WHEN validating the sample fastq file
-    is_valid_fastq = is_valid_sample_fastq_file(sample_fastq, sample_id="sample_id")
+    is_valid_fastq = is_valid_sample_fastq_file(sample_fastq, sample_internal_id="sample_id")
 
     # THEN it should not be valid
     assert not is_valid_fastq
@@ -49,10 +49,10 @@ def test_validate_sample_fastq_without_lane_number():
 
 def test_validate_sample_fastq_without_fastq_file_extension():
     # GIVEN a sample fastq file without a .fastq.gz file extension
-    sample_fastq = Path("Sample_123/sample_L0002.fastq")
+    sample_fastq = Path("Sample_123/123_L0002.fastq")
 
     # WHEN validating the sample fastq file
-    is_valid_fastq = is_valid_sample_fastq_file(sample_fastq, sample_id="sample_id")
+    is_valid_fastq = is_valid_sample_fastq_file(sample_fastq, sample_internal_id="123")
 
     # THEN it should not be valid
     assert not is_valid_fastq
@@ -107,7 +107,7 @@ def test_is_sample_id_in_directory_name_with_valid_directory():
     directory = Path("Sample_123")
 
     # WHEN checking if the sample id is in the directory name
-    result = is_sample_id_in_directory_name(directory=directory, sample_id="Sample_123")
+    result = is_sample_id_in_directory_name(directory=directory, sample_internal_id="Sample_123")
 
     # THEN the result should be True
     assert result is True
@@ -115,10 +115,10 @@ def test_is_sample_id_in_directory_name_with_valid_directory():
 
 def test_is_sample_id_in_directory_name_with_invalid_directory():
     # GIVEN a directory without sample id
-    directory = Path("sample")
+    directory = Path("sample/123_L0002.fastq.gz")
 
     # WHEN checking if the sample id is in the directory name
-    result = is_sample_id_in_directory_name(directory=directory, sample_id="sample_id")
+    result = is_sample_id_in_directory_name(directory=directory, sample_internal_id="sample_id")
 
     # THEN the result should be False
     assert result is False

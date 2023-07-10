@@ -16,6 +16,7 @@ from cg.meta.demultiplex.validation import (
     is_valid_sample_fastq_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.utils.utils import get_matching_files
 
 LOG = logging.getLogger(__name__)
 
@@ -35,11 +36,6 @@ def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
     raise ValueError(f"Could not extract lane number from fastq file name {sample_fastq_path.name}")
 
 
-def get_sample_fastqs(flow_cell_directory: Path, pattern: str) -> List[Path]:
-    """Search for all files in a directory that match a pattern."""
-    return list(flow_cell_directory.glob(pattern))
-
-
 def get_sample_fastqs_from_flow_cell(
     flow_cell_directory: Path, sample_id: str
 ) -> Optional[List[Path]]:
@@ -50,19 +46,21 @@ def get_sample_fastqs_from_flow_cell(
     )
 
     for pattern in [root_pattern, unaligned_pattern]:
-        sample_fastqs = get_sample_fastqs(flow_cell_directory, pattern)
-        valid_sample_fastqs = get_valid_sample_fastqs(fastqs=sample_fastqs, sample_id=sample_id)
+        sample_fastqs: List[Path] = get_matching_files(directory=flow_cell_directory, pattern=pattern)
+        valid_sample_fastqs: List[Path] = get_valid_sample_fastqs(
+            fastq_paths=sample_fastqs, sample_internal_id=sample_id
+        )
 
         if valid_sample_fastqs:
             return valid_sample_fastqs
 
 
-def get_valid_sample_fastqs(fastqs: List[Path], sample_id: str) -> List[Path]:
+def get_valid_sample_fastqs(fastq_paths: List[Path], sample_internal_id: str) -> List[Path]:
     """Return a list of valid fastq files."""
     return [
         fastq
-        for fastq in fastqs
-        if is_valid_sample_fastq_file(sample_fastq=fastq, sample_id=sample_id)
+        for fastq in fastq_paths
+        if is_valid_sample_fastq_file(sample_fastq=fastq, sample_internal_id=sample_internal_id)
     ]
 
 

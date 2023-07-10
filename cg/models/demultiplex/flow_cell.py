@@ -77,7 +77,7 @@ class FlowCellDirectoryData:
     @property
     def sample_sheet_path(self) -> Path:
         """Return sample sheet path."""
-        primary_sample_sheet_path: Path = Path(
+        root_sample_sheet_path: Path = Path(
             self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
         )
 
@@ -87,19 +87,14 @@ class FlowCellDirectoryData:
             DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
         )
 
-        root_sample_sheet_path: Path = Path(
-            self.path,
-            DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-        )
+        sample_sheet_paths: List[Path] = [
+            root_sample_sheet_path,
+            unaligned_sample_sheet_path,
+        ]
 
-        if primary_sample_sheet_path.exists():
-            return primary_sample_sheet_path
-        elif unaligned_sample_sheet_path.exists():
-            return unaligned_sample_sheet_path
-        elif root_sample_sheet_path.exists():
-            return root_sample_sheet_path
-
-        return primary_sample_sheet_path
+        for sample_sheet in sample_sheet_paths:
+            if sample_sheet.exists():
+                return sample_sheet
 
     @property
     def run_parameters_path(self) -> Path:
