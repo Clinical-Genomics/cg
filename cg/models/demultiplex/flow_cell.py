@@ -122,7 +122,7 @@ class FlowCellDirectoryData:
         self,
     ) -> Literal[Sequencers.HISEQX, Sequencers.HISEQGA, Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
         """Return the sequencer type."""
-        return sequencer_types[self.machine_name]
+        return sequencer_types[self.machine_name].value
 
     @property
     def rta_complete_path(self) -> Path:
