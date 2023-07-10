@@ -13,7 +13,7 @@ from cg.meta.demultiplex.validation import (
     is_bcl2fastq_demux_folder_structure,
     is_flow_cell_directory_valid,
     is_valid_sample_id,
-    validate_sample_fastq_file,
+    is_valid_sample_fastq_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
@@ -35,41 +35,35 @@ def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
     raise ValueError(f"Could not extract lane number from fastq file name {sample_fastq_path.name}")
 
 
-def get_sample_fastq_path_from_flow_cell(
+def get_sample_fastqs(flow_cell_directory: Path, pattern: str) -> List[Path]:
+    """Search for all files in a directory that match a pattern."""
+    return list(flow_cell_directory.glob(pattern))
+
+
+def get_sample_fastqs_from_flow_cell(
     flow_cell_directory: Path, sample_id: str
-) -> Optional[Path]:
-    sample_fastq_in_root: Optional[Path] = get_sample_fastq_in_root(
-        flow_cell_directory=flow_cell_directory, sample_id=sample_id
-    )
-
-    if sample_fastq_in_root:
-        return sample_fastq_in_root
-
-    sample_fastq_in_unaligned = get_sample_fastq_in_unaligned(
-        flow_cell_directory=flow_cell_directory, sample_id=sample_id
-    )
-
-    if sample_fastq_in_unaligned:
-        return sample_fastq_in_unaligned
-
-
-def get_sample_fastq_in_unaligned(flow_cell_directory: Path, sample_id: str) -> Optional[Path]:
-    fastq_sample_pattern: str = (
+) -> Optional[List[Path]]:
+    """Retrieve sample FastQs from a flow cell directory."""
+    root_pattern = f"{sample_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    unaligned_pattern = (
         f"Unaligned*/Project_*/Sample_{sample_id}/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     )
 
-    files_paths = list(flow_cell_directory.glob(fastq_sample_pattern))
-    if files_paths:
-        sample_fastq_file = files_paths[0]
-        validate_sample_fastq_file(sample_fastq_file)
+    for pattern in [root_pattern, unaligned_pattern]:
+        sample_fastqs = get_sample_fastqs(flow_cell_directory, pattern)
+        valid_sample_fastqs = get_valid_sample_fastqs(fastqs=sample_fastqs, sample_id=sample_id)
+
+        if valid_sample_fastqs:
+            return valid_sample_fastqs
 
 
-def get_sample_fastq_in_root(flow_cell_directory: Path, sample_id: str) -> Optional[Path]:
-    file_pattern = f"{sample_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    file_paths = list(flow_cell_directory.glob(file_pattern))
-
-    if file_paths:
-        return file_paths[0]
+def get_valid_sample_fastqs(fastqs: List[Path], sample_id: str) -> List[Path]:
+    """Return a list of valid fastq files."""
+    return [
+        fastq
+        for fastq in fastqs
+        if is_valid_sample_fastq_file(sample_fastq=fastq, sample_id=sample_id)
+    ]
 
 
 def get_bcl_converter_name(flow_cell_directory: Path) -> str:

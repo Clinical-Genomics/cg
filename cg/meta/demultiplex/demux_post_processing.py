@@ -27,7 +27,7 @@ from cg.meta.demultiplex.utils import (
     get_bcl_converter_name,
     get_lane_from_sample_fastq,
     get_q30_threshold,
-    get_sample_fastq_path_from_flow_cell,
+    get_sample_fastqs_from_flow_cell,
     get_sample_ids_from_sample_sheet,
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
@@ -209,38 +209,37 @@ class DemuxPostProcessingAPI:
         for sample_id in sample_ids:
             self.add_bundle_and_version_if_non_existent(sample_id)
 
-            sample_fastq_path: Optional[Path] = get_sample_fastq_path_from_flow_cell(
+            sample_fastqs: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
                 flow_cell_directory=flow_cell.path, sample_id=sample_id
             )
 
-            if not sample_fastq_path:
+            if not sample_fastqs:
                 LOG.warning(
-                    f"Cannot find fastq file for sample {sample_id} in {flow_cell.path}. Skipping."
+                    f"Cannot find fastq files for sample {sample_id} in {flow_cell.path}. Skipping."
                 )
                 continue
 
-            sample_fastq_should_be_stored: bool = self.fastq_path_should_be_stored_in_housekeeper(
-                sample_id=sample_id,
-                sample_fastq_path=sample_fastq_path,
-                sequencer_type=flow_cell.sequencer_type,
-                flow_cell_name=flow_cell.id,
-            )
-
-            if sample_fastq_should_be_stored:
+            for sample_fastq_path in sample_fastqs:
                 self.store_fastq_path_in_housekeeper(
-                    sample_id=sample_id,
-                    sample_fastq_path=sample_fastq_path,
-                    flow_cell_name=flow_cell.id,
+                    sample_id=sample_id, sample_fastq_path=sample_fastq_path, flow_cell=flow_cell
                 )
 
     def store_fastq_path_in_housekeeper(
-        self, sample_id: str, sample_fastq_path: Path, flow_cell_name: str
+        self, sample_id: str, sample_fastq_path: Path, flow_cell: FlowCellDirectoryData
     ) -> None:
-        self.add_file_to_bundle_if_non_existent(
-            file_path=sample_fastq_path,
-            bundle_name=sample_id,
-            tag_names=[SequencingFileTag.FASTQ, flow_cell_name],
+        sample_fastq_should_be_stored: bool = self.fastq_path_should_be_stored_in_housekeeper(
+            sample_id=sample_id,
+            sample_fastq_path=sample_fastq_path,
+            sequencer_type=flow_cell.sequencer_type,
+            flow_cell_name=flow_cell.id,
         )
+
+        if sample_fastq_should_be_stored:
+            self.add_file_to_bundle_if_non_existent(
+                file_path=sample_fastq_path,
+                bundle_name=sample_id,
+                tag_names=[SequencingFileTag.FASTQ, flow_cell.id],
+            )
 
     def fastq_path_should_be_stored_in_housekeeper(
         self,
