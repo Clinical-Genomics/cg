@@ -215,7 +215,10 @@ class FlowCellDirectoryData:
     def sample_sheet_exists(self) -> bool:
         """Check if sample sheet exists."""
         LOG.info("Check if sample sheet exists")
-        return self.sample_sheet_path.exists()
+        try:
+            self.sample_sheet_path
+        except FileNotFoundError:
+            return False
 
     def validate_sample_sheet(self) -> bool:
         """Validate if sample sheet is on correct format."""
