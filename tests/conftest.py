@@ -1575,9 +1575,9 @@ def fixture_apptag_rna() -> str:
     return "RNAPOAR025"
 
 
-@pytest.fixture(name="bed_id")
-def fixture_bed_id() -> int:
-    """Return a bed model id attribute."""
+@pytest.fixture(name="entry_id")
+def fixture_entry_id() -> int:
+    """Return an entry id attribute."""
     return 1
 
 

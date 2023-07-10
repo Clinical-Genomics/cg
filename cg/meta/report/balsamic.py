@@ -77,7 +77,7 @@ class BalsamicReportAPI(ReportAPI):
         bed_version: BedVersion = self.status_db.get_bed_version_by_filename(
             analysis_metadata.config.panel.capture_kit
         )
-        bed: Bed = self.status_db.get_bed_by_id(bed_version.bed_id) if bed_version else None
+        bed: Bed = self.status_db.get_bed_by_entry_id(bed_version.bed_id) if bed_version else None
         return BalsamicTargetedSampleMetadataModel(
             bait_set=bed.name if bed else None,
             bait_set_version=analysis_metadata.config.panel.capture_kit_version,

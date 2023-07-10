@@ -13,16 +13,16 @@ from cg.store.models import (
 )
 
 
-def test_get_bed_by_bed_id(base_store: Store, bed_id: str):
+def test_get_bed_by_bed_id(base_store: Store, entry_id: str):
     """Test returning panel bed by bed id."""
 
     # GIVEN a store with bed records
 
     # WHEN getting the query for the bed
-    bed: Bed = base_store.get_bed_by_id(bed_id)
+    bed: Bed = base_store.get_bed_by_entry_id(entry_id)
 
     # THEN return a bed with the supplied bed id
-    assert bed.id == bed_id
+    assert bed.id == entry_id
 
 
 def test_get_active_beds(base_store: Store):
