@@ -77,7 +77,7 @@ class FlowCellDirectoryData:
     @property
     def sample_sheet_path(self) -> Path:
         """Return sample sheet path.
-        
+
         Raises:
             - FileNotFoundError: if no sample sheet is found in any of the expected locations.
         """
@@ -96,14 +96,16 @@ class FlowCellDirectoryData:
             DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
         )
 
-        if primary_sample_sheet_path.is_file():
+        if primary_sample_sheet_path.exists():
             return primary_sample_sheet_path
-        elif alternative_sample_sheet_path.is_file():
+        elif alternative_sample_sheet_path.exists():
             return alternative_sample_sheet_path
-        elif root_sample_sheet_path.is_file():
+        elif root_sample_sheet_path.exists():
             return root_sample_sheet_path
 
-        raise FileNotFoundError("No sample sheet found in any of the expected locations.")
+        raise FileNotFoundError(
+            f"Could not locate SampleSheet.csv in flow cell directory {self.path}."
+        )
 
     @property
     def run_parameters_path(self) -> Path:

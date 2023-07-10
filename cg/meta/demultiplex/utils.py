@@ -35,52 +35,42 @@ def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
     raise ValueError(f"Could not extract lane number from fastq file name {sample_fastq_path.name}")
 
 
-def get_sample_id_from_sample_fastq(sample_fastq: Path) -> str:
-    """
-    Extract sample id from fastq file path.
 
-    Raises:
-        - ValueError: If the sample id could not be found.
-    """
-
-    sample_id_from_directory = get_sample_id_from_parent_directory(sample_fastq)
-
-    if sample_id_from_directory:
-        return sample_id_from_directory
-
-    sample_id_from_fastq_name = get_sample_id_from_fastq_name(sample_fastq)
-
-    if sample_id_from_fastq_name:
-        return sample_id_from_fastq_name
-    
-    raise ValueError(f"Could not extract sample id from fastq file path {sample_fastq}")
-
-
-def get_sample_id_from_fastq_name(sample_fastq: Path) -> Optional[str]:
-    """
-    Extract sample id from fastq file name.
-    """
-
-    parts = sample_fastq.name.split('_')
-    if len(parts) > 0:
-        return parts[1]
-
-
-def get_sample_id_from_parent_directory(sample_fastq: Path) -> Optional[str]:
-    """
-    Extract sample id from parent directory.
-    """
-    sample_parent_match = re.search(r"Sample_(\w+)", sample_fastq.parent.name)
-
-    if sample_parent_match:
-        return sample_parent_match.group(1)
-
-
-def get_sample_fastq_paths_from_flow_cell(flow_cell_directory: Path) -> List[Path]:
-    fastq_sample_pattern: str = (
-        f"Unaligned*/Project_*/Sample_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+def get_sample_fastq_path_from_flow_cell(
+    flow_cell_directory: Path, sample_id: str
+) -> Optional[Path]:
+    sample_fastq_in_root: Optional[Path] = get_sample_fastq_in_root(
+        flow_cell_directory=flow_cell_directory, sample_id=sample_id
     )
-    return list(flow_cell_directory.glob(fastq_sample_pattern))
+
+    if sample_fastq_in_root:
+        return sample_fastq_in_root
+
+    sample_fastq_in_unaligned = get_sample_fastq_in_unaligned(
+        flow_cell_directory=flow_cell_directory, sample_id=sample_id
+    )
+
+    if sample_fastq_in_unaligned:
+        return sample_fastq_in_unaligned
+
+
+def get_sample_fastq_in_unaligned(flow_cell_directory: Path, sample_id: str) -> Optional[Path]:
+    fastq_sample_pattern: str = (
+        f"Unaligned*/Project_*/Sample_{sample_id}/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    )
+
+    files_paths = list(flow_cell_directory.glob(fastq_sample_pattern))
+    if files_paths:
+        sample_fastq_file = files_paths[0]
+        validate_sample_fastq_file(sample_fastq_file)
+
+
+def get_sample_fastq_in_root(flow_cell_directory: Path, sample_id: str) -> Optional[Path]:
+    file_pattern = f"{sample_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    file_paths = list(flow_cell_directory.glob(file_pattern))
+
+    if file_paths:
+        return file_paths[0]
 
 
 def get_bcl_converter_name(flow_cell_directory: Path) -> str:
@@ -109,21 +99,6 @@ def get_valid_sample_ids(samples: List[FlowCellSample]) -> List[str]:
 
 def get_q30_threshold(sequencer_type: Sequencers) -> int:
     return FLOWCELL_Q30_THRESHOLD[sequencer_type]
-
-
-def get_valid_sample_fastq_paths(flow_cell_directory: Path) -> List[Path]:
-    """Get all valid sample fastq file paths from flow cell directory."""
-    fastq_file_paths: List[Path] = get_sample_fastq_paths_from_flow_cell(flow_cell_directory)
-    valid_sample_fastq_paths: List[Path] = []
-
-    for fastq_path in fastq_file_paths:
-        try:
-            validate_sample_fastq_file(fastq_path)
-            valid_sample_fastq_paths.append(fastq_path)
-        except ValueError as e:
-            LOG.warning(f"Skipping invalid sample fastq file {fastq_path.name}: {e}")
-
-    return valid_sample_fastq_paths
 
 
 def get_sample_sheet_path(flow_cell_directory: Path) -> Path:
