@@ -204,21 +204,10 @@ class FlowCellDirectoryData:
 
     def get_sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
-        try:
-            return get_sample_sheet_from_file(
-                infile=self.sample_sheet_path,
-                flow_cell_sample_type=self.sample_type,
-            )
-        except Exception as error:
-            alternative_sample_sheet_path: Path = Path(
-                self.path,
-                DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
-                DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-            )
-            return get_sample_sheet_from_file(
-                infile=alternative_sample_sheet_path,
-                flow_cell_sample_type=self.sample_type,
-            )
+        return get_sample_sheet_from_file(
+            infile=self.sample_sheet_path,
+            flow_cell_sample_type=self.sample_type,
+        )
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done.

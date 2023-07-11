@@ -10,7 +10,7 @@ from cg.meta.demultiplex.validation import (
     is_flow_cell_directory_valid,
     is_lane_in_fastq_file_name,
     is_sample_id_in_directory_name,
-    validate_sample_fastq_file,
+    is_valid_sample_fastq_file,
 )
 
 
@@ -19,45 +19,45 @@ def test_validate_sample_fastq_with_valid_file():
     sample_fastq = Path("Sample_123/sample_L0002.fastq.gz")
 
     # WHEN validating the sample fastq file
-    validate_sample_fastq_file(sample_fastq)
+    is_valid = is_valid_sample_fastq_file(sample_fastq=sample_fastq, sample_internal_id="sample")
 
-    # THEN no exception should be raised
+    # THEN it should be valid
+    assert is_valid
 
 
 def test_validate_sample_fastq_without_sample_id_in_parent_directory_name():
-    # GIVEN a sample fastq file without a sample id in the parent directory name
-    sample_fastq = Path("sample_L0002.fastq.gz")
+    # GIVEN a sample fastq file without a sample id in the parent directory name or file name
+    sample_fastq = Path("L0002.fastq.gz")
 
     # WHEN validating the sample fastq file
-    # THEN a ValueError should be raised
-    with pytest.raises(
-        ValueError, match="Parent directory name of sample fastq must contain 'Sample_<sample_id>'."
-    ):
-        validate_sample_fastq_file(sample_fastq)
+    is_valid_fastq = is_valid_sample_fastq_file(
+        sample_fastq=sample_fastq, sample_internal_id="sample_id"
+    )
+
+    # THEN it should not be valid
+    assert not is_valid_fastq
 
 
-def test_validate_sample_fastq_without_lane_number():
+def test_validate_sample_fastq_without_lane_number_in_path():
     # GIVEN a sample fastq file without a lane number
-    sample_fastq = Path("Sample_123/sample.fastq.gz")
+    sample_fastq = Path("Sample_123/sample_id.fastq.gz")
 
     # WHEN validating the sample fastq file
-    # THEN a ValueError should be raised
-    with pytest.raises(
-        ValueError, match="Sample fastq must contain lane number formatted as '_L<lane_number>'."
-    ):
-        validate_sample_fastq_file(sample_fastq)
+    is_valid_fastq = is_valid_sample_fastq_file(sample_fastq, sample_internal_id="sample_id")
+
+    # THEN it should not be valid
+    assert not is_valid_fastq
 
 
-def test_validate_sample_fastq_without_fastq_file_extension():
-    # GIVEN a sample fastq file without a .fastq.gz file extension
-    sample_fastq = Path("Sample_123/sample_L0002.fastq")
+def test_validate_sample_fastq_with_invalid_file_extension():
+    # GIVEN a sample fastq file without a valid file extension
+    sample_fastq = Path("Sample_123/123_L0002.fastq")
 
     # WHEN validating the sample fastq file
-    # THEN a ValueError should be raised
-    with pytest.raises(
-        ValueError, match=f"Sample fastq must end with {FileExtensions.FASTQ}{FileExtensions.GZIP}."
-    ):
-        validate_sample_fastq_file(sample_fastq)
+    is_valid_fastq = is_valid_sample_fastq_file(sample_fastq, sample_internal_id="123")
+
+    # THEN it should not be valid
+    assert not is_valid_fastq
 
 
 def test_is_file_path_compressed_fastq_with_valid_file():
@@ -109,7 +109,7 @@ def test_is_sample_id_in_directory_name_with_valid_directory():
     directory = Path("Sample_123")
 
     # WHEN checking if the sample id is in the directory name
-    result = is_sample_id_in_directory_name(directory)
+    result = is_sample_id_in_directory_name(directory=directory, sample_internal_id="123")
 
     # THEN the result should be True
     assert result is True
@@ -117,10 +117,10 @@ def test_is_sample_id_in_directory_name_with_valid_directory():
 
 def test_is_sample_id_in_directory_name_with_invalid_directory():
     # GIVEN a directory without sample id
-    directory = Path("sample")
+    directory = Path("sample/123_L0002.fastq.gz")
 
     # WHEN checking if the sample id is in the directory name
-    result = is_sample_id_in_directory_name(directory)
+    result = is_sample_id_in_directory_name(directory=directory, sample_internal_id="sample_id")
 
     # THEN the result should be False
     assert result is False
