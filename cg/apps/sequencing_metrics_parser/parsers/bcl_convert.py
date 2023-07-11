@@ -113,7 +113,7 @@ class BclConvertMetricsParser:
 
     def is_valid_sample(self, sample_internal_id: str) -> bool:
         """Return True if the sample project is valid."""
-        pattern = r"^[A-Za-z]{3}[0-9]{3}.*"
+        pattern = r"^[A-Za-z]{3}\d{3}.*"
         if re.match(pattern, sample_internal_id) is not None:
             return True
         return False
