@@ -18,12 +18,12 @@ LOG = logging.getLogger(__name__)
 
 
 def get_sample_sheet_from_file(
-    sample_sheet_path: Path,
+    infile: Path,
     flow_cell_sample_type: Type[FlowCellSample],
 ) -> SampleSheet:
     """Parse and validate a sample sheet from file."""
     sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=sample_sheet_path
+        file_format=FileFormat.CSV, file_path=infile
     )
     return get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_content,
@@ -88,7 +88,7 @@ def get_sample_internal_ids_from_sample_sheet(
     sample_sheet_path: Path, flow_cell_type: Type[FlowCellSample]
 ) -> List[str]:
     sample_sheet = get_sample_sheet_from_file(
-        sample_sheet_path=sample_sheet_path, flow_cell_sample_type=flow_cell_type
+        infile=sample_sheet_path, flow_cell_sample_type=flow_cell_type
     )
     sample_internal_ids: List[str] = []
     for sample in sample_sheet.samples:
