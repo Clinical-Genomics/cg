@@ -13,7 +13,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeqX,
     SampleSheet,
 )
-from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import (
     BclConverter,

@@ -256,6 +256,6 @@ def test_is_valid_sample_project(
     # THEN assert that the outcome is correct
     for index in range(len(sample_project_list)):
         assert (
-            parsed_bcl_convert_metrics.is_valid_sample_project(sample_project_list[index])
+            parsed_bcl_convert_metrics.is_valid_sample(sample_project_list[index])
             == expected_outcome[index]
         )
