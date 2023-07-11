@@ -18,7 +18,9 @@ def is_valid_sample_fastq_file(sample_fastq: Path, sample_internal_id: str) -> b
     sample_id_in_directory: bool = is_sample_id_in_directory_name(
         directory=sample_fastq.parent, sample_internal_id=sample_internal_id
     )
-    sample_id_in_file_name = is_sample_id_in_file_name(sample_fastq, sample_internal_id)
+    sample_id_in_file_name: bool = is_sample_id_in_file_name(
+        sample_fastq=sample_fastq, sample_internal_id=sample_internal_id
+    )
 
     return (
         is_file_path_compressed_fastq(sample_fastq)

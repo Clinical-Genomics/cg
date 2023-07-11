@@ -87,15 +87,8 @@ class FlowCellDirectoryData:
             DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
         )
 
-        sample_sheet_paths: List[Path] = [
-            root_sample_sheet_path,
-            unaligned_sample_sheet_path,
-        ]
-
-        for sample_sheet in sample_sheet_paths:
-            if sample_sheet.exists():
-                return sample_sheet
-
+        if unaligned_sample_sheet_path.exists():
+            return unaligned_sample_sheet_path
         return root_sample_sheet_path
 
     @property
