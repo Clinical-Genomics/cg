@@ -77,10 +77,7 @@ class FlowCellDirectoryData:
     @property
     def sample_sheet_path(self) -> Path:
         """Return sample sheet path."""
-        root_sample_sheet_path: Path = Path(
-            self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-        )
-        return root_sample_sheet_path
+        return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
 
     @property
     def run_parameters_path(self) -> Path:
