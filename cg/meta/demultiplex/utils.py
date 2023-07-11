@@ -41,7 +41,7 @@ def get_sample_fastqs_from_flow_cell(
 ) -> Optional[List[Path]]:
     """Retrieve sample FastQs from a flow cell directory."""
     root_pattern = f"{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    unaligned_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    unaligned_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
     for pattern in [root_pattern, unaligned_pattern]:
         sample_fastqs: List[Path] = get_files_matching_pattern(
