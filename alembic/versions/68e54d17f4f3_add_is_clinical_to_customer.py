@@ -1,7 +1,7 @@
 """add is_clinical to customer
 
 Revision ID: 68e54d17f4f3
-Revises: c3fdf3a8a5b3
+Revises: 2fdb42ba801a
 Create Date: 2023-07-07 09:57:29.371815
 
 """
