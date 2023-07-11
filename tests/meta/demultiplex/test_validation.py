@@ -109,7 +109,7 @@ def test_is_sample_id_in_directory_name_with_valid_directory():
     directory = Path("Sample_123")
 
     # WHEN checking if the sample id is in the directory name
-    result = is_sample_id_in_directory_name(directory=directory, sample_internal_id="Sample_123")
+    result = is_sample_id_in_directory_name(directory=directory, sample_internal_id="123")
 
     # THEN the result should be True
     assert result is True
