@@ -280,7 +280,7 @@ class UploadScoutAPI:
                     case_id=dna_case_id,
                     customer_sample_id=dna_sample_name,
                 )
-        for upload_statement in self.rna_bigwig_coverage_upload_summary(rna_dna_collections):
+        for upload_statement in self.get_rna_bigwig_coverage_upload_summary(rna_dna_collections):
             LOG.info(upload_statement)
         LOG.info("Upload RNA coverage bigwig file finished!")
 
@@ -320,12 +320,12 @@ class UploadScoutAPI:
                     case_id=dna_case_id,
                     customer_sample_id=dna_sample_name,
                 )
-        for upload_statement in self.rna_splice_junctions_upload_summary(rna_dna_collections):
+        for upload_statement in self.get_rna_splice_junctions_upload_summary(rna_dna_collections):
             LOG.info(upload_statement)
         LOG.info("Upload splice junctions bed file finished!")
 
     @staticmethod
-    def rna_splice_junctions_upload_summary(
+    def get_rna_splice_junctions_upload_summary(
         rna_dna_collections: List[RNADNACollection],
     ) -> List[str]:
         upload_summary: List[str] = []
@@ -337,7 +337,7 @@ class UploadScoutAPI:
         return upload_summary
 
     @staticmethod
-    def rna_bigwig_coverage_upload_summary(
+    def get_rna_bigwig_coverage_upload_summary(
         rna_dna_collections: List[RNADNACollection],
     ) -> List[str]:
         log_statements: List[str] = []
