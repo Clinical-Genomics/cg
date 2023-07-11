@@ -18,3 +18,4 @@ jobs:
         uses: psf/black@stable
         with:
           options: ". --check --line-length 100"
+          version: "~=23.3.0"
