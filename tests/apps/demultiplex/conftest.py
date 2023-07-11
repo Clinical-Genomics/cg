@@ -349,9 +349,9 @@ def fixture_novaseq6000_flow_cell_sample_before_adapt_indexes() -> (
     )
 
 
-@pytest.fixture(name="novaseq6000_sample_sheet_path")
+@pytest.fixture(name="novaseq6000_bcl_convert_sample_sheet_path")
 def fixture_novaseq6000_sample_sheet_path() -> Path:
-    """Return the path to a NovaSeq 6000 sample sheet."""
+    """Return the path to a NovaSeq 6000 BCL convert sample sheet."""
     return Path(
         "tests",
         "fixtures",

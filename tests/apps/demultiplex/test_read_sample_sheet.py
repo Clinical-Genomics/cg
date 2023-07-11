@@ -210,7 +210,7 @@ def test_get_sample_sheet_dragen_duplicate_different_lanes(
 
 
 def test_get_sample_internal_ids_from_sample_sheet(
-    novaseq6000_sample_sheet_path: Path,
+    novaseq6000_bcl_convert_sample_sheet_path: Path,
     flow_cell_type: Type[FlowCellSample] = FlowCellSampleNovaSeq6000Dragen,
 ):
     """Test that getting sample internal ids from a sample sheet returns a unique list of strings."""
@@ -218,7 +218,7 @@ def test_get_sample_internal_ids_from_sample_sheet(
 
     # WHEN getting the valid sample internal ids
     sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
-        sample_sheet_path=novaseq6000_sample_sheet_path,
+        sample_sheet_path=novaseq6000_bcl_convert_sample_sheet_path,
         flow_cell_type=flow_cell_type,
     )
 
