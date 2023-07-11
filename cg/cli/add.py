@@ -67,7 +67,7 @@ def add():
     "--is-clinical",
     "is_clinical",
     help="Set to true to indicate that this customer is clinical"
-         " and handle data storage accordingly, i.e. for 10 years instead if 2 years.",
+    " and handle data storage accordingly, i.e. for 10 years instead if 2 years.",
     is_flag=True,
     default=False,
     show_default=True,
