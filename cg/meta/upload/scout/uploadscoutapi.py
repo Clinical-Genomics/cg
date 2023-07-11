@@ -451,7 +451,7 @@ class UploadScoutAPI:
             ):
                 if not case.is_uploaded:
                     LOG.warning(
-                        f"Will not upload report to DNA case {case.internal_id} since its upload has not finished."
+                        f"Cannot upload RNA report to DNA case {case.internal_id}. DNA case is not uploaded."
                     )
                 filtered_dna_cases.append(case.internal_id)
         return filtered_dna_cases
