@@ -80,10 +80,9 @@ def test_is_valid_sample_internal_id_invalid_sample_internal_ids(
     novaseq6000_flow_cell_sample_2.sample_id = "invalid_sample_id"
 
     # WHEN validating the sample internal ids
+    # THEN no error is raised
     for sample in [novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]:
         assert not is_valid_sample_internal_id(sample_internal_id=sample.sample_id)
-
-    # THEN no error is raised
 
 
 def test_get_samples_by_lane(
