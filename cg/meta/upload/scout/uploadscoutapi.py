@@ -334,7 +334,7 @@ class UploadScoutAPI:
     def rna_splice_junctions_upload_summary(
         self, rna_dna_collections: List[RNADNACollection]
     ) -> List[str]:
-        log_statements: List[str] = []
+        upload_summary: List[str] = []
         for rna_dna_collection in rna_dna_collections:
             log_statements.extend(
                 f"Uploaded splice junctions bed file for sample {rna_dna_collection.dna_sample_name} in case {dna_case}."
