@@ -11,7 +11,7 @@ from cg.store.models import Customer
 
 # revision identifiers, used by Alembic.
 revision = "68e54d17f4f3"
-down_revision = "c3fdf3a8a5b3"
+down_revision = "2fdb42ba801a"
 branch_labels = None
 depends_on = None
 
