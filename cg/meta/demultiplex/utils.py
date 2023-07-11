@@ -43,7 +43,8 @@ def get_sample_id_from_sample_fastq(sample_fastq: Path) -> str:
         - The parent directory name contains the sample id formatted as Sample_<sample_id>
     """
 
-    sample_parent_match = re.search(r"Sample_(\w+)", sample_fastq.parent.name)
+    # Stop at first underscore after 'Sample_'
+    sample_parent_match = re.search(r"Sample_([^_]+)", sample_fastq.parent.name)
 
     if sample_parent_match:
         return sample_parent_match.group(1)
