@@ -87,6 +87,7 @@ def get_samples_by_lane(
 def get_sample_internal_ids_from_sample_sheet(
     sample_sheet_path: Path, flow_cell_type: Type[FlowCellSample]
 ) -> List[str]:
+"""Return the sample internal ids for samples in the sample sheet."""
     sample_sheet = get_sample_sheet_from_file(
         infile=sample_sheet_path, flow_cell_sample_type=flow_cell_type
     )
@@ -118,5 +119,5 @@ def validate_samples_unique_per_lane(samples: List[FlowCellSample]) -> None:
 
 
 def is_valid_sample_internal_id(sample_internal_id: str) -> bool:
-    """Check if a sample id is a valid internal id."""
+    """Check if a sample internal id has the correct structure."""
     return bool(re.search(r"[A-Za-z]{3}\d{3}", sample_internal_id))
