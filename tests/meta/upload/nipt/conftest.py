@@ -5,7 +5,7 @@ from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.stats import StatsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from tests.apps.cgstats.conftest import fixture_nipt_stats_api, fixture_stats_api
+from tests.apps.cgstats.conftest import fixture_nipt_stats_api
 from tests.store.api.conftest import fixture_re_sequenced_sample_store
 from cg.store.models import Application
 

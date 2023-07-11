@@ -13,10 +13,18 @@ import pytest
 from housekeeper.store.models import File, Version
 from requests import Response
 
+from cg.apps.cgstats.crud import create
+from cg.apps.cgstats.stats import StatsAPI
+from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeq6000Dragen,
+)
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.lims.api import LimsAPI
 from cg.constants import FileExtensions, Pipeline
 from cg.constants.constants import CaseActions, FileFormat
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
@@ -43,6 +51,7 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
 )
+from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -713,6 +722,367 @@ def fixture_compression_object(
 
 
 # Demultiplex fixtures
+
+
+@pytest.fixture(name="lims_novaseq_dragen_samples")
+def fixture_lims_novaseq_dragen_samples(
+    lims_novaseq_samples_raw: List[dict],
+) -> List[FlowCellSampleNovaSeq6000Dragen]:
+    """Return a list of parsed Dragen flow cell samples"""
+    return [FlowCellSampleNovaSeq6000Dragen(**sample) for sample in lims_novaseq_samples_raw]
+
+
+@pytest.fixture(name="lims_novaseq_bcl2fastq_samples")
+def fixture_lims_novaseq_bcl2fastq_samples(
+    lims_novaseq_samples_raw: List[dict],
+) -> List[FlowCellSampleNovaSeq6000Bcl2Fastq]:
+    """Return a list of parsed Bcl2fastq flow cell samples"""
+    return [FlowCellSampleNovaSeq6000Bcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
+
+
+@pytest.fixture(name="stats_api")
+def fixture_stats_api(project_dir: Path) -> StatsAPI:
+    """Setup base CGStats store."""
+    _store = StatsAPI(
+        {
+            "cgstats": {
+                "binary_path": "echo",
+                "database": "sqlite://",
+                "root": "tests/fixtures/DEMUX",
+            }
+        }
+    )
+    _store.create_all()
+    yield _store
+    _store.drop_all()
+
+
+@pytest.fixture(name="demux_results_not_finished_dir")
+def fixture_demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a dir with demultiplexing results where demux has been done but nothing is cleaned."""
+    return Path(demultiplex_fixtures, "demultiplexed-runs-unfinished")
+
+
+@pytest.fixture(name="flow_cell_runs_working_directory")
+def fixture_flow_cell_runs_working_directory(project_dir: Path) -> Path:
+    """Return the path to a working directory with flow cells ready for demux."""
+    working_dir: Path = Path(project_dir, "flow-cell-runs", "nova_seq_6000")
+    working_dir.mkdir(parents=True)
+    return working_dir
+
+
+@pytest.fixture(name="flow_cell_runs_working_directory_bcl2fastq")
+def fixture_flow_cell_runs_working_directory_bcl2fastq(
+    flow_cell_runs_working_directory: Path,
+) -> Path:
+    """Return the path to a working directory with flow cells ready for demux."""
+    working_dir: Path = Path(flow_cell_runs_working_directory, "bcl2fastq")
+    working_dir.mkdir(parents=True)
+    return working_dir
+
+
+@pytest.fixture(name="flow_cell_runs_working_directory_dragen")
+def fixture_flow_cell_runs_working_directory_dragen(flow_cell_runs_working_directory: Path) -> Path:
+    """Return the path to a working directory with flow cells ready for demux."""
+    working_dir: Path = Path(flow_cell_runs_working_directory, "dragen")
+    working_dir.mkdir(parents=True)
+    return working_dir
+
+
+@pytest.fixture(name="demultiplexed_flow_cells_working_directory")
+def fixture_demultiplexed_flow_cells_working_directory(project_dir: Path) -> Path:
+    """Return the path to a working directory with flow cells that have been demultiplexed."""
+    working_dir: Path = Path(project_dir, "demultiplexed-runs")
+    working_dir.mkdir(parents=True)
+    return working_dir
+
+
+@pytest.fixture(name="demultiplexed_flow_cell_working_directory")
+def fixture_demultiplexed_flow_cell_working_directory(
+    demux_results_not_finished_dir: Path,
+    demultiplexed_flow_cells_working_directory: Path,
+    bcl2fastq_flow_cell_full_name: str,
+) -> Path:
+    """Copy the content of a demultiplexed but not finished directory to a temporary location."""
+    source: Path = Path(demux_results_not_finished_dir, bcl2fastq_flow_cell_full_name)
+    destination: Path = Path(
+        demultiplexed_flow_cells_working_directory, bcl2fastq_flow_cell_full_name
+    )
+    shutil.copytree(src=source, dst=destination)
+    return destination
+
+
+@pytest.fixture(name="demultiplexed_flow_cell_finished_working_directory")
+def fixture_demultiplexed_flow_cell_finished_working_directory(
+    demultiplexed_runs: Path,
+    demultiplexed_flow_cells_working_directory: Path,
+    bcl2fastq_flow_cell_full_name: str,
+) -> Path:
+    """Copy the content of a demultiplexed but not finished directory to a temporary location."""
+    source: Path = Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
+    destination: Path = Path(
+        demultiplexed_flow_cells_working_directory, bcl2fastq_flow_cell_full_name
+    )
+    shutil.copytree(src=source, dst=destination)
+    return destination
+
+
+@pytest.fixture(name="flow_cell_working_directory")
+def fixture_flow_cell_working_directory(
+    bcl2fastq_flow_cell_dir: Path, flow_cell_runs_working_directory: Path
+) -> Path:
+    """Return the path to a working directory that will be deleted after test is run.
+
+    This is a path to a flow cell directory with the run parameters present.
+    """
+    working_dir: Path = Path(flow_cell_runs_working_directory, bcl2fastq_flow_cell_dir.name)
+    working_dir.mkdir(parents=True)
+    existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=bcl2fastq_flow_cell_dir
+    )
+    working_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=working_dir)
+    shutil.copy(
+        existing_flow_cell.run_parameters_path.as_posix(),
+        working_flow_cell.run_parameters_path.as_posix(),
+    )
+    return working_dir
+
+
+@pytest.fixture(name="flow_cell_working_directory_bcl2fastq")
+def fixture_flow_cell_working_directory_bcl2fastq(
+    bcl2fastq_flow_cell_dir: Path, flow_cell_runs_working_directory_bcl2fastq: Path
+) -> Path:
+    """Return the path to a working directory that will be deleted after test is run.
+
+    This is a path to a flow cell directory with the run parameters present.
+    """
+    working_dir: Path = Path(
+        flow_cell_runs_working_directory_bcl2fastq, bcl2fastq_flow_cell_dir.name
+    )
+    working_dir.mkdir(parents=True)
+    existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=bcl2fastq_flow_cell_dir
+    )
+    working_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=working_dir)
+    shutil.copy(
+        existing_flow_cell.run_parameters_path.as_posix(),
+        working_flow_cell.run_parameters_path.as_posix(),
+    )
+    return working_dir
+
+
+@pytest.fixture(name="flow_cell_working_directory_dragen")
+def fixture_flow_cell_working_directory_dragen(
+    dragen_flow_cell_dir: Path, flow_cell_runs_working_directory_dragen: Path
+) -> Path:
+    """Return the path to a working directory that will be deleted after test is run.
+
+    This is a path to a flow cell directory with the run parameters present.
+    """
+    working_dir: Path = Path(flow_cell_runs_working_directory_dragen, dragen_flow_cell_dir.name)
+    working_dir.mkdir(parents=True)
+    existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=dragen_flow_cell_dir
+    )
+    working_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=working_dir)
+    shutil.copy(
+        existing_flow_cell.run_parameters_path.as_posix(),
+        working_flow_cell.run_parameters_path.as_posix(),
+    )
+    return working_dir
+
+
+@pytest.fixture(name="flow_cell_working_directory_no_run_parameters")
+def fixture_flow_cell_working_directory_no_run_parameters(
+    bcl2fastq_flow_cell_dir: Path, flow_cell_runs_working_directory: Path
+) -> Path:
+    """This is a path to a flow cell directory with the run parameters missing."""
+    working_dir: Path = Path(flow_cell_runs_working_directory, bcl2fastq_flow_cell_dir.name)
+    working_dir.mkdir(parents=True)
+    return working_dir
+
+
+@pytest.fixture(name="demultiplex_ready_flow_cell")
+def fixture_demultiplex_ready_flow_cell(
+    flow_cell_working_directory: Path, bcl2fastq_flow_cell_dir: Path
+) -> Path:
+    """Return the path to a working directory that is ready for demultiplexing.
+
+    This is a path to a flow cell directory with all the files necessary to start demultiplexing present.
+    """
+    existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=bcl2fastq_flow_cell_dir
+    )
+    working_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=flow_cell_working_directory
+    )
+    shutil.copy(
+        existing_flow_cell.sample_sheet_path.as_posix(),
+        working_flow_cell.sample_sheet_path.as_posix(),
+    )
+    shutil.copy(
+        str(DemultiplexingAPI.get_stderr_logfile(existing_flow_cell)),
+        str(DemultiplexingAPI.get_stderr_logfile(working_flow_cell)),
+    )
+    working_flow_cell.copy_complete_path.touch()
+    working_flow_cell.rta_complete_path.touch()
+    return flow_cell_working_directory
+
+
+@pytest.fixture(name="demultiplex_ready_flow_cell_bcl2fastq")
+def fixture_demultiplex_ready_flow_cell_bcl2fastq(
+    flow_cell_working_directory_bcl2fastq: Path, bcl2fastq_flow_cell_dir: Path
+) -> Path:
+    """Return the path to a working directory that is ready for demultiplexing.
+
+    This is a path to a flow cell directory with all the files necessary to start demultiplexing present.
+    """
+    existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=bcl2fastq_flow_cell_dir
+    )
+    working_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=flow_cell_working_directory_bcl2fastq
+    )
+    shutil.copy(
+        existing_flow_cell.sample_sheet_path.as_posix(),
+        working_flow_cell.sample_sheet_path.as_posix(),
+    )
+    shutil.copy(
+        str(DemultiplexingAPI.get_stderr_logfile(existing_flow_cell)),
+        str(DemultiplexingAPI.get_stderr_logfile(working_flow_cell)),
+    )
+    working_flow_cell.copy_complete_path.touch()
+    working_flow_cell.rta_complete_path.touch()
+    return flow_cell_working_directory_bcl2fastq
+
+
+@pytest.fixture(name="demultiplex_ready_flow_cell_dragen")
+def fixture_demultiplex_ready_flow_cell_dragen(
+    flow_cell_working_directory_dragen: Path, dragen_flow_cell_dir: Path
+) -> Path:
+    """Return the path to a working directory that is ready for demultiplexing.
+
+    This is a path to a flow cell directory with all the files necessary to start demultiplexing present.
+    """
+    existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=dragen_flow_cell_dir, bcl_converter="dragen"
+    )
+    working_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=flow_cell_working_directory_dragen, bcl_converter="dragen"
+    )
+    shutil.copy(
+        existing_flow_cell.sample_sheet_path.as_posix(),
+        working_flow_cell.sample_sheet_path.as_posix(),
+    )
+    shutil.copy(
+        str(DemultiplexingAPI.get_stderr_logfile(existing_flow_cell)),
+        str(DemultiplexingAPI.get_stderr_logfile(working_flow_cell)),
+    )
+    working_flow_cell.copy_complete_path.touch()
+    working_flow_cell.rta_complete_path.touch()
+    return flow_cell_working_directory_dragen
+
+
+@pytest.fixture(name="sample_sheet_context")
+def fixture_sample_sheet_context(cg_context: CGConfig, lims_api: LimsAPI) -> CGConfig:
+    """Return cg context with an added lims API."""
+    cg_context.lims_api_ = lims_api
+    return cg_context
+
+
+@pytest.fixture
+def bcl_convert_demultiplexed_flow_cell_sample_ids() -> List[str]:
+    """
+    Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
+    cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/230504_A00689_0804_BHY7FFDRX2.
+    """
+    return ["ACC11927A2", "ACC11927A5"]
+
+
+@pytest.fixture(name="bcl2fastq_demultiplexed_flow_cell_sample_ids", scope="session")
+def fixture_bcl2fastq_demultiplexed_flow_cell_sample_ids() -> List[str]:
+    """
+    Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
+    cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/170407_ST-E00198_0209_BHHKVCALXX.
+    """
+    return ["SVE2528A1"]
+
+
+@pytest.fixture(name="flow_cell_name_demultiplexed_with_bcl2fastq", scope="session")
+def fixture_flow_cell_name_demultiplexed_with_bcl2fastq() -> str:
+    return "HHKVCALXX"
+
+
+@pytest.fixture(name="flow_cell_directory_name_demultiplexed_with_bcl2fastq", scope="session")
+def flow_cell_directory_name_demultiplexed_with_bcl2fastq(
+    flow_cell_name_demultiplexed_with_bcl2fastq: str,
+):
+    return f"170407_ST-E00198_0209_B{flow_cell_name_demultiplexed_with_bcl2fastq}"
+
+
+@pytest.fixture
+def store_with_demultiplexed_samples(
+    store: Store,
+    helpers: StoreHelpers,
+    bcl_convert_demultiplexed_flow_cell_sample_ids: List[str],
+    bcl2fastq_demultiplexed_flow_cell_sample_ids: List[str],
+) -> Store:
+    for i, sample_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_ids):
+        helpers.add_sample(store, internal_id=sample_id, name=f"sample_bcl_convert_{i}")
+
+    for i, sample_id in enumerate(bcl2fastq_demultiplexed_flow_cell_sample_ids):
+        helpers.add_sample(store, internal_id=sample_id, name=f"sample_bcl2fastq_{i}")
+    return store
+
+
+@pytest.fixture(name="demultiplex_context")
+def fixture_demultiplex_context(
+    demultiplexing_api: DemultiplexingAPI,
+    stats_api: StatsAPI,
+    real_housekeeper_api: HousekeeperAPI,
+    cg_context: CGConfig,
+    store_with_demultiplexed_samples: Store,
+) -> CGConfig:
+    """Return cg context with a demultiplex context."""
+    cg_context.demultiplex_api_ = demultiplexing_api
+    cg_context.cg_stats_api_ = stats_api
+    cg_context.housekeeper_api_ = real_housekeeper_api
+    cg_context.status_db_ = store_with_demultiplexed_samples
+    return cg_context
+
+
+@pytest.fixture(name="demultiplex_configs")
+def fixture_demultiplex_configs(
+    flow_cell_runs_working_directory: Path,
+    demultiplexed_flow_cells_working_directory: Path,
+) -> dict:
+    """Return demultiplex configs."""
+    demultiplexed_flow_cells_working_directory.mkdir(parents=True, exist_ok=True)
+    return {
+        "demultiplex": {
+            "out_dir": demultiplexed_flow_cells_working_directory.as_posix(),
+            "run_dir": flow_cell_runs_working_directory.as_posix(),
+            "slurm": {"account": "test", "mail_user": "testuser@github.se"},
+        }
+    }
+
+
+@pytest.fixture(name="demultiplexing_api")
+def fixture_demultiplexing_api(
+    demultiplex_configs: dict, sbatch_process: Process
+) -> DemultiplexingAPI:
+    """Return demultiplex API."""
+    demux_api = DemultiplexingAPI(config=demultiplex_configs)
+    demux_api.slurm_api.process = sbatch_process
+    return demux_api
+
+
+@pytest.fixture(name="populated_stats_api")
+def fixture_populated_stats_api(
+    stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
+) -> StatsAPI:
+    create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
+    return stats_api
 
 
 @pytest.fixture(name="demultiplex_fixtures", scope="session")
@@ -2313,3 +2683,25 @@ def store_with_sequencing_metrics(
     store.session.add_all(sample_lane_sequencing_metrics)
     store.session.commit()
     yield store
+
+
+@pytest.fixture
+def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
+    return "HY7FFDRX2"
+
+
+@pytest.fixture
+def flow_cell_directory_name_demultiplexed_with_bcl_convert(
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
+):
+    return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
+
+
+@pytest.fixture
+def demultiplexed_flow_cells_directory(tmp_path) -> Path:
+    original_dir = Path(
+        Path(__file__).parent, "fixtures", "apps", "demultiplexing", "demultiplexed-runs"
+    )
+    tmp_dir = Path(tmp_path, "tmp_run_dir")
+
+    return Path(shutil.copytree(original_dir, tmp_dir))
