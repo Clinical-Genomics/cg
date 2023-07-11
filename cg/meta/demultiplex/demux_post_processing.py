@@ -209,17 +209,17 @@ class DemuxPostProcessingAPI:
         for sample_internal_id in sample_internal_ids:
             self.add_bundle_and_version_if_non_existent(sample_internal_id)
 
-            sample_fastqs: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
+            sample_fastq_paths: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
                 flow_cell_directory=flow_cell.path, sample_internal_id=sample_internal_id
             )
 
-            if not sample_fastqs:
+            if not sample_fastq_paths:
                 LOG.warning(
                     f"Cannot find fastq files for sample {sample_internal_id} in {flow_cell.path}. Skipping."
                 )
                 continue
 
-            for sample_fastq_path in sample_fastqs:
+            for sample_fastq_path in sample_fastq_paths:
                 self.store_fastq_path_in_housekeeper(
                     sample_internal_id=sample_internal_id,
                     sample_fastq_path=sample_fastq_path,
