@@ -50,9 +50,3 @@ OPTION_OBSERVATIONS = click.option(
     help="VCF paths of clinical and/or cancer SNVs and SVs observations (WGS analysis only). Set this option to "
     "override the latest Loqusdb dump files.",
 )
-OPTION_FORCE_NORMAL = click.option(
-    "--force-normal",
-    is_flag=True,
-    default=False,
-    help="Force Balsamic analysis on a normal sample",
-)

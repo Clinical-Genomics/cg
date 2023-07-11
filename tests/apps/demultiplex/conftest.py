@@ -36,25 +36,10 @@ def fixture_demux_run_dir_dragen(flow_cell_runs_dir: Path) -> Path:
     return Path(flow_cell_runs_dir, BclConverter.DRAGEN)
 
 
-@pytest.fixture(name="index_obj")
-def fixture_index_obj() -> Index:
+@pytest.fixture(name="valid_index")
+def fixture_valid_index_() -> Index:
+    """Return a valid index."""
     return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
-
-
-@pytest.fixture(name="lims_novaseq_bcl2fastq_samples")
-def fixture_lims_novaseq_bcl2fastq_samples(
-    lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleNovaSeq6000Bcl2Fastq]:
-    """Return a list of parsed Bcl2fastq flow cell samples"""
-    return [FlowCellSampleNovaSeq6000Bcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
-
-
-@pytest.fixture(name="lims_novaseq_dragen_samples")
-def fixture_lims_novaseq_dragen_samples(
-    lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleNovaSeq6000Dragen]:
-    """Return a list of parsed Dragen flow cell samples"""
-    return [FlowCellSampleNovaSeq6000Dragen(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture(name="lims_novaseq_x_samples")
