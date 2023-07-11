@@ -213,8 +213,10 @@ def test_get_sample_internal_ids_from_sample_sheet(
     novaseq6000_sample_sheet_path: Path,
     flow_cell_type: Type[FlowCellSample] = FlowCellSampleNovaSeq6000Dragen,
 ):
-    """Test that getting sample internal ids from a sample sheet returns a list of strings."""
-    # GIVEN a sample sheet path
+    """Test that getting sample internal ids from a sample sheet returns a unique list of strings."""
+    # GIVEN a path to a sample sheet with only valid samples
+    
+    # WHEN getting the valid sample internal ids
     sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
         sample_sheet_path=novaseq6000_sample_sheet_path,
         flow_cell_type=flow_cell_type,
