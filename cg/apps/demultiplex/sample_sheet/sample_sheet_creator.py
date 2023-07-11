@@ -12,7 +12,10 @@ from cg.apps.demultiplex.sample_sheet.index import (
     is_dual_index,
     is_reverse_complement,
 )
-from cg.apps.demultiplex.sample_sheet.validate import get_samples_by_lane, validate_sample_sheet
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_samples_by_lane,
+    get_validated_sample_sheet,
+)
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.constants.demultiplexing import (
     BclConverter,
@@ -124,7 +127,7 @@ class SampleSheetCreator:
             LOG.info("Skipping validation of sample sheet due to force flag")
             return sample_sheet_content
         LOG.info("Validating sample sheet")
-        validate_sample_sheet(
+        get_validated_sample_sheet(
             sample_sheet_content=sample_sheet_content,
             sample_type=self.sample_type,
         )
