@@ -33,7 +33,7 @@ class RNADNACollection:
     """Contains the id for an RNA sample, the name of its connected DNA sample,
     and a list of connected, uploaded DNA cases."""
 
-    rna_sample_id: str
+    rna_sample_internal_id: str
     dna_sample_name: str
     dna_case_ids: List[str]
 
@@ -254,18 +254,18 @@ class UploadScoutAPI:
         rna_case = status_db.get_case_by_internal_id(case_id)
         rna_dna_collections: List[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
-            rna_sample_id: str = rna_dna_collection.rna_sample_id
+            rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             rna_coverage_bigwig: Optional[File] = self.get_rna_coverage_bigwig(
-                case_id=case_id, sample_id=rna_sample_id
+                case_id=case_id, sample_id=rna_sample_internal_id
             )
 
             if rna_coverage_bigwig is None:
                 raise FileNotFoundError(
-                    f"No RNA coverage bigwig file was found in housekeeper for {rna_sample_id}."
+                    f"No RNA coverage bigwig file was found in housekeeper for {rna_sample_internal_id}."
                 )
 
-            LOG.info(f"RNA coverage bigwig file {rna_coverage_bigwig.path} found.")
+            LOG.debug(f"RNA coverage bigwig file {rna_coverage_bigwig.path} found.")
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading RNA coverage bigwig file for sample {dna_sample_name} "
@@ -280,9 +280,6 @@ class UploadScoutAPI:
                     case_id=dna_case_id,
                     customer_sample_id=dna_sample_name,
                 )
-                LOG.info(
-                    f"Uploaded RNA coverage bigwig file for sample {dna_sample_name} in case {dna_case_id}."
-                )
         for upload_statement in self.rna_bigwig_coverage_upload_summary(rna_dna_collections):
             LOG.info(upload_statement)
         LOG.info("Upload RNA coverage bigwig file finished!")
@@ -295,18 +292,18 @@ class UploadScoutAPI:
 
         rna_dna_collections: List[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
-            rna_sample_id: str = rna_dna_collection.rna_sample_id
+            rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             splice_junctions_bed: Optional[File] = self.get_splice_junctions_bed(
-                case_id=case_id, sample_id=rna_sample_id
+                case_id=case_id, sample_id=rna_sample_internal_id
             )
 
             if splice_junctions_bed is None:
                 raise FileNotFoundError(
-                    f"No splice junctions bed file was found in Housekeeper for {rna_sample_id}."
+                    f"No splice junctions bed file was found in Housekeeper for {rna_sample_internal_id}."
                 )
 
-            LOG.info(f"Splice junctions bed file {splice_junctions_bed.path} found")
+            LOG.debug(f"Splice junctions bed file {splice_junctions_bed.path} found")
             dna_sample_id: str
             dna_cases: List[str]
             for dna_case_id in rna_dna_collection.dna_case_ids:
@@ -323,27 +320,25 @@ class UploadScoutAPI:
                     case_id=dna_case_id,
                     customer_sample_id=dna_sample_name,
                 )
-                LOG.info(
-                    f"Uploaded splice junctions bed file for sample {dna_sample_name} "
-                    f"in case {dna_case_id}."
-                )
         for upload_statement in self.rna_splice_junctions_upload_summary(rna_dna_collections):
             LOG.info(upload_statement)
         LOG.info("Upload splice junctions bed file finished!")
 
+    @staticmethod
     def rna_splice_junctions_upload_summary(
-        self, rna_dna_collections: List[RNADNACollection]
+        rna_dna_collections: List[RNADNACollection],
     ) -> List[str]:
         upload_summary: List[str] = []
         for rna_dna_collection in rna_dna_collections:
-            log_statements.extend(
+            upload_summary.extend(
                 f"Uploaded splice junctions bed file for sample {rna_dna_collection.dna_sample_name} in case {dna_case}."
                 for dna_case in rna_dna_collection.dna_case_ids
             )
-        return log_statements
+        return upload_summary
 
+    @staticmethod
     def rna_bigwig_coverage_upload_summary(
-        self, rna_dna_collections: List[RNADNACollection]
+        rna_dna_collections: List[RNADNACollection],
     ) -> List[str]:
         log_statements: List[str] = []
         for rna_dna_collection in rna_dna_collections:
@@ -421,7 +416,7 @@ class UploadScoutAPI:
             dna_sample=dna_sample, collaborators=collaborators
         )
         return RNADNACollection(
-            rna_sample_id=rna_sample.internal_id,
+            rna_sample_internal_id=rna_sample.internal_id,
             dna_sample_name=dna_sample.name,
             dna_case_ids=dna_cases,
         )
