@@ -215,7 +215,7 @@ def test_get_sample_internal_ids_from_sample_sheet(
 ):
     """Test that getting sample internal ids from a sample sheet returns a unique list of strings."""
     # GIVEN a path to a sample sheet with only valid samples
-    
+
     # WHEN getting the valid sample internal ids
     sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
         sample_sheet_path=novaseq6000_sample_sheet_path,
