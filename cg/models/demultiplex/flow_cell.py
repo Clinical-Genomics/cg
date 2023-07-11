@@ -80,15 +80,6 @@ class FlowCellDirectoryData:
         root_sample_sheet_path: Path = Path(
             self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
         )
-
-        unaligned_sample_sheet_path: Path = Path(
-            self.path,
-            DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
-            DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-        )
-
-        if unaligned_sample_sheet_path.exists():
-            return unaligned_sample_sheet_path
         return root_sample_sheet_path
 
     @property
