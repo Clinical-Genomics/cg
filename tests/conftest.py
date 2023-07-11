@@ -918,7 +918,7 @@ def fixture_demultiplex_ready_flow_cell(
     )
     shutil.copy(
         existing_flow_cell.sample_sheet_path.as_posix(),
-        Path(working_flow_cell.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME).as_posix(),
+        working_flow_cell.sample_sheet_path.as_posix(),
     )
     shutil.copy(
         str(DemultiplexingAPI.get_stderr_logfile(existing_flow_cell)),
@@ -945,7 +945,7 @@ def fixture_demultiplex_ready_flow_cell_bcl2fastq(
     )
     shutil.copy(
         existing_flow_cell.sample_sheet_path.as_posix(),
-        Path(working_flow_cell.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME).as_posix(),
+        working_flow_cell.sample_sheet_path.as_posix(),
     )
     shutil.copy(
         str(DemultiplexingAPI.get_stderr_logfile(existing_flow_cell)),
@@ -972,7 +972,7 @@ def fixture_demultiplex_ready_flow_cell_dragen(
     )
     shutil.copy(
         existing_flow_cell.sample_sheet_path.as_posix(),
-        Path(working_flow_cell.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME).as_posix(),
+        working_flow_cell.sample_sheet_path.as_posix(),
     )
     shutil.copy(
         str(DemultiplexingAPI.get_stderr_logfile(existing_flow_cell)),
