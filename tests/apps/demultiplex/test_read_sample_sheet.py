@@ -64,9 +64,8 @@ def test_is_valid_sample_internal_id(
 
     # WHEN validating the sample internal ids
     for sample in [novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]:
-        assert is_valid_sample_internal_id(sample_internal_id=sample.sample_id) is True
-
-    # THEN no error is raised
+        # THEN no error is raised
+        assert is_valid_sample_internal_id(sample_internal_id=sample.sample_id)
 
 
 def test_is_valid_sample_internal_id_invalid_sample_internal_ids(
