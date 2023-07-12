@@ -83,10 +83,9 @@ def get_sample_sheet_path(
     sample_sheet_file_name: str = DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
 ) -> Path:
     """Get the path to the sample sheet in the flow cell directory."""
-    sample_sheet_path: Path = get_file_in_directory(
+    return get_file_in_directory(
         directory=flow_cell_directory, file_name=sample_sheet_file_name
     )
-    return sample_sheet_path
 
 
 def parse_flow_cell_directory_data(
