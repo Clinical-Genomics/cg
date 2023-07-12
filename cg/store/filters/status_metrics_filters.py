@@ -7,7 +7,7 @@ from cg.store.models import SampleLaneSequencingMetrics
 
 
 def filter_total_read_count_for_sample(metrics: Query, sample_internal_id: str, **kwargs) -> Query:
-    """Return total read count for sample."""
+    """Return total read count for sample across all lanes."""
     total_reads_query: Query = metrics.with_entities(
         func.sum(SampleLaneSequencingMetrics.sample_total_reads_in_lane)
     ).filter(SampleLaneSequencingMetrics.sample_internal_id == sample_internal_id)
