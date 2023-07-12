@@ -21,7 +21,7 @@ def create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell
             sample_lane_sequencing_metrics.append(
                 SampleLaneSequencingMetrics(
                     sample_internal_id=sample_internal_id,
-                    flow_cell_name=metrics_parser.get_flow_cell_name(),
+                    flow_cell_name=get_flow_cell_name_from_directory(flow_cell_dir=flow_cell_dir),
                     flow_cell_lane_number=lane,
                     sample_total_reads_in_lane=metrics_parser.calculate_total_reads_for_sample_in_lane(
                         sample_internal_id=sample_internal_id, lane=lane
@@ -37,3 +37,8 @@ def create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell
             )
 
     return sample_lane_sequencing_metrics
+
+
+def get_flow_cell_name_from_directory(flow_cell_dir: Path) -> str:
+    """Get the flow cell name from the directory name."""
+    return flow_cell_dir.name.split("_")[-1][1:]

@@ -1010,6 +1010,7 @@ def fixture_bcl2fastq_demultiplexed_flow_cell_sample_internal_ids() -> List[str]
 
 @pytest.fixture(name="flow_cell_name_demultiplexed_with_bcl2fastq", scope="session")
 def fixture_flow_cell_name_demultiplexed_with_bcl2fastq() -> str:
+    """Return the name of a flow cell that has been demultiplexed with BCL2Fastq."""
     return "HHKVCALXX"
 
 
@@ -1017,6 +1018,7 @@ def fixture_flow_cell_name_demultiplexed_with_bcl2fastq() -> str:
 def flow_cell_directory_name_demultiplexed_with_bcl2fastq(
     flow_cell_name_demultiplexed_with_bcl2fastq: str,
 ):
+    """Return the name of a flow cell directory that has been demultiplexed with BCL2Fastq."""
     return f"170407_ST-E00198_0209_B{flow_cell_name_demultiplexed_with_bcl2fastq}"
 
 
@@ -1024,9 +1026,10 @@ def flow_cell_directory_name_demultiplexed_with_bcl2fastq(
 def store_with_demultiplexed_samples(
     store: Store,
     helpers: StoreHelpers,
-    bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
+    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
     bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
 ) -> Store:
+    """Return a store with samples that have been demultiplexed with BCL Convert and BCL2Fastq."""
     for i, sample_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_internal_ids):
         helpers.add_sample(store, internal_id=sample_id, name=f"sample_bcl_convert_{i}")
 

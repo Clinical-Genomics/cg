@@ -39,7 +39,7 @@ def validate_samples_unique_per_lane(samples: List[FlowCellSample]) -> None:
 
 def is_valid_sample_internal_id(sample_internal_id: str) -> bool:
     """Check if a sample internal id has the correct structure."""
-    return bool(re.search(r"[A-Za-z]{3}\d{3}", sample_internal_id))
+    return bool(re.search(r"^[A-Za-z]{3}\d{3}", sample_internal_id))
 
 
 def get_sample_sheet_from_file(

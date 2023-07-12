@@ -29,12 +29,19 @@ def filter_metrics_for_flow_cell_sample_internal_id_and_lane(
     )
 
 
+def filter_metrics_by_flow_cell_name(metrics: Query, flow_cell_name: str, **kwargs) -> Query:
+    return metrics.filter(
+        SampleLaneSequencingMetrics.flow_cell_name == flow_cell_name,
+    )
+
+
 class SequencingMetricsFilter(Enum):
     FILTER_TOTAL_READ_COUNT_FOR_SAMPLE: Callable = filter_total_read_count_for_sample
     FILTER_METRICS_FOR_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE: Callable = (
         filter_metrics_for_flow_cell_sample_internal_id_and_lane
     )
     FILTER_ABOVE_Q30_THRESHOLD: Callable = filter_above_q30_threshold
+    FILTER_METRICS_BY_FLOW_CELL_NAME: Callable = filter_metrics_by_flow_cell_name
 
 
 def apply_metrics_filter(
