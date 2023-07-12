@@ -1665,6 +1665,12 @@ def fixture_bed_name() -> str:
     return "Bed"
 
 
+@pytest.fixture(name="bed_version_file_name")
+def fixture_bed_version_filename(bed_name: str) -> str:
+    """Return a bed version model file name attribute."""
+    return f"{bed_name}.bed"
+
+
 @pytest.fixture(name="bed_version_short_name")
 def fixture_bed_version_short_name() -> str:
     """Return a bed version model short name attribute."""

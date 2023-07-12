@@ -45,6 +45,7 @@ class AddHandler(BaseHandler):
         invoice_reference: str,
         data_archive_location: str = "PDC",
         scout_access: bool = False,
+        is_clinical: bool = False,
         *args,
         **kwargs,
     ) -> Customer:
@@ -57,6 +58,7 @@ class AddHandler(BaseHandler):
             invoice_address=invoice_address,
             invoice_reference=invoice_reference,
             data_archive_location=data_archive_location,
+            is_clinical=is_clinical,
             **kwargs,
         )
 
