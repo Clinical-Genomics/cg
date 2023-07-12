@@ -44,9 +44,10 @@ class FlowCellDirectoryData:
         self.base_name: str = ""  # Base name is flow cell-id + flow cell position
         self.id: str = ""
         self.position: Literal["A", "B"] = "A"
-        self.parse_flow_cell_name()
+        self.flow_cell_name: str = ""
+        self.parse_flow_cell_dir_name()
 
-    def parse_flow_cell_name(self):
+    def parse_flow_cell_dir_name(self):
         """Parse relevant information from flow cell name.
 
         This will assume that the flow cell naming convention is used. If not we skip the flow cell.
@@ -54,7 +55,7 @@ class FlowCellDirectoryData:
         Example: '201203_A00689_0200_AHVKJCDRXX'.
         """
 
-        self.validate_flow_cell_name()
+        self.validate_flow_cell_dir_name()
         self.run_date = self._parse_date()
         self.machine_name = self.split_flow_cell_name[1]
         self.machine_number = int(self.split_flow_cell_name[2])
@@ -63,6 +64,7 @@ class FlowCellDirectoryData:
         LOG.debug(f"Set flow cell id to {base_name}")
         self.id = base_name[1:]
         self.position = base_name[0]
+        self.flow_cell_name = base_name[1:]
 
     @property
     def split_flow_cell_name(self) -> List[str]:
@@ -169,7 +171,7 @@ class FlowCellDirectoryData:
             return datetime.datetime.strptime(self.split_flow_cell_name[0], "%Y%m%d")
         return datetime.datetime.strptime(self.split_flow_cell_name[0], "%y%m%d")
 
-    def validate_flow_cell_name(self) -> None:
+    def validate_flow_cell_dir_name(self) -> None:
         """
         Validate on the following criteria:
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>

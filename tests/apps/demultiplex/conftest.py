@@ -357,6 +357,7 @@ def fixture_novaseq6000_sample_sheet_path() -> Path:
         "fixtures",
         "apps",
         "sequencing_metrics_parser",
+        "230622_A00621_0864_AHY7FFDRX2",
         "Unaligned",
         "Reports",
         "SampleSheet.csv",
