@@ -13,7 +13,7 @@ from cg.store.models import (
 )
 
 
-def test_get_bed_by_entry_id(base_store: Store, entry_id: int):
+def test_get_bed_by_entry_id(base_store: Store, entry_id: int = 1):
     """Test returning panel bed by entry id."""
 
     # GIVEN a store with bed records

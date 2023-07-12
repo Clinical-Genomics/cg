@@ -10,7 +10,7 @@ from cg.store.filters.status_bed_filters import (
 from cg.store.models import Bed
 
 
-def test_get_bed_by_entry_id(base_store: Store, entry_id: str):
+def test_get_bed_by_entry_id(base_store: Store, entry_id: int = 1):
     """Test return panel bed by entry id."""
     # GIVEN a store containing bed
 
@@ -30,10 +30,8 @@ def test_get_bed_by_entry_id_no_id(base_store: Store):
     """Test return panel bed by entry id when invalid id."""
     # GIVEN a store containing bed
 
-    # WHEN retrieving a bed by id
-    bed: Bed = get_bed_by_entry_id(
-        beds=base_store._get_query(table=Bed), bed_entry_id="not_an_id"
-    ).first()
+    # WHEN retrieving a bed by an invalid id
+    bed: Bed = get_bed_by_entry_id(beds=base_store._get_query(table=Bed), bed_entry_id=999).first()
 
     # THEN bed should not be returned
     assert not bed
