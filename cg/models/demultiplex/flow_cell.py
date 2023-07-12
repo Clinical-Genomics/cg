@@ -13,7 +13,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeqX,
     SampleSheet,
 )
-from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import (
     BclConverter,
@@ -204,21 +204,10 @@ class FlowCellDirectoryData:
 
     def get_sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
-        try:
-            return get_sample_sheet_from_file(
-                infile=self.sample_sheet_path,
-                flow_cell_sample_type=self.sample_type,
-            )
-        except Exception as error:
-            alternative_sample_sheet_path: Path = Path(
-                self.path,
-                DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
-                DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-            )
-            return get_sample_sheet_from_file(
-                infile=alternative_sample_sheet_path,
-                flow_cell_sample_type=self.sample_type,
-            )
+        return get_sample_sheet_from_file(
+            infile=self.sample_sheet_path,
+            flow_cell_sample_type=self.sample_type,
+        )
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done.
