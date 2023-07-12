@@ -16,3 +16,4 @@ def get_file_in_directory(directory: Path, file_name: str) -> Path:
             if file_name == file:
                 path_to_file = Path(directory_path, file)
                 return path_to_file
+    raise FileNotFoundError(f"File {file_name} not found in {directory}")

@@ -70,9 +70,3 @@ def is_flow_cell_directory_valid(flow_cell_directory: Path) -> None:
 
 def is_demultiplexing_complete(flow_cell_directory: Path) -> bool:
     return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
-
-
-def is_valid_sample_id(sample_id: str) -> bool:
-    sample_id_is_index_check = INDEX_CHECK in sample_id
-    sample_id_is_non_empty = bool(sample_id)
-    return sample_id_is_non_empty and not sample_id_is_index_check
