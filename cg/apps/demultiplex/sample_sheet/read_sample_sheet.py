@@ -9,8 +9,10 @@ from cg.constants.demultiplexing import (
     SampleSheetNovaSeq6000Sections,
     SampleSheetNovaSeqXSections,
 )
+
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
+import re
 
 LOG = logging.getLogger(__name__)
 
@@ -27,26 +29,42 @@ def validate_samples_are_unique(samples: List[FlowCellSample]) -> None:
         sample_ids.add(sample_id)
 
 
-def get_samples_by_lane(
-    samples: List[FlowCellSample],
-) -> Dict[int, List[FlowCellSample]]:
-    """Group and return samples by lane."""
-    LOG.debug("Order samples by lane")
-    sample_by_lane: Dict[int, List[FlowCellSample]] = {}
-    for sample in samples:
-        if sample.lane not in sample_by_lane:
-            sample_by_lane[sample.lane] = []
-        sample_by_lane[sample.lane].append(sample)
-    return sample_by_lane
-
-
 def validate_samples_unique_per_lane(samples: List[FlowCellSample]) -> None:
     """Validate that each sample only exists once per lane in a sample sheet."""
-
     sample_by_lane: Dict[int, List[FlowCellSample]] = get_samples_by_lane(samples)
     for lane, lane_samples in sample_by_lane.items():
         LOG.info(f"Validate that samples are unique in lane {lane}")
         validate_samples_are_unique(samples=lane_samples)
+
+
+def is_valid_sample_internal_id(sample_internal_id: str) -> bool:
+    """Check if a sample internal id has the correct structure."""
+    return bool(re.search(r"[A-Za-z]{3}\d{3}", sample_internal_id))
+
+
+def get_sample_sheet_from_file(
+    infile: Path,
+    flow_cell_sample_type: Type[FlowCellSample],
+) -> SampleSheet:
+    """Parse and validate a sample sheet from file."""
+    sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.CSV, file_path=infile
+    )
+    return get_validated_sample_sheet(
+        sample_sheet_content=sample_sheet_content,
+        sample_type=flow_cell_sample_type,
+    )
+
+
+def get_validated_sample_sheet(
+    sample_sheet_content: List[List[str]],
+    sample_type: Type[FlowCellSample],
+) -> SampleSheet:
+    """Return a validated sample sheet object."""
+    raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
+    samples = parse_obj_as(List[sample_type], raw_samples)
+    validate_samples_unique_per_lane(samples=samples)
+    return SampleSheet(samples=samples)
 
 
 def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str]]:
@@ -78,26 +96,28 @@ def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str
     return raw_samples
 
 
-def validate_sample_sheet(
-    sample_sheet_content: List[List[str]],
-    sample_type: Type[FlowCellSample],
-) -> SampleSheet:
-    """Return a validated sample sheet object."""
-    raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
-    samples = parse_obj_as(List[sample_type], raw_samples)
-    validate_samples_unique_per_lane(samples=samples)
-    return SampleSheet(samples=samples)
+def get_samples_by_lane(
+    samples: List[FlowCellSample],
+) -> Dict[int, List[FlowCellSample]]:
+    """Group and return samples by lane."""
+    LOG.debug("Order samples by lane")
+    sample_by_lane: Dict[int, List[FlowCellSample]] = {}
+    for sample in samples:
+        if sample.lane not in sample_by_lane:
+            sample_by_lane[sample.lane] = []
+        sample_by_lane[sample.lane].append(sample)
+    return sample_by_lane
 
 
-def get_sample_sheet_from_file(
-    infile: Path,
-    flow_cell_sample_type: Type[FlowCellSample],
-) -> SampleSheet:
-    """Parse and validate a sample sheet from file."""
-    sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=infile
+def get_sample_internal_ids_from_sample_sheet(
+    sample_sheet_path: Path, flow_cell_type: Type[FlowCellSample]
+) -> List[str]:
+    """Return the sample internal ids for samples in the sample sheet."""
+    sample_sheet = get_sample_sheet_from_file(
+        infile=sample_sheet_path, flow_cell_sample_type=flow_cell_type
     )
-    return validate_sample_sheet(
-        sample_sheet_content=sample_sheet_content,
-        sample_type=flow_cell_sample_type,
-    )
+    sample_internal_ids: List[str] = []
+    for sample in sample_sheet.samples:
+        if is_valid_sample_internal_id(sample_internal_id=sample.sample_id):
+            sample_internal_ids.append(sample.sample_id)
+    return list(set(sample_internal_ids))
