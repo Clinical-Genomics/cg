@@ -990,7 +990,7 @@ def fixture_sample_sheet_context(cg_context: CGConfig, lims_api: LimsAPI) -> CGC
     return cg_context
 
 
-@pytest.fixture(name="bcl_convert_demultiplexed_flow_cell_sample_internal_ids")
+@pytest.fixture(name="bcl_convert_demultiplexed_flow_cell_sample_internal_ids", scope="session")
 def fixture_bcl_convert_demultiplexed_flow_cell_sample_internal_ids() -> List[str]:
     """
     Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
