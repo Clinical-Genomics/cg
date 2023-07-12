@@ -15,8 +15,8 @@ from cg.meta.demultiplex.validation import (
     is_valid_sample_fastq_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.utils.utils import get_files_matching_pattern
-from cg.utils.files import get_file_in_directory
+
+from cg.utils.files import get_file_in_directory, get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
 
@@ -83,9 +83,7 @@ def get_sample_sheet_path(
     sample_sheet_file_name: str = DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
 ) -> Path:
     """Get the path to the sample sheet in the flow cell directory."""
-    return get_file_in_directory(
-        directory=flow_cell_directory, file_name=sample_sheet_file_name
-    )
+    return get_file_in_directory(directory=flow_cell_directory, file_name=sample_sheet_file_name)
 
 
 def parse_flow_cell_directory_data(

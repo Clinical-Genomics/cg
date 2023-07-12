@@ -1,7 +1,7 @@
 """Some helper functions for working with files"""
 from pathlib import Path
-from typing import Optional
 import os
+from typing import List
 
 
 def get_file_in_directory(directory: Path, file_name: str) -> Path:
@@ -17,3 +17,8 @@ def get_file_in_directory(directory: Path, file_name: str) -> Path:
                 path_to_file = Path(directory_path, file)
                 return path_to_file
     raise FileNotFoundError(f"File {file_name} not found in {directory}")
+
+
+def get_files_matching_pattern(directory: Path, pattern: str) -> List[Path]:
+    """Search for all files in a directory that match a pattern."""
+    return list(directory.glob(pattern))
