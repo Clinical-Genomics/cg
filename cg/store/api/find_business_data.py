@@ -1,42 +1,35 @@
 """Handler to find business data objects."""
 import datetime as dt
 import logging
-from typing import Callable, List, Optional, Iterator, Union, Dict
-
-
-from sqlalchemy.orm import Query, Session
+from typing import Callable, Dict, Iterator, List, Optional, Union
 
 from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError, CgError
 from cg.store.api.base import BaseHandler
+from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
+from cg.store.filters.status_case_sample_filters import CaseSampleFilter, apply_case_sample_filter
+from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
+from cg.store.filters.status_flow_cell_filters import FlowCellFilter, apply_flow_cell_filter
+from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
 from cg.store.filters.status_metrics_filters import SequencingMetricsFilter, apply_metrics_filter
-
+from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
+from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
 from cg.store.models import (
     Analysis,
     Application,
     Customer,
-    Flowcell,
     Family,
     FamilySample,
+    Flowcell,
     Invoice,
     Pool,
     Sample,
     SampleLaneSequencingMetrics,
 )
-
-from cg.store.filters.status_invoice_filters import apply_invoice_filter, InvoiceFilter
-from cg.store.filters.status_pool_filters import apply_pool_filter, PoolFilter
-
-from cg.store.filters.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilter
-from cg.store.filters.status_case_sample_filters import apply_case_sample_filter, CaseSampleFilter
-from cg.store.filters.status_sample_filters import apply_sample_filter, SampleFilter
-
-from cg.store.filters.status_analysis_filters import apply_analysis_filter, AnalysisFilter
-from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
-
+from sqlalchemy.orm import Query, Session
 
 LOG = logging.getLogger(__name__)
 

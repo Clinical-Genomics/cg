@@ -12,7 +12,7 @@ from sqlalchemy.orm import Query
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
-from housekeeper.store.models import Bundle, File, Version
+from housekeeper.store.models import Archive, Bundle, File, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -241,6 +241,21 @@ class HousekeeperAPI:
             .filter(Bundle.name == bundle)
             .order_by(models.Version.created_at.desc())
             .first()
+        )
+
+    def get_version_by_version_id(self, version_id: int) -> Optional[Version]:
+        """Get the version corresponding to the given id in Housekeeper."""
+        return self._store.get_version_by_id(version_id)
+
+    def get_all_non_archived_spring_files(self) -> List[File]:
+        """Return all files which are not marked as archived in Housekeeper."""
+        return (
+            self._store._get_query(table=File)
+            .join(Archive)
+            .filter(File.id not in Archive)
+            .filter(SequencingFileTag.SPRING in File.tags)
+            .filter()
+            .all()
         )
 
     def get_latest_bundle_version(self, bundle_name: str) -> Optional[Version]:

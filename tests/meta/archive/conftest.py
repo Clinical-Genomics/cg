@@ -3,14 +3,14 @@ from pathlib import Path
 from unittest import mock
 
 import pytest
-from requests import Response
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import ArchiveAPI
-from cg.meta.archive.ddn_dataflow import DDNDataFlowApi, TransferData, TransferPayload, ROOT_TO_TRIM
+from cg.meta.archive.ddn_dataflow import ROOT_TO_TRIM, DDNDataFlowApi, TransferData, TransferPayload
 from cg.models.cg_config import DDNDataFlowConfig
+from cg.store import Store
+from requests import Response
 
 
 @pytest.fixture(name="ddn_dataflow_config")
@@ -112,7 +112,13 @@ def fixture_full_local_path(local_storage_repository: str, trimmed_local_directo
 
 @pytest.fixture(name="archive_api")
 def fixture_archive_api(
-    populated_housekeeper_api: HousekeeperAPI, ddn_dataflow_api: DDNDataFlowApi
+    populated_housekeeper_api: HousekeeperAPI,
+    ddn_dataflow_api: DDNDataFlowApi,
+    sample_store: Store,
 ) -> ArchiveAPI:
     """Returns an ArchiveAPI with a populated housekeeper store and a DDNDataFlowApi"""
-    return ArchiveAPI(ddn_dataflow_api=ddn_dataflow_api, housekeeper_api=populated_housekeeper_api)
+    return ArchiveAPI(
+        ddn_dataflow_api=ddn_dataflow_api,
+        housekeeper_api=populated_housekeeper_api,
+        status_db=sample_store,
+    )
