@@ -818,14 +818,13 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     for sample_internal_id in bcl2fastq_demultiplexed_flow_cell_sample_internal_ids:
         sample = demux_post_processing_api.status_db.get_sample_by_internal_id(sample_internal_id)
         assert sample is not None
-        assert sample.calculated_read_count == 0
+        assert sample.calculated_read_count
 
     # THEN a bundle was added to Housekeeper for the flow cell
     assert demux_post_processing_api.hk_api.bundle(flow_cell_name_demultiplexed_with_bcl2fastq)
 
     # THEN a bundle was added to Housekeeper for each sample
     for sample_internal_id in bcl2fastq_demultiplexed_flow_cell_sample_internal_ids:
-        bundle = demux_post_processing_api.hk_api.bundle(sample_internal_id)
         assert demux_post_processing_api.hk_api.bundle(sample_internal_id)
 
     # THEN a sample sheet was added to Housekeeper

@@ -118,6 +118,7 @@ def get_sample_internal_ids_from_sample_sheet(
     )
     sample_internal_ids: List[str] = []
     for sample in sample_sheet.samples:
-        if is_valid_sample_internal_id(sample_internal_id=sample.sample_id):
-            sample_internal_ids.append(sample.sample_id)
+        sample_internal_id = sample.sample_id.split("_")[0]
+        if is_valid_sample_internal_id(sample_internal_id=sample_internal_id):
+            sample_internal_ids.append(sample_internal_id)
     return list(set(sample_internal_ids))
