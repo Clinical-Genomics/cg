@@ -187,7 +187,8 @@ class DDNDataFlowApi:
         return {"Authorization": f"Bearer {self.auth_token}"}
 
     def archive_folders(self, sources_and_destinations: List[TransferData]) -> int:
-        """Archives all folders provided, to their corresponding destination, as given by sources and destination parameter."""
+        """Archives all folders provided, to their corresponding destination,
+        as given by sources and destination parameter."""
         transfer_request: TransferPayload = TransferPayload(
             files_to_transfer=sources_and_destinations
         )
