@@ -8,6 +8,7 @@ from cg.constants import SequencingFileTag
 from cg.meta.archive.ddn_dataflow import DDNDataFlowApi, TransferData
 from cg.store import Store
 from cg.store.models import Sample
+from housekeeper.store.models import Version
 
 LOG = logging.getLogger(__name__)
 DDN = "DDN"
@@ -92,7 +93,7 @@ class ArchiveAPI:
 
         sample_and_spring_files_per_archive_location: Dict[
             str, List[SampleAndFile]
-        ] = self.spring_files_sorted_on_archive_location(spring_files_to_archive)
+        ] = self.sort_spring_files_on_archive_location(spring_files_to_archive)
         files_to_archive: List[TransferData] = [
             TransferData(destination=ddn_file_to_archive.sample, source=ddn_file_to_archive.file)
             for ddn_file_to_archive in sample_and_spring_files_per_archive_location[DDN]
@@ -105,9 +106,11 @@ class ArchiveAPI:
             archive_task_id=archive_task_id,
         )
 
-    def spring_files_sorted_on_archive_location(
+    def sort_spring_files_on_archive_location(
         self, files: List[str]
-    ) -> Dict[str, List[Tuple[str, str]]]:
+    ) -> Dict[str, List[SampleAndFile]]:
+        """Sort the given list of files and gives back a dictionary
+        mapping the data archive location to a tuple containing sample id and file path."""
         files_per_archive_location: Dict[str, List[SampleAndFile]] = {}
         for file in files:
             location_and_sample: ArchiveLocationAndSample = (
@@ -125,8 +128,9 @@ class ArchiveAPI:
 
     def get_archive_location_and_sample_id_from_file_path(
         self, file_path: str
-    ) -> Optional[Tuple[str, str]]:
-        sample_internal_id: str = self.get_sample_id_from_path(file_path)
+    ) -> Optional[ArchiveLocationAndSample]:
+        """Returns the data archive location and sample id connected to the Housekeeper spring file."""
+        sample_internal_id: str = self.get_sample_id_from_file_path(file_path)
         sample: Sample = self.status_db.get_sample_by_internal_id(sample_internal_id)
         if not sample:
             LOG.warning(
@@ -136,7 +140,9 @@ class ArchiveAPI:
             return
         return ArchiveLocationAndSample(sample.customer.data_archive_location, sample_internal_id)
 
-    def get_sample_id_from_path(self, file_path: str):
-        return self.housekeeper_api.get_version_by_version_id(
-            self.housekeeper_api.files(path=file_path).version_id
-        ).bundle_id
+    def get_sample_id_from_file_path(self, file_path: str):
+        """Return the sample id, i.e. bundle name, for the specified spring file in Housekeeper."""
+        version: Version = self.housekeeper_api.get_version_by_version_id(
+            self.housekeeper_api.files(path=file_path).first().version_id
+        )
+        return version.bundle_id

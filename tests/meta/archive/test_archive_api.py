@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.meta.archive.archive import ArchiveAPI
@@ -20,6 +22,30 @@ def test_archive_samples(
         .first()
         .archive
     )
+
+
+def test_get_sample_id_from_file(
+    archive_api: ArchiveAPI, populated_housekeeper_api: HousekeeperAPI, spring_file: Path
+):
+    sample_id: str = archive_api.get_sample_id_from_path(file_path=spring_file.as_posix())
+
+
+def test_get_archive_location_and_sample_id_from_file_path(
+    archive_api: ArchiveAPI, populated_housekeeper_api: HousekeeperAPI, spring_file: Path
+):
+    assert False
+
+
+def test_sort_spring_files_on_archive_location(
+    archive_api: ArchiveAPI, populated_housekeeper_api: HousekeeperAPI, spring_file: Path
+):
+    assert False
+
+
+def test_archive_all_non_archived_spring_files(
+    archive_api: ArchiveAPI, populated_housekeeper_api: HousekeeperAPI, spring_file: Path
+):
+    assert False
 
 
 def test_retrieve_sample():
