@@ -9,6 +9,7 @@ from cg.exc import CgError
 from cg.meta.rsync import RsyncAPI
 from cg.store import Store
 from cg.store.models import Family
+from cg.constants.priority import SlurmQos, SlurmAccount
 from tests.meta.deliver.conftest import fixture_all_samples_in_inbox, fixture_dummy_file_name
 from tests.store.conftest import fixture_case_obj
 
@@ -254,3 +255,23 @@ def test_slurm_rsync_single_case_missing_file(
     # THEN check that an integer was returned as sbatch number
     assert isinstance(sbatch_number, int)
     assert not is_complete_delivery
+
+
+def test_slurm_quality_of_service_production(rsync_api: RsyncAPI):
+    # GIVEN an RsyncAPI instance
+
+    # WHEN the account of the api is set to "production
+    rsync_api.account = SlurmAccount.PRODUCTION
+
+    # THEN the quality of service should be set to HIGH
+    assert rsync_api.slurm_quality_of_service == SlurmQos.HIGH
+
+
+def test_slurm_quality_of_service_other(rsync_api: RsyncAPI):
+    # GIVEN an RsyncAPI instance
+
+    # WHEN the account of the api is set to "production
+    rsync_api.account = SlurmAccount.DEVELOPMENT
+
+    # THEN the quality of service should be set to HIGH
+    assert rsync_api.slurm_quality_of_service == SlurmQos.LOW
