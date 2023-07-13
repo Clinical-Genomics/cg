@@ -4,7 +4,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Union, Optional
 
-from cg.store.models import Family
 from housekeeper.store.models import Version
 
 from cg.apps.coverage import ChanjoAPI
