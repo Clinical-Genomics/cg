@@ -81,19 +81,8 @@ class FlowCellDirectoryData:
     def sample_sheet_path(self) -> Path:
         """
         Return sample sheet path.
-        If no SampleSheet is found, a sample sheet path to the parent directory is returned.
-        This sample sheet path is the used to create a sample sheet.
         """
-        try:
-            return get_file_in_directory(
-                directory=self.path,
-                file_name=DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME.value,
-            )
-        except FileNotFoundError:
-            LOG.warning(
-                f"Could not find sample sheet file in {self.path}, setting sample sheet path to {Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME.value)}"
-            )
-            return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME.value)
+        return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME.value)
 
     @property
     def run_parameters_path(self) -> Path:
