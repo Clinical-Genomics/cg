@@ -776,16 +776,16 @@ def fixture_flow_cell_runs_working_directory_bcl2fastq(
     flow_cell_runs_working_directory: Path,
 ) -> Path:
     """Return the path to a working directory with flow cells ready for demux."""
-    working_dir: Path = Path(flow_cell_runs_working_directory, "bcl2fastq")
-    working_dir.mkdir(parents=True)
+    working_dir: Path = Path(flow_cell_runs_working_directory)
+    # working_dir.mkdir(parents=True)
     return working_dir
 
 
 @pytest.fixture(name="flow_cell_runs_working_directory_dragen")
 def fixture_flow_cell_runs_working_directory_dragen(flow_cell_runs_working_directory: Path) -> Path:
     """Return the path to a working directory with flow cells ready for demux."""
-    working_dir: Path = Path(flow_cell_runs_working_directory, "dragen")
-    working_dir.mkdir(parents=True)
+    working_dir: Path = Path(flow_cell_runs_working_directory)
+    # working_dir.mkdir(parents=True)
     return working_dir
 
 
@@ -837,6 +837,7 @@ def fixture_flow_cell_working_directory(
     """
     working_dir: Path = Path(flow_cell_runs_working_directory, bcl2fastq_flow_cell_dir.name)
     working_dir.mkdir(parents=True)
+
     existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=bcl2fastq_flow_cell_dir
     )
