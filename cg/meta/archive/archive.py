@@ -12,6 +12,7 @@ from cg.store.models import Sample
 LOG = logging.getLogger(__name__)
 DDN = "DDN"
 
+
 class ArchiveAPI:
     """Class handling the archiving of sample SPRING files."""
 
@@ -77,19 +78,18 @@ class ArchiveAPI:
         return sample_ids_per_archive_location
 
     def archive_all_non_archived_spring_files(self):
-        spring_files_to_archive: List[str] = self.housekeeper_api.get_all_non_archived_spring_files()
+        spring_files_to_archive: List[
+            str
+        ] = self.housekeeper_api.get_all_non_archived_spring_files()
         if not spring_files_to_archive:
             LOG.info("Found no files ready to be archived.")
             return
-        sample_and_spring_files_per_archive_location: Dict[str, List[
-            Tuple[str, str]]] = self.spring_files_sorted_on_archive_location(spring_files_to_archive)
+        sample_and_spring_files_per_archive_location: Dict[
+            str, List[Tuple[str, str]]
+        ] = self.spring_files_sorted_on_archive_location(spring_files_to_archive)
         files_to_archive: List[TransferData] = [
-            TransferData(
-                destination=ddn_file_to_archive[0], source=ddn_file_to_archive[1]
-            )
-            for ddn_file_to_archive in sample_and_spring_files_per_archive_location[
-                DDN
-            ]
+            TransferData(destination=ddn_file_to_archive[0], source=ddn_file_to_archive[1])
+            for ddn_file_to_archive in sample_and_spring_files_per_archive_location[DDN]
         ]
         archive_task_id: int = self.ddn_api.archive_folders(
             sources_and_destinations=files_to_archive
@@ -99,12 +99,15 @@ class ArchiveAPI:
             archive_task_id=archive_task_id,
         )
 
-
-
-    def spring_files_sorted_on_archive_location(self, files: List[str]) -> Dict[str, List[Tuple[str, str]]]:
+    def spring_files_sorted_on_archive_location(
+        self, files: List[str]
+    ) -> Dict[str, List[Tuple[str, str]]]:
         files_per_archive_location: Dict[str, List[Tuple[str, str]]] = {}
         for file in files:
-            data_archive_location, sample_id = self.get_archive_location_and_sample_id_from_file_path(file)
+            (
+                data_archive_location,
+                sample_id,
+            ) = self.get_archive_location_and_sample_id_from_file_path(file)
             if not data_archive_location:
                 continue
             if files_per_archive_location.get(data_archive_location):
@@ -113,7 +116,9 @@ class ArchiveAPI:
                 files_per_archive_location[data_archive_location] = [(sample_id, file)]
         return files_per_archive_location
 
-    def get_archive_location_and_sample_id_from_file_path(self, file_path: str) -> Optional[Tuple[str, str]]:
+    def get_archive_location_and_sample_id_from_file_path(
+        self, file_path: str
+    ) -> Optional[Tuple[str, str]]:
         sample_internal_id: str = self.get_sample_id_from_path(file_path)
         sample: Sample = self.status_db.get_sample_by_internal_id(sample_internal_id)
         if not sample:
@@ -126,5 +131,5 @@ class ArchiveAPI:
 
     def get_sample_id_from_path(self, file_path: str):
         return self.housekeeper_api.get_version_by_version_id(
-                self.housekeeper_api.files(path=file_path).version_id
-            ).bundle_id
+            self.housekeeper_api.files(path=file_path).version_id
+        ).bundle_id
