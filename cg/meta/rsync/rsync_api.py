@@ -34,8 +34,12 @@ class RsyncAPI(MetaAPI):
         self.account: str = config.data_delivery.account
         self.log_dir: Path = Path(config.data_delivery.base_path)
         self.mail_user: str = config.data_delivery.mail_user
-        self.slurm_quality_of_service: str = SLURM_ACCOUNT_TO_QOS[self.account] or SlurmQos.LOW
         self.pipeline: str = Pipeline.RSYNC
+
+    @property
+    def slurm_quality_of_service(self) -> str:
+        """Return the slurm quality of service."""
+        return SlurmQos.HIGH if self.account == "production" else SlurmQos.LOW
 
     @property
     def trailblazer_config_path(self) -> Path:
