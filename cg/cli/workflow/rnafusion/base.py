@@ -348,11 +348,14 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
 def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     """Generate deliverables files for a case and store in Housekeeper if they
     pass QC metrics checks."""
-    LOG.info("Generating metrics file and performing QC checks for %s", case_id)
-    context.invoke(metrics_deliver, case_id=case_id, dry_run=dry_run)
-    LOG.info(f"Storing analysis for {case_id}")
-    context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
-    context.invoke(store_housekeeper, case_id=case_id, dry_run=dry_run)
+    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+    if analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id):
+        LOG.info("Generating metrics file and performing QC checks for %s", case_id)
+        context.invoke(metrics_deliver, case_id=case_id, dry_run=dry_run)
+    if analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id):
+        LOG.info(f"Storing analysis for {case_id}")
+        context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
+        context.invoke(store_housekeeper, case_id=case_id, dry_run=dry_run)
 
 
 @rnafusion.command("store-available")
