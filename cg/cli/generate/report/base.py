@@ -64,9 +64,7 @@ def generate_delivery_report(
         case_id=case_id, version=version
     )
     if delivery_report:
-        click.echo(
-            click.style(f"Delivery report already in housekeeper: {delivery_report}", fg="yellow")
-        )
+        click.echo(click.style("Delivery report already in housekeeper", fg="yellow"))
         return
 
     delivery_report: TextIO = report_api.create_delivery_report_file(
@@ -75,11 +73,11 @@ def generate_delivery_report(
         analysis_date=analysis_date,
         force_report=force_report,
     )
-    hk_file: Optional[hk_models.File] = report_api.add_delivery_report_to_hk(
+    report_api.add_delivery_report_to_hk(
         case_id=case_id, delivery_report_file=delivery_report, version=version
     )
-    click.echo(click.style(f"Uploaded delivery report to housekeeper: {hk_file.path}", fg="green"))
-    report_api.update_delivery_report_date(case, analysis_date)
+    click.echo(click.style("Uploaded delivery report to housekeeper", fg="green"))
+    report_api.update_delivery_report_date(case=case, analysis_date=analysis_date)
 
 
 @click.command("available-delivery-reports")
