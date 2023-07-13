@@ -35,3 +35,9 @@ PRIORITY_TO_SLURM_QOS = {
     Priority.express: SlurmQos.EXPRESS,
     Priority.clinical_trials: SlurmQos.NORMAL,
 }
+
+
+class SlurmAccount(StrEnum):
+    PRODUCTION: str = "production"
+    DEVELOPMENT: str = "development"
+    STAGE: str = "stage"

@@ -10,7 +10,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import INBOX_NAME
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import SlurmQos, SlurmAccount
 from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.meta.meta import MetaAPI
@@ -39,7 +39,7 @@ class RsyncAPI(MetaAPI):
     @property
     def slurm_quality_of_service(self) -> str:
         """Return the slurm quality of service."""
-        return SlurmQos.HIGH if self.account == "production" else SlurmQos.LOW
+        return SlurmQos.HIGH if self.account == SlurmAccount.PRODUCTION.value else SlurmQos.LOW
 
     @property
     def trailblazer_config_path(self) -> Path:
