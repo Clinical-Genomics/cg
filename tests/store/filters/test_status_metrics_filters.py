@@ -4,6 +4,7 @@ from cg.store.filters.status_metrics_filters import (
     filter_above_q30_threshold,
     filter_total_read_count_for_sample,
     filter_metrics_for_flow_cell_sample_internal_id_and_lane,
+    filter_metrics_by_flow_cell_name,
 )
 from cg.store.models import SampleLaneSequencingMetrics
 from sqlalchemy.orm import Query
@@ -84,3 +85,25 @@ def test_filter_above_q30_threshold(store_with_sequencing_metrics: Store):
     # THEN assert that all returned metrics have a sample_base_fraction_passing_q30 greater than the threshold
     for metric in filtered_metrics.all():
         assert metric.sample_base_fraction_passing_q30 > q30_threshold / 100
+
+
+def test_filter_metrics_by_flow_cell_name(
+    store_with_sequencing_metrics: Store, flow_cell_name: str
+):
+    # GIVEN a Store with sequencing metrics
+    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
+
+    # WHEN filtering metrics by flow cell name
+    filtered_metrics: Query = filter_metrics_by_flow_cell_name(
+        metrics=metrics, flow_cell_name=flow_cell_name
+    )
+
+    # THEN assert that the returned object is a Query
+    assert isinstance(filtered_metrics, Query)
+
+    # THEN assert that the query returns a list of filtered metrics
+    assert filtered_metrics.all()
+
+    # THEN assert that all returned metrics have the expected flow cell name
+    for metric in filtered_metrics.all():
+        assert metric.flow_cell_name == flow_cell_name
