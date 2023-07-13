@@ -732,13 +732,8 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
     )
 
     # THEN sequencing metrics were created for the flow cell
-    assert (
-        demux_post_processing_api.status_db._get_query(table=SampleLaneSequencingMetrics)
-        .filter(
-            SampleLaneSequencingMetrics.flow_cell_name
-            == flow_cell_name_demultiplexed_with_bcl_convert
-        )
-        .all()
+    assert demux_post_processing_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=flow_cell_name_demultiplexed_with_bcl_convert
     )
 
     # THEN the read count was calculated for all samples in the flow cell directory
@@ -801,13 +796,8 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     )
 
     # THEN sequencing metrics were created for the flow cell
-    assert (
-        demux_post_processing_api.status_db._get_query(table=SampleLaneSequencingMetrics)
-        .filter(
-            SampleLaneSequencingMetrics.flow_cell_name
-            == flow_cell_name_demultiplexed_with_bcl2fastq
-        )
-        .all()
+    assert demux_post_processing_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq
     )
 
     # THEN the read count was calculated for all samples in the flow cell directory
