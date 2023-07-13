@@ -260,7 +260,7 @@ def test_slurm_rsync_single_case_missing_file(
 def test_slurm_quality_of_service_production(rsync_api: RsyncAPI):
     # GIVEN an RsyncAPI instance
 
-    # WHEN the account of the api is set to "production
+    # WHEN the account of the api is set to production
     rsync_api.account = SlurmAccount.PRODUCTION
 
     # THEN the quality of service should be set to HIGH
@@ -270,8 +270,8 @@ def test_slurm_quality_of_service_production(rsync_api: RsyncAPI):
 def test_slurm_quality_of_service_other(rsync_api: RsyncAPI):
     # GIVEN an RsyncAPI instance
 
-    # WHEN the account of the api is set to "production
+    # WHEN the account of the api is set to development
     rsync_api.account = SlurmAccount.DEVELOPMENT
 
-    # THEN the quality of service should be set to HIGH
+    # THEN the quality of service should be set to LOW
     assert rsync_api.slurm_quality_of_service == SlurmQos.LOW
