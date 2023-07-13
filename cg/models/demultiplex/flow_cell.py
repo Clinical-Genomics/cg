@@ -26,6 +26,7 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
+from cg.utils.files import get_file_in_directory
 
 LOG = logging.getLogger(__name__)
 
@@ -79,7 +80,9 @@ class FlowCellDirectoryData:
     @property
     def sample_sheet_path(self) -> Path:
         """Return sample sheet path."""
-        return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+        return get_file_in_directory(
+            directory=self.path, file_name=DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        )
 
     @property
     def run_parameters_path(self) -> Path:
