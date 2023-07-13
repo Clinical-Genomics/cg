@@ -2,6 +2,7 @@
 import copy
 import gzip
 import http
+import json
 import logging
 import os
 import shutil
@@ -10,9 +11,6 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
-from housekeeper.store.models import File, Version, Bundle
-from requests import Response
-
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -24,9 +22,8 @@ from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import FileExtensions, Pipeline, SequencingFileTag
 from cg.apps.lims.api import LimsAPI
-from cg.constants import FileExtensions, Pipeline
+from cg.constants import FileExtensions, Pipeline, SequencingFileTag
 from cg.constants.constants import CaseActions, FileFormat
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
@@ -53,6 +50,8 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
 )
 from cg.utils import Process
+from housekeeper.store.models import Bundle, File, Version
+from requests import Response
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -2370,6 +2369,7 @@ def fixture_store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
 def fixture_ok_response() -> Response:
     """Return a response with the OK status code."""
     response: Response = Response()
+    response.json = json.loads('{"job_id":"123"}')
     response.status_code = http.HTTPStatus.OK
     return response
 

@@ -116,6 +116,7 @@ def fixture_full_local_path(local_storage_repository: str, trimmed_local_directo
 
 @pytest.fixture(name="archive_store")
 def fixture_archive_store(base_store: Store, helpers: StoreHelpers) -> Store:
+    """Returns a store with samples for both a DDN customer as well as a non-DDN customer."""
     customer_ddn: Customer = base_store.add_customer(
         internal_id="CustWithDDN",
         invoice_address="Baker Street 221B",
@@ -132,6 +133,7 @@ def fixture_archive_store(base_store: Store, helpers: StoreHelpers) -> Store:
         is_clinical=False,
         data_archive_location="PDC",
     )
+    # internal_id for sample 1 matches the bundle in the populated Housekeeper store.
     new_samples: List[Sample] = [
         base_store.add_sample(
             name="sample_1_with_ddn_customer",
