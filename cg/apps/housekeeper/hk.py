@@ -7,12 +7,13 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError
-from sqlalchemy.orm import Query
+from sqlalchemy import exists
+from sqlalchemy.orm import Query, aliased
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
-from housekeeper.store.models import Archive, Bundle, File, Version
+from housekeeper.store.models import Archive, Bundle, File, Tag, Version, file_tag_link
 
 LOG = logging.getLogger(__name__)
 
@@ -253,12 +254,12 @@ class HousekeeperAPI:
 
     def get_all_non_archived_spring_files(self) -> List[File]:
         """Return all files which are not marked as archived in Housekeeper."""
+        aliasFile = aliased(File)
+        filter_archived = exists().where(aliasFile.id == Archive.file_id)
         return (
-            self._store._get_query(table=File)
+            self._store.get_files(tag_names=[SequencingFileTag.SPRING])
             .join(Archive)
-            .filter(File.id not in Archive)
-            .filter(SequencingFileTag.SPRING in File.tags)
-            .filter()
+            .filter(~filter_archived)
             .all()
         )
 
