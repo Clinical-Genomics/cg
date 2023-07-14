@@ -4,22 +4,21 @@ from unittest import mock
 from urllib.parse import urljoin
 
 import pytest
-from requests import Response
-
-from cg.constants.constants import FileFormat, APIMethods
+from cg.constants.constants import APIMethods, FileFormat
 from cg.exc import DdnDataflowAuthenticationError
-from cg.io.controller import WriteStream, APIRequest
+from cg.io.controller import APIRequest, WriteStream
 from cg.meta.archive.ddn_dataflow import (
+    DESTINATION_ATTRIBUTE,
+    OSTYPE,
+    ROOT_TO_TRIM,
+    SOURCE_ATTRIBUTE,
+    DataflowEndpoints,
     DDNDataFlowApi,
     TransferData,
-    ROOT_TO_TRIM,
     TransferPayload,
-    DataflowEndpoints,
-    OSTYPE,
-    DESTINATION_ATTRIBUTE,
-    SOURCE_ATTRIBUTE,
 )
 from cg.models.cg_config import DDNDataFlowConfig
+from requests import Response
 
 FUNCTION_TO_MOCK = "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content"
 
@@ -269,7 +268,7 @@ def test_archive_folders(
     ddn_dataflow_api: DDNDataFlowApi,
     full_remote_path: str,
     full_local_path: str,
-    ok_response: Response,
+    ok_ddn_response: Response,
     transfer_data_archive: TransferData,
 ):
     """Tests that the archiving function correctly formats the input and sends API request."""
@@ -280,9 +279,9 @@ def test_archive_folders(
     with mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_response,
+        return_value=ok_ddn_response,
     ) as mock_request_submitter:
-        response: bool = ddn_dataflow_api.archive_folders([transfer_data_archive])
+        response: int = ddn_dataflow_api.archive_folders([transfer_data_archive])
 
     # THEN a boolean response should be returned
     assert response
@@ -305,7 +304,7 @@ def test_retrieve_folders(
     ddn_dataflow_api: DDNDataFlowApi,
     full_remote_path: str,
     full_local_path: str,
-    ok_response: Response,
+    ok_ddn_response: Response,
     transfer_data_retrieve: TransferData,
 ):
     """Tests that the retrieve function correctly formats the input and sends API request."""
@@ -314,9 +313,7 @@ def test_retrieve_folders(
 
     # WHEN running the retrieve method and providing two paths
     with mock.patch.object(
-        APIRequest,
-        "api_request_from_content",
-        return_value=ok_response,
+        APIRequest, "api_request_from_content", return_value=ok_ddn_response
     ) as mock_request_submitter:
         response: bool = ddn_dataflow_api.retrieve_folders([transfer_data_retrieve])
 

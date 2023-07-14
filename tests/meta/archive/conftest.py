@@ -32,6 +32,12 @@ def fixture_ddn_dataflow_config(
     )
 
 
+@pytest.fixture(name="ok_ddn_response")
+def fixture_ok_ddn_response(ok_response: Response):
+    ok_response._content = b'{"job_id": "123"}'
+    return ok_response
+
+
 @pytest.fixture(name="ddn_dataflow_api")
 def fixture_ddn_dataflow_api(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDataFlowApi:
     """Returns a DDNApi without tokens being set."""
