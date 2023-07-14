@@ -1,45 +1,51 @@
-"""Code that handles CLI commands to upload"""
+"""Code that handles upload CLI commands."""
 import logging
 import sys
 import traceback
 from typing import Optional
 
 import click
-
-from cg.cli.upload.nipt import nipt
-from cg.constants import Pipeline
-from cg.models.cg_config import CGConfig
-from cg.store import Store, models
-from cg.utils.click.EnumChoice import EnumChoice
-
-from cg.cli.upload import vogue
-from cg.cli.upload.clinical_delivery import fastq
-from cg.cli.upload.coverage import coverage
+from cg.cli.upload.clinical_delivery import auto_fastq, upload_clinical_delivery
+from cg.cli.upload.coverage import upload_coverage
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.cli.upload.fohm import fohm
-from cg.cli.upload.genotype import genotypes
-from cg.cli.upload.gisaid import gisaid
+from cg.cli.upload.genotype import upload_genotypes
+from cg.cli.upload.gens import upload_to_gens
+from cg.cli.upload.gisaid import upload_to_gisaid
 from cg.cli.upload.mutacc import process_solved, processed_solved
-from cg.cli.upload.observations import observations
+from cg.cli.upload.nipt import nipt
+from cg.cli.upload.observations import (
+    upload_available_observations_to_loqusdb,
+    upload_observations_to_loqusdb,
+)
 from cg.cli.upload.scout import (
     create_scout_load_config,
-    scout,
     upload_case_to_scout,
+    upload_multiqc_to_scout,
     upload_rna_fusion_report_to_scout,
-    upload_rna_to_scout,
     upload_rna_junctions_to_scout,
+    upload_rna_to_scout,
+    upload_to_scout,
 )
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.upload.validate import validate
+from cg.constants import Pipeline
 from cg.exc import AnalysisAlreadyUploadedError
 from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
-from cg.meta.upload.mip_dna.mip_dna import MipDNAUploadAPI
+from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
+from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
+from cg.meta.upload.rnafusion.rnafusion import RnafusionUploadAPI
+from cg.meta.upload.upload_api import UploadAPI
+from cg.models.cg_config import CGConfig
+from cg.store import Store
+from cg.store.models import Family
+from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)
 
 
 @click.group(invoke_without_command=True)
-@click.option("-f", "--family", "family_id", help="Upload to all apps")
+@click.option("-c", "--case", "case_id", help="Upload to all apps")
 @click.option(
     "-r",
     "--restart",
@@ -47,41 +53,46 @@ LOG = logging.getLogger(__name__)
     help="Force upload of an analysis that has already been uploaded or marked as started",
 )
 @click.pass_context
-def upload(context: click.Context, family_id: Optional[str], restart: bool):
+def upload(context: click.Context, case_id: Optional[str], restart: bool):
     """Upload results from analyses"""
 
     config_object: CGConfig = context.obj
-    upload_api = MipDNAUploadAPI(config=config_object)  # default upload API
+    upload_api: UploadAPI = MipDNAUploadAPI(config=config_object)  # default upload API
 
     LOG.info("----------------- UPLOAD -----------------")
 
     if context.invoked_subcommand is not None:
         context.obj.meta_apis["upload_api"] = upload_api
-    elif family_id:  # Provided case ID without a subcommand: upload everything
+    elif case_id:  # Provided case ID without a subcommand: upload everything
         try:
-            upload_api.analysis_api.verify_case_id_in_statusdb(case_id=family_id)
-            case_obj: models.Family = upload_api.status_db.family(family_id)
-            upload_api.verify_analysis_upload(case_obj=case_obj, restart=restart)
+            upload_api.analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
+            case: Family = upload_api.status_db.get_case_by_internal_id(internal_id=case_id)
+            upload_api.verify_analysis_upload(case_obj=case, restart=restart)
         except AnalysisAlreadyUploadedError:
             # Analysis being uploaded or it has been already uploaded
             return
 
         # Update the upload API based on the data analysis type (MIP-DNA by default)
-        if Pipeline.BALSAMIC in case_obj.data_analysis:
+        # Upload for balsamic, balsamic-umi and balsamic-qc
+        if Pipeline.BALSAMIC in case.data_analysis:
             upload_api = BalsamicUploadAPI(config=config_object)
+        elif case.data_analysis == Pipeline.RNAFUSION:
+            upload_api = RnafusionUploadAPI(config=config_object)
+        elif case.data_analysis == Pipeline.MIP_RNA:
+            upload_api: UploadAPI = MipRNAUploadAPI(config=config_object)
 
         context.obj.meta_apis["upload_api"] = upload_api
-        upload_api.upload(ctx=context, case_obj=case_obj, restart=restart)
-        click.echo(click.style(f"{family_id} analysis has been successfully uploaded", fg="green"))
+        upload_api.upload(ctx=context, case=case, restart=restart)
+        click.echo(click.style(f"{case_id} analysis has been successfully uploaded", fg="green"))
     else:
         suggest_cases_to_upload(status_db=upload_api.status_db)
         raise click.Abort()
 
 
-@upload.command()
+@upload.command("auto")
 @click.option("--pipeline", type=EnumChoice(Pipeline), help="Limit to specific pipeline")
 @click.pass_context
-def auto(context: click.Context, pipeline: Pipeline = None):
+def upload_all_completed_analyses(context: click.Context, pipeline: Pipeline = None):
     """Upload all completed analyses"""
 
     LOG.info("----------------- AUTO -----------------")
@@ -89,7 +100,7 @@ def auto(context: click.Context, pipeline: Pipeline = None):
     status_db: Store = context.obj.status_db
 
     exit_code = 0
-    for analysis_obj in status_db.analyses_to_upload(pipeline=pipeline):
+    for analysis_obj in status_db.get_analyses_to_upload(pipeline=pipeline):
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
                 f"Skipping upload for case {analysis_obj.family.internal_id}. "
@@ -100,7 +111,7 @@ def auto(context: click.Context, pipeline: Pipeline = None):
         case_id = analysis_obj.family.internal_id
         LOG.info("Uploading analysis for case: %s", case_id)
         try:
-            context.invoke(upload, family_id=case_id)
+            context.invoke(upload, case_id=case_id)
         except Exception:
             LOG.error(f"Case {case_id} upload failed")
             LOG.error(traceback.format_exc())
@@ -109,21 +120,24 @@ def auto(context: click.Context, pipeline: Pipeline = None):
     sys.exit(exit_code)
 
 
+upload.add_command(auto_fastq)
+upload.add_command(create_scout_load_config)
+upload.add_command(fohm)
+upload.add_command(nipt)
 upload.add_command(process_solved)
 upload.add_command(processed_solved)
-upload.add_command(validate)
-upload.add_command(scout)
+upload.add_command(upload_available_observations_to_loqusdb)
 upload.add_command(upload_case_to_scout)
+upload.add_command(upload_clinical_delivery)
+upload.add_command(upload_coverage)
+upload.add_command(upload_delivery_report_to_scout)
+upload.add_command(upload_genotypes)
+upload.add_command(upload_multiqc_to_scout)
+upload.add_command(upload_observations_to_loqusdb)
 upload.add_command(upload_rna_fusion_report_to_scout)
 upload.add_command(upload_rna_junctions_to_scout)
 upload.add_command(upload_rna_to_scout)
-upload.add_command(create_scout_load_config)
-upload.add_command(observations)
-upload.add_command(genotypes)
-upload.add_command(coverage)
-upload.add_command(vogue)
-upload.add_command(gisaid)
-upload.add_command(nipt)
-upload.add_command(fohm)
-upload.add_command(fastq)
-upload.add_command(upload_delivery_report_to_scout)
+upload.add_command(upload_to_gens)
+upload.add_command(upload_to_gisaid)
+upload.add_command(upload_to_scout)
+upload.add_command(validate)

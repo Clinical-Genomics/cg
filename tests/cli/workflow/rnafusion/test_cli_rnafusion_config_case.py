@@ -1,0 +1,161 @@
+"""Tests cli methods to create the case config for RNAfusion"""
+
+import logging
+from pathlib import Path
+from typing import List
+
+from _pytest.logging import LogCaptureFixture
+from click.testing import CliRunner
+
+from cg.cli.workflow.rnafusion.base import config_case
+from cg.constants import EXIT_SUCCESS
+from cg.models.cg_config import CGConfig
+
+LOG = logging.getLogger(__name__)
+
+
+def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):
+    """Test command without case_id."""
+    # GIVEN NO case_id
+    # WHEN dry running without anything specified
+    result = cli_runner.invoke(config_case, obj=rnafusion_context)
+    # THEN command should mention argument
+    assert result.exit_code != EXIT_SUCCESS
+    assert "Missing argument" in result.output
+
+
+def test_with_missing_case(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    case_id_does_not_exist: str,
+):
+    """Test command with invalid case to start with."""
+    caplog.set_level(logging.ERROR)
+    # GIVEN case_id not in database
+    assert not rnafusion_context.status_db.get_case_by_internal_id(
+        internal_id=case_id_does_not_exist
+    )
+    # WHEN running
+    result = cli_runner.invoke(config_case, [case_id_does_not_exist], obj=rnafusion_context)
+    # THEN command should NOT successfully call the command it creates
+    assert result.exit_code != EXIT_SUCCESS
+    # THEN ERROR log should be printed containing invalid case_id
+    assert "could not be found in Status DB!" in caplog.text
+
+
+def test_without_samples(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    no_sample_case_id: str,
+):
+    """Test command with case_id and no samples."""
+    caplog.set_level(logging.ERROR)
+    # GIVEN case-id
+    case_id: str = no_sample_case_id
+    # WHEN running config case
+    result = cli_runner.invoke(config_case, [case_id], obj=rnafusion_context)
+    # THEN command should print the rnafusion command-string
+    assert result.exit_code != EXIT_SUCCESS
+    # THEN warning should be printed that no sample is found
+    assert case_id in caplog.text
+    assert "has no samples" in caplog.text
+
+
+def test_strandedness(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
+):
+    """Test command with --strandedness option."""
+    caplog.set_level(logging.INFO)
+    # GIVEN a VALID case_id and genome_version
+    case_id: str = rnafusion_case_id
+    option_key: str = "--strandedness"
+    option_values: List[str] = ["reverse", "forward", "unstranded"]
+    # WHEN running with strandedness option specified
+    for option_value in option_values:
+        result = cli_runner.invoke(
+            config_case,
+            [case_id, option_key, option_value],
+            obj=rnafusion_context,
+        )
+        # THEN command should be generated successfully
+        assert result.exit_code == EXIT_SUCCESS
+        # THEN dry-print should include the option key and value
+        assert option_key.replace("--", "") in caplog.text
+        assert option_value in caplog.text
+
+
+def test_wrong_strandedness(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
+):
+    """Test command with --strandedness option."""
+    caplog.set_level(logging.INFO)
+    # GIVEN a VALID case_id and genome_version
+    case_id: str = rnafusion_case_id
+    option_key: str = "--strandedness"
+    option_value: str = "unknown"
+    # WHEN running with strandedness option specified
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, option_key, option_value],
+        obj=rnafusion_context,
+    )
+    # THEN command should fail
+    assert result.exit_code != EXIT_SUCCESS
+
+
+def test_params_file(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
+):
+    """Test that command generates default params_file."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a VALID case_id and genome_version
+    case_id: str = rnafusion_case_id
+
+    # WHEN running config case
+    result = cli_runner.invoke(config_case, [case_id], obj=rnafusion_context)
+
+    # THEN command should print the rnafusion command-string
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN parameters file should be generated
+    assert "Generating parameters file" in caplog.text
+
+
+def test_reference(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
+):
+    """Test command with given reference directory."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a VALID case_id and reference dir
+    case_id: str = rnafusion_case_id
+    reference_dir: str = Path("non", "default", "path", "to", "references").as_posix()
+
+    # WHEN running config case
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--genomes_base", reference_dir],
+        obj=rnafusion_context,
+    )
+
+    # THEN command should print the rnafusion command-string
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN parameters file should be generated
+    assert "Generating parameters file" in caplog.text
+    assert reference_dir in caplog.text

@@ -9,6 +9,14 @@ class LimsProject(BaseModel):
     id: str = "1"
 
 
+class MockReagentType:
+    """Mock class for reagent type."""
+
+    def __init__(self, label: str, sequence: str):
+        self.label: str = label
+        self.sequence: str = sequence
+
+
 class LimsSample(BaseModel):
     id: str
     name: str = None
@@ -29,10 +37,14 @@ class LimsSample(BaseModel):
 
 
 class MockLimsAPI(LimsAPI):
-    """Mock LIMS API to get target bed from lims"""
+    """Mock LIMS API to get target bed from LIMS."""
 
-    def __init__(self, config: dict = None, samples: List[dict] = []):
+    def __init__(self, config: dict = None, samples: List[dict] = None):
+        if samples is None:
+            samples = []
         self.config = config
+        self.baseuri = "https://clinical-lims-mock.scilifelab.se"
+        self._received_at = None
         self.sample_vars = {}
         self._samples = samples
         self._prep_method = (
@@ -52,10 +64,7 @@ class MockLimsAPI(LimsAPI):
         self._prep_method = method
 
     def sample(self, sample_id: str) -> Optional[dict]:
-        for sample in self._samples:
-            if sample["id"] == sample_id:
-                return sample
-        return None
+        return next((sample for sample in self._samples if sample["id"] == sample_id), None)
 
     def add_sample(self, internal_id: str):
         self.sample_vars[internal_id] = {}
@@ -65,9 +74,9 @@ class MockLimsAPI(LimsAPI):
             self.add_sample(internal_id)
         self.sample_vars[internal_id]["capture_kit"] = capture_kit
 
-    def capture_kit(self, internal_id: str):
-        if internal_id in self.sample_vars:
-            return self.sample_vars[internal_id].get("capture_kit")
+    def capture_kit(self, lims_id: str):
+        if lims_id in self.sample_vars:
+            return self.sample_vars[lims_id].get("capture_kit")
         return None
 
     def get_prep_method(self, lims_id: str) -> str:
@@ -80,7 +89,6 @@ class MockLimsAPI(LimsAPI):
         return self._delivery_method
 
     def get_sample_project(self, sample_id: str) -> str:
-
         return self.sample(sample_id).get("project").get("id")
 
     def get_sample_comment(self, sample_id: str) -> str:
@@ -90,3 +98,24 @@ class MockLimsAPI(LimsAPI):
         self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs
     ):
         pass  # This is completely mocked out
+
+    def set_samples(self, samples):
+        self._samples = samples
+
+    def cache(self):
+        pass  # This is completely mocked out
+
+    def get_received_date(self, lims_id: str):
+        received_date = None
+        for sample in self._samples:
+            if sample.internal_id == lims_id:
+                received_date = sample.received_at
+        return received_date
+
+    def get_sample_rin(self, sample_id: str) -> float:
+        """Mock return sample RIN value."""
+        return 10.0
+
+    def get_latest_rna_input_amount(self, sample_id: str) -> float:
+        """Mock return input amount used in the latest preparation of an RNA sample."""
+        return 300.0

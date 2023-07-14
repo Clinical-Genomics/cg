@@ -1,19 +1,19 @@
 """ Trailblazer API for cg """ ""
+import datetime
 import datetime as dt
 import logging
 from typing import Any, Optional
 
-import requests
 from google.auth import jwt
 from google.auth.crypt import RSASigner
 
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat
+from cg.constants.constants import APIMethods, FileFormat, WorkflowManager
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
 from cg.exc import TrailblazerAPIHTTPError
-from cg.io.controller import ReadStream
+from cg.io.controller import APIRequest, ReadStream
 
 LOG = logging.getLogger(__name__)
 
@@ -27,8 +27,14 @@ class TrailblazerAPI:
         AnalysisStatus.PENDING,
         AnalysisStatus.RUNNING,
         AnalysisStatus.ERROR,
+        AnalysisStatus.QC,
     ]
-    __ONGOING_STATUSES = [AnalysisStatus.PENDING, AnalysisStatus.RUNNING, AnalysisStatus.ERROR]
+    __ONGOING_STATUSES = [
+        AnalysisStatus.PENDING,
+        AnalysisStatus.RUNNING,
+        AnalysisStatus.ERROR,
+        AnalysisStatus.QC,
+    ]
 
     def __init__(self, config: dict):
         self.service_account = config["trailblazer"]["service_account"]
@@ -42,15 +48,17 @@ class TrailblazerAPI:
         jwt_token = jwt.encode(signer=signer, payload=payload).decode("ascii")
         return {"Authorization": f"Bearer {jwt_token}"}
 
-    def query_trailblazer(self, command: str, request_body: dict) -> Any:
+    def query_trailblazer(
+        self, command: str, request_body: dict, method: str = APIMethods.POST
+    ) -> Any:
         url = self.host + "/" + command
         LOG.debug(f"REQUEST HEADER {self.auth_header}")
-        LOG.debug(f"POST: URL={url}; JSON={request_body}")
-        response = requests.post(
-            url=url,
-            headers=self.auth_header,
-            json=request_body,
+        LOG.debug(f"{method}: URL={url}; JSON={request_body}")
+
+        response = APIRequest.api_request_from_content(
+            api_method=method, url=url, headers=self.auth_header, json=request_body
         )
+
         LOG.debug(f"RESPONSE STATUS CODE {response.status_code}")
         if not response.ok:
             raise TrailblazerAPIHTTPError(
@@ -98,14 +106,6 @@ class TrailblazerAPI:
         if response:
             return TrailblazerAnalysis.parse_obj(response)
 
-    def find_analysis(
-        self, case_id: str, started_at: dt.datetime, status: str
-    ) -> Optional[TrailblazerAnalysis]:
-        request_body = {"case_id": case_id, "started_at": str(started_at), "status": status}
-        response = self.query_trailblazer(command="find-analysis", request_body=request_body)
-        if response:
-            return TrailblazerAnalysis.parse_obj(response)
-
     def get_latest_analysis_status(self, case_id: str) -> Optional[str]:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
         if latest_analysis:
@@ -120,10 +120,8 @@ class TrailblazerAPI:
     def is_latest_analysis_completed(self, case_id: str) -> bool:
         return self.get_latest_analysis_status(case_id=case_id) == AnalysisStatus.COMPLETED
 
-    def delete_analysis(self, analysis_id: str, force: bool = False) -> None:
-        """Raises TrailblazerAPIHTTPError"""
-        request_body = {"analysis_id": analysis_id, "force": force}
-        self.query_trailblazer(command="delete-analysis", request_body=request_body)
+    def is_latest_analysis_qc(self, case_id: str) -> bool:
+        return self.get_latest_analysis_status(case_id=case_id) == AnalysisStatus.QC
 
     def mark_analyses_deleted(self, case_id: str) -> Optional[list]:
         """Mark all analyses for case deleted without removing analysis files"""
@@ -148,6 +146,8 @@ class TrailblazerAPI:
         slurm_quality_of_service: SlurmQos,
         email: str = None,
         data_analysis: Pipeline = None,
+        ticket: str = None,
+        workflow_manager: str = WorkflowManager.Slurm,
     ) -> TrailblazerAnalysis:
         request_body = {
             "case_id": case_id,
@@ -157,8 +157,40 @@ class TrailblazerAPI:
             "out_dir": out_dir,
             "priority": slurm_quality_of_service,
             "data_analysis": str(data_analysis).upper(),
+            "ticket": ticket,
+            "workflow_manager": workflow_manager,
         }
         LOG.debug("Submitting job to Trailblazer: %s", request_body)
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
         if response:
             return TrailblazerAnalysis.parse_obj(response)
+
+    def set_analysis_uploaded(self, case_id: str, uploaded_at: datetime) -> None:
+        """Set a uploaded at date for a trailblazer analysis."""
+        request_body = {"case_id": case_id, "uploaded_at": str(uploaded_at)}
+
+        LOG.debug(f"Setting analysis uploaded at for {request_body}")
+        LOG.info(f"{case_id} - uploaded at set to {uploaded_at}")
+        self.query_trailblazer(
+            command="set-analysis-uploaded", request_body=request_body, method=APIMethods.PUT
+        )
+
+    def set_analysis_status(self, case_id: str, status: str) -> datetime:
+        """Set an analysis to a given status."""
+        request_body = {"case_id": case_id, "status": status}
+
+        LOG.debug(f"Request body: {request_body}")
+        LOG.info(f"Setting analysis status to {status} for case {case_id}")
+        self.query_trailblazer(
+            command="set-analysis-status", request_body=request_body, method=APIMethods.PUT
+        )
+
+    def add_comment(self, case_id: str, comment: str):
+        """Adding a comment to a trailblazer analysis."""
+        request_body = {"case_id": case_id, "comment": comment}
+
+        LOG.debug(f"Request body: {request_body}")
+        LOG.info(f"Adding comment: {comment} to case {case_id}")
+        self.query_trailblazer(
+            command="add-comment", request_body=request_body, method=APIMethods.PUT
+        )

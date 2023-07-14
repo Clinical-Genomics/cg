@@ -4,7 +4,7 @@ import logging
 
 import click
 from cg.cli.workflow.commands import (
-    ensure_flowcells_ondisk,
+    ensure_flow_cells_on_disk,
     link,
     resolve_compression,
     store,
@@ -12,6 +12,7 @@ from cg.cli.workflow.commands import (
 )
 from cg.cli.workflow.mip.base import config_case, panel, run, start, start_available
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.analysis import AnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -22,20 +23,21 @@ def mip_dna(
     context: click.Context,
 ):
     """Rare disease DNA workflow"""
-    if context.invoked_subcommand is None:
-        click.echo(context.get_help())
-        return
+    AnalysisAPI.get_help(context)
 
     context.obj.meta_apis["analysis_api"] = MipDNAAnalysisAPI(config=context.obj)
 
 
-mip_dna.add_command(config_case)
-mip_dna.add_command(ensure_flowcells_ondisk)
-mip_dna.add_command(link)
-mip_dna.add_command(panel)
-mip_dna.add_command(resolve_compression)
-mip_dna.add_command(run)
-mip_dna.add_command(start)
-mip_dna.add_command(start_available)
-mip_dna.add_command(store)
-mip_dna.add_command(store_available)
+for sub_cmd in [
+    config_case,
+    ensure_flow_cells_on_disk,
+    link,
+    panel,
+    resolve_compression,
+    run,
+    start,
+    start_available,
+    store,
+    store_available,
+]:
+    mip_dna.add_command(sub_cmd)

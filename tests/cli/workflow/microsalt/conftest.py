@@ -1,12 +1,9 @@
 """ Fixtures for microsalt CLI test """
 
-from pathlib import Path
 
 import pytest
-from cg.apps.hermes.hermes_api import HermesApi
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -26,7 +23,10 @@ class MockLims:
 
             def __init__(self, sample_id):
                 self.sample_id = sample_id
-                self.sample_data = {"comment": "a comment in LimsSample"}
+                self.sample_data = {
+                    "comment": "a comment in LimsSample",
+                    "project": {"id": "microbial_order_test"},
+                }
 
             def get(self, key):
                 """only here to get the sample.get('comment')"""
@@ -88,12 +88,6 @@ def base_context(cg_context: CGConfig, helpers: StoreHelpers, lims_api):
 def fixture_microbial_sample_id():
     """Define a name for a microbial sample"""
     return "microbial_sample_id"
-
-
-@pytest.fixture(name="microbial_sample_name")
-def fixture_microbial_sample_name():
-    """Define a name for a microbial sample"""
-    return "microbial_sample_name"
 
 
 @pytest.fixture(scope="function")

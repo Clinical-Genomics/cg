@@ -6,13 +6,20 @@ from cg.constants import DataDelivery
 
 BALSAMIC_REPORT_ACCREDITED_PANELS = ["gmsmyeloid"]
 
-REPORT_SUPPORTED_PIPELINES = (Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI)
+REPORT_SUPPORTED_PIPELINES = (
+    Pipeline.BALSAMIC,
+    Pipeline.BALSAMIC_UMI,
+    Pipeline.MIP_DNA,
+    Pipeline.RNAFUSION,
+)
+
 REPORT_SUPPORTED_DATA_DELIVERY = (
     DataDelivery.ANALYSIS_FILES,
     DataDelivery.ANALYSIS_SCOUT,
     DataDelivery.FASTQ_ANALYSIS,
-    DataDelivery.FASTQ_QC_ANALYSIS,
     DataDelivery.FASTQ_ANALYSIS_SCOUT,
+    DataDelivery.FASTQ_QC_ANALYSIS,
+    DataDelivery.FASTQ_SCOUT,
     DataDelivery.SCOUT,
 )
 
@@ -58,7 +65,7 @@ REQUIRED_CASE_FIELDS = [
     "applications",
 ]
 
-# Application required fields (OPTIONAL: "version", "prep_category", "description", "limitations")
+# Application required fields (OPTIONAL: "version", "prep_category", "description", "limitations", "external")
 REQUIRED_APPLICATION_FIELDS = [
     "tag",
     "accredited",
@@ -81,6 +88,8 @@ REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS = _REQUIRED_DATA_ANALYSIS_FIELDS + [
     "variant_callers",
 ]
 
+REQUIRED_DATA_ANALYSIS_RNAFUSION_FIELDS = _REQUIRED_DATA_ANALYSIS_FIELDS
+
 # Sample required fields
 _REQUIRED_SAMPLE_FIELDS = [
     "name",
@@ -102,13 +111,15 @@ REQUIRED_SAMPLE_BALSAMIC_FIELDS = _REQUIRED_SAMPLE_FIELDS + [
     "tumour",
 ]
 
+REQUIRED_SAMPLE_RNAFUSION_FIELDS = REQUIRED_SAMPLE_BALSAMIC_FIELDS
+
 # Methods required fields (OPTIONAL: "library_prep", "sequencing")
 REQUIRED_SAMPLE_METHODS_FIELDS = []
 
 # Timestamp required fields (OPTIONAL: "prepared_at", "sequenced_at")
 REQUIRED_SAMPLE_TIMESTAMP_FIELDS = [
     "ordered_at",
-    "received_at",
+    "received_at",  # Optional for external samples
 ]
 
 # Metadata required fields
@@ -152,3 +163,19 @@ REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS = (
         "pct_15x",
     ]
 )
+
+REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS = _REQUIRED_SAMPLE_METADATA_FIELDS + [
+    "bias_5_3",
+    "gc_content",
+    "input_amount",
+    "mapped_reads",
+    "mean_length_r1",
+    "mrna_bases",
+    "pct_adapter",
+    "pct_surviving",
+    "q20_rate",
+    "q30_rate",
+    "ribosomal_bases",
+    "rin",
+    "uniquely_mapped_reads",
+]

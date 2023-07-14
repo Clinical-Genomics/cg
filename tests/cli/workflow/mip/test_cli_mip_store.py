@@ -9,7 +9,7 @@ from click.testing import CliRunner
 def test_cli_store_dry_no_case(
     cli_runner: CliRunner,
     mip_case_id_non_existing: str,
-    dna_mip_context: CGConfig,
+    mip_dna_context: CGConfig,
     caplog,
 ):
     caplog.set_level("ERROR")
@@ -17,7 +17,7 @@ def test_cli_store_dry_no_case(
     # GIVEN a case_id that does not exist in database
 
     # WHEN running command in dry-run mode
-    result = cli_runner.invoke(store, [mip_case_id_non_existing, "--dry-run"], obj=dna_mip_context)
+    result = cli_runner.invoke(store, [mip_case_id_non_existing, "--dry-run"], obj=mip_dna_context)
 
     # THEN command does not terminate successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -32,15 +32,14 @@ def test_cli_store(
     mip_case_id: str,
     mip_deliverables_file,
     mip_hermes_dna_deliverables_response_data,
-    dna_mip_context: CGConfig,
+    mip_dna_context: CGConfig,
     timestamp_yesterday,
     case_qc_sample_info_path,
     caplog,
     mocker,
 ):
-
     caplog.set_level("INFO")
-    mip_analysis_api: MipDNAAnalysisAPI = dna_mip_context.meta_apis["analysis_api"]
+    mip_analysis_api: MipDNAAnalysisAPI = mip_dna_context.meta_apis["analysis_api"]
 
     # GIVEN a case_id that does exist in database
 
@@ -64,7 +63,7 @@ def test_cli_store(
     MipDNAAnalysisAPI.get_sample_info_path.return_value = case_qc_sample_info_path
 
     # WHEN running command
-    result = cli_runner.invoke(store, [mip_case_id], obj=dna_mip_context)
+    result = cli_runner.invoke(store, [mip_case_id], obj=mip_dna_context)
 
     # THEN command terminates successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -74,7 +73,7 @@ def test_cli_store(
     assert "stored in StatusDB" in caplog.text
 
     # THEN action of case in StatusDB is set to None
-    assert not mip_analysis_api.status_db.family(mip_case_id).action
+    assert not mip_analysis_api.status_db.get_case_by_internal_id(internal_id=mip_case_id).action
 
 
 def test_cli_store_bundle_already_added(
@@ -82,14 +81,13 @@ def test_cli_store_bundle_already_added(
     mip_case_id: str,
     mip_deliverables_file,
     mip_hermes_dna_deliverables_response_data,
-    dna_mip_context: CGConfig,
+    mip_dna_context: CGConfig,
     timestamp_yesterday,
     caplog,
     mocker,
 ):
-
     caplog.set_level("INFO")
-    mip_analysis_api: MipDNAAnalysisAPI = dna_mip_context.meta_apis["analysis_api"]
+    mip_analysis_api: MipDNAAnalysisAPI = mip_dna_context.meta_apis["analysis_api"]
 
     # GIVEN a case_id that does exist in database
 
@@ -109,10 +107,10 @@ def test_cli_store_bundle_already_added(
     HermesApi.create_housekeeper_bundle.return_value = mip_hermes_dna_deliverables_response_data
 
     # GIVEN deliverables have already been stored in Housekeeper
-    cli_runner.invoke(store, [mip_case_id], obj=dna_mip_context)
+    cli_runner.invoke(store, [mip_case_id], obj=mip_dna_context)
 
     # WHEN running command
-    result = cli_runner.invoke(store, [mip_case_id], obj=dna_mip_context)
+    result = cli_runner.invoke(store, [mip_case_id], obj=mip_dna_context)
 
     # THEN command does not terminate successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -127,14 +125,14 @@ def test_cli_store_available_case_is_running(
     mip_case_dirs,
     mip_deliverables_file,
     mip_hermes_dna_deliverables_response_data,
-    dna_mip_context: CGConfig,
+    mip_dna_context: CGConfig,
     timestamp_yesterday,
     case_qc_sample_info_path,
     caplog,
     mocker,
 ):
     caplog.set_level("INFO")
-    mip_analysis_api: MipDNAAnalysisAPI = dna_mip_context.meta_apis["analysis_api"]
+    mip_analysis_api: MipDNAAnalysisAPI = mip_dna_context.meta_apis["analysis_api"]
     # GIVEN a case_id that does exist in database
 
     # GIVEN that case action is "running"
@@ -159,11 +157,11 @@ def test_cli_store_available_case_is_running(
     # GIVEN that the case analysis is finished in trailblazer
     mocker.patch.object(MipDNAAnalysisAPI, "get_cases_to_store")
     MipDNAAnalysisAPI.get_cases_to_store.return_value = [
-        mip_analysis_api.status_db.family(internal_id=mip_case_id)
+        mip_analysis_api.status_db.get_case_by_internal_id(internal_id=mip_case_id)
     ]
 
     # WHEN running command
-    result = cli_runner.invoke(store_available, [], obj=dna_mip_context)
+    result = cli_runner.invoke(store_available, [], obj=mip_dna_context)
 
     # THEN command terminates successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -176,7 +174,7 @@ def test_cli_store_available_case_is_running(
     assert mip_case_id in caplog.text
 
     # THEN case action is set to None after storing
-    assert not mip_analysis_api.status_db.family(mip_case_id).action
+    assert not mip_analysis_api.status_db.get_case_by_internal_id(internal_id=mip_case_id).action
 
 
 def test_cli_store_available_case_not_running(
@@ -184,20 +182,19 @@ def test_cli_store_available_case_not_running(
     mip_case_id,
     mip_deliverables_file,
     mip_hermes_dna_deliverables_response_data,
-    dna_mip_context: CGConfig,
+    mip_dna_context: CGConfig,
     timestamp_yesterday,
     caplog,
     mocker,
 ):
-
     caplog.set_level("INFO")
-    mip_analysis_api: MipDNAAnalysisAPI = dna_mip_context.meta_apis["analysis_api"]
+    mip_analysis_api: MipDNAAnalysisAPI = mip_dna_context.meta_apis["analysis_api"]
 
     # GIVEN a case_id that does exist in database
 
     # GIVEN that case action is None
-    mip_analysis_api.status_db.family(mip_case_id).action = None
-    mip_analysis_api.status_db.commit()
+    mip_analysis_api.status_db.get_case_by_internal_id(internal_id=mip_case_id).action = None
+    mip_analysis_api.status_db.session.commit()
 
     # GIVEN deliverables were generated and could be found
     mocker.patch.object(MipDNAAnalysisAPI, "get_deliverables_file_path")
@@ -212,7 +209,7 @@ def test_cli_store_available_case_not_running(
     HermesApi.create_housekeeper_bundle.return_value = mip_hermes_dna_deliverables_response_data
 
     # WHEN running command
-    result = cli_runner.invoke(store_available, [], obj=dna_mip_context)
+    result = cli_runner.invoke(store_available, [], obj=mip_dna_context)
 
     # THEN command terminates successfully
     assert result.exit_code == EXIT_SUCCESS

@@ -2,7 +2,7 @@ import logging
 from enum import Enum
 from typing import Dict, Union, List
 
-import cg.store.models
+from cg.store.models import Pool, Sample
 import genologics.entities
 from cg.apps.lims import LimsAPI
 from cg.store import Store
@@ -21,13 +21,6 @@ class PoolState(Enum):
     DELIVERED = "delivered"
 
 
-class MicrobialState(Enum):
-    RECEIVED = "received"
-    PREPARED = "prepared"
-    SEQUENCED = "sequenced"
-    DELIVERED = "delivered"
-
-
 class IncludeOptions(Enum):
     UNSET = "unset"
     NOTINVOICED = "not-invoiced"
@@ -40,14 +33,14 @@ class TransferLims(object):
         self.lims = lims
 
         self._sample_functions = {
-            SampleState.RECEIVED: self.status.samples_to_receive,
-            SampleState.PREPARED: self.status.samples_to_prepare,
-            SampleState.DELIVERED: self.status.samples_to_deliver,
+            SampleState.RECEIVED: self.status.get_samples_to_receive,
+            SampleState.PREPARED: self.status.get_samples_to_prepare,
+            SampleState.DELIVERED: self.status.get_samples_to_deliver,
         }
 
         self._pool_functions = {
-            PoolState.RECEIVED: self.status.pools_to_receive,
-            PoolState.DELIVERED: self.status.pools_to_deliver,
+            PoolState.RECEIVED: self.status.get_pools_to_receive,
+            PoolState.DELIVERED: self.status.get_all_pools_to_deliver,
         }
 
         self._date_functions = {
@@ -58,30 +51,26 @@ class TransferLims(object):
             PoolState.DELIVERED: self.lims.get_delivery_date,
         }
 
-    def _get_all_samples_not_yet_delivered(self):
-        return self.status.samples_not_delivered()
-
     def transfer_samples(
         self, status_type: SampleState, include: str = "unset", sample_id: str = None
     ):
         """Transfer information about samples."""
 
         if sample_id:
-            samples = self.status.Sample.query.filter_by(internal_id=sample_id)
+            samples: List[Sample] = self.status.get_samples_by_internal_id(internal_id=sample_id)
         else:
-            samples = self._get_samples_to_include(include, status_type)
+            samples: List[Sample] = self._get_samples_to_include(include, status_type)
 
         if samples is None:
             LOG.info(f"No samples to process found with {include} {status_type.value}")
             return
         else:
-            LOG.info(f"{samples.count()} samples to process")
+            LOG.info(f"{len(samples)} samples to process")
 
         for sample_obj in samples:
             lims_date = self._date_functions[status_type](sample_obj.internal_id)
             statusdb_date = getattr(sample_obj, f"{status_type.value}_at")
             if lims_date:
-
                 if statusdb_date and statusdb_date.date() == lims_date:
                     continue
 
@@ -91,7 +80,7 @@ class TransferLims(object):
                 )
 
                 setattr(sample_obj, f"{status_type.value}_at", lims_date)
-                self.status.commit()
+                self.status.session.commit()
             else:
                 LOG.debug(f"no {status_type.value} date found for {sample_obj.internal_id}")
 
@@ -100,9 +89,9 @@ class TransferLims(object):
         if include == IncludeOptions.UNSET.value:
             samples = self._get_samples_in_step(status_type)
         elif include == IncludeOptions.NOTINVOICED.value:
-            samples = self.status.samples_not_invoiced()
+            samples = self.status.get_samples_not_invoiced()
         elif include == IncludeOptions.ALL.value:
-            samples = self._get_all_relevant_samples()
+            samples = self.status.get_samples_not_down_sampled()
         return samples
 
     def transfer_pools(self, status_type: PoolState):
@@ -132,17 +121,14 @@ class TransferLims(object):
                     status_date,
                 )
                 setattr(pool_obj, f"{status_type.value}_at", status_date)
-                self.status.commit()
+                self.status.session.commit()
                 break
 
-    def _get_samples_in_step(self, status_type):
+    def _get_samples_in_step(self, status_type) -> List[Sample]:
         return self._sample_functions[status_type]()
 
-    def _get_all_relevant_samples(self):
-        return self.status.samples_not_downsampled()
-
     @staticmethod
-    def _is_pool_valid(pool_obj: cg.store.models.Pool, ticket: str, number_of_samples: int) -> bool:
+    def _is_pool_valid(pool_obj: Pool, ticket: str, number_of_samples: int) -> bool:
         """Checks if a pool object can be transferred. A pool needs to have a ticket number and at least one sample"""
 
         if ticket is None:
@@ -154,9 +140,7 @@ class TransferLims(object):
         return True
 
     @staticmethod
-    def _is_sample_valid(
-        pool_obj: cg.store.models.Pool, sample_obj: genologics.entities.Sample
-    ) -> bool:
+    def _is_sample_valid(pool_obj: Pool, sample_obj: genologics.entities.Sample) -> bool:
         """Checks if a sample can have the status date set. A sample needs to have a udf "pool name" that matches the
         name of the pool object it's part of"""
         if sample_obj.udf.get("pool name") is None:

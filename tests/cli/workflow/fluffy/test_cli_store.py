@@ -39,7 +39,6 @@ def test_cli_store(
     caplog,
     mocker,
 ):
-
     caplog.set_level("INFO")
     fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
 
@@ -71,7 +70,9 @@ def test_cli_store(
     assert "stored in StatusDB" in caplog.text
 
     # THEN action of case in StatusDB is set to None
-    assert not fluffy_analysis_api.status_db.family(fluffy_case_id_existing).action
+    assert not fluffy_analysis_api.status_db.get_case_by_internal_id(
+        internal_id=fluffy_case_id_existing
+    ).action
 
 
 def test_cli_store_bundle_already_added(
@@ -156,7 +157,9 @@ def test_cli_store_available_case_is_running(
     assert fluffy_case_id_existing in caplog.text
 
     # THEN case action is set to None after storing
-    assert not fluffy_analysis_api.status_db.family(fluffy_case_id_existing).action
+    assert not fluffy_analysis_api.status_db.get_case_by_internal_id(
+        internal_id=fluffy_case_id_existing
+    ).action
 
 
 def test_cli_store_available_case_not_running(
@@ -169,15 +172,16 @@ def test_cli_store_available_case_not_running(
     caplog,
     mocker,
 ):
-
     caplog.set_level("INFO")
     fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
 
     # GIVEN a case_id that does exist in database
 
     # GIVEN that case action is None
-    fluffy_analysis_api.status_db.family(fluffy_case_id_existing).action = None
-    fluffy_analysis_api.status_db.commit()
+    fluffy_analysis_api.status_db.get_case_by_internal_id(
+        internal_id=fluffy_case_id_existing
+    ).action = None
+    fluffy_analysis_api.status_db.session.commit()
 
     # GIVEN deliverables were generated and could be found
     mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_file_path")

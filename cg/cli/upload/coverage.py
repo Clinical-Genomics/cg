@@ -2,14 +2,14 @@
 
 import click
 from cg.meta.upload.coverage import UploadCoverageApi
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family
 
 from .utils import suggest_cases_to_upload
 
 
-@click.command()
+@click.command("coverage")
 @click.option(
     "-r",
     "--re-upload",
@@ -18,7 +18,7 @@ from .utils import suggest_cases_to_upload
 )
 @click.argument("family_id", required=False)
 @click.pass_obj
-def coverage(context: CGConfig, re_upload, family_id):
+def upload_coverage(context: CGConfig, re_upload, family_id):
     """Upload coverage from an analysis to Chanjo."""
 
     click.echo(click.style("----------------- COVERAGE --------------------"))
@@ -29,7 +29,7 @@ def coverage(context: CGConfig, re_upload, family_id):
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
 
-    case_obj: models.Family = status_db.family(family_id)
+    case_obj: Family = status_db.get_case_by_internal_id(internal_id=family_id)
     upload_coverage_api = UploadCoverageApi(
         status_api=status_db,
         hk_api=context.housekeeper_api,

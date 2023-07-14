@@ -1,45 +1,39 @@
-name: CG Installation tests
+name: CG Installation Tests
 
-on: ["pull_request"]
+on:
+  pull_request:
 
 jobs:
-
   installations:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.7]
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-    # Check out cg code
-    - name: Check out git repository
-      uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version}}
 
-    # Set up python
-    - name: Set up Python ${{ matrix.python-version}}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version}}
+      - name: Install and Upgrade Pip
+        run: |
+          python -m pip install --upgrade pip
+          echo ${{ matrix.python-version}}
+          pip --version
 
-    - name: Intall pip
-      # Make sure that we have correct python version and pip version
-      # For details see .github/workflows/server_info.md
-      run: |
-        python -m pip install --upgrade pip==21.0.1
-        echo $PYTHON_VERSION
-        pip --version
-      env:
-        PYTHON_VERSION: ${{ matrix.python-version}}
-        OLD_VERSION: 3.7
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('**/requirements*.txt') }}
 
-    - name: Production Dependencies
-      run: |
-        pip install .
-        pip check
-
-    - name: Development Dependencies
-      run: |
-        pip install -r requirements-dev.txt
-        pip check
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          pip install -r requirements.txt -r requirements-dev.txt
+          pip check

@@ -1,3 +1,9 @@
+# LIMS constants
+
+from cg.utils.enums import StrEnum
+
+YES_NO_LIMS_BOOLEANS = ["require_qc_ok", "tumour", "verified_organism"]
+
 PROP2UDF = {
     "application": "Sequencing Analysis",
     "bait_set": "Bait Set",
@@ -30,11 +36,13 @@ PROP2UDF = {
     "reference_genome": "Reference Genome Microbial",
     "region": "Region",
     "region_code": "Region Code",
-    "require_qcok": "Process only if QC OK",
+    "require_qc_ok": "Process only if QC OK",
+    "rin": "RIN",
     "rml_plate_name": "RML plate name",
     "selection_criteria": "Selection Criteria",
     "sequencing_qc_pass": "Passed Sequencing QC",
     "sex": "Gender",
+    "skip_reception_control": "Skip Reception Control QC",
     "source": "Source",
     "target_reads": "Reads missing (M)",
     "tissue_block_size": "Tissue Block Size",
@@ -52,10 +60,15 @@ MASTER_STEPS_UDFS = {
         "Hybridize Library TWIST v2": "Bait Set",
         "Target enrichment TWIST v1": "Bait Set",
     },
+    "rna_prep_step": {
+        "Aliquot Samples for Fragmentation (RNA) v1": "Amount needed (ng)",
+    },
     "prep_method_step": {
         "Library Preparation (Cov) v1": {
             "method_number": "Method document",
             "method_version": "Document version",
+            "atlas_document": "Library Preparation Method",
+            "atlas_version": "Atlas Version",
         },
         "Library Prep (Dev) v3": {
             "method_number": "Method Document",
@@ -68,6 +81,8 @@ MASTER_STEPS_UDFS = {
         "End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free DNA)": {
             "method_number": "Method document",
             "method_version": "Method document version",
+            "atlas_document": "Library Preparation Method",
+            "atlas_version": "Atlas Version",
         },
         "obsolete_CG002 - Hybridize Library  (SS XT)": {
             "method_number": "Method document",
@@ -76,6 +91,8 @@ MASTER_STEPS_UDFS = {
         "CG002 - Microbial Library Prep (Nextera)": {
             "method_number": "Method",
             "method_version": "Method Version",
+            "atlas_document": "Library Preparation Method",
+            "atlas_version": "Atlas Version",
         },
         "End-Repair and A-tailing TWIST v1": {
             "method_number": "Method document",
@@ -84,6 +101,14 @@ MASTER_STEPS_UDFS = {
         "KAPA Library Preparation TWIST v1": {
             "method_number": "Method document",
             "method_version": "Document version",
+            "atlas_document": "Library Preparation Method",
+            "atlas_version": "Atlas Version",
+        },
+        "A-tailing and Adapter ligation (RNA) v1": {
+            "method_number": "Method document",
+            "method_version": "Document version",
+            "atlas_document": "Library Preparation Method",
+            "atlas_version": "Atlas Version",
         },
     },
     "sequencing_method_step": {
@@ -98,6 +123,8 @@ MASTER_STEPS_UDFS = {
         "Define Run Format and Calculate Volumes (Nova Seq)": {
             "method_number": "Method",
             "method_version": "Version",
+            "atlas_document": "Sequencing Method",
+            "atlas_version": "Atlas Version",
         },
     },
     "delivery_method_step": {
@@ -105,8 +132,23 @@ MASTER_STEPS_UDFS = {
             "method_number": "Method Document",
             "method_version": "Method Version",
         },
-        "Delivery v1": {"method_number": "Method Document", "method_version": "Method Version"},
+        "Delivery v1": {
+            "method_number": "Method Document",
+            "method_document_2": "Method document 2",
+            "method_version": "Method Version",
+            "atlas_version": "Atlas Version",
+        },
     },
 }
 
 PROCESSES = {"sequenced_date": "AUTOMATED - NovaSeq Run"}
+
+
+class DocumentationMethod(StrEnum):
+    ATLAS: str = "Atlas"
+    AM: str = "AM"
+
+
+class LimsArtifactTypes(StrEnum):
+    ANALYTE: str = "Analyte"
+    RESULT_FILE: str = "ResultFile"

@@ -11,7 +11,8 @@ from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver_ticket import DeliverTicketAPI
 
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
 
@@ -23,7 +24,23 @@ DELIVERY_TYPE = click.option(
     type=click.Choice(PIPELINE_ANALYSIS_OPTIONS),
     required=True,
 )
+FORCE_ALL = click.option(
+    "--force-all",
+    help=(
+        "Force delivery of all sample files "
+        "- disregarding of amount of reads or previous deliveries"
+    ),
+    is_flag=True,
+)
 TICKET_ID_ARG = click.argument("ticket", type=str, required=True)
+
+IGNORE_MISSING_BUNDLES = click.option(
+    "-i",
+    "--ignore-missing-bundles",
+    help="Ignore errors due to missing case bundles",
+    is_flag=True,
+    default=False,
+)
 
 
 @click.group()
@@ -39,6 +56,8 @@ def deliver():
 @click.option(
     "-t", "--ticket", type=str, help="Deliver the files for ALL cases connected to a ticket"
 )
+@FORCE_ALL
+@IGNORE_MISSING_BUNDLES
 @click.pass_obj
 def deliver_analysis(
     context: CGConfig,
@@ -46,6 +65,8 @@ def deliver_analysis(
     ticket: Optional[str],
     delivery_type: List[str],
     dry_run: bool,
+    force_all: bool,
+    ignore_missing_bundles: bool,
 ):
     """Deliver analysis files to customer inbox
 
@@ -70,17 +91,19 @@ def deliver_analysis(
             sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"],
             project_base_path=Path(inbox),
             delivery_type=delivery,
+            force_all=force_all,
+            ignore_missing_bundles=ignore_missing_bundles,
         )
         deliver_api.set_dry_run(dry_run)
-        cases: List[models.Family] = []
+        cases: List[Family] = []
         if case_id:
-            case_obj: models.Family = status_db.family(case_id)
+            case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
             if not case_obj:
                 LOG.warning("Could not find case %s", case_id)
                 return
             cases.append(case_obj)
         else:
-            cases: List[models.Family] = status_db.get_cases_from_ticket(ticket=ticket).all()
+            cases: List[Family] = status_db.get_cases_by_ticket_id(ticket_id=ticket)
             if not cases:
                 LOG.warning("Could not find cases for ticket %s", ticket)
                 return
@@ -122,6 +145,8 @@ def concatenate(context: click.Context, ticket: str, dry_run: bool):
 @deliver.command(name="ticket")
 @DELIVERY_TYPE
 @DRY_RUN
+@FORCE_ALL
+@IGNORE_MISSING_BUNDLES
 @click.option(
     "-t",
     "--ticket",
@@ -132,9 +157,11 @@ def concatenate(context: click.Context, ticket: str, dry_run: bool):
 @click.pass_context
 def deliver_ticket(
     context: click.Context,
-    ticket: str,
     delivery_type: List[str],
     dry_run: bool,
+    force_all: bool,
+    ticket: str,
+    ignore_missing_bundles: bool,
 ):
     """Will first collect hard links in the customer inbox then
     concatenate fastq files if needed and finally send the folder
@@ -143,10 +170,15 @@ def deliver_ticket(
     cg_context: CGConfig = context.obj
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
     is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket=ticket)
-    if is_upload_needed:
+    if is_upload_needed or force_all:
         LOG.info("Delivering files to customer inbox on the HPC")
         context.invoke(
-            deliver_analysis, ticket=ticket, delivery_type=delivery_type, dry_run=dry_run
+            deliver_analysis,
+            delivery_type=delivery_type,
+            dry_run=dry_run,
+            force_all=force_all,
+            ticket=ticket,
+            ignore_missing_bundles=ignore_missing_bundles,
         )
     else:
         LOG.info("Files already delivered to customer inbox on the HPC")

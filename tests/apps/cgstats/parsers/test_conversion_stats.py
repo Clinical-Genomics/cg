@@ -13,5 +13,5 @@ def test_parse_demux_stats(conversion_stats_path: Path):
     # WHEN instantiating a conversion stats parser
     parser: ConversionStats = ConversionStats(conversion_stats_path=conversion_stats_path)
 
-    # THEN assert that the the parser have some content
+    # THEN assert that the parser have some content
     assert parser.lanes_to_barcode

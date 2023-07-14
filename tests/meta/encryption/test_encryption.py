@@ -1,12 +1,10 @@
 """Tests for the meta EncryptionAPI and SpringEncryptionAPI"""
 import logging
 import pathlib
-from pathlib import Path
 
 import mock
 import pytest
 
-import cg.utils.checksum.checksum
 from cg.exc import ChecksumFailedError
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 
@@ -54,56 +52,6 @@ def test_generate_temporary_passphrase(mocker, binary_path):
     # THEN the passphrase file should be generated as a temporary file
     assert type(result) is pathlib.PosixPath
     assert result.exists()
-
-
-@mock.patch("cg.meta.encryption.encryption.sha512_checksum")
-def test_compare_file_checksums_equal(
-    mock_file_checksum,
-    binary_path,
-    spring_file_path,
-    checksum_spring_file_path,
-    checksum_result_1,
-    caplog,
-):
-    """Tests the compare_file_checksum method"""
-    # GIVEN two identical checksum results
-    caplog.set_level(logging.INFO)
-    encryption_api = SpringEncryptionAPI(binary_path=binary_path)
-
-    mock_file_checksum.side_effect = [checksum_result_1, checksum_result_1]
-
-    # WHEN comparing the checksums of those files
-    encryption_api.compare_file_checksums(
-        original_file=spring_file_path, decrypted_file_checksum=checksum_spring_file_path
-    )
-
-    # THEN the checksum comparison should pass
-    assert "Checksum comparison successful!" in caplog.text
-
-
-@mock.patch("cg.meta.encryption.encryption.sha512_checksum")
-def test_compare_file_checksums_not_equal(
-    mock_file_checksum,
-    binary_path,
-    spring_file_path,
-    checksum_spring_file_path,
-    checksum_result_1,
-    checksum_result_2,
-):
-    """Tests the compare_file_checksum method"""
-    # GIVEN two nonidentical checksum results
-    encryption_api = SpringEncryptionAPI(binary_path=binary_path)
-
-    mock_file_checksum.side_effect = [checksum_result_1, checksum_result_2]
-
-    # WHEN comparing the checksums of those files
-    with pytest.raises(ChecksumFailedError) as error:
-        encryption_api.compare_file_checksums(
-            original_file=spring_file_path, decrypted_file_checksum=checksum_spring_file_path
-        )
-
-    # THEN the checksum comparison should fail and an exception should be raised
-    assert error.value.message == "Checksum comparison failed!"
 
 
 def test_get_asymmetric_encryption_command(

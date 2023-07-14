@@ -1,14 +1,12 @@
 """ Test the CLI for run mip-dna """
 import logging
-import pytest
 
 from cg.cli.workflow.mip_dna.base import run
-from cg.exc import CgError
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 
 def test_cg_dry_run(
-    cli_runner, mocker, caplog, case_id, email_adress, dna_mip_context, mip_dna_fixture_config_path
+    cli_runner, mocker, caplog, case_id, email_adress, mip_dna_context, mip_dna_fixture_config_path
 ):
     """Test print the MIP run to console"""
 
@@ -20,7 +18,7 @@ def test_cg_dry_run(
     # GIVEN a cli function
     # WHEN we run a case in dry run mode
     result = cli_runner.invoke(
-        run, ["--dry-run", "--email", email_adress, case_id], obj=dna_mip_context
+        run, ["--dry-run", "--email", email_adress, case_id], obj=mip_dna_context
     )
     # THEN command is run successfully
     assert result.exit_code == 0
@@ -30,7 +28,7 @@ def test_cg_dry_run(
 
 
 def test_mip_dry_run(
-    cli_runner, mocker, caplog, case_id, email_adress, dna_mip_context, mip_dna_fixture_config_path
+    cli_runner, mocker, caplog, case_id, email_adress, mip_dna_context, mip_dna_fixture_config_path
 ):
     """Test print the MIP run to console"""
 
@@ -44,7 +42,7 @@ def test_mip_dry_run(
     # GIVEN a cli function
     # WHEN we run a case in dry run mode
     result = cli_runner.invoke(
-        run, ["--mip-dry-run", "--email", email_adress, case_id], obj=dna_mip_context
+        run, ["--mip-dry-run", "--email", email_adress, case_id], obj=mip_dna_context
     )
 
     # THEN command is run successfully
@@ -60,7 +58,7 @@ def test_mip_run(
     caplog,
     case_id,
     email_adress,
-    dna_mip_context,
+    mip_dna_context,
     trailblazer_api,
     mip_dna_fixture_config_path,
 ):
@@ -78,7 +76,7 @@ def test_mip_run(
 
     # GIVEN a cli function
     # WHEN we run a case
-    result = cli_runner.invoke(run, ["--email", email_adress, case_id], obj=dna_mip_context)
+    result = cli_runner.invoke(run, ["--email", email_adress, case_id], obj=mip_dna_context)
 
     # THEN command is run successfully
     assert result.exit_code == 0
@@ -93,7 +91,7 @@ def test_mip_run_fail(
     caplog,
     case_id,
     email_adress,
-    dna_mip_context,
+    mip_dna_context,
     tb_api,
     mip_dna_fixture_config_path,
 ):
@@ -111,7 +109,7 @@ def test_mip_run_fail(
 
     # GIVEN a cli function
     # WHEN we run a case
-    result = cli_runner.invoke(run, ["--email", email_adress, case_id], obj=dna_mip_context)
+    result = cli_runner.invoke(run, ["--email", email_adress, case_id], obj=mip_dna_context)
 
     # THEN command should return an exit fail code
     assert result.exit_code == 1

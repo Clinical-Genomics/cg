@@ -1,7 +1,6 @@
 """Tests for the prepare_fastq_api"""
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store
@@ -9,22 +8,27 @@ from cg.store.models import Family
 
 
 def test_is_spring_decompression_needed_when_true(
-    populated_compress_spring_api: CompressAPI, analysis_store_single_case: Store, case_id: str
+    populated_compress_spring_api: CompressAPI,
+    analysis_store_single_case: Store,
+    case_id: str,
+    sample_id: str,
 ):
-    """Test when spring decompression is needed"""
+    """Test when spring decompression is needed."""
 
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
         store=analysis_store_single_case, compress_api=populated_compress_spring_api
     )
     # GIVEN a store with a case that has linked samples
-    case_obj: Family = analysis_store_single_case.family(case_id)
+    case_obj: Family = analysis_store_single_case.get_case_by_internal_id(internal_id=case_id)
     assert case_obj
     # GIVEN that the case has linked samples
     link_objects = [link_obj for link_obj in case_obj.links]
     assert link_objects
     # GIVEN a that there exists a version with only spring in housekeeper
-    version_object = populated_compress_spring_api.get_latest_version("ADM1")
+    version_object = populated_compress_spring_api.hk_api.get_latest_bundle_version(
+        bundle_name=sample_id
+    )
     for file in version_object.files:
         assert file.path.endswith(".spring")
 
@@ -47,7 +51,7 @@ def test_is_spring_decompression_needed_when_false(
         store=analysis_store_single_case, compress_api=populated_compress_api_fastq_spring
     )
     # GIVEN a store with a case that has linked samples
-    case_obj: Family = analysis_store_single_case.family(case_id)
+    case_obj: Family = analysis_store_single_case.get_case_by_internal_id(internal_id=case_id)
     assert case_obj
     # GIVEN that the case has linked samples
     link_objects = [link_obj for link_obj in case_obj.links]
@@ -108,21 +112,24 @@ def test_no_fastq_in_housekeeper(
     populated_compress_spring_api: CompressAPI,
     analysis_store_single_case: Store,
     case_id: str,
+    sample_id: str,
 ):
-    """Test when fastq needs to be added to housekeeper"""
+    """Test when FASTQ needs to be added to Housekeeper."""
 
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
         store=analysis_store_single_case, compress_api=populated_compress_spring_api
     )
     # GIVEN a store with a case that has linked samples
-    case_obj: Family = analysis_store_single_case.family(case_id)
+    case_obj: Family = analysis_store_single_case.get_case_by_internal_id(internal_id=case_id)
     assert case_obj
     # GIVEN that the case has linked samples
     link_objects = [link_obj for link_obj in case_obj.links]
     assert link_objects
     # GIVEN a that there exists a version with only spring in housekeeper
-    version_object = populated_compress_spring_api.get_latest_version("ADM1")
+    version_object = populated_compress_spring_api.hk_api.get_latest_bundle_version(
+        bundle_name=sample_id
+    )
     for file in version_object.files:
         assert file.path.endswith(".spring")
 

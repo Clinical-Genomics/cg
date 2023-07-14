@@ -5,10 +5,13 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict, Set
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.store import models
+from cg.constants import SequencingFileTag
+from cg.exc import HousekeeperBundleVersionMissingError
+
+from housekeeper.store.models import File, Version, Bundle
 
 ROOT_PATH = tempfile.TemporaryDirectory().name
 
@@ -170,18 +173,33 @@ class MockHousekeeperAPI:
         self.root_path = config.get("housekeeper", {}).get("root", str(ROOT_PATH))
 
     # Mock specific functions
-    def fetch_file_from_version(self, version_obj, tags):
+    def get_file_from_version(self, version: Version, tags: Set[str]):
         if tags.intersection(self._missing_tags):
             return None
         return self._files[0]
 
-    def find_file_in_latest_version(self, case_id, tags):
+    def get_latest_file_from_version(self, version: Version, tags: Set[str]):
+        if tags.intersection(self._missing_tags):
+            return None
+        return self._files[-1]
 
-        for file_obj in self._files:
-            tag: models.Tag
-            file_tags = {tag.name for tag in file_obj.tags}
-            if tags.issubset(file_tags):
-                return file_obj
+    def get_file_from_latest_version(self, bundle_name: str, tags: List[str]) -> Optional[File]:
+        """Find a file in the latest version of a bundle."""
+        version: Version = self.last_version(bundle=bundle_name)
+        if not version:
+            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
+            raise HousekeeperBundleVersionMissingError
+        return self.files(version=version.id, tags=tags).first()
+
+    def get_files_from_latest_version(
+        self, bundle_name: str, tags: List[str]
+    ) -> Optional[List[File]]:
+        """Return files in the latest version of a bundle."""
+        version: Version = self.last_version(bundle=bundle_name)
+        if not version:
+            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
+            raise HousekeeperBundleVersionMissingError
+        return self.files(version=version.id, tags=tags)
 
     def add_missing_tag(self, tag_name: str):
         """Add a missing tag"""
@@ -252,14 +270,14 @@ class MockHousekeeperAPI:
         tags = {}
         for tag_name in tag_names:
             if self.tag_exists(tag_name):
-                tag_obj = self.tag(tag_name)
+                tag_obj = self.get_tag(tag_name)
             else:
                 tag_obj = self.new_tag(tag_name)
                 self._tags.append(tag_obj)
             tags[tag_name] = tag_obj
         return tags
 
-    def tag(self, name: str):
+    def get_tag(self, name: str):
         """Fetch a tag"""
         for tag_obj in self._tags:
             if tag_obj.name == name:
@@ -290,14 +308,14 @@ class MockHousekeeperAPI:
         """Fetch a version"""
         return self._version_obj
 
-    def get_create_version(self, bundle: str):
+    def get_create_version(self, bundle_name: str):
         """Returns the latest version of a bundle if it exists. If no creates a bundle and returns its version"""
-        last_version = self.last_version(bundle=bundle)
+        last_version = self.last_version(bundle=bundle_name)
         if not last_version:
-            LOG.info("Creating bundle for sample %s in housekeeper", bundle)
+            LOG.info(f"Creating bundle for sample {bundle_name} in housekeeper")
             bundle_result = self.add_bundle(
                 bundle_data={
-                    "name": bundle,
+                    "name": bundle_name,
                     "created": datetime.datetime.now(),
                     "expires": None,
                     "files": [],
@@ -391,7 +409,7 @@ class MockHousekeeperAPI:
         self._file_included = True
 
     def last_version(self, *args, **kwargs):
-        """Gets the latest version of a bundle"""
+        """Gets the latest version of a bundle."""
         if self._last_version is False:
             return None
         if len(args) > 0:
@@ -400,8 +418,18 @@ class MockHousekeeperAPI:
                 return bundle.versions[-1]
         return self._version_obj
 
+    def get_latest_bundle_version(self, bundle_name: str):
+        """Get latest version of a bundle or log."""
+        last_version = self.last_version(bundle_name)
+        if not last_version:
+            LOG.warning(f"No bundle found for {bundle_name} in Housekeeper")
+            return None
+        LOG.debug(f"Found version obj for {bundle_name}: {repr(last_version)}")
+        return last_version
+
     def get_root_dir(self):
-        """Returns the root dir of Housekeeper"""
+        """Returns the root dir of Housekeeper."""
+
         return self.root_path
 
     def get_files(self, *args, **kwargs):
@@ -419,13 +447,13 @@ class MockHousekeeperAPI:
         if isinstance(tags, str):
             tags = [tags]
         for tag_name in tags:
-            if not self.tag(tag_name):
+            if not self.get_tag(tag_name):
                 self.add_tag(tag_name)
 
         new_file = self.new_file(
             path=str(Path(path).absolute()),
             to_archive=to_archive,
-            tags=[self.tag(tag_name) for tag_name in tags],
+            tags=[self.get_tag(tag_name) for tag_name in tags],
         )
         if not version_obj:
             version_obj = self.new_version(created_at=datetime.datetime.now())
@@ -449,7 +477,7 @@ class MockHousekeeperAPI:
                 )
         return file_paths
 
-    def create_new_bundle_and_version(self, name: str):
+    def create_new_bundle_and_version(self, name: str) -> Bundle:
         """Create new bundle with version"""
         new_bundle = self.new_bundle(name=name)
         self.add_commit(new_bundle)
@@ -458,6 +486,64 @@ class MockHousekeeperAPI:
         self.commit()
         LOG.info("New bundle created with name %s", new_bundle.name)
         return new_bundle
+
+    def add_and_include_file_to_latest_version(
+        self, bundle_name: str, file: Path, tags: list
+    ) -> None:
+        """Adds and includes a file in the latest version of a bundle."""
+        version: Version = self.last_version(bundle_name)
+        if not version:
+            LOG.info(f"Bundle: {bundle_name} not found in housekeeper")
+            raise HousekeeperBundleVersionMissingError
+        hk_file: File = self.add_file(version_obj=version, tags=tags, path=str(file.absolute()))
+        self.include_file(version_obj=version, file_obj=hk_file)
+        self.commit()
+
+    def include_files_to_latest_version(self, bundle_name: str) -> None:
+        """Include all files in the latest version on a bundle."""
+        bundle_version: Version = self.get_latest_bundle_version(bundle_name=bundle_name)
+        self.include(version_obj=bundle_version)
+        self.commit()
+
+    def is_fastq_or_spring_in_all_bundles(self, bundle_names: List[str]) -> bool:
+        """Return whether or not all FASTQ/SPRING files are included for the given bundles."""
+        sequencing_files_in_hk: Dict[str, bool] = {}
+        for bundle_name in bundle_names:
+            sequencing_files_in_hk[bundle_name] = False
+            for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
+                sample_file_in_hk: List[bool] = []
+                hk_files: Optional[List[File]] = self.get_files_from_latest_version(
+                    bundle_name=bundle_name, tags=[tag]
+                )
+                sample_file_in_hk += [True for hk_file in hk_files if hk_file.is_included]
+                if sample_file_in_hk:
+                    break
+            sequencing_files_in_hk[bundle_name] = (
+                all(sample_file_in_hk) if sample_file_in_hk else False
+            )
+        return all(sequencing_files_in_hk.values())
+
+    def delete_file(self, file_id: int) -> Optional[File]:
+        """Mock deleting a file both from database and disk (if included)."""
+        file_obj = self._get_mock_file(file_id)
+        if not file_obj:
+            LOG.info(f"Could not find file {file_id}")
+            return
+
+        if file_obj.is_included and Path(file_obj.full_path).exists():
+            LOG.info(f"Deleting file {file_obj.full_path} from disc")
+            Path(file_obj.full_path).unlink()
+
+        LOG.info(f"Deleting file {file_id} from mock housekeeper")
+        self._files.remove(file_obj)
+
+        return file_obj
+
+    def _get_mock_file(self, file_id: int) -> Optional[File]:
+        for file_obj in self._files:
+            if file_obj.id == file_id:
+                return file_obj
+        return None
 
     @staticmethod
     def get_tag_names_from_file(file) -> [str]:

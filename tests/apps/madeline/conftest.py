@@ -76,18 +76,6 @@ def fixture_trio(proband: dict, mother: dict, father: dict) -> List[Dict[str, Op
     return [proband, mother, father]
 
 
-@pytest.fixture
-def madeline_input(proband: dict) -> List[str]:
-    """return a iterable with madeline formated lines"""
-    individuals = [proband]
-    case_id = "test"
-    _input = []
-    for line in MadelineAPI.make_ped(case_id, individuals):
-        _input.append(line)
-
-    return _input
-
-
 @pytest.fixture(name="madeline_api")
 def fixture_madeline_api() -> MadelineAPI:
     """Return a madeline API with mocked process"""

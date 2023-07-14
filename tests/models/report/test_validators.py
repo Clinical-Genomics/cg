@@ -1,4 +1,4 @@
-"""Tests delivery report models validators"""
+"""Tests delivery report models validators."""
 from cgmodels.cg.constants import Pipeline
 
 from cg.constants import NA_FIELD, YES_FIELD, REPORT_GENDER
@@ -12,11 +12,12 @@ from cg.models.report.validators import (
     validate_rml_sample,
     validate_supported_pipeline,
     validate_gender,
+    validate_percentage,
 )
 
 
 def test_validate_empty_field():
-    """Tests formatting an empty value"""
+    """Tests formatting an empty value."""
 
     # GIVEN a not valid empty field
     none_field = None
@@ -29,7 +30,7 @@ def test_validate_empty_field():
 
 
 def test_validate_boolean():
-    """Tests boolean formatting for the delivery report"""
+    """Tests boolean formatting for the delivery report."""
 
     # GIVEN a not formatted inputs
     none_field = None
@@ -48,7 +49,7 @@ def test_validate_boolean():
 
 
 def test_validate_float():
-    """Tests the validation of a float value"""
+    """Tests the validation of a float value."""
 
     # GIVEN a valid float input (float and string format)
     float_value = 12.3456789
@@ -63,8 +64,37 @@ def test_validate_float():
     assert validated_str_value == "12.35"
 
 
+def test_validate_float_zero_input():
+    """Tests the validation of a float value."""
+
+    # GIVEN a valid float input (float and string format)
+    float_value = 0.0
+    str_value = "0.0"
+
+    # WHEN performing the validation
+    validated_float_value = validate_float(float_value)
+    validated_str_value = validate_float(str_value)
+
+    # THEN check if the input values were formatted correctly
+    assert validated_float_value == "0.0"
+    assert validated_str_value == "0.0"
+
+
+def test_validate_percentage():
+    """Tests the validation of a percentage value."""
+
+    # GIVEN a not formatted percentage
+    pct_value = 0.9876
+
+    # WHEN performing the validation
+    validated_pct_value = validate_percentage(pct_value)
+
+    # THEN check if the input values were formatted correctly
+    assert validated_pct_value == "98.76"
+
+
 def test_validate_list():
-    """Tests if a list is transformed into a string of comma separated values"""
+    """Tests if a list is transformed into a string of comma separated values."""
 
     # GIVEN a mock list
     mock_list = ["I'm", "a", "list"]
@@ -77,7 +107,7 @@ def test_validate_list():
 
 
 def test_validate_rml_sample(caplog):
-    """Performs validation on a preparation category"""
+    """Performs validation on a preparation category."""
 
     # GIVEN an invalid prep category
     prep_category = OrderType.RML
@@ -92,7 +122,7 @@ def test_validate_rml_sample(caplog):
 
 
 def test_validate_gender(caplog):
-    """Tests report gender parsing"""
+    """Tests report gender parsing."""
 
     # GIVEN an invalid gender category
     gender = Gender.FEMALE
@@ -108,7 +138,7 @@ def test_validate_gender(caplog):
 
 
 def test_validate_supported_pipeline_match_error(caplog):
-    """Tests if a customer requested pipeline matches the data analysis one"""
+    """Tests if a customer requested pipeline matches the data analysis one."""
 
     # GIVEN an input dictionary where the customers and executed pipeline are different
     dict_different_pipelines = {"customer_pipeline": Pipeline.MIP_DNA, "pipeline": Pipeline.FLUFFY}
@@ -126,7 +156,7 @@ def test_validate_supported_pipeline_match_error(caplog):
 
 
 def test_validate_supported_pipeline(caplog):
-    """Tests that the analysis pipeline is supported by the delivery report workflow"""
+    """Tests that the analysis pipeline is supported by the delivery report workflow."""
 
     # GIVEN a dictionary with a not supported pipeline
     dict_invalid_pipeline = {"customer_pipeline": Pipeline.FLUFFY, "pipeline": Pipeline.FLUFFY}

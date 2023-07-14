@@ -1,36 +1,34 @@
 import logging
 
 import click
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family, Sample
 
-from .case import case
+from cg.cli.delete.case import delete_case
 
 CONFIRM = "Continue?"
 
 LOG = logging.getLogger(__name__)
 
 
-def _get_samples_by_identifiers(
-    identifiers: click.Tuple([str, str]), store: Store
-) -> [models.Sample]:
+def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Store) -> [Sample]:
     """Get samples matched by given set of identifiers"""
     identifier_args = dict(identifiers)
-    return store.samples_by_ids(**identifier_args)
+    return store.get_samples_by_any_id(**identifier_args)
 
 
-def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [models.Family]:
+def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [Family]:
     """Get cases that have samples that match identifiers if given"""
     samples_by_id = _get_samples_by_identifiers(identifiers, store)
     _cases = set()
     for sample in samples_by_id:
-
         for link in sample.links:
             _cases.add(link.family)
 
     return _cases
 
 
-@click.command()
+@click.command("cases")
 @click.option("--dry-run", is_flag=True)
 @click.option(
     "--sample-identifier",
@@ -42,7 +40,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [models.Fa
     "name Prov52",
 )
 @click.pass_context
-def cases(
+def delete_cases(
     context: click.Context,
     dry_run: bool,
     identifiers: click.Tuple([str, str]),
@@ -68,7 +66,7 @@ def cases(
 
     for _case in _cases:
         context.invoke(
-            case,
+            delete_case,
             case_id=_case.internal_id,
             dry_run=dry_run,
         )

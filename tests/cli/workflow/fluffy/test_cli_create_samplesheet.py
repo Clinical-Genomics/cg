@@ -13,10 +13,11 @@ def test_create_samplesheet_dry(
     caplog,
 ):
     caplog.set_level("INFO")
+
     fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
     # GIVEN a case_id that does exist in database
 
-    # WHEN running command to create samplesheet with dry-run flag
+    # WHEN running command to create sample sheet with dry-run flag
     result = cli_runner.invoke(
         create_samplesheet, [fluffy_case_id_existing, "--dry-run"], obj=fluffy_context
     )
@@ -28,7 +29,7 @@ def test_create_samplesheet_dry(
     assert "Writing modified csv" in caplog.text
 
     # THEN no file is created
-    assert not fluffy_analysis_api.get_samplesheet_path(fluffy_case_id_existing).exists()
+    assert not fluffy_analysis_api.get_sample_sheet_path(fluffy_case_id_existing).exists()
 
 
 def test_create_samplesheet_dry_no_case(
@@ -65,8 +66,8 @@ def test_create_samplesheet_success(
     # GIVEN a case_id that does exist in database
 
     # GIVEN an existing samplesheet in Housekeeper
-    mocker.patch.object(FluffyAnalysisAPI, "get_samplesheet_housekeeper_path")
-    FluffyAnalysisAPI.get_samplesheet_housekeeper_path.return_value = samplesheet_fixture_path
+    mocker.patch.object(FluffyAnalysisAPI, "get_sample_sheet_housekeeper_path")
+    FluffyAnalysisAPI.get_sample_sheet_housekeeper_path.return_value = samplesheet_fixture_path
 
     # GIVEN Concentrations are set in LIMS on sample level
     mocker.patch.object(FluffyAnalysisAPI, "get_concentrations_from_lims")
@@ -97,4 +98,4 @@ def test_create_samplesheet_success(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN newly generated SampleSheet file can be found on disk
-    assert fluffy_analysis_api.get_samplesheet_path(fluffy_case_id_existing).exists()
+    assert fluffy_analysis_api.get_sample_sheet_path(fluffy_case_id_existing).exists()

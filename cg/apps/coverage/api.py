@@ -15,10 +15,9 @@ class ChanjoAPI:
     """Interface to Chanjo, the coverage analysis tool"""
 
     def __init__(self, config: dict):
-
         self.chanjo_config = config["chanjo"]["config_path"]
         self.chanjo_binary = config["chanjo"]["binary_path"]
-        self.process = Process(self.chanjo_binary, self.chanjo_config)
+        self.process = Process(binary=self.chanjo_binary, config=self.chanjo_config)
 
     def upload(
         self, sample_id: str, sample_name: str, group_id: str, group_name: str, bed_file: str

@@ -1,44 +1,44 @@
-"""Tests for the transfer of external data"""
+"""Tests for the transfer of external data."""
 import logging
 from pathlib import Path
 from typing import List
 
+from cg.meta.transfer.external_data import ExternalDataAPI
+from cg.store import Store
+from cg.store.models import Sample
+from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
+from housekeeper.store.models import Version
 from tests.cli.workflow.conftest import dna_case
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store.conftest import fixture_sample_obj
 
-from cg.meta.transfer.external_data import ExternalDataAPI
-from cg.models.cg_config import CGConfig
-from cg.store import Store, models
-from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 
-
-def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket: str):
-    """Test generating the directory for logging"""
+def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_id: str):
+    """Test generating the directory for logging."""
     caplog.set_level(logging.INFO)
 
     # WHEN the log directory is created
-    log_dir = external_data_api.create_log_dir(ticket=ticket, dry_run=True)
+    log_dir = external_data_api.create_log_dir(ticket=ticket_id, dry_run=True)
 
     # THEN the path is not created since it is a dry run
     assert "Would have created path" in caplog.text
 
     # THEN the created path should start with 2 dirs and then the ticket id
-    assert str(log_dir).startswith("/another/path/123456")
+    assert str(log_dir).startswith(f"/another/path/{ticket_id}")
 
 
 def test_get_source_path(
     cust_sample_id: str,
     customer_id: str,
     external_data_api: ExternalDataAPI,
-    ticket: str,
+    ticket_id: str,
 ):
-    """Test generating the source path"""
+    """Test generating the source path."""
     # GIVEN a ticket number a customer and a customer sample id
 
     # WHEN the function is called and assigned
     source_path = external_data_api.get_source_path(
-        ticket=ticket,
+        ticket=ticket_id,
         customer=customer_id,
         cust_sample_id=cust_sample_id,
     )
@@ -52,7 +52,7 @@ def test_get_destination_path(
     external_data_api: ExternalDataAPI,
     sample_id: str,
 ):
-    """Test generating the destination path"""
+    """Test generating the destination path."""
     # GIVEN a customer and an internal sample id
     # WHEN the function creates the destination path
     destination_path = external_data_api.get_destination_path(
@@ -65,26 +65,21 @@ def test_get_destination_path(
 
 def test_transfer_sample_files_from_source(
     caplog,
-    cg_context: CGConfig,
     customer_id: str,
     cust_sample_id: str,
     external_data_api: ExternalDataAPI,
     external_data_directory: Path,
     helpers,
     mocker,
-    sample_store: Store,
-    ticket: str,
+    ticket_id: str,
 ):
     caplog.set_level(logging.INFO)
 
     # GIVEN a Store with three samples, where only two samples are present in the source folder
-    sample_name1: str = cust_sample_id + "1"
-    sample_name2: str = cust_sample_id + "2"
-    sample_name3: str = cust_sample_id + "3"
-
-    helpers.add_sample(store=external_data_api.status_db, name=sample_name1, original_ticket=ticket)
-    helpers.add_sample(store=external_data_api.status_db, name=sample_name2, original_ticket=ticket)
-    helpers.add_sample(store=external_data_api.status_db, name=sample_name3, original_ticket=ticket)
+    for sample in [f"{cust_sample_id}1", f"{cust_sample_id}2", f"{cust_sample_id}3"]:
+        helpers.add_sample(
+            store=external_data_api.status_db, name=sample, original_ticket=ticket_id
+        )
 
     mocker.patch.object(Store, "get_customer_id_from_ticket")
     Store.get_customer_id_from_ticket.return_value = customer_id
@@ -98,7 +93,7 @@ def test_transfer_sample_files_from_source(
     )
 
     # WHEN the transfer is initiated
-    external_data_api.transfer_sample_files_from_source(ticket=ticket, dry_run=True)
+    external_data_api.transfer_sample_files_from_source(ticket=ticket_id, dry_run=True)
 
     # THEN only the two samples present in the source directory are included in the rsync
 
@@ -114,7 +109,7 @@ def test_get_all_fastq(external_data_api: ExternalDataAPI, external_data_directo
             sample_folder=external_data_directory.joinpath(folder)
         )
         # THEN only fast.gz files are returned
-        assert all([tmp.suffixes == [".fastq", ".gz"] for tmp in files])
+        assert all(tmp.suffixes == [".fastq", ".gz"] for tmp in files)
 
 
 def test_get_failed_fastq_paths(external_data_api: ExternalDataAPI, fastq_file: Path):
@@ -129,21 +124,20 @@ def test_get_failed_fastq_paths(external_data_api: ExternalDataAPI, fastq_file: 
 
 
 def test_add_files_to_bundles(
-    external_data_api: ExternalDataAPI, fastq_file: Path, hk_version_obj, sample_id: str
+    external_data_api: ExternalDataAPI, fastq_file: Path, hk_version: Version, sample_id: str
 ):
-    """Tests adding files to housekeeper"""
+    """Tests adding files to Housekeeper."""
     # GIVEN a file to be added
-    to_be_added = [fastq_file]
 
     # WHEN the files are added.
     external_data_api.add_files_to_bundles(
-        fastq_paths=to_be_added,
-        last_version=hk_version_obj,
+        fastq_paths=[fastq_file],
+        last_version=hk_version,
         lims_sample_id=sample_id,
     )
 
-    # THEN the function should return True and the file should be added.
-    assert str(fastq_file.absolute()) in [idx.path for idx in hk_version_obj.files]
+    # THEN the function should return True and the file should have benn added.
+    assert str(fastq_file.absolute()) in [idx.path for idx in hk_version.files]
 
 
 def test_add_transfer_to_housekeeper(
@@ -151,16 +145,14 @@ def test_add_transfer_to_housekeeper(
     external_data_api: ExternalDataAPI,
     fastq_file: Path,
     mocker,
-    ticket: str,
+    ticket_id: str,
 ):
     """Test adding samples from a case to Housekeeper"""
     # GIVEN a Store with a DNA case, which is available for analysis
-    cases = external_data_api.status_db.query(models.Family).filter(
-        models.Family.internal_id == case_id
-    )
-    mocker.patch.object(Store, "get_cases_from_ticket")
-    Store.get_cases_from_ticket.return_value = cases
-    samples = [fam_sample.sample for fam_sample in cases.all()[0].links]
+    case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
+    mocker.patch.object(Store, "get_cases_by_ticket_id")
+    Store.get_cases_by_ticket_id.return_value = [case]
+    samples = [fam_sample.sample for fam_sample in case.links]
 
     # GIVEN a list of paths and only two samples being available
     mocker.patch.object(ExternalDataAPI, "get_all_paths")
@@ -190,10 +182,10 @@ def test_add_transfer_to_housekeeper(
     )
 
     # WHEN the sample bundles are added to housekeeper
-    external_data_api.add_transfer_to_housekeeper(ticket=ticket)
+    external_data_api.add_transfer_to_housekeeper(ticket=ticket_id)
 
     # THEN two sample bundles exist in housekeeper and the file has been added to those bundles bundles
-    added_samples = [sample for sample in external_data_api.housekeeper_api.bundles()]
+    added_samples = list(external_data_api.housekeeper_api.bundles())
     assert all(
         sample.internal_id in [added_sample.name for added_sample in added_samples]
         for sample in samples[:-1]
@@ -206,27 +198,26 @@ def test_add_transfer_to_housekeeper(
 
 
 def test_get_available_samples(
-    analysis_store_trio,
-    customer_id: str,
     external_data_api: ExternalDataAPI,
-    sample_obj: models.Sample,
-    ticket: str,
+    sample: Sample,
+    ticket_id: str,
     tmpdir_factory,
 ):
     # GIVEN one such sample exists
-    tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample_obj.internal_id, numbered=False)).parent
-    available_samples = external_data_api.get_available_samples(folder=tmp_dir_path, ticket=ticket)
+    tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample.internal_id, numbered=False))
+    available_samples = external_data_api.get_available_samples(
+        folder=tmp_dir_path.parent, ticket=ticket_id
+    )
     # THEN the function should return a list containing the sample object
-    assert available_samples == [sample_obj]
+    assert available_samples == [sample]
+    tmp_dir_path.rmdir()
 
 
 def test_curate_sample_folder(
-    case_id, customer_id, dna_case, external_data_api: ExternalDataAPI, tmpdir_factory
+    case_id, customer_id, external_data_api: ExternalDataAPI, tmpdir_factory
 ):
-    cases = external_data_api.status_db.query(models.Family).filter(
-        models.Family.internal_id == case_id
-    )
-    sample: models.Sample = cases.first().links[0].sample
+    case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
+    sample: Sample = case.links[0].sample
     tmp_folder = Path(tmpdir_factory.mktemp(sample.name, numbered=False))
     external_data_api.curate_sample_folder(
         cust_name=customer_id, sample_folder=tmp_folder, force=False
@@ -236,21 +227,21 @@ def test_curate_sample_folder(
 
 
 def test_get_available_samples_no_samples_avail(
-    analysis_store_trio,
-    customer_id: str,
     external_data_api: ExternalDataAPI,
-    ticket: str,
+    ticket_id: str,
     tmpdir_factory,
 ):
     # GIVEN that the empty directory created does not contain any correct folders
     tmp_dir_path: Path = Path(tmpdir_factory.mktemp("not_sample_id", numbered=False))
-    available_samples = external_data_api.get_available_samples(folder=tmp_dir_path, ticket=ticket)
+    available_samples = external_data_api.get_available_samples(
+        folder=tmp_dir_path, ticket=ticket_id
+    )
     # THEN the function should return an empty list
     assert available_samples == []
 
 
 def test_checksum(fastq_file: Path):
-    """Tests if the function correctly calculates md5sum and returns the correct result"""
+    """Tests if the function correctly calculates md5sum and returns the correct result."""
     # GIVEN a fastq file with corresponding correct md5 file and a fastq file with a corresponding incorrect md5 file
     bad_md5sum_file_path: Path = fastq_file.parent.joinpath("fastq_run_R1_001.fastq.gz")
 
@@ -264,10 +255,10 @@ def test_checksum(fastq_file: Path):
 
 
 def test_extract_checksum(fastq_file: Path):
-    """Tests if the function successfully extract the correct md5sum"""
+    """Tests if the function successfully extract the correct md5sum."""
 
-    # Given a file containing an md5sum
-    file = Path(str(fastq_file) + ".md5")
+    # Given a file containing a md5sum
+    md5sum_file = Path(f"{fastq_file.as_posix()}.md5")
 
     # Then the function should extract it
-    assert extract_md5sum(md5sum_file=file) == "a95cbb265540a2261fce941059784fd1"
+    assert extract_md5sum(md5sum_file=md5sum_file) == "a95cbb265540a2261fce941059784fd1"

@@ -1,13 +1,14 @@
-"""Fixtures for backup tests"""
-
+"""Fixtures for backup tests."""
 from pathlib import Path
 
 import pytest
-from tests.store_helpers import StoreHelpers
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.delivery import INBOX_NAME
+from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
+from cg.store.models import Family
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(scope="function", name="deliver_api")
@@ -23,7 +24,7 @@ def fixture_deliver_api(
         store=analysis_store,
         hk_api=real_housekeeper_api,
         case_tags=[{"case-tag"}],
-        sample_tags=[{"sample-tag"}],
+        sample_tags=[{AlignmentFileTag.CRAM}],
         project_base_path=project_dir,
         delivery_type="balsamic",
     )
@@ -32,19 +33,13 @@ def fixture_deliver_api(
 
 @pytest.fixture(name="delivery_hk_api")
 def fixture_delivery_hk_api(
-    case_hk_bundle_no_files: dict,
-    sample1_cram: Path,
-    vcf_file: Path,
+    mip_delivery_bundle,
     real_housekeeper_api: HousekeeperAPI,
     helpers=StoreHelpers,
 ) -> HousekeeperAPI:
     """Fixture that returns a housekeeper database with delivery data"""
 
-    case_hk_bundle_no_files["files"] = [
-        {"path": str(sample1_cram), "archive": False, "tags": ["cram", "ADM1"]},
-        {"path": str(vcf_file), "archive": False, "tags": ["vcf-snv-clinical"]},
-    ]
-    helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=case_hk_bundle_no_files)
+    helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=mip_delivery_bundle)
     return real_housekeeper_api
 
 
@@ -56,33 +51,43 @@ def fixture_populated_deliver_api(
     _deliver_api = DeliverAPI(
         store=analysis_store,
         hk_api=delivery_hk_api,
-        case_tags=["case-tag"],
-        sample_tags=["sample-tag"],
+        case_tags=[{"case-tag"}],
+        sample_tags=[{AlignmentFileTag.CRAM}],
         project_base_path=project_dir,
         delivery_type="balsamic",
     )
     return _deliver_api
 
 
+@pytest.fixture(name="dummy_file_name")
+def fixture_dummy_file_name() -> str:
+    """Returns a dummy file name."""
+    return "dummy_file_name"
+
+
 @pytest.fixture(name="all_samples_in_inbox")
-def fixture_all_samples_in_inbox(tmpdir_factory) -> Path:
-    """Fixture that returns a customer inbox path with all samples delivered"""
-    inbox = tmpdir_factory.mktemp("inbox")
-    Path(inbox, "sample1").mkdir(exist_ok=True, parents=True)
-    Path(inbox, "sample2").mkdir(exist_ok=True, parents=True)
-    Path(inbox, "case").mkdir(exist_ok=True, parents=True)
-    Path(inbox, "sample1", "sample_file.txt").touch(exist_ok=True)
-    Path(inbox, "sample2", "sample_file.txt").touch(exist_ok=True)
-    Path(inbox, "case", "case_file.txt").touch(exist_ok=True)
+def fixture_all_samples_in_inbox(analysis_family, dummy_file_name: str, tmpdir_factory) -> Path:
+    """Fixture that returns a customer inbox path with all samples delivered."""
+    inbox = tmpdir_factory.mktemp(INBOX_NAME)
+    for index in range(3):
+        Path(inbox, analysis_family["samples"][index]["name"]).mkdir(exist_ok=True, parents=True)
+        Path(inbox, analysis_family["samples"][index]["name"], dummy_file_name).touch(exist_ok=True)
+    Path(inbox, analysis_family["name"]).mkdir(exist_ok=True, parents=True)
+    Path(inbox, analysis_family["name"], dummy_file_name).touch(exist_ok=True)
     return Path(inbox)
 
 
 @pytest.fixture(name="samples_missing_in_inbox")
-def fixture_samples_missing_in_inbox(tmpdir_factory) -> Path:
-    """Fixture that returns a customer inbox path with all samples delivered"""
-    inbox = tmpdir_factory.mktemp("inbox")
-    Path(inbox, "sample1").mkdir(exist_ok=True, parents=True)
-    Path(inbox, "sample2").mkdir(exist_ok=True, parents=True)
-    Path(inbox, "sample1", "sample_file.txt").touch(exist_ok=True)
-    Path(inbox, "case_with_no_data").mkdir(exist_ok=True, parents=True)
-    return Path(inbox)
+def fixture_samples_missing_in_inbox(
+    all_samples_in_inbox: Path,
+    analysis_family: dict,
+    dummy_file_name: str,
+) -> Path:
+    """Fixture that returns a customer inbox path with all samples delivered."""
+    all_samples_in_inbox.joinpath(analysis_family["samples"][0]["name"], dummy_file_name).unlink()
+    return Path(all_samples_in_inbox)
+
+
+@pytest.fixture(name="deliver_api_destination_path")
+def fixture_deliver_api_destination_path(customer_id: str, case: Family, ticket_id: str) -> Path:
+    return Path(customer_id, INBOX_NAME, ticket_id, case.name)

@@ -9,7 +9,7 @@ from cg.exc import OrderFormError
 from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool
 from cg.models.orders.sample_base import OrderSample
-from cg.store import models
+from cg.store.models import Customer
 
 LOG = logging.getLogger(__name__)
 
@@ -21,13 +21,10 @@ class OrderformParser(BaseModel):
     project_type: Optional[OrderType] = None
     delivery_type: Optional[DataDelivery] = None
     customer_id: constr(
-        min_length=1, max_length=models.Customer.internal_id.property.columns[0].type.length
+        min_length=1, max_length=Customer.internal_id.property.columns[0].type.length
     ) = None
     order_comment: Optional[str] = None
     order_name: Optional[str] = None
-
-    class Config:
-        validate_assignment = True
 
     def parse_orderform(self, orderform_file: Path) -> None:
         """Parse the orderform information"""

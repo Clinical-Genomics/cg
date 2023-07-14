@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 from cg.cli.workflow.commands import link
@@ -14,7 +15,6 @@ def test_cli_link_no_case(
     fluffy_context: CGConfig,
     caplog,
 ):
-
     caplog.set_level("ERROR")
     fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
 
@@ -45,7 +45,6 @@ def test_cli_link(
     fastq_file_fixture_path,
     caplog,
 ):
-
     caplog.set_level("INFO")
     fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
     # GIVEN that a fastq path does not exist
@@ -55,6 +54,7 @@ def test_cli_link(
         )
     )
     assert not fastq_path.exists()
+
     # GIVEN a case_id that does exist in database
 
     # WHEN running command
@@ -68,6 +68,9 @@ def test_cli_link(
 
     # THEN file directories were created
     assert fastq_path.exists()
+
+    # Clean-uo
+    shutil.rmtree(fastq_path)
 
 
 def test_cli_link_dir_exists(

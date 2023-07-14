@@ -1,19 +1,79 @@
-"""Tests for the compress fastq cli"""
+"""Tests for the compress fastq cli."""
 
 import datetime as dt
 import logging
+from typing import List
 
-from cg.cli.compress.fastq import fastq_cmd
+from cg.cli.compress.fastq import fastq_cmd, get_cases_to_process
 from cg.constants import Pipeline
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
 from cg.store import Store
+from cg.store.models import Family
 
 from tests.store_helpers import StoreHelpers
 
+MOCK_SET_MEM_ACCORDING_TO_READS_PATH: str = "cg.cli.compress.helpers.set_memory_according_to_reads"
+
+
+def test_get_cases_to_process(
+    case_id: str,
+    cli_runner: CliRunner,
+    helpers: StoreHelpers,
+    populated_compress_context: CGConfig,
+):
+    """Test get cases to process."""
+
+    # GIVEN a populated store
+    status_db: Store = populated_compress_context.status_db
+
+    # GIVEN a context with a case that can be compressed
+
+    valid_compressable_case: Family = helpers.add_case(
+        store=status_db,
+        name=case_id,
+        internal_id=case_id,
+        data_analysis=Pipeline.MIP_DNA,
+        action=None,
+    )
+    valid_compressable_case.created_at = dt.datetime.now() - dt.timedelta(days=1000)
+    status_db.session.commit()
+
+    # WHEN running the compress command
+    cases: List[Family] = get_cases_to_process(days_back=1, store=status_db)
+
+    # THEN assert cases are returned
+    assert cases
+
+    # THEN assert correct case was returned
+    assert cases[0].internal_id == case_id
+
+
+def test_get_cases_to_process_when_no_case(
+    case_id_does_not_exist: str,
+    caplog,
+    cli_runner: CliRunner,
+    helpers: StoreHelpers,
+    populated_compress_context: CGConfig,
+):
+    """Test get cases to proces when there are no cases to compress."""
+    caplog.set_level(logging.DEBUG)
+    status_db: Store = populated_compress_context.status_db
+
+    # WHEN running the compress command
+    cases: List[Family] = get_cases_to_process(
+        case_id=case_id_does_not_exist, days_back=1, store=status_db
+    )
+
+    # THEN assert no cases where found
+    assert not cases
+
+    # THEN assert we log no cases where found
+    assert f"Could not find case {case_id_does_not_exist}" in caplog.text
+
 
 def test_compress_fastq_cli_no_family(compress_context: CGConfig, cli_runner: CliRunner, caplog):
-    """Test to run the compress command with a database without samples"""
+    """Test to run the compress command with a database without samples,"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context without families
 
@@ -22,37 +82,43 @@ def test_compress_fastq_cli_no_family(compress_context: CGConfig, cli_runner: Cl
 
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
+
     # THEN assert it was communicated that no families where found
-    assert "Individuals in 0 (completed) cases where compressed" in caplog.text
+    assert "No cases to compress" in caplog.text
 
 
 def test_compress_fastq_cli_case_id_no_family(
-    compress_context: CGConfig, cli_runner: CliRunner, caplog
+    case_id_does_not_exist: str, compress_context: CGConfig, cli_runner: CliRunner, caplog
 ):
-    """Test to run the compress command when no families are found"""
+    """Test to run the compress command when no families are found."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context without families
-    case_id = "notrealcase"
+
     # WHEN running the compress command
-    res = cli_runner.invoke(fastq_cmd, ["--case-id", case_id], obj=compress_context)
+    res = cli_runner.invoke(fastq_cmd, ["--case-id", case_id_does_not_exist], obj=compress_context)
 
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
+
     # THEN assert it was communicated that no families where found
-    assert f"Could not find case {case_id}" in caplog.text
+    assert f"Could not find case {case_id_does_not_exist}" in caplog.text
 
 
 def test_compress_fastq_cli_case_id(
-    populated_compress_context: CGConfig, cli_runner: CliRunner, helpers: StoreHelpers, caplog
+    case_id: str,
+    caplog,
+    cli_runner: CliRunner,
+    helpers: StoreHelpers,
+    mocker,
+    populated_compress_context: CGConfig,
 ):
-    """Test to run the compress command with a specified case id"""
+    """Test to run the compress command with a specified case id."""
     caplog.set_level(logging.DEBUG)
     status_db: Store = populated_compress_context.status_db
 
     # GIVEN a context with a case that can be compressed
-    case_id = "chonkywombat"
 
-    valid_compressable_case = helpers.add_case(
+    valid_compressable_case: Family = helpers.add_case(
         store=status_db,
         name=case_id,
         internal_id=case_id,
@@ -72,25 +138,32 @@ def test_compress_fastq_cli_case_id(
         sample=sample2,
         case=valid_compressable_case,
     )
-    status_db.commit()
+    status_db.session.commit()
+
+    # GIVEN no adjusting according to readsa
+    mocker.patch(MOCK_SET_MEM_ACCORDING_TO_READS_PATH, return_value=None)
 
     # WHEN running the compress command
     res = cli_runner.invoke(fastq_cmd, ["--case-id", case_id], obj=populated_compress_context)
 
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
+
     # THEN assert it was communicated that no families where found
-    assert f"Individuals in 1 (completed) cases where compressed" in caplog.text
+    assert f"individuals in 1 (completed) cases where compressed" in caplog.text
 
 
 def test_compress_fastq_cli_multiple_family(
-    populated_multiple_compress_context: CGConfig, cli_runner: CliRunner, caplog
+    caplog, cli_runner: CliRunner, mocker, populated_multiple_compress_context: CGConfig
 ):
-    """Test to run the compress command with multiple families"""
+    """Test to run the compress command with multiple families."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a database with multiple families
-    nr_cases = populated_multiple_compress_context.status_db.families().count()
+    nr_cases = populated_multiple_compress_context.status_db._get_query(table=Family).count()
     assert nr_cases > 1
+
+    # GIVEN no adjusting according to readsa
+    mocker.patch(MOCK_SET_MEM_ACCORDING_TO_READS_PATH, return_value=None)
 
     # WHEN running the compress command
     res = cli_runner.invoke(
@@ -100,19 +173,22 @@ def test_compress_fastq_cli_multiple_family(
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
-    assert f"Individuals in {nr_cases} (completed) cases where compressed" in caplog.text
+    assert f"individuals in {nr_cases} (completed) cases where compressed" in caplog.text
 
 
 def test_compress_fastq_cli_multiple_set_limit(
-    populated_multiple_compress_context: CGConfig, cli_runner: CliRunner, caplog
+    caplog, cli_runner: CliRunner, mocker, populated_multiple_compress_context: CGConfig
 ):
-    """Test to run the compress command with multiple families and use a limit"""
+    """Test to run the compress command with multiple families and use a limit."""
     compress_context = populated_multiple_compress_context
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with more families than the limit
-    nr_cases = compress_context.status_db.families().count()
+    nr_cases = compress_context.status_db._get_query(table=Family).count()
     limit = 5
     assert nr_cases > limit
+
+    # GIVEN no adjusting according to readsa
+    mocker.patch(MOCK_SET_MEM_ACCORDING_TO_READS_PATH, return_value=None)
 
     # WHEN running the compress command
     res = cli_runner.invoke(fastq_cmd, ["--number-of-conversions", limit], obj=compress_context)
@@ -120,4 +196,4 @@ def test_compress_fastq_cli_multiple_set_limit(
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated no more than the limited number of cases was compressed
-    assert f"Individuals in {limit} (completed) cases where compressed" in caplog.text
+    assert f"individuals in {limit} (completed) cases where compressed" in caplog.text

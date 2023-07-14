@@ -6,3 +6,4 @@ class AnalysisStatus:
     PENDING: str = "pending"
     RUNNING: str = "running"
     TIMEOUT: str = "timeout"
+    QC: str = "qc"

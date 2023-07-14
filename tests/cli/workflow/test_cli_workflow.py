@@ -1,14 +1,13 @@
-"""This script tests the cli method enable workflows"""
+"""This script tests the CLI method enable workflows."""
 
 from cg.cli.workflow.base import workflow as workflow_cmd
+from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
 
-EXIT_SUCCESS = 0
-
 
 def test_no_options(cli_runner: CliRunner, base_context: CGConfig):
-    """Test command with no options"""
+    """Test command with no options."""
     # GIVEN
     # WHEN dry running
     result = cli_runner.invoke(workflow_cmd, obj=base_context)
@@ -21,3 +20,4 @@ def test_no_options(cli_runner: CliRunner, base_context: CGConfig):
     assert "microsalt" in result.output
     assert "mip-dna" in result.output
     assert "mip-rna" in result.output
+    assert "rnafusion" in result.output

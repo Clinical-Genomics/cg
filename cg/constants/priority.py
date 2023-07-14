@@ -5,6 +5,7 @@ from cg.utils.enums import StrEnum
 
 
 class SlurmQos(StrEnum):
+    MAINTENANCE: str = "maintenance"
     LOW: str = "low"
     NORMAL: str = "normal"
     HIGH: str = "high"
@@ -16,12 +17,7 @@ class PriorityTerms(StrEnum):
     PRIORITY: str = "priority"
     RESEARCH: str = "research"
     STANDARD: str = "standard"
-
-
-SLURM_ACCOUNT_TO_QOS = {
-    "production": SlurmQos.NORMAL,
-    "development": SlurmQos.LOW,
-}
+    CLINICAL_TRIALS: str = "clinical_trials"
 
 
 class Priority(IntEnum):
@@ -39,3 +35,9 @@ PRIORITY_TO_SLURM_QOS = {
     Priority.express: SlurmQos.EXPRESS,
     Priority.clinical_trials: SlurmQos.NORMAL,
 }
+
+
+class SlurmAccount(StrEnum):
+    PRODUCTION: str = "production"
+    DEVELOPMENT: str = "development"
+    STAGE: str = "stage"

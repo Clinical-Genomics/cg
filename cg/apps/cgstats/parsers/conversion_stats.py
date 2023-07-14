@@ -94,9 +94,8 @@ class ConversionStats:
         event: str
         node: Element
         LOG.info("Parsing demux conversion stats file %s", self.conversion_stats_path)
-        for (event, node) in iterparse(str(self.conversion_stats_path), ["start", "end"]):
+        for event, node in iterparse(str(self.conversion_stats_path), ["start", "end"]):
             # Only search nodes when correct
-            # print("Path", self.current_path, self._current_barcode)
             current_tag: str = self.get_current_tag(node=node)
             if event == "start":
                 self.evaluate_start_event(node=node, current_tag=current_tag)
@@ -154,8 +153,6 @@ class ConversionStats:
         self.unknown_barcodes_entry = False
 
     def evaluate_start_event(self, node: Element, current_tag: str) -> None:
-        # print("Start!", current_tag, node, node.attrib, node.text)
-
         LOG.debug("Add start event %s to current path", current_tag)
         self.current_path.append(current_tag)
         if current_tag == "Lane":

@@ -1,4 +1,4 @@
-FROM docker.io/library/python:3.7-slim
+FROM docker.io/library/python:3.7-slim-bullseye
 
 ENV GUNICORN_WORKERS=1
 ENV GUNICORN_THREADS=1
@@ -28,7 +28,9 @@ ENV GOOGLE_OAUTH_CLIENT_SECRET="1"
 
 
 WORKDIR /home/src/app
-COPY . /home/src/app
+COPY cg ./cg
+COPY templates ./templates
+COPY MANIFEST.in pyproject.toml requirements* setup.py ./
 
 
 RUN pip install -r requirements.txt

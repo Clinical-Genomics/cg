@@ -1,6 +1,7 @@
-"""CLI support to create config and/or start BALSAMIC """
+"""CLI support to create config and/or start BALSAMIC."""
 
 import logging
+from typing import List
 
 import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -11,6 +12,7 @@ from cg.cli.workflow.balsamic.options import (
     OPTION_GENOME_VERSION,
     OPTION_PON_CNN,
     OPTION_GENDER,
+    OPTION_OBSERVATIONS,
 )
 from cg.cli.workflow.commands import link, resolve_compression, ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -22,6 +24,7 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store
 from pydantic import ValidationError
 
+
 LOG = logging.getLogger(__name__)
 
 
@@ -29,9 +32,8 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def balsamic(context: click.Context):
     """Cancer analysis workflow"""
-    if context.invoked_subcommand is None:
-        click.echo(context.get_help())
-        return None
+    AnalysisAPI.get_help(context)
+
     config = context.obj
     context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(
         config=config,
@@ -48,6 +50,7 @@ balsamic.add_command(link)
 @OPTION_GENOME_VERSION
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
+@OPTION_OBSERVATIONS
 @DRY_RUN
 @click.pass_obj
 def config_case(
@@ -57,24 +60,26 @@ def config_case(
     genome_version: str,
     panel_bed: str,
     pon_cnn: click.Path,
+    observations: List[click.Path],
     dry_run: bool,
 ):
-    """Create config file for BALSAMIC analysis for a given CASE_ID"""
+    """Create config file for BALSAMIC analysis for a given CASE_ID."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     try:
         LOG.info(f"Creating config file for {case_id}.")
-        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.config_case(
             case_id=case_id,
             gender=gender,
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
+            observations=observations,
             dry_run=dry_run,
         )
-    except CgError as e:
-        LOG.error(f"Could not create config: {e.message}")
+    except CgError as error:
+        LOG.error(f"Could not create config: {error}")
         raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not create config: {error}")
@@ -97,7 +102,7 @@ def run(
     """Run balsamic analysis for given CASE ID"""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     try:
-        analysis_api.verify_case_id_in_statusdb(case_id)
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.check_analysis_ongoing(case_id)
         analysis_api.run_analysis(
@@ -110,11 +115,11 @@ def run(
             return
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
-    except CgError as e:
-        LOG.error(f"Could not run analysis: {e.message}")
+    except CgError as error:
+        LOG.error(f"Could not run analysis: {error}")
         raise click.Abort()
-    except Exception as e:
-        LOG.error(f"Could not run analysis: {e}")
+    except Exception as error:
+        LOG.error(f"Could not run analysis: {error}")
         raise click.Abort()
 
 
@@ -128,15 +133,15 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
 
     try:
-        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
         analysis_api.report_deliver(case_id=case_id, dry_run=dry_run)
-    except CgError as e:
-        LOG.error(f"Could not create report file: {e.message}")
+    except CgError as error:
+        LOG.error(f"Could not create report file: {error}")
         raise click.Abort()
-    except Exception as e:
-        LOG.error(f"Could not create report file: {e}")
+    except Exception as error:
+        LOG.error(f"Could not create report file: {error}")
         raise click.Abort()
 
 
@@ -151,7 +156,7 @@ def store_housekeeper(context: CGConfig, case_id: str):
     status_db: Store = context.status_db
 
     try:
-        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
         analysis_api.upload_bundle_housekeeper(case_id=case_id)
@@ -160,13 +165,13 @@ def store_housekeeper(context: CGConfig, case_id: str):
     except ValidationError as error:
         LOG.warning("Deliverables file is malformed")
         raise error
-    except CgError as e:
-        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}")
+    except CgError as error:
+        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}")
         raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
         housekeeper_api.rollback()
-        status_db.rollback()
+        status_db.session.rollback()
         raise click.Abort()
 
 
@@ -191,7 +196,7 @@ def start(
     run_analysis: bool,
     dry_run: bool,
 ):
-    """Start full workflow for CASE ID"""
+    """Start full workflow for case ID."""
     LOG.info(f"Starting analysis for {case_id}")
     try:
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
@@ -212,8 +217,8 @@ def start(
             run_analysis=run_analysis,
             dry_run=dry_run,
         )
-    except DecompressionNeededError as e:
-        LOG.error(e.message)
+    except DecompressionNeededError as error:
+        LOG.error(error)
 
 
 @balsamic.command("start-available")
@@ -229,10 +234,10 @@ def start_available(context: click.Context, dry_run: bool = False):
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run, run_analysis=True)
         except CgError as error:
-            LOG.error(error.message)
+            LOG.error(error)
             exit_code = EXIT_FAIL
-        except Exception as e:
-            LOG.error("Unspecified error occurred: %s", e)
+        except Exception as error:
+            LOG.error("Unspecified error occurred: %s", error)
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

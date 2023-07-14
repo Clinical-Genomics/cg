@@ -49,18 +49,3 @@ class EnumChoice(click.Choice):
                 return next(_ for _ in self.__enum if _.name.lower() == value.lower())
             else:
                 return next(_ for _ in self.__enum if _.name == value)
-
-    def get_metavar(self, param):
-        word = self.__enum.__name__
-
-        # from jpvanhal/inflection
-        import re
-
-        word = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", word)
-        word = re.sub(r"([a-z\d])([A-Z])", r"\1_\2", word)
-        word = word.replace("-", "_").lower().split("_")
-
-        if word[-1] == "enum":
-            word.pop()
-
-        return ("_".join(word)).upper()

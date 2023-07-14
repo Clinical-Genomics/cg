@@ -23,8 +23,8 @@ class ApplicationModel(BaseModel):
         prep_category: library preparation category; source: StatusDB/application/prep_category
         description: analysis description; source: StatusDB/application/description
         limitations: application limitations; source: StatusDB/application/limitations
-        accredited: if the sample associated process is accredited or not; ; source: StatusDB/application/is_accredited
-
+        accredited: if the sample associated process is accredited or not; source: StatusDB/application/is_accredited
+        external: whether the app tag is external or not; source: StatusDB/application/is_external
     """
 
     tag: Optional[str]
@@ -33,6 +33,7 @@ class ApplicationModel(BaseModel):
     description: Optional[str]
     limitations: Optional[str]
     accredited: Optional[bool]
+    external: Optional[bool]
 
     _prep_category = validator("prep_category", always=True, allow_reuse=True)(validate_rml_sample)
     _values = validator(
@@ -94,11 +95,11 @@ class SampleModel(BaseModel):
     Sample attributes model
 
     Attributes:
-        name: sample name; source: LIMS/sample/name
+        name: sample name; source: StatusDB/sample/name
         id: sample internal ID; source: StatusDB/sample/internal_id
         ticket: ticket number; source: StatusDB/sample/ticket_number
         status: sample status provided by the customer; source: StatusDB/family-sample/status
-        gender: sample gender provided by the customer; source: LIMS/sample/sex
+        gender: sample gender provided by the customer; source: StatusDB/sample/sex
         source: sample type/source; source: LIMS/sample/source
         tumour: whether the sample is a tumour or normal one; source: StatusDB/sample/is_tumour
         application: analysis application model

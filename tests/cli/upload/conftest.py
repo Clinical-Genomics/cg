@@ -1,4 +1,5 @@
-"""Fixtures for cli balsamic tests"""
+"""Fixtures for cli balsamic tests."""
+
 from typing import Union
 
 import logging
@@ -8,54 +9,37 @@ from tempfile import tempdir
 
 import pytest
 from cgmodels.cg.constants import Pipeline
-from cg.apps.gt import GenotypeAPI
+from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.constants.tags import HkMipAnalysisTag, HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import HkMipAnalysisTag, GensAnalysisTag, HK_DELIVERY_REPORT_TAG
 from cg.io.controller import ReadFile
 from cg.meta.deliver import DeliverAPI
-from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.store import Store, models
-from tests.meta.upload.scout.conftest import fixture_mip_load_config
+from cg.store import Store
+from cg.store.models import Analysis
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.report import MockMipDNAReportAPI
+from tests.store_helpers import StoreHelpers
+
+from tests.meta.upload.scout.conftest import fixture_mip_load_config
+from tests.cli.workflow.mip.conftest import (
+    fixture_mip_rna_context,
+    fixture_mip_dna_context,
+    fixture_mip_case_ids,
+    fixture_mip_case_id,
+)
 
 LOG = logging.getLogger(__name__)
-
-
-@pytest.fixture(name="scout_load_config")
-def fixture_scout_load_config(apps_dir: Path) -> Path:
-    """Yaml file with load information from scout"""
-    return apps_dir / "scout/643594.config.yaml"
-
-
-@pytest.fixture(scope="function", name="scout_hk_bundle_data")
-def fixture_scout_hk_bundle_data(case_id: str, scout_load_config: Path, timestamp: datetime):
-    """Get some bundle data for housekeeper"""
-    tag_name = UploadScoutAPI.get_load_config_tag()
-
-    return {
-        "name": case_id,
-        "created": timestamp,
-        "expires": timestamp,
-        "files": [
-            {
-                "path": str(scout_load_config),
-                "archive": False,
-                "tags": [tag_name],
-            }
-        ],
-    }
 
 
 @pytest.fixture(name="upload_genotypes_hk_bundle")
@@ -81,16 +65,16 @@ def fixture_upload_genotypes_hk_bundle(
 @pytest.fixture(name="analysis_obj")
 def fixture_analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers
-) -> models.Analysis:
+) -> Analysis:
     """Return a analysis object with a trio"""
-    return analysis_store_trio.family(case_id).analyses[0]
+    return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
 
 
 @pytest.fixture(name="upload_genotypes_hk_api")
 def fixture_upload_genotypes_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     upload_genotypes_hk_bundle: dict,
-    analysis_obj: models.Analysis,
+    analysis_obj: Analysis,
     helpers,
 ) -> HousekeeperAPI:
     """Add and include files from upload genotypes hk bundle"""
@@ -100,16 +84,59 @@ def fixture_upload_genotypes_hk_api(
     return real_housekeeper_api
 
 
-@pytest.fixture(name="upload_genotypes_context")
-def fixture_upload_genotypes_context(
-    upload_genotypes_hk_api: HousekeeperAPI,
-    genotype_api: GenotypeAPI,
+@pytest.fixture(name="upload_gens_hk_bundle")
+def fixture_upload_gens_hk_bundle(
+    case_id: str,
+    gens_coverage_path: Path,
+    gens_fracsnp_path: Path,
+    later_timestamp: datetime,
+    sample_id: str,
+    timestamp: datetime,
+) -> dict:
+    """Returns a dictionary in Housekeeper format with files used in upload gens process."""
+    return {
+        "name": case_id,
+        "created": timestamp,
+        "expires": later_timestamp,
+        "files": [
+            {
+                "path": gens_coverage_path.as_posix(),
+                "archive": False,
+                "tags": [sample_id] + GensAnalysisTag.COVERAGE,
+            },
+            {
+                "path": gens_fracsnp_path.as_posix(),
+                "archive": False,
+                "tags": [sample_id] + GensAnalysisTag.FRACSNP,
+            },
+        ],
+    }
+
+
+@pytest.fixture(name="upload_gens_hk_api")
+def fixture_upload_gens_hk_api(
+    case_id: str,
+    helpers: StoreHelpers,
+    real_housekeeper_api: HousekeeperAPI,
+    upload_gens_hk_bundle: dict,
+) -> HousekeeperAPI:
+    """Add and include files from upload_gens_hk_bundle."""
+    helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=upload_gens_hk_bundle)
+    hk_version = real_housekeeper_api.last_version(bundle=case_id)
+    real_housekeeper_api.include(hk_version)
+    return real_housekeeper_api
+
+
+@pytest.fixture(name="upload_gens_context")
+def fixture_upload_gens_context(
     analysis_store_trio: Store,
     base_context: CGConfig,
+    gens_api: GensAPI,
+    upload_gens_hk_api: HousekeeperAPI,
 ) -> CGConfig:
-    """Create a upload genotypes context"""
-    base_context.genotype_api_ = genotype_api
-    base_context.housekeeper_api_ = upload_genotypes_hk_api
+    """Create a gens upload context."""
+    base_context.gens_api_ = gens_api
+    base_context.housekeeper_api_ = upload_gens_hk_api
     base_context.status_db_ = analysis_store_trio
     return base_context
 
@@ -131,7 +158,7 @@ def fixture_upload_report_hk_bundle(case_id: str, delivery_report_html: Path, ti
 def fixture_upload_report_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     upload_report_hk_bundle: dict,
-    analysis_obj: models.Analysis,
+    analysis_obj: Analysis,
     helpers,
 ) -> HousekeeperAPI:
     """Add and include files from upload reports hk bundle"""
@@ -140,22 +167,6 @@ def fixture_upload_report_hk_api(
     hk_version = real_housekeeper_api.last_version(analysis_obj.family.internal_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
-
-
-@pytest.fixture(name="scout_load_object")
-def fixture_scout_load_object(case_id: str, timestamp: datetime) -> ScoutLoadConfig:
-    """Create a scout load config case object"""
-    case_data = {
-        "owner": "cust000",
-        "case": case_id,
-        "human_genome_build": "37",
-        "rank_score_threshold": 5,
-        "analysis_date": timestamp,
-        "samples": [
-            {"sample_id": "sample", "sex": "male", "phenotype": "affected", "analysis_type": "wgs"}
-        ],
-    }
-    return ScoutLoadConfig(**case_data)
 
 
 @pytest.fixture(name="base_context")
@@ -215,7 +226,7 @@ class MockScoutApi(ScoutAPI):
     def __init__(self):
         """docstring for __init__"""
 
-    def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
+    def upload(self, scout_load_config: Path, force: bool = False):
         """docstring for upload"""
         LOG.info("Case loaded successfully to Scout")
 

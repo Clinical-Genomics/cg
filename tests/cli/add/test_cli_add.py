@@ -1,32 +1,10 @@
 from cg.cli.add import add
+from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
 
-
-def test_add_customer(cli_runner: CliRunner, base_context: CGConfig):
-    # GIVEN database with some customers
-    status_db: Store = base_context.status_db
-    nr_customers: int = status_db.Customer.query.count()
-
-    # WHEN adding a customer
-    result = cli_runner.invoke(
-        add,
-        [
-            "customer",
-            "internal_id",
-            "testcust",
-            "--invoice-address",
-            "Test adress",
-            "--invoice-reference",
-            "ABCDEF",
-        ],
-        obj=base_context,
-    )
-
-    # THEN it should be stored in the database
-    assert result.exit_code == 0
-    assert status_db.Customer.query.count() == nr_customers + 1
+from cg.store.models import User
 
 
 def test_add_user(cli_runner: CliRunner, base_context: CGConfig):
@@ -40,14 +18,16 @@ def test_add_user(cli_runner: CliRunner, base_context: CGConfig):
         invoice_address="Street nr, 12345 Uppsala",
         invoice_reference="ABCDEF",
     )
-    disk_store.add_commit(customer)
+    disk_store.session.add(customer)
+    disk_store.session.commit()
     # GIVEN that there is a certain number of users
-    nr_users = disk_store.User.query.count()
+    user_query = disk_store._get_query(table=User)
+    nr_users = user_query.count()
 
     # WHEN adding a new user
     name, email = "Paul T. Anderson", "paul.anderson@magnolia.com"
     result = cli_runner.invoke(add, ["user", "-c", customer_id, email, name], obj=base_context)
 
-    # THEN it should be stored in the database
-    assert result.exit_code == 0
-    assert disk_store.User.query.count() == nr_users + 1
+    # THEN exit successfully
+    assert result.exit_code == EXIT_SUCCESS
+    assert user_query.count() == nr_users + 1

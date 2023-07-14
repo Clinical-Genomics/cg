@@ -3,16 +3,18 @@ import re
 from pathlib import Path
 from typing import Optional
 
+from housekeeper.store.models import Version
+
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.scout_upload import MIP_CASE_TAGS, MIP_SAMPLE_TAGS
+from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig, ScoutMipIndividual
-from cg.store import models
-from housekeeper.store import models as hk_models
+from cg.store.models import Analysis, Family, FamilySample
 
 LOG = logging.getLogger(__name__)
 
@@ -20,8 +22,8 @@ LOG = logging.getLogger(__name__)
 class MipConfigBuilder(ScoutConfigBuilder):
     def __init__(
         self,
-        hk_version_obj: hk_models.Version,
-        analysis_obj: models.Analysis,
+        hk_version_obj: Version,
+        analysis_obj: Analysis,
         mip_analysis_api: MipAnalysisAPI,
         lims_api: LimsAPI,
         madeline_api: MadelineAPI,
@@ -61,9 +63,9 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.include_case_files()
 
         LOG.info("Building samples")
-        db_sample: models.FamilySample
+        db_sample: FamilySample
         for db_sample in self.analysis_obj.family.links:
-            self.load_config.samples.append(self.build_config_sample(db_sample=db_sample))
+            self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
         self.include_pedigree_picture()
 
     def include_pedigree_picture(self) -> None:
@@ -76,28 +78,39 @@ class MipConfigBuilder(ScoutConfigBuilder):
         else:
             LOG.info("family of 1 sample - skip pedigree graph")
 
-    def build_config_sample(self, db_sample: models.FamilySample) -> ScoutMipIndividual:
+    def build_config_sample(self, case_sample: FamilySample) -> ScoutMipIndividual:
         """Build a sample with mip specific information"""
 
         config_sample = ScoutMipIndividual()
-        self.add_common_sample_info(config_sample=config_sample, db_sample=db_sample)
-        config_sample.father = db_sample.father.internal_id if db_sample.father else "0"
-        config_sample.mother = db_sample.mother.internal_id if db_sample.mother else "0"
+        self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
+        self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
+        config_sample.father = (
+            case_sample.father.internal_id
+            if case_sample.father
+            else RelationshipStatus.HAS_NO_PARENT.value
+        )
+        config_sample.mother = (
+            case_sample.mother.internal_id
+            if case_sample.mother
+            else RelationshipStatus.HAS_NO_PARENT.value
+        )
 
         return config_sample
 
     def include_case_files(self):
         """Include case level files for mip case"""
         LOG.info("Including MIP specific case level files")
-        self.load_config.vcf_snv = self.fetch_file_from_hk(self.case_tags.snv_vcf)
-        self.load_config.vcf_sv = self.fetch_file_from_hk(self.case_tags.sv_vcf)
-        self.load_config.vcf_snv_research = self.fetch_file_from_hk(self.case_tags.snv_research_vcf)
-        self.load_config.vcf_sv_research = self.fetch_file_from_hk(self.case_tags.sv_research_vcf)
-        self.load_config.vcf_str = self.fetch_file_from_hk(self.case_tags.vcf_str)
-        self.load_config.peddy_ped = self.fetch_file_from_hk(self.case_tags.peddy_ped)
-        self.load_config.peddy_sex = self.fetch_file_from_hk(self.case_tags.peddy_sex)
-        self.load_config.peddy_check = self.fetch_file_from_hk(self.case_tags.peddy_check)
-        self.load_config.smn_tsv = self.fetch_file_from_hk(self.case_tags.smn_tsv)
+        self.load_config.peddy_check = self.get_file_from_hk(self.case_tags.peddy_check)
+        self.load_config.peddy_ped = self.get_file_from_hk(self.case_tags.peddy_ped)
+        self.load_config.peddy_sex = self.get_file_from_hk(self.case_tags.peddy_sex)
+        self.load_config.smn_tsv = self.get_file_from_hk(self.case_tags.smn_tsv)
+        self.load_config.vcf_mei = self.get_file_from_hk(self.case_tags.vcf_mei)
+        self.load_config.vcf_mei_research = self.get_file_from_hk(self.case_tags.vcf_mei_research)
+        self.load_config.vcf_snv = self.get_file_from_hk(self.case_tags.snv_vcf)
+        self.load_config.vcf_snv_research = self.get_file_from_hk(self.case_tags.snv_research_vcf)
+        self.load_config.vcf_str = self.get_file_from_hk(self.case_tags.vcf_str)
+        self.load_config.vcf_sv = self.get_file_from_hk(self.case_tags.sv_vcf)
+        self.load_config.vcf_sv_research = self.get_file_from_hk(self.case_tags.sv_research_vcf)
         self.include_multiqc_report()
         self.include_delivery_report()
 
@@ -105,31 +118,44 @@ class MipConfigBuilder(ScoutConfigBuilder):
         """Include sample level files that are optional for mip samples"""
         LOG.info("Including MIP specific sample level files")
         sample_id: str = config_sample.sample_id
-        config_sample.vcf2cytosure = self.fetch_sample_file(
+        config_sample.vcf2cytosure = self.get_sample_file(
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
         )
-        config_sample.mt_bam = self.fetch_sample_file(
+        config_sample.mt_bam = self.get_sample_file(
             hk_tags=self.sample_tags.mt_bam, sample_id=sample_id
         )
         config_sample.chromograph_images.autozygous = self.extract_generic_filepath(
-            file_path=self.fetch_sample_file(
+            file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_autozyg, sample_id=sample_id
             )
         )
         config_sample.chromograph_images.coverage = self.extract_generic_filepath(
-            file_path=self.fetch_sample_file(
+            file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_coverage, sample_id=sample_id
             )
         )
         config_sample.chromograph_images.upd_regions = self.extract_generic_filepath(
-            file_path=self.fetch_sample_file(
+            file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_regions, sample_id=sample_id
             )
         )
         config_sample.chromograph_images.upd_sites = self.extract_generic_filepath(
-            file_path=self.fetch_sample_file(
+            file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_sites, sample_id=sample_id
             )
+        )
+        config_sample.reviewer.alignment = self.get_sample_file(
+            hk_tags=self.sample_tags.reviewer_alignment, sample_id=sample_id
+        )
+        config_sample.reviewer.alignment_index = self.get_sample_file(
+            hk_tags=self.sample_tags.reviewer_alignment_index, sample_id=sample_id
+        )
+        config_sample.reviewer.vcf = self.get_sample_file(
+            hk_tags=self.sample_tags.reviewer_vcf, sample_id=sample_id
+        )
+        config_sample.reviewer.catalog = self.get_file_from_hk(hk_tags=self.case_tags.str_catalog)
+        config_sample.mitodel_file = self.get_sample_file(
+            hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
         )
 
     @staticmethod
@@ -156,7 +182,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
     def is_multi_sample_case(load_config: ScoutLoadConfig) -> bool:
         return len(load_config.samples) > 1
 
-    def run_madeline(self, family_obj: models.Family) -> Path:
+    def run_madeline(self, family_obj: Family) -> Path:
         """Generate a madeline file for an analysis. Use customer sample names"""
         samples = [
             {

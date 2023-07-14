@@ -1,0 +1,43 @@
+{
+    "name": "Metagenome",
+    "customer": "cust000",
+    "comment": "",
+    "samples": [
+        {
+            "name": "Bristol",
+            "container": "96 well plate",
+            "application": "METLIFR020",
+            "data_analysis": "fastq",
+            "data_delivery": "fastq",
+            "require_qc_ok": false,
+            "elution_buffer": "EB-buffer",
+            "source": "faeces",
+            "priority": "standard",
+            "container_name": "Platen",
+            "well_position": "A:1",
+            "concentration_sample": "2",
+            "quantity": "10",
+            "extraction_method": "best",
+            "volume": "1",
+            "comment": "5 on the chart"
+        },
+        {
+            "name": "Trefyrasex",
+            "container": "Tube",
+            "application": "METNXTR020",
+            "data_analysis": "fastq",
+            "data_delivery": "fastq",
+            "require_qc_ok": true,
+            "elution_buffer": "Nuclease-free water",
+            "source": "blood",
+            "priority": "priority",
+            "container_name": "Tuben",
+            "well_position": "",
+            "concentration_sample": "1",
+            "quantity": "2",
+            "extraction_method": "unknown",
+            "volume": "2",
+            "comment": "test"
+        }
+    ]
+}

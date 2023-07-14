@@ -1,35 +1,59 @@
 import logging
 from typing import List
+from typing_extensions import Literal
 
-from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
-from cg.apps.lims.samplesheet import LimsFlowcellSample
-from cg.exc import FlowcellError
-from cg.models.demultiplex.run_parameters import RunParameters
-from cg.store.models import Flowcell
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
+    SampleSheetCreator,
+    SampleSheetCreatorV1,
+    SampleSheetCreatorV2,
+)
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
+from cg.constants.sequencing import Sequencers
+from cg.constants.demultiplexing import BclConverter
+from cg.exc import FlowCellError
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
 
 
+def get_sample_sheet_creator(
+    bcl_converter: str,
+    flow_cell: FlowCellDirectoryData,
+    lims_samples: List[FlowCellSample],
+    force: bool,
+) -> SampleSheetCreator:
+    """Returns an initialised sample sheet creator according to the flow cell sequencer."""
+    sequencer: str = flow_cell.sequencer_type
+    if sequencer == Sequencers.NOVASEQ:
+        return SampleSheetCreatorV1(
+            bcl_converter=bcl_converter, flow_cell=flow_cell, lims_samples=lims_samples, force=force
+        )
+    elif sequencer == Sequencers.NOVASEQX:
+        return SampleSheetCreatorV2(
+            bcl_converter=bcl_converter, flow_cell=flow_cell, lims_samples=lims_samples, force=force
+        )
+    else:
+        message: str = (
+            "Only NovaSeq and NovaSeqX sample sheets are currently supported."
+            + f"Found sequencer type: {sequencer}"
+        )
+        raise FlowCellError(message)
+
+
 def create_sample_sheet(
-    flowcell: Flowcell, lims_samples: List[LimsFlowcellSample], bcl_converter: str
-) -> str:
-    """Create a sample sheet for a flowcell"""
-    if flowcell.sample_sheet_path.exists():
-        message = f"Sample sheet {flowcell.sample_sheet_path} already exists!"
-        LOG.warning(message)
-        raise FileExistsError(message)
-
-    run_parameters: RunParameters = flowcell.run_parameters_object
-
-    if run_parameters.flowcell_type != "novaseq":
-        message = f"Can only demultiplex novaseq with cg. Found type {run_parameters.flowcell_type}"
-        LOG.warning(message)
-        raise FlowcellError(message=message)
-
-    sample_sheet_creator = SampleSheetCreator(
-        flowcell_id=flowcell.flowcell_id,
-        lims_samples=lims_samples,
-        run_parameters=run_parameters,
+    bcl_converter: Literal[BclConverter.BCL2FASTQ, BclConverter.DRAGEN],
+    flow_cell: FlowCellDirectoryData,
+    lims_samples: List[FlowCellSample],
+    force: bool = False,
+) -> List[List[str]]:
+    """Create a sample sheet for a flow cell."""
+    sample_sheet_creator = get_sample_sheet_creator(
         bcl_converter=bcl_converter,
+        flow_cell=flow_cell,
+        lims_samples=lims_samples,
+        force=force,
+    )
+    LOG.info(
+        f"Constructing a {bcl_converter} sample sheet for the {flow_cell.sequencer_type} flow cell {flow_cell.id}"
     )
     return sample_sheet_creator.construct_sample_sheet()

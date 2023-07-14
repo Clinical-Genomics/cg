@@ -2,6 +2,7 @@ import logging
 import getpass
 import paramiko
 import shutil
+import os
 from pathlib import Path
 from typing import List, Optional
 import datetime as dt
@@ -13,10 +14,10 @@ from cg.constants.constants import SARS_COV_REGEX
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family, Sample
 from cg.utils.email import send_mail
 from housekeeper.store.models import Version
-from alive_progress import alive_bar
 
 LOG = logging.getLogger(__name__)
 
@@ -93,7 +94,8 @@ class FOHMUploadAPI:
 
     @property
     def aggregation_dataframe(self) -> pd.DataFrame:
-        """Dataframe with all 'komplettering' rows from multiple cases, and additional rows to be used for aggregation"""
+        """Dataframe with all 'komplettering' rows from multiple cases, and additional rows to be
+        used for aggregation."""
         if not isinstance(self._aggregation_dataframe, pd.DataFrame):
             self._aggregation_dataframe = self.reports_dataframe.copy()
         return self._aggregation_dataframe
@@ -103,8 +105,8 @@ class FOHMUploadAPI:
         if not self._daily_reports_list:
             for case_id in self._cases_to_aggregate:
                 self._daily_reports_list.append(
-                    self.housekeeper_api.find_file_in_latest_version(
-                        case_id=case_id, tags=["komplettering"]
+                    self.housekeeper_api.get_file_from_latest_version(
+                        bundle_name=case_id, tags=["komplettering"]
                     ).full_path
                 )
         return self._daily_reports_list
@@ -114,8 +116,8 @@ class FOHMUploadAPI:
         if not self._daily_pangolin_list:
             for case_id in self._cases_to_aggregate:
                 self._daily_pangolin_list.append(
-                    self.housekeeper_api.find_file_in_latest_version(
-                        case_id=case_id, tags=["pangolin-typing-fohm"]
+                    self.housekeeper_api.get_file_from_latest_version(
+                        bundle_name=case_id, tags=["pangolin-typing-fohm"]
                     ).full_path
                 )
         return self._daily_pangolin_list
@@ -130,7 +132,7 @@ class FOHMUploadAPI:
         if getpass.getuser() == self.config.fohm.valid_uploader:
             return
         raise CgError(
-            f"Cannot upload to FOHM as {getpass.getuser()}, please log in as {self.config.fohm.valid_uploader}"
+            f"Cannot upload to FOHM as {getpass.getuser()}, please log in as {self.config.fohm.valid_uploader} "
         )
 
     def set_cases_to_aggregate(self, cases: list) -> None:
@@ -138,8 +140,8 @@ class FOHMUploadAPI:
         self._cases_to_aggregate = cases
 
     def create_daily_delivery_folders(self) -> None:
-        LOG.info(f"Creating direcroty: {self.daily_rawdata_path}")
-        LOG.info(f"Creating direcroty: {self.daily_report_path}")
+        LOG.info(f"Creating directory: {self.daily_rawdata_path}")
+        LOG.info(f"Creating directory: {self.daily_report_path}")
         if self._dry_run:
             return
         self.daily_rawdata_path.mkdir(parents=True, exist_ok=True)
@@ -165,25 +167,19 @@ class FOHMUploadAPI:
         )
 
     def link_sample_rawdata_files(self) -> None:
-        """
-        Hardlink samples rawdata files to fohm delivery folder
-        """
-        samples_to_link = len(self.aggregation_dataframe)
-        with alive_bar(samples_to_link) as bar:
-            for sample_id in self.aggregation_dataframe["internal_id"]:
-                sample_obj: models.Sample = self.status_db.sample(sample_id)
-                bundle_name = sample_obj.links[0].family.internal_id
-                version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
-                files = self.housekeeper_api.files(version=version_obj.id, tags=[sample_id]).all()
-                for file in files:
-                    if self._dry_run:
-                        LOG.info(
-                            f"Would have copied {file.full_path} to {Path(self.daily_rawdata_path)}"
-                        )
-                        continue
-                    shutil.copy(file.full_path, Path(self.daily_rawdata_path))
-                    Path(self.daily_rawdata_path, Path(file.full_path).name).chmod(0o0777)
-                bar()
+        """Hardlink samples rawdata files to fohm delivery folder."""
+        for sample_id in self.aggregation_dataframe["internal_id"]:
+            sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
+            bundle_name = sample.links[0].family.internal_id
+            version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
+            files = self.housekeeper_api.files(version=version_obj.id, tags=[sample_id]).all()
+            for file in files:
+                if self._dry_run:
+                    LOG.info(
+                        f"Would have copied {file.full_path} to {Path(self.daily_rawdata_path)}"
+                    )
+                    continue
+                shutil.copy(file.full_path, Path(self.daily_rawdata_path))
 
     def create_pangolin_reports(self) -> None:
         LOG.info("Creating pangolin reports")
@@ -233,16 +229,28 @@ class FOHMUploadAPI:
             )
             if self._dry_run:
                 return
-            send_mail(
-                EmailInfo(
-                    receiver_email=self.config.fohm.email_recipient,
-                    sender_email=self.config.fohm.email_sender,
-                    smtp_server=self.config.fohm.email_host,
-                    subject=file.name,
-                    message=" ",
-                    file=file,
+
+            try:
+                send_mail(
+                    EmailInfo(
+                        receiver_email=self.config.fohm.email_recipient,
+                        sender_email=self.config.fohm.email_sender,
+                        smtp_server=self.config.fohm.email_host,
+                        subject=file.name,
+                        message=" ",
+                        file=file,
+                    )
                 )
-            )
+                file.unlink()
+
+            except Exception as ex:
+                LOG.error(f"Failed sending email report {file} with error: {ex}")
+
+        if os.listdir(self.daily_report_path) == []:
+            self.daily_report_path.rmdir()
+
+        if os.listdir(self.daily_bundle_path) == []:
+            self.daily_bundle_path.rmdir()
 
     def sync_files_sftp(self) -> None:
         self.check_username()
@@ -250,30 +258,36 @@ class FOHMUploadAPI:
         ed_key = paramiko.Ed25519Key.from_private_key_file(self.config.fohm.key)
         transport.connect(username=self.config.fohm.username, pkey=ed_key)
         sftp = paramiko.SFTPClient.from_transport(transport)
-        files_to_upload = len(list(self.daily_rawdata_path.iterdir()))
-        with alive_bar(files_to_upload) as bar:
-            for file in self.daily_rawdata_path.iterdir():
-                bar()
-                LOG.info(f"Sending {file} via SFTP, dry-run {self.dry_run}")
-                if self._dry_run:
-                    continue
+        for file in self.daily_rawdata_path.iterdir():
+            LOG.info(f"Sending {file} via SFTP, dry-run {self.dry_run}")
+            if self._dry_run:
+                continue
+
+            try:
                 sftp.put(file.as_posix(), f"/till-fohm/{file.name}")
                 LOG.info(f"Finished sending {file}")
+                file.unlink()
+            except Exception as ex:
+                LOG.error(f"Failed sending {file} with error: {ex}")
+
         sftp.close()
         transport.close()
+
+        if os.listdir(self.daily_rawdata_path) == []:
+            self.daily_rawdata_path.rmdir()
 
     def update_upload_started_at(self, case_id: str) -> None:
         """Update timestamp for cases which started being processed as batch"""
         if self._dry_run:
             return
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         case_obj.analyses[0].upload_started_at = dt.datetime.now()
-        self.status_db.commit()
+        self.status_db.session.commit()
 
     def update_uploaded_at(self, case_id: str) -> None:
         """Update timestamp for cases which uploaded successfully"""
         if self._dry_run:
             return
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         case_obj.analyses[0].uploaded_at = dt.datetime.now()
-        self.status_db.commit()
+        self.status_db.session.commit()

@@ -4,19 +4,34 @@ import datetime
 from pathlib import Path
 
 import pytest
+
 from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 
 
+@pytest.fixture(name="balsamic_case_clean")
+def fixture_balsamic_case_clean() -> str:
+    """Return a balsamic case to clean"""
+    return "balsamic_case_clean"
+
+
+@pytest.fixture(name="balsamic_case_not_clean")
+def fixture_balsamic_case_not_clean() -> str:
+    """Return a balsamic case to clean"""
+    return "balsamic_case_not_clean"
+
+
 @pytest.fixture()
 def clean_context(
+    balsamic_case_clean: str,
+    balsamic_case_not_clean: str,
     cg_context: CGConfig,
     helpers: StoreHelpers,
     project_dir: Path,
     timestamp_yesterday: datetime.datetime,
-    timestamp_today: datetime.datetime,
 ) -> CGConfig:
     analysis_api = BalsamicAnalysisAPI(cg_context)
     store = analysis_api.status_db
@@ -24,13 +39,13 @@ def clean_context(
     # Create textbook case for cleaning
     case_to_clean = helpers.add_case(
         store=store,
-        internal_id="balsamic_case_clean",
-        name="balsamic_case_clean",
+        internal_id=balsamic_case_clean,
+        name=balsamic_case_clean,
         data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_to_clean = helpers.add_sample(
         store,
-        internal_id="balsamic_sample_clean",
+        internal_id=balsamic_case_clean,
         is_tumour=True,
         application_type="wgs",
     )
@@ -44,21 +59,21 @@ def clean_context(
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
     )
-    Path(analysis_api.get_case_path("balsamic_case_clean")).mkdir(exist_ok=True, parents=True)
+    Path(analysis_api.get_case_path(balsamic_case_clean)).mkdir(exist_ok=True, parents=True)
 
     # Create textbook case not for cleaning
     case_to_not_clean = helpers.add_case(
         store=store,
-        internal_id="balsamic_case_not_clean",
-        name="balsamic_case_not_clean",
+        internal_id=balsamic_case_not_clean,
+        name=balsamic_case_not_clean,
         data_analysis=Pipeline.BALSAMIC,
     )
     case_to_not_clean.action = "running"
-    store.commit()
+    store.session.commit()
 
     sample_case_to_not_clean = helpers.add_sample(
         store,
-        internal_id="balsamic_sample_not_clean",
+        internal_id=balsamic_case_not_clean,
         is_tumour=True,
         application_type="wgs",
     )
@@ -72,7 +87,7 @@ def clean_context(
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
     )
-    Path(analysis_api.get_case_path("balsamic_case_not_clean")).mkdir(exist_ok=True, parents=True)
+    Path(analysis_api.get_case_path(balsamic_case_not_clean)).mkdir(exist_ok=True, parents=True)
     cg_context.meta_apis["analysis_api"] = analysis_api
 
     cg_context.data_delivery.base_path = f"{project_dir}/rsync"
@@ -88,3 +103,101 @@ def fixture_rsync_process(project_dir: Path) -> Path:
 
     rsync_process.mkdir(exist_ok=True, parents=True)
     return rsync_process
+
+
+@pytest.fixture(name="microsalt_case_clean_dry")
+def fixture_microsalt_case_clean_dry() -> str:
+    """Return a microsalt case to clean in dry-run"""
+    return "microsalt_case_clean_dry"
+
+
+@pytest.fixture(name="microsalt_case_clean")
+def fixture_microsalt_case_not_clean() -> str:
+    """Return a microsalt case to clean"""
+    return "microsalt_case_clean"
+
+
+@pytest.fixture(scope="function")
+def clean_context_microsalt(
+    microsalt_case_clean: str,
+    microsalt_case_clean_dry: str,
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    project_dir: Path,
+    timestamp_yesterday: datetime.datetime,
+    timestamp_now: datetime.datetime,
+    mocker,
+) -> CGConfig:
+    """Clean context for microsalt."""
+
+    analysis_api = MicrosaltAnalysisAPI(cg_context)
+    store = analysis_api.status_db
+
+    mocker.patch.object(MicrosaltAnalysisAPI, "get_case_path")
+
+    # Create textbook case for cleaning
+    MicrosaltAnalysisAPI.get_case_path.return_value = [
+        Path("home/proj/production/microbial/test/result", microsalt_case_clean)
+    ]
+
+    case_to_clean = helpers.add_case(
+        store=store,
+        internal_id=microsalt_case_clean,
+        name=microsalt_case_clean,
+        data_analysis=Pipeline.MICROSALT,
+    )
+    sample_case_to_clean = helpers.add_sample(
+        store,
+        internal_id=microsalt_case_clean,
+    )
+
+    helpers.add_relationship(store, case=case_to_clean, sample=sample_case_to_clean)
+
+    helpers.add_analysis(
+        store,
+        case=case_to_clean,
+        pipeline=Pipeline.MICROSALT,
+        started_at=timestamp_yesterday,
+        uploaded_at=timestamp_yesterday,
+        cleaned_at=None,
+    )
+    case_path_list = analysis_api.get_case_path(microsalt_case_clean)
+    for path in case_path_list:
+        Path(path).mkdir(exist_ok=True, parents=True)
+
+    # Create textbook case for cleaning in dry run
+    MicrosaltAnalysisAPI.get_case_path.return_value = [
+        Path("home/proj/production/microbial/test/result", microsalt_case_clean_dry)
+    ]
+
+    case_to_clean_dry_run = helpers.add_case(
+        store=store,
+        internal_id=microsalt_case_clean_dry,
+        name=microsalt_case_clean_dry,
+        data_analysis=Pipeline.MICROSALT,
+    )
+
+    sample_case_to_not_clean = helpers.add_sample(
+        store,
+        internal_id=microsalt_case_clean_dry,
+    )
+    helpers.add_relationship(store, case=case_to_clean_dry_run, sample=sample_case_to_not_clean)
+
+    helpers.add_analysis(
+        store,
+        case=case_to_clean_dry_run,
+        pipeline=Pipeline.MICROSALT,
+        started_at=timestamp_yesterday,
+        uploaded_at=timestamp_yesterday,
+        cleaned_at=None,
+    )
+
+    case_path_list = analysis_api.get_case_path(microsalt_case_clean_dry)
+    for path in case_path_list:
+        Path(path).mkdir(exist_ok=True, parents=True)
+
+    cg_context.meta_apis["analysis_api"] = analysis_api
+
+    cg_context.data_delivery.base_path = f"{project_dir}/rsync"
+
+    return cg_context

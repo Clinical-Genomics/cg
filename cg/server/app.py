@@ -5,7 +5,26 @@ from flask_admin.base import AdminIndexView
 from flask_dance.consumer import oauth_authorized
 from flask_dance.contrib.google import google, make_google_blueprint
 
-from cg.store import models
+from cg.store.models import (
+    Analysis,
+    Application,
+    ApplicationVersion,
+    Bed,
+    BedVersion,
+    Collaboration,
+    Customer,
+    Delivery,
+    Family,
+    FamilySample,
+    Flowcell,
+    Invoice,
+    Organism,
+    Panel,
+    Pool,
+    Sample,
+    User,
+    SampleLaneSequencingMetrics,
+)
 
 from . import admin, api, ext, invoices
 
@@ -16,6 +35,7 @@ def create_app():
     _load_config(app)
     _configure_extensions(app)
     _register_blueprints(app)
+    _register_teardowns(app)
 
     return app
 
@@ -25,12 +45,12 @@ def _load_config(app):
 
 
 def _configure_extensions(app: Flask):
-
     _initialize_logging(app)
     certs_resp = requests.get("https://www.googleapis.com/oauth2/v1/certs")
     app.config["GOOGLE_OAUTH_CERTS"] = certs_resp.json()
 
     ext.cors.init_app(app)
+    ext.csrf.init_app(app)
     ext.db.init_app(app)
     ext.lims.init_app(app)
     if app.config["OSTICKET_API_KEY"]:
@@ -43,7 +63,6 @@ def _initialize_logging(app):
 
 
 def _register_blueprints(app: Flask):
-
     if not app.config["CG_ENABLE_ADMIN"]:
         return
 
@@ -62,10 +81,11 @@ def _register_blueprints(app: Flask):
         session["user_email"] = user_data["email"]
 
     app.register_blueprint(api.BLUEPRINT)
-    _register_admin_views()
     app.register_blueprint(invoices.BLUEPRINT, url_prefix="/invoices")
-
     app.register_blueprint(oauth_bp, url_prefix="/login")
+    _register_admin_views()
+
+    ext.csrf.exempt(api.BLUEPRINT)  # Protected with Auth header already
 
     @app.route("/")
     def index():
@@ -80,22 +100,33 @@ def _register_blueprints(app: Flask):
 
 def _register_admin_views():
     # Base data views
-    ext.admin.add_view(admin.ApplicationView(models.Application, ext.db.session))
-    ext.admin.add_view(admin.ApplicationVersionView(models.ApplicationVersion, ext.db.session))
-    ext.admin.add_view(admin.BedView(models.Bed, ext.db.session))
-    ext.admin.add_view(admin.BedVersionView(models.BedVersion, ext.db.session))
-    ext.admin.add_view(admin.CustomerView(models.Customer, ext.db.session))
-    ext.admin.add_view(admin.CollaborationView(models.Collaboration, ext.db.session))
-    ext.admin.add_view(admin.OrganismView(models.Organism, ext.db.session))
-    ext.admin.add_view(admin.PanelView(models.Panel, ext.db.session))
-    ext.admin.add_view(admin.UserView(models.User, ext.db.session))
+    ext.admin.add_view(admin.ApplicationView(Application, ext.db.session))
+    ext.admin.add_view(admin.ApplicationVersionView(ApplicationVersion, ext.db.session))
+    ext.admin.add_view(admin.BedView(Bed, ext.db.session))
+    ext.admin.add_view(admin.BedVersionView(BedVersion, ext.db.session))
+    ext.admin.add_view(admin.CustomerView(Customer, ext.db.session))
+    ext.admin.add_view(admin.CollaborationView(Collaboration, ext.db.session))
+    ext.admin.add_view(admin.OrganismView(Organism, ext.db.session))
+    ext.admin.add_view(admin.PanelView(Panel, ext.db.session))
+    ext.admin.add_view(admin.UserView(User, ext.db.session))
+    ext.admin.add_view(
+        admin.SampleLaneSequencingMetricsView(SampleLaneSequencingMetrics, ext.db.session)
+    )
 
     # Business data views
-    ext.admin.add_view(admin.FamilyView(models.Family, ext.db.session))
-    ext.admin.add_view(admin.FamilySampleView(models.FamilySample, ext.db.session))
-    ext.admin.add_view(admin.SampleView(models.Sample, ext.db.session))
-    ext.admin.add_view(admin.PoolView(models.Pool, ext.db.session))
-    ext.admin.add_view(admin.FlowcellView(models.Flowcell, ext.db.session))
-    ext.admin.add_view(admin.AnalysisView(models.Analysis, ext.db.session))
-    ext.admin.add_view(admin.DeliveryView(models.Delivery, ext.db.session))
-    ext.admin.add_view(admin.InvoiceView(models.Invoice, ext.db.session))
+    ext.admin.add_view(admin.FamilyView(Family, ext.db.session))
+    ext.admin.add_view(admin.FamilySampleView(FamilySample, ext.db.session))
+    ext.admin.add_view(admin.SampleView(Sample, ext.db.session))
+    ext.admin.add_view(admin.PoolView(Pool, ext.db.session))
+    ext.admin.add_view(admin.FlowcellView(Flowcell, ext.db.session))
+    ext.admin.add_view(admin.AnalysisView(Analysis, ext.db.session))
+    ext.admin.add_view(admin.DeliveryView(Delivery, ext.db.session))
+    ext.admin.add_view(admin.InvoiceView(Invoice, ext.db.session))
+
+
+def _register_teardowns(app: Flask):
+    """Register teardown functions."""
+
+    @app.teardown_appcontext
+    def remove_database_session(exception=None):
+        ext.db.session.remove()

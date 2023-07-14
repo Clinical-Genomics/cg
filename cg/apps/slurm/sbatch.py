@@ -1,4 +1,4 @@
-SBATCH_HEADER_TEMPLATE = """#! /bin/bash
+SBATCH_HEADER_TEMPLATE = """#! /bin/bash {use_login_shell}
 #SBATCH --job-name={job_name}
 #SBATCH --account={account}
 #SBATCH --ntasks={number_tasks}
@@ -33,6 +33,7 @@ DRAGEN_SBATCH_HEADER_TEMPLATE = """#! /bin/bash
 #SBATCH --mail-user={email}
 #SBATCH --time={hours}:{minutes}:00
 #SBATCH --qos={quality_of_service}
+#SBATCH --exclude=cg-dragen2
 
 set -eu -o pipefail
 

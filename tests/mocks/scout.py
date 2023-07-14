@@ -2,11 +2,50 @@
 
 import logging
 from pathlib import Path
+from pydantic import BaseModel, validator
 from typing import List
+from typing_extensions import Literal
 
 from cg.apps.scout.scoutapi import ScoutAPI
+from tests.mocks.process_mock import ProcessMock
+
 
 LOG = logging.getLogger(__name__)
+
+
+class MockScoutIndividual(BaseModel):
+    sample_id: str = "sample_id"
+    sex: str = "female"
+    analysis_type: Literal[
+        "external",
+        "mixed",
+        "panel",
+        "panel-umi",
+        "unknown",
+        "wes",
+        "wgs",
+        "wts",
+    ] = "wgs"
+
+    @validator("sample_id", "sex", "analysis_type")
+    def field_not_none(cls, value):
+        if value is None:
+            raise ValueError("sample_id, sex and analysis_type can not be None")
+        return value
+
+
+class MockScoutLoadConfig(BaseModel):
+    owner: str = "cust000"
+    family: str = "family_id"
+
+    @validator("owner", "family")
+    def field_not_none(cls, value):
+        if value is None:
+            raise ValueError("Owner and family can not be None")
+        return value
+
+    class Config:
+        validate_assignment = True
 
 
 class MockScoutAPI(ScoutAPI):
@@ -20,6 +59,7 @@ class MockScoutAPI(ScoutAPI):
         self._cases = []
         self._upload_report_success = True
         self._alignment_file_updated = 0
+        self.process = ProcessMock(binary="scout", error=False)
 
     # Mock specific functions
 
@@ -37,13 +77,9 @@ class MockScoutAPI(ScoutAPI):
 
     # Overridden functions
 
-    def upload(self, data: dict, threshold: int = 5, force: bool = False):
+    def upload(self, data: dict, force: bool = False):
         """Load analysis of a new case into Scout."""
         LOG.debug("Case loaded successfully to Scout")
-
-    def update_alignment_file(self, case_id: str, sample_id: str, alignment_path: Path):
-        """Update alignment file for individual in case"""
-        self._alignment_file_updated += 1
 
     def export_panels(self, panels: List[str], versions=None):
         """Pass through to export of a list of gene panels."""

@@ -1,2 +1,2 @@
-from .flowcell import TransferFlowcell
-from .lims import MicrobialState, PoolState, SampleState, TransferLims
+from .flowcell import TransferFlowCell
+from .lims import PoolState, SampleState, TransferLims

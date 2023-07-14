@@ -1,23 +1,30 @@
-import click
 import datetime as dt
 import logging
 import shutil
-
 from pathlib import Path
+from typing import List, Union
 
-from cgmodels.cg.constants import Pipeline
+import click
+from dateutil.parser import parse as parse_date
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.exc import FlowcellsNeededError, DecompressionNeededError
+from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
+from cg.exc import DecompressionNeededError, FlowCellsNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.balsamic_pon import BalsamicPonAnalysisAPI
+from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
+from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
-from dateutil.parser import parse as parse_date
+from cg.store import Store
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", help="Simulate process without executing", is_flag=True
@@ -28,22 +35,34 @@ ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_ANALYSIS_PARAMETERS_CONFIG = click.option(
     "--config-artic", type=str, help="Config with computational and lab related settings"
 )
+OPTION_LOQUSDB_SUPPORTED_PIPELINES = click.option(
+    "--pipeline",
+    type=click.Choice(LOQUSDB_SUPPORTED_PIPELINES),
+    help="Limit observations upload to a specific pipeline",
+)
 
 LOG = logging.getLogger(__name__)
 
 
-@click.command("ensure-flowcells-ondisk")
+@click.command("ensure-flow-cells-on-disk")
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def ensure_flowcells_ondisk(context: CGConfig, case_id: str):
-    """Check if flowcells are on disk for given case. If not, request flowcells and raise FlowcellsNeededError"""
+def ensure_flow_cells_on_disk(context: CGConfig, case_id: str):
+    """Check if flow cells are on disk for given case. If not, request flow cells and raise FlowcellsNeededError."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    if not analysis_api.all_flowcells_on_disk(case_id=case_id):
-        raise FlowcellsNeededError(
-            "Analysis cannot be started: all flowcells need to be on disk to run the analysis"
+    status_db: Store = context.status_db
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
+    if not status_db.is_all_flow_cells_on_disk(case_id=case_id):
+        if analysis_api.status_db.is_case_down_sampled(case_id=case_id):
+            LOG.debug("All samples have been down sampled. Flow cell check not applicable")
+            return
+        elif analysis_api.status_db.is_case_external(case_id=case_id):
+            LOG.debug("All samples are external. Flow cell check not applicable")
+            return
+        raise FlowCellsNeededError(
+            "Analysis cannot be started: all flow cells need to be on disk to run the analysis"
         )
-    LOG.info("All flowcells present on disk")
+    LOG.info("All flow cells present on disk")
 
 
 @click.command("resolve-compression")
@@ -51,9 +70,9 @@ def ensure_flowcells_ondisk(context: CGConfig, case_id: str):
 @OPTION_DRY
 @click.pass_obj
 def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
-    """Handles cases where decompression is needed before starting analysis"""
+    """Handles cases where decompression is needed before starting analysis."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     is_decompression_running: bool = analysis_api.resolve_decompression(
         case_id=case_id, dry_run=dry_run
     )
@@ -66,9 +85,9 @@ def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
 @OPTION_DRY
 @click.pass_obj
 def link(context: CGConfig, case_id: str, dry_run: bool):
-    """Link FASTQ files for all samples in a case"""
+    """Link FASTQ files for all samples in a case."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id)
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     if dry_run:
         return
     analysis_api.link_fastq_files(case_id=case_id)
@@ -79,12 +98,12 @@ def link(context: CGConfig, case_id: str, dry_run: bool):
 @OPTION_DRY
 @click.pass_obj
 def store(context: CGConfig, case_id: str, dry_run: bool):
-    """Store finished analysis files in Housekeeper"""
+    """Store finished analysis files in Housekeeper."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     status_db: Store = context.status_db
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
     if dry_run:
         LOG.info("Dry run: Would have stored deliverables for %s", case_id)
@@ -95,7 +114,7 @@ def store(context: CGConfig, case_id: str, dry_run: bool):
         analysis_api.set_statusdb_action(case_id=case_id, action=None)
     except Exception as exception_object:
         housekeeper_api.rollback()
-        status_db.rollback()
+        status_db.session.rollback()
         LOG.error("Error storing deliverables for case %s - %s", case_id, exception_object)
         raise
 
@@ -104,7 +123,7 @@ def store(context: CGConfig, case_id: str, dry_run: bool):
 @OPTION_DRY
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool) -> None:
-    """Store bundles for all finished analyses in Housekeeper"""
+    """Store bundles for all finished analyses in Housekeeper."""
 
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
@@ -126,7 +145,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 @ARGUMENT_BEFORE_STR
 @click.pass_obj
 def rsync_past_run_dirs(context: CGConfig, before_str: str, dry_run: bool, yes: bool) -> None:
-    """Remove deliver workflow commands"""
+    """Remove deliver workflow commands."""
 
     rsync_api: RsyncAPI = RsyncAPI(config=context)
 
@@ -150,32 +169,18 @@ def rsync_past_run_dirs(context: CGConfig, before_str: str, dry_run: bool, yes: 
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = False):
-    """Remove workflow run directory"""
+    """Remove workflow run directory."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-    status_db: Store = context.status_db
-    analysis_api.verify_case_id_in_statusdb(case_id)
-    analysis_api.verify_case_path_exists(case_id=case_id)
     analysis_api.check_analysis_ongoing(case_id=case_id)
-    analysis_path: Path = analysis_api.get_case_path(case_id)
+
+    analysis_path: Union[List[Path], Path] = analysis_api.get_case_path(case_id)
 
     if dry_run:
         LOG.info(f"Would have deleted: {analysis_path}")
         return EXIT_SUCCESS
 
-    if yes or click.confirm(f"Are you sure you want to remove all files in {analysis_path}?"):
-        if analysis_path.is_symlink():
-            LOG.warning(
-                f"Will not automatically delete symlink: {analysis_path}, delete it manually",
-            )
-            return EXIT_FAIL
-
-        shutil.rmtree(analysis_path, ignore_errors=True)
-        LOG.info("Cleaned %s", analysis_path)
-        analyses: list = status_db.family(case_id).analyses
-        for analysis_obj in analyses:
-            analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
-            status_db.commit()
+    analysis_api.clean_run_dir(case_id=case_id, yes=yes, case_path=analysis_path)
 
 
 @click.command("past-run-dirs")
@@ -186,7 +191,7 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
 def past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of old case run dirs"""
+    """Clean up of old case run dirs."""
 
     exit_code = EXIT_SUCCESS
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
@@ -200,9 +205,12 @@ def past_run_dirs(
         try:
             LOG.info("Cleaning %s output for %s", analysis_api.pipeline, case_id)
             context.invoke(clean_run_dir, yes=yes, case_id=case_id, dry_run=dry_run)
+        except FileNotFoundError:
+            continue
         except Exception as error:
-            LOG.error("Failed to clean directories for case %s - %s", case_id, error)
+            LOG.error(f"Failed to clean directories for case {case_id} - {repr(error)}")
             exit_code = EXIT_FAIL
+
     if exit_code:
         raise click.Abort
     LOG.info("Done cleaning %s output ", analysis_api.pipeline)
@@ -216,10 +224,51 @@ def past_run_dirs(
 def balsamic_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of "old" Balsamic case run dirs"""
+    """Clean up of "old" Balsamic case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
+
+@click.command("balsamic-qc-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def balsamic_qc_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" Balsamic qc case run dirs."""
+
+    context.obj.meta_apis["analysis_api"] = BalsamicQCAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
+@click.command("balsamic-umi-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def balsamic_umi_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" Balsamic umi case run dirs."""
+
+    context.obj.meta_apis["analysis_api"] = BalsamicUmiAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
+@click.command("balsamic-pon-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def balsamic_pon_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" Balsamic pon case run dirs."""
+
+    context.obj.meta_apis["analysis_api"] = BalsamicPonAnalysisAPI(context.obj)
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -231,25 +280,37 @@ def balsamic_past_run_dirs(
 def fluffy_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of "old" Fluffy case run dirs"""
+    """Clean up of "old" Fluffy case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = FluffyAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
-@click.command("mip-past-run-dirs")
+@click.command("mip-dna-past-run-dirs")
 @OPTION_YES
 @OPTION_DRY
 @ARGUMENT_BEFORE_STR
 @click.pass_context
-def mip_past_run_dirs(
+def mip_dna_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of "old" MIP case run dirs"""
+    """Clean up of "old" MIP_DNA case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
+
+@click.command("mip-rna-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def mip_rna_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" MIP_RNA case run dirs."""
+
+    context.obj.meta_apis["analysis_api"] = MipRNAAnalysisAPI(context.obj)
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -261,8 +322,35 @@ def mip_past_run_dirs(
 def mutant_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of "old" MUTANT case run dirs"""
+    """Clean up of "old" MUTANT case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
+
+@click.command("rnafusion-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def rnafusion_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" RNAFUSION case run dirs."""
+
+    context.obj.meta_apis["analysis_api"] = RnafusionAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
+@click.command("microsalt-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def microsalt_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" microSALT case run dirs."""
+
+    context.obj.meta_apis["analysis_api"]: MicrosaltAnalysisAPI = MicrosaltAnalysisAPI(context.obj)
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)

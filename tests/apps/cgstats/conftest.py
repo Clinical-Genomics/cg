@@ -6,36 +6,29 @@ import pytest
 from pydantic import BaseModel
 
 from cg.apps.cgstats.crud import create
-from cg.apps.cgstats.db import models as stats_models
+from cg.apps.cgstats.db.models import Supportparams, Sample, Project, Datasource, Demux
 from cg.apps.cgstats.stats import StatsAPI
-from cg.apps.cgstats.parsers.run_info import RunInfo
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from tests.models.demultiplexing.conftest import (
-    fixture_bcl2fastq_demux_results,
     fixture_demultiplexed_dragen_flow_cell,
-    fixture_demultiplexed_flowcell,
     fixture_dragen_demux_results,
-    fixture_dragen_flow_cell_full_name,
-    fixture_dragen_flow_cell_object,
-    fixture_dragen_flow_cell_path,
-    fixture_flowcell_object,
-    fixture_flowcell_path,
-    fixture_flowcell_runs,
 )
 
 
 class MockDemuxResults:
     """Mock Demux Results"""
 
-    def __init__(self, flowcell_full_name: str, sample_sheet_path: Path):
+    def __init__(self, flow_cell_full_name: str, sample_sheet_path: Path):
         self.bcl_converter = "dragen"
         self.conversion_stats_path = Path("Demultiplex_Stats.csv")
         self.demux_host = "hasta"
-        self.flowcell: Flowcell = self.mock_flowcell(flowcell_full_name=flowcell_full_name)
+        self.flow_cell: FlowCellDirectoryData = self.mock_flowcell(
+            flow_cell_full_name=flow_cell_full_name
+        )
         self.machine_name = "barbara"
         self.run_date = datetime.now()
-        self.run_name = flowcell_full_name
+        self.run_name = flow_cell_full_name
         self.results_dir = Path("results_dir/unaligned")
         self.sample_sheet_path = sample_sheet_path
         self.run_info = self.RunInfo()
@@ -53,8 +46,8 @@ class MockDemuxResults:
         return self.LogfileParameters()
 
     @staticmethod
-    def mock_flowcell(flowcell_full_name: str) -> Flowcell:
-        return Flowcell(flowcell_path=Path(flowcell_full_name))
+    def mock_flowcell(flow_cell_full_name: str) -> FlowCellDirectoryData:
+        return FlowCellDirectoryData(flow_cell_path=Path(flow_cell_full_name))
 
 
 class MockDemuxSample(BaseModel):
@@ -71,50 +64,40 @@ class MockDemuxSample(BaseModel):
     lane: int = 1
 
 
-@pytest.fixture(name="stats_api")
-def fixture_stats_api(project_dir: Path) -> StatsAPI:
-    """Setup base CGStats store."""
-    _store = StatsAPI({"cgstats": {"database": "sqlite://", "root": "tests/fixtures/DEMUX"}})
-    _store.create_all()
-    yield _store
-    _store.drop_all()
-
-
 @pytest.fixture(name="nipt_stats_api")
 def fixture_nipt_stats_api(
     stats_api: StatsAPI,
-    flowcell_full_name: str,
-    novaseq_dragen_sample_sheet_path: Path,
+    bcl2fastq_flow_cell_full_name: str,
+    novaseq_bcl2fastq_sample_sheet_path: Path,
     sample_id: str,
-    ticket: str,
+    ticket_id: str,
 ):
     nipt_stats_api: StatsAPI = stats_api
     mock_demux_sample = MockDemuxSample(pass_filter_clusters=600000000, pass_filter_Q30=0.90)
     mock_demux_results = MockDemuxResults(
-        flowcell_full_name=flowcell_full_name, sample_sheet_path=novaseq_dragen_sample_sheet_path
+        flow_cell_full_name=bcl2fastq_flow_cell_full_name,
+        sample_sheet_path=novaseq_bcl2fastq_sample_sheet_path,
     )
 
-    project_obj: stats_models.Project = create.create_project(
-        manager=nipt_stats_api, project_name=ticket
-    )
-    support_parameters_obj: stats_models.Supportparams = create.create_support_parameters(
+    project_obj: Project = create.create_project(manager=nipt_stats_api, project_name=ticket_id)
+    support_parameters_obj: Supportparams = create.create_support_parameters(
         manager=nipt_stats_api, demux_results=mock_demux_results
     )
-    flowcell_obj: stats_models.Flowcell = create.create_flowcell(
+    flowcell_obj: FlowCellDirectoryData = create.create_flowcell(
         manager=nipt_stats_api, demux_results=mock_demux_results
     )
-    datasource_obj: stats_models.Datasource = create.create_datasource(
+    datasource_obj: Datasource = create.create_datasource(
         manager=nipt_stats_api,
         demux_results=mock_demux_results,
         support_parameters_id=support_parameters_obj.supportparams_id,
     )
-    demux_obj: stats_models.Demux = create.create_demux(
+    demux_obj: Demux = create.create_demux(
         manager=nipt_stats_api,
-        flowcell_id=flowcell_obj.flowcell_id,
+        flow_cell_id=flowcell_obj.flowcell_id,
         datasource_id=datasource_obj.datasource_id,
         demux_results=mock_demux_results,
     )
-    sample_obj: stats_models.Sample = create.create_sample(
+    sample_obj: Sample = create.create_sample(
         manager=nipt_stats_api,
         sample_id=sample_id,
         barcode="51,8,8,51",
@@ -127,14 +110,6 @@ def fixture_nipt_stats_api(
         sample_id=sample_obj.sample_id,
     )
     return nipt_stats_api
-
-
-@pytest.fixture(name="populated_stats_api")
-def fixture_populated_stats_api(
-    stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
-) -> StatsAPI:
-    create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
-    return stats_api
 
 
 @pytest.fixture(name="demultiplexing_stats_path")
@@ -151,4 +126,18 @@ def fixture_conversion_stats_path(bcl2fastq_demux_results: DemuxResults) -> Path
 def fixture_run_info(context_config: Dict[str, str]) -> Path:
     return Path(context_config["demultiplex"]["out_dir"]).joinpath(
         "211101_A00187_0615_AHLG5GDRXY/Unaligned/Reports/RunInfo.xml"
+    )
+
+
+@pytest.fixture(name="quality_metrics_path")
+def fixture_quality_metrics(context_config: Dict[str, str]) -> Path:
+    return Path(context_config["demultiplex"]["out_dir"]).joinpath(
+        "211101_A00187_0615_AHLG5GDRXY/Unaligned/Reports/Quality_Metrics.csv"
+    )
+
+
+@pytest.fixture(name="adapter_metrics_path")
+def fixture_adapter_metrics(context_config: Dict[str, str]) -> Path:
+    return Path(context_config["demultiplex"]["out_dir"]).joinpath(
+        "211101_A00187_0615_AHLG5GDRXY/Unaligned/Reports/Adapter_Metrics.csv"
     )

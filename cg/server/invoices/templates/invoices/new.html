@@ -5,6 +5,7 @@
   <h1>Make new invoice ({{record_type}})</h1>
   <br>
   <form action="{{ url_for('invoices.new', record_type=record_type) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     <input type="hidden" name="record_type" value="{{ record_type }}">
     <div class="row">
       <div class="col">
@@ -23,6 +24,7 @@
     </div>
   </form>
   <form name="listForm" action="{{ url_for('invoices.index')}}" method="POST" class="mt-3">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     <input type="hidden" name="customer" value="{{ args.customer }}">
     <input type="hidden" name="record_type" value="{{record_type}}">
     <label>Discount (%)</label>
@@ -106,7 +108,7 @@
   function check_subset() {
     total_price = 0;
     $("input[name='records']").each(function() {
-      if (total_price + parseInt(this.id) <= {{total_price_treshold}}) {
+      if (total_price + parseInt(this.id) <= {{total_price_threshold}}) {
         this.checked = !this.checked
         total_price += parseInt(this.id)
       }

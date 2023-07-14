@@ -3,7 +3,8 @@
 from cg.cli.get import get
 from cg.constants import RETURN_SUCCESS
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Analysis
 from click.testing import CliRunner
 from tests.store_helpers import StoreHelpers
 
@@ -25,9 +26,9 @@ def test_get_analysis_required(
 ):
     """Test to get a analysis using only the required argument"""
     # GIVEN a database with an analysis
-    analysis: models.Analysis = helpers.add_analysis(disk_store, pipeline_version="9.3")
+    analysis: Analysis = helpers.add_analysis(disk_store, pipeline_version="9.3")
     internal_id = analysis.family.internal_id
-    assert disk_store.Analysis.query.count() == 1
+    assert disk_store._get_query(table=Analysis).count() == 1
 
     # WHEN getting a analysis
     result = cli_runner.invoke(get, ["analysis", internal_id], obj=base_context)

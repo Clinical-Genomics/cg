@@ -5,7 +5,8 @@ from pathlib import Path
 import pytest
 from cg.constants import Pipeline, DataDelivery
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family
 from tests.store_helpers import StoreHelpers
 
 
@@ -20,18 +21,6 @@ def base_context(cg_context: CGConfig, analysis_store: Store) -> CGConfig:
 def fixture_workflow_case_id() -> str:
     """Return a special case id"""
     return "dna_case"
-
-
-@pytest.fixture(name="dna_sample_id")
-def fixture_dna_sample_id() -> str:
-    """Return a special sample id"""
-    return "dna_sample"
-
-
-@pytest.fixture(name="rna_sample_id")
-def fixture_rna_sample_id() -> str:
-    """Return a special sample id"""
-    return "rna_sample"
 
 
 @pytest.fixture(scope="function", name="analysis_store")
@@ -79,7 +68,7 @@ def fixture_fastq_context(
 
 
 @pytest.fixture(name="fastq_case")
-def fixture_fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket: str) -> dict:
+def fixture_fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_id: str) -> dict:
     """Returns a dict describing a fastq case"""
     return {
         "name": family_name,
@@ -89,13 +78,13 @@ def fixture_fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket: 
         "data_delivery": DataDelivery.FASTQ,
         "completed_at": None,
         "action": None,
-        "tickets": ticket,
+        "tickets": ticket_id,
         "samples": [
             {
                 "internal_id": sample_id,
                 "sex": "male",
                 "name": cust_sample_id,
-                "original_ticket": ticket,
+                "original_ticket": ticket_id,
                 "reads": 1000000,
                 "capture_kit": "anything",
             },
@@ -104,24 +93,24 @@ def fixture_fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket: 
 
 
 @pytest.fixture(scope="function")
-def dna_case(analysis_store, helpers) -> models.Family:
+def dna_case(analysis_store, helpers) -> Family:
     """Case with DNA application"""
     cust = helpers.ensure_customer(analysis_store)
-    return analysis_store.find_family(cust, "dna_case")
+    return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="dna_case")
 
 
 @pytest.fixture(scope="function")
-def rna_case(analysis_store, helpers) -> models.Family:
+def rna_case(analysis_store, helpers) -> Family:
     """Case with RNA application"""
     cust = helpers.ensure_customer(analysis_store)
-    return analysis_store.find_family(cust, "rna_case")
+    return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="rna_case")
 
 
 @pytest.fixture(scope="function")
-def dna_rna_mix_case(analysis_store, helpers) -> models.Family:
+def dna_rna_mix_case(analysis_store, helpers) -> Family:
     """Case with MIP analysis type DNA and RNA application"""
     cust = helpers.ensure_customer(analysis_store)
-    return analysis_store.find_family(cust, "dna_rna_mix_case")
+    return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="dna_rna_mix_case")
 
 
 @pytest.fixture(name="create_multiqc_html_file")
@@ -241,6 +230,9 @@ class MockTB:
     def has_latest_analysis_started(self, case_id: str):
         """Override TrailblazerAPI has_analysis_started method to avoid default behaviour"""
         return False
+
+    def set_analysis_uploaded(self, case_id: str, uploaded_at: datetime):
+        return None
 
 
 @pytest.fixture(scope="function")

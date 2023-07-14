@@ -19,7 +19,6 @@ class UploadToMutaccAPI:
     """API to upload finished cases to mutacc"""
 
     def __init__(self, scout_api: ScoutAPI, mutacc_auto_api: MutaccAutoAPI):
-
         self.scout = scout_api
         self.mutacc_auto = mutacc_auto_api
 
@@ -29,11 +28,6 @@ class UploadToMutaccAPI:
         if data:
             LOG.info("Extracting reads from case %s", case.id)
             self.mutacc_auto.extract_reads(case=data["case"], variants=data["causatives"])
-
-    def import_cases(self):
-        """Use mutacc API to import cases to database"""
-        LOG.info("importing cases into mutacc database")
-        self.mutacc_auto.import_reads()
 
     def data(self, case: scout_export.ScoutExportCase) -> Dict[str, dict]:
         """
@@ -57,7 +51,6 @@ class UploadToMutaccAPI:
 
     @staticmethod
     def _has_bam(case: scout_export.ScoutExportCase) -> bool:
-
         """
         Check that all samples in case has a given path to a bam file,
         and that the file exists
@@ -71,7 +64,6 @@ class UploadToMutaccAPI:
         """
         sample: scout_export.Individual
         for sample in case.individuals:
-
             if sample.bam_file is None:
                 LOG.info(
                     "sample %s in case %s is missing bam file. skipping",

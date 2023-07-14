@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from cg.cli.workflow.fluffy.base import start_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
@@ -11,7 +9,6 @@ import datetime as dt
 def test_start_available_dry(
     cli_runner: CliRunner, fluffy_case_id_existing: str, fluffy_context: CGConfig, caplog
 ):
-
     caplog.set_level("INFO")
 
     # GIVEN a case_id that does exist in database
@@ -50,10 +47,6 @@ def test_start_available(
     # GIVEN successful process execution
     mocker.patch.object(FluffyAnalysisAPI, "run_fluffy")
     FluffyAnalysisAPI.run_fluffy.return_value = None
-
-    # GIVEN an existing samplesheet in Housekeeper
-    mocker.patch.object(FluffyAnalysisAPI, "get_samplesheet_housekeeper_path")
-    FluffyAnalysisAPI.get_samplesheet_housekeeper_path.return_value = samplesheet_fixture_path
 
     # GIVEN Concentrations are set in LIMS on sample level
     mocker.patch.object(FluffyAnalysisAPI, "get_concentrations_from_lims")

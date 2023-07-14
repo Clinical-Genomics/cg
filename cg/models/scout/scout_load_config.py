@@ -14,10 +14,24 @@ class ChromographImages(BaseModel):
     upd_sites: Optional[str] = None
 
 
+class Reviewer(BaseModel):
+    alignment: Optional[str] = None
+    alignment_index: Optional[str] = None
+    vcf: Optional[str] = None
+    catalog: Optional[str] = None
+
+
 class ScoutIndividual(BaseModel):
     alignment_path: Optional[str] = None
     analysis_type: Literal[
-        "wgs", "wes", "mixed", "unknown", "panel", "panel-umi", "external"
+        "external",
+        "mixed",
+        "panel",
+        "panel-umi",
+        "unknown",
+        "wes",
+        "wgs",
+        "wts",
     ] = None
     capture_kit: Optional[str] = None
     confirmed_parent: Optional[bool] = None
@@ -32,10 +46,10 @@ class ScoutIndividual(BaseModel):
     tissue_type: Optional[str] = None
 
     @validator("sample_id", "sex", "analysis_type")
-    def field_not_none(cls, v):
-        if v is None:
+    def field_not_none(cls, value):
+        if value is None:
             raise ValueError("sample_id, sex and analysis_type can not be None")
-        return v
+        return value
 
     class Config:
         validate_assignment = True
@@ -44,15 +58,17 @@ class ScoutIndividual(BaseModel):
 class ScoutMipIndividual(ScoutIndividual):
     mt_bam: Optional[str] = None
     chromograph_images: ChromographImages = ChromographImages()
+    reviewer: Reviewer = Reviewer()
     rhocall_bed: Optional[str] = None
     rhocall_wig: Optional[str] = None
     tiddit_coverage_wig: Optional[str] = None
     upd_regions_bed: Optional[str] = None
     upd_sites_bed: Optional[str] = None
     vcf2cytosure: Optional[str] = None
+    mitodel_file: Optional[str] = None
 
 
-class ScoutBalsamicIndividual(ScoutIndividual):
+class ScoutCancerIndividual(ScoutIndividual):
     tumor_type: Optional[str] = None
     tmb: Optional[str] = None
     msi: Optional[str] = None
@@ -85,10 +101,10 @@ class ScoutLoadConfig(BaseModel):
     track: Literal["rare", "cancer"] = "rare"
 
     @validator("owner", "family")
-    def field_not_none(cls, v):
-        if v is None:
+    def field_not_none(cls, value):
+        if value is None:
             raise ValueError("Owner and family can not be None")
-        return v
+        return value
 
     class Config:
         validate_assignment = True
@@ -100,13 +116,13 @@ class BalsamicLoadConfig(ScoutLoadConfig):
     vcf_cancer_sv: Optional[str] = None
     vcf_cancer_research: Optional[str] = None
     vcf_cancer_sv_research: Optional[str] = None
-    samples: List[ScoutBalsamicIndividual] = []
+    samples: List[ScoutCancerIndividual] = []
 
     @validator("vcf_cancer")
-    def check_mandatory_files(cls, v):
-        if v is None:
+    def check_mandatory_files(cls, vcf):
+        if vcf is None:
             raise ValueError("Vcf can not be none")
-        return v
+        return vcf
 
 
 class BalsamicUmiLoadConfig(BalsamicLoadConfig):
@@ -114,22 +130,36 @@ class BalsamicUmiLoadConfig(BalsamicLoadConfig):
 
 
 class MipLoadConfig(ScoutLoadConfig):
-    smn_tsv: Optional[str] = None
     chromograph_image_files: Optional[List[str]]
     chromograph_prefixes: Optional[List[str]]
-    vcf_snv: str = None
-    vcf_sv: Optional[str] = None
-    vcf_str: Optional[str] = None
-    vcf_snv_research: Optional[str] = None
-    vcf_sv_research: Optional[str] = None
+    madeline: Optional[str] = None
+    peddy_check: Optional[str] = None
     peddy_ped: Optional[str] = None
     peddy_sex: Optional[str] = None
-    peddy_check: Optional[str] = None
-    madeline: Optional[str] = None
     samples: List[ScoutMipIndividual] = []
+    smn_tsv: Optional[str] = None
+    variant_catalog: Optional[str] = None
+    vcf_mei: Optional[str] = None
+    vcf_mei_research: Optional[str] = None
+    vcf_snv: str = None
+    vcf_snv_research: Optional[str] = None
+    vcf_str: Optional[str] = None
+    vcf_sv: Optional[str] = None
+    vcf_sv_research: Optional[str] = None
 
     @validator("vcf_snv", "vcf_sv", "vcf_snv_research", "vcf_sv_research")
-    def check_mandatory_files(cls, v):
-        if v is None:
+    def check_mandatory_files(cls, vcf):
+        if vcf is None:
             raise ValueError("Mandatory vcf can not be None")
-        return v
+        return vcf
+
+
+class RnafusionLoadConfig(ScoutLoadConfig):
+    multiqc_rna: Optional[str] = None
+    gene_fusion: Optional[str] = None
+    gene_fusion_report_research: Optional[str] = None
+    RNAfusion_inspector: Optional[str] = None
+    RNAfusion_inspector_research: Optional[str] = None
+    RNAfusion_report: Optional[str] = None
+    RNAfusion_report_research: Optional[str] = None
+    samples: List[ScoutCancerIndividual] = []

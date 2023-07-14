@@ -1,5 +1,4 @@
 """API for encryption on Hasta"""
-import hashlib
 import logging
 import subprocess
 from io import TextIOWrapper
@@ -7,11 +6,8 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import List
 
-from housekeeper.store import models as hk_models
-
 from cg.constants import FileExtensions
 from cg.constants.encryption import GPGParameters
-from cg.constants.extraction import FlowCellExtractionParameters
 from cg.exc import ChecksumFailedError
 from cg.utils import Process
 from cg.utils.checksum.checksum import sha512_checksum
@@ -59,15 +55,6 @@ class EncryptionAPI:
         LOG.debug(f"Temporary passphrase file generated: {passphrase_file.name}")
 
         return Path(passphrase_file.name)
-
-    def compare_file_checksums(self, original_file: Path, decrypted_file_checksum: Path) -> bool:
-        """Performs a checksum by decrypting an encrypted file and comparing it to the original file"""
-        is_checksum_equal = sha512_checksum(original_file) == sha512_checksum(
-            decrypted_file_checksum
-        )
-        if not is_checksum_equal:
-            raise ChecksumFailedError(message="Checksum comparison failed!")
-        LOG.info("Checksum comparison successful!")
 
     def get_asymmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
         """Generates the gpg command for asymmetric encryption"""

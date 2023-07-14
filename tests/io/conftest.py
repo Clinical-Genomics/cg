@@ -33,11 +33,31 @@ def fixture_yaml_stream() -> str:
     return _content
 
 
-@pytest.fixture(name="invalid_yaml_file")
-def fixture_invalid_yaml_file(project_dir: Path) -> Path:
-    """Return path for invalid yaml file"""
-    content = """a: b: c"""
-    invalid_yaml: Path = Path(project_dir, "invalid_yaml_file.txt")
-    with open(invalid_yaml, "w") as outfile:
-        outfile.write(content)
-    return invalid_yaml
+@pytest.fixture(name="csv_file_path")
+def fixture_csv_file_path(fixtures_dir: Path) -> Path:
+    """Return a file path to example CSV file."""
+    return Path(fixtures_dir, "io", "example_csv.csv")
+
+
+@pytest.fixture(name="csv_stream")
+def fixture_csv_stream() -> str:
+    """Return string with CSV format."""
+    return """Lorem,ipsum,sit,amet"""
+
+
+@pytest.fixture(name="csv_temp_path")
+def fixture_csv_temp_path(cg_dir: Path) -> Path:
+    """Return a temp file path to use when writing csv."""
+    return Path(cg_dir, "write_csv.csv")
+
+
+@pytest.fixture(name="xml_file_path")
+def fixture_xml_file_path(fixtures_dir: Path) -> Path:
+    """Return a file path to example XML file."""
+    return Path(fixtures_dir, "io", "example_xml.xml")
+
+
+@pytest.fixture(name="xml_temp_path")
+def fixture_xml_temp_path(cg_dir: Path) -> Path:
+    """Return a temp file path to use when writing xml."""
+    return Path(cg_dir, "write_xml.xml")

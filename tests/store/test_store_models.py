@@ -1,11 +1,28 @@
 from cg.store import Store
+from cg.store.models import Customer, ApplicationVersion, Application
+from tests.cli.conftest import fixture_application_tag
+from tests.store_helpers import StoreHelpers
+
+
+def test_application_version_has_application(store: Store, helpers: StoreHelpers, application_tag):
+    """Test that an Application version has the application that was instantiated to."""
+    # GIVEN an application
+    application: Application = helpers.ensure_application(store=store, tag=application_tag)
+
+    # WHEN initialising an application version with the application
+    application_version = ApplicationVersion(application=application)
+
+    # THEN the application version has an application attribute
+    assert application_version.application
+    # THEN the application version's application is the application used for instantiation
+    assert application_version.application == application
 
 
 def test_microbial_sample_to_dict(microbial_store: Store, helpers):
-
     # GIVEN a store with a Microbial sample
     sample_obj = helpers.add_microbial_sample(microbial_store)
-    microbial_store.add_commit(sample_obj)
+    microbial_store.session.add(sample_obj)
+    microbial_store.session.commit()
     assert sample_obj
 
     # WHEN running to dict on that sample
@@ -43,7 +60,7 @@ def test_no_collaborators(base_store):
 
 def test_collaborators(base_store, customer_id):
     # GIVEN a customer with one collaboration
-    customer = base_store.customer(customer_id)
+    customer: Customer = base_store.get_customer_by_internal_id(customer_internal_id=customer_id)
     assert all(
         customer_obj.internal_id
         in [
@@ -82,10 +99,13 @@ def test_multiple_collaborations(base_store, customer_id):
         invoice_address="Test street",
         invoice_reference="ABCDEF",
     )
-    prod_customer = base_store.customer(customer_id)
+    prod_customer: Customer = base_store.get_customer_by_internal_id(
+        customer_internal_id=customer_id
+    )
     collaboration.customers.extend([prod_customer, new_customer])
-    base_store.add_commit(new_customer, collaboration)
-    base_store.refresh(collaboration)
+    base_store.session.add_all([new_customer, collaboration])
+    base_store.session.commit()
+    base_store.session.refresh(collaboration)
     # WHEN calling the collaborators property
     collaborators = prod_customer.collaborators
     # THEN all customers in both collaborations should be returned

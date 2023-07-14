@@ -1,13 +1,18 @@
-"""Constants for cg"""
+"""Constants for cg."""
+
 import click
-from cgmodels.cg.constants import Pipeline, StrEnum
 
 from cg.utils.date import get_date
-
+from cg.utils.enums import StrEnum
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
+LENGTH_LONG_DATE: int = len("YYYYMMDD")
+
 MAX_ITEMS_TO_RETRIEVE = 50
+
+SCALE_TO_MILLION_READ_PAIRS = 2_000_000
+SCALE_TO_READ_PAIRS = 2
 
 ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
 
@@ -29,14 +34,16 @@ CAPTUREKIT_OPTIONS = (
 
 class CaseActions(StrEnum):
     ANALYZE: str = "analyze"
+    HOLD: str = "hold"
+    RUNNING: str = "running"
 
 
-CASE_ACTIONS = ("analyze", "running", "hold")
+CASE_ACTIONS = [action.value for action in CaseActions]
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
 COMBOS = {
-    "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
+    "DSD": ("DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"),
     "CM": ("CNM", "CM"),
     "Horsel": ("Horsel", "141217", "141201"),
 }
@@ -48,13 +55,34 @@ CONTROL_OPTIONS = ("", "negative", "positive")
 DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
 
-FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing", "retrieved")
+class FlowCellStatus(StrEnum):
+    ON_DISK: str = "ondisk"
+    REMOVED: str = "removed"
+    REQUESTED: str = "requested"
+    PROCESSING: str = "processing"
+    RETRIEVED: str = "retrieved"
 
-FLOWCELL_Q30_THRESHOLD = {
-    "hiseqx": 75,
-    "hiseqga": 80,
-    "novaseq": 75,
-}
+
+FLOWCELL_STATUS = [status.value for status in FlowCellStatus]
+
+
+class AnalysisType(StrEnum):
+    TARGETED_GENOME_SEQUENCING: str = "tgs"
+    WHOLE_EXOME_SEQUENCING: str = "wes"
+    WHOLE_GENOME_SEQUENCING: str = "wgs"
+    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
+    OTHER: str = "other"
+
+
+class PrepCategory(StrEnum):
+    COVID: str = "cov"
+    MICROBIAL: str = "mic"
+    READY_MADE_LIBRARY: str = "rml"
+    TARGETED_GENOME_SEQUENCING: str = "tgs"
+    WHOLE_EXOME_SEQUENCING: str = "wes"
+    WHOLE_GENOME_SEQUENCING: str = "wgs"
+    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
+
 
 PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
 
@@ -66,14 +94,22 @@ STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
 class FileFormat(StrEnum):
+    FASTQ: str = "fastq"
     JSON: str = "json"
     YAML: str = "yaml"
+    CSV: str = "csv"
+    XML: str = "xml"
 
 
 class GenomeVersion(StrEnum):
     hg19: str = "hg19"
     hg38: str = "hg38"
     canfam3: str = "canfam3"
+
+
+class SampleType(StrEnum):
+    TUMOR: str = "tumor"
+    NORMAL: str = "normal"
 
 
 class DataDelivery(StrEnum):
@@ -86,37 +122,20 @@ class DataDelivery(StrEnum):
     FASTQ_QC_ANALYSIS: str = "fastq_qc-analysis"
     FASTQ_ANALYSIS_SCOUT: str = "fastq-analysis-scout"
     NIPT_VIEWER: str = "nipt-viewer"
+    NO_DELIVERY: str = "no-delivery"
     SCOUT: str = "scout"
     STATINA: str = "statina"
-
-
-class FlowCellStatus(StrEnum):
-    ONDISK: str = "ondisk"
-    REMOVED: str = "removed"
-    REQUESTED: str = "requested"
-    PROCESSING: str = "processing"
-    RETRIEVED: str = "retrieved"
 
 
 class HastaSlurmPartitions(StrEnum):
     DRAGEN: str = "dragen"
 
 
-class HousekeeperTags(StrEnum):
-    FASTQ: str = "fastq"
-    SAMPLESHEET: str = "samplesheet"
-    SPRING: str = "spring"
-    ARCHIVED_SAMPLE_SHEET: str = "archived_sample_sheet"
-
-
-class Sequencers(StrEnum):
-    HISEQX: str = "hiseqx"
-    HISEQGA: str = "hiseqga"
-    NOVASEQ: str = "novaseq"
-    ALL: str = "all"
-
-
 class FileExtensions(StrEnum):
+    BED: str = ".bed"
+    CRAM: str = ".cram"
+    CSV: str = ".csv"
+    FASTQ: str = ".fastq"
     GPG: str = ".gpg"
     GZIP: str = ".gz"
     JSON: str = ".json"
@@ -125,6 +144,17 @@ class FileExtensions(StrEnum):
     SPRING: str = ".spring"
     TAR: str = ".tar"
     TMP: str = ".tmp"
+    VCF: str = ".vcf"
+    XML: str = ".xml"
+    YAML: str = ".yaml"
+
+
+class APIMethods(StrEnum):
+    POST: str = "POST"
+    PUT: str = "PUT"
+    GET: str = "GET"
+    DELETE: str = "DELETE"
+    PATCH: str = "PATCH"
 
 
 DRY_RUN = click.option(
@@ -134,3 +164,36 @@ DRY_RUN = click.option(
     default=False,
     help="Runs the command without making any changes",
 )
+
+SKIP_CONFIRMATION = click.option(
+    "-y",
+    "--yes",
+    is_flag=True,
+    default=False,
+    help="Skip confirmation",
+)
+
+
+class MicrosaltQC:
+    QC_PERCENT_THRESHOLD_MWX: float = 0.1
+    COVERAGE_10X_THRESHOLD: float = 0.75
+    NEGATIVE_CONTROL_READS_THRESHOLD: float = 0.2
+    TARGET_READS: int = 6000000
+
+
+class MicrosaltAppTags(StrEnum):
+    MWRNXTR003: str = "MWRNXTR003"
+    MWXNXTR003: str = "MWXNXTR003"
+    PREP_CATEGORY: str = "mic"
+
+
+DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"
+
+
+class MetaApis:
+    ANALYSIS_API: str = "analysis_api"
+
+
+class WorkflowManager(StrEnum):
+    Slurm: str = "slurm"
+    Tower: str = "nf_tower"

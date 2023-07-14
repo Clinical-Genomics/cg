@@ -14,7 +14,6 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 
-from pydantic.main import BaseModel
 
 LOG = logging.getLogger(__name__)
 
@@ -286,3 +285,42 @@ class MutantFastqHandler(FastqHandler):
                 "flowcell": header_info["flowcell"],
             }
             return data
+
+
+class RnafusionFastqHandler(FastqHandler):
+    @staticmethod
+    def create_fastq_name(
+        lane: str,
+        flow_cell: str,
+        sample: str,
+        read: str,
+        date: dt.datetime = DEFAULT_DATE_STR,
+        index: str = DEFAULT_INDEX,
+        undetermined: Optional[str] = None,
+        meta: Optional[str] = None,
+    ) -> str:
+        """Name a FASTQ file following MIP conventions,
+        no naming constrains from pipeline."""
+        flow_cell: str = f"{flow_cell}-undetermined" if undetermined else flow_cell
+        date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
+        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read}.fastq.gz"
+
+
+class TaxprofilerFastqHandler(FastqHandler):
+    """Handles Taxprofiler fastq file linking."""
+
+    @staticmethod
+    def create_fastq_name(
+        lane: str,
+        flow_cell: str,
+        sample: str,
+        read: str,
+        date: dt.datetime = DEFAULT_DATE_STR,
+        index: str = DEFAULT_INDEX,
+        undetermined: Optional[str] = None,
+        meta: Optional[str] = None,
+    ) -> str:
+        """Name a FASTQ file, no naming constrains from pipeline."""
+        flow_cell: str = f"{flow_cell}-undetermined" if undetermined else flow_cell
+        date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
+        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read}.fastq.gz"

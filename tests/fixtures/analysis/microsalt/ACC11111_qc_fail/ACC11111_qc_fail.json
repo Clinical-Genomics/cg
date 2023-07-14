@@ -1,0 +1,527 @@
+{
+  "ACC11111A1": {
+    "blast_pubmlst": {
+      "sequence_type": "29",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1762508,
+      "gc_percentage": "38.3700000000",
+      "n50": 112219,
+      "necessary_contigs": 34
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 180,
+      "duplication_rate": 0.172517
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 916834,
+      "mapped_rate": 0.9379080618737962,
+      "average_coverage": 56.12674250566687,
+      "coverage_10x": 0.4,
+      "coverage_30x": 0.7797555970985185,
+      "coverage_50x": 0.5569858666953137,
+      "coverage_100x": ""
+    }
+  },
+  "ACC11111A2": {
+    "blast_pubmlst": {
+      "sequence_type": "29",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1763437,
+      "gc_percentage": "38.3700000000",
+      "n50": 112329,
+      "necessary_contigs": 32
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 221,
+      "duplication_rate": ""
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 1144012,
+      "mapped_rate": 0.8660066502798922,
+      "average_coverage": 69.893433662648,
+      "coverage_10x": 0.4,
+      "coverage_30x": 0.8202239973051657,
+      "coverage_50x": 0.6810340778856779,
+      "coverage_100x": 0.21300419502351772
+    }
+  },
+  "ACC11111A3": {
+    "blast_pubmlst": {
+      "sequence_type": "29",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1765582,
+      "gc_percentage": "38.3800000000",
+      "n50": 162973,
+      "necessary_contigs": 29
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 176,
+      "duplication_rate": 0.237704
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 6913844,
+      "mapped_rate": 0.8951376397847565,
+      "average_coverage": 374.977636438133,
+      "coverage_10x": 0.4,
+      "coverage_30x": 0.9010231409179171,
+      "coverage_50x": 0.8969884470855356,
+      "coverage_100x": 0.8807929895440213
+    }
+  },
+  "ACC11111A4": {
+    "blast_pubmlst": {
+      "sequence_type": "30",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1805955,
+      "gc_percentage": "38.4000000000",
+      "n50": 112989,
+      "necessary_contigs": 34
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 174,
+      "duplication_rate": 0.198461
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 1751541,
+      "mapped_rate": 0.9102681581533062,
+      "average_coverage": 100.7341706825564,
+      "coverage_10x": 0.4,
+      "coverage_30x": 0.8555202806255341,
+      "coverage_50x": 0.7784006223167046,
+      "coverage_100x": 0.4933668316209007
+    }
+  },
+  "ACC11111A5": {
+    "blast_pubmlst": {
+      "sequence_type": "1222",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1745467,
+      "gc_percentage": "38.2400000000",
+      "n50": 82872,
+      "necessary_contigs": 34
+    },
+    "blast_resfinder_resistence": [
+      "tet(M)"
+    ],
+    "picard_markduplicate": {
+      "insert_size": 172,
+      "duplication_rate": 0.203806
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 2411419,
+      "mapped_rate": 0.9628214756539614,
+      "average_coverage": 146.74962333320556,
+      "coverage_10x": 0.4,
+      "coverage_30x": 0.879133550309242,
+      "coverage_50x": 0.8432283380829428,
+      "coverage_100x": 0.6981515660755342
+    }
+  },
+  "ACC11111A6": {
+    "blast_pubmlst": {
+      "sequence_type": "30",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1762897,
+      "gc_percentage": "38.3700000000",
+      "n50": 162944,
+      "necessary_contigs": 30
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 175,
+      "duplication_rate": 0.212225
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 2330247,
+      "mapped_rate": 0.9414259518411567,
+      "average_coverage": 136.6118121411139,
+      "coverage_10x": 0.8985318227433867,
+      "coverage_30x": 0.8761704201987333,
+      "coverage_50x": 0.8377857660708916,
+      "coverage_100x": 0.6687000285570383
+    }
+  },
+  "ACC11111A7": {
+    "blast_pubmlst": {
+      "sequence_type": "30",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1777555,
+      "gc_percentage": "38.3200000000",
+      "n50": 176094,
+      "necessary_contigs": 23
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 261,
+      "duplication_rate": 0.160428
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 12365058,
+      "mapped_rate": 0.9235749642258047,
+      "average_coverage": 765.8582080971349,
+      "coverage_10x": 0.9024839224954425,
+      "coverage_30x": 0.9016493444027396,
+      "coverage_50x": 0.9008023502064582,
+      "coverage_100x": 0.8996336169783199
+    }
+  },
+  "ACC11111A8": {
+    "blast_pubmlst": {
+      "sequence_type": "371",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1777866,
+      "gc_percentage": "38.3000000000",
+      "n50": 134228,
+      "necessary_contigs": 29
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 181,
+      "duplication_rate": 0.265586
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 9076236,
+      "mapped_rate": 0.9479027429432201,
+      "average_coverage": 502.605238624015,
+      "coverage_10x": 0.9156633465285924,
+      "coverage_30x": 0.9143796293847065,
+      "coverage_50x": 0.9131304613986039,
+      "coverage_100x": 0.9093063014964644
+    }
+  },
+  "ACC11111A9": {
+    "blast_pubmlst": {
+      "sequence_type": "29",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1764096,
+      "gc_percentage": "38.3700000000",
+      "n50": 162935,
+      "necessary_contigs": 29
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 172,
+      "duplication_rate": 0.236488
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 4302775,
+      "mapped_rate": 0.8857425731068903,
+      "average_coverage": 230.78031810057368,
+      "coverage_10x": 0.9034324048427123,
+      "coverage_30x": 0.8943583924492816,
+      "coverage_50x": 0.8802472208171631,
+      "coverage_100x": 0.8184560521217231
+    }
+  },
+  "ACC11111A10": {
+    "blast_pubmlst": {
+      "sequence_type": "29",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1779807,
+      "gc_percentage": "38.3500000000",
+      "n50": 162935,
+      "necessary_contigs": 23
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 231,
+      "duplication_rate": 0.191311
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 14011957,
+      "mapped_rate": 0.8767098700060242,
+      "average_coverage": 793.3423584010866,
+      "coverage_10x": 0.9076139325956728,
+      "coverage_30x": 0.9066983799144153,
+      "coverage_50x": 0.9059350594596404,
+      "coverage_100x": 0.9048440618365144
+    }
+  },
+  "ACC11111A11": {
+    "blast_pubmlst": {
+      "sequence_type": "29",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1773155,
+      "gc_percentage": "38.3400000000",
+      "n50": 126093,
+      "necessary_contigs": 28
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 289,
+      "duplication_rate": 0.138655
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 11590178,
+      "mapped_rate": 0.8109224897149984,
+      "average_coverage": 644.0170052034271,
+      "coverage_10x": 0.9063663841013413,
+      "coverage_30x": 0.9052888822429745,
+      "coverage_50x": 0.9039560405153655,
+      "coverage_100x": 0.9021103597269104
+    }
+  },
+  "ACC11111A12": {
+    "blast_pubmlst": {
+      "sequence_type": "29",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1728428,
+      "gc_percentage": "38.3800000000",
+      "n50": 148171,
+      "necessary_contigs": 31
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 173,
+      "duplication_rate": 0.259231
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 6624042,
+      "mapped_rate": 0.9562631094428448,
+      "average_coverage": 373.3937362376939,
+      "coverage_10x": 0.8996017669734884,
+      "coverage_30x": 0.8958553426763614,
+      "coverage_50x": 0.8895204306984382,
+      "coverage_100x": 0.8646342404826517
+    }
+  },
+  "ACC11111A13": {
+    "blast_pubmlst": {
+      "sequence_type": "371",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1777299,
+      "gc_percentage": "38.3100000000",
+      "n50": 113401,
+      "necessary_contigs": 33
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 174,
+      "duplication_rate": 0.198094
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 2359927,
+      "mapped_rate": 0.9511056909811193,
+      "average_coverage": 142.21025753697975,
+      "coverage_10x": 0.9104750347246027,
+      "coverage_30x": 0.8859618674467579,
+      "coverage_50x": 0.8444418772500814,
+      "coverage_100x": 0.6791338742075962
+    }
+  },
+  "ACC11111A14": {
+    "blast_pubmlst": {
+      "sequence_type": "371",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1734261,
+      "gc_percentage": "38.3400000000",
+      "n50": 58778,
+      "necessary_contigs": 67
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 173,
+      "duplication_rate": 0.144946
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 580740,
+      "mapped_rate": 0.9696680097806247,
+      "average_coverage": 37.72419677256883,
+      "coverage_10x": 0.8404303961330856,
+      "coverage_30x": 0.5580736253348973,
+      "coverage_50x": 0.2726662718705616,
+      "coverage_100x": ""
+    }
+  },
+  "ACC11111A15": {
+    "blast_pubmlst": {
+      "sequence_type": "36",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1796375,
+      "gc_percentage": "38.4000000000",
+      "n50": 203711,
+      "necessary_contigs": 25
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 283,
+      "duplication_rate": 0.144951
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 11609677,
+      "mapped_rate": 0.9539324823593284,
+      "average_coverage": 756.4581088762725,
+      "coverage_10x": 0.9418095013422888,
+      "coverage_30x": 0.940997596134381,
+      "coverage_50x": 0.9404102604520649,
+      "coverage_100x": 0.939329519610156
+    }
+  },
+  "ACC11111A16": {
+    "blast_pubmlst": {
+      "sequence_type": "36",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1778178,
+      "gc_percentage": "38.5500000000",
+      "n50": 177133,
+      "necessary_contigs": 24
+    },
+    "blast_resfinder_resistence": [
+      "tet(O)"
+    ],
+    "picard_markduplicate": {
+      "insert_size": 303,
+      "duplication_rate": 0.124049
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 8957782,
+      "mapped_rate": 0.9204336519910844,
+      "average_coverage": 574.8878555931577,
+      "coverage_10x": 0.9002123153711902,
+      "coverage_30x": 0.8991655838564742,
+      "coverage_50x": 0.8985706905458929,
+      "coverage_100x": 0.8973366378163204
+    }
+  },
+  "ACC11111A17": {
+    "blast_pubmlst": {
+      "sequence_type": "36",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1756253,
+      "gc_percentage": "38.3800000000",
+      "n50": 183713,
+      "necessary_contigs": 25
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 232,
+      "duplication_rate": 0.190033
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 13860351,
+      "mapped_rate": 0.9553056051755111,
+      "average_coverage": 857.2860227603373,
+      "coverage_10x": 0.9204516438651222,
+      "coverage_30x": 0.9197514835894199,
+      "coverage_50x": 0.9190583411113924,
+      "coverage_100x": 0.9181654613149302
+    }
+  },
+  "ACC11111A18": {
+    "blast_pubmlst": {
+      "sequence_type": "36",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1755992,
+      "gc_percentage": "38.3800000000",
+      "n50": 148574,
+      "necessary_contigs": 27
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 183,
+      "duplication_rate": 0.215527
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 9083468,
+      "mapped_rate": 0.9541061849945417,
+      "average_coverage": 541.1664707981341,
+      "coverage_10x": 0.9200408327858551,
+      "coverage_30x": 0.9191744046883207,
+      "coverage_50x": 0.9185557588317634,
+      "coverage_100x": 0.9173006527091668
+    }
+  },
+  "ACC11111A19": {
+    "blast_pubmlst": {
+      "sequence_type": "36",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1798626,
+      "gc_percentage": "38.4000000000",
+      "n50": 203711,
+      "necessary_contigs": 23
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 285,
+      "duplication_rate": 0.117221
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 8912668,
+      "mapped_rate": 0.9533093794136616,
+      "average_coverage": 595.5411078295409,
+      "coverage_10x": 0.9414942402775162,
+      "coverage_30x": 0.9404944740241618,
+      "coverage_50x": 0.939978935810364,
+      "coverage_100x": 0.9385964296684415
+    }
+  },
+  "ACC11111A20": {
+    "blast_pubmlst": {
+      "sequence_type": "36",
+      "thresholds": "Passed"
+    },
+    "quast_assembly": {
+      "estimated_genome_length": 1756710,
+      "gc_percentage": "38.3800000000",
+      "n50": 203711,
+      "necessary_contigs": 23
+    },
+    "blast_resfinder_resistence": [],
+    "picard_markduplicate": {
+      "insert_size": 289,
+      "duplication_rate": 0.118533
+    },
+    "microsalt_samtools_stats": {
+      "total_reads": 6642857,
+      "mapped_rate": 0.9488763644919648,
+      "average_coverage": 444.5701982203945,
+      "coverage_10x": 0.9201811887393498,
+      "coverage_30x": 0.9189622512663076,
+      "coverage_50x": 0.9181989308115327,
+      "coverage_100x": 0.9162857711992822
+    }
+  }
+}
+

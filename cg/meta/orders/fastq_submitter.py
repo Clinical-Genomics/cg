@@ -3,14 +3,17 @@ from typing import List
 
 from cgmodels.cg.constants import Pipeline
 
-from cg.constants import DataDelivery
+from cg.constants import DataDelivery, GenePanelMasterList
+from cg.constants.constants import PrepCategory
+from cg.constants.invoice import CustomerNames
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
-from cg.store import models
 from cg.constants.priority import Priority
+from cg.store.models import Sample, Family, FamilySample, Customer, ApplicationVersion
+from cg.constants.constants import PrepCategory
 
 
 class FastqSubmitter(Submitter):
@@ -21,12 +24,12 @@ class FastqSubmitter(Submitter):
             lims_api=self.lims, lims_order=order, new_samples=order.samples
         )
         status_data = self.order_to_status(order)
-        self._fill_in_sample_ids(status_data["samples"], lims_map)
+        self._fill_in_sample_ids(samples=status_data["samples"], lims_map=lims_map)
         new_samples = self.store_items_in_status(
-            customer=status_data["customer"],
+            customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
-            ticket=order.ticket,
+            ticket_id=order.ticket,
             items=status_data["samples"],
         )
         self._add_missing_reads(new_samples)
@@ -56,31 +59,38 @@ class FastqSubmitter(Submitter):
         }
         return status_data
 
-    def create_maf_case(self, sample_obj: models.Sample):
-        case_obj: models.Family = self.status.add_case(
+    def create_maf_case(self, sample_obj: Sample) -> None:
+        """Add a MAF case to the Status database."""
+        case: Family = self.status.add_case(
             data_analysis=Pipeline(Pipeline.MIP_DNA),
-            data_delivery=DataDelivery(DataDelivery.ANALYSIS_FILES),
+            data_delivery=DataDelivery(DataDelivery.NO_DELIVERY),
             name="_".join([sample_obj.name, "MAF"]),
-            panels=None,
+            panels=[GenePanelMasterList.OMIM_AUTO],
             priority=Priority.research,
             ticket=sample_obj.original_ticket,
         )
-        case_obj.customer = self.status.customer("cust000")
-        relationship: models.FamilySample = self.status.relate_sample(
-            family=case_obj, sample=sample_obj, status=StatusEnum.unknown
+        case.customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=CustomerNames.CG_INTERNAL_CUSTOMER
         )
-        self.status.add(case_obj, relationship)
+        relationship: FamilySample = self.status.relate_sample(
+            family=case, sample=sample_obj, status=StatusEnum.unknown
+        )
+        self.status.session.add_all([case, relationship])
 
     def store_items_in_status(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
-    ) -> List[models.Sample]:
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
+    ) -> List[Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
-        customer_obj = self.status.customer(customer)
-        if customer_obj is None:
-            raise OrderError(f"unknown customer: {customer}")
+        customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
+        if not customer:
+            raise OrderError(f"Unknown customer: {customer_id}")
         new_samples = []
-        case_obj: models.Family = self.status.find_family(customer=customer_obj, name=ticket)
-        case: dict = items[0]
+        case: Family = self.status.get_case_by_name_and_customer(
+            customer=customer, case_name=ticket_id
+        )
+        submitted_case: dict = items[0]
         with self.status.session.no_autoflush:
             for sample in items:
                 new_sample = self.status.add_sample(
@@ -90,38 +100,41 @@ class FastqSubmitter(Submitter):
                     internal_id=sample.get("internal_id"),
                     order=order,
                     ordered=ordered,
-                    original_ticket=ticket,
+                    original_ticket=ticket_id,
                     priority=sample["priority"],
                     tumour=sample["tumour"],
                     capture_kit=sample["capture_kit"],
                 )
-                new_sample.customer = customer_obj
-                application_tag = sample["application"]
-                application_version = self.status.current_application_version(application_tag)
+                new_sample.customer: Customer = customer
+                application_tag: str = sample["application"]
+                application_version: ApplicationVersion = (
+                    self.status.get_current_application_version_by_tag(tag=application_tag)
+                )
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
-                new_sample.application_version = application_version
+                new_sample.application_version: ApplicationVersion = application_version
                 new_samples.append(new_sample)
-                if not case_obj:
-                    case_obj = self.status.add_case(
-                        data_analysis=Pipeline(case["data_analysis"]),
-                        data_delivery=DataDelivery(case["data_delivery"]),
-                        name=ticket,
+                if not case:
+                    case = self.status.add_case(
+                        data_analysis=Pipeline(submitted_case["data_analysis"]),
+                        data_delivery=DataDelivery(submitted_case["data_delivery"]),
+                        name=ticket_id,
                         panels=None,
-                        priority=case["priority"],
-                        ticket=ticket,
+                        priority=submitted_case["priority"],
+                        ticket=ticket_id,
                     )
                 if (
                     not new_sample.is_tumour
-                    and new_sample.application_version.application.prep_category == "wgs"
+                    and new_sample.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING
                 ):
                     self.create_maf_case(sample_obj=new_sample)
-                case_obj.customer = customer_obj
+                case.customer = customer
                 new_relationship = self.status.relate_sample(
-                    family=case_obj, sample=new_sample, status=StatusEnum.unknown
+                    family=case, sample=new_sample, status=StatusEnum.unknown
                 )
                 new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
-                self.status.add(case_obj, new_relationship, new_delivery)
+                self.status.session.add_all([case, new_relationship, new_delivery])
 
-        self.status.add_commit(new_samples)
+        self.status.session.add_all(new_samples)
+        self.status.session.commit()
         return new_samples

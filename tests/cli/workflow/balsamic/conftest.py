@@ -6,16 +6,14 @@ from pathlib import Path
 from typing import List
 
 import pytest
-from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat
-from cg.io.controller import WriteFile, WriteStream
+from cg.constants.constants import FileFormat, PrepCategory
+from cg.io.controller import WriteFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from tests.mocks.limsmock import MockLimsAPI
-from tests.mocks.process_mock import ProcessMock
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
 
@@ -33,23 +31,9 @@ def fixture_balsamic_case_id() -> str:
 
 
 @pytest.fixture(name="balsamic_housekeeper_dir")
-def balsamic_housekeeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
-    """Return the path to the balsamic housekeeper dir"""
+def balsamic_housekeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
+    """Return the path to the balsamic housekeeper bundle dir."""
     return tmpdir_factory.mktemp("bundles")
-
-
-@pytest.fixture(name="balsamic_singularity_path")
-def balsamic_singularity_path(balsamic_dir: Path) -> str:
-    balsamic_singularity_path = Path(balsamic_dir, "singularity.sif")
-    balsamic_singularity_path.touch(exist_ok=True)
-    return balsamic_singularity_path.as_posix()
-
-
-@pytest.fixture(name="balsamic_reference_path")
-def balsamic_reference_path(balsamic_dir: Path) -> str:
-    balsamic_reference_path = Path(balsamic_dir, "reference.json")
-    balsamic_reference_path.touch(exist_ok=True)
-    return balsamic_reference_path.as_posix()
 
 
 @pytest.fixture(name="balsamic_pon_1_path")
@@ -310,7 +294,6 @@ def fixture_balsamic_context(
     balsamic_lims: MockLimsAPI,
     balsamic_housekeeper: HousekeeperAPI,
     trailblazer_api: MockTB,
-    hermes_api: HermesApi,
     cg_dir,
 ) -> CGConfig:
     """context to use in cli"""
@@ -322,12 +305,16 @@ def fixture_balsamic_context(
 
     # Create tgs application version
     helpers.ensure_application_version(
-        store=status_db, application_tag="TGSA", application_type="tgs"
+        store=status_db,
+        application_tag="TGSA",
+        prep_category=PrepCategory.TARGETED_GENOME_SEQUENCING,
     )
 
     # Create wes application version
     helpers.ensure_application_version(
-        store=status_db, application_tag="WESA", application_type="wes"
+        store=status_db,
+        application_tag="WESA",
+        prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING,
     )
 
     # Create textbook case for WGS PAIRED with enough reads
@@ -341,7 +328,7 @@ def fixture_balsamic_context(
         status_db,
         internal_id="sample_case_wgs_paired_tumor_enough_reads",
         is_tumour=True,
-        application_type="wgs",
+        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         reads=10,
         sequenced_at=dt.datetime.now(),
     )
@@ -349,7 +336,7 @@ def fixture_balsamic_context(
         status_db,
         internal_id="sample_case_wgs_paired_normal_enough_reads",
         is_tumour=False,
-        application_type="wgs",
+        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         reads=10,
         sequenced_at=dt.datetime.now(),
     )
@@ -375,7 +362,7 @@ def fixture_balsamic_context(
         status_db,
         internal_id="sample_case_wgs_paired_tumor",
         is_tumour=True,
-        application_type="wgs",
+        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         reads=10,
         sequenced_at=dt.datetime.now(),
     )
@@ -383,7 +370,7 @@ def fixture_balsamic_context(
         status_db,
         internal_id="sample_case_wgs_paired_normal",
         is_tumour=False,
-        application_type="wgs",
+        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         reads=10,
         sequenced_at=dt.datetime.now(),
     )
@@ -402,7 +389,7 @@ def fixture_balsamic_context(
         internal_id="sample_case_tgs_paired_tumor",
         is_tumour=True,
         application_tag="TGSA",
-        application_type="tgs",
+        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         reads=10,
         sequenced_at=dt.datetime.now(),
     )
@@ -411,7 +398,7 @@ def fixture_balsamic_context(
         internal_id="sample_case_tgs_paired_normal",
         is_tumour=False,
         application_tag="TGSA",
-        application_type="tgs",
+        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         reads=0,
         sequenced_at=dt.datetime.now(),
     )
@@ -429,7 +416,7 @@ def fixture_balsamic_context(
         status_db,
         internal_id="sample_case_wgs_single_tumor",
         is_tumour=True,
-        application_type="wgs",
+        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         reads=100,
         sequenced_at=dt.datetime.now(),
     )
@@ -447,7 +434,7 @@ def fixture_balsamic_context(
         internal_id="sample_case_tgs_single_tumor",
         is_tumour=True,
         application_tag="TGSA",
-        application_type="tgs",
+        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(status_db, case=case_tgs_single, sample=sample_case_tgs_single_tumor)
@@ -464,7 +451,7 @@ def fixture_balsamic_context(
         internal_id="sample_case_tgs_single_normal_error",
         is_tumour=False,
         application_tag="TGSA",
-        application_type="tgs",
+        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
@@ -485,7 +472,7 @@ def fixture_balsamic_context(
         internal_id="sample_case_tgs_paired_tumor_error",
         is_tumour=True,
         application_tag="TGSA",
-        application_type="tgs",
+        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     sample_case_tgs_paired_tumor2_error = helpers.add_sample(
@@ -493,7 +480,7 @@ def fixture_balsamic_context(
         internal_id="sample_case_tgs_paired_tumor2_error",
         is_tumour=True,
         application_tag="TGSA",
-        application_type="tgs",
+        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     sample_case_tgs_paired_normal_error = helpers.add_sample(
@@ -501,7 +488,7 @@ def fixture_balsamic_context(
         internal_id="sample_case_tgs_paired_normal_error",
         is_tumour=False,
         application_tag="TGSA",
-        application_type="tgs",
+        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
@@ -531,7 +518,7 @@ def fixture_balsamic_context(
         status_db,
         internal_id="mixed_sample_case_wgs_paired_tumor_error",
         is_tumour=True,
-        application_type="wgs",
+        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     mixed_sample_case_tgs_paired_normal_error = helpers.add_sample(
@@ -539,7 +526,7 @@ def fixture_balsamic_context(
         internal_id="mixed_sample_case_tgs_paired_normal_error",
         is_tumour=False,
         application_tag="TGSA",
-        application_type="tgs",
+        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
@@ -564,7 +551,7 @@ def fixture_balsamic_context(
         status_db,
         internal_id="mixed_sample_case_wgs_mic_paired_tumor_error",
         is_tumour=True,
-        application_type="wgs",
+        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     mixed_sample_case_wgs_mic_paired_normal_error = helpers.add_sample(
@@ -598,7 +585,7 @@ def fixture_balsamic_context(
         internal_id="mixed_sample_case_mixed_bed_paired_tumor_error",
         is_tumour=True,
         application_tag="TGSA",
-        application_type="tgs",
+        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     mixed_sample_case_mixed_bed_paired_normal_error = helpers.add_sample(
@@ -606,7 +593,7 @@ def fixture_balsamic_context(
         internal_id="mixed_sample_case_mixed_bed_paired_normal_error",
         is_tumour=False,
         application_tag="TGSA",
-        application_type="tgs",
+        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
@@ -631,7 +618,7 @@ def fixture_balsamic_context(
         status_db,
         internal_id="mip_sample_case_wgs_single_tumor",
         is_tumour=True,
-        application_type="wgs",
+        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
@@ -652,7 +639,7 @@ def fixture_balsamic_context(
         internal_id="sample_case_wgs_paired_two_normal_tumor_error",
         is_tumour=True,
         application_tag="WGSA",
-        application_type="wgs",
+        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     sample_case_wgs_paired_two_normal_normal1_error = helpers.add_sample(
@@ -660,7 +647,7 @@ def fixture_balsamic_context(
         internal_id="sample_case_wgs_paired_two_normal_normal1_error",
         is_tumour=False,
         application_tag="WGSA",
-        application_type="wgs",
+        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     sample_case_wgs_paired_two_normal_normal2_error = helpers.add_sample(
@@ -668,7 +655,7 @@ def fixture_balsamic_context(
         internal_id="sample_case_wgs_paired_two_normal_normal2_error",
         is_tumour=False,
         application_tag="WGSA",
-        application_type="wgs",
+        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
@@ -699,7 +686,7 @@ def fixture_balsamic_context(
         internal_id="sample_case_wes_tumor",
         is_tumour=True,
         application_tag="WESA",
-        application_type="wes",
+        application_type=PrepCategory.WHOLE_EXOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(status_db, case=case_wes_tumor, sample=sample_case_wes_tumor)
@@ -716,7 +703,7 @@ def fixture_balsamic_context(
         internal_id="sample_case_wes_panel_error",
         is_tumour=True,
         application_tag="WESA",
-        application_type="wes",
+        application_type=PrepCategory.WHOLE_EXOME_SEQUENCING,
         sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
@@ -731,22 +718,23 @@ def fixture_balsamic_context(
     bed1_filename = "balsamic_bed_1.bed"
     Path(cg_dir, bed1_filename).touch(exist_ok=True)
     bed1 = status_db.add_bed(name=bed1_name)
-    status_db.add_commit(bed1)
+    status_db.session.add(bed1)
     version1 = status_db.add_bed_version(
         bed=bed1, version=1, filename=bed1_filename, shortname=bed1_name
     )
-    status_db.add_commit(version1)
+    status_db.session.add(version1)
 
     # Create BED2 version 1
     bed2_name = "BalsamicBed2"
     bed2_filename = "balsamic_bed_2.bed"
     Path(cg_dir, bed2_filename).touch(exist_ok=True)
     bed2 = status_db.add_bed(name=bed2_name)
-    status_db.add_commit(bed2)
+    status_db.session.add(bed2)
     version2 = status_db.add_bed_version(
         bed=bed2, version=1, filename=bed2_filename, shortname=bed2_name
     )
-    status_db.add_commit(version2)
+    status_db.session.add(version2)
+    status_db.session.commit()
     return cg_context
 
 
@@ -864,17 +852,6 @@ def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     malformed_deliverable.pop("pipeline")
 
     return malformed_deliverable
-
-
-@pytest.fixture(name="balsamic_hermes_process")
-def fixture_balsamic_hermes_process(hermes_deliverables: dict, process: ProcessMock) -> ProcessMock:
-    """Return a process mock populated with some balsamic hermes output"""
-    process.set_stdout(
-        text=WriteStream.write_stream_from_content(
-            content=hermes_deliverables, file_format=FileFormat.JSON
-        )
-    )
-    return process
 
 
 @pytest.fixture

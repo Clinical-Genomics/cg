@@ -13,8 +13,9 @@ from cg.exc import CgError
 from cg.io.controller import WriteStream, WriteFile
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store.models import Analysis, Sample
 from housekeeper.store.models import File
+from cg.meta.workflow.analysis import AnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -43,9 +44,7 @@ ARGUMENT_UNIQUE_IDENTIFIER = click.argument("unique_id", required=True, type=cli
 @click.pass_context
 def microsalt(context: click.Context) -> None:
     """Microbial workflow"""
-    if context.invoked_subcommand is None:
-        click.echo(context.get_help())
-        return None
+    AnalysisAPI.get_help(context)
     context.obj.meta_apis["analysis_api"] = MicrosaltAnalysisAPI(
         config=context.obj,
     )
@@ -91,9 +90,7 @@ def config_case(
     case_id, sample_id = analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
     )
-    sample_objs: List[models.Sample] = analysis_api.get_samples(
-        case_id=case_id, sample_id=sample_id
-    )
+    sample_objs: List[Sample] = analysis_api.get_samples(case_id=case_id, sample_id=sample_id)
 
     if not sample_objs:
         LOG.error("No sample found for that ticket/sample_id")
@@ -166,11 +163,11 @@ def run(
         return
     try:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-    except Exception as e:
+    except Exception as error:
         LOG.warning(
             "Trailblazer warning: Could not track analysis progress for case %s! %s",
             case_id,
-            e.__class__.__name__,
+            error.__class__.__name__,
         )
     try:
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
@@ -211,90 +208,30 @@ def start_available(context: click.Context, dry_run: bool = False):
         try:
             context.invoke(start, unique_id=case_obj.internal_id, dry_run=dry_run)
         except CgError as error:
-            LOG.error(error.message)
+            LOG.error(error)
             exit_code = EXIT_FAIL
-        except Exception as e:
-            LOG.error(f"Unspecified error occurred: %s", e)
+        except Exception as error:
+            LOG.error(f"Unspecified error occurred: {error}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
 
 
-@microsalt.command("upload-analysis-vogue")
-@OPTION_DRY_RUN
+@microsalt.command("qc-microsalt")
 @ARGUMENT_UNIQUE_IDENTIFIER
-@click.pass_obj
-def upload_analysis_vogue(context: CGConfig, unique_id: str, dry_run: bool) -> None:
-    """Upload the trending report for latest analysis of given case_id to Vogue"""
-
-    analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
-    case_obj = analysis_api.status_db.family(unique_id)
-    if not case_obj or not case_obj.analyses:
-        LOG.error("No analysis available for %s", unique_id)
-        raise click.Abort
-
-    samples_string = ",".join(str(link_obj.sample.internal_id) for link_obj in case_obj.links)
-    microsalt_version: str = analysis_api.get_pipeline_version(case_id=case_obj.internal_id)
-
-    if dry_run:
-        LOG.info(
-            "Would have loaded case %s, with samples %s, analyzed with pipeline version %s",
-            unique_id,
-            samples_string,
-            microsalt_version,
-        )
-        return
-
-    analysis_result_file: Optional[File] = analysis_api.housekeeper_api.get_files(
-        bundle=unique_id, tags=["vogue"]
-    ).first()
-    if not analysis_result_file:
-        LOG.error("Vogue upload file not found in Housekeeper for case %s", unique_id)
-        raise click.Abort
-
-    vogue_load_args = {
-        "samples": samples_string,
-        "analysis_result_file": analysis_result_file.full_path,
-        "analysis_case_name": unique_id,
-        "analysis_type": "microsalt",
-        "analysis_workflow_name": "microsalt",
-        "analysis_workflow_version": microsalt_version,
-        "case_analysis_type": "microsalt",
-    }
-    analysis_api.vogue_api.load_bioinfo_raw(load_bioinfo_inputs=vogue_load_args)
-    analysis_api.vogue_api.load_bioinfo_process(
-        load_bioinfo_inputs=vogue_load_args, cleanup_flag=False
-    )
-    analysis_api.vogue_api.load_bioinfo_sample(load_bioinfo_inputs=vogue_load_args)
-    case_obj.analyses[0].uploaded_at = dt.datetime.now()
-    analysis_api.status_db.commit()
-    LOG.info("Successfully uploaded latest analysis data for case %s to Vogue!", unique_id)
-
-
-@microsalt.command("upload-latest-analyses-vogue")
-@OPTION_DRY_RUN
 @click.pass_context
-def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
-    """Upload the trending reports for all un-uploaded latest analyses to Vogue"""
-
-    EXIT_CODE: int = EXIT_SUCCESS
+def qc_microsalt(context: click.Context, unique_id: str) -> None:
+    """Perform QC on a microsalt case."""
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
-    latest_analyses = list(
-        analysis_api.status_db.latest_analyses()
-        .filter(models.Analysis.pipeline == Pipeline.MICROSALT)
-        .filter(models.Analysis.uploaded_at.is_(None))
-    )
-    for analysis in latest_analyses:
-        unique_id: str = analysis.family.internal_id
-        try:
-            context.invoke(upload_analysis_vogue, unique_id=unique_id, dry_run=dry_run)
-        except Exception as e:
-            LOG.error(
-                "Could not upload data for %s to vogue, exception %s",
-                unique_id,
-                e.__class__.__name__,
-            )
-            EXIT_CODE: int = EXIT_FAIL
-
-    if EXIT_CODE:
-        raise click.Abort
+    try:
+        analysis_api.microsalt_qc(
+            case_id=unique_id,
+            run_dir_path=analysis_api.get_latest_case_path(case_id=unique_id),
+            lims_project=analysis_api.get_project(
+                analysis_api.status_db.get_case_by_internal_id(internal_id=unique_id)
+                .samples[0]
+                .internal_id
+            ),
+        )
+    except IndexError:
+        LOG.error(f"No existing analysis directories found for case {unique_id}.")

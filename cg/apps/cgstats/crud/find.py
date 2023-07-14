@@ -1,10 +1,24 @@
 import logging
-from typing import List, Optional
+from pathlib import Path
+from typing import Dict, List, Optional
 
 import alchy
 from sqlalchemy import or_
 
-from cg.apps.cgstats.db import models
+from cg.apps.cgstats.db.models import (
+    Supportparams,
+    Datasource,
+    Demux,
+    DemuxSample,
+    DragenDemuxSample,
+    Flowcell,
+    Project,
+    Sample,
+    Unaligned,
+)
+from cg.apps.cgstats.parsers.conversion_stats import ConversionStats, SampleConversionResults
+from cg.apps.cgstats.parsers.demux_stats import DemuxStats, SampleBarcodeStats
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
 from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
 
@@ -12,103 +26,170 @@ LOG = logging.getLogger(__name__)
 SAMPLE_PATTERN = "{}\_%"
 
 
-def get_support_parameters_id(demux_results: DemuxResults) -> Optional[int]:
-    """Fetch the id of the support parameters if post exists"""
-    LOG.debug("Search for support parameters with file %s", demux_results.results_dir)
-    support_parameters_id: Optional[int] = models.Supportparams.exists(
-        str(demux_results.results_dir)
-    )
-    if support_parameters_id:
-        LOG.debug("Found support parameters with id %s", support_parameters_id)
-        return support_parameters_id
-    LOG.debug("Could not find support parameters")
-    return None
+class FindHandler:
+    def get_support_parameters_by_document_path(
+        self, document_path: str
+    ) -> Optional[Supportparams]:
+        """Get support parameters by document path."""
 
+        LOG.debug(f"Searching for support parameters with file {document_path}")
 
-def get_datasource_id(demux_results: DemuxResults) -> Optional[int]:
-    """Fetch the datasource id for a certain run"""
-    stats_path = {
-        "bcl2fastq": demux_results.conversion_stats_path,
-        "dragen": demux_results.demux_stats_path,
-    }
-    LOG.debug("Search for datasource with file %s", stats_path[demux_results.bcl_converter])
-    datasource_id: Optional[int] = models.Datasource.exists(
-        str(stats_path[demux_results.bcl_converter])
-    )
-    if datasource_id:
-        LOG.debug("Found datasource with id %s", datasource_id)
-        return datasource_id
-    LOG.debug("Could not find datasource")
-    return None
+        support_params: Supportparams = Supportparams.query.filter_by(
+            document_path=document_path
+        ).first()
 
+        if support_params:
+            LOG.debug(f"Found support parameters with id {support_params.supportparams_id}")
+        else:
+            LOG.debug("Support parameters not found")
 
-def get_flowcell_id(flowcell_name: str) -> Optional[int]:
-    LOG.debug("Search for flowcell %s", flowcell_name)
-    flowcell_id: Optional[int] = models.Flowcell.exists(flowcell_name)
-    if flowcell_id:
-        LOG.debug("Found flowcell with id %s", flowcell_id)
-        return flowcell_id
-    LOG.debug("Could not find flowcell")
-    return None
+        return support_params
 
+    def get_datasource_by_document_path(self, document_path: str) -> Optional[Datasource]:
+        """Get data source by document path."""
+        LOG.debug(f"Search for datasource with file {document_path}")
 
-def get_demux_id(flowcell_object_id: int, base_mask: str = "") -> Optional[int]:
-    """Flowcell object id refers to a database object"""
-    demux_id: Optional[int] = models.Demux.exists(
-        flowcell_id=flowcell_object_id, basemask=base_mask
-    )
-    if demux_id:
-        return demux_id
-    return None
+        datasource: Datasource = Datasource.query.filter_by(document_path=document_path).first()
 
+        if datasource:
+            LOG.debug(f"Found datasource with id {datasource.datasource_id}")
+        else:
+            LOG.debug("Could not find datasource")
 
-def get_project_id(project_name: str) -> Optional[int]:
-    project_id: Optional[int] = models.Project.exists(project_name=project_name)
-    if project_id:
-        return project_id
-    return None
+        return datasource
 
+    def get_flow_cell_by_name(self, flow_cell_name: str) -> Optional[Flowcell]:
+        """Get flow cell by name."""
+        LOG.debug(f"Searching for flow cell {flow_cell_name}")
 
-def get_sample(sample_id: str):
-    """Get a unique demux sample."""
-    pattern = SAMPLE_PATTERN.format(sample_id)
-    return models.Sample.query.filter(
-        or_(models.Sample.samplename.like(pattern), models.Sample.samplename == sample_id)
-    ).first()
+        flowcell: Flowcell = Flowcell.query.filter_by(flowcellname=flow_cell_name).first()
 
+        if flowcell:
+            LOG.debug(f"Found flow cell with id {flowcell.flowcell_id}")
+        else:
+            LOG.debug("Flow cell not found")
 
-def get_sample_id(sample_id: str, barcode: str) -> Optional[int]:
-    sample_id: Optional[int] = models.Sample.exists(sample_name=sample_id, barcode=barcode)
-    if sample_id:
-        return sample_id
-    return None
+        return flowcell
 
+    def get_demux_by_flow_cell_id_and_base_mask(
+        self, flowcell_id: int, base_mask: str = ""
+    ) -> Optional[Demux]:
+        """Get demux by flow cell id and base mask."""
+        return Demux.query.filter_by(flowcell_id=flowcell_id).filter_by(basemask=base_mask).first()
 
-def get_unaligned_id(sample_id: int, demux_id: int, lane: int) -> Optional[int]:
-    unaligned_id: Optional[int] = models.Unaligned.exists(
-        sample_id=sample_id, demux_id=demux_id, lane=lane
-    )
-    if unaligned_id:
-        return unaligned_id
-    return None
+    def get_project_by_name(self, project_name: str) -> Optional[Project]:
+        """Get project by name."""
+        return Project.query.filter_by(projectname=project_name).first()
 
+    def get_sample(self, sample_id: str):
+        """Get a unique demux sample."""
+        pattern = SAMPLE_PATTERN.format(sample_id)
+        return Sample.query.filter(
+            or_(Sample.samplename.like(pattern), Sample.samplename == sample_id)
+        ).first()
 
-def get_samples(flowcell: str, project_name: Optional[str] = None) -> alchy.Query:
-    query: alchy.Query = models.Sample.query.join(
-        models.Sample.unaligned, models.Unaligned.demux, models.Demux.flowcell
-    )
-    if project_name:
-        query = query.join(models.Sample.project).filter(models.Project.projectname == project_name)
+    def get_sample_by_name_and_barcode(self, sample_name: str, barcode: str) -> Optional[Sample]:
+        """Get sample by name and barcode."""
+        return Sample.query.filter_by(samplename=sample_name).filter_by(barcode=barcode).first()
 
-    query = query.filter(models.Flowcell.flowcellname == flowcell)
+    def get_unaligned_by_sample_id_demux_id_and_lane(
+        self, sample_id: int, demux_id: int, lane: int
+    ) -> Optional[Unaligned]:
+        """Get unaligned by sample id, demux id and lane."""
+        return (
+            Unaligned.query.filter_by(sample_id=sample_id)
+            .filter_by(demux_id=demux_id)
+            .filter_by(lane=lane)
+            .first()
+        )
 
-    return query
+    def get_samples(self, flowcell: str, project_name: Optional[str] = None) -> alchy.Query:
+        query: alchy.Query = Sample.query.join(Sample.unaligned, Unaligned.demux, Demux.flowcell)
+        if project_name:
+            query = query.join(Sample.project).filter(Project.projectname == project_name)
 
+        query = query.filter(Flowcell.flowcellname == flowcell)
 
-def project_sample_stats(flowcell: str, project_name: Optional[str] = None) -> List[StatsSample]:
-    samples_query: alchy.Query = get_samples(flowcell=flowcell, project_name=project_name)
-    db_sample: models.Sample
-    sample_stats: List[StatsSample] = [
-        StatsSample.from_orm(db_sample) for db_sample in samples_query
-    ]
-    return sample_stats
+        return query
+
+    def project_sample_stats(
+        self, flowcell: str, project_name: Optional[str] = None
+    ) -> List[StatsSample]:
+        samples_query: alchy.Query = self.get_samples(flowcell=flowcell, project_name=project_name)
+        db_sample: Sample
+        return [StatsSample.from_orm(db_sample) for db_sample in samples_query]
+
+    def get_dragen_demux_samples(
+        self,
+        demux_results: DemuxResults,
+        sample_sheet: SampleSheet,
+    ) -> Dict[int, Dict[str, DragenDemuxSample]]:
+        """Gather information from Dragen demultiplexing results and create samples with the correct
+        information"""
+        LOG.info("Gather post Dragen demultiplexing statistics for demultiplexed samples")
+        demux_samples: Dict[int, Dict[str, DragenDemuxSample]] = {}
+
+        for sample in sample_sheet.samples:
+            if sample.lane not in demux_samples:
+                demux_samples[sample.lane] = {}
+
+            demultiplexing_stats = demux_results.demultiplexing_stats.parsed_stats[sample.lane][
+                sample.sample_id
+            ]
+
+            quality_metrics = demux_results.quality_metrics.parsed_metrics[sample.lane][
+                sample.sample_id
+            ]
+
+            adapter_metrics = demux_results.adapter_metrics.parsed_metrics[sample.lane][
+                sample.sample_id
+            ]
+
+            demux_samples[sample.lane][sample.sample_id] = DragenDemuxSample(
+                sample_name=sample.sample_id,
+                flowcell=demux_results.flow_cell.id,
+                lane=sample.lane,
+                reads=int(demultiplexing_stats["# Reads"]),
+                perfect_reads=int(demultiplexing_stats["# Perfect Index Reads"]),
+                one_mismatch_reads=int(demultiplexing_stats["# One Mismatch Index Reads"]),
+                pass_filter_q30=int(quality_metrics["YieldQ30"]),
+                mean_quality_score=float(quality_metrics["Mean Quality Score (PF)"]),
+                r1_sample_bases=int(adapter_metrics["R1_SampleBases"]),
+                r2_sample_bases=int(adapter_metrics["R2_SampleBases"]),
+                read_length=demux_results.run_info.mean_read_length(),
+            )
+
+        return demux_samples
+
+    def get_demux_samples(
+        self, conversion_stats: ConversionStats, demux_stats_path: Path, sample_sheet: SampleSheet
+    ) -> Dict[int, Dict[str, DemuxSample]]:
+        """Gather information from demultiplexing results and create samples with the correct
+        information"""
+        LOG.info("Gather post demultiplexing statistics for demultiplexed samples")
+        demux_samples: Dict[int, Dict[str, DemuxSample]] = {}
+        demux_stats: DemuxStats = DemuxStats(demux_stats_path=demux_stats_path)
+        raw_clusters: Dict[int, int] = conversion_stats.raw_clusters_per_lane
+        flowcell_id: str = conversion_stats.flowcell_id
+        sample: FlowCellSample
+        for sample in sample_sheet.samples:
+            lane: int = sample.lane
+            if lane not in demux_samples:
+                demux_samples[lane] = {}
+            barcode = "+".join([sample.index, sample.index2]) if sample.index2 else sample.index
+            sample_barcode_stats: SampleBarcodeStats = demux_stats.lanes_to_barcode[lane][barcode]
+            sample_conversion_stats: SampleConversionResults = conversion_stats.lanes_to_barcode[
+                lane
+            ][barcode]
+            lane_raw_cluster: int = raw_clusters[lane]
+            sample_id: str = sample.sample_id
+            demux_samples[lane][sample_id] = DemuxSample(
+                sample_name=sample.sample_id,
+                flowcell=flowcell_id,
+                lane=lane,
+                nr_raw_clusters_=lane_raw_cluster,
+                barcode_stats_=sample_barcode_stats,
+                conversion_stats_=sample_conversion_stats,
+            )
+
+        return demux_samples

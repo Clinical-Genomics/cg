@@ -1,24 +1,24 @@
 """This script tests the cli methods to create prerequisites and start a mip-dna analysis"""
 import logging
 
-from cg.cli.workflow.mip_dna.base import start, start_available
+from cg.cli.workflow.mip_dna.base import start_available
 from cg.constants import EXIT_SUCCESS, Pipeline
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 
 
-def test_dry(cli_runner, dna_mip_context):
+def test_dry(cli_runner, mip_dna_context):
     """Test mip dna start with --dry option"""
 
-    # GIVEN a dna_mip_context
+    # GIVEN a mip_dna_context
 
     # WHEN using dry running
-    result = cli_runner.invoke(start_available, ["--dry-run"], obj=dna_mip_context)
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_dna_context)
 
     # THEN command should have accepted the option happily
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_dna_case_included(cli_runner, caplog, dna_case, dna_mip_context, mocker):
+def test_dna_case_included(cli_runner, caplog, dna_case, mip_dna_context, mocker):
     """Test mip dna start with a DNA case"""
 
     caplog.set_level(logging.INFO)
@@ -40,13 +40,13 @@ def test_dna_case_included(cli_runner, caplog, dna_case, dna_mip_context, mocker
     assert not dna_case.analyses
 
     # WHEN running command
-    result = cli_runner.invoke(start_available, ["--dry-run"], obj=dna_mip_context)
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_dna_context)
 
     # THEN command should have printed the case id
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_rna_case_excluded(cli_runner, caplog, dna_mip_context, rna_case, mocker):
+def test_rna_case_excluded(cli_runner, caplog, mip_dna_context, rna_case, mocker):
     """Test mip dna start with a RNA case"""
 
     caplog.set_level(logging.INFO)
@@ -68,14 +68,14 @@ def test_rna_case_excluded(cli_runner, caplog, dna_mip_context, rna_case, mocker
         assert sample.sequenced_at
 
     # WHEN running command
-    result = cli_runner.invoke(start_available, ["--dry-run"], obj=dna_mip_context)
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_dna_context)
 
     # THEN command should not mention the rna-case
     assert result.exit_code == EXIT_SUCCESS
     assert rna_case.internal_id not in caplog.text
 
 
-def test_mixed_dna_rna_case(cli_runner, caplog, dna_mip_context, dna_rna_mix_case, mocker):
+def test_mixed_dna_rna_case(cli_runner, caplog, mip_dna_context, dna_rna_mix_case, mocker):
     """Test mip dna start with a mixed DNA/RNA case"""
     caplog.set_level(logging.INFO)
     # GIVEN spring decompression is needed
@@ -91,7 +91,7 @@ def test_mixed_dna_rna_case(cli_runner, caplog, dna_mip_context, dna_rna_mix_cas
     assert not dna_rna_mix_case.analyses
 
     # WHEN running command
-    result = cli_runner.invoke(start_available, ["--dry-run"], obj=dna_mip_context)
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_dna_context)
 
     # THEN command should info about it starting the case but warn about skipping
     assert result.exit_code == EXIT_SUCCESS
