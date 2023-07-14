@@ -28,9 +28,11 @@ from cg.meta.demultiplex.utils import (
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_fastqs_from_flow_cell,
-    get_sample_internal_ids_from_flow_cell,
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
+)
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_internal_ids_from_sample_sheet,
 )
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
@@ -165,7 +167,10 @@ class DemuxPostProcessingAPI:
         """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
 
         q30_threshold: int = get_q30_threshold(flow_cell_data.sequencer_type)
-        sample_internal_ids: List[str] = get_sample_internal_ids_from_flow_cell(flow_cell_data)
+        sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
+            sample_sheet_path=flow_cell_data.sample_sheet_path,
+            flow_cell_sample_type=flow_cell_data.sample_type,
+        )
 
         for sample_id in sample_internal_ids:
             self.update_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold)
@@ -204,7 +209,10 @@ class DemuxPostProcessingAPI:
     def add_sample_fastq_files_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
 
-        sample_internal_ids: List[str] = get_sample_internal_ids_from_flow_cell(flow_cell)
+        sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
+            sample_sheet_path=flow_cell.sample_sheet_path,
+            flow_cell_sample_type=flow_cell.sample_type,
+        )
 
         for sample_internal_id in sample_internal_ids:
             self.add_bundle_and_version_if_non_existent(sample_internal_id)
@@ -280,7 +288,9 @@ class DemuxPostProcessingAPI:
         """Add sample sheet path to Housekeeper."""
 
         try:
-            sample_sheet_file_path: Path = get_sample_sheet_path(flow_cell_directory)
+            sample_sheet_file_path: Path = get_sample_sheet_path(
+                flow_cell_directory=flow_cell_directory
+            )
 
             self.add_file_to_bundle_if_non_existent(
                 file_path=sample_sheet_file_path,

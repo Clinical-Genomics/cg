@@ -12,7 +12,6 @@ from cg.meta.demultiplex.utils import (
     get_bcl_converter_name,
     get_lane_from_sample_fastq,
     get_q30_threshold,
-    get_sample_internal_ids_from_flow_cell,
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
 )
@@ -163,29 +162,6 @@ def test_get_sample_sheet_path_not_found(tmp_path: Path):
     # THEN a FileNotFoundError should be raised
     with pytest.raises(FileNotFoundError):
         get_sample_sheet_path(flow_cell_directory)
-
-
-def test_get_sample_ids_from_sample_sheet():
-    # GIVEN some flow cell samples
-    mock_sample1 = MagicMock()
-    mock_sample1.sample_id = "sample1_index1"
-    mock_sample2 = MagicMock()
-    mock_sample2.sample_id = "sample2_index2"
-    mock_samples = [mock_sample1, mock_sample2]
-
-    # GIVEN a sample sheet with the samples
-    mock_sample_sheet = MagicMock()
-    type(mock_sample_sheet).samples = PropertyMock(return_value=mock_samples)
-
-    # GIVEN a flow cell data with the parsed sample sheet object
-    mock_flow_cell_data = MagicMock()
-    mock_flow_cell_data.get_sample_sheet.return_value = mock_sample_sheet
-
-    # WHEN extracting the sample ids from the sample sheet in the flow cell directory data
-    result = get_sample_internal_ids_from_flow_cell(mock_flow_cell_data)
-
-    # THEN the sample ids are returned without the index
-    assert result == ["sample1", "sample2"]
 
 
 @patch("cg.meta.demultiplex.utils.is_flow_cell_directory_valid", return_value=False)
