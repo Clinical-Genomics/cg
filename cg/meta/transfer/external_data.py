@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from cg.apps.cgstats.db.models import Version
+from housekeeper.store.models import Version
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import HK_FASTQ_TAGS
 from cg.meta.meta import MetaAPI

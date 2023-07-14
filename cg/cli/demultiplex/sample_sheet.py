@@ -6,7 +6,7 @@ import click
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
-from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
@@ -96,7 +96,7 @@ def create_sheet(
         sample_sheet_content: List[List[str]] = create_sample_sheet(
             bcl_converter=bcl_converter, flow_cell=flow_cell, lims_samples=lims_samples, force=force
         )
-    except (FileNotFoundError, FileExistsError) as error:
+    except (FileNotFoundError, FileExistsError, FlowCellError) as error:
         raise click.Abort from error
 
     if dry_run:
