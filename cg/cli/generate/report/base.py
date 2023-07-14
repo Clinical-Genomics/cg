@@ -1,5 +1,4 @@
 """Commands to generate delivery reports."""
-
 import logging
 import sys
 from datetime import datetime
@@ -8,7 +7,6 @@ from typing import TextIO, Optional
 
 import click
 from cgmodels.cg.constants import Pipeline
-from housekeeper.store import models as hk_models
 from housekeeper.store.models import Version
 
 from cg.cli.generate.report.options import (
