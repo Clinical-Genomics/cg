@@ -8,7 +8,6 @@ from cg.constants import SequencingFileTag
 from cg.meta.archive.ddn_dataflow import DDNDataFlowApi, TransferData
 from cg.store import Store
 from cg.store.models import Sample
-from housekeeper.store.models import Version
 
 LOG = logging.getLogger(__name__)
 DDN = "DDN"
@@ -142,7 +141,7 @@ class ArchiveAPI:
 
     def get_sample_id_from_file_path(self, file_path: str):
         """Return the sample id, i.e. bundle name, for the specified spring file in Housekeeper."""
-        version: Version = self.housekeeper_api.get_version_by_version_id(
+        version = self.housekeeper_api.get_version_by_version_id(
             self.housekeeper_api.files(path=file_path).first().version_id
         )
-        return version.bundle_id
+        return self.housekeeper_api.get_bundle_by_bundle_id(version.bundle_id).name

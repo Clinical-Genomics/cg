@@ -247,6 +247,10 @@ class HousekeeperAPI:
         """Get the version corresponding to the given id in Housekeeper."""
         return self._store.get_version_by_id(version_id)
 
+    def get_bundle_by_bundle_id(self, bundle_id: int) -> Optional[Bundle]:
+        """Get the bundle corresponding to the given id in Housekeeper."""
+        return self._store.get_bundle_by_id(bundle_id)
+
     def get_all_non_archived_spring_files(self) -> List[File]:
         """Return all files which are not marked as archived in Housekeeper."""
         return (

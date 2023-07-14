@@ -28,6 +28,7 @@ def test_get_sample_id_from_file(
     archive_api: ArchiveAPI, populated_housekeeper_api: HousekeeperAPI, spring_file: Path
 ):
     sample_id: str = archive_api.get_sample_id_from_file_path(file_path=spring_file.as_posix())
+    assert sample_id == "ADM1"
 
 
 def test_get_archive_location_and_sample_id_from_file_path(
