@@ -93,13 +93,16 @@ class ArchiveAPI:
         sample_and_spring_files_per_archive_location: Dict[
             str, List[SampleAndFile]
         ] = self.sort_spring_files_on_archive_location(spring_files_to_archive)
+
         files_to_archive: List[TransferData] = [
             TransferData(destination=ddn_file_to_archive.sample, source=ddn_file_to_archive.file)
             for ddn_file_to_archive in sample_and_spring_files_per_archive_location[DDN]
         ]
+
         archive_task_id: int = self.ddn_api.archive_folders(
             sources_and_destinations=files_to_archive
         )
+
         self.housekeeper_api.add_archives(
             files=[Path(transfer_data.source) for transfer_data in files_to_archive],
             archive_task_id=archive_task_id,
@@ -131,6 +134,7 @@ class ArchiveAPI:
         """Returns the data archive location and sample id connected to the Housekeeper spring file."""
         sample_internal_id: str = self.get_sample_id_from_file_path(file_path)
         sample: Sample = self.status_db.get_sample_by_internal_id(sample_internal_id)
+
         if not sample:
             LOG.warning(
                 f"No sample found in status_db corresponding to sample_id {sample_internal_id}."
@@ -141,7 +145,4 @@ class ArchiveAPI:
 
     def get_sample_id_from_file_path(self, file_path: str):
         """Return the sample id, i.e. bundle name, for the specified spring file in Housekeeper."""
-        version = self.housekeeper_api.get_version_by_version_id(
-            self.housekeeper_api.files(path=file_path).first().version_id
-        )
-        return self.housekeeper_api.get_bundle_by_bundle_id(version.bundle_id).name
+        return self.housekeeper_api.files(path=file_path).first().version.bundle.name

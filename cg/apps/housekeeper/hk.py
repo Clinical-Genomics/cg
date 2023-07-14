@@ -253,7 +253,7 @@ class HousekeeperAPI:
         return self._store.get_bundle_by_id(bundle_id)
 
     def get_all_non_archived_spring_files(self) -> List[File]:
-        """Return all files which are not marked as archived in Housekeeper."""
+        """Return all spring files which are not marked as archived in Housekeeper."""
         aliasFile = aliased(File)
         filter_archived = exists().where(aliasFile.id == Archive.file_id)
         return (
