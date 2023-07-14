@@ -258,7 +258,7 @@ class HousekeeperAPI:
         filter_archived = exists().where(aliasFile.id == Archive.file_id)
         return (
             self._store.get_files(tag_names=[SequencingFileTag.SPRING])
-            .join(Archive)
+            .outerjoin(Archive)
             .filter(~filter_archived)
             .all()
         )

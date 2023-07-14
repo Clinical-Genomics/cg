@@ -59,9 +59,9 @@ def test_sort_spring_files_on_archive_location(
     # When sorting the returned files on the data archive locations of the customers
     sorted_spring_files: Dict[
         str, List[SampleAndFile]
-    ] = archive_api.sort_spring_files_on_archive_location(spring_files)
+    ] = archive_api.sort_spring_files_on_archive_location([file.path for file in spring_files])
 
-    assert len(sorted_spring_files["DDN"]) == 2
+    assert len(sorted_spring_files["DDN"]) == 1
 
 
 def test_archive_all_non_archived_spring_files(
