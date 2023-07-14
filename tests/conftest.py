@@ -2369,7 +2369,7 @@ def fixture_store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
 def fixture_ok_response() -> Response:
     """Return a response with the OK status code."""
     response: Response = Response()
-    response.json = json.loads('{"job_id":"123"}')
+    response._content = b'{"job_id": "123"}'
     response.status_code = http.HTTPStatus.OK
     return response
 

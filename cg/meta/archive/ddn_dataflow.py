@@ -201,7 +201,7 @@ class DDNDataFlowApi:
             url=urljoin(base=self.url, url=DataflowEndpoints.ARCHIVE_FILES),
         )
         if response.ok:
-            return response.json["job_id"]
+            return response.json()["job_id"]
         else:
             raise IOError(response.text)
 
@@ -219,6 +219,6 @@ class DDNDataFlowApi:
             url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
         )
         if response.ok:
-            return read_json_stream(response.json())["job_id"]
+            return response.json()["job_id"]
         else:
             raise IOError(response.text)
