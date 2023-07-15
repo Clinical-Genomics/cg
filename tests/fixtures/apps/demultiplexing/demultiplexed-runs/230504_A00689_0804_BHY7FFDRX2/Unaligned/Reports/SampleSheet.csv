@@ -1,0 +1,9 @@
+[Settings]
+BarcodeMismatchesIndex1,0
+BarcodeMismatchesIndex2,0
+[Data]
+FCID,Lane,Sample_ID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,Sample_Project
+HY7FFDRX2,1,ACC11927A2,hg19,GTCCTTCGGC,CTGTGCATGA,anonymous_1,N,R1,script,405887
+HY7FFDRX2,1,ACC11927A5,hg19,GTTTCACGAT,TTTGGCCGAA,anonymous_2,N,R1,script,405887
+HY7FFDRX2,2,ACC11927A2,hg19,GTCCTTCGGC,CTGTGCATGA,anonymous_1,N,R1,script,405887
+HY7FFDRX2,2,ACC11927A5,hg19,GTTTCACGAT,TTTGGCCGAA,anonymous_2,N,R1,script,405887

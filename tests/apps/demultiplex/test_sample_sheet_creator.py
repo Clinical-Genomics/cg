@@ -14,7 +14,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeq6000Dragen,
     FlowCellSampleNovaSeqX,
 )
-from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_validated_sample_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.exc import SampleSheetError
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -69,7 +69,7 @@ def test_construct_bcl2fastq_sheet(
     ] = novaseq_bcl2fastq_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
-    sample_sheet: SampleSheet = validate_sample_sheet(
+    sample_sheet: SampleSheet = get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_content,
         sample_type=FlowCellSampleNovaSeq6000Bcl2Fastq,
     )
@@ -89,7 +89,7 @@ def test_construct_dragen_sheet(
     ] = novaseq_dragen_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
-    sample_sheet: SampleSheet = validate_sample_sheet(
+    sample_sheet: SampleSheet = get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_content,
         sample_type=FlowCellSampleNovaSeq6000Dragen,
     )
@@ -107,7 +107,7 @@ def test_construct_novaseq_x_sheet(
     sample_sheet_content: List[List[str]] = novaseq_x_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
-    sample_sheet: SampleSheet = validate_sample_sheet(
+    sample_sheet: SampleSheet = get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_content,
         sample_type=FlowCellSampleNovaSeqX,
     )

@@ -12,18 +12,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store.api import Store
 from cg.store.models import Sample, Family
-
-from tests.apps.cgstats.conftest import fixture_populated_stats_api
-from tests.cli.demultiplex.conftest import (
-    fixture_demultiplex_configs,
-    fixture_demultiplex_context,
-    fixture_demultiplexed_flow_cell_working_directory,
-    fixture_demultiplexed_flow_cells_working_directory,
-    fixture_demultiplexing_api,
-    fixture_demux_results_not_finished_dir,
-    fixture_flow_cell_runs_working_directory,
-    fixture_stats_api,
-)
 from tests.store_helpers import StoreHelpers
 
 
