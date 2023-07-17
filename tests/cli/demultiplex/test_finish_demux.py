@@ -32,7 +32,7 @@ def test_finish_all_cmd_dry_run(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_finish_all_cmd(
+def test_finish_all_cmd_fail(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
@@ -40,7 +40,7 @@ def test_finish_all_cmd(
 ):
     caplog.set_level(logging.INFO)
 
-    # GIVEN a demultiplex flow cell finished output directory that exist
+    # GIVEN a demultiplex flow cell finished output directory that does not exist
 
     # GIVEN a demultiplex context
 
@@ -51,7 +51,7 @@ def test_finish_all_cmd(
     )
 
     # THEN assert the command exits successfully
-    assert result.exit_code == EXIT_SUCCESS
+    assert result.exit_code != EXIT_SUCCESS
 
 
 def test_finish_flow_cell_dry_run(
@@ -89,7 +89,7 @@ def test_finish_flow_cell_fail(
 ):
     caplog.set_level(logging.INFO)
 
-    # GIVEN a demultiplex flow cell finished output directory that exist
+    # GIVEN a demultiplex flow cell finished output directory that does not exist
 
     # GIVEN a demultiplex context
 

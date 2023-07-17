@@ -32,6 +32,11 @@ def finish_all_cmd(context: CGConfig, bcl_converter: str, dry_run: bool) -> None
     demux_post_processing_api.set_dry_run(dry_run=dry_run)
     demux_post_processing_api.finish_all_flow_cells(bcl_converter=bcl_converter)
 
+    # Temporary finish flow cell logic will replace logic above when validated
+    demux_post_processing_api_temp: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
+    demux_post_processing_api_temp.set_dry_run(dry_run=dry_run)
+    demux_post_processing_api_temp.finish_all_flow_cells_temp()
+
 
 @finish_group.command(name="flow-cell")
 @click.argument("flow-cell-name")
@@ -68,6 +73,17 @@ def finish_flow_cell_temporary(context: CGConfig, flow_cell_directory_name: str)
     demux_post_processing_api.finish_flow_cell_temp(
         flow_cell_directory_name=flow_cell_directory_name
     )
+
+
+@finish_group.command(name="temporary-all")
+@click.argument("flow-cell-directory-name")
+@click.pass_obj
+@DRY_RUN
+def finish_flow_cell_temporary_all(context: CGConfig, dry_run: bool):
+    # Temporary finish flow cell logic will replace logic above when validated
+    demux_post_processing_api_temp: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
+    demux_post_processing_api_temp.set_dry_run(dry_run=dry_run)
+    demux_post_processing_api_temp.finish_all_flow_cells_temp()
 
 
 @finish_group.command(name="all-hiseq-x")

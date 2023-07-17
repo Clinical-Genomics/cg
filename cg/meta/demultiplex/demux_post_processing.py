@@ -119,6 +119,12 @@ class DemuxPostProcessingAPI:
 
         create_delivery_file_in_flow_cell_directory(flow_cell_directory_path)
 
+    def finish_all_flow_cells_temp(self) -> None:
+        """Finish all flow cells that need it."""
+        flow_cell_dirs = self.demux_api.get_all_demultiplexed_flow_cell_dirs()
+        for flow_cell_dir in flow_cell_dirs:
+            self.finish_flow_cell_temp(flow_cell_dir.name)
+
     def store_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Store data from the flow cell directory in status db and housekeeper."""
         self.store_flow_cell_data_in_status_db(parsed_flow_cell)
