@@ -175,6 +175,9 @@ class DemuxPostProcessingAPI:
             )
         return bool(existing_metrics_entry)
 
+    def add_demux_logs_to_housekeeper(self):
+        pass
+
     def add_metric_to_status_db(self, metric: SampleLaneSequencingMetrics) -> None:
         LOG.debug(
             f"Adding sample lane sequencing metrics for {metric.flow_cell_name}, {metric.sample_internal_id}, and {metric.flow_cell_lane_number}."
