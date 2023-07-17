@@ -1,9 +1,8 @@
 import logging
 from pathlib import Path
 from typing import Generator, List
-from mock import MagicMock, call, patch
+from mock import MagicMock, call
 
-import cg.apps.demultiplex.sample_sheet.models
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import (
@@ -15,10 +14,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-from cg.store.models import SampleLaneSequencingMetrics
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_internal_ids_from_sample_sheet,
-)
 
 
 def test_set_dry_run(
@@ -877,6 +872,11 @@ def test_add_demux_logs_to_housekeeper(
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN a bundle and flow cell version exists in housekeeper
+    demux_post_processing_api.add_bundle_and_version_if_non_existent(
+        bundle_name=dragen_flow_cell.id
+    )
 
     # GIVEN a demux log in the run directory
     demux_log_file_paths: List[Path] = [
