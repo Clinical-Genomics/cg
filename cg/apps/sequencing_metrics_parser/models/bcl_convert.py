@@ -38,7 +38,6 @@ class BclConvertDemuxMetrics(BaseModel):
     sample_internal_id: str = Field(
         ..., alias=BclConvertDemuxMetricsColumnNames.SAMPLE_INTERNAL_ID.value
     )
-    sample_project: str = Field(..., alias=BclConvertDemuxMetricsColumnNames.SAMPLE_PROJECT.value)
     read_pair_count: int = Field(..., alias=BclConvertDemuxMetricsColumnNames.READ_PAIR_COUNT.value)
     perfect_index_reads_count: int = Field(
         ..., alias=BclConvertDemuxMetricsColumnNames.PERFECT_INDEX_READS_COUNT.value
@@ -61,7 +60,6 @@ class BclConvertAdapterMetrics(BaseModel):
     sample_internal_id: str = Field(
         ..., alias=BclConvertAdapterMetricsColumnNames.SAMPLE_INTERNAL_ID.value
     )
-    sample_project: str = Field(..., alias=BclConvertAdapterMetricsColumnNames.SAMPLE_PROJECT.value)
     read_number: int = Field(..., alias=BclConvertAdapterMetricsColumnNames.READ_NUMBER.value)
     sample_bases: int = Field(..., alias=BclConvertAdapterMetricsColumnNames.SAMPLE_BASES.value)
 
@@ -76,19 +74,7 @@ class BclConvertSampleSheetData(BaseModel):
     )
     sample_name: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_NAME.value)
     control: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.CONTROL.value)
-    sample_project: str = Field(
-        ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_PROJECT_BCLCONVERT.value
-    )
 
 
 class CustomConfig(BaseConfig):
     arbitrary_types_allowed = True
-
-
-class BclConvertRunInfo(BaseModel):
-    """Model for the BCL convert run info file."""
-
-    tree: ET.ElementTree
-
-    class Config(CustomConfig):
-        pass

@@ -82,12 +82,36 @@ class FindBasicDataHandler(BaseHandler):
             valid_from=dt.datetime.now(),
         ).first()
 
+    def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion:
+        """Return bed version with file name."""
+        return apply_bed_version_filter(
+            bed_versions=self._get_query(table=BedVersion),
+            bed_version_file_name=bed_version_file_name,
+            filter_functions=[BedVersionFilter.FILTER_BY_FILE_NAME],
+        ).first()
+
     def get_bed_version_by_short_name(self, bed_version_short_name: str) -> BedVersion:
         """Return bed version with short name."""
         return apply_bed_version_filter(
             bed_versions=self._get_query(table=BedVersion),
             bed_version_short_name=bed_version_short_name,
             filter_functions=[BedVersionFilter.FILTER_BY_SHORT_NAME],
+        ).first()
+
+    def get_bed_by_entry_id(self, bed_entry_id: int) -> Bed:
+        """Get panel bed with bed entry id."""
+        return apply_bed_filter(
+            beds=self._get_query(table=Bed),
+            filter_functions=[BedFilter.FILTER_BY_ENTRY_ID],
+            bed_entry_id=bed_entry_id,
+        ).first()
+
+    def get_bed_by_name(self, bed_name: str) -> Bed:
+        """Get panel bed with bed name."""
+        return apply_bed_filter(
+            beds=self._get_query(table=Bed),
+            filter_functions=[BedFilter.FILTER_BY_NAME],
+            bed_name=bed_name,
         ).first()
 
     def get_active_beds(self) -> Query:

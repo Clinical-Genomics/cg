@@ -229,11 +229,11 @@ class ScoutAPI:
         ]
 
         try:
-            LOG.info("Uploading splice junctions bed file {file_path} to case {case_id}")
+            LOG.info(f"Uploading splice junctions bed file {file_path} to case {case_id}.")
             self.process.run_command(upload_command)
         except CalledProcessError as error:
             raise ScoutUploadError(
-                "Something went wrong when uploading splice junctions bed file"
+                "Something went wrong when uploading the splice junctions bed file."
             ) from error
 
     def upload_rna_coverage_bigwig(
