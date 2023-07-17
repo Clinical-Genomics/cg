@@ -90,7 +90,9 @@ class DemuxPostProcessingAPI:
             This method does not return anything but updates the status and housekeeper databases
             with data from the flow cell directory.
         """
-
+        if self.dry_run:
+            LOG.info("Dry run will not finish flow cell")
+            return
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
         flow_cell_directory_path: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)

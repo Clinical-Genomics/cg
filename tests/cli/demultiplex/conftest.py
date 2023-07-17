@@ -60,6 +60,17 @@ def fixture_demultiplexed_flow_cells_working_directory(project_dir: Path) -> Pat
     return working_dir
 
 
+@pytest.fixture(name="demultiplexed_flow_cell_directory")
+def fixture_demultiplexed_flow_cell_directory(
+    demultiplexed_flow_cells_working_directory: Path,
+    bcl2fastq_flow_cell_id: str,
+) -> Path:
+    """Return the path to a working directory with flow cells that have been demultiplexed."""
+    working_dir: Path = Path(demultiplexed_flow_cells_working_directory, bcl2fastq_flow_cell_id)
+    working_dir.mkdir(parents=True, exist_ok=True)
+    return working_dir
+
+
 @pytest.fixture(name="demultiplexed_flow_cell_working_directory")
 def fixture_demultiplexed_flow_cell_working_directory(
     demux_results_not_finished_dir: Path,
@@ -80,12 +91,14 @@ def fixture_demultiplexed_flow_cell_finished_working_directory(
     demultiplexed_runs: Path,
     demultiplexed_flow_cells_working_directory: Path,
     bcl2fastq_flow_cell_full_name: str,
+    tmp_path_factory,
 ) -> Path:
     """Copy the content of a demultiplexed but not finished directory to a temporary location."""
     source: Path = Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
     destination: Path = Path(
         demultiplexed_flow_cells_working_directory, bcl2fastq_flow_cell_full_name
     )
+
     shutil.copytree(src=source, dst=destination)
     return destination
 
