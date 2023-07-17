@@ -86,7 +86,7 @@ class ReportAPI(MetaAPI):
             bundle=case_id, tags=[HK_DELIVERY_REPORT_TAG], version=version.id
         )
         if not delivery_report:
-            LOG.warning(f"No existing delivery report found in housekeeper for {case_id}")
+            LOG.warning(f"No delivery report found in housekeeper for {case_id}")
             return None
         return delivery_report.full_path
 

@@ -19,7 +19,7 @@ LOG = logging.getLogger(__name__)
     "-d", "--dry-run", is_flag=True, default=False, help="Run command without uploading to scout"
 )
 @click.pass_context
-def upload_delivery_report_to_scout(context: click.Context, case_id: str, dry_run: bool):
+def upload_delivery_report_to_scout(context: click.Context, case_id: str, dry_run: bool) -> None:
     """Fetches a delivery report from housekeeper and uploads it to scout."""
     click.echo(click.style("--------------- DELIVERY REPORT UPLOAD ---------------"))
     case: Family = get_report_case(context, case_id)
@@ -32,3 +32,5 @@ def upload_delivery_report_to_scout(context: click.Context, case_id: str, dry_ru
         report_api.scout_api.upload_delivery_report(
             report_path=delivery_report, case_id=case.internal_id, update=True
         )
+        return
+    LOG.error("Delivery report not uploaded to Scout")
