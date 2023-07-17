@@ -76,7 +76,6 @@ def finish_flow_cell_temporary(context: CGConfig, flow_cell_directory_name: str)
 
 
 @finish_group.command(name="temporary-all")
-@click.argument("flow-cell-directory-name")
 @click.pass_obj
 @DRY_RUN
 def finish_flow_cell_temporary_all(context: CGConfig, dry_run: bool):
