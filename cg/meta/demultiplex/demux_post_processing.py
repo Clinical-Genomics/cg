@@ -17,7 +17,6 @@ from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
 )
 from cg.constants.cgstats import STATS_HEADER
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
 from cg.exc import FlowCellError
@@ -119,6 +118,7 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
         self.copy_sample_sheet()
+
         flow_cell_directory_path: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
         bcl_converter: str = get_bcl_converter_name(flow_cell_directory_path)
 
@@ -175,9 +175,6 @@ class DemuxPostProcessingAPI:
             )
         return bool(existing_metrics_entry)
 
-    def add_demux_logs_to_housekeeper(self):
-        pass
-
     def add_metric_to_status_db(self, metric: SampleLaneSequencingMetrics) -> None:
         LOG.debug(
             f"Adding sample lane sequencing metrics for {metric.flow_cell_name}, {metric.sample_internal_id}, and {metric.flow_cell_lane_number}."
@@ -226,6 +223,19 @@ class DemuxPostProcessingAPI:
             flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id
         )
         self.add_sample_fastq_files_to_housekeeper(flow_cell)
+        self.add_demux_logs_to_housekeeper(flow_cell)
+
+    def add_demux_logs_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
+        """Add demux logs to Housekeeper."""
+        demux_log_file_paths: List[Path] = [
+            self.demux_api.get_stderr_logfile(flow_cell=flow_cell),
+            self.demux_api.get_stdout_logfile(flow_cell=flow_cell),
+        ]
+        tag_names: List[str] = [SequencingFileTag.DEMUX_LOG, flow_cell.id]
+        for file_path in demux_log_file_paths:
+            self.add_file_to_bundle_if_non_existent(
+                file_path=file_path, bundle_name=flow_cell.id, tag_names=tag_names
+            )
 
     def add_sample_fastq_files_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
