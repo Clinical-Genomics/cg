@@ -2,14 +2,14 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import TextIO, Optional, List
+from typing import Optional, List
 
 import requests
-from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import File, Version
 from jinja2 import Environment, PackageLoader, select_autoescape, Template
 from sqlalchemy.orm import Query
 
+from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, MAX_ITEMS_TO_RETRIEVE
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError

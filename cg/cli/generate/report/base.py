@@ -3,10 +3,9 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import TextIO, Optional
+from typing import Optional
 
 import click
-from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import Version
 
 from cg.cli.generate.report.options import (
@@ -22,7 +21,7 @@ from cg.cli.generate.report.utils import (
     get_report_analysis_started,
     get_report_api_pipeline,
 )
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
 from cg.exc import CgError
 from cg.meta.report.report_api import ReportAPI
 from cg.store.models import Family

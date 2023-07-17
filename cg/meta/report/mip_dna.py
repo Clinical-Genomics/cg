@@ -1,7 +1,6 @@
 import logging
 from typing import List, Optional, Iterable
 
-from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import Version, File
 
 from cg.constants import (
@@ -15,6 +14,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS,
     REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS,
+    Pipeline,
 )
 from cg.constants.scout_upload import MIP_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
