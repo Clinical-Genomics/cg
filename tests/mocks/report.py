@@ -27,7 +27,7 @@ class MockMipDNAAnalysisAPI(MipDNAAnalysisAPI):
 
 
 class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
-    """Mock ReportAPI for CLI tests overwriting housekeeper methods."""
+    """Mock ReportAPI for CLI tests overwriting Housekeeper methods."""
 
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         super().__init__(config, analysis_api)
