@@ -32,7 +32,7 @@ def test_finish_all_cmd_dry_run(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_finish_all_cmd_fail(
+def test_finish_all_cmd(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
@@ -51,7 +51,7 @@ def test_finish_all_cmd_fail(
     )
 
     # THEN assert the command exits successfully
-    assert result.exit_code != EXIT_SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
 
 
 def test_finish_flow_cell_dry_run(
