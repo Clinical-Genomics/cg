@@ -68,14 +68,14 @@ class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
         )
 
     def create_delivery_report_file(
-        self, case_id: str, file_path: Path, analysis_date: datetime, force_report: bool
+        self, case_id: str, directory: Path, analysis_date: datetime, force_report: bool
     ):
         """Return mocked delivery report file path."""
         LOG.info(
-            f"create_delivery_report_file called with the following args: case={case_id}, file_path={file_path}, "
+            f"create_delivery_report_file called with the following args: case={case_id}, directory={directory}, "
             f"analysis_date={analysis_date}, force_report={force_report}"
         )
-        return file_path
+        return directory
 
 
 class MockChanjo(ChanjoAPI):
