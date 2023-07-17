@@ -896,8 +896,9 @@ def test_add_demux_logs_to_housekeeper(
     demux_post_processing_api.add_demux_logs_to_housekeeper(flow_cell=dragen_flow_cell)
 
     # THEN the demux log was added to housekeeper
-    for file in demux_post_processing_api.hk_api.get_files(
+    files = demux_post_processing_api.hk_api.get_files(
         tags=[SequencingFileTag.DEMUX_LOG],
-        bundle=demux_post_processing_api.demux_api.run_dir.name,
-    ):
-        assert file.path in demux_log_file_paths
+        bundle=dragen_flow_cell.id,
+    ).all()
+
+    assert len(files) == 2
