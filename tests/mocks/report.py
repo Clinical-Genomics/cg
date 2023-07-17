@@ -41,14 +41,14 @@ class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
             f"{delivery_report_file}, version={version}"
         )
 
-    def get_delivery_report_from_hk(self, case_id: str, version: Version) -> Optional[str]:
+    def get_delivery_report_from_hk(self, case_id: str, version: Version) -> None:
         """Return mocked delivery report path stored in Housekeeper."""
         LOG.info(
             f"get_delivery_report_from_hk called with the following args: case={case_id}, version={version}"
         )
         return None
 
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str:
         """Return mocked uploaded to Scout file."""
         LOG.info(
             f"get_scout_uploaded_file_from_hk called with the following args: case={case_id}, scout_tag={scout_tag}"

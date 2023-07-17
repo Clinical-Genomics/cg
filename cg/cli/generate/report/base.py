@@ -62,19 +62,26 @@ def generate_delivery_report(
         case_id=case_id, version=version
     )
     if delivery_report:
-        click.echo(click.style("Delivery report already in housekeeper", fg="yellow"))
+        click.echo(
+            click.style(f"Delivery report already in housekeeper: {delivery_report}", fg="yellow")
+        )
         return
 
-    delivery_report: TextIO = report_api.create_delivery_report_file(
+    created_delivery_report: Path = report_api.create_delivery_report_file(
         case_id=case_id,
         directory=Path(report_api.analysis_api.root, case_id),
         analysis_date=analysis_date,
         force_report=force_report,
     )
     report_api.add_delivery_report_to_hk(
-        case_id=case_id, delivery_report_file=delivery_report, version=version
+        case_id=case_id, delivery_report_file=created_delivery_report, version=version
     )
-    click.echo(click.style("Uploaded delivery report to housekeeper", fg="green"))
+    click.echo(
+        click.style(
+            f"Uploaded delivery report to housekeeper: {created_delivery_report.as_posix()}",
+            fg="green",
+        )
+    )
     report_api.update_delivery_report_date(case=case, analysis_date=analysis_date)
 
 
