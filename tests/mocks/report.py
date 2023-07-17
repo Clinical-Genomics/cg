@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Union, Optional
+from typing import Union, Optional, Dict
 
 from housekeeper.store.models import Version
 
@@ -32,7 +32,9 @@ class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         super().__init__(config, analysis_api)
 
-    def add_delivery_report_to_hk(self, case_id: str, delivery_report_file: Path, version: Version):
+    def add_delivery_report_to_hk(
+        self, case_id: str, delivery_report_file: Path, version: Version
+    ) -> None:
         """Mocked add_delivery_report_to_hk method."""
         LOG.info(
             f"add_delivery_report_to_hk called with the following args:  case={case_id}, delivery_report_file="
@@ -60,7 +62,9 @@ class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         super().__init__(config, analysis_api)
 
-    def create_delivery_report(self, case_id: str, analysis_date: datetime, force_report: bool):
+    def create_delivery_report(
+        self, case_id: str, analysis_date: datetime, force_report: bool
+    ) -> None:
         """Mocked create_delivery_report method."""
         LOG.info(
             f"create_delivery_report called with the following args: case={case_id}, analysis_date={analysis_date}, "
@@ -69,7 +73,7 @@ class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
 
     def create_delivery_report_file(
         self, case_id: str, directory: Path, analysis_date: datetime, force_report: bool
-    ):
+    ) -> Path:
         """Return mocked delivery report file path."""
         LOG.info(
             f"create_delivery_report_file called with the following args: case={case_id}, directory={directory}, "
@@ -85,7 +89,7 @@ class MockChanjo(ChanjoAPI):
         mock_config = {"chanjo": {"config_path": "/mock/path", "binary_path": "/mock/path"}}
         super().__init__(mock_config)
 
-    def sample_coverage(self, sample_id: str, panel_genes: list) -> Union[None, dict]:
+    def sample_coverage(self, sample_id: str, panel_genes: list) -> Optional[Dict[str, float]]:
         """Return mocked sample dictionary."""
         sample_coverage = None
         if sample_id == "ADM1":
