@@ -67,7 +67,7 @@ def generate_delivery_report(
 
     delivery_report: TextIO = report_api.create_delivery_report_file(
         case_id=case_id,
-        file_path=Path(report_api.analysis_api.root, case_id),
+        directory=Path(report_api.analysis_api.root, case_id),
         analysis_date=analysis_date,
         force_report=force_report,
     )

@@ -54,17 +54,17 @@ class ReportAPI(MetaAPI):
         return rendered_report
 
     def create_delivery_report_file(
-        self, case_id: str, file_path: Path, analysis_date: datetime, force_report: bool
-    ) -> TextIO:
-        """Generates a temporary file containing a delivery report."""
-        file_path.mkdir(parents=True, exist_ok=True)
+        self, case_id: str, directory: Path, analysis_date: datetime, force_report: bool
+    ) -> Path:
+        """Generates a file containing the delivery report content."""
+        directory.mkdir(parents=True, exist_ok=True)
         delivery_report: str = self.create_delivery_report(
             case_id=case_id, analysis_date=analysis_date, force_report=force_report
         )
-        report_file_path: Path = Path(file_path / "delivery-report.html")
-        with open(report_file_path, "w") as delivery_report_file:
-            delivery_report_file.write(delivery_report)
-        return delivery_report_file
+        report_file_path: Path = Path(directory, "delivery-report.html")
+        with open(report_file_path, "w") as delivery_report_stream:
+            delivery_report_stream.write(delivery_report)
+        return report_file_path
 
     def add_delivery_report_to_hk(
         self, case_id: str, delivery_report_file: Path, version: Version

@@ -1,6 +1,7 @@
 import logging
 import os
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import List, TextIO
 
 from cg.models.report.report import DataAnalysisModel, ReportModel, CustomerModel, CaseModel
@@ -38,15 +39,16 @@ def test_create_delivery_report_file(report_api_mip_dna, case_mip_dna, tmp_path)
     # GIVEN a pre-built case
 
     # WHEN creating the report file
-    created_report_file: TextIO = report_api_mip_dna.create_delivery_report_file(
+    created_report_file: Path = report_api_mip_dna.create_delivery_report_file(
         case_id=case_mip_dna.internal_id,
-        file_path=tmp_path,
+        directory=tmp_path,
         analysis_date=case_mip_dna.analyses[0].started_at,
         force_report=False,
     )
 
-    # THEN check if an html report has been created and saved
-    assert os.path.isfile(created_report_file.name)
+    # THEN check if a html report has been created and saved
+    assert created_report_file.is_file()
+    assert created_report_file.exists()
 
 
 def test_render_delivery_report(report_api_mip_dna, case_mip_dna):
