@@ -89,11 +89,6 @@ def get_sample_sheet_path(
 def parse_flow_cell_directory_data(
     flow_cell_directory: Path, bcl_converter: str
 ) -> FlowCellDirectoryData:
-    """Parse flow cell data from the flow cell directory."""
-
-    try:
-        is_flow_cell_directory_valid(flow_cell_directory)
-    except FlowCellError as e:
-        raise FlowCellError(f"Flow cell directory was not valid: {flow_cell_directory}, {e}")
-
+    """Return flow cell data from the flow cell directory."""
+    is_flow_cell_directory_valid(flow_cell_directory)
     return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)

@@ -99,7 +99,7 @@ class DemuxPostProcessingAPI:
             FlowCellError: If the flow cell directory or the data it contains is not valid.
         """
         if self.dry_run:
-            LOG.info("Dry run will not finish flow cell")
+            LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
             return
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
@@ -623,6 +623,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
                 bcl_converter=bcl_converter,
             )
         except FlowCellError:
+            LOG.warning(f"Could not find flow cell {flow_cell_name}")
             return
         if not self.demux_api.is_demultiplexing_completed(flow_cell=flow_cell):
             LOG.warning("Demultiplex is not ready for %s", flow_cell_name)

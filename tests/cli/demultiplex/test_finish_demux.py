@@ -86,7 +86,6 @@ def test_finish_flow_cell(
     demultiplex_context: CGConfig,
     demultiplexed_flow_cell_finished_working_directory: Path,
     bcl2fastq_flow_cell_id: str,
-    demultiplexed_flow_cell_directory: Path,
 ):
     caplog.set_level(logging.INFO)
 
