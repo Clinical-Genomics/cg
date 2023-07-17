@@ -233,9 +233,12 @@ class DemuxPostProcessingAPI:
         ]
         tag_names: List[str] = [SequencingFileTag.DEMUX_LOG, flow_cell.id]
         for file_path in demux_log_file_paths:
-            self.add_file_to_bundle_if_non_existent(
-                file_path=file_path, bundle_name=flow_cell.id, tag_names=tag_names
-            )
+            try:
+                self.add_file_to_bundle_if_non_existent(
+                    file_path=file_path, bundle_name=flow_cell.id, tag_names=tag_names
+                )
+            except FileNotFoundError as e:
+                LOG.error(f"Cannot find demux log file {file_path}. Error: {e}.")
 
     def add_sample_fastq_files_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
