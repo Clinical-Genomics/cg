@@ -18,15 +18,15 @@ from cg.constants import (
 )
 from cg.constants.scout_upload import MIP_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
-from cg.models.cg_config import CGConfig
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
+from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.models.report.metadata import MipDNASampleMetadataModel
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
-from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
-from cg.store.models import Family, Sample, Application
+from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
 
