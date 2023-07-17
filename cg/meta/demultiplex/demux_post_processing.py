@@ -42,6 +42,8 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils import Process
+from cg.utils.files import get_file_in_directory
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 
 LOG = logging.getLogger(__name__)
 
@@ -65,6 +67,22 @@ class DemuxPostProcessingAPI:
         self.dry_run = dry_run
         if dry_run:
             self.demux_api.set_dry_run(dry_run=dry_run)
+
+    def copy_sample_sheet(self) -> None:
+        """Copy the sample sheet from run dir to demux dir"""
+        sample_sheet_path = get_file_in_directory(
+            self.demux_api.run_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        )
+        target_sample_sheet_path = Path(
+            self.demux_api.out_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        )
+        LOG.info(
+            f"Copy sample sheet {sample_sheet_path} from flow cell to demuxed result dir {target_sample_sheet_path}"
+        )
+        shutil.copy(
+            sample_sheet_path.as_posix(),
+            target_sample_sheet_path.as_posix(),
+        )
 
     def transfer_flow_cell(
         self, flow_cell_dir: Path, flow_cell_id: str, store: bool = True
@@ -100,7 +118,7 @@ class DemuxPostProcessingAPI:
         """
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
-
+        self.copy_sample_sheet()
         flow_cell_directory_path: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
         bcl_converter: str = get_bcl_converter_name(flow_cell_directory_path)
 
