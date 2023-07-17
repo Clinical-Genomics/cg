@@ -41,7 +41,7 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils import Process
-from cg.utils.files import get_file_in_directory
+from cg.utils.files import get_file_in_directory, get_files_matching_pattern
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 
 LOG = logging.getLogger(__name__)
@@ -227,10 +227,11 @@ class DemuxPostProcessingAPI:
 
     def add_demux_logs_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
         """Add demux logs to Housekeeper."""
-        demux_log_file_paths: List[Path] = [
-            self.demux_api.get_stderr_logfile(flow_cell=flow_cell),
-            self.demux_api.get_stdout_logfile(flow_cell=flow_cell),
-        ]
+        log_pattern: str = "*_demultiplex.std*"
+        demux_log_file_paths: List[Path] = get_files_matching_pattern(
+            directory=self.demux_api.run_dir, pattern=log_pattern
+        )
+
         tag_names: List[str] = [SequencingFileTag.DEMUX_LOG, flow_cell.id]
         for file_path in demux_log_file_paths:
             try:
