@@ -17,9 +17,9 @@ from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
 )
 from cg.constants.cgstats import STATS_HEADER
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.demultiplex.utils import (
@@ -42,8 +42,8 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils import Process
-from cg.utils.files import get_file_in_directory
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.utils.files import get_file_in_directory, get_files_matching_pattern
+
 
 LOG = logging.getLogger(__name__)
 
@@ -122,6 +122,7 @@ class DemuxPostProcessingAPI:
         """
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
+
 
         flow_cell_directory: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
         flow_cell_run_directory: Path = Path(self.demux_api.run_dir, flow_cell_directory_name)
@@ -234,6 +235,24 @@ class DemuxPostProcessingAPI:
             flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id
         )
         self.add_sample_fastq_files_to_housekeeper(flow_cell)
+        self.add_demux_logs_to_housekeeper(flow_cell)
+
+    def add_demux_logs_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
+        """Add demux logs to Housekeeper."""
+        log_pattern: str = r"*_demultiplex.std*"
+        demux_log_file_paths: List[Path] = get_files_matching_pattern(
+            directory=Path(self.demux_api.run_dir, flow_cell.full_name), pattern=log_pattern
+        )
+
+        tag_names: List[str] = [SequencingFileTag.DEMUX_LOG, flow_cell.id]
+        for file_path in demux_log_file_paths:
+            try:
+                self.add_file_to_bundle_if_non_existent(
+                    file_path=file_path, bundle_name=flow_cell.id, tag_names=tag_names
+                )
+                LOG.info(f"Added demux log file {file_path} to Housekeeper.")
+            except FileNotFoundError as e:
+                LOG.error(f"Cannot find demux log file {file_path}. Error: {e}.")
 
     def add_sample_fastq_files_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
