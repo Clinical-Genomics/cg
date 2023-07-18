@@ -68,17 +68,17 @@ class DemuxPostProcessingAPI:
         if dry_run:
             self.demux_api.set_dry_run(dry_run=dry_run)
 
-    def copy_sample_sheet(self, target_sample_sheet_path: Path) -> None:
+    def copy_sample_sheet(
+        self, sample_sheet_source_directory: Path, sample_sheet_destination_directory: Path
+    ) -> None:
         """Copy the sample sheet from run dir to demux dir"""
-        sample_sheet_path = get_file_in_directory(
-            self.demux_api.run_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-        )
+
         LOG.info(
-            f"Copy sample sheet {sample_sheet_path} from flow cell to demuxed result dir {target_sample_sheet_path}"
+            f"Copy sample sheet {sample_sheet_source_directory} from flow cell to demuxed result dir {sample_sheet_destination_directory}"
         )
         shutil.copy(
-            sample_sheet_path.as_posix(),
-            target_sample_sheet_path.as_posix(),
+            sample_sheet_source_directory.as_posix(),
+            sample_sheet_destination_directory.as_posix(),
         )
 
     def transfer_flow_cell(
@@ -117,15 +117,20 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
-        flow_cell_directory_path: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
-        bcl_converter: str = get_bcl_converter_name(flow_cell_directory_path)
+        flow_cell_directory: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
+        flow_cell_run_directory: Path = Path(self.demux_api.run_dir, flow_cell_directory_name)
+
+        bcl_converter: str = get_bcl_converter_name(flow_cell_directory)
 
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
-            flow_cell_directory=flow_cell_directory_path,
+            flow_cell_directory=flow_cell_directory,
             bcl_converter=bcl_converter,
         )
 
-        self.copy_sample_sheet(flow_cell_directory_path)
+        self.copy_sample_sheet(
+            sample_sheet_source_directory=flow_cell_run_directory,
+            sample_sheet_destination_directory=flow_cell_directory,
+        )
 
         try:
             self.store_flow_cell_data(parsed_flow_cell)
@@ -133,7 +138,7 @@ class DemuxPostProcessingAPI:
             LOG.error(f"Failed to store flow cell data: {str(e)}")
             raise
 
-        create_delivery_file_in_flow_cell_directory(flow_cell_directory_path)
+        create_delivery_file_in_flow_cell_directory(flow_cell_directory)
 
     def store_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Store data from the flow cell directory in status db and housekeeper."""
