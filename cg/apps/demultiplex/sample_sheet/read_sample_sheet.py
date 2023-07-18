@@ -33,7 +33,7 @@ def validate_samples_unique_per_lane(samples: List[FlowCellSample]) -> None:
     """Validate that each sample only exists once per lane in a sample sheet."""
     sample_by_lane: Dict[int, List[FlowCellSample]] = get_samples_by_lane(samples)
     for lane, lane_samples in sample_by_lane.items():
-        LOG.info(f"Validate that samples are unique in lane {lane}")
+        LOG.debug(f"Validate that samples are unique in lane {lane}")
         validate_samples_are_unique(samples=lane_samples)
 
 

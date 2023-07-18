@@ -219,7 +219,6 @@ class DemuxPostProcessingAPI:
 
         tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell.id]
         self.add_tags_if_non_existent(tag_names=tags)
-
         self.add_sample_sheet_path_to_housekeeper(
             flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id
         )

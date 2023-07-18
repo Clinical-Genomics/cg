@@ -69,7 +69,7 @@ class HousekeeperAPI:
 
     def get_file(self, file_id: int) -> Optional[File]:
         """Get a file based on file id."""
-        LOG.info("Fetching file %s", file_id)
+        LOG.info(f"Fetching file {file_id}")
         file_obj: File = self._store.get_file_by_id(file_id=file_id)
         if not file_obj:
             LOG.info("file not found")
@@ -227,7 +227,7 @@ class HousekeeperAPI:
 
     def version(self, bundle: str, date: dt.datetime) -> Version:
         """Fetch a version."""
-        LOG.info("Fetch version %s from bundle %s", date, bundle)
+        LOG.debug(f"Fetch version {date} from {bundle}")
         return self._store.get_version_by_date_and_bundle_name(
             bundle_name=bundle, version_date=date
         )
@@ -325,7 +325,7 @@ class HousekeeperAPI:
         """Adds and includes a file in the latest version of a bundle."""
         version: Version = self.last_version(bundle_name)
         if not version:
-            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
+            LOG.warning(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperBundleVersionMissingError
         hk_file: File = self.add_file(version_obj=version, tags=tags, path=str(file.absolute()))
         self.include_file(version_obj=version, file_obj=hk_file)
@@ -358,7 +358,7 @@ class HousekeeperAPI:
         """Return a file in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
-            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
+            LOG.warning(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperBundleVersionMissingError
         return self.files(version=version.id, tags=tags).first()
 
@@ -366,7 +366,7 @@ class HousekeeperAPI:
         """Return files in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
-            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
+            LOG.warning(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperBundleVersionMissingError
         return self.files(version=version.id, tags=tags)
 
