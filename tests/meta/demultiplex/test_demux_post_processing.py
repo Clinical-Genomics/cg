@@ -882,14 +882,17 @@ def test_add_demux_logs_to_housekeeper(
     demux_log_file_paths: List[Path] = [
         Path(
             demux_post_processing_api.demux_api.run_dir,
-            f"({dragen_flow_cell.id}_demultiplex.stdout)",
+            f"{dragen_flow_cell.full_name}",
+            f"{dragen_flow_cell.id}_demultiplex.stdout",
         ),
         Path(
             demux_post_processing_api.demux_api.run_dir,
-            f"({dragen_flow_cell.id}_demultiplex.stderr)",
+            f"{dragen_flow_cell.full_name}",
+            f"{dragen_flow_cell.id}_demultiplex.stderr",
         ),
     ]
     for file_path in demux_log_file_paths:
+        file_path.parent.mkdir(parents=True, exist_ok=True)
         file_path.touch()
 
     # WHEN adding the demux logs to housekeeper

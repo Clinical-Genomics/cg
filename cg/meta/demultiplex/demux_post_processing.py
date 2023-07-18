@@ -19,6 +19,7 @@ from cg.apps.sequencing_metrics_parser.api import (
 from cg.constants.cgstats import STATS_HEADER
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.demultiplex.utils import (
@@ -42,7 +43,7 @@ from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils import Process
 from cg.utils.files import get_file_in_directory, get_files_matching_pattern
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+
 
 LOG = logging.getLogger(__name__)
 
