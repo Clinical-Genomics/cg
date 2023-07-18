@@ -2,7 +2,6 @@
 import copy
 import gzip
 import http
-import json
 import logging
 import os
 import shutil
@@ -50,7 +49,7 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
 )
 from cg.utils import Process
-from housekeeper.store.models import Bundle, File, Version
+from housekeeper.store.models import File, Version
 from requests import Response
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -1507,6 +1506,17 @@ def fixture_real_housekeeper_api(hk_config_dict: dict) -> Generator[HousekeeperA
     _api = HousekeeperAPI(hk_config_dict)
     _api.initialise_db()
     yield _api
+
+
+@pytest.fixture(name="base_housekeeper_api")
+def fixture_base_housekeeper_api(
+    real_housekeeper_api: HousekeeperAPI, hk_bundle_data: dict, hk_sample_bundle: dict, helpers
+) -> HousekeeperAPI:
+    """Setup a Housekeeper store with some basic tags."""
+    real_housekeeper_api.add_tag(SequencingFileTag.FASTQ)
+    real_housekeeper_api.add_tag(SequencingFileTag.SPRING)
+    real_housekeeper_api.add_tag("bed")
+    return real_housekeeper_api
 
 
 @pytest.fixture(name="populated_housekeeper_api")

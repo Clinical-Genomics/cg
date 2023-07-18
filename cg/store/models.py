@@ -713,6 +713,11 @@ class Sample(Model, PriorityMixin):
 
         return f"Ordered {self.ordered_at.date()}"
 
+    @property
+    def archive_location(self) -> str:
+        """Returns the data_archive_location if the customer linked to the sample."""
+        return self.customer.data_archive_location
+
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
         data = to_dict(model_instance=self)

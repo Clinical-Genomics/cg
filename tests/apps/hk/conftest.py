@@ -1,6 +1,6 @@
 """Fixtures for the housekeeper tests."""
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import List
 
 import datetime
 
@@ -27,16 +27,10 @@ def fixture_housekeeper_api(hk_config):
     _api.destroy_db()
 
 
-@pytest.fixture(scope="function", name="populated_housekeeper_api")
-def fixture_populated_housekeeper_api(
-    housekeeper_api: MockHousekeeperAPI, hk_bundle_data: Dict[str, Any]
-) -> MockHousekeeperAPI:
-    """Setup Moch Housekeeper store and return API."""
-    _api: MockHousekeeperAPI = housekeeper_api
-    bundle_obj, version_obj = _api.add_bundle(hk_bundle_data)
-    _api.add_commit(bundle_obj)
-    _api.add_commit(version_obj)
-    return _api
+@pytest.fixture(name="new_bundle_name")
+def fixture_new_bundle_name() -> str:
+    """Return a bundle name that does not exist in the database."""
+    return "new_name"
 
 
 @pytest.fixture(name="minimal_bundle_obj")

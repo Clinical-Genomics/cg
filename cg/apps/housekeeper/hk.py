@@ -7,13 +7,12 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError
-from sqlalchemy import exists
-from sqlalchemy.orm import Query, aliased
+from sqlalchemy.orm import Query
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
-from housekeeper.store.models import Archive, Bundle, File, Tag, Version, file_tag_link
+from housekeeper.store.models import Bundle, File, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -440,3 +439,9 @@ class HousekeeperAPI:
                 all(sample_file_on_disk) if sample_file_on_disk else False
             )
         return all(sequencing_files_on_disk.values())
+
+    def get_non_archived_spring_path_and_bundle_name(self) -> List[Tuple[str, str]]:
+        return [
+            (file.version.bundle.name, file.path)
+            for file in self.get_all_non_archived_spring_files()
+        ]
