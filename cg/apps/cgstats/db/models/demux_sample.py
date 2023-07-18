@@ -1,5 +1,5 @@
 import logging
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 from cg.apps.cgstats.parsers.conversion_stats import SampleConversionResults
 from cg.apps.cgstats.parsers.demux_stats import SampleBarcodeStats
@@ -32,9 +32,7 @@ class DemuxSample(BaseModel):
     perfect_barcodes: int = 0
     one_mismatch_barcodes: int = 0
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("raw_clusters_pc", always=True)
+    @field_validator("raw_clusters_pc", mode="before")
     def set_raw_clusters_pc(cls, value: float, values: dict) -> float:
         """Calculate the percentage of raw clusters"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -42,9 +40,7 @@ class DemuxSample(BaseModel):
             return value
         return round(conversion_stats.raw_cluster_count / values["nr_raw_clusters_"] * 100, 2)
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("pass_filter_yield_pc", always=True)
+    @field_validator("pass_filter_yield_pc", mode="before")
     def set_pass_filter_yield_pc(cls, value: float, values: dict) -> float:
         """Calculate the pass filter yield percentage"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -55,25 +51,19 @@ class DemuxSample(BaseModel):
             2,
         )
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("pass_filter_clusters", always=True)
+    @field_validator("pass_filter_clusters", mode="before")
     def set_pass_filter_clusters(cls, _, values) -> int:
         """Set the number of pass filter clusters"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
         return conversion_stats.pass_filter_cluster_count
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("pass_filter_yield", always=True)
+    @field_validator("pass_filter_yield", mode="before")
     def set_pass_filter_yield(cls, _, values) -> int:
         """Set the number of pass filter yield (reads)"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
         return conversion_stats.pass_filter_yield
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("pass_filter_Q30", always=True)
+    @field_validator("pass_filter_Q30", mode="before")
     def set_pass_filter_Q30(cls, value, values) -> float:
         """Set the percentage of pass filter high quality reads"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -81,9 +71,7 @@ class DemuxSample(BaseModel):
             return value
         return round(conversion_stats.pass_filter_q30 / conversion_stats.pass_filter_yield * 100, 2)
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("pass_filter_read1_q30", always=True)
+    @field_validator("pass_filter_read1_q30", mode="before")
     def set_percentage_high_quality_read_one(cls, value, values) -> float:
         """Calculate the percentage of high quality read one reads of all reads"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -94,9 +82,7 @@ class DemuxSample(BaseModel):
             2,
         )
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("pass_filter_read2_q30", always=True)
+    @field_validator("pass_filter_read2_q30", mode="before")
     def set_percentage_high_quality_read_two(cls, value, values) -> float:
         """Calculate the percentage of high quality read two reads of all reads"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -107,9 +93,7 @@ class DemuxSample(BaseModel):
             2,
         )
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("pass_filter_qscore", always=True)
+    @field_validator("pass_filter_qscore", mode="before")
     def set_pass_filter_qscore(cls, value, values) -> float:
         """Calculate the average quality score per read"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -120,9 +104,7 @@ class DemuxSample(BaseModel):
             2,
         )
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("undetermined_pc", always=True)
+    @field_validator("undetermined_pc", mode="before")
     def set_undetermined_pc(cls, value, values) -> float:
         """Calculate the average quality score per read"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -136,25 +118,19 @@ class DemuxSample(BaseModel):
             2,
         )
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("barcodes", always=True)
+    @field_validator("barcodes", mode="before")
     def set_nr_barcodes(cls, _, values) -> int:
         """Set the total number of barcodes"""
         barcode_stats: SampleBarcodeStats = values["barcode_stats_"]
         return barcode_stats.barcode_count or 0
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("perfect_barcodes", always=True)
+    @field_validator("perfect_barcodes", mode="before")
     def set_nr_perfect_barcodes(cls, _, values) -> int:
         """Set the total number of perfect barcodes"""
         barcode_stats: SampleBarcodeStats = values["barcode_stats_"]
         return barcode_stats.perfect_barcode_count or 0
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("one_mismatch_barcodes", always=True)
+    @field_validator("one_mismatch_barcodes", mode="before")
     def set_nr_one_mismatch_barcodes(cls, _, values) -> int:
         """Set the total number of mismatch barcodes"""
         barcode_stats: SampleBarcodeStats = values["barcode_stats_"]

@@ -29,8 +29,6 @@ class TrailblazerAnalysis(BaseModel):
     ticket: Optional[str] = None
     uploaded_at: Optional[str] = None
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @field_validator("case_id")
     def inherit_family_value(cls, value: str, values: dict) -> str:
         return values.get("family")
