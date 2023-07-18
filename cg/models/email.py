@@ -10,4 +10,4 @@ class EmailInfo(EmailBaseSettings):
     sender_email: str = "hiseq.clinical@hasta.scilifelab.se"
     subject: str
     message: str
-    file: Optional[Path]
+    file: Optional[Path] = None

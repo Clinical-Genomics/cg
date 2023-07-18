@@ -29,26 +29,26 @@ class InvoiceInfo(BaseModel):
 
     name: str
     id: str
-    lims_id: Optional[str]
+    lims_id: Optional[str] = None
     application_tag: str
     project: str
-    date: Optional[Any]
+    date: Optional[Any] = None
     price: int
     priority: PriorityTerms
-    price_kth: Optional[int]
-    total_price: Optional[int]
+    price_kth: Optional[int] = None
+    total_price: Optional[int] = None
 
 
 class InvoiceReport(BaseModel):
     """Class that collects information used to create the invoice Excel sheet."""
 
     cost_center: str
-    project_number: Optional[str]
+    project_number: Optional[str] = None
     customer_id: str
     customer_name: str
-    agreement: Optional[str]
+    agreement: Optional[str] = None
     invoice_id: int
     contact: dict
     records: List
-    pooled_samples: Optional[Any]
+    pooled_samples: Optional[Any] = None
     record_type: RecordType

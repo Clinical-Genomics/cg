@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 
 
 class MutantSampleConfig(BaseModel):
@@ -21,6 +21,7 @@ class MutantSampleConfig(BaseModel):
     selection_criteria: str
     primer: str
 
-    @validator("region_code", "lab_code")
+    @field_validator("region_code", "lab_code")
+    @classmethod
     def sanitize_values(cls, value):
         return value.split(" ")[0]

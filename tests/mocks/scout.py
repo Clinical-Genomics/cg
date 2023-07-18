@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from pydantic import BaseModel, validator
+from pydantic import field_validator, ConfigDict, BaseModel
 from typing import List
 from typing_extensions import Literal
 
@@ -27,7 +27,8 @@ class MockScoutIndividual(BaseModel):
         "wts",
     ] = "wgs"
 
-    @validator("sample_id", "sex", "analysis_type")
+    @field_validator("sample_id", "sex", "analysis_type")
+    @classmethod
     def field_not_none(cls, value):
         if value is None:
             raise ValueError("sample_id, sex and analysis_type can not be None")
@@ -38,14 +39,14 @@ class MockScoutLoadConfig(BaseModel):
     owner: str = "cust000"
     family: str = "family_id"
 
-    @validator("owner", "family")
+    @field_validator("owner", "family")
+    @classmethod
     def field_not_none(cls, value):
         if value is None:
             raise ValueError("Owner and family can not be None")
         return value
 
-    class Config:
-        validate_assignment = True
+    model_config = ConfigDict(validate_assignment=True)
 
 
 class MockScoutAPI(ScoutAPI):

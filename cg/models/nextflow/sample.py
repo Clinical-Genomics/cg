@@ -16,6 +16,8 @@ class NextflowSample(BaseModel):
     fastq_r1: List[str]
     fastq_r2: List[str]
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("fastq_r2")
     def fastq1_fastq2_len_match(cls, value: List[str], values: dict) -> str:
         """Verify that the number of fastq files is the same for R1 and R2."""

@@ -12,7 +12,7 @@ class StatsSample(BaseModel):
 
 class StatsFlowcell(BaseModel):
     name: str
-    sequencer: Optional[str]
+    sequencer: Optional[str] = None
     sequencer_type: str
     date: datetime
     samples: List[StatsSample]

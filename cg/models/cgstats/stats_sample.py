@@ -1,6 +1,6 @@
 from typing import List, Set
 
-from pydantic import BaseModel, Field, validator
+from pydantic import field_validator, ConfigDict, BaseModel, Field, validator
 
 
 class Unaligned(BaseModel):
@@ -11,9 +11,7 @@ class Unaligned(BaseModel):
 
     q30_bases_pct: float
     mean_quality_score: float
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class StatsSample(BaseModel):
@@ -23,6 +21,8 @@ class StatsSample(BaseModel):
     read_count_sum: int = 0
     sum_yield: int = 0
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("lanes", always=True)
     def set_lanes(cls, _, values: dict) -> List[int]:
         """Set the number of pass filter clusters"""
@@ -32,6 +32,8 @@ class StatsSample(BaseModel):
             lanes_found.add(read.lane)
         return list(lanes_found)
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("read_count_sum", always=True)
     def set_read_count(cls, _, values: dict):
         unaligned_reads: List[Unaligned] = values["unaligned"]
@@ -40,6 +42,8 @@ class StatsSample(BaseModel):
             count += read.read_count
         return count
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("sum_yield", always=True)
     def set_sum_yield(cls, _, values: dict):
         unaligned_reads: List[Unaligned] = values["unaligned"]
@@ -48,9 +52,9 @@ class StatsSample(BaseModel):
             count += read.yield_mb
         return count
 
-    @validator("unaligned")
+    @field_validator("unaligned")
+    @classmethod
     def sort_unaligned(cls, values):
         return sorted(values, key=lambda x: x.lane)
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

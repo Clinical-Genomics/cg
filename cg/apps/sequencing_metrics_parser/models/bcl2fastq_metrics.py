@@ -15,6 +15,8 @@ class IndexMetric(BaseModel):
 
     mismatch_counts: Dict[str, int] = Field(..., alias="MismatchCounts")
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("mismatch_counts", each_item=True)
     def check_non_negative(cls, value):
         if value < 0:

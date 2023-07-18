@@ -18,28 +18,28 @@ class BalsamicMetricsBase(MetricsBase):
         condition: balsamic metric validation condition
     """
 
-    condition: Optional[MetricCondition]
+    condition: Optional[MetricCondition] = None
 
 
 class BalsamicQCMetrics(BaseModel):
     """BALSAMIC common QC metrics"""
 
-    mean_insert_size: Optional[float]
-    fold_80_base_penalty: Optional[float]
+    mean_insert_size: Optional[float] = None
+    fold_80_base_penalty: Optional[float] = None
 
 
 class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
     """BALSAMIC targeted QC metrics"""
 
-    mean_target_coverage: Optional[float]
-    median_target_coverage: Optional[float]
-    percent_duplication: Optional[float]
-    pct_target_bases_50x: Optional[float]
-    pct_target_bases_100x: Optional[float]
-    pct_target_bases_250x: Optional[float]
-    pct_target_bases_500x: Optional[float]
-    pct_target_bases_1000x: Optional[float]
-    pct_off_bait: Optional[float]
+    mean_target_coverage: Optional[float] = None
+    median_target_coverage: Optional[float] = None
+    percent_duplication: Optional[float] = None
+    pct_target_bases_50x: Optional[float] = None
+    pct_target_bases_100x: Optional[float] = None
+    pct_target_bases_250x: Optional[float] = None
+    pct_target_bases_500x: Optional[float] = None
+    pct_target_bases_1000x: Optional[float] = None
+    pct_off_bait: Optional[float] = None
 
     _pct_values = validator(
         "percent_duplication",
@@ -56,13 +56,13 @@ class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
 class BalsamicWGSQCMetrics(BalsamicQCMetrics):
     """BALSAMIC WGS QC metrics"""
 
-    median_coverage: Optional[float]
-    percent_duplication_r1: Optional[float]
-    percent_duplication_r2: Optional[float]
-    pct_15x: Optional[float]
-    pct_30x: Optional[float]
-    pct_60x: Optional[float]
-    pct_100x: Optional[float]
+    median_coverage: Optional[float] = None
+    percent_duplication_r1: Optional[float] = None
+    percent_duplication_r2: Optional[float] = None
+    pct_15x: Optional[float] = None
+    pct_30x: Optional[float] = None
+    pct_60x: Optional[float] = None
+    pct_100x: Optional[float] = None
 
     _pct_values = validator(
         "pct_15x",

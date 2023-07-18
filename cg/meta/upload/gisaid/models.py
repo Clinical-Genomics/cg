@@ -13,13 +13,17 @@ class FastaFile(BaseModel):
 
 class GisaidAccession(BaseModel):
     log_message: str
-    accession_nr: Optional[str]
-    sample_id: Optional[str]
+    accession_nr: Optional[str] = None
+    sample_id: Optional[str] = None
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("accession_nr", always=True)
     def parse_accession(cls, v, values):
         return values["log_message"].split(";")[-1]
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("sample_id", always=True)
     def parse_sample_id(cls, v, values):
         return values["log_message"].split("/")[2].split("_")[2]
@@ -40,31 +44,37 @@ class GisaidSample(BaseModel):
     fn: str
     covv_collection_date: str
     covv_subm_sample_id: str
-    covv_virus_name: Optional[str]
-    covv_orig_lab: Optional[str]
+    covv_virus_name: Optional[str] = None
+    covv_orig_lab: Optional[str] = None
     covv_type: Optional[str] = "betacoronavirus"
     covv_passage: Optional[str] = "Original"
-    covv_location: Optional[str]
+    covv_location: Optional[str] = None
     covv_host: Optional[str] = "Human"
     covv_gender: Optional[str] = "unknown"
     covv_patient_age: Optional[str] = "unknown"
     covv_patient_status: Optional[str] = "unknown"
     covv_seq_technology: Optional[str] = "Illumina NovaSeq"
-    covv_orig_lab_addr: Optional[str]
+    covv_orig_lab_addr: Optional[str] = None
     covv_subm_lab: Optional[str] = "Karolinska University Hospital"
     covv_subm_lab_addr: Optional[str] = "171 76 Stockholm, Sweden"
     covv_authors: Optional[str] = " ,".join(AUTHORS)
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("covv_location", always=True)
     def parse_location(cls, v, values):
         region: str = values.get("region")
         return f"Europe/Sweden/{region}"
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("covv_subm_sample_id", always=True)
     def parse_subm_sample_id(cls, v, values):
         region_code = values.get("region_code")
         return f"{region_code}_SE100_{v}"
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("covv_virus_name", always=True)
     def parse_virus_name(cls, v, values):
         sample_name = values.get("covv_subm_sample_id")

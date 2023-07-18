@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 from typing_extensions import Literal
 
 from cg.constants import Priority
@@ -10,49 +10,50 @@ SEX_MAP = {"male": "M", "female": "F"}
 
 class Udf(BaseModel):
     application: str
-    capture_kit: Optional[str]
-    collection_date: Optional[str]
-    comment: Optional[str]
-    concentration: Optional[str]
-    concentration_sample: Optional[str]
+    capture_kit: Optional[str] = None
+    collection_date: Optional[str] = None
+    comment: Optional[str] = None
+    concentration: Optional[str] = None
+    concentration_sample: Optional[str] = None
     customer: str
-    control: Optional[str]
-    data_analysis: Optional[str]
-    data_delivery: Optional[str]
-    elution_buffer: Optional[str]
-    extraction_method: Optional[str]
+    control: Optional[str] = None
+    data_analysis: Optional[str] = None
+    data_delivery: Optional[str] = None
+    elution_buffer: Optional[str] = None
+    extraction_method: Optional[str] = None
     family_name: str = "NA"
-    formalin_fixation_time: Optional[str]
-    index: Optional[str]
-    index_number: Optional[str]
-    lab_code: Optional[str]
-    organism: Optional[str]
-    organism_other: Optional[str]
-    original_lab: Optional[str]
-    original_lab_address: Optional[str]
-    pool: Optional[str]
-    post_formalin_fixation_time: Optional[str]
-    pre_processing_method: Optional[str]
-    primer: Optional[str]
+    formalin_fixation_time: Optional[str] = None
+    index: Optional[str] = None
+    index_number: Optional[str] = None
+    lab_code: Optional[str] = None
+    organism: Optional[str] = None
+    organism_other: Optional[str] = None
+    original_lab: Optional[str] = None
+    original_lab_address: Optional[str] = None
+    pool: Optional[str] = None
+    post_formalin_fixation_time: Optional[str] = None
+    pre_processing_method: Optional[str] = None
+    primer: Optional[str] = None
     priority: str = Priority.standard.name
-    quantity: Optional[str]
-    reference_genome: Optional[str]
-    region: Optional[str]
-    region_code: Optional[str]
+    quantity: Optional[str] = None
+    reference_genome: Optional[str] = None
+    region: Optional[str] = None
+    region_code: Optional[str] = None
     require_qc_ok: bool = False
-    rml_plate_name: Optional[str]
-    selection_criteria: Optional[str]
+    rml_plate_name: Optional[str] = None
+    selection_criteria: Optional[str] = None
     sex: Literal["M", "F", "unknown"] = "unknown"
     skip_reception_control: Optional[bool] = None
     source: str = "NA"
-    tissue_block_size: Optional[str]
+    tissue_block_size: Optional[str] = None
     tumour: Optional[bool] = False
-    tumour_purity: Optional[str]
-    volume: Optional[str]
-    well_position_rml: Optional[str]
-    verified_organism: Optional[bool]
+    tumour_purity: Optional[str] = None
+    volume: Optional[str] = None
+    well_position_rml: Optional[str] = None
+    verified_organism: Optional[bool] = None
 
-    @validator("sex", pre=True)
+    @field_validator("sex", mode="before")
+    @classmethod
     def validate_sex(cls, value: str):
         return SEX_MAP.get(value, "unknown")
 
@@ -60,10 +61,10 @@ class Udf(BaseModel):
 class LimsSample(BaseModel):
     name: str
     container: str = "Tube"
-    container_name: Optional[str]
-    well_position: Optional[str]
-    index_sequence: Optional[str]
-    udfs: Optional[Udf]
+    container_name: Optional[str] = None
+    well_position: Optional[str] = None
+    index_sequence: Optional[str] = None
+    udfs: Optional[Udf] = None
 
     @classmethod
     def parse_obj(cls, obj: dict):

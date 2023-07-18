@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import List, Optional, Dict
 
-from pydantic import BaseModel, Field, validator
+from pydantic import field_validator, BaseModel, Field
 from typing_extensions import Literal
 
 from cg.constants.gene_panel import GENOME_BUILD_37
@@ -20,18 +20,20 @@ class Individual(BaseModel):
     bam_file: Optional[str] = None
     individual_id: str
     sex: Literal[PlinkGender.UNKNOWN, PlinkGender.MALE, PlinkGender.FEMALE, Gender.OTHER]
-    father: Optional[str]
-    mother: Optional[str]
+    father: Optional[str] = None
+    mother: Optional[str] = None
     phenotype: PlinkPhenotypeStatus
     analysis_type: str = "wgs"
 
-    @validator(Pedigree.FATHER, Pedigree.MOTHER)
+    @field_validator(Pedigree.FATHER, Pedigree.MOTHER)
+    @classmethod
     def convert_to_zero(cls, value):
         if value is None:
             return RelationshipStatus.HAS_NO_PARENT
         return value
 
-    @validator(Pedigree.SEX)
+    @field_validator(Pedigree.SEX)
+    @classmethod
     def convert_sex_to_zero(cls, value):
         if value == Gender.OTHER:
             return PlinkGender.UNKNOWN
@@ -49,18 +51,18 @@ class Phenotype(BaseModel):
 
 class Gene(BaseModel):
     hgnc_id: int
-    hgnc_symbol: Optional[str]
-    region_annotation: Optional[str]
-    functional_annotation: Optional[str]
-    sift_prediction: Optional[str]
-    polyphen_prediction: Optional[str]
+    hgnc_symbol: Optional[str] = None
+    region_annotation: Optional[str] = None
+    functional_annotation: Optional[str] = None
+    sift_prediction: Optional[str] = None
+    polyphen_prediction: Optional[str] = None
 
 
 class DiagnosisPhenotypes(BaseModel):
     disease_nr: int
     disease_id: str
     description: str
-    individuals: Optional[List[Dict[str, str]]]
+    individuals: Optional[List[Dict[str, str]]] = None
 
 
 class ScoutExportCase(BaseModel):
@@ -70,17 +72,18 @@ class ScoutExportCase(BaseModel):
     causatives: Optional[List[str]] = None
     collaborators: List[str] = []
     individuals: List[Individual]
-    genome_build: Optional[str]
-    panels: Optional[List[Panel]]
-    rank_model_version: Optional[str]
-    sv_rank_model_version: Optional[str]
+    genome_build: Optional[str] = None
+    panels: Optional[List[Panel]] = None
+    rank_model_version: Optional[str] = None
+    sv_rank_model_version: Optional[str] = None
     rank_score_threshold: int = 5
-    phenotype_terms: Optional[List[Phenotype]]
-    phenotype_groups: Optional[List[Phenotype]]
-    diagnosis_phenotypes: Optional[List[DiagnosisPhenotypes]]
-    diagnosis_genes: Optional[List[int]]
+    phenotype_terms: Optional[List[Phenotype]] = None
+    phenotype_groups: Optional[List[Phenotype]] = None
+    diagnosis_phenotypes: Optional[List[DiagnosisPhenotypes]] = None
+    diagnosis_genes: Optional[List[int]] = None
 
-    @validator("genome_build")
+    @field_validator("genome_build")
+    @classmethod
     def convert_genome_build(cls, value):
         if value is None:
             return GENOME_BUILD_37
@@ -109,5 +112,5 @@ class Variant(BaseModel):
     rank_score: int
     category: str
     sub_category: str
-    genes: Optional[List[Gene]]
+    genes: Optional[List[Gene]] = None
     samples: List[Genotype]

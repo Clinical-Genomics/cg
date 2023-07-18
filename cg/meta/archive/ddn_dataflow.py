@@ -117,7 +117,7 @@ class AuthResponse(BaseModel):
 
     access: str
     expire: int
-    refresh: Optional[str]
+    refresh: Optional[str] = None
 
 
 class DDNDataFlowApi:

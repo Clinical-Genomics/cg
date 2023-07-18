@@ -1,6 +1,6 @@
 import collections
 
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 
 from cg.constants.nextflow import DELIVER_FILE_HEADERS
 
@@ -23,7 +23,8 @@ class NextflowDeliverables(BaseModel):
 
     deliverables: dict
 
-    @validator("deliverables")
+    @field_validator("deliverables")
+    @classmethod
     def headers(cls, v: dict) -> None:
         """Validate header format."""
         if collections.Counter(list(v.keys())) != collections.Counter(DELIVER_FILE_HEADERS):

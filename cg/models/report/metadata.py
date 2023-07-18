@@ -19,8 +19,8 @@ class SampleMetadataModel(BaseModel):
 
     """
 
-    million_read_pairs: Union[None, float, str]
-    duplicates: Union[None, float, str]
+    million_read_pairs: Union[None, float, str] = None
+    duplicates: Union[None, float, str] = None
 
     _float_values = validator("million_read_pairs", "duplicates", always=True, allow_reuse=True)(
         validate_float
@@ -38,11 +38,11 @@ class MipDNASampleMetadataModel(SampleMetadataModel):
         pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: pipeline workflow
     """
 
-    bait_set: Optional[str]
-    gender: Optional[str]
-    mapped_reads: Union[None, float, str]
-    mean_target_coverage: Union[None, float, str]
-    pct_10x: Union[None, float, str]
+    bait_set: Optional[str] = None
+    gender: Optional[str] = None
+    mapped_reads: Union[None, float, str] = None
+    mean_target_coverage: Union[None, float, str] = None
+    pct_10x: Union[None, float, str] = None
 
     _bait_set = validator("bait_set", always=True, allow_reuse=True)(validate_empty_field)
     _gender = validator("gender", always=True, allow_reuse=True)(validate_gender)
@@ -60,8 +60,8 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
             fold_80: fold 80 base penalty; source: pipeline workflow
     """
 
-    mean_insert_size: Union[None, float, str]
-    fold_80: Union[None, float, str]
+    mean_insert_size: Union[None, float, str] = None
+    fold_80: Union[None, float, str] = None
 
     _float_values_balsamic = validator(
         "mean_insert_size", "fold_80", always=True, allow_reuse=True
@@ -79,11 +79,11 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
             pct_500x: percent of targeted bases that are covered to 500X coverage or more; source: pipeline workflow
     """
 
-    bait_set: Optional[str]
-    bait_set_version: Union[None, int, str]
-    median_target_coverage: Union[None, float, str]
-    pct_250x: Union[None, float, str]
-    pct_500x: Union[None, float, str]
+    bait_set: Optional[str] = None
+    bait_set_version: Union[None, int, str] = None
+    median_target_coverage: Union[None, float, str] = None
+    pct_250x: Union[None, float, str] = None
+    pct_500x: Union[None, float, str] = None
 
     _str_values = validator("bait_set", "bait_set_version", always=True, allow_reuse=True)(
         validate_empty_field
@@ -103,9 +103,9 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
             pct_60x: fraction of bases that attained at least 15X sequence coverage; source: pipeline workflow
     """
 
-    median_coverage: Union[None, float, str]
-    pct_15x: Union[None, float, str]
-    pct_60x: Union[None, float, str]
+    median_coverage: Union[None, float, str] = None
+    pct_15x: Union[None, float, str] = None
+    pct_60x: Union[None, float, str] = None
 
     _float_values_balsamic_wgs = validator(
         "median_coverage", "pct_15x", "pct_60x", always=True, allow_reuse=True
@@ -133,21 +133,21 @@ class RnafusionSampleMetadataModel(SampleMetadataModel):
         uniquely_mapped_reads: percentage of mapped reads; source: pipeline workflow
     """
 
-    bias_5_3: Union[None, float, str]
-    gc_content: Union[None, float, str]
-    input_amount: Union[None, float, str]
-    insert_size: Union[None, float, str]
-    insert_size_peak: Union[None, float, str]
-    mapped_reads: Union[None, float, str]
-    mean_length_r1: Union[None, float, str]
-    mrna_bases: Union[None, float, str]
-    pct_adapter: Union[None, float, str]
-    pct_surviving: Union[None, float, str]
-    q20_rate: Union[None, float, str]
-    q30_rate: Union[None, float, str]
-    ribosomal_bases: Union[None, float, str]
-    rin: Union[None, float, str]
-    uniquely_mapped_reads: Union[None, float, str]
+    bias_5_3: Union[None, float, str] = None
+    gc_content: Union[None, float, str] = None
+    input_amount: Union[None, float, str] = None
+    insert_size: Union[None, float, str] = None
+    insert_size_peak: Union[None, float, str] = None
+    mapped_reads: Union[None, float, str] = None
+    mean_length_r1: Union[None, float, str] = None
+    mrna_bases: Union[None, float, str] = None
+    pct_adapter: Union[None, float, str] = None
+    pct_surviving: Union[None, float, str] = None
+    q20_rate: Union[None, float, str] = None
+    q30_rate: Union[None, float, str] = None
+    ribosomal_bases: Union[None, float, str] = None
+    rin: Union[None, float, str] = None
+    uniquely_mapped_reads: Union[None, float, str] = None
 
     _float_values = validator(
         "bias_5_3",

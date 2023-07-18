@@ -10,7 +10,7 @@ class MipBaseSampleInfo(BaseModel):
     """This model is used when validating the mip sample info file"""
 
     family_id_: Optional[str] = Field(None, alias="family_id")
-    case_id: Optional[str]
+    case_id: Optional[str] = None
     human_genome_build_: dict = Field(..., alias="human_genome_build")
     genome_build: str = None
     program_: dict = Field(None, alias="program")
@@ -22,11 +22,15 @@ class MipBaseSampleInfo(BaseModel):
     is_finished: bool = False
     mip_version: str = None
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("case_id", always=True, pre=True)
     def set_case_id(cls, value, values: dict) -> str:
         """Set case_id. Family_id is used for older versions of MIP analysis"""
         return value or values.get("family_id_")
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("genome_build", always=True, pre=True)
     def set_genome_build(cls, _, values: dict) -> str:
         """Set genome_build by combining source i.e. "hg"|"grch" and version"""
@@ -35,11 +39,15 @@ class MipBaseSampleInfo(BaseModel):
         version = raw_genome_build.get("version")
         return f"{source}{version}"
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("is_finished", always=True)
     def set_is_finished(cls, _, values: dict) -> bool:
         """Set is_finished from analysisrunstatus_"""
         return values.get("analysis_run_status_") == "finished"
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("rank_model_version", always=True)
     def set_rank_model_version(cls, _, values: dict) -> str:
         """Set rank_model_version from genmod snv/indel analysis"""
@@ -50,6 +58,8 @@ class MipBaseSampleInfo(BaseModel):
             if "genmod" in values["program_"]:
                 return values["program_"]["genmod"]["rank_model"]["version"]
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("sv_rank_model_version", always=True)
     def set_sv_rank_model_version(cls, _, values: dict) -> str:
         """Set rank_model_version from genmod SV analysis"""

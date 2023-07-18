@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import ConfigDict, BaseModel, EmailStr, Field
 from typing_extensions import Literal
 
 from cg.apps.cgstats.stats import StatsAPI
@@ -56,11 +56,11 @@ class CleanConfig(BaseModel):
 
 class SlurmConfig(BaseModel):
     account: str
-    hours: Optional[int]
+    hours: Optional[int] = None
     mail_user: EmailStr
-    memory: Optional[int]
-    number_tasks: Optional[int]
-    conda_env: Optional[str]
+    memory: Optional[int] = None
+    number_tasks: Optional[int] = None
+    conda_env: Optional[str] = None
     qos: SlurmQos = SlurmQos.LOW
 
 
@@ -82,7 +82,7 @@ class TrailblazerConfig(BaseModel):
 
 
 class StatinaConfig(BaseModel):
-    host: Optional[str]
+    host: Optional[str] = None
     user: str
     key: str
     api_url: str
@@ -92,7 +92,7 @@ class StatinaConfig(BaseModel):
 
 class CommonAppConfig(BaseModel):
     binary_path: str
-    config_path: Optional[str]
+    config_path: Optional[str] = None
 
 
 class FluffyUploadConfig(BaseModel):
@@ -198,7 +198,7 @@ class GisaidConfig(CommonAppConfig):
 class DataDeliveryConfig(BaseModel):
     destination_path: str
     covid_destination_path: str
-    covid_source_path = str
+    covid_source_path: Optional[str] = None
     covid_report_path: str
     account: str
     base_path: str
@@ -240,87 +240,70 @@ class CGConfig(BaseModel):
     environment: Literal["production", "stage"] = "stage"
     madeline_exe: str
     delivery_path: str
-    max_flowcells: Optional[int]
+    max_flowcells: Optional[int] = None
     email_base_settings: EmailBaseSettings
 
     # Base APIs that always should exist
-    status_db_: Store = None
+    status_db_: Store = Field(None, alias="status_db")
     housekeeper: HousekeeperConfig
-    housekeeper_api_: HousekeeperAPI = None
+    housekeeper_api_: HousekeeperAPI = Field(None, alias="housekeeper_api")
 
     # App APIs that can be instantiated in CGConfig
-    backup: BackupConfig = None
-    cgstats: CGStatsConfig = None
-    cg_stats_api_: StatsAPI = None
-    chanjo: CommonAppConfig = None
-    chanjo_api_: ChanjoAPI = None
+    backup: Optional[BackupConfig] = None
+    cgstats: Optional[CGStatsConfig] = None
+    cg_stats_api_: Optional[StatsAPI] = Field(None, alias="cg_stats_api")
+    chanjo: Optional[CommonAppConfig] = None
+    chanjo_api_: Optional[ChanjoAPI] = Field(None, alias="chanjo_api")
     clean: Optional[CleanConfig] = None
-    crunchy: CrunchyConfig = None
-    crunchy_api_: CrunchyAPI = None
-    data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
+    crunchy: Optional[CrunchyConfig] = None
+    crunchy_api_: Optional[CrunchyAPI] = Field(None, alias="crunchy_api")
+    data_delivery: Optional[DataDeliveryConfig] = Field(None, alias="data-delivery")
     ddn: Optional[DDNDataFlowConfig] = None
-    demultiplex: DemultiplexConfig = None
-    demultiplex_api_: DemultiplexingAPI = None
+    demultiplex: Optional[DemultiplexConfig] = None
+    demultiplex_api_: Optional[DemultiplexingAPI] = Field(None, alias="demultiplex_api")
     encryption: Optional[CommonAppConfig] = None
-    external: ExternalConfig = None
-    genotype: CommonAppConfig = None
-    genotype_api_: GenotypeAPI = None
-    gens: CommonAppConfig = None
-    gens_api_: GensAPI = None
-    hermes: CommonAppConfig = None
-    hermes_api_: HermesApi = None
-    lims: LimsConfig = None
-    lims_api_: LimsAPI = None
-    loqusdb: CommonAppConfig = Field(None, alias=LoqusdbInstance.WGS.value)
-    loqusdb_api_: LoqusdbAPI = None
-    loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
-    loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
-    loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
-    madeline_api_: MadelineAPI = None
-    mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
-    mutacc_auto_api_: MutaccAutoAPI = None
+    external: Optional[ExternalConfig] = None
+    genotype: Optional[CommonAppConfig] = None
+    genotype_api_: Optional[GenotypeAPI] = Field(None, alias="genotype_api")
+    gens: Optional[CommonAppConfig] = None
+    gens_api_: Optional[GensAPI] = Field(None, alias="gens_api")
+    hermes: Optional[CommonAppConfig] = None
+    hermes_api_: Optional[HermesApi] = Field(None, alias="hermes_api")
+    lims: Optional[LimsConfig] = None
+    lims_api_: Optional[LimsAPI] = Field(None, alias="lims_api")
+    loqusdb: Optional[CommonAppConfig] = Field(None, alias=LoqusdbInstance.WGS.value)
+    loqusdb_api_: Optional[LoqusdbAPI] = Field(None, alias="loqusdb_api")
+    loqusdb_wes: Optional[CommonAppConfig] = Field(None, alias=LoqusdbInstance.WES.value)
+    loqusdb_somatic: Optional[CommonAppConfig] = Field(None, alias=LoqusdbInstance.SOMATIC.value)
+    loqusdb_tumor: Optional[CommonAppConfig] = Field(None, alias=LoqusdbInstance.TUMOR.value)
+    madeline_api_: Optional[MadelineAPI] = Field(None, alias="madeline_api")
+    mutacc_auto: Optional[MutaccAutoConfig] = Field(None, alias="mutacc-auto")
+    mutacc_auto_api_: Optional[MutaccAutoAPI] = Field(None, alias="mutacc_auto_api")
     pdc: Optional[CommonAppConfig] = None
-    scout: CommonAppConfig = None
-    scout_api_: ScoutAPI = None
+    scout: Optional[CommonAppConfig] = None
+    scout_api_: Optional[ScoutAPI] = Field(None, alias="scout_api")
     tar: Optional[CommonAppConfig] = None
-    trailblazer: TrailblazerConfig = None
-    trailblazer_api_: TrailblazerAPI = None
+    trailblazer: Optional[TrailblazerConfig] = None
+    trailblazer_api_: Optional[TrailblazerAPI] = Field(None, alias="trailblazer_api")
 
     # Meta APIs that will use the apps from CGConfig
-    balsamic: BalsamicConfig = None
-    statina: StatinaConfig = None
+    balsamic: Optional[BalsamicConfig] = None
+    statina: Optional[StatinaConfig] = None
     fohm: Optional[FOHMConfig] = None
-    fluffy: FluffyConfig = None
-    microsalt: MicrosaltConfig = None
-    gisaid: GisaidConfig = None
-    mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
-    mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
-    mutant: MutantConfig = None
-    rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
-    taxprofiler: TaxprofilerConfig = Field(None, alias="taxprofiler")
+    fluffy: Optional[FluffyConfig] = None
+    microsalt: Optional[MicrosaltConfig] = None
+    gisaid: Optional[GisaidConfig] = None
+    mip_rd_dna: Optional[MipConfig] = Field(None, alias="mip-rd-dna")
+    mip_rd_rna: Optional[MipConfig] = Field(None, alias="mip-rd-rna")
+    mutant: Optional[MutantConfig] = None
+    rnafusion: Optional[RnafusionConfig] = Field(None, alias="rnafusion")
+    taxprofiler: Optional[TaxprofilerConfig] = Field(None, alias="taxprofiler")
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
-
-    class Config:
-        arbitrary_types_allowed = True
-        fields = {
-            "cg_stats_api_": "cg_stats_api",
-            "chanjo_api_": "chanjo_api",
-            "crunchy_api_": "crunchy_api",
-            "demultiplex_api_": "demultiplex_api",
-            "genotype_api_": "genotype_api",
-            "gens_api_": "gens_api",
-            "hermes_api_": "hermes_api",
-            "housekeeper_api_": "housekeeper_api",
-            "lims_api_": "lims_api",
-            "loqusdb_api_": "loqusdb_api",
-            "madeline_api_": "madeline_api",
-            "mutacc_auto_api_": "mutacc_auto_api",
-            "scout_api_": "scout_api",
-            "status_db_": "status_db",
-            "trailblazer_api_": "trailblazer_api",
-        }
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+    )
 
     @property
     def chanjo_api(self) -> ChanjoAPI:

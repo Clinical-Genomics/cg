@@ -28,11 +28,15 @@ class MipBaseConfig(BaseModel):
     sample_info_path: str = Field(..., alias="sample_info_file")
     sample_ids: List[str]
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("case_id", always=True, pre=True)
     def set_case_id(cls, value, values: dict) -> str:
         """Set case_id. Family_id is used for older versions of MIP analysis"""
         return value or values.get("family_id_")
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("samples", always=True, pre=True)
     def set_samples(cls, _, values: dict) -> List[AnalysisType]:
         """Set samples analysis type"""

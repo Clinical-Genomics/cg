@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import field_validator, ConfigDict, BaseModel
 from typing_extensions import Literal
 
 
@@ -45,14 +45,14 @@ class ScoutIndividual(BaseModel):
     subject_id: Optional[str] = None
     tissue_type: Optional[str] = None
 
-    @validator("sample_id", "sex", "analysis_type")
+    @field_validator("sample_id", "sex", "analysis_type")
+    @classmethod
     def field_not_none(cls, value):
         if value is None:
             raise ValueError("sample_id, sex and analysis_type can not be None")
         return value
 
-    class Config:
-        validate_assignment = True
+    model_config = ConfigDict(validate_assignment=True)
 
 
 class ScoutMipIndividual(ScoutIndividual):
@@ -100,25 +100,26 @@ class ScoutLoadConfig(BaseModel):
     multiqc: Optional[str] = None
     track: Literal["rare", "cancer"] = "rare"
 
-    @validator("owner", "family")
+    @field_validator("owner", "family")
+    @classmethod
     def field_not_none(cls, value):
         if value is None:
             raise ValueError("Owner and family can not be None")
         return value
 
-    class Config:
-        validate_assignment = True
+    model_config = ConfigDict(validate_assignment=True)
 
 
 class BalsamicLoadConfig(ScoutLoadConfig):
-    madeline: Optional[str]
+    madeline: Optional[str] = None
     vcf_cancer: str = None
     vcf_cancer_sv: Optional[str] = None
     vcf_cancer_research: Optional[str] = None
     vcf_cancer_sv_research: Optional[str] = None
     samples: List[ScoutCancerIndividual] = []
 
-    @validator("vcf_cancer")
+    @field_validator("vcf_cancer")
+    @classmethod
     def check_mandatory_files(cls, vcf):
         if vcf is None:
             raise ValueError("Vcf can not be none")
@@ -130,8 +131,8 @@ class BalsamicUmiLoadConfig(BalsamicLoadConfig):
 
 
 class MipLoadConfig(ScoutLoadConfig):
-    chromograph_image_files: Optional[List[str]]
-    chromograph_prefixes: Optional[List[str]]
+    chromograph_image_files: Optional[List[str]] = None
+    chromograph_prefixes: Optional[List[str]] = None
     madeline: Optional[str] = None
     peddy_check: Optional[str] = None
     peddy_ped: Optional[str] = None
@@ -147,7 +148,8 @@ class MipLoadConfig(ScoutLoadConfig):
     vcf_sv: Optional[str] = None
     vcf_sv_research: Optional[str] = None
 
-    @validator("vcf_snv", "vcf_sv", "vcf_snv_research", "vcf_sv_research")
+    @field_validator("vcf_snv", "vcf_sv", "vcf_snv_research", "vcf_sv_research")
+    @classmethod
     def check_mandatory_files(cls, vcf):
         if vcf is None:
             raise ValueError("Mandatory vcf can not be None")

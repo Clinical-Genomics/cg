@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import Field, validator
+from pydantic import field_validator, Field
 
 from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
 from cg.models.orders.sample_base import OrderSample
@@ -61,7 +61,8 @@ class ExcelSample(OrderSample):
     well_position: str = Field(None, alias="Sample/Well Location")
     well_position_rml: str = Field(None, alias="UDF/RML well position")
 
-    @validator("data_analysis")
+    @field_validator("data_analysis")
+    @classmethod
     def validate_data_analysis(cls, value):
         data_analysis_alternatives = [
             "Balsamic",  # OF 1508
@@ -80,7 +81,8 @@ class ExcelSample(OrderSample):
             raise AttributeError(f"'{value}' is not a valid data analysis")
         return value
 
-    @validator("index_number", "volume", "quantity", "concentration", "concentration_sample")
+    @field_validator("index_number", "volume", "quantity", "concentration", "concentration_sample")
+    @classmethod
     def numeric_value(cls, value: Optional[str]):
         if not value:
             return None
@@ -89,26 +91,30 @@ class ExcelSample(OrderSample):
             return str_value
         raise AttributeError(f"Order contains non-numeric value '{value}'")
 
-    @validator("mother", "father")
+    @field_validator("mother", "father")
+    @classmethod
     def validate_parent(cls, value: str):
         if value == "0.0":
             return None
         return value
 
-    @validator("source")
+    @field_validator("source")
+    @classmethod
     def validate_source(cls, value: Optional[str]):
         if value not in SOURCE_TYPES:
             raise ValueError(f"'{value}' is not a valid source")
         return value
 
-    @validator("sex")
+    @field_validator("sex")
+    @classmethod
     def convert_sex(cls, value: Optional[str]):
         if not value:
             return None
         value = value.strip()
         return REV_SEX_MAP.get(value, "unknown")
 
-    @validator("panels", pre=True)
+    @field_validator("panels", mode="before")
+    @classmethod
     def parse_panels(cls, value):
         if not value:
             return None
@@ -117,22 +123,26 @@ class ExcelSample(OrderSample):
             separator = ":"
         return value.split(separator)
 
-    @validator("data_delivery")
+    @field_validator("data_delivery")
+    @classmethod
     def convert_data_delivery(cls, value: Optional[str]):
         return value.lower()
 
-    @validator("status", "priority")
+    @field_validator("status", "priority")
+    @classmethod
     def convert_to_lower(cls, value: Optional[str]):
         value = value.lower()
         return value
 
-    @validator("priority")
+    @field_validator("priority")
+    @classmethod
     def convert_to_priority(cls, value: Optional[str]):
         if value.lower() == "förtur":
             return "priority"
         return value
 
-    @validator("collection_date")
+    @field_validator("collection_date")
+    @classmethod
     def convert_to_date(cls, value: Optional[str]) -> Optional[str]:
         if not value:
             return None

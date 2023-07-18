@@ -11,12 +11,12 @@ from cg.apps.crunchy.files import (
     get_log_dir,
     get_spring_archive_files,
 )
+from cg.apps.crunchy.models import CrunchyFile, CrunchyMetadata
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.models import CompressionData
 from cg.utils import Process
-from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
 from pydantic import ValidationError
 
 

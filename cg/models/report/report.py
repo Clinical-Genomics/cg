@@ -24,10 +24,10 @@ class CustomerModel(BaseModel):
         scout_access: whether the customer has access to scout or not; source: statusDB/family/customer/scout_access
     """
 
-    name: Optional[str]
-    id: Optional[str]
-    invoice_address: Optional[str]
-    scout_access: Optional[bool]
+    name: Optional[str] = None
+    id: Optional[str] = None
+    invoice_address: Optional[str] = None
+    scout_access: Optional[bool] = None
 
     _values = validator("name", "id", "invoice_address", always=True, allow_reuse=True)(
         validate_empty_field
@@ -47,12 +47,12 @@ class ScoutReportFiles(BaseModel):
         smn_tsv: SMN gene variants file (MIP-DNA specific); source: HK
     """
 
-    snv_vcf: Optional[str]
-    snv_research_vcf: Optional[str]
-    sv_vcf: Optional[str]
-    sv_research_vcf: Optional[str]
-    vcf_str: Optional[str]
-    smn_tsv: Optional[str]
+    snv_vcf: Optional[str] = None
+    snv_research_vcf: Optional[str] = None
+    sv_vcf: Optional[str] = None
+    sv_research_vcf: Optional[str] = None
+    vcf_str: Optional[str] = None
+    smn_tsv: Optional[str] = None
 
     _str_values = validator(
         "snv_vcf",
@@ -82,14 +82,14 @@ class DataAnalysisModel(BaseModel):
         scout_files: list of file names uploaded to Scout
     """
 
-    customer_pipeline: Optional[Pipeline]
-    data_delivery: Optional[DataDelivery]
-    pipeline: Optional[Pipeline]
-    pipeline_version: Optional[str]
-    type: Optional[str]
-    genome_build: Optional[str]
-    variant_callers: Union[None, List[str], str]
-    panels: Union[None, List[str], str]
+    customer_pipeline: Optional[Pipeline] = None
+    data_delivery: Optional[DataDelivery] = None
+    pipeline: Optional[Pipeline] = None
+    pipeline_version: Optional[str] = None
+    type: Optional[str] = None
+    genome_build: Optional[str] = None
+    variant_callers: Union[None, List[str], str] = None
+    panels: Union[None, List[str], str] = None
     scout_files: ScoutReportFiles
 
     _values = root_validator(pre=True, allow_reuse=True)(validate_supported_pipeline)
@@ -120,8 +120,8 @@ class CaseModel(BaseModel):
         applications: case associated unique applications
     """
 
-    name: Optional[str]
-    id: Optional[str]
+    name: Optional[str] = None
+    id: Optional[str] = None
     samples: List[SampleModel]
     data_analysis: DataAnalysisModel
     applications: List[ApplicationModel]
@@ -142,10 +142,10 @@ class ReportModel(BaseModel):
     """
 
     customer: CustomerModel
-    version: Union[None, int, str]
-    date: Union[None, datetime, str]
+    version: Union[None, int, str] = None
+    date: Union[None, datetime, str] = None
     case: CaseModel
-    accredited: Optional[bool]
+    accredited: Optional[bool] = None
 
     _version = validator("version", always=True, allow_reuse=True)(validate_empty_field)
     _date = validator("date", always=True, allow_reuse=True)(validate_date)

@@ -27,6 +27,8 @@ class DuplicateReads(SampleMetric):
 
     value: float
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("value", always=True)
     def convert_duplicate_read(cls, value) -> float:
         """Convert raw value from fraction to percent"""
@@ -44,6 +46,8 @@ class MIPMappedReads(SampleMetric):
 
     value: float
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("value", always=True)
     def convert_mapped_read(cls, value) -> float:
         """Convert raw value from fraction to percent"""
@@ -70,19 +74,23 @@ class MIPMetricsDeliverables(MetricsDeliverables):
         "MEDIAN_TARGET_COVERAGE": MedianTargetCoverage,
         "gender": GenderCheck,
     }
-    duplicate_reads: Optional[List[DuplicateReads]]
-    mapped_reads: Optional[List[MIPMappedReads]]
-    mean_insert_size: Optional[List[MeanInsertSize]]
-    median_target_coverage: Optional[List[MedianTargetCoverage]]
-    predicted_sex: Optional[List[GenderCheck]]
+    duplicate_reads: Optional[List[DuplicateReads]] = None
+    mapped_reads: Optional[List[MIPMappedReads]] = None
+    mean_insert_size: Optional[List[MeanInsertSize]] = None
+    median_target_coverage: Optional[List[MedianTargetCoverage]] = None
+    predicted_sex: Optional[List[GenderCheck]] = None
     sample_metric_to_parse: List[str] = SAMPLE_METRICS_TO_PARSE
-    sample_id_metrics: Optional[List[MIPParsedMetrics]]
+    sample_id_metrics: Optional[List[MIPParsedMetrics]] = None
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("duplicate_reads", always=True)
     def set_duplicate_reads(cls, _, values: dict) -> List[DuplicateReads]:
         """Set duplicate_reads"""
         return add_metric(name="fraction_duplicates", values=values)
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("mapped_reads", always=True)
     def set_mapped_reads(cls, _, values: dict) -> List[MIPMappedReads]:
         """Set mapped reads"""
@@ -107,21 +115,29 @@ class MIPMetricsDeliverables(MetricsDeliverables):
             )
         return mapped_reads
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("mean_insert_size", always=True)
     def set_mean_insert_size(cls, _, values: dict) -> List[MeanInsertSize]:
         """Set mean insert size"""
         return add_metric(name="MEAN_INSERT_SIZE", values=values)
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("median_target_coverage", always=True)
     def set_median_target_coverage(cls, _, values: dict) -> List[MedianTargetCoverage]:
         """Set median target coverage"""
         return add_metric(name="MEDIAN_TARGET_COVERAGE", values=values)
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("predicted_sex", always=True)
     def set_predicted_sex(cls, _, values: dict) -> List[GenderCheck]:
         """Set predicted sex"""
         return add_metric(name="gender", values=values)
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("sample_id_metrics", always=True)
     def set_sample_id_metrics(cls, _, values: dict) -> List[MIPParsedMetrics]:
         """Set parsed sample_id metrics gathered from all metrics"""

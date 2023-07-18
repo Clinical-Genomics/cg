@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Union, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel, validator
 
 
 class BalsamicConfigAnalysis(BaseModel):
@@ -48,8 +48,10 @@ class BalsamicConfigReference(BaseModel):
     """
 
     reference_genome: Path
-    reference_genome_version: Optional[str]
+    reference_genome_version: Optional[str] = None
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("reference_genome_version", always=True)
     def extract_genome_version_from_path(cls, value: Optional[str], values: dict) -> str:
         """
@@ -70,14 +72,17 @@ class BalsamicConfigPanel(BaseModel):
     """
 
     capture_kit: str
-    capture_kit_version: Optional[str]
+    capture_kit_version: Optional[str] = None
     chrom: List[str]
 
-    @validator("capture_kit", pre=True)
+    @field_validator("capture_kit", mode="before")
+    @classmethod
     def extract_capture_kit_name_from_path(cls, capture_kit: str) -> str:
         """Return the base name of the provided capture kit path."""
         return Path(capture_kit).name
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("capture_kit_version", always=True)
     def extract_capture_kit_name_from_name(
         cls, capture_kit_version: Optional[str], values: dict
@@ -100,12 +105,12 @@ class BalsamicConfigQC(BaseModel):
     """
 
     picard_rmdup: bool
-    adapter: Optional[str]
+    adapter: Optional[str] = None
     quality_trim: bool
     adapter_trim: bool
     umi_trim: bool
-    min_seq_length: Optional[str]
-    umi_trim_length: Optional[str]
+    min_seq_length: Optional[str] = None
+    umi_trim_length: Optional[str] = None
 
 
 class BalsamicVarCaller(BaseModel):
@@ -139,7 +144,7 @@ class BalsamicConfigJSON(BaseModel):
     analysis: BalsamicConfigAnalysis
     samples: Dict[str, BalsamicConfigSample]
     reference: BalsamicConfigReference
-    panel: Optional[BalsamicConfigPanel]
+    panel: Optional[BalsamicConfigPanel] = None
     QC: BalsamicConfigQC
     vcf: Dict[str, BalsamicVarCaller]
     bioinfo_tools_version: Dict[str, List[str]]

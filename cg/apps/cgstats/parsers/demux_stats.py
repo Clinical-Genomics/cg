@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 class SampleBarcodeStats(BaseModel):
     barcode_count: int
     perfect_barcode_count: int
-    one_mismatch_barcode_count: Optional[int]
+    one_mismatch_barcode_count: Optional[int] = None
 
 
 class DemuxStats:

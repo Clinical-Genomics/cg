@@ -27,13 +27,13 @@ class ApplicationModel(BaseModel):
         external: whether the app tag is external or not; source: StatusDB/application/is_external
     """
 
-    tag: Optional[str]
-    version: Union[None, int, str]
-    prep_category: Optional[str]
-    description: Optional[str]
-    limitations: Optional[str]
-    accredited: Optional[bool]
-    external: Optional[bool]
+    tag: Optional[str] = None
+    version: Union[None, int, str] = None
+    prep_category: Optional[str] = None
+    description: Optional[str] = None
+    limitations: Optional[str] = None
+    accredited: Optional[bool] = None
+    external: Optional[bool] = None
 
     _prep_category = validator("prep_category", always=True, allow_reuse=True)(validate_rml_sample)
     _values = validator(
@@ -56,8 +56,8 @@ class MethodsModel(BaseModel):
         sequencing: sequencing procedure; source: LIMS/sample/sequencing_method
     """
 
-    library_prep: Optional[str]
-    sequencing: Optional[str]
+    library_prep: Optional[str] = None
+    sequencing: Optional[str] = None
 
     _values = validator("library_prep", "sequencing", always=True, allow_reuse=True)(
         validate_empty_field
@@ -75,10 +75,10 @@ class TimestampModel(BaseModel):
         sequenced_at: sequencing date; source: StatusDB/sample/sequenced_at
     """
 
-    ordered_at: Union[None, datetime, str]
-    received_at: Union[None, datetime, str]
-    prepared_at: Union[None, datetime, str]
-    sequenced_at: Union[None, datetime, str]
+    ordered_at: Union[None, datetime, str] = None
+    received_at: Union[None, datetime, str] = None
+    prepared_at: Union[None, datetime, str] = None
+    sequenced_at: Union[None, datetime, str] = None
 
     _values = validator(
         "ordered_at",
@@ -108,13 +108,13 @@ class SampleModel(BaseModel):
         timestamps: processing timestamp attributes
     """
 
-    name: Optional[str]
-    id: Optional[str]
-    ticket: Union[None, int, str]
-    status: Optional[str]
+    name: Optional[str] = None
+    id: Optional[str] = None
+    ticket: Union[None, int, str] = None
+    status: Optional[str] = None
     gender: Optional[str] = Gender.UNKNOWN
-    source: Optional[str]
-    tumour: Union[None, bool, str]
+    source: Optional[str] = None
+    tumour: Union[None, bool, str] = None
     application: ApplicationModel
     methods: MethodsModel
     metadata: SampleMetadataModel
