@@ -21,7 +21,9 @@ from datetime import datetime
 @pytest.fixture(name="bcl_convert_metrics_dir_path", scope="session")
 def fixture_bcl_convert_metrics_dir_path() -> Path:
     """Return a path to a BCLConvert metrics directory."""
-    return Path("tests", "fixtures", "apps", "sequencing_metrics_parser")
+    return Path(
+        "tests", "fixtures", "apps", "sequencing_metrics_parser", "230622_A00621_0864_AHY7FFDRX2"
+    )
 
 
 @pytest.fixture(name="test_sample_internal_id", scope="session")
@@ -134,7 +136,7 @@ def fixture_bcl_convert_sample_sheet_model_with_data(
             SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value: "HY7FFDRX2",
             SampleSheetNovaSeq6000Sections.Data.LANE.value: test_lane,
             SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCLCONVERT.value: test_sample_internal_id,
-            SampleSheetNovaSeq6000Sections.Data.SAMPLE_NAME.value: "p023BCR",
+            SampleSheetNovaSeq6000Sections.Data.SAMPLE_NAME.value: "anonymous_1",
             SampleSheetNovaSeq6000Sections.Data.CONTROL.value: "N",
             SampleSheetNovaSeq6000Sections.Data.SAMPLE_PROJECT_BCLCONVERT.value: test_sample_project,
         }

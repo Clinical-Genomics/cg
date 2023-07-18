@@ -1,0 +1,88 @@
+{
+    "Flowcell": "HHKVCALXX",
+    "RunNumber": 209,
+    "RunId": "170407_ST-E00198_0209_BHHKVCALXX",
+    "ReadInfosForLanes": [
+        {
+            "LaneNumber": 1,
+            "ReadInfos": [
+                {
+                    "Number": 1,
+                    "NumCycles": 151,
+                    "IsIndexedRead": false
+                },
+                {
+                    "Number": 1,
+                    "NumCycles": 8,
+                    "IsIndexedRead": true
+                },
+                {
+                    "Number": 2,
+                    "NumCycles": 151,
+                    "IsIndexedRead": false
+                }
+            ]
+        }
+    ],
+    "ConversionResults": [
+        {
+            "LaneNumber": 1,
+            "TotalClustersRaw": 310605552,
+            "TotalClustersPF": 225446886,
+            "Yield": 68084959572,
+            "DemuxResults": [
+                {
+                    "SampleId": "SVE2528A1_CTGAAGCT",
+                    "SampleName": "123456",
+                    "IndexMetrics": [
+                        {
+                            "IndexSequence": "CTGAAGCT",
+                            "MismatchCounts": {
+                                "0": 23770714,
+                                "1": 7269068
+                            }
+                        }
+                    ],
+                    "NumberReads": 31039782,
+                    "Yield": 9374014164,
+                    "ReadMetrics": [
+                        {
+                            "ReadNumber": 1,
+                            "Yield": 4687007082,
+                            "YieldQ30": 4337617174,
+                            "QualityScoreSum": 179887822876,
+                            "TrimmedBases": 0
+                        },
+                        {
+                            "ReadNumber": 2,
+                            "Yield": 4687007082,
+                            "YieldQ30": 3698732151,
+                            "QualityScoreSum": 162540300621,
+                            "TrimmedBases": 0
+                        }
+                    ]
+                }
+            ],
+            "Undetermined": {
+                "NumberReads": 5293801,
+                "Yield": 1598727902,
+                "ReadMetrics": [
+                    {
+                        "ReadNumber": 1,
+                        "Yield": 799363951,
+                        "YieldQ30": 719898156,
+                        "QualityScoreSum": 30157716143,
+                        "TrimmedBases": 0
+                    },
+                    {
+                        "ReadNumber": 2,
+                        "Yield": 799363951,
+                        "YieldQ30": 615436475,
+                        "QualityScoreSum": 27313363301,
+                        "TrimmedBases": 0
+                    }
+                ]
+            }
+        }
+    ]
+}
