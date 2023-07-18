@@ -238,6 +238,7 @@ class DemuxPostProcessingAPI:
                 self.add_file_to_bundle_if_non_existent(
                     file_path=file_path, bundle_name=flow_cell.id, tag_names=tag_names
                 )
+                LOG.info(f"Added demux log file {file_path} to Housekeeper.")
             except FileNotFoundError as e:
                 LOG.error(f"Cannot find demux log file {file_path}. Error: {e}.")
 
