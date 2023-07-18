@@ -229,7 +229,7 @@ class DemuxPostProcessingAPI:
         """Add demux logs to Housekeeper."""
         log_pattern: str = r"*_demultiplex.std*"
         demux_log_file_paths: List[Path] = get_files_matching_pattern(
-            directory=self.demux_api.run_dir, pattern=log_pattern
+            directory=Path(self.demux_api.run_dir, flow_cell.full_name), pattern=log_pattern
         )
 
         tag_names: List[str] = [SequencingFileTag.DEMUX_LOG, flow_cell.id]
