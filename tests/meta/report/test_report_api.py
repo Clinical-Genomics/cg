@@ -1,22 +1,27 @@
+"""Test delivery report API methods."""
 import logging
-import os
 from datetime import datetime, timedelta
-from typing import List, TextIO
+from pathlib import Path
+from typing import List
 
-from cg.models.report.report import DataAnalysisModel, ReportModel, CustomerModel, CaseModel
+from _pytest.logging import LogCaptureFixture
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
-from cg.models.report.sample import SampleModel, ApplicationModel, MethodsModel, TimestampModel
+from cg.store import Store
 
-from cg.models.mip.mip_analysis import MipAnalysis
-
-from cg.store.models import Analysis, FamilySample
+from cg.meta.report.mip_dna import MipDNAReportAPI
 
 from cg.constants import REPORT_GENDER
 from cg.exc import DeliveryReportError
+from cg.models.mip.mip_analysis import MipAnalysis
+from cg.models.report.report import DataAnalysisModel, ReportModel, CustomerModel, CaseModel
+from cg.models.report.sample import SampleModel, ApplicationModel, MethodsModel, TimestampModel
+from cg.store.models import Analysis, FamilySample, Family
 from tests.meta.report.helper import recursive_assert
+from tests.store_helpers import StoreHelpers
 
 
-def test_create_delivery_report(report_api_mip_dna, case_mip_dna):
+def test_create_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family):
     """Tests the creation of the rendered delivery report."""
 
     # GIVEN a pre-built case
@@ -32,24 +37,27 @@ def test_create_delivery_report(report_api_mip_dna, case_mip_dna):
     assert len(delivery_report) > 0
 
 
-def test_create_delivery_report_file(report_api_mip_dna, case_mip_dna, tmp_path):
+def test_create_delivery_report_file(
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family, tmp_path: Path
+):
     """Tests file generation containing the delivery report data."""
 
     # GIVEN a pre-built case
 
     # WHEN creating the report file
-    created_report_file: TextIO = report_api_mip_dna.create_delivery_report_file(
+    created_report_file: Path = report_api_mip_dna.create_delivery_report_file(
         case_id=case_mip_dna.internal_id,
-        file_path=tmp_path,
+        directory=tmp_path,
         analysis_date=case_mip_dna.analyses[0].started_at,
         force_report=False,
     )
 
-    # THEN check if an html report has been created and saved
-    assert os.path.isfile(created_report_file.name)
+    # THEN check if a html report has been created and saved
+    assert created_report_file.is_file()
+    assert created_report_file.exists()
 
 
-def test_render_delivery_report(report_api_mip_dna, case_mip_dna):
+def test_render_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family):
     """Tests delivery report rendering."""
 
     # GIVEN a generated report
@@ -65,7 +73,7 @@ def test_render_delivery_report(report_api_mip_dna, case_mip_dna):
     assert "html" in rendered_report
 
 
-def test_get_validated_report_data(report_api_mip_dna, case_mip_dna):
+def test_get_validated_report_data(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family):
     """Tests report data retrieval."""
 
     # GIVEN a valid case
@@ -85,9 +93,10 @@ def test_get_validated_report_data(report_api_mip_dna, case_mip_dna):
     recursive_assert(report_data.dict())
 
 
-def test_validate_report_empty_fields(report_api_mip_dna, case_mip_dna, caplog):
+def test_validate_report_empty_fields(
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family, caplog: LogCaptureFixture
+):
     """Tests the validations of allowed empty report fields."""
-
     caplog.set_level(logging.INFO)
 
     # GIVEN a delivery report
@@ -110,7 +119,9 @@ def test_validate_report_empty_fields(report_api_mip_dna, case_mip_dna, caplog):
     assert "library_prep" in caplog.text
 
 
-def test_validate_report_missing_fields(report_api_mip_dna, case_mip_dna, caplog):
+def test_validate_report_missing_fields(
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family, caplog: LogCaptureFixture
+):
     """Tests the validations of empty required report fields."""
 
     # GIVEN a delivery report
@@ -134,7 +145,9 @@ def test_validate_report_missing_fields(report_api_mip_dna, case_mip_dna, caplog
         assert "accredited" in caplog.text
 
 
-def test_get_validated_report_data_external_sample(report_api_mip_dna, case_mip_dna):
+def test_get_validated_report_data_external_sample(
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family
+):
     """Tests report data retrieval."""
 
     # GIVEN a delivery report with external sample data
@@ -153,13 +166,13 @@ def test_get_validated_report_data_external_sample(report_api_mip_dna, case_mip_
     assert report_data
 
 
-def test_get_customer_data(report_api_mip_dna, case_mip_dna):
+def test_get_customer_data(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family):
     """Checks that the retrieved customer data is the expected one."""
 
     # GIVEN a pre-built case
 
     # GIVEN an expected output
-    expected_customer = {
+    expected_customer: dict = {
         "name": "Production",
         "id": "cust000",
         "invoice_address": "Test street",
@@ -173,7 +186,12 @@ def test_get_customer_data(report_api_mip_dna, case_mip_dna):
     assert customer_data == expected_customer
 
 
-def test_get_report_version_version(report_api_mip_dna, store, helpers, timestamp_yesterday):
+def test_get_report_version_version(
+    report_api_mip_dna: MipDNAReportAPI,
+    store: Store,
+    helpers: StoreHelpers,
+    timestamp_yesterday: datetime,
+):
     """Validates the extracted report versions of two analyses."""
 
     # GIVEN a specific set of analyses
@@ -191,7 +209,12 @@ def test_get_report_version_version(report_api_mip_dna, store, helpers, timestam
     assert first_analysis_version == 1
 
 
-def test_get_case_data(report_api_mip_dna, mip_analysis_api, case_mip_dna, family_name):
+def test_get_case_data(
+    report_api_mip_dna: MipDNAReportAPI,
+    mip_analysis_api: MipDNAAnalysisAPI,
+    case_mip_dna: Family,
+    family_name: str,
+):
     """Tests the extracted case data."""
 
     # GIVEN a pre-built case
@@ -212,7 +235,11 @@ def test_get_case_data(report_api_mip_dna, mip_analysis_api, case_mip_dna, famil
 
 
 def test_get_samples_data(
-    report_api_mip_dna, mip_analysis_api, case_mip_dna, case_samples_data, lims_samples
+    report_api_mip_dna: MipDNAReportAPI,
+    mip_analysis_api: MipDNAAnalysisAPI,
+    case_mip_dna: Family,
+    case_samples_data: List[FamilySample],
+    lims_samples: List[dict],
 ):
     """Validates the retrieved sample data."""
 
@@ -242,7 +269,11 @@ def test_get_samples_data(
     assert samples_data.timestamps
 
 
-def test_get_lims_sample(report_api_mip_dna, case_samples_data, lims_samples):
+def test_get_lims_sample(
+    report_api_mip_dna: MipDNAReportAPI,
+    case_samples_data: List[FamilySample],
+    lims_samples: List[dict],
+):
     """Tests lims data extraction."""
 
     # GIVEN a family samples instance
@@ -257,7 +288,11 @@ def test_get_lims_sample(report_api_mip_dna, case_samples_data, lims_samples):
     assert lims_data == expected_lims_data
 
 
-def test_get_sample_application_data(report_api_mip_dna, case_samples_data, lims_samples):
+def test_get_sample_application_data(
+    report_api_mip_dna: MipDNAReportAPI,
+    case_samples_data: List[FamilySample],
+    lims_samples: List[dict],
+):
     """Tests sample application data extraction."""
 
     # GIVEN a lims sample instance
@@ -279,7 +314,9 @@ def test_get_sample_application_data(report_api_mip_dna, case_samples_data, lims
     assert application_data.accredited == expected_application_data.get("is_accredited")
 
 
-def test_get_unique_applications(report_api_mip_dna, mip_analysis_api, case_mip_dna):
+def test_get_unique_applications(
+    report_api_mip_dna: MipDNAReportAPI, mip_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Family
+):
     """Tests unique applications filtering."""
 
     # GIVEN a list of samples sharing the same application
@@ -295,7 +332,9 @@ def test_get_unique_applications(report_api_mip_dna, mip_analysis_api, case_mip_
     assert len(unique_applications) == 1
 
 
-def test_get_sample_methods_data(report_api_mip_dna, case_samples_data):
+def test_get_sample_methods_data(
+    report_api_mip_dna: MipDNAReportAPI, case_samples_data: List[FamilySample]
+):
     """Tests sample methods retrieval from lims."""
 
     # GIVEN a sample ID
@@ -314,7 +353,9 @@ def test_get_sample_methods_data(report_api_mip_dna, case_samples_data):
     assert sample_methods == expected_sample_methods
 
 
-def test_get_case_analysis_data(report_api_mip_dna, mip_analysis_api, case_mip_dna):
+def test_get_case_analysis_data(
+    report_api_mip_dna: MipDNAReportAPI, mip_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Family
+):
     """Tests data analysis parameters retrieval."""
 
     # GIVEN a pre-built case
@@ -333,7 +374,11 @@ def test_get_case_analysis_data(report_api_mip_dna, mip_analysis_api, case_mip_d
     assert case_analysis_data.scout_files
 
 
-def test_get_sample_timestamp_data(report_api_mip_dna, case_samples_data, timestamp_yesterday):
+def test_get_sample_timestamp_data(
+    report_api_mip_dna: MipDNAReportAPI,
+    case_samples_data: List[FamilySample],
+    timestamp_yesterday: datetime,
+):
     """Checks that the sample timestamp information is correctly retrieved from StatusDB."""
 
     # GIVEN a mock sample data

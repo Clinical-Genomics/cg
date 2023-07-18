@@ -1,23 +1,13 @@
-"""Commands to generate delivery reports"""
-
+"""Commands to generate delivery reports."""
 import logging
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import TextIO, Optional
+from typing import Optional
 
 import click
+from housekeeper.store.models import Version
 
-from cg.store.models import Family
-from cgmodels.cg.constants import Pipeline
-from housekeeper.store import models as hk_models
-
-from cg.cli.generate.report.utils import (
-    get_report_case,
-    get_report_api,
-    get_report_analysis_started,
-    get_report_api_pipeline,
-)
 from cg.cli.generate.report.options import (
     ARGUMENT_CASE_ID,
     OPTION_FORCE_REPORT,
@@ -25,9 +15,16 @@ from cg.cli.generate.report.options import (
     OPTION_STARTED_AT,
     OPTION_PIPELINE,
 )
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+from cg.cli.generate.report.utils import (
+    get_report_case,
+    get_report_api,
+    get_report_analysis_started,
+    get_report_api_pipeline,
+)
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
 from cg.exc import CgError
 from cg.meta.report.report_api import ReportAPI
+from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
 
@@ -44,11 +41,9 @@ def generate_delivery_report(
     force_report: bool,
     dry_run: bool,
     analysis_started_at: str = None,
-):
+) -> None:
     """Creates a delivery report for the provided case."""
-
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
-
     case: Family = get_report_case(context, case_id)
     report_api: ReportAPI = get_report_api(context, case)
     analysis_date: datetime = get_report_analysis_started(case, report_api, analysis_started_at)
@@ -61,22 +56,32 @@ def generate_delivery_report(
         click.echo(delivery_report_html)
         return
 
-    delivery_report_file: TextIO = report_api.create_delivery_report_file(
-        case_id,
-        file_path=Path(report_api.analysis_api.root, case_id),
+    version: Version = report_api.housekeeper_api.version(bundle=case_id, date=analysis_date)
+    delivery_report: Optional[str] = report_api.get_delivery_report_from_hk(
+        case_id=case_id, version=version
+    )
+    if delivery_report:
+        click.echo(
+            click.style(f"Delivery report already in housekeeper: {delivery_report}", fg="yellow")
+        )
+        return
+
+    created_delivery_report: Path = report_api.create_delivery_report_file(
+        case_id=case_id,
+        directory=Path(report_api.analysis_api.root, case_id),
         analysis_date=analysis_date,
         force_report=force_report,
     )
-
-    hk_report_file: Optional[hk_models.File] = report_api.add_delivery_report_to_hk(
-        delivery_report_file, case_id, analysis_date
+    report_api.add_delivery_report_to_hk(
+        case_id=case_id, delivery_report_file=created_delivery_report, version=version
     )
-
-    if hk_report_file:
-        click.echo(click.style("Uploaded delivery report to housekeeper", fg="green"))
-        report_api.update_delivery_report_date(case, analysis_date)
-    else:
-        click.echo(click.style("Delivery report already uploaded to housekeeper", fg="yellow"))
+    click.echo(
+        click.style(
+            f"Uploaded delivery report to housekeeper: {created_delivery_report.as_posix()}",
+            fg="green",
+        )
+    )
+    report_api.update_delivery_report_date(case=case, analysis_date=analysis_date)
 
 
 @click.command("available-delivery-reports")
@@ -86,7 +91,7 @@ def generate_delivery_report(
 @click.pass_context
 def generate_available_delivery_reports(
     context: click.Context, pipeline: Pipeline, force_report: bool, dry_run: bool
-):
+) -> None:
     """Generates delivery reports for all cases that need one and stores them in housekeeper."""
 
     click.echo(click.style("--------------- AVAILABLE DELIVERY REPORTS ---------------"))
