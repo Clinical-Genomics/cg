@@ -11,7 +11,7 @@ from cg.exc import DeleteDemuxError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.store.api import Store
-from cg.store.models import Sample, Flowcell, SampleLaneSequencingMetrics
+from cg.store.models import Sample, Flowcell
 from tests.store_helpers import StoreHelpers
 
 
@@ -98,7 +98,7 @@ def test_set_dry_run_delete_demux_api(
 
     # THEN the dry run parameter should be set to True and it should be logged
     assert delete_demultiplex_api.dry_run
-    assert f"DeleteDemuxAPI: Setting dry run mode to True" in caplog.text
+    assert "DeleteDemuxAPI: Setting dry run mode to True" in caplog.text
 
 
 def test_no_active_samples_on_flow_cell(
@@ -410,7 +410,7 @@ def test_delete_flow_cell_sample_lane_sequencing_metrics(
 
     wipe_demux_api: DeleteDemuxAPI = populated_sample_lane_sequencing_metrics_demultiplex_api
     wipe_demux_api.set_dry_run(dry_run=False)
-    assert wipe_demux_api.status_db.get_sample_lane_sequencing_metrics_for_flow_cell(
+    assert wipe_demux_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(
         flow_cell_name=flow_cell_name
     )
 
@@ -420,7 +420,7 @@ def test_delete_flow_cell_sample_lane_sequencing_metrics(
 
     # THEN the object should not exist anymore and the user should be notified
 
-    assert not wipe_demux_api.status_db.get_sample_lane_sequencing_metrics_for_flow_cell(
+    assert not wipe_demux_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(
         flow_cell_name=flow_cell_name
     )
     assert (

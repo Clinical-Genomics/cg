@@ -1,6 +1,6 @@
 from typing import List
 from cg.store import Store
-from cg.store.models import Flowcell, Family, FamilySample, Sample, SampleLaneSequencingMetrics
+from cg.store.models import Flowcell, Family, FamilySample, Sample
 
 
 def test_delete_flow_cell(bcl2fastq_flow_cell_id: str, populated_flow_cell_store: Store):
@@ -135,7 +135,7 @@ def test_delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
     """Test function to delete flow cell entries in sample_lane_sequencing_metrics table"""
 
     # GIVEN a database containing a flow cell
-    metrics = store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_for_flow_cell(
+    metrics = store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
         flow_cell_name=flow_cell_name
     )
     assert metrics
@@ -146,6 +146,6 @@ def test_delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
     )
 
     # THEN no entry should be found for the flow cell
-    assert not store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_for_flow_cell(
+    assert not store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
         flow_cell_name=metrics[0].flow_cell_name
     )

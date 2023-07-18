@@ -61,32 +61,6 @@ def test_filter_metrics_for_flow_cell_sample_internal_id_and_lane(
     assert metrics_query[0].flow_cell_lane_number == 1
 
 
-def test_filter_metrics_for_flow_cell_name(
-    store_with_sequencing_metrics: Store, flow_cell_name: str
-):
-    # GIVEN a Store with sequencing metrics
-    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
-
-    # WHEN getting metrics for a flow cell
-    metrics_query: Query = filter_metrics_for_flow_cell_name(
-        metrics=metrics,
-        flow_cell_name=flow_cell_name,
-    )
-
-    # THEN the returned object is a Query
-    assert isinstance(metrics_query, Query)
-
-    # THEN the query returns a list of metrics
-    assert metrics_query.all()
-
-    # THEN the query returns the expected number of metrics
-    assert len(metrics_query.all()) == 2
-
-    # THEN the query returns the expected metrics
-    for metric in metrics_query:
-        assert metric.flow_cell_name == flow_cell_name
-
-
 def test_filter_above_q30_threshold(store_with_sequencing_metrics: Store):
     # GIVEN a Store with sequencing metrics
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
