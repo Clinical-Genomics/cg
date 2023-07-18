@@ -68,13 +68,10 @@ class DemuxPostProcessingAPI:
         if dry_run:
             self.demux_api.set_dry_run(dry_run=dry_run)
 
-    def copy_sample_sheet(self) -> None:
+    def copy_sample_sheet(self, target_sample_sheet_path: Path) -> None:
         """Copy the sample sheet from run dir to demux dir"""
         sample_sheet_path = get_file_in_directory(
             self.demux_api.run_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-        )
-        target_sample_sheet_path = Path(
-            self.demux_api.out_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
         )
         LOG.info(
             f"Copy sample sheet {sample_sheet_path} from flow cell to demuxed result dir {target_sample_sheet_path}"
@@ -103,6 +100,7 @@ class DemuxPostProcessingAPI:
         """Store data for the demultiplexed flow cell and mark it as ready for delivery.
 
         This function:
+            - Copies the sample sheet to the demultiplexed flow cell directory
             - Parses and validates the flow cell directory data
             - Stores the flow cell in the status database
             - Stores sequencing metrics in the status database
@@ -118,7 +116,7 @@ class DemuxPostProcessingAPI:
         """
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
-        self.copy_sample_sheet()
+
         flow_cell_directory_path: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
         bcl_converter: str = get_bcl_converter_name(flow_cell_directory_path)
 
@@ -126,6 +124,8 @@ class DemuxPostProcessingAPI:
             flow_cell_directory=flow_cell_directory_path,
             bcl_converter=bcl_converter,
         )
+
+        self.copy_sample_sheet(flow_cell_directory_path)
 
         try:
             self.store_flow_cell_data(parsed_flow_cell)

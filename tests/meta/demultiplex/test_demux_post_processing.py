@@ -862,11 +862,14 @@ def test_copy_sample_sheet(demultiplex_context: CGConfig):
     )
     sample_sheet_path.touch()
 
+    # GIVEN a sample sheet target path
+    target_sample_sheet_path = Path(demux_post_processing_api.demux_api.out_dir)
+
     # WHEN copying the sample sheet
-    demux_post_processing_api.copy_sample_sheet()
+    demux_post_processing_api.copy_sample_sheet(target_sample_sheet_path)
 
     # THEN the sample sheet was copied to the out directory
     assert Path(
-        demux_post_processing_api.demux_api.out_dir,
+        target_sample_sheet_path,
         DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
     ).exists()
