@@ -1,21 +1,22 @@
 import logging
-from typing import List, Dict
-
+from typing import List, Dict, Type
 import pytest
-
+from pathlib import Path
+from cg.exc import SampleSheetError
 from cg.apps.demultiplex.sample_sheet.models import (
     SampleSheet,
     FlowCellSample,
     FlowCellSampleNovaSeq6000Bcl2Fastq,
     FlowCellSampleNovaSeq6000Dragen,
 )
-from cg.apps.demultiplex.sample_sheet.validate import (
-    get_samples_by_lane,
-    get_raw_samples,
-    validate_sample_sheet,
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     validate_samples_are_unique,
+    is_valid_sample_internal_id,
+    get_samples_by_lane,
+    get_sample_internal_ids_from_sample_sheet,
+    get_validated_sample_sheet,
+    get_raw_samples,
 )
-from cg.exc import SampleSheetError
 
 
 def test_validate_samples_are_unique(
@@ -52,6 +53,36 @@ def test_validate_samples_are_unique_when_not_unique(
         f"Sample {novaseq6000_flow_cell_sample_1.sample_id} exists multiple times in sample sheet"
         in caplog.text
     )
+
+
+def test_is_valid_sample_internal_id(
+    novaseq6000_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
+):
+    """Test that validating two different samples finishes successfully."""
+    # GIVEN two different NovaSeq samples with valid internal IDs
+
+    # WHEN validating the sample internal ids
+    for sample in [novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]:
+        # THEN no error is raised
+        assert is_valid_sample_internal_id(sample_internal_id=sample.sample_id)
+
+
+def test_is_valid_sample_internal_id_invalid_sample_internal_ids(
+    novaseq6000_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
+):
+    """Test that validating two different samples finishes successfully."""
+    # GIVEN two different NovaSeq samples with valid internal IDs
+
+    # WHEN setting the sample internal ids to invalid values
+    novaseq6000_flow_cell_sample_1.sample_id = "invalid_sample_id"
+    novaseq6000_flow_cell_sample_2.sample_id = "invalid_sample_id"
+
+    # WHEN validating the sample internal ids
+    # THEN no error is raised
+    for sample in [novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]:
+        assert not is_valid_sample_internal_id(sample_internal_id=sample.sample_id)
 
 
 def test_get_samples_by_lane(
@@ -124,7 +155,7 @@ def test_get_sample_sheet_bcl2fastq_duplicate_same_lane(
     # WHEN creating the sample sheet object
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
-        validate_sample_sheet(
+        get_validated_sample_sheet(
             sample_sheet_content=sample_sheet_bcl2fastq_duplicate_same_lane,
             sample_type=FlowCellSampleNovaSeq6000Bcl2Fastq,
         )
@@ -139,7 +170,7 @@ def test_get_sample_sheet_dragen_duplicate_same_lane(
     # WHEN creating the sample sheet object
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
-        validate_sample_sheet(
+        get_validated_sample_sheet(
             sample_sheet_content=sample_sheet_dragen_duplicate_same_lane,
             sample_type=FlowCellSampleNovaSeq6000Dragen,
         )
@@ -152,7 +183,7 @@ def test_get_sample_sheet_bcl2fastq_duplicate_different_lanes(
     # GIVEN a Bcl2fastq sample sheet with same sample duplicated in different lanes
 
     # WHEN creating the sample sheet object
-    sample_sheet: SampleSheet = validate_sample_sheet(
+    sample_sheet: SampleSheet = get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_bcl2fastq_duplicate_different_lane,
         sample_type=FlowCellSampleNovaSeq6000Bcl2Fastq,
     )
@@ -168,10 +199,34 @@ def test_get_sample_sheet_dragen_duplicate_different_lanes(
     # GIVEN a Dragen sample sheet with same sample duplicated in different lanes
 
     # WHEN creating the sample sheet object
-    sample_sheet: SampleSheet = validate_sample_sheet(
+    sample_sheet: SampleSheet = get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_dragen_duplicate_different_lane,
         sample_type=FlowCellSampleNovaSeq6000Dragen,
     )
 
     # THEN a sample sheet is returned with samples in it
     assert sample_sheet.samples
+
+
+def test_get_sample_internal_ids_from_sample_sheet(
+    novaseq6000_bcl_convert_sample_sheet_path: Path,
+    flow_cell_type: Type[FlowCellSample] = FlowCellSampleNovaSeq6000Dragen,
+):
+    """Test that getting sample internal ids from a sample sheet returns a unique list of strings."""
+    # GIVEN a path to a sample sheet with only valid samples
+
+    # WHEN getting the valid sample internal ids
+    sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
+        sample_sheet_path=novaseq6000_bcl_convert_sample_sheet_path,
+        flow_cell_sample_type=flow_cell_type,
+    )
+
+    # THEN the returned value is a list
+    assert isinstance(sample_internal_ids, List)
+    # THEN the list contains strings
+    assert isinstance(sample_internal_ids[0], str)
+    # THEN the sample internal ids are unique
+    assert len(sample_internal_ids) == len(set(sample_internal_ids))
+    # THEN the sample internal ids are the expected ones
+    for sample_internal_id in sample_internal_ids:
+        assert is_valid_sample_internal_id(sample_internal_id=sample_internal_id) is True
