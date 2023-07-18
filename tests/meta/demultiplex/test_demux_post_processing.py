@@ -901,4 +901,11 @@ def test_add_demux_logs_to_housekeeper(
         bundle=dragen_flow_cell.id,
     ).all()
 
+    expected_file_names: List[str] = []
+    for file_path in demux_log_file_paths:
+        expected_file_names.append(file_path.name.split("/")[-1])
+
+    # THEN the demux logs were added to housekeeper with the correct names
     assert len(files) == 2
+    for file in files:
+        assert file.path.split("/")[-1] in expected_file_names
