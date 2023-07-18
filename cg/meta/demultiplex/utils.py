@@ -1,10 +1,10 @@
 import logging
-import os
 import re
+
 from pathlib import Path
 from typing import List, Optional
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
+from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
