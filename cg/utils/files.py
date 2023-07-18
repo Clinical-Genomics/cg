@@ -21,4 +21,7 @@ def get_file_in_directory(directory: Path, file_name: str) -> Path:
 
 def get_files_matching_pattern(directory: Path, pattern: str) -> List[Path]:
     """Search for all files in a directory that match a pattern."""
-    return list(directory.glob(pattern))
+    file_paths = list(directory.glob(pattern))
+    if not file_paths:
+        raise FileNotFoundError(f"No files matching pattern {pattern} in {directory}")
+    return file_paths

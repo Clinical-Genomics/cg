@@ -227,7 +227,7 @@ class DemuxPostProcessingAPI:
 
     def add_demux_logs_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
         """Add demux logs to Housekeeper."""
-        log_pattern: str = "*_demultiplex.std*"
+        log_pattern: str = r"*_demultiplex.std*"
         demux_log_file_paths: List[Path] = get_files_matching_pattern(
             directory=self.demux_api.run_dir, pattern=log_pattern
         )
