@@ -26,7 +26,6 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
-from cg.utils.files import get_file_in_directory
 
 LOG = logging.getLogger(__name__)
 
@@ -45,7 +44,6 @@ class FlowCellDirectoryData:
         self.base_name: str = ""  # Base name is flow cell-id + flow cell position
         self.id: str = ""
         self.position: Literal["A", "B"] = "A"
-        self.flow_cell_name: str = ""
         self.parse_flow_cell_dir_name()
 
     def parse_flow_cell_dir_name(self):
@@ -65,7 +63,6 @@ class FlowCellDirectoryData:
         LOG.debug(f"Set flow cell id to {base_name}")
         self.id = base_name[1:]
         self.position = base_name[0]
-        self.flow_cell_name = base_name[1:]
 
     @property
     def split_flow_cell_name(self) -> List[str]:
