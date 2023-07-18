@@ -42,6 +42,7 @@ FLOWCELL_Q30_THRESHOLD = {
     Sequencers.HISEQX: 75,
     Sequencers.HISEQGA: 80,
     Sequencers.NOVASEQ: 75,
+    Sequencers.NOVASEQX: 75,
 }
 
 

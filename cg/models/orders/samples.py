@@ -1,21 +1,19 @@
-from typing import List
-
-from cgmodels.cg.constants import Pipeline
-from pydantic import BaseModel, constr, validator
-from pydantic.typing import Optional
+from typing import List, Optional
 
 from cg.constants import DataDelivery
 from cg.constants.constants import GenomeVersion
 from cg.models.orders.order import OrderType
 from cg.models.orders.sample_base import (
-    ContainerEnum,
     NAME_PATTERN,
+    ContainerEnum,
+    ControlEnum,
     PriorityEnum,
     SexEnum,
     StatusEnum,
-    ControlEnum,
 )
 from cg.store.models import Application, Family, Organism, Panel, Pool, Sample
+from cgmodels.cg.constants import Pipeline
+from pydantic import BaseModel, constr, validator
 
 
 class OptionalIntValidator:
