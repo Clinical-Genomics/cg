@@ -1,6 +1,6 @@
 """Model MIP config"""
 
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import List
 
 from cg.constants.priority import SlurmQos
@@ -28,16 +28,12 @@ class MipBaseConfig(BaseModel):
     sample_info_path: str = Field(..., alias="sample_info_file")
     sample_ids: List[str]
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("case_id", always=True, pre=True)
+    @field_validator("case_id", mode="before")
     def set_case_id(cls, value, values: dict) -> str:
         """Set case_id. Family_id is used for older versions of MIP analysis"""
         return value or values.get("family_id_")
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("samples", always=True, pre=True)
+    @field_validator("samples", mode="before")
     def set_samples(cls, _, values: dict) -> List[AnalysisType]:
         """Set samples analysis type"""
         raw_samples: dict = values.get("analysis_type_")
