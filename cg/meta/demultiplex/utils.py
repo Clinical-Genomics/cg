@@ -1,10 +1,10 @@
 import logging
 import re
-
+import shutil
 from pathlib import Path
 from typing import List, Optional
 
-from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
@@ -17,6 +17,7 @@ from cg.meta.demultiplex.validation import (
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 from cg.utils.files import get_file_in_directory, get_files_matching_pattern
+
 
 LOG = logging.getLogger(__name__)
 
@@ -97,3 +98,31 @@ def parse_flow_cell_directory_data(
         raise FlowCellError(f"Flow cell directory was not valid: {flow_cell_directory}, {e}")
 
     return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
+
+
+def copy_sample_sheet(
+    sample_sheet_source_directory: Path, sample_sheet_destination_directory: Path
+) -> None:
+    """Copy the sample sheet from the flow-cell-run dir to demultiplex-runs dir for a flow cell."""
+    sample_sheet_source: Path = Path(
+        sample_sheet_source_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+    sample_sheet_destination: Path = Path(
+        sample_sheet_destination_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+
+    if not sample_sheet_destination.exists():
+        LOG.debug(
+            f"Copy sample sheet {sample_sheet_source_directory} from flow cell to demuxed result dir {sample_sheet_destination_directory}"
+        )
+        try:
+            shutil.copy(
+                sample_sheet_source.as_posix(),
+                sample_sheet_destination.as_posix(),
+            )
+        except FileNotFoundError as e:
+            raise FileNotFoundError(
+                f"Could not copy sample sheet from {sample_sheet_source_directory} to {sample_sheet_destination_directory}: {e}"
+            )
+        return
+    LOG.warning(f"Sample sheet already exists: {sample_sheet_destination}, skipping copy.")
