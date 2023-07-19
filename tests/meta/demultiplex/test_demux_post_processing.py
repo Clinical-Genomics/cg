@@ -787,12 +787,6 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_directory
     demux_post_processing_api.demux_api.run_dir = flow_cell_runs_directory_with_bcl2fastq
 
-    # GIVEN a sample sheet exisits in the flow cell run directory
-    Path(
-        demux_post_processing_api.demux_api.run_dir,
-        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-    ).touch()
-
     # WHEN post processing the demultiplexed flow cell
     demux_post_processing_api.finish_flow_cell_temp(
         flow_cell_directory_name_demultiplexed_with_bcl2fastq
