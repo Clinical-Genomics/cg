@@ -712,19 +712,15 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
     flow_cell_directory_name_demultiplexed_with_bcl_convert: str,
     flow_cell_name_demultiplexed_with_bcl_convert: str,
     demultiplexed_flow_cells_directory: Path,
-    bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
+    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
+    flow_cell_runs_directory_with_bcl_convert: Path,
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a directory with a flow cell demultiplexed with BCL Convert
     demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_directory
-
-    # GIVEN a sample sheet exisits in the flow cell run directory
-    Path(
-        demux_post_processing_api.demux_api.run_dir,
-        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-    ).touch()
+    demux_post_processing_api.demux_api.run_dir = flow_cell_runs_directory_with_bcl_convert
 
     # WHEN post processing the demultiplexed flow cell
     demux_post_processing_api.finish_flow_cell_temp(
@@ -781,6 +777,7 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     flow_cell_directory_name_demultiplexed_with_bcl2fastq: str,
     flow_cell_name_demultiplexed_with_bcl2fastq: str,
     demultiplexed_flow_cells_directory: Path,
+    flow_cell_runs_directory_with_bcl2fastq: Path,
     bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
 ):
     # GIVEN a DemuxPostProcessing API
@@ -788,6 +785,7 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
 
     # GIVEN a directory with a flow cell demultiplexed with bcl2fastq
     demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_directory
+    demux_post_processing_api.demux_api.run_dir = flow_cell_runs_directory_with_bcl2fastq
 
     # GIVEN a sample sheet exisits in the flow cell run directory
     Path(
@@ -853,15 +851,18 @@ def test_copy_sample_sheet(demultiplex_context: CGConfig):
     # GIVEN a sample sheet in the run directory
     sample_sheet_path = Path(
         demux_post_processing_api.demux_api.run_dir,
-        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
     )
-    sample_sheet_path.touch()
+    sample_sheet_path.mkdir(parents=True, exist_ok=True)
+    Path(sample_sheet_path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME).touch()
 
     # GIVEN a sample sheet target path
     target_sample_sheet_path = Path(demux_post_processing_api.demux_api.out_dir)
 
     # WHEN copying the sample sheet
-    demux_post_processing_api.copy_sample_sheet(target_sample_sheet_path)
+    demux_post_processing_api.copy_sample_sheet(
+        sample_sheet_source_directory=sample_sheet_path,
+        sample_sheet_destination_directory=target_sample_sheet_path,
+    )
 
     # THEN the sample sheet was copied to the out directory
     assert Path(
