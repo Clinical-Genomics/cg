@@ -32,7 +32,7 @@ class DemuxSample(BaseModel):
     perfect_barcodes: int = 0
     one_mismatch_barcodes: int = 0
 
-    @field_validator("raw_clusters_pc", mode="before")
+    @field_validator("raw_clusters_pc")
     def set_raw_clusters_pc(cls, value: float, values: dict) -> float:
         """Calculate the percentage of raw clusters"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -40,7 +40,7 @@ class DemuxSample(BaseModel):
             return value
         return round(conversion_stats.raw_cluster_count / values["nr_raw_clusters_"] * 100, 2)
 
-    @field_validator("pass_filter_yield_pc", mode="before")
+    @field_validator("pass_filter_yield_pc")
     def set_pass_filter_yield_pc(cls, value: float, values: dict) -> float:
         """Calculate the pass filter yield percentage"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -51,19 +51,19 @@ class DemuxSample(BaseModel):
             2,
         )
 
-    @field_validator("pass_filter_clusters", mode="before")
+    @field_validator("pass_filter_clusters")
     def set_pass_filter_clusters(cls, _, values) -> int:
         """Set the number of pass filter clusters"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
         return conversion_stats.pass_filter_cluster_count
 
-    @field_validator("pass_filter_yield", mode="before")
+    @field_validator("pass_filter_yield")
     def set_pass_filter_yield(cls, _, values) -> int:
         """Set the number of pass filter yield (reads)"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
         return conversion_stats.pass_filter_yield
 
-    @field_validator("pass_filter_Q30", mode="before")
+    @field_validator("pass_filter_Q30")
     def set_pass_filter_Q30(cls, value, values) -> float:
         """Set the percentage of pass filter high quality reads"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -71,7 +71,7 @@ class DemuxSample(BaseModel):
             return value
         return round(conversion_stats.pass_filter_q30 / conversion_stats.pass_filter_yield * 100, 2)
 
-    @field_validator("pass_filter_read1_q30", mode="before")
+    @field_validator("pass_filter_read1_q30")
     def set_percentage_high_quality_read_one(cls, value, values) -> float:
         """Calculate the percentage of high quality read one reads of all reads"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -82,7 +82,7 @@ class DemuxSample(BaseModel):
             2,
         )
 
-    @field_validator("pass_filter_read2_q30", mode="before")
+    @field_validator("pass_filter_read2_q30")
     def set_percentage_high_quality_read_two(cls, value, values) -> float:
         """Calculate the percentage of high quality read two reads of all reads"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -93,7 +93,7 @@ class DemuxSample(BaseModel):
             2,
         )
 
-    @field_validator("pass_filter_qscore", mode="before")
+    @field_validator("pass_filter_qscore")
     def set_pass_filter_qscore(cls, value, values) -> float:
         """Calculate the average quality score per read"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -104,7 +104,7 @@ class DemuxSample(BaseModel):
             2,
         )
 
-    @field_validator("undetermined_pc", mode="before")
+    @field_validator("undetermined_pc")
     def set_undetermined_pc(cls, value, values) -> float:
         """Calculate the average quality score per read"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -118,19 +118,19 @@ class DemuxSample(BaseModel):
             2,
         )
 
-    @field_validator("barcodes", mode="before")
+    @field_validator("barcodes")
     def set_nr_barcodes(cls, _, values) -> int:
         """Set the total number of barcodes"""
         barcode_stats: SampleBarcodeStats = values["barcode_stats_"]
         return barcode_stats.barcode_count or 0
 
-    @field_validator("perfect_barcodes", mode="before")
+    @field_validator("perfect_barcodes")
     def set_nr_perfect_barcodes(cls, _, values) -> int:
         """Set the total number of perfect barcodes"""
         barcode_stats: SampleBarcodeStats = values["barcode_stats_"]
         return barcode_stats.perfect_barcode_count or 0
 
-    @field_validator("one_mismatch_barcodes", mode="before")
+    @field_validator("one_mismatch_barcodes")
     def set_nr_one_mismatch_barcodes(cls, _, values) -> int:
         """Set the total number of mismatch barcodes"""
         barcode_stats: SampleBarcodeStats = values["barcode_stats_"]
