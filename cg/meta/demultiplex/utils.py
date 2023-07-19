@@ -125,4 +125,4 @@ def copy_sample_sheet(
                 f"Could not copy sample sheet from {sample_sheet_source_directory} to {sample_sheet_destination_directory}: {e}"
             )
         return
-    LOG.warning("Sample sheet already exists in demuxed result dir, skipping copy.")
+    LOG.warning(f"Sample sheet already exists: {sample_sheet_destination}, skipping copy.")
