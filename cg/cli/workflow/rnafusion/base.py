@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 import click
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
