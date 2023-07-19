@@ -14,9 +14,14 @@ from cg.meta.demultiplex.utils import (
     get_q30_threshold,
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
+    copy_sample_sheet,
 )
 from cg.meta.demultiplex.validation import is_bcl2fastq_demux_folder_structure
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.meta.demultiplex.demux_post_processing import (
+    DemuxPostProcessingAPI,
+)
+from cg.models.cg_config import CGConfig
 
 
 def test_get_lane_from_sample_fastq_file_path():
@@ -186,3 +191,30 @@ def test_parse_flow_cell_directory_data_valid(mocked_function):
     # THEN the flow cell path and bcl converter should be set
     assert result.path == Path(flow_cell_run_directory)
     assert result.bcl_converter == "dummy_bcl_converter"
+
+
+def test_copy_sample_sheet(demultiplex_context: CGConfig):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN a sample sheet in the run directory
+    sample_sheet_path = Path(
+        demux_post_processing_api.demux_api.run_dir,
+    )
+    sample_sheet_path.mkdir(parents=True, exist_ok=True)
+    Path(sample_sheet_path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME).touch()
+
+    # GIVEN a sample sheet target path
+    target_sample_sheet_path = Path(demux_post_processing_api.demux_api.out_dir)
+
+    # WHEN copying the sample sheet
+    copy_sample_sheet(
+        sample_sheet_source_directory=sample_sheet_path,
+        sample_sheet_destination_directory=target_sample_sheet_path,
+    )
+
+    # THEN the sample sheet was copied to the out directory
+    assert Path(
+        target_sample_sheet_path,
+        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
+    ).exists()

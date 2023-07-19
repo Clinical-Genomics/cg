@@ -2706,7 +2706,7 @@ def flow_cell_directory_name_demultiplexed_with_bcl_convert(
 
 
 @pytest.fixture(name="demultiplexed_flow_cells_tmp_directory")
-def fixture_demultiplexed_flow_cells_directory(tmp_path) -> Path:
+def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
     original_dir = Path(
         Path(__file__).parent, "fixtures", "apps", "demultiplexing", "demultiplexed-runs"
     )

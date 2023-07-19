@@ -30,6 +30,7 @@ from cg.meta.demultiplex.utils import (
     get_sample_fastqs_from_flow_cell,
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
+    copy_sample_sheet,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_internal_ids_from_sample_sheet,
@@ -67,26 +68,6 @@ class DemuxPostProcessingAPI:
         self.dry_run = dry_run
         if dry_run:
             self.demux_api.set_dry_run(dry_run=dry_run)
-
-    def copy_sample_sheet(
-        self, sample_sheet_source_directory: Path, sample_sheet_destination_directory: Path
-    ) -> None:
-        """Copy the sample sheet from the flow-cell-run dir to demultiplex-runs dir for a flow cell."""
-        sample_sheet_source: Path = Path(
-            sample_sheet_source_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-        )
-        sample_sheet_destination: Path = Path(
-            sample_sheet_destination_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-        )
-
-        if not sample_sheet_destination.exists():
-            LOG.debug(
-                f"Copy sample sheet {sample_sheet_source} from flow cell to demuxed result dir {sample_sheet_destination}"
-            )
-            shutil.copy(
-                sample_sheet_source.as_posix(),
-                sample_sheet_destination.as_posix(),
-            )
 
     def transfer_flow_cell(
         self, flow_cell_dir: Path, flow_cell_id: str, store: bool = True
@@ -134,7 +115,7 @@ class DemuxPostProcessingAPI:
             bcl_converter=bcl_converter,
         )
 
-        self.copy_sample_sheet(
+        copy_sample_sheet(
             sample_sheet_source_directory=flow_cell_run_directory,
             sample_sheet_destination_directory=flow_cell_directory,
         )

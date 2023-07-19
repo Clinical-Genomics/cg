@@ -838,33 +838,6 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     assert delivery_path.exists()
 
 
-def test_copy_sample_sheet(demultiplex_context: CGConfig):
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    # GIVEN a sample sheet in the run directory
-    sample_sheet_path = Path(
-        demux_post_processing_api.demux_api.run_dir,
-    )
-    sample_sheet_path.mkdir(parents=True, exist_ok=True)
-    Path(sample_sheet_path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME).touch()
-
-    # GIVEN a sample sheet target path
-    target_sample_sheet_path = Path(demux_post_processing_api.demux_api.out_dir)
-
-    # WHEN copying the sample sheet
-    demux_post_processing_api.copy_sample_sheet(
-        sample_sheet_source_directory=sample_sheet_path,
-        sample_sheet_destination_directory=target_sample_sheet_path,
-    )
-
-    # THEN the sample sheet was copied to the out directory
-    assert Path(
-        target_sample_sheet_path,
-        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-    ).exists()
-
-
 def test_add_demux_logs_to_housekeeper(
     demultiplex_context: CGConfig, dragen_flow_cell: FlowCellDirectoryData
 ):
