@@ -13,7 +13,7 @@ from cg.models.orders.sample_base import (
 )
 from cg.store.models import Application, Family, Organism, Panel, Pool, Sample
 from cgmodels.cg.constants import Pipeline
-from pydantic import field_validator, BaseModel, constr, validator
+from pydantic import field_validator, BaseModel, constr
 
 
 class OptionalIntValidator:
@@ -114,9 +114,7 @@ class Of1508Sample(OrderInSample):
     ] = None
     synopsis: Optional[str] = None
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("container", "container_name", "name", "source", "subject_id", "volume")
+    @field_validator("container", "container_name", "name", "source", "subject_id", "volume")
     def required_for_new_samples(cls, value, values, **kwargs):
         if not value and not values.get("internal_id"):
             raise ValueError("required for new sample '%s'" % (values.get("name")))
@@ -129,12 +127,10 @@ class Of1508Sample(OrderInSample):
         "quantity",
         mode="before",
     )
-    @classmethod
     def str_to_int(cls, v: str) -> Optional[int]:
         return OptionalIntValidator.str_to_int(v=v)
 
     @field_validator("age_at_sampling", "volume", mode="before")
-    @classmethod
     def str_to_float(cls, v: str) -> Optional[float]:
         return OptionalFloatValidator.str_to_float(v=v)
 
