@@ -2705,7 +2705,7 @@ def flow_cell_directory_name_demultiplexed_with_bcl_convert(
     return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
 
 
-@pytest.fixture(name="demultiplexed_flow_cells_directory")
+@pytest.fixture(name="demultiplexed_flow_cells_tmp_directory")
 def fixture_demultiplexed_flow_cells_directory(tmp_path) -> Path:
     original_dir = Path(
         Path(__file__).parent, "fixtures", "apps", "demultiplexing", "demultiplexed-runs"
@@ -2713,21 +2713,3 @@ def fixture_demultiplexed_flow_cells_directory(tmp_path) -> Path:
     tmp_dir = Path(tmp_path, "tmp_run_dir")
 
     return Path(shutil.copytree(original_dir, tmp_dir))
-
-
-@pytest.fixture(name="flow_cell_runs_directory_with_bcl_convert")
-def fixture_flow_cell_runs_directory_with_bcl_convert(
-    flow_cell_runs_dir: Path,
-) -> Path:
-    """Return a directory with flow cell runs with bcl convert."""
-    dir_path = Path(flow_cell_runs_dir, "nova_seq_6000")
-    return dir_path
-
-
-@pytest.fixture(name="flow_cell_runs_directory_with_bcl2fastq")
-def fixture_flow_cell_runs_directory_with_bcl2fastq(
-    flow_cell_runs_dir: Path,
-) -> Path:
-    """Return a directory with flow cell runs with bcl2fastq."""
-    dir_path = Path(flow_cell_runs_dir, "hiseq")
-    return dir_path
