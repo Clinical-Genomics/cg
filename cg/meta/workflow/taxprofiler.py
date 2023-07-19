@@ -78,6 +78,13 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             return profile
         return self.profile
 
+    def get_case_path(self, case_id: str) -> Path:
+        """Path to case working directory."""
+        return NextflowAnalysisAPI.get_case_path(case_id=case_id, root_dir=self.root)
+
+    def get_case_config_path(self, case_id):
+        return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
+
     @staticmethod
     def build_sample_sheet_content(
         sample_name: str,
