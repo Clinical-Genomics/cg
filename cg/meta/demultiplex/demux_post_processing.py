@@ -71,7 +71,7 @@ class DemuxPostProcessingAPI:
     def copy_sample_sheet(
         self, sample_sheet_source_directory: Path, sample_sheet_destination_directory: Path
     ) -> None:
-        """Copy the sample sheet from run dir to demux dir"""
+        """Copy the sample sheet from the flow-cell-run dir to demultiplex-runs dir for a flow cell."""
         sample_sheet_source: Path = Path(
             sample_sheet_source_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
         )
