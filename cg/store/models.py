@@ -518,7 +518,7 @@ class Flowcell(Model):
     name = Column(types.String(32), unique=True, nullable=False)
     sequencer_type = Column(types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx"))
     sequencer_name = Column(types.String(32))
-    sequenced_at = Column(types.DateTime)
+    sequenced_at = Column(types.DateTime, default=dt.datetime.now)
     status = Column(types.Enum(*FLOWCELL_STATUS), default="ondisk")
     archived_at = Column(types.DateTime)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)

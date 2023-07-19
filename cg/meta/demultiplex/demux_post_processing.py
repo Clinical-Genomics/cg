@@ -381,7 +381,6 @@ class DemuxPostProcessingAPI:
                 name=parsed_flow_cell.id,
                 sequencer_type=parsed_flow_cell.sequencer_type,
                 sequencer_name=parsed_flow_cell.machine_name,
-                sequenced_at=parsed_flow_cell.run_date,
             )
             self.status_db.session.add(flow_cell)
             self.status_db.session.commit()
