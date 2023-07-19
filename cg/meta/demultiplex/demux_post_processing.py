@@ -42,7 +42,7 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils import Process
-from cg.utils.files import get_file_in_directory, get_files_matching_pattern
+from cg.utils.files import get_files_matching_pattern
 
 
 LOG = logging.getLogger(__name__)
@@ -122,7 +122,6 @@ class DemuxPostProcessingAPI:
         """
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
-
 
         flow_cell_directory: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
         flow_cell_run_directory: Path = Path(self.demux_api.run_dir, flow_cell_directory_name)
@@ -687,6 +686,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             LOG.warning("Flow cell is already finished!")
             if not force:
                 return
+
             LOG.info("Post processing flow cell anyway")
         self.post_process_flow_cell(demux_results=demux_results)
 
