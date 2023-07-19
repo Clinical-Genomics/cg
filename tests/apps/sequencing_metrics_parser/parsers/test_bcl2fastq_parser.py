@@ -1,5 +1,7 @@
 import json
 
+import pytest
+from pathlib import Path
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
     Bcl2FastqSampleLaneMetrics,
 )
@@ -29,3 +31,12 @@ def test_parse_valid_bcl2fastq_sequencing_metrics(tmp_path, valid_bcl2fastq_metr
 
     # THEN the Bcl2FastqTileSequencingMetrics model contains the expected data
     assert result[0].flow_cell_name == valid_bcl2fastq_metrics_data["Flowcell"]
+
+
+def test_parse_not_found_bcl2fastq_sequencing_metrics():
+    """Test that an error is raised when the expected directory structure is not found."""
+    # GIVEN a directory structure that does not contain the expected directory structure
+    # WHEN parsing the directory containing the valid stats.json file
+    # THEN a FileNotFoundError is raised
+    with pytest.raises(FileNotFoundError):
+        parse_bcl2fastq_sequencing_metrics(flow_cell_dir=Path("/does/not/exist"))

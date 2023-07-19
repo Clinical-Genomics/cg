@@ -2,8 +2,8 @@
 
 import click
 
-from cg.utils.enums import StrEnum
 from cg.utils.date import get_date
+from cg.utils.enums import StrEnum
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
@@ -135,6 +135,7 @@ class FileExtensions(StrEnum):
     BED: str = ".bed"
     CRAM: str = ".cram"
     CSV: str = ".csv"
+    FASTQ: str = ".fastq"
     GPG: str = ".gpg"
     GZIP: str = ".gz"
     JSON: str = ".json"
@@ -145,6 +146,7 @@ class FileExtensions(StrEnum):
     TMP: str = ".tmp"
     VCF: str = ".vcf"
     XML: str = ".xml"
+    YAML: str = ".yaml"
 
 
 class APIMethods(StrEnum):

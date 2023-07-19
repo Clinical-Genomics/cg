@@ -39,7 +39,7 @@
       "container_name": "CMMS",
       "data_analysis": "rnafusion",
       "data_delivery": "scout",
-      "family_name": "family1",
+      "family_name": "family2",
       "name": "sample1-rna-t2",
       "phenotype_groups": [
         ""

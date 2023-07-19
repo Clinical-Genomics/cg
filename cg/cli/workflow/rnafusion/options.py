@@ -3,7 +3,7 @@ import click
 from cg.constants.rnafusion import RnafusionDefaults
 
 OPTION_FROM_START = click.option(
-    "--from_start",
+    "--from-start",
     is_flag=True,
     default=False,
     show_default=True,

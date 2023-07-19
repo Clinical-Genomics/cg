@@ -3,6 +3,7 @@ import datetime as dt
 import logging
 from typing import Callable, List, Optional, Iterator, Union, Dict
 
+
 from sqlalchemy.orm import Query, Session
 
 from cg.constants import FlowCellStatus, Pipeline
@@ -10,16 +11,12 @@ from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError, CgError
 from cg.store.api.base import BaseHandler
-from cg.store.filters.status_application_version_filters import (
-    ApplicationVersionFilter,
-    apply_application_versions_filter,
-)
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
+from cg.store.filters.status_metrics_filters import SequencingMetricsFilter, apply_metrics_filter
 
 from cg.store.models import (
     Analysis,
     Application,
-    ApplicationVersion,
     Customer,
     Flowcell,
     Family,
@@ -27,6 +24,7 @@ from cg.store.models import (
     Invoice,
     Pool,
     Sample,
+    SampleLaneSequencingMetrics,
 )
 
 from cg.store.filters.status_invoice_filters import apply_invoice_filter, InvoiceFilter
@@ -314,6 +312,46 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=filter_functions,
             customer_entry_ids=customer_entry_id,
             name=sample_name,
+        ).first()
+
+    def get_number_of_reads_for_sample_passing_q30_threshold(
+        self, sample_internal_id: str, q30_threshold: int
+    ) -> int:
+        """Get number of reads above q30 threshold for sample from sample lane sequencing metrics."""
+        total_reads_query: Query = apply_metrics_filter(
+            metrics=self._get_query(table=SampleLaneSequencingMetrics),
+            filter_functions=[
+                SequencingMetricsFilter.FILTER_TOTAL_READ_COUNT_FOR_SAMPLE,
+                SequencingMetricsFilter.FILTER_ABOVE_Q30_THRESHOLD,
+            ],
+            sample_internal_id=sample_internal_id,
+            q30_threshold=q30_threshold,
+        )
+        reads_count: Optional[int] = total_reads_query.scalar()
+        return reads_count if reads_count else 0
+
+    def get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        self, flow_cell_name: str
+    ) -> List[SampleLaneSequencingMetrics]:
+        """Return sample lane sequencing metrics for a flow cell."""
+        return apply_metrics_filter(
+            metrics=self._get_query(table=SampleLaneSequencingMetrics),
+            filter_functions=[SequencingMetricsFilter.FILTER_METRICS_BY_FLOW_CELL_NAME],
+            flow_cell_name=flow_cell_name,
+        ).all()
+
+    def get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+        self, flow_cell_name: str, sample_internal_id: str, lane: int
+    ) -> SampleLaneSequencingMetrics:
+        """Get metrics entry by flow cell name, sample internal id and lane."""
+        return apply_metrics_filter(
+            metrics=self._get_query(table=SampleLaneSequencingMetrics),
+            filter_functions=[
+                SequencingMetricsFilter.FILTER_METRICS_FOR_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE
+            ],
+            flow_cell_name=flow_cell_name,
+            sample_internal_id=sample_internal_id,
+            lane=lane,
         ).first()
 
     def get_flow_cell_by_name(self, flow_cell_name: str) -> Flowcell:
@@ -632,7 +670,7 @@ class FindBusinessDataHandler(BaseHandler):
         LOG.info(f"Case {case_internal_id} exists in Status DB")
 
     def get_running_cases_in_pipeline(self, pipeline: Pipeline) -> List[Family]:
-        """Get all running cases in a pipeline."""
+        """Return all running cases in a pipeline."""
         return apply_case_filter(
             filter_functions=[CaseFilter.FILTER_WITH_PIPELINE, CaseFilter.FILTER_IS_RUNNING],
             cases=self._get_query(table=Family),

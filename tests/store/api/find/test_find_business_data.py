@@ -1,7 +1,7 @@
 """Tests the findbusinessdata part of the Cg store API."""
 import logging
-from datetime import datetime, timedelta
-from typing import List
+from datetime import datetime
+from typing import List, Optional
 
 import pytest
 from cg.constants import FlowCellStatus
@@ -19,6 +19,7 @@ from cg.store.models import (
     Invoice,
     Pool,
     Sample,
+    SampleLaneSequencingMetrics,
 )
 from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
@@ -768,3 +769,112 @@ def test_get_cases_not_analysed_by_sample_internal_id_multiple_cases(
     for case in cases:
         assert not case.analyses
         assert any(sample.internal_id == sample_id_in_multiple_cases for sample in case.samples)
+
+
+def test_get_total_read_counts(
+    store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads: int
+):
+    # GIVEN a store with sequencing metrics
+
+    # WHEN getting total read counts for a sample
+    total_reads_count: int = (
+        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
+            sample_internal_id=sample_id, q30_threshold=0
+        )
+    )
+
+    # THEN assert that the total read count is correct
+    assert total_reads_count == expected_total_reads
+
+
+def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+    store_with_sequencing_metrics: Store, sample_id: str, flow_cell_name: str, lane: int = 1
+):
+    # GIVEN a store with sequencing metrics
+
+    # WHEN getting a metrics entry by flow cell name, sample internal id and lane
+    metrics_entry: SampleLaneSequencingMetrics = store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+        sample_internal_id=sample_id, flow_cell_name=flow_cell_name, lane=lane
+    )
+
+    assert metrics_entry is not None
+    assert metrics_entry.flow_cell_name == flow_cell_name
+    assert metrics_entry.flow_cell_lane_number == lane
+    assert metrics_entry.sample_internal_id == sample_id
+
+
+def test_get_number_of_reads_for_sample_passing_q30_threshold(
+    store_with_sequencing_metrics: Store,
+    sample_id: str,
+):
+    # GIVEN a store with sequencing metrics
+    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
+
+    # GIVEN a metric for a specific sample
+    sample_metric: Optional[SampleLaneSequencingMetrics] = metrics.filter(
+        SampleLaneSequencingMetrics.sample_internal_id == sample_id
+    ).first()
+    assert sample_metric
+
+    # GIVEN a Q30 threshold that the sample will pass
+    q30_threshold = int(sample_metric.sample_base_fraction_passing_q30 / 2 * 100)
+
+    # WHEN getting the number of reads for the sample that pass the Q30 threshold
+    number_of_reads: int = (
+        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
+            sample_internal_id=sample_id, q30_threshold=q30_threshold
+        )
+    )
+
+    # THEN assert that the number of reads is an integer
+    assert isinstance(number_of_reads, int)
+
+    # THEN assert that the number of reads is at least the number of reads in the lane for the sample passing the q30
+    assert number_of_reads >= sample_metric.sample_total_reads_in_lane
+
+
+def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
+    store_with_sequencing_metrics: Store, sample_id: str
+):
+    # GIVEN a store with sequencing metrics
+    metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
+
+    # GIVEN a metric for a specific sample
+    sample_metrics: List[SampleLaneSequencingMetrics] = metrics.filter(
+        SampleLaneSequencingMetrics.sample_internal_id == sample_id
+    ).all()
+
+    assert sample_metrics
+
+    # GIVEN a Q30 threshold that some of the sample's metrics will not pass
+    q30_values = [int(metric.sample_base_fraction_passing_q30 * 100) for metric in sample_metrics]
+    q30_threshold = sorted(q30_values)[len(q30_values) // 2]  # This is the median
+
+    # WHEN getting the number of reads for the sample that pass the Q30 threshold
+    number_of_reads: int = (
+        store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
+            sample_internal_id=sample_id, q30_threshold=q30_threshold
+        )
+    )
+
+    # THEN assert that the number of reads is less than the total number of reads for the sample
+    total_sample_reads = sum([metric.sample_total_reads_in_lane for metric in sample_metrics])
+    assert number_of_reads < total_sample_reads
+
+
+def test_get_sample_lane_sequencing_metrics_by_flow_cell_name(
+    store_with_sequencing_metrics: Store, flow_cell_name: str
+):
+    # GIVEN a store with sequencing metrics
+
+    # WHEN getting sequencing metrics for a flow cell
+    metrics: List[
+        SampleLaneSequencingMetrics
+    ] = store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=flow_cell_name
+    )
+
+    # THEN assert that the metrics are returned
+    assert metrics
+    for metric in metrics:
+        assert metric.flow_cell_name == flow_cell_name

@@ -6,8 +6,13 @@ from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell, delete_flow_cell
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from tests.meta.demultiplex.conftest import (
+    fixture_tmp_flow_cell_demux_base_path,
+    fixture_tmp_flow_cell_run_base_path,
+)
 
 
 def test_demultiplex_flow_cell_dry_run(
@@ -197,45 +202,19 @@ def test_demultiplex_all_novaseq(
     assert f"Flow cell {flow_cell.id} is ready for demultiplexing" in caplog.text
 
 
-def test_start_demultiplex_flow_cell(
-    caplog,
-    cli_runner: testing.CliRunner,
-    demultiplex_ready_flow_cell: Path,
-    demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCellDirectoryData,
-    mocker,
-):
-    caplog.set_level(logging.DEBUG)
-
-    # GIVEN that all files are present for demultiplexing
-    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
-
-    # GIVEN that demultiplexing has started
-    bcl2fastq_flow_cell.demultiplexing_started_path.touch()
-
-    # GIVEN a out dir that exist
-    demux_api.flow_cell_out_dir_path(bcl2fastq_flow_cell).mkdir(parents=True)
-
-    # GIVEN that demultiplexing is completed
-    demux_api.demultiplexing_completed_path(flow_cell=bcl2fastq_flow_cell).touch()
-
-    mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
-
-    # WHEN starting demultiplexing from the CLI
-    result: testing.Result = cli_runner.invoke(
-        demultiplex_flow_cell,
-        [str(demultiplex_ready_flow_cell), "-b", "bcl2fastq"],
-        obj=demultiplex_context,
+def test_is_demultiplexing_complete(demultiplex_ready_flow_cell: Path):
+    """Tests the is_demultiplexing_complete property of FlowCellDirectoryData"""
+    # GIVEN a demultiplexing directory with no demuxcomplete.txt file
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=demultiplex_ready_flow_cell
     )
+    assert not flow_cell.is_demultiplexing_complete
 
-    # THEN assert the command exits without problems
-    assert result.exit_code == 0
+    # WHEN creating the demuxcomplete.txt file
+    Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
 
-    # THEN assert it was communicated that previous demux was deleted
-    assert f"Removing flow cell demultiplexing directory {bcl2fastq_flow_cell.path}"
-
-    # THEN demultiplexing was started
-    assert f"Demultiplexing running as job" in caplog.text
+    # THEN the property should return true
+    assert flow_cell.is_demultiplexing_complete
 
 
 def test_delete_flow_cell_dry_run_cgstats(
@@ -251,22 +230,23 @@ def test_delete_flow_cell_dry_run_cgstats(
     # GIVEN a flow cell to be deleted
     assert bcl2fastq_flow_cell_id in demultiplex_ready_flow_cell.name
 
+    # GIVEN a path to the demux out dir for a flow cell
+    Path(demultiplex_context.demultiplex_api.out_dir, bcl2fastq_flow_cell_id).mkdir()
+
     # WHEN executing the commando to remove flow cell from cgstats in dry run mode
+
+    # THEN the exit code should be fine
     result: testing.Result = cli_runner.invoke(
         delete_flow_cell,
         [
-            "-d",
-            str(demultiplex_context.demultiplex_api.out_dir),
-            "-r",
-            demultiplex_ready_flow_cell,
+            "-f",
+            bcl2fastq_flow_cell_id,
             "--cg-stats",
             "--dry-run",
             "--yes",
         ],
         obj=demultiplex_context,
     )
-
-    # THEN the exit code should be fine
     assert result.exit_code == 0
 
     # THEN the appropriate flow cell should be prompted for removal
@@ -277,13 +257,22 @@ def test_delete_flow_cell_dry_run_status_db(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell_full_name: str,
+    tmp_flow_cell_demux_base_path: Path,
+    tmp_flow_cell_run_base_path: Path,
     bcl2fastq_flow_cell_id: str,
     caplog,
 ):
     """Test if logic work - call all true if status_db passed."""
     caplog.set_level(logging.DEBUG)
 
+    demultiplex_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
+    demultiplex_context.demultiplex_api.out_dir = tmp_flow_cell_demux_base_path
+    Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
+        parents=True, exist_ok=True
+    )
+    Path(tmp_flow_cell_demux_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
+        parents=True, exist_ok=True
+    )
     # GIVEN a flow cell to be deleted
     assert bcl2fastq_flow_cell_id in demultiplex_ready_flow_cell.name
 
@@ -291,10 +280,8 @@ def test_delete_flow_cell_dry_run_status_db(
     result: testing.Result = cli_runner.invoke(
         delete_flow_cell,
         [
-            "-d",
-            str(demultiplex_context.demultiplex_api.out_dir),
-            "-r",
-            demultiplex_ready_flow_cell,
+            "-f",
+            bcl2fastq_flow_cell_id,
             "--status-db",
             "--dry-run",
             "--yes",
@@ -318,7 +305,7 @@ def test_delete_flow_cell_dry_run_status_db(
     assert f"DeleteDemuxAPI-CGStats: Would remove {bcl2fastq_flow_cell_id}" in caplog.text
     assert (
         "DeleteDemuxAPI-Hasta: Would have removed the following directory: "
-        f"{demultiplex_context.demultiplex_api.out_dir / Path(bcl2fastq_flow_cell_full_name)}\n"
-        f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_ready_flow_cell}"
+        f"{demultiplex_context.demultiplex_api.out_dir / Path(f'some_prefix_1100_{bcl2fastq_flow_cell_id}')}\n"
+        f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_context.demultiplex_api.run_dir / Path(f'some_prefix_1100_{bcl2fastq_flow_cell_id}')}"
     ) in caplog.text
     assert "DeleteDemuxAPI-Init-files: Would have removed" not in caplog.text

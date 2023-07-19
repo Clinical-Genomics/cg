@@ -20,12 +20,6 @@ class PriorityTerms(StrEnum):
     CLINICAL_TRIALS: str = "clinical_trials"
 
 
-SLURM_ACCOUNT_TO_QOS = {
-    "production": SlurmQos.NORMAL,
-    "development": SlurmQos.LOW,
-}
-
-
 class Priority(IntEnum):
     research: int = 0
     standard: int = 1
@@ -41,3 +35,9 @@ PRIORITY_TO_SLURM_QOS = {
     Priority.express: SlurmQos.EXPRESS,
     Priority.clinical_trials: SlurmQos.NORMAL,
 }
+
+
+class SlurmAccount(StrEnum):
+    PRODUCTION: str = "production"
+    DEVELOPMENT: str = "development"
+    STAGE: str = "stage"

@@ -2,38 +2,29 @@
 from typing import List, Optional
 
 from cg.constants import (
-    REQUIRED_REPORT_FIELDS,
-    REQUIRED_CUSTOMER_FIELDS,
-    REQUIRED_CASE_FIELDS,
     REQUIRED_APPLICATION_FIELDS,
+    REQUIRED_CASE_FIELDS,
+    REQUIRED_CUSTOMER_FIELDS,
     REQUIRED_DATA_ANALYSIS_RNAFUSION_FIELDS,
-    REQUIRED_SAMPLE_METHODS_FIELDS,
-    REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
-    REQUIRED_SAMPLE_RNAFUSION_FIELDS,
+    REQUIRED_REPORT_FIELDS,
     REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS,
+    REQUIRED_SAMPLE_METHODS_FIELDS,
+    REQUIRED_SAMPLE_RNAFUSION_FIELDS,
+    REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
+    Pipeline,
 )
-from cg.models.report.report import CaseModel
-from cgmodels.cg.constants import Pipeline
-
-from cg.models.report.sample import SampleModel
-
 from cg.constants.constants import GenomeVersion
-
-from cg.models.analysis import AnalysisModel
-
 from cg.meta.report.field_validators import get_million_read_pairs
-from cg.models.rnafusion.metrics import RnafusionQCMetrics
-
-from cg.models.report.metadata import RnafusionSampleMetadataModel
-from cg.models.rnafusion.analysis import RnafusionAnalysis
-
-from cg.store.models import Family, Sample
-
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
-
-from cg.models.cg_config import CGConfig
-
 from cg.meta.report.report_api import ReportAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.models.analysis import AnalysisModel
+from cg.models.cg_config import CGConfig
+from cg.models.report.metadata import RnafusionSampleMetadataModel
+from cg.models.report.report import CaseModel
+from cg.models.report.sample import SampleModel
+from cg.models.rnafusion.analysis import RnafusionAnalysis
+from cg.models.rnafusion.metrics import RnafusionQCMetrics
+from cg.store.models import Family, Sample
 
 
 class RnafusionReportAPI(ReportAPI):
@@ -55,7 +46,9 @@ class RnafusionReportAPI(ReportAPI):
             input_amount=self.lims_api.get_latest_rna_input_amount(sample_id=sample.internal_id),
             insert_size=None,
             insert_size_peak=None,
-            mapped_reads=sample_metrics.reads_aligned / sample_metrics.before_filtering_total_reads,
+            mapped_reads=sample_metrics.reads_aligned
+            * 2
+            / sample_metrics.before_filtering_total_reads,
             mean_length_r1=sample_metrics.after_filtering_read1_mean_length,
             million_read_pairs=get_million_read_pairs(
                 reads=sample_metrics.before_filtering_total_reads
@@ -77,8 +70,8 @@ class RnafusionReportAPI(ReportAPI):
     def get_report_accreditation(
         self, samples: List[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Checks if the report is accredited or not. Rnafusion is an accredited workflow."""
-        return True
+        """Checks if the report is accredited or not. Rnafusion is not an accredited workflow."""
+        return False
 
     def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
         """Return the file path of the uploaded to Scout file given its tag."""

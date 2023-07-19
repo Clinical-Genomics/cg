@@ -1,24 +1,22 @@
 import datetime as dt
 import re
-from typing import List, Optional, Set, Dict
-
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
-from sqlalchemy.util import deprecated
-from sqlalchemy.orm.attributes import InstrumentedAttribute
+from typing import Dict, List, Optional, Set
 
 from cg.constants import (
     CASE_ACTIONS,
     FLOWCELL_STATUS,
     PREP_CATEGORIES,
-    Priority,
     SEX_OPTIONS,
     STATUS_OPTIONS,
     DataDelivery,
     Pipeline,
+    Priority,
 )
-
 from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.util import deprecated
 
 Model = declarative_base()
 
@@ -274,6 +272,8 @@ class Customer(Model):
     return_samples = Column(types.Boolean, nullable=False, default=False)
     scout_access = Column(types.Boolean, nullable=False, default=False)
     uppmax_account = Column(types.String(32))
+    data_archive_location = Column(types.String(32), nullable=False, default="PDC")
+    is_clinical = Column(types.Boolean, nullable=False, default=False)
 
     collaborations = orm.relationship("Collaboration", secondary=customer_collaboration)
     delivery_contact_id = Column(ForeignKey("user.id"))
@@ -441,6 +441,11 @@ class Family(Model, PriorityMixin):
         """Extract samples uploaded to Loqusdb."""
         return [link.sample for link in self.links if link.sample.loqusdb_id]
 
+    @property
+    def is_uploaded(self) -> bool:
+        """Returns True if the latest connected analysis has been uploaded."""
+        return self.analyses and self.analyses[0].uploaded_at
+
     def get_delivery_arguments(self) -> Set[str]:
         """Translates the case data_delivery field to pipeline specific arguments."""
         delivery_arguments: Set[str] = set()
@@ -511,7 +516,7 @@ class Flowcell(Model):
     __tablename__ = "flowcell"
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
-    sequencer_type = Column(types.Enum("hiseqga", "hiseqx", "novaseq"))
+    sequencer_type = Column(types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx"))
     sequencer_name = Column(types.String(32))
     sequenced_at = Column(types.DateTime)
     status = Column(types.Enum(*FLOWCELL_STATUS), default="ondisk")
@@ -519,7 +524,11 @@ class Flowcell(Model):
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
     samples = orm.relationship("Sample", secondary=flowcell_sample, backref="flowcells")
-    sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="flowcell")
+    sequencing_metrics = orm.relationship(
+        "SampleLaneSequencingMetrics",
+        back_populates="flowcell",
+        cascade="all, delete, delete-orphan",
+    )
 
     def __str__(self):
         return self.name
@@ -639,6 +648,7 @@ class Sample(Model, PriorityMixin):
     sequenced_at = Column(types.DateTime)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
+    calculated_read_count = Column(types.BigInteger, default=0)
 
     sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
 
@@ -781,3 +791,12 @@ class SampleLaneSequencingMetrics(Model):
 
     flowcell = orm.relationship(Flowcell, back_populates="sequencing_metrics")
     sample = orm.relationship(Sample, back_populates="sequencing_metrics")
+
+    __table_args__ = (
+        UniqueConstraint(
+            "flow_cell_name",
+            "sample_internal_id",
+            "flow_cell_lane_number",
+            name="uix_flowcell_sample_lane",
+        ),
+    )

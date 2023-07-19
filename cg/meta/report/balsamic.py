@@ -1,7 +1,6 @@
 import logging
 from typing import List, Union, Optional, Dict
 
-from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import Version, File
 
 from cg.constants import (
@@ -18,11 +17,12 @@ from cg.constants import (
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS,
     BALSAMIC_ANALYSIS_TYPE,
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS,
+    Pipeline,
 )
 from cg.constants.scout_upload import BALSAMIC_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.report.report_api import ReportAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.config import BalsamicVarCaller
 from cg.models.balsamic.metrics import (
@@ -37,7 +37,7 @@ from cg.models.report.metadata import (
 )
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
-from cg.store.models import Family, Sample
+from cg.store.models import Family, Sample, BedVersion, Bed
 
 LOG = logging.getLogger(__name__)
 
@@ -62,22 +62,24 @@ class BalsamicReportAPI(ReportAPI):
                 million_read_pairs=million_read_pairs, sample_metrics=sample_metrics
             )
         return self.get_panel_metadata(
-            sample=sample,
             million_read_pairs=million_read_pairs,
             sample_metrics=sample_metrics,
             analysis_metadata=analysis_metadata,
         )
 
-    @staticmethod
     def get_panel_metadata(
-        sample: Sample,
+        self,
         million_read_pairs: float,
         sample_metrics: BalsamicTargetedQCMetrics,
         analysis_metadata: BalsamicAnalysis,
     ) -> BalsamicTargetedSampleMetadataModel:
         """Returns a report metadata for BALSAMIC TGS analysis."""
+        bed_version: BedVersion = self.status_db.get_bed_version_by_file_name(
+            analysis_metadata.config.panel.capture_kit
+        )
+        bed: Bed = self.status_db.get_bed_by_entry_id(bed_version.bed_id) if bed_version else None
         return BalsamicTargetedSampleMetadataModel(
-            bait_set=sample.capture_kit,
+            bait_set=bed.name if bed else None,
             bait_set_version=analysis_metadata.config.panel.capture_kit_version,
             million_read_pairs=million_read_pairs,
             median_target_coverage=sample_metrics.median_target_coverage

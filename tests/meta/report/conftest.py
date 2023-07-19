@@ -1,19 +1,17 @@
-from pathlib import Path
-
 from datetime import datetime, timedelta
-from typing import List, Dict
+from pathlib import Path
+from typing import Dict, List
 
 import pytest
-from cg.store import Store
 
-from cg.meta.report.rnafusion import RnafusionReportAPI
-from cgmodels.cg.constants import Pipeline
-
+from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
+from cg.meta.report.rnafusion import RnafusionReportAPI
 from cg.models.cg_config import CGConfig
+from cg.store import Store
 from cg.store.models import Family
 from tests.apps.scout.conftest import MockScoutApi
 from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
@@ -123,7 +121,7 @@ def fixture_rnafusion_validated_metrics() -> Dict[str, str]:
         "ribosomal_bases": "65.81",
         "q20_rate": "97.48",
         "q30_rate": "92.95",
-        "mapped_reads": "48.27",
+        "mapped_reads": "96.53",
         "rin": "10.0",
         "input_amount": "300.0",
         "insert_size": "N/A",
