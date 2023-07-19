@@ -1,6 +1,6 @@
 from typing import List, Set
 
-from pydantic import field_validator, ConfigDict, BaseModel, Field, validator
+from pydantic import field_validator, ConfigDict, BaseModel, Field
 
 
 class Unaligned(BaseModel):
@@ -21,9 +21,7 @@ class StatsSample(BaseModel):
     read_count_sum: int = 0
     sum_yield: int = 0
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("lanes", always=True)
+    @field_validator("lanes")
     def set_lanes(cls, _, values: dict) -> List[int]:
         """Set the number of pass filter clusters"""
         unaligned_reads: List[Unaligned] = values["unaligned"]
@@ -32,9 +30,7 @@ class StatsSample(BaseModel):
             lanes_found.add(read.lane)
         return list(lanes_found)
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("read_count_sum", always=True)
+    @field_validator("read_count_sum")
     def set_read_count(cls, _, values: dict):
         unaligned_reads: List[Unaligned] = values["unaligned"]
         count: int = 0
@@ -42,9 +38,7 @@ class StatsSample(BaseModel):
             count += read.read_count
         return count
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("sum_yield", always=True)
+    @field_validator("sum_yield")
     def set_sum_yield(cls, _, values: dict):
         unaligned_reads: List[Unaligned] = values["unaligned"]
         count: int = 0
@@ -53,7 +47,6 @@ class StatsSample(BaseModel):
         return count
 
     @field_validator("unaligned")
-    @classmethod
     def sort_unaligned(cls, values):
         return sorted(values, key=lambda x: x.lane)
 
