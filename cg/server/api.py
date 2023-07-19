@@ -372,7 +372,7 @@ def get_sequencing_metrics(flow_cell_id: str):
     metrics: List[
         SampleLaneSequencingMetrics
     ] = db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_id)
-    return jsonify(metrics)
+    return jsonify([metric.to_dict() for metric in metrics])
 
 
 @BLUEPRINT.route("/analyses")
