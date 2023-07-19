@@ -102,18 +102,18 @@ def run(
         "log": NextflowAnalysisAPI.get_log_path(
             case_id=case_id, pipeline=analysis_api.pipeline, root_dir=analysis_api.root_dir, log=log
         ),
-        # "work-dir": NextflowAnalysisAPI.get_workdir_path(
-        #     case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
-        # ),
-        # "resume": not from_start,
-        # "profile": analysis_api.get_profile(profile=profile),
-        # "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
-        # "params-file": NextflowAnalysisAPI.get_params_file_path(
-        #     case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
-        # ),
-        # "name": case_id,
-        # "revision": revision or analysis_api.revision,
-        # "wait": "SUBMITTED",
+        "work-dir": NextflowAnalysisAPI.get_workdir_path(
+            case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
+        ),
+        "resume": not from_start,
+        "profile": analysis_api.get_profile(profile=profile),
+        "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
+        "params-file": NextflowAnalysisAPI.get_params_file_path(
+            case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
+        ),
+        "name": case_id,
+        "revision": revision or analysis_api.revision,
+        "wait": "SUBMITTED",
     }
 
     try:

@@ -24,6 +24,7 @@ from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
 from cg.utils import Process
 from cg.store.models import Family, Sample
+from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -59,6 +60,18 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
+
+    @property
+    def process(self):
+        if not self._process:
+            self._process = Process(
+                binary=self.tower_binary_path,
+            )
+        return self._process
+
+    @process.setter
+    def process(self, process: Process):
+        self._process = process
 
     def get_profile(self, profile: Optional[str] = None) -> str:
         if profile:
