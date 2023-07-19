@@ -19,7 +19,17 @@ from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.ext import db, lims, osticket
-from cg.store.models import Analysis, Application, Customer, Family, Flowcell, Pool, Sample, User
+from cg.store.models import (
+    Analysis,
+    Application,
+    Customer,
+    Family,
+    Flowcell,
+    Pool,
+    Sample,
+    SampleLaneSequencingMetrics,
+    User,
+)
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from pydantic.v1 import ValidationError
@@ -354,6 +364,15 @@ def parse_flow_cell(flowcell_id):
     if flow_cell is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     return jsonify(**flow_cell.to_dict(samples=True))
+
+
+@BLUEPRINT.route("/flowcells/<flow_cell_id>/sequencing_metrics", methods=["GET"])
+def get_sequencing_metrics(flow_cell_id: str):
+    """Return sequencing metrics for a flow cell."""
+    metrics: List[
+        SampleLaneSequencingMetrics
+    ] = db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_id)
+    return jsonify(metrics)
 
 
 @BLUEPRINT.route("/analyses")
