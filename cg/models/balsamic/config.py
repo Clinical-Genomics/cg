@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Union, Optional
 
-from pydantic import field_validator, BaseModel, validator
+from pydantic import field_validator, BaseModel
 
 
 class BalsamicConfigAnalysis(BaseModel):
@@ -50,9 +50,7 @@ class BalsamicConfigReference(BaseModel):
     reference_genome: Path
     reference_genome_version: Optional[str] = None
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("reference_genome_version", always=True)
+    @field_validator("reference_genome_version")
     def extract_genome_version_from_path(cls, value: Optional[str], values: dict) -> str:
         """
         Returns the genome version from the reference path:
@@ -76,14 +74,11 @@ class BalsamicConfigPanel(BaseModel):
     chrom: List[str]
 
     @field_validator("capture_kit", mode="before")
-    @classmethod
     def extract_capture_kit_name_from_path(cls, capture_kit: str) -> str:
         """Return the base name of the provided capture kit path."""
         return Path(capture_kit).name
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("capture_kit_version", always=True)
+    @field_validator("capture_kit_version")
     def extract_capture_kit_name_from_name(
         cls, capture_kit_version: Optional[str], values: dict
     ) -> str:
