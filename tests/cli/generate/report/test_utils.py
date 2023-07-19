@@ -3,7 +3,7 @@ from datetime import datetime
 
 import click.exceptions
 import pytest
-from cgmodels.cg.constants import Pipeline
+from cg.constants import Pipeline
 
 from cg.cli.generate.report.utils import (
     get_report_case,
