@@ -1,7 +1,7 @@
 import operator
 from typing import Any, Callable, Dict, List, Optional
 
-from pydantic import field_validator, BaseModel, Field, validator
+from pydantic import field_validator, BaseModel, Field
 
 from cg.exc import CgError, MetricsQCError
 
@@ -96,9 +96,7 @@ class MeanInsertSize(SampleMetric):
 
     value: float
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("value", always=True)
+    @field_validator("value")
     def convert_mean_insert_size(cls, value) -> int:
         """Convert raw value from float to int"""
         return int(value)
@@ -126,9 +124,7 @@ class MetricsDeliverables(BaseModel):
     metrics_: List[MetricsBase] = Field(..., alias="metrics")
     sample_ids: Optional[set] = None
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("sample_ids", always=True)
+    @field_validator("sample_ids")
     def set_sample_ids(cls, _, values: dict) -> set:
         """Set sample_ids gathered from all metrics"""
         sample_ids: list = []
