@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set
 from xml.etree.ElementTree import Element, iterparse
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 LOG = logging.getLogger(__name__)
 

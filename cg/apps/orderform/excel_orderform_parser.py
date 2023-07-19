@@ -6,7 +6,7 @@ import openpyxl
 from openpyxl.cell.cell import Cell
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
-from pydantic import parse_obj_as
+from pydantic.v1 import parse_obj_as
 
 from cg.apps.orderform.orderform_parser import OrderformParser
 from cg.constants import DataDelivery

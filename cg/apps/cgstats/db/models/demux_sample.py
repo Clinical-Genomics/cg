@@ -1,5 +1,5 @@
 import logging
-from pydantic import BaseModel, validator
+from pydantic.v1 import BaseModel, validator
 
 from cg.apps.cgstats.parsers.conversion_stats import SampleConversionResults
 from cg.apps.cgstats.parsers.demux_stats import SampleBarcodeStats

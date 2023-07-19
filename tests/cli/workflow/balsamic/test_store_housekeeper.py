@@ -13,7 +13,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
 from click.testing import CliRunner
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 
 def test_without_options(cli_runner: CliRunner, balsamic_context: CGConfig):
