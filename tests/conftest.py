@@ -2743,6 +2743,12 @@ def fixture_taxprofiler_case_id() -> str:
     return "taxprofiler_case"
 
 
+@pytest.fixture(name="taxprofiler_sample_id")
+def fixture_taxprofiler_sample_id() -> str:
+    """Returns a rnafusion sample id."""
+    return "taxprofiler_sample"
+
+
 @pytest.fixture(name="taxprofiler_dir")
 def taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the taxprofiler apps dir."""
@@ -2753,7 +2759,31 @@ def taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> str:
 @pytest.fixture(scope="function", name="taxprofiler_context")
 def fixture_taxprofiler_context(
     cg_context: CGConfig,
+    cg_dir: Path,
+    helpers: StoreHelpers,
+    taxprofiler_case_id: str,
+    taxprofiler_sample_id: str,
 ) -> CGConfig:
     """Context to use in cli."""
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
+    status_db: Store = cg_context.status_db
+    taxprofiler_case: Family = helpers.add_case(
+        store=status_db,
+        internal_id=taxprofiler_case_id,
+        name=taxprofiler_case_id,
+        data_analysis=Pipeline.TAXPROFILER,
+    )
+
+    taxprofiler_sample: Sample = helpers.add_sample(
+        status_db,
+        internal_id=taxprofiler_sample_id,
+        sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=taxprofiler_case,
+        sample=taxprofiler_sample,
+    )
+
     return cg_context
