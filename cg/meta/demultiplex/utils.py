@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 
-from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
@@ -113,7 +113,7 @@ def copy_sample_sheet(
 
     if not sample_sheet_destination.exists():
         LOG.debug(
-            f"Copy sample sheet {sample_sheet_source} from flow cell to demuxed result dir {sample_sheet_destination}"
+            f"Copy sample sheet {sample_sheet_source_directory} from flow cell to demuxed result dir {sample_sheet_destination_directory}"
         )
         try:
             shutil.copy(
@@ -122,5 +122,5 @@ def copy_sample_sheet(
             )
         except FileNotFoundError as e:
             raise FileNotFoundError(
-                f"Could not copy sample sheet from {sample_sheet_source} to {sample_sheet_destination}: {e}"
+                f"Could not copy sample sheet from {sample_sheet_source_directory} to {sample_sheet_destination_directory}: {e}"
             )
