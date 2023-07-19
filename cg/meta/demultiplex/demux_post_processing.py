@@ -79,13 +79,14 @@ class DemuxPostProcessingAPI:
             sample_sheet_destination_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
         )
 
-        LOG.info(
-            f"Copy sample sheet {sample_sheet_source} from flow cell to demuxed result dir {sample_sheet_destination}"
-        )
-        shutil.copy(
-            sample_sheet_source.as_posix(),
-            sample_sheet_destination.as_posix(),
-        )
+        if not sample_sheet_destination.exists():
+            LOG.debug(
+                f"Copy sample sheet {sample_sheet_source} from flow cell to demuxed result dir {sample_sheet_destination}"
+            )
+            shutil.copy(
+                sample_sheet_source.as_posix(),
+                sample_sheet_destination.as_posix(),
+            )
 
     def transfer_flow_cell(
         self, flow_cell_dir: Path, flow_cell_id: str, store: bool = True
