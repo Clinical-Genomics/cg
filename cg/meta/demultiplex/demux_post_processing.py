@@ -1,4 +1,5 @@
 """Post-processing Demultiiplex API."""
+from datetime import datetime
 import logging
 import shutil
 from contextlib import redirect_stdout
@@ -381,6 +382,7 @@ class DemuxPostProcessingAPI:
                 name=parsed_flow_cell.id,
                 sequencer_type=parsed_flow_cell.sequencer_type,
                 sequencer_name=parsed_flow_cell.machine_name,
+                sequenced_at=datetime.now()
             )
             self.status_db.session.add(flow_cell)
             self.status_db.session.commit()
