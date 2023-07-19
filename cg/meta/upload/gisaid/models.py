@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Optional
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from datetime import datetime
 
 from cg.meta.upload.gisaid.constants import AUTHORS
@@ -16,15 +16,11 @@ class GisaidAccession(BaseModel):
     accession_nr: Optional[str] = None
     sample_id: Optional[str] = None
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("accession_nr", always=True)
+    @field_validator("accession_nr")
     def parse_accession(cls, v, values):
         return values["log_message"].split(";")[-1]
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("sample_id", always=True)
+    @field_validator("sample_id")
     def parse_sample_id(cls, v, values):
         return values["log_message"].split("/")[2].split("_")[2]
 
@@ -59,23 +55,17 @@ class GisaidSample(BaseModel):
     covv_subm_lab_addr: Optional[str] = "171 76 Stockholm, Sweden"
     covv_authors: Optional[str] = " ,".join(AUTHORS)
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("covv_location", always=True)
+    @field_validator("covv_location")
     def parse_location(cls, v, values):
         region: str = values.get("region")
         return f"Europe/Sweden/{region}"
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("covv_subm_sample_id", always=True)
+    @field_validator("covv_subm_sample_id")
     def parse_subm_sample_id(cls, v, values):
         region_code = values.get("region_code")
         return f"{region_code}_SE100_{v}"
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("covv_virus_name", always=True)
+    @field_validator("covv_virus_name")
     def parse_virus_name(cls, v, values):
         sample_name = values.get("covv_subm_sample_id")
         date = values.get("covv_collection_date")
