@@ -36,6 +36,7 @@ from cg.io.yaml import write_yaml
 from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
@@ -2725,3 +2726,34 @@ def demultiplexed_flow_cells_directory(tmp_path) -> Path:
     tmp_dir = Path(tmp_path, "tmp_run_dir")
 
     return Path(shutil.copytree(original_dir, tmp_dir))
+
+
+@pytest.fixture
+def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
+    """Create samplesheet.csv file for testing"""
+    Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
+    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
+
+
+@pytest.fixture(name="taxprofiler_case_id")
+def fixture_taxprofiler_case_id() -> str:
+    """Returns a taxprofiler case id."""
+    return "taxprofiler_case"
+
+
+@pytest.fixture(name="taxprofiler_dir")
+def taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> str:
+    """Return the path to the taxprofiler apps dir."""
+    taxprofiler_dir = tmpdir_factory.mktemp("taxprofiler")
+    return Path(taxprofiler_dir).absolute().as_posix()
+
+
+@pytest.fixture(scope="function", name="taxprofiler_context")
+def fixture_taxprofiler_context(
+    cg_context: CGConfig,
+) -> CGConfig:
+    """Context to use in cli."""
+    cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
+    return cg_context
