@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 
 class NextflowSample(BaseModel):
@@ -16,9 +16,7 @@ class NextflowSample(BaseModel):
     fastq_r1: List[str]
     fastq_r2: List[str]
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("fastq_r2")
+    @field_validator("fastq_r2")
     def fastq1_fastq2_len_match(cls, value: List[str], values: dict) -> str:
         """Verify that the number of fastq files is the same for R1 and R2."""
         assert len(value) == len(values.get("fastq_r1")) or len(value) == 0
