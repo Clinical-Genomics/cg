@@ -368,10 +368,18 @@ def parse_flow_cell(flowcell_id):
 
 @BLUEPRINT.route("/flowcells/<flow_cell_id>/sequencing_metrics", methods=["GET"])
 def get_sequencing_metrics(flow_cell_id: str):
-    """Return sequencing metrics for a flow cell"""
+    """Return sequencing metrics for a flow cell."""
+
+    if not flow_cell_id:
+        return jsonify({"error": "Invalid or missing flow cell id"}), http.HTTPStatus.BAD_REQUEST
+
     metrics: List[
         SampleLaneSequencingMetrics
     ] = db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_id)
+
+    if not metrics:
+        return jsonify({"error": "Sequencing metrics not found"}), http.HTTPStatus.NOT_FOUND
+
     return jsonify([metric.to_dict() for metric in metrics])
 
 
