@@ -123,9 +123,9 @@ def run(
         analysis_api.run_analysis(
             case_id=case_id, command_args=command_args, use_nextflow=use_nextflow, dry_run=dry_run
         )
-        analysis_api.set_statusdb_action(
-            case_id=case_id, action=CaseActions.RUNNING, dry_run=dry_run
-        )
+        #analysis_api.set_statusdb_action(
+        #    case_id=case_id, action=CaseActions.RUNNING, dry_run=dry_run
+        #)
     except (CgError, ValueError) as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort() from error
