@@ -211,6 +211,11 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
         LOG.info("Configs files written")
 
+    def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
+        NextflowAnalysisAPI.verify_case_config_file_exists(
+            case_id=case_id, root_dir=self.root_dir, dry_run=dry_run
+        )
+
     def run_analysis(
         self, case_id: str, command_args: dict, use_nextflow: bool, dry_run: bool = False
     ) -> None:
