@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from cg.constants.constants import HastaSlurmPartitions
 from cg.constants.priority import SlurmQos

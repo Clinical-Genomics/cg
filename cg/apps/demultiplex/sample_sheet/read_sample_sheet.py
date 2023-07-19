@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 from typing import Dict, List, Type
-from pydantic import parse_obj_as
+from pydantic.v1 import parse_obj_as
 
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
 from cg.constants.constants import FileFormat

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional, Union
 
-from pydantic import BaseModel, validator, root_validator
+from pydantic.v1 import BaseModel, validator, root_validator
 from cg.constants import Pipeline, DataDelivery
 from cg.models.report.sample import SampleModel, ApplicationModel
 from cg.models.report.validators import (

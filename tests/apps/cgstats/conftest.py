@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict
 
 import pytest
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.db.models import Supportparams, Sample, Project, Datasource, Demux
