@@ -81,7 +81,7 @@ class DemuxPostProcessingAPI:
 
         if not sample_sheet_destination.exists():
             LOG.debug(
-                f"Copy sample sheet {sample_sheet_source} from flow cell to demuxed result dir {sample_sheet_destination}"
+                f"Copy sample sheet {sample_sheet_source} from flow cell to demuxed result dir {sample_sheet_destination_directory}"
             )
             shutil.copy(
                 sample_sheet_source.as_posix(),
