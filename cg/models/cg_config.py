@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic.v1 import BaseModel, EmailStr, Field
 from typing_extensions import Literal
 
 from cg.apps.cgstats.stats import StatsAPI

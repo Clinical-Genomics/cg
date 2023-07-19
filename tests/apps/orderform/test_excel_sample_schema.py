@@ -1,5 +1,5 @@
 import pytest
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from cg.constants import DataDelivery
 from cg.models.orders.excel_sample import ExcelSample

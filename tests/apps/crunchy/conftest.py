@@ -5,10 +5,10 @@ from typing import List
 
 import pytest
 
+from cg.apps.crunchy.models import CrunchyMetadata
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.models import CompressionData
-from cgmodels.crunchy.metadata import CrunchyMetadata
 
 LOG = logging.getLogger(__name__)
 

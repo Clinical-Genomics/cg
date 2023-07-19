@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from urllib.parse import urljoin
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 from requests.models import Response
 
 from datetime import datetime

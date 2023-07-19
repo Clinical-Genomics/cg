@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from pydantic import BaseModel, validator
+from pydantic.v1 import BaseModel, validator
 from typing import List
 from typing_extensions import Literal
 
