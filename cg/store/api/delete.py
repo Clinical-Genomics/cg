@@ -3,7 +3,7 @@
 from typing import List
 
 from cg.store.filters.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilter
-from cg.store.models import Flowcell, Family, Sample
+from cg.store.models import Flowcell, Family, Sample, SampleLaneSequencingMetrics
 from cg.store.api.base import BaseHandler
 from sqlalchemy.orm import Session
 
@@ -40,4 +40,16 @@ class DeleteDataHandler(BaseHandler):
             case: Family = self.get_case_by_internal_id(internal_id=case_internal_id)
             if case and not case.links:
                 self.session.delete(case)
+        self.session.commit()
+
+    def delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
+        self, flow_cell_name: str
+    ) -> None:
+        """Delete all entries in sample_lane_sequencing_metrics for a flow cell."""
+        metrics: List[
+            SampleLaneSequencingMetrics
+        ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
+        for metric in metrics:
+            if metric:
+                self.session.delete(metric)
         self.session.commit()
