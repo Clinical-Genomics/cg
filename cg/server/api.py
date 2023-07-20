@@ -22,7 +22,7 @@ from cg.server.ext import db, lims, osticket
 from cg.store.models import Analysis, Application, Customer, Family, Flowcell, Pool, Sample, User
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.exc import IntegrityError
 from urllib3.exceptions import MaxRetryError, NewConnectionError

@@ -3,7 +3,7 @@
 
 import logging
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 LOG = logging.getLogger(__name__)
 

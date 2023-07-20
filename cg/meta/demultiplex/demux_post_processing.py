@@ -30,6 +30,7 @@ from cg.meta.demultiplex.utils import (
     get_sample_fastqs_from_flow_cell,
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
+    copy_sample_sheet,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_internal_ids_from_sample_sheet,
@@ -42,7 +43,7 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils import Process
-from cg.utils.files import get_file_in_directory, get_files_matching_pattern
+from cg.utils.files import get_files_matching_pattern
 
 
 LOG = logging.getLogger(__name__)
@@ -68,22 +69,6 @@ class DemuxPostProcessingAPI:
         if dry_run:
             self.demux_api.set_dry_run(dry_run=dry_run)
 
-    def copy_sample_sheet(self) -> None:
-        """Copy the sample sheet from run dir to demux dir"""
-        sample_sheet_path = get_file_in_directory(
-            self.demux_api.run_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-        )
-        target_sample_sheet_path = Path(
-            self.demux_api.out_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-        )
-        LOG.info(
-            f"Copy sample sheet {sample_sheet_path} from flow cell to demuxed result dir {target_sample_sheet_path}"
-        )
-        shutil.copy(
-            sample_sheet_path.as_posix(),
-            target_sample_sheet_path.as_posix(),
-        )
-
     def transfer_flow_cell(
         self, flow_cell_dir: Path, flow_cell_id: str, store: bool = True
     ) -> None:
@@ -103,6 +88,7 @@ class DemuxPostProcessingAPI:
         """Store data for the demultiplexed flow cell and mark it as ready for delivery.
 
         This function:
+            - Copies the sample sheet to the demultiplexed flow cell directory
             - Parses and validates the flow cell directory data
             - Stores the flow cell in the status database
             - Stores sequencing metrics in the status database
@@ -116,16 +102,24 @@ class DemuxPostProcessingAPI:
         Raises:
             FlowCellError: If the flow cell directory or the data it contains is not valid.
         """
-
+        if self.dry_run:
+            LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
+            return
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
-        self.copy_sample_sheet()
 
-        flow_cell_directory_path: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
-        bcl_converter: str = get_bcl_converter_name(flow_cell_directory_path)
+        flow_cell_directory: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
+        flow_cell_run_directory: Path = Path(self.demux_api.run_dir, flow_cell_directory_name)
+
+        bcl_converter: str = get_bcl_converter_name(flow_cell_directory)
 
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
-            flow_cell_directory=flow_cell_directory_path,
+            flow_cell_directory=flow_cell_directory,
             bcl_converter=bcl_converter,
+        )
+
+        copy_sample_sheet(
+            sample_sheet_source_directory=flow_cell_run_directory,
+            sample_sheet_destination_directory=flow_cell_directory,
         )
 
         try:
@@ -134,7 +128,17 @@ class DemuxPostProcessingAPI:
             LOG.error(f"Failed to store flow cell data: {str(e)}")
             raise
 
-        create_delivery_file_in_flow_cell_directory(flow_cell_directory_path)
+        create_delivery_file_in_flow_cell_directory(flow_cell_directory)
+
+    def finish_all_flow_cells_temp(self) -> None:
+        """Finish all flow cells that need it."""
+        flow_cell_dirs = self.demux_api.get_all_demultiplexed_flow_cell_dirs()
+        for flow_cell_dir in flow_cell_dirs:
+            try:
+                self.finish_flow_cell_temp(flow_cell_dir.name)
+            except FlowCellError as e:
+                LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(e)}")
+                continue
 
     def store_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Store data from the flow cell directory in status db and housekeeper."""
@@ -658,6 +662,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
                 bcl_converter=bcl_converter,
             )
         except FlowCellError:
+            LOG.warning(f"Could not find flow cell {flow_cell_name}")
             return
         if not self.demux_api.is_demultiplexing_completed(flow_cell=flow_cell):
             LOG.warning("Demultiplex is not ready for %s", flow_cell_name)
@@ -676,6 +681,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             LOG.warning("Flow cell is already finished!")
             if not force:
                 return
+
             LOG.info("Post processing flow cell anyway")
         self.post_process_flow_cell(demux_results=demux_results)
 

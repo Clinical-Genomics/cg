@@ -23,7 +23,7 @@ from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
 from cg.store.models import Analysis, Customer, Family, Sample
 from housekeeper.store.models import File, Version
-from pydantic.dataclasses import dataclass
+from pydantic.v1.dataclasses import dataclass
 
 LOG = logging.getLogger(__name__)
 

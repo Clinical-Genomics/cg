@@ -711,20 +711,16 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
     demultiplex_context: CGConfig,
     flow_cell_directory_name_demultiplexed_with_bcl_convert: str,
     flow_cell_name_demultiplexed_with_bcl_convert: str,
-    demultiplexed_flow_cells_directory: Path,
-    bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
+    demultiplexed_flow_cells_tmp_directory: Path,
+    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
+    novaseq_6000_dir: Path,
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a directory with a flow cell demultiplexed with BCL Convert
-    demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_directory
-
-    # GIVEN a sample sheet exisits in the flow cell run directory
-    Path(
-        demux_post_processing_api.demux_api.run_dir,
-        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-    ).touch()
+    demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_tmp_directory
+    demux_post_processing_api.demux_api.run_dir = novaseq_6000_dir
 
     # WHEN post processing the demultiplexed flow cell
     demux_post_processing_api.finish_flow_cell_temp(
@@ -780,20 +776,16 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     demultiplex_context: CGConfig,
     flow_cell_directory_name_demultiplexed_with_bcl2fastq: str,
     flow_cell_name_demultiplexed_with_bcl2fastq: str,
-    demultiplexed_flow_cells_directory: Path,
+    demultiplexed_flow_cells_tmp_directory: Path,
+    hiseq_dir: Path,
     bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a directory with a flow cell demultiplexed with bcl2fastq
-    demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_directory
-
-    # GIVEN a sample sheet exisits in the flow cell run directory
-    Path(
-        demux_post_processing_api.demux_api.run_dir,
-        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-    ).touch()
+    demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_tmp_directory
+    demux_post_processing_api.demux_api.run_dir = hiseq_dir
 
     # WHEN post processing the demultiplexed flow cell
     demux_post_processing_api.finish_flow_cell_temp(
@@ -844,27 +836,6 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     )
 
     assert delivery_path.exists()
-
-
-def test_copy_sample_sheet(demultiplex_context: CGConfig):
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    # GIVEN a sample sheet in the run directory
-    sample_sheet_path = Path(
-        demux_post_processing_api.demux_api.run_dir,
-        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-    )
-    sample_sheet_path.touch()
-
-    # WHEN copying the sample sheet
-    demux_post_processing_api.copy_sample_sheet()
-
-    # THEN the sample sheet was copied to the out directory
-    assert Path(
-        demux_post_processing_api.demux_api.out_dir,
-        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-    ).exists()
 
 
 def test_add_demux_logs_to_housekeeper(
