@@ -777,7 +777,6 @@ def fixture_flow_cell_runs_working_directory_bcl2fastq(
 ) -> Path:
     """Return the path to a working directory with flow cells ready for demux."""
     working_dir: Path = Path(flow_cell_runs_working_directory)
-    # working_dir.mkdir(parents=True)
     return working_dir
 
 
@@ -785,7 +784,6 @@ def fixture_flow_cell_runs_working_directory_bcl2fastq(
 def fixture_flow_cell_runs_working_directory_dragen(flow_cell_runs_working_directory: Path) -> Path:
     """Return the path to a working directory with flow cells ready for demux."""
     working_dir: Path = Path(flow_cell_runs_working_directory)
-    # working_dir.mkdir(parents=True)
     return working_dir
 
 
@@ -2722,8 +2720,8 @@ def flow_cell_directory_name_demultiplexed_with_bcl_convert(
     return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
 
 
-@pytest.fixture
-def demultiplexed_flow_cells_directory(tmp_path) -> Path:
+@pytest.fixture(name="demultiplexed_flow_cells_tmp_directory")
+def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
     original_dir = Path(
         Path(__file__).parent, "fixtures", "apps", "demultiplexing", "demultiplexed-runs"
     )

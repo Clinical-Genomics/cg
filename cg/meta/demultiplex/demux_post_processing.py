@@ -17,9 +17,9 @@ from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
 )
 from cg.constants.cgstats import STATS_HEADER
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.demultiplex.utils import (
@@ -30,6 +30,7 @@ from cg.meta.demultiplex.utils import (
     get_sample_fastqs_from_flow_cell,
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
+    copy_sample_sheet,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_internal_ids_from_sample_sheet,
@@ -42,6 +43,8 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils import Process
+from cg.utils.files import get_files_matching_pattern
+
 
 LOG = logging.getLogger(__name__)
 
@@ -85,6 +88,7 @@ class DemuxPostProcessingAPI:
         """Store data for the demultiplexed flow cell and mark it as ready for delivery.
 
         This function:
+            - Copies the sample sheet to the demultiplexed flow cell directory
             - Parses and validates the flow cell directory data
             - Stores the flow cell in the status database
             - Stores sequencing metrics in the status database
@@ -103,12 +107,19 @@ class DemuxPostProcessingAPI:
             return
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
-        flow_cell_directory_path: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
-        bcl_converter: str = get_bcl_converter_name(flow_cell_directory_path)
+        flow_cell_directory: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
+        flow_cell_run_directory: Path = Path(self.demux_api.run_dir, flow_cell_directory_name)
+
+        bcl_converter: str = get_bcl_converter_name(flow_cell_directory)
 
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
-            flow_cell_directory=flow_cell_directory_path,
+            flow_cell_directory=flow_cell_directory,
             bcl_converter=bcl_converter,
+        )
+
+        copy_sample_sheet(
+            sample_sheet_source_directory=flow_cell_run_directory,
+            sample_sheet_destination_directory=flow_cell_directory,
         )
 
         try:
@@ -117,7 +128,7 @@ class DemuxPostProcessingAPI:
             LOG.error(f"Failed to store flow cell data: {str(e)}")
             raise
 
-        create_delivery_file_in_flow_cell_directory(flow_cell_directory_path)
+        create_delivery_file_in_flow_cell_directory(flow_cell_directory)
 
     def finish_all_flow_cells_temp(self) -> None:
         """Finish all flow cells that need it."""
@@ -217,6 +228,24 @@ class DemuxPostProcessingAPI:
             flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id
         )
         self.add_sample_fastq_files_to_housekeeper(flow_cell)
+        self.add_demux_logs_to_housekeeper(flow_cell)
+
+    def add_demux_logs_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
+        """Add demux logs to Housekeeper."""
+        log_pattern: str = r"*_demultiplex.std*"
+        demux_log_file_paths: List[Path] = get_files_matching_pattern(
+            directory=Path(self.demux_api.run_dir, flow_cell.full_name), pattern=log_pattern
+        )
+
+        tag_names: List[str] = [SequencingFileTag.DEMUX_LOG, flow_cell.id]
+        for file_path in demux_log_file_paths:
+            try:
+                self.add_file_to_bundle_if_non_existent(
+                    file_path=file_path, bundle_name=flow_cell.id, tag_names=tag_names
+                )
+                LOG.info(f"Added demux log file {file_path} to Housekeeper.")
+            except FileNotFoundError as e:
+                LOG.error(f"Cannot find demux log file {file_path}. Error: {e}.")
 
     def add_sample_fastq_files_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
@@ -652,6 +681,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             LOG.warning("Flow cell is already finished!")
             if not force:
                 return
+
             LOG.info("Post processing flow cell anyway")
         self.post_process_flow_cell(demux_results=demux_results)
 

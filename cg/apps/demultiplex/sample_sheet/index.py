@@ -10,7 +10,7 @@ from cg.models.demultiplex.run_parameters import RunParameters
 from cg.resources import VALID_INDEXES_PATH
 from cg.utils.utils import get_hamming_distance
 from packaging import version
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 LOG = logging.getLogger(__name__)
 DNA_COMPLEMENTS: Dict[str, str] = {"A": "T", "C": "G", "G": "C", "T": "A"}

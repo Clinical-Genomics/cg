@@ -2,7 +2,7 @@
 from typing import Any
 
 import pytest
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from cg.models.scout import scout_load_config
 from cg.models.scout.scout_load_config import MipLoadConfig, ScoutMipIndividual

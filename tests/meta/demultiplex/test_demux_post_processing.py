@@ -1,9 +1,8 @@
 import logging
 from pathlib import Path
 from typing import Generator, List
-from mock import MagicMock, call, patch
+from mock import MagicMock, call
 
-import cg.apps.demultiplex.sample_sheet.models
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import (
@@ -15,10 +14,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-from cg.store.models import SampleLaneSequencingMetrics
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_internal_ids_from_sample_sheet,
-)
 
 
 def test_set_dry_run(
@@ -716,14 +711,16 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
     demultiplex_context: CGConfig,
     flow_cell_directory_name_demultiplexed_with_bcl_convert: str,
     flow_cell_name_demultiplexed_with_bcl_convert: str,
-    demultiplexed_flow_cells_directory: Path,
-    bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
+    demultiplexed_flow_cells_tmp_directory: Path,
+    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
+    novaseq_6000_dir: Path,
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a directory with a flow cell demultiplexed with BCL Convert
-    demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_directory
+    demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_tmp_directory
+    demux_post_processing_api.demux_api.run_dir = novaseq_6000_dir
 
     # WHEN post processing the demultiplexed flow cell
     demux_post_processing_api.finish_flow_cell_temp(
@@ -779,14 +776,16 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     demultiplex_context: CGConfig,
     flow_cell_directory_name_demultiplexed_with_bcl2fastq: str,
     flow_cell_name_demultiplexed_with_bcl2fastq: str,
-    demultiplexed_flow_cells_directory: Path,
+    demultiplexed_flow_cells_tmp_directory: Path,
+    hiseq_dir: Path,
     bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a directory with a flow cell demultiplexed with bcl2fastq
-    demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_directory
+    demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_tmp_directory
+    demux_post_processing_api.demux_api.run_dir = hiseq_dir
 
     # WHEN post processing the demultiplexed flow cell
     demux_post_processing_api.finish_flow_cell_temp(
@@ -837,3 +836,50 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     )
 
     assert delivery_path.exists()
+
+
+def test_add_demux_logs_to_housekeeper(
+    demultiplex_context: CGConfig, dragen_flow_cell: FlowCellDirectoryData
+):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN a bundle and flow cell version exists in housekeeper
+    demux_post_processing_api.add_bundle_and_version_if_non_existent(
+        bundle_name=dragen_flow_cell.id
+    )
+
+    # GIVEN a demux log in the run directory
+    demux_log_file_paths: List[Path] = [
+        Path(
+            demux_post_processing_api.demux_api.run_dir,
+            f"{dragen_flow_cell.full_name}",
+            f"{dragen_flow_cell.id}_demultiplex.stdout",
+        ),
+        Path(
+            demux_post_processing_api.demux_api.run_dir,
+            f"{dragen_flow_cell.full_name}",
+            f"{dragen_flow_cell.id}_demultiplex.stderr",
+        ),
+    ]
+    for file_path in demux_log_file_paths:
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.touch()
+
+    # WHEN adding the demux logs to housekeeper
+    demux_post_processing_api.add_demux_logs_to_housekeeper(flow_cell=dragen_flow_cell)
+
+    # THEN the demux log was added to housekeeper
+    files = demux_post_processing_api.hk_api.get_files(
+        tags=[SequencingFileTag.DEMUX_LOG],
+        bundle=dragen_flow_cell.id,
+    ).all()
+
+    expected_file_names: List[str] = []
+    for file_path in demux_log_file_paths:
+        expected_file_names.append(file_path.name.split("/")[-1])
+
+    # THEN the demux logs were added to housekeeper with the correct names
+    assert len(files) == 2
+    for file in files:
+        assert file.path.split("/")[-1] in expected_file_names

@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from housekeeper.store.models import Version, File
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, SampleType, AnalysisType

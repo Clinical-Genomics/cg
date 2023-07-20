@@ -2,7 +2,7 @@ from enum import Enum
 from typing import List, Optional
 
 from cg.constants import DataDelivery, Pipeline
-from pydantic import BaseModel, constr, validator
+from pydantic.v1 import BaseModel, constr, validator
 
 from cg.store.models import Application, Family, Customer, Pool, Sample
 

@@ -5,10 +5,10 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from cg.apps.crunchy.models import CrunchyFile, CrunchyMetadata
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, ReadStream, WriteFile
 from cg.utils.date import get_date
-from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
 
 LOG = logging.getLogger(__name__)
 
