@@ -715,7 +715,7 @@ def test_update_sample_read_count(demultiplex_context: CGConfig):
     "demux_type",
     ["BCL2FASTQ_TREE", "BCLCONVERT_TREE", "BCLCONVERT_FLAT"],
 )
-def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
+def test_post_processing_of_flow_cell(
     demux_type: str,
     demultiplex_context: CGConfig,
     flow_cell_info_map: Dict[str, FlowCellInfo],

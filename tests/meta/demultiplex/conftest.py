@@ -325,23 +325,23 @@ def fixture_flow_cell_info_map(
     flow_cell_directory_name_demultiplexed_with_bcl_convert,
     flow_cell_directory_name_demultiplexed_with_bcl2fastq,
 ) -> Dict[str, FlowCellInfo]:
-    """Returns a dict with the suitable fixtures for different demultiplexing software and
-    settings."""
+    """Returns a dict with the suitable fixtures for different demultiplexing softwares and
+    settings. Keys are string, values are named tuples FlowCellInfo."""
     return {
         "BCL2FASTQ_TREE": FlowCellInfo(
-            flow_cell_directory_name_demultiplexed_with_bcl2fastq,
-            flow_cell_name_demultiplexed_with_bcl2fastq,
-            bcl2fastq_demultiplexed_flow_cell_sample_internal_ids,
+            directory=flow_cell_directory_name_demultiplexed_with_bcl2fastq,
+            name=flow_cell_name_demultiplexed_with_bcl2fastq,
+            sample_ids=bcl2fastq_demultiplexed_flow_cell_sample_internal_ids,
         ),
         "BCLCONVERT_FLAT": FlowCellInfo(
-            flow_cell_directory_name_demultiplexed_with_bcl_convert_flat,
-            flow_cell_name_demultiplexed_with_bcl_convert,
-            bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
+            directory=flow_cell_directory_name_demultiplexed_with_bcl_convert_flat,
+            name=flow_cell_name_demultiplexed_with_bcl_convert,
+            sample_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
         ),
         "BCLCONVERT_TREE": FlowCellInfo(
-            flow_cell_directory_name_demultiplexed_with_bcl_convert,
-            flow_cell_name_demultiplexed_with_bcl_convert,
-            bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
+            directory=flow_cell_directory_name_demultiplexed_with_bcl_convert,
+            name=flow_cell_name_demultiplexed_with_bcl_convert,
+            sample_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
         ),
     }
 
