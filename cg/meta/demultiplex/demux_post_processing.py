@@ -102,7 +102,9 @@ class DemuxPostProcessingAPI:
         Raises:
             FlowCellError: If the flow cell directory or the data it contains is not valid.
         """
-
+        if self.dry_run:
+            LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
+            return
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
         flow_cell_directory: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
@@ -127,6 +129,16 @@ class DemuxPostProcessingAPI:
             raise
 
         create_delivery_file_in_flow_cell_directory(flow_cell_directory)
+
+    def finish_all_flow_cells_temp(self) -> None:
+        """Finish all flow cells that need it."""
+        flow_cell_dirs = self.demux_api.get_all_demultiplexed_flow_cell_dirs()
+        for flow_cell_dir in flow_cell_dirs:
+            try:
+                self.finish_flow_cell_temp(flow_cell_dir.name)
+            except FlowCellError as e:
+                LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(e)}")
+                continue
 
     def store_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Store data from the flow cell directory in status db and housekeeper."""
@@ -650,6 +662,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
                 bcl_converter=bcl_converter,
             )
         except FlowCellError:
+            LOG.warning(f"Could not find flow cell {flow_cell_name}")
             return
         if not self.demux_api.is_demultiplexing_completed(flow_cell=flow_cell):
             LOG.warning("Demultiplex is not ready for %s", flow_cell_name)
