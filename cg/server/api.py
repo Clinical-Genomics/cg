@@ -378,7 +378,10 @@ def get_sequencing_metrics(flow_cell_name: str):
     ] = db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
 
     if not metrics:
-        return jsonify({"error": "Sequencing metrics not found"}), http.HTTPStatus.NOT_FOUND
+        return (
+            jsonify({"error": f"Sequencing metrics not found for flow cell {flow_cell_name}."}),
+            http.HTTPStatus.NOT_FOUND,
+        )
 
     return jsonify([metric.to_dict() for metric in metrics])
 
