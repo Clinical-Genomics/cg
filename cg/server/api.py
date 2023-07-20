@@ -368,7 +368,7 @@ def parse_flow_cell(flowcell_id):
 
 @BLUEPRINT.route("/flowcells/<flow_cell_id>/sequencing_metrics", methods=["GET"])
 def get_sequencing_metrics(flow_cell_id: str):
-    """Return sequencing metrics for a flow cell."""
+    """Return sample lane sequencing metrics for a flow cell."""
 
     if not flow_cell_id:
         return jsonify({"error": "Invalid or missing flow cell id"}), http.HTTPStatus.BAD_REQUEST
