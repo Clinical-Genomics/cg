@@ -162,9 +162,19 @@ class DemuxPostProcessingAPI:
         self, sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics]
     ) -> None:
         for metric in sample_lane_sequencing_metrics:
-            if not self.metric_exists_in_status_db(metric):
+            metric_exists: bool = self.metric_exists_in_status_db(metric)
+            metric_has_sample: bool = self.metric_has_sample_in_statusdb(metric.sample_internal_id)
+            if not metric_exists and metric_has_sample:
                 self.add_metric_to_status_db(metric)
         self.status_db.session.commit()
+
+    def metric_has_sample_in_statusdb(self, sample_internal_id: str) -> bool:
+        """Check if a sample exists in status db for the sample lane sequencing metrics."""
+        sample: Sample = self.status_db.get_sample_by_internal_id(sample_internal_id)
+        if sample:
+            return True
+        LOG.warning(f"Sample {sample_internal_id} does not exist in status db. Skipping.")
+        return False
 
     def metric_exists_in_status_db(self, metric: SampleLaneSequencingMetrics) -> bool:
         existing_metrics_entry: Optional[
@@ -176,7 +186,7 @@ class DemuxPostProcessingAPI:
         )
         if existing_metrics_entry:
             LOG.warning(
-                f"Sample lane sequencing metrics already exist for {metric.flow_cell_name}, {metric.sample_internal_id}, and {metric.flow_cell_lane_number}. Skipping."
+                f"Sample lane sequencing metrics already exist for {metric.flow_cell_name}, {metric.sample_internal_id}, and lane {metric.flow_cell_lane_number}. Skipping."
             )
         return bool(existing_metrics_entry)
 
