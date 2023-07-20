@@ -373,17 +373,17 @@ def get_sequencing_metrics(flow_cell_name: str):
     if not flow_cell_name:
         return jsonify({"error": "Invalid or missing flow cell id"}), http.HTTPStatus.BAD_REQUEST
 
-    metrics: List[
+    sequencing_metrics: List[
         SampleLaneSequencingMetrics
     ] = db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
 
-    if not metrics:
+    if not sequencing_metrics:
         return (
             jsonify({"error": f"Sequencing metrics not found for flow cell {flow_cell_name}."}),
             http.HTTPStatus.NOT_FOUND,
         )
 
-    return jsonify([metric.to_dict() for metric in metrics])
+    return jsonify([metric.to_dict() for metric in sequencing_metrics])
 
 
 @BLUEPRINT.route("/analyses")
