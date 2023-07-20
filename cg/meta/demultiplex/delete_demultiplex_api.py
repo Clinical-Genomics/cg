@@ -149,6 +149,19 @@ class DeleteDemuxAPI:
         else:
             delete_flowcell(manager=self.stats_api, flowcell_name=self.flow_cell_name)
 
+    def delete_flow_cell_sample_lane_sequencing_metrics(self) -> None:
+        if self.dry_run:
+            LOG.info(
+                f"Would delete entries for Flow Cell: {self.flow_cell_name} in the Sample Lane Sequencing Metrics table"
+            )
+        else:
+            LOG.info(
+                f"Delete entries for Flow Cell: {self.flow_cell_name} in the Sample Lane Sequencing Metrics table"
+            )
+            self.status_db.delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
+                flow_cell_name=self.flow_cell_name
+            )
+
     def _delete_demultiplexing_dir_hasta(self, demultiplexing_dir: bool) -> None:
         """delete demultiplexing directory on server."""
         if demultiplexing_dir and self.demultiplexing_out_path.exists():
@@ -248,6 +261,7 @@ class DeleteDemuxAPI:
         demultiplexing_dir: bool,
         run_dir: bool,
         housekeeper: bool,
+        sample_lane_sequencing_metrics: bool,
         init_files: bool,
         status_db: bool,
     ) -> None:
@@ -261,6 +275,7 @@ class DeleteDemuxAPI:
             self.delete_flow_cell_cgstats()
             self.delete_flow_cell_housekeeper()
             self.delete_flow_cell_in_status_db()
+
         if demultiplexing_dir or run_dir:
             self.delete_flow_cell_hasta(
                 demultiplexing_dir=demultiplexing_dir,
@@ -272,3 +287,5 @@ class DeleteDemuxAPI:
             self.delete_demux_init_files()
         if housekeeper:
             self.delete_flow_cell_housekeeper()
+        if sample_lane_sequencing_metrics:
+            self.delete_flow_cell_sample_lane_sequencing_metrics()

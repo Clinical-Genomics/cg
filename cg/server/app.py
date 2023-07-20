@@ -56,6 +56,7 @@ def _configure_extensions(app: Flask):
     if app.config["OSTICKET_API_KEY"]:
         ext.osticket.init_app(app)
     ext.admin.init_app(app, index_view=AdminIndexView(endpoint="admin"))
+    app.json_encoder = ext.CustomJSONEncoder
 
 
 def _initialize_logging(app):

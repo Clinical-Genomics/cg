@@ -2678,7 +2678,8 @@ def store_with_sequencing_metrics(
     """Return a store with multiple samples with sample lane sequencing metrics."""
 
     sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
-        (sample_id, flow_cell_name, 1, expected_total_reads, 90.5, 32),
+        (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
+        (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
         ("sample_2", "flow_cell_2", 2, 2_000_000, 85.5, 30),
         ("sample_3", "flow_cell_3", 3, 1_500_000, 80.5, 33),
     ]
