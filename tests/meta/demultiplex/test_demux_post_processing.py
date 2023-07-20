@@ -723,6 +723,8 @@ def test_post_processing_of_flow_cell(
 ):
     """Test adding a demultiplexed flow cell to the databases with. Runs on each type of
     demultiplexing software and setting used."""
+
+    # GIVEN a demultiplexed flow cell
     flow_cell_demultplexing_directory: str = flow_cell_info_map.get(demux_type).directory
     flow_cell_name: str = flow_cell_info_map.get(demux_type).name
     sample_ids: List[str] = flow_cell_info_map.get(demux_type).sample_ids
