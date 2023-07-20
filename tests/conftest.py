@@ -1088,6 +1088,21 @@ def fixture_populated_stats_api(
     return stats_api
 
 
+@pytest.fixture(name="novaseq6000_bcl_convert_sample_sheet_path")
+def fixture_novaseq6000_sample_sheet_path() -> Path:
+    """Return the path to a NovaSeq 6000 BCL convert sample sheet."""
+    return Path(
+        "tests",
+        "fixtures",
+        "apps",
+        "sequencing_metrics_parser",
+        "230622_A00621_0864_AHY7FFDRX2",
+        "Unaligned",
+        "Reports",
+        "SampleSheet.csv",
+    )
+
+
 @pytest.fixture(name="demultiplex_fixtures", scope="session")
 def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
     """Return the path to the demultiplex fixture directory."""
@@ -2718,8 +2733,8 @@ def flow_cell_directory_name_demultiplexed_with_bcl_convert(
     return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
 
 
-@pytest.fixture
-def demultiplexed_flow_cells_directory(tmp_path) -> Path:
+@pytest.fixture(name="demultiplexed_flow_cells_tmp_directory")
+def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
     original_dir = Path(
         Path(__file__).parent, "fixtures", "apps", "demultiplexing", "demultiplexed-runs"
     )

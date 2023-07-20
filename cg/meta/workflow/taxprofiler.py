@@ -3,10 +3,7 @@
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-
-
-from pydantic import ValidationError
-from cg.constants import Pipeline
+from pydantic.v1 import ValidationError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.constants import Pipeline
