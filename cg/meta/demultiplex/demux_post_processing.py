@@ -186,7 +186,7 @@ class DemuxPostProcessingAPI:
         )
         if existing_metrics_entry:
             LOG.warning(
-                f"Sample lane sequencing metrics already exist for {metric.flow_cell_name}, {metric.sample_internal_id}, and {metric.flow_cell_lane_number}. Skipping."
+                f"Sample lane sequencing metrics already exist for {metric.flow_cell_name}, {metric.sample_internal_id}, and lane {metric.flow_cell_lane_number}. Skipping."
             )
         return bool(existing_metrics_entry)
 
