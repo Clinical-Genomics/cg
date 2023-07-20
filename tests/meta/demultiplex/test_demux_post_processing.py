@@ -14,7 +14,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-from cg.store.models import SampleLaneSequencingMetrics
 
 
 def test_set_dry_run(
@@ -886,9 +885,7 @@ def test_add_demux_logs_to_housekeeper(
         assert file.path.split("/")[-1] in expected_file_names
 
 
-def test_metric_has_sample_in_statusdb(
-    store_with_sequencing_metrics: Store, demultiplex_context: CGConfig
-):
+def test_metric_has_sample_in_statusdb(demultiplex_context: CGConfig):
     # GIVEN a store with a sample and a sequencing metric
 
     # GIVEN a DemuxPostProcessing API
@@ -897,10 +894,5 @@ def test_metric_has_sample_in_statusdb(
     # GIVEN a sample internal id that does not exist in statusdb
     sample_internal_id = "does_not_exist"
 
-    # GIVEN a metric with the sample internal id
-    sequencing_metric = store_with_sequencing_metrics._get_query(
-        table=SampleLaneSequencingMetrics
-    ).first()
-    sequencing_metric.sample_id = sample_internal_id
     # WHEN checking if the sample exists in statusdb
-    assert not demux_post_processing_api.metric_has_sample_in_statusdb(sequencing_metric)
+    assert not demux_post_processing_api.metric_has_sample_in_statusdb(sample_internal_id)
