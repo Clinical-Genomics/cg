@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 from pytest_mock import MockFixture
 
 from cg.apps.hermes.hermes_api import HermesApi

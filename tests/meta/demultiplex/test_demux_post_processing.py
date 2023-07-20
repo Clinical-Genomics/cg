@@ -785,22 +785,48 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
     assert delivery_path.exists()
 
 
-def test_copy_sample_sheet(demultiplex_context: CGConfig):
+def test_add_demux_logs_to_housekeeper(
+    demultiplex_context: CGConfig, dragen_flow_cell: FlowCellDirectoryData
+):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
-    # GIVEN a sample sheet in the run directory
-    sample_sheet_path = Path(
-        demux_post_processing_api.demux_api.run_dir,
-        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
+    # GIVEN a bundle and flow cell version exists in housekeeper
+    demux_post_processing_api.add_bundle_and_version_if_non_existent(
+        bundle_name=dragen_flow_cell.id
     )
-    sample_sheet_path.touch()
 
-    # WHEN copying the sample sheet
-    demux_post_processing_api.copy_sample_sheet()
+    # GIVEN a demux log in the run directory
+    demux_log_file_paths: List[Path] = [
+        Path(
+            demux_post_processing_api.demux_api.run_dir,
+            f"{dragen_flow_cell.full_name}",
+            f"{dragen_flow_cell.id}_demultiplex.stdout",
+        ),
+        Path(
+            demux_post_processing_api.demux_api.run_dir,
+            f"{dragen_flow_cell.full_name}",
+            f"{dragen_flow_cell.id}_demultiplex.stderr",
+        ),
+    ]
+    for file_path in demux_log_file_paths:
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.touch()
 
-    # THEN the sample sheet was copied to the out directory
-    assert Path(
-        demux_post_processing_api.demux_api.out_dir,
-        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-    ).exists()
+    # WHEN adding the demux logs to housekeeper
+    demux_post_processing_api.add_demux_logs_to_housekeeper(flow_cell=dragen_flow_cell)
+
+    # THEN the demux log was added to housekeeper
+    files = demux_post_processing_api.hk_api.get_files(
+        tags=[SequencingFileTag.DEMUX_LOG],
+        bundle=dragen_flow_cell.id,
+    ).all()
+
+    expected_file_names: List[str] = []
+    for file_path in demux_log_file_paths:
+        expected_file_names.append(file_path.name.split("/")[-1])
+
+    # THEN the demux logs were added to housekeeper with the correct names
+    assert len(files) == 2
+    for file in files:
+        assert file.path.split("/")[-1] in expected_file_names

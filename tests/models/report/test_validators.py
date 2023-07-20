@@ -1,7 +1,5 @@
 """Tests delivery report models validators."""
-from cgmodels.cg.constants import Pipeline
-
-from cg.constants import NA_FIELD, YES_FIELD, REPORT_GENDER
+from cg.constants import NA_FIELD, YES_FIELD, REPORT_GENDER, Pipeline
 from cg.constants.subject import Gender
 from cg.models.orders.constants import OrderType
 from cg.models.report.validators import (
