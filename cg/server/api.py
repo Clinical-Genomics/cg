@@ -366,16 +366,16 @@ def parse_flow_cell(flowcell_id):
     return jsonify(**flow_cell.to_dict(samples=True))
 
 
-@BLUEPRINT.route("/flowcells/<flow_cell_id>/sequencing_metrics", methods=["GET"])
-def get_sequencing_metrics(flow_cell_id: str):
+@BLUEPRINT.route("/flowcells/<flow_cell_name>/sequencing_metrics", methods=["GET"])
+def get_sequencing_metrics(flow_cell_name: str):
     """Return sample lane sequencing metrics for a flow cell."""
 
-    if not flow_cell_id:
+    if not flow_cell_name:
         return jsonify({"error": "Invalid or missing flow cell id"}), http.HTTPStatus.BAD_REQUEST
 
     metrics: List[
         SampleLaneSequencingMetrics
-    ] = db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_id)
+    ] = db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
 
     if not metrics:
         return jsonify({"error": "Sequencing metrics not found"}), http.HTTPStatus.NOT_FOUND
