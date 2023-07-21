@@ -57,8 +57,6 @@ def is_bcl2fastq_demux_folder_structure(flow_cell_directory: Path) -> bool:
 
 
 def is_flow_cell_ready_for_postprocessing(flow_cell_directory: Path) -> None:
-    """Validate that the flow cell directory exists and that the demultiplexing is complete."""
-
     if not flow_cell_directory.is_dir():
         raise FlowCellError(f"Flow cell directory {flow_cell_directory} does not exist.")
 
