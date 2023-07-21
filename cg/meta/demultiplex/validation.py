@@ -67,7 +67,7 @@ def is_flow_cell_ready_for_postprocessing(flow_cell_directory: Path) -> None:
 
     if is_flow_cell_ready_for_delivery(flow_cell_directory):
         raise FlowCellError(
-            f"Flow cell directory {flow_cell_directory} is already ready for delivery."
+            f"Flow cell directory {flow_cell_directory} has already been processed and is ready for delivery."
         )
 
 
