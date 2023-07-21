@@ -330,6 +330,16 @@ class FindBusinessDataHandler(BaseHandler):
         reads_count: Optional[int] = total_reads_query.scalar()
         return reads_count if reads_count else 0
 
+    def get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        self, flow_cell_name: str
+    ) -> List[SampleLaneSequencingMetrics]:
+        """Return sample lane sequencing metrics for a flow cell."""
+        return apply_metrics_filter(
+            metrics=self._get_query(table=SampleLaneSequencingMetrics),
+            filter_functions=[SequencingMetricsFilter.FILTER_METRICS_BY_FLOW_CELL_NAME],
+            flow_cell_name=flow_cell_name,
+        ).all()
+
     def get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
         self, flow_cell_name: str, sample_internal_id: str, lane: int
     ) -> SampleLaneSequencingMetrics:

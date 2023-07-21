@@ -14,7 +14,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-from cg.store.models import SampleLaneSequencingMetrics
 
 
 def test_set_dry_run(
@@ -603,6 +602,22 @@ def test_add_tags_if_all_exist(demultiplex_context: CGConfig):
     demux_post_processing_api.hk_api.add_tag.assert_not_called()
 
 
+def test_add_fastq_files_without_sample_id(
+    demultiplex_context: CGConfig, dragen_flow_cell: FlowCellDirectoryData
+):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    demux_post_processing_api.add_file_to_bundle_if_non_existent = MagicMock()
+
+    # WHEN add_fastq_files is called
+
+    demux_post_processing_api.add_sample_fastq_files_to_housekeeper(flow_cell=dragen_flow_cell)
+
+    # THEN add_file_if_non_existent was not called
+    demux_post_processing_api.add_file_to_bundle_if_non_existent.assert_not_called()
+
+
 def test_add_existing_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
@@ -630,22 +645,6 @@ def test_add_existing_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory
         bundle_name=flow_cell_name,
         tag_names=expected_tag_names,
     )
-
-
-def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig):
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    get_sample_id_from_sample_fastq_path = MagicMock()
-    get_sample_id_from_sample_fastq_path.return_value = None
-
-    demux_post_processing_api.add_file_to_bundle_if_non_existent = MagicMock()
-
-    # WHEN add_fastq_files is called
-    demux_post_processing_api.add_sample_fastq_files_to_housekeeper(MagicMock())
-
-    # THEN add_file_if_non_existent was not called
-    demux_post_processing_api.add_file_to_bundle_if_non_existent.assert_not_called()
 
 
 def test_add_single_sequencing_metrics_entry_to_statusdb(
@@ -712,14 +711,16 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
     demultiplex_context: CGConfig,
     flow_cell_directory_name_demultiplexed_with_bcl_convert: str,
     flow_cell_name_demultiplexed_with_bcl_convert: str,
-    demultiplexed_flow_cells_directory: Path,
-    bcl_convert_demultiplexed_flow_cell_sample_ids: List[str],
+    demultiplexed_flow_cells_tmp_directory: Path,
+    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
+    novaseq_6000_dir: Path,
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a directory with a flow cell demultiplexed with BCL Convert
-    demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_directory
+    demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_tmp_directory
+    demux_post_processing_api.demux_api.run_dir = novaseq_6000_dir
 
     # WHEN post processing the demultiplexed flow cell
     demux_post_processing_api.finish_flow_cell_temp(
@@ -732,17 +733,11 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
     )
 
     # THEN sequencing metrics were created for the flow cell
-    assert (
-        demux_post_processing_api.status_db._get_query(table=SampleLaneSequencingMetrics)
-        .filter(
-            SampleLaneSequencingMetrics.flow_cell_name
-            == flow_cell_name_demultiplexed_with_bcl_convert
-        )
-        .all()
+    assert demux_post_processing_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=flow_cell_name_demultiplexed_with_bcl_convert
     )
-
     # THEN the read count was calculated for all samples in the flow cell directory
-    for sample_id in bcl_convert_demultiplexed_flow_cell_sample_ids:
+    for sample_id in bcl_convert_demultiplexed_flow_cell_sample_internal_ids:
         sample = demux_post_processing_api.status_db.get_sample_by_internal_id(sample_id)
         assert sample is not None
         assert sample.calculated_read_count
@@ -751,7 +746,7 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
     assert demux_post_processing_api.hk_api.bundle(flow_cell_name_demultiplexed_with_bcl_convert)
 
     # THEN a bundle was added to Housekeeper for each sample
-    for sample_id in bcl_convert_demultiplexed_flow_cell_sample_ids:
+    for sample_id in bcl_convert_demultiplexed_flow_cell_sample_internal_ids:
         assert demux_post_processing_api.hk_api.bundle(sample_id)
 
     # THEN a sample sheet was added to Housekeeper
@@ -761,7 +756,7 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
     ).all()
 
     # THEN sample fastq files were added to Housekeeper tagged with FASTQ and the flow cell name
-    for sample_id in bcl_convert_demultiplexed_flow_cell_sample_ids:
+    for sample_id in bcl_convert_demultiplexed_flow_cell_sample_internal_ids:
         assert demux_post_processing_api.hk_api.get_files(
             tags=[SequencingFileTag.FASTQ, flow_cell_name_demultiplexed_with_bcl_convert],
             bundle=sample_id,
@@ -781,14 +776,16 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     demultiplex_context: CGConfig,
     flow_cell_directory_name_demultiplexed_with_bcl2fastq: str,
     flow_cell_name_demultiplexed_with_bcl2fastq: str,
-    demultiplexed_flow_cells_directory: Path,
-    bcl2fastq_demultiplexed_flow_cell_sample_ids: List[str],
+    demultiplexed_flow_cells_tmp_directory: Path,
+    hiseq_dir: Path,
+    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a directory with a flow cell demultiplexed with bcl2fastq
-    demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_directory
+    demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_tmp_directory
+    demux_post_processing_api.demux_api.run_dir = hiseq_dir
 
     # WHEN post processing the demultiplexed flow cell
     demux_post_processing_api.finish_flow_cell_temp(
@@ -801,18 +798,13 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     )
 
     # THEN sequencing metrics were created for the flow cell
-    assert (
-        demux_post_processing_api.status_db._get_query(table=SampleLaneSequencingMetrics)
-        .filter(
-            SampleLaneSequencingMetrics.flow_cell_name
-            == flow_cell_name_demultiplexed_with_bcl2fastq
-        )
-        .all()
+    assert demux_post_processing_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq
     )
 
     # THEN the read count was calculated for all samples in the flow cell directory
-    for sample_id in bcl2fastq_demultiplexed_flow_cell_sample_ids:
-        sample = demux_post_processing_api.status_db.get_sample_by_internal_id(sample_id)
+    for sample_internal_id in bcl2fastq_demultiplexed_flow_cell_sample_internal_ids:
+        sample = demux_post_processing_api.status_db.get_sample_by_internal_id(sample_internal_id)
         assert sample is not None
         assert sample.calculated_read_count
 
@@ -820,8 +812,8 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     assert demux_post_processing_api.hk_api.bundle(flow_cell_name_demultiplexed_with_bcl2fastq)
 
     # THEN a bundle was added to Housekeeper for each sample
-    for sample_id in bcl2fastq_demultiplexed_flow_cell_sample_ids:
-        assert demux_post_processing_api.hk_api.bundle(sample_id)
+    for sample_internal_id in bcl2fastq_demultiplexed_flow_cell_sample_internal_ids:
+        assert demux_post_processing_api.hk_api.bundle(sample_internal_id)
 
     # THEN a sample sheet was added to Housekeeper
     assert demux_post_processing_api.hk_api.get_files(
@@ -830,10 +822,10 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     ).all()
 
     # THEN sample fastq files were added to Housekeeper tagged with FASTQ and the flow cell name
-    for sample_id in bcl2fastq_demultiplexed_flow_cell_sample_ids:
+    for sample_internal_id in bcl2fastq_demultiplexed_flow_cell_sample_internal_ids:
         assert demux_post_processing_api.hk_api.get_files(
             tags=[SequencingFileTag.FASTQ, flow_cell_name_demultiplexed_with_bcl2fastq],
-            bundle=sample_id,
+            bundle=sample_internal_id,
         ).all()
 
     # THEN a delivery file was created in the flow cell directory
@@ -844,3 +836,63 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     )
 
     assert delivery_path.exists()
+
+
+def test_add_demux_logs_to_housekeeper(
+    demultiplex_context: CGConfig, dragen_flow_cell: FlowCellDirectoryData
+):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN a bundle and flow cell version exists in housekeeper
+    demux_post_processing_api.add_bundle_and_version_if_non_existent(
+        bundle_name=dragen_flow_cell.id
+    )
+
+    # GIVEN a demux log in the run directory
+    demux_log_file_paths: List[Path] = [
+        Path(
+            demux_post_processing_api.demux_api.run_dir,
+            f"{dragen_flow_cell.full_name}",
+            f"{dragen_flow_cell.id}_demultiplex.stdout",
+        ),
+        Path(
+            demux_post_processing_api.demux_api.run_dir,
+            f"{dragen_flow_cell.full_name}",
+            f"{dragen_flow_cell.id}_demultiplex.stderr",
+        ),
+    ]
+    for file_path in demux_log_file_paths:
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.touch()
+
+    # WHEN adding the demux logs to housekeeper
+    demux_post_processing_api.add_demux_logs_to_housekeeper(flow_cell=dragen_flow_cell)
+
+    # THEN the demux log was added to housekeeper
+    files = demux_post_processing_api.hk_api.get_files(
+        tags=[SequencingFileTag.DEMUX_LOG],
+        bundle=dragen_flow_cell.id,
+    ).all()
+
+    expected_file_names: List[str] = []
+    for file_path in demux_log_file_paths:
+        expected_file_names.append(file_path.name.split("/")[-1])
+
+    # THEN the demux logs were added to housekeeper with the correct names
+    assert len(files) == 2
+    for file in files:
+        assert file.path.split("/")[-1] in expected_file_names
+
+
+def test_metric_has_sample_in_statusdb(demultiplex_context: CGConfig):
+    # GIVEN a store with a sample and a sequencing metric
+
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN a sample internal id that does not exist in statusdb
+    sample_internal_id = "does_not_exist"
+
+    # WHEN checking if the sample exists in statusdb
+    assert not demux_post_processing_api.metric_has_sample_in_statusdb(sample_internal_id)

@@ -12,12 +12,16 @@ from cg.meta.demultiplex.utils import (
     get_bcl_converter_name,
     get_lane_from_sample_fastq,
     get_q30_threshold,
-    get_sample_internal_ids_from_flow_cell,
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
+    copy_sample_sheet,
 )
 from cg.meta.demultiplex.validation import is_bcl2fastq_demux_folder_structure
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.meta.demultiplex.demux_post_processing import (
+    DemuxPostProcessingAPI,
+)
+from cg.models.cg_config import CGConfig
 
 
 def test_get_lane_from_sample_fastq_file_path():
@@ -165,29 +169,6 @@ def test_get_sample_sheet_path_not_found(tmp_path: Path):
         get_sample_sheet_path(flow_cell_directory)
 
 
-def test_get_sample_ids_from_sample_sheet():
-    # GIVEN some flow cell samples
-    mock_sample1 = MagicMock()
-    mock_sample1.sample_id = "sample1_index1"
-    mock_sample2 = MagicMock()
-    mock_sample2.sample_id = "sample2_index2"
-    mock_samples = [mock_sample1, mock_sample2]
-
-    # GIVEN a sample sheet with the samples
-    mock_sample_sheet = MagicMock()
-    type(mock_sample_sheet).samples = PropertyMock(return_value=mock_samples)
-
-    # GIVEN a flow cell data with the parsed sample sheet object
-    mock_flow_cell_data = MagicMock()
-    mock_flow_cell_data.get_sample_sheet.return_value = mock_sample_sheet
-
-    # WHEN extracting the sample ids from the sample sheet in the flow cell directory data
-    result = get_sample_internal_ids_from_flow_cell(mock_flow_cell_data)
-
-    # THEN the sample ids are returned without the index
-    assert result == ["sample1", "sample2"]
-
-
 @patch("cg.meta.demultiplex.utils.is_flow_cell_directory_valid", return_value=False)
 # GIVEN a flow cell directory which is not valid
 # WHEN parsing the flow cell directory data
@@ -210,3 +191,30 @@ def test_parse_flow_cell_directory_data_valid(mocked_function):
     # THEN the flow cell path and bcl converter should be set
     assert result.path == Path(flow_cell_run_directory)
     assert result.bcl_converter == "dummy_bcl_converter"
+
+
+def test_copy_sample_sheet(demultiplex_context: CGConfig):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN a sample sheet in the run directory
+    sample_sheet_path = Path(
+        demux_post_processing_api.demux_api.run_dir,
+    )
+    sample_sheet_path.mkdir(parents=True, exist_ok=True)
+    Path(sample_sheet_path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME).touch()
+
+    # GIVEN a sample sheet target path
+    target_sample_sheet_path = Path(demux_post_processing_api.demux_api.out_dir)
+
+    # WHEN copying the sample sheet
+    copy_sample_sheet(
+        sample_sheet_source_directory=sample_sheet_path,
+        sample_sheet_destination_directory=target_sample_sheet_path,
+    )
+
+    # THEN the sample sheet was copied to the out directory
+    assert Path(
+        target_sample_sheet_path,
+        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
+    ).exists()

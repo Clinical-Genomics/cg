@@ -40,6 +40,7 @@ class SequencingFileTag(StrEnum):
     SAMPLE_SHEET: str = "samplesheet"
     SPRING: str = "spring"
     SPRING_METADATA: str = "spring-metadata"
+    DEMUX_LOG: str = "log"
 
 
 HK_MULTIQC_HTML_TAG = ["multiqc-html"]

@@ -1,0 +1,3 @@
+[Data]
+FCID,Lane,SampleID,SampleRef,index,SampleName,Control,Recipe,Operator,Project
+HHKVCALXX,1,SVE2528A1_CTGAAGCT,hg19,CTGAAGCT,123456,N,R1,script,123456

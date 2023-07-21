@@ -1,10 +1,10 @@
 import logging
-import os
 import re
+import shutil
 from pathlib import Path
 from typing import List, Optional
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
+
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
@@ -12,11 +12,12 @@ from cg.exc import FlowCellError
 from cg.meta.demultiplex.validation import (
     is_bcl2fastq_demux_folder_structure,
     is_flow_cell_directory_valid,
-    is_valid_sample_id,
     is_valid_sample_fastq_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.utils.utils import get_files_matching_pattern
+
+from cg.utils.files import get_file_in_directory, get_files_matching_pattern
+
 
 LOG = logging.getLogger(__name__)
 
@@ -74,49 +75,49 @@ def create_delivery_file_in_flow_cell_directory(flow_cell_directory: Path) -> No
     Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
 
 
-def get_sample_internal_ids_from_flow_cell(flow_cell_data: FlowCellDirectoryData) -> List[str]:
-    samples: List[FlowCellSample] = flow_cell_data.get_sample_sheet().samples
-    return get_valid_sample_ids(samples)
-
-
-def get_valid_sample_ids(samples: List[FlowCellSample]) -> List[str]:
-    """Get all valid sample ids from sample sheet."""
-    valid_sample_ids = [
-        sample.sample_id for sample in samples if is_valid_sample_id(sample.sample_id)
-    ]
-    formatted_sample_ids = [sample_id_index.split("_")[0] for sample_id_index in valid_sample_ids]
-    return formatted_sample_ids
-
-
 def get_q30_threshold(sequencer_type: Sequencers) -> int:
     return FLOWCELL_Q30_THRESHOLD[sequencer_type]
 
 
-def get_sample_sheet_path(flow_cell_directory: Path) -> Path:
-    """
-    Recursively searches for the given sample sheet file in the provided flow cell directory.
-
-    Raises:
-        FileNotFoundError: If the sample sheet file is not found in the flow cell directory.
-    """
-    for directory_path, _, files in os.walk(flow_cell_directory):
-        if DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME in files:
-            LOG.info(f"Found sample sheet in {directory_path}")
-            return Path(directory_path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
-
-    raise FileNotFoundError(
-        f"Sample sheet not found in given flow cell directory: {flow_cell_directory}"
-    )
+def get_sample_sheet_path(
+    flow_cell_directory: Path,
+    sample_sheet_file_name: str = DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
+) -> Path:
+    """Return the path to the sample sheet in the flow cell directory."""
+    return get_file_in_directory(directory=flow_cell_directory, file_name=sample_sheet_file_name)
 
 
 def parse_flow_cell_directory_data(
     flow_cell_directory: Path, bcl_converter: str
 ) -> FlowCellDirectoryData:
-    """Parse flow cell data from the flow cell directory."""
-
-    try:
-        is_flow_cell_directory_valid(flow_cell_directory)
-    except FlowCellError as e:
-        raise FlowCellError(f"Flow cell directory was not valid: {flow_cell_directory}, {e}")
-
+    """Return flow cell data from the flow cell directory."""
+    is_flow_cell_directory_valid(flow_cell_directory)
     return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
+
+
+def copy_sample_sheet(
+    sample_sheet_source_directory: Path, sample_sheet_destination_directory: Path
+) -> None:
+    """Copy the sample sheet from the flow-cell-run dir to demultiplex-runs dir for a flow cell."""
+    sample_sheet_source: Path = Path(
+        sample_sheet_source_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+    sample_sheet_destination: Path = Path(
+        sample_sheet_destination_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+
+    if not sample_sheet_destination.exists():
+        LOG.debug(
+            f"Copy sample sheet {sample_sheet_source_directory} from flow cell to demuxed result dir {sample_sheet_destination_directory}"
+        )
+        try:
+            shutil.copy(
+                sample_sheet_source.as_posix(),
+                sample_sheet_destination.as_posix(),
+            )
+        except FileNotFoundError as e:
+            raise FileNotFoundError(
+                f"Could not copy sample sheet from {sample_sheet_source_directory} to {sample_sheet_destination_directory}: {e}"
+            )
+        return
+    LOG.warning(f"Sample sheet already exists: {sample_sheet_destination}, skipping copy.")

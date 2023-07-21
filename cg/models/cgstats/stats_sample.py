@@ -1,6 +1,6 @@
 from typing import List, Set
 
-from pydantic import BaseModel, Field, validator
+from pydantic.v1 import BaseModel, Field, validator
 
 
 class Unaligned(BaseModel):

@@ -98,7 +98,7 @@ def test_set_dry_run_delete_demux_api(
 
     # THEN the dry run parameter should be set to True and it should be logged
     assert delete_demultiplex_api.dry_run
-    assert f"DeleteDemuxAPI: Setting dry run mode to True" in caplog.text
+    assert "DeleteDemuxAPI: Setting dry run mode to True" in caplog.text
 
 
 def test_no_active_samples_on_flow_cell(
@@ -394,3 +394,36 @@ def test_delete_demultiplexing_init_files(
     # THEN the files should no longer exist
 
     assert not any(init_file.exists() for init_file in demultiplexing_init_files)
+
+
+def test_delete_flow_cell_sample_lane_sequencing_metrics(
+    caplog,
+    populated_sample_lane_sequencing_metrics_demultiplex_api: DeleteDemuxAPI,
+    populated_sample_lane_seq_demux_context: CGConfig,
+    flow_cell_name: str,
+):
+    """Test removing objects from sample lane sequencing metrics."""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a delete demultiplex API with a sequencing metric object
+
+    wipe_demux_api: DeleteDemuxAPI = populated_sample_lane_sequencing_metrics_demultiplex_api
+    wipe_demux_api.set_dry_run(dry_run=False)
+    assert wipe_demux_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=flow_cell_name
+    )
+
+    # WHEN wiping the existence of said object
+
+    wipe_demux_api.delete_flow_cell_sample_lane_sequencing_metrics()
+
+    # THEN the object should not exist anymore and the user should be notified
+
+    assert not wipe_demux_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=flow_cell_name
+    )
+    assert (
+        f"Delete entries for Flow Cell: {flow_cell_name} in the Sample Lane Sequencing Metrics table"
+        in caplog.text
+    )

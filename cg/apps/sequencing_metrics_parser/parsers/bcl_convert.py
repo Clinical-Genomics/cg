@@ -5,21 +5,22 @@ import logging
 from pathlib import Path
 from typing import List, Union, Dict, Callable
 from cg.io.controller import ReadFile
-from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
+
 from cg.constants.constants import FileFormat, SCALE_TO_READ_PAIRS
+
 from cg.constants.bcl_convert_metrics import (
     DEMUX_METRICS_FILE_NAME,
     QUALITY_METRICS_FILE_NAME,
     ADAPTER_METRICS_FILE_NAME,
-    SAMPLE_SHEET_FILE_NAME,
 )
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertAdapterMetrics,
     BclConvertDemuxMetrics,
     BclConvertQualityMetrics,
-    BclConvertSampleSheetData,
 )
-from cg.constants.demultiplexing import INDEX_CHECK, UNDETERMINED
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    is_valid_sample_internal_id,
+)
 from cg.utils.files import get_file_in_directory
 
 LOG = logging.getLogger(__name__)
@@ -41,9 +42,6 @@ class BclConvertMetricsParser:
         self.adapter_metrics_path: Path = get_file_in_directory(
             directory=self.bcl_convert_demultiplex_dir, file_name=ADAPTER_METRICS_FILE_NAME
         )
-        self.sample_sheet_path: Path = get_file_in_directory(
-            directory=self.bcl_convert_demultiplex_dir, file_name=SAMPLE_SHEET_FILE_NAME
-        )
         self.quality_metrics: List[BclConvertQualityMetrics] = self.parse_metrics_file(
             metrics_file_path=self.quality_metrics_path,
             metrics_model=BclConvertQualityMetrics,
@@ -56,16 +54,11 @@ class BclConvertMetricsParser:
             self.adapter_metrics_path,
             metrics_model=BclConvertAdapterMetrics,
         )
-        self.sample_sheet: List[BclConvertSampleSheetData] = self.parse_sample_sheet_file(
-            sample_sheet_path=self.sample_sheet_path
-        )
 
     def parse_metrics_file(
         self, metrics_file_path, metrics_model: Callable
     ) -> List[Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]]:
         """Parse specified BCL convert metrics file."""
-        if not metrics_file_path.exists():
-            raise FileNotFoundError(f"File {metrics_file_path} does not exist.")
         LOG.info(f"Parsing BCLConvert metrics file: {metrics_file_path}")
         parsed_metrics: List[
             Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]
@@ -77,46 +70,15 @@ class BclConvertMetricsParser:
             parsed_metrics.append(metrics_model(**sample_metrics_dict))
         return parsed_metrics
 
-    def get_nr_of_header_lines_in_sample_sheet(self, sample_sheet_path: Path) -> int:
-        """Return the number of header lines in a sample sheet.
-        Any lines before and including the line starting with [Data] is considered the header."""
-        sample_sheet_content = ReadFile.get_content_from_file(FileFormat.CSV, sample_sheet_path)
-        header_line_count: int = 1
-        for line in sample_sheet_content:
-            if SampleSheetNovaSeq6000Sections.Data.HEADER.value in line:
-                break
-            header_line_count += 1
-        return header_line_count
-
-    def parse_sample_sheet_file(self, sample_sheet_path: Path) -> List[BclConvertSampleSheetData]:
-        """Return sample sheet sample lines."""
-        LOG.info(f"Parsing BCLConvert sample sheet file: {sample_sheet_path}")
-        header_line_count: int = self.get_nr_of_header_lines_in_sample_sheet(
-            sample_sheet_path=sample_sheet_path
-        )
-        sample_sheet_sample_lines: List[BclConvertSampleSheetData] = []
-        with open(sample_sheet_path, "r") as sample_sheet_file:
-            for _ in range(header_line_count):
-                next(sample_sheet_file)
-            sample_sheet_content = csv.DictReader(sample_sheet_file)
-            for line in sample_sheet_content:
-                sample_sheet_sample_lines.append(BclConvertSampleSheetData(**line))
-        return sample_sheet_sample_lines
-
     def get_sample_internal_ids(self) -> List[str]:
         """Return a list of sample internal ids."""
         sample_internal_ids: List[str] = []
         for sample_demux_metric in self.demux_metrics:
-            if self.is_valid_sample(sample_internal_id=sample_demux_metric.sample_internal_id):
+            if is_valid_sample_internal_id(
+                sample_internal_id=sample_demux_metric.sample_internal_id
+            ):
                 sample_internal_ids.append(sample_demux_metric.sample_internal_id)
         return list(set(sample_internal_ids))
-
-    def is_valid_sample(self, sample_internal_id: str) -> bool:
-        """Return True if the sample project is valid."""
-        pattern = r"^[A-Za-z]{3}\d{3}.*"
-        if re.match(pattern, sample_internal_id) is not None:
-            return True
-        return False
 
     def get_lanes_for_sample(self, sample_internal_id: str) -> List[int]:
         """Return a list of lanes for a sample."""
@@ -155,10 +117,6 @@ class BclConvertMetricsParser:
             metrics=self.demux_metrics, sample_internal_id=sample_internal_id, lane=lane
         )
         return metric.read_pair_count * SCALE_TO_READ_PAIRS
-
-    def get_flow_cell_name(self) -> str:
-        """Return the flow cell name of the demultiplexed flow cell."""
-        return self.sample_sheet[0].flow_cell_name
 
     def get_q30_bases_percent_for_sample_in_lane(self, sample_internal_id: str, lane: int) -> float:
         """Return the percent of bases that are Q30 for a sample and lane."""

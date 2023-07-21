@@ -1,7 +1,6 @@
 import logging
 from typing import List, Union, Optional, Dict
 
-from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import Version, File
 
 from cg.constants import (
@@ -18,11 +17,12 @@ from cg.constants import (
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS,
     BALSAMIC_ANALYSIS_TYPE,
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS,
+    Pipeline,
 )
 from cg.constants.scout_upload import BALSAMIC_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.report.report_api import ReportAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.config import BalsamicVarCaller
 from cg.models.balsamic.metrics import (

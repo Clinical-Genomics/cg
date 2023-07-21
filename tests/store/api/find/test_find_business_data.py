@@ -860,3 +860,21 @@ def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
     # THEN assert that the number of reads is less than the total number of reads for the sample
     total_sample_reads = sum([metric.sample_total_reads_in_lane for metric in sample_metrics])
     assert number_of_reads < total_sample_reads
+
+
+def test_get_sample_lane_sequencing_metrics_by_flow_cell_name(
+    store_with_sequencing_metrics: Store, flow_cell_name: str
+):
+    # GIVEN a store with sequencing metrics
+
+    # WHEN getting sequencing metrics for a flow cell
+    metrics: List[
+        SampleLaneSequencingMetrics
+    ] = store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=flow_cell_name
+    )
+
+    # THEN assert that the metrics are returned
+    assert metrics
+    for metric in metrics:
+        assert metric.flow_cell_name == flow_cell_name

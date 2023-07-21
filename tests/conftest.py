@@ -776,16 +776,14 @@ def fixture_flow_cell_runs_working_directory_bcl2fastq(
     flow_cell_runs_working_directory: Path,
 ) -> Path:
     """Return the path to a working directory with flow cells ready for demux."""
-    working_dir: Path = Path(flow_cell_runs_working_directory, "bcl2fastq")
-    working_dir.mkdir(parents=True)
+    working_dir: Path = Path(flow_cell_runs_working_directory)
     return working_dir
 
 
 @pytest.fixture(name="flow_cell_runs_working_directory_dragen")
 def fixture_flow_cell_runs_working_directory_dragen(flow_cell_runs_working_directory: Path) -> Path:
     """Return the path to a working directory with flow cells ready for demux."""
-    working_dir: Path = Path(flow_cell_runs_working_directory, "dragen")
-    working_dir.mkdir(parents=True)
+    working_dir: Path = Path(flow_cell_runs_working_directory)
     return working_dir
 
 
@@ -837,6 +835,7 @@ def fixture_flow_cell_working_directory(
     """
     working_dir: Path = Path(flow_cell_runs_working_directory, bcl2fastq_flow_cell_dir.name)
     working_dir.mkdir(parents=True)
+
     existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=bcl2fastq_flow_cell_dir
     )
@@ -990,8 +989,8 @@ def fixture_sample_sheet_context(cg_context: CGConfig, lims_api: LimsAPI) -> CGC
     return cg_context
 
 
-@pytest.fixture
-def bcl_convert_demultiplexed_flow_cell_sample_ids() -> List[str]:
+@pytest.fixture(name="bcl_convert_demultiplexed_flow_cell_sample_internal_ids", scope="session")
+def fixture_bcl_convert_demultiplexed_flow_cell_sample_internal_ids() -> List[str]:
     """
     Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
     cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/230504_A00689_0804_BHY7FFDRX2.
@@ -999,8 +998,8 @@ def bcl_convert_demultiplexed_flow_cell_sample_ids() -> List[str]:
     return ["ACC11927A2", "ACC11927A5"]
 
 
-@pytest.fixture(name="bcl2fastq_demultiplexed_flow_cell_sample_ids", scope="session")
-def fixture_bcl2fastq_demultiplexed_flow_cell_sample_ids() -> List[str]:
+@pytest.fixture(name="bcl2fastq_demultiplexed_flow_cell_sample_internal_ids", scope="session")
+def fixture_bcl2fastq_demultiplexed_flow_cell_sample_internal_ids() -> List[str]:
     """
     Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
     cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/170407_ST-E00198_0209_BHHKVCALXX.
@@ -1010,6 +1009,7 @@ def fixture_bcl2fastq_demultiplexed_flow_cell_sample_ids() -> List[str]:
 
 @pytest.fixture(name="flow_cell_name_demultiplexed_with_bcl2fastq", scope="session")
 def fixture_flow_cell_name_demultiplexed_with_bcl2fastq() -> str:
+    """Return the name of a flow cell that has been demultiplexed with BCL2Fastq."""
     return "HHKVCALXX"
 
 
@@ -1017,6 +1017,7 @@ def fixture_flow_cell_name_demultiplexed_with_bcl2fastq() -> str:
 def flow_cell_directory_name_demultiplexed_with_bcl2fastq(
     flow_cell_name_demultiplexed_with_bcl2fastq: str,
 ):
+    """Return the name of a flow cell directory that has been demultiplexed with BCL2Fastq."""
     return f"170407_ST-E00198_0209_B{flow_cell_name_demultiplexed_with_bcl2fastq}"
 
 
@@ -1024,13 +1025,14 @@ def flow_cell_directory_name_demultiplexed_with_bcl2fastq(
 def store_with_demultiplexed_samples(
     store: Store,
     helpers: StoreHelpers,
-    bcl_convert_demultiplexed_flow_cell_sample_ids: List[str],
-    bcl2fastq_demultiplexed_flow_cell_sample_ids: List[str],
+    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
+    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
 ) -> Store:
-    for i, sample_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_ids):
+    """Return a store with samples that have been demultiplexed with BCL Convert and BCL2Fastq."""
+    for i, sample_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_internal_ids):
         helpers.add_sample(store, internal_id=sample_id, name=f"sample_bcl_convert_{i}")
 
-    for i, sample_id in enumerate(bcl2fastq_demultiplexed_flow_cell_sample_ids):
+    for i, sample_id in enumerate(bcl2fastq_demultiplexed_flow_cell_sample_internal_ids):
         helpers.add_sample(store, internal_id=sample_id, name=f"sample_bcl2fastq_{i}")
     return store
 
@@ -1083,6 +1085,21 @@ def fixture_populated_stats_api(
 ) -> StatsAPI:
     create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
     return stats_api
+
+
+@pytest.fixture(name="novaseq6000_bcl_convert_sample_sheet_path")
+def fixture_novaseq6000_sample_sheet_path() -> Path:
+    """Return the path to a NovaSeq 6000 BCL convert sample sheet."""
+    return Path(
+        "tests",
+        "fixtures",
+        "apps",
+        "sequencing_metrics_parser",
+        "230622_A00621_0864_AHY7FFDRX2",
+        "Unaligned",
+        "Reports",
+        "SampleSheet.csv",
+    )
 
 
 @pytest.fixture(name="demultiplex_fixtures", scope="session")
@@ -2661,7 +2678,8 @@ def store_with_sequencing_metrics(
     """Return a store with multiple samples with sample lane sequencing metrics."""
 
     sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
-        (sample_id, flow_cell_name, 1, expected_total_reads, 90.5, 32),
+        (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
+        (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
         ("sample_2", "flow_cell_2", 2, 2_000_000, 85.5, 30),
         ("sample_3", "flow_cell_3", 3, 1_500_000, 80.5, 33),
     ]
@@ -2703,8 +2721,8 @@ def flow_cell_directory_name_demultiplexed_with_bcl_convert(
     return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
 
 
-@pytest.fixture
-def demultiplexed_flow_cells_directory(tmp_path) -> Path:
+@pytest.fixture(name="demultiplexed_flow_cells_tmp_directory")
+def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
     original_dir = Path(
         Path(__file__).parent, "fixtures", "apps", "demultiplexing", "demultiplexed-runs"
     )

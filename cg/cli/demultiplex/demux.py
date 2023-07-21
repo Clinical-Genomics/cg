@@ -121,6 +121,11 @@ def demultiplex_flow_cell(
 @click.option("--init-files", is_flag=True, help="Delete flow cell init-files")
 @click.option("--run-dir", is_flag=True, help="Delete flow cell run on file system")
 @click.option(
+    "--sample-lane-sequencing-metrics",
+    is_flag=True,
+    help="Delete flow cell in sample lane sequencing metrics",
+)
+@click.option(
     "--status-db",
     is_flag=True,
     help="Delete flow cell in status-db, if passed all other entries are also deleted",
@@ -136,6 +141,7 @@ def delete_flow_cell(
     housekeeper: bool,
     init_files: bool,
     run_dir: bool,
+    sample_lane_sequencing_metrics: bool,
     status_db: bool,
     yes: bool,
     flow_cell_name: str,
@@ -151,12 +157,14 @@ def delete_flow_cell(
         f"cg-stats={True if status_db else cg_stats}\nDemultiplexing-dir={True if status_db else demultiplexing_dir}\n"
         f"Housekeeper={True if status_db else housekeeper}\nInit_files={True if status_db else init_files}\n"
         f"Run-dir={True if status_db else run_dir}\nStatusdb={status_db}"
+        f"\nSample-lane-sequencing-metrics={True if sample_lane_sequencing_metrics else sample_lane_sequencing_metrics}\n"
     ):
         delete_demux_api.delete_flow_cell(
             cg_stats=cg_stats,
             demultiplexing_dir=demultiplexing_dir,
             housekeeper=housekeeper,
             init_files=init_files,
+            sample_lane_sequencing_metrics=sample_lane_sequencing_metrics,
             run_dir=run_dir,
             status_db=status_db,
         )

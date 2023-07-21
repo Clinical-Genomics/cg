@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Hashable, Iterable
 
-from pydantic import constr, BaseModel
+from pydantic.v1 import constr, BaseModel
 
 from cg.constants import DataDelivery
 from cg.exc import OrderFormError

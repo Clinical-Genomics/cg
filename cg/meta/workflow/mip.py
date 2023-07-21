@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from typing import Any, List, Optional, Dict, Union
 
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, GenePanelMasterList, Pipeline, FileExtensions

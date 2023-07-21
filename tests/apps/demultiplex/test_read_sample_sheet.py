@@ -218,7 +218,7 @@ def test_get_sample_internal_ids_from_sample_sheet(
     # WHEN getting the valid sample internal ids
     sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
         sample_sheet_path=novaseq6000_bcl_convert_sample_sheet_path,
-        flow_cell_type=flow_cell_type,
+        flow_cell_sample_type=flow_cell_type,
     )
 
     # THEN the returned value is a list
