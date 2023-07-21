@@ -4,7 +4,6 @@ from pathlib import Path
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
-from cg.meta.demultiplex.utils import generate_sample_sheet_path
 
 
 def is_valid_sample_fastq_file(sample_fastq: Path, sample_internal_id: str) -> bool:
