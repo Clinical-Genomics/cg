@@ -107,26 +107,28 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
-        flow_cell_directory: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
+        flow_cell_out_directory: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
+        flow_cell_run_directory: Path = Path(self.demux_api.run_dir, flow_cell_directory_name)
 
         try:
-            is_flow_cell_ready_for_postprocessing(flow_cell_directory)
+            is_flow_cell_ready_for_postprocessing(
+                flow_cell_output_directory=flow_cell_out_directory,
+                flow_cell_run_directory=flow_cell_run_directory,
+            )
         except FlowCellError as e:
             LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
             raise e
 
-        flow_cell_run_directory: Path = Path(self.demux_api.run_dir, flow_cell_directory_name)
-
-        bcl_converter: str = get_bcl_converter_name(flow_cell_directory)
+        bcl_converter: str = get_bcl_converter_name(flow_cell_out_directory)
 
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
-            flow_cell_directory=flow_cell_directory,
+            flow_cell_directory=flow_cell_out_directory,
             bcl_converter=bcl_converter,
         )
 
         copy_sample_sheet(
             sample_sheet_source_directory=flow_cell_run_directory,
-            sample_sheet_destination_directory=flow_cell_directory,
+            sample_sheet_destination_directory=flow_cell_out_directory,
         )
 
         try:
@@ -135,7 +137,7 @@ class DemuxPostProcessingAPI:
             LOG.error(f"Failed to store flow cell data: {str(e)}")
             raise e
 
-        create_delivery_file_in_flow_cell_directory(flow_cell_directory)
+        create_delivery_file_in_flow_cell_directory(flow_cell_out_directory)
 
     def finish_all_flow_cells_temp(self) -> None:
         """Finish all flow cells that need it."""
