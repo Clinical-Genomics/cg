@@ -106,7 +106,7 @@ class DemuxPostProcessingAPI:
             is_flow_cell_ready_for_postprocessing(flow_cell_directory)
         except FlowCellError as e:
             LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
-            return
+            raise e
 
         flow_cell_run_directory: Path = Path(self.demux_api.run_dir, flow_cell_directory_name)
 
