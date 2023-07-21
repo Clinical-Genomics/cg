@@ -253,38 +253,22 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     If failed, it sets it as failed and adds a comment with information of the failed metrics."""
 
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     except CgError as error:
         raise click.Abort() from error
 
-    if analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id):
-        analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
-        if dry_run:
-            LOG.info("Dry-run: QC metrics validation would be performed.")
-            return
-        try:
-            LOG.info("Validating QC metrics")
-            analysis_api.validate_qc_metrics(case_id=case_id)
-        except MetricsQCError as error:
-            LOG.error(f"QC metrics failed for {case_id}")
-            analysis_api.trailblazer_api.set_analysis_status(
-                case_id=case_id, status=AnalysisStatus.FAILED
-            )
-            analysis_api.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
-            raise click.Abort() from error
-        except CgError as error:
-            LOG.error(f"Could not create metrics deliverables file: {error}")
-            analysis_api.trailblazer_api.set_analysis_status(
-                case_id=case_id, status=AnalysisStatus.ERROR
-            )
-            raise click.Abort() from error
-        analysis_api.trailblazer_api.set_analysis_status(
-            case_id=case_id, status=AnalysisStatus.COMPLETED
-        )
-    else:
+    if not analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id):
         LOG.info("QC checks not performed")
         LOG.error("The analysis status must be in the QC step to be able to perform QC checks")
+        return
+
+    analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
+    try:
+        analysis_api.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
+    except CgError as error:
+        raise click.Abort() from error
 
 
 @rnafusion.command("report-deliver")
