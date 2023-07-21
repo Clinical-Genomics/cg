@@ -5,9 +5,6 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from typing import Iterable, List, Optional
 
-from housekeeper.store.models import Version
-
-
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -15,38 +12,30 @@ from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.apps.housekeeper.hk import HousekeeperAPI
 
 from cg.constants.cgstats import STATS_HEADER
-from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.constants.sequencing import Sequencers
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
     get_bcl_converter_name,
-    get_lane_from_sample_fastq,
-    get_q30_threshold,
-    get_sample_fastqs_from_flow_cell,
-    get_sample_sheet_path,
     parse_flow_cell_directory_data,
     copy_sample_sheet,
 )
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_internal_ids_from_sample_sheet,
-)
+
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-from cg.store.models import Flowcell, SampleLaneSequencingMetrics
+from cg.store.models import Flowcell
 from cg.utils import Process
-from cg.utils.files import get_files_matching_pattern
 from cg.meta.demultiplex.store_functions import (
     store_flow_cell_data_in_status_db,
     store_sequencing_metrics_in_status_db,
     update_sample_read_counts_in_status_db,
 )
+from cg.meta.demultiplex.hk_functions import store_flow_cell_data_in_housekeeper
 
 LOG = logging.getLogger(__name__)
 
@@ -150,7 +139,9 @@ class DemuxPostProcessingAPI:
         store_flow_cell_data_in_status_db(parsed_flow_cell, store=self.status_db)
         store_sequencing_metrics_in_status_db(parsed_flow_cell, store=self.status_db)
         update_sample_read_counts_in_status_db(parsed_flow_cell, store=self.status_db)
-        store_flow_cell_data_in_housekeeper(parsed_flow_cell, hk_api=self.hk_api)
+        store_flow_cell_data_in_housekeeper(
+            parsed_flow_cell, hk_api=self.hk_api, demux_api=self.demux_api, store=self.status_db
+        )
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
