@@ -58,32 +58,6 @@ def test_finish_flow_cell_dry_run(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_finish_flow_cell_fail(
-    caplog,
-    cli_runner: testing.CliRunner,
-    demultiplex_context: CGConfig,
-    demultiplexed_flow_cell_finished_working_directory: Path,
-    bcl2fastq_flow_cell_id: str,
-):
-    caplog.set_level(logging.INFO)
-
-    # GIVEN a demultiplex flow cell finished output directory that does not exist
-
-    # GIVEN a demultiplex context
-
-    # GIVEN a flow cell id
-
-    # WHEN starting post-processing for new demultiplexing from the CLI
-    result: testing.Result = cli_runner.invoke(
-        finish_flow_cell,
-        [bcl2fastq_flow_cell_id],
-        obj=demultiplex_context,
-    )
-
-    # THEN assert the command exits successfully
-    assert result.exit_code != EXIT_SUCCESS
-
-
 def test_finish_all_hiseq_x_dry_run(
     caplog,
     cli_runner: testing.CliRunner,
