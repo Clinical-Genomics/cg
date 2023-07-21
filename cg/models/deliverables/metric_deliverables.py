@@ -146,7 +146,10 @@ class MetricsDeliverablesCondition(BaseModel):
             if metric.condition is not None:
                 qc_function: Callable = getattr(operator, metric.condition.norm)
                 if not qc_function(metric.value, metric.condition.threshold):
-                    failed_metrics.append(f"{metric.name}={metric.value}")
+                    metric_value = (
+                        round(metric.value, 2) if isinstance(metric.value, float) else metric.value
+                    )
+                    failed_metrics.append(f"{metric.name}={metric_value}")
         if failed_metrics:
             raise MetricsQCError(f"QC failed: {'; '.join(failed_metrics)}")
         return metrics
