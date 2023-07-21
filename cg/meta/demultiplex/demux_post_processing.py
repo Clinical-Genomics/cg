@@ -278,11 +278,6 @@ class DemuxPostProcessingAPI:
         )
 
         for sample_internal_id in sample_internal_ids:
-            if not self.status_db.get_sample_by_internal_id(sample_internal_id):
-                LOG.warning(f"Sample {sample_internal_id} does not exist in status db. Skipping.")
-                continue
-
-            self.add_bundle_and_version_if_non_existent(sample_internal_id)
 
             sample_fastq_paths: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
                 flow_cell_directory=flow_cell.path, sample_internal_id=sample_internal_id
@@ -293,6 +288,8 @@ class DemuxPostProcessingAPI:
                     f"Cannot find fastq files for sample {sample_internal_id} in {flow_cell.path}. Skipping."
                 )
                 continue
+            
+            self.add_bundle_and_version_if_non_existent(sample_internal_id)
 
             for sample_fastq_path in sample_fastq_paths:
                 self.store_fastq_path_in_housekeeper(
