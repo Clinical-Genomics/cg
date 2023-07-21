@@ -118,7 +118,3 @@ def copy_sample_sheet(
             )
         return
     LOG.warning(f"Sample sheet already exists: {sample_sheet_destination}, skipping copy.")
-
-
-def generate_sample_sheet_path(flow_cell_run_directory: Path) -> Path:
-    return Path(flow_cell_run_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)

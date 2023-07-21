@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 
 from cg.constants.constants import FileExtensions
-from cg.constants.demultiplexing import INDEX_CHECK, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.utils import generate_sample_sheet_path
 
@@ -66,7 +66,9 @@ def is_flow_cell_ready_for_delivery(flow_cell_directory: Path) -> bool:
 
 
 def validate_sample_sheet_exists(flow_cell_run_directory: Path) -> None:
-    sample_sheet_path: Path = generate_sample_sheet_path(flow_cell_run_directory)
+    sample_sheet_path: Path = Path(
+        flow_cell_run_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
     if not sample_sheet_path.exists():
         raise FlowCellError(
             f"Sample sheet {sample_sheet_path} does not exist in flow cell run directory."
