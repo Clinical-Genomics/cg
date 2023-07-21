@@ -169,17 +169,12 @@ def test_get_sample_sheet_path_not_found(tmp_path: Path):
         get_sample_sheet_path(flow_cell_directory)
 
 
-@patch("cg.meta.demultiplex.utils.is_flow_cell_directory_valid", return_value=False)
-# GIVEN a flow cell directory which is not valid
-# WHEN parsing the flow cell directory data
-# THEN a FlowCellError should be raised
-def test_parse_flow_cell_directory_data_invalid(mocked_function):
+def test_parse_flow_cell_directory_data_invalid():
     with pytest.raises(FlowCellError):
         parse_flow_cell_directory_data(Path("dummy_path"), "dummy_bcl_converter")
 
 
-@patch("cg.meta.demultiplex.utils.is_flow_cell_directory_valid", return_value=True)
-def test_parse_flow_cell_directory_data_valid(mocked_function):
+def test_parse_flow_cell_directory_data_valid():
     # GIVEN a flow cell directory which is valid
     # WHEN parsing the flow cell directory data
     flow_cell_run_directory = "20230508_LH00188_0003_A22522YLT3"
