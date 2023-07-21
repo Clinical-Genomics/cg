@@ -91,6 +91,7 @@ def add_sample_fastq_files_to_housekeeper(
                 sample_internal_id=sample_internal_id,
                 sample_fastq_path=sample_fastq_path,
                 flow_cell=flow_cell,
+                hk_api=hk_api,
                 store=store,
             )
 
@@ -192,7 +193,9 @@ def add_file_to_bundle_if_non_existent(
         LOG.warning(f"File does not exist: {file_path}")
         return
 
-    if not file_exists_in_latest_version_for_bundle(file_path=file_path, bundle_name=bundle_name):
+    if not file_exists_in_latest_version_for_bundle(
+        file_path=file_path, bundle_name=bundle_name, hk_api=hk_api
+    ):
         hk_api.add_and_include_file_to_latest_version(
             bundle_name=bundle_name,
             file=file_path,
