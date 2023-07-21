@@ -117,7 +117,7 @@ class DemuxPostProcessingAPI:
             )
         except FlowCellError as e:
             LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
-            raise
+            return
 
         bcl_converter: str = get_bcl_converter_name(flow_cell_out_directory)
 
@@ -135,7 +135,7 @@ class DemuxPostProcessingAPI:
             self.store_flow_cell_data(parsed_flow_cell)
         except Exception as e:
             LOG.error(f"Failed to store flow cell data: {str(e)}")
-            return
+            raise
 
         create_delivery_file_in_flow_cell_directory(flow_cell_out_directory)
 
