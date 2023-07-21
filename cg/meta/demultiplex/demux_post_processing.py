@@ -137,8 +137,8 @@ class DemuxPostProcessingAPI:
         for flow_cell_dir in flow_cell_dirs:
             try:
                 self.finish_flow_cell_temp(flow_cell_dir.name)
-            except Exception as e:
-                LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(e)}")
+            except Exception as error:
+                LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(error)}")
                 is_error_raised = True
                 continue
         return is_error_raised
