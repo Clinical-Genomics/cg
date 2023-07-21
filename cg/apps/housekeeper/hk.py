@@ -69,7 +69,7 @@ class HousekeeperAPI:
 
     def get_file(self, file_id: int) -> Optional[File]:
         """Get a file based on file id."""
-        LOG.info(f"Fetching file {file_id}")
+        LOG.info(f"Return file: {file_id}")
         file_obj: File = self._store.get_file_by_id(file_id=file_id)
         if not file_obj:
             LOG.info("file not found")
@@ -227,7 +227,7 @@ class HousekeeperAPI:
 
     def version(self, bundle: str, date: dt.datetime) -> Version:
         """Fetch a version."""
-        LOG.debug(f"Fetch version {date} from {bundle}")
+        LOG.debug(f"Return version: {date}, from {bundle}")
         return self._store.get_version_by_date_and_bundle_name(
             bundle_name=bundle, version_date=date
         )
