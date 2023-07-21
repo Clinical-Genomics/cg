@@ -259,11 +259,6 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     except CgError as error:
         raise click.Abort() from error
 
-    if not analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id):
-        LOG.info("QC checks not performed")
-        LOG.error("The analysis status must be in the QC step to be able to perform QC checks")
-        return
-
     analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
     try:
         analysis_api.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
@@ -332,8 +327,13 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
 def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     """Generate deliverables files for a case and store in Housekeeper if they
     pass QC metrics checks."""
-    LOG.info("Generating metrics file and performing QC checks for %s", case_id)
-    context.invoke(metrics_deliver, case_id=case_id, dry_run=dry_run)
+    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+    if (
+        analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id)
+        or not analysis_api.metrics_deliverables_exists()
+    ):
+        LOG.info("Generating metrics file and performing QC checks for %s", case_id)
+        context.invoke(metrics_deliver, case_id=case_id, dry_run=dry_run)
     LOG.info(f"Storing analysis for {case_id}")
     context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
     context.invoke(store_housekeeper, case_id=case_id, dry_run=dry_run)
