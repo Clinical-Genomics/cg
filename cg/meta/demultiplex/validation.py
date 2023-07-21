@@ -56,7 +56,7 @@ def is_bcl2fastq_demux_folder_structure(flow_cell_directory: Path) -> bool:
     return False
 
 
-def is_flow_cell_directory_valid(flow_cell_directory: Path) -> None:
+def is_flow_cell_ready_for_postprocessing(flow_cell_directory: Path) -> None:
     """Validate that the flow cell directory exists and that the demultiplexing is complete."""
 
     if not flow_cell_directory.is_dir():
@@ -67,6 +67,15 @@ def is_flow_cell_directory_valid(flow_cell_directory: Path) -> None:
             f"Demultiplexing not completed for flow cell directory {flow_cell_directory}."
         )
 
+    if is_flow_cell_ready_for_delivery(flow_cell_directory):
+        raise FlowCellError(
+            f"Flow cell directory {flow_cell_directory} is already ready for delivery."
+        )
+
 
 def is_demultiplexing_complete(flow_cell_directory: Path) -> bool:
     return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
+
+
+def is_flow_cell_ready_for_delivery(flow_cell_directory: Path) -> bool:
+    return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).exists()

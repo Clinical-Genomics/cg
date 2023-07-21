@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Iterable, List, Optional
 
 from housekeeper.store.models import Version
+from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
 from cg.store.models import Sample
 
 from cg.apps.cgstats.crud import create
@@ -87,15 +88,6 @@ class DemuxPostProcessingAPI:
     def finish_flow_cell_temp(self, flow_cell_directory_name: str) -> None:
         """Store data for the demultiplexed flow cell and mark it as ready for delivery.
 
-        This function:
-            - Copies the sample sheet to the demultiplexed flow cell directory
-            - Parses and validates the flow cell directory data
-            - Stores the flow cell in the status database
-            - Stores sequencing metrics in the status database
-            - Updates sample read counts in the status database
-            - Stores the flow cell data in the housekeeper database
-            - Creates a delivery file in the flow cell directory
-
         Args:
             flow_cell_directory_name (str): The name of the flow cell directory to be finalized.
 
@@ -105,9 +97,17 @@ class DemuxPostProcessingAPI:
         if self.dry_run:
             LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
             return
+
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
         flow_cell_directory: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
+
+        try:
+            is_flow_cell_ready_for_postprocessing(flow_cell_directory)
+        except FlowCellError as e:
+            LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
+            return
+
         flow_cell_run_directory: Path = Path(self.demux_api.run_dir, flow_cell_directory_name)
 
         bcl_converter: str = get_bcl_converter_name(flow_cell_directory)
