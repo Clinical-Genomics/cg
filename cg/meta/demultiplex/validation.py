@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 
 from cg.constants.constants import FileExtensions
-from cg.constants.demultiplexing import INDEX_CHECK, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 
 
@@ -56,17 +56,41 @@ def is_bcl2fastq_demux_folder_structure(flow_cell_directory: Path) -> bool:
     return False
 
 
-def is_flow_cell_directory_valid(flow_cell_directory: Path) -> None:
-    """Validate that the flow cell directory exists and that the demultiplexing is complete."""
+def is_demultiplexing_complete(flow_cell_directory: Path) -> bool:
+    return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
 
-    if not flow_cell_directory.is_dir():
-        raise FlowCellError(f"Flow cell directory {flow_cell_directory} does not exist.")
 
-    if not is_demultiplexing_complete(flow_cell_directory):
+def is_flow_cell_ready_for_delivery(flow_cell_directory: Path) -> bool:
+    return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).exists()
+
+
+def validate_sample_sheet_exists(flow_cell_run_directory: Path) -> None:
+    sample_sheet_path: Path = Path(
+        flow_cell_run_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+    if not sample_sheet_path.exists():
         raise FlowCellError(
-            f"Demultiplexing not completed for flow cell directory {flow_cell_directory}."
+            f"Sample sheet {sample_sheet_path} does not exist in flow cell run directory."
         )
 
 
-def is_demultiplexing_complete(flow_cell_directory: Path) -> bool:
-    return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
+def validate_demultiplexing_complete(flow_cell_output_directory: Path) -> None:
+    if not is_demultiplexing_complete(flow_cell_output_directory):
+        raise FlowCellError(
+            f"Demultiplexing not completed for flow cell directory {flow_cell_output_directory}."
+        )
+
+
+def validate_flow_cell_delivery_status(flow_cell_output_directory: Path) -> None:
+    if is_flow_cell_ready_for_delivery(flow_cell_output_directory):
+        raise FlowCellError(
+            f"Flow cell output directory {flow_cell_output_directory} has already been processed and is ready for delivery."
+        )
+
+
+def is_flow_cell_ready_for_postprocessing(
+    flow_cell_output_directory: Path, flow_cell_run_directory: Path
+) -> None:
+    validate_sample_sheet_exists(flow_cell_run_directory)
+    validate_demultiplexing_complete(flow_cell_output_directory)
+    validate_flow_cell_delivery_status(flow_cell_output_directory)
