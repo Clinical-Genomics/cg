@@ -264,7 +264,7 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
             LOG.info("Dry-run: QC metrics validation would be performed.")
             return
         try:
-            LOG.info("Validating QC metrics.")
+            LOG.info("Validating QC metrics")
             analysis_api.validate_qc_metrics(case_id=case_id)
         except MetricsQCError as error:
             LOG.error(f"QC metrics failed for {case_id}")
