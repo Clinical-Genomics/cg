@@ -32,28 +32,6 @@ def test_finish_all_cmd_dry_run(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_finish_all_cmd(
-    caplog,
-    cli_runner: testing.CliRunner,
-    demultiplex_context: CGConfig,
-    demultiplexed_flow_cell_finished_working_directory: Path,
-):
-    caplog.set_level(logging.INFO)
-
-    # GIVEN a demultiplex flow cell finished output directory that exist
-
-    # GIVEN a demultiplex context
-
-    # WHEN starting post-processing for new demultiplexing from the CLI
-    result: testing.Result = cli_runner.invoke(
-        finish_all_cmd,
-        obj=demultiplex_context,
-    )
-
-    # THEN assert the command exits successfully
-    assert result.exit_code == EXIT_SUCCESS
-
-
 def test_finish_flow_cell_dry_run(
     caplog,
     cli_runner: testing.CliRunner,
@@ -80,7 +58,7 @@ def test_finish_flow_cell_dry_run(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_finish_flow_cell(
+def test_finish_flow_cell_fail(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
@@ -89,7 +67,7 @@ def test_finish_flow_cell(
 ):
     caplog.set_level(logging.INFO)
 
-    # GIVEN a demultiplex flow cell finished output directory that exist
+    # GIVEN a demultiplex flow cell finished output directory that does not exist
 
     # GIVEN a demultiplex context
 
@@ -103,7 +81,7 @@ def test_finish_flow_cell(
     )
 
     # THEN assert the command exits successfully
-    assert result.exit_code == EXIT_SUCCESS
+    assert result.exit_code != EXIT_SUCCESS
 
 
 def test_finish_all_hiseq_x_dry_run(

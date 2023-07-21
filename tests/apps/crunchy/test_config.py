@@ -3,9 +3,9 @@ from pathlib import Path
 from typing import Dict, Any
 
 from cg.apps.crunchy.files import get_crunchy_metadata, update_metadata_date, update_metadata_paths
+from cg.apps.crunchy.models import CrunchyMetadata
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
-from cgmodels.crunchy.metadata import CrunchyMetadata
 
 
 def test_get_spring_metadata_real_file(
