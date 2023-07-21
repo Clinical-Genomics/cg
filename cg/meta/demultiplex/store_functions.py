@@ -58,8 +58,10 @@ def add_sequencing_metrics_to_statusdb(
     sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics], store: Store
 ) -> None:
     for metric in sample_lane_sequencing_metrics:
-        metric_exists: bool = metric_exists_in_status_db(metric)
-        metric_has_sample: bool = metric_has_sample_in_statusdb(metric.sample_internal_id)
+        metric_exists: bool = metric_exists_in_status_db(metric=metric, store=store)
+        metric_has_sample: bool = metric_has_sample_in_statusdb(
+            sample_internal_id=metric.sample_internal_id, store=store
+        )
         if not metric_exists and metric_has_sample:
             LOG.debug(
                 f"Adding sample lane sequencing metrics for {metric.flow_cell_name}, {metric.sample_internal_id}, and {metric.flow_cell_lane_number}."
@@ -102,7 +104,7 @@ def update_sample_read_counts_in_status_db(
         flow_cell_sample_type=flow_cell_data.sample_type,
     )
     for sample_id in sample_internal_ids:
-        update_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold)
+        update_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold, store=store)
     store.session.commit()
 
 
