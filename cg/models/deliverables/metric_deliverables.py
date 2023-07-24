@@ -3,6 +3,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from pydantic.v1 import BaseModel, Field, validator
 
+from cg.constants import PRECISION
 from cg.exc import CgError, MetricsQCError
 
 
@@ -147,7 +148,9 @@ class MetricsDeliverablesCondition(BaseModel):
                 qc_function: Callable = getattr(operator, metric.condition.norm)
                 if not qc_function(metric.value, metric.condition.threshold):
                     metric_value = (
-                        round(metric.value, 2) if isinstance(metric.value, float) else metric.value
+                        round(metric.value, PRECISION)
+                        if isinstance(metric.value, float)
+                        else metric.value
                     )
                     failed_metrics.append(f"{metric.name}={metric_value}")
         if failed_metrics:

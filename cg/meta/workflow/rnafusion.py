@@ -367,11 +367,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Return a path where the <case>_metrics_deliverables.yaml file should be located."""
         return Path(self.root_dir, case_id, f"{case_id}_metrics_deliverables.yaml")
 
-    def metrics_deliverables_exists(self, case_id: str) -> bool:
-        """Return True if metrics_deliverables file exists."""
-        metrics_deliverables: Path = self.get_metrics_deliverables_path(case_id=case_id)
-        return metrics_deliverables.exists()
-
     def get_multiqc_json_metrics(self, case_id: str) -> List[MetricsBase]:
         """Get a multiqc_data.json file and returns metrics and values formatted."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -435,10 +430,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         LOG.info("Validating QC metrics")
         try:
             metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-            qcmetrics_raw: dict = ReadFile.get_content_from_file(
+            qc_metrics_raw: dict = ReadFile.get_content_from_file(
                 file_format=FileFormat.YAML, file_path=metrics_deliverables_path
             )
-            MetricsDeliverablesCondition(**qcmetrics_raw)
+            MetricsDeliverablesCondition(**qc_metrics_raw)
         except MetricsQCError as error:
             LOG.error(f"QC metrics failed for {case_id}")
             self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)

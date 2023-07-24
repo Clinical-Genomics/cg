@@ -332,7 +332,7 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     # Avoid storing a case without QC checks previously performed
     if (
         analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id)
-        or not analysis_api.metrics_deliverables_exists()
+        or not analysis_api.get_metrics_deliverables_path(case_id=case_id).exists()
     ):
         LOG.info("Generating metrics file and performing QC checks for %s", case_id)
         context.invoke(metrics_deliver, case_id=case_id, dry_run=dry_run)
