@@ -15,13 +15,11 @@ from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.meta.demultiplex.hk_functions import (
-    store_flow_cell_data_in_housekeeper,
     add_bundle_and_version_if_non_existent,
     add_tags_if_non_existent,
     add_sample_fastq_files_to_housekeeper,
     add_sample_sheet_path_to_housekeeper,
     add_demux_logs_to_housekeeper,
-    add_file_to_bundle_if_non_existent,
 )
 from cg.meta.demultiplex.store_functions import (
     add_sequencing_metrics_to_statusdb,
@@ -604,7 +602,6 @@ def test_add_existing_sample_sheet(
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-    add_file_to_bundle_if_non_existent = MagicMock()
 
     # GIVEN a flow cell directory and name
     flow_cell_directory = Path(novaseq_6000_dir, dragen_flow_cell.full_name)

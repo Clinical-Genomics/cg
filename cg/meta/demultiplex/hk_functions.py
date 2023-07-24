@@ -47,20 +47,23 @@ def add_demux_logs_to_housekeeper(
     flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, demux_api: DemultiplexingAPI
 ) -> None:
     """Add demux logs to Housekeeper."""
-    log_pattern: str = r"*_demultiplex.std*"
+    log_file_name_pattern: str = r"*_demultiplex.std*"
     demux_log_file_paths: List[Path] = get_files_matching_pattern(
-        directory=Path(demux_api.run_dir, flow_cell.full_name), pattern=log_pattern
+        directory=Path(demux_api.run_dir, flow_cell.full_name), pattern=log_file_name_pattern
     )
 
     tag_names: List[str] = [SequencingFileTag.DEMUX_LOG, flow_cell.id]
-    for file_path in demux_log_file_paths:
+    for log_file_path in demux_log_file_paths:
         try:
             add_file_to_bundle_if_non_existent(
-                file_path=file_path, bundle_name=flow_cell.id, tag_names=tag_names, hk_api=hk_api
+                file_path=log_file_path,
+                bundle_name=flow_cell.id,
+                tag_names=tag_names,
+                hk_api=hk_api,
             )
-            LOG.info(f"Added demux log file {file_path} to Housekeeper.")
+            LOG.info(f"Added demux log file {log_file_path} to Housekeeper.")
         except FileNotFoundError as e:
-            LOG.error(f"Cannot find demux log file {file_path}. Error: {e}.")
+            LOG.error(f"Cannot find demux log file {log_file_path}. Error: {e}.")
 
 
 def add_sample_fastq_files_to_housekeeper(
