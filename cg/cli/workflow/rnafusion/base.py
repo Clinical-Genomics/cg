@@ -327,7 +327,7 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
 def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     """Generate deliverables files for a case and store in Housekeeper if they
     pass QC metrics checks."""
-    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+    analysis_api: RnafusionAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
     # Avoid storing a case without QC checks previously performed
     if (
