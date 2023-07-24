@@ -40,12 +40,12 @@ def is_lane_in_fastq_file_name(sample_fastq: Path) -> bool:
 
 def is_sample_id_in_directory_name(directory: Path, sample_internal_id: str) -> bool:
     """Validate that directory name contains the sample id formatted as Sample_<sample_id>."""
-    return f"Sample_{sample_internal_id}" in directory.name
+    return f"Sample_{sample_internal_id}" == directory.name
 
 
 def is_sample_id_in_file_name(sample_fastq: Path, sample_internal_id: str) -> bool:
-    """Validate that file name contains the sample id formatted as <sample_id>."""
-    return sample_internal_id in sample_fastq.name
+    """Validate that file name contains the sample id formatted as <sample_id>_."""
+    return f"{sample_internal_id}_" in sample_fastq.name
 
 
 def is_bcl2fastq_demux_folder_structure(flow_cell_directory: Path) -> bool:
