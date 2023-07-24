@@ -1,6 +1,6 @@
 from typing import Optional, Any
 
-from pydantic import BaseModel, constr, conlist
+from pydantic.v1 import BaseModel, constr, conlist
 
 from cg.models.orders.constants import OrderType
 from cg.models.orders.samples import (

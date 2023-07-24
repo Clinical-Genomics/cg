@@ -37,7 +37,6 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
         panel_bed: str,
         pon_cnn: str,
         observations: List[str],
-        force_normal: bool,
         dry_run: bool = False,
     ) -> None:
         """Creates a config file for BALSAMIC PON analysis."""

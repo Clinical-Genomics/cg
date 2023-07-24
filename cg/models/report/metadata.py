@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from pydantic import BaseModel, validator
+from pydantic.v1 import BaseModel, validator
 from cg.models.report.validators import (
     validate_empty_field,
     validate_float,

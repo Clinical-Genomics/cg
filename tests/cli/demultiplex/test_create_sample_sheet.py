@@ -77,7 +77,9 @@ def test_create_bcl2fastq_sample_sheet(
 
     # WHEN creating a sample sheet
     result = cli_runner.invoke(
-        create_sheet, [str(flow_cell_working_directory)], obj=sample_sheet_context
+        create_sheet,
+        [str(flow_cell_working_directory)],
+        obj=sample_sheet_context,
     )
 
     # THEN the process finishes successfully

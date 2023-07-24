@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Iterable, List, Optional
 
 from housekeeper.store.models import Version
+from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
 from cg.store.models import Sample
 
 from cg.apps.cgstats.crud import create
@@ -17,9 +18,9 @@ from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
 )
 from cg.constants.cgstats import STATS_HEADER
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.demultiplex.utils import (
@@ -27,11 +28,13 @@ from cg.meta.demultiplex.utils import (
     get_bcl_converter_name,
     get_lane_from_sample_fastq,
     get_q30_threshold,
-    get_sample_id_from_sample_fastq,
-    get_sample_ids_from_sample_sheet,
+    get_sample_fastqs_from_flow_cell,
     get_sample_sheet_path,
-    get_valid_sample_fastq_paths,
     parse_flow_cell_directory_data,
+    copy_sample_sheet,
+)
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_internal_ids_from_sample_sheet,
 )
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
@@ -41,6 +44,8 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils import Process
+from cg.utils.files import get_files_matching_pattern
+
 
 LOG = logging.getLogger(__name__)
 
@@ -84,7 +89,6 @@ class DemuxPostProcessingAPI:
         """Store data for the demultiplexed flow cell and mark it as ready for delivery.
 
         This function:
-            - Parses and validates the flow cell directory data
             - Stores the flow cell in the status database
             - Stores sequencing metrics in the status database
             - Updates sample read counts in the status database
@@ -97,15 +101,34 @@ class DemuxPostProcessingAPI:
         Raises:
             FlowCellError: If the flow cell directory or the data it contains is not valid.
         """
+        if self.dry_run:
+            LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
+            return
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
-        flow_cell_directory_path: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
-        bcl_converter: str = get_bcl_converter_name(flow_cell_directory_path)
+        flow_cell_out_directory: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
+        flow_cell_run_directory: Path = Path(self.demux_api.run_dir, flow_cell_directory_name)
+
+        try:
+            is_flow_cell_ready_for_postprocessing(
+                flow_cell_output_directory=flow_cell_out_directory,
+                flow_cell_run_directory=flow_cell_run_directory,
+            )
+        except FlowCellError as e:
+            LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
+            return
+
+        bcl_converter: str = get_bcl_converter_name(flow_cell_out_directory)
 
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
-            flow_cell_directory=flow_cell_directory_path,
+            flow_cell_directory=flow_cell_out_directory,
             bcl_converter=bcl_converter,
+        )
+
+        copy_sample_sheet(
+            sample_sheet_source_directory=flow_cell_run_directory,
+            sample_sheet_destination_directory=flow_cell_out_directory,
         )
 
         try:
@@ -114,7 +137,20 @@ class DemuxPostProcessingAPI:
             LOG.error(f"Failed to store flow cell data: {str(e)}")
             raise
 
-        create_delivery_file_in_flow_cell_directory(flow_cell_directory_path)
+        create_delivery_file_in_flow_cell_directory(flow_cell_out_directory)
+
+    def finish_all_flow_cells_temp(self) -> bool:
+        """Finish all flow cells that need it."""
+        flow_cell_dirs = self.demux_api.get_all_demultiplexed_flow_cell_dirs()
+        is_error_raised: bool = False
+        for flow_cell_dir in flow_cell_dirs:
+            try:
+                self.finish_flow_cell_temp(flow_cell_dir.name)
+            except Exception as error:
+                LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(error)}")
+                is_error_raised = True
+                continue
+        return is_error_raised
 
     def store_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Store data from the flow cell directory in status db and housekeeper."""
@@ -138,9 +174,19 @@ class DemuxPostProcessingAPI:
         self, sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics]
     ) -> None:
         for metric in sample_lane_sequencing_metrics:
-            if not self.metric_exists_in_status_db(metric):
+            metric_exists: bool = self.metric_exists_in_status_db(metric)
+            metric_has_sample: bool = self.metric_has_sample_in_statusdb(metric.sample_internal_id)
+            if not metric_exists and metric_has_sample:
                 self.add_metric_to_status_db(metric)
         self.status_db.session.commit()
+
+    def metric_has_sample_in_statusdb(self, sample_internal_id: str) -> bool:
+        """Check if a sample exists in status db for the sample lane sequencing metrics."""
+        sample: Sample = self.status_db.get_sample_by_internal_id(sample_internal_id)
+        if sample:
+            return True
+        LOG.warning(f"Sample {sample_internal_id} does not exist in status db. Skipping.")
+        return False
 
     def metric_exists_in_status_db(self, metric: SampleLaneSequencingMetrics) -> bool:
         existing_metrics_entry: Optional[
@@ -152,7 +198,7 @@ class DemuxPostProcessingAPI:
         )
         if existing_metrics_entry:
             LOG.warning(
-                f"Sample lane sequencing metrics already exist for {metric.flow_cell_name}, {metric.sample_internal_id}, and {metric.flow_cell_lane_number}. Skipping."
+                f"Sample lane sequencing metrics already exist for {metric.flow_cell_name}, {metric.sample_internal_id}, and lane {metric.flow_cell_lane_number}. Skipping."
             )
         return bool(existing_metrics_entry)
 
@@ -166,7 +212,10 @@ class DemuxPostProcessingAPI:
         """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
 
         q30_threshold: int = get_q30_threshold(flow_cell_data.sequencer_type)
-        sample_internal_ids: List[str] = get_sample_ids_from_sample_sheet(flow_cell_data)
+        sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
+            sample_sheet_path=flow_cell_data.sample_sheet_path,
+            flow_cell_sample_type=flow_cell_data.sample_type,
+        )
 
         for sample_id in sample_internal_ids:
             self.update_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold)
@@ -201,39 +250,83 @@ class DemuxPostProcessingAPI:
             flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id
         )
         self.add_sample_fastq_files_to_housekeeper(flow_cell)
+        self.add_demux_logs_to_housekeeper(flow_cell)
+
+    def add_demux_logs_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
+        """Add demux logs to Housekeeper."""
+        log_pattern: str = r"*_demultiplex.std*"
+        demux_log_file_paths: List[Path] = get_files_matching_pattern(
+            directory=Path(self.demux_api.run_dir, flow_cell.full_name), pattern=log_pattern
+        )
+
+        tag_names: List[str] = [SequencingFileTag.DEMUX_LOG, flow_cell.id]
+        for file_path in demux_log_file_paths:
+            try:
+                self.add_file_to_bundle_if_non_existent(
+                    file_path=file_path, bundle_name=flow_cell.id, tag_names=tag_names
+                )
+                LOG.info(f"Added demux log file {file_path} to Housekeeper.")
+            except FileNotFoundError as e:
+                LOG.error(f"Cannot find demux log file {file_path}. Error: {e}.")
 
     def add_sample_fastq_files_to_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
-        valid_sample_fastq_paths = get_valid_sample_fastq_paths(flow_cell.path)
 
-        for sample_fastq_path in valid_sample_fastq_paths:
-            if self.fastq_path_should_be_stored_in_housekeeper(
+        sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
+            sample_sheet_path=flow_cell.sample_sheet_path,
+            flow_cell_sample_type=flow_cell.sample_type,
+        )
+
+        for sample_internal_id in sample_internal_ids:
+            self.add_bundle_and_version_if_non_existent(sample_internal_id)
+
+            sample_fastq_paths: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
+                flow_cell_directory=flow_cell.path, sample_internal_id=sample_internal_id
+            )
+
+            if not sample_fastq_paths:
+                LOG.warning(
+                    f"Cannot find fastq files for sample {sample_internal_id} in {flow_cell.path}. Skipping."
+                )
+                continue
+
+            for sample_fastq_path in sample_fastq_paths:
+                self.store_fastq_path_in_housekeeper(
+                    sample_internal_id=sample_internal_id,
+                    sample_fastq_path=sample_fastq_path,
+                    flow_cell=flow_cell,
+                )
+
+    def store_fastq_path_in_housekeeper(
+        self, sample_internal_id: str, sample_fastq_path: Path, flow_cell: FlowCellDirectoryData
+    ) -> None:
+        sample_fastq_should_be_stored: bool = (
+            self.check_if_fastq_path_should_be_stored_in_housekeeper(
+                sample_id=sample_internal_id,
                 sample_fastq_path=sample_fastq_path,
                 sequencer_type=flow_cell.sequencer_type,
                 flow_cell_name=flow_cell.id,
-            ):
-                self.store_fastq_path_in_housekeeper(
-                    sample_fastq_path=sample_fastq_path, flow_cell_name=flow_cell.id
-                )
-
-    def store_fastq_path_in_housekeeper(self, sample_fastq_path: Path, flow_cell_name: str) -> None:
-        sample_id = get_sample_id_from_sample_fastq(sample_fastq_path)
-
-        self.add_bundle_and_version_if_non_existent(bundle_name=sample_id)
-        self.add_file_to_bundle_if_non_existent(
-            file_path=sample_fastq_path,
-            bundle_name=sample_id,
-            tag_names=[SequencingFileTag.FASTQ, flow_cell_name],
+            )
         )
 
-    def fastq_path_should_be_stored_in_housekeeper(
-        self, sample_fastq_path: Path, sequencer_type: Sequencers, flow_cell_name: str
+        if sample_fastq_should_be_stored:
+            self.add_file_to_bundle_if_non_existent(
+                file_path=sample_fastq_path,
+                bundle_name=sample_internal_id,
+                tag_names=[SequencingFileTag.FASTQ, flow_cell.id],
+            )
+
+    def check_if_fastq_path_should_be_stored_in_housekeeper(
+        self,
+        sample_id: str,
+        sample_fastq_path: Path,
+        sequencer_type: Sequencers,
+        flow_cell_name: str,
     ) -> bool:
         """
         Check if a sample fastq file should be tracked in Housekeeper.
         Only fastq files that pass the q30 threshold should be tracked.
         """
-        sample_id = get_sample_id_from_sample_fastq(sample_fastq_path)
         lane = get_lane_from_sample_fastq(sample_fastq_path)
         q30_threshold: int = get_q30_threshold(sequencer_type)
 
@@ -258,7 +351,9 @@ class DemuxPostProcessingAPI:
         """Add sample sheet path to Housekeeper."""
 
         try:
-            sample_sheet_file_path: Path = get_sample_sheet_path(flow_cell_directory)
+            sample_sheet_file_path: Path = get_sample_sheet_path(
+                flow_cell_directory=flow_cell_directory
+            )
 
             self.add_file_to_bundle_if_non_existent(
                 file_path=sample_sheet_file_path,
@@ -589,6 +684,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
                 bcl_converter=bcl_converter,
             )
         except FlowCellError:
+            LOG.warning(f"Could not find flow cell {flow_cell_name}")
             return
         if not self.demux_api.is_demultiplexing_completed(flow_cell=flow_cell):
             LOG.warning("Demultiplex is not ready for %s", flow_cell_name)
@@ -607,6 +703,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             LOG.warning("Flow cell is already finished!")
             if not force:
                 return
+
             LOG.info("Post processing flow cell anyway")
         self.post_process_flow_cell(demux_results=demux_results)
 

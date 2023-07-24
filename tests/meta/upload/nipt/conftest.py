@@ -6,10 +6,14 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
+
 from tests.store.api.conftest import (
     fixture_re_sequenced_sample_store,
     fixture_store_failing_sequencing_qc,
 )
+
+from tests.apps.cgstats.conftest import fixture_nipt_stats_api
+from tests.store.api.conftest import fixture_re_sequenced_sample_store
 from cg.store.models import Application
 
 

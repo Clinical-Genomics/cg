@@ -6,7 +6,6 @@ from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertDemuxMetrics,
     BclConvertSampleSheetData,
     BclConvertAdapterMetrics,
-    BclConvertRunInfo,
 )
 from cg.constants.demultiplexing import INDEX_CHECK, UNDETERMINED
 from pathlib import Path
@@ -29,12 +28,9 @@ def test_parse_bcl_convert_metrics(
     assert isinstance(bcl_convert_metrics_parser.quality_metrics[0], BclConvertQualityMetrics)
     assert bcl_convert_metrics_parser.demux_metrics
     assert isinstance(bcl_convert_metrics_parser.demux_metrics[0], BclConvertDemuxMetrics)
-    assert bcl_convert_metrics_parser.sample_sheet
-    assert isinstance(bcl_convert_metrics_parser.sample_sheet[0], BclConvertSampleSheetData)
+
     assert bcl_convert_metrics_parser.adapter_metrics
     assert isinstance(bcl_convert_metrics_parser.adapter_metrics[0], BclConvertAdapterMetrics)
-    assert bcl_convert_metrics_parser.run_info
-    assert isinstance(bcl_convert_metrics_parser.run_info, BclConvertRunInfo)
 
 
 def test_parse_metrics_files_not_existing():
@@ -97,24 +93,6 @@ def test_parse_bcl_convert_demux_metrics(
     # ASSERT that the parsed demux metrics has the correct values
     for attr_name, attr_value in demux_metrics_model.dict().items():
         assert getattr(bcl_convert_demux_metric_model_with_data, attr_name) == attr_value
-
-
-def test_parse_bcl_convert_sample_sheet(
-    parsed_bcl_convert_metrics: BclConvertMetricsParser,
-    bcl_convert_sample_sheet_model_with_data: BclConvertSampleSheetData,
-):
-    """Test to parse BCLConvert sample sheet."""
-    # GIVEN a parsed BCLConvert metrics
-
-    # ASSERT that the parsed sample sheet is correct
-    sample_sheet_model: BclConvertSampleSheetData = parsed_bcl_convert_metrics.sample_sheet[0]
-
-    # ASSERT that the parsed sample sheet is of the correct type
-    assert isinstance(sample_sheet_model, BclConvertSampleSheetData)
-
-    # ASSERT that the parsed sample sheet has the correct values
-    for attr_name, attr_value in sample_sheet_model.dict().items():
-        assert getattr(bcl_convert_sample_sheet_model_with_data, attr_name) == attr_value
 
 
 def test_get_sample_internal_ids(
@@ -193,19 +171,6 @@ def test_calculate_total_reads_per_lane(
     assert total_reads_per_lane == expected_total_reads_per_lane
 
 
-def test_get_flow_cell_name(
-    parsed_bcl_convert_metrics: BclConvertMetricsParser, bcl_convert_test_flow_cell_name: str
-):
-    """Test to get flow cell name from BclConvertMetricsParser."""
-    # GIVEN a parsed BCLConvert metrics
-
-    # WHEN getting flow cell name
-    flow_cell_name: str = parsed_bcl_convert_metrics.get_flow_cell_name()
-
-    # THEN assert that the flow cell name is correct
-    assert flow_cell_name == bcl_convert_test_flow_cell_name
-
-
 def test_get_q30_bases_percent_per_lane(
     parsed_bcl_convert_metrics,
     bcl_convert_test_q30_bases_percent: float,
@@ -244,21 +209,3 @@ def test_get_mean_quality_score_per_lane(
 
     # THEN assert that the mean quality score per lane is correct
     assert mean_quality_score_per_lane == bcl_convert_test_mean_quality_score_per_lane
-
-
-def test_is_valid_sample_project(
-    parsed_bcl_convert_metrics: BclConvertMetricsParser, test_sample_internal_id: str
-):
-    """Test to check if a sample project is valid."""
-    # GIVEN a sample project
-
-    # WHEN checking if the sample project is valid
-    sample_project_list: List[str] = [test_sample_internal_id, INDEX_CHECK, UNDETERMINED]
-    expected_outcome: List[bool] = [True, False, False]
-
-    # THEN assert that the outcome is correct
-    for index in range(len(sample_project_list)):
-        assert (
-            parsed_bcl_convert_metrics.is_valid_sample_project(sample_project_list[index])
-            == expected_outcome[index]
-        )

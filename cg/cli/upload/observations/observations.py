@@ -8,7 +8,7 @@ from typing import Optional, Union
 import click
 from sqlalchemy.orm import Query
 from cgmodels.cg.constants import Pipeline
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from cg.cli.upload.observations.utils import get_observations_case_to_upload, get_observations_api
 from cg.exc import LoqusdbError, CaseNotFoundError

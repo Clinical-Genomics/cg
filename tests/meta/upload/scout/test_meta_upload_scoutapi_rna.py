@@ -576,7 +576,7 @@ def test_link_rna_sample_to_dna_sample(
     rna_dna_collection: RNADNACollection = upload_scout_api.create_rna_dna_collection(rna_sample)
 
     # THEN the RNADNACollection should contain the RNA sample
-    assert rna_sample_son_id == rna_dna_collection.rna_sample_id
+    assert rna_sample_son_id == rna_dna_collection.rna_sample_internal_id
 
     # THEN the RNADNACollection should have its dna_sample_id set to the related dna_sample_id
     assert dna_sample_son_id == rna_dna_collection.dna_sample_name

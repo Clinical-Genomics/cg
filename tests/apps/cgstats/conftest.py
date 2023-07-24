@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict
 
 import pytest
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.db.models import Supportparams, Sample, Project, Datasource, Demux
@@ -64,23 +64,6 @@ class MockDemuxSample(BaseModel):
     lane: int = 1
 
 
-@pytest.fixture(name="stats_api")
-def fixture_stats_api(project_dir: Path) -> StatsAPI:
-    """Setup base CGStats store."""
-    _store = StatsAPI(
-        {
-            "cgstats": {
-                "binary_path": "echo",
-                "database": "sqlite://",
-                "root": "tests/fixtures/DEMUX",
-            }
-        }
-    )
-    _store.create_all()
-    yield _store
-    _store.drop_all()
-
-
 @pytest.fixture(name="nipt_stats_api")
 def fixture_nipt_stats_api(
     stats_api: StatsAPI,
@@ -127,14 +110,6 @@ def fixture_nipt_stats_api(
         sample_id=sample_obj.sample_id,
     )
     return nipt_stats_api
-
-
-@pytest.fixture(name="populated_stats_api")
-def fixture_populated_stats_api(
-    stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
-) -> StatsAPI:
-    create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
-    return stats_api
 
 
 @pytest.fixture(name="demultiplexing_stats_path")

@@ -2,8 +2,6 @@ from pathlib import Path
 
 import pytest
 
-from tests.cli.demultiplex.conftest import fixture_demultiplexed_flow_cells_working_directory
-
 
 @pytest.fixture(name="correct_flow_cell_name")
 def fixture_correct_flow_cell_name(bcl2fastq_flow_cell_full_name: str) -> str:

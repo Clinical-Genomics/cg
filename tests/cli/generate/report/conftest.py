@@ -2,9 +2,9 @@ from datetime import datetime
 
 import click
 import pytest
-from cgmodels.cg.constants import Pipeline
 
 from cg.cli.generate.report.base import generate_delivery_report
+from cg.constants import Pipeline
 from cg.models.cg_config import CGConfig
 from tests.mocks.report import MockMipDNAReportAPI, MockMipDNAAnalysisAPI
 

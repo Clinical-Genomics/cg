@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import Field, validator
+from pydantic.v1 import Field, validator
 
 from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
 from cg.models.orders.sample_base import OrderSample
