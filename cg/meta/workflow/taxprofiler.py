@@ -39,6 +39,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         self.root_dir: str = config.taxprofiler.root
         self.nfcore_pipeline_path: str = config.taxprofiler.pipeline_path
         self.conda_env: str = config.taxprofiler.conda_env
+        self.compute_env: str = config.taxprofiler.compute_env
         self.conda_binary: str = config.taxprofiler.conda_binary
         self.profile: str = config.taxprofiler.profile
         self.revision: str = config.taxprofiler.revision
@@ -247,30 +248,30 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 ),
             )
             LOG.info("Pipeline will be executed using nextflow")
-            # parameters: List[str] = NextflowAnalysisAPI.get_nextflow_run_parameters(
-            #    case_id=case_id,
-            #    pipeline_path=self.nfcore_pipeline_path,
-            #    root_dir=self.root_dir,
-            #    command_args=command_args.dict(),
-            # )
-            # self.process.export_variables(
-            #    export=NextflowAnalysisAPI.get_variables_to_export(
-            #        case_id=case_id, root_dir=self.root_dir
-            #    ),
-            # )
+            parameters: List[str] = NextflowAnalysisAPI.get_nextflow_run_parameters(
+                case_id=case_id,
+                pipeline_path=self.nfcore_pipeline_path,
+                root_dir=self.root_dir,
+                command_args=command_args.dict(),
+            )
+            self.process.export_variables(
+                export=NextflowAnalysisAPI.get_variables_to_export(
+                    case_id=case_id, root_dir=self.root_dir
+                ),
+            )
 
-            # command = self.process.get_command(parameters=parameters)
-            # LOG.info(f"{command}")
-            # sbatch_number: int = NextflowAnalysisAPI.execute_head_job(
-            #    case_id=case_id,
-            #    root_dir=self.root_dir,
-            #    slurm_account=self.account,
-            #    email=self.email,
-            #    qos=self.get_slurm_qos_for_case(case_id=case_id),
-            #    commands=command,
-            #    dry_run=dry_run,
-            # )
-            # LOG.info(f"Nextflow head job running as job {sbatch_number}")
+            command = self.process.get_command(parameters=parameters)
+            LOG.info(f"{command}")
+            sbatch_number: int = NextflowAnalysisAPI.execute_head_job(
+                case_id=case_id,
+                root_dir=self.root_dir,
+                slurm_account=self.account,
+                email=self.email,
+                qos=self.get_slurm_qos_for_case(case_id=case_id),
+                commands=command,
+                dry_run=dry_run,
+            )
+            LOG.info(f"Nextflow head job running as job {sbatch_number}")
 
         else:
             LOG.info("Pipeline will be executed using tower")
