@@ -883,3 +883,16 @@ def test_add_demux_logs_to_housekeeper(
     assert len(files) == 2
     for file in files:
         assert file.path.split("/")[-1] in expected_file_names
+
+
+def test_metric_has_sample_in_statusdb(demultiplex_context: CGConfig):
+    # GIVEN a store with a sample and a sequencing metric
+
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN a sample internal id that does not exist in statusdb
+    sample_internal_id = "does_not_exist"
+
+    # WHEN checking if the sample exists in statusdb
+    assert not demux_post_processing_api.metric_has_sample_in_statusdb(sample_internal_id)

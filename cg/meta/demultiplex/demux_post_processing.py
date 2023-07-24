@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Iterable, List, Optional
 
 from housekeeper.store.models import Version
+from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
 from cg.store.models import Sample
 
 from cg.apps.cgstats.crud import create
@@ -88,8 +89,6 @@ class DemuxPostProcessingAPI:
         """Store data for the demultiplexed flow cell and mark it as ready for delivery.
 
         This function:
-            - Copies the sample sheet to the demultiplexed flow cell directory
-            - Parses and validates the flow cell directory data
             - Stores the flow cell in the status database
             - Stores sequencing metrics in the status database
             - Updates sample read counts in the status database
@@ -105,21 +104,31 @@ class DemuxPostProcessingAPI:
         if self.dry_run:
             LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
             return
+
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
-        flow_cell_directory: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
+        flow_cell_out_directory: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
         flow_cell_run_directory: Path = Path(self.demux_api.run_dir, flow_cell_directory_name)
 
-        bcl_converter: str = get_bcl_converter_name(flow_cell_directory)
+        try:
+            is_flow_cell_ready_for_postprocessing(
+                flow_cell_output_directory=flow_cell_out_directory,
+                flow_cell_run_directory=flow_cell_run_directory,
+            )
+        except FlowCellError as e:
+            LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
+            return
+
+        bcl_converter: str = get_bcl_converter_name(flow_cell_out_directory)
 
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
-            flow_cell_directory=flow_cell_directory,
+            flow_cell_directory=flow_cell_out_directory,
             bcl_converter=bcl_converter,
         )
 
         copy_sample_sheet(
             sample_sheet_source_directory=flow_cell_run_directory,
-            sample_sheet_destination_directory=flow_cell_directory,
+            sample_sheet_destination_directory=flow_cell_out_directory,
         )
 
         try:
@@ -128,17 +137,20 @@ class DemuxPostProcessingAPI:
             LOG.error(f"Failed to store flow cell data: {str(e)}")
             raise
 
-        create_delivery_file_in_flow_cell_directory(flow_cell_directory)
+        create_delivery_file_in_flow_cell_directory(flow_cell_out_directory)
 
-    def finish_all_flow_cells_temp(self) -> None:
+    def finish_all_flow_cells_temp(self) -> bool:
         """Finish all flow cells that need it."""
         flow_cell_dirs = self.demux_api.get_all_demultiplexed_flow_cell_dirs()
+        is_error_raised: bool = False
         for flow_cell_dir in flow_cell_dirs:
             try:
                 self.finish_flow_cell_temp(flow_cell_dir.name)
-            except FlowCellError as e:
-                LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(e)}")
+            except Exception as error:
+                LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(error)}")
+                is_error_raised = True
                 continue
+        return is_error_raised
 
     def store_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Store data from the flow cell directory in status db and housekeeper."""
@@ -162,9 +174,19 @@ class DemuxPostProcessingAPI:
         self, sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics]
     ) -> None:
         for metric in sample_lane_sequencing_metrics:
-            if not self.metric_exists_in_status_db(metric):
+            metric_exists: bool = self.metric_exists_in_status_db(metric)
+            metric_has_sample: bool = self.metric_has_sample_in_statusdb(metric.sample_internal_id)
+            if not metric_exists and metric_has_sample:
                 self.add_metric_to_status_db(metric)
         self.status_db.session.commit()
+
+    def metric_has_sample_in_statusdb(self, sample_internal_id: str) -> bool:
+        """Check if a sample exists in status db for the sample lane sequencing metrics."""
+        sample: Sample = self.status_db.get_sample_by_internal_id(sample_internal_id)
+        if sample:
+            return True
+        LOG.warning(f"Sample {sample_internal_id} does not exist in status db. Skipping.")
+        return False
 
     def metric_exists_in_status_db(self, metric: SampleLaneSequencingMetrics) -> bool:
         existing_metrics_entry: Optional[
@@ -176,7 +198,7 @@ class DemuxPostProcessingAPI:
         )
         if existing_metrics_entry:
             LOG.warning(
-                f"Sample lane sequencing metrics already exist for {metric.flow_cell_name}, {metric.sample_internal_id}, and {metric.flow_cell_lane_number}. Skipping."
+                f"Sample lane sequencing metrics already exist for {metric.flow_cell_name}, {metric.sample_internal_id}, and lane {metric.flow_cell_lane_number}. Skipping."
             )
         return bool(existing_metrics_entry)
 
