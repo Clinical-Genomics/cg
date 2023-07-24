@@ -14,7 +14,7 @@ from cg.exc import FlowCellError
 from cg.io.controller import WriteFile, WriteStream
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 LOG = logging.getLogger(__name__)
 

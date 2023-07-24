@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from pydantic import validator
+from pydantic.v1 import validator
 
 from cg.constants.subject import Gender
 from cg.models.deliverables.metric_deliverables import (

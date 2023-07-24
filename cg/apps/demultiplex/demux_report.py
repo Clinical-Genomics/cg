@@ -6,7 +6,7 @@ from cg.apps.cgstats.parsers.conversion_stats import (
     SampleConversionResults,
     UnknownBarcode,
 )
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)

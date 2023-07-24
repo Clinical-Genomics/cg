@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Dict, List
 
 import pytest
+from pydantic.v1 import ValidationError
+
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import (
     get_crunchy_metadata,
@@ -11,13 +13,12 @@ from cg.apps.crunchy.files import (
     get_log_dir,
     get_spring_archive_files,
 )
+from cg.apps.crunchy.models import CrunchyFile, CrunchyMetadata
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.models import CompressionData
 from cg.utils import Process
-from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
-from pydantic import ValidationError
 
 
 def test_get_spring_metadata(spring_metadata_file: Path):

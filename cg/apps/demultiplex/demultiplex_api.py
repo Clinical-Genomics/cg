@@ -139,7 +139,7 @@ class DemultiplexingAPI:
         LOG.info(f"Check if demultiplexing is ready for {flow_cell.path}")
         logfile: Path = self.get_stderr_logfile(flow_cell)
         if not logfile.exists():
-            LOG.warning("Could not find logfile!")
+            LOG.warning(f"Could not find logfile: {logfile}!")
             return False
         return self.demultiplexing_completed_path(flow_cell).exists()
 

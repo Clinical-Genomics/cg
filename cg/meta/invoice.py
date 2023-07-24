@@ -11,7 +11,7 @@ from cg.constants.invoice import (
     CustomerNames,
 )
 from cg.models.invoice.invoice import InvoiceContact, InvoiceApplication, InvoiceReport, InvoiceInfo
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 
 class InvoiceAPI:

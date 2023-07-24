@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Union, Optional
 
-from pydantic import BaseModel, validator
+from pydantic.v1 import BaseModel, validator
 
 
 class BalsamicConfigAnalysis(BaseModel):

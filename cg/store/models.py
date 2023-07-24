@@ -800,3 +800,6 @@ class SampleLaneSequencingMetrics(Model):
             name="uix_flowcell_sample_lane",
         ),
     )
+
+    def to_dict(self):
+        return to_dict(model_instance=self)

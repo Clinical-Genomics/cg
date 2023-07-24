@@ -2,7 +2,6 @@ import logging
 
 from cg.constants.scout_upload import BALSAMIC_UMI_CASE_TAGS
 from cg.meta.report.balsamic import BalsamicReportAPI
-
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.models.cg_config import CGConfig
 
