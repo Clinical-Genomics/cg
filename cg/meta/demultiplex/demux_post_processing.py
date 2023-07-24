@@ -21,6 +21,7 @@ from cg.meta.demultiplex.utils import (
     parse_flow_cell_directory_data,
     copy_sample_sheet,
 )
+from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
 
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig

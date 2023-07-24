@@ -208,6 +208,7 @@ def file_exists_in_latest_version_for_bundle(
 ) -> bool:
     """Check if file exists in latest version for bundle."""
     latest_version: Version = hk_api.get_latest_bundle_version(bundle_name=bundle_name)
+
     return any(
         file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
     )
