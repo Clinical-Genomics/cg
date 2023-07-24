@@ -39,7 +39,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         self.root_dir: str = config.taxprofiler.root
         self.nfcore_pipeline_path: str = config.taxprofiler.pipeline_path
         self.conda_env: str = config.taxprofiler.conda_env
-        self.compute_env: str = config.taxprofiler.compute_env
         self.conda_binary: str = config.taxprofiler.conda_binary
         self.profile: str = config.taxprofiler.profile
         self.revision: str = config.taxprofiler.revision
