@@ -251,7 +251,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 case_id=case_id,
                 pipeline_path=self.nfcore_pipeline_path,
                 root_dir=self.root_dir,
-                command_args=command_args.dict(),
+                command_args=command_args,
             )
             self.process.export_variables(
                 export=NextflowAnalysisAPI.get_variables_to_export(
