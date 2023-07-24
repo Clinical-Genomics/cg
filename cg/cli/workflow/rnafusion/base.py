@@ -350,7 +350,8 @@ def store_available(context: click.Context, dry_run: bool) -> None:
     analysis_api: AnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
     exit_code: int = EXIT_SUCCESS
-    for case_obj in [*analysis_api.get_cases_to_qc(), *analysis_api.get_cases_to_store()]:
+
+    for case_obj in set([*analysis_api.get_cases_to_qc(), *analysis_api.get_cases_to_store()]):
         LOG.info("Storing RNAFUSION deliverables for %s", case_obj.internal_id)
         try:
             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
