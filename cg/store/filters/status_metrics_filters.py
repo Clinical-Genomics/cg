@@ -32,16 +32,15 @@ def filter_by_flow_cell_sample_internal_id_and_lane(
     )
 
 
-
-def filter_metrics_by_flow_cell_name(metrics: Query, flow_cell_name: str, **kwargs) -> Query:
+def filter_by_flow_cell_name(metrics: Query, flow_cell_name: str, **kwargs) -> Query:
     """Filter metrics by flow cell name."""
-
     return metrics.filter(
         SampleLaneSequencingMetrics.flow_cell_name == flow_cell_name,
     )
 
 
 def filter_by_sample_internal_id(metrics: Query, sample_internal_id: str, **kwargs) -> Query:
+    """Filter metrics by sample internal id."""
     return metrics.filter(
         SampleLaneSequencingMetrics.sample_internal_id == sample_internal_id,
     )
@@ -55,7 +54,6 @@ class SequencingMetricsFilter(Enum):
     FILTER_BY_FLOW_CELL_NAME: Callable = filter_by_flow_cell_name
     FILTER_BY_SAMPLE_INTERNAL_ID: Callable = filter_by_sample_internal_id
     FILTER_ABOVE_Q30_THRESHOLD: Callable = filter_above_q30_threshold
-    FILTER_METRICS_BY_FLOW_CELL_NAME: Callable = filter_metrics_by_flow_cell_name
 
 
 def apply_metrics_filter(

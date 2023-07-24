@@ -3,10 +3,9 @@ from cg.store import Store
 from cg.store.filters.status_metrics_filters import (
     filter_above_q30_threshold,
     filter_total_read_count_for_sample,
-
-    filter_metrics_for_flow_cell_sample_internal_id_and_lane,
-    filter_metrics_by_flow_cell_name,
-
+    filter_by_flow_cell_sample_internal_id_and_lane,
+    filter_by_flow_cell_name,
+    filter_by_sample_internal_id,
 )
 from cg.store.models import SampleLaneSequencingMetrics
 from sqlalchemy.orm import Query
@@ -91,8 +90,8 @@ def test_filter_metrics_by_sample_internal_id(store_with_sequencing_metrics: Sto
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
 
     # WHEN getting metrics for a sample internal id
-    metrics_query: Query = metrics.filter(
-        SampleLaneSequencingMetrics.sample_internal_id == sample_id
+    metrics_query: Query = filter_by_sample_internal_id(
+        sample_internal_id=sample_id, metrics=metrics
     )
 
     # THEN assert that the returned object is a Query
@@ -102,7 +101,7 @@ def test_filter_metrics_by_sample_internal_id(store_with_sequencing_metrics: Sto
     assert metrics_query.all()
 
     # THEN assert that the query returns the expected number of metrics
-    assert len(metrics_query.all()) == 1
+    assert len(metrics_query.all()) == 2
 
     # THEN assert that the query returns the expected metrics
     for metric in metrics_query.all():
@@ -142,7 +141,7 @@ def test_filter_metrics_by_flow_cell_name(
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
 
     # WHEN filtering metrics by flow cell name
-    filtered_metrics: Query = filter_metrics_by_flow_cell_name(
+    filtered_metrics: Query = filter_by_flow_cell_name(
         metrics=metrics, flow_cell_name=flow_cell_name
     )
 

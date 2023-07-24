@@ -664,6 +664,7 @@ def test_add_single_sequencing_metrics_entry_to_statusdb(
         sample_internal_id=sample_id,
         flow_cell_lane_number=lane,
     )
+    # GIVEN that a sample exists for the sample lane sequencing metrics
 
     # WHEN adding the sequencing metrics entry to the statusdb
     demux_post_processing_api.add_sequencing_metrics_to_statusdb(
