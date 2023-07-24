@@ -27,6 +27,7 @@ from cg.cli.workflow.taxprofiler.options import (
     OPTION_FROM_START,
     OPTION_INSTRUMENT_PLATFORM,
 )
+from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 
