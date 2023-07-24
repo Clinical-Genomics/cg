@@ -172,6 +172,7 @@ class TaxprofilerConfig(CommonAppConfig):
     root: str
     binary_path: str
     conda_env: str
+    compute_env: str
     profile: str
     pipeline_path: str
     revision: str

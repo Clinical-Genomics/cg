@@ -46,6 +46,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         self.databases: str = config.taxprofiler.databases
         self.account: str = config.taxprofiler.slurm.account
         self.email: str = config.taxprofiler.slurm.mail_user
+        self.compute_env: str = config.taxprofiler.compute_env
 
     @property
     def root(self) -> str:

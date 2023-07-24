@@ -80,6 +80,7 @@ def config_case(
 @OPTION_REVISION
 @OPTION_USE_NEXTFLOW
 @DRY_RUN
+@OPTION_COMPUTE_ENV
 @click.pass_obj
 def run(
     context: CGConfig,
@@ -91,6 +92,7 @@ def run(
     config: str,
     params_file: str,
     revision: str,
+    compute_env: str,
     use_nextflow: bool,
     dry_run: bool,
 ) -> None:
@@ -112,6 +114,7 @@ def run(
             case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
         ),
         "name": case_id,
+        "compute_env": compute_env or analysis_api.compute_env,
         "revision": revision or analysis_api.revision,
         "wait": "SUBMITTED",
     }
