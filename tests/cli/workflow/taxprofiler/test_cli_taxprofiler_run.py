@@ -19,5 +19,3 @@ def test_without_options(cli_runner: CliRunner, taxprofiler_context: CGConfig):
     assert result.exit_code != EXIT_SUCCESS
     # THEN command should mention argument
     assert "Missing argument" in result.output
-
-
