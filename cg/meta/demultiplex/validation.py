@@ -39,8 +39,9 @@ def is_lane_in_fastq_file_name(sample_fastq: Path) -> bool:
 
 
 def is_sample_id_in_directory_name(directory: Path, sample_internal_id: str) -> bool:
-    """Validate that directory name contains the sample id formatted as Sample_<sample_id>."""
-    return f"Sample_{sample_internal_id}" == directory.name
+    """Validate that directory name contains the sample id formatted as Sample_<sample_id> or Sample_<sample_id>_."""
+    sample_pattern: str = f"Sample_{sample_internal_id}"
+    return f"{sample_pattern}_" in directory.name or sample_pattern == directory.name
 
 
 def is_sample_id_in_file_name(sample_fastq: Path, sample_internal_id: str) -> bool:
