@@ -329,20 +329,20 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     pass QC metrics checks."""
     analysis_api: RnafusionAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
-    if not any(
-        [
-            analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id),
-            analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id),
-        ]
+    is_latest_analysis_qc: bool = analysis_api.trailblazer_api.is_latest_analysis_qc(
+        case_id=case_id
+    )
+    if not is_latest_analysis_qc and not analysis_api.trailblazer_api.is_latest_analysis_completed(
+        case_id=case_id
     ):
         LOG.error(
-            "Case not stored. Trailblazer status must be either QC or COMPLETE to be able to store."
+            "Case not stored. Trailblazer status must be either QC or COMPLETE to be able to store"
         )
         return
 
-    # Avoid storing a case without QC checks previously performed.
+    # Avoid storing a case without QC checks previously performed
     if (
-        analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id)
+        is_latest_analysis_qc
         or not analysis_api.get_metrics_deliverables_path(case_id=case_id).exists()
     ):
         LOG.info("Generating metrics file and performing QC checks for %s", case_id)
