@@ -2201,6 +2201,7 @@ def fixture_context_config(
         "pdc": {"binary_path": "/bin/dsmc"},
         "taxprofiler": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
+            "compute_env": "nf_tower_compute_env",
             "root": str(taxprofiler_dir),
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_TAXPROFILER",
