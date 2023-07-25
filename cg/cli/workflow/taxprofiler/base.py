@@ -11,6 +11,7 @@ from cg.constants.constants import MetaApis, DRY_RUN, CaseActions
 from cg.constants.sequencing import SequencingPlatform
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.models.rnafusion.command_args import CommandArgs
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.exc import CgError, DecompressionNeededError
@@ -98,24 +99,28 @@ def run(
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
-    command_args = {
-        "log": NextflowAnalysisAPI.get_log_path(
-            case_id=case_id, pipeline=analysis_api.pipeline, root_dir=analysis_api.root_dir, log=log
-        ),
-        "work-dir": NextflowAnalysisAPI.get_workdir_path(
-            case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
-        ),
-        "resume": not from_start,
-        "profile": analysis_api.get_profile(profile=profile),
-        "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
-        "params-file": NextflowAnalysisAPI.get_params_file_path(
-            case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
-        ),
-        "name": case_id,
-        "revision": revision or analysis_api.revision,
-        "wait": "SUBMITTED",
-    }
-
+    command_args: CommandArgs = CommandArgs(
+        **{
+            "log": NextflowAnalysisAPI.get_log_path(
+                case_id=case_id,
+                pipeline=analysis_api.pipeline,
+                root_dir=analysis_api.root_dir,
+                log=log,
+            ),
+            "work_dir": NextflowAnalysisAPI.get_workdir_path(
+                case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
+            ),
+            "resume": not from_start,
+            "profile": analysis_api.get_profile(profile=profile),
+            "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
+            "params_file": NextflowAnalysisAPI.get_params_file_path(
+                case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
+            ),
+            "name": case_id,
+            "revision": revision or analysis_api.revision,
+            "wait": "SUBMITTED",
+        }
+    )
     try:
         analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.check_analysis_ongoing(case_id)

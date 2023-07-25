@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Tuple
 from pydantic.v1 import ValidationError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.rnafusion.command_args import CommandArgs
 from cg.constants import Pipeline
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.sequencing import SequencingPlatform
@@ -234,7 +235,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         )
 
     def run_analysis(
-        self, case_id: str, command_args: dict, use_nextflow: bool, dry_run: bool = False
+        self, case_id: str, command_args: CommandArgs, use_nextflow: bool, dry_run: bool = False
     ) -> None:
         """Execute Taxprofiler run analysis with given options."""
         if use_nextflow:
@@ -251,7 +252,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 case_id=case_id,
                 pipeline_path=self.nfcore_pipeline_path,
                 root_dir=self.root_dir,
-                command_args=command_args,
+                command_args=command_args.dict(),
             )
             self.process.export_variables(
                 export=NextflowAnalysisAPI.get_variables_to_export(
