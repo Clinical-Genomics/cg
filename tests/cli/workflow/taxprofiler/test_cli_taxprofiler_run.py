@@ -36,7 +36,9 @@ def test_with_config_use_nextflow(
     # GIVEN a mocked config
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run", "--use-nextflow"], obj=taxprofiler_context)
+    result = cli_runner.invoke(
+        run, [case_id, "--dry-run", "--use-nextflow"], obj=taxprofiler_context
+    )
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
