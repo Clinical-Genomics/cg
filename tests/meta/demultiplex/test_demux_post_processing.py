@@ -15,6 +15,7 @@ from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import SampleLaneSequencingMetrics
+from tests.store_helpers import StoreHelpers
 
 
 def test_set_dry_run(
@@ -653,6 +654,7 @@ def test_add_single_sequencing_metrics_entry_to_statusdb(
     demultiplex_context: CGConfig,
     flow_cell_name: str,
     sample_id: str,
+    helpers: StoreHelpers,
     lane: int = 1,
 ):
     # GIVEN a DemuxPostProcessing API
@@ -665,6 +667,8 @@ def test_add_single_sequencing_metrics_entry_to_statusdb(
         flow_cell_lane_number=lane,
     )
     # GIVEN that a sample exists for the sample lane sequencing metrics
+    helpers.add_sample(store=demux_post_processing_api.status_db, internal_id=sample_id)
+    assert demux_post_processing_api.status_db.get_sample_by_internal_id(internal_id=sample_id)
 
     # WHEN adding the sequencing metrics entry to the statusdb
     demux_post_processing_api.add_sequencing_metrics_to_statusdb(
