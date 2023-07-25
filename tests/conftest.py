@@ -2747,7 +2747,6 @@ def store_with_sequencing_metrics(
     store.drop_all()
 
 
-
 @pytest.fixture
 def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
     return "HY7FFDRX2"
@@ -2768,4 +2767,3 @@ def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
     tmp_dir = Path(tmp_path, "tmp_run_dir")
 
     return Path(shutil.copytree(original_dir, tmp_dir))
-
