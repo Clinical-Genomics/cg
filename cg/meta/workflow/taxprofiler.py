@@ -201,8 +201,8 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             "run_kraken2": TaxprofilerDefaults.RUN_KRAKEN2,
             "kraken2_save_reads": TaxprofilerDefaults.KRAKEN2_SAVE_READS,
             "kraken2_save_readclassification": TaxprofilerDefaults.KRAKEN2_SAVE_READCLASSIFICATION,
-            "run_profile_standardisation": TaxprofilerDefaults.RUN_PROFILE_STANDARDISATION,
             "run_krona": TaxprofilerDefaults.RUN_KRONA,
+            "run_profile_standardisation": TaxprofilerDefaults.RUN_PROFILE_STANDARDISATION,
             "priority": self.account,
             "clusterOptions": f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
         }
