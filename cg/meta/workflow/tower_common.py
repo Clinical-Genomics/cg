@@ -1,6 +1,7 @@
 """Module for Tower Analysis API."""
 
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Iterable, List
 
@@ -58,7 +59,7 @@ class TowerAnalysisAPI:
             "--id",
             str(from_tower_id),
             "--name",
-            f"{command_args.get('name')}_from{str(from_tower_id)}",
+            f"{command_args.get('name')}_from{str(from_tower_id)}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
         ] + tower_options
 
     @staticmethod
