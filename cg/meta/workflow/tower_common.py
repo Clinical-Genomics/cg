@@ -53,13 +53,14 @@ class TowerAnalysisAPI:
             },
             exclude_true=True,
         )
+        now: str = datetime.now().strftime("%Y%m%d%H%M%S")
         return [
             "runs",
             "relaunch",
             "--id",
             str(from_tower_id),
             "--name",
-            f"{command_args.get('name')}_from{str(from_tower_id)}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            f"{command_args.get('name')}_from{str(from_tower_id)}_{now}",
         ] + tower_options
 
     @staticmethod
