@@ -435,6 +435,8 @@ class HousekeeperAPI:
         return all(sequencing_files_on_disk.values())
 
     def get_non_archived_spring_path_and_bundle_name(self) -> List[Tuple[str, str]]:
+        """Return a list of bundles with corresponding file paths for all non-archived SPRING
+        files."""
         return [
             (file.version.bundle.name, file.path)
             for file in self.get_all_non_archived_spring_files()

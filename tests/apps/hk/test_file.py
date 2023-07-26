@@ -637,6 +637,7 @@ def testis_fastq_or_spring_on_disk_in_all_bundles_when_multiple_bundles(
 
 
 def test_get_non_archived_spring_path_and_bundle_name(populated_housekeeper_api: HousekeeperAPI):
+    """Test fetching the path and associated bundle for each non-archived SPRING file."""
     # GIVEN a housekeeper_api containing spring_files which are not archived
 
     # WHEN fetching all non-archived spring baths and bundle names

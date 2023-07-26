@@ -8,6 +8,8 @@ from cg.store.models import Sample
 def test_sort_spring_files_on_archive_location(
     archive_api: ArchiveAPI, populated_housekeeper_api: HousekeeperAPI
 ):
+    """Tests the fetching of sample/customer info from statusdb based on bundle_names
+    and the sorting of the data."""
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
     # with the DDN customer having two samples, and the non-DDN having one sample.
 

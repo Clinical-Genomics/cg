@@ -692,7 +692,7 @@ def fixture_spring_file(spring_dir: Path) -> Path:
 
 @pytest.fixture(name="spring_file_father")
 def fixture_spring_file_father(spring_dir: Path) -> Path:
-    """Return the path to an existing spring file."""
+    """Return the path to a second existing spring file."""
     return Path(spring_dir, "dummy_run_002.spring")
 
 
@@ -1456,6 +1456,7 @@ def fixture_hk_sample_bundle(
     sample_id: str,
     spring_file: Path,
 ) -> dict:
+    """Returns a dict for building a housekeeper bundle for a sample."""
     sample_hk_bundle_no_files["files"] = [
         {
             "path": spring_file.as_posix(),
@@ -1479,6 +1480,7 @@ def fixture_hk_father_sample_bundle(
     father_sample_id: str,
     spring_file_father: Path,
 ) -> dict:
+    """Returns a dict for building a housekeeper bundle for a second sample."""
     father_sample_bundle = deepcopy(sample_hk_bundle_no_files)
     father_sample_bundle["name"] = father_sample_id
     father_sample_bundle["files"] = [

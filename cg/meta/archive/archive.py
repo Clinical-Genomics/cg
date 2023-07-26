@@ -26,7 +26,8 @@ class ArchiveAPI:
         self,
         file_data: List[PathAndSample],
     ) -> Dict[str, List[PathAndSample]]:
-        """Add the archive location to each file in the given list and return the list."""
+        """Fetches the archiving location from statusdb for each sample and returns a dict of the
+        sorted samples."""
         sorted_files: Dict[str, List[PathAndSample]] = {}
         for file in file_data:
             sample = self.status_db.get_sample_by_internal_id(file.sample_internal_id)

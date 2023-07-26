@@ -110,7 +110,12 @@ def fixture_full_local_path(local_storage_repository: str, trimmed_local_directo
 
 @pytest.fixture(name="archive_store")
 def fixture_archive_store(
-    base_store: Store, helpers: StoreHelpers, sample_id, father_sample_id, mother_sample_id
+    base_store: Store,
+    helpers: StoreHelpers,
+    sample_id,
+    father_sample_id,
+    mother_sample_id,
+    sample_name,
 ) -> Store:
     """Returns a store with samples for both a DDN customer as well as a non-DDN customer."""
     customer_ddn: Customer = base_store.add_customer(
@@ -129,10 +134,10 @@ def fixture_archive_store(
         is_clinical=False,
         data_archive_location="PDC",
     )
-    # internal_id for sample 1 matches the bundle in the populated Housekeeper store.
+
     new_samples: List[Sample] = [
         base_store.add_sample(
-            name="sample_1_with_ddn_customer",
+            name=sample_name,
             sex=Gender.MALE,
             internal_id=sample_id,
         ),
@@ -170,7 +175,8 @@ def fixture_archive_api(
     father_sample_id: str,
     helpers,
 ) -> ArchiveAPI:
-    """Returns an ArchiveAPI with a populated housekeeper store and a DDNDataFlowApi"""
+    """Returns an ArchiveAPI with a populated housekeeper store and a DDNDataFlowApi.
+    Also adds /home/ as a prefix for eahc SPRING file for the DDNDataFlowApi to accept them."""
     for spring_file in populated_housekeeper_api.files(tags=[SequencingFileTag.SPRING]):
         spring_file.path = f"/home/{spring_file.path}"
     populated_housekeeper_api.commit()
