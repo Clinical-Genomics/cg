@@ -5,6 +5,10 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from urllib.parse import urljoin
 
+from pydantic.v1 import BaseModel
+from requests.models import Response
+
+from datetime import datetime
 from cg.constants.constants import APIMethods, FileFormat
 from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import APIRequest, ReadStream

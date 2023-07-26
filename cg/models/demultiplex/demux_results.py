@@ -4,7 +4,7 @@ import socket
 from pathlib import Path
 from typing import Iterable, Optional, Union
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 from typing_extensions import Literal
 
 from cg.apps.cgstats.parsers.adapter_metrics import AdapterMetrics

@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional
 
 from dateutil.parser import parse as parse_datestr
-from pydantic import BaseModel, validator
+from pydantic.v1 import BaseModel, validator
 
 
 class TrailblazerAnalysis(BaseModel):

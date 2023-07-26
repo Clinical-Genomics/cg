@@ -800,7 +800,6 @@ def fixture_flow_cell_runs_working_directory_bcl2fastq(
 ) -> Path:
     """Return the path to a working directory with flow cells ready for demux."""
     working_dir: Path = Path(flow_cell_runs_working_directory)
-    # working_dir.mkdir(parents=True)
     return working_dir
 
 
@@ -808,7 +807,6 @@ def fixture_flow_cell_runs_working_directory_bcl2fastq(
 def fixture_flow_cell_runs_working_directory_dragen(flow_cell_runs_working_directory: Path) -> Path:
     """Return the path to a working directory with flow cells ready for demux."""
     working_dir: Path = Path(flow_cell_runs_working_directory)
-    # working_dir.mkdir(parents=True)
     return working_dir
 
 
@@ -1110,6 +1108,21 @@ def fixture_populated_stats_api(
 ) -> StatsAPI:
     create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
     return stats_api
+
+
+@pytest.fixture(name="novaseq6000_bcl_convert_sample_sheet_path")
+def fixture_novaseq6000_sample_sheet_path() -> Path:
+    """Return the path to a NovaSeq 6000 BCL convert sample sheet."""
+    return Path(
+        "tests",
+        "fixtures",
+        "apps",
+        "sequencing_metrics_parser",
+        "230622_A00621_0864_AHY7FFDRX2",
+        "Unaligned",
+        "Reports",
+        "SampleSheet.csv",
+    )
 
 
 @pytest.fixture(name="demultiplex_fixtures", scope="session")
@@ -2762,7 +2775,8 @@ def store_with_sequencing_metrics(
     """Return a store with multiple samples with sample lane sequencing metrics."""
 
     sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
-        (sample_id, flow_cell_name, 1, expected_total_reads, 90.5, 32),
+        (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
+        (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
         ("sample_2", "flow_cell_2", 2, 2_000_000, 85.5, 30),
         ("sample_3", "flow_cell_3", 3, 1_500_000, 80.5, 33),
     ]
@@ -2804,8 +2818,8 @@ def flow_cell_directory_name_demultiplexed_with_bcl_convert(
     return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
 
 
-@pytest.fixture
-def demultiplexed_flow_cells_directory(tmp_path) -> Path:
+@pytest.fixture(name="demultiplexed_flow_cells_tmp_directory")
+def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
     original_dir = Path(
         Path(__file__).parent, "fixtures", "apps", "demultiplexing", "demultiplexed-runs"
     )

@@ -13,7 +13,7 @@ from cg.models.orders.sample_base import (
 )
 from cg.store.models import Application, Family, Organism, Panel, Pool, Sample
 from cgmodels.cg.constants import Pipeline
-from pydantic import BaseModel, constr, validator
+from pydantic.v1 import BaseModel, constr, validator
 
 
 class OptionalIntValidator:

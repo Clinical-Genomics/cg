@@ -25,7 +25,7 @@ def create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell
                     sample_internal_id=sample_internal_id,
                     flow_cell_name=FlowCellDirectoryData(
                         flow_cell_path=flow_cell_dir, bcl_converter=BclConverter.BCLCONVERT
-                    ).flow_cell_name,
+                    ).id,
                     flow_cell_lane_number=lane,
                     sample_total_reads_in_lane=metrics_parser.calculate_total_reads_for_sample_in_lane(
                         sample_internal_id=sample_internal_id, lane=lane

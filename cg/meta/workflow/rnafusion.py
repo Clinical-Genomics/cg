@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from cg import resources
 from cg.constants import Pipeline
@@ -16,7 +16,8 @@ from cg.constants.rnafusion import (
     RNAFUSION_STRANDEDNESS_HEADER,
     RnafusionDefaults,
 )
-from cg.exc import MissingMetrics
+from cg.constants.tb import AnalysisStatus
+from cg.exc import CgError, MetricsQCError, MissingMetrics
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -408,7 +409,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
         if dry_run:
             LOG.info(
-                f"Dry run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
+                f"Dry-run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
             )
             return
 
@@ -419,13 +420,30 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             file_path=metrics_deliverables_path,
         )
 
-    def validate_qc_metrics(self, case_id: str) -> None:
+    def validate_qc_metrics(self, case_id: str, dry_run: bool = False) -> None:
         """Validate the information from a qc metrics deliverable file."""
-        metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-        qcmetrics_raw: dict = ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML, file_path=metrics_deliverables_path
-        )
-        MetricsDeliverablesCondition(**qcmetrics_raw)
+
+        if dry_run:
+            LOG.info("Dry-run: QC metrics validation would be performed")
+            return
+
+        LOG.info("Validating QC metrics")
+        try:
+            metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
+            qc_metrics_raw: dict = ReadFile.get_content_from_file(
+                file_format=FileFormat.YAML, file_path=metrics_deliverables_path
+            )
+            MetricsDeliverablesCondition(**qc_metrics_raw)
+        except MetricsQCError as error:
+            LOG.error(f"QC metrics failed for {case_id}")
+            self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
+            self.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
+            raise MetricsQCError from error
+        except CgError as error:
+            LOG.error(f"Could not create metrics deliverables file: {error}")
+            self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.ERROR)
+            raise CgError from error
+        self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
 
     def parse_analysis(self, qc_metrics_raw: List[MetricsBase], **kwargs) -> RnafusionAnalysis:
         """Parse Rnafusion output analysis files and return analysis model."""

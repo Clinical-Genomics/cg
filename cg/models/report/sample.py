@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, Union
 
 from cg.constants.subject import Gender
-from pydantic import BaseModel, validator
+from pydantic.v1 import BaseModel, validator
 from cg.models.report.metadata import SampleMetadataModel
 from cg.models.report.validators import (
     validate_empty_field,
