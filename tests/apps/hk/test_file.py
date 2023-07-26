@@ -1,7 +1,7 @@
 """Test how the api handles files."""
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
@@ -85,25 +85,7 @@ def test_add_new_file(
     assert new_nr_files == nr_files_in_db + 1
 
 
-def test_get_files(
-    populated_housekeeper_api: MockHousekeeperAPI,
-    case_id: str,
-    tags: List[str],
-    small_helpers: SmallHelpers,
-):
-    """Test get files method."""
-    # GIVEN a populated housekeeper api with some files
-    nr_files = small_helpers.length_of_iterable(populated_housekeeper_api.files())
-    assert nr_files > 0
-
-    # WHEN fetching all files
-    files = populated_housekeeper_api.get_files(bundle=case_id, tags=tags)
-
-    # THEN assert all files where fetched
-    assert small_helpers.length_of_iterable(files) == nr_files
-
-
-def test_get_file(populated_housekeeper_api: MockHousekeeperAPI):
+def test_get_file(populated_housekeeper_api: HousekeeperAPI):
     """Test to get a file from the database."""
     # GIVEN a housekeeper api with a file
     hk_file: File = populated_housekeeper_api.files().first()
@@ -181,7 +163,7 @@ def test_get_latest_file_from_version(
     assert latest_file == second_file
 
 
-def test_get_file_from_latest_version(case_id: str, populated_housekeeper_api: MockHousekeeperAPI):
+def test_get_file_from_latest_version(case_id: str, populated_housekeeper_api: HousekeeperAPI):
     """Test to get a file from the database from the latest version."""
     # GIVEN a housekeeper api with a file
     hk_file: File = populated_housekeeper_api.files().first()
@@ -199,7 +181,7 @@ def test_get_file_from_latest_version(case_id: str, populated_housekeeper_api: M
 
 
 def test_get_files_from_latest_version(
-    case_id: str, populated_housekeeper_api: MockHousekeeperAPI, small_helpers: SmallHelpers
+    case_id: str, populated_housekeeper_api: HousekeeperAPI, small_helpers: SmallHelpers
 ):
     """Test to get files from the database from the latest version."""
 
@@ -241,7 +223,7 @@ def test_delete_file(populated_housekeeper_api: HousekeeperAPI):
     assert populated_housekeeper_api.get_file(hk_file.id) is None
 
 
-def test_get_included_path(populated_housekeeper_api: MockHousekeeperAPI, case_id: str):
+def test_get_included_path(populated_housekeeper_api: HousekeeperAPI, case_id: str):
     """Test to get the included path for a file."""
     # GIVEN a populated housekeeper api and the root dir
     root_dir: Path = Path(populated_housekeeper_api.get_root_dir())
@@ -262,7 +244,7 @@ def test_get_included_path(populated_housekeeper_api: MockHousekeeperAPI, case_i
     assert included_path == Path(root_dir, version.relative_root_dir, Path(hk_file.path).name)
 
 
-def test_get_include_file(populated_housekeeper_api: MockHousekeeperAPI, case_id: str):
+def test_get_include_file(populated_housekeeper_api: HousekeeperAPI, case_id: str):
     """Test to get the included path for a file."""
     # GIVEN a populated housekeeper api and the root dir
     root_dir: Path = Path(populated_housekeeper_api.get_root_dir())
@@ -285,7 +267,7 @@ def test_get_include_file(populated_housekeeper_api: MockHousekeeperAPI, case_id
 
 
 def test_include_files_to_latest_version_when_included(
-    caplog, case_id: str, populated_housekeeper_api: MockHousekeeperAPI
+    caplog, case_id: str, populated_housekeeper_api: HousekeeperAPI
 ):
     """Test to include files for a bundle."""
     # GIVEN a populated Housekeeper API and the root dir
@@ -320,7 +302,7 @@ def test_include_files_to_latest_version(
     case_id: str,
     madeline_output: Path,
     not_existing_hk_tag: str,
-    populated_housekeeper_api: MockHousekeeperAPI,
+    populated_housekeeper_api: HousekeeperAPI,
 ):
     """Test to include files for a bundle."""
     # GIVEN a populated Housekeeper API and the root dir
@@ -356,8 +338,8 @@ def test_include_files_to_latest_version(
 
 def test_check_bundle_files(
     case_id: str,
-    timestamp: datetime,
-    populated_housekeeper_api: MockHousekeeperAPI,
+    timestamp_yesterday: datetime,
+    populated_housekeeper_api: HousekeeperAPI,
     hk_version: Version,
     fastq_file: Path,
     sample_id: str,
@@ -365,7 +347,7 @@ def test_check_bundle_files(
 ):
     """Test to see if the function correctly identifies a file that is present and returns a lis without it."""
     # GIVEN a housekeeper version with a file
-    version: Version = populated_housekeeper_api.version(bundle=case_id, date=timestamp)
+    version: Version = populated_housekeeper_api.version(bundle=case_id, date=timestamp_yesterday)
 
     # WHEN attempting to add two files, one existing and one new
     files_to_add: List[Path] = populated_housekeeper_api.check_bundle_files(
@@ -378,7 +360,7 @@ def test_check_bundle_files(
     assert files_to_add == [fastq_file]
 
 
-def test_get_tag_names_from_file(populated_housekeeper_api: MockHousekeeperAPI):
+def test_get_tag_names_from_file(populated_housekeeper_api: HousekeeperAPI):
     """Test get tag names on a file."""
     # GIVEN a housekeeper api with a file
     hk_file = populated_housekeeper_api.files().first()
@@ -396,7 +378,7 @@ def test_get_tag_names_from_file(populated_housekeeper_api: MockHousekeeperAPI):
 
 
 def test_is_fastq_or_spring_in_all_bundles_when_none(
-    populated_housekeeper_api: MockHousekeeperAPI,
+    populated_housekeeper_api: HousekeeperAPI,
     case_id: str,
     tags: List[str],
 ):
@@ -411,7 +393,7 @@ def test_is_fastq_or_spring_in_all_bundles_when_none(
 
 
 def test_is_fastq_or_spring_in_all_bundles(
-    populated_housekeeper_api: MockHousekeeperAPI,
+    populated_housekeeper_api: HousekeeperAPI,
     case_id: str,
     madeline_output: Path,
     tags: List[str],
@@ -432,10 +414,10 @@ def test_is_fastq_or_spring_in_all_bundles(
 
 
 def test_is_fastq_or_spring_in_all_bundles_when_missing(
-    populated_housekeeper_api: MockHousekeeperAPI,
+    populated_housekeeper_api: HousekeeperAPI,
     case_id: str,
-    sample_id: str,
     madeline_output: Path,
+    new_bundle_name: str,
     tags: List[str],
 ):
     """Test checking if all FASTQ or SPRING files are present in bundles when not all bundles have files present."""
@@ -448,13 +430,13 @@ def test_is_fastq_or_spring_in_all_bundles_when_missing(
     )
 
     # GIVEN an empty bundle
-    populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
+    populated_housekeeper_api.create_new_bundle_and_version(name=new_bundle_name)
 
     populated_housekeeper_api.commit()
 
     # WHEN fetching all files
     was_true = populated_housekeeper_api.is_fastq_or_spring_in_all_bundles(
-        bundle_names=[case_id, sample_id]
+        bundle_names=[case_id, new_bundle_name]
     )
 
     # THEN assert all file were not present in all bundles
@@ -464,9 +446,9 @@ def test_is_fastq_or_spring_in_all_bundles_when_missing(
 def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles(
     case_id: str,
     compression_object: MockCompressionData,
-    populated_housekeeper_api: MockHousekeeperAPI,
+    populated_housekeeper_api: HousekeeperAPI,
     madeline_output: Path,
-    sample_id: str,
+    new_bundle_name: str,
     tags: List[str],
 ):
     """Test checking if all FASTQ or SPRING files are present in bundles when all bundles have files present."""
@@ -478,7 +460,7 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles(
     )
 
     # GIVEN an empty bundle
-    populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
+    populated_housekeeper_api.create_new_bundle_and_version(name=new_bundle_name)
 
     # GIVEN an existing SPRING metadata file
     compression_object.spring_metadata_path.touch()
@@ -486,13 +468,13 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles(
     # GIVEN a SPRING file tag with a file included the bundle
     populated_housekeeper_api.add_and_include_file_to_latest_version(
         file=compression_object.spring_metadata_path,
-        bundle_name=sample_id,
+        bundle_name=new_bundle_name,
         tags=[SequencingFileTag.SPRING_METADATA],
     )
 
     # WHEN fetching all files
     was_true = populated_housekeeper_api.is_fastq_or_spring_in_all_bundles(
-        bundle_names=[case_id, sample_id]
+        bundle_names=[case_id, new_bundle_name]
     )
 
     # THEN assert all file were present in all bundles
@@ -502,9 +484,9 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles(
 def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles_and_files(
     case_id: str,
     compression_object: MockCompressionData,
-    populated_housekeeper_api: MockHousekeeperAPI,
+    populated_housekeeper_api: HousekeeperAPI,
     madeline_output: Path,
-    sample_id: str,
+    new_bundle_name: str,
     tags: List[str],
 ):
     """
@@ -519,7 +501,7 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles_and_files(
     )
 
     # GIVEN an empty bundle
-    populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
+    populated_housekeeper_api.create_new_bundle_and_version(name=new_bundle_name)
 
     # GIVEN an existing SPRING metadata file
     compression_object.spring_metadata_path.touch()
@@ -527,13 +509,13 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles_and_files(
     # GIVEN a SPRING file tag with a file included in the bundle
     populated_housekeeper_api.add_and_include_file_to_latest_version(
         file=compression_object.spring_metadata_path,
-        bundle_name=sample_id,
+        bundle_name=new_bundle_name,
         tags=[SequencingFileTag.SPRING_METADATA],
     )
 
     # WHEN fetching all files
     was_true = populated_housekeeper_api.is_fastq_or_spring_in_all_bundles(
-        bundle_names=[case_id, sample_id]
+        bundle_names=[case_id, new_bundle_name]
     )
 
     # THEN assert all file were present in all bundles
@@ -541,7 +523,7 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles_and_files(
 
 
 def test_is_fastq_or_spring_on_disk_in_all_bundles_when_none(
-    populated_housekeeper_api: MockHousekeeperAPI,
+    populated_housekeeper_api: HousekeeperAPI,
     case_id: str,
     tags: List[str],
 ):
@@ -558,7 +540,7 @@ def test_is_fastq_or_spring_on_disk_in_all_bundles_when_none(
 
 
 def test_is_fastq_or_spring_on_disk_in_all_bundles(
-    populated_housekeeper_api: MockHousekeeperAPI,
+    populated_housekeeper_api: HousekeeperAPI,
     case_id: str,
     madeline_output: Path,
     tags: List[str],
@@ -581,10 +563,11 @@ def test_is_fastq_or_spring_on_disk_in_all_bundles(
 
 
 def test_is_fastq_or_spring_on_disk_in_all_bundles_when_missing_file(
-    populated_housekeeper_api: MockHousekeeperAPI,
+    populated_housekeeper_api: HousekeeperAPI,
     case_id: str,
     sample_id: str,
     madeline_output: Path,
+    new_bundle_name: str,
     tags: List[str],
 ):
     """Test checking if all FASTQ or SPRING files are on disk in bundles when not all bundles have files on disk."""
@@ -597,7 +580,7 @@ def test_is_fastq_or_spring_on_disk_in_all_bundles_when_missing_file(
     )
 
     # GIVEN an empty bundle
-    populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
+    populated_housekeeper_api.create_new_bundle_and_version(name=new_bundle_name)
 
     # GIVEN a FASTQ file tag in the bundle, but not on disk
     populated_housekeeper_api.add_file(
@@ -608,7 +591,7 @@ def test_is_fastq_or_spring_on_disk_in_all_bundles_when_missing_file(
 
     # WHEN fetching all files
     was_true = populated_housekeeper_api.is_fastq_or_spring_on_disk_in_all_bundles(
-        bundle_names=[case_id, sample_id]
+        bundle_names=[case_id, new_bundle_name]
     )
 
     # THEN assert all file were not on disk in all bundles
@@ -618,9 +601,9 @@ def test_is_fastq_or_spring_on_disk_in_all_bundles_when_missing_file(
 def testis_fastq_or_spring_on_disk_in_all_bundles_when_multiple_bundles(
     case_id: str,
     compression_object: MockCompressionData,
-    populated_housekeeper_api: MockHousekeeperAPI,
+    populated_housekeeper_api: HousekeeperAPI,
     madeline_output: Path,
-    sample_id: str,
+    new_bundle_name: str,
     tags: List[str],
 ):
     """Test checking if all FASTQ or SPRING files are on disk in bundles when all bundles have files on disk."""
@@ -632,7 +615,7 @@ def testis_fastq_or_spring_on_disk_in_all_bundles_when_multiple_bundles(
     )
 
     # GIVEN an empty bundle
-    populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
+    populated_housekeeper_api.create_new_bundle_and_version(name=new_bundle_name)
 
     # GIVEN an existing SPRING metadata file
     compression_object.spring_metadata_path.touch()
@@ -640,14 +623,32 @@ def testis_fastq_or_spring_on_disk_in_all_bundles_when_multiple_bundles(
     # GIVEN a SPRING file tag with a file included the bundle
     populated_housekeeper_api.add_and_include_file_to_latest_version(
         file=compression_object.spring_metadata_path,
-        bundle_name=sample_id,
+        bundle_name=new_bundle_name,
         tags=[SequencingFileTag.SPRING_METADATA],
     )
 
     # WHEN fetching all files
     was_true = populated_housekeeper_api.is_fastq_or_spring_on_disk_in_all_bundles(
-        bundle_names=[case_id, sample_id]
+        bundle_names=[case_id, new_bundle_name]
     )
 
     # THEN assert all file were on disk in all bundles
     assert was_true
+
+
+def test_get_non_archived_spring_path_and_bundle_name(populated_housekeeper_api: HousekeeperAPI):
+    # GIVEN a housekeeper_api containing spring_files which are not archived
+
+    # WHEN fetching all non-archived spring baths and bundle names
+    files_and_bundle_names: List[
+        Tuple[str, str]
+    ] = populated_housekeeper_api.get_non_archived_spring_path_and_bundle_name()
+    assert len(files_and_bundle_names) > 0
+    # THEN each file should be a spring file
+    # THEN none of the files should have an archive
+    # THEN each of the files should have a corresponding bundle name
+    for bundle_name, file in files_and_bundle_names:
+        housekeeper_file: File = populated_housekeeper_api.files(path=file).first()
+        assert SequencingFileTag.SPRING in [tag.name for tag in housekeeper_file.tags]
+        assert not housekeeper_file.archive
+        assert bundle_name == housekeeper_file.version.bundle.name
