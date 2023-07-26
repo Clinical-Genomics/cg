@@ -14,14 +14,14 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-from cg.meta.demultiplex.hk_functions import (
+from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_bundle_and_version_if_non_existent,
     add_tags_if_non_existent,
     add_sample_fastq_files_to_housekeeper,
     add_sample_sheet_path_to_housekeeper,
     add_demux_logs_to_housekeeper,
 )
-from cg.meta.demultiplex.store_functions import (
+from cg.meta.demultiplex.store_storage_functions import (
     add_sequencing_metrics_to_statusdb,
     update_sample_read_count,
     metric_has_sample_in_statusdb,

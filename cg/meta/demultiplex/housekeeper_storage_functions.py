@@ -115,6 +115,7 @@ def store_fastq_path_in_housekeeper(
     )
 
     if sample_fastq_should_be_stored:
+        add_bundle_and_version_if_non_existent(bundle_name=sample_internal_id, hk_api=hk_api)
         add_file_to_bundle_if_non_existent(
             file_path=sample_fastq_path,
             bundle_name=sample_internal_id,

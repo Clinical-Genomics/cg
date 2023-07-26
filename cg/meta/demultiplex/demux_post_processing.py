@@ -31,12 +31,12 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell
 from cg.utils import Process
-from cg.meta.demultiplex.store_functions import (
+from cg.meta.demultiplex.store_storage_functions import (
     store_flow_cell_data_in_status_db,
     store_sequencing_metrics_in_status_db,
     update_sample_read_counts_in_status_db,
 )
-from cg.meta.demultiplex.hk_functions import store_flow_cell_data_in_housekeeper
+from cg.meta.demultiplex.housekeeper_storage_functions import store_flow_cell_data_in_housekeeper
 
 LOG = logging.getLogger(__name__)
 
