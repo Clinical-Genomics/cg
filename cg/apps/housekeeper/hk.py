@@ -414,8 +414,10 @@ class HousekeeperAPI:
         """Creates an archive object for the given files, and adds the archive task id to them."""
         for file in files:
             archived_file: File = self._store.get_files(file_path=file.as_posix()).first()
-            archive = self._store.create_archive(archived_file.id, archive_task_id=archive_task_id)
-            self.add(archive)
+            archive = self._store.create_archive(
+                archived_file.id, archiving_task_id=archive_task_id
+            )
+            self._store.session.add(archive)
         self.commit()
 
     def is_fastq_or_spring_on_disk_in_all_bundles(self, bundle_names: List[str]) -> bool:

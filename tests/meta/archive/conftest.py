@@ -4,11 +4,14 @@ from typing import List
 from unittest import mock
 
 import pytest
+from housekeeper.store.models import File
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import SequencingFileTag
 from cg.constants.constants import FileFormat
 from cg.constants.subject import Gender
 from cg.io.controller import WriteStream
-from cg.meta.archive.archive import ArchiveAPI
+from cg.meta.archive.archive import ArchiveAPI, DDN
 from cg.meta.archive.ddn_dataflow import ROOT_TO_TRIM, DDNDataFlowApi, TransferData, TransferPayload
 from cg.models.cg_config import DDNDataFlowConfig
 from cg.store import Store
@@ -121,7 +124,9 @@ def fixture_full_local_path(local_storage_repository: str, trimmed_local_directo
 
 
 @pytest.fixture(name="archive_store")
-def fixture_archive_store(base_store: Store, helpers: StoreHelpers) -> Store:
+def fixture_archive_store(
+    base_store: Store, helpers: StoreHelpers, sample_id, father_sample_id, mother_sample_id
+) -> Store:
     """Returns a store with samples for both a DDN customer as well as a non-DDN customer."""
     customer_ddn: Customer = base_store.add_customer(
         internal_id="CustWithDDN",
@@ -144,17 +149,17 @@ def fixture_archive_store(base_store: Store, helpers: StoreHelpers) -> Store:
         base_store.add_sample(
             name="sample_1_with_ddn_customer",
             sex=Gender.MALE,
-            internal_id="ADM1",
+            internal_id=sample_id,
         ),
         base_store.add_sample(
             name="sample_2_with_ddn_customer",
             sex=Gender.MALE,
-            internal_id="sample_2_with_ddn_customer",
+            internal_id=mother_sample_id,
         ),
         base_store.add_sample(
             name="sample_without_ddn_customer",
             sex=Gender.MALE,
-            internal_id="sample_without_ddn_customer",
+            internal_id=father_sample_id,
         ),
     ]
     new_samples[0].customer = customer_ddn
@@ -172,12 +177,18 @@ def fixture_archive_store(base_store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture(name="archive_api")
-def fixture_archive_housekeeper_api(
+def fixture_archive_api(
     populated_housekeeper_api: HousekeeperAPI,
     ddn_dataflow_api: DDNDataFlowApi,
     archive_store: Store,
+    spring_file: Path,
+    father_sample_id: str,
+    helpers,
 ) -> ArchiveAPI:
     """Returns an ArchiveAPI with a populated housekeeper store and a DDNDataFlowApi"""
+    for spring_file in populated_housekeeper_api.files(tags=[SequencingFileTag.SPRING]):
+        spring_file.path = f"/home/{spring_file.path}"
+    populated_housekeeper_api.commit()
     return ArchiveAPI(
         ddn_dataflow_api=ddn_dataflow_api,
         housekeeper_api=populated_housekeeper_api,

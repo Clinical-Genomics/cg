@@ -1,10 +1,10 @@
 """Conftest file for pytest fixtures that needs to be shared for multiple tests."""
-import copy
 import gzip
 import http
 import logging
 import os
 import shutil
+from copy import deepcopy
 from datetime import MAXYEAR, datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
@@ -678,10 +678,22 @@ def fixture_fastq_file(fastq_dir: Path) -> Path:
     return Path(fastq_dir, "dummy_run_R1_001.fastq.gz")
 
 
+@pytest.fixture(name="fastq_file_father")
+def fixture_fastq_file_father(fastq_dir: Path) -> Path:
+    """Return the path to a FASTQ file."""
+    return Path(fastq_dir, "fastq_run_R1_001.fastq.gz")
+
+
 @pytest.fixture(name="spring_file")
 def fixture_spring_file(spring_dir: Path) -> Path:
     """Return the path to an existing spring file."""
     return Path(spring_dir, "dummy_run_001.spring")
+
+
+@pytest.fixture(name="spring_file_father")
+def fixture_spring_file_father(spring_dir: Path) -> Path:
+    """Return the path to an existing spring file."""
+    return Path(spring_dir, "dummy_run_002.spring")
 
 
 @pytest.fixture(name="madeline_output")
@@ -1446,6 +1458,31 @@ def fixture_hk_sample_bundle(
     return sample_hk_bundle_no_files
 
 
+@pytest.fixture(name="hk_father_sample_bundle")
+def fixture_hk_father_sample_bundle(
+    fastq_file_father: Path,
+    helpers,
+    sample_hk_bundle_no_files: dict,
+    father_sample_id: str,
+    spring_file_father: Path,
+) -> dict:
+    father_sample_bundle = deepcopy(sample_hk_bundle_no_files)
+    father_sample_bundle["name"] = father_sample_id
+    father_sample_bundle["files"] = [
+        {
+            "path": spring_file_father.as_posix(),
+            "archive": False,
+            "tags": [SequencingFileTag.SPRING, father_sample_id],
+        },
+        {
+            "path": fastq_file_father.as_posix(),
+            "archive": False,
+            "tags": [SequencingFileTag.FASTQ, father_sample_id],
+        },
+    ]
+    return father_sample_bundle
+
+
 @pytest.fixture(name="sample_hk_bundle_no_files")
 def fixture_sample_hk_bundle_no_files(sample_id: str, timestamp: datetime) -> dict:
     """Create a complete bundle mock for testing compression."""
@@ -1476,7 +1513,7 @@ def fixture_compress_hk_fastq_bundle(
 
     This bundle contains a pair of fastq files.
     ."""
-    hk_bundle_data = copy.deepcopy(sample_hk_bundle_no_files)
+    hk_bundle_data = deepcopy(sample_hk_bundle_no_files)
 
     first_fastq = compression_object.fastq_first
     second_fastq = compression_object.fastq_second
@@ -1508,25 +1545,19 @@ def fixture_real_housekeeper_api(hk_config_dict: dict) -> Generator[HousekeeperA
     yield _api
 
 
-@pytest.fixture(name="base_housekeeper_api")
-def fixture_base_housekeeper_api(
-    real_housekeeper_api: HousekeeperAPI, hk_bundle_data: dict, hk_sample_bundle: dict, helpers
-) -> HousekeeperAPI:
-    """Setup a Housekeeper store with some basic tags."""
-    real_housekeeper_api.add_tag(SequencingFileTag.FASTQ)
-    real_housekeeper_api.add_tag(SequencingFileTag.SPRING)
-    real_housekeeper_api.add_tag("bed")
-    return real_housekeeper_api
-
-
 @pytest.fixture(name="populated_housekeeper_api")
 def fixture_populated_housekeeper_api(
-    real_housekeeper_api: HousekeeperAPI, hk_bundle_data: dict, hk_sample_bundle: dict, helpers
+    real_housekeeper_api: HousekeeperAPI,
+    hk_bundle_data: dict,
+    hk_father_sample_bundle: dict,
+    hk_sample_bundle: dict,
+    helpers,
 ) -> HousekeeperAPI:
     """Setup a Housekeeper store with some data."""
     hk_api = real_housekeeper_api
     helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_bundle_data)
     helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_sample_bundle)
+    helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_father_sample_bundle)
     return hk_api
 
 
