@@ -2,7 +2,6 @@
 import logging
 from pathlib import Path
 from typing import List, Optional
-from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from housekeeper.store.models import Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -26,7 +25,7 @@ LOG = logging.getLogger(__name__)
 def store_flow_cell_data_in_housekeeper(
     flow_cell: FlowCellDirectoryData,
     hk_api: HousekeeperAPI,
-    demux_api: DemultiplexingAPI,
+    flow_cell_run_dir: Path,
     store: Store,
 ) -> None:
     LOG.info(f"Add flow cell data to Housekeeper for {flow_cell.id}")
@@ -40,16 +39,18 @@ def store_flow_cell_data_in_housekeeper(
         flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id, hk_api=hk_api
     )
     add_sample_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api, store=store)
-    add_demux_logs_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api, demux_api=demux_api)
+    add_demux_logs_to_housekeeper(
+        flow_cell=flow_cell, hk_api=hk_api, flow_cell_run_dir=flow_cell_run_dir
+    )
 
 
 def add_demux_logs_to_housekeeper(
-    flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, demux_api: DemultiplexingAPI
+    flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, flow_cell_run_dir: Path
 ) -> None:
     """Add demux logs to Housekeeper."""
     log_file_name_pattern: str = r"*_demultiplex.std*"
     demux_log_file_paths: List[Path] = get_files_matching_pattern(
-        directory=Path(demux_api.run_dir, flow_cell.full_name), pattern=log_file_name_pattern
+        directory=Path(flow_cell_run_dir, flow_cell.full_name), pattern=log_file_name_pattern
     )
 
     tag_names: List[str] = [SequencingFileTag.DEMUX_LOG, flow_cell.id]

@@ -852,7 +852,7 @@ def test_add_demux_logs_to_housekeeper(
     # WHEN adding the demux logs to housekeeper
     add_demux_logs_to_housekeeper(
         flow_cell=dragen_flow_cell,
-        demux_api=demux_post_processing_api.demux_api,
+        flow_cell_run_dir=demux_post_processing_api.demux_api.run_dir,
         hk_api=demux_post_processing_api.hk_api,
     )
 
