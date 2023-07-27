@@ -371,18 +371,18 @@ class FindBusinessDataHandler(BaseHandler):
             SequencingMetricsFilter.FILTER_BY_FLOW_CELL_NAME,
             SequencingMetricsFilter.FILTER_BY_SAMPLE_INTERNAL_ID,
         ]
-        metrics = apply_metrics_filter(
+        sequencing_metrics = apply_metrics_filter(
             metrics=self._get_query(table=SampleLaneSequencingMetrics),
             filter_functions=sample_lane_metrics_filter_functions,
             sample_internal_id=sample_internal_id,
             flow_cell_name=flow_cell_name,
         ).all()
         sum_fraction_of_bases_passing_q30: float = 0
-        for metric in metrics:
-            sum_fraction_of_bases_passing_q30 += metric.sample_base_fraction_passing_q30
+        for sequencing_metric in sequencing_metrics:
+            sum_fraction_of_bases_passing_q30 += sequencing_metric.sample_base_fraction_passing_q30
 
         return (
-            sum_fraction_of_bases_passing_q30 / len(metrics)
+            sum_fraction_of_bases_passing_q30 / len(sequencing_metrics)
             if sum_fraction_of_bases_passing_q30
             else 0
         )
@@ -391,31 +391,13 @@ class FindBusinessDataHandler(BaseHandler):
         self, flow_cell_name: str
     ) -> int:
         """Get total number of reads for a flow cell from sample lane sequencing metrics."""
-        samples: List[Sample] = self.get_samples_on_flow_cell_from_sample_lane_metrics(
-            flow_cell_name=flow_cell_name
-        )
+        sequencing_metrics: List[
+            SampleLaneSequencingMetrics
+        ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
         reads_count: int = 0
-        for sample in samples:
-            reads_count += (
-                self.get_number_of_reads_for_sample_on_flow_cell_from_sample_lane_metrics(
-                    sample_internal_id=sample.internal_id, flow_cell_name=flow_cell_name
-                )
-            )
+        for sequencing_metric in sequencing_metrics:
+            reads_count += sequencing_metric.sample_total_reads_in_lane
         return reads_count if reads_count else 0
-
-    def get_average_passing_q30_for_samples_on_flow_cell(self, flow_cell_name: str) -> float:
-        """Get average q30 for samples on a given flow cell."""
-        samples: List[Sample] = self.get_samples_on_flow_cell_from_sample_lane_metrics(
-            flow_cell_name=flow_cell_name
-        )
-        total_passing_q30: int = 0
-        for sample in samples:
-            total_passing_q30 += self.get_average_passing_q30_for_sample_from_sample_lane_metrics(
-                sample_internal_id=sample.internal_id,
-                flow_cell_name=flow_cell_name,
-            )
-
-        return total_passing_q30 / len(samples) if total_passing_q30 else 0
 
     def get_sample_lane_sequencing_metrics_by_flow_cell_name(
         self, flow_cell_name: str
