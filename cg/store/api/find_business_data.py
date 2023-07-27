@@ -36,7 +36,7 @@ from cg.store.filters.status_sample_filters import apply_sample_filter, SampleFi
 
 from cg.store.filters.status_analysis_filters import apply_analysis_filter, AnalysisFilter
 from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
-from cg.store.api.status import StatusHandler
+
 
 LOG = logging.getLogger(__name__)
 
@@ -313,20 +313,6 @@ class FindBusinessDataHandler(BaseHandler):
             customer_entry_ids=customer_entry_id,
             name=sample_name,
         ).first()
-
-    def get_number_of_reads_for_sample_from_sample_lane_metrics(
-        self, sample_internal_id: str
-    ) -> int:
-        """Get number of reads for sample from sample lane sequencing metrics."""
-        total_reads_query: Query = apply_metrics_filter(
-            metrics=self._get_query(table=SampleLaneSequencingMetrics),
-            filter_functions=[
-                SequencingMetricsFilter.FILTER_TOTAL_READ_COUNT_FOR_SAMPLE,
-            ],
-            sample_internal_id=sample_internal_id,
-        )
-        reads_count: Optional[int] = total_reads_query.scalar()
-        return reads_count if reads_count else 0
 
     def get_number_of_reads_for_sample_passing_q30_threshold(
         self, sample_internal_id: str, q30_threshold: int

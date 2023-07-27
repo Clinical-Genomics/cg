@@ -2,7 +2,7 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import List, Optional
 
 import requests
 from requests import Response
@@ -67,9 +67,9 @@ class NiptUploadAPI:
         ) or not flow_cell_summary.reads_above_threshold(
             threshold=self.status_db.get_ready_made_library_expected_reads(case_id=case_id)
         ):
-            LOG.info(
+            LOG.warning(
                 f"Flow cell {flow_cell.name} did not pass QC for case {case_id} with Q30: "
-                f"{flow_cell_summary.q30} and reads: {flow_cell_summary.reads}"
+                f"{flow_cell_summary.q30} and reads: {flow_cell_summary.reads}. Skipping upload."
             )
             return False
 
