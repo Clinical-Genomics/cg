@@ -1,6 +1,7 @@
 """Module for Tower Analysis API."""
 
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Iterable, List
 
@@ -52,13 +53,14 @@ class TowerAnalysisAPI:
             },
             exclude_true=True,
         )
+        now: str = datetime.now().strftime("%Y%m%d%H%M%S")
         return [
             "runs",
             "relaunch",
             "--id",
             str(from_tower_id),
             "--name",
-            f"{command_args.get('name')}_from{str(from_tower_id)}",
+            f"{command_args.get('name')}_from{str(from_tower_id)}_{now}",
         ] + tower_options
 
     @staticmethod
