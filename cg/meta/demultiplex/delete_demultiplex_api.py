@@ -246,7 +246,6 @@ class DeleteDemuxAPI:
 
     def delete_flow_cell(
         self,
-        cg_stats: bool,
         demultiplexing_dir: bool,
         run_dir: bool,
         housekeeper: bool,
