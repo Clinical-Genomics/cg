@@ -345,38 +345,11 @@ class FindBusinessDataHandler(BaseHandler):
         reads_count: Optional[int] = total_reads_query.scalar()
         return reads_count if reads_count else 0
 
-    def get_samples_on_flow_cell_from_sample_lane_metrics(
-        self, flow_cell_name: str
-    ) -> List[Sample]:
-        """Get samples on a given flow cell."""
-        metrics = apply_metrics_filter(
-            metrics=self._get_query(table=SampleLaneSequencingMetrics),
-            filter_functions=[SequencingMetricsFilter.FILTER_BY_FLOW_CELL_NAME],
-            flow_cell_name=flow_cell_name,
-        ).all()
-        unique_sample_internal_ids: List[str] = list(
-            set([metric.sample_internal_id for metric in metrics])
-        )
-        samples: List[Sample] = [
-            self.get_sample_by_internal_id(internal_id=internal_id)
-            for internal_id in unique_sample_internal_ids
-        ]
-        return samples
-
-    def get_average_passing_q30_for_sample_from_sample_lane_metrics(
-        self, sample_internal_id: str, flow_cell_name: str
-    ) -> float:
-        """Get average q30 for a sample on a given flow cell."""
-        sample_lane_metrics_filter_functions = [
-            SequencingMetricsFilter.FILTER_BY_FLOW_CELL_NAME,
-            SequencingMetricsFilter.FILTER_BY_SAMPLE_INTERNAL_ID,
-        ]
-        sequencing_metrics = apply_metrics_filter(
-            metrics=self._get_query(table=SampleLaneSequencingMetrics),
-            filter_functions=sample_lane_metrics_filter_functions,
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=flow_cell_name,
-        ).all()
+    def get_average_passing_q30_from_sample_lane_metrics(self, flow_cell_name: str) -> float:
+        """Get average q30 on a given flow cell."""
+        sequencing_metrics: List[
+            SampleLaneSequencingMetrics
+        ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
         sum_fraction_of_bases_passing_q30: float = 0
         for sequencing_metric in sequencing_metrics:
             sum_fraction_of_bases_passing_q30 += sequencing_metric.sample_base_fraction_passing_q30

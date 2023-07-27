@@ -801,28 +801,6 @@ def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
     assert metrics_entry.sample_internal_id == sample_id
 
 
-def test_get_samples_on_flow_cell_from_metrics(
-    store_with_sequencing_metrics: Store,
-    flow_cell_name: str,
-    sample_id: str,
-):
-    # GIVEN a store with sequencing metrics
-
-    # ASSERT that the store has samples
-    assert store_with_sequencing_metrics.get_sample_by_internal_id(internal_id=sample_id)
-
-    # WHEN getting samples on a flow cell
-    samples: List[
-        Sample
-    ] = store_with_sequencing_metrics.get_samples_on_flow_cell_from_sample_lane_metrics(
-        flow_cell_name=flow_cell_name
-    )
-
-    # THEN assert that the correct sample is returned
-    assert len(samples) == 1
-    assert samples[0].internal_id == sample_id
-
-
 def test_get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
     store_with_sequencing_metrics: Store,
     flow_cell_2: str,
@@ -849,27 +827,8 @@ def test_get_average_passing_q30_for_sample_from_metrics(
 
     # WHEN getting average passing q30 for a sample
     average_passing_q30 = (
-        store_with_sequencing_metrics.get_average_passing_q30_for_sample_from_sample_lane_metrics(
-            sample_internal_id=sample_2,
+        store_with_sequencing_metrics.get_average_passing_q30_from_sample_lane_metrics(
             flow_cell_name=flow_cell_2,
-        )
-    )
-
-    # THEN assert that the average passing q30 is correct
-    assert average_passing_q30 == expected_average_q30_on_flow_cell
-
-
-def test_get_average_passing_q30_for_samples_on_flow_cell(
-    store_with_sequencing_metrics: Store,
-    flow_cell_2: str,
-    expected_average_q30_on_flow_cell: float,
-):
-    # GIVEN a store with sequencing metrics
-
-    # WHEN getting average passing q30 for samples on a flow cell
-    average_passing_q30 = (
-        store_with_sequencing_metrics.get_average_passing_q30_for_samples_on_flow_cell(
-            flow_cell_name=flow_cell_2
         )
     )
 
