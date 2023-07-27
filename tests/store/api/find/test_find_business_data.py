@@ -803,54 +803,54 @@ def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
 
 def test_get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
     store_with_sequencing_metrics: Store,
-    flow_cell_2: str,
-    expected_total_reads_flow_cell_2: int,
+    flow_cell_name_demultiplexed_with_bcl2fastq: str,
+    expected_total_reads_flow_cell_bcl2fastq: int,
 ):
     # GIVEN a store with sequencing metrics
     # WHEN getting total read counts for a flow cell
     reads = (
         store_with_sequencing_metrics.get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
-            flow_cell_name=flow_cell_2
+            flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq
         )
     )
     # THEN assert that the total read count is correct
-    assert reads == expected_total_reads_flow_cell_2
+    assert reads == expected_total_reads_flow_cell_bcl2fastq
 
 
 def test_get_average_bases_above_q30_for_sample_from_metrics(
     store_with_sequencing_metrics: Store,
-    expected_average_q30_on_flow_cell: float,
-    sample_2: str,
-    flow_cell_2: str,
+    expected_average_q30_for_sample: float,
+    mother_sample_id: str,
+    flow_cell_name_demultiplexed_with_bcl2fastq: str,
 ):
     # GIVEN a store with sequencing metrics
 
     # WHEN getting average bases above q30 for a sample
     average_bases_above_q30 = store_with_sequencing_metrics.get_average_q30_for_sample_on_flow_cell_from_sample_lane_metrics(
-        sample_internal_id=sample_2,
-        flow_cell_name=flow_cell_2,
+        sample_internal_id=mother_sample_id,
+        flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
     )
 
     # THEN assert that the average bases above q30 is correct
-    assert average_bases_above_q30 == expected_average_q30_on_flow_cell
+    assert average_bases_above_q30 == expected_average_q30_for_sample
 
 
 def test_get_average_passing_q30_for_sample_from_metrics(
     store_with_sequencing_metrics: Store,
-    expected_average_q30_on_flow_cell: float,
-    flow_cell_2: str,
+    expected_average_q30_for_flow_cell: float,
+    flow_cell_name_demultiplexed_with_bcl2fastq: str,
 ):
     # GIVEN a store with sequencing metrics
 
     # WHEN getting average passing q30 for a sample
     average_passing_q30 = (
         store_with_sequencing_metrics.get_average_fraction_passing_q30_from_sample_lane_metrics(
-            flow_cell_name=flow_cell_2,
+            flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
         )
     )
 
     # THEN assert that the average passing q30 is correct
-    assert average_passing_q30 == expected_average_q30_on_flow_cell
+    assert average_passing_q30 == expected_average_q30_for_flow_cell
 
 
 def test_get_number_of_reads_for_sample_passing_q30_threshold(

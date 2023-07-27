@@ -42,6 +42,7 @@ from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.store import Store
+from cg.utils import Process
 from cg.store.models import (
     Bed,
     BedVersion,
@@ -49,9 +50,7 @@ from cg.store.models import (
     Family,
     Organism,
     Sample,
-    SampleLaneSequencingMetrics,
 )
-from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -2677,53 +2676,51 @@ def fixture_expected_average_q30() -> float:
     return 90.50
 
 
-@pytest.fixture(name="expected_average_q30_on_flow_cell")
-def fixture_expected_average_on_flow_cell_q30() -> float:
-    """Return expected average Q30 for a flow cell."""
+@pytest.fixture(name="expected_average_q30_for_sample")
+def fixture_expected_average_q30_for_sample() -> float:
+    """Return expected average Q30 for a sample."""
     return (85.5 + 80.5) / 2
 
 
-@pytest.fixture(name="sample_2")
-def fixture_sample_2() -> str:
-    """Return a sample name"""
-    return "sample_2"
+@pytest.fixture(name="expected_average_q30_for_flow_cell")
+def fixture_expected_average_q30_for_flow_cell() -> float:
+    return (((85.5 + 80.5) / 2) + ((83.5 + 81.5) / 2)) / 2
 
 
-@pytest.fixture(name="flow_cell_2")
-def fixture_flow_cell_2() -> str:
-    """Return a flow cell name"""
-    return "flow_cell_2"
-
-
-@pytest.fixture(name="expected_total_reads_flow_cell_2")
+@pytest.fixture(name="expected_total_reads_flow_cell_bcl2fastq")
 def fixture_expected_total_reads_flow_cell_2() -> int:
     """Return an expected read count"""
-    return 4_000_000
+    return 8_000_000
 
 
 @pytest.fixture
 def store_with_sequencing_metrics(
+    store: Store,
     sample_id: str,
+    father_sample_id: str,
+    mother_sample_id: str,
     expected_total_reads: int,
     flow_cell_name: str,
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
+    flow_cell_name_demultiplexed_with_bcl2fastq: str,
     helpers: StoreHelpers,
-) -> Generator[Store, None, None]:
+) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
-    store = Store(uri="sqlite:///")
-    store.create_all()
+
     sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
         (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
         (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
-        ("sample_2", "flow_cell_2", 2, 2_000_000, 85.5, 30),
-        ("sample_3", "flow_cell_3", 3, 1_500_000, 80.5, 33),
-        ("sample_2", "flow_cell_2", 1, 2_000_000, 80.5, 30),
-        ("sample_2", "flow_cell_3", 2, 1_500_000, 80.5, 33),
+        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 2, 2_000_000, 85.5, 30),
+        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 1, 2_000_000, 80.5, 30),
+        (father_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 2, 2_000_000, 83.5, 30),
+        (father_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 1, 2_000_000, 81.5, 30),
+        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 3, 1_500_000, 80.5, 33),
+        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 2, 1_500_000, 80.5, 33),
     ]
 
-    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
     for (
         sample_internal_id,
-        flow_cell_name,
+        flow_cell_name_,
         flow_cell_lane_number,
         sample_total_reads_in_lane,
         sample_base_fraction_passing_q30,
@@ -2732,19 +2729,13 @@ def store_with_sequencing_metrics(
         helpers.add_sample_lane_sequencing_metrics(
             store=store,
             sample_internal_id=sample_internal_id,
-            flow_cell_name=flow_cell_name,
+            flow_cell_name=flow_cell_name_,
             flow_cell_lane_number=flow_cell_lane_number,
             sample_total_reads_in_lane=sample_total_reads_in_lane,
             sample_base_fraction_passing_q30=sample_base_fraction_passing_q30,
             sample_base_mean_quality_score=sample_base_mean_quality_score,
         )
-
-    store.session.add_all(sample_lane_sequencing_metrics)
-    store.session.commit()
-
-    yield store
-
-    store.drop_all()
+    return store
 
 
 @pytest.fixture

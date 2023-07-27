@@ -32,7 +32,6 @@ from cg.meta.demultiplex.status_db_storage_functions import (
 )
 
 
-
 def test_set_dry_run(
     demultiplex_context: CGConfig,
 ):
@@ -633,7 +632,7 @@ def test_add_existing_sample_sheet(
 
 
 def test_add_single_sequencing_metrics_entry_to_statusdb(
-    store_with_sequencing_metrics: Store,
+    store: Store,
     demultiplex_context: CGConfig,
     flow_cell_name: str,
     sample_id: str,
