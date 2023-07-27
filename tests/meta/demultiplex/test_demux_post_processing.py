@@ -14,6 +14,18 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_bundle_and_version_if_non_existent,
+    add_tags_if_non_existent,
+    add_sample_fastq_files_to_housekeeper,
+    add_sample_sheet_path_to_housekeeper,
+    add_demux_logs_to_housekeeper,
+)
+from cg.meta.demultiplex.status_db_storage_functions import (
+    add_sequencing_metrics_to_statusdb,
+    update_sample_read_count,
+    metric_has_sample_in_statusdb,
+)
 
 
 def test_set_dry_run(
@@ -485,46 +497,6 @@ def test_finish_all_flowcells(
     assert f"Check demultiplexed flow cell {bcl2fastq_flow_cell.full_name}" in caplog.text
 
 
-def test_add_flow_cell_data_to_housekeeper(demultiplex_context: CGConfig):
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    demux_post_processing_api.add_bundle_and_version_if_non_existent = MagicMock()
-    demux_post_processing_api.add_tags_if_non_existent = MagicMock()
-    demux_post_processing_api.add_sample_sheet_path_to_housekeeper = MagicMock()
-    demux_post_processing_api.add_sample_fastq_files_to_housekeeper = MagicMock()
-
-    flow_cell_name: str = "flow_cell_name"
-    flow_cell_directory: Path = Path("some/path/to/flow/cell/directory")
-
-    flow_cell = MagicMock()
-    flow_cell.path = flow_cell_directory
-    flow_cell.id = flow_cell_name
-
-    # WHEN the flow cell data is added to housekeeper
-    demux_post_processing_api.store_flow_cell_data_in_housekeeper(flow_cell)
-
-    # THEN the bundle and version is added
-    demux_post_processing_api.add_bundle_and_version_if_non_existent.assert_called_once_with(
-        bundle_name=flow_cell_name
-    )
-
-    # THEN the correct tags are added
-    demux_post_processing_api.add_tags_if_non_existent.assert_called_once_with(
-        tag_names=[SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell_name]
-    )
-
-    # THEN the sample sheet is added
-    demux_post_processing_api.add_sample_sheet_path_to_housekeeper.assert_called_once_with(
-        flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
-    )
-
-    # THEN the fastq files are added
-    demux_post_processing_api.add_sample_fastq_files_to_housekeeper.assert_called_once_with(
-        flow_cell
-    )
-
-
 def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
@@ -534,7 +506,9 @@ def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
 
     # WHEN adding a bundle and version which does not exist
     flow_cell_name: str = "flow_cell_name"
-    demux_post_processing_api.add_bundle_and_version_if_non_existent(bundle_name=flow_cell_name)
+    add_bundle_and_version_if_non_existent(
+        bundle_name=flow_cell_name, hk_api=demux_post_processing_api.hk_api
+    )
 
     # THEN that the expected methods were called with the expected arguments
     demux_post_processing_api.hk_api.bundle.assert_called_once_with(name=flow_cell_name)
@@ -553,8 +527,9 @@ def test_add_bundle_and_version_if_already_exists(demultiplex_context: CGConfig)
 
     # WHEN adding a bundle and version which already exists
     flow_cell_name: str = "flow_cell_name"
-    demux_post_processing_api.add_bundle_and_version_if_non_existent(bundle_name=flow_cell_name)
-
+    add_bundle_and_version_if_non_existent(
+        bundle_name=flow_cell_name, hk_api=demux_post_processing_api.hk_api
+    )
     # THEN the bundle was retrieved
     demux_post_processing_api.hk_api.bundle.assert_called_once_with(name=flow_cell_name)
 
@@ -572,7 +547,7 @@ def test_add_tags_if_non_existent(demultiplex_context: CGConfig):
 
     # WHEN adding new tags
     tag_names = ["tag1", "tag2"]
-    demux_post_processing_api.add_tags_if_non_existent(tag_names=tag_names)
+    add_tags_if_non_existent(tag_names=tag_names, hk_api=demux_post_processing_api.hk_api)
 
     # THEN the expected housekeeper API methods were called to create the tags
     demux_post_processing_api.hk_api.get_tag.assert_has_calls(
@@ -593,7 +568,7 @@ def test_add_tags_if_all_exist(demultiplex_context: CGConfig):
 
     # Call the add_tags_if_non_existent method with two tag names
     tag_names = ["tag1", "tag2"]
-    demux_post_processing_api.add_tags_if_non_existent(tag_names=tag_names)
+    add_tags_if_non_existent(tag_names=tag_names, hk_api=demux_post_processing_api.hk_api)
 
     # Assert that the expected methods were called with the expected arguments
     demux_post_processing_api.hk_api.get_tag.assert_has_calls(
@@ -612,39 +587,44 @@ def test_add_fastq_files_without_sample_id(
 
     # WHEN add_fastq_files is called
 
-    demux_post_processing_api.add_sample_fastq_files_to_housekeeper(flow_cell=dragen_flow_cell)
+    add_sample_fastq_files_to_housekeeper(
+        flow_cell=dragen_flow_cell,
+        hk_api=demux_post_processing_api.hk_api,
+        store=demux_post_processing_api.status_db,
+    )
 
     # THEN add_file_if_non_existent was not called
     demux_post_processing_api.add_file_to_bundle_if_non_existent.assert_not_called()
 
 
-def test_add_existing_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory):
+def test_add_existing_sample_sheet(
+    demultiplex_context: CGConfig, dragen_flow_cell: FlowCellDirectoryData, novaseq_6000_dir: Path
+):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-    demux_post_processing_api.add_file_to_bundle_if_non_existent = MagicMock()
 
     # GIVEN a flow cell directory and name
-    flow_cell_directory: Path = Path(tmpdir_factory.mktemp("flow_cell_directory"))
-    sample_sheet_file = Path(flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
-    sample_sheet_file.touch()
-    flow_cell_name = "flow_cell_name"
+    flow_cell_directory = Path(novaseq_6000_dir, dragen_flow_cell.full_name)
+
+    # GIVEN that a flow cell bundle exists in Housekeeper
+    add_bundle_and_version_if_non_existent(
+        bundle_name=dragen_flow_cell.id, hk_api=demux_post_processing_api.hk_api
+    )
 
     # WHEN a sample sheet is added
-    demux_post_processing_api.add_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=flow_cell_directory,
+        flow_cell_name=dragen_flow_cell.id,
+        hk_api=demux_post_processing_api.hk_api,
     )
 
-    # THEN add_file_if_non_existent was called with expected arguments
-    expected_file_path = Path(
-        flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-    )
-    expected_tag_names = [SequencingFileTag.SAMPLE_SHEET, flow_cell_name]
+    # THEN a sample sheet file was added to the bundle
+    expected_tag_names = [SequencingFileTag.SAMPLE_SHEET, dragen_flow_cell.id]
 
-    demux_post_processing_api.add_file_to_bundle_if_non_existent.assert_called_once_with(
-        file_path=expected_file_path,
-        bundle_name=flow_cell_name,
-        tag_names=expected_tag_names,
-    )
+    files = demux_post_processing_api.hk_api.get_files(
+        bundle=dragen_flow_cell.id, tags=expected_tag_names
+    ).all()
+    assert len(files) == 1
 
 
 def test_add_single_sequencing_metrics_entry_to_statusdb(
@@ -663,8 +643,9 @@ def test_add_single_sequencing_metrics_entry_to_statusdb(
     )
 
     # WHEN adding the sequencing metrics entry to the statusdb
-    demux_post_processing_api.add_sequencing_metrics_to_statusdb(
-        sample_lane_sequencing_metrics=[sequencing_metrics_entry]
+    add_sequencing_metrics_to_statusdb(
+        sample_lane_sequencing_metrics=[sequencing_metrics_entry],
+        store=demux_post_processing_api.status_db,
     )
 
     # THEN the sequencing metrics entry was added to the statusdb
@@ -678,7 +659,7 @@ def test_update_sample_read_count(demultiplex_context: CGConfig):
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a sample id and a q30 threshold
-    sample_id = "sample_1"
+    sample_internal_id = "sample_1"
     q30_threshold = 0
 
     # GIVEN a sample and a read count
@@ -692,14 +673,16 @@ def test_update_sample_read_count(demultiplex_context: CGConfig):
     demux_post_processing_api.status_db = status_db
 
     # WHEN calling update_sample_read_count
-    demux_post_processing_api.update_sample_read_count(sample_id, q30_threshold)
+    update_sample_read_count(
+        sample_id=sample_internal_id, q30_threshold=q30_threshold, store=status_db
+    )
 
     # THEN get_sample_by_internal_id is called with the correct argument
-    status_db.get_sample_by_internal_id.assert_called_with(sample_id)
+    status_db.get_sample_by_internal_id.assert_called_with(sample_internal_id)
 
     # THEN get_number_of_reads_for_sample_passing_q30_threshold is called with the correct arguments
     status_db.get_number_of_reads_for_sample_passing_q30_threshold.assert_called_with(
-        sample_internal_id=sample_id,
+        sample_internal_id=sample_internal_id,
         q30_threshold=q30_threshold,
     )
 
@@ -845,8 +828,8 @@ def test_add_demux_logs_to_housekeeper(
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a bundle and flow cell version exists in housekeeper
-    demux_post_processing_api.add_bundle_and_version_if_non_existent(
-        bundle_name=dragen_flow_cell.id
+    add_bundle_and_version_if_non_existent(
+        bundle_name=dragen_flow_cell.id, hk_api=demux_post_processing_api.hk_api
     )
 
     # GIVEN a demux log in the run directory
@@ -867,7 +850,11 @@ def test_add_demux_logs_to_housekeeper(
         file_path.touch()
 
     # WHEN adding the demux logs to housekeeper
-    demux_post_processing_api.add_demux_logs_to_housekeeper(flow_cell=dragen_flow_cell)
+    add_demux_logs_to_housekeeper(
+        flow_cell=dragen_flow_cell,
+        flow_cell_run_dir=demux_post_processing_api.demux_api.run_dir,
+        hk_api=demux_post_processing_api.hk_api,
+    )
 
     # THEN the demux log was added to housekeeper
     files = demux_post_processing_api.hk_api.get_files(
@@ -895,4 +882,6 @@ def test_metric_has_sample_in_statusdb(demultiplex_context: CGConfig):
     sample_internal_id = "does_not_exist"
 
     # WHEN checking if the sample exists in statusdb
-    assert not demux_post_processing_api.metric_has_sample_in_statusdb(sample_internal_id)
+    assert not metric_has_sample_in_statusdb(
+        sample_internal_id=sample_internal_id, store=demux_post_processing_api.status_db
+    )
