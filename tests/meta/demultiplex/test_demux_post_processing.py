@@ -21,7 +21,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_sample_sheet_path_to_housekeeper,
     add_demux_logs_to_housekeeper,
 )
-from cg.meta.demultiplex.store_storage_functions import (
+from cg.meta.demultiplex.status_db_storage_functions import (
     add_sequencing_metrics_to_statusdb,
     update_sample_read_count,
     metric_has_sample_in_statusdb,

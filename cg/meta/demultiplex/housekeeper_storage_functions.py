@@ -78,8 +78,6 @@ def add_sample_fastq_files_to_housekeeper(
     )
 
     for sample_internal_id in sample_internal_ids:
-        add_bundle_and_version_if_non_existent(bundle_name=sample_internal_id, hk_api=hk_api)
-
         sample_fastq_paths: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
             flow_cell_directory=flow_cell.path, sample_internal_id=sample_internal_id
         )
