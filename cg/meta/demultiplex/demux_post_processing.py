@@ -146,14 +146,12 @@ class DemuxPostProcessingAPI:
     def store_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Store data from the flow cell directory in status db and housekeeper."""
         store_flow_cell_data_in_status_db(parsed_flow_cell=parsed_flow_cell, store=self.status_db)
-        store_sequencing_metrics_in_status_db(
-            parsed_flow_cell=parsed_flow_cell, store=self.status_db
-        )
+        store_sequencing_metrics_in_status_db(flow_cell=parsed_flow_cell, store=self.status_db)
         update_sample_read_counts_in_status_db(
-            parsed_flow_cell=parsed_flow_cell, store=self.status_db
+            flow_cell_data=parsed_flow_cell, store=self.status_db
         )
         store_flow_cell_data_in_housekeeper(
-            parsed_flow_cell=parsed_flow_cell,
+            flow_cell=parsed_flow_cell,
             hk_api=self.hk_api,
             flow_cell_run_dir=self.demux_api.run_dir,
             store=self.status_db,
