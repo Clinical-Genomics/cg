@@ -28,6 +28,7 @@ class TaxprofilerDefaults:
     SAVE_HOSTREMOVAL_INDEX: bool = True
     SAVE_HOSTREMOVAL_MAPPED: bool = True
     SAVE_HOSTREMOVAL_UNMAPPED: bool = True
+    PERFORM_RUNMERGING: bool = True
     RUN_KRAKEN2: bool = True
     KRAKEN2_SAVE_READS: bool = True
     KRAKEN2_SAVE_READCLASSIFICATION: bool = True

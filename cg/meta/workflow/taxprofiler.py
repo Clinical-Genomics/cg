@@ -198,6 +198,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             "save_hostremoval_index": TaxprofilerDefaults.SAVE_HOSTREMOVAL_INDEX,
             "save_hostremoval_mapped": TaxprofilerDefaults.SAVE_HOSTREMOVAL_MAPPED,
             "save_hostremoval_unmapped": TaxprofilerDefaults.SAVE_HOSTREMOVAL_UNMAPPED,
+            "perform_runmerging": TaxprofilerDefaults.PERFORM_RUNMERGING,
             "run_kraken2": TaxprofilerDefaults.RUN_KRAKEN2,
             "kraken2_save_reads": TaxprofilerDefaults.KRAKEN2_SAVE_READS,
             "kraken2_save_readclassification": TaxprofilerDefaults.KRAKEN2_SAVE_READCLASSIFICATION,
