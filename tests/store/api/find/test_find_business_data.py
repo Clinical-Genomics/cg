@@ -812,15 +812,15 @@ def test_get_samples_on_flow_cell_from_metrics(
     assert store_with_sequencing_metrics.get_sample_by_internal_id(internal_id=sample_id)
 
     # WHEN getting samples on a flow cell
-    sample_internal_ids: List[
-        str
-    ] = store_with_sequencing_metrics.get_samples_internal_ids_on_flow_cell_from_sample_lane_metrics(
+    samples: List[
+        Sample
+    ] = store_with_sequencing_metrics.get_samples_on_flow_cell_from_sample_lane_metrics(
         flow_cell_name=flow_cell_name
     )
 
     # THEN assert that the correct sample is returned
-    assert len(sample_internal_ids) == 1
-    assert sample_internal_ids[0] == sample_id
+    assert len(samples) == 1
+    assert samples[0].internal_id == sample_id
 
 
 def test_get_number_of_reads_for_flow_cell_from_sample_lane_metrics(

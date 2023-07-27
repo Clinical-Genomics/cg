@@ -345,17 +345,23 @@ class FindBusinessDataHandler(BaseHandler):
         reads_count: Optional[int] = total_reads_query.scalar()
         return reads_count if reads_count else 0
 
-    def get_samples_internal_ids_on_flow_cell_from_sample_lane_metrics(
+    def get_samples_on_flow_cell_from_sample_lane_metrics(
         self, flow_cell_name: str
-    ) -> List[str]:
+    ) -> List[Sample]:
         """Get samples on a given flow cell."""
         metrics = apply_metrics_filter(
             metrics=self._get_query(table=SampleLaneSequencingMetrics),
             filter_functions=[SequencingMetricsFilter.FILTER_BY_FLOW_CELL_NAME],
             flow_cell_name=flow_cell_name,
         ).all()
-
-        return list(set([metric.sample_internal_id for metric in metrics]))
+        unique_sample_internal_ids: List[str] = list(
+            set([metric.sample_internal_id for metric in metrics])
+        )
+        samples: List[Sample] = [
+            self.get_sample_by_internal_id(internal_id=internal_id)
+            for internal_id in unique_sample_internal_ids
+        ]
+        return samples
 
     def get_average_passing_q30_for_sample_from_sample_lane_metrics(
         self, sample_internal_id: str, flow_cell_name: str
@@ -371,45 +377,45 @@ class FindBusinessDataHandler(BaseHandler):
             sample_internal_id=sample_internal_id,
             flow_cell_name=flow_cell_name,
         ).all()
-        total_passing_q30: float = 0
+        sum_fraction_of_bases_passing_q30: float = 0
         for metric in metrics:
-            total_passing_q30 += metric.sample_base_fraction_passing_q30
+            sum_fraction_of_bases_passing_q30 += metric.sample_base_fraction_passing_q30
 
-        return total_passing_q30 / len(metrics) if total_passing_q30 else 0
+        return (
+            sum_fraction_of_bases_passing_q30 / len(metrics)
+            if sum_fraction_of_bases_passing_q30
+            else 0
+        )
 
     def get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
         self, flow_cell_name: str
     ) -> int:
-        """Get number of reads for flow cell from sample lane sequencing metrics."""
-        sample_internal_ids: List[
-            str
-        ] = self.get_samples_internal_ids_on_flow_cell_from_sample_lane_metrics(
+        """Get total number of reads for a flow cell from sample lane sequencing metrics."""
+        samples: List[Sample] = self.get_samples_on_flow_cell_from_sample_lane_metrics(
             flow_cell_name=flow_cell_name
         )
         reads_count: int = 0
-        for sample_internal_id in sample_internal_ids:
+        for sample in samples:
             reads_count += (
                 self.get_number_of_reads_for_sample_on_flow_cell_from_sample_lane_metrics(
-                    sample_internal_id=sample_internal_id, flow_cell_name=flow_cell_name
+                    sample_internal_id=sample.internal_id, flow_cell_name=flow_cell_name
                 )
             )
         return reads_count if reads_count else 0
 
     def get_average_passing_q30_for_samples_on_flow_cell(self, flow_cell_name: str) -> float:
         """Get average q30 for samples on a given flow cell."""
-        sample_internal_ids: List[
-            str
-        ] = self.get_samples_internal_ids_on_flow_cell_from_sample_lane_metrics(
+        samples: List[Sample] = self.get_samples_on_flow_cell_from_sample_lane_metrics(
             flow_cell_name=flow_cell_name
         )
         total_passing_q30: int = 0
-        for sample_internal_id in sample_internal_ids:
+        for sample in samples:
             total_passing_q30 += self.get_average_passing_q30_for_sample_from_sample_lane_metrics(
-                sample_internal_id=sample_internal_id,
+                sample_internal_id=sample.internal_id,
                 flow_cell_name=flow_cell_name,
             )
 
-        return total_passing_q30 / len(sample_internal_ids) if total_passing_q30 else 0
+        return total_passing_q30 / len(samples) if total_passing_q30 else 0
 
     def get_sample_lane_sequencing_metrics_by_flow_cell_name(
         self, flow_cell_name: str
