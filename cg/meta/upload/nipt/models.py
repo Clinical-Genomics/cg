@@ -8,15 +8,11 @@ class StatinaUploadFiles(BaseModel):
     segmental_calls: Optional[str]
 
 
-class FlowCellQ30AndReads:
+class FlowCellQ30AndReads(BaseModel):
     """Summary of a flow cell"""
 
     reads: int
     q30: float
-
-    def __init__(self, reads: int, q30: float):
-        self.reads = reads
-        self.q30 = q30
 
     def reads_above_threshold(self, threshold: int) -> bool:
         """Check if the number of reads is above a threshold"""
