@@ -113,7 +113,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             )
         except ValidationError as error:
             LOG.error(error)
-            raise ValueError
+            raise CgError(f"Error creating sample sheet")
 
         samples_full_list: list = []
         strandedness_full_list: list = []
@@ -146,12 +146,9 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(
                 read_nb=2, metadata=sample_metadata
             )
-            try:
-                samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
-                    case_id, fastq_r1, fastq_r2, strandedness
-                )
-            except ValidationError as error:
-                raise CgError(f"Error creating sample sheet: {error}") from error
+            samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
+                case_id, fastq_r1, fastq_r2, strandedness
+            )
             LOG.info(samplesheet_content)
             if dry_run:
                 continue
