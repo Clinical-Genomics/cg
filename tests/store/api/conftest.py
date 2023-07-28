@@ -1,7 +1,7 @@
 import datetime as dt
 import pytest
 
-from typing import List, Generator
+from typing import List
 from cg.constants.constants import PrepCategory
 from cg.constants.priority import PriorityTerms
 from cg.meta.orders.pool_submitter import PoolSubmitter
@@ -173,26 +173,23 @@ def fixture_max_nr_of_cases() -> int:
 
 @pytest.fixture(name="store_failing_sequencing_qc")
 def fixture_store_failing_sequencing_qc(
-    case_id: str,
-    family_name: str,
     bcl2fastq_flow_cell_id: str,
     sample_id: str,
     ticket_id: str,
     timestamp_now: dt.datetime,
     helpers,
-) -> Generator[Store, None, None]:
+    store: Store,
+) -> Store:
     """Populate a store with a Fluffy case, with a sample that has been sequenced on two flow cells."""
-    store = Store(uri="sqlite:///")
-    store.create_all()
     store_case = helpers.add_case(
         store=store,
-        internal_id=case_id,
-        name=family_name,
+        internal_id="fluffy_case",
+        name="fluffy_case",
         data_analysis=Pipeline.FLUFFY,
     )
 
     store_sample = helpers.add_sample(
-        internal_id=sample_id,
+        internal_id="fluffy_sample",
         is_tumour=False,
         application_type=PrepCategory.READY_MADE_LIBRARY.value,
         reads=5,
@@ -217,8 +214,7 @@ def fixture_store_failing_sequencing_qc(
         sample_total_reads_in_lane=5,
         sample_base_fraction_passing_q30=0.3,
     )
-    yield store
-    store.drop_all()
+    return store
 
 
 @pytest.fixture(name="max_nr_of_samples")
