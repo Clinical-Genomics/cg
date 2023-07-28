@@ -196,6 +196,7 @@ def fixture_store_failing_sequencing_qc(
         store=store,
         original_ticket=ticket_id,
         sequenced_at=timestamp_now,
+        customer_id="fluffy_customer",
     )
 
     helpers.add_flowcell(
