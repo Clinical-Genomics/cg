@@ -82,16 +82,17 @@ def validate_demultiplexing_complete(flow_cell_output_directory: Path) -> None:
         )
 
 
-def validate_flow_cell_delivery_status(flow_cell_output_directory: Path) -> None:
-    if is_flow_cell_ready_for_delivery(flow_cell_output_directory):
+def validate_flow_cell_delivery_status(flow_cell_output_directory: Path, force: bool) -> None:
+    if is_flow_cell_ready_for_delivery(flow_cell_output_directory) and not force:
         raise FlowCellError(
             f"Flow cell output directory {flow_cell_output_directory} has already been processed and is ready for delivery."
         )
+    return
 
 
 def is_flow_cell_ready_for_postprocessing(
-    flow_cell_output_directory: Path, flow_cell_run_directory: Path
+    flow_cell_output_directory: Path, flow_cell_run_directory: Path, force: bool = False
 ) -> None:
     validate_sample_sheet_exists(flow_cell_run_directory)
     validate_demultiplexing_complete(flow_cell_output_directory)
-    validate_flow_cell_delivery_status(flow_cell_output_directory)
+    validate_flow_cell_delivery_status(flow_cell_output_directory, force=force)
