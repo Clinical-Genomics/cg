@@ -834,7 +834,12 @@ class StoreHelpers:
 
     @classmethod
     def add_sample_lane_sequencing_metrics(
-        cls, store: Store, sample_internal_id: str, flow_cell_name: str, customer_id: str, **kwargs
+        cls,
+        store: Store,
+        sample_internal_id: str,
+        flow_cell_name: str,
+        customer_id: str = "some_customer_007",
+        **kwargs,
     ):
         """Helper function to add a sample lane sequencing metrics associated with a sample with the given ids."""
         sample: Sample = store.get_sample_by_internal_id(internal_id=sample_internal_id)

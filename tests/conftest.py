@@ -2734,7 +2734,6 @@ def store_with_sequencing_metrics(
             sample_total_reads_in_lane=sample_total_reads_in_lane,
             sample_base_fraction_passing_q30=sample_base_fraction_passing_q30,
             sample_base_mean_quality_score=sample_base_mean_quality_score,
-            customer_id="some_customer_007",
         )
     return store
 
