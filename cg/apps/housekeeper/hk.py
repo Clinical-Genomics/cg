@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from cg.constants import SequencingFileTag
-from cg.exc import HousekeeperBundleVersionMissingError
+from cg.exc import HousekeeperBundleVersionMissingError, HousekeeperFileMissingError
 from sqlalchemy.orm import Query
 
 from housekeeper.include import checksum as hk_checksum
@@ -406,6 +406,8 @@ class HousekeeperAPI:
         """Creates an archive object for the given files, and adds the archive task id to them."""
         for file in files:
             archived_file: File = self._store.get_files(file_path=file.as_posix()).first()
+            if not archived_file:
+                raise HousekeeperFileMissingError(f"No file in housekeeper with the path {file}")
             archive = self._store.create_archive(
                 archived_file.id, archiving_task_id=archive_task_id
             )

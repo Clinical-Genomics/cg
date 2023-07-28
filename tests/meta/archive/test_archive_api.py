@@ -5,7 +5,7 @@ from cg.meta.archive.archive import ArchiveAPI, PathAndSample
 from cg.store.models import Sample
 
 
-def test_sort_spring_files_on_archive_location(
+def test_sort_files_by_archive_location(
     archive_api: ArchiveAPI, populated_housekeeper_api: HousekeeperAPI
 ):
     """Tests the fetching of sample/customer info from statusdb based on bundle_names
@@ -21,7 +21,7 @@ def test_sort_spring_files_on_archive_location(
     # WHEN sorting the returned files on the data archive locations of the customers
     sorted_spring_files: Dict[
         str, List[PathAndSample]
-    ] = archive_api.sort_files_on_archive_location(non_archived_spring_files)
+    ] = archive_api.sort_files_by_archive_location(non_archived_spring_files)
 
     # THEN there should be spring files
     assert sorted_spring_files

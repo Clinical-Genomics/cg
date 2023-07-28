@@ -169,19 +169,16 @@ def fixture_archive_store(
 @pytest.fixture(name="archive_api")
 def fixture_archive_api(
     populated_housekeeper_api: HousekeeperAPI,
-    ddn_dataflow_api: DDNDataFlowApi,
     archive_store: Store,
-    spring_file: Path,
     father_sample_id: str,
     helpers,
 ) -> ArchiveAPI:
     """Returns an ArchiveAPI with a populated housekeeper store and a DDNDataFlowApi.
-    Also adds /home/ as a prefix for eahc SPRING file for the DDNDataFlowApi to accept them."""
+    Also adds /home/ as a prefix for each SPRING file for the DDNDataFlowApi to accept them."""
     for spring_file in populated_housekeeper_api.files(tags=[SequencingFileTag.SPRING]):
         spring_file.path = f"/home/{spring_file.path}"
     populated_housekeeper_api.commit()
     return ArchiveAPI(
-        ddn_dataflow_api=ddn_dataflow_api,
         housekeeper_api=populated_housekeeper_api,
         status_db=archive_store,
     )
