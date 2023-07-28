@@ -17,7 +17,7 @@ from cg.constants.rnafusion import (
     RnafusionDefaults,
 )
 from cg.constants.tb import AnalysisStatus
-from cg.exc import CgError, MetricsQCError, MissingMetrics
+from cg.exc import CgError, HousekeeperFileMissingError, MetricsQCError, MissingMetrics
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -142,6 +142,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
+            if not fastq_r1 or not fastq_r2:
+                raise HousekeeperFileMissingError(
+                    message=f"Fastq files missing in Housekeeper for case {case_id}"
+                )
             samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
                 case_id, fastq_r1, fastq_r2, strandedness
             )
