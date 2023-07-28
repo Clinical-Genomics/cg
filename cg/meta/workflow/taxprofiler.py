@@ -55,9 +55,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     def fastq_handler(self):
         return TaxprofilerFastqHandler
 
-    # def get_case_config_path(self, case_id):
-    #    return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
-
     @property
     def process(self):
         return self._process

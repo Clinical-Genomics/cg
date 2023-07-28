@@ -2213,7 +2213,7 @@ def fixture_context_config(
             "revision": "1.0.1",
             "slurm": {
                 "account": "development",
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": "taxprofiler.email@scilifelab.se",
             },
         },
         "scout": {
