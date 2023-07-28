@@ -22,7 +22,6 @@ from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
 from cg.utils import Process
 from cg.store.models import Family, Sample
-from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -56,15 +55,11 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     def fastq_handler(self):
         return TaxprofilerFastqHandler
 
-    def get_case_config_path(self, case_id):
-        return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
+    # def get_case_config_path(self, case_id):
+    #    return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
 
     @property
     def process(self):
-        if not self._process:
-            self._process = Process(
-                binary=self.tower_binary_path,
-            )
         return self._process
 
     @process.setter
@@ -75,10 +70,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         if profile:
             return profile
         return self.profile
-
-    def get_case_path(self, case_id: str) -> Path:
-        """Path to case working directory."""
-        return NextflowAnalysisAPI.get_case_path(case_id=case_id, root_dir=self.root)
 
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
@@ -174,9 +165,11 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         )
 
     def get_reference_path(self) -> Path:
+        """Returns the reference for host genome"""
         return Path(self.hostremoval_reference).absolute()
 
     def get_database_samplesheet(self) -> Path:
+        """Returns samplesheet with databases for classification"""
         return Path(self.databases).absolute()
 
     def get_default_parameters(self, case_id: str) -> Dict:
