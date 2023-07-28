@@ -73,7 +73,7 @@ class NiptUploadAPI:
                 f"Skipping upload."
             )
             return False
-
+        LOG.debug(f"Flow cell {flow_cell.name} passed QC for case {case_id}.")
         return True
 
     def get_housekeeper_results_file(self, case_id: str, tags: Optional[list] = None) -> str:
