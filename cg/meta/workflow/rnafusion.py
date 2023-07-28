@@ -140,15 +140,18 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
         for link in case_obj.links:
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
-            fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
-            fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
-            if not fastq_r1 or not fastq_r2:
-                raise HousekeeperFileMissingError(
-                    message=f"Fastq files missing in Housekeeper for case {case_id}"
-                )
-            samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
-                case_id, fastq_r1, fastq_r2, strandedness
+            fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(
+                read_nb=1, metadata=sample_metadata
             )
+            fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(
+                read_nb=2, metadata=sample_metadata
+            )
+            try:
+                samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
+                    case_id, fastq_r1, fastq_r2, strandedness
+                )
+            except ValidationError as error:
+                raise CgError(f"Error creating sample sheet: {error}") from error
             LOG.info(samplesheet_content)
             if dry_run:
                 continue
