@@ -71,11 +71,12 @@ def finish_flow_cell(
 
 @finish_group.command(name="temporary")
 @click.argument("flow-cell-directory-name")
+@click.option("--force", is_flag=True)
 @click.pass_obj
-def finish_flow_cell_temporary(context: CGConfig, flow_cell_directory_name: str):
+def finish_flow_cell_temporary(context: CGConfig, flow_cell_directory_name: str, force: bool):
     demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
     demux_post_processing_api.finish_flow_cell_temp(
-        flow_cell_directory_name=flow_cell_directory_name
+        flow_cell_directory_name=flow_cell_directory_name, force=force
     )
 
 
