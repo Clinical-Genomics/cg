@@ -39,7 +39,7 @@ def test_flow_cell_name(
         flow_cell_path=flow_cell_path,
         status_db=mock_statusdb,
         housekeeper_api=mock_hk,
-        trailblazer_api=mock_tb,
+        trailblazer_client=mock_tb,
     )
 
     # WHEN checking the name of the flow cell
@@ -75,7 +75,7 @@ def test_flow_cell_exists_in_statusdb_(
         flow_cell_path=flow_cell_path,
         status_db=mock_statusdb,
         housekeeper_api=mock_hk,
-        trailblazer_api=mock_tb,
+        trailblazer_client=mock_tb,
     )
 
     # WHEN checking if the flow cell exists in statusdb
@@ -95,7 +95,7 @@ def test_check_fastq_files_exist_in_hk(
         flow_cell_path=correct_flow_cell_path,
         status_db=mock_statusdb,
         housekeeper_api=mock_hk,
-        trailblazer_api=mock_tb,
+        trailblazer_client=mock_tb,
     )
     flow_cell_obj._hk_fastq_files = ["file.fastq.gz"]
 
@@ -116,7 +116,7 @@ def test_check_no_fastq_files_exist_in_hk(
         flow_cell_path=correct_flow_cell_path,
         status_db=mock_statusdb,
         housekeeper_api=mock_hk,
-        trailblazer_api=mock_tb,
+        trailblazer_client=mock_tb,
     )
     flow_cell_obj._hk_fastq_files = []
 

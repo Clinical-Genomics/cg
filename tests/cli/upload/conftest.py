@@ -174,13 +174,13 @@ def fixture_base_context(
     analysis_store: Store,
     housekeeper_api: HousekeeperAPI,
     upload_scout_api: UploadScoutAPI,
-    trailblazer_api: TrailblazerAPI,
+    trailblazer_client: TrailblazerAPI,
     cg_context: CGConfig,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.status_db_ = analysis_store
     cg_context.housekeeper_api_ = housekeeper_api
-    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.trailblazer_api_ = trailblazer_client
     cg_context.scout_api_ = MockScoutApi()
     cg_context.meta_apis["scout_upload_api"] = upload_scout_api
     cg_context.mip_rd_dna.root = tempdir
@@ -194,7 +194,7 @@ def fixture_fastq_context(
     analysis_store: Store,
     housekeeper_api: HousekeeperAPI,
     upload_scout_api: UploadScoutAPI,
-    trailblazer_api: TrailblazerAPI,
+    trailblazer_client: TrailblazerAPI,
     cg_context: CGConfig,
 ) -> CGConfig:
     """Fastq context to use in cli"""
@@ -208,7 +208,7 @@ def fixture_fastq_context(
         project_base_path=Path(base_context.delivery_path),
     )
     base_context.meta_apis["rsync_api"] = RsyncAPI(cg_context)
-    base_context.trailblazer_api_ = trailblazer_api
+    base_context.trailblazer_api_ = trailblazer_client
     return base_context
 
 

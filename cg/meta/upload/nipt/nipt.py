@@ -42,7 +42,7 @@ class NiptUploadAPI:
         self.stats_api: StatsAPI = config.cg_stats_api
         self.status_db: Store = config.status_db
         self.dry_run: bool = False
-        self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
+        self.trailblazer_client: TrailblazerAPI = config.trailblazer_client
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run"""
@@ -125,7 +125,7 @@ class NiptUploadAPI:
         if not self.dry_run:
             analysis_obj.uploaded_at = dt.datetime.now()
             self.status_db.session.commit()
-            self.trailblazer_api.set_analysis_uploaded(
+            self.trailblazer_client.set_analysis_uploaded(
                 case_id=case_id, uploaded_at=analysis_obj.uploaded_at
             )
 

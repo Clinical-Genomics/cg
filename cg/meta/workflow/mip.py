@@ -291,7 +291,7 @@ class MipAnalysisAPI(AnalysisAPI):
             if case_obj.action == "analyze" or not case_obj.latest_analyzed:
                 cases_to_analyze.append(case_obj)
             elif (
-                self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
+                self.trailblazer_client.get_latest_analysis_status(case_id=case_obj.internal_id)
                 == "failed"
             ):
                 cases_to_analyze.append(case_obj)

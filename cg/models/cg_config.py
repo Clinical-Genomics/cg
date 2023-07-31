@@ -319,7 +319,7 @@ class CGConfig(BaseModel):
             "mutacc_auto_api_": "mutacc_auto_api",
             "scout_api_": "scout_api",
             "status_db_": "status_db",
-            "trailblazer_api_": "trailblazer_api",
+            "trailblazer_api_": "trailblazer_client",
         }
 
     @property
@@ -452,7 +452,7 @@ class CGConfig(BaseModel):
         return status_db
 
     @property
-    def trailblazer_api(self) -> TrailblazerAPI:
+    def trailblazer_client(self) -> TrailblazerAPI:
         api = self.__dict__.get("trailblazer_api_")
         if api is None:
             LOG.debug("Instantiating trailblazer api")

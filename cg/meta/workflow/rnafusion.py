@@ -436,14 +436,14 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             MetricsDeliverablesCondition(**qc_metrics_raw)
         except MetricsQCError as error:
             LOG.error(f"QC metrics failed for {case_id}")
-            self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
-            self.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
+            self.trailblazer_client.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
+            self.trailblazer_client.add_comment(case_id=case_id, comment=str(error))
             raise MetricsQCError from error
         except CgError as error:
             LOG.error(f"Could not create metrics deliverables file: {error}")
-            self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.ERROR)
+            self.trailblazer_client.set_analysis_status(case_id=case_id, status=AnalysisStatus.ERROR)
             raise CgError from error
-        self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
+        self.trailblazer_client.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
 
     def parse_analysis(self, qc_metrics_raw: List[MetricsBase], **kwargs) -> RnafusionAnalysis:
         """Parse Rnafusion output analysis files and return analysis model."""

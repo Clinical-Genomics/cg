@@ -277,7 +277,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+        analysis_api.trailblazer_client.is_latest_analysis_completed(case_id=case_id)
         if not dry_run:
             analysis_api.report_deliver(case_id=case_id)
         else:
@@ -302,7 +302,7 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+        analysis_api.trailblazer_client.is_latest_analysis_completed(case_id=case_id)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
         analysis_api.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run)
         analysis_api.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
@@ -329,10 +329,10 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     pass QC metrics checks."""
     analysis_api: RnafusionAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
-    is_latest_analysis_qc: bool = analysis_api.trailblazer_api.is_latest_analysis_qc(
+    is_latest_analysis_qc: bool = analysis_api.trailblazer_client.is_latest_analysis_qc(
         case_id=case_id
     )
-    if not is_latest_analysis_qc and not analysis_api.trailblazer_api.is_latest_analysis_completed(
+    if not is_latest_analysis_qc and not analysis_api.trailblazer_client.is_latest_analysis_completed(
         case_id=case_id
     ):
         LOG.error(

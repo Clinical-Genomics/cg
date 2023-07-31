@@ -1975,7 +1975,7 @@ def sample_store(base_store: Store) -> Store:
     return base_store
 
 
-@pytest.fixture(name="trailblazer_api", scope="session")
+@pytest.fixture(name="trailblazer_client", scope="session")
 def fixture_trailblazer_api() -> MockTB:
     """Return a mock Trailblazer API."""
     return MockTB()
@@ -2598,7 +2598,7 @@ def fixture_rnafusion_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     rnafusion_housekeeper: HousekeeperAPI,
-    trailblazer_api: MockTB,
+    trailblazer_client: MockTB,
     hermes_api: HermesApi,
     cg_dir: Path,
     rnafusion_case_id: str,
@@ -2607,7 +2607,7 @@ def fixture_rnafusion_context(
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = rnafusion_housekeeper
-    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.trailblazer_api_ = trailblazer_client
     cg_context.meta_apis["analysis_api"] = RnafusionAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 

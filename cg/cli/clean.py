@@ -267,7 +267,7 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
     status_db: Store = context.status_db
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    trailblazer_api: TrailblazerAPI = context.trailblazer_api
+    trailblazer_client: TrailblazerAPI = context.trailblazer_client
     sample_sheets_dir: str = context.clean.flow_cells.sample_sheets_dir_name
     checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
     search: str = f"%{demux_api.out_dir}%"
@@ -282,7 +282,7 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
             flow_cell_path=flow_cell_dir,
             status_db=status_db,
             housekeeper_api=housekeeper_api,
-            trailblazer_api=trailblazer_api,
+            trailblazer_client=trailblazer_client,
             sample_sheets_dir=sample_sheets_dir,
             fastq_files=fastq_files_in_housekeeper,
             spring_files=spring_files_in_housekeeper,
@@ -451,7 +451,7 @@ def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run:
     status_db: Store = context.status_db
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    trailblazer_api: TrailblazerAPI = context.trailblazer_api
+    trailblazer_client: TrailblazerAPI = context.trailblazer_client
     for flow_cell_dir in demux_api.get_all_demultiplexed_flow_cell_dirs():
         try:
             flow_cell: DemultiplexFlowCell = DemultiplexFlowCell(flow_cell_path=flow_cell_dir)
@@ -480,7 +480,7 @@ def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run:
             flow_cell_path=flow_cell_dir,
             status_db=status_db,
             housekeeper_api=housekeeper_api,
-            trailblazer_api=trailblazer_api,
+            trailblazer_client=trailblazer_client,
             sample_sheets_dir=context.clean.flow_cells.sample_sheets_dir_name,
         )
         if (

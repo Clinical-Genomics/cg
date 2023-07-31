@@ -65,7 +65,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
     )
     analysis_name: str = f"{case_id}_rsync" if is_complete_delivery else f"{case_id}_partial"
     if not dry_run:
-        context.obj.trailblazer_api.add_pending_analysis(
+        context.obj.trailblazer_client.add_pending_analysis(
             case_id=analysis_name,
             analysis_type=AnalysisTypes.OTHER,
             config_path=rsync_api.trailblazer_config_path.as_posix(),
@@ -85,7 +85,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
     clinical-delivery."""
 
     status_db: Store = context.obj.status_db
-    trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
+    trailblazer_client: TrailblazerAPI = context.obj.trailblazer_client
     for analysis_obj in status_db.get_analyses_to_upload(pipeline=Pipeline.FASTQ):
         if analysis_obj.family.analyses[0].uploaded_at:
             LOG.warning(
@@ -94,7 +94,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
             )
             continue
         if analysis_obj.upload_started_at:
-            if trailblazer_api.is_latest_analysis_completed(
+            if trailblazer_client.is_latest_analysis_completed(
                 case_id=analysis_obj.family.internal_id
             ):
                 LOG.info(

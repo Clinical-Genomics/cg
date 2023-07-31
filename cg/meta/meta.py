@@ -48,4 +48,4 @@ class MetaAPI:
         )
         self.status_db: Store = config.status_db
         self.scout_api: ScoutAPI = config.scout_api
-        self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
+        self.trailblazer_client: TrailblazerAPI = config.trailblazer_client

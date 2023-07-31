@@ -46,7 +46,7 @@ class UploadAPI(MetaAPI):
         analysis.uploaded_at: datetime = datetime.now()
 
         self.status_db.session.commit()
-        self.trailblazer_api.set_analysis_uploaded(
+        self.trailblazer_client.set_analysis_uploaded(
             case_id=analysis.family.internal_id, uploaded_at=analysis.uploaded_at
         )
 

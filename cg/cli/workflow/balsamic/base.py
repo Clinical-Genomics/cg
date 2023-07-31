@@ -135,7 +135,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
-        analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+        analysis_api.trailblazer_client.is_latest_analysis_completed(case_id=case_id)
         analysis_api.report_deliver(case_id=case_id, dry_run=dry_run)
     except CgError as error:
         LOG.error(f"Could not create report file: {error}")

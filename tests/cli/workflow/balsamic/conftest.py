@@ -293,13 +293,13 @@ def fixture_balsamic_context(
     helpers: StoreHelpers,
     balsamic_lims: MockLimsAPI,
     balsamic_housekeeper: HousekeeperAPI,
-    trailblazer_api: MockTB,
+    trailblazer_client: MockTB,
     cg_dir,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = balsamic_housekeeper
     cg_context.lims_api_ = balsamic_lims
-    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.trailblazer_api_ = trailblazer_client
     cg_context.meta_apis["analysis_api"] = BalsamicAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 

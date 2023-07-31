@@ -68,7 +68,7 @@ class AnalysisAPI(MetaAPI):
             raise CgError(f"No config file found for case {case_id}")
 
     def check_analysis_ongoing(self, case_id: str) -> None:
-        if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
+        if self.trailblazer_client.is_latest_analysis_ongoing(case_id=case_id):
             LOG.warning(f"{case_id} : analysis is still ongoing - skipping")
             raise CgError(f"Analysis still ongoing in Trailblazer for case {case_id}")
 
@@ -189,8 +189,8 @@ class AnalysisAPI(MetaAPI):
 
     def add_pending_trailblazer_analysis(self, case_id: str) -> None:
         self.check_analysis_ongoing(case_id=case_id)
-        self.trailblazer_api.mark_analyses_deleted(case_id=case_id)
-        self.trailblazer_api.add_pending_analysis(
+        self.trailblazer_client.mark_analyses_deleted(case_id=case_id)
+        self.trailblazer_client.add_pending_analysis(
             case_id=case_id,
             email=environ_email(),
             analysis_type=self.get_application_type(
@@ -263,7 +263,7 @@ class AnalysisAPI(MetaAPI):
         return [
             case
             for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
-            if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
+            if self.trailblazer_client.is_latest_analysis_completed(case_id=case.internal_id)
         ]
 
     def get_cases_to_qc(self) -> List[Family]:
@@ -272,7 +272,7 @@ class AnalysisAPI(MetaAPI):
         return [
             case
             for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
-            if self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
+            if self.trailblazer_client.is_latest_analysis_qc(case_id=case.internal_id)
         ]
 
     def get_sample_fastq_destination_dir(self, case: Family, sample: Sample):
