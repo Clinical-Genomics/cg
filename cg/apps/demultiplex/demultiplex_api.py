@@ -192,7 +192,10 @@ class DemultiplexingAPI:
         )
 
     def add_to_trailblazer(
-        self, trailblazer_client: TrailblazerAPI, slurm_job_id: int, flow_cell: FlowCellDirectoryData
+        self,
+        trailblazer_client: TrailblazerAPI,
+        slurm_job_id: int,
+        flow_cell: FlowCellDirectoryData,
     ):
         """Add demultiplexing entry to trailblazer."""
         if self.dry_run:
