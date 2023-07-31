@@ -62,9 +62,9 @@ class NiptUploadAPI:
                 flow_cell_name=flow_cell.name
             ),
         )
-        if not flow_cell_summary.q30_above_threshold(
+        if not flow_cell_summary.passes_q30_threshold(
             threshold=q30_threshold
-        ) or not flow_cell_summary.reads_above_threshold(
+        ) or not flow_cell_summary.passes_read_threshold(
             threshold=self.status_db.get_ready_made_library_expected_reads(case_id=case_id)
         ):
             LOG.warning(

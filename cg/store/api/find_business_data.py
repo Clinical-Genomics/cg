@@ -1,7 +1,7 @@
 """Handler to find business data objects."""
 import datetime as dt
 import logging
-from typing import Callable, List, Optional, Iterator, Union, Dict
+from typing import Callable, List, Optional, Iterator, Union, Dict, Set
 
 
 from sqlalchemy.orm import Query, Session
@@ -333,6 +333,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_average_q30_for_sample_on_flow_cell_from_sample_lane_metrics(
         self, sample_internal_id: str, flow_cell_name: str
     ) -> float:
+        """Calculates the average q30 across lanes for a sample on a flow cell."""
         sample_lanes: List[SampleLaneSequencingMetrics] = apply_metrics_filter(
             metrics=self._get_query(table=SampleLaneSequencingMetrics),
             filter_functions=[
@@ -350,13 +351,13 @@ class FindBusinessDataHandler(BaseHandler):
     def get_average_fraction_passing_q30_from_sample_lane_metrics(
         self, flow_cell_name: str
     ) -> float:
-        """Get average q30 on a given flow cell."""
+        """Calculates the average q30 for each sample on a flow cell and returns the average between the samples."""
         sequencing_metrics: List[
             SampleLaneSequencingMetrics
         ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
-        unique_sample_internal_ids: List[str] = list(
-            set([sequencing_metric.sample_internal_id for sequencing_metric in sequencing_metrics])
-        )
+        unique_sample_internal_ids: Set[str] = {
+            sequencing_metric.sample_internal_id for sequencing_metric in sequencing_metrics
+        }
 
         sum_average_q30_across_samples: float = 0
         for sample_internal_id in unique_sample_internal_ids:
