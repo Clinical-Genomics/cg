@@ -21,7 +21,7 @@ from cg.store.models import Flowcell
         ("incorrect_flow_cell_path_extension", False),
     ],
 )
-@mock.patch("cg.apps.tb.api.TrailblazerClient")
+@mock.patch("cg.apps.tb.client.TrailblazerClient")
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.store.Store")
 def test_flow_cell_name(
@@ -55,7 +55,7 @@ def test_flow_cell_name(
         ("non-existent_flow_cell_path", None, False),
     ],
 )
-@mock.patch("cg.apps.tb.api.TrailblazerClient")
+@mock.patch("cg.apps.tb.client.TrailblazerClient")
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.store.Store")
 def test_flow_cell_exists_in_statusdb_(
@@ -84,7 +84,7 @@ def test_flow_cell_exists_in_statusdb_(
     assert flow_cell_obj.exists_in_statusdb == result
 
 
-@mock.patch("cg.apps.tb.api.TrailblazerClient")
+@mock.patch("cg.apps.tb.client.TrailblazerClient")
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.store.Store")
 def test_check_fastq_files_exist_in_hk(
@@ -108,7 +108,7 @@ def test_check_fastq_files_exist_in_hk(
     assert flow_cell_obj.fastq_files_exist_in_housekeeper
 
 
-@mock.patch("cg.apps.tb.api.TrailblazerClient")
+@mock.patch("cg.apps.tb.client.TrailblazerClient")
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.store.Store")
 def test_check_no_fastq_files_exist_in_hk(
