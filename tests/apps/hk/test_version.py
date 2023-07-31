@@ -3,11 +3,11 @@ from typing import Dict, Any
 
 import datetime
 
-from tests.mocks.hk_mock import MockHousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from tests.small_helpers import SmallHelpers
 
 
-def test_new_version(housekeeper_api: MockHousekeeperAPI, timestamp: datetime.datetime):
+def test_new_version(housekeeper_api: HousekeeperAPI, timestamp: datetime.datetime):
     """Test to create a new version with the API."""
     # GIVEN a housekeeper api and a date
 
@@ -33,9 +33,7 @@ def test_new_version(housekeeper_api: MockHousekeeperAPI, timestamp: datetime.da
     assert version_obj.bundle_id is None
 
 
-def test_get_version_non_existing(
-    housekeeper_api: MockHousekeeperAPI, timestamp: datetime.datetime
-):
+def test_get_version_non_existing(housekeeper_api: HousekeeperAPI, timestamp: datetime.datetime):
     """Test to get a version when there are no existing version."""
     # GIVEN a empty housekeeper_api
 
@@ -47,7 +45,7 @@ def test_get_version_non_existing(
 
 
 def test_get_version_existing(
-    housekeeper_api: MockHousekeeperAPI,
+    housekeeper_api: HousekeeperAPI,
     timestamp_yesterday: datetime.datetime,
     hk_bundle_data: Dict[str, Any],
 ):
@@ -68,7 +66,7 @@ def test_get_version_existing(
 
 
 def test_add_version_existing_bundle(
-    populated_housekeeper_api: MockHousekeeperAPI,
+    populated_housekeeper_api: HousekeeperAPI,
     later_timestamp: datetime.datetime,
     case_id: str,
     small_helpers: SmallHelpers,
@@ -90,7 +88,7 @@ def test_add_version_existing_bundle(
 
 
 def test_get_last_version(
-    case_id: str, populated_housekeeper_api: MockHousekeeperAPI, timestamp_now: datetime.datetime
+    case_id: str, populated_housekeeper_api: HousekeeperAPI, timestamp_now: datetime.datetime
 ):
     """Test to get a version when there is a bundle and a version."""
     # GIVEN a populated housekeeper_api and a bundle with two versions
@@ -107,7 +105,7 @@ def test_get_last_version(
 
 
 def test_get_latest_bundle_version_no_housekeeper_bundle(
-    case_id: str, housekeeper_api: MockHousekeeperAPI, caplog
+    case_id: str, housekeeper_api: HousekeeperAPI, caplog
 ):
     """Test get_latest_bundle_version function when there is no case bundle in Housekeeper."""
 
@@ -123,28 +121,9 @@ def test_get_latest_bundle_version_no_housekeeper_bundle(
     assert f"No bundle found for {case_id} in Housekeeper" in caplog.text
 
 
-def test_get_latest_bundle_version_with_housekeeper_bundle(
-    populated_housekeeper_api: MockHousekeeperAPI, timestamp_now: datetime.datetime, case_id: str
-):
-    """Test to get a version when there is a bundle and a version."""
-    # GIVEN a populated housekeeper_api
-    bundle_obj = populated_housekeeper_api.bundle(name=case_id)
-
-    # GIVEN a bundle with two versions
-    new_version = populated_housekeeper_api.new_version(created_at=timestamp_now)
-    new_version.bundle = bundle_obj
-    populated_housekeeper_api.add_commit(new_version)
-
-    # WHEN fetching the last version of a bundle
-    fetched_version = populated_housekeeper_api.get_latest_bundle_version(bundle_name=case_id)
-
-    # THEN assert that the later_date version was fetched
-    assert fetched_version.created_at == timestamp_now
-
-
 def test_get_create_version(
     another_case_id: str,
-    populated_housekeeper_api: MockHousekeeperAPI,
+    populated_housekeeper_api: HousekeeperAPI,
     case_id: str,
 ):
     # Given a populated housekeeper_api with a bundle

@@ -1,21 +1,32 @@
 from pathlib import Path
-from typing import List, Dict
+
+from cg.constants.archiving import ArchiveLocationsInUse
+
+from typing import List
 from unittest import mock
 
-from housekeeper.store.models import File
-
-import cg.meta.archive.ddn_dataflow
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.constants import APIMethods
 from cg.io.controller import APIRequest
-from cg.meta.archive.archive import ArchiveAPI, PathAndSample, ARCHIVES_IN_USE
-from cg.meta.archive.ddn_dataflow import DDNDataFlowApi, TransferPayload
+from cg.meta.archive.archive import SpringArchiveAPI, PathAndSample
+
 from cg.store.models import Sample
 
 
+def test_get_files_by_archive_location(
+    spring_archive_api: SpringArchiveAPI, populated_housekeeper_api: HousekeeperAPI
+):
+    """Tests the fetching of sample/customer info from statusdb based on bundle_names
+    and returning the samples with the given Archive location."""
+    # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
+    # with the DDN customer having two samples, and the non-DDN having one sample.
+
+    # Given non-archived spring files
+
+
 def test_archive_samples(
-    archive_api: ArchiveAPI, populated_housekeeper_api: HousekeeperAPI, sample_id: str
+    archive_api: SpringArchiveAPI, populated_housekeeper_api: HousekeeperAPI, sample_id: str
 ):
     # GIVEN a list of sample ids whit housekeeper bundles and SPRING files
     sample: Sample = archive_api.status_db.get_sample_by_internal_id(sample_id)
@@ -33,7 +44,7 @@ def test_archive_samples(
 
 
 def test_sort_spring_files_on_archive_location(
-    archive_api: ArchiveAPI, populated_housekeeper_api: HousekeeperAPI
+    spring_archive_api: SpringArchiveAPI, populated_housekeeper_api: HousekeeperAPI
 ):
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
     # with the DDN customer having two samples, and the non-DDN having one sample.
@@ -43,25 +54,51 @@ def test_sort_spring_files_on_archive_location(
         PathAndSample(path=path, sample_internal_id=sample)
         for sample, path in populated_housekeeper_api.get_non_archived_spring_path_and_bundle_name()
     ]
-    # WHEN sorting the returned files on the data archive locations of the customers
-    sorted_spring_files: Dict[
-        str, List[PathAndSample]
-    ] = archive_api.sort_files_on_archive_location(non_archived_spring_files)
+    # WHEN extracting the files based on data archive
+    sorted_spring_files: List[PathAndSample] = spring_archive_api.get_files_by_archive_location(
+        non_archived_spring_files, archive_location=ArchiveLocationsInUse.KAROLINSKA_BUCKET
+    )
 
     # THEN there should be spring files
     assert sorted_spring_files
-    for archive_location, files_and_samples in sorted_spring_files.items():
-        assert files_and_samples
-        for file_and_sample in files_and_samples:
-            sample: Sample = archive_api.status_db.get_sample_by_internal_id(
-                file_and_sample.sample_internal_id
-            )
-            # THEN then each file should be correctly sorted on it's archive location
-            assert sample.customer.data_archive_location == archive_location
+    for file_and_sample in sorted_spring_files:
+        sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(
+            file_and_sample.sample_internal_id
+        )
+        # THEN each file should be correctly sorted on its archive location
+        assert sample.customer.data_archive_location == ArchiveLocationsInUse.KAROLINSKA_BUCKET
+
+
+def test_get_sample_exists(sample_id: str, spring_archive_api: SpringArchiveAPI, spring_file: Path):
+    """Tests fetching a sample when the sample exists."""
+    # GIVEN a sample that exists in the database
+    file_info: PathAndSample = PathAndSample(spring_file, sample_id)
+
+    # WHEN getting the sample
+    sample: Sample = spring_archive_api.get_sample(file_info)
+
+    # THEN the correct sample should be returned
+    assert sample.internal_id == sample_id
+
+
+def test_get_sample_not_exists(caplog, spring_archive_api: SpringArchiveAPI, spring_file: Path):
+    """Tests fetching a sample when the sample does not exist."""
+    # GIVEN a sample that does not exist in the database
+    sample_id: str = "non-existent-sample"
+    file_info: PathAndSample = PathAndSample(spring_file, sample_id)
+
+    # WHEN getting the sample
+    sample: Sample = spring_archive_api.get_sample(file_info)
+
+    # THEN the no sample should be returned
+    # THEN both sample_id and file path should be logged
+    assert not sample
+    assert sample_id in caplog.text
+    assert spring_file.as_posix() in caplog.text
 
 
 def test_archive_all_non_archived_spring_files(
-    archive_api: ArchiveAPI,
+    archive_api: SpringArchiveAPI,
     caplog,
     transfer_data_archive,
     ok_ddn_response,

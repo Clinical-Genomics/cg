@@ -3,10 +3,10 @@
 from datetime import datetime
 
 from cg.apps.coverage.api import ChanjoAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.store import Store
 from cg.store.models import Family
-from tests.mocks.hk_mock import MockHousekeeperAPI
 
 
 class MockAnalysis:
@@ -46,7 +46,7 @@ def test_data(
 
 def test_upload(
     chanjo_config: dict,
-    populated_housekeeper_api: MockHousekeeperAPI,
+    populated_housekeeper_api: HousekeeperAPI,
     analysis_store: Store,
     mocker,
     case_id: str,
