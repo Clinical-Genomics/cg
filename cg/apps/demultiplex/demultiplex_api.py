@@ -192,7 +192,7 @@ class DemultiplexingAPI:
         )
 
     def add_to_trailblazer(
-        self, tb_api: TrailblazerAPI, slurm_job_id: int, flow_cell: FlowCellDirectoryData
+        self, trailblazer_client: TrailblazerAPI, slurm_job_id: int, flow_cell: FlowCellDirectoryData
     ):
         """Add demultiplexing entry to trailblazer."""
         if self.dry_run:
@@ -201,7 +201,7 @@ class DemultiplexingAPI:
             content=self.get_trailblazer_config(slurm_job_id=slurm_job_id),
             file_path=flow_cell.trailblazer_config_path,
         )
-        tb_api.add_pending_analysis(
+        trailblazer_client.add_pending_analysis(
             case_id=flow_cell.id,
             analysis_type=AnalysisTypes.OTHER,
             config_path=flow_cell.trailblazer_config_path.as_posix(),

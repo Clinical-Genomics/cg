@@ -120,12 +120,12 @@ def rsync(context: CGConfig, ticket: str, dry_run: bool):
     """The folder generated using the "cg deliver analysis" command will be
     rsynced with this function to the customers inbox on the delivery server
     """
-    tb_api: TrailblazerAPI = context.trailblazer_client
+    trailblazer_client: TrailblazerAPI = context.trailblazer_client
     rsync_api: RsyncAPI = RsyncAPI(config=context)
     slurm_id = rsync_api.run_rsync_on_slurm(ticket=ticket, dry_run=dry_run)
     LOG.info("Rsync to the delivery server running as job %s", slurm_id)
     rsync_api.add_to_trailblazer_api(
-        tb_api=tb_api, slurm_job_id=slurm_id, ticket=ticket, dry_run=dry_run
+        trailblazer_client=trailblazer_client, slurm_job_id=slurm_id, ticket=ticket, dry_run=dry_run
     )
 
 

@@ -119,7 +119,7 @@ class RsyncAPI(MetaAPI):
         return source_and_destination_paths
 
     def add_to_trailblazer_api(
-        self, tb_api: TrailblazerAPI, slurm_job_id: int, ticket: str, dry_run: bool
+        self, trailblazer_client: TrailblazerAPI, slurm_job_id: int, ticket: str, dry_run: bool
     ) -> None:
         """Add rsync process to trailblazer."""
         if dry_run:
@@ -128,7 +128,7 @@ class RsyncAPI(MetaAPI):
             content=self.get_trailblazer_config(slurm_job_id),
             config_path=self.trailblazer_config_path,
         )
-        tb_api.add_pending_analysis(
+        trailblazer_client.add_pending_analysis(
             case_id=ticket,
             analysis_type=AnalysisTypes.OTHER,
             config_path=self.trailblazer_config_path.as_posix(),
