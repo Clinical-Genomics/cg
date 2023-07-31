@@ -6,7 +6,7 @@ from click.testing import CliRunner
 
 from cg.cli.upload.nipt.base import nipt_upload_all, nipt_upload_case
 from cg.meta.upload.nipt import NiptUploadAPI
-from cg.apps.tb.api import TrailblazerClient
+from cg.apps.tb.client import TrailblazerClient
 from cg.models.cg_config import CGConfig
 from cgmodels.cg.constants import Pipeline
 from cg.store.models import Analysis
