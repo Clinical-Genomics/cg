@@ -11,7 +11,7 @@ from cg.constants.archiving import ArchiveLocationsInUse
 from cg.constants.constants import FileFormat
 from cg.constants.subject import Gender
 from cg.io.controller import WriteStream
-from cg.meta.archive.archive import ArchiveAPI
+from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.archive.ddn_dataflow import ROOT_TO_TRIM, DDNDataFlowApi, TransferData, TransferPayload
 from cg.models.cg_config import DDNDataFlowConfig
 from cg.store import Store
@@ -167,19 +167,19 @@ def fixture_archive_store(
     return base_store
 
 
-@pytest.fixture(name="archive_api")
-def fixture_archive_api(
+@pytest.fixture(name="spring_archive_api")
+def fixture_spring_archive_api(
     populated_housekeeper_api: HousekeeperAPI,
     archive_store: Store,
     father_sample_id: str,
     helpers,
-) -> ArchiveAPI:
+) -> SpringArchiveAPI:
     """Returns an ArchiveAPI with a populated housekeeper store and a DDNDataFlowApi.
     Also adds /home/ as a prefix for each SPRING file for the DDNDataFlowApi to accept them."""
     for spring_file in populated_housekeeper_api.files(tags=[SequencingFileTag.SPRING]):
         spring_file.path = f"/home/{spring_file.path}"
     populated_housekeeper_api.commit()
-    return ArchiveAPI(
+    return SpringArchiveAPI(
         housekeeper_api=populated_housekeeper_api,
         status_db=archive_store,
     )

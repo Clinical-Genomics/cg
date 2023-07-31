@@ -12,7 +12,7 @@ from sqlalchemy.orm import Query
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
-from housekeeper.store.models import Bundle, File, Version
+from housekeeper.store.models import Bundle, File, Version, Archive
 
 LOG = logging.getLogger(__name__)
 
@@ -405,10 +405,10 @@ class HousekeeperAPI:
     def add_archives(self, files: List[Path], archive_task_id: int) -> None:
         """Creates an archive object for the given files, and adds the archive task id to them."""
         for file in files:
-            archived_file: File = self._store.get_files(file_path=file.as_posix()).first()
+            archived_file: Optional[File] = self._store.get_files(file_path=file.as_posix()).first()
             if not archived_file:
                 raise HousekeeperFileMissingError(f"No file in housekeeper with the path {file}")
-            archive = self._store.create_archive(
+            archive: Archive = self._store.create_archive(
                 archived_file.id, archiving_task_id=archive_task_id
             )
             self._store.session.add(archive)
