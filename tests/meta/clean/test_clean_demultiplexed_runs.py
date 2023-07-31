@@ -88,7 +88,10 @@ def test_flow_cell_exists_in_statusdb_(
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.store.Store")
 def test_check_fastq_files_exist_in_hk(
-    mock_statusdb: Store, mock_hk: HousekeeperAPI, mock_tb: TrailblazerClient, correct_flow_cell_path
+    mock_statusdb: Store,
+    mock_hk: HousekeeperAPI,
+    mock_tb: TrailblazerClient,
+    correct_flow_cell_path,
 ):
     # GIVEN a flow cell that has fastq files in housekeeper
     flow_cell_obj = DemultiplexedRunsFlowCell(
@@ -109,7 +112,10 @@ def test_check_fastq_files_exist_in_hk(
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.store.Store")
 def test_check_no_fastq_files_exist_in_hk(
-    mock_statusdb: Store, mock_hk: HousekeeperAPI, mock_tb: TrailblazerClient, correct_flow_cell_path
+    mock_statusdb: Store,
+    mock_hk: HousekeeperAPI,
+    mock_tb: TrailblazerClient,
+    correct_flow_cell_path,
 ):
     # GIVEN a flow cell that has no fastq files in housekeeper
     flow_cell_obj = DemultiplexedRunsFlowCell(
