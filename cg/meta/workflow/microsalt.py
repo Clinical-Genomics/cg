@@ -252,13 +252,17 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                     run_dir_path=case_run_dir,
                     lims_project=self.get_project(case.samples[0].internal_id),
                 ):
-                    self.trailblazer_client.add_comment(case_id=case.internal_id, comment="QC passed")
+                    self.trailblazer_client.add_comment(
+                        case_id=case.internal_id, comment="QC passed"
+                    )
                     cases_to_store.append(case)
                 else:
                     self.trailblazer_client.set_analysis_status(
                         case_id=case.internal_id, status=AnalysisStatus.FAILED
                     )
-                    self.trailblazer_client.add_comment(case_id=case.internal_id, comment="QC failed")
+                    self.trailblazer_client.add_comment(
+                        case_id=case.internal_id, comment="QC failed"
+                    )
             else:
                 cases_to_store.append(case)
 

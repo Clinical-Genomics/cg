@@ -332,8 +332,9 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     is_latest_analysis_qc: bool = analysis_api.trailblazer_client.is_latest_analysis_qc(
         case_id=case_id
     )
-    if not is_latest_analysis_qc and not analysis_api.trailblazer_client.is_latest_analysis_completed(
-        case_id=case_id
+    if (
+        not is_latest_analysis_qc
+        and not analysis_api.trailblazer_client.is_latest_analysis_completed(case_id=case_id)
     ):
         LOG.error(
             "Case not stored. Trailblazer status must be either QC or COMPLETE to be able to store"
