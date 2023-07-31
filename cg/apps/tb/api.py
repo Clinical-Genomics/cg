@@ -18,7 +18,7 @@ from cg.io.controller import APIRequest, ReadStream
 LOG = logging.getLogger(__name__)
 
 
-class TrailblazerAPI:
+class TrailblazerClient:
     """Interface to Trailblazer for `cg`."""
 
     __STARTED_STATUSES = [

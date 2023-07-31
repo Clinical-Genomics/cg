@@ -1,7 +1,7 @@
 """ Test the CLI for run mip-rna """
 import logging
 
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 from cg.cli.workflow.mip_rna.base import run
 
 
@@ -12,8 +12,8 @@ def test_cg_dry_run(cli_runner, caplog, case_id, email_adress, mip_rna_context, 
     # GIVEN a cli function
     # WHEN we run a case in dry run mode
 
-    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
-    TrailblazerAPI.is_latest_analysis_ongoing.return_value = False
+    mocker.patch.object(TrailblazerClient, "is_latest_analysis_ongoing")
+    TrailblazerClient.is_latest_analysis_ongoing.return_value = False
 
     result = cli_runner.invoke(
         run, ["--dry-run", "--email", email_adress, case_id], obj=mip_rna_context

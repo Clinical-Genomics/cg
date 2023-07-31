@@ -17,7 +17,7 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Analysis, Flowcell, Family
 from housekeeper.store.models import File
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 
 LOG = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class NiptUploadAPI:
         self.stats_api: StatsAPI = config.cg_stats_api
         self.status_db: Store = config.status_db
         self.dry_run: bool = False
-        self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
+        self.trailblazer_api: TrailblazerClient = config.trailblazer_api
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run"""

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import INBOX_NAME
@@ -119,7 +119,7 @@ class RsyncAPI(MetaAPI):
         return source_and_destination_paths
 
     def add_to_trailblazer_api(
-        self, tb_api: TrailblazerAPI, slurm_job_id: int, ticket: str, dry_run: bool
+        self, tb_api: TrailblazerClient, slurm_job_id: int, ticket: str, dry_run: bool
     ) -> None:
         """Add rsync process to trailblazer."""
         if dry_run:

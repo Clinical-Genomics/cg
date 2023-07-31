@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 
 
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 from cg.cli.workflow.commands import clean_run_dir
 from cg.constants import Pipeline
 from click.testing import CliRunner
@@ -44,8 +44,8 @@ def test_dry_run(
     for path in case_path_list:
         Path(path).mkdir(exist_ok=True, parents=True)
 
-    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
-    TrailblazerAPI.is_latest_analysis_ongoing.return_value = False
+    mocker.patch.object(TrailblazerClient, "is_latest_analysis_ongoing")
+    TrailblazerClient.is_latest_analysis_ongoing.return_value = False
 
     # WHEN dry running with dry run specified
     result = cli_runner.invoke(
@@ -92,8 +92,8 @@ def test_clean_run(
     for path in case_path_list:
         Path(path).mkdir(exist_ok=True, parents=True)
 
-    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
-    TrailblazerAPI.is_latest_analysis_ongoing.return_value = False
+    mocker.patch.object(TrailblazerClient, "is_latest_analysis_ongoing")
+    TrailblazerClient.is_latest_analysis_ongoing.return_value = False
 
     # WHEN dry running with dry run specified
     result = cli_runner.invoke(

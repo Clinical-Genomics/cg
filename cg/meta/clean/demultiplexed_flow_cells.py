@@ -10,7 +10,7 @@ from sqlalchemy.orm import Query
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 from cg.constants import FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers, sequencer_types
@@ -39,7 +39,7 @@ class DemultiplexedRunsFlowCell:
         flow_cell_path: Path,
         status_db: Store,
         housekeeper_api: HousekeeperAPI,
-        trailblazer_api: Optional[TrailblazerAPI] = None,
+        trailblazer_api: Optional[TrailblazerClient] = None,
         sample_sheets_dir: Optional[str] = None,
         fastq_files: Optional[Query] = None,
         spring_files: Optional[Query] = None,
@@ -48,7 +48,7 @@ class DemultiplexedRunsFlowCell:
         self.path: Path = flow_cell_path
         self.status_db: Store = status_db
         self.hk: HousekeeperAPI = housekeeper_api
-        self.tb: TrailblazerAPI = trailblazer_api
+        self.tb: TrailblazerClient = trailblazer_api
         self.all_fastq_files: Optional[Query] = fastq_files
         self.all_spring_files: Optional[Query] = spring_files
         self.run_name: str = self.path.name

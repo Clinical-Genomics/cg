@@ -4,7 +4,7 @@ from pathlib import Path
 import click
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
@@ -32,7 +32,7 @@ def demultiplex_all(
         flow_cells_directory: Path = Path(context.demultiplex.run_dir)
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
-    tb_api: TrailblazerAPI = context.trailblazer_api
+    tb_api: TrailblazerClient = context.trailblazer_api
     LOG.info(f"Search for flow cells ready to demultiplex in {flow_cells_directory}")
     for sub_dir in flow_cells_directory.iterdir():
         if not sub_dir.is_dir():
@@ -100,7 +100,7 @@ def demultiplex_flow_cell(
         raise click.Abort
 
     slurm_job_id: int = demultiplex_api.start_demultiplexing(flow_cell=flow_cell)
-    tb_api: TrailblazerAPI = context.trailblazer_api
+    tb_api: TrailblazerClient = context.trailblazer_api
     demultiplex_api.add_to_trailblazer(
         tb_api=tb_api, slurm_job_id=slurm_job_id, flow_cell=flow_cell
     )

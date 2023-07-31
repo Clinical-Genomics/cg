@@ -68,7 +68,7 @@ def test_demultiplex_flow_cell(
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
-    mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
+    mocker.patch("cg.apps.tb.TrailblazerClient.add_pending_analysis")
 
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
@@ -107,7 +107,7 @@ def test_demultiplex_bcl2fastq_flowcell(
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
-    mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
+    mocker.patch("cg.apps.tb.TrailblazerClient.add_pending_analysis")
 
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
@@ -149,7 +149,7 @@ def test_demultiplex_dragen_flowcell(
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
-    mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
+    mocker.patch("cg.apps.tb.TrailblazerClient.add_pending_analysis")
 
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(

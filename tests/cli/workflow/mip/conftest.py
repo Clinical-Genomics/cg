@@ -4,7 +4,7 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 from cg.constants import Pipeline
 from cg.meta.compress import CompressAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -171,8 +171,8 @@ def setup_mocks(
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
     PrepareFastqAPI.is_spring_decompression_needed.return_value = is_spring_decompression_needed
 
-    mocker.patch.object(TrailblazerAPI, "has_latest_analysis_started")
-    TrailblazerAPI.has_latest_analysis_started.return_value = has_latest_analysis_started
+    mocker.patch.object(TrailblazerClient, "has_latest_analysis_started")
+    TrailblazerClient.has_latest_analysis_started.return_value = has_latest_analysis_started
 
     mocker.patch.object(PrepareFastqAPI, "can_at_least_one_sample_be_decompressed")
     PrepareFastqAPI.can_at_least_one_sample_be_decompressed.return_value = (

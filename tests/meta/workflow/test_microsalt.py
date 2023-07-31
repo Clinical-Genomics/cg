@@ -1,7 +1,7 @@
 """Tests for MicroSALT analysis."""
 from typing import List
 
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
 from pathlib import Path
@@ -123,8 +123,8 @@ def test_get_cases_to_store_pass(
     store = qc_microsalt_context.status_db
     microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
     mocker.patch.object(MicrosaltAnalysisAPI, "create_qc_done_file")
-    mocker.patch.object(TrailblazerAPI, "set_analysis_status")
-    mocker.patch.object(TrailblazerAPI, "add_comment")
+    mocker.patch.object(TrailblazerClient, "set_analysis_status")
+    mocker.patch.object(TrailblazerClient, "add_comment")
 
     # GIVEN a store with a QC ready microsalt case that will pass QC
     microsalt_pass_case: Family = store.get_case_by_internal_id(internal_id=microsalt_case_qc_pass)
@@ -165,8 +165,8 @@ def test_get_cases_to_store_fail(
     store = qc_microsalt_context.status_db
     microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
     mocker.patch.object(MicrosaltAnalysisAPI, "create_qc_done_file")
-    mocker.patch.object(TrailblazerAPI, "set_analysis_status")
-    mocker.patch.object(TrailblazerAPI, "add_comment")
+    mocker.patch.object(TrailblazerClient, "set_analysis_status")
+    mocker.patch.object(TrailblazerClient, "add_comment")
 
     # GIVEN a store with a QC ready microsalt case that will fail QC
     microsalt_fail_case: Family = store.get_case_by_internal_id(internal_id=microsalt_case_qc_fail)

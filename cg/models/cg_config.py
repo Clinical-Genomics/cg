@@ -17,7 +17,7 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.store import Store
@@ -284,7 +284,7 @@ class CGConfig(BaseModel):
     scout_api_: ScoutAPI = None
     tar: Optional[CommonAppConfig] = None
     trailblazer: TrailblazerConfig = None
-    trailblazer_api_: TrailblazerAPI = None
+    trailblazer_api_: TrailblazerClient = None
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
@@ -452,10 +452,10 @@ class CGConfig(BaseModel):
         return status_db
 
     @property
-    def trailblazer_api(self) -> TrailblazerAPI:
+    def trailblazer_api(self) -> TrailblazerClient:
         api = self.__dict__.get("trailblazer_api_")
         if api is None:
             LOG.debug("Instantiating trailblazer api")
-            api = TrailblazerAPI(config=self.dict())
+            api = TrailblazerClient(config=self.dict())
             self.trailblazer_api_ = api
         return api

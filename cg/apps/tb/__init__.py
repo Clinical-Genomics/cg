@@ -1,1 +1,1 @@
-from .api import TrailblazerAPI
+from .api import TrailblazerClient

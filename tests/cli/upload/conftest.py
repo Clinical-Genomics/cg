@@ -12,7 +12,7 @@ from cgmodels.cg.constants import Pipeline
 from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.housekeeper_tags import HkMipAnalysisTag, GensAnalysisTag, HK_DELIVERY_REPORT_TAG
@@ -174,7 +174,7 @@ def fixture_base_context(
     analysis_store: Store,
     housekeeper_api: HousekeeperAPI,
     upload_scout_api: UploadScoutAPI,
-    trailblazer_api: TrailblazerAPI,
+    trailblazer_api: TrailblazerClient,
     cg_context: CGConfig,
 ) -> CGConfig:
     """context to use in cli"""
@@ -194,7 +194,7 @@ def fixture_fastq_context(
     analysis_store: Store,
     housekeeper_api: HousekeeperAPI,
     upload_scout_api: UploadScoutAPI,
-    trailblazer_api: TrailblazerAPI,
+    trailblazer_api: TrailblazerClient,
     cg_context: CGConfig,
 ) -> CGConfig:
     """Fastq context to use in cli"""

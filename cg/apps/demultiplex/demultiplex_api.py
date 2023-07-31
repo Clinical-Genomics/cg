@@ -8,7 +8,7 @@ from typing_extensions import Literal
 from cgmodels.trailblazer.constants import AnalysisTypes
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
 from cg.constants.priority import SlurmQos
@@ -192,7 +192,7 @@ class DemultiplexingAPI:
         )
 
     def add_to_trailblazer(
-        self, tb_api: TrailblazerAPI, slurm_job_id: int, flow_cell: FlowCellDirectoryData
+        self, tb_api: TrailblazerClient, slurm_job_id: int, flow_cell: FlowCellDirectoryData
     ):
         """Add demultiplexing entry to trailblazer."""
         if self.dry_run:

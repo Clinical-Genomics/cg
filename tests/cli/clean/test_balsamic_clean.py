@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 from pathlib import Path
 
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 from cg.cli.workflow.commands import clean_run_dir, past_run_dirs
 from cg.constants import Pipeline
 from click.testing import CliRunner
@@ -53,8 +53,8 @@ def test_with_yes(
     case_path = analysis_api.get_case_path(balsamic_case_clean)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 
-    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
-    TrailblazerAPI.is_latest_analysis_ongoing.return_value = False
+    mocker.patch.object(TrailblazerClient, "is_latest_analysis_ongoing")
+    TrailblazerClient.is_latest_analysis_ongoing.return_value = False
 
     # WHEN running with yes and remove stuff from before today
     result = cli_runner.invoke(past_run_dirs, ["-y", str(timestamp_now)], obj=clean_context)
@@ -91,8 +91,8 @@ def test_dry_run(
     case_path = clean_context.meta_apis["analysis_api"].get_case_path(balsamic_case_clean)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 
-    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
-    TrailblazerAPI.is_latest_analysis_ongoing.return_value = False
+    mocker.patch.object(TrailblazerClient, "is_latest_analysis_ongoing")
+    TrailblazerClient.is_latest_analysis_ongoing.return_value = False
 
     # WHEN dry running with dry run specified
     result = cli_runner.invoke(clean_run_dir, [balsamic_case_clean, "-d", "-y"], obj=clean_context)
@@ -112,8 +112,8 @@ def test_cleaned_at_valid(
     case_path = clean_context.meta_apis["analysis_api"].get_case_path(balsamic_case_clean)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 
-    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
-    TrailblazerAPI.is_latest_analysis_ongoing.return_value = False
+    mocker.patch.object(TrailblazerClient, "is_latest_analysis_ongoing")
+    TrailblazerClient.is_latest_analysis_ongoing.return_value = False
 
     # WHEN dry running with dry run specified
     result = cli_runner.invoke(clean_run_dir, [balsamic_case_clean, "-y"], obj=clean_context)

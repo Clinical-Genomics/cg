@@ -212,23 +212,23 @@ class MockTB:
         return self._add_pending_was_called
 
     def is_latest_analysis_ongoing(self, case_id: str):
-        """Override TrailblazerAPI is_ongoing method to avoid default behaviour"""
+        """Override TrailblazerClient is_ongoing method to avoid default behaviour"""
         return False
 
     def is_latest_analysis_failed(self, case_id: str):
-        """Override TrailblazerAPI is_failed method to avoid default behaviour"""
+        """Override TrailblazerClient is_failed method to avoid default behaviour"""
         return False
 
     def is_latest_analysis_completed(self, case_id: str):
-        """Override TrailblazerAPI is_completed method to avoid default behaviour"""
+        """Override TrailblazerClient is_completed method to avoid default behaviour"""
         return False
 
     def get_latest_analysis_status(self, case_id: str):
-        """Override TrailblazerAPI get_analysis_status method to avoid default behaviour"""
+        """Override TrailblazerClient get_analysis_status method to avoid default behaviour"""
         return None
 
     def has_latest_analysis_started(self, case_id: str):
-        """Override TrailblazerAPI has_analysis_started method to avoid default behaviour"""
+        """Override TrailblazerClient has_analysis_started method to avoid default behaviour"""
         return False
 
     def set_analysis_uploaded(self, case_id: str, uploaded_at: datetime):

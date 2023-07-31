@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Set
 
 import click
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 from cg.constants import Pipeline
 from cg.constants.constants import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
@@ -85,7 +85,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
     clinical-delivery."""
 
     status_db: Store = context.obj.status_db
-    trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
+    trailblazer_api: TrailblazerClient = context.obj.trailblazer_api
     for analysis_obj in status_db.get_analyses_to_upload(pipeline=Pipeline.FASTQ):
         if analysis_obj.family.analyses[0].uploaded_at:
             LOG.warning(

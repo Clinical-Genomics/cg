@@ -7,7 +7,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import CompressAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
@@ -48,4 +48,4 @@ class MetaAPI:
         )
         self.status_db: Store = config.status_db
         self.scout_api: ScoutAPI = config.scout_api
-        self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
+        self.trailblazer_api: TrailblazerClient = config.trailblazer_api

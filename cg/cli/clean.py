@@ -9,7 +9,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb import TrailblazerClient
 from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
     balsamic_pon_past_run_dirs,
@@ -267,7 +267,7 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
     status_db: Store = context.status_db
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    trailblazer_api: TrailblazerAPI = context.trailblazer_api
+    trailblazer_api: TrailblazerClient = context.trailblazer_api
     sample_sheets_dir: str = context.clean.flow_cells.sample_sheets_dir_name
     checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
     search: str = f"%{demux_api.out_dir}%"
@@ -451,7 +451,7 @@ def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run:
     status_db: Store = context.status_db
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    trailblazer_api: TrailblazerAPI = context.trailblazer_api
+    trailblazer_api: TrailblazerClient = context.trailblazer_api
     for flow_cell_dir in demux_api.get_all_demultiplexed_flow_cell_dirs():
         try:
             flow_cell: DemultiplexFlowCell = DemultiplexFlowCell(flow_cell_path=flow_cell_dir)
