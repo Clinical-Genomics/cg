@@ -8,10 +8,8 @@ from typing import List, Optional
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
-from cg.exc import FlowCellError
 from cg.meta.demultiplex.validation import (
     is_bcl2fastq_demux_folder_structure,
-    is_flow_cell_directory_valid,
     is_valid_sample_fastq_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -42,9 +40,10 @@ def get_sample_fastqs_from_flow_cell(
 ) -> Optional[List[Path]]:
     """Retrieve sample FastQs from a flow cell directory."""
     root_pattern = f"{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    unaligned_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    unaligned_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    unaligned_alt_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
-    for pattern in [root_pattern, unaligned_pattern]:
+    for pattern in [root_pattern, unaligned_pattern, unaligned_alt_pattern]:
         sample_fastqs: List[Path] = get_files_matching_pattern(
             directory=flow_cell_directory, pattern=pattern
         )
@@ -91,7 +90,6 @@ def parse_flow_cell_directory_data(
     flow_cell_directory: Path, bcl_converter: str
 ) -> FlowCellDirectoryData:
     """Return flow cell data from the flow cell directory."""
-    is_flow_cell_directory_valid(flow_cell_directory)
     return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
 
 

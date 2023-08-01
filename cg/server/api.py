@@ -19,7 +19,17 @@ from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.ext import db, lims, osticket
-from cg.store.models import Analysis, Application, Customer, Family, Flowcell, Pool, Sample, User
+from cg.store.models import (
+    Analysis,
+    Application,
+    Customer,
+    Family,
+    Flowcell,
+    Pool,
+    Sample,
+    SampleLaneSequencingMetrics,
+    User,
+)
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from pydantic.v1 import ValidationError
@@ -354,6 +364,26 @@ def parse_flow_cell(flowcell_id):
     if flow_cell is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     return jsonify(**flow_cell.to_dict(samples=True))
+
+
+@BLUEPRINT.route("/flowcells/<flow_cell_name>/sequencing_metrics", methods=["GET"])
+def get_sequencing_metrics(flow_cell_name: str):
+    """Return sample lane sequencing metrics for a flow cell."""
+
+    if not flow_cell_name:
+        return jsonify({"error": "Invalid or missing flow cell id"}), http.HTTPStatus.BAD_REQUEST
+
+    sequencing_metrics: List[
+        SampleLaneSequencingMetrics
+    ] = db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
+
+    if not sequencing_metrics:
+        return (
+            jsonify({"error": f"Sequencing metrics not found for flow cell {flow_cell_name}."}),
+            http.HTTPStatus.NOT_FOUND,
+        )
+
+    return jsonify([metric.to_dict() for metric in sequencing_metrics])
 
 
 @BLUEPRINT.route("/analyses")
