@@ -81,7 +81,7 @@ def get_spring_archive_files(crunchy_metadata: CrunchyMetadata) -> Dict[str, Cru
     names_map = {"first_read": "fastq_first", "second_read": "fastq_second", "spring": "spring"}
     archive_files = {}
     for file_info in crunchy_metadata.files:
-        file_name = names_map[file_info.path]
+        file_name = names_map[file_info.file]
         archive_files[file_name] = file_info
     return archive_files
 

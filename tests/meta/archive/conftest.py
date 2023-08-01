@@ -12,7 +12,12 @@ from cg.constants.constants import FileFormat
 from cg.constants.subject import Gender
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
-from cg.meta.archive.ddn_dataflow import ROOT_TO_TRIM, DDNDataFlowApi, TransferData, TransferPayload
+from cg.meta.archive.ddn_dataflow import (
+    ROOT_TO_TRIM,
+    DDNDataFlowApi,
+    DataFlowFileTransferData,
+    TransferPayload,
+)
 from cg.models.cg_config import DDNDataFlowConfig
 from cg.store import Store
 from cg.store.models import Customer, Sample
@@ -51,7 +56,7 @@ def fixture_ddn_dataflow_api(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDataF
         content={
             "access": "test_auth_token",
             "refresh": "test_refresh_token",
-            "expire": (datetime.now() + timedelta(minutes=20)).timestamp(),
+            "expire": int((datetime.now() + timedelta(minutes=20)).timestamp()),
         },
     ).encode()
     with mock.patch(
@@ -62,20 +67,28 @@ def fixture_ddn_dataflow_api(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDataF
 
 
 @pytest.fixture(name="transfer_data_archive")
-def fixture_transfer_data_archive(local_directory: Path, remote_path: Path) -> TransferData:
-    """Return a TransferData object for archiving."""
-    return TransferData(source=local_directory.as_posix(), destination=remote_path.as_posix())
+def fixture_transfer_data_archive(
+    local_directory: Path, remote_path: Path
+) -> DataFlowFileTransferData:
+    """Return a DataFlowFileTransferData object for archiving."""
+    return DataFlowFileTransferData(
+        source=local_directory.as_posix(), destination=remote_path.as_posix()
+    )
 
 
 @pytest.fixture(name="transfer_data_retrieve")
-def fixture_transfer_data_retrieve(local_directory: Path, remote_path: Path) -> TransferData:
-    """Return a TransferData object for retrieval."""
-    return TransferData(source=remote_path.as_posix(), destination=local_directory.as_posix())
+def fixture_transfer_data_retrieve(
+    local_directory: Path, remote_path: Path
+) -> DataFlowFileTransferData:
+    """Return a DataFlowFileTransferData object for retrieval."""
+    return DataFlowFileTransferData(
+        source=remote_path.as_posix(), destination=local_directory.as_posix()
+    )
 
 
 @pytest.fixture(name="transfer_payload")
-def fixture_transfer_payload(transfer_data_archive: TransferData) -> TransferPayload:
-    """Return a TransferPayload object containing two identical TransferData object.."""
+def fixture_transfer_payload(transfer_data_archive: DataFlowFileTransferData) -> TransferPayload:
+    """Return a TransferPayload object containing two identical DataFlowFileTransferData object."""
     return TransferPayload(
         files_to_transfer=[transfer_data_archive, transfer_data_archive.copy(deep=True)]
     )
@@ -185,6 +198,7 @@ def fixture_archive_store(
 def fixture_spring_archive_api(
     populated_housekeeper_api: HousekeeperAPI,
     archive_store: Store,
+    ddn_dataflow_api: DDNDataFlowApi,
     father_sample_id: str,
     helpers,
 ) -> SpringArchiveAPI:
@@ -196,4 +210,5 @@ def fixture_spring_archive_api(
     return SpringArchiveAPI(
         housekeeper_api=populated_housekeeper_api,
         status_db=archive_store,
+        ddn_dataflow_api=ddn_dataflow_api,
     )

@@ -1,21 +1,21 @@
 """Module for archiving and retrieving folders via DDN Dataflow."""
-from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional
 from urllib.parse import urljoin
 
-from pydantic.v1 import BaseModel
-from requests.models import Response
+from housekeeper.store.models import File
 
 from datetime import datetime
 from cg.constants.constants import APIMethods, FileFormat
 from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import APIRequest, ReadStream
-from cg.io.json import read_json_stream
+from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DDNDataFlowConfig
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 from requests.models import Response
+
+from cg.store.models import Sample
 
 OSTYPE: str = "Unix/MacOS"
 ROOT_TO_TRIM: str = "/home"
@@ -42,12 +42,16 @@ class ResponseFields(str, Enum):
     RETRIEVE_FILES = "files/retrieve"
 
 
-class TransferData(BaseModel):
+class DataFlowFileTransferData(FileTransferData):
     """Model for representing a singular object transfer."""
 
     _metadata = None
     destination: str
     source: str
+
+    @classmethod
+    def from_models(cls, file: File, sample: Sample):
+        return cls(destination=sample.internal_id, source=file.path)
 
     def trim_path(self, attribute_to_trim: str):
         """Trims the given attribute (source or destination) from its root directory."""
@@ -66,7 +70,7 @@ class TransferData(BaseModel):
 class TransferPayload(BaseModel):
     """Model for representing a Dataflow transfer task."""
 
-    files_to_transfer: List[TransferData]
+    files_to_transfer: List[DataFlowFileTransferData]
     osType: str = OSTYPE
     createFolder: bool = False
 
@@ -124,7 +128,7 @@ class AuthResponse(BaseModel):
     refresh: Optional[str]
 
 
-class DDNDataFlowApi:
+class DDNDataFlowApi(ArchiveHandler):
     """Class for archiving and retrieving folders via DDN Dataflow."""
 
     def __init__(self, config: DDNDataFlowConfig):
@@ -190,7 +194,7 @@ class DDNDataFlowApi:
             self._refresh_auth_token()
         return {"Authorization": f"Bearer {self.auth_token}"}
 
-    def archive_folders(self, sources_and_destinations: List[TransferData]) -> int:
+    def archive_folders(self, sources_and_destinations: List[DataFlowFileTransferData]) -> int:
         """Archives all folders provided, to their corresponding destination,
         as given by sources and destination parameter."""
         transfer_request: TransferPayload = TransferPayload(
@@ -209,7 +213,7 @@ class DDNDataFlowApi:
         else:
             raise IOError(response.text)
 
-    def retrieve_folders(self, sources_and_destinations: List[TransferData]) -> int:
+    def retrieve_folders(self, sources_and_destinations: List[DataFlowFileTransferData]) -> int:
         """Retrieves all folders provided, to their corresponding destination, as given by the sources and destination parameter."""
         transfer_request: TransferPayload = TransferPayload(
             files_to_transfer=sources_and_destinations

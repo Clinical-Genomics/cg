@@ -26,12 +26,12 @@ def test_get_files_by_archive_location(
 
 
 def test_archive_samples(
-    archive_api: SpringArchiveAPI, populated_housekeeper_api: HousekeeperAPI, sample_id: str
+    spring_archive_api: SpringArchiveAPI, populated_housekeeper_api: HousekeeperAPI, sample_id: str
 ):
     # GIVEN a list of sample ids whit housekeeper bundles and SPRING files
-    sample: Sample = archive_api.status_db.get_sample_by_internal_id(sample_id)
+    sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(sample_id)
     # WHEN archiving these samples
-    archive_api.archive_samples(samples=[sample])
+    spring_archive_api.archive_samples(samples=[sample])
     # THEN tha archive objects should be added to housekeeper along with a task_id
 
     assert (
@@ -98,7 +98,7 @@ def test_get_sample_not_exists(caplog, spring_archive_api: SpringArchiveAPI, spr
 
 
 def test_archive_all_non_archived_spring_files(
-    archive_api: SpringArchiveAPI,
+    spring_archive_api: SpringArchiveAPI,
     caplog,
     transfer_data_archive,
     ok_ddn_response,
@@ -114,7 +114,7 @@ def test_archive_all_non_archived_spring_files(
         "api_request_from_content",
         return_value=ok_ddn_response,
     ) as mock_request_submitter:
-        archive_api.archive_all_non_archived_spring_files()
+        spring_archive_api.archive_all_non_archived_spring_files()
 
     # THEN the DDN archiving function should have been called
     mock_request_submitter.assert_called_once_with(

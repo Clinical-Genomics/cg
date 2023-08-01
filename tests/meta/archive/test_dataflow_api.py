@@ -14,7 +14,7 @@ from cg.meta.archive.ddn_dataflow import (
     SOURCE_ATTRIBUTE,
     DataflowEndpoints,
     DDNDataFlowApi,
-    TransferData,
+    DataFlowFileTransferData,
     TransferPayload,
 )
 from cg.models.cg_config import DDNDataFlowConfig
@@ -24,7 +24,9 @@ FUNCTION_TO_MOCK = "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_con
 
 
 def test_correct_source_root(
-    local_directory: Path, transfer_data_archive: TransferData, trimmed_local_directory: Path
+    local_directory: Path,
+    transfer_data_archive: DataFlowFileTransferData,
+    trimmed_local_directory: Path,
 ):
     """Tests the method for trimming the source directory."""
 
@@ -38,7 +40,9 @@ def test_correct_source_root(
 
 
 def test_correct_destination_root(
-    local_directory: Path, transfer_data_retrieve: TransferData, trimmed_local_directory: Path
+    local_directory: Path,
+    transfer_data_retrieve: DataFlowFileTransferData,
+    trimmed_local_directory: Path,
 ):
     """Tests the method for trimming the destination directory."""
 
@@ -52,11 +56,14 @@ def test_correct_destination_root(
 
 
 def test_add_repositories(
-    ddn_dataflow_config, local_directory, remote_path, transfer_data_archive: TransferData
+    ddn_dataflow_config,
+    local_directory,
+    remote_path,
+    transfer_data_archive: DataFlowFileTransferData,
 ):
     """Tests the method for adding the repositories to the source and destination paths."""
 
-    # GIVEN a TransferData object
+    # GIVEN a DataFlowFileTransferData object
 
     # WHEN adding the repositories
     transfer_data_archive.add_repositories(
@@ -75,7 +82,7 @@ def test_transfer_payload_dict(transfer_payload: TransferPayload):
     """Tests that the dict structure returned by TransferPayload.dict() is compatible with the
     Dataflow API."""
 
-    # GIVEN a TransferPayload object with two TransferData objects
+    # GIVEN a TransferPayload object with two DataFlowFileTransferData objects
 
     # WHEN obtaining the dict representation
     dict_representation: dict = transfer_payload.dict()
@@ -175,7 +182,7 @@ def test_transfer_payload_correct_source_root(transfer_payload: TransferPayload)
     """Tests that the dict structure returned by TransferPayload.dict() is compatible with the
     Dataflow API."""
 
-    # GIVEN a TransferPayload object with two TransferData objects with untrimmed source paths
+    # GIVEN a TransferPayload object with two DataFlowFileTransferData objects with untrimmed source paths
     for transfer_data_archive in transfer_payload.files_to_transfer:
         assert transfer_data_archive.source.startswith(ROOT_TO_TRIM)
 
@@ -191,7 +198,7 @@ def test_transfer_payload_correct_destination_root(transfer_payload: TransferPay
     """Tests that the dict structure returned by TransferPayload.dict() is compatible with the
     Dataflow API."""
 
-    # GIVEN a TransferPayload object with two TransferData objects with untrimmed destination paths
+    # GIVEN a TransferPayload object with two DataFlowFileTransferData objects with untrimmed destination paths
     for transfer_data in transfer_payload.files_to_transfer:
         transfer_data.destination = ROOT_TO_TRIM + transfer_data.destination
         assert transfer_data.destination.startswith(ROOT_TO_TRIM)
@@ -247,7 +254,7 @@ def test__refresh_auth_token(ddn_dataflow_api: DDNDataFlowApi, ok_response: Resp
     ok_response._content = WriteStream.write_stream_from_content(
         content={
             "access": new_token,
-            "expire": new_expiration.timestamp(),
+            "expire": int(new_expiration.timestamp()),
         },
         file_format=FileFormat.JSON,
     ).encode()
@@ -269,7 +276,7 @@ def test_archive_folders(
     full_remote_path: str,
     full_local_path: str,
     ok_ddn_response: Response,
-    transfer_data_archive: TransferData,
+    transfer_data_archive: DataFlowFileTransferData,
 ):
     """Tests that the archiving function correctly formats the input and sends API request."""
 
@@ -305,7 +312,7 @@ def test_retrieve_folders(
     full_remote_path: str,
     full_local_path: str,
     ok_ddn_response: Response,
-    transfer_data_retrieve: TransferData,
+    transfer_data_retrieve: DataFlowFileTransferData,
 ):
     """Tests that the retrieve function correctly formats the input and sends API request."""
 

@@ -3,33 +3,50 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Dict, List, Optional, Callable
 
+from housekeeper.store.models import File
+from pydantic import ConfigDict
 from pydantic import BaseModel
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocationsInUse
-from cg.meta.archive.ddn_dataflow import DDNDataFlowApi, TransferData
+from cg.meta.archive.ddn_dataflow import DDNDataFlowApi, DataFlowFileTransferData
+from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.store import Store
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
-DDN = "DDN"
 DEFAULT_SPRING_ARCHIVE_COUNT = 200
 
 PathAndSample = namedtuple("PathAndSample", "path sample_internal_id")
 ArchiveLocationAndSample = namedtuple("ArchiveLocationAndSample", "location sample_id")
 
 
+class FileAndSample(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    file: File
+    sample: Sample
+
+
 class ArchiveModels(BaseModel):
     """Model containing the necessary file and sample information."""
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     file_model: Callable
-    archive_method: Callable
+    handler: ArchiveHandler
 
 
-ARCHIVES_IN_USE: Dict[str, ArchiveModels] = {
-    DDN: ArchiveModels(file_model=TransferData, archive_method=DDNDataFlowApi.archive_folders)
-}
+def get_files_by_archive_location(
+    files_and_samples: List[FileAndSample], archive_location: ArchiveLocationsInUse
+) -> List[FileAndSample]:
+    """
+    Returns a list of FileAndSample where the associated sample has a specific archive location.
+    """
+    return [
+        file_and_sample
+        for file_and_sample in files_and_samples
+        if file_and_sample.sample.archive_location == archive_location
+    ]
 
 
 class SpringArchiveAPI:
@@ -42,17 +59,22 @@ class SpringArchiveAPI:
         self.housekeeper_api: HousekeeperAPI = housekeeper_api
         self.ddn_api: DDNDataFlowApi = ddn_dataflow_api
         self.status_db: Store = status_db
+        self.handler_map: Dict[str, ArchiveModels] = {
+            ArchiveLocationsInUse.KAROLINSKA_BUCKET: ArchiveModels(
+                file_model=DataFlowFileTransferData.from_models, handler=self.ddn_api
+            )
+        }
 
     def archive_samples(self, samples: List[Sample]) -> None:
         """Archives all non-archived spring files for the given samples."""
-        files_to_archive: List[TransferData] = []
+        files_to_archive: List[DataFlowFileTransferData] = []
         for sample in samples:
             files_to_archive.extend(
-                TransferData(destination=sample.internal_id, source=file.full_path)
+                DataFlowFileTransferData(destination=sample.internal_id, source=file.full_path)
                 for file in self.housekeeper_api.get_non_archived_files(
                     bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING]
                 )
-                if sample.archive_location == DDN
+                if sample.archive_location == "DDN"
             )
         archive_task_id: int = self.ddn_api.archive_folders(
             sources_and_destinations=files_to_archive
@@ -64,10 +86,10 @@ class SpringArchiveAPI:
 
     def retrieve_sample(self, sample_ids: List[str]) -> None:
         """Archives all non-retrieved spring files for the given samples."""
-        files_to_retrieve: List[TransferData] = []
+        files_to_retrieve: List[DataFlowFileTransferData] = []
         for sample_id in sample_ids:
             files_to_retrieve.extend(
-                TransferData(destination=sample_id, source=file.as_posix())
+                DataFlowFileTransferData(destination=sample_id, source=file.as_posix())
                 for file in self.housekeeper_api.get_non_archived_files(
                     bundle_name=sample_id, tags=[SequencingFileTag.SPRING]
                 )
@@ -85,66 +107,33 @@ class SpringArchiveAPI:
     ) -> None:
         """Archives all non archived spring files (so far only for DDN customers)."""
 
-        files_archive: List[PathAndSample] = [
-            PathAndSample(path=path, sample_internal_id=sample_id)
-            for sample_id, path in self.housekeeper_api.get_non_archived_spring_path_and_bundle_name()[
-                :spring_file_count_limit
-            ]
-        ]
-        sorted_files_to_archive: Dict[
-            str, List[PathAndSample]
-        ] = self.sort_files_on_archive_location(files_archive)
+        files_to_archive: List[File] = self.housekeeper_api.get_all_non_archived_spring_files()
+        files_and_samples: List[FileAndSample] = self.add_samples_to_files(files_to_archive)
 
-        for archive_location in sorted_files_to_archive:
-            if archive_location not in ARCHIVES_IN_USE:
-                LOG.warning(f"No support for archiving using the location: {archive_location}")
-                continue
-            files_archive_info: List[TransferData] = [
-                ARCHIVES_IN_USE[archive_location].file_model(
-                    destination=file.sample_internal_id,
-                    source=file.path,
-                )
-                for file in sorted_files_to_archive[archive_location]
-            ]
-            archive_task_id: int = ARCHIVES_IN_USE[archive_location].archive_method(
-                self=self.ddn_api, sources_and_destinations=files_archive_info
+        for archive_location in ArchiveLocationsInUse:
+            selected_files: [List[FileAndSample]] = get_files_by_archive_location(
+                files_and_samples=files_and_samples, archive_location=archive_location
+            )
+
+            converted_files: List[FileTransferData] = self.convert_into_correct_model(
+                files_and_samples=files_and_samples, archive_location=archive_location
+            )
+
+            archive_task_id: int = self.invoke_corresponding_archiving_function(
+                files=converted_files, archive_location=archive_location
             )
 
             self.housekeeper_api.add_archives(
-                files=[Path(file.path) for file in sorted_files_to_archive[archive_location]],
+                files=[Path(file.path) for file in selected_files],
                 archive_task_id=archive_task_id,
             )
 
-    def sort_files_on_archive_location(
-        self,
-        file_data: List[PathAndSample],
-    ) -> Dict[str, List[PathAndSample]]:
-        """Add the archive location to each file in the given list and return the list."""
-        sorted_files: Dict[str, List[PathAndSample]] = {}
-        for file in file_data:
-            sample = self.status_db.get_sample_by_internal_id(file.sample_internal_id)
-            if not sample:
-                LOG.warning(
-                    f"No sample found in status_db corresponding to sample_id {file.sample_internal_id}."
-                    f"Skipping archiving for corresponding file {file.path}."
-                )
-                continue
-            sorted_files.setdefault(sample.archive_location, [])
-            sorted_files[sample.archive_location].append(file)
-        return sorted_files
-
-    def get_files_by_archive_location(
-        self, file_data: List[PathAndSample], archive_location: ArchiveLocationsInUse
-    ) -> List[PathAndSample]:
-        """
-        Returns a list of PathAndSample where the associated sample has a specific archive location.
-        """
-        selected_files: List[PathAndSample] = []
-        for file in file_data:
-            sample: Optional[Sample] = self.get_sample(file)
-            if sample and sample.archive_location == archive_location:
-                selected_files.append(file)
-        return selected_files
+    def invoke_corresponding_archiving_function(
+        self, files: List[FileTransferData], archive_location: ArchiveLocationsInUse
+    ) -> int:
+        return self.handler_map[archive_location].handler.archive_folders(
+            sources_and_destinations=files
+        )
 
     def get_sample(self, file: PathAndSample) -> Optional[Sample]:
         sample: Optional[Sample] = self.status_db.get_sample_by_internal_id(file.sample_internal_id)
@@ -154,3 +143,21 @@ class SpringArchiveAPI:
                 f"Skipping archiving for corresponding file {file.path}."
             )
         return sample
+
+    def add_samples_to_files(self, files_to_archive: List[File]):
+        files_and_samples = []
+        for file in files_to_archive:
+            sample: Optional[Sample] = self.get_sample(file)
+            if sample:
+                files_and_samples.append(FileAndSample(file=file, sample=sample))
+        return files_and_samples
+
+    def convert_into_correct_model(
+        self, files_and_samples: List[FileAndSample], archive_location: ArchiveLocationsInUse
+    ) -> List[FileTransferData]:
+        return [
+            self.handler_map[archive_location].file_model(
+                file=file_and_sample.file, sample=file_and_sample.sample
+            )
+            for file_and_sample in files_and_samples
+        ]
