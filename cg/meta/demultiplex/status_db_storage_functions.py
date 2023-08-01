@@ -33,11 +33,32 @@ def store_flow_cell_data_in_status_db(
             sequencer_name=parsed_flow_cell.machine_name,
             sequenced_at=parsed_flow_cell.run_date,
         )
+        flow_cell = add_samples_to_flow_cell_in_status_db(
+            flow_cell=flow_cell, parsed_flow_cell=parsed_flow_cell, store=store
+        )
         store.session.add(flow_cell)
         store.session.commit()
         LOG.info(f"Flow cell added to status db: {parsed_flow_cell.id}.")
     else:
         LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}. Skipping.")
+
+
+def add_samples_to_flow_cell_in_status_db(
+    flow_cell: Flowcell, parsed_flow_cell: FlowCellDirectoryData, store: Store
+) -> Flowcell:
+    """Adds samples to a flow cell in status db."""
+    sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
+        sample_sheet_path=parsed_flow_cell.sample_sheet_path,
+        flow_cell_sample_type=parsed_flow_cell.sample_type,
+    )
+    samples: List[Sample] = [
+        store.get_sample_by_internal_id(sample_internal_id)
+        for sample_internal_id in sample_internal_ids
+    ]
+    for sample in samples:
+        if sample:
+            flow_cell.samples.append(sample)
+    return flow_cell
 
 
 def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
