@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 from typing import Dict, Generator, List
 
@@ -513,11 +514,14 @@ def test_post_processing_of_flow_cell(
     # GIVEN a directory with a flow cell demultiplexed with BCL Convert
     demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_tmp_directory
 
-    # GIVEN a sample sheet exists in the flow cell run directory
-    Path(
+    # GIVEN that a sample sheet exists in the flow cell run directory
+    path = Path(
         demux_post_processing_api.demux_api.run_dir,
+        flow_cell_demultplexing_directory,
         DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-    ).touch()
+    )
+    os.makedirs(path.parent, exist_ok=True)
+    path.touch()
 
     # WHEN post processing the demultiplexed flow cell
     demux_post_processing_api.finish_flow_cell_temp(flow_cell_demultplexing_directory)
