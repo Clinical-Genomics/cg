@@ -15,7 +15,7 @@ from cg.store.api import Store
 from cg.store.models import Sample, Family
 from tests.store_helpers import StoreHelpers
 
-FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_ids")
+FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_internal_ids")
 
 
 @pytest.fixture(name="tmp_demulitplexing_dir")
@@ -331,17 +331,17 @@ def fixture_flow_cell_info_map(
         "BCL2FASTQ_TREE": FlowCellInfo(
             directory=flow_cell_directory_name_demultiplexed_with_bcl2fastq,
             name=flow_cell_name_demultiplexed_with_bcl2fastq,
-            sample_ids=bcl2fastq_demultiplexed_flow_cell_sample_internal_ids,
+            sample_internal_ids=bcl2fastq_demultiplexed_flow_cell_sample_internal_ids,
         ),
         "BCLCONVERT_FLAT": FlowCellInfo(
             directory=flow_cell_directory_name_demultiplexed_with_bcl_convert_flat,
             name=flow_cell_name_demultiplexed_with_bcl_convert,
-            sample_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
+            sample_internal_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
         ),
         "BCLCONVERT_TREE": FlowCellInfo(
             directory=flow_cell_directory_name_demultiplexed_with_bcl_convert,
             name=flow_cell_name_demultiplexed_with_bcl_convert,
-            sample_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
+            sample_internal_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
         ),
     }
 

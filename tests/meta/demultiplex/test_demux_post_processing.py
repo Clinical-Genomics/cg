@@ -727,7 +727,7 @@ def test_post_processing_of_flow_cell(
     # GIVEN a demultiplexed flow cell
     flow_cell_demultplexing_directory: str = flow_cell_info_map.get(demux_type).directory
     flow_cell_name: str = flow_cell_info_map.get(demux_type).name
-    sample_ids: List[str] = flow_cell_info_map.get(demux_type).sample_ids
+    sample_internal_ids: List[str] = flow_cell_info_map.get(demux_type).sample_internal_ids
 
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
@@ -752,8 +752,8 @@ def test_post_processing_of_flow_cell(
         flow_cell_name=flow_cell_name
     )
     # THEN the read count was calculated for all samples in the flow cell directory
-    for sample_id in sample_ids:
-        sample = demux_post_processing_api.status_db.get_sample_by_internal_id(sample_id)
+    for sample_internal_id in sample_internal_ids:
+        sample = demux_post_processing_api.status_db.get_sample_by_internal_id(sample_internal_id)
         assert sample is not None
         assert sample.calculated_read_count
 
@@ -761,8 +761,8 @@ def test_post_processing_of_flow_cell(
     assert demux_post_processing_api.hk_api.bundle(flow_cell_name)
 
     # THEN a bundle was added to Housekeeper for each sample
-    for sample_id in sample_ids:
-        assert demux_post_processing_api.hk_api.bundle(sample_id)
+    for sample_internal_id in sample_internal_ids:
+        assert demux_post_processing_api.hk_api.bundle(sample_internal_id)
 
     # THEN a sample sheet was added to Housekeeper
     assert demux_post_processing_api.hk_api.get_files(
@@ -771,10 +771,10 @@ def test_post_processing_of_flow_cell(
     ).all()
 
     # THEN sample fastq files were added to Housekeeper tagged with FASTQ and the flow cell name
-    for sample_id in sample_ids:
+    for sample_internal_id in sample_internal_ids:
         assert demux_post_processing_api.hk_api.get_files(
             tags=[SequencingFileTag.FASTQ, flow_cell_name],
-            bundle=sample_id,
+            bundle=sample_internal_id,
         ).all()
 
     # THEN a delivery file was created in the flow cell directory
