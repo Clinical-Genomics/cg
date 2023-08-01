@@ -118,6 +118,6 @@ def update_sample_read_count(sample_id: str, q30_threshold: int, store: Store) -
             q30_threshold=q30_threshold,
         )
         LOG.debug(f"Updating sample {sample_id} with read count {sample_read_count}")
-        sample.calculated_read_count = sample_read_count
+        sample.reads = sample_read_count
     else:
         LOG.warning(f"Cannot find {sample_id} in status_db when adding read counts. Skipping.")

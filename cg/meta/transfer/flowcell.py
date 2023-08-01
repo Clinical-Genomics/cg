@@ -111,8 +111,6 @@ class TransferFlowCell:
                     tag_name=SequencingFileTag.FASTQ,
                 )
 
-            status_db_sample.reads = cgstats_sample.reads
-
             _set_status_db_sample_sequenced_at(
                 status_db_sample=status_db_sample, flow_cell_sequenced_at=flow_cell.sequenced_at
             )
