@@ -110,6 +110,8 @@ class TransferFlowCell:
                     sequencing_files=cgstats_sample.fastqs,
                     tag_name=SequencingFileTag.FASTQ,
                 )
+            # commenting out for now - just for traceability. This code will be removed later.
+            # status_db_sample.reads = cgstats_sample.reads
 
             _set_status_db_sample_sequenced_at(
                 status_db_sample=status_db_sample, flow_cell_sequenced_at=flow_cell.sequenced_at
