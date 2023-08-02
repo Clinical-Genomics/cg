@@ -23,7 +23,6 @@ from cg.models import CompressionData
 from cg.store import Store
 from cg.store.models import Flowcell
 from cg.utils.time import get_elapsed_time, get_start_time
-from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
