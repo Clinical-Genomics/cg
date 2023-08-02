@@ -7,6 +7,7 @@ from cg.store import Store
 
 from cg.store.models import Sample, Invoice, Customer
 from tests.store_helpers import StoreHelpers
+from tests.meta.demultiplex.conftest import fixture_flow_cell_name_demultiplexed_with_bcl_convert
 
 
 def test_get_all_pools_and_samples_for_invoice_by_invoice_id(store: Store, helpers: StoreHelpers):

@@ -23,6 +23,7 @@ from cg.store.models import (
 )
 from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
+from tests.meta.demultiplex.conftest import fixture_flow_cell_name_demultiplexed_with_bcl_convert
 
 
 def test_get_analysis_by_case_entry_id_and_started_at(

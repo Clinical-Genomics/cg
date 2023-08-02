@@ -9,6 +9,7 @@ from cg.store.filters.status_metrics_filters import (
 )
 from cg.store.models import SampleLaneSequencingMetrics
 from sqlalchemy.orm import Query
+from tests.meta.demultiplex.conftest import fixture_flow_cell_name_demultiplexed_with_bcl_convert
 
 
 def test_filter_total_read_count_for_sample(
