@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from cg.constants.archiving import ArchiveLocationsInUse
+from housekeeper.store.models import File
+
 
 from typing import List
 from unittest import mock
@@ -9,7 +10,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.constants import APIMethods
 from cg.io.controller import APIRequest
-from cg.meta.archive.archive import SpringArchiveAPI, PathAndSample
+from cg.meta.archive.archive import SpringArchiveAPI, PathAndSample, FileAndSample
 
 from cg.store.models import Sample
 
@@ -43,30 +44,41 @@ def test_archive_samples(
     )
 
 
-def test_sort_spring_files_on_archive_location(
-    spring_archive_api: SpringArchiveAPI, populated_housekeeper_api: HousekeeperAPI
-):
-    # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
-    # with the DDN customer having two samples, and the non-DDN having one sample.
-
-    # WHEN fetching all non-archived spring files
-    non_archived_spring_files: List[PathAndSample] = [
-        PathAndSample(path=path, sample_internal_id=sample)
-        for sample, path in populated_housekeeper_api.get_non_archived_spring_path_and_bundle_name()
-    ]
-    # WHEN extracting the files based on data archive
-    sorted_spring_files: List[PathAndSample] = spring_archive_api.get_files_by_archive_location(
-        non_archived_spring_files, archive_location=ArchiveLocationsInUse.KAROLINSKA_BUCKET
+def test_add_samples_to_files_missing_sample(spring_archive_api: SpringArchiveAPI):
+    # GIVEN a list of SPRING Files to archive
+    files_to_archive: List[
+        File
+    ] = spring_archive_api.housekeeper_api.get_all_non_archived_spring_files()
+    # GIVEN one of the files does not match the
+    files_to_archive[0].version.bundle.name = "does-not-exist"
+    # WHEN adding the Sample objects
+    file_and_samples: List[FileAndSample] = spring_archive_api.add_samples_to_files(
+        files_to_archive
     )
 
-    # THEN there should be spring files
-    assert sorted_spring_files
-    for file_and_sample in sorted_spring_files:
-        sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(
-            file_and_sample.sample_internal_id
-        )
-        # THEN each file should be correctly sorted on its archive location
-        assert sample.customer.data_archive_location == ArchiveLocationsInUse.KAROLINSKA_BUCKET
+    # THEN each file should have a matching sample
+    assert len(files_to_archive) != len(file_and_samples) > 0
+    for file_and_sample in file_and_samples:
+        # THEN the bundle name of each file should match the sample internal id
+        assert file_and_sample.file.version.bundle.name == file_and_sample.sample.internal_id
+
+
+def test_add_samples_to_files(spring_archive_api: SpringArchiveAPI):
+    # GIVEN a list of SPRING Files to archive
+    files_to_archive: List[
+        File
+    ] = spring_archive_api.housekeeper_api.get_all_non_archived_spring_files()
+
+    # WHEN adding the Sample objects
+    file_and_samples: List[FileAndSample] = spring_archive_api.add_samples_to_files(
+        files_to_archive
+    )
+
+    # THEN each file should have a matching sample
+    assert len(files_to_archive) == len(file_and_samples) > 0
+    for file_and_sample in file_and_samples:
+        # THEN the bundle name of each file should match the sample internal id
+        assert file_and_sample.file.version.bundle.name == file_and_sample.sample.internal_id
 
 
 def test_get_sample_exists(sample_id: str, spring_archive_api: SpringArchiveAPI, spring_file: Path):
@@ -102,7 +114,6 @@ def test_archive_all_non_archived_spring_files(
     caplog,
     transfer_data_archive,
     ok_ddn_response,
-    spring_file: Path,
 ):
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
     # with the DDN customer having two samples, and the non-DDN having one sample.
@@ -137,9 +148,6 @@ def test_archive_all_non_archived_spring_files(
             "metadataList": [],
         },
     )
-
-    # THEN the log should report that the PDC sample was skipped
-    assert "No support for archiving using the location: PDC" in caplog.text
 
 
 def test_retrieve_sample():
