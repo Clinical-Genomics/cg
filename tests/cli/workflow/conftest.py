@@ -237,6 +237,6 @@ class MockTB:
 
 @pytest.fixture(scope="function")
 def tb_api():
-    """Trailblazer API fixture"""
+    """Trailblazer API client fixture"""
 
     return MockTB()

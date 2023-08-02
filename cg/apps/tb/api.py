@@ -1,4 +1,4 @@
-""" Trailblazer API for cg """ ""
+""" Trailblazer API client for cg """ ""
 import datetime
 import datetime as dt
 import logging

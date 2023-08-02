@@ -455,7 +455,7 @@ class CGConfig(BaseModel):
     def trailblazer_client(self) -> TrailblazerAPI:
         api = self.__dict__.get("trailblazer_client_")
         if api is None:
-            LOG.debug("Instantiating trailblazer api")
+            LOG.debug("Instantiating trailblazer api client")
             api = TrailblazerAPI(config=self.dict())
             self.trailblazer_client_ = api
         return api

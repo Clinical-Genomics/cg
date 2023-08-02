@@ -1977,7 +1977,7 @@ def sample_store(base_store: Store) -> Store:
 
 @pytest.fixture(name="trailblazer_client", scope="session")
 def fixture_trailblazer_client() -> MockTB:
-    """Return a mock Trailblazer API."""
+    """Return a mock Trailblazer API client."""
     return MockTB()
 
 
