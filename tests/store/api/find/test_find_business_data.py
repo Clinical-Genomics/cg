@@ -808,10 +808,8 @@ def test_get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
 ):
     # GIVEN a store with sequencing metrics
     # WHEN getting total read counts for a flow cell
-    reads = (
-        store_with_sequencing_metrics.get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
-            flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq
-        )
+    reads = store_with_sequencing_metrics.get_number_of_reads_for_flow_cell(
+        flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq
     )
     # THEN assert that the total read count is correct
     assert reads == expected_total_reads_flow_cell_bcl2fastq
@@ -826,7 +824,7 @@ def test_get_average_bases_above_q30_for_sample_from_metrics(
     # GIVEN a store with sequencing metrics
 
     # WHEN getting average bases above q30 for a sample
-    average_bases_above_q30 = store_with_sequencing_metrics.get_average_q30_for_sample_on_flow_cell_from_sample_lane_metrics(
+    average_bases_above_q30 = store_with_sequencing_metrics.get_average_q30_for_sample_on_flow_cell(
         sample_internal_id=mother_sample_id,
         flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
     )
@@ -844,7 +842,7 @@ def test_get_average_passing_q30_for_sample_from_metrics(
 
     # WHEN getting average passing q30 for a sample
     average_passing_q30 = (
-        store_with_sequencing_metrics.get_average_fraction_passing_q30_from_sample_lane_metrics(
+        store_with_sequencing_metrics.get_average_fraction_passing_q30_for_flow_cell(
             flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
         )
     )

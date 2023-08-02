@@ -330,7 +330,7 @@ class FindBusinessDataHandler(BaseHandler):
         reads_count: Optional[int] = total_reads_query.scalar()
         return reads_count if reads_count else 0
 
-    def get_average_q30_for_sample_on_flow_cell_from_sample_lane_metrics(
+    def get_average_q30_for_sample_on_flow_cell(
         self, sample_internal_id: str, flow_cell_name: str
     ) -> float:
         """Calculates the average q30 across lanes for a sample on a flow cell."""
@@ -348,9 +348,7 @@ class FindBusinessDataHandler(BaseHandler):
             [sample_lane.sample_base_fraction_passing_q30 for sample_lane in sample_lanes]
         ) / len(sample_lanes)
 
-    def get_average_fraction_passing_q30_from_sample_lane_metrics(
-        self, flow_cell_name: str
-    ) -> float:
+    def get_average_fraction_passing_q30_for_flow_cell(self, flow_cell_name: str) -> float:
         """Calculates the average q30 for each sample on a flow cell and returns the average between the samples."""
         sequencing_metrics: List[
             SampleLaneSequencingMetrics
@@ -361,29 +359,25 @@ class FindBusinessDataHandler(BaseHandler):
 
         sum_average_q30_across_samples: float = 0
         for sample_internal_id in unique_sample_internal_ids:
-            sum_average_q30_across_samples += (
-                self.get_average_q30_for_sample_on_flow_cell_from_sample_lane_metrics(
-                    sample_internal_id=sample_internal_id,
-                    flow_cell_name=flow_cell_name,
-                )
+            sum_average_q30_across_samples += self.get_average_q30_for_sample_on_flow_cell(
+                sample_internal_id=sample_internal_id,
+                flow_cell_name=flow_cell_name,
             )
         return (
             sum_average_q30_across_samples / len(unique_sample_internal_ids)
-            if sum_average_q30_across_samples
+            if sum_average_q30_across_samples and unique_sample_internal_ids
             else 0
         )
 
-    def get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
-        self, flow_cell_name: str
-    ) -> int:
+    def get_number_of_reads_for_flow_cell(self, flow_cell_name: str) -> int:
         """Get total number of reads for a flow cell from sample lane sequencing metrics."""
         sequencing_metrics: List[
             SampleLaneSequencingMetrics
         ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
-        reads_count: int = 0
+        read_count: int = 0
         for sequencing_metric in sequencing_metrics:
-            reads_count += sequencing_metric.sample_total_reads_in_lane
-        return reads_count if reads_count else 0
+            read_count += sequencing_metric.sample_total_reads_in_lane
+        return read_count
 
     def get_sample_lane_sequencing_metrics_by_flow_cell_name(
         self, flow_cell_name: str
