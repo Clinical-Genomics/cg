@@ -1,7 +1,8 @@
 """API for uploading cancer observations."""
-
 import logging
 from typing import Dict, List
+
+from housekeeper.store.models import Version, File
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import (
@@ -12,15 +13,12 @@ from cg.constants.observations import (
     LOQUSDB_ID,
     LoqusdbBalsamicCustomers,
 )
-from cg.exc import LoqusdbUploadCaseError, CaseNotFoundError, LoqusdbDuplicateRecordError
-from cg.store.models import Family
-
-from housekeeper.store.models import Version, File
-
 from cg.constants.sequencing import SequencingMethod
+from cg.exc import LoqusdbUploadCaseError, CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
+from cg.store.models import Family
 from cg.utils.dict import get_full_path_dictionary
 
 LOG = logging.getLogger(__name__)
@@ -75,7 +73,8 @@ class BalsamicObservationsAPI(ObservationsAPI):
             case_id=case.internal_id,
             snv_vcf_path=input_files.snv_vcf_path if is_somatic else input_files.snv_all_vcf_path,
             sv_vcf_path=input_files.sv_vcf_path if is_somatic else None,
-            gq_threshold=BalsamicLoadParameters.GQ_THRESHOLD.value,
+            qual_gq=True,
+            gq_threshold=BalsamicLoadParameters.QUAL_THRESHOLD.value,
         )
         LOG.info(f"Uploaded {load_output['variants']} variants to {repr(loqusdb_api)}")
 

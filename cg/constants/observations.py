@@ -1,5 +1,4 @@
 """Loqusdb related constants."""
-
 from enum import Enum
 
 from cgmodels.cg.constants import Pipeline, StrEnum
@@ -78,7 +77,4 @@ class BalsamicObservationsAnalysisTag(StrEnum):
 class BalsamicLoadParameters(Enum):
     """Cancer Loqusdb load command parameters."""
 
-    PROFILE_THRESHOLD: float = 0.95
-    GQ_THRESHOLD: int = 10
-    HARD_THRESHOLD: float = 0.95
-    SOFT_THRESHOLD: float = 0.90
+    QUAL_THRESHOLD: int = 10
