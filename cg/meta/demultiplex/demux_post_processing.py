@@ -1,7 +1,6 @@
 """Post-processing Demultiplex API."""
 import logging
 from pathlib import Path
-from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import FlowCellError
@@ -12,11 +11,9 @@ from cg.meta.demultiplex.utils import (
     copy_sample_sheet,
 )
 from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
-from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-from cg.store.models import Flowcell
 from cg.meta.demultiplex.status_db_storage_functions import (
     store_flow_cell_data_in_status_db,
     store_sequencing_metrics_in_status_db,
