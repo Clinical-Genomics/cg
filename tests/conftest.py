@@ -2754,8 +2754,8 @@ def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
     )
 
 
-@pytest.fixture
-def expected_total_reads() -> int:
+@pytest.fixture(name="expected_total_reads", scope="session")
+def fixture_expected_total_reads() -> int:
     return 1_000_000
 
 
@@ -2765,8 +2765,8 @@ def fixture_flow_cell_name() -> str:
     return "HVKJCDRXX"
 
 
-@pytest.fixture
-def store_with_sequencing_metrics(
+@pytest.fixture(name="store_with_sequencing_metrics")
+def fixture_store_with_sequencing_metrics(
     store: Store, sample_id: str, expected_total_reads: int, flow_cell_name: str
 ) -> Generator[Store, None, None]:
     """Return a store with multiple samples with sample lane sequencing metrics."""
@@ -2801,18 +2801,6 @@ def store_with_sequencing_metrics(
     store.session.add_all(sample_lane_sequencing_metrics)
     store.session.commit()
     yield store
-
-
-@pytest.fixture
-def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
-    return "HY7FFDRX2"
-
-
-@pytest.fixture
-def flow_cell_directory_name_demultiplexed_with_bcl_convert(
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-):
-    return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
 
 
 @pytest.fixture(name="demultiplexed_flow_cells_tmp_directory")
