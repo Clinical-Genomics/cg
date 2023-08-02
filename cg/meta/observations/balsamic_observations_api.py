@@ -75,10 +75,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             case_id=case.internal_id,
             snv_vcf_path=input_files.snv_vcf_path if is_somatic else input_files.snv_all_vcf_path,
             sv_vcf_path=input_files.sv_vcf_path if is_somatic else None,
-            profile_vcf_path=None,
             gq_threshold=BalsamicLoadParameters.GQ_THRESHOLD.value,
-            hard_threshold=BalsamicLoadParameters.HARD_THRESHOLD.value,
-            soft_threshold=BalsamicLoadParameters.SOFT_THRESHOLD.value,
         )
         LOG.info(f"Uploaded {load_output['variants']} variants to {repr(loqusdb_api)}")
 
