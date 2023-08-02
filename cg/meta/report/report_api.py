@@ -1,25 +1,24 @@
-"""Module to create delivery reports"""
-
-from datetime import datetime
+"""Module to create delivery reports."""
 import logging
+from datetime import datetime
 from pathlib import Path
-from typing import TextIO, Optional, List
+from typing import Optional, List
 
 import requests
+from housekeeper.store.models import File, Version
+from jinja2 import Environment, PackageLoader, select_autoescape, Template
 from sqlalchemy.orm import Query
 
-from cgmodels.cg.constants import Pipeline
-from housekeeper.store.models import File, Version
-
+from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, MAX_ITEMS_TO_RETRIEVE
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError
 from cg.io.controller import WriteStream
+from cg.meta.meta import MetaAPI
 from cg.meta.report.field_validators import get_missing_report_data, get_empty_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
-from cg.meta.meta import MetaAPI
 from cg.models.report.metadata import SampleMetadataModel
 from cg.models.report.report import (
     ReportModel,
@@ -30,7 +29,6 @@ from cg.models.report.report import (
 )
 from cg.models.report.sample import SampleModel, ApplicationModel, TimestampModel, MethodsModel
 from cg.store.models import Analysis, Application, Family, Sample, FamilySample
-from jinja2 import Environment, PackageLoader, select_autoescape, Template
 
 LOG = logging.getLogger(__name__)
 
@@ -56,47 +54,38 @@ class ReportAPI(MetaAPI):
         return rendered_report
 
     def create_delivery_report_file(
-        self, case_id: str, file_path: Path, analysis_date: datetime, force_report: bool
-    ) -> TextIO:
-        """Generates a temporary file containing a delivery report."""
-        file_path.mkdir(parents=True, exist_ok=True)
+        self, case_id: str, directory: Path, analysis_date: datetime, force_report: bool
+    ) -> Path:
+        """Generates a file containing the delivery report content."""
+        directory.mkdir(parents=True, exist_ok=True)
         delivery_report: str = self.create_delivery_report(
             case_id=case_id, analysis_date=analysis_date, force_report=force_report
         )
-        report_file_path: Path = Path(file_path / "delivery-report.html")
-        with open(report_file_path, "w") as delivery_report_file:
-            delivery_report_file.write(delivery_report)
-        return delivery_report_file
+        report_file_path: Path = Path(directory, "delivery-report.html")
+        with open(report_file_path, "w") as delivery_report_stream:
+            delivery_report_stream.write(delivery_report)
+        return report_file_path
 
     def add_delivery_report_to_hk(
-        self, delivery_report_file: Path, case_id: str, analysis_date: datetime
+        self, case_id: str, delivery_report_file: Path, version: Version
     ) -> Optional[File]:
-        """
-        Adds a delivery report file, if it has not already been generated, to an analysis bundle for a specific case
-        in HK and returns a pointer to it.
-        """
-        version = self.housekeeper_api.version(case_id, analysis_date)
-        try:
-            self.get_delivery_report_from_hk(case_id=case_id)
-        except FileNotFoundError:
-            LOG.info(f"Adding a new delivery report to housekeeper for {case_id}")
-            file: File = self.housekeeper_api.add_file(
-                delivery_report_file.name, version, [case_id, HK_DELIVERY_REPORT_TAG]
-            )
-            self.housekeeper_api.include_file(file, version)
-            self.housekeeper_api.add_commit(file)
-            return file
-        return None
+        """Add a delivery report file to a case bundle and return its file object."""
+        LOG.info(f"Adding a new delivery report to housekeeper for {case_id}")
+        file: File = self.housekeeper_api.add_file(
+            path=delivery_report_file, version_obj=version, tags=[case_id, HK_DELIVERY_REPORT_TAG]
+        )
+        self.housekeeper_api.include_file(file, version)
+        self.housekeeper_api.add_commit(file)
+        return file
 
-    def get_delivery_report_from_hk(self, case_id: str) -> str:
-        """Extracts the delivery reports of a specific case stored in HK."""
-        version: Version = self.housekeeper_api.last_version(case_id)
+    def get_delivery_report_from_hk(self, case_id: str, version: Version) -> Optional[str]:
+        """Return path of a delivery report stored in HK."""
         delivery_report: File = self.housekeeper_api.get_latest_file(
             bundle=case_id, tags=[HK_DELIVERY_REPORT_TAG], version=version.id
         )
         if not delivery_report:
-            LOG.warning(f"No existing delivery report found in housekeeper for {case_id}")
-            raise FileNotFoundError
+            LOG.warning(f"No delivery report found in housekeeper for {case_id}")
+            return None
         return delivery_report.full_path
 
     def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:

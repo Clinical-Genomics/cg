@@ -2,7 +2,7 @@
 
 from typing import Optional, Set
 
-from pydantic import BaseModel, Field
+from pydantic.v1 import BaseModel, Field
 
 
 class CaseTags(BaseModel):

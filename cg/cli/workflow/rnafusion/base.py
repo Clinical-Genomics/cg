@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 import click
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
@@ -253,38 +253,17 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     If failed, it sets it as failed and adds a comment with information of the failed metrics."""
 
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     except CgError as error:
         raise click.Abort() from error
 
-    if not analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id):
-        LOG.error("The analysis status must be in the QC step to be stored.")
-        raise click.Abort()
     analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
-    if dry_run:
-        LOG.info("Dry-run: QC metrics validation would be performed.")
-        return
     try:
-        LOG.info("Validating QC metrics.")
-        analysis_api.validate_qc_metrics(case_id=case_id)
-    except MetricsQCError as error:
-        LOG.error(f"QC metrics failed for {case_id}")
-        analysis_api.trailblazer_api.set_analysis_status(
-            case_id=case_id, status=AnalysisStatus.FAILED
-        )
-        analysis_api.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
-        raise click.Abort() from error
+        analysis_api.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
     except CgError as error:
-        LOG.error(f"Could not create metrics deliverables file: {error}")
-        analysis_api.trailblazer_api.set_analysis_status(
-            case_id=case_id, status=AnalysisStatus.ERROR
-        )
         raise click.Abort() from error
-
-    analysis_api.trailblazer_api.set_analysis_status(
-        case_id=case_id, status=AnalysisStatus.COMPLETED
-    )
 
 
 @rnafusion.command("report-deliver")
@@ -348,8 +327,26 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
 def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     """Generate deliverables files for a case and store in Housekeeper if they
     pass QC metrics checks."""
-    LOG.info("Generating metrics file and performing QC checks for %s", case_id)
-    context.invoke(metrics_deliver, case_id=case_id, dry_run=dry_run)
+    analysis_api: RnafusionAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
+
+    is_latest_analysis_qc: bool = analysis_api.trailblazer_api.is_latest_analysis_qc(
+        case_id=case_id
+    )
+    if not is_latest_analysis_qc and not analysis_api.trailblazer_api.is_latest_analysis_completed(
+        case_id=case_id
+    ):
+        LOG.error(
+            "Case not stored. Trailblazer status must be either QC or COMPLETE to be able to store"
+        )
+        return
+
+    # Avoid storing a case without QC checks previously performed
+    if (
+        is_latest_analysis_qc
+        or not analysis_api.get_metrics_deliverables_path(case_id=case_id).exists()
+    ):
+        LOG.info("Generating metrics file and performing QC checks for %s", case_id)
+        context.invoke(metrics_deliver, case_id=case_id, dry_run=dry_run)
     LOG.info(f"Storing analysis for {case_id}")
     context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
     context.invoke(store_housekeeper, case_id=case_id, dry_run=dry_run)
@@ -364,7 +361,8 @@ def store_available(context: click.Context, dry_run: bool) -> None:
     analysis_api: AnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
     exit_code: int = EXIT_SUCCESS
-    for case_obj in analysis_api.get_cases_to_qc():
+
+    for case_obj in set([*analysis_api.get_cases_to_qc(), *analysis_api.get_cases_to_store()]):
         LOG.info("Storing RNAFUSION deliverables for %s", case_obj.internal_id)
         try:
             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)

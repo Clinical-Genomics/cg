@@ -1,5 +1,4 @@
-from pydantic import BaseModel, BaseConfig, Field
-import xml.etree.ElementTree as ET
+from pydantic.v1 import BaseModel, BaseConfig, Field
 from cg.constants.bcl_convert_metrics import (
     BclConvertQualityMetricsColumnNames,
     BclConvertDemuxMetricsColumnNames,

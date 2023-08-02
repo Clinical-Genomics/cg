@@ -22,7 +22,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 
 LOG = logging.getLogger(__name__)
