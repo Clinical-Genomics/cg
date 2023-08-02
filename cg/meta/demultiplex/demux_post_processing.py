@@ -31,13 +31,9 @@ class DemuxPostProcessingAPI:
     """Post demultiplexing API class."""
 
     def __init__(self, config: CGConfig) -> None:
-        self.stats_api: StatsAPI = config.cg_stats_api
         self.demux_api: DemultiplexingAPI = config.demultiplex_api
         self.status_db: Store = config.status_db
         self.hk_api: HousekeeperAPI = config.housekeeper_api
-        self.transfer_flow_cell_api: TransferFlowCell = TransferFlowCell(
-            db=self.status_db, stats_api=self.stats_api, hk_api=self.hk_api
-        )
         self.dry_run = False
 
     def set_dry_run(self, dry_run: bool) -> None:
