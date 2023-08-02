@@ -47,21 +47,6 @@ class DemuxPostProcessingAPI:
         if dry_run:
             self.demux_api.set_dry_run(dry_run=dry_run)
 
-    def transfer_flow_cell(
-        self, flow_cell_dir: Path, flow_cell_id: str, store: bool = True
-    ) -> None:
-        """Transfer flow cell and sequencing files."""
-        flow_cell: Flowcell = self.transfer_flow_cell_api.transfer(
-            flow_cell_dir=flow_cell_dir, flow_cell_id=flow_cell_id, store=store
-        )
-        if self.dry_run:
-            LOG.info("Dry run will not commit flow cell to database")
-            return
-        self.status_db.session.add(flow_cell)
-        self.status_db.session.commit()
-
-        LOG.info(f"Flow cell added: {flow_cell}")
-
     def finish_flow_cell(self, flow_cell_directory_name: str) -> None:
         """Store data for the demultiplexed flow cell and mark it as ready for delivery.
 
