@@ -284,7 +284,7 @@ class CGConfig(BaseModel):
     scout_api_: ScoutAPI = None
     tar: Optional[CommonAppConfig] = None
     trailblazer: TrailblazerConfig = None
-    trailblazer_api_: TrailblazerAPI = None
+    trailblazer_client_: TrailblazerAPI = None
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
@@ -319,7 +319,7 @@ class CGConfig(BaseModel):
             "mutacc_auto_api_": "mutacc_auto_api",
             "scout_api_": "scout_api",
             "status_db_": "status_db",
-            "trailblazer_api_": "trailblazer_client",
+            "trailblazer_client_": "trailblazer_client",
         }
 
     @property
@@ -453,9 +453,9 @@ class CGConfig(BaseModel):
 
     @property
     def trailblazer_client(self) -> TrailblazerAPI:
-        api = self.__dict__.get("trailblazer_api_")
+        api = self.__dict__.get("trailblazer_client_")
         if api is None:
             LOG.debug("Instantiating trailblazer api")
             api = TrailblazerAPI(config=self.dict())
-            self.trailblazer_api_ = api
+            self.trailblazer_client_ = api
         return api

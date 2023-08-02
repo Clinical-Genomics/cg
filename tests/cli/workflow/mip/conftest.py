@@ -107,7 +107,7 @@ def fixture_mip_rna_context(
     tb_api,
 ) -> CGConfig:
     cg_context.housekeeper_api_ = housekeeper_api
-    cg_context.trailblazer_api_ = tb_api
+    cg_context.trailblazer_client_ = tb_api
     analysis_family_single_case["data_analysis"] = str(Pipeline.MIP_RNA)
     if not cg_context.status_db.get_case_by_internal_id(internal_id=case_id):
         helpers.ensure_case_from_dict(
@@ -127,7 +127,7 @@ def fixture_mip_dna_context(
 ) -> CGConfig:
     _store = cg_context.status_db
     cg_context.housekeeper_api_ = real_housekeeper_api
-    cg_context.trailblazer_api_ = tb_api
+    cg_context.trailblazer_client_ = tb_api
     mip_analysis_api = MipDNAAnalysisAPI(config=cg_context)
 
     # Add apptag to db

@@ -299,7 +299,7 @@ def fixture_balsamic_context(
     """context to use in cli"""
     cg_context.housekeeper_api_ = balsamic_housekeeper
     cg_context.lims_api_ = balsamic_lims
-    cg_context.trailblazer_api_ = trailblazer_client
+    cg_context.trailblazer_client_ = trailblazer_client
     cg_context.meta_apis["analysis_api"] = BalsamicAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 

@@ -180,7 +180,7 @@ def fixture_base_context(
     """context to use in cli"""
     cg_context.status_db_ = analysis_store
     cg_context.housekeeper_api_ = housekeeper_api
-    cg_context.trailblazer_api_ = trailblazer_client
+    cg_context.trailblazer_client_ = trailblazer_client
     cg_context.scout_api_ = MockScoutApi()
     cg_context.meta_apis["scout_upload_api"] = upload_scout_api
     cg_context.mip_rd_dna.root = tempdir
@@ -208,7 +208,7 @@ def fixture_fastq_context(
         project_base_path=Path(base_context.delivery_path),
     )
     base_context.meta_apis["rsync_api"] = RsyncAPI(cg_context)
-    base_context.trailblazer_api_ = trailblazer_client
+    base_context.trailblazer_client_ = trailblazer_client
     return base_context
 
 
