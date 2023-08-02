@@ -51,6 +51,7 @@ class DataFlowFileTransferData(FileTransferData):
 
     @classmethod
     def from_models(cls, file: File, sample: Sample):
+        """Instantiates the class from a File and Sample object."""
         return cls(destination=sample.internal_id, source=file.path)
 
     def trim_path(self, attribute_to_trim: str):
