@@ -60,32 +60,18 @@ def fixture_ddn_dataflow_client(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDa
         return DDNDataFlowClient(ddn_dataflow_config)
 
 
-@pytest.fixture(name="transfer_data_archive")
-def fixture_transfer_data_archive(
-    local_directory: Path, remote_path: Path
-) -> DataFlowFileTransferData:
-    """Return a DataFlowFileTransferData object for archiving."""
+@pytest.fixture(name="transfer_data")
+def fixture_transfer_data(local_directory: Path, remote_path: Path) -> DataFlowFileTransferData:
+    """Return a TransferData object."""
     return DataFlowFileTransferData(
         source=local_directory.as_posix(), destination=remote_path.as_posix()
     )
 
 
-@pytest.fixture(name="transfer_data_retrieve")
-def fixture_transfer_data_retrieve(
-    local_directory: Path, remote_path: Path
-) -> DataFlowFileTransferData:
-    """Return a DataFlowFileTransferData object for retrieval."""
-    return DataFlowFileTransferData(
-        source=remote_path.as_posix(), destination=local_directory.as_posix()
-    )
-
-
 @pytest.fixture(name="transfer_payload")
-def fixture_transfer_payload(transfer_data_archive: DataFlowFileTransferData) -> TransferPayload:
+def fixture_transfer_payload(transfer_data: DataFlowFileTransferData) -> TransferPayload:
     """Return a TransferPayload object containing two identical DataFlowFileTransferData object."""
-    return TransferPayload(
-        files_to_transfer=[transfer_data_archive, transfer_data_archive.copy(deep=True)]
-    )
+    return TransferPayload(files_to_transfer=[transfer_data, transfer_data.copy(deep=True)])
 
 
 @pytest.fixture(name="remote_path")
