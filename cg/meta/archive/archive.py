@@ -43,20 +43,8 @@ class SpringArchiveAPI:
         self.ddn_api: DDNDataFlowApi = ddn_dataflow_api
         self.status_db: Store = status_db
 
-    def get_files_by_archive_location(
-        self, file_data: List[FileAndSample], archive_location: ArchiveLocationsInUse
-    ) -> List[FileAndSample]:
-        """
-        Returns a list of PathAndSample where the associated sample has a specific archive location.
-        """
-        selected_files: List[FileAndSample] = []
-        for file in file_data:
-            sample: Optional[Sample] = self.get_sample(file)
-            if sample and sample.archive_location == archive_location:
-                selected_files.append(file)
-        return selected_files
-
     def get_sample(self, file: File) -> Optional[Sample]:
+        """Fetches the Sample corresponding to a File and logs if a Sample is not found."""
         sample: Optional[Sample] = self.status_db.get_sample_by_internal_id(
             file.version.bundle.name
         )
@@ -68,6 +56,8 @@ class SpringArchiveAPI:
         return sample
 
     def add_samples_to_files(self, files_to_archive: List[File]) -> List[FileAndSample]:
+        """Fetches the Sample corresponding to each File, instantiates a FileAndSample object and
+        adds it to the list which is returned."""
         files_and_samples: List[FileAndSample] = []
         for file in files_to_archive:
             sample: Optional[Sample] = self.get_sample(file)
