@@ -4,14 +4,18 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from urllib.parse import urljoin
 
-from pydantic.v1 import BaseModel
-from requests.models import Response
+from housekeeper.store.models import File
 
 from datetime import datetime
 from cg.constants.constants import APIMethods, FileFormat
 from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import APIRequest, ReadStream
+from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DDNDataFlowConfig
+from pydantic.v1 import BaseModel
+from requests.models import Response
+
+from cg.store.models import Sample
 
 OSTYPE: str = "Unix/MacOS"
 ROOT_TO_TRIM: str = "/home"
@@ -38,12 +42,17 @@ class ResponseFields(str, Enum):
     RETRIEVE_FILES = "files/retrieve"
 
 
-class TransferData(BaseModel):
+class DataFlowFileTransferData(FileTransferData):
     """Model for representing a singular object transfer."""
 
     _metadata = None
     destination: str
     source: str
+
+    @classmethod
+    def from_models(cls, file: File, sample: Sample):
+        """Instantiates the class from a File and Sample object."""
+        return cls(destination=sample.internal_id, source=file.path)
 
     def trim_path(self, attribute_to_trim: str):
         """Trims the given attribute (source or destination) from its root directory."""
@@ -62,7 +71,7 @@ class TransferData(BaseModel):
 class TransferPayload(BaseModel):
     """Model for representing a Dataflow transfer task."""
 
-    files_to_transfer: List[TransferData]
+    files_to_transfer: List[DataFlowFileTransferData]
     osType: str = OSTYPE
     createFolder: bool = False
 
@@ -86,7 +95,7 @@ class TransferPayload(BaseModel):
         payload["metadataList"] = []
         return payload
 
-    def post_request(self, url: str, headers: dict) -> bool:
+    def post_request(self, url: str, headers: dict) -> Response:
         """Sends a request to the given url with, the given headers, and its own content as
         payload."""
         return APIRequest.api_request_from_content(
@@ -94,7 +103,7 @@ class TransferPayload(BaseModel):
             url=url,
             headers=headers,
             json=self.dict(),
-        ).ok
+        )
 
 
 class AuthPayload(BaseModel):
@@ -120,7 +129,7 @@ class AuthResponse(BaseModel):
     refresh: Optional[str]
 
 
-class DDNDataFlowApi:
+class DDNDataFlowApi(ArchiveHandler):
     """Class for archiving and retrieving folders via DDN Dataflow."""
 
     def __init__(self, config: DDNDataFlowConfig):
@@ -186,34 +195,39 @@ class DDNDataFlowApi:
             self._refresh_auth_token()
         return {"Authorization": f"Bearer {self.auth_token}"}
 
-    def archive_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
-        """Archives all folders provided, to their corresponding destination, as given by sources and destination parameter."""
-        transfer_data: List[TransferData] = [
-            TransferData(source=source.as_posix(), destination=destination.as_posix())
-            for source, destination in sources_and_destinations.items()
-        ]
-        transfer_request: TransferPayload = TransferPayload(files_to_transfer=transfer_data)
+    def archive_folders(self, sources_and_destinations: List[DataFlowFileTransferData]) -> int:
+        """Archives all folders provided, to their corresponding destination,
+        as given by sources and destination parameter."""
+        transfer_request: TransferPayload = TransferPayload(
+            files_to_transfer=sources_and_destinations
+        )
         transfer_request.trim_paths(attribute_to_trim=SOURCE_ATTRIBUTE)
         transfer_request.add_repositories(
             source_prefix=self.local_storage, destination_prefix=self.archive_repository
         )
-        return transfer_request.post_request(
+        response: Response = transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.ARCHIVE_FILES),
         )
+        if response.ok:
+            return response.json()["job_id"]
+        else:
+            raise IOError(response.text)
 
-    def retrieve_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
+    def retrieve_folders(self, sources_and_destinations: List[DataFlowFileTransferData]) -> int:
         """Retrieves all folders provided, to their corresponding destination, as given by the sources and destination parameter."""
-        transfer_data: List[TransferData] = [
-            TransferData(source=source.as_posix(), destination=destination.as_posix())
-            for source, destination in sources_and_destinations.items()
-        ]
-        transfer_request: TransferPayload = TransferPayload(files_to_transfer=transfer_data)
+        transfer_request: TransferPayload = TransferPayload(
+            files_to_transfer=sources_and_destinations
+        )
         transfer_request.trim_paths(attribute_to_trim=DESTINATION_ATTRIBUTE)
         transfer_request.add_repositories(
             source_prefix=self.archive_repository, destination_prefix=self.local_storage
         )
-        return transfer_request.post_request(
+        response: Response = transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
         )
+        if response.ok:
+            return response.json()["job_id"]
+        else:
+            raise IOError(response.text)

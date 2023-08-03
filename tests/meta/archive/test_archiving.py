@@ -10,14 +10,14 @@ from cg.constants.constants import FileFormat, APIMethods
 from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import WriteStream, APIRequest
 from cg.meta.archive.ddn_dataflow import (
-    DDNDataFlowApi,
-    TransferData,
-    ROOT_TO_TRIM,
-    TransferPayload,
-    DataflowEndpoints,
-    OSTYPE,
     DESTINATION_ATTRIBUTE,
+    OSTYPE,
+    ROOT_TO_TRIM,
     SOURCE_ATTRIBUTE,
+    DataflowEndpoints,
+    DDNDataFlowApi,
+    DataFlowFileTransferData,
+    TransferPayload,
 )
 from cg.models.cg_config import DDNDataFlowConfig
 
@@ -25,50 +25,58 @@ FUNCTION_TO_MOCK = "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_con
 
 
 def test_correct_source_root(
-    local_directory: Path, transfer_data: TransferData, trimmed_local_directory: Path
+    local_directory: Path,
+    transfer_data_archive: DataFlowFileTransferData,
+    trimmed_local_directory: Path,
 ):
     """Tests the method for trimming the source directory."""
 
     # GIVEN a source path and a destination path
 
     # WHEN creating the correctly formatted dictionary
-    transfer_data.trim_path(attribute_to_trim=SOURCE_ATTRIBUTE)
+    transfer_data_archive.trim_path(attribute_to_trim=SOURCE_ATTRIBUTE)
 
     # THEN the destination path should be the local directory minus the /home part
-    assert transfer_data.source == trimmed_local_directory.as_posix()
+    assert transfer_data_archive.source == trimmed_local_directory.as_posix()
 
 
 def test_correct_destination_root(
-    local_directory: Path, transfer_data: TransferData, trimmed_local_directory: Path
+    local_directory: Path,
+    transfer_data_retrieve: DataFlowFileTransferData,
+    trimmed_local_directory: Path,
 ):
     """Tests the method for trimming the destination directory."""
 
     # GIVEN a source path and a destination path
-    transfer_data.destination = local_directory
 
     # WHEN creating the correctly formatted dictionary
-    transfer_data.trim_path(attribute_to_trim=DESTINATION_ATTRIBUTE)
+    transfer_data_retrieve.trim_path(attribute_to_trim=DESTINATION_ATTRIBUTE)
 
     # THEN the destination path should be the local directory minus the /home part
-    assert transfer_data.destination == trimmed_local_directory.as_posix()
+    assert transfer_data_retrieve.destination == trimmed_local_directory.as_posix()
 
 
 def test_add_repositories(
-    ddn_dataflow_config, local_directory, remote_path, transfer_data: TransferData
+    ddn_dataflow_config,
+    local_directory,
+    remote_path,
+    transfer_data_archive: DataFlowFileTransferData,
 ):
     """Tests the method for adding the repositories to the source and destination paths."""
 
     # GIVEN a TransferData object
 
     # WHEN adding the repositories
-    transfer_data.add_repositories(
+    transfer_data_archive.add_repositories(
         source_prefix=ddn_dataflow_config.local_storage,
         destination_prefix=ddn_dataflow_config.archive_repository,
     )
 
     # THEN the repositories should be prepended to the paths
-    assert transfer_data.source == ddn_dataflow_config.local_storage + str(local_directory)
-    assert transfer_data.destination == ddn_dataflow_config.archive_repository + str(remote_path)
+    assert transfer_data_archive.source == ddn_dataflow_config.local_storage + str(local_directory)
+    assert transfer_data_archive.destination == ddn_dataflow_config.archive_repository + str(
+        remote_path
+    )
 
 
 def test_transfer_payload_dict(transfer_payload: TransferPayload):
@@ -266,11 +274,10 @@ def test__refresh_auth_token(ddn_dataflow_api: DDNDataFlowApi, ok_response: Resp
 
 def test_archive_folders(
     ddn_dataflow_api: DDNDataFlowApi,
-    local_directory: Path,
-    remote_path: Path,
     full_remote_path: str,
     full_local_path: str,
-    ok_response: Response,
+    ok_ddn_response: Response,
+    transfer_data_archive: DataFlowFileTransferData,
 ):
     """Tests that the archiving function correctly formats the input and sends API request."""
 
@@ -280,11 +287,9 @@ def test_archive_folders(
     with mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_response,
+        return_value=ok_ddn_response,
     ) as mock_request_submitter:
-        response: bool = ddn_dataflow_api.archive_folders(
-            {Path(local_directory): Path(remote_path)}
-        )
+        response: int = ddn_dataflow_api.archive_folders([transfer_data_archive])
 
     # THEN a boolean response should be returned
     assert response
@@ -305,11 +310,10 @@ def test_archive_folders(
 
 def test_retrieve_folders(
     ddn_dataflow_api: DDNDataFlowApi,
-    local_directory: Path,
-    remote_path: Path,
     full_remote_path: str,
     full_local_path: str,
-    ok_response: Response,
+    ok_ddn_response: Response,
+    transfer_data_retrieve: DataFlowFileTransferData,
 ):
     """Tests that the retrieve function correctly formats the input and sends API request."""
 
@@ -317,13 +321,9 @@ def test_retrieve_folders(
 
     # WHEN running the retrieve method and providing two paths
     with mock.patch.object(
-        APIRequest,
-        "api_request_from_content",
-        return_value=ok_response,
+        APIRequest, "api_request_from_content", return_value=ok_ddn_response
     ) as mock_request_submitter:
-        response: bool = ddn_dataflow_api.retrieve_folders(
-            {Path(remote_path): Path(local_directory)}
-        )
+        response: int = ddn_dataflow_api.retrieve_folders([transfer_data_retrieve])
 
     # THEN the response returned should be true
     assert response
