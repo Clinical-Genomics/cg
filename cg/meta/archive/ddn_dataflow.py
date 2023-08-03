@@ -10,7 +10,7 @@ from datetime import datetime
 from cg.constants.constants import APIMethods, FileFormat
 from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import APIRequest, ReadStream
-from cg.meta.archive.models import ArchiveHandler, FileTransferData
+from cg.meta.archive.models import ArchiveInterface, ArchiveFile
 from cg.models.cg_config import DDNDataFlowConfig
 from pydantic.v1 import BaseModel
 from requests.models import Response
@@ -42,7 +42,7 @@ class ResponseFields(str, Enum):
     RETRIEVE_FILES = "files/retrieve"
 
 
-class DataFlowFileTransferData(FileTransferData):
+class MiriaFile(ArchiveFile):
     """Model for representing a singular object transfer."""
 
     _metadata = None
@@ -50,7 +50,7 @@ class DataFlowFileTransferData(FileTransferData):
     source: str
 
     @classmethod
-    def from_models(cls, file: File, sample: Sample):
+    def from_file_and_sample(cls, file: File, sample: Sample) -> "MiriaFile":
         """Instantiates the class from a File and Sample object."""
         return cls(destination=sample.internal_id, source=file.path)
 
@@ -71,27 +71,27 @@ class DataFlowFileTransferData(FileTransferData):
 class TransferPayload(BaseModel):
     """Model for representing a Dataflow transfer task."""
 
-    files_to_transfer: List[DataFlowFileTransferData]
+    files_to_transfer: List[MiriaFile]
     osType: str = OSTYPE
     createFolder: bool = False
 
     def trim_paths(self, attribute_to_trim: str):
         """Trims the source path from its root directory for all objects in the transfer."""
-        for transfer_data in self.files_to_transfer:
-            transfer_data.trim_path(attribute_to_trim=attribute_to_trim)
+        for miria_file in self.files_to_transfer:
+            miria_file.trim_path(attribute_to_trim=attribute_to_trim)
 
     def add_repositories(self, source_prefix: str, destination_prefix: str):
         """Prepends the given repositories to the source and destination paths all objects in the
         transfer."""
-        for transfer_data in self.files_to_transfer:
-            transfer_data.add_repositories(
+        for miria_file in self.files_to_transfer:
+            miria_file.add_repositories(
                 source_prefix=source_prefix, destination_prefix=destination_prefix
             )
 
     def dict(self, **kwargs) -> dict:
         """Creates a correctly structured dict to be used as the request payload."""
         payload: dict = super().dict(exclude={"files_to_transfer"})
-        payload["pathInfo"] = [transfer_data.dict() for transfer_data in self.files_to_transfer]
+        payload["pathInfo"] = [miria_file.dict() for miria_file in self.files_to_transfer]
         payload["metadataList"] = []
         return payload
 
@@ -129,7 +129,7 @@ class AuthResponse(BaseModel):
     refresh: Optional[str]
 
 
-class DDNDataFlowClient(ArchiveHandler):
+class DDNDataFlowClient(ArchiveInterface):
     """Class for archiving and retrieving folders via DDN Dataflow."""
 
     def __init__(self, config: DDNDataFlowConfig):
@@ -197,11 +197,11 @@ class DDNDataFlowClient(ArchiveHandler):
 
     def archive_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
         """Archives all folders provided, to their corresponding destination, as given by sources and destination parameter."""
-        transfer_data: List[DataFlowFileTransferData] = [
-            DataFlowFileTransferData(source=source.as_posix(), destination=destination.as_posix())
+        miria_file: List[MiriaFile] = [
+            MiriaFile(source=source.as_posix(), destination=destination.as_posix())
             for source, destination in sources_and_destinations.items()
         ]
-        transfer_request: TransferPayload = TransferPayload(files_to_transfer=transfer_data)
+        transfer_request: TransferPayload = TransferPayload(files_to_transfer=miria_file)
         transfer_request.trim_paths(attribute_to_trim=SOURCE_ATTRIBUTE)
         transfer_request.add_repositories(
             source_prefix=self.local_storage, destination_prefix=self.archive_repository
@@ -213,11 +213,11 @@ class DDNDataFlowClient(ArchiveHandler):
 
     def retrieve_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
         """Retrieves all folders provided, to their corresponding destination, as given by the sources and destination parameter."""
-        transfer_data: List[DataFlowFileTransferData] = [
-            DataFlowFileTransferData(source=source.as_posix(), destination=destination.as_posix())
+        miria_file: List[MiriaFile] = [
+            MiriaFile(source=source.as_posix(), destination=destination.as_posix())
             for source, destination in sources_and_destinations.items()
         ]
-        transfer_request: TransferPayload = TransferPayload(files_to_transfer=transfer_data)
+        transfer_request: TransferPayload = TransferPayload(files_to_transfer=miria_file)
         transfer_request.trim_paths(attribute_to_trim=DESTINATION_ATTRIBUTE)
         transfer_request.add_repositories(
             source_prefix=self.archive_repository, destination_prefix=self.local_storage

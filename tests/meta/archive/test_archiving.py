@@ -16,7 +16,7 @@ from cg.meta.archive.ddn_dataflow import (
     SOURCE_ATTRIBUTE,
     DataflowEndpoints,
     DDNDataFlowClient,
-    DataFlowFileTransferData,
+    MiriaFile,
     TransferPayload,
 )
 from cg.models.cg_config import DDNDataFlowConfig
@@ -25,57 +25,55 @@ FUNCTION_TO_MOCK = "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_con
 
 
 def test_correct_source_root(
-    local_directory: Path, transfer_data: DataFlowFileTransferData, trimmed_local_directory: Path
+    local_directory: Path, miria_file: MiriaFile, trimmed_local_directory: Path
 ):
     """Tests the method for trimming the source directory."""
 
     # GIVEN a source path and a destination path
 
     # WHEN creating the correctly formatted dictionary
-    transfer_data.trim_path(attribute_to_trim=SOURCE_ATTRIBUTE)
+    miria_file.trim_path(attribute_to_trim=SOURCE_ATTRIBUTE)
 
     # THEN the destination path should be the local directory minus the /home part
-    assert transfer_data.source == trimmed_local_directory.as_posix()
+    assert miria_file.source == trimmed_local_directory.as_posix()
 
 
 def test_correct_destination_root(
-    local_directory: Path, transfer_data: DataFlowFileTransferData, trimmed_local_directory: Path
+    local_directory: Path, miria_file: MiriaFile, trimmed_local_directory: Path
 ):
     """Tests the method for trimming the destination directory."""
 
     # GIVEN a source path and a destination path
-    transfer_data.destination = local_directory
+    miria_file.destination = local_directory
 
     # WHEN creating the correctly formatted dictionary
-    transfer_data.trim_path(attribute_to_trim=DESTINATION_ATTRIBUTE)
+    miria_file.trim_path(attribute_to_trim=DESTINATION_ATTRIBUTE)
 
     # THEN the destination path should be the local directory minus the /home part
-    assert transfer_data.destination == trimmed_local_directory.as_posix()
+    assert miria_file.destination == trimmed_local_directory.as_posix()
 
 
-def test_add_repositories(
-    ddn_dataflow_config, local_directory, remote_path, transfer_data: DataFlowFileTransferData
-):
+def test_add_repositories(ddn_dataflow_config, local_directory, remote_path, miria_file: MiriaFile):
     """Tests the method for adding the repositories to the source and destination paths."""
 
-    # GIVEN a DataFlowFileTransferData object
+    # GIVEN a MiriaFile object
 
     # WHEN adding the repositories
-    transfer_data.add_repositories(
+    miria_file.add_repositories(
         source_prefix=ddn_dataflow_config.local_storage,
         destination_prefix=ddn_dataflow_config.archive_repository,
     )
 
     # THEN the repositories should be prepended to the paths
-    assert transfer_data.source == ddn_dataflow_config.local_storage + str(local_directory)
-    assert transfer_data.destination == ddn_dataflow_config.archive_repository + str(remote_path)
+    assert miria_file.source == ddn_dataflow_config.local_storage + str(local_directory)
+    assert miria_file.destination == ddn_dataflow_config.archive_repository + str(remote_path)
 
 
 def test_transfer_payload_dict(transfer_payload: TransferPayload):
     """Tests that the dict structure returned by TransferPayload.dict() is compatible with the
     Dataflow API."""
 
-    # GIVEN a TransferPayload object with two DataFlowFileTransferData objects
+    # GIVEN a TransferPayload object with two MiriaFile objects
 
     # WHEN obtaining the dict representation
     dict_representation: dict = transfer_payload.dict()
@@ -175,33 +173,33 @@ def test_transfer_payload_correct_source_root(transfer_payload: TransferPayload)
     """Tests that the dict structure returned by TransferPayload.dict() is compatible with the
     Dataflow API."""
 
-    # GIVEN a TransferPayload object with two DataFlowFileTransferData objects with untrimmed source paths
-    for transfer_data in transfer_payload.files_to_transfer:
-        assert transfer_data.source.startswith(ROOT_TO_TRIM)
+    # GIVEN a TransferPayload object with two MiriaFile objects with untrimmed source paths
+    for miria_file in transfer_payload.files_to_transfer:
+        assert miria_file.source.startswith(ROOT_TO_TRIM)
 
     # WHEN trimming the source directory
     transfer_payload.trim_paths(attribute_to_trim=SOURCE_ATTRIBUTE)
 
     # THEN the source directories should no longer contain /home
-    for transfer_data in transfer_payload.files_to_transfer:
-        assert not transfer_data.source.startswith(ROOT_TO_TRIM)
+    for miria_file in transfer_payload.files_to_transfer:
+        assert not miria_file.source.startswith(ROOT_TO_TRIM)
 
 
 def test_transfer_payload_correct_destination_root(transfer_payload: TransferPayload):
     """Tests that the dict structure returned by TransferPayload.dict() is compatible with the
     Dataflow API."""
 
-    # GIVEN a TransferPayload object with two DataFlowFileTransferData objects with untrimmed destination paths
-    for transfer_data in transfer_payload.files_to_transfer:
-        transfer_data.destination = ROOT_TO_TRIM + transfer_data.destination
-        assert transfer_data.destination.startswith(ROOT_TO_TRIM)
+    # GIVEN a TransferPayload object with two MiriaFile objects with untrimmed destination paths
+    for miria_file in transfer_payload.files_to_transfer:
+        miria_file.destination = ROOT_TO_TRIM + miria_file.destination
+        assert miria_file.destination.startswith(ROOT_TO_TRIM)
 
     # WHEN trimming the destination directories
     transfer_payload.trim_paths(attribute_to_trim=DESTINATION_ATTRIBUTE)
 
     # THEN the destination directories should no longer contain /home
-    for transfer_data in transfer_payload.files_to_transfer:
-        assert not transfer_data.destination.startswith(ROOT_TO_TRIM)
+    for miria_file in transfer_payload.files_to_transfer:
+        assert not miria_file.destination.startswith(ROOT_TO_TRIM)
 
 
 def test_auth_header_old_token(ddn_dataflow_client: DDNDataFlowClient, old_timestamp: datetime):

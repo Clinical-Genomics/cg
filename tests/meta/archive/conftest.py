@@ -15,7 +15,7 @@ from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.archive.ddn_dataflow import (
     ROOT_TO_TRIM,
     DDNDataFlowClient,
-    DataFlowFileTransferData,
+    MiriaFile,
     TransferPayload,
 )
 from cg.models.cg_config import DDNDataFlowConfig
@@ -60,18 +60,16 @@ def fixture_ddn_dataflow_client(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDa
         return DDNDataFlowClient(ddn_dataflow_config)
 
 
-@pytest.fixture(name="transfer_data")
-def fixture_transfer_data(local_directory: Path, remote_path: Path) -> DataFlowFileTransferData:
+@pytest.fixture(name="miria_file")
+def fixture_miria_file(local_directory: Path, remote_path: Path) -> MiriaFile:
     """Return a TransferData object."""
-    return DataFlowFileTransferData(
-        source=local_directory.as_posix(), destination=remote_path.as_posix()
-    )
+    return MiriaFile(source=local_directory.as_posix(), destination=remote_path.as_posix())
 
 
 @pytest.fixture(name="transfer_payload")
-def fixture_transfer_payload(transfer_data: DataFlowFileTransferData) -> TransferPayload:
-    """Return a TransferPayload object containing two identical DataFlowFileTransferData object."""
-    return TransferPayload(files_to_transfer=[transfer_data, transfer_data.copy(deep=True)])
+def fixture_transfer_payload(miria_file: MiriaFile) -> TransferPayload:
+    """Return a TransferPayload object containing two identical MiriaFile object."""
+    return TransferPayload(files_to_transfer=[miria_file, miria_file.copy(deep=True)])
 
 
 @pytest.fixture(name="remote_path")
