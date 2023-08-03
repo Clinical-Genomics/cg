@@ -14,7 +14,7 @@ from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.archive.ddn_dataflow import (
     ROOT_TO_TRIM,
-    DDNDataFlowApi,
+    DDNDataFlowClient,
     DataFlowFileTransferData,
     TransferPayload,
 )
@@ -46,8 +46,8 @@ def fixture_ok_ddn_response(ok_response: Response):
     return ok_response
 
 
-@pytest.fixture(name="ddn_dataflow_api")
-def fixture_ddn_dataflow_api(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDataFlowApi:
+@pytest.fixture(name="ddn_dataflow_client")
+def fixture_ddn_dataflow_client(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDataFlowClient:
     """Returns a DDNApi without tokens being set."""
     mock_ddn_auth_success_response = Response()
     mock_ddn_auth_success_response.status_code = 200
@@ -63,7 +63,7 @@ def fixture_ddn_dataflow_api(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDataF
         "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content",
         return_value=mock_ddn_auth_success_response,
     ):
-        return DDNDataFlowApi(ddn_dataflow_config)
+        return DDNDataFlowClient(ddn_dataflow_config)
 
 
 @pytest.fixture(name="transfer_data_archive")
@@ -201,8 +201,8 @@ def fixture_spring_archive_api(
     father_sample_id: str,
     helpers,
 ) -> SpringArchiveAPI:
-    """Returns an ArchiveAPI with a populated housekeeper store and a DDNDataFlowApi.
-    Also adds /home/ as a prefix for each SPRING file for the DDNDataFlowApi to accept them."""
+    """Returns an ArchiveAPI with a populated housekeeper store and a DDNDataFlowClient.
+    Also adds /home/ as a prefix for each SPRING file for the DDNDataFlowClient to accept them."""
     for spring_file in populated_housekeeper_api.files(tags=[SequencingFileTag.SPRING]):
         spring_file.path = f"/home/{spring_file.path}"
     populated_housekeeper_api.commit()

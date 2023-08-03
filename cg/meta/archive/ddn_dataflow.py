@@ -129,7 +129,7 @@ class AuthResponse(BaseModel):
     refresh: Optional[str]
 
 
-class DDNDataFlowApi(ArchiveHandler):
+class DDNDataFlowClient(ArchiveHandler):
     """Class for archiving and retrieving folders via DDN Dataflow."""
 
     def __init__(self, config: DDNDataFlowConfig):

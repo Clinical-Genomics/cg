@@ -15,7 +15,7 @@ from cg.meta.archive.ddn_dataflow import (
     ROOT_TO_TRIM,
     SOURCE_ATTRIBUTE,
     DataflowEndpoints,
-    DDNDataFlowApi,
+    DDNDataFlowClient,
     DataFlowFileTransferData,
     TransferPayload,
 )
@@ -98,13 +98,13 @@ def test_transfer_payload_dict(transfer_payload: TransferPayload):
     assert dict_representation.get("pathInfo")[0].get("destination", None)
 
 
-def test_ddn_dataflow_api_initialization(
+def test_ddn_dataflow_client_initialization(
     future_date: datetime,
     local_storage_repository: str,
     remote_storage_repository: str,
     ok_response: Response,
 ):
-    """Tests the initialization of the DDNDataFlowApi object with given an ok-response."""
+    """Tests the initialization of the DDNDataFlowClient object with given an ok-response."""
 
     # GIVEN a valid DDNConfig object
     valid_config = DDNDataFlowConfig(
@@ -126,15 +126,15 @@ def test_ddn_dataflow_api_initialization(
         file_format=FileFormat.JSON,
     ).encode()
 
-    # WHEN initializing the DDNDataFlowApi class with the valid DDNConfig object
+    # WHEN initializing the DDNDataFlowClient class with the valid DDNConfig object
     with mock.patch(
         FUNCTION_TO_MOCK,
         return_value=ok_response,
     ):
-        ddn_dataflow_api = DDNDataFlowApi(config=valid_config)
+        ddn_dataflow_client = DDNDataFlowClient(config=valid_config)
 
-    # THEN the DDNDataFlowApi object should be created successfully
-    assert isinstance(ddn_dataflow_api, DDNDataFlowApi)
+    # THEN the DDNDataFlowClient object should be created successfully
+    assert isinstance(ddn_dataflow_client, DDNDataFlowClient)
 
 
 def test_set_auth_tokens(ddn_dataflow_config: DDNDataFlowConfig, ok_response: Response):
@@ -146,22 +146,22 @@ def test_set_auth_tokens(ddn_dataflow_config: DDNDataFlowConfig, ok_response: Re
         b'{"access": "test_auth_token", "refresh": "test_refresh_token", "expire": 1677649423}'
     )
 
-    # WHEN initializing the DDNDataFlowApi class with the valid DDNConfig object
+    # WHEN initializing the DDNDataFlowClient class with the valid DDNConfig object
     with mock.patch(
         FUNCTION_TO_MOCK,
         return_value=ok_response,
     ):
-        ddn_dataflow_api = DDNDataFlowApi(config=ddn_dataflow_config)
+        ddn_dataflow_client = DDNDataFlowClient(config=ddn_dataflow_config)
 
     # THEN the auth and refresh tokens should be set correctly
-    assert ddn_dataflow_api.auth_token == "test_auth_token"
-    assert ddn_dataflow_api.refresh_token == "test_refresh_token"
+    assert ddn_dataflow_client.auth_token == "test_auth_token"
+    assert ddn_dataflow_client.refresh_token == "test_refresh_token"
 
 
-def test_ddn_dataflow_api_initialization_invalid_credentials(
+def test_ddn_dataflow_client_initialization_invalid_credentials(
     ddn_dataflow_config: DDNDataFlowConfig, unauthorized_response: Response
 ):
-    """Tests initialization of a DDNDataFlowApi when an error is returned."""
+    """Tests initialization of a DDNDataFlowClient when an error is returned."""
 
     # GIVEN a valid DDNConfig object with invalid credentials
     ddn_dataflow_config.password = "Wrong_password"
@@ -169,14 +169,14 @@ def test_ddn_dataflow_api_initialization_invalid_credentials(
     # GIVEN a mock response with a 401 Unauthorized status code
     unauthorized_response._content = b'{"detail": "Invalid credentials"}'
 
-    # WHEN initializing the DDNDataFlowApi class with the invalid credentials
+    # WHEN initializing the DDNDataFlowClient class with the invalid credentials
     with mock.patch(
         "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content",
         return_value=unauthorized_response,
     ):
         # THEN an exception should be raised
         with pytest.raises(DdnDataflowAuthenticationError):
-            DDNDataFlowApi(config=ddn_dataflow_config)
+            DDNDataFlowClient(config=ddn_dataflow_config)
 
 
 def test_transfer_payload_correct_source_root(transfer_payload: TransferPayload):
@@ -212,44 +212,44 @@ def test_transfer_payload_correct_destination_root(transfer_payload: TransferPay
         assert not transfer_data.destination.startswith(ROOT_TO_TRIM)
 
 
-def test_auth_header_old_token(ddn_dataflow_api: DDNDataFlowApi, old_timestamp: datetime):
+def test_auth_header_old_token(ddn_dataflow_client: DDNDataFlowClient, old_timestamp: datetime):
     """Tests that the refresh method is called if the auth token is too old."""
 
-    # GIVEN a DDNDataFlowApi with an old auth token
-    ddn_dataflow_api.token_expiration = old_timestamp
+    # GIVEN a DDNDataFlowClient with an old auth token
+    ddn_dataflow_client.token_expiration = old_timestamp
 
     # WHEN asking for the auth header
-    with mock.patch.object(ddn_dataflow_api, "_refresh_auth_token") as mock_refresh_method:
-        auth_header: dict = ddn_dataflow_api.auth_header
+    with mock.patch.object(ddn_dataflow_client, "_refresh_auth_token") as mock_refresh_method:
+        auth_header: dict = ddn_dataflow_client.auth_header
 
     # THEN the refresh method should have been called
     mock_refresh_method.assert_called()
 
     # THEN the returned dict should have the correct format and contain the current auth token
-    assert auth_header.get("Authorization") == f"Bearer {ddn_dataflow_api.auth_token}"
+    assert auth_header.get("Authorization") == f"Bearer {ddn_dataflow_client.auth_token}"
 
 
-def test_auth_header_new_token(ddn_dataflow_api: DDNDataFlowApi):
+def test_auth_header_new_token(ddn_dataflow_client: DDNDataFlowClient):
     """Tests that the refresh method is not called if the auth token is new."""
 
-    # GIVEN a DDNDataFlowApi with a new auth token
-    ddn_dataflow_api.token_expiration = datetime.now() + timedelta(minutes=20)
+    # GIVEN a DDNDataFlowClient with a new auth token
+    ddn_dataflow_client.token_expiration = datetime.now() + timedelta(minutes=20)
 
     # WHEN asking for the auth header
-    with mock.patch.object(ddn_dataflow_api, "_refresh_auth_token") as mock_refresh_method:
-        auth_header: dict = ddn_dataflow_api.auth_header
+    with mock.patch.object(ddn_dataflow_client, "_refresh_auth_token") as mock_refresh_method:
+        auth_header: dict = ddn_dataflow_client.auth_header
 
     # THEN the refresh method should not have been called
     mock_refresh_method.assert_not_called()
 
     # THEN the returned dict should have the correct format and contain the current auth token
-    assert auth_header.get("Authorization") == f"Bearer {ddn_dataflow_api.auth_token}"
+    assert auth_header.get("Authorization") == f"Bearer {ddn_dataflow_client.auth_token}"
 
 
-def test__refresh_auth_token(ddn_dataflow_api: DDNDataFlowApi, ok_response: Response):
+def test__refresh_auth_token(ddn_dataflow_client: DDNDataFlowClient, ok_response: Response):
     """Tests if the refresh token is correctly updated when used."""
 
-    # GIVEN a DDNDataFlowApi with new token
+    # GIVEN a DDNDataFlowClient with new token
     new_token: str = "new_token"
     new_expiration: datetime = datetime.now() + timedelta(minutes=30)
     ok_response._content = WriteStream.write_stream_from_content(
@@ -265,15 +265,15 @@ def test__refresh_auth_token(ddn_dataflow_api: DDNDataFlowApi, ok_response: Resp
         FUNCTION_TO_MOCK,
         return_value=ok_response,
     ):
-        ddn_dataflow_api._refresh_auth_token()
+        ddn_dataflow_client._refresh_auth_token()
 
     # THEN the api token and the expiration time should be updated
-    assert ddn_dataflow_api.auth_token == new_token
-    assert ddn_dataflow_api.token_expiration.second == new_expiration.second
+    assert ddn_dataflow_client.auth_token == new_token
+    assert ddn_dataflow_client.token_expiration.second == new_expiration.second
 
 
 def test_archive_folders(
-    ddn_dataflow_api: DDNDataFlowApi,
+    ddn_dataflow_client: DDNDataFlowClient,
     full_remote_path: str,
     full_local_path: str,
     ok_ddn_response: Response,
@@ -289,7 +289,7 @@ def test_archive_folders(
         "api_request_from_content",
         return_value=ok_ddn_response,
     ) as mock_request_submitter:
-        response: int = ddn_dataflow_api.archive_folders([transfer_data_archive])
+        response: int = ddn_dataflow_client.archive_folders([transfer_data_archive])
 
     # THEN a boolean response should be returned
     assert response
@@ -297,8 +297,8 @@ def test_archive_folders(
     # THEN the mocked submit function should have been called exactly once with correct arguments
     mock_request_submitter.assert_called_once_with(
         api_method=APIMethods.POST,
-        url=urljoin(base=ddn_dataflow_api.url, url=DataflowEndpoints.ARCHIVE_FILES),
-        headers=dict(ddn_dataflow_api.headers, **ddn_dataflow_api.auth_header),
+        url=urljoin(base=ddn_dataflow_client.url, url=DataflowEndpoints.ARCHIVE_FILES),
+        headers=dict(ddn_dataflow_client.headers, **ddn_dataflow_client.auth_header),
         json={
             "pathInfo": [{"source": full_local_path, "destination": full_remote_path}],
             "osType": OSTYPE,
@@ -309,7 +309,7 @@ def test_archive_folders(
 
 
 def test_retrieve_folders(
-    ddn_dataflow_api: DDNDataFlowApi,
+    ddn_dataflow_client: DDNDataFlowClient,
     full_remote_path: str,
     full_local_path: str,
     ok_ddn_response: Response,
@@ -323,7 +323,7 @@ def test_retrieve_folders(
     with mock.patch.object(
         APIRequest, "api_request_from_content", return_value=ok_ddn_response
     ) as mock_request_submitter:
-        response: int = ddn_dataflow_api.retrieve_folders([transfer_data_retrieve])
+        response: int = ddn_dataflow_client.retrieve_folders([transfer_data_retrieve])
 
     # THEN the response returned should be true
     assert response
@@ -331,8 +331,8 @@ def test_retrieve_folders(
     # THEN the mocked submit function should have been called exactly once with correct arguments
     mock_request_submitter.assert_called_once_with(
         api_method=APIMethods.POST,
-        url=urljoin(base=ddn_dataflow_api.url, url=DataflowEndpoints.RETRIEVE_FILES),
-        headers=dict(ddn_dataflow_api.headers, **ddn_dataflow_api.auth_header),
+        url=urljoin(base=ddn_dataflow_client.url, url=DataflowEndpoints.RETRIEVE_FILES),
+        headers=dict(ddn_dataflow_client.headers, **ddn_dataflow_client.auth_header),
         json={
             "pathInfo": [{"source": full_remote_path, "destination": full_local_path}],
             "osType": OSTYPE,
