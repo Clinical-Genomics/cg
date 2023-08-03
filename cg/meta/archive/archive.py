@@ -1,43 +1,76 @@
 import logging
-from collections import namedtuple
 from typing import List, Optional
+
+from housekeeper.store.models import File
+from pydantic.v1 import BaseModel, ConfigDict
 
 from cg.apps.cgstats.db.models import Sample
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.archiving import ArchiveLocationsInUse
+from cg.meta.archive.ddn_dataflow import DDNDataFlowApi
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
-PathAndSample = namedtuple("PathAndSample", "path sample_internal_id")
+
+class FileAndSample(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    file: File
+    sample: Sample
+
+
+def get_files_by_archive_location(
+    files_and_samples: List[FileAndSample], archive_location: ArchiveLocationsInUse
+) -> List[FileAndSample]:
+    """
+    Returns a list of FileAndSample where the associated sample has a specific archive location.
+    """
+    return [
+        file_and_sample
+        for file_and_sample in files_and_samples
+        if file_and_sample.sample.archive_location == archive_location
+    ]
 
 
 class SpringArchiveAPI:
     """Class handling the archiving of sample SPRING files to an off-premise location for long
     term storage."""
 
-    def __init__(self, housekeeper_api: HousekeeperAPI, status_db: Store):
+    def __init__(
+        self, ddn_dataflow_api: DDNDataFlowApi, housekeeper_api: HousekeeperAPI, status_db: Store
+    ):
         self.housekeeper_api: HousekeeperAPI = housekeeper_api
+        self.ddn_api: DDNDataFlowApi = ddn_dataflow_api
         self.status_db: Store = status_db
 
     def get_files_by_archive_location(
-        self, file_data: List[PathAndSample], archive_location: ArchiveLocationsInUse
-    ) -> List[PathAndSample]:
+        self, file_data: List[FileAndSample], archive_location: ArchiveLocationsInUse
+    ) -> List[FileAndSample]:
         """
         Returns a list of PathAndSample where the associated sample has a specific archive location.
         """
-        selected_files: List[PathAndSample] = []
+        selected_files: List[FileAndSample] = []
         for file in file_data:
             sample: Optional[Sample] = self.get_sample(file)
             if sample and sample.archive_location == archive_location:
                 selected_files.append(file)
         return selected_files
 
-    def get_sample(self, file: PathAndSample) -> Optional[Sample]:
-        sample: Optional[Sample] = self.status_db.get_sample_by_internal_id(file.sample_internal_id)
+    def get_sample(self, file: File) -> Optional[Sample]:
+        sample: Optional[Sample] = self.status_db.get_sample_by_internal_id(
+            file.version.bundle.name
+        )
         if not sample:
             LOG.warning(
-                f"No sample found in status_db corresponding to sample_id {file.sample_internal_id}."
+                f"No sample found in status_db corresponding to sample_id {file.version.bundle.name}."
                 f"Skipping archiving for corresponding file {file.path}."
             )
         return sample
+
+    def add_samples_to_files(self, files_to_archive: List[File]) -> List[FileAndSample]:
+        files_and_samples: List[FileAndSample] = []
+        for file in files_to_archive:
+            sample: Optional[Sample] = self.get_sample(file)
+            if sample:
+                files_and_samples.append(FileAndSample(file=file, sample=sample))
+        return files_and_samples
