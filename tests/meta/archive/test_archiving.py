@@ -274,9 +274,11 @@ def test__refresh_auth_token(ddn_dataflow_client: DDNDataFlowClient, ok_response
 
 def test_archive_folders(
     ddn_dataflow_client: DDNDataFlowClient,
+    local_directory: Path,
+    remote_path: Path,
     full_remote_path: str,
     full_local_path: str,
-    ok_ddn_response: Response,
+    ok_response: Response,
     transfer_data_archive: DataFlowFileTransferData,
 ):
     """Tests that the archiving function correctly formats the input and sends API request."""
@@ -287,9 +289,11 @@ def test_archive_folders(
     with mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_response,
+        return_value=ok_response,
     ) as mock_request_submitter:
-        response: int = ddn_dataflow_client.archive_folders([transfer_data_archive])
+        response: bool = ddn_dataflow_client.archive_folders(
+            {Path(local_directory): Path(remote_path)}
+        )
 
     # THEN a boolean response should be returned
     assert response
@@ -310,9 +314,11 @@ def test_archive_folders(
 
 def test_retrieve_folders(
     ddn_dataflow_client: DDNDataFlowClient,
+    local_directory: Path,
+    remote_path: Path,
     full_remote_path: str,
     full_local_path: str,
-    ok_ddn_response: Response,
+    ok_response: Response,
     transfer_data_retrieve: DataFlowFileTransferData,
 ):
     """Tests that the retrieve function correctly formats the input and sends API request."""
@@ -321,9 +327,13 @@ def test_retrieve_folders(
 
     # WHEN running the retrieve method and providing two paths
     with mock.patch.object(
-        APIRequest, "api_request_from_content", return_value=ok_ddn_response
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_response,
     ) as mock_request_submitter:
-        response: int = ddn_dataflow_client.retrieve_folders([transfer_data_retrieve])
+        response: bool = ddn_dataflow_client.retrieve_folders(
+            {Path(remote_path): Path(local_directory)}
+        )
 
     # THEN the response returned should be true
     assert response

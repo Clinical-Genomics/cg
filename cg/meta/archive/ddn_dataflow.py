@@ -95,7 +95,7 @@ class TransferPayload(BaseModel):
         payload["metadataList"] = []
         return payload
 
-    def post_request(self, url: str, headers: dict) -> Response:
+    def post_request(self, url: str, headers: dict) -> bool:
         """Sends a request to the given url with, the given headers, and its own content as
         payload."""
         return APIRequest.api_request_from_content(
@@ -103,7 +103,7 @@ class TransferPayload(BaseModel):
             url=url,
             headers=headers,
             json=self.dict(),
-        )
+        ).ok
 
 
 class AuthPayload(BaseModel):
@@ -195,39 +195,34 @@ class DDNDataFlowClient(ArchiveHandler):
             self._refresh_auth_token()
         return {"Authorization": f"Bearer {self.auth_token}"}
 
-    def archive_folders(self, sources_and_destinations: List[DataFlowFileTransferData]) -> int:
-        """Archives all folders provided, to their corresponding destination,
-        as given by sources and destination parameter."""
-        transfer_request: TransferPayload = TransferPayload(
-            files_to_transfer=sources_and_destinations
-        )
+    def archive_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
+        """Archives all folders provided, to their corresponding destination, as given by sources and destination parameter."""
+        transfer_data: List[DataFlowFileTransferData] = [
+            DataFlowFileTransferData(source=source.as_posix(), destination=destination.as_posix())
+            for source, destination in sources_and_destinations.items()
+        ]
+        transfer_request: TransferPayload = TransferPayload(files_to_transfer=transfer_data)
         transfer_request.trim_paths(attribute_to_trim=SOURCE_ATTRIBUTE)
         transfer_request.add_repositories(
             source_prefix=self.local_storage, destination_prefix=self.archive_repository
         )
-        response: Response = transfer_request.post_request(
+        return transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.ARCHIVE_FILES),
         )
-        if response.ok:
-            return response.json()["job_id"]
-        else:
-            raise IOError(response.text)
 
-    def retrieve_folders(self, sources_and_destinations: List[DataFlowFileTransferData]) -> int:
+    def retrieve_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
         """Retrieves all folders provided, to their corresponding destination, as given by the sources and destination parameter."""
-        transfer_request: TransferPayload = TransferPayload(
-            files_to_transfer=sources_and_destinations
-        )
+        transfer_data: List[DataFlowFileTransferData] = [
+            DataFlowFileTransferData(source=source.as_posix(), destination=destination.as_posix())
+            for source, destination in sources_and_destinations.items()
+        ]
+        transfer_request: TransferPayload = TransferPayload(files_to_transfer=transfer_data)
         transfer_request.trim_paths(attribute_to_trim=DESTINATION_ATTRIBUTE)
         transfer_request.add_repositories(
             source_prefix=self.archive_repository, destination_prefix=self.local_storage
         )
-        response: Response = transfer_request.post_request(
+        return transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
         )
-        if response.ok:
-            return response.json()["job_id"]
-        else:
-            raise IOError(response.text)
