@@ -183,12 +183,3 @@ def fixture_spring_archive_api(
         housekeeper_api=populated_housekeeper_api,
         status_db=archive_store,
     )
-
-
-# @pytest.fixture(name="file_and_sample")
-# def fixture_file_and_sample(spring_archive_api: SpringArchiveAPI, sample_id):
-#     """Returns a FileAndSample object with a real File and Sample objects."""
-#     return FileAndSample(
-#         file=spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first(),
-#         sample=spring_archive_api.status_db.get_sample_by_internal_id(sample_id),
-#     )

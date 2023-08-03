@@ -27,6 +27,7 @@ def test_get_files_by_archive_location(
                 sample=spring_archive_api.status_db.get_sample_by_internal_id(sample),
             )
         )
+
     # WHEN fetching the files by archive location
     selected_files: List[FileAndSample] = get_files_by_archive_location(
         files_and_samples, ArchiveLocationsInUse.KAROLINSKA_BUCKET

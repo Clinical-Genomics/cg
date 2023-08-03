@@ -4,10 +4,10 @@ from typing import List, Optional
 from housekeeper.store.models import File
 from pydantic import BaseModel, ConfigDict
 
-from cg.apps.cgstats.db.models import Sample
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.archiving import ArchiveLocationsInUse
 from cg.store import Store
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
