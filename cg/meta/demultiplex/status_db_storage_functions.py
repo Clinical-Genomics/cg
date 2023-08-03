@@ -1,5 +1,5 @@
 """Functions interacting with statusdb in the DemuxPostProcessingAPI."""
-from typing import List, Optional
+from typing import List, Optional, Set
 import logging
 
 from cg.store.models import Sample
@@ -51,12 +51,12 @@ def add_samples_to_flow_cell_in_status_db(
         sample_sheet_path=parsed_flow_cell.sample_sheet_path,
         flow_cell_sample_type=parsed_flow_cell.sample_type,
     )
-    samples: List[Sample] = [
+    samples: Set[Sample] = {
         store.get_sample_by_internal_id(sample_internal_id)
         for sample_internal_id in sample_internal_ids
-    ]
+    }
     for sample in samples:
-        if sample:
+        if sample and sample not in flow_cell.samples:
             flow_cell.samples.append(sample)
     return flow_cell
 
