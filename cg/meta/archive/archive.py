@@ -2,12 +2,11 @@ import logging
 from typing import List, Optional
 
 from housekeeper.store.models import File
-from pydantic.v1 import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict
 
 from cg.apps.cgstats.db.models import Sample
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.archiving import ArchiveLocationsInUse
-from cg.meta.archive.ddn_dataflow import DDNDataFlowApi
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -36,11 +35,8 @@ class SpringArchiveAPI:
     """Class handling the archiving of sample SPRING files to an off-premise location for long
     term storage."""
 
-    def __init__(
-        self, ddn_dataflow_api: DDNDataFlowApi, housekeeper_api: HousekeeperAPI, status_db: Store
-    ):
+    def __init__(self, housekeeper_api: HousekeeperAPI, status_db: Store):
         self.housekeeper_api: HousekeeperAPI = housekeeper_api
-        self.ddn_api: DDNDataFlowApi = ddn_dataflow_api
         self.status_db: Store = status_db
 
     def get_sample(self, file: File) -> Optional[Sample]:
