@@ -35,6 +35,12 @@ def fixture_ddn_dataflow_config(
     )
 
 
+@pytest.fixture(name="ok_ddn_response")
+def fixture_ok_ddn_response(ok_response: Response):
+    ok_response._content = b'{"job_id": "123"}'
+    return ok_response
+
+
 @pytest.fixture(name="ddn_dataflow_api")
 def fixture_ddn_dataflow_api(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDataFlowApi:
     """Returns a DDNApi without tokens being set."""
@@ -55,16 +61,24 @@ def fixture_ddn_dataflow_api(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDataF
         return DDNDataFlowApi(ddn_dataflow_config)
 
 
-@pytest.fixture(name="transfer_data")
-def fixture_transfer_data(local_directory: Path, remote_path: Path) -> TransferData:
-    """Return a TransferData object."""
+@pytest.fixture(name="transfer_data_archive")
+def fixture_transfer_data_archive(local_directory: Path, remote_path: Path) -> TransferData:
+    """Return a DataFlowFileTransferData object for archiving."""
     return TransferData(source=local_directory.as_posix(), destination=remote_path.as_posix())
 
 
+@pytest.fixture(name="transfer_data_retrieve")
+def fixture_transfer_data_retrieve(local_directory: Path, remote_path: Path) -> TransferData:
+    """Return a DataFlowFileTransferData object for retrieval."""
+    return TransferData(source=remote_path.as_posix(), destination=local_directory.as_posix())
+
+
 @pytest.fixture(name="transfer_payload")
-def fixture_transfer_payload(transfer_data: TransferData) -> TransferPayload:
-    """Return a TransferPayload object containing two identical TransferData object.."""
-    return TransferPayload(files_to_transfer=[transfer_data, transfer_data.copy(deep=True)])
+def fixture_transfer_payload(transfer_data_archive: TransferData) -> TransferPayload:
+    """Return a TransferPayload object containing two identical DataFlowFileTransferData object."""
+    return TransferPayload(
+        files_to_transfer=[transfer_data_archive, transfer_data_archive.copy(deep=True)]
+    )
 
 
 @pytest.fixture(name="remote_path")
