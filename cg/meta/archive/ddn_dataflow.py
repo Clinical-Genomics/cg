@@ -197,11 +197,11 @@ class DDNDataFlowClient(ArchiveInterface):
 
     def archive_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
         """Archives all folders provided, to their corresponding destination, as given by sources and destination parameter."""
-        miria_file: List[MiriaFile] = [
+        miria_files: List[MiriaFile] = [
             MiriaFile(source=source.as_posix(), destination=destination.as_posix())
             for source, destination in sources_and_destinations.items()
         ]
-        transfer_request: TransferPayload = TransferPayload(files_to_transfer=miria_file)
+        transfer_request: TransferPayload = TransferPayload(files_to_transfer=miria_files)
         transfer_request.trim_paths(attribute_to_trim=SOURCE_ATTRIBUTE)
         transfer_request.add_repositories(
             source_prefix=self.local_storage, destination_prefix=self.archive_repository
@@ -213,11 +213,11 @@ class DDNDataFlowClient(ArchiveInterface):
 
     def retrieve_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
         """Retrieves all folders provided, to their corresponding destination, as given by the sources and destination parameter."""
-        miria_file: List[MiriaFile] = [
+        miria_files: List[MiriaFile] = [
             MiriaFile(source=source.as_posix(), destination=destination.as_posix())
             for source, destination in sources_and_destinations.items()
         ]
-        transfer_request: TransferPayload = TransferPayload(files_to_transfer=miria_file)
+        transfer_request: TransferPayload = TransferPayload(files_to_transfer=miria_files)
         transfer_request.trim_paths(attribute_to_trim=DESTINATION_ATTRIBUTE)
         transfer_request.add_repositories(
             source_prefix=self.archive_repository, destination_prefix=self.local_storage
