@@ -12,7 +12,7 @@ from cg.exc import DdnDataflowAuthenticationError
 from cg.meta.archive.models import ArchiveInterface, ArchiveFile
 from cg.io.controller import APIRequest
 from cg.models.cg_config import DDNDataFlowConfig
-from pydantic.v1 import BaseModel
+from pydantic import BaseModel
 from requests.models import Response
 
 from cg.store.models import Sample

@@ -72,8 +72,8 @@ def fixture_miria_file(local_directory: Path, remote_path: Path) -> MiriaFile:
     return MiriaFile(source=local_directory.as_posix(), destination=remote_path.as_posix())
 
 
-@pytest.fixture(name="retrieve")
-def fixture_transfer_data_retrieve(local_directory: Path, remote_path: Path) -> MiriaFile:
+@pytest.fixture(name="miria_file_retrieve")
+def fixture_miria_file_retrieve(local_directory: Path, remote_path: Path) -> MiriaFile:
     """Return a MiriaFile for retrieval."""
     return MiriaFile(source=remote_path.as_posix(), destination=local_directory.as_posix())
 

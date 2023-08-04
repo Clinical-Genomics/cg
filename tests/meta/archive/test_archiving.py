@@ -25,32 +25,32 @@ FUNCTION_TO_MOCK = "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_con
 
 
 def test_correct_source_root(
-    local_directory: Path, miria_file: MiriaFile, trimmed_local_directory: Path
+    local_directory: Path, miria_file_archive: MiriaFile, trimmed_local_directory: Path
 ):
     """Tests the method for trimming the source directory."""
 
     # GIVEN a MiriaFile with a source path and a destination path
 
     # WHEN trimming the path of the source attribute
-    miria_file.trim_path(attribute_to_trim=SOURCE_ATTRIBUTE)
+    miria_file_archive.trim_path(attribute_to_trim=SOURCE_ATTRIBUTE)
 
     # THEN the source path should be the local directory minus the /home part
-    assert miria_file.source == trimmed_local_directory.as_posix()
+    assert miria_file_archive.source == trimmed_local_directory.as_posix()
 
 
 def test_correct_destination_root(
-    local_directory: Path, miria_file: MiriaFile, trimmed_local_directory: Path
+    local_directory: Path, miria_file_archive: MiriaFile, trimmed_local_directory: Path
 ):
     """Tests the method for trimming the destination directory."""
 
     # GIVEN a MiriaFile with a source path and a destination path
-    miria_file.destination = local_directory
+    miria_file_archive.destination = local_directory
 
     # WHEN trimming the path of the destination attribute
-    miria_file.trim_path(attribute_to_trim=DESTINATION_ATTRIBUTE)
+    miria_file_archive.trim_path(attribute_to_trim=DESTINATION_ATTRIBUTE)
 
     # THEN the destination path should be the local directory minus the /home part
-    assert miria_file.destination == trimmed_local_directory.as_posix()
+    assert miria_file_archive.destination == trimmed_local_directory.as_posix()
 
 
 def test_add_repositories(
@@ -73,14 +73,14 @@ def test_add_repositories(
     )
 
 
-def test_transfer_payload_dict(transfer_payload: TransferPayload):
+def test_transfer_payload_model_dump(transfer_payload: TransferPayload):
     """Tests that the dict structure returned by TransferPayload.dict() is compatible with the
     Dataflow API."""
 
     # GIVEN a TransferPayload object with two MiriaFile objects
 
     # WHEN obtaining the dict representation
-    dict_representation: dict = transfer_payload.dict()
+    dict_representation: dict = transfer_payload.model_dump()
 
     # THEN the following fields should exist
     assert dict_representation.get("pathInfo", None)
@@ -270,7 +270,7 @@ def test_archive_folders(
     full_remote_path: str,
     full_local_path: str,
     ok_ddn_response: Response,
-    transfer_data_archive: MiriaFile,
+    miria_file_archive: MiriaFile,
 ):
     """Tests that the archiving function correctly formats the input and sends API request."""
 
@@ -282,7 +282,7 @@ def test_archive_folders(
         "api_request_from_content",
         return_value=ok_ddn_response,
     ) as mock_request_submitter:
-        job_id: int = ddn_dataflow_client.archive_folders([transfer_data_archive])
+        job_id: int = ddn_dataflow_client.archive_folders([miria_file_archive])
 
     # THEN an integer should be returned
     assert isinstance(job_id, int)
@@ -308,7 +308,7 @@ def test_retrieve_folders(
     full_remote_path: str,
     full_local_path: str,
     ok_ddn_response: Response,
-    transfer_data_retrieve: MiriaFile,
+    miria_file_retrieve: MiriaFile,
 ):
     """Tests that the retrieve function correctly formats the input and sends API request."""
 
@@ -318,7 +318,7 @@ def test_retrieve_folders(
     with mock.patch.object(
         APIRequest, "api_request_from_content", return_value=ok_ddn_response
     ) as mock_request_submitter:
-        job_id: int = ddn_dataflow_client.retrieve_folders([transfer_data_retrieve])
+        job_id: int = ddn_dataflow_client.retrieve_folders([miria_file_retrieve])
 
         # THEN an integer should be returned
     assert isinstance(job_id, int)
@@ -338,16 +338,16 @@ def test_retrieve_folders(
 
 
 def test_create_transfer_request_archiving(
-    ddn_dataflow_api: DDNDataFlowClient, transfer_data_archive
+    ddn_dataflow_client: DDNDataFlowClient, miria_file_archive: MiriaFile
 ):
     """Tests creating a archiving request."""
     # GIVEN a TransferData object with an untrimmed source path, and without the source and
     # destination repositories pre-pended
-    assert transfer_data_archive.source.startswith(ROOT_TO_TRIM)
+    assert miria_file_archive.source.startswith(ROOT_TO_TRIM)
 
     # WHEN creating the archiving request
-    transfer_request: TransferPayload = ddn_dataflow_api.create_transfer_request(
-        [transfer_data_archive], is_archiving_request=True
+    transfer_request: TransferPayload = ddn_dataflow_client.create_transfer_request(
+        [miria_file_archive], is_archiving_request=True
     )
 
     # THEN the source directories should no longer contain /home
@@ -356,21 +356,21 @@ def test_create_transfer_request_archiving(
     assert transfer_request.files_to_transfer
     for transfer_data_archive in transfer_request.files_to_transfer:
         assert ROOT_TO_TRIM not in transfer_data_archive.source
-        assert transfer_data_archive.source.startswith(ddn_dataflow_api.local_storage)
-        assert transfer_data_archive.destination.startswith(ddn_dataflow_api.archive_repository)
+        assert transfer_data_archive.source.startswith(ddn_dataflow_client.local_storage)
+        assert transfer_data_archive.destination.startswith(ddn_dataflow_client.archive_repository)
 
 
 def test_create_transfer_request_retrieve(
-    ddn_dataflow_api: DDNDataFlowClient, transfer_data_retrieve
+    ddn_dataflow_client: DDNDataFlowClient, miria_file_retrieve: MiriaFile
 ):
     """Tests creating a retrieve request."""
     # GIVEN a TransferData object with an untrimmed destination path, and without the source and
     # destination repositories pre-pended
-    assert transfer_data_retrieve.destination.startswith(ROOT_TO_TRIM)
+    assert miria_file_retrieve.destination.startswith(ROOT_TO_TRIM)
 
     # WHEN creating the retrieve request
-    transfer_request: TransferPayload = ddn_dataflow_api.create_transfer_request(
-        [transfer_data_retrieve], is_archiving_request=False
+    transfer_request: TransferPayload = ddn_dataflow_client.create_transfer_request(
+        [miria_file_retrieve], is_archiving_request=False
     )
 
     # THEN the destination directories should no longer contain /home
@@ -379,5 +379,5 @@ def test_create_transfer_request_retrieve(
     assert transfer_request.files_to_transfer
     for transfer_data_archive in transfer_request.files_to_transfer:
         assert ROOT_TO_TRIM not in transfer_data_archive.destination
-        assert transfer_data_archive.source.startswith(ddn_dataflow_api.archive_repository)
-        assert transfer_data_archive.destination.startswith(ddn_dataflow_api.local_storage)
+        assert transfer_data_archive.source.startswith(ddn_dataflow_client.archive_repository)
+        assert transfer_data_archive.destination.startswith(ddn_dataflow_client.local_storage)
