@@ -12,7 +12,12 @@ from cg.constants.constants import FileFormat
 from cg.constants.subject import Gender
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
-from cg.meta.archive.ddn_dataflow import ROOT_TO_TRIM, DDNDataFlowApi, TransferData, TransferPayload
+from cg.meta.archive.ddn_dataflow import (
+    ROOT_TO_TRIM,
+    DDNDataFlowClient,
+    MiriaFile,
+    TransferPayload,
+)
 from cg.models.cg_config import DDNDataFlowConfig
 from cg.store import Store
 from cg.store.models import Customer, Sample
@@ -35,8 +40,8 @@ def fixture_ddn_dataflow_config(
     )
 
 
-@pytest.fixture(name="ddn_dataflow_api")
-def fixture_ddn_dataflow_api(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDataFlowApi:
+@pytest.fixture(name="ddn_dataflow_client")
+def fixture_ddn_dataflow_client(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDataFlowClient:
     """Returns a DDNApi without tokens being set."""
     mock_ddn_auth_success_response = Response()
     mock_ddn_auth_success_response.status_code = 200
@@ -52,19 +57,19 @@ def fixture_ddn_dataflow_api(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDataF
         "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content",
         return_value=mock_ddn_auth_success_response,
     ):
-        return DDNDataFlowApi(ddn_dataflow_config)
+        return DDNDataFlowClient(ddn_dataflow_config)
 
 
-@pytest.fixture(name="transfer_data")
-def fixture_transfer_data(local_directory: Path, remote_path: Path) -> TransferData:
+@pytest.fixture(name="miria_file")
+def fixture_miria_file(local_directory: Path, remote_path: Path) -> MiriaFile:
     """Return a TransferData object."""
-    return TransferData(source=local_directory.as_posix(), destination=remote_path.as_posix())
+    return MiriaFile(source=local_directory.as_posix(), destination=remote_path.as_posix())
 
 
 @pytest.fixture(name="transfer_payload")
-def fixture_transfer_payload(transfer_data: TransferData) -> TransferPayload:
-    """Return a TransferPayload object containing two identical TransferData object.."""
-    return TransferPayload(files_to_transfer=[transfer_data, transfer_data.copy(deep=True)])
+def fixture_transfer_payload(miria_file: MiriaFile) -> TransferPayload:
+    """Return a TransferPayload object containing two identical MiriaFile object."""
+    return TransferPayload(files_to_transfer=[miria_file, miria_file.copy(deep=True)])
 
 
 @pytest.fixture(name="remote_path")
@@ -174,8 +179,8 @@ def fixture_spring_archive_api(
     father_sample_id: str,
     helpers,
 ) -> SpringArchiveAPI:
-    """Returns an ArchiveAPI with a populated housekeeper store and a DDNDataFlowApi.
-    Also adds /home/ as a prefix for each SPRING file for the DDNDataFlowApi to accept them."""
+    """Returns an ArchiveAPI with a populated housekeeper store and a DDNDataFlowClient.
+    Also adds /home/ as a prefix for each SPRING file for the DDNDataFlowClient to accept them."""
     for spring_file in populated_housekeeper_api.files(tags=[SequencingFileTag.SPRING]):
         spring_file.path = f"/home/{spring_file.path}"
     populated_housekeeper_api.commit()
