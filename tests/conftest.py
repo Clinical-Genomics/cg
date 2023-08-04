@@ -1045,14 +1045,42 @@ def flow_cell_directory_name_demultiplexed_with_bcl2fastq(
     return f"170407_ST-E00198_0209_B{flow_cell_name_demultiplexed_with_bcl2fastq}"
 
 
+@pytest.fixture(name="flow_cell_name_demultiplexed_with_bcl_convert", scope="session")
+def fixture_flow_cell_name_demultiplexed_with_bcl_convert() -> str:
+    return "HY7FFDRX2"
+
+
+@pytest.fixture(name="flow_cell_directory_name_demultiplexed_with_bcl_convert", scope="session")
+def fixture_flow_cell_directory_name_demultiplexed_with_bcl_convert(
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
+):
+    return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
+
+
+@pytest.fixture(
+    name="flow_cell_directory_name_demultiplexed_with_bcl_convert_flat", scope="session"
+)
+def fixture_flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
+):
+    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert using a flat output directory structure."""
+    return f"230505_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
+
+
 @pytest.fixture
 def store_with_demultiplexed_samples(
     store: Store,
     helpers: StoreHelpers,
     bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
     bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
+    flow_cell_name_demultiplexed_with_bcl2fastq: str,
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
 ) -> Store:
     """Return a store with samples that have been demultiplexed with BCL Convert and BCL2Fastq."""
+    helpers.add_flowcell(
+        store, flow_cell_name_demultiplexed_with_bcl_convert, sequencer_type="novaseq"
+    )
+    helpers.add_flowcell(store, flow_cell_name_demultiplexed_with_bcl2fastq)
     for i, sample_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_internal_ids):
         helpers.add_sample(store, internal_id=sample_id, name=f"sample_bcl_convert_{i}")
 
@@ -2773,7 +2801,7 @@ def fixture_store_with_sequencing_metrics(
     expected_total_reads: int,
     flow_cell_name: str,
     helpers: StoreHelpers,
-) -> Generator[Store, None, None]:
+) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
 
     sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
@@ -2788,7 +2816,7 @@ def fixture_store_with_sequencing_metrics(
         store=store,
     )
     sample: Sample = helpers.add_sample(
-        name=sample_id, internal_id=sample_id, sex="male", store=store
+        name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
     )
     sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
     for (
@@ -2813,7 +2841,7 @@ def fixture_store_with_sequencing_metrics(
     store.session.add(sample)
     store.session.add_all(sample_lane_sequencing_metrics)
     store.session.commit()
-    yield store
+    return store
 
 
 @pytest.fixture(name="demultiplexed_flow_cells_tmp_directory")

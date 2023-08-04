@@ -373,28 +373,6 @@ def fixture_flow_cell_info_map(
     }
 
 
-@pytest.fixture(name="flow_cell_name_demultiplexed_with_bcl_convert", scope="session")
-def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
-    return "HY7FFDRX2"
-
-
-@pytest.fixture(name="flow_cell_directory_name_demultiplexed_with_bcl_convert", scope="session")
-def fixture_flow_cell_directory_name_demultiplexed_with_bcl_convert(
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-):
-    return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
-
-
-@pytest.fixture(
-    name="flow_cell_directory_name_demultiplexed_with_bcl_convert_flat", scope="session"
-)
-def fixture_flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-):
-    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert using a flat output directory structure."""
-    return f"230505_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
-
-
 @pytest.fixture(name="demultiplexing_init_files")
 def tmp_demultiplexing_init_files(
     bcl2fastq_flow_cell_id: str, populated_delete_demultiplex_api: DeleteDemuxAPI
