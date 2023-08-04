@@ -29,15 +29,6 @@ class DataflowEndpoints(str, Enum):
     RETRIEVE_FILES = "files/retrieve"
 
 
-class ResponseFields(str, Enum):
-    """Enum containing all DDN dataflow endpoints used."""
-
-    ACCESS = "access"
-    EXPIRE = "expire"
-    REFRESH = "refresh"
-    RETRIEVE_FILES = "files/retrieve"
-
-
 class TransferData(BaseModel):
     """Model for representing a singular object transfer."""
 
@@ -86,15 +77,24 @@ class TransferPayload(BaseModel):
         payload["metadataList"] = []
         return payload
 
-    def post_request(self, url: str, headers: dict) -> Response:
+    def post_request(self, url: str, headers: dict) -> int:
         """Sends a request to the given url with, the given headers, and its own content as
-        payload."""
-        return APIRequest.api_request_from_content(
+        payload. Raises an error if the response code is not ok. Returns the job ID of the
+        launched transfer task.
+        """
+        response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=url,
             headers=headers,
             json=self.dict(),
         )
+        response.raise_for_status()
+        parsed_response = TransferResponse(
+            **ReadStream.get_content_from_stream(
+                file_format=FileFormat.JSON, stream=response.content
+            )
+        )
+        return parsed_response.job_id
 
 
 class AuthPayload(BaseModel):
@@ -118,6 +118,13 @@ class AuthResponse(BaseModel):
     access: str
     expire: int
     refresh: Optional[str]
+
+
+class TransferResponse(BaseModel):
+    """Model representing th response fields of an archive or retrieve reqeust to the Dataflow
+    API."""
+
+    job_id: int
 
 
 class DDNDataFlowApi:
@@ -187,8 +194,8 @@ class DDNDataFlowApi:
         return {"Authorization": f"Bearer {self.auth_token}"}
 
     def archive_folders(self, sources_and_destinations: List[TransferData]) -> int:
-        """Archives all folders provided, to their corresponding destination,
-        as given by sources and destination parameter."""
+        """Archives all folders provided, to their corresponding destination, as given by sources
+        and destination in TransferData. Returns the job ID of the archiving task."""
         transfer_request: TransferPayload = TransferPayload(
             files_to_transfer=sources_and_destinations
         )
@@ -196,17 +203,15 @@ class DDNDataFlowApi:
         transfer_request.add_repositories(
             source_prefix=self.local_storage, destination_prefix=self.archive_repository
         )
-        response: Response = transfer_request.post_request(
+        job_id: int = transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.ARCHIVE_FILES),
         )
-        if response.ok:
-            return response.json()["job_id"]
-        else:
-            raise IOError(response.text)
+        return job_id
 
     def retrieve_folders(self, sources_and_destinations: List[TransferData]) -> int:
-        """Retrieves all folders provided, to their corresponding destination, as given by the sources and destination parameter."""
+        """Retrieves all folders provided, to their corresponding destination, as given by sources
+        and destination in TransferData. Returns the job ID of the retrieval task."""
         transfer_request: TransferPayload = TransferPayload(
             files_to_transfer=sources_and_destinations
         )
@@ -214,11 +219,8 @@ class DDNDataFlowApi:
         transfer_request.add_repositories(
             source_prefix=self.archive_repository, destination_prefix=self.local_storage
         )
-        response: Response = transfer_request.post_request(
+        job_id: int = transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
         )
-        if response.ok:
-            return response.json()["job_id"]
-        else:
-            raise IOError(response.text)
+        return job_id

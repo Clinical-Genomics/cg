@@ -31,12 +31,12 @@ def test_correct_source_root(
 ):
     """Tests the method for trimming the source directory."""
 
-    # GIVEN a source path and a destination path
+    # GIVEN a TransferData object with a source path and a destination path
 
-    # WHEN creating the correctly formatted dictionary
+    # WHEN trimming the path of the source attribute
     transfer_data_archive.trim_path(attribute_to_trim=SOURCE_ATTRIBUTE)
 
-    # THEN the destination path should be the local directory minus the /home part
+    # THEN the source path should be the local directory minus the /home part
     assert transfer_data_archive.source == trimmed_local_directory.as_posix()
 
 
@@ -47,9 +47,9 @@ def test_correct_destination_root(
 ):
     """Tests the method for trimming the destination directory."""
 
-    # GIVEN a source path and a destination path
+    # GIVEN a TransferData object with a source path and a destination path
 
-    # WHEN creating the correctly formatted dictionary
+    # WHEN trimming the path of the destination attribute
     transfer_data_retrieve.trim_path(attribute_to_trim=DESTINATION_ATTRIBUTE)
 
     # THEN the destination path should be the local directory minus the /home part
@@ -180,8 +180,7 @@ def test_ddn_dataflow_api_initialization_invalid_credentials(
 
 
 def test_transfer_payload_correct_source_root(transfer_payload: TransferPayload):
-    """Tests that the dict structure returned by TransferPayload.dict() is compatible with the
-    Dataflow API."""
+    """Tests trimming all source paths in the TransferPayload object."""
 
     # GIVEN a TransferPayload object with two TransferData objects with untrimmed source paths
     for transfer_data_archive in transfer_payload.files_to_transfer:
@@ -196,8 +195,7 @@ def test_transfer_payload_correct_source_root(transfer_payload: TransferPayload)
 
 
 def test_transfer_payload_correct_destination_root(transfer_payload: TransferPayload):
-    """Tests that the dict structure returned by TransferPayload.dict() is compatible with the
-    Dataflow API."""
+    """Tests trimming all destination paths in the TransferPayload object."""
 
     # GIVEN a TransferPayload object with two TransferData objects with untrimmed destination paths
     for transfer_data in transfer_payload.files_to_transfer:
@@ -289,10 +287,10 @@ def test_archive_folders(
         "api_request_from_content",
         return_value=ok_ddn_response,
     ) as mock_request_submitter:
-        response: int = ddn_dataflow_api.archive_folders([transfer_data_archive])
+        job_id: int = ddn_dataflow_api.archive_folders([transfer_data_archive])
 
-    # THEN a boolean response should be returned
-    assert response
+    # THEN an integer should be returned
+    assert isinstance(job_id, int)
 
     # THEN the mocked submit function should have been called exactly once with correct arguments
     mock_request_submitter.assert_called_once_with(
@@ -323,10 +321,10 @@ def test_retrieve_folders(
     with mock.patch.object(
         APIRequest, "api_request_from_content", return_value=ok_ddn_response
     ) as mock_request_submitter:
-        response: int = ddn_dataflow_api.retrieve_folders([transfer_data_retrieve])
+        job_id: int = ddn_dataflow_api.archive_folders([transfer_data_retrieve])
 
-    # THEN the response returned should be true
-    assert response
+        # THEN an integer should be returned
+    assert isinstance(job_id, int)
 
     # THEN the mocked submit function should have been called exactly once with correct arguments
     mock_request_submitter.assert_called_once_with(
