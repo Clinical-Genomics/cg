@@ -253,7 +253,7 @@ def test__refresh_auth_token(ddn_dataflow_api: DDNDataFlowApi, ok_response: Resp
     ok_response._content = WriteStream.write_stream_from_content(
         content={
             "access": new_token,
-            "expire": new_expiration.timestamp(),
+            "expire": int(new_expiration.timestamp()),
         },
         file_format=FileFormat.JSON,
     ).encode()

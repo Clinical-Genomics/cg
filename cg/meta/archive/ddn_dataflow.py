@@ -4,13 +4,13 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from urllib.parse import urljoin
 
-from pydantic.v1 import BaseModel
+from pydantic import BaseModel
 from requests.models import Response
 
 from datetime import datetime
-from cg.constants.constants import APIMethods, FileFormat
+from cg.constants.constants import APIMethods
 from cg.exc import DdnDataflowAuthenticationError
-from cg.io.controller import APIRequest, ReadStream
+from cg.io.controller import APIRequest
 from cg.models.cg_config import DDNDataFlowConfig
 
 OSTYPE: str = "Unix/MacOS"
@@ -70,10 +70,12 @@ class TransferPayload(BaseModel):
                 source_prefix=source_prefix, destination_prefix=destination_prefix
             )
 
-    def dict(self, **kwargs) -> dict:
+    def model_dump(self, **kwargs) -> dict:
         """Creates a correctly structured dict to be used as the request payload."""
-        payload: dict = super().dict(exclude={"files_to_transfer"})
-        payload["pathInfo"] = [transfer_data.dict() for transfer_data in self.files_to_transfer]
+        payload: dict = super().model_dump(exclude={"files_to_transfer"})
+        payload["pathInfo"] = [
+            transfer_data.model_dump() for transfer_data in self.files_to_transfer
+        ]
         payload["metadataList"] = []
         return payload
 
@@ -86,14 +88,10 @@ class TransferPayload(BaseModel):
             api_method=APIMethods.POST,
             url=url,
             headers=headers,
-            json=self.dict(),
+            json=self.model_dump(),
         )
         response.raise_for_status()
-        parsed_response = TransferResponse(
-            **ReadStream.get_content_from_stream(
-                file_format=FileFormat.JSON, stream=response.content
-            )
-        )
+        parsed_response = TransferJob.model_validate_json(response.content)
         return parsed_response.job_id
 
 
@@ -112,15 +110,15 @@ class RefreshPayload(BaseModel):
     refresh: str
 
 
-class AuthResponse(BaseModel):
+class AuthToken(BaseModel):
     """Model representing th response fields from an access request to the Dataflow API."""
 
     access: str
     expire: int
-    refresh: Optional[str]
+    refresh: Optional[str] = None
 
 
-class TransferResponse(BaseModel):
+class TransferJob(BaseModel):
     """Model representing th response fields of an archive or retrieve reqeust to the Dataflow
     API."""
 
@@ -156,15 +154,11 @@ class DDNDataFlowApi:
                 dbName=self.database_name,
                 name=self.user,
                 password=self.password,
-            ).dict(),
+            ).model_dump(),
         )
         if not response.ok:
-            raise DdnDataflowAuthenticationError(message=response.content.decode())
-        response_content: AuthResponse = AuthResponse(
-            **ReadStream.get_content_from_stream(
-                file_format=FileFormat.JSON, stream=response.content
-            )
-        )
+            raise DdnDataflowAuthenticationError(message=response.content)
+        response_content: AuthToken = AuthToken.model_validate_json(response.content.decode())
         self.refresh_token: str = response_content.refresh
         self.auth_token: str = response_content.access
         self.token_expiration: datetime = datetime.fromtimestamp(response_content.expire)
@@ -175,13 +169,9 @@ class DDNDataFlowApi:
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url=DataflowEndpoints.REFRESH_AUTH_TOKEN),
             headers=self.headers,
-            json=RefreshPayload(refresh=self.refresh_token).dict(),
+            json=RefreshPayload(refresh=self.refresh_token).model_dump(),
         )
-        response_content: AuthResponse = AuthResponse(
-            **ReadStream.get_content_from_stream(
-                file_format=FileFormat.JSON, stream=response.content
-            )
-        )
+        response_content: AuthToken = AuthToken.model_validate_json(response.content)
         self.auth_token: str = response_content.access
         self.token_expiration: datetime = datetime.fromtimestamp(response_content.expire)
 

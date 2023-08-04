@@ -51,7 +51,7 @@ def fixture_ddn_dataflow_api(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDataF
         content={
             "access": "test_auth_token",
             "refresh": "test_refresh_token",
-            "expire": (datetime.now() + timedelta(minutes=20)).timestamp(),
+            "expire": int((datetime.now() + timedelta(minutes=20)).timestamp()),
         },
     ).encode()
     with mock.patch(

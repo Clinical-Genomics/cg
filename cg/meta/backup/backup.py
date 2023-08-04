@@ -398,7 +398,7 @@ class SpringBackupAPI:
         LOG.debug("*** RETRIEVAL PROCESS COMPLETED SUCCESSFULLY ***")
 
     def mark_file_as_archived(self, spring_file_path: Path) -> None:
-        """Set the field 'is_archiving_request' of the file in Housekeeper to mark that it has been
+        """Set the field 'to_archive' of the file in Housekeeper to mark that it has been
         archived to PDC."""
         if self.dry_run:
             LOG.info(f"Dry run, no changes made to {spring_file_path}")
