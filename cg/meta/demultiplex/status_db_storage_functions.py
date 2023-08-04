@@ -34,7 +34,12 @@ def store_flow_cell_data_in_status_db(
             sequenced_at=parsed_flow_cell.run_date,
         )
         flow_cell = add_samples_to_flow_cell_in_status_db(
-            flow_cell=flow_cell, parsed_flow_cell=parsed_flow_cell, store=store
+            flow_cell_name=flow_cell.name,
+            sample_internal_ids=get_sample_internal_ids_from_sample_sheet(
+                sample_sheet_path=parsed_flow_cell.sample_sheet_path,
+                flow_cell_sample_type=parsed_flow_cell.sample_type,
+            ),
+            store=store,
         )
         store.session.add(flow_cell)
         store.session.commit()
@@ -44,19 +49,18 @@ def store_flow_cell_data_in_status_db(
 
 
 def add_samples_to_flow_cell_in_status_db(
-    flow_cell: Flowcell, parsed_flow_cell: FlowCellDirectoryData, store: Store
+    flow_cell_name: str, sample_internal_ids: List[str], store: Store
 ) -> Flowcell:
     """Adds samples to a flow cell in status db."""
-    sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
-        sample_sheet_path=parsed_flow_cell.sample_sheet_path,
-        flow_cell_sample_type=parsed_flow_cell.sample_type,
-    )
+    flow_cell: Flowcell = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
+    if not flow_cell:
+        raise ValueError(f"Flow cell not found in status db: {flow_cell_name}")
     samples: Set[Sample] = {
         store.get_sample_by_internal_id(sample_internal_id)
         for sample_internal_id in sample_internal_ids
     }
     for sample in samples:
-        if sample and sample not in flow_cell.samples:
+        if isinstance(sample, Sample) and sample not in flow_cell.samples:
             flow_cell.samples.append(sample)
     return flow_cell
 

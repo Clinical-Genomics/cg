@@ -47,6 +47,7 @@ from cg.store.models import (
     Organism,
     Sample,
     SampleLaneSequencingMetrics,
+    Flowcell,
 )
 from cg.utils import Process
 from housekeeper.store.models import File, Version
@@ -2767,7 +2768,11 @@ def fixture_flow_cell_name() -> str:
 
 @pytest.fixture(name="store_with_sequencing_metrics")
 def fixture_store_with_sequencing_metrics(
-    store: Store, sample_id: str, expected_total_reads: int, flow_cell_name: str
+    store: Store,
+    sample_id: str,
+    expected_total_reads: int,
+    flow_cell_name: str,
+    helpers: StoreHelpers,
 ) -> Generator[Store, None, None]:
     """Return a store with multiple samples with sample lane sequencing metrics."""
 
@@ -2778,6 +2783,13 @@ def fixture_store_with_sequencing_metrics(
         ("sample_3", "flow_cell_3", 3, 1_500_000, 80.5, 33),
     ]
 
+    flow_cell: Flowcell = helpers.add_flowcell(
+        flow_cell_name=flow_cell_name,
+        store=store,
+    )
+    sample: Sample = helpers.add_sample(
+        name=sample_id, internal_id=sample_id, sex="male", store=store
+    )
     sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
     for (
         sample_internal_id,
@@ -2797,7 +2809,8 @@ def fixture_store_with_sequencing_metrics(
             created_at=datetime.now(),
         )
         sample_lane_sequencing_metrics.append(sequencing_metrics)
-
+    store.session.add(flow_cell)
+    store.session.add(sample)
     store.session.add_all(sample_lane_sequencing_metrics)
     store.session.commit()
     yield store
