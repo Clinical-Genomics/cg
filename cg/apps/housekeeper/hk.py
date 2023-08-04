@@ -55,7 +55,7 @@ class HousekeeperAPI:
         return new_bundle
 
     def set_to_archive(self, file: File, value: bool) -> None:
-        """Sets the 'to_archive' field of a file."""
+        """Sets the 'is_archiving_request' field of a file."""
         file.to_archive: bool = value
         self.commit()
 

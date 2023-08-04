@@ -196,13 +196,10 @@ class DDNDataFlowApi:
     def archive_folders(self, sources_and_destinations: List[TransferData]) -> int:
         """Archives all folders provided, to their corresponding destination, as given by sources
         and destination in TransferData. Returns the job ID of the archiving task."""
-        transfer_request: TransferPayload = TransferPayload(
-            files_to_transfer=sources_and_destinations
+        transfer_request: TransferPayload = self.create_transfer_request(
+            sources_and_destinations, is_archiving_request=True
         )
-        transfer_request.trim_paths(attribute_to_trim=SOURCE_ATTRIBUTE)
-        transfer_request.add_repositories(
-            source_prefix=self.local_storage, destination_prefix=self.archive_repository
-        )
+
         job_id: int = transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.ARCHIVE_FILES),
@@ -212,15 +209,36 @@ class DDNDataFlowApi:
     def retrieve_folders(self, sources_and_destinations: List[TransferData]) -> int:
         """Retrieves all folders provided, to their corresponding destination, as given by sources
         and destination in TransferData. Returns the job ID of the retrieval task."""
-        transfer_request: TransferPayload = TransferPayload(
-            files_to_transfer=sources_and_destinations
-        )
-        transfer_request.trim_paths(attribute_to_trim=DESTINATION_ATTRIBUTE)
-        transfer_request.add_repositories(
-            source_prefix=self.archive_repository, destination_prefix=self.local_storage
+        transfer_request: TransferPayload = self.create_transfer_request(
+            sources_and_destinations, is_archiving_request=False
         )
         job_id: int = transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
         )
         return job_id
+
+    def create_transfer_request(
+        self, sources_and_destinations: List[TransferData], is_archiving_request: bool
+    ) -> TransferPayload:
+        """Performs the necessary curation of paths for the request to be valid, depending on if
+        it is an archiving or a retrieve request.
+        """
+        source_prefix: str
+        destination_prefix: str
+        attribute: str
+
+        source_prefix, destination_prefix, attribute = (
+            (self.local_storage, self.archive_repository, SOURCE_ATTRIBUTE)
+            if is_archiving_request
+            else (self.archive_repository, self.local_storage, DESTINATION_ATTRIBUTE)
+        )
+
+        transfer_request: TransferPayload = TransferPayload(
+            files_to_transfer=sources_and_destinations
+        )
+        transfer_request.trim_paths(attribute_to_trim=attribute)
+        transfer_request.add_repositories(
+            source_prefix=source_prefix, destination_prefix=destination_prefix
+        )
+        return transfer_request

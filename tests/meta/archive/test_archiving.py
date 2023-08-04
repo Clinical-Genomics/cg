@@ -321,7 +321,7 @@ def test_retrieve_folders(
     with mock.patch.object(
         APIRequest, "api_request_from_content", return_value=ok_ddn_response
     ) as mock_request_submitter:
-        job_id: int = ddn_dataflow_api.archive_folders([transfer_data_retrieve])
+        job_id: int = ddn_dataflow_api.retrieve_folders([transfer_data_retrieve])
 
         # THEN an integer should be returned
     assert isinstance(job_id, int)
@@ -338,3 +338,45 @@ def test_retrieve_folders(
             "metadataList": [],
         },
     )
+
+
+def test_create_transfer_request_archiving(ddn_dataflow_api: DDNDataFlowApi, transfer_data_archive):
+    """Tests creating a archiving request."""
+    # GIVEN a TransferData object with an untrimmed source path, and without the source and
+    # destination repositories pre-pended
+    assert transfer_data_archive.source.startswith(ROOT_TO_TRIM)
+
+    # WHEN creating the archiving request
+    transfer_request: TransferPayload = ddn_dataflow_api.create_transfer_request(
+        [transfer_data_archive], is_archiving_request=True
+    )
+
+    # THEN the source directories should no longer contain /home
+    # THEN the source path should start with the local_storage prefix
+    # THEN the destination path should start with the archive prefix
+    assert transfer_request.files_to_transfer
+    for transfer_data_archive in transfer_request.files_to_transfer:
+        assert ROOT_TO_TRIM not in transfer_data_archive.source
+        assert transfer_data_archive.source.startswith(ddn_dataflow_api.local_storage)
+        assert transfer_data_archive.destination.startswith(ddn_dataflow_api.archive_repository)
+
+
+def test_create_transfer_request_retrieve(ddn_dataflow_api: DDNDataFlowApi, transfer_data_retrieve):
+    """Tests creating a retrieve request."""
+    # GIVEN a TransferData object with an untrimmed destination path, and without the source and
+    # destination repositories pre-pended
+    assert transfer_data_retrieve.destination.startswith(ROOT_TO_TRIM)
+
+    # WHEN creating the retrieve request
+    transfer_request: TransferPayload = ddn_dataflow_api.create_transfer_request(
+        [transfer_data_retrieve], is_archiving_request=False
+    )
+
+    # THEN the destination directories should no longer contain /home
+    # THEN the source path should start with the archive prefix
+    # THEN the destination path should start with the local_storage prefix
+    assert transfer_request.files_to_transfer
+    for transfer_data_archive in transfer_request.files_to_transfer:
+        assert ROOT_TO_TRIM not in transfer_data_archive.destination
+        assert transfer_data_archive.source.startswith(ddn_dataflow_api.archive_repository)
+        assert transfer_data_archive.destination.startswith(ddn_dataflow_api.local_storage)
