@@ -233,7 +233,7 @@ def test_validate_flow_cell_delivery_status_forced(tmp_path: Path):
     (tmp_path / DemultiplexingDirsAndFiles.DELIVERY).touch()
 
     # WHEN validating the flow cell delivery status
-    # THEN it should raise a FlowCellError
+    # THEN it should not raise a FlowCellError
     assert (
         validate_flow_cell_delivery_status(flow_cell_output_directory=tmp_path, force=True) is None
     )
