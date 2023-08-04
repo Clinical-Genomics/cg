@@ -75,7 +75,7 @@ def fixture_transfer_data_retrieve(local_directory: Path, remote_path: Path) -> 
 
 @pytest.fixture(name="transfer_payload")
 def fixture_transfer_payload(transfer_data_archive: TransferData) -> TransferPayload:
-    """Return a TransferPayload object containing two identical DataFlowFileTransferData object."""
+    """Return a TransferPayload object containing two DataFlowFileTransferData object."""
     return TransferPayload(
         files_to_transfer=[transfer_data_archive, transfer_data_archive.copy(deep=True)]
     )
