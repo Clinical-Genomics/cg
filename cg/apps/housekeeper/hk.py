@@ -12,7 +12,7 @@ from sqlalchemy.orm import Query
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
-from housekeeper.store.models import Bundle, File, Version, Archive
+from housekeeper.store.models import Archive, Bundle, File, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -159,7 +159,7 @@ class HousekeeperAPI:
 
     def get_files(
         self, bundle: str, tags: Optional[list] = None, version: Optional[int] = None
-    ) -> Iterable[File]:
+    ) -> Query:
         """Get all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version.
         """
