@@ -113,7 +113,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             )
         except ValidationError as error:
             LOG.error(error)
-            raise CgError(f"Error creating sample sheet")
+            raise CgError("Error creating sample sheet")
 
         samples_full_list: list = []
         strandedness_full_list: list = []
