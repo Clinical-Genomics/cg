@@ -107,9 +107,18 @@ class NextflowAnalysisAPI:
             os.makedirs(cls.get_case_path(case_id=case_id, root_dir=root_dir), exist_ok=True)
 
     @classmethod
-    def extract_read_files(cls, read_nb: int, metadata: list) -> List[str]:
+    def extract_read_files(
+        cls, metadata: list, forward: bool = False, reverse: bool = False
+    ) -> List[str]:
+        """Extract a list of fastq file paths for either forward or reverse reads."""
+        if forward and not reverse:
+            read_number = 1
+        elif reverse and not forward:
+            read_number = 2
+        else:
+            raise ValueError("Either forward or reverse needs to be specified")
         sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
-        return [d["path"] for d in sorted_metadata if d["read"] == read_nb]
+        return [d["path"] for d in sorted_metadata if d["read"] == read_number]
 
     @classmethod
     def create_samplesheet_csv(
