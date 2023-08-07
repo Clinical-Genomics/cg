@@ -2844,7 +2844,6 @@ def store_with_sequencing_metrics(
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 2, 1_500_000, 80.5, 33),
     ]
 
-
     flow_cell: Flowcell = helpers.add_flowcell(
         flow_cell_name=flow_cell_name,
         store=store,
@@ -2872,7 +2871,6 @@ def store_with_sequencing_metrics(
             sample_base_mean_quality_score=sample_base_mean_quality_score,
         )
 
-        sample_lane_sequencing_metrics.append(sequencing_metrics)
     store.session.add(flow_cell)
     store.session.add(sample)
     store.session.add_all(sample_lane_sequencing_metrics)
