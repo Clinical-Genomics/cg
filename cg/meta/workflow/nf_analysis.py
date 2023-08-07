@@ -1,0 +1,105 @@
+import logging
+from pathlib import Path
+from typing import Optional
+
+from cg.constants import Pipeline
+from cg.constants.constants import FileFormat, WorkflowManager
+from cg.io.controller import WriteFile
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.fastq import StandardFastqHandler
+from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.utils import Process
+
+LOG = logging.getLogger(__name__)
+
+
+class NfAnalysisAPI(AnalysisAPI):
+    """
+    Parent class for handling nf-core analyses.
+    """
+
+    def __init__(
+        self,
+        config: CGConfig,
+        pipeline: Pipeline,
+    ):
+        super().__init__(config=config, pipeline=pipeline)
+        self.pipeline: Pipeline = pipeline
+        self.root_dir: Optional[str] = None
+        self.nfcore_pipeline_path: Optional[str] = None
+        self.references: Optional[str] = None
+        self.profile: Optional[str] = None
+        self.conda_env: Optional[str] = None
+        self.conda_binary: Optional[str] = None
+        self.tower_binary_path: Optional[str] = None
+        self.tower_pipeline: Optional[str] = None
+        self.account: Optional[str] = None
+        self.email: Optional[str] = None
+        self.compute_env: Optional[str] = None
+        self.revision: Optional[str] = None
+
+    @property
+    def root(self) -> str:
+        return self.root_dir
+
+    @property
+    def fastq_handler(self):
+        return StandardFastqHandler
+
+    @property
+    def process(self):
+        if not self._process:
+            self._process = Process(
+                binary=self.tower_binary_path,
+            )
+        return self._process
+
+    @process.setter
+    def process(self, process: Process):
+        self._process = process
+
+    def get_profile(self, profile: Optional[str] = None) -> str:
+        return profile or self.profile
+
+    def get_workflow_manager(self) -> str:
+        """Get workflow manager for rnafusion."""
+        return WorkflowManager.Tower.value
+
+    def get_case_path(self, case_id: str) -> Path:
+        """Path to case working directory."""
+        return NextflowAnalysisAPI.get_case_path(case_id=case_id, root_dir=self.root)
+
+    def get_case_config_path(self, case_id):
+        return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
+
+    def get_trailblazer_config_path(self, case_id: str) -> Path:
+        """Return the path to a trailblazer config file containing Tower IDs."""
+        return Path(self.root_dir, case_id, "tower_ids.yaml")
+
+    def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
+        """Write Tower IDs to a .YAML file used as the trailblazer config."""
+        config_path = self.get_trailblazer_config_path(case_id=case_id)
+        LOG.info(f"Writing Tower ID to {config_path.as_posix()}")
+        WriteFile.write_file_from_content(
+            content={case_id: [tower_id]},
+            file_format=FileFormat.YAML,
+            file_path=config_path,
+        )
+
+    def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
+        NextflowAnalysisAPI.verify_case_config_file_exists(
+            case_id=case_id, root_dir=self.root_dir, dry_run=dry_run
+        )
+
+    def get_deliverables_file_path(self, case_id: str) -> Path:
+        return NextflowAnalysisAPI.get_deliverables_file_path(
+            case_id=case_id, root_dir=self.root_dir
+        )
+
+    def verify_deliverables_file_exists(self, case_id: str) -> None:
+        NextflowAnalysisAPI.verify_deliverables_file_exists(case_id=case_id, root_dir=self.root_dir)
+
+    def get_metrics_deliverables_path(self, case_id: str) -> Path:
+        """Return a path where the <case>_metrics_deliverables.yaml file should be located."""
+        return Path(self.root_dir, case_id, f"{case_id}_metrics_deliverables.yaml")
