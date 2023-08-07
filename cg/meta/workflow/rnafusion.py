@@ -141,10 +141,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         for link in case_obj.links:
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(
-                read_nb=1, metadata=sample_metadata
+                metadata=sample_metadata, forward=True
             )
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(
-                read_nb=2, metadata=sample_metadata
+                metadata=sample_metadata, reverse=True
             )
             samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
                 case_id, fastq_r1, fastq_r2, strandedness
