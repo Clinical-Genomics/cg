@@ -1,6 +1,7 @@
 from typing import List
 from cg.store import Store
 from cg.store.models import Flowcell, Family, FamilySample, Sample
+from tests.meta.demultiplex.conftest import fixture_flow_cell_name_demultiplexed_with_bcl_convert
 
 
 def test_delete_flow_cell(bcl2fastq_flow_cell_id: str, populated_flow_cell_store: Store):
