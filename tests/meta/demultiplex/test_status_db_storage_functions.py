@@ -101,9 +101,12 @@ def test_add_samples_to_flow_cell_in_status_db(
     # GIVEN a store with sequencing metrics
     store = store_with_sequencing_metrics
 
-    # WHEN adding samples to flow cell in statusdb
+    # GIVEN a flow cell
+    flow_cell = store_with_sequencing_metrics.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
+
+    # WHEN adding samples to flow cell
     add_samples_to_flow_cell_in_status_db(
-        flow_cell_name=flow_cell_name, sample_internal_ids=[sample_id], store=store
+        flow_cell=flow_cell, sample_internal_ids=[sample_id], store=store
     )
 
     # THEN the samples are added to the flow cell in statusdb and FlowcellSamples are updated
