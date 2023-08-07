@@ -40,6 +40,12 @@ def fixture_ddn_dataflow_config(
     )
 
 
+@pytest.fixture(name="ok_ddn_response")
+def fixture_ok_ddn_response(ok_response: Response):
+    ok_response._content = b'{"job_id": "123"}'
+    return ok_response
+
+
 @pytest.fixture(name="ddn_dataflow_client")
 def fixture_ddn_dataflow_client(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDataFlowClient:
     """Returns a DDNApi without tokens being set."""
@@ -50,7 +56,7 @@ def fixture_ddn_dataflow_client(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDa
         content={
             "access": "test_auth_token",
             "refresh": "test_refresh_token",
-            "expire": (datetime.now() + timedelta(minutes=20)).timestamp(),
+            "expire": int((datetime.now() + timedelta(minutes=20)).timestamp()),
         },
     ).encode()
     with mock.patch(
@@ -60,16 +66,24 @@ def fixture_ddn_dataflow_client(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDa
         return DDNDataFlowClient(ddn_dataflow_config)
 
 
-@pytest.fixture(name="miria_file")
+@pytest.fixture(name="miria_file_archive")
 def fixture_miria_file(local_directory: Path, remote_path: Path) -> MiriaFile:
-    """Return a TransferData object."""
+    """Return a MiriaFile for archiving."""
     return MiriaFile(source=local_directory.as_posix(), destination=remote_path.as_posix())
 
 
+@pytest.fixture(name="miria_file_retrieve")
+def fixture_miria_file_retrieve(local_directory: Path, remote_path: Path) -> MiriaFile:
+    """Return a MiriaFile for retrieval."""
+    return MiriaFile(source=remote_path.as_posix(), destination=local_directory.as_posix())
+
+
 @pytest.fixture(name="transfer_payload")
-def fixture_transfer_payload(miria_file: MiriaFile) -> TransferPayload:
+def fixture_transfer_payload(miria_file_archive: MiriaFile) -> TransferPayload:
     """Return a TransferPayload object containing two identical MiriaFile object."""
-    return TransferPayload(files_to_transfer=[miria_file, miria_file.copy(deep=True)])
+    return TransferPayload(
+        files_to_transfer=[miria_file_archive, miria_file_archive.copy(deep=True)]
+    )
 
 
 @pytest.fixture(name="remote_path")
