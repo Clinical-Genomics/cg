@@ -1,15 +1,14 @@
 from pathlib import Path
 
 import pytest
-from cg.constants.constants import FileExtensions
+
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
-from cg.meta.demultiplex.utils import create_delivery_file_in_flow_cell_directory
+
 from cg.meta.demultiplex.validation import (
     is_demultiplexing_complete,
     is_file_path_compressed_fastq,
     is_flow_cell_ready_for_delivery,
-    is_flow_cell_ready_for_postprocessing,
     is_lane_in_fastq_file_name,
     is_sample_id_in_directory_name,
     is_valid_sample_fastq_file,
@@ -131,7 +130,7 @@ def test_is_sample_id_in_directory_name_with_invalid_directory():
     assert result is False
 
 
-def test_is_demultiplexing_complete_true(tmp_path):
+def test_is_demultiplexing_complete_true(tmp_path: Path):
     # GIVEN a path where DEMUX_COMPLETE file is present
     (tmp_path / DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
 
@@ -142,7 +141,7 @@ def test_is_demultiplexing_complete_true(tmp_path):
     assert result == True
 
 
-def test_is_demultiplexing_complete_false(tmp_path):
+def test_is_demultiplexing_complete_false(tmp_path: Path):
     # GIVEN a path without DEMUX_COMPLETE file
 
     # WHEN checking if demultiplexing is complete
@@ -152,7 +151,7 @@ def test_is_demultiplexing_complete_false(tmp_path):
     assert result == False
 
 
-def test_is_flow_cell_ready_for_delivery_true(tmp_path):
+def test_is_flow_cell_ready_for_delivery_true(tmp_path: Path):
     # GIVEN a path where DELIVERY file is present
     (tmp_path / DemultiplexingDirsAndFiles.DELIVERY).touch()
 
@@ -163,7 +162,7 @@ def test_is_flow_cell_ready_for_delivery_true(tmp_path):
     assert result == True
 
 
-def test_is_flow_cell_ready_for_delivery_false(tmp_path):
+def test_is_flow_cell_ready_for_delivery_false(tmp_path: Path):
     # GIVEN a path without DELIVERY file
 
     # WHEN checking if the flow cell is ready for delivery
@@ -173,7 +172,7 @@ def test_is_flow_cell_ready_for_delivery_false(tmp_path):
     assert result == False
 
 
-def test_validate_sample_sheet_exists_raises_error(tmp_path):
+def test_validate_sample_sheet_exists_raises_error(tmp_path: Path):
     # GIVEN a path with no sample sheet
 
     # WHEN validating the existence of the sample sheet
@@ -182,7 +181,7 @@ def test_validate_sample_sheet_exists_raises_error(tmp_path):
         validate_sample_sheet_exists(tmp_path)
 
 
-def test_validate_sample_sheet_exists_no_error(tmp_path):
+def test_validate_sample_sheet_exists_no_error(tmp_path: Path):
     # GIVEN a path with a sample sheet
     (tmp_path / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME).touch()
 
@@ -191,7 +190,7 @@ def test_validate_sample_sheet_exists_no_error(tmp_path):
     assert validate_sample_sheet_exists(tmp_path) is None
 
 
-def test_validate_demultiplexing_complete_raises_error(tmp_path):
+def test_validate_demultiplexing_complete_raises_error(tmp_path: Path):
     # GIVEN a path without DEMUX_COMPLETE file
 
     # WHEN validating if demultiplexing is complete
@@ -200,7 +199,7 @@ def test_validate_demultiplexing_complete_raises_error(tmp_path):
         validate_demultiplexing_complete(tmp_path)
 
 
-def test_validate_demultiplexing_complete_no_error(tmp_path):
+def test_validate_demultiplexing_complete_no_error(tmp_path: Path):
     # GIVEN a path where DEMUX_COMPLETE file is present
     (tmp_path / DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
 
@@ -209,19 +208,32 @@ def test_validate_demultiplexing_complete_no_error(tmp_path):
     assert validate_demultiplexing_complete(tmp_path) is None
 
 
-def test_validate_flow_cell_delivery_status_no_error(tmp_path):
+def test_validate_flow_cell_delivery_status_no_error(tmp_path: Path):
     # GIVEN a path without DELIVERY file
 
     # WHEN validating the flow cell delivery status
     # THEN it should not raise an error
-    assert validate_flow_cell_delivery_status(tmp_path) is None
+    assert (
+        validate_flow_cell_delivery_status(flow_cell_output_directory=tmp_path, force=False) is None
+    )
 
 
-def test_validate_flow_cell_delivery_status_raises_error(tmp_path):
+def test_validate_flow_cell_delivery_status_raises_error(tmp_path: Path):
     # GIVEN a path where DELIVERY file is present
     (tmp_path / DemultiplexingDirsAndFiles.DELIVERY).touch()
 
     # WHEN validating the flow cell delivery status
     # THEN it should raise a FlowCellError
     with pytest.raises(FlowCellError):
-        validate_flow_cell_delivery_status(tmp_path)
+        validate_flow_cell_delivery_status(flow_cell_output_directory=tmp_path, force=False)
+
+
+def test_validate_flow_cell_delivery_status_forced(tmp_path: Path):
+    # GIVEN a path where DELIVERY file is present
+    (tmp_path / DemultiplexingDirsAndFiles.DELIVERY).touch()
+
+    # WHEN validating the flow cell delivery status
+    # THEN it should not raise a FlowCellError
+    assert (
+        validate_flow_cell_delivery_status(flow_cell_output_directory=tmp_path, force=True) is None
+    )
