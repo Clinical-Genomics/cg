@@ -3,7 +3,7 @@ from abc import abstractmethod, ABC
 from typing import List
 
 from housekeeper.store.models import File
-from pydantic.v1 import BaseModel
+from pydantic import BaseModel
 
 from cg.store.models import Sample
 
