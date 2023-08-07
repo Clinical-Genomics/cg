@@ -62,17 +62,16 @@ rnafusion.add_command(resolve_compression)
 def config_case(
     context: CGConfig, case_id: str, strandedness: str, genomes_base: Path, dry_run: bool
 ) -> None:
-    """Create sample sheet file for RNAFUSION analysis for a given CASE_ID."""
+    """Create sample sheet file and params file for a given case."""
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     LOG.info(f"Creating sample sheet file for {case_id}.")
-    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     try:
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.config_case(
             case_id=case_id, strandedness=strandedness, genomes_base=genomes_base, dry_run=dry_run
         )
-
     except CgError as error:
-        LOG.error(f"Could not create sample sheet: {error}")
+        LOG.error(f"Could not create config files for {case_id}: {error}")
         raise click.Abort() from error
 
 

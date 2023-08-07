@@ -49,7 +49,7 @@ class MockFile:
         self.id = kwargs.get("id", 1)
         self.path = kwargs.get("path", "a_file")
         self.checksum = calculate_checksum(self.path)
-        self.to_archive = kwargs.get("to_archive", False)
+        self.to_archive = kwargs.get("is_archiving_request", False)
 
         self.version_id = kwargs.get("version_id", 1)
         self.tags = kwargs.get("tags", [MockTag()])
@@ -71,7 +71,7 @@ class MockFile:
         return True
 
     def __repr__(self):
-        return f"MockFile:id={self.id}, path={self.path}, to_archive={self.to_archive}"
+        return f"MockFile:id={self.id}, path={self.path}, is_archiving_request={self.to_archive}"
 
 
 class MockVersion:
