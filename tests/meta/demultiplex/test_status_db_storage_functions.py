@@ -14,6 +14,7 @@ from cg.meta.demultiplex.status_db_storage_functions import (
     add_sequencing_metrics_to_statusdb,
     update_sample_read_count,
     metric_has_sample_in_statusdb,
+    add_samples_to_flow_cell_in_status_db,
 )
 
 
@@ -93,3 +94,23 @@ def test_metric_has_sample_in_statusdb(demultiplex_context: CGConfig):
     assert not metric_has_sample_in_statusdb(
         sample_internal_id=sample_internal_id, store=demux_post_processing_api.status_db
     )
+
+
+def test_add_samples_to_flow_cell_in_status_db(
+    store_with_sequencing_metrics: Store, flow_cell_name: str, sample_id: str
+):
+    # GIVEN a store with sequencing metrics
+    store = store_with_sequencing_metrics
+
+    # GIVEN a flow cell
+    flow_cell = store_with_sequencing_metrics.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
+
+    # WHEN adding samples to flow cell
+    add_samples_to_flow_cell_in_status_db(
+        flow_cell=flow_cell, sample_internal_ids=[sample_id], store=store
+    )
+
+    # THEN the samples are added to the flow cell in statusdb and FlowcellSamples are updated
+    flow_cell = store_with_sequencing_metrics.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
+    assert flow_cell.samples
+    assert flow_cell.samples[0].internal_id == sample_id
