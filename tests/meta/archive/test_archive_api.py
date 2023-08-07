@@ -1,35 +1,28 @@
-from housekeeper.store.models import File
-
 from typing import List
 
 from cg.constants.archiving import ArchiveLocationsInUse
-
 from cg.meta.archive.archive import (
-    SpringArchiveAPI,
     FileAndSample,
-    get_files_by_archive_location,
+    SpringArchiveAPI,
+    filter_files_on_archive_location,
 )
-
-
 from cg.store.models import Sample
+from housekeeper.store.models import File
 
 
 def test_get_files_by_archive_location(
     spring_archive_api: SpringArchiveAPI, sample_id, father_sample_id
 ):
     """Tests filtering out files and samples with the correct Archive location from a list."""
-    # GIVEN two Samples and two corresponding files
-    files_and_samples: List[FileAndSample] = []
-    for sample in [sample_id, father_sample_id]:
-        files_and_samples.append(
-            FileAndSample(
-                file=spring_archive_api.housekeeper_api.get_files(bundle=sample).first(),
-                sample=spring_archive_api.status_db.get_sample_by_internal_id(sample),
-            )
+    files_and_samples: List[FileAndSample] = [
+        FileAndSample(
+            file=spring_archive_api.housekeeper_api.get_files(bundle=sample).first(),
+            sample=spring_archive_api.status_db.get_sample_by_internal_id(sample),
         )
-
+        for sample in [sample_id, father_sample_id]
+    ]
     # WHEN fetching the files by archive location
-    selected_files: List[FileAndSample] = get_files_by_archive_location(
+    selected_files: List[FileAndSample] = filter_files_on_archive_location(
         files_and_samples, ArchiveLocationsInUse.KAROLINSKA_BUCKET
     )
 

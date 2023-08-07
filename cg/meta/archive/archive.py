@@ -1,13 +1,12 @@
 import logging
 from typing import List, Optional
 
-from housekeeper.store.models import File
-from pydantic import BaseModel, ConfigDict
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.archiving import ArchiveLocationsInUse
 from cg.store import Store
 from cg.store.models import Sample
+from housekeeper.store.models import File
+from pydantic import BaseModel, ConfigDict
 
 LOG = logging.getLogger(__name__)
 
@@ -18,7 +17,7 @@ class FileAndSample(BaseModel):
     sample: Sample
 
 
-def get_files_by_archive_location(
+def filter_files_on_archive_location(
     files_and_samples: List[FileAndSample], archive_location: ArchiveLocationsInUse
 ) -> List[FileAndSample]:
     """
