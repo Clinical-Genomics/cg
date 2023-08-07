@@ -374,7 +374,7 @@ def fixture_flow_cell_info_map(
 
 
 @pytest.fixture(name="flow_cell_name_demultiplexed_with_bcl_convert", scope="session")
-def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
+def fixture_flow_cell_name_demultiplexed_with_bcl_convert() -> str:
     return "HY7FFDRX2"
 
 

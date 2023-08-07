@@ -7,6 +7,7 @@ from cg.store import Store
 
 from cg.store.models import Sample, Invoice, Customer
 from tests.store_helpers import StoreHelpers
+from tests.meta.demultiplex.conftest import fixture_flow_cell_name_demultiplexed_with_bcl_convert
 
 
 def test_get_all_pools_and_samples_for_invoice_by_invoice_id(store: Store, helpers: StoreHelpers):
@@ -319,7 +320,7 @@ def test_get_samples_by_any_id_exclusive_filtering_gives_empty_query(
     assert filtered_query.count() == 0
 
 
-def test_get_number_of_reads_for_sample_from_metrics(
+def test_get_number_of_reads_for_sample_passing_q30_from_metrics(
     store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads: int
 ):
     """Test if get_number_of_reads_for_sample_from_metrics function returns correct total reads."""
