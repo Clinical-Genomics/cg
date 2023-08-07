@@ -111,7 +111,6 @@ def update_sample_read_counts_in_status_db(
 def update_sample_read_count(sample_id: str, q30_threshold: int, store: Store) -> None:
     """Update the read count for a sample in status db with all reads exceeding the q30 threshold from the sequencing metrics table."""
     sample: Optional[Sample] = store.get_sample_by_internal_id(sample_id)
-
     if sample:
         sample_read_count: int = store.get_number_of_reads_for_sample_passing_q30_threshold(
             sample_internal_id=sample_id,

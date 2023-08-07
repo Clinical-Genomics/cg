@@ -7,6 +7,7 @@ from typing import Dict
 import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.meta.upload.coverage import UploadCoverageApi
@@ -23,7 +24,6 @@ from tests.cli.workflow.mip.conftest import (
 )
 
 from tests.store_helpers import StoreHelpers
-from tests.mocks.hk_mock import MockHousekeeperAPI
 
 
 class MockCoverage(ChanjoAPI):
@@ -77,7 +77,7 @@ def fixture_upload_genotypes_api(
 
 @pytest.fixture(scope="function")
 def coverage_upload_api(
-    chanjo_config: Dict[str, Dict[str, str]], populated_housekeeper_api: MockHousekeeperAPI
+    chanjo_config: Dict[str, Dict[str, str]], populated_housekeeper_api: HousekeeperAPI
 ):
     """Return a upload coverage API."""
     return UploadCoverageApi(
