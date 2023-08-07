@@ -1,4 +1,5 @@
 from typing import List
+from unittest import mock
 
 from cg.constants.archiving import ArchiveLocationsInUse
 from cg.meta.archive.archive import (
@@ -6,6 +7,8 @@ from cg.meta.archive.archive import (
     SpringArchiveAPI,
     filter_files_on_archive_location,
 )
+from cg.meta.archive.ddn_dataflow import MiriaFile
+from cg.meta.archive.models import FileTransferData
 from cg.store.models import Sample
 from housekeeper.store.models import File
 
@@ -102,3 +105,40 @@ def test_get_sample_not_exists(
     assert not sample
     assert sample_id in caplog.text
     assert file.path in caplog.text
+
+
+def test_convert_into_correct_model(sample_id: str, spring_archive_api: SpringArchiveAPI):
+    """Tests instantiating the correct dataclass for a sample."""
+    # GIVEN file and Sample
+    file_and_sample = FileAndSample(
+        file=spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first(),
+        sample=spring_archive_api.status_db.get_sample_by_internal_id(sample_id),
+    )
+    # WHEN using it to instantiate the correct class
+    transferdata: List[FileTransferData] = spring_archive_api.convert_into_correct_model(
+        files_and_samples=[file_and_sample],
+        archive_location=ArchiveLocationsInUse.KAROLINSKA_BUCKET,
+    )
+
+    # THEN the returned object should be of the correct type
+    assert type(transferdata[0]) == MiriaFile
+
+
+def test_call_corresponding_archiving_function(
+    spring_archive_api: SpringArchiveAPI, miria_file_archive: MiriaFile
+):
+    """Tests so that the correct archiving function is used when"""
+    # GIVEN a file to be transferred
+    # GIVEN a spring_archive_api with a mocked archive function
+    with mock.patch.object(
+        spring_archive_api.ddn_client,
+        "archive_folders",
+        return_value=123,
+    ) as mock_request_submitter:
+        # WHEN calling the corresponding archive method
+        spring_archive_api.call_corresponding_archiving_function(
+            files=[miria_file_archive], archive_location=ArchiveLocationsInUse.KAROLINSKA_BUCKET
+        )
+
+    # THEN the correct archive function should have been called once
+    mock_request_submitter.assert_called_once_with(sources_and_destinations=[miria_file_archive])

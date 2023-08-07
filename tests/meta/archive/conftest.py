@@ -4,7 +4,6 @@ from typing import List
 from unittest import mock
 
 import pytest
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocationsInUse
@@ -12,12 +11,7 @@ from cg.constants.constants import FileFormat
 from cg.constants.subject import Gender
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
-from cg.meta.archive.ddn_dataflow import (
-    ROOT_TO_TRIM,
-    DDNDataFlowClient,
-    MiriaFile,
-    TransferPayload,
-)
+from cg.meta.archive.ddn_dataflow import ROOT_TO_TRIM, DDNDataFlowClient, MiriaFile, TransferPayload
 from cg.models.cg_config import DDNDataFlowConfig
 from cg.store import Store
 from cg.store.models import Customer, Sample
@@ -190,6 +184,7 @@ def fixture_archive_store(
 def fixture_spring_archive_api(
     populated_housekeeper_api: HousekeeperAPI,
     archive_store: Store,
+    ddn_dataflow_client: DDNDataFlowClient,
     father_sample_id: str,
     helpers,
 ) -> SpringArchiveAPI:
@@ -201,4 +196,5 @@ def fixture_spring_archive_api(
     return SpringArchiveAPI(
         housekeeper_api=populated_housekeeper_api,
         status_db=archive_store,
+        ddn_dataflow_client=ddn_dataflow_client,
     )

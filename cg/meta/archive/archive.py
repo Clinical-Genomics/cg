@@ -1,8 +1,10 @@
 import logging
-from typing import List, Optional
+from typing import Callable, Dict, List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.archiving import ArchiveLocationsInUse
+from cg.meta.archive.ddn_dataflow import DDNDataFlowClient, MiriaFile
+from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.store import Store
 from cg.store.models import Sample
 from housekeeper.store.models import File
@@ -15,6 +17,14 @@ class FileAndSample(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     file: File
     sample: Sample
+
+
+class ArchiveModels(BaseModel):
+    """Model containing the necessary file and sample information."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    file_model: Callable
+    handler: ArchiveHandler
 
 
 def filter_files_on_archive_location(
@@ -34,12 +44,29 @@ class SpringArchiveAPI:
     """Class handling the archiving of sample SPRING files to an off-premise location for long
     term storage."""
 
-    def __init__(self, housekeeper_api: HousekeeperAPI, status_db: Store):
+    def __init__(
+        self,
+        ddn_dataflow_client: DDNDataFlowClient,
+        housekeeper_api: HousekeeperAPI,
+        status_db: Store,
+    ):
         self.housekeeper_api: HousekeeperAPI = housekeeper_api
+        self.ddn_client: DDNDataFlowClient = ddn_dataflow_client
         self.status_db: Store = status_db
+        self.handler_map: Dict[str, ArchiveModels] = {
+            ArchiveLocationsInUse.KAROLINSKA_BUCKET: ArchiveModels(
+                file_model=MiriaFile.from_file_and_sample, handler=self.ddn_client
+            )
+        }
+
+    def call_corresponding_archiving_function(
+        self, files: List[FileTransferData], archive_location: ArchiveLocationsInUse
+    ) -> int:
+        return self.handler_map[archive_location].handler.archive_folders(
+            sources_and_destinations=files
+        )
 
     def get_sample(self, file: File) -> Optional[Sample]:
-        """Fetches the Sample corresponding to a File and logs if a Sample is not found."""
         sample: Optional[Sample] = self.status_db.get_sample_by_internal_id(
             file.version.bundle.name
         )
@@ -59,3 +86,13 @@ class SpringArchiveAPI:
             if sample:
                 files_and_samples.append(FileAndSample(file=file, sample=sample))
         return files_and_samples
+
+    def convert_into_correct_model(
+        self, files_and_samples: List[FileAndSample], archive_location: ArchiveLocationsInUse
+    ) -> List[MiriaFile]:
+        return [
+            self.handler_map[archive_location].file_model(
+                file=file_and_sample.file, sample=file_and_sample.sample
+            )
+            for file_and_sample in files_and_samples
+        ]

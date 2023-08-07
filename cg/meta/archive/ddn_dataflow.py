@@ -1,21 +1,19 @@
 """Module for archiving and retrieving folders via DDN Dataflow."""
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional
 from urllib.parse import urljoin
 
-from housekeeper.store.models import File
-
-from datetime import datetime
 from cg.constants.constants import APIMethods
 from cg.exc import DdnDataflowAuthenticationError
-from cg.meta.archive.models import ArchiveInterface, ArchiveFile
 from cg.io.controller import APIRequest
+from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DDNDataFlowConfig
+from cg.store.models import Sample
+from housekeeper.store.models import File
 from pydantic import BaseModel
 from requests.models import Response
-
-from cg.store.models import Sample
 
 OSTYPE: str = "Unix/MacOS"
 ROOT_TO_TRIM: str = "/home"
@@ -33,7 +31,7 @@ class DataflowEndpoints(str, Enum):
     RETRIEVE_FILES = "files/retrieve"
 
 
-class MiriaFile(ArchiveFile):
+class MiriaFile(FileTransferData):
     """Model for representing a singular object transfer."""
 
     _metadata = None
@@ -132,7 +130,7 @@ class TransferJob(BaseModel):
     job_id: int
 
 
-class DDNDataFlowClient(ArchiveInterface):
+class DDNDataFlowClient(ArchiveHandler):
     """Class for archiving and retrieving folders via DDN Dataflow."""
 
     def __init__(self, config: DDNDataFlowConfig):
