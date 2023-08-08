@@ -8,6 +8,7 @@ from housekeeper.store.models import File
 from pydantic import BaseModel
 from pydantic.v1 import ConfigDict
 
+from cg.store.models import Sample
 
 class FileAndSample(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)

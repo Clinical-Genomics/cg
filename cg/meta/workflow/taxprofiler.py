@@ -15,11 +15,10 @@ from cg.constants.taxprofiler import (
     TAXPROFILER_SAMPLE_SHEET_HEADERS,
 )
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fastq import TaxprofilerFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
-from cg.store.models import Family, Sample
+from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
 
@@ -35,17 +34,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.root_dir: str = config.taxprofiler.root
-
-    @property
-    def root(self) -> str:
-        return self.root_dir
-
-    @property
-    def fastq_handler(self):
-        return TaxprofilerFastqHandler
-
-    def get_case_config_path(self, case_id):
-        return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
 
     @staticmethod
     def build_sample_sheet_content(

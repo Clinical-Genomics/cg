@@ -3,7 +3,6 @@ from typing import Callable, Dict, List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.archiving import ArchiveLocations
-from cg.meta.archive.ddn_dataflow import DDNDataFlowClient
 from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
@@ -54,6 +53,7 @@ class SpringArchiveAPI:
         return archive_handler.archive_folders(files_and_samples=files)
 
     def get_sample(self, file: File) -> Optional[Sample]:
+        """Fetches the Sample corresponding to a File and logs if a Sample is not found."""
         sample: Optional[Sample] = self.status_db.get_sample_by_internal_id(
             file.version.bundle.name
         )
