@@ -3,6 +3,7 @@ from typing import Callable, Dict, List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.archiving import ArchiveLocations
+from cg.meta.archive.ddn_dataflow import DDNDataFlowClient
 from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store

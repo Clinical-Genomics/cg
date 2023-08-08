@@ -14,6 +14,7 @@ from cg.store.models import Sample
 from housekeeper.store.models import File
 from pydantic import BaseModel
 from requests.models import Response
+
 OSTYPE: str = "Unix/MacOS"
 ROOT_TO_TRIM: str = "/home"
 
