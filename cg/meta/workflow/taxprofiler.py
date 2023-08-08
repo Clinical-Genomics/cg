@@ -11,14 +11,17 @@ from cg.constants import Pipeline
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.taxprofiler import (
+    TAXPROFILER_FASTA_HEADER,
     TAXPROFILER_INSTRUMENT_PLATFORM,
     TAXPROFILER_RUN_ACCESSION,
     TAXPROFILER_SAMPLE_SHEET_HEADERS,
     TAXPROFILER_FASTA_HEADER,
     TaxprofilerDefaults,
 )
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import TaxprofilerFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
 from cg.utils import Process
 from cg.store.models import Family, Sample
@@ -122,10 +125,10 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             sample_name: str = link.sample.name
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(
-                read_nb=1, metadata=sample_metadata
+                metadata=sample_metadata, forward=True
             )
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(
-                read_nb=2, metadata=sample_metadata
+                metadata=sample_metadata, reverse=True
             )
             sample_content: Dict[str, List[str]] = self.build_sample_sheet_content(
                 sample_name=sample_name,

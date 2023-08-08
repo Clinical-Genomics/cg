@@ -1,5 +1,4 @@
 """Tests for the BaseHandle class."""
-
 from cg.constants.subject import PhenotypeStatus
 from sqlalchemy.orm import Query
 
