@@ -59,7 +59,7 @@ class SpringArchiveAPI:
             )
         }
 
-    def call_corresponding_archiving_function(
+    def call_corresponding_archiving_method(
         self, files: List[FileTransferData], archive_location: ArchiveLocationsInUse
     ) -> int:
         return self.handler_map[archive_location].handler.archive_folders(
@@ -87,9 +87,9 @@ class SpringArchiveAPI:
                 files_and_samples.append(FileAndSample(file=file, sample=sample))
         return files_and_samples
 
-    def convert_into_correct_model(
+    def convert_files_into_transfer_data(
         self, files_and_samples: List[FileAndSample], archive_location: ArchiveLocationsInUse
-    ) -> List[MiriaFile]:
+    ) -> List[FileTransferData]:
         return [
             self.handler_map[archive_location].file_model(
                 file=file_and_sample.file, sample=file_and_sample.sample

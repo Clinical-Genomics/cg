@@ -107,7 +107,7 @@ def test_get_sample_not_exists(
     assert file.path in caplog.text
 
 
-def test_convert_into_correct_model(sample_id: str, spring_archive_api: SpringArchiveAPI):
+def test_convert_into_transfer_data(sample_id: str, spring_archive_api: SpringArchiveAPI):
     """Tests instantiating the correct dataclass for a sample."""
     # GIVEN file and Sample
     file_and_sample = FileAndSample(
@@ -115,7 +115,7 @@ def test_convert_into_correct_model(sample_id: str, spring_archive_api: SpringAr
         sample=spring_archive_api.status_db.get_sample_by_internal_id(sample_id),
     )
     # WHEN using it to instantiate the correct class
-    transferdata: List[FileTransferData] = spring_archive_api.convert_into_correct_model(
+    transferdata: List[FileTransferData] = spring_archive_api.convert_files_into_transfer_data(
         files_and_samples=[file_and_sample],
         archive_location=ArchiveLocationsInUse.KAROLINSKA_BUCKET,
     )
@@ -124,10 +124,10 @@ def test_convert_into_correct_model(sample_id: str, spring_archive_api: SpringAr
     assert type(transferdata[0]) == MiriaFile
 
 
-def test_call_corresponding_archiving_function(
+def test_call_corresponding_archiving_method(
     spring_archive_api: SpringArchiveAPI, miria_file_archive: MiriaFile
 ):
-    """Tests so that the correct archiving function is used when"""
+    """Tests so that the correct archiving function is used when providing a Karolinska customer."""
     # GIVEN a file to be transferred
     # GIVEN a spring_archive_api with a mocked archive function
     with mock.patch.object(
@@ -136,7 +136,7 @@ def test_call_corresponding_archiving_function(
         return_value=123,
     ) as mock_request_submitter:
         # WHEN calling the corresponding archive method
-        spring_archive_api.call_corresponding_archiving_function(
+        spring_archive_api.call_corresponding_archiving_method(
             files=[miria_file_archive], archive_location=ArchiveLocationsInUse.KAROLINSKA_BUCKET
         )
 
