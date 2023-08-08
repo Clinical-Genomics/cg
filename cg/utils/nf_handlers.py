@@ -301,9 +301,9 @@ class NextflowHandler(NfHandler):
     #         file_path=file_bundle_template,
     #     )
 
-    @classmethod
-    def add_bundle_header(cls, deliverables_content: dict) -> dict:
-        return {"files": deliverables_content}
+    # @classmethod
+    # def add_bundle_header(cls, deliverables_content: dict) -> dict:
+    #     return {"files": deliverables_content}
 
     @classmethod
     def write_deliverables_bundle(

@@ -168,3 +168,7 @@ class NfAnalysisAPI(AnalysisAPI):
             file_format=FileFormat.YAML,
             file_path=file_bundle_template,
         )
+
+    def add_bundle_header(self, deliverables_content: dict) -> dict:
+        """Adds header to bundle content."""
+        return {"files": deliverables_content}

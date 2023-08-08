@@ -280,9 +280,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             raise ValueError
         self.create_case_directory(case_id=case_id)
         NextflowHandler.write_deliverables_bundle(
-            deliverables_content=NextflowHandler.add_bundle_header(
-                deliverables_content=deliverables_content
-            ),
+            deliverables_content=self.add_bundle_header(deliverables_content=deliverables_content),
             file_path=self.get_deliverables_file_path(case_id=case_id),
         )
         LOG.info(
