@@ -61,9 +61,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.compute_env: str = config.rnafusion.compute_env
         self.revision: str = config.rnafusion.revision
 
-    # def verify_analysis_finished(self, case_id):
-    #     return NextflowHandler.verify_analysis_finished(case_id=case_id, root_dir=self.root_dir)
-
     @staticmethod
     def build_samplesheet_content(
         case_id: str, fastq_r1: List[str], fastq_r2: List[str], strandedness: str
@@ -255,11 +252,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
                 tower_id = NfTowerHandler.get_tower_id(stdout_lines=self.process.stdout_lines())
                 self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
             LOG.info(self.process.stdout)
-
-    # def get_pipeline_version(self, case_id: str) -> str:
-    #     return NextflowHandler.get_pipeline_version(
-    #         case_id=case_id, root_dir=self.root_dir, pipeline=self.pipeline
-    #     )
 
     def report_deliver(self, case_id: str) -> None:
         """Get a deliverables file template from resources, parse it and, then write the deliverables file."""
