@@ -2,9 +2,8 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from pydantic.v1 import ValidationError
-from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.command_args import CommandArgs
 from cg.constants import Pipeline
@@ -18,8 +17,8 @@ from cg.constants.taxprofiler import (
     TAXPROFILER_FASTA_HEADER,
     TaxprofilerDefaults,
 )
-from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
 from cg.utils import Process
@@ -28,7 +27,7 @@ from cg.store.models import Family, Sample
 LOG = logging.getLogger(__name__)
 
 
-class TaxprofilerAnalysisAPI(AnalysisAPI):
+class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     """Handles communication between Taxprofiler processes
     and the rest of CG infrastructure."""
 
@@ -197,11 +196,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             return
 
         LOG.info("Configs files written")
-
-    def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
-        NextflowAnalysisAPI.verify_case_config_file_exists(
-            case_id=case_id, root_dir=self.root_dir, dry_run=dry_run
-        )
 
     def run_analysis(
         self, case_id: str, command_args: CommandArgs, use_nextflow: bool, dry_run: bool = False
