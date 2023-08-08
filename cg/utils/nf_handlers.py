@@ -135,35 +135,35 @@ class NextflowHandler(NfHandler):
     #     if nextflow_config:
     #         return Path(nextflow_config).absolute()
 
-    @classmethod
-    def get_software_version_path(cls, case_id: str, root_dir: str) -> Path:
-        return Path(
-            (cls.get_case_path(case_id, root_dir)), "pipeline_info", "software_versions.yml"
-        )
+    # @classmethod
+    # def get_software_version_path(cls, case_id: str, root_dir: str) -> Path:
+    #     return Path(
+    #         (cls.get_case_path(case_id, root_dir)), "pipeline_info", "software_versions.yml"
+    #     )
 
-    @classmethod
-    def get_pipeline_version(cls, case_id: str, root_dir: str, pipeline: str) -> str:
-        try:
-            with open(
-                cls.get_software_version_path(case_id=case_id, root_dir=root_dir), "r"
-            ) as file:
-                last_line = file.readlines()[-1]
-            return last_line.split(" ")[-1]
-        except (Exception, CalledProcessError):
-            LOG.warning(f"Could not retrieve {pipeline} workflow version!")
-            return "0.0.0"
+    # @classmethod
+    # def get_pipeline_version(cls, case_id: str, root_dir: str, pipeline: str) -> str:
+    #     try:
+    #         with open(
+    #             cls.get_software_version_path(case_id=case_id, root_dir=root_dir), "r"
+    #         ) as file:
+    #             last_line = file.readlines()[-1]
+    #         return last_line.split(" ")[-1]
+    #     except (Exception, CalledProcessError):
+    #         LOG.warning(f"Could not retrieve {pipeline} workflow version!")
+    #         return "0.0.0"
 
     @classmethod
     def get_variables_to_export(cls, case_id: str, root_dir: str) -> Dict[str, str]:
         """Generates a dictionary with variables that needs to be exported."""
         return {NXF_JVM_ARGS_ENV: f"'{JAVA_MEMORY_HEADJOB}'"}
 
-    @classmethod
-    def verify_analysis_finished(cls, case_id: str, root_dir: str) -> None:
-        if not Path(cls.get_software_version_path(case_id=case_id, root_dir=root_dir)).exists():
-            raise ValueError(
-                f"Analysis not finished: pipeline_info/software_versions.yml file not found for case {case_id}"
-            )
+    # @classmethod
+    # def verify_analysis_finished(cls, case_id: str, root_dir: str) -> None:
+    #     if not Path(cls.get_software_version_path(case_id=case_id, root_dir=root_dir)).exists():
+    #         raise ValueError(
+    #             f"Analysis not finished: pipeline_info/software_versions.yml file not found for case {case_id}"
+    #         )
 
     @classmethod
     def make_case_folder(cls, case_id: str, root_dir: str, dry_run: bool = False) -> None:
