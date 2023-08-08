@@ -20,7 +20,6 @@ from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, MetricsQCError, MissingMetrics
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
-from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
@@ -34,7 +33,7 @@ from cg.models.rnafusion.command_args import CommandArgs
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.store.models import Family
 from cg.utils import Process
-from cg.utils.nf_handlers import NfTowerHandler
+from cg.utils.nf_handlers import NextflowHandler, NfTowerHandler
 
 LOG = logging.getLogger(__name__)
 
@@ -63,7 +62,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.revision: str = config.rnafusion.revision
 
     def verify_analysis_finished(self, case_id):
-        return NextflowAnalysisAPI.verify_analysis_finished(case_id=case_id, root_dir=self.root_dir)
+        return NextflowHandler.verify_analysis_finished(case_id=case_id, root_dir=self.root_dir)
 
     @staticmethod
     def build_samplesheet_content(
@@ -103,10 +102,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
         for link in case_obj.links:
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
-            fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(
+            fastq_r1: List[str] = NextflowHandler.extract_read_files(
                 metadata=sample_metadata, forward=True
             )
-            fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(
+            fastq_r2: List[str] = NextflowHandler.extract_read_files(
                 metadata=sample_metadata, reverse=True
             )
             samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
@@ -115,10 +114,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             LOG.info(samplesheet_content)
             if dry_run:
                 continue
-            NextflowAnalysisAPI.create_samplesheet_csv(
+            NextflowHandler.create_samplesheet_csv(
                 samplesheet_content=samplesheet_content,
                 headers=RNAFUSION_SAMPLESHEET_HEADERS,
-                config_path=NextflowAnalysisAPI.get_case_config_path(
+                config_path=NextflowHandler.get_case_config_path(
                     case_id=case_id, root_dir=self.root_dir
                 ),
             )
@@ -133,11 +132,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         LOG.info(default_options)
         if dry_run:
             return
-        NextflowAnalysisAPI.write_nextflow_yaml(
+        NextflowHandler.write_nextflow_yaml(
             content=default_options,
-            file_path=NextflowAnalysisAPI.get_params_file_path(
-                case_id=case_id, root_dir=self.root_dir
-            ),
+            file_path=NextflowHandler.get_params_file_path(case_id=case_id, root_dir=self.root_dir),
         )
 
     def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
@@ -158,10 +155,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def get_default_parameters(self, case_id: str) -> Dict:
         """Returns a dictionary with default RNAFusion parameters."""
         return {
-            "input": NextflowAnalysisAPI.get_input_path(
+            "input": NextflowHandler.get_input_path(
                 case_id=case_id, root_dir=self.root_dir
             ).as_posix(),
-            "outdir": NextflowAnalysisAPI.get_outdir_path(
+            "outdir": NextflowHandler.get_outdir_path(
                 case_id=case_id, root_dir=self.root_dir
             ).as_posix(),
             "genomes_base": self.get_references_path().as_posix(),
@@ -189,9 +186,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         dry_run: bool,
     ) -> None:
         """Create sample sheet file for RNAFUSION analysis."""
-        NextflowAnalysisAPI.make_case_folder(
-            case_id=case_id, root_dir=self.root_dir, dry_run=dry_run
-        )
+        NextflowHandler.make_case_folder(case_id=case_id, root_dir=self.root_dir, dry_run=dry_run)
         LOG.info("Generating samplesheet")
         self.write_samplesheet(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
         LOG.info("Generating parameters file")
@@ -215,26 +210,26 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
                 binary=self.config.rnafusion.binary_path,
                 environment=self.conda_env,
                 conda_binary=self.conda_binary,
-                launch_directory=NextflowAnalysisAPI.get_case_path(
+                launch_directory=NextflowHandler.get_case_path(
                     case_id=case_id, root_dir=self.root_dir
                 ),
             )
             LOG.info("Pipeline will be executed using nextflow")
-            parameters: List[str] = NextflowAnalysisAPI.get_nextflow_run_parameters(
+            parameters: List[str] = NextflowHandler.get_nextflow_run_parameters(
                 case_id=case_id,
                 pipeline_path=self.nfcore_pipeline_path,
                 root_dir=self.root_dir,
                 command_args=command_args.dict(),
             )
             self.process.export_variables(
-                export=NextflowAnalysisAPI.get_variables_to_export(
+                export=NextflowHandler.get_variables_to_export(
                     case_id=case_id, root_dir=self.root_dir
                 ),
             )
 
             command = self.process.get_command(parameters=parameters)
             LOG.info(f"{command}")
-            sbatch_number: int = NextflowAnalysisAPI.execute_head_job(
+            sbatch_number: int = NextflowHandler.execute_head_job(
                 case_id=case_id,
                 root_dir=self.root_dir,
                 slurm_account=self.account,
@@ -272,40 +267,38 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             LOG.info(self.process.stdout)
 
     def get_pipeline_version(self, case_id: str) -> str:
-        return NextflowAnalysisAPI.get_pipeline_version(
+        return NextflowHandler.get_pipeline_version(
             case_id=case_id, root_dir=self.root_dir, pipeline=self.pipeline
         )
 
     def report_deliver(self, case_id: str) -> None:
         """Get a deliverables file template from resources, parse it and, then write the deliverables file."""
-        deliverables_content: dict = NextflowAnalysisAPI.get_template_deliverables_file_content(
+        deliverables_content: dict = NextflowHandler.get_template_deliverables_file_content(
             resources.RNAFUSION_BUNDLE_FILENAMES_PATH
         )
         try:
             for index, deliver_file in enumerate(deliverables_content):
                 NextflowDeliverables(deliverables=deliver_file)
                 deliverables_content[index] = replace_dict_values(
-                    NextflowAnalysisAPI.get_replace_map(case_id=case_id, root_dir=self.root_dir),
+                    NextflowHandler.get_replace_map(case_id=case_id, root_dir=self.root_dir),
                     deliver_file,
                 )
         except ValidationError as error:
             LOG.error(error)
             raise ValueError
-        NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
-        NextflowAnalysisAPI.write_deliverables_bundle(
-            deliverables_content=NextflowAnalysisAPI.add_bundle_header(
+        NextflowHandler.make_case_folder(case_id=case_id, root_dir=self.root_dir)
+        NextflowHandler.write_deliverables_bundle(
+            deliverables_content=NextflowHandler.add_bundle_header(
                 deliverables_content=deliverables_content
             ),
-            file_path=NextflowAnalysisAPI.get_deliverables_file_path(
+            file_path=NextflowHandler.get_deliverables_file_path(
                 case_id=case_id, root_dir=self.root_dir
             ),
         )
         LOG.info(
             "Writing deliverables file in "
             + str(
-                NextflowAnalysisAPI.get_deliverables_file_path(
-                    case_id=case_id, root_dir=self.root_dir
-                )
+                NextflowHandler.get_deliverables_file_path(case_id=case_id, root_dir=self.root_dir)
             )
         )
 

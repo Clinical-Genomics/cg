@@ -8,7 +8,7 @@ from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import FastqHandler
-from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
+from cg.utils.nf_handlers import NextflowHandler
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
 
@@ -63,10 +63,10 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
-        return NextflowAnalysisAPI.get_case_path(case_id=case_id, root_dir=self.root)
+        return NextflowHandler.get_case_path(case_id=case_id, root_dir=self.root)
 
     def get_case_config_path(self, case_id):
-        return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
+        return NextflowHandler.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         """Return the path to a Trailblazer config file containing Tower IDs."""
@@ -89,9 +89,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the deliverables file for a case should be located."""
-        return NextflowAnalysisAPI.get_deliverables_file_path(
-            case_id=case_id, root_dir=self.root_dir
-        )
+        return NextflowHandler.get_deliverables_file_path(case_id=case_id, root_dir=self.root_dir)
 
     def verify_deliverables_file_exists(self, case_id: str) -> None:
         """Raise an error if deliverables files file is not found."""
