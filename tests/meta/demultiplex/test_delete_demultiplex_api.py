@@ -4,8 +4,6 @@ import pytest
 from pathlib import Path
 from typing import List, Optional
 
-from cg.apps.cgstats.db import models
-from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import DeleteDemuxError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
@@ -77,13 +75,11 @@ def test_set_dry_run_delete_demux_api(
     caplog,
     cg_context: CGConfig,
     bcl2fastq_flow_cell_id: str,
-    stats_api: StatsAPI,
     tmp_flow_cell_run_base_path: Path,
 ):
     """Test to test function to set the API to run in dry run mode"""
 
     caplog.set_level(logging.DEBUG)
-    cg_context.cg_stats_api_ = stats_api
     cg_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
     cg_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
@@ -333,47 +329,6 @@ def test_delete_flow_cell_hasta(
 
     # THEN the status of the flow cell in statusdb should be set to removed
     assert flow_cell_obj.status == "removed"
-
-
-def test_delete_flow_cell_cgstats(
-    caplog,
-    populated_delete_demux_context: CGConfig,
-    populated_delete_demultiplex_api: DeleteDemuxAPI,
-    bcl2fastq_flow_cell_id: str,
-):
-    """Test if function to remove objects from cg-stats is working."""
-
-    caplog.set_level(logging.INFO)
-    delete_demux_api: DeleteDemuxAPI = populated_delete_demultiplex_api
-    delete_demux_api.set_dry_run(dry_run=False)
-
-    # GIVEN an existing object in cg-stags database
-
-    existing_object: models.Flowcell = (
-        populated_delete_demux_context.cg_stats_api.query(models.Flowcell)
-        .filter(models.Flowcell.flowcellname == bcl2fastq_flow_cell_id)
-        .first()
-    )
-
-    assert existing_object
-
-    # WHEN wiping the existence of said object
-
-    delete_demux_api.delete_flow_cell_cgstats()
-
-    # THEN the user should be notified that the object was removed
-
-    assert f"Removing entry {bcl2fastq_flow_cell_id} in from cgstats" in caplog.text
-
-    # AND the object should no longer exist
-
-    existing_object: models.Flowcell = (
-        populated_delete_demux_context.cg_stats_api.query(models.Flowcell)
-        .filter(models.Flowcell.flowcellname == bcl2fastq_flow_cell_id)
-        .first()
-    )
-
-    assert not existing_object
 
 
 def test_delete_demultiplexing_init_files(

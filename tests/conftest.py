@@ -10,8 +10,6 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
-from cg.apps.cgstats.crud import create
-from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeq6000Bcl2Fastq,
@@ -35,7 +33,6 @@ from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.store import Store
@@ -767,23 +764,6 @@ def fixture_lims_novaseq_bcl2fastq_samples(
     return [FlowCellSampleNovaSeq6000Bcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
 
 
-@pytest.fixture(name="stats_api")
-def fixture_stats_api(project_dir: Path) -> StatsAPI:
-    """Setup base CGStats store."""
-    _store = StatsAPI(
-        {
-            "cgstats": {
-                "binary_path": "echo",
-                "database": "sqlite://",
-                "root": "tests/fixtures/DEMUX",
-            }
-        }
-    )
-    _store.create_all()
-    yield _store
-    _store.drop_all()
-
-
 @pytest.fixture(name="demux_results_not_finished_dir")
 def fixture_demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to a dir with demultiplexing results where demux has been done but nothing is cleaned."""
@@ -1095,14 +1075,13 @@ def store_with_demultiplexed_samples(
 @pytest.fixture(name="demultiplex_context")
 def fixture_demultiplex_context(
     demultiplexing_api: DemultiplexingAPI,
-    stats_api: StatsAPI,
     real_housekeeper_api: HousekeeperAPI,
     cg_context: CGConfig,
     store_with_demultiplexed_samples: Store,
 ) -> CGConfig:
     """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api
-    cg_context.cg_stats_api_ = stats_api
+
     cg_context.housekeeper_api_ = real_housekeeper_api
     cg_context.status_db_ = store_with_demultiplexed_samples
     return cg_context
@@ -1132,14 +1111,6 @@ def fixture_demultiplexing_api(
     demux_api = DemultiplexingAPI(config=demultiplex_configs)
     demux_api.slurm_api.process = sbatch_process
     return demux_api
-
-
-@pytest.fixture(name="populated_stats_api")
-def fixture_populated_stats_api(
-    stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
-) -> StatsAPI:
-    create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
-    return stats_api
 
 
 @pytest.fixture(name="novaseq6000_bcl_convert_sample_sheet_path")
@@ -1378,17 +1349,6 @@ def fixture_demultiplexed_flow_cell(
     demultiplexed_runs: Path, bcl2fastq_flow_cell_full_name: str
 ) -> Path:
     return Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
-
-
-@pytest.fixture(name="bcl2fastq_demux_results")
-def fixture_bcl2fastq_demux_results(
-    demultiplexed_flow_cell: Path, bcl2fastq_flow_cell: FlowCellDirectoryData
-) -> DemuxResults:
-    return DemuxResults(
-        demux_dir=demultiplexed_flow_cell,
-        flow_cell=bcl2fastq_flow_cell,
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
 
 
 # Genotype file fixture
