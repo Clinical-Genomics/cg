@@ -35,16 +35,6 @@ class NextflowAnalysisAPI:
         return Path(root_dir, case_id)
 
     @classmethod
-    def verify_case_config_file_exists(
-        cls, case_id: str, root_dir: str, dry_run: bool = False
-    ) -> None:
-        if (
-            not dry_run
-            and not Path(cls.get_case_config_path(case_id=case_id, root_dir=root_dir)).exists()
-        ):
-            raise ValueError(f"No config file found for case {case_id}")
-
-    @classmethod
     def get_case_config_path(cls, case_id: str, root_dir: str) -> str:
         """Return a path where the sample sheet for the case_id should be located."""
         return (
@@ -218,11 +208,6 @@ class NextflowAnalysisAPI:
             file_format=FileFormat.YAML,
             file_path=file_bundle_template,
         )
-
-    @classmethod
-    def verify_deliverables_file_exists(cls, case_id, root_dir):
-        if not Path(cls.get_deliverables_file_path(case_id=case_id, root_dir=root_dir)).exists():
-            raise CgError(f"No deliverables file found for case {case_id}")
 
     @classmethod
     def add_bundle_header(cls, deliverables_content: dict) -> dict:
