@@ -4,6 +4,7 @@ from typing import Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
+from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import FastqHandler
@@ -82,17 +83,20 @@ class NfAnalysisAPI(AnalysisAPI):
         )
 
     def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
-        NextflowAnalysisAPI.verify_case_config_file_exists(
-            case_id=case_id, root_dir=self.root_dir, dry_run=dry_run
-        )
+        """Raise an error if config file is not found."""
+        if not dry_run and not Path(self.get_case_config_path(case_id=case_id)).exists():
+            raise ValueError(f"No config file found for case {case_id}")
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
+        """Returns a path where the deliverables file for a case should be located."""
         return NextflowAnalysisAPI.get_deliverables_file_path(
             case_id=case_id, root_dir=self.root_dir
         )
 
     def verify_deliverables_file_exists(self, case_id: str) -> None:
-        NextflowAnalysisAPI.verify_deliverables_file_exists(case_id=case_id, root_dir=self.root_dir)
+        """Raise an error if deliverables files file is not found."""
+        if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
+            raise CgError(f"No deliverables file found for case {case_id}")
 
     def get_metrics_deliverables_path(self, case_id: str) -> Path:
         """Return a path where the <case>_metrics_deliverables.yaml file should be located."""
