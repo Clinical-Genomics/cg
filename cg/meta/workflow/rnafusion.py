@@ -22,7 +22,6 @@ from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.meta.workflow.tower_common import TowerAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
@@ -35,6 +34,7 @@ from cg.models.rnafusion.command_args import CommandArgs
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.store.models import Family
 from cg.utils import Process
+from cg.utils.nf_handlers import NfTowerHandler
 
 LOG = logging.getLogger(__name__)
 
@@ -250,16 +250,16 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             if command_args.resume:
                 from_tower_id: int = command_args.id
                 if not from_tower_id:
-                    from_tower_id: int = TowerAnalysisAPI.get_last_tower_id(
+                    from_tower_id: int = NfTowerHandler.get_last_tower_id(
                         case_id=case_id,
                         trailblazer_config=self.get_trailblazer_config_path(case_id=case_id),
                     )
                 LOG.info(f"Pipeline will be resumed from run {from_tower_id}.")
-                parameters: List[str] = TowerAnalysisAPI.get_tower_relaunch_parameters(
+                parameters: List[str] = NfTowerHandler.get_tower_relaunch_parameters(
                     from_tower_id=from_tower_id, command_args=command_args.dict()
                 )
             else:
-                parameters: List[str] = TowerAnalysisAPI.get_tower_launch_parameters(
+                parameters: List[str] = NfTowerHandler.get_tower_launch_parameters(
                     tower_pipeline=self.tower_pipeline,
                     command_args=command_args.dict(),
                 )
@@ -267,7 +267,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             if self.process.stderr:
                 LOG.error(self.process.stderr)
             if not dry_run:
-                tower_id = TowerAnalysisAPI.get_tower_id(stdout_lines=self.process.stdout_lines())
+                tower_id = NfTowerHandler.get_tower_id(stdout_lines=self.process.stdout_lines())
                 self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
             LOG.info(self.process.stdout)
 

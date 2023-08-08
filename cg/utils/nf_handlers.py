@@ -1,4 +1,4 @@
-"""Module for Tower Analysis API."""
+"""Module to handle NF executors."""
 
 import logging
 from datetime import datetime
@@ -12,9 +12,18 @@ from cg.utils.utils import build_command_from_dict
 LOG = logging.getLogger(__name__)
 
 
-class TowerAnalysisAPI:
-    """Handles communication between tower processes
-    and the rest of CG infrastructure."""
+class NfHandler:
+    """
+    Parent class for handling the interaction with NF executors.
+    """
+
+    pass
+
+
+class NfTowerHandler(NfHandler):
+    """
+    Parent class for handling the interaction with NF-Tower.
+    """
 
     @classmethod
     def get_tower_launch_parameters(cls, tower_pipeline: str, command_args: dict) -> List[str]:
@@ -87,3 +96,11 @@ class TowerAnalysisAPI:
         return ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=trailblazer_config
         ).get(case_id)[-1]
+
+
+class Nextflow(NfHandler):
+    """
+    Parent class for handling the interaction with Nextflow.
+    """
+
+    pass
