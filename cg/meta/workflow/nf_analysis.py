@@ -172,3 +172,11 @@ class NfAnalysisAPI(AnalysisAPI):
     def add_bundle_header(self, deliverables_content: dict) -> dict:
         """Adds header to bundle content."""
         return {"files": deliverables_content}
+
+    def write_deliverables_bundle(
+        self, deliverables_content: dict, file_path: Path, file_format=FileFormat.YAML
+    ) -> None:
+        """Write deliverables file."""
+        WriteFile.write_file_from_content(
+            content=deliverables_content, file_format=file_format, file_path=file_path
+        )

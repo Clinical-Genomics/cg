@@ -101,9 +101,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             self.create_samplesheet_csv(
                 samplesheet_content=sample_sheet_content,
                 headers=TAXPROFILER_SAMPLE_SHEET_HEADERS,
-                config_path=NextflowHandler.get_case_config_path(
-                    case_id=case_id, root_dir=self.root_dir
-                ),
+                config_path=self.get_case_config_path(case_id=case_id),
             )
 
     def config_case(

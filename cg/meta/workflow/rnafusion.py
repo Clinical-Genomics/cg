@@ -113,9 +113,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             self.create_samplesheet_csv(
                 samplesheet_content=samplesheet_content,
                 headers=RNAFUSION_SAMPLESHEET_HEADERS,
-                config_path=NextflowHandler.get_case_config_path(
-                    case_id=case_id, root_dir=self.root_dir
-                ),
+                config_path=self.get_case_config_path(case_id=case_id),
             )
 
     def write_params_file(
@@ -279,7 +277,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             LOG.error(error)
             raise ValueError
         self.create_case_directory(case_id=case_id)
-        NextflowHandler.write_deliverables_bundle(
+        self.write_deliverables_bundle(
             deliverables_content=self.add_bundle_header(deliverables_content=deliverables_content),
             file_path=self.get_deliverables_file_path(case_id=case_id),
         )

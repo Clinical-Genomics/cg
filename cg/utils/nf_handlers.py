@@ -137,14 +137,14 @@ class NextflowHandler(NfHandler):
     Parent class for handling the interaction with Nextflow.
     """
 
-    @classmethod
-    def get_case_config_path(cls, case_id: str, root_dir: str) -> str:
-        """Return a path where the sample sheet for the case_id should be located."""
-        return (
-            Path((cls.get_case_path(case_id, root_dir)), f"{case_id}_samplesheet.csv")
-            .absolute()
-            .as_posix()
-        )
+    # @classmethod
+    # def get_case_config_path(cls, case_id: str, root_dir: str) -> str:
+    #     """Return a path where the sample sheet for the case_id should be located."""
+    #     return (
+    #         Path((cls.get_case_path(case_id, root_dir)), f"{case_id}_samplesheet.csv")
+    #         .absolute()
+    #         .as_posix()
+    #     )
 
     # @classmethod
     # def get_nextflow_config_path(cls, nextflow_config: Optional[str] = None) -> Optional[Path]:
@@ -305,13 +305,13 @@ class NextflowHandler(NfHandler):
     # def add_bundle_header(cls, deliverables_content: dict) -> dict:
     #     return {"files": deliverables_content}
 
-    @classmethod
-    def write_deliverables_bundle(
-        cls, deliverables_content: dict, file_path: Path, file_format=FileFormat.YAML
-    ) -> None:
-        WriteFile.write_file_from_content(
-            content=deliverables_content, file_format=file_format, file_path=file_path
-        )
+    # @classmethod
+    # def write_deliverables_bundle(
+    #     cls, deliverables_content: dict, file_path: Path, file_format=FileFormat.YAML
+    # ) -> None:
+    #     WriteFile.write_file_from_content(
+    #         content=deliverables_content, file_format=file_format, file_path=file_path
+    #     )
 
     @classmethod
     def get_sbatch_path(cls, case_id: str, root_dir: str) -> Path:
