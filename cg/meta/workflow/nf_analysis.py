@@ -8,7 +8,7 @@ from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
 from cg.constants.nextflow import NFX_SAMPLE_HEADER
 from cg.exc import CgError
-from cg.io.controller import WriteFile
+from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.cg_config import CGConfig
@@ -161,3 +161,10 @@ class NfAnalysisAPI(AnalysisAPI):
             "PATHTOCASE": str(self.get_case_path(case_id)),
             "CASEID": case_id,
         }
+
+    def get_template_deliverables_file_content(self, file_bundle_template: Path) -> dict:
+        """Read deliverables file template and return content."""
+        return ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML,
+            file_path=file_bundle_template,
+        )

@@ -293,13 +293,13 @@ class NextflowHandler(NfHandler):
     #     """Returns a path where the rnafusion deliverables file for the case_id should be located."""
     #     return Path(cls.get_case_path(case_id, root_dir), f"{case_id}_deliverables.yaml")
 
-    @classmethod
-    def get_template_deliverables_file_content(cls, file_bundle_template: Path) -> dict:
-        """Read deliverables file template and return content."""
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=file_bundle_template,
-        )
+    # @classmethod
+    # def get_template_deliverables_file_content(cls, file_bundle_template: Path) -> dict:
+    #     """Read deliverables file template and return content."""
+    #     return ReadFile.get_content_from_file(
+    #         file_format=FileFormat.YAML,
+    #         file_path=file_bundle_template,
+    #     )
 
     @classmethod
     def add_bundle_header(cls, deliverables_content: dict) -> dict:

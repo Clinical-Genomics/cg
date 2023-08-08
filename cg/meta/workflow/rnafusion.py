@@ -265,7 +265,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def report_deliver(self, case_id: str) -> None:
         """Get a deliverables file template from resources, parse it and, then write the deliverables file."""
-        deliverables_content: dict = NextflowHandler.get_template_deliverables_file_content(
+        deliverables_content: dict = self.get_template_deliverables_file_content(
             resources.RNAFUSION_BUNDLE_FILENAMES_PATH
         )
         try:
