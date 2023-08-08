@@ -33,7 +33,7 @@ from cg.models.rnafusion.command_args import CommandArgs
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.store.models import Family
 from cg.utils import Process
-from cg.utils.nf_handlers import NextflowHandler, NfTowerHandler
+from cg.utils.nf_handlers import NextflowHandler, NfHandler, NfTowerHandler
 
 LOG = logging.getLogger(__name__)
 
@@ -128,7 +128,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         LOG.info(default_options)
         if dry_run:
             return
-        NextflowHandler.write_nextflow_yaml(
+        NfHandler.write_nextflow_yaml(
             content=default_options,
             file_path=self.get_params_file_path(case_id=case_id),
         )

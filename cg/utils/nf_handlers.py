@@ -29,7 +29,18 @@ class NfHandler:
     Parent class for handling the interaction with NF executors.
     """
 
-    pass
+    # TODO: decide where to place this method
+    @classmethod
+    def write_nextflow_yaml(
+        cls,
+        content: Dict[str, Any],
+        file_path: str,
+    ) -> None:
+        """Write nextflow file with non-quoted booleans and quoted strings."""
+        with open(file_path, "w") as outfile:
+            for key, value in content.items():
+                quotes = '"' if type(value) is str else ""
+                outfile.write(f"{key}: {quotes}{value}{quotes}\n")
 
 
 class NfTowerHandler(NfHandler):
@@ -199,17 +210,17 @@ class NextflowHandler(NfHandler):
     #             outfile.write("\n")
     #             outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
 
-    @classmethod
-    def write_nextflow_yaml(
-        cls,
-        content: Dict[str, Any],
-        file_path: str,
-    ) -> None:
-        """Write nextflow file with non-quoted booleans and quoted strings."""
-        with open(file_path, "w") as outfile:
-            for key, value in content.items():
-                quotes = '"' if type(value) is str else ""
-                outfile.write(f"{key}: {quotes}{value}{quotes}\n")
+    # @classmethod
+    # def write_nextflow_yaml(
+    #     cls,
+    #     content: Dict[str, Any],
+    #     file_path: str,
+    # ) -> None:
+    #     """Write nextflow file with non-quoted booleans and quoted strings."""
+    #     with open(file_path, "w") as outfile:
+    #         for key, value in content.items():
+    #             quotes = '"' if type(value) is str else ""
+    #             outfile.write(f"{key}: {quotes}{value}{quotes}\n")
 
     @classmethod
     def get_nextflow_run_parameters(
