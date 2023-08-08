@@ -99,8 +99,10 @@ class NfAnalysisAPI(AnalysisAPI):
             raise ValueError(f"No config file found for case {case_id}")
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
-        """Returns a path where the deliverables file for a case should be located."""
-        return NextflowHandler.get_deliverables_file_path(case_id=case_id, root_dir=self.root_dir)
+        """Path to deliverables file for a case."""
+        return Path(self.get_case_path(case_id), f"{case_id}_deliverables").with_suffix(
+            FileExtensions.YAML
+        )
 
     def verify_deliverables_file_exists(self, case_id: str) -> None:
         """Raise an error if deliverables files file is not found."""

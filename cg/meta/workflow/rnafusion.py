@@ -283,15 +283,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             deliverables_content=NextflowHandler.add_bundle_header(
                 deliverables_content=deliverables_content
             ),
-            file_path=NextflowHandler.get_deliverables_file_path(
-                case_id=case_id, root_dir=self.root_dir
-            ),
+            file_path=self.get_deliverables_file_path(case_id=case_id),
         )
         LOG.info(
-            "Writing deliverables file in "
-            + str(
-                NextflowHandler.get_deliverables_file_path(case_id=case_id, root_dir=self.root_dir)
-            )
+            "Writing deliverables file in " + str(self.get_deliverables_file_path(case_id=case_id))
         )
 
     def get_multiqc_json_path(self, case_id: str) -> Path:

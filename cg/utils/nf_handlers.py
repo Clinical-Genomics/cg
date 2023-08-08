@@ -288,10 +288,10 @@ class NextflowHandler(NfHandler):
     #         "CASEID": case_id,
     #     }
 
-    @classmethod
-    def get_deliverables_file_path(cls, case_id: str, root_dir: str) -> Path:
-        """Returns a path where the rnafusion deliverables file for the case_id should be located."""
-        return Path(cls.get_case_path(case_id, root_dir), f"{case_id}_deliverables.yaml")
+    # @classmethod
+    # def get_deliverables_file_path(cls, case_id: str, root_dir: str) -> Path:
+    #     """Returns a path where the rnafusion deliverables file for the case_id should be located."""
+    #     return Path(cls.get_case_path(case_id, root_dir), f"{case_id}_deliverables.yaml")
 
     @classmethod
     def get_template_deliverables_file_content(cls, file_bundle_template: Path) -> dict:
