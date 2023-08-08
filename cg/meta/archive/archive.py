@@ -2,7 +2,7 @@ import logging
 from typing import Callable, Dict, List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.archiving import ArchiveLocationsInUse
+from cg.constants.archiving import ArchiveLocations
 from cg.meta.archive.ddn_dataflow import DDNDataFlowClient, MiriaFile
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.store import Store
@@ -28,7 +28,7 @@ class ArchiveModels(BaseModel):
 
 
 def filter_files_on_archive_location(
-    files_and_samples: List[FileAndSample], archive_location: ArchiveLocationsInUse
+    files_and_samples: List[FileAndSample], archive_location: ArchiveLocations
 ) -> List[FileAndSample]:
     """
     Returns a list of FileAndSample where the associated sample has a specific archive location.
@@ -54,13 +54,13 @@ class SpringArchiveAPI:
         self.ddn_client: DDNDataFlowClient = ddn_dataflow_client
         self.status_db: Store = status_db
         self.handler_map: Dict[str, ArchiveModels] = {
-            ArchiveLocationsInUse.KAROLINSKA_BUCKET: ArchiveModels(
+            ArchiveLocations.KAROLINSKA_BUCKET: ArchiveModels(
                 file_model=MiriaFile.from_file_and_sample, handler=self.ddn_client
             )
         }
 
     def call_corresponding_archiving_method(
-        self, files: List[FileTransferData], archive_location: ArchiveLocationsInUse
+        self, files: List[FileTransferData], archive_location: ArchiveLocations
     ) -> int:
         return self.handler_map[archive_location].handler.archive_folders(
             sources_and_destinations=files
@@ -88,7 +88,7 @@ class SpringArchiveAPI:
         return files_and_samples
 
     def convert_files_into_transfer_data(
-        self, files_and_samples: List[FileAndSample], archive_location: ArchiveLocationsInUse
+        self, files_and_samples: List[FileAndSample], archive_location: ArchiveLocations
     ) -> List[FileTransferData]:
         return [
             self.handler_map[archive_location].file_model(

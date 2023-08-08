@@ -1,7 +1,7 @@
 from typing import List
 from unittest import mock
 
-from cg.constants.archiving import ArchiveLocationsInUse
+from cg.constants.archiving import ArchiveLocations
 from cg.meta.archive.archive import (
     FileAndSample,
     SpringArchiveAPI,
@@ -26,13 +26,13 @@ def test_get_files_by_archive_location(
     ]
     # WHEN fetching the files by archive location
     selected_files: List[FileAndSample] = filter_files_on_archive_location(
-        files_and_samples, ArchiveLocationsInUse.KAROLINSKA_BUCKET
+        files_and_samples, ArchiveLocations.KAROLINSKA_BUCKET
     )
 
     # THEN every file returned should have that archive location
     assert selected_files
     for selected_file in selected_files:
-        assert selected_file.sample.archive_location == ArchiveLocationsInUse.KAROLINSKA_BUCKET
+        assert selected_file.sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET
 
 
 def test_add_samples_to_files(spring_archive_api: SpringArchiveAPI):
@@ -117,7 +117,7 @@ def test_convert_into_transfer_data(sample_id: str, spring_archive_api: SpringAr
     # WHEN using it to instantiate the correct class
     transferdata: List[FileTransferData] = spring_archive_api.convert_files_into_transfer_data(
         files_and_samples=[file_and_sample],
-        archive_location=ArchiveLocationsInUse.KAROLINSKA_BUCKET,
+        archive_location=ArchiveLocations.KAROLINSKA_BUCKET,
     )
 
     # THEN the returned object should be of the correct type
@@ -137,7 +137,7 @@ def test_call_corresponding_archiving_method(
     ) as mock_request_submitter:
         # WHEN calling the corresponding archive method
         spring_archive_api.call_corresponding_archiving_method(
-            files=[miria_file_archive], archive_location=ArchiveLocationsInUse.KAROLINSKA_BUCKET
+            files=[miria_file_archive], archive_location=ArchiveLocations.KAROLINSKA_BUCKET
         )
 
     # THEN the correct archive function should have been called once

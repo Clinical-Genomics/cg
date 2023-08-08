@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.constants.archiving import ArchiveLocationsInUse
+from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import FileFormat
 from cg.constants.subject import Gender
 from cg.io.controller import WriteStream
@@ -138,7 +138,7 @@ def fixture_archive_store(
         invoice_reference="Sherlock Holmes",
         name="Sherlock Holmes",
         is_clinical=True,
-        data_archive_location=ArchiveLocationsInUse.KAROLINSKA_BUCKET,
+        data_archive_location=ArchiveLocations.KAROLINSKA_BUCKET,
     )
     customer_without_ddn: Customer = base_store.add_customer(
         internal_id="CustWithoutDDN",
