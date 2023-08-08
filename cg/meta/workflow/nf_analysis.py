@@ -6,7 +6,7 @@ from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, WorkflowManager
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fastq import StandardFastqHandler
+from cg.meta.workflow.fastq import FastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
@@ -45,7 +45,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     @property
     def fastq_handler(self):
-        return StandardFastqHandler
+        return FastqHandler
 
     @property
     def process(self):
