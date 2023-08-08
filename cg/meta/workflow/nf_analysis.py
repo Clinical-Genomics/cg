@@ -63,10 +63,18 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
-        return NextflowHandler.get_case_path(case_id=case_id, root_dir=self.root)
+        return Path(self.root_dir, case_id)
 
-    def get_case_config_path(self, case_id):
-        return NextflowHandler.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
+    def get_case_config_path(self, case_id: str) -> Path:
+        """Path to sample sheet."""
+        return Path(self.get_case_path(case_id), f"{case_id}_samplesheet").with_suffix(
+            FileExtensions.CSV
+        )
+
+    def get_nextflow_config_path(self, nextflow_config: Optional[str] = None) -> Optional[Path]:
+        """Path to Nextflow config file."""
+        if nextflow_config:
+            return Path(nextflow_config).absolute()
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         """Return the path to a Trailblazer config file containing Tower IDs."""

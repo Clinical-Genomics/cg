@@ -129,11 +129,11 @@ class NextflowHandler(NfHandler):
             .as_posix()
         )
 
-    @classmethod
-    def get_nextflow_config_path(cls, nextflow_config: Optional[str] = None) -> Optional[Path]:
-        """Generates a path where the Nextflow configurations should be located."""
-        if nextflow_config:
-            return Path(nextflow_config).absolute()
+    # @classmethod
+    # def get_nextflow_config_path(cls, nextflow_config: Optional[str] = None) -> Optional[Path]:
+    #     """Generates a path where the Nextflow configurations should be located."""
+    #     if nextflow_config:
+    #         return Path(nextflow_config).absolute()
 
     @classmethod
     def get_software_version_path(cls, case_id: str, root_dir: str) -> Path:
