@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional
 
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat, WorkflowManager
+from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import FastqHandler
@@ -15,15 +15,9 @@ LOG = logging.getLogger(__name__)
 
 
 class NfAnalysisAPI(AnalysisAPI):
-    """
-    Parent class for handling nf-core analyses.
-    """
+    """Parent class for handling NF-core analyses."""
 
-    def __init__(
-        self,
-        config: CGConfig,
-        pipeline: Pipeline,
-    ):
+    def __init__(self, config: CGConfig, pipeline: Pipeline):
         super().__init__(config=config, pipeline=pipeline)
         self.pipeline: Pipeline = pipeline
         self.root_dir: Optional[str] = None
@@ -63,7 +57,7 @@ class NfAnalysisAPI(AnalysisAPI):
         return profile or self.profile
 
     def get_workflow_manager(self) -> str:
-        """Get workflow manager for rnafusion."""
+        """Get workflow manager from Tower."""
         return WorkflowManager.Tower.value
 
     def get_case_path(self, case_id: str) -> Path:
@@ -74,12 +68,12 @@ class NfAnalysisAPI(AnalysisAPI):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
-        """Return the path to a trailblazer config file containing Tower IDs."""
-        return Path(self.root_dir, case_id, "tower_ids.yaml")
+        """Return the path to a Trailblazer config file containing Tower IDs."""
+        return Path(self.root_dir, case_id, "tower_ids").with_suffix(FileExtensions.YAML)
 
     def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
-        """Write Tower IDs to a .YAML file used as the trailblazer config."""
-        config_path = self.get_trailblazer_config_path(case_id=case_id)
+        """Write Tower IDs to a file used as the Trailblazer config."""
+        config_path: Path = self.get_trailblazer_config_path(case_id=case_id)
         LOG.info(f"Writing Tower ID to {config_path.as_posix()}")
         WriteFile.write_file_from_content(
             content={case_id: [tower_id]},
@@ -102,4 +96,6 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_metrics_deliverables_path(self, case_id: str) -> Path:
         """Return a path where the <case>_metrics_deliverables.yaml file should be located."""
-        return Path(self.root_dir, case_id, f"{case_id}_metrics_deliverables.yaml")
+        return Path(self.root_dir, case_id, f"{case_id}_metrics_deliverables").with_suffix(
+            FileExtensions.YAML
+        )
