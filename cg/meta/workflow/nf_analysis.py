@@ -1,7 +1,8 @@
 import logging
+import operator
 import os
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
@@ -123,3 +124,16 @@ class NfAnalysisAPI(AnalysisAPI):
         """Create case directory."""
         if not dry_run:
             os.makedirs(self.get_case_path(case_id=case_id), exist_ok=True)
+
+    def extract_read_files(
+        self, metadata: list, forward: bool = False, reverse: bool = False
+    ) -> List[str]:
+        """Extract a list of fastq file paths for either forward or reverse reads."""
+        if forward and not reverse:
+            read_number = 1
+        elif reverse and not forward:
+            read_number = 2
+        else:
+            raise ValueError("Either forward or reverse needs to be specified")
+        sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
+        return [d["path"] for d in sorted_metadata if d["read"] == read_number]
