@@ -281,12 +281,12 @@ class NextflowHandler(NfHandler):
     #         return outdir
     #     return Path(cls.get_case_path(case_id, root_dir))
 
-    @classmethod
-    def get_replace_map(cls, case_id: str, root_dir: str) -> dict:
-        return {
-            "PATHTOCASE": str(cls.get_case_path(case_id, root_dir)),
-            "CASEID": case_id,
-        }
+    # @classmethod
+    # def get_replace_map(cls, case_id: str, root_dir: str) -> dict:
+    #     return {
+    #         "PATHTOCASE": str(cls.get_case_path(case_id, root_dir)),
+    #         "CASEID": case_id,
+    #     }
 
     @classmethod
     def get_deliverables_file_path(cls, case_id: str, root_dir: str) -> Path:

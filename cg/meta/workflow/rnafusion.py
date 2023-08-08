@@ -272,7 +272,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             for index, deliver_file in enumerate(deliverables_content):
                 NextflowDeliverables(deliverables=deliver_file)
                 deliverables_content[index] = replace_dict_values(
-                    NextflowHandler.get_replace_map(case_id=case_id, root_dir=self.root_dir),
+                    self.get_replace_map(case_id=case_id),
                     deliver_file,
                 )
         except ValidationError as error:

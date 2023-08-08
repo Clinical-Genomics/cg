@@ -152,3 +152,10 @@ class NfAnalysisAPI(AnalysisAPI):
             for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
                 outfile.write("\n")
                 outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
+
+    def get_replace_map(self, case_id: str) -> dict:
+        """Get a mapping to replace constants from template to create case deliverables."""
+        return {
+            "PATHTOCASE": str(self.get_case_path(case_id)),
+            "CASEID": case_id,
+        }
