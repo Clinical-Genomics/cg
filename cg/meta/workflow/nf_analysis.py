@@ -2,10 +2,11 @@ import logging
 import operator
 import os
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
+from cg.constants.nextflow import NFX_SAMPLE_HEADER
 from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -137,3 +138,17 @@ class NfAnalysisAPI(AnalysisAPI):
             raise ValueError("Either forward or reverse needs to be specified")
         sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
         return [d["path"] for d in sorted_metadata if d["read"] == read_number]
+
+    # TODO: needs to be cleaned up and generalized
+    def create_samplesheet_csv(
+        self,
+        samplesheet_content: Dict[str, List[str]],
+        headers: List[str],
+        config_path: Path,
+    ) -> None:
+        """Write sample sheet csv file."""
+        with open(config_path, "w") as outfile:
+            outfile.write(",".join(headers))
+            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
+                outfile.write("\n")
+                outfile.write(",".join([samplesheet_content[k][i] for k in headers]))

@@ -98,7 +98,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 sample_sheet_content.setdefault(headers, []).extend(contents)
 
             LOG.info(sample_sheet_content)
-            NextflowHandler.create_samplesheet_csv(
+            self.create_samplesheet_csv(
                 samplesheet_content=sample_sheet_content,
                 headers=TAXPROFILER_SAMPLE_SHEET_HEADERS,
                 config_path=NextflowHandler.get_case_config_path(

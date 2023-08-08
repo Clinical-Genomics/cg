@@ -185,19 +185,19 @@ class NextflowHandler(NfHandler):
     #     sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
     #     return [d["path"] for d in sorted_metadata if d["read"] == read_number]
 
-    @classmethod
-    def create_samplesheet_csv(
-        cls,
-        samplesheet_content: Dict[str, List[str]],
-        headers: List[str],
-        config_path: Path,
-    ) -> None:
-        """Write sample sheet csv file."""
-        with open(config_path, "w") as outfile:
-            outfile.write(",".join(headers))
-            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
-                outfile.write("\n")
-                outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
+    # @classmethod
+    # def create_samplesheet_csv(
+    #     cls,
+    #     samplesheet_content: Dict[str, List[str]],
+    #     headers: List[str],
+    #     config_path: Path,
+    # ) -> None:
+    #     """Write sample sheet csv file."""
+    #     with open(config_path, "w") as outfile:
+    #         outfile.write(",".join(headers))
+    #         for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
+    #             outfile.write("\n")
+    #             outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
 
     @classmethod
     def write_nextflow_yaml(

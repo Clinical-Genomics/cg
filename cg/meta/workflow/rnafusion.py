@@ -110,7 +110,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             LOG.info(samplesheet_content)
             if dry_run:
                 continue
-            NextflowHandler.create_samplesheet_csv(
+            self.create_samplesheet_csv(
                 samplesheet_content=samplesheet_content,
                 headers=RNAFUSION_SAMPLESHEET_HEADERS,
                 config_path=NextflowHandler.get_case_config_path(
