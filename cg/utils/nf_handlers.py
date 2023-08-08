@@ -29,7 +29,18 @@ class NfHandler:
     Parent class for handling the interaction with NF executors.
     """
 
-    # TODO: decide where to place this method
+    @classmethod
+    def get_case_path(cls, case_id: str, root_dir: str) -> Path:
+        """Path to case directory."""
+        return Path(root_dir, case_id)
+
+    @classmethod
+    def get_workdir_path(cls, case_id: str, root_dir: str, work_dir: str = None) -> Path:
+        """Path to NF work directory."""
+        if work_dir:
+            return work_dir
+        return Path(cls.get_case_path(case_id, root_dir), NFX_WORK_DIR)
+
     @classmethod
     def write_nextflow_yaml(
         cls,
@@ -125,11 +136,6 @@ class NextflowHandler(NfHandler):
     """
     Parent class for handling the interaction with Nextflow.
     """
-
-    @classmethod
-    def get_case_path(cls, case_id: str, root_dir: str) -> Path:
-        """Returns a path where the rnafusion case should be located."""
-        return Path(root_dir, case_id)
 
     @classmethod
     def get_case_config_path(cls, case_id: str, root_dir: str) -> str:
@@ -257,11 +263,11 @@ class NextflowHandler(NfHandler):
             f"{case_id}_{pipeline}_nextflow_log_{launch_time}.log",
         )
 
-    @classmethod
-    def get_workdir_path(cls, case_id: str, root_dir: str, work_dir: str = None) -> Path:
-        if work_dir:
-            return work_dir
-        return Path(cls.get_case_path(case_id, root_dir), NFX_WORK_DIR)
+    # @classmethod
+    # def get_workdir_path(cls, case_id: str, root_dir: str, work_dir: str = None) -> Path:
+    #     if work_dir:
+    #         return work_dir
+    #     return Path(cls.get_case_path(case_id, root_dir), NFX_WORK_DIR)
 
     # @classmethod
     # def get_input_path(cls, case_id: str, root_dir: str, input: str = None) -> Path:
