@@ -165,11 +165,11 @@ class NextflowHandler(NfHandler):
     #             f"Analysis not finished: pipeline_info/software_versions.yml file not found for case {case_id}"
     #         )
 
-    @classmethod
-    def make_case_folder(cls, case_id: str, root_dir: str, dry_run: bool = False) -> None:
-        """Make the case folder where analysis should be located."""
-        if not dry_run:
-            os.makedirs(cls.get_case_path(case_id=case_id, root_dir=root_dir), exist_ok=True)
+    # @classmethod
+    # def make_case_folder(cls, case_id: str, root_dir: str, dry_run: bool = False) -> None:
+    #     """Make the case folder where analysis should be located."""
+    #     if not dry_run:
+    #         os.makedirs(cls.get_case_path(case_id=case_id, root_dir=root_dir), exist_ok=True)
 
     @classmethod
     def extract_read_files(

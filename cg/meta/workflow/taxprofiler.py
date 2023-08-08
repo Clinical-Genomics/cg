@@ -117,7 +117,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         fasta: Optional[str],
     ) -> None:
         """Create sample sheet file for Taxprofiler analysis."""
-        NextflowHandler.make_case_folder(case_id=case_id, root_dir=self.root_dir)
+        self.create_case_directory(case_id=case_id)
         LOG.info("Generating sample sheet")
         self.write_sample_sheet(
             case_id=case_id,

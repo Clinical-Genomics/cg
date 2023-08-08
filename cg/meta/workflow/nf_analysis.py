@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -117,3 +118,8 @@ class NfAnalysisAPI(AnalysisAPI):
         return Path((self.get_case_path(case_id)), f"{case_id}_params_file").with_suffix(
             FileExtensions.YAML
         )
+
+    def create_case_directory(self, case_id: str, dry_run: bool = False) -> None:
+        """Create case directory."""
+        if not dry_run:
+            os.makedirs(self.get_case_path(case_id=case_id), exist_ok=True)

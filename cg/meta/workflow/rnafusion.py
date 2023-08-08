@@ -186,7 +186,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         dry_run: bool,
     ) -> None:
         """Create sample sheet file for RNAFUSION analysis."""
-        NextflowHandler.make_case_folder(case_id=case_id, root_dir=self.root_dir, dry_run=dry_run)
+        self.create_case_directory(case_id=case_id, dry_run=dry_run)
         LOG.info("Generating samplesheet")
         self.write_samplesheet(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
         LOG.info("Generating parameters file")
@@ -286,7 +286,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         except ValidationError as error:
             LOG.error(error)
             raise ValueError
-        NextflowHandler.make_case_folder(case_id=case_id, root_dir=self.root_dir)
+        self.create_case_directory(case_id=case_id)
         NextflowHandler.write_deliverables_bundle(
             deliverables_content=NextflowHandler.add_bundle_header(
                 deliverables_content=deliverables_content
