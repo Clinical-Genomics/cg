@@ -5,10 +5,12 @@ from cg.constants.archiving import ArchiveLocations
 from cg.meta.archive.archive import (
     FileAndSample,
     SpringArchiveAPI,
+    archive_handlers,
     filter_files_on_archive_location,
 )
-from cg.meta.archive.ddn_dataflow import MiriaFile
-from cg.meta.archive.models import FileTransferData
+from cg.meta.archive.ddn_dataflow import DDNDataFlowClient, MiriaFile
+from cg.meta.archive.models import ArchiveHandler, FileTransferData
+from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
 from housekeeper.store.models import File
 
@@ -24,10 +26,16 @@ def test_get_files_by_archive_location(
         )
         for sample in [sample_id, father_sample_id]
     ]
-    # WHEN fetching the files by archive location
-    selected_files: List[FileAndSample] = filter_files_on_archive_location(
-        files_and_samples, ArchiveLocations.KAROLINSKA_BUCKET
-    )
+
+    with mock.patch.object(
+        DDNDataFlowClient,
+        "_set_auth_tokens",
+        return_value=123,
+    ):
+        # WHEN fetching the files by archive location
+        selected_files: List[FileAndSample] = filter_files_on_archive_location(
+            files_and_samples, ArchiveLocations.KAROLINSKA_BUCKET
+        )
 
     # THEN every file returned should have that archive location
     assert selected_files
@@ -107,38 +115,55 @@ def test_get_sample_not_exists(
     assert file.path in caplog.text
 
 
-def test_convert_into_transfer_data(sample_id: str, spring_archive_api: SpringArchiveAPI):
+def test_convert_into_transfer_data(
+    sample_id: str, spring_archive_api: SpringArchiveAPI, ddn_dataflow_config: DataFlowConfig
+):
     """Tests instantiating the correct dataclass for a sample."""
     # GIVEN file and Sample
     file_and_sample = FileAndSample(
         file=spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first(),
         sample=spring_archive_api.status_db.get_sample_by_internal_id(sample_id),
     )
+    with mock.patch.object(
+        DDNDataFlowClient,
+        "_set_auth_tokens",
+        return_value=123,
+    ):
+        # WHEN calling the corresponding archive method
+        data_flow_client: ArchiveHandler = archive_handlers[ArchiveLocations.KAROLINSKA_BUCKET](
+            config=ddn_dataflow_config
+        )
     # WHEN using it to instantiate the correct class
-    transferdata: List[FileTransferData] = spring_archive_api.convert_files_into_transfer_data(
+    transferdata: List[FileTransferData] = data_flow_client.convert_into_transfer_data(
         files_and_samples=[file_and_sample],
-        archive_location=ArchiveLocations.KAROLINSKA_BUCKET,
     )
 
     # THEN the returned object should be of the correct type
     assert type(transferdata[0]) == MiriaFile
 
 
-def test_call_corresponding_archiving_method(
-    spring_archive_api: SpringArchiveAPI, miria_file_archive: MiriaFile
-):
+def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAPI, sample_id: str):
     """Tests so that the correct archiving function is used when providing a Karolinska customer."""
     # GIVEN a file to be transferred
     # GIVEN a spring_archive_api with a mocked archive function
+    file_and_sample = FileAndSample(
+        file=spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first(),
+        sample=spring_archive_api.status_db.get_sample_by_internal_id(sample_id),
+    )
+
     with mock.patch.object(
-        spring_archive_api.ddn_client,
+        DDNDataFlowClient,
+        "_set_auth_tokens",
+        return_value=123,
+    ), mock.patch.object(
+        DDNDataFlowClient,
         "archive_folders",
         return_value=123,
     ) as mock_request_submitter:
         # WHEN calling the corresponding archive method
-        spring_archive_api.call_corresponding_archiving_method(
-            files=[miria_file_archive], archive_location=ArchiveLocations.KAROLINSKA_BUCKET
+        spring_archive_api.archive_files(
+            files=[file_and_sample], archive_location=ArchiveLocations.KAROLINSKA_BUCKET
         )
 
     # THEN the correct archive function should have been called once
-    mock_request_submitter.assert_called_once_with(sources_and_destinations=[miria_file_archive])
+    mock_request_submitter.assert_called_once_with(files_and_samples=[file_and_sample])
