@@ -252,11 +252,11 @@ class NextflowHandler(NfHandler):
             return work_dir
         return Path(cls.get_case_path(case_id, root_dir), NFX_WORK_DIR)
 
-    @classmethod
-    def get_input_path(cls, case_id: str, root_dir: str, input: str = None) -> Path:
-        if input:
-            return input
-        return Path(cls.get_case_config_path(case_id, root_dir))
+    # @classmethod
+    # def get_input_path(cls, case_id: str, root_dir: str, input: str = None) -> Path:
+    #     if input:
+    #         return input
+    #     return Path(cls.get_case_config_path(case_id, root_dir))
 
     @classmethod
     def get_outdir_path(cls, case_id: str, root_dir: str, outdir: str = None) -> Path:

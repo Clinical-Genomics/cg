@@ -155,7 +155,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def get_default_parameters(self, case_id: str) -> Dict:
         """Returns a dictionary with default RNAFusion parameters."""
         return {
-            "input": NextflowHandler.get_input_path(
+            "input": NextflowHandler.get_case_path(
                 case_id=case_id, root_dir=self.root_dir
             ).as_posix(),
             "outdir": NextflowHandler.get_outdir_path(
