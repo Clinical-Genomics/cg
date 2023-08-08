@@ -19,7 +19,6 @@ from cg.constants.taxprofiler import (
     TaxprofilerDefaults,
 )
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fastq import TaxprofilerFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
@@ -49,30 +48,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         self.databases: str = config.taxprofiler.databases
         self.account: str = config.taxprofiler.slurm.account
         self.email: str = config.taxprofiler.slurm.mail_user
-
-    @property
-    def root(self) -> str:
-        return self.root_dir
-
-    @property
-    def fastq_handler(self):
-        return TaxprofilerFastqHandler
-
-    @property
-    def process(self):
-        return self._process
-
-    @process.setter
-    def process(self, process: Process):
-        self._process = process
-
-    def get_profile(self, profile: Optional[str] = None) -> str:
-        if profile:
-            return profile
-        return self.profile
-
-    def get_case_config_path(self, case_id):
-        return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
 
     @staticmethod
     def build_sample_sheet_content(
