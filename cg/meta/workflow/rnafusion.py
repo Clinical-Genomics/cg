@@ -151,12 +151,8 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def get_default_parameters(self, case_id: str) -> Dict:
         """Returns a dictionary with default RNAFusion parameters."""
         return {
-            "input": NextflowHandler.get_case_path(
-                case_id=case_id, root_dir=self.root_dir
-            ).as_posix(),
-            "outdir": NextflowHandler.get_outdir_path(
-                case_id=case_id, root_dir=self.root_dir
-            ).as_posix(),
+            "input": self.get_case_path(case_id=case_id).as_posix(),
+            "outdir": self.get_case_path(case_id=case_id).as_posix(),
             "genomes_base": self.get_references_path().as_posix(),
             "trim": RnafusionDefaults.TRIM,
             "fastp_trim": RnafusionDefaults.FASTP_TRIM,

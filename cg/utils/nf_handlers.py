@@ -275,11 +275,11 @@ class NextflowHandler(NfHandler):
     #         return input
     #     return Path(cls.get_case_config_path(case_id, root_dir))
 
-    @classmethod
-    def get_outdir_path(cls, case_id: str, root_dir: str, outdir: str = None) -> Path:
-        if outdir:
-            return outdir
-        return Path(cls.get_case_path(case_id, root_dir))
+    # @classmethod
+    # def get_outdir_path(cls, case_id: str, root_dir: str, outdir: str = None) -> Path:
+    #     if outdir:
+    #         return outdir
+    #     return Path(cls.get_case_path(case_id, root_dir))
 
     @classmethod
     def get_replace_map(cls, case_id: str, root_dir: str) -> dict:
