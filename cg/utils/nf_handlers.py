@@ -130,17 +130,6 @@ class NextflowHandler(NfHandler):
         )
 
     @classmethod
-    def get_params_file_path(
-        cls, case_id: str, root_dir: str, params_file: Optional[str] = None
-    ) -> Path:
-        """Return parameters file or a path where the Rnafusion default parameters file for a case id should be located."""
-        if params_file:
-            return Path(params_file).absolute()
-        return Path(
-            (cls.get_case_path(case_id, root_dir)), f"{case_id}_params_file.yaml"
-        ).absolute()
-
-    @classmethod
     def get_nextflow_config_path(cls, nextflow_config: Optional[str] = None) -> Optional[Path]:
         """Generates a path where the Nextflow configurations should be located."""
         if nextflow_config:

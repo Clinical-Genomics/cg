@@ -128,8 +128,8 @@ def run(
             "with_tower": with_tower,
             "stub": stub,
             "config": NextflowHandler.get_nextflow_config_path(nextflow_config=config),
-            "params_file": NextflowHandler.get_params_file_path(
-                case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
+            "params_file": analysis_api.get_params_file_path(
+                case_id=case_id, params_file=params_file
             ),
             "name": case_id,
             "compute_env": compute_env or analysis_api.compute_env,

@@ -8,9 +8,9 @@ from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import FastqHandler
-from cg.utils.nf_handlers import NextflowHandler
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
+from cg.utils.nf_handlers import NextflowHandler
 
 LOG = logging.getLogger(__name__)
 
@@ -99,5 +99,13 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_metrics_deliverables_path(self, case_id: str) -> Path:
         """Return a path where the <case>_metrics_deliverables.yaml file should be located."""
         return Path(self.root_dir, case_id, f"{case_id}_metrics_deliverables").with_suffix(
+            FileExtensions.YAML
+        )
+
+    def get_params_file_path(self, case_id: str, params_file: Optional[Path] = None) -> Path:
+        """Return parameters file or a path where the default parameters file for a case id should be located."""
+        if params_file:
+            return Path(params_file).absolute()
+        return Path((self.get_case_path(case_id)), f"{case_id}_params_file").with_suffix(
             FileExtensions.YAML
         )

@@ -134,7 +134,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             return
         NextflowHandler.write_nextflow_yaml(
             content=default_options,
-            file_path=NextflowHandler.get_params_file_path(case_id=case_id, root_dir=self.root_dir),
+            file_path=self.get_params_file_path(case_id=case_id),
         )
 
     def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
