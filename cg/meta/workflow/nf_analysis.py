@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
@@ -114,10 +114,10 @@ class NfAnalysisAPI(AnalysisAPI):
         use_nextflow: bool,
         dry_run: bool = False,
     ) -> None:
-        """Execute RNAFUSION run analysis with given options."""
+        """Execute nf-core run analysis with given options."""
         if use_nextflow:
             self.process = Process(
-                binary=self.config.rnafusion.binary_path,
+                binary=self.nextflow_binary_path,
                 environment=self.conda_env,
                 conda_binary=self.conda_binary,
                 launch_directory=NextflowAnalysisAPI.get_case_path(
