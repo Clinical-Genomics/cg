@@ -22,7 +22,6 @@ from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.meta.workflow.tower_common import TowerAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
@@ -31,7 +30,6 @@ from cg.models.deliverables.metric_deliverables import (
 )
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
 from cg.models.rnafusion.analysis import RnafusionAnalysis
-from cg.models.rnafusion.command_args import CommandArgs
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.store.models import Family
 from cg.utils import Process
@@ -61,6 +59,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.email: str = config.rnafusion.slurm.mail_user
         self.compute_env: str = config.rnafusion.compute_env
         self.revision: str = config.rnafusion.revision
+        self.nextflow_binary_path: str = config.rnafusion.binary_path
 
     def verify_analysis_finished(self, case_id):
         return NextflowAnalysisAPI.verify_analysis_finished(case_id=case_id, root_dir=self.root_dir)
@@ -201,75 +200,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             return
 
         LOG.info("Configs files written")
-
-    def run_analysis(
-        self,
-        case_id: str,
-        command_args: CommandArgs,
-        use_nextflow: bool,
-        dry_run: bool = False,
-    ) -> None:
-        """Execute RNAFUSION run analysis with given options."""
-        if use_nextflow:
-            self.process = Process(
-                binary=self.config.rnafusion.binary_path,
-                environment=self.conda_env,
-                conda_binary=self.conda_binary,
-                launch_directory=NextflowAnalysisAPI.get_case_path(
-                    case_id=case_id, root_dir=self.root_dir
-                ),
-            )
-            LOG.info("Pipeline will be executed using nextflow")
-            parameters: List[str] = NextflowAnalysisAPI.get_nextflow_run_parameters(
-                case_id=case_id,
-                pipeline_path=self.nfcore_pipeline_path,
-                root_dir=self.root_dir,
-                command_args=command_args.dict(),
-            )
-            self.process.export_variables(
-                export=NextflowAnalysisAPI.get_variables_to_export(
-                    case_id=case_id, root_dir=self.root_dir
-                ),
-            )
-
-            command = self.process.get_command(parameters=parameters)
-            LOG.info(f"{command}")
-            sbatch_number: int = NextflowAnalysisAPI.execute_head_job(
-                case_id=case_id,
-                root_dir=self.root_dir,
-                slurm_account=self.account,
-                email=self.email,
-                qos=self.get_slurm_qos_for_case(case_id=case_id),
-                commands=command,
-                dry_run=dry_run,
-            )
-            LOG.info(f"Nextflow head job running as job {sbatch_number}")
-
-        else:
-            LOG.info("Pipeline will be executed using tower")
-            if command_args.resume:
-                from_tower_id: int = command_args.id
-                if not from_tower_id:
-                    from_tower_id: int = TowerAnalysisAPI.get_last_tower_id(
-                        case_id=case_id,
-                        trailblazer_config=self.get_trailblazer_config_path(case_id=case_id),
-                    )
-                LOG.info(f"Pipeline will be resumed from run {from_tower_id}.")
-                parameters: List[str] = TowerAnalysisAPI.get_tower_relaunch_parameters(
-                    from_tower_id=from_tower_id, command_args=command_args.dict()
-                )
-            else:
-                parameters: List[str] = TowerAnalysisAPI.get_tower_launch_parameters(
-                    tower_pipeline=self.tower_pipeline,
-                    command_args=command_args.dict(),
-                )
-            self.process.run_command(parameters=parameters, dry_run=dry_run)
-            if self.process.stderr:
-                LOG.error(self.process.stderr)
-            if not dry_run:
-                tower_id = TowerAnalysisAPI.get_tower_id(stdout_lines=self.process.stdout_lines())
-                self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
-            LOG.info(self.process.stdout)
 
     def get_pipeline_version(self, case_id: str) -> str:
         return NextflowAnalysisAPI.get_pipeline_version(
