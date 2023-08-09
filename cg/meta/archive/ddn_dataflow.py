@@ -120,7 +120,7 @@ class RefreshPayload(BaseModel):
 
 
 class AuthToken(BaseModel):
-    """Model representing th response fields from an access request to the Dataflow API."""
+    """Model representing the response fields from an access request to the Dataflow API."""
 
     access: str
     expire: int
@@ -167,7 +167,9 @@ class DDNDataFlowClient(ArchiveHandler):
         )
         if not response.ok:
             raise DdnDataflowAuthenticationError(message=response.text)
-        response_content: AuthToken = AuthToken.model_validate_json(response.content.decode())
+        response_content: AuthToken = AuthToken.model_validate_json(
+            json_data=response.content.decode()
+        )
         self.refresh_token: str = response_content.refresh
         self.auth_token: str = response_content.access
         self.token_expiration: datetime = datetime.fromtimestamp(response_content.expire)

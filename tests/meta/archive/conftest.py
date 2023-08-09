@@ -42,6 +42,12 @@ def fixture_ok_ddn_response(ok_response: Response):
     return ok_response
 
 
+@pytest.fixture(name="ddn_auth_token_response")
+def fixture_ddn_auth_token_response(ok_response: Response):
+    ok_response._content = b'{"access": "yes", "expire":15}'
+    return ok_response
+
+
 @pytest.fixture(name="ddn_dataflow_client")
 def fixture_ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataFlowClient:
     """Returns a DDNApi without tokens being set."""
