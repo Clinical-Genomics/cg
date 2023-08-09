@@ -13,7 +13,6 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
-from cg.utils.nf_handlers import NextflowHandler
 
 LOG = logging.getLogger(__name__)
 
@@ -58,6 +57,7 @@ class NfAnalysisAPI(AnalysisAPI):
         self._process = process
 
     def get_profile(self, profile: Optional[str] = None) -> str:
+        """Get NF profiles."""
         return profile or self.profile
 
     def get_workflow_manager(self) -> str:
@@ -83,31 +83,11 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return the path to a Trailblazer config file containing Tower IDs."""
         return Path(self.root_dir, case_id, "tower_ids").with_suffix(FileExtensions.YAML)
 
-    def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
-        """Write Tower IDs to a file used as the Trailblazer config."""
-        config_path: Path = self.get_trailblazer_config_path(case_id=case_id)
-        LOG.info(f"Writing Tower ID to {config_path.as_posix()}")
-        WriteFile.write_file_from_content(
-            content={case_id: [tower_id]},
-            file_format=FileFormat.YAML,
-            file_path=config_path,
-        )
-
-    def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
-        """Raise an error if config file is not found."""
-        if not dry_run and not Path(self.get_case_config_path(case_id=case_id)).exists():
-            raise ValueError(f"No config file found for case {case_id}")
-
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Path to deliverables file for a case."""
         return Path(self.get_case_path(case_id), f"{case_id}_deliverables").with_suffix(
             FileExtensions.YAML
         )
-
-    def verify_deliverables_file_exists(self, case_id: str) -> None:
-        """Raise an error if deliverables files file is not found."""
-        if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
-            raise CgError(f"No deliverables file found for case {case_id}")
 
     def get_metrics_deliverables_path(self, case_id: str) -> Path:
         """Return a path where the <case>_metrics_deliverables.yaml file should be located."""
@@ -141,19 +121,15 @@ class NfAnalysisAPI(AnalysisAPI):
         sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
         return [d["path"] for d in sorted_metadata if d["read"] == read_number]
 
-    # TODO: needs to be cleaned up and generalized
-    def create_samplesheet_csv(
-        self,
-        samplesheet_content: Dict[str, List[str]],
-        headers: List[str],
-        config_path: Path,
-    ) -> None:
-        """Write sample sheet csv file."""
-        with open(config_path, "w") as outfile:
-            outfile.write(",".join(headers))
-            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
-                outfile.write("\n")
-                outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
+    def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
+        """Raise an error if config file is not found."""
+        if not dry_run and not Path(self.get_case_config_path(case_id=case_id)).exists():
+            raise ValueError(f"No config file found for case {case_id}")
+
+    def verify_deliverables_file_exists(self, case_id: str) -> None:
+        """Raise an error if deliverables files file is not found."""
+        if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
+            raise CgError(f"No deliverables file found for case {case_id}")
 
     def get_replace_map(self, case_id: str) -> dict:
         """Get a mapping to replace constants from template to create case deliverables."""
@@ -179,4 +155,14 @@ class NfAnalysisAPI(AnalysisAPI):
         """Write deliverables file."""
         WriteFile.write_file_from_content(
             content=deliverables_content, file_format=file_format, file_path=file_path
+        )
+
+    def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
+        """Write Tower IDs to a file used as the Trailblazer config."""
+        config_path: Path = self.get_trailblazer_config_path(case_id=case_id)
+        LOG.info(f"Writing Tower ID to {config_path.as_posix()}")
+        WriteFile.write_file_from_content(
+            content={case_id: [tower_id]},
+            file_format=FileFormat.YAML,
+            file_path=config_path,
         )

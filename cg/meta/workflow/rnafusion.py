@@ -89,6 +89,19 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         }
         return samplesheet_content
 
+    def create_samplesheet_csv(
+        self,
+        samplesheet_content: Dict[str, List[str]],
+        headers: List[str],
+        config_path: Path,
+    ) -> None:
+        """Write sample sheet csv file."""
+        with open(config_path, "w") as outfile:
+            outfile.write(",".join(headers))
+            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
+                outfile.write("\n")
+                outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
+
     def write_samplesheet(self, case_id: str, strandedness: str, dry_run: bool = False) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
