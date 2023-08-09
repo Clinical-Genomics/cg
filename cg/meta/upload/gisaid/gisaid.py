@@ -18,11 +18,11 @@ from cg.store.models import Sample
 from cg.utils import Process
 from .constants import HEADERS
 from .models import GisaidSample, GisaidAccession
-from enum import StrEnum
+
 from cg.exc import (
     HousekeeperFileMissingError,
 )
-from cg.constants.constants import FileExtensions
+from cg.constants.constants import FileExtensions, StrEnum
 
 LOG = logging.getLogger(__name__)
 
