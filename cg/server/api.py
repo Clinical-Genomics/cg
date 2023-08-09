@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
-from google.auth import jwt
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 from pydantic.v1 import ValidationError
@@ -41,14 +40,17 @@ from cg.store.models import (
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
 
+CLIENT_ID: str = current_app.config['GOOGLE_OAUTH_CLIENT_ID']
 
-def validate_google_token(token):
-    CLIENT_ID = "YOUR_CLIENT_ID"
-
+def verify_google_token(token):
+    """Validate expiration, issuer, audience and signature of a Google OAuth2 token."""
     user_data = id_token.verify_oauth2_token(
         id_token=token, request=google_requests.Request(), audience=CLIENT_ID
     )
-    if user_data["iss"] not in ["accounts.google.com", "https://accounts.google.com"]:
+    issuer: str = user_data["iss"]
+    valid_issuers = ["accounts.google.com", "https://accounts.google.com"]
+
+    if issuer not in valid_issuers:
         raise ValueError("Invalid issuer")
 
     return user_data
@@ -90,7 +92,7 @@ def before_request():
 
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
-        user_data = validate_google_token(jwt_token)
+        user_data = verify_google_token(jwt_token)
     except ValueError as e:
         LOG.error(f"Error occurred while decoding JWT token: {e}")
         return abort(
