@@ -3,9 +3,9 @@ from unittest import mock
 
 from cg.constants.archiving import ArchiveLocations
 from cg.meta.archive.archive import (
+    ARCHIVE_HANDLERS,
     FileAndSample,
     SpringArchiveAPI,
-    archive_handlers,
     filter_files_on_archive_location,
 )
 from cg.meta.archive.ddn_dataflow import DDNDataFlowClient, MiriaFile
@@ -130,7 +130,7 @@ def test_convert_into_transfer_data(
         return_value=123,
     ):
         # WHEN calling the corresponding archive method
-        data_flow_client: ArchiveHandler = archive_handlers[ArchiveLocations.KAROLINSKA_BUCKET](
+        data_flow_client: ArchiveHandler = ARCHIVE_HANDLERS[ArchiveLocations.KAROLINSKA_BUCKET](
             config=ddn_dataflow_config
         )
     # WHEN using it to instantiate the correct class
