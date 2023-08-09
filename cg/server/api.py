@@ -2,13 +2,20 @@ import http
 import json
 import logging
 import tempfile
-from datetime import datetime
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import requests
-from cachetools import TTLCache
+from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
+from google.auth import jwt
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token
+from pydantic.v1 import ValidationError
+from requests.exceptions import HTTPError
+from sqlalchemy.exc import IntegrityError
+from urllib3.exceptions import MaxRetryError, NewConnectionError
+from werkzeug.utils import secure_filename
+
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
@@ -30,54 +37,21 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     User,
 )
-from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
-from google.auth import jwt
-from pydantic.v1 import ValidationError
-from requests.exceptions import HTTPError
-from sqlalchemy.exc import IntegrityError
-from urllib3.exceptions import MaxRetryError, NewConnectionError
-from werkzeug.utils import secure_filename
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
 
-cache = TTLCache(maxsize=1, ttl=3600)
-cache_certificates_key = "certs"
-cache[cache_certificates_key] = None
 
+def validate_google_token(token):
+    CLIENT_ID = "YOUR_CLIENT_ID"
 
-def get_certificate_ttl(response_data) -> int:
-    """Extract time to live in seconds for certificate from response headers."""
-    expires_header = response_data.headers.get("Expires")
-    expires = datetime.strptime(expires_header, "%a, %d %b %Y %H:%M:%S %Z")
-    return int((expires - datetime.utcnow()).total_seconds())
+    user_data = id_token.verify_oauth2_token(
+        id_token=token, request=google_requests.Request(), audience=CLIENT_ID
+    )
+    if user_data["iss"] not in ["accounts.google.com", "https://accounts.google.com"]:
+        raise ValueError("Invalid issuer")
 
-
-def fetch_and_cache_google_oauth2_certificates():
-    """Fetch and cache Google OAuth2 certificates."""
-    global cache
-
-    url = "https://www.googleapis.com/oauth2/v1/certs"
-    response = requests.get(url)
-    response.raise_for_status()
-
-    certs = response.json()
-    ttl = get_certificate_ttl(response_data=response)
-
-    cache = TTLCache(maxsize=1, ttl=ttl)
-    cache[cache_certificates_key] = certs
-
-    return certs
-
-
-def get_google_oauth2_certificates():
-    """Get Google OAuth2 certificates from cache or fetch and cache them."""
-    certs = cache.get(cache_certificates_key)
-
-    if not certs:
-        certs = fetch_and_cache_google_oauth2_certificates()
-
-    return certs
+    return user_data
 
 
 def is_public(route_function):
@@ -116,7 +90,7 @@ def before_request():
 
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
-        user_data = jwt.decode(jwt_token, certs=get_google_oauth2_certificates())
+        user_data = validate_google_token(jwt_token)
     except ValueError as e:
         LOG.error(f"Error occurred while decoding JWT token: {e}")
         return abort(
