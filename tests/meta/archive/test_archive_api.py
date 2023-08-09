@@ -139,7 +139,7 @@ def test_convert_into_transfer_data(
     )
 
     # THEN the returned object should be of the correct type
-    assert type(transferdata[0]) == MiriaFile
+    assert isinstance(transferdata[0], MiriaFile)
 
 
 def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAPI, sample_id: str):

@@ -28,7 +28,9 @@ class FileTransferData(BaseModel):
 class ArchiveHandler:
     """Base class for classes handling different archiving programs."""
 
+    @abstractmethod
     def __init__(self, config: DataFlowConfig):
+        """Initiates the ArchiveHandler based on the provided configuration."""
         pass
 
     @abstractmethod
@@ -46,5 +48,6 @@ class ArchiveHandler:
     @abstractmethod
     def convert_into_transfer_data(
         self, files_and_samples: List[FileAndSample], is_archiving: bool = True
-    ):
+    ) -> List[FileTransferData]:
+        """Converts the provided files_and_samples into a list of objects formatted for the specific archiving flow."""
         pass
