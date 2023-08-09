@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from typing import Callable, Dict, List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -12,6 +13,7 @@ from housekeeper.store.models import File
 from pydantic import BaseModel, ConfigDict
 
 LOG = logging.getLogger(__name__)
+DEFAULT_SPRING_ARCHIVE_COUNT = 200
 
 
 class ArchiveModels(BaseModel):
@@ -51,7 +53,29 @@ class SpringArchiveAPI:
 
     def archive_files(self, files: List[FileAndSample], archive_location: ArchiveLocations) -> int:
         archive_handler: ArchiveHandler = archive_handlers[archive_location](self.data_flow_config)
-        return archive_handler.archive_folders(files_and_samples=files)
+        return archive_handler.archive_files(files_and_samples=files)
+
+    def archive_all_non_archived_spring_files(
+        self, spring_file_count_limit: int = DEFAULT_SPRING_ARCHIVE_COUNT
+    ) -> None:
+        """Archives all non archived spring files."""
+
+        files_to_archive: List[File] = self.housekeeper_api.get_all_non_archived_spring_files()[
+            :spring_file_count_limit
+        ]
+        files_and_samples: List[FileAndSample] = self.add_samples_to_files(files_to_archive)
+
+        for archive_location in ArchiveLocations:
+            selected_files: [List[FileAndSample]] = filter_files_on_archive_location(
+                files_and_samples=files_and_samples, archive_location=archive_location
+            )
+            archive_task_id: int = self.archive_files(
+                files=selected_files, archive_location=archive_location
+            )
+            self.housekeeper_api.add_archives(
+                files=[Path(file_and_sample.file.path) for file_and_sample in selected_files],
+                archive_task_id=archive_task_id,
+            )
 
     def get_sample(self, file: File) -> Optional[Sample]:
         """Fetches the Sample corresponding to a File and logs if a Sample is not found."""

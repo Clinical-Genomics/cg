@@ -192,7 +192,7 @@ class DDNDataFlowClient(ArchiveHandler):
             self._refresh_auth_token()
         return {"Authorization": f"Bearer {self.auth_token}"}
 
-    def archive_folders(self, files_and_samples: List[FileAndSample]) -> int:
+    def archive_files(self, files_and_samples: List[FileAndSample]) -> int:
         """Archives all folders provided, to their corresponding destination, as given by sources
         and destination in TransferData. Returns the job ID of the archiving task."""
         miria_file_data: List[MiriaFile] = self.convert_into_transfer_data(
@@ -243,11 +243,13 @@ class DDNDataFlowClient(ArchiveHandler):
         transfer_request.add_repositories(
             source_prefix=source_prefix, destination_prefix=destination_prefix
         )
+
         return transfer_request
 
     def convert_into_transfer_data(
         self, files_and_samples: List[FileAndSample], is_archiving: bool = True
     ) -> List[MiriaFile]:
+        """Converts the provided files and samples to the format used for the request."""
         return [
             MiriaFile.from_file_and_sample(
                 file=file_and_sample.file, sample=file_and_sample.sample, is_archiving=is_archiving

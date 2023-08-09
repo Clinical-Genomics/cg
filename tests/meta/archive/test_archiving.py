@@ -280,7 +280,7 @@ def test_archive_folders(
         "api_request_from_content",
         return_value=ok_ddn_response,
     ) as mock_request_submitter:
-        job_id: int = ddn_dataflow_client.archive_folders([file_and_sample])
+        job_id: int = ddn_dataflow_client.archive_files([file_and_sample])
 
     # THEN an integer should be returned
     assert isinstance(job_id, int)

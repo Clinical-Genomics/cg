@@ -34,7 +34,7 @@ class ArchiveHandler:
         pass
 
     @abstractmethod
-    def archive_folders(self, files_and_samples: List[FileAndSample]):
+    def archive_files(self, files_and_samples: List[FileAndSample]):
         """Archives all folders provided, to their corresponding destination,
         as given by sources and destination parameter."""
         pass
