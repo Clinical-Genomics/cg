@@ -19,7 +19,7 @@ from cg.utils.utils import build_command_from_dict
 
 class NfHandler:
     """
-    Parent class for handling the interaction with NF executors.
+    Parent class for handling the interaction with NF executors (both Nextflow and NF-Tower).
     """
 
     @classmethod
