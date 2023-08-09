@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Type
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.archiving import ArchiveLocations
@@ -37,7 +37,9 @@ def filter_files_on_archive_location(
     ]
 
 
-ARCHIVE_HANDLERS: Dict[str, Callable] = {ArchiveLocations.KAROLINSKA_BUCKET: DDNDataFlowClient}
+ARCHIVE_HANDLERS: Dict[str, Type[ArchiveHandler]] = {
+    ArchiveLocations.KAROLINSKA_BUCKET: DDNDataFlowClient
+}
 
 
 class SpringArchiveAPI:
