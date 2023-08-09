@@ -37,7 +37,7 @@ def filter_files_on_archive_location(
     ]
 
 
-archive_handlers: Dict[str, Callable] = {ArchiveLocations.KAROLINSKA_BUCKET: DDNDataFlowClient}
+ARCHIVE_HANDLERS: Dict[str, Callable] = {ArchiveLocations.KAROLINSKA_BUCKET: DDNDataFlowClient}
 
 
 class SpringArchiveAPI:
@@ -52,7 +52,7 @@ class SpringArchiveAPI:
         self.data_flow_config: DataFlowConfig = data_flow_config
 
     def archive_files(self, files: List[FileAndSample], archive_location: ArchiveLocations) -> int:
-        archive_handler: ArchiveHandler = archive_handlers[archive_location](self.data_flow_config)
+        archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
         return archive_handler.archive_files(files_and_samples=files)
 
     def archive_all_non_archived_spring_files(
