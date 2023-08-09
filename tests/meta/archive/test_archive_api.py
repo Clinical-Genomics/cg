@@ -4,6 +4,7 @@ from unittest import mock
 
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import APIMethods
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.io.controller import APIRequest
 from cg.meta.archive.archive import (
     ARCHIVE_HANDLERS,
@@ -215,9 +216,9 @@ def test_archive_all_non_archived_spring_files(
     # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper
     files: List[File] = spring_archive_api.housekeeper_api.files()
     for file in files:
-        if "spring" in [tag.name for tag in file.tags]:
+        if SequencingFileTag.SPRING in [tag.name for tag in file.tags]:
             sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(
                 file.version.bundle.name
             )
-            if sample and sample.archive_location == "karolinska_bucket":
+            if sample and sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET:
                 assert file.archive
