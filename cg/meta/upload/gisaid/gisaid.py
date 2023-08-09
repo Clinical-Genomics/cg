@@ -27,7 +27,7 @@ from cg.constants.constants import FileExtensions, StrEnum
 LOG = logging.getLogger(__name__)
 
 UPLOADED_REGEX_MATCH: str = r"\[\"([A-Za-z0-9_]+)\"\]\}$"
-KOMPLETTERING: str = "komplettering"
+COMPLETION: str = "komplettering"
 PROVNUMMER: str = "provnummer"
 
 
