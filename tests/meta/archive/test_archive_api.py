@@ -170,11 +170,11 @@ def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAP
 def test_archive_all_non_archived_spring_files(
     spring_archive_api: SpringArchiveAPI, caplog, ok_ddn_response
 ):
-    """Test archiving all non-archived SPRING files"""
+    """Test archiving all non-archived SPRING files for Miria customers."""
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
     # with the DDN customer having two samples, and the non-DDN having one sample.
 
-    # WHEN archiving all available samples
+    # WHEN archiving all available files
     with mock.patch.object(
         AuthToken,
         "model_validate_json",
@@ -190,7 +190,7 @@ def test_archive_all_non_archived_spring_files(
     ) as mock_request_submitter:
         spring_archive_api.archive_all_non_archived_spring_files()
 
-    # THEN the DDN archiving function should have been called
+    # THEN the DDN archiving function should have been called with the correct destination and source.
     mock_request_submitter.assert_called_with(
         api_method=APIMethods.POST,
         url="some/api/files/archive",
