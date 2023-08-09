@@ -28,7 +28,7 @@ LOG = logging.getLogger(__name__)
 
 UPLOADED_REGEX_MATCH: str = r"\[\"([A-Za-z0-9_]+)\"\]\}$"
 COMPLETION: str = "komplettering"
-PROVNUMMER: str = "provnummer"
+SAMPLE_NUMBER: str = "provnummer"
 
 
 class GsaidKeys(StrEnum):
@@ -101,7 +101,7 @@ class GisaidAPI:
         return Path(self.mutant_root_dir, case_id, "results", f"{case_id}{FileExtensions.FASTA}")
 
     def get_gisaid_csv_path(self, case_id: str) -> Path:
-        """Get path to gisaid csv."""
+        """Get path to Gisaid CSV."""
         return Path(self.mutant_root_dir, case_id, "results", f"{case_id}{FileExtensions.CSV}")
 
     def get_gisaid_samples(self, case_id: str) -> List[GisaidSample]:
