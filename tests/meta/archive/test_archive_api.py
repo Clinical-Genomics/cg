@@ -30,15 +30,10 @@ def test_get_files_by_archive_location(
         for sample in [sample_id, father_sample_id]
     ]
 
-    with mock.patch.object(
-        DDNDataFlowClient,
-        "_set_auth_tokens",
-        return_value=123,
-    ):
-        # WHEN fetching the files by archive location
-        selected_files: List[FileAndSample] = filter_files_on_archive_location(
-            files_and_samples, ArchiveLocations.KAROLINSKA_BUCKET
-        )
+    # WHEN fetching the files by archive location
+    selected_files: List[FileAndSample] = filter_files_on_archive_location(
+        files_and_samples, ArchiveLocations.KAROLINSKA_BUCKET
+    )
 
     # THEN every file returned should have that archive location
     assert selected_files
