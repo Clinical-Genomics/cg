@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Optional
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import FileFormat
@@ -28,10 +28,12 @@ class NfHandler:
         return Path(root_dir, case_id)
 
     @classmethod
-    def get_workdir_path(cls, case_id: str, root_dir: str, work_dir: str = None) -> Path:
+    def get_workdir_path(
+        cls, case_id: str, root_dir: Path, work_dir: Optional[Path] = None
+    ) -> Path:
         """Path to NF work directory."""
         if work_dir:
-            return work_dir
+            return work_dir.absolute()
         return Path(cls.get_case_path(case_id, root_dir), NFX_WORK_DIR)
 
     @classmethod
