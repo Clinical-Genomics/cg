@@ -44,7 +44,7 @@ def fixture_ok_ddn_response(ok_response: Response):
 
 @pytest.fixture(name="ddn_auth_token_response")
 def fixture_ddn_auth_token_response(ok_response: Response):
-    ok_response._content = b'{"access": "yes", "expire":15}'
+    ok_response._content = b'{"access": "test_auth_token", "expire":15, "test_refresh_token"}'
     return ok_response
 
 
