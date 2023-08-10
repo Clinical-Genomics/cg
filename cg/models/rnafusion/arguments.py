@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional, Union
 
+from pydantic import BaseModel
 from pydantic.v1 import BaseModel
 
 
@@ -21,3 +22,25 @@ class CommandArgs(BaseModel):
     compute_env: Optional[str]
     work_dir: Optional[Union[str, Path]]
     params_file: Optional[Union[str, Path]]
+
+
+class RnafusionParameters(BaseModel):
+    """Rnafusion parameters."""
+
+    all: bool = False
+    arriba: bool = True
+    clusterOptions: str
+    cram: str = "arriba,starfusion"
+    fastp_trim: bool = True
+    fusioncatcher: bool = True
+    fusioninspector_filter: bool = False
+    fusionreport_filter: bool = False
+    genomes_base: Path
+    input: Path
+    outdir: Path
+    pizzly: bool = False
+    priority: str
+    squid: bool = False
+    starfusion: bool = True
+    trim: bool = False
+    trim_tail: int = 50

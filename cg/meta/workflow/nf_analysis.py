@@ -12,7 +12,7 @@ from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.command_args import CommandArgs
+from cg.models.rnafusion.arguments import CommandArgs
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
