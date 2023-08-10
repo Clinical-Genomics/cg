@@ -2,13 +2,12 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 from pydantic.v1 import ValidationError
 from cg.constants import Pipeline
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.taxprofiler import (
-    TAXPROFILER_FASTA_HEADER,
     TAXPROFILER_INSTRUMENT_PLATFORM,
     TAXPROFILER_RUN_ACCESSION,
     TAXPROFILER_SAMPLE_SHEET_HEADERS,
@@ -19,7 +18,7 @@ from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
-from cg.store.models import Family, Sample
+from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
 
