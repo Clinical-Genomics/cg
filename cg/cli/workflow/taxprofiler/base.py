@@ -50,13 +50,13 @@ taxprofiler.add_command(resolve_compression)
 def config_case(
     context: CGConfig, case_id: str, instrument_platform: SequencingPlatform, dry_run: bool
 ) -> None:
-    """Create sample sheet file for Taxprofiler analysis for a given case_id."""
+    """Create sample sheet file for Taxprofiler analysis for a given case."""
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.config_case(
-            case_id=case_id, instrument_platform=instrument_platform, fasta="", dry_run=dry_run
+            case_id=case_id, instrument_platform=instrument_platform, dry_run=dry_run
         )
 
     except CgError as error:

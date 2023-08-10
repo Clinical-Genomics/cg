@@ -4,8 +4,6 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 from pydantic.v1 import ValidationError
-from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.command_args import CommandArgs
 from cg.constants import Pipeline
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.sequencing import SequencingPlatform
@@ -21,7 +19,6 @@ from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
-from cg.utils import Process
 from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
@@ -55,7 +52,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         fastq_r1: List[str],
         fastq_r2: List[str],
         instrument_platform: SequencingPlatform.ILLUMINA,
-        fasta: Optional[str] = "",
+        fasta: str = "",
     ) -> Dict[str, List[str]]:
         """Build sample sheet headers and lists."""
         try:
@@ -89,7 +86,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self,
         case_id: str,
         instrument_platform: SequencingPlatform.ILLUMINA,
-        fasta: Optional[str],
+        fasta: str= "",
         dry_run: bool = False,
     ) -> None:
         """Write sample sheet for taxprofiler analysis in case folder."""
@@ -180,8 +177,8 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self,
         case_id: str,
         instrument_platform: SequencingPlatform.ILLUMINA,
-        fasta: Optional[str],
         dry_run: bool,
+        fasta: str = "",
     ) -> None:
         """Create sample sheet file for Taxprofiler analysis."""
         NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
