@@ -21,11 +21,13 @@ class NfBaseHandler:
     def write_nextflow_yaml(
         cls,
         content: Dict[str, Any],
-        file_path: str,
+        file_path: Path,
     ) -> None:
         """Write Nextflow file with non-quoted booleans and quoted strings."""
         with open(file_path, "w") as outfile:
             for key, value in content.items():
+                if isinstance(value, Path):
+                    value: str = value.as_posix()
                 quotes = '"' if type(value) is str else ""
                 outfile.write(f"{key}: {quotes}{value}{quotes}\n")
 
