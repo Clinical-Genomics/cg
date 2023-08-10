@@ -8,7 +8,7 @@ from pydantic.v1 import ValidationError
 
 from cg import resources
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat, WorkflowManager
+from cg.constants.constants import FileFormat
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.rnafusion import (
     RNAFUSION_METRIC_CONDITIONS,
@@ -20,9 +20,8 @@ from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, MetricsQCError, MissingMetrics
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
-from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fastq import RnafusionFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.tower_common import TowerAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
@@ -40,7 +39,7 @@ from cg.utils import Process
 LOG = logging.getLogger(__name__)
 
 
-class RnafusionAnalysisAPI(AnalysisAPI):
+class RnafusionAnalysisAPI(NfAnalysisAPI):
     """Handles communication between RNAFUSION processes
     and the rest of CG infrastructure."""
 
@@ -63,42 +62,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self.compute_env: str = config.rnafusion.compute_env
         self.revision: str = config.rnafusion.revision
 
-    @property
-    def root(self) -> str:
-        return self.root_dir
-
-    @property
-    def fastq_handler(self):
-        return RnafusionFastqHandler
-
-    @property
-    def process(self):
-        if not self._process:
-            self._process = Process(
-                binary=self.tower_binary_path,
-            )
-        return self._process
-
-    @process.setter
-    def process(self, process: Process):
-        self._process = process
-
-    def get_profile(self, profile: Optional[str] = None) -> str:
-        if profile:
-            return profile
-        return self.profile
-
-    def get_workflow_manager(self) -> str:
-        """Get workflow manager for rnafusion."""
-        return WorkflowManager.Tower.value
-
-    def get_case_path(self, case_id: str) -> Path:
-        """Path to case working directory."""
-        return NextflowAnalysisAPI.get_case_path(case_id=case_id, root_dir=self.root)
-
-    def get_case_config_path(self, case_id):
-        return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
-
     def verify_analysis_finished(self, case_id):
         return NextflowAnalysisAPI.verify_analysis_finished(case_id=case_id, root_dir=self.root_dir)
 
@@ -113,7 +76,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             )
         except ValidationError as error:
             LOG.error(error)
-            raise ValueError
+            raise CgError("Error creating sample sheet")
 
         samples_full_list: list = []
         strandedness_full_list: list = []
@@ -140,8 +103,12 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
         for link in case_obj.links:
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
-            fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
-            fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
+            fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(
+                metadata=sample_metadata, forward=True
+            )
+            fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(
+                metadata=sample_metadata, reverse=True
+            )
             samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
                 case_id, fastq_r1, fastq_r2, strandedness
             )
@@ -172,10 +139,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 case_id=case_id, root_dir=self.root_dir
             ),
         )
-
-    def get_trailblazer_config_path(self, case_id: str) -> Path:
-        """Return the path to a trailblazer config file containing Tower IDs."""
-        return Path(self.root_dir, case_id, "tower_ids.yaml")
 
     def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
         """Write Tower IDs to a .YAML file used as the trailblazer config."""
@@ -308,23 +271,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
             LOG.info(self.process.stdout)
 
-    def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
-        NextflowAnalysisAPI.verify_case_config_file_exists(
-            case_id=case_id, root_dir=self.root_dir, dry_run=dry_run
-        )
-
-    def get_deliverables_file_path(self, case_id: str) -> Path:
-        return NextflowAnalysisAPI.get_deliverables_file_path(
-            case_id=case_id, root_dir=self.root_dir
-        )
-
     def get_pipeline_version(self, case_id: str) -> str:
         return NextflowAnalysisAPI.get_pipeline_version(
             case_id=case_id, root_dir=self.root_dir, pipeline=self.pipeline
         )
-
-    def verify_deliverables_file_exists(self, case_id: str) -> None:
-        NextflowAnalysisAPI.verify_deliverables_file_exists(case_id=case_id, root_dir=self.root_dir)
 
     def report_deliver(self, case_id: str) -> None:
         """Get a deliverables file template from resources, parse it and, then write the deliverables file."""
@@ -362,10 +312,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def get_multiqc_json_path(self, case_id: str) -> Path:
         """Return the path of the multiqc_data.json file."""
         return Path(self.root_dir, case_id, "multiqc", "multiqc_data", "multiqc_data.json")
-
-    def get_metrics_deliverables_path(self, case_id: str) -> Path:
-        """Return a path where the <case>_metrics_deliverables.yaml file should be located."""
-        return Path(self.root_dir, case_id, f"{case_id}_metrics_deliverables.yaml")
 
     def get_multiqc_json_metrics(self, case_id: str) -> List[MetricsBase]:
         """Get a multiqc_data.json file and returns metrics and values formatted."""

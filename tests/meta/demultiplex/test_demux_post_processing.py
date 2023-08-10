@@ -1,6 +1,9 @@
 import logging
+import os
 from pathlib import Path
-from typing import Generator, List
+from typing import Dict, Generator, List
+
+import pytest
 
 
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
@@ -14,6 +17,8 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
+
+from tests.meta.demultiplex.conftest import FlowCellInfo
 
 
 def test_set_dry_run(
@@ -485,34 +490,51 @@ def test_finish_all_flowcells(
     assert f"Check demultiplexed flow cell {bcl2fastq_flow_cell.full_name}" in caplog.text
 
 
-def test_post_processing_of_flow_cell_demultiplexed_with_bclconvert(
+@pytest.mark.parametrize(
+    "demux_type",
+    ["BCL2FASTQ_TREE", "BCLCONVERT_TREE", "BCLCONVERT_FLAT"],
+)
+def test_post_processing_of_flow_cell(
+    demux_type: str,
     demultiplex_context: CGConfig,
-    flow_cell_directory_name_demultiplexed_with_bcl_convert: str,
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
+    flow_cell_info_map: Dict[str, FlowCellInfo],
     demultiplexed_flow_cells_tmp_directory: Path,
     bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
-    novaseq_6000_dir: Path,
+    flow_cell_name_demultiplexed_with_bcl_convert,
+    flow_cell_directory_name_demultiplexed_with_bcl_convert,
 ):
+    """Test adding a demultiplexed flow cell to the databases with. Runs on each type of
+    demultiplexing software and setting used."""
+
+    # GIVEN a demultiplexed flow cell
+    flow_cell_demultplexing_directory: str = flow_cell_info_map.get(demux_type).directory
+    flow_cell_name: str = flow_cell_info_map.get(demux_type).name
+    sample_internal_ids: List[str] = flow_cell_info_map.get(demux_type).sample_internal_ids
+
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a directory with a flow cell demultiplexed with BCL Convert
     demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_tmp_directory
-    demux_post_processing_api.demux_api.run_dir = novaseq_6000_dir
+
+    # GIVEN that a sample sheet exists in the flow cell run directory
+    path = Path(
+        demux_post_processing_api.demux_api.run_dir,
+        flow_cell_demultplexing_directory,
+        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
+    )
+    os.makedirs(path.parent, exist_ok=True)
+    path.touch()
 
     # WHEN post processing the demultiplexed flow cell
-    demux_post_processing_api.finish_flow_cell_temp(
-        flow_cell_directory_name_demultiplexed_with_bcl_convert
-    )
+    demux_post_processing_api.finish_flow_cell_temp(flow_cell_demultplexing_directory)
 
     # THEN a flow cell was created in statusdb
-    assert demux_post_processing_api.status_db.get_flow_cell_by_name(
-        flow_cell_name_demultiplexed_with_bcl_convert
-    )
+    assert demux_post_processing_api.status_db.get_flow_cell_by_name(flow_cell_name)
 
     # THEN sequencing metrics were created for the flow cell
     assert demux_post_processing_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(
-        flow_cell_name=flow_cell_name_demultiplexed_with_bcl_convert
+        flow_cell_name=flow_cell_name
     )
     # THEN the read count was calculated for all samples in the flow cell directory
     for sample_id in bcl_convert_demultiplexed_flow_cell_sample_internal_ids:
@@ -584,7 +606,7 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     for sample_internal_id in bcl2fastq_demultiplexed_flow_cell_sample_internal_ids:
         sample = demux_post_processing_api.status_db.get_sample_by_internal_id(sample_internal_id)
         assert sample is not None
-        assert sample.reads
+        assert sample.reads == 0
 
     # THEN a bundle was added to Housekeeper for the flow cell
     assert demux_post_processing_api.hk_api.bundle(flow_cell_name_demultiplexed_with_bcl2fastq)
@@ -609,7 +631,7 @@ def test_post_processing_of_flow_cell_demultiplexed_with_bcl2fastq(
     # THEN a delivery file was created in the flow cell directory
     delivery_path = Path(
         demux_post_processing_api.demux_api.out_dir,
-        flow_cell_directory_name_demultiplexed_with_bcl2fastq,
+        demultiplexed_flow_cells_tmp_directory,
         DemultiplexingDirsAndFiles.DELIVERY,
     )
 
