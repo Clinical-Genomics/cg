@@ -139,16 +139,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             priority=self.account,
         ).dict()
 
-    def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
-        """Write Tower IDs to a .YAML file used as the trailblazer config."""
-        config_path = self.get_trailblazer_config_path(case_id=case_id)
-        LOG.info(f"Writing Tower ID to {config_path.as_posix()}")
-        WriteFile.write_file_from_content(
-            content={case_id: [tower_id]},
-            file_format=FileFormat.YAML,
-            file_path=config_path,
-        )
-
     def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
         if genomes_base:
             return genomes_base.absolute()
