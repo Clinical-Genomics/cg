@@ -90,7 +90,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         return samplesheet_content
 
     @staticmethod
-    def create_samplesheet_csv(
+    def write_samplesheet_csv(
         samplesheet_content: Dict[str, List[str]],
         headers: List[str],
         config_path: Path,
@@ -124,7 +124,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             LOG.info(samplesheet_content)
             if dry_run:
                 continue
-            self.create_samplesheet_csv(
+            self.write_samplesheet_csv(
                 samplesheet_content=samplesheet_content,
                 headers=RNAFUSION_SAMPLESHEET_HEADERS,
                 config_path=self.get_case_config_path(case_id=case_id),
