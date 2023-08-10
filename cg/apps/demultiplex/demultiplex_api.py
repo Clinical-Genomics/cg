@@ -17,6 +17,7 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch, SbatchDragen
 from cgmodels.cg.constants import Pipeline
+from cg.constants.sequencing import sequencer_types, Sequencers
 
 LOG = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class DemultiplexingAPI:
         self.slurm_api = SlurmAPI()
         self.slurm_account: str = config["demultiplex"]["slurm"]["account"]
         self.mail: str = config["demultiplex"]["slurm"]["mail_user"]
-        self.run_dir: Path = Path(config["demultiplex"]["run_dir"])
+        self.run_dir: Path = self.get_run_dir_by_sequencer_type()
         self.out_dir: Path = out_dir or Path(config["demultiplex"]["out_dir"])
         self.environment: str = config.get("environment", "stage")
         LOG.info(f"Set environment to {self.environment}")
@@ -41,6 +42,22 @@ class DemultiplexingAPI:
     def slurm_quality_of_service(self) -> Literal[SlurmQos.HIGH, SlurmQos.LOW]:
         """Return SLURM quality of service."""
         return SlurmQos.LOW if self.environment == "stage" else SlurmQos.HIGH
+
+    @property
+    def set_run_dir_by_sequencer_type(
+        self,
+        config: dict,
+        sequencer_type: str = None,
+    ) -> Path:
+        """Return run dir for sequencer type.
+        Defaults to novaseq flow cell runs dir."""
+        if sequencer_types[sequencer_type] == Sequencers.HISEQX:
+            return Path(config["demultiplex"]["run_dir_hiseqx"])
+        elif sequencer_types[sequencer_type] == Sequencers.HISEQGA:
+            return Path(config["demultiplex"]["run_dir_hiseqga"])
+        elif sequencer_types[sequencer_type] == Sequencers.NOVASEQX:
+            return Path(config["demultiplex"]["run_dir_novaseqx"])
+        return Path(config["demultiplex"]["run_dir_novaseq"])
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run."""
