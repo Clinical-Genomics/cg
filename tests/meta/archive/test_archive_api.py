@@ -169,7 +169,11 @@ def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAP
 
 
 def test_archive_all_non_archived_spring_files(
-    spring_archive_api: SpringArchiveAPI, caplog, ok_ddn_response
+    spring_archive_api: SpringArchiveAPI,
+    caplog,
+    ok_ddn_response,
+    archive_request_json,
+    header_with_test_auth_token,
 ):
     """Test archiving all non-archived SPRING files for Miria customers."""
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
@@ -195,22 +199,8 @@ def test_archive_all_non_archived_spring_files(
     mock_request_submitter.assert_called_with(
         api_method=APIMethods.POST,
         url="some/api/files/archive",
-        headers={
-            "Content-Type": "application/json",
-            "accept": "application/json",
-            "Authorization": "Bearer test_auth_token",
-        },
-        json={
-            "osType": "Unix/MacOS",
-            "createFolder": False,
-            "pathInfo": [
-                {
-                    "destination": "archive@repository:ADM1",
-                    "source": "local@storage:/tests/fixtures/apps/demultiplexing/demultiplexed-runs/spring/dummy_run_001.spring",
-                }
-            ],
-            "metadataList": [],
-        },
+        headers=header_with_test_auth_token,
+        json=archive_request_json,
     )
 
     # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper

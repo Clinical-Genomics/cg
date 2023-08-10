@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 from unittest import mock
 
 import pytest
@@ -40,6 +40,32 @@ def fixture_ddn_dataflow_config(
 def fixture_ok_ddn_response(ok_response: Response):
     ok_response._content = b'{"job_id": "123"}'
     return ok_response
+
+
+@pytest.fixture(name="archive_request_json")
+def fixture_archive_request_json(
+    remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
+) -> Dict:
+    return {
+        "osType": "Unix/MacOS",
+        "createFolder": False,
+        "pathInfo": [
+            {
+                "destination": f"{remote_storage_repository}ADM1",
+                "source": local_storage_repository + trimmed_local_path,
+            }
+        ],
+        "metadataList": [],
+    }
+
+
+@pytest.fixture(name="header_with_test_auth_token")
+def fixture_header_with_test_auth_token() -> Dict:
+    return {
+        "Content-Type": "application/json",
+        "accept": "application/json",
+        "Authorization": "Bearer test_auth_token",
+    }
 
 
 @pytest.fixture(name="ddn_auth_token_response")
