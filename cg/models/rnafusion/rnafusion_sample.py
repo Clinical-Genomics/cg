@@ -1,14 +1,15 @@
+from typing import List
+
 from cg.constants.rnafusion import RNAFUSION_ACCEPTED_STRANDEDNESS
 from cg.models.nextflow.sample import NextflowSample, validator
 
 
 class RnafusionSample(NextflowSample):
-    """Rnafusion sample model
+    """Rnafusion sample sheet model."""
 
-    Attributes:
-        strandedness: rnafusion config file attributes model
-    """
-
+    sample: str
+    fastq_r1: List[str]
+    fastq_r2: List[str]
     strandedness: str
 
     @validator("strandedness", always=True)

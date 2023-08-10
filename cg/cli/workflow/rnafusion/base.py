@@ -28,10 +28,8 @@ from cg.cli.workflow.rnafusion.options import (
 from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV, OPTION_TOWER_RUN_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
-from cg.constants.tb import AnalysisStatus
-from cg.exc import CgError, DecompressionNeededError, MetricsQCError
+from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.command_args import CommandArgs
@@ -62,17 +60,16 @@ rnafusion.add_command(resolve_compression)
 def config_case(
     context: CGConfig, case_id: str, strandedness: str, genomes_base: Path, dry_run: bool
 ) -> None:
-    """Create sample sheet file for RNAFUSION analysis for a given CASE_ID."""
+    """Create sample sheet file and params file for a given case."""
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     LOG.info(f"Creating sample sheet file for {case_id}.")
-    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     try:
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.config_case(
             case_id=case_id, strandedness=strandedness, genomes_base=genomes_base, dry_run=dry_run
         )
-
     except CgError as error:
-        LOG.error(f"Could not create sample sheet: {error}")
+        LOG.error(f"Could not create config files for {case_id}: {error}")
         raise click.Abort() from error
 
 
@@ -115,22 +112,19 @@ def run(
 
     command_args: CommandArgs = CommandArgs(
         **{
-            "log": NextflowAnalysisAPI.get_log_path(
+            "log": analysis_api.get_log_path(
                 case_id=case_id,
                 pipeline=analysis_api.pipeline,
-                root_dir=analysis_api.root_dir,
                 log=log,
             ),
-            "work_dir": NextflowAnalysisAPI.get_workdir_path(
-                case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
-            ),
+            "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
             "with_tower": with_tower,
             "stub": stub,
-            "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
-            "params_file": NextflowAnalysisAPI.get_params_file_path(
-                case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
+            "config": analysis_api.get_nextflow_config_path(nextflow_config=config),
+            "params_file": analysis_api.get_params_file_path(
+                case_id=case_id, params_file=params_file
             ),
             "name": case_id,
             "compute_env": compute_env or analysis_api.compute_env,

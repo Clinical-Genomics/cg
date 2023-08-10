@@ -648,7 +648,6 @@ class Sample(Model, PriorityMixin):
     sequenced_at = Column(types.DateTime)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
-    calculated_read_count = Column(types.BigInteger, default=0)
 
     sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
 
@@ -712,6 +711,11 @@ class Sample(Model, PriorityMixin):
             return f"Received {self.received_at.date()}"
 
         return f"Ordered {self.ordered_at.date()}"
+
+    @property
+    def archive_location(self) -> str:
+        """Returns the data_archive_location if the customer linked to the sample."""
+        return self.customer.data_archive_location
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
