@@ -15,6 +15,7 @@ from cg.constants.taxprofiler import (
     TaxprofilerDefaults,
 )
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.nf_handlers import NfBaseHandler
 from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
 from cg.store.models import Family
@@ -125,23 +126,17 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         default_options: Dict[str, str] = self.get_default_parameters(case_id=case_id)
         if dry_run:
             return
-        NextflowAnalysisAPI.write_nextflow_yaml(
+        NfBaseHandler.write_nextflow_yaml(
             content=default_options,
-            file_path=NextflowAnalysisAPI.get_params_file_path(
-                case_id=case_id, root_dir=self.root_dir
-            ),
+            file_path=self.get_params_file_path(case_id=case_id),
         )
 
     def get_default_parameters(self, case_id: str) -> Dict:
         """Returns a dictionary with default Taxprofiler parameters."""
         return {
-            "input": NextflowAnalysisAPI.get_input_path(
-                case_id=case_id, root_dir=self.root_dir
-            ).as_posix(),
+            "input": self.get_case_config_path(case_id=case_id).as_posix(),
             "databases": self.databases,
-            "outdir": NextflowAnalysisAPI.get_outdir_path(
-                case_id=case_id, root_dir=self.root_dir
-            ).as_posix(),
+            "outdir": self.get_case_path(case_id=case_id).as_posix(),
             "save_preprocessed_reads": TaxprofilerDefaults.SAVE_PREPROCESSED_READS,
             "perform_shortread_qc": TaxprofilerDefaults.PERFORM_SHORTREAD_QC,
             "perform_shortread_complexityfilter": TaxprofilerDefaults.PERFORM_SHORTREAD_COMPLEXITYFILTER,

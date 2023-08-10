@@ -24,7 +24,6 @@ from cg.cli.workflow.taxprofiler.options import (
     OPTION_INSTRUMENT_PLATFORM,
 )
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
-from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -96,20 +95,17 @@ def run(
 
     command_args: CommandArgs = CommandArgs(
         **{
-            "log": NextflowAnalysisAPI.get_log_path(
+            "log": analysis_api.get_log_path(
                 case_id=case_id,
                 pipeline=analysis_api.pipeline,
-                root_dir=analysis_api.root_dir,
                 log=log,
             ),
-            "work_dir": NextflowAnalysisAPI.get_workdir_path(
-                case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
-            ),
+            "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
-            "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
-            "params_file": NextflowAnalysisAPI.get_params_file_path(
-                case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
+            "config": analysis_api.get_nextflow_config_path(nextflow_config=config),
+            "params_file": analysis_api.get_params_file_path(
+                case_id=case_id, params_file=params_file
             ),
             "name": case_id,
             "revision": revision or analysis_api.revision,
