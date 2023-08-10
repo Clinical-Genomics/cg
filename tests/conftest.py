@@ -2963,7 +2963,7 @@ def fixture_taxprofiler_fastq_file_l_1_r_1(taxprofiler_housekeeper_dir: Path) ->
 
 
 @pytest.fixture(name="taxprofiler_fastq_file_l_1_r_2")
-def fixture_taxprofiler_fastq_file_l_1_r_2(taxprofiler_housekeeper_dir: Path) -> str:
+def fixture_taxprofiler_fastq_file_l_1_r_2(taxprofiler_housekeeper_dir: Path) -> Path:
     fastq_filename = Path(
         taxprofiler_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
     ).as_posix()
