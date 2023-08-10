@@ -137,8 +137,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def write_params_file(self, case_id: str, dry_run: bool = False) -> None:
         """Write params-file for taxprofiler analysis in case folder."""
         default_options: Dict[str, str] = self.get_default_parameters(case_id=case_id)
-        if dry_run:
-            return
         NfBaseHandler.write_nextflow_yaml(
             content=default_options,
             file_path=self.get_params_file_path(case_id=case_id),
@@ -184,9 +182,9 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         )
         LOG.info("Sample sheet written")
         LOG.info("Generating parameters file")
-        self.write_params_file(case_id=case_id, dry_run=dry_run)
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
+        self.write_params_file(case_id=case_id, dry_run=dry_run)
 
         LOG.info("Configs files written")
