@@ -68,7 +68,7 @@ def test_with_config_use_nextflow(
     assert "using nextflow" in caplog.text
     assert "path/to/bin/nextflow" in caplog.text
     assert "-work-dir" in caplog.text
-    assert "params-file" in caplog.text
+    assert "-params-file" in caplog.text
 
     # THEN command should include resume flag
     assert "-resume" in caplog.text
