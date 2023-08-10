@@ -10,21 +10,3 @@ RNAFUSION_METRIC_CONDITIONS: dict = {
     "PCT_RIBOSOMAL_BASES": {"norm": "lt", "threshold": 5},
     "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.7},
 }
-
-
-class RnafusionDefaults:
-    """Rnafusion default parameters"""
-
-    STRANDEDNESS: str = "reverse"
-    TRIM: bool = False
-    FASTP_TRIM: bool = True
-    TRIM_TAIL: int = 50
-    FUSIONREPORT_FILTER: bool = False
-    FUSIONINSPECTOR_FILTER: bool = False
-    ALL: bool = False
-    PIZZLY: bool = False
-    SQUID: bool = False
-    STARFUSION: bool = True
-    FUSIONCATCHER: bool = True
-    ARRIBA: bool = True
-    CRAM: str = "arriba,starfusion"
