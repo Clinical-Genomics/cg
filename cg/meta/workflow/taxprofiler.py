@@ -181,10 +181,10 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             case_id=case_id, instrument_platform=instrument_platform, fasta=fasta, dry_run=dry_run
         )
         LOG.info("Sample sheet written")
-        LOG.info("Generating parameters file")
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
         self.write_params_file(case_id=case_id, dry_run=dry_run)
+        LOG.info("Generating parameters file")
 
         LOG.info("Configs files written")
