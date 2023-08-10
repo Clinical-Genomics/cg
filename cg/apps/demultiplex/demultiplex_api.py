@@ -32,7 +32,7 @@ class DemultiplexingAPI:
         self.slurm_api = SlurmAPI()
         self.slurm_account: str = config["demultiplex"]["slurm"]["account"]
         self.mail: str = config["demultiplex"]["slurm"]["mail_user"]
-        self.run_dir: Path = self.get_run_dir_by_sequencer_type()
+        self.run_dir: Path = self.get_run_dir_by_sequencer_type(config=config)
         self.out_dir: Path = out_dir or Path(config["demultiplex"]["out_dir"])
         self.environment: str = config.get("environment", "stage")
         LOG.info(f"Set environment to {self.environment}")
@@ -43,11 +43,10 @@ class DemultiplexingAPI:
         """Return SLURM quality of service."""
         return SlurmQos.LOW if self.environment == "stage" else SlurmQos.HIGH
 
-    @property
-    def set_run_dir_by_sequencer_type(
-        self,
+    @staticmethod
+    def get_run_dir_by_sequencer_type(
         config: dict,
-        sequencer_type: str = None,
+        sequencer_type: Optional[str] = None,
     ) -> Path:
         """Return run dir for sequencer type.
         Defaults to novaseq flow cell runs dir."""

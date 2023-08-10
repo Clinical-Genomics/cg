@@ -97,7 +97,15 @@ class DemuxPostProcessingAPI:
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
         flow_cell_out_directory: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
-        flow_cell_run_directory: Path = Path(self.demux_api.run_dir, flow_cell_directory_name)
+        bcl_converter: str = get_bcl_converter_name(flow_cell_out_directory)
+        parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
+            flow_cell_directory=flow_cell_out_directory,
+            bcl_converter=bcl_converter,
+        )
+
+        flow_cell_run_directory: Path = self.demux_api.get_run_dir_by_sequencer_type(
+            sequencer_type=parsed_flow_cell.sequencer_type
+        )
 
         try:
             is_flow_cell_ready_for_postprocessing(
@@ -108,13 +116,6 @@ class DemuxPostProcessingAPI:
         except FlowCellError as e:
             LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
             return
-
-        bcl_converter: str = get_bcl_converter_name(flow_cell_out_directory)
-
-        parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
-            flow_cell_directory=flow_cell_out_directory,
-            bcl_converter=bcl_converter,
-        )
 
         copy_sample_sheet(
             sample_sheet_source_directory=flow_cell_run_directory,
