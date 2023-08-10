@@ -42,19 +42,10 @@ BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
 
 
 def verify_google_token(token):
-    """Validate expiration, issuer, audience and signature of a Google OAuth2 token."""
     client_id: str = current_app.config["GOOGLE_OAUTH_CLIENT_ID"]
-
-    user_data = id_token.verify_oauth2_token(
+    return id_token.verify_oauth2_token(
         id_token=token, request=google_requests.Request(), audience=client_id
     )
-    issuer: str = user_data["iss"]
-    valid_issuers = ["accounts.google.com", "https://accounts.google.com"]
-
-    if issuer not in valid_issuers:
-        raise ValueError("Invalid issuer")
-
-    return user_data
 
 
 def is_public(route_function):
