@@ -162,7 +162,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def get_default_parameters(self, case_id: str) -> Dict:
         """Returns a dictionary with default RNAFusion parameters."""
         return {
-            "input": self.get_case_path(case_id=case_id).as_posix(),
+            "input": self.get_case_config_path(case_id=case_id).as_posix(),
             "outdir": self.get_case_path(case_id=case_id).as_posix(),
             "genomes_base": self.get_references_path().as_posix(),
             "trim": RnafusionDefaults.TRIM,
