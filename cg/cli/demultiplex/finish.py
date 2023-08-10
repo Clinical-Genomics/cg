@@ -45,9 +45,7 @@ def finish_flow_cell(
     """
     demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(context)
     demux_post_processing_api.set_dry_run(dry_run)
-    demux_post_processing_api.finish_flow_cell(
-        flow_cell_directory_name=flow_cell_name, force=force
-    )
+    demux_post_processing_api.finish_flow_cell(flow_cell_directory_name=flow_cell_name, force=force)
 
 
 @finish_group.command(name="all-hiseq-x")
