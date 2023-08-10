@@ -537,7 +537,7 @@ def test_post_processing_of_flow_cell(
     for sample_internal_id in sample_internal_ids:
         sample = demux_post_processing_api.status_db.get_sample_by_internal_id(sample_internal_id)
         assert sample is not None
-        assert sample.calculated_read_count
+        assert sample.reads
 
     # THEN a bundle was added to Housekeeper for the flow cell
     assert demux_post_processing_api.hk_api.bundle(flow_cell_name)

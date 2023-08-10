@@ -78,7 +78,7 @@ def test_update_sample_read_count(demultiplex_context: CGConfig):
     )
 
     # THEN the calculated_read_count has been updated with the read count for the sample
-    assert sample.calculated_read_count == read_count
+    assert sample.reads == read_count
 
 
 def test_metric_has_sample_in_statusdb(demultiplex_context: CGConfig):
