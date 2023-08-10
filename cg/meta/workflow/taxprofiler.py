@@ -134,7 +134,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
                 config_path=self.get_case_config_path(case_id=case_id),
             )
 
-    def write_params_file(self, case_id: str) -> None:
+    def write_params_file(self, case_id: str, dry_run: bool = False) -> None:
         """Write params-file for taxprofiler analysis in case folder."""
         default_options: Dict[str, str] = self.get_default_parameters(case_id=case_id)
         NfBaseHandler.write_nextflow_yaml(
