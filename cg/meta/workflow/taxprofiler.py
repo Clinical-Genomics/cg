@@ -14,7 +14,6 @@ from cg.constants.taxprofiler import (
     TAXPROFILER_FASTA_HEADER,
     TaxprofilerDefaults,
 )
-from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
@@ -95,11 +94,11 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         for link in case.links:
             sample_name: str = link.sample.name
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
-            fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(
-                metadata=sample_metadata, forward=True
+            fastq_r1: List[str] = self.extract_read_files(
+                metadata=sample_metadata, forward_read=True
             )
-            fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(
-                metadata=sample_metadata, reverse=True
+            fastq_r2: List[str] = self.extract_read_files(
+                metadata=sample_metadata, reverse_read=True
             )
             sample_content: Dict[str, List[str]] = self.build_sample_sheet_content(
                 sample_name=sample_name,
@@ -115,12 +114,10 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             LOG.info(sample_sheet_content)
             if dry_run:
                 continue
-            NextflowAnalysisAPI.create_samplesheet_csv(
+            self.write_samplesheet_csv(
                 samplesheet_content=sample_sheet_content,
                 headers=TAXPROFILER_SAMPLE_SHEET_HEADERS,
-                config_path=NextflowAnalysisAPI.get_case_config_path(
-                    case_id=case_id, root_dir=self.root_dir
-                ),
+                config_path=self.get_case_config_path(case_id=case_id),
             )
 
     def write_params_file(self, case_id: str, dry_run: bool = False) -> None:
@@ -172,7 +169,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         fasta: str = "",
     ) -> None:
         """Create sample sheet file for Taxprofiler analysis."""
-        NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
+        self.create_case_directory(case_id=case_id)
         LOG.info("Generating sample sheet")
         self.write_sample_sheet(
             case_id=case_id, instrument_platform=instrument_platform, fasta=fasta, dry_run=dry_run
