@@ -86,7 +86,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self,
         case_id: str,
         instrument_platform: SequencingPlatform.ILLUMINA,
-        fasta: str= "",
+        fasta: str = "",
         dry_run: bool = False,
     ) -> None:
         """Write sample sheet for taxprofiler analysis in case folder."""
