@@ -47,6 +47,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.databases: str = config.taxprofiler.databases
         self.account: str = config.taxprofiler.slurm.account
         self.email: str = config.taxprofiler.slurm.mail_user
+        self.nextflow_binary_path: str = config.taxprofiler.binary_path
 
     @staticmethod
     def build_sample_sheet_content(
@@ -196,45 +197,3 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             return
 
         LOG.info("Configs files written")
-
-    def run_analysis(
-        self, case_id: str, command_args: CommandArgs, use_nextflow: bool, dry_run: bool = False
-    ) -> None:
-        """Execute Taxprofiler run analysis with given options."""
-        if use_nextflow:
-            self.process = Process(
-                binary=self.config.taxprofiler.binary_path,
-                environment=self.conda_env,
-                conda_binary=self.conda_binary,
-                launch_directory=NextflowAnalysisAPI.get_case_path(
-                    case_id=case_id, root_dir=self.root_dir
-                ),
-            )
-            LOG.info("Pipeline will be executed using nextflow")
-            parameters: List[str] = NextflowAnalysisAPI.get_nextflow_run_parameters(
-                case_id=case_id,
-                pipeline_path=self.nfcore_pipeline_path,
-                root_dir=self.root_dir,
-                command_args=command_args.dict(),
-            )
-            self.process.export_variables(
-                export=NextflowAnalysisAPI.get_variables_to_export(
-                    case_id=case_id, root_dir=self.root_dir
-                ),
-            )
-
-            command = self.process.get_command(parameters=parameters)
-            LOG.info(f"{command}")
-            sbatch_number: int = NextflowAnalysisAPI.execute_head_job(
-                case_id=case_id,
-                root_dir=self.root_dir,
-                slurm_account=self.account,
-                email=self.email,
-                qos=self.get_slurm_qos_for_case(case_id=case_id),
-                commands=command,
-                dry_run=dry_run,
-            )
-            LOG.info(f"Nextflow head job running as job {sbatch_number}")
-
-        else:
-            LOG.info("Pipeline will be executed using tower")
