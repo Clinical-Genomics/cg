@@ -114,15 +114,12 @@ def run(
 
     command_args: CommandArgs = CommandArgs(
         **{
-            "log": NextflowHandler.get_log_path(
+            "log": analysis_api.get_log_path(
                 case_id=case_id,
                 pipeline=analysis_api.pipeline,
-                root_dir=analysis_api.root_dir,
                 log=log,
             ),
-            "work_dir": NfBaseHandler.get_workdir_path(
-                case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
-            ),
+            "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
             "with_tower": with_tower,

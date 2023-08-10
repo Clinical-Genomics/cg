@@ -2,16 +2,11 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import FileExtensions, FileFormat
-from cg.constants.nextflow import (
-    JAVA_MEMORY_HEADJOB,
-    NFX_WORK_DIR,
-    NXF_JVM_ARGS_ENV,
-    SlurmHeadJobDefaults,
-)
+from cg.constants.nextflow import JAVA_MEMORY_HEADJOB, NXF_JVM_ARGS_ENV, SlurmHeadJobDefaults
 from cg.io.controller import ReadFile
 from cg.models.slurm.sbatch import Sbatch
 from cg.utils.utils import build_command_from_dict
@@ -21,20 +16,6 @@ class NfBaseHandler:
     """
     Parent class for handling the interaction with NF executors that are common to both Nextflow and NF-Tower.
     """
-
-    @classmethod
-    def get_case_path(cls, case_id: str, root_dir: str) -> Path:
-        """Path to case directory."""
-        return Path(root_dir, case_id)
-
-    @classmethod
-    def get_workdir_path(
-        cls, case_id: str, root_dir: Path, work_dir: Optional[Path] = None
-    ) -> Path:
-        """Path to NF work directory."""
-        if work_dir:
-            return work_dir.absolute()
-        return Path(cls.get_case_path(case_id, root_dir), NFX_WORK_DIR)
 
     @classmethod
     def write_nextflow_yaml(
@@ -132,9 +113,9 @@ class NextflowHandler(NfBaseHandler):
     Parent class for handling the interaction with Nextflow.
     """
 
-    @classmethod
-    def get_variables_to_export(cls, case_id: str, root_dir: str) -> Dict[str, str]:
-        """Generates a dictionary with variables that needs to be exported."""
+    @staticmethod
+    def get_variables_to_export() -> Dict[str, str]:
+        """Dictionary with required environment variables to be exported."""
         return {NXF_JVM_ARGS_ENV: f"'{JAVA_MEMORY_HEADJOB}'"}
 
     @classmethod
@@ -162,29 +143,16 @@ class NextflowHandler(NfBaseHandler):
         )
         return nextflow_options + ["run", pipeline_path] + run_options
 
-    @classmethod
-    def get_log_path(cls, case_id: str, pipeline: str, root_dir: str, log: str = None) -> Path:
-        """Path to Nextflow log."""
-        if log:
-            return log
-        launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
-        return Path(
-            cls.get_case_path(case_id, root_dir),
-            f"{case_id}_{pipeline}_nextflow_{launch_time}",
-        ).with_suffix(FileExtensions.LOG)
-
-    @classmethod
-    def get_head_job_sbatch_path(cls, case_id: str, root_dir: str) -> Path:
+    @staticmethod
+    def get_head_job_sbatch_path(case_directory: Path) -> Path:
         """Path to Nextflow sbatch for the head job."""
-        return Path(
-            cls.get_case_path(case_id=case_id, root_dir=root_dir), "nextflow_head_job"
-        ).with_suffix(FileExtensions.SBATCH)
+        return Path(case_directory, "nextflow_head_job").with_suffix(FileExtensions.SBATCH)
 
     @classmethod
     def execute_head_job(
         cls,
         case_id: str,
-        root_dir: str,
+        case_directory: Path,
         slurm_account: str,
         email: str,
         qos: str,
@@ -204,14 +172,14 @@ class NextflowHandler(NfBaseHandler):
             email=email,
             hours=hours,
             job_name=f"{case_id}.%j",
-            log_dir=cls.get_case_path(case_id=case_id, root_dir=root_dir).as_posix(),
+            log_dir=case_directory.as_posix(),
             memory=memory,
             number_tasks=number_tasks,
             quality_of_service=qos,
         )
 
         sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
-        sbatch_path: Path = cls.get_head_job_sbatch_path(case_id=case_id, root_dir=root_dir)
+        sbatch_path: Path = cls.get_head_job_sbatch_path(case_directory=case_directory)
         sbatch_number: int = slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )

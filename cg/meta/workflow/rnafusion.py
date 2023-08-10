@@ -214,9 +214,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
                 binary=self.config.rnafusion.binary_path,
                 environment=self.conda_env,
                 conda_binary=self.conda_binary,
-                launch_directory=NextflowHandler.get_case_path(
-                    case_id=case_id, root_dir=self.root_dir
-                ),
+                launch_directory=self.get_case_path(case_id=case_id),
             )
             LOG.info("Pipeline will be executed using nextflow")
             parameters: List[str] = NextflowHandler.get_nextflow_run_parameters(
@@ -226,16 +224,14 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
                 command_args=command_args.dict(),
             )
             self.process.export_variables(
-                export=NextflowHandler.get_variables_to_export(
-                    case_id=case_id, root_dir=self.root_dir
-                ),
+                export=NextflowHandler.get_variables_to_export(),
             )
 
             command = self.process.get_command(parameters=parameters)
             LOG.info(f"{command}")
             sbatch_number: int = NextflowHandler.execute_head_job(
                 case_id=case_id,
-                root_dir=self.root_dir,
+                case_directory=self.get_case_path(case_id=case_id),
                 slurm_account=self.account,
                 email=self.email,
                 qos=self.get_slurm_qos_for_case(case_id=case_id),

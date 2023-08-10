@@ -1,10 +1,12 @@
 import logging
 import operator
+from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
+from cg.constants.nextflow import NFX_WORK_DIR
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -101,6 +103,22 @@ class NfAnalysisAPI(AnalysisAPI):
         """Create case directory."""
         if not dry_run:
             Path(self.get_case_path(case_id=case_id)).mkdir(parents=True, exist_ok=True)
+
+    def get_log_path(self, case_id: str, pipeline: str, log: str = None) -> Path:
+        """Path to NF log."""
+        if log:
+            return log
+        launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
+        return Path(
+            self.get_case_path(case_id),
+            f"{case_id}_{pipeline}_nextflow_{launch_time}",
+        ).with_suffix(FileExtensions.LOG)
+
+    def get_workdir_path(self, case_id: str, work_dir: Optional[Path] = None) -> Path:
+        """Path to NF work directory."""
+        if work_dir:
+            return work_dir.absolute()
+        return Path(self.get_case_path(case_id), NFX_WORK_DIR)
 
     @staticmethod
     def extract_read_files(
