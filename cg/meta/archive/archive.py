@@ -11,6 +11,7 @@ from cg.store import Store
 from cg.store.models import Sample
 from housekeeper.store.models import File
 from pydantic import BaseModel, ConfigDict
+from requests import Response
 
 LOG = logging.getLogger(__name__)
 DEFAULT_SPRING_ARCHIVE_COUNT = 200
@@ -100,3 +101,8 @@ class SpringArchiveAPI:
             if sample:
                 files_and_samples.append(FileAndSample(file=file, sample=sample))
         return files_and_samples
+
+    def get_job_status(self, job_id: int, archive_location: ArchiveLocations):
+        """Fetches info on an ongoing job and updates the Archive entry in Housekeeper."""
+        archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
+        response: Response = archive_handler.get_job_status(job_id)

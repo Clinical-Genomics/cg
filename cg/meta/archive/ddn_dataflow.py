@@ -134,6 +134,47 @@ class TransferJob(BaseModel):
     job_id: int
 
 
+class SubJob(BaseModel):
+    """Model representing the response fields in a subjob returned in a get_job_status post."""
+
+    subjob_id: int
+    subjob_type: str
+    status: int
+    description: str
+    progress: float
+    total_rate: int
+    throughput: int
+    estimated_end: datetime
+    estimated_left: int
+
+
+class GetJobStatusResponse(BaseModel):
+    """Model representing the response fields from a get_job_status post."""
+
+    request_date: datetime
+    operation: str
+    job_id: int
+    type: str
+    status: int
+    description: str
+    start_date: datetime
+    end_date: datetime
+    durationTime: int
+    priority: int
+    progress: float
+    subjobs: List[SubJob]
+
+
+class GetJobStatusPayload(BaseModel):
+    """Model representing the payload for a get_job_status request."""
+
+    job_id: int
+    subjob_id: Optional[int]
+    related_jobs: Optional[bool]
+    main_subjob: Optional[bool]
+    debug: Optional[bool]
+
+
 class DDNDataFlowClient(ArchiveHandler):
     """Class for archiving and retrieving folders via DDN Dataflow."""
 
