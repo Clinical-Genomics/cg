@@ -4,11 +4,9 @@ from unittest import mock
 from urllib.parse import urljoin
 
 import pytest
-from requests import Response
-
-from cg.constants.constants import FileFormat, APIMethods
+from cg.constants.constants import APIMethods, FileFormat
 from cg.exc import DdnDataflowAuthenticationError
-from cg.io.controller import WriteStream, APIRequest
+from cg.io.controller import APIRequest, WriteStream
 from cg.meta.archive.ddn_dataflow import (
     DESTINATION_ATTRIBUTE,
     OSTYPE,
@@ -19,7 +17,9 @@ from cg.meta.archive.ddn_dataflow import (
     MiriaFile,
     TransferPayload,
 )
-from cg.models.cg_config import DDNDataFlowConfig
+from cg.meta.archive.models import FileAndSample
+from cg.models.cg_config import DataFlowConfig
+from requests import Response
 
 FUNCTION_TO_MOCK = "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content"
 
@@ -101,7 +101,7 @@ def test_ddn_dataflow_client_initialization(
     """Tests the initialization of the DDNDataFlowClient object with given an ok-response."""
 
     # GIVEN a valid DDNConfig object
-    valid_config = DDNDataFlowConfig(
+    valid_config = DataFlowConfig(
         database_name="test_database",
         user="test_user",
         password="test_password",
@@ -131,7 +131,7 @@ def test_ddn_dataflow_client_initialization(
     assert isinstance(ddn_dataflow_client, DDNDataFlowClient)
 
 
-def test_set_auth_tokens(ddn_dataflow_config: DDNDataFlowConfig, ok_response: Response):
+def test_set_auth_tokens(ddn_dataflow_config: DataFlowConfig, ok_response: Response):
     """Tests the functions setting the auth- and refresh token as well as the expiration date."""
 
     # GIVEN a valid DDNConfig object
@@ -153,7 +153,7 @@ def test_set_auth_tokens(ddn_dataflow_config: DDNDataFlowConfig, ok_response: Re
 
 
 def test_ddn_dataflow_client_initialization_invalid_credentials(
-    ddn_dataflow_config: DDNDataFlowConfig, unauthorized_response: Response
+    ddn_dataflow_config: DataFlowConfig, unauthorized_response: Response
 ):
     """Tests initialization of a DDNDataFlowClient when an error is returned."""
 
@@ -265,24 +265,22 @@ def test__refresh_auth_token(ddn_dataflow_client: DDNDataFlowClient, ok_response
 
 def test_archive_folders(
     ddn_dataflow_client: DDNDataFlowClient,
-    local_directory: Path,
-    remote_path: Path,
-    full_remote_path: str,
-    full_local_path: str,
+    remote_storage_repository: str,
+    local_storage_repository: str,
+    file_and_sample: FileAndSample,
+    trimmed_local_path: str,
     ok_ddn_response: Response,
-    miria_file_archive: MiriaFile,
 ):
     """Tests that the archiving function correctly formats the input and sends API request."""
 
     # GIVEN two paths that should be archived
-
     # WHEN running the archive method and providing two paths
     with mock.patch.object(
         APIRequest,
         "api_request_from_content",
         return_value=ok_ddn_response,
     ) as mock_request_submitter:
-        job_id: int = ddn_dataflow_client.archive_folders([miria_file_archive])
+        job_id: int = ddn_dataflow_client.archive_folders([file_and_sample])
 
     # THEN an integer should be returned
     assert isinstance(job_id, int)
@@ -293,7 +291,12 @@ def test_archive_folders(
         url=urljoin(base=ddn_dataflow_client.url, url=DataflowEndpoints.ARCHIVE_FILES),
         headers=dict(ddn_dataflow_client.headers, **ddn_dataflow_client.auth_header),
         json={
-            "pathInfo": [{"source": full_local_path, "destination": full_remote_path}],
+            "pathInfo": [
+                {
+                    "source": local_storage_repository + trimmed_local_path,
+                    "destination": remote_storage_repository + file_and_sample.sample.internal_id,
+                }
+            ],
             "osType": OSTYPE,
             "createFolder": False,
             "metadataList": [],
@@ -303,22 +306,20 @@ def test_archive_folders(
 
 def test_retrieve_folders(
     ddn_dataflow_client: DDNDataFlowClient,
-    local_directory: Path,
-    remote_path: Path,
-    full_remote_path: str,
-    full_local_path: str,
+    remote_storage_repository: str,
+    local_storage_repository: str,
+    file_and_sample: FileAndSample,
+    trimmed_local_path: str,
     ok_ddn_response: Response,
-    miria_file_retrieve: MiriaFile,
 ):
     """Tests that the retrieve function correctly formats the input and sends API request."""
 
     # GIVEN two paths that should be retrieved
-
     # WHEN running the retrieve method and providing two paths
     with mock.patch.object(
         APIRequest, "api_request_from_content", return_value=ok_ddn_response
     ) as mock_request_submitter:
-        job_id: int = ddn_dataflow_client.retrieve_folders([miria_file_retrieve])
+        job_id: int = ddn_dataflow_client.retrieve_folders([file_and_sample])
 
         # THEN an integer should be returned
     assert isinstance(job_id, int)
@@ -329,7 +330,12 @@ def test_retrieve_folders(
         url=urljoin(base=ddn_dataflow_client.url, url=DataflowEndpoints.RETRIEVE_FILES),
         headers=dict(ddn_dataflow_client.headers, **ddn_dataflow_client.auth_header),
         json={
-            "pathInfo": [{"source": full_remote_path, "destination": full_local_path}],
+            "pathInfo": [
+                {
+                    "source": remote_storage_repository + file_and_sample.sample.internal_id,
+                    "destination": local_storage_repository + trimmed_local_path,
+                }
+            ],
             "osType": OSTYPE,
             "createFolder": False,
             "metadataList": [],

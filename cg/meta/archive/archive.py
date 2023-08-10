@@ -1,8 +1,11 @@
 import logging
-from typing import List, Optional
+from typing import Callable, Dict, List, Optional, Type
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.archiving import ArchiveLocationsInUse
+from cg.constants.archiving import ArchiveLocations
+from cg.meta.archive.ddn_dataflow import DDNDataFlowClient
+from cg.meta.archive.models import ArchiveHandler, FileAndSample
+from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
 from cg.store.models import Sample
 from housekeeper.store.models import File
@@ -11,14 +14,16 @@ from pydantic import BaseModel, ConfigDict
 LOG = logging.getLogger(__name__)
 
 
-class FileAndSample(BaseModel):
+class ArchiveModels(BaseModel):
+    """Model containing the necessary file and sample information."""
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    file: File
-    sample: Sample
+    file_model: Callable
+    handler: ArchiveHandler
 
 
 def filter_files_on_archive_location(
-    files_and_samples: List[FileAndSample], archive_location: ArchiveLocationsInUse
+    files_and_samples: List[FileAndSample], archive_location: ArchiveLocations
 ) -> List[FileAndSample]:
     """
     Returns a list of FileAndSample where the associated sample has a specific archive location.
@@ -30,13 +35,25 @@ def filter_files_on_archive_location(
     ]
 
 
+ARCHIVE_HANDLERS: Dict[str, Type[ArchiveHandler]] = {
+    ArchiveLocations.KAROLINSKA_BUCKET: DDNDataFlowClient
+}
+
+
 class SpringArchiveAPI:
     """Class handling the archiving of sample SPRING files to an off-premise location for long
     term storage."""
 
-    def __init__(self, housekeeper_api: HousekeeperAPI, status_db: Store):
+    def __init__(
+        self, housekeeper_api: HousekeeperAPI, status_db: Store, data_flow_config: DataFlowConfig
+    ):
         self.housekeeper_api: HousekeeperAPI = housekeeper_api
         self.status_db: Store = status_db
+        self.data_flow_config: DataFlowConfig = data_flow_config
+
+    def archive_files(self, files: List[FileAndSample], archive_location: ArchiveLocations) -> int:
+        archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
+        return archive_handler.archive_folders(files_and_samples=files)
 
     def get_sample(self, file: File) -> Optional[Sample]:
         """Fetches the Sample corresponding to a File and logs if a Sample is not found."""
