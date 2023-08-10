@@ -1,20 +1,15 @@
 """CLI support to create config and/or start TAXPROFILER."""
 
 import logging
-from pathlib import Path
-
 import click
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
-from cg.cli.workflow.taxprofiler.options import OPTION_INSTRUMENT_PLATFORM
 from cg.constants.constants import MetaApis, DRY_RUN, CaseActions
 from cg.constants.sequencing import SequencingPlatform
-from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.rnafusion.command_args import CommandArgs
-from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.exc import CgError, DecompressionNeededError
+from cg.exc import CgError
 from cg.cli.workflow.nextflow.options import (
     OPTION_CONFIG,
     OPTION_LOG,
