@@ -14,7 +14,6 @@ from cg.constants.rnafusion import (
     RNAFUSION_METRIC_CONDITIONS,
     RNAFUSION_SAMPLESHEET_HEADERS,
     RNAFUSION_STRANDEDNESS_HEADER,
-    RnafusionDefaults,
 )
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, MetricsQCError, MissingMetrics
@@ -30,6 +29,7 @@ from cg.models.deliverables.metric_deliverables import (
 )
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
 from cg.models.rnafusion.analysis import RnafusionAnalysis
+from cg.models.rnafusion.arguments import RnafusionParameters
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.store.models import Family
 
@@ -133,9 +133,13 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self, case_id: str, genomes_base: Optional[Path] = None, dry_run: bool = False
     ) -> None:
         """Write params-file for rnafusion analysis in case folder."""
-        default_options: Dict[str, str] = self.get_default_parameters(case_id=case_id)
-        if genomes_base:
-            default_options["genomes_base"] = genomes_base
+        default_options: Dict[str, str] = RnafusionParameters(
+            clusterOptions=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
+            genomes_base=genomes_base or self.get_references_path(),
+            input=self.get_case_config_path(case_id=case_id),
+            outdir=self.get_case_path(case_id=case_id),
+            priority=self.account,
+        ).dict()
         LOG.info(default_options)
         if dry_run:
             return
@@ -158,28 +162,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         if genomes_base:
             return genomes_base.absolute()
         return Path(self.references).absolute()
-
-    def get_default_parameters(self, case_id: str) -> Dict:
-        """Returns a dictionary with default RNAFusion parameters."""
-        return {
-            "input": self.get_case_config_path(case_id=case_id).as_posix(),
-            "outdir": self.get_case_path(case_id=case_id).as_posix(),
-            "genomes_base": self.get_references_path().as_posix(),
-            "trim": RnafusionDefaults.TRIM,
-            "fastp_trim": RnafusionDefaults.FASTP_TRIM,
-            "trim_tail": RnafusionDefaults.TRIM_TAIL,
-            "fusioninspector_filter": RnafusionDefaults.FUSIONINSPECTOR_FILTER,
-            "fusionreport_filter": RnafusionDefaults.FUSIONREPORT_FILTER,
-            "all": RnafusionDefaults.ALL,
-            "pizzly": RnafusionDefaults.PIZZLY,
-            "squid": RnafusionDefaults.SQUID,
-            "starfusion": RnafusionDefaults.STARFUSION,
-            "fusioncatcher": RnafusionDefaults.FUSIONCATCHER,
-            "arriba": RnafusionDefaults.ARRIBA,
-            "cram": RnafusionDefaults.CRAM,
-            "priority": self.account,
-            "clusterOptions": f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
-        }
 
     def config_case(
         self,
