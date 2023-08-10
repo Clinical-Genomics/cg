@@ -76,7 +76,7 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Flow cell added: {flow_cell}")
 
-    def finish_flow_cell_temp(self, flow_cell_directory_name: str, force: bool = False) -> None:
+    def finish_flow_cell(self, flow_cell_directory_name: str, force: bool = False) -> None:
         """Store data for the demultiplexed flow cell and mark it as ready for delivery.
         This function:
             - Stores the flow cell in the status database
@@ -128,13 +128,13 @@ class DemuxPostProcessingAPI:
             raise
         create_delivery_file_in_flow_cell_directory(flow_cell_out_directory)
 
-    def finish_all_flow_cells_temp(self) -> bool:
+    def finish_all_flow_cells(self) -> bool:
         """Finish all flow cells that need it."""
         flow_cell_dirs = self.demux_api.get_all_demultiplexed_flow_cell_dirs()
         is_error_raised: bool = False
         for flow_cell_dir in flow_cell_dirs:
             try:
-                self.finish_flow_cell_temp(flow_cell_dir.name)
+                self.finish_flow_cell(flow_cell_dir.name)
             except Exception as error:
                 LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(error)}")
                 is_error_raised = True

@@ -24,7 +24,7 @@ def finish_all_cmd(context: CGConfig, bcl_converter: str, dry_run: bool) -> None
     """Command to post-process all demultiplexed flow cells."""
     demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(context)
     demux_post_processing_api.set_dry_run(dry_run)
-    is_error_raised: bool = demux_post_processing_api.finish_all_flow_cells_temp()
+    is_error_raised: bool = demux_post_processing_api.finish_all_flow_cells()
 
     if is_error_raised:
         raise click.Abort
@@ -45,7 +45,7 @@ def finish_flow_cell(
     """
     demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(context)
     demux_post_processing_api.set_dry_run(dry_run)
-    demux_post_processing_api.finish_flow_cell_temp(
+    demux_post_processing_api.finish_flow_cell(
         flow_cell_directory_name=flow_cell_name, force=force
     )
 
@@ -58,4 +58,4 @@ def finish_all_hiseq_x(context: CGConfig, dry_run: bool) -> None:
     logging.debug("Checking for new Hiseq X demultiplexed flow cells")
     demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(context)
     demux_post_processing_api.set_dry_run(dry_run)
-    demux_post_processing_api.finish_all_flow_cells_temp()
+    demux_post_processing_api.finish_all_flow_cells()

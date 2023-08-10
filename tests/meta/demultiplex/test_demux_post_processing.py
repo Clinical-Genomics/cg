@@ -524,7 +524,7 @@ def test_post_processing_of_flow_cell(
     path.touch()
 
     # WHEN post processing the demultiplexed flow cell
-    demux_post_processing_api.finish_flow_cell_temp(flow_cell_demultplexing_directory)
+    demux_post_processing_api.finish_flow_cell(flow_cell_demultplexing_directory)
 
     # THEN a flow cell was created in statusdb
     assert demux_post_processing_api.status_db.get_flow_cell_by_name(flow_cell_name)
