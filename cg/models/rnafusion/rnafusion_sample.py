@@ -1,6 +1,6 @@
 from typing import List
 
-from cg.constants.rnafusion import RNAFUSION_ACCEPTED_STRANDEDNESS
+from cg.constants.constants import Strandedness
 from cg.models.nextflow.sample import NextflowSample, validator
 
 
@@ -15,5 +15,5 @@ class RnafusionSample(NextflowSample):
     @validator("strandedness", always=True)
     def valid_value_strandedness(cls, value) -> str:
         """Verify that the strandedness value is accepted."""
-        assert value in RNAFUSION_ACCEPTED_STRANDEDNESS
+        assert value in Strandedness.accepted_values()
         return "Strandedness value not valid"
