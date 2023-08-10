@@ -1,14 +1,18 @@
+from datetime import datetime, timedelta
 from typing import List
 from unittest import mock
 
 from cg.constants.archiving import ArchiveLocations
+from cg.constants.constants import APIMethods
+from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.io.controller import APIRequest
 from cg.meta.archive.archive import (
     ARCHIVE_HANDLERS,
     FileAndSample,
     SpringArchiveAPI,
     filter_files_on_archive_location,
 )
-from cg.meta.archive.ddn_dataflow import DDNDataFlowClient, MiriaFile
+from cg.meta.archive.ddn_dataflow import AuthToken, DDNDataFlowClient, MiriaFile
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
@@ -27,15 +31,10 @@ def test_get_files_by_archive_location(
         for sample in [sample_id, father_sample_id]
     ]
 
-    with mock.patch.object(
-        DDNDataFlowClient,
-        "_set_auth_tokens",
-        return_value=123,
-    ):
-        # WHEN fetching the files by archive location
-        selected_files: List[FileAndSample] = filter_files_on_archive_location(
-            files_and_samples, ArchiveLocations.KAROLINSKA_BUCKET
-        )
+    # WHEN fetching the files by archive location
+    selected_files: List[FileAndSample] = filter_files_on_archive_location(
+        files_and_samples, ArchiveLocations.KAROLINSKA_BUCKET
+    )
 
     # THEN every file returned should have that archive location
     assert selected_files
@@ -157,7 +156,7 @@ def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAP
         return_value=123,
     ), mock.patch.object(
         DDNDataFlowClient,
-        "archive_folders",
+        "archive_files",
         return_value=123,
     ) as mock_request_submitter:
         # WHEN calling the corresponding archive method
@@ -167,3 +166,49 @@ def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAP
 
     # THEN the correct archive function should have been called once
     mock_request_submitter.assert_called_once_with(files_and_samples=[file_and_sample])
+
+
+def test_archive_all_non_archived_spring_files(
+    spring_archive_api: SpringArchiveAPI,
+    caplog,
+    ok_ddn_response,
+    archive_request_json,
+    header_with_test_auth_token,
+):
+    """Test archiving all non-archived SPRING files for Miria customers."""
+    # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
+    # with the DDN customer having two samples, and the non-DDN having one sample.
+
+    # WHEN archiving all available files
+    with mock.patch.object(
+        AuthToken,
+        "model_validate_json",
+        return_value=AuthToken(
+            access="test_auth_token",
+            expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
+            refresh="test_refresh_token",
+        ),
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_ddn_response,
+    ) as mock_request_submitter:
+        spring_archive_api.archive_all_non_archived_spring_files()
+
+    # THEN the DDN archiving function should have been called with the correct destination and source.
+    mock_request_submitter.assert_called_with(
+        api_method=APIMethods.POST,
+        url="some/api/files/archive",
+        headers=header_with_test_auth_token,
+        json=archive_request_json,
+    )
+
+    # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper
+    files: List[File] = spring_archive_api.housekeeper_api.files()
+    for file in files:
+        if SequencingFileTag.SPRING in [tag.name for tag in file.tags]:
+            sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(
+                file.version.bundle.name
+            )
+            if sample and sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET:
+                assert file.archive
