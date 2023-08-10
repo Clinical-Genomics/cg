@@ -121,9 +121,6 @@ def run(
         analysis_api.set_statusdb_action(
             case_id=case_id, action=CaseActions.RUNNING, dry_run=dry_run
         )
-    except (CgError, ValueError) as error:
-        LOG.error(f"Could not run analysis: {error}")
-        raise click.Abort() from error
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort() from error
