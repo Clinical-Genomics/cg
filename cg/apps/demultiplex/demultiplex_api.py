@@ -52,12 +52,12 @@ class DemultiplexingAPI:
         """Return run dir for sequencer type.
         Defaults to novaseq flow cell runs dir."""
         if sequencer_types[sequencer_type] == Sequencers.HISEQX:
-            return Path(config["demultiplex"]["run_dir_hiseqx"])
+            return Path(config["demultiplex"]["run_dir"]["hiseqx"])
         elif sequencer_types[sequencer_type] == Sequencers.HISEQGA:
-            return Path(config["demultiplex"]["run_dir_hiseqga"])
+            return Path(config["demultiplex"]["run_dir"]["hiseqga"])
         elif sequencer_types[sequencer_type] == Sequencers.NOVASEQX:
-            return Path(config["demultiplex"]["run_dir_novaseqx"])
-        return Path(config["demultiplex"]["run_dir_novaseq"])
+            return Path(config["demultiplex"]["run_dir"]["novaseqx"])
+        return Path(config["demultiplex"]["run_dir"]["novaseq"])
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run."""
