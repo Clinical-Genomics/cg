@@ -39,8 +39,8 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.conda_binary: str = config.taxprofiler.conda_binary
         self.profile: str = config.taxprofiler.profile
         self.revision: str = config.taxprofiler.revision
-        self.hostremoval_reference: str = config.taxprofiler.hostremoval_reference
-        self.databases: str = config.taxprofiler.databases
+        self.hostremoval_reference: Path = Path(config.taxprofiler.hostremoval_reference)
+        self.databases: Path = Path(config.taxprofiler.databases)
         self.account: str = config.taxprofiler.slurm.account
         self.email: str = config.taxprofiler.slurm.mail_user
         self.nextflow_binary_path: str = config.taxprofiler.binary_path
@@ -135,21 +135,13 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             ),
         )
 
-    def get_reference_path(self) -> Path:
-        """Returns the reference for host genome"""
-        return Path(self.hostremoval_reference).absolute()
-
-    def get_database_samplesheet(self) -> Path:
-        """Returns samplesheet with databases for classification"""
-        return Path(self.databases).absolute()
-
     def get_default_parameters(self, case_id: str) -> Dict:
         """Returns a dictionary with default Taxprofiler parameters."""
         return {
             "input": NextflowAnalysisAPI.get_input_path(
                 case_id=case_id, root_dir=self.root_dir
             ).as_posix(),
-            "databases": self.get_database_samplesheet().as_posix(),
+            "databases": self.databases,
             "outdir": NextflowAnalysisAPI.get_outdir_path(
                 case_id=case_id, root_dir=self.root_dir
             ).as_posix(),
@@ -158,7 +150,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             "perform_shortread_complexityfilter": TaxprofilerDefaults.PERFORM_SHORTREAD_COMPLEXITYFILTER,
             "save_complexityfiltered_reads": TaxprofilerDefaults.SAVE_COMPLEXITYFILTERED_READS,
             "perform_shortread_hostremoval": TaxprofilerDefaults.PERFORM_SHORTREAD_HOSTREMOVAL,
-            "hostremoval_reference": self.get_reference_path().as_posix(),
+            "hostremoval_reference": self.hostremoval_reference,
             "save_hostremoval_index": TaxprofilerDefaults.SAVE_HOSTREMOVAL_INDEX,
             "save_hostremoval_mapped": TaxprofilerDefaults.SAVE_HOSTREMOVAL_MAPPED,
             "save_hostremoval_unmapped": TaxprofilerDefaults.SAVE_HOSTREMOVAL_UNMAPPED,
