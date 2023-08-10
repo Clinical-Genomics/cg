@@ -10,7 +10,7 @@ from cg.constants.nextflow import NFX_WORK_DIR
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
+from cg.meta.workflow.nf_handlers import NextflowHandler, NfBaseHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.arguments import CommandArgs
 from cg.utils import Process
@@ -166,6 +166,21 @@ class NfAnalysisAPI(AnalysisAPI):
     def add_bundle_header(deliverables_content: dict) -> dict:
         """Adds header to bundle content."""
         return {"files": deliverables_content}
+
+    def get_pipeline_parameters(self, case_id: str) -> dict:
+        NotImplementedError
+
+    def write_params_file(
+        self, case_id: str, pipeline_parameters: dict, dry_run: bool = False
+    ) -> None:
+        """Write params-file for analysis."""
+        LOG.info(pipeline_parameters)
+        if dry_run:
+            return
+        NfBaseHandler.write_nextflow_yaml(
+            content=pipeline_parameters,
+            file_path=self.get_params_file_path(case_id=case_id),
+        )
 
     @staticmethod
     def write_deliverables_bundle(
