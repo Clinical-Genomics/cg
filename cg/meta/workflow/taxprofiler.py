@@ -141,6 +141,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             content=default_options,
             file_path=self.get_params_file_path(case_id=case_id),
         )
+        LOG.info("Generating parameters file")
 
     def get_default_parameters(self, case_id: str) -> Dict:
         """Returns a dictionary with default Taxprofiler parameters."""
@@ -185,6 +186,5 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             LOG.info("Dry run: Config files will not be written")
             return
         self.write_params_file(case_id=case_id, dry_run=dry_run)
-        LOG.info("Generating parameters file")
 
         LOG.info("Configs files written")
