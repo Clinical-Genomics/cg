@@ -4,11 +4,8 @@ import logging
 import click
 
 from cg.constants.constants import DRY_RUN
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, BclConverter
-from cg.meta.demultiplex.demux_post_processing import (
-    DemuxPostProcessingAPI,
-    DemuxPostProcessingHiseqXAPI,
-)
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
@@ -25,7 +22,7 @@ def finish_group():
 @click.pass_obj
 def finish_all_cmd(context: CGConfig, bcl_converter: str, dry_run: bool) -> None:
     """Command to post-process all demultiplexed flow cells."""
-    demux_post_processing_api = DemuxPostProcessingAPI(context)
+    demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(context)
     demux_post_processing_api.set_dry_run(dry_run)
     is_error_raised: bool = demux_post_processing_api.finish_all_flow_cells_temp()
 
@@ -59,8 +56,6 @@ def finish_flow_cell(
 def finish_all_hiseq_x(context: CGConfig, dry_run: bool) -> None:
     """Command to post-process new demultiplexed Hiseq X flow cells."""
     logging.debug("Checking for new Hiseq X demultiplexed flow cells")
-    demux_post_processing_api: DemuxPostProcessingHiseqXAPI = DemuxPostProcessingHiseqXAPI(
-        config=context
-    )
-    demux_post_processing_api.set_dry_run(dry_run=dry_run)
+    demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(context)
+    demux_post_processing_api.set_dry_run(dry_run)
     demux_post_processing_api.finish_all_flow_cells_temp()
