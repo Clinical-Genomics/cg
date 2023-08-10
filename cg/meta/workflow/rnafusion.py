@@ -20,8 +20,8 @@ from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, MetricsQCError, MissingMetrics
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
-from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.nf_handlers import NfBaseHandler
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
@@ -32,7 +32,6 @@ from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_v
 from cg.models.rnafusion.analysis import RnafusionAnalysis
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.store.models import Family
-from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -60,9 +59,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.compute_env: str = config.rnafusion.compute_env
         self.revision: str = config.rnafusion.revision
         self.nextflow_binary_path: str = config.rnafusion.binary_path
-
-    def verify_analysis_finished(self, case_id):
-        return NextflowAnalysisAPI.verify_analysis_finished(case_id=case_id, root_dir=self.root_dir)
 
     @staticmethod
     def build_samplesheet_content(
@@ -92,34 +88,45 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         }
         return samplesheet_content
 
+    @staticmethod
+    def write_samplesheet_csv(
+        samplesheet_content: Dict[str, List[str]],
+        headers: List[str],
+        config_path: Path,
+    ) -> None:
+        """Write sample sheet CSV file."""
+        with open(config_path, "w") as outfile:
+            outfile.write(",".join(headers))
+            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
+                outfile.write("\n")
+                outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
+
     def write_samplesheet(self, case_id: str, strandedness: str, dry_run: bool = False) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
-        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if len(case_obj.links) != 1:
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if len(case.links) != 1:
             raise NotImplementedError(
                 "Case objects are assumed to be related to a single sample (one link)"
             )
 
-        for link in case_obj.links:
-            sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
-            fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(
-                metadata=sample_metadata, forward=True
+        for link in case.links:
+            sample_metadata: List[dict] = self.gather_file_metadata_for_sample(link.sample)
+            forward_read: List[str] = self.extract_read_files(
+                metadata=sample_metadata, forward_read=True
             )
-            fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(
-                metadata=sample_metadata, reverse=True
+            reverse_read: List[str] = self.extract_read_files(
+                metadata=sample_metadata, reverse_read=True
             )
             samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
-                case_id, fastq_r1, fastq_r2, strandedness
+                case_id, forward_read, reverse_read, strandedness
             )
             LOG.info(samplesheet_content)
             if dry_run:
                 continue
-            NextflowAnalysisAPI.create_samplesheet_csv(
+            self.write_samplesheet_csv(
                 samplesheet_content=samplesheet_content,
                 headers=RNAFUSION_SAMPLESHEET_HEADERS,
-                config_path=NextflowAnalysisAPI.get_case_config_path(
-                    case_id=case_id, root_dir=self.root_dir
-                ),
+                config_path=self.get_case_config_path(case_id=case_id),
             )
 
     def write_params_file(
@@ -132,11 +139,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         LOG.info(default_options)
         if dry_run:
             return
-        NextflowAnalysisAPI.write_nextflow_yaml(
+        NfBaseHandler.write_nextflow_yaml(
             content=default_options,
-            file_path=NextflowAnalysisAPI.get_params_file_path(
-                case_id=case_id, root_dir=self.root_dir
-            ),
+            file_path=self.get_params_file_path(case_id=case_id),
         )
 
     def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
@@ -157,12 +162,8 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def get_default_parameters(self, case_id: str) -> Dict:
         """Returns a dictionary with default RNAFusion parameters."""
         return {
-            "input": NextflowAnalysisAPI.get_input_path(
-                case_id=case_id, root_dir=self.root_dir
-            ).as_posix(),
-            "outdir": NextflowAnalysisAPI.get_outdir_path(
-                case_id=case_id, root_dir=self.root_dir
-            ).as_posix(),
+            "input": self.get_case_config_path(case_id=case_id).as_posix(),
+            "outdir": self.get_case_path(case_id=case_id).as_posix(),
             "genomes_base": self.get_references_path().as_posix(),
             "trim": RnafusionDefaults.TRIM,
             "fastp_trim": RnafusionDefaults.FASTP_TRIM,
@@ -188,9 +189,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         dry_run: bool,
     ) -> None:
         """Create sample sheet file for RNAFUSION analysis."""
-        NextflowAnalysisAPI.make_case_folder(
-            case_id=case_id, root_dir=self.root_dir, dry_run=dry_run
-        )
+        self.create_case_directory(case_id=case_id, dry_run=dry_run)
         LOG.info("Generating samplesheet")
         self.write_samplesheet(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
         LOG.info("Generating parameters file")
@@ -201,42 +200,28 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
         LOG.info("Configs files written")
 
-    def get_pipeline_version(self, case_id: str) -> str:
-        return NextflowAnalysisAPI.get_pipeline_version(
-            case_id=case_id, root_dir=self.root_dir, pipeline=self.pipeline
-        )
-
     def report_deliver(self, case_id: str) -> None:
         """Get a deliverables file template from resources, parse it and, then write the deliverables file."""
-        deliverables_content: dict = NextflowAnalysisAPI.get_template_deliverables_file_content(
+        deliverables_content: dict = self.get_template_deliverables_file_content(
             resources.RNAFUSION_BUNDLE_FILENAMES_PATH
         )
         try:
             for index, deliver_file in enumerate(deliverables_content):
                 NextflowDeliverables(deliverables=deliver_file)
                 deliverables_content[index] = replace_dict_values(
-                    NextflowAnalysisAPI.get_replace_map(case_id=case_id, root_dir=self.root_dir),
+                    self.get_replace_map(case_id=case_id),
                     deliver_file,
                 )
         except ValidationError as error:
             LOG.error(error)
             raise ValueError
-        NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
-        NextflowAnalysisAPI.write_deliverables_bundle(
-            deliverables_content=NextflowAnalysisAPI.add_bundle_header(
-                deliverables_content=deliverables_content
-            ),
-            file_path=NextflowAnalysisAPI.get_deliverables_file_path(
-                case_id=case_id, root_dir=self.root_dir
-            ),
+        self.create_case_directory(case_id=case_id)
+        self.write_deliverables_bundle(
+            deliverables_content=self.add_bundle_header(deliverables_content=deliverables_content),
+            file_path=self.get_deliverables_file_path(case_id=case_id),
         )
         LOG.info(
-            "Writing deliverables file in "
-            + str(
-                NextflowAnalysisAPI.get_deliverables_file_path(
-                    case_id=case_id, root_dir=self.root_dir
-                )
-            )
+            f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
         )
 
     def get_multiqc_json_path(self, case_id: str) -> Path:
