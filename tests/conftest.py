@@ -2340,7 +2340,7 @@ def fixture_context_config(
         "taxprofiler": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
             "compute_env": "nf_tower_compute_env",
-            "root":taxprofiler_dir.as_posix(),
+            "root": taxprofiler_dir.as_posix(),
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_TAXPROFILER",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
@@ -2964,9 +2964,7 @@ def fixture_taxprofiler_fastq_file_l_1_r_1(taxprofiler_housekeeper_dir: Path) ->
 
 @pytest.fixture(name="taxprofiler_fastq_file_l_1_r_2")
 def fixture_taxprofiler_fastq_file_l_1_r_2(taxprofiler_housekeeper_dir: Path) -> Path:
-    fastq_filename = Path(
-        taxprofiler_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
-    )
+    fastq_filename = Path(taxprofiler_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz")
     with gzip.open(fastq_filename, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
     return fastq_filename
