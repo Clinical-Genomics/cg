@@ -57,6 +57,21 @@ class SpringArchiveAPI:
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
         return archive_handler.archive_files(files_and_samples=files)
 
+    def archive_archive_location(
+        self, files_and_samples: List[FileAndSample], archive_location: str
+    ) -> None:
+        """Archives a collection of files in the specified location and adds corresponding entries in HouseKeeper."""
+        selected_files: [List[FileAndSample]] = filter_files_on_archive_location(
+            files_and_samples=files_and_samples, archive_location=archive_location
+        )
+        archive_task_id: int = self.archive_files(
+            files=selected_files, archive_location=archive_location
+        )
+        self.housekeeper_api.add_archives(
+            files=[Path(file_and_sample.file.path) for file_and_sample in selected_files],
+            archive_task_id=archive_task_id,
+        )
+
     def archive_all_non_archived_spring_files(
         self, spring_file_count_limit: int = DEFAULT_SPRING_ARCHIVE_COUNT
     ) -> None:
@@ -68,15 +83,8 @@ class SpringArchiveAPI:
         files_and_samples: List[FileAndSample] = self.add_samples_to_files(files_to_archive)
 
         for archive_location in ArchiveLocations:
-            selected_files: [List[FileAndSample]] = filter_files_on_archive_location(
+            self.archive_archive_location(
                 files_and_samples=files_and_samples, archive_location=archive_location
-            )
-            archive_task_id: int = self.archive_files(
-                files=selected_files, archive_location=archive_location
-            )
-            self.housekeeper_api.add_archives(
-                files=[Path(file_and_sample.file.path) for file_and_sample in selected_files],
-                archive_task_id=archive_task_id,
             )
 
     def get_sample(self, file: File) -> Optional[Sample]:
