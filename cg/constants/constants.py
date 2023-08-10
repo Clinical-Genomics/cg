@@ -1,4 +1,5 @@
 """Constants for cg."""
+from enum import Enum
 
 import click
 
@@ -199,3 +200,15 @@ class MetaApis:
 class WorkflowManager(StrEnum):
     Slurm: str = "slurm"
     Tower: str = "nf_tower"
+
+
+class Strandedness(str, Enum):
+    """Strandedness types."""
+
+    FORWARD: str = "forward"
+    REVERSE: str = "reverse"
+    UNSTRANDED: str = "unstranded"
+
+    @classmethod
+    def accepted_values(cls) -> set:
+        return {stranded_type.value for stranded_type in cls}
