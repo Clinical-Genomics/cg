@@ -2966,7 +2966,7 @@ def fixture_taxprofiler_fastq_file_l_1_r_1(taxprofiler_housekeeper_dir: Path) ->
 def fixture_taxprofiler_fastq_file_l_1_r_2(taxprofiler_housekeeper_dir: Path) -> Path:
     fastq_filename = Path(
         taxprofiler_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
-    ).as_posix()
+    )
     with gzip.open(fastq_filename, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
     return fastq_filename
