@@ -35,7 +35,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.command_args import CommandArgs
 from cg.store import Store
-from cg.utils.nf_handlers import NextflowHandler, NfHandler
+from cg.utils.nf_handlers import NextflowHandler, NfBaseHandler
 
 LOG = logging.getLogger(__name__)
 
@@ -120,7 +120,7 @@ def run(
                 root_dir=analysis_api.root_dir,
                 log=log,
             ),
-            "work_dir": NfHandler.get_workdir_path(
+            "work_dir": NfBaseHandler.get_workdir_path(
                 case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
             ),
             "resume": not from_start,

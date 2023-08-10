@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileExtensions, FileFormat
 from cg.constants.nextflow import (
     JAVA_MEMORY_HEADJOB,
     NFX_WORK_DIR,
@@ -17,9 +17,9 @@ from cg.models.slurm.sbatch import Sbatch
 from cg.utils.utils import build_command_from_dict
 
 
-class NfHandler:
+class NfBaseHandler:
     """
-    Parent class for handling the interaction with NF executors (both Nextflow and NF-Tower).
+    Parent class for handling the interaction with NF executors that are common to both Nextflow and NF-Tower.
     """
 
     @classmethod
@@ -42,14 +42,14 @@ class NfHandler:
         content: Dict[str, Any],
         file_path: str,
     ) -> None:
-        """Write nextflow file with non-quoted booleans and quoted strings."""
+        """Write Nextflow file with non-quoted booleans and quoted strings."""
         with open(file_path, "w") as outfile:
             for key, value in content.items():
                 quotes = '"' if type(value) is str else ""
                 outfile.write(f"{key}: {quotes}{value}{quotes}\n")
 
 
-class NfTowerHandler(NfHandler):
+class NfTowerHandler(NfBaseHandler):
     """
     Parent class for handling the interaction with NF-Tower.
     """
@@ -127,7 +127,7 @@ class NfTowerHandler(NfHandler):
         ).get(case_id)[-1]
 
 
-class NextflowHandler(NfHandler):
+class NextflowHandler(NfBaseHandler):
     """
     Parent class for handling the interaction with Nextflow.
     """
@@ -141,7 +141,7 @@ class NextflowHandler(NfHandler):
     def get_nextflow_run_parameters(
         cls, case_id: str, pipeline_path: str, root_dir: str, command_args: dict
     ) -> List[str]:
-        """Returns a nextflow run command given a dictionary with arguments."""
+        """Returns a Nextflow run command given a dictionary with arguments."""
 
         nextflow_options: List[str] = build_command_from_dict(
             options=dict((f"-{arg}", command_args.get(arg, True)) for arg in ("log", "config")),
@@ -164,20 +164,21 @@ class NextflowHandler(NfHandler):
 
     @classmethod
     def get_log_path(cls, case_id: str, pipeline: str, root_dir: str, log: str = None) -> Path:
+        """Path to Nextflow log."""
         if log:
             return log
         launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
         return Path(
             cls.get_case_path(case_id, root_dir),
-            f"{case_id}_{pipeline}_nextflow_log_{launch_time}.log",
-        )
+            f"{case_id}_{pipeline}_nextflow_{launch_time}",
+        ).with_suffix(FileExtensions.LOG)
 
     @classmethod
-    def get_sbatch_path(cls, case_id: str, root_dir: str) -> Path:
-        """Returns a path where the nextflow sbatch for the head job should be located."""
+    def get_head_job_sbatch_path(cls, case_id: str, root_dir: str) -> Path:
+        """Path to Nextflow sbatch for the head job."""
         return Path(
-            cls.get_case_path(case_id=case_id, root_dir=root_dir), "nextflow_head_job.sbatch"
-        )
+            cls.get_case_path(case_id=case_id, root_dir=root_dir), "nextflow_head_job"
+        ).with_suffix(FileExtensions.SBATCH)
 
     @classmethod
     def execute_head_job(
@@ -193,7 +194,7 @@ class NextflowHandler(NfHandler):
         number_tasks: int = SlurmHeadJobDefaults.NUMBER_TASKS,
         dry_run: bool = False,
     ) -> int:
-        """Executes nextflow head job command."""
+        """Executes Nextflow head job command."""
 
         slurm_api: SlurmAPI = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
@@ -210,7 +211,7 @@ class NextflowHandler(NfHandler):
         )
 
         sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
-        sbatch_path: Path = cls.get_sbatch_path(case_id=case_id, root_dir=root_dir)
+        sbatch_path: Path = cls.get_head_job_sbatch_path(case_id=case_id, root_dir=root_dir)
         sbatch_number: int = slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )

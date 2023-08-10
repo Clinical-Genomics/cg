@@ -33,7 +33,7 @@ from cg.models.rnafusion.command_args import CommandArgs
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.store.models import Family
 from cg.utils import Process
-from cg.utils.nf_handlers import NextflowHandler, NfHandler, NfTowerHandler
+from cg.utils.nf_handlers import NextflowHandler, NfBaseHandler, NfTowerHandler
 
 LOG = logging.getLogger(__name__)
 
@@ -89,13 +89,13 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         }
         return samplesheet_content
 
+    @staticmethod
     def create_samplesheet_csv(
-        self,
         samplesheet_content: Dict[str, List[str]],
         headers: List[str],
         config_path: Path,
     ) -> None:
-        """Write sample sheet csv file."""
+        """Write sample sheet CSV file."""
         with open(config_path, "w") as outfile:
             outfile.write(",".join(headers))
             for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
@@ -104,18 +104,22 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def write_samplesheet(self, case_id: str, strandedness: str, dry_run: bool = False) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
-        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if len(case_obj.links) != 1:
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if len(case.links) != 1:
             raise NotImplementedError(
                 "Case objects are assumed to be related to a single sample (one link)"
             )
 
-        for link in case_obj.links:
-            sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
-            fastq_r1: List[str] = self.extract_read_files(metadata=sample_metadata, forward=True)
-            fastq_r2: List[str] = self.extract_read_files(metadata=sample_metadata, reverse=True)
+        for link in case.links:
+            sample_metadata: List[dict] = self.gather_file_metadata_for_sample(link.sample)
+            forward_read: List[str] = self.extract_read_files(
+                metadata=sample_metadata, forward_read=True
+            )
+            reverse_read: List[str] = self.extract_read_files(
+                metadata=sample_metadata, reverse_read=True
+            )
             samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
-                case_id, fastq_r1, fastq_r2, strandedness
+                case_id, forward_read, reverse_read, strandedness
             )
             LOG.info(samplesheet_content)
             if dry_run:
@@ -136,7 +140,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         LOG.info(default_options)
         if dry_run:
             return
-        NfHandler.write_nextflow_yaml(
+        NfBaseHandler.write_nextflow_yaml(
             content=default_options,
             file_path=self.get_params_file_path(case_id=case_id),
         )
@@ -287,7 +291,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             file_path=self.get_deliverables_file_path(case_id=case_id),
         )
         LOG.info(
-            "Writing deliverables file in " + str(self.get_deliverables_file_path(case_id=case_id))
+            f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
         )
 
     def get_multiqc_json_path(self, case_id: str) -> Path:

@@ -1,16 +1,13 @@
 import logging
 import operator
-import os
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
-from cg.constants.nextflow import NFX_SAMPLE_HEADER
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fastq import FastqHandler
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
 
@@ -39,10 +36,6 @@ class NfAnalysisAPI(AnalysisAPI):
     @property
     def root(self) -> str:
         return self.root_dir
-
-    @property
-    def fastq_handler(self):
-        return FastqHandler
 
     @property
     def process(self):
@@ -74,7 +67,8 @@ class NfAnalysisAPI(AnalysisAPI):
             FileExtensions.CSV
         )
 
-    def get_nextflow_config_path(self, nextflow_config: Optional[str] = None) -> Optional[Path]:
+    @staticmethod
+    def get_nextflow_config_path(nextflow_config: Optional[str] = None) -> Optional[Path]:
         """Path to Nextflow config file."""
         if nextflow_config:
             return Path(nextflow_config).absolute()
@@ -106,20 +100,21 @@ class NfAnalysisAPI(AnalysisAPI):
     def create_case_directory(self, case_id: str, dry_run: bool = False) -> None:
         """Create case directory."""
         if not dry_run:
-            os.makedirs(self.get_case_path(case_id=case_id), exist_ok=True)
+            Path(self.get_case_path(case_id=case_id)).mkdir(parents=True, exist_ok=True)
 
+    @staticmethod
     def extract_read_files(
-        self, metadata: list, forward: bool = False, reverse: bool = False
+        metadata: list, forward_read: bool = False, reverse_read: bool = False
     ) -> List[str]:
         """Extract a list of fastq file paths for either forward or reverse reads."""
-        if forward and not reverse:
-            read_number = 1
-        elif reverse and not forward:
-            read_number = 2
+        if forward_read and not reverse_read:
+            read_direction = 1
+        elif reverse_read and not forward_read:
+            read_direction = 2
         else:
             raise ValueError("Either forward or reverse needs to be specified")
         sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
-        return [d["path"] for d in sorted_metadata if d["read"] == read_number]
+        return [d["path"] for d in sorted_metadata if d["read"] == read_direction]
 
     def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
         """Raise an error if config file is not found."""
@@ -138,19 +133,22 @@ class NfAnalysisAPI(AnalysisAPI):
             "CASEID": case_id,
         }
 
-    def get_template_deliverables_file_content(self, file_bundle_template: Path) -> dict:
-        """Read deliverables file template and return content."""
+    @staticmethod
+    def get_template_deliverables_file_content(file_bundle_template: Path) -> dict:
+        """Return deliverables file template content."""
         return ReadFile.get_content_from_file(
             file_format=FileFormat.YAML,
             file_path=file_bundle_template,
         )
 
-    def add_bundle_header(self, deliverables_content: dict) -> dict:
+    @staticmethod
+    def add_bundle_header(deliverables_content: dict) -> dict:
         """Adds header to bundle content."""
         return {"files": deliverables_content}
 
+    @staticmethod
     def write_deliverables_bundle(
-        self, deliverables_content: dict, file_path: Path, file_format=FileFormat.YAML
+        deliverables_content: dict, file_path: Path, file_format=FileFormat.YAML
     ) -> None:
         """Write deliverables file."""
         WriteFile.write_file_from_content(
