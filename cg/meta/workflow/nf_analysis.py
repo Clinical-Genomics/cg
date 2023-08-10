@@ -167,9 +167,6 @@ class NfAnalysisAPI(AnalysisAPI):
         """Adds header to bundle content."""
         return {"files": deliverables_content}
 
-    def get_pipeline_parameters(self, case_id: str) -> dict:
-        NotImplementedError
-
     def write_params_file(
         self, case_id: str, pipeline_parameters: dict, dry_run: bool = False
     ) -> None:
