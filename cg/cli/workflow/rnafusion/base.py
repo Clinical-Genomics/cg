@@ -28,14 +28,12 @@ from cg.cli.workflow.rnafusion.options import (
 from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV, OPTION_TOWER_RUN_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
-from cg.constants.tb import AnalysisStatus
-from cg.exc import CgError, DecompressionNeededError, MetricsQCError
+from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.command_args import CommandArgs
 from cg.store import Store
-from cg.utils.nf_handlers import NextflowHandler, NfBaseHandler
 
 LOG = logging.getLogger(__name__)
 

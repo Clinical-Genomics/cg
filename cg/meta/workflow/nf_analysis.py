@@ -10,10 +10,10 @@ from cg.constants.nextflow import NFX_WORK_DIR
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.command_args import CommandArgs
 from cg.utils import Process
-from cg.utils.nf_handlers import NextflowHandler, NfTowerHandler
 
 LOG = logging.getLogger(__name__)
 

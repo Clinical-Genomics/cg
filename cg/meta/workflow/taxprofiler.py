@@ -18,7 +18,6 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
 from cg.store.models import Family
-from cg.utils.nf_handlers import NextflowHandler
 
 LOG = logging.getLogger(__name__)
 

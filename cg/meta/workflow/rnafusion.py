@@ -21,6 +21,7 @@ from cg.exc import CgError, MetricsQCError, MissingMetrics
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.nf_handlers import NfBaseHandler
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
@@ -31,7 +32,6 @@ from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_v
 from cg.models.rnafusion.analysis import RnafusionAnalysis
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.store.models import Family
-from cg.utils.nf_handlers import NfBaseHandler
 
 LOG = logging.getLogger(__name__)
 
