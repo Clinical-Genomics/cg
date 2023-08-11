@@ -44,7 +44,7 @@ def store_flow_cell_data_in_status_db(
         sample_sheet_path=parsed_flow_cell.sample_sheet_path,
         flow_cell_sample_type=parsed_flow_cell.sample_type,
     )
-    flow_cell = add_samples_to_flow_cell_in_status_db(
+    flow_cell: Flowcell = add_samples_to_flow_cell_in_status_db(
         flow_cell=flow_cell,
         sample_internal_ids=sample_internal_ids,
         store=store,
