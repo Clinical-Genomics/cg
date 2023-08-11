@@ -95,11 +95,15 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         config_path: Path,
     ) -> None:
         """Write sample sheet CSV file."""
-        with open(config_path, "w") as outfile:
-            outfile.write(",".join(headers))
-            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
-                outfile.write("\n")
-                outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
+        content = [headers]
+        for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
+            content.append([samplesheet_content[k][i] for k in headers])
+
+        WriteFile.write_file_from_content(
+            content=content,
+            file_format=FileFormat.CSV,
+            file_path=config_path,
+        )
 
     def write_samplesheet(self, case_id: str, strandedness: str, dry_run: bool = False) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
