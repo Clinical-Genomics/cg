@@ -15,7 +15,8 @@ from cg.meta.demultiplex.validation import (
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 from cg.utils.files import get_file_in_directory, get_files_matching_pattern
-
+from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -119,3 +120,19 @@ def copy_sample_sheet(
             )
         return
     LOG.warning(f"Sample sheet already exists: {sample_sheet_destination}, skipping copy.")
+
+
+def finish_all_flow_cells_temp(
+    demux_api: DemultiplexingAPI, demux_post_processing_api: DemuxPostProcessingAPI
+) -> bool:
+    """Finish all flow cells that need it."""
+    flow_cell_dirs = demux_api.get_all_demultiplexed_flow_cell_dirs()
+    is_error_raised: bool = False
+    for flow_cell_dir in flow_cell_dirs:
+        try:
+            demux_post_processing_api.finish_flow_cell_temp(flow_cell_dir.name)
+        except Exception as error:
+            LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(error)}")
+            is_error_raised = True
+            continue
+    return is_error_raised

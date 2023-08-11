@@ -10,6 +10,7 @@ from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingNovaseqAPI,
     DemuxPostProcessingHiseqXAPI,
 )
+from cg.meta.demultiplex.utils import finish_all_flow_cells_temp
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
@@ -35,7 +36,10 @@ def finish_all_cmd(context: CGConfig, bcl_converter: str, dry_run: bool) -> None
     # Temporary finish flow cell logic will replace logic above when validated
     demux_post_processing_api_temp: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
     demux_post_processing_api_temp.set_dry_run(dry_run=dry_run)
-    is_error_raised: bool = demux_post_processing_api_temp.finish_all_flow_cells_temp()
+    is_error_raised: bool = finish_all_flow_cells_temp(
+        demux_api=demux_post_processing_api_temp.demux_api,
+        demux_post_processing_api=demux_post_processing_api_temp,
+    )
     if is_error_raised:
         raise click.Abort
 
@@ -87,7 +91,10 @@ def finish_flow_cell_temporary_all(context: CGConfig, dry_run: bool):
     # Temporary finish flow cell logic will replace logic above when validated
     demux_post_processing_api_temp: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
     demux_post_processing_api_temp.set_dry_run(dry_run=dry_run)
-    demux_post_processing_api_temp.finish_all_flow_cells_temp()
+    finish_all_flow_cells_temp(
+        demux_api=demux_post_processing_api_temp.demux_api,
+        demux_post_processing_api=demux_post_processing_api_temp,
+    )
 
 
 @finish_group.command(name="all-hiseq-x")
