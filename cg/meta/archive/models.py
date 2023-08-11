@@ -3,7 +3,7 @@ from abc import abstractmethod
 from typing import List
 
 from cg.models.cg_config import DataFlowConfig
-from cg.store.models import Sample
+from cg.store.models import Sample, Flowcell
 from housekeeper.store.models import File
 from pydantic import BaseModel
 from pydantic.v1 import ConfigDict
@@ -20,7 +20,9 @@ class FileTransferData(BaseModel):
 
     @classmethod
     @abstractmethod
-    def from_file_and_sample(cls, file: File, sample: Sample, is_archiving: bool) -> "ArchiveFile":
+    def from_file_and_sample(
+        cls, file: File, sample: Sample, is_archiving: bool
+    ) -> "FileTransferData":
         """Instantiates the class from a File and Sample object."""
         pass
 
@@ -50,4 +52,9 @@ class ArchiveHandler:
         self, files_and_samples: List[FileAndSample], is_archiving: bool = True
     ) -> List[FileTransferData]:
         """Converts the provided files_and_samples into a list of objects formatted for the specific archiving flow."""
+        pass
+
+    @abstractmethod
+    def is_job_done(self, file_id: int, job_id: int) -> bool:
+        """Returns true if job has been completed, false otherwise."""
         pass

@@ -1,4 +1,5 @@
 """Module for archiving and retrieving folders via DDN Dataflow."""
+import logging
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -11,9 +12,12 @@ from cg.io.controller import APIRequest
 from cg.meta.archive.models import ArchiveHandler, FileAndSample, FileTransferData
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
+from cg.utils.enums import StrEnum
 from housekeeper.store.models import File
 from pydantic import BaseModel
 from requests.models import Response
+
+LOG = logging.getLogger(__name__)
 
 OSTYPE: str = "Unix/MacOS"
 ROOT_TO_TRIM: str = "/home"
@@ -29,6 +33,20 @@ class DataflowEndpoints(str, Enum):
     GET_AUTH_TOKEN = "auth/token"
     REFRESH_AUTH_TOKEN = "auth/token/refresh"
     RETRIEVE_FILES = "files/retrieve"
+    GET_JOB_STATUS = "getJobStatus"
+
+
+class JobDescription(StrEnum):
+    """Enum for the different job statuses which can be returned via Miria."""
+
+    CANCELED = "Canceled"
+    COMPLETED = "Completed"
+    CREATION = "Creation"
+    IN_QUEUE = "In Queue"
+    REFUSED = "Refused"
+    RUNNING = "Running"
+    SUSPENDED = "Suspended"
+    TERMINATED_ON_ERROR = "Terminated on Error"
 
 
 class MiriaFile(FileTransferData):
@@ -174,6 +192,21 @@ class GetJobStatusPayload(BaseModel):
     main_subjob: Optional[bool]
     debug: Optional[bool]
 
+    def post_request(self, url: str, headers: dict) -> int:
+        """Sends a request to the given url with, the given headers, and its own content as
+        payload. Raises an error if the response code is not ok. Returns the job ID of the
+        launched transfer task.
+        """
+        response: Response = APIRequest.api_request_from_content(
+            api_method=APIMethods.POST,
+            url=url,
+            headers=headers,
+            json=self.model_dump(),
+        )
+        response.raise_for_status()
+        parsed_response = TransferJob.model_validate_json(response.content)
+        return parsed_response.job_id
+
 
 class DDNDataFlowClient(ArchiveHandler):
     """Class for archiving and retrieving folders via DDN Dataflow."""
@@ -299,3 +332,23 @@ class DDNDataFlowClient(ArchiveHandler):
             )
             for file_and_sample in files_and_samples
         ]
+
+    def is_job_done(self, job_id: int) -> bool:
+        get_job_status_response: GetJobStatusResponse = self.get_job_status(job_id)
+        if get_job_status_response.description == JobDescription.COMPLETED:
+            return True
+        LOG.info(
+            f"Job with id {job_id} has not been completed. "
+            f"Current job description is {get_job_status_response.description}"
+        )
+        return False
+
+    def get_job_status(self, job_id: int):
+        response: Response = APIRequest.api_request_from_content(
+            api_method=APIMethods.POST,
+            url=urljoin(base=self.url, url=DataflowEndpoints.GET_JOB_STATUS),
+            headers=self.headers,
+            json=GetJobStatusPayload(job_id=job_id).model_dump(),
+        )
+        response.raise_for_status()
+        return GetJobStatusResponse.model_validate_json(response.content)

@@ -110,7 +110,11 @@ class SpringArchiveAPI:
                 files_and_samples.append(FileAndSample(file=file, sample=sample))
         return files_and_samples
 
-    def get_job_status(self, job_id: int, archive_location: ArchiveLocations):
+    def update_ongoing_archival_task(
+        self, file_id: int, task_id: int, archive_location: ArchiveLocations
+    ) -> None:
         """Fetches info on an ongoing job and updates the Archive entry in Housekeeper."""
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
-        response: Response = archive_handler.get_job_status(job_id)
+        is_job_done: bool = archive_handler.is_job_done(file_id=file_id, job_id=task_id)
+        if is_job_done:
+            self.housekeeper_api.set_archive_archived_at()
