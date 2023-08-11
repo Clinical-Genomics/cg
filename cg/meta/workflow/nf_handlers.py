@@ -18,11 +18,7 @@ class NfBaseHandler:
     """
 
     @classmethod
-    def write_nextflow_yaml(
-        cls,
-        content: Dict[str, Any],
-        file_path: Path,
-    ) -> None:
+    def write_nextflow_yaml(cls, content: Dict[str, Any], file_path: Path) -> None:
         """Write Nextflow file with non-quoted booleans and quoted strings."""
         with open(file_path, "w") as outfile:
             for key, value in content.items():
