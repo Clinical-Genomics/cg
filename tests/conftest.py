@@ -2335,7 +2335,7 @@ def fixture_context_config(
         "taxprofiler": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
             "compute_env": "nf_tower_compute_env",
-            "root": str(taxprofiler_dir),
+            "root": taxprofiler_dir.as_posix(),
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_TAXPROFILER",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
@@ -2935,10 +2935,10 @@ def fixture_taxprofiler_sample_id() -> str:
 
 
 @pytest.fixture(name="taxprofiler_dir")
-def fixture_taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> str:
+def fixture_taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> Path:
     """Return the path to the taxprofiler apps dir."""
     taxprofiler_dir = tmpdir_factory.mktemp("taxprofiler")
-    return Path(taxprofiler_dir).absolute().as_posix()
+    return Path(taxprofiler_dir).absolute()
 
 
 @pytest.fixture(name="taxprofiler_housekeeper_dir")
