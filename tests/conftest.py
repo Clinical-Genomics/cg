@@ -2634,7 +2634,7 @@ def fixture_rnafusion_housekeeper(
 ):
     """Create populated housekeeper that holds files for all mock samples."""
 
-    bundle_data = {
+    bundle_data: Dict[str, Any] = {
         "name": rnafusion_sample_id,
         "created": datetime.now(),
         "version": "1.0",
@@ -2935,7 +2935,7 @@ def fixture_taxprofiler_sample_id() -> str:
 
 
 @pytest.fixture(name="taxprofiler_dir")
-def taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> str:
+def fixture_taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the taxprofiler apps dir."""
     taxprofiler_dir = tmpdir_factory.mktemp("taxprofiler")
     return Path(taxprofiler_dir).absolute().as_posix()
