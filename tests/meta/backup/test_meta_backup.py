@@ -451,7 +451,7 @@ def test_process_flow_cell(
     )
 
     # THEN when done the status of that flow cell is set to "retrieved"
-    
+
     assert (
         f"Status for flow cell {mock_flow_cell.name} set to {FlowCellStatus.RETRIEVED}"
         in caplog.text

@@ -103,13 +103,19 @@ class BackupAPI:
             )
 
     def _process_flow_cell(
-        self, flow_cell: Flowcell, archived_key: Path, archived_flow_cell: Path, already_fetched: bool = False
+        self,
+        flow_cell: Flowcell,
+        archived_key: Path,
+        archived_flow_cell: Path,
+        already_fetched: bool = False,
     ) -> float:
         """Process a flow cell from backup. Return elapsed time."""
         start_time: float = get_start_time()
         run_dir: Path = Path(self.root_dir[flow_cell.sequencer_type])
         if not already_fetched:
-            self.retrieve_archived_key(archived_key=archived_key, flow_cell=flow_cell, run_dir=run_dir)
+            self.retrieve_archived_key(
+                archived_key=archived_key, flow_cell=flow_cell, run_dir=run_dir
+            )
             self.retrieve_archived_flow_cell(
                 archived_flow_cell=archived_flow_cell, flow_cell=flow_cell, run_dir=run_dir
             )
