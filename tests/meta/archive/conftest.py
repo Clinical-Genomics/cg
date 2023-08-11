@@ -59,6 +59,24 @@ def fixture_archive_request_json(
     }
 
 
+@pytest.fixture(name="retrieve_request_json")
+def fixture_retrieve_request_json(
+    remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
+) -> Dict:
+    return {
+        "osType": "Unix/MacOS",
+        "createFolder": False,
+        "pathInfo": [
+            {
+                "destination": local_storage_repository
+                + Path(trimmed_local_path).parent.as_posix(),
+                "source": f"{remote_storage_repository}ADM1",
+            }
+        ],
+        "metadataList": [],
+    }
+
+
 @pytest.fixture(name="header_with_test_auth_token")
 def fixture_header_with_test_auth_token() -> Dict:
     return {

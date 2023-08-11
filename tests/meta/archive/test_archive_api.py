@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import List
 from unittest import mock
 
@@ -201,6 +202,59 @@ def test_archive_all_non_archived_spring_files(
         url="some/api/files/archive",
         headers=header_with_test_auth_token,
         json=archive_request_json,
+    )
+
+    # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper
+    files: List[File] = spring_archive_api.housekeeper_api.files()
+    for file in files:
+        if SequencingFileTag.SPRING in [tag.name for tag in file.tags]:
+            sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(
+                file.version.bundle.name
+            )
+            if sample and sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET:
+                assert file.archive
+
+
+def test_retrieve_file(
+    spring_archive_api: SpringArchiveAPI,
+    caplog,
+    ok_ddn_response,
+    trimmed_local_path,
+    retrieve_request_json,
+    header_with_test_auth_token,
+):
+    """Test archiving all non-archived SPRING files for Miria customers."""
+    # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
+    # with the DDN customer having two samples, and the non-DDN having one sample.
+
+    file: File = spring_archive_api.housekeeper_api.files(tags=[SequencingFileTag.SPRING]).first()
+
+    spring_archive_api.housekeeper_api.add_archives(
+        files=[Path(file.full_path)], archive_task_id=123
+    )
+
+    # WHEN archiving all available files
+    with mock.patch.object(
+        AuthToken,
+        "model_validate_json",
+        return_value=AuthToken(
+            access="test_auth_token",
+            expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
+            refresh="test_refresh_token",
+        ),
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_ddn_response,
+    ) as mock_request_submitter:
+        spring_archive_api.retrieve_spring_file(file_path=file.full_path)
+
+    # THEN the DDN archiving function should have been called with the correct destination and source.
+    mock_request_submitter.assert_called_with(
+        api_method=APIMethods.POST,
+        url="some/api/files/retrieve",
+        headers=header_with_test_auth_token,
+        json=retrieve_request_json,
     )
 
     # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper

@@ -319,7 +319,7 @@ def test_retrieve_folders(
     with mock.patch.object(
         APIRequest, "api_request_from_content", return_value=ok_ddn_response
     ) as mock_request_submitter:
-        job_id: int = ddn_dataflow_client.retrieve_folders([file_and_sample])
+        job_id: int = ddn_dataflow_client.retrieve_file(file_and_sample)
 
         # THEN an integer should be returned
     assert isinstance(job_id, int)
@@ -333,7 +333,8 @@ def test_retrieve_folders(
             "pathInfo": [
                 {
                     "source": remote_storage_repository + file_and_sample.sample.internal_id,
-                    "destination": local_storage_repository + trimmed_local_path,
+                    "destination": local_storage_repository
+                    + Path(trimmed_local_path).parent.as_posix(),
                 }
             ],
             "osType": OSTYPE,

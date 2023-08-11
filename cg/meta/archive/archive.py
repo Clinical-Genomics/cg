@@ -8,7 +8,7 @@ from cg.meta.archive.ddn_dataflow import DDNDataFlowClient
 from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
-from cg.store.models import Sample
+from cg.store.models import Flowcell, Sample
 from housekeeper.store.models import File
 from pydantic import BaseModel, ConfigDict
 
@@ -86,6 +86,45 @@ class SpringArchiveAPI:
             self.archive_archive_location(
                 files_and_samples=files_and_samples, archive_location=archive_location
             )
+
+    def retrieve_flowcell(self, flowcell_name: str) -> None:
+        """Retrieves the archived spring files for all samples ran on the specified flowcell."""
+        flowcell: Flowcell = self.status_db.get_flow_cell_by_name(flowcell_name)
+        for sample in flowcell.samples:
+            LOG.info(f"Retrieving sample: {sample.internal_id}.")
+            self.retrieve_sample(sample.internal_id)
+
+    def retrieve_sample(self, sample_internal_id: str) -> None:
+        """Retrieves all archived spring files for the given sample."""
+        sample: Sample = self.status_db.get_sample_by_internal_id(sample_internal_id)
+        archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[sample.archive_location](
+            self.data_flow_config
+        )
+        housekeeper_destination: str = self.housekeeper_api.get_latest_bundle_version(
+            sample.internal_id
+        ).full_path.as_posix()
+        retrieval_task_id: int = archive_handler.retrieve_sample(
+            sample=sample, housekeeper_destination=housekeeper_destination
+        )
+        spring_files: List[File] = self.housekeeper_api.get_archived_files(
+            bundle_name=sample_internal_id
+        )
+        for spring_file in spring_files:
+            self.housekeeper_api.set_archive_retrieval_task_id(
+                file_id=spring_file.id, retrieval_task_id=retrieval_task_id
+            )
+
+    def retrieve_spring_file(self, file_path: str):
+        """Retrieves the archived spring file."""
+        file: File = self.housekeeper_api.files(path=file_path).first()
+        sample: Sample = self.status_db.get_sample_by_internal_id(file.version.bundle.name)
+        archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[sample.archive_location](
+            self.data_flow_config
+        )
+        retrieval_task_id = archive_handler.retrieve_file(FileAndSample(file=file, sample=sample))
+        self.housekeeper_api.set_archive_retrieval_task_id(
+            file_id=file.id, retrieval_task_id=retrieval_task_id
+        )
 
     def get_sample(self, file: File) -> Optional[Sample]:
         """Fetches the Sample corresponding to a File and logs if a Sample is not found."""

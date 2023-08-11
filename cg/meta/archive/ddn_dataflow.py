@@ -47,6 +47,17 @@ class MiriaFile(FileTransferData):
             return cls(destination=sample.internal_id, source=file.path)
         return cls(destination=file.path, source=sample.internal_id)
 
+    @classmethod
+    def from_housekeeper_destination_and_sample(
+        cls, housekeeper_destination: str, sample: Sample
+    ) -> "MiriaFile":
+        """Instantiates the class from a Sample object, i.e. when we want to fetch a folder containing all spring files
+        for said sample."""
+        return cls(
+            destination=housekeeper_destination,
+            source=sample.internal_id,
+        )
+
     def trim_path(self, attribute_to_trim: str):
         """Trims the given attribute (source or destination) from its root directory."""
         setattr(
@@ -209,20 +220,34 @@ class DDNDataFlowClient(ArchiveHandler):
         )
         return job_id
 
-    def retrieve_folders(self, files_and_samples: List[FileAndSample]) -> int:
+    def retrieve_file(self, file_and_sample: FileAndSample) -> int:
         """Retrieves all folders provided, to their corresponding destination, as given by sources
         and destination in TransferData. Returns the job ID of the retrieval task."""
-        miria_file_data: List[MiriaFile] = self.convert_into_transfer_data(
-            files_and_samples, is_archiving=False
+        housekeeper_destination = Path(file_and_sample.file.full_path).parent.as_posix()
+        miria_file_data: MiriaFile = MiriaFile.from_housekeeper_destination_and_sample(
+            housekeeper_destination=housekeeper_destination, sample=file_and_sample.sample
         )
         transfer_request: TransferPayload = self.create_transfer_request(
-            miria_file_data=miria_file_data, is_archiving_request=False
+            miria_file_data=[miria_file_data], is_archiving_request=False
         )
-        job_id: int = transfer_request.post_request(
+        return transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
         )
-        return job_id
+
+    def retrieve_sample(self, sample: Sample, housekeeper_destination: str):
+        """Retrieves all archived files for the provided samples and stores them in the specified location in
+        HouseKeeper."""
+        miria_file_data: MiriaFile = MiriaFile.from_housekeeper_destination_and_sample(
+            housekeeper_destination=housekeeper_destination, sample=sample
+        )
+        transfer_request: TransferPayload = self.create_transfer_request(
+            miria_file_data=[miria_file_data], is_archiving_request=False
+        )
+        return transfer_request.post_request(
+            headers=dict(self.headers, **self.auth_header),
+            url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
+        )
 
     def create_transfer_request(
         self, miria_file_data: List[MiriaFile], is_archiving_request: bool

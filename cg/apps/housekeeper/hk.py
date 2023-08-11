@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError, HousekeeperFileMissingError
@@ -443,3 +443,31 @@ class HousekeeperAPI:
             (file.version.bundle.name, file.path)
             for file in self.get_all_non_archived_spring_files()
         ]
+
+    def set_archive_retrieved_at(self, file_id: int, retrieval_task_id: int):
+        file: File = self._store.get_file_by_id(file_id)
+        archive: Archive = file.archive
+        if archive.retrieval_task_id != retrieval_task_id:
+            raise ValueError(
+                f"Retrieval task id did not match database entry. Given task id was {retrieval_task_id}, "
+                f"while retrieval task id in Housekeeper is {archive.retrieval_task_id}."
+            )
+        self._store.update_retrieval_time_stamp(archive=archive)
+        self.commit()
+
+    def set_archive_archived_at(self, file_id: int, archiving_task_id: int):
+        file: File = self._store.get_file_by_id(file_id)
+        archive: Archive = file.archive
+        if archive.archiving_task_id != archiving_task_id:
+            raise ValueError(
+                f"Archiving task id did not match database entry. Given task id was {archiving_task_id}, "
+                f"while archiving task id in Housekeeper is {archive.archiving_task_id}."
+            )
+        self._store.update_archiving_time_stamp(archive=archive)
+        self.commit()
+
+    def set_archive_retrieval_task_id(self, file_id: int, retrieval_task_id: int) -> None:
+        archive: Archive = self._store.get_file_by_id(file_id).archive
+        if not archive:
+            LOG.warning(f"No archive entry found for file with id: {file_id}.")
+        self._store.update_retrieval_task_id(archive=archive, retrieval_task_id=retrieval_task_id)

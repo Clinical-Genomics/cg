@@ -40,9 +40,13 @@ class ArchiveHandler:
         pass
 
     @abstractmethod
-    def retrieve_folders(self, sources_and_destinations: List[FileTransferData]):
-        """Retrieves all folders provided, to their corresponding destination, as given by the
-        sources and destination parameter."""
+    def retrieve_sample(self, sample: Sample, housekeeper_destination: str):
+        """Retrieves all files for the given sample."""
+        pass
+
+    @abstractmethod
+    def retrieve_file(self, file_and_sample: FileAndSample):
+        """Retrieves the specified archived file."""
         pass
 
     @abstractmethod
