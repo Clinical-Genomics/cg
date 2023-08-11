@@ -2984,7 +2984,7 @@ def fixture_taxprofiler_housekeeper(
 ):
     """Create populated housekeeper that holds files for all mock samples."""
 
-    bundle_data = {
+    bundle_data: Dict[str, Any] = {
         "name": taxprofiler_sample_id,
         "created": datetime.now(),
         "version": "1.0",
