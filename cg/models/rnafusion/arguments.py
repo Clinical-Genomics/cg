@@ -1,8 +1,9 @@
 from pathlib import Path
 from typing import Optional, Union
 
-from pydantic import BaseModel
 from pydantic.v1 import BaseModel
+
+from cg.models.workflow.nf_analysis import PipelineParameters
 
 
 class CommandArgs(BaseModel):
@@ -24,14 +25,12 @@ class CommandArgs(BaseModel):
     params_file: Optional[Union[str, Path]]
 
 
-class RnafusionParameters(BaseModel):
+class RnafusionParameters(PipelineParameters):
     """Rnafusion parameters."""
 
-    clusterOptions: str
     genomes_base: Path
     input: Path
     outdir: Path
-    priority: str
     all: bool = False
     arriba: bool = True
     cram: str = "arriba,starfusion"

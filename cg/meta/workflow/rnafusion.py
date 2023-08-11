@@ -31,6 +31,7 @@ from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_v
 from cg.models.rnafusion.analysis import RnafusionAnalysis
 from cg.models.rnafusion.arguments import RnafusionParameters
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
+from cg.models.workflow.nf_analysis import PipelineParameters
 from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
@@ -129,7 +130,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
                 config_path=self.get_case_config_path(case_id=case_id),
             )
 
-    def get_pipeline_parameters(self, case_id: str, genomes_base: Optional[Path] = None) -> dict:
+    def get_pipeline_parameters(
+        self, case_id: str, genomes_base: Optional[Path] = None
+    ) -> PipelineParameters:
         """Get rnafusion parameters."""
         return RnafusionParameters(
             clusterOptions=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
@@ -137,7 +140,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             input=self.get_case_config_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             priority=self.account,
-        ).dict()
+        )
 
     def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
         if genomes_base:
@@ -160,7 +163,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             case_id=case_id,
             pipeline_parameters=self.get_pipeline_parameters(
                 case_id=case_id, genomes_base=genomes_base
-            ),
+            ).dict(),
             dry_run=dry_run,
         )
         if dry_run:
