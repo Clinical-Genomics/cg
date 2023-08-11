@@ -3,7 +3,7 @@ from abc import abstractmethod
 from typing import List
 
 from cg.models.cg_config import DataFlowConfig
-from cg.store.models import Sample, Flowcell
+from cg.store.models import Flowcell, Sample
 from housekeeper.store.models import File
 from pydantic import BaseModel
 from pydantic.v1 import ConfigDict
