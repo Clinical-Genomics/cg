@@ -208,7 +208,3 @@ class Strandedness(str, Enum):
     FORWARD: str = "forward"
     REVERSE: str = "reverse"
     UNSTRANDED: str = "unstranded"
-
-    @classmethod
-    def accepted_values(cls) -> set:
-        return {stranded_type.value for stranded_type in cls}
