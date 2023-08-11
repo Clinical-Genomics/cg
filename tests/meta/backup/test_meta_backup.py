@@ -403,6 +403,69 @@ def test_fetch_flow_cell_integration(
     assert result > 0
 
 
+@pytest.mark.parametrize("already_fetched", [True, False])
+@mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
+@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
+@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
+@mock.patch("cg.meta.backup.backup.BackupAPI.query_pdc_for_flow_cell")
+@mock.patch("cg.meta.tar.tar.TarAPI")
+@mock.patch("cg.store.models.Flowcell")
+@mock.patch("cg.store")
+def test_process_flow_cell(
+    mock_store,
+    mock_flow_cell,
+    mock_tar,
+    mock_query,
+    archived_key,
+    archived_flow_cell,
+    create_rta_complete,
+    already_fetched,
+    cg_context,
+    caplog,
+):
+    """Test the process_flow_cell method of the BackupAPI, processing a specified flow cell"""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN we want to process a specific flow cell from PDC
+    backup_api = BackupAPI(
+        encryption_api=mock.Mock(),
+        encrypt_dir=cg_context.backup.encrypt_dir.dict(),
+        status=mock_store,
+        tar_api=mock_tar,
+        pdc_api=mock.Mock(),
+        root_dir=cg_context.backup.root.dict(),
+    )
+    mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
+    mock_flow_cell.status = FlowCellStatus.REQUESTED
+    mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
+    mock_store.get_flow_cells_by_statuses.return_value.count.return_value = 0
+    mock_query.return_value = "pdc_query"
+
+    backup_api.tar_api.run_tar_command.return_value = None
+    result = backup_api._process_flow_cell(
+        flow_cell=mock_flow_cell,
+        archived_key=archived_key,
+        archived_flow_cell=archived_flow_cell,
+        already_fetched=already_fetched,
+    )
+
+    # THEN when done the status of that flow cell is set to "retrieved"
+    
+    assert (
+        f"Status for flow cell {mock_flow_cell.name} set to {FlowCellStatus.RETRIEVED}"
+        in caplog.text
+    )
+
+    assert mock_flow_cell.status == "retrieved"
+
+    # AND status-db is updated with the new status
+    assert mock_store.session.commit.called
+
+    # AND the elapsed time of the retrieval process is returned
+    assert result > 0
+
+
 @mock.patch("cg.meta.backup.backup.SpringBackupAPI.is_spring_file_archived")
 @mock.patch("cg.meta.backup.backup.SpringBackupAPI.remove_archived_spring_file")
 @mock.patch("cg.meta.backup.backup.SpringBackupAPI.mark_file_as_archived")

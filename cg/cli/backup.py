@@ -27,6 +27,47 @@ def backup(context: CGConfig):
     pass
 
 
+@backup.command("decrypt-flow-cell")
+@click.option("--encrypted-dir-path", help="Path to the encrypted dir")
+@click.option("--encrypted-key-path", help="Path to the encrypted key")
+@click.option("-f", "--flow-cell-id", help="Decrypt a specific flow cell, ex. 'HCK2KDSXX'")
+@DRY_RUN
+@click.pass_obj
+def decrypt_flow_cell(
+    context: CGConfig,
+    dry_run: bool,
+    flow_cell_id: str,
+    encrypted_dir_path: str,
+    encrypted_key_path: str,
+):
+    """Decrypt a flow cell"""
+
+    pdc_api = PdcAPI(binary_path=context.pdc.binary_path, dry_run=dry_run)
+    encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
+    tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
+    status_api: Store = context.status_db
+    backup_api = BackupAPI(
+        encryption_api=encryption_api,
+        encrypt_dir=context.backup.encrypt_dir.dict(),
+        status=status_api,
+        tar_api=tar_api,
+        pdc_api=pdc_api,
+        root_dir=context.backup.root.dict(),
+        dry_run=dry_run,
+    )
+    flow_cell: Flowcell = status_api.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
+    if not flow_cell and flow_cell_id:
+        LOG.error(f"{flow_cell_id}: not found in database")
+        raise click.Abort
+
+    backup_api._process_flow_cell(
+        flow_cell=flow_cell,
+        archived_key=encrypted_key_path,
+        archived_flow_cell=encrypted_dir_path,
+        already_fetched=True,
+    )
+
+
 @backup.command("fetch-flow-cell")
 @click.option("-f", "--flow-cell-id", help="Retrieve a specific flow cell, ex. 'HCK2KDSXX'")
 @DRY_RUN
