@@ -9,8 +9,9 @@ from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
+from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.nf_handlers import NextflowHandler, NfBaseHandler, NfTowerHandler
+from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.rnafusion import CommandArgs
 from cg.utils import Process
@@ -174,7 +175,7 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info(pipeline_parameters)
         if dry_run:
             return
-        NfBaseHandler.write_nextflow_yaml(
+        write_yaml_nextflow_style(
             content=pipeline_parameters,
             file_path=self.get_params_file_path(case_id=case_id),
         )
