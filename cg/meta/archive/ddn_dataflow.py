@@ -8,7 +8,12 @@ from urllib.parse import urljoin
 from cg.constants.constants import APIMethods
 from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import APIRequest
-from cg.meta.archive.models import ArchiveHandler, FileAndSample, FileTransferData
+from cg.meta.archive.models import (
+    ArchiveHandler,
+    FileAndSample,
+    FileTransferData,
+    SampleAndHousekeeperDestination,
+)
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
 from housekeeper.store.models import File
@@ -235,14 +240,20 @@ class DDNDataFlowClient(ArchiveHandler):
             url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
         )
 
-    def retrieve_sample(self, sample: Sample, housekeeper_destination: str):
+    def retrieve_samples(
+        self, samples_and_housekeeper_destinations: List[SampleAndHousekeeperDestination]
+    ):
         """Retrieves all archived files for the provided samples and stores them in the specified location in
         HouseKeeper."""
-        miria_file_data: MiriaFile = MiriaFile.from_housekeeper_destination_and_sample(
-            housekeeper_destination=housekeeper_destination, sample=sample
-        )
+        miria_file_data: List[MiriaFile] = []
+        for sample_and_housekeeper_destination in samples_and_housekeeper_destinations:
+            miria_file: MiriaFile = MiriaFile.from_housekeeper_destination_and_sample(
+                housekeeper_destination=sample_and_housekeeper_destination.housekeeper_destination,
+                sample=sample_and_housekeeper_destination.sample,
+            )
+            miria_file_data.append(miria_file)
         transfer_request: TransferPayload = self.create_transfer_request(
-            miria_file_data=[miria_file_data], is_archiving_request=False
+            miria_file_data=miria_file_data, is_archiving_request=False
         )
         return transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
