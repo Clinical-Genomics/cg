@@ -53,14 +53,30 @@ def add_samples_to_flow_cell_in_status_db(
     flow_cell: Flowcell, sample_internal_ids: List[str], store: Store
 ) -> Flowcell:
     """Adds samples to a flow cell in status db."""
-    samples: Set[Sample] = {
-        store.get_sample_by_internal_id(sample_internal_id)
-        for sample_internal_id in sample_internal_ids
-    }
-    for sample in samples:
-        if isinstance(sample, Sample) and sample not in flow_cell.samples:
+
+    samples_to_add: List[Sample] = get_unique_samples(
+        sample_internal_ids=sample_internal_ids, store=store
+    )
+    flow_cell_sample_ids: List[str] = get_flow_cell_samples_ids(flow_cell)
+
+    for sample in samples_to_add:
+        if sample.internal_id not in flow_cell_sample_ids:
             flow_cell.samples.append(sample)
     return flow_cell
+
+
+def get_flow_cell_samples_ids(flow_cell: Flowcell):
+    return [sample.internal_id for sample in flow_cell.samples]
+
+
+def get_unique_samples(sample_internal_ids: List[str], store: Store) -> List[Sample]:
+    unique_sample_ids: Set[str] = set(sample_internal_ids)
+    samples: List[Sample] = []
+    for sample_id in unique_sample_ids:
+        sample: Optional[Sample] = store.get_sample_by_internal_id(sample_id)
+        if sample:
+            samples.append(sample)
+    return samples
 
 
 def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
