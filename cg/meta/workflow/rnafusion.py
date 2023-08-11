@@ -28,10 +28,8 @@ from cg.models.deliverables.metric_deliverables import (
     MultiqcDataJson,
 )
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
-from cg.models.rnafusion.analysis import RnafusionAnalysis
-from cg.models.rnafusion.arguments import RnafusionParameters
-from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.models.workflow.nf_analysis import PipelineParameters
+from cg.models.workflow.rnafusion import RnafusionAnalysis, RnafusionParameters, RnafusionSample
 from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)

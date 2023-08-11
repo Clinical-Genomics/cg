@@ -1,12 +1,10 @@
 """Module for Rnafusion analysis API tests."""
 from typing import List
 
-from cg.models.deliverables.metric_deliverables import MetricsBase
-
-from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.analysis import RnafusionAnalysis
-
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.models.deliverables.metric_deliverables import MetricsBase
+from cg.models.workflow.rnafusion import RnafusionAnalysis
 
 
 def test_parse_analysis(

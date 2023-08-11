@@ -1,12 +1,10 @@
 """Test module for the Rnafusion delivery report API."""
 from typing import Dict
 
-from cg.models.report.metadata import RnafusionSampleMetadataModel
-from cg.models.rnafusion.analysis import RnafusionAnalysis
-
 from cg.meta.report.rnafusion import RnafusionReportAPI
-
-from cg.store.models import Sample, Family
+from cg.models.report.metadata import RnafusionSampleMetadataModel
+from cg.models.workflow.rnafusion import RnafusionAnalysis
+from cg.store.models import Family, Sample
 
 
 def test_get_sample_metadata(

@@ -1,9 +1,9 @@
 from typing import List
 
-from pydantic.v1 import ValidationError as PydanticValidationError
 import pytest
+from pydantic.v1 import ValidationError as PydanticValidationError
 
-from cg.models.rnafusion.rnafusion_sample import RnafusionSample
+from cg.models.workflow.rnafusion import RnafusionSample
 
 
 def test_instantiate_rnafusion_sample(
