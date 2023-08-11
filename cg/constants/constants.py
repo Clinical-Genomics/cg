@@ -202,7 +202,7 @@ class WorkflowManager(StrEnum):
     Tower: str = "nf_tower"
 
 
-class Strandedness(str, Enum):
+class Strandedness(StrEnum):
     """Strandedness types."""
 
     FORWARD: str = "forward"
