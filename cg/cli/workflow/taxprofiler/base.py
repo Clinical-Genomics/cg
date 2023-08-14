@@ -24,6 +24,7 @@ from cg.cli.workflow.taxprofiler.options import (
     OPTION_INSTRUMENT_PLATFORM,
 )
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
+from cg.constants.nf_analysis import NfTowerStatus
 
 LOG = logging.getLogger(__name__)
 
@@ -108,7 +109,7 @@ def run(
             ),
             "name": case_id,
             "revision": revision or analysis_api.revision,
-            "wait": "SUBMITTED",
+            "wait": NfTowerStatus.SUBMITTED,
         }
     )
     try:
