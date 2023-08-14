@@ -14,7 +14,7 @@ from cg.constants.taxprofiler import (
     TAXPROFILER_RUN_ACCESSION,
     TAXPROFILER_SAMPLE_SHEET_HEADERS,
 )
-from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
 from cg.store.models import Family
@@ -22,7 +22,7 @@ from cg.store.models import Family
 LOG = logging.getLogger(__name__)
 
 
-class TaxprofilerAnalysisAPI(AnalysisAPI):
+class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     """Handles communication between Taxprofiler processes
     and the rest of CG infrastructure."""
 
