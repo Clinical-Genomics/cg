@@ -101,7 +101,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
                 sample_sheet_content.setdefault(headers, []).extend(contents)
 
             LOG.info(sample_sheet_content)
-            self.write_samplesheet_csv(
+            self.write_sample_sheet_csv(
                 samplesheet_content=sample_sheet_content,
                 headers=TAXPROFILER_SAMPLE_SHEET_HEADERS,
                 config_path=self.get_case_config_path(case_id=case_id),

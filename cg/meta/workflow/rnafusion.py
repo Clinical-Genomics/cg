@@ -123,7 +123,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             LOG.info(samplesheet_content)
             if dry_run:
                 continue
-            self.write_samplesheet_csv(
+            self.write_sample_sheet_csv(
                 samplesheet_content=samplesheet_content,
                 headers=RNAFUSION_SAMPLESHEET_HEADERS,
                 config_path=self.get_case_config_path(case_id=case_id),
