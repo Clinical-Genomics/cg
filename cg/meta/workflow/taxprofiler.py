@@ -124,10 +124,14 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def get_pipeline_parameters(
         self,
         case_id: str,
+        intrument_platform: SequencingPlatform.ILLUMINA,
+        fasta: str = "",
     ) -> PipelineParameters:
         """Get taxprofiler parameters."""
         return TaxprofilerParameters(
             clusterOptions=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
+            intrument_platform=intrument_platform,
+            fasta=fasta,
             input=self.get_case_config_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             priority=self.account,
@@ -145,7 +149,9 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         LOG.info("Generating sample sheet")
         self.write_params_file(
             case_id=case_id,
-            pipeline_parameters=self.get_pipeline_parameters(case_id=case_id).dict(),
+            pipeline_parameters=self.get_pipeline_parameters(
+                case_id=case_id, instrument_platform=instrument_platform, fasta=fasta
+            ).dict(),
             dry_run=dry_run,
         )
         LOG.info("Sample sheet written")
