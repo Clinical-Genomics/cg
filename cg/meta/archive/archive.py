@@ -145,7 +145,7 @@ class SpringArchiveAPI:
         samples_to_retrieve: List[SampleAndHousekeeperDestination] = []
         for sample in flowcell.samples:
             LOG.info(f"Will try to retrieve sample: {sample.internal_id}.")
-            housekeeper_destination: str = self.get_housekeeper_destination_from_sample_internal_id(
+            housekeeper_destination: str = self.get_destination_from_sample_internal_id(
                 sample.internal_id
             )
             samples_to_retrieve.append(
@@ -169,7 +169,7 @@ class SpringArchiveAPI:
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[sample.archive_location](
             self.data_flow_config
         )
-        housekeeper_destination: str = self.get_housekeeper_destination_from_sample_internal_id(
+        housekeeper_destination: str = self.get_destination_from_sample_internal_id(
             sample_internal_id
         )
         retrieval_task_id: int = archive_handler.retrieve_samples(
@@ -184,7 +184,8 @@ class SpringArchiveAPI:
         )
         self.set_archive_retrieval_task_ids(retrieval_task_id=retrieval_task_id, files=spring_files)
 
-    def get_housekeeper_destination_from_sample_internal_id(self, sample_internal_id):
+    def get_destination_from_sample_internal_id(self, sample_internal_id):
+        """Returns where in Housekeeper to put the retrieved spring files for the specified sample."""
         return self.housekeeper_api.get_latest_bundle_version(
             sample_internal_id
         ).full_path.as_posix()
