@@ -2949,12 +2949,12 @@ def fixture_taxprofiler_housekeeper_dir(tmpdir_factory, taxprofiler_dir: Path) -
 
 @pytest.fixture(name="taxprofiler_fastq_file_forward")
 def fixture_taxprofiler_fastq_file_l_1_r_1(taxprofiler_housekeeper_dir: Path) -> Path:
-    return Path(taxprofiler_housekeeper_dir,"forward_read.fastq.gz" )
+    return Path(taxprofiler_housekeeper_dir, "forward_read.fastq.gz")
 
 
 @pytest.fixture(name="taxprofiler_fastq_file_reverse")
 def fixture_taxprofiler_fastq_file_l_1_r_2(taxprofiler_housekeeper_dir: Path) -> Path:
-    return Path(taxprofiler_housekeeper_dir,"reverse_read.fastq.gz")
+    return Path(taxprofiler_housekeeper_dir, "reverse_read.fastq.gz")
 
 
 @pytest.fixture(name="taxprofiler_mock_fastq_files")
@@ -2979,7 +2979,8 @@ def fixture_taxprofiler_housekeeper(
         "created": datetime.now(),
         "version": "1.0",
         "files": [
-            {"path": str(f), "tags": ["fastq"], "archive": False} for f in taxprofiler_mock_fastq_files
+            {"path": str(f), "tags": ["fastq"], "archive": False}
+            for f in taxprofiler_mock_fastq_files
         ],
     }
     helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
