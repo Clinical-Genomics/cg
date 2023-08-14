@@ -7,7 +7,7 @@ from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.constants.constants import MetaApis, DRY_RUN, CaseActions
 from cg.constants.sequencing import SequencingPlatform
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.models.rnafusion.command_args import CommandArgs
+from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.models.cg_config import CGConfig
 from cg.exc import CgError
 from cg.cli.workflow.nextflow.options import (
