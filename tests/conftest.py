@@ -2947,32 +2947,21 @@ def fixture_taxprofiler_housekeeper_dir(tmpdir_factory, taxprofiler_dir: Path) -
     return tmpdir_factory.mktemp("bundles")
 
 
-@pytest.fixture(name="taxprofiler_fastq_file_l_1_r_1")
-def fixture_taxprofiler_fastq_file_l_1_r_1(taxprofiler_housekeeper_dir: Path) -> str:
-    fastq_filename = Path(
-        taxprofiler_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz"
-    ).as_posix()
-    with gzip.open(fastq_filename, "wb") as wh:
-        wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
-    return fastq_filename
+@pytest.fixture(name="taxprofiler_fastq_file_forward")
+def fixture_taxprofiler_fastq_file_l_1_r_1(taxprofiler_housekeeper_dir: Path) -> Path:
+    return Path(taxprofiler_housekeeper_dir,"forward_read.fastq.gz" )
 
-
-@pytest.fixture(name="taxprofiler_fastq_file_l_1_r_2")
-def fixture_taxprofiler_fastq_file_l_1_r_2(taxprofiler_housekeeper_dir: Path) -> str:
-    fastq_filename = Path(
-        taxprofiler_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
-    ).as_posix()
-    with gzip.open(fastq_filename, "wb") as wh:
-        wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
-    return fastq_filename
+@pytest.fixture(name="taxprofiler_fastq_file_reverse")
+def fixture_taxprofiler_fastq_file_l_1_r_2(taxprofiler_housekeeper_dir: Path) -> Path:
+    return Path(taxprofiler_housekeeper_dir,"reverse_read.fastq.gz")
 
 
 @pytest.fixture(name="taxprofiler_mock_fastq_files")
 def fixture_taxprofiler_mock_fastq_files(
-    taxprofiler_fastq_file_l_1_r_1: Path, taxprofiler_fastq_file_l_1_r_2: Path
+    taxprofiler_fastq_file_forward: Path, taxprofiler_fastq_file_reverse: Path
 ) -> List[Path]:
     """Return list of all mock fastq files to commit to mock housekeeper"""
-    return [taxprofiler_fastq_file_l_1_r_1, taxprofiler_fastq_file_l_1_r_2]
+    return [taxprofiler_fastq_file_forward, taxprofiler_fastq_file_reverse]
 
 
 @pytest.fixture(scope="function", name="taxprofiler_housekeeper")
@@ -2989,7 +2978,7 @@ def fixture_taxprofiler_housekeeper(
         "created": datetime.now(),
         "version": "1.0",
         "files": [
-            {"path": f, "tags": ["fastq"], "archive": False} for f in taxprofiler_mock_fastq_files
+            {"path": str(f), "tags": ["fastq"], "archive": False} for f in taxprofiler_mock_fastq_files
         ],
     }
     helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
