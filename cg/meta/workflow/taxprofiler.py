@@ -186,5 +186,4 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             LOG.info("Dry run: Config files will not be written")
             return
         self.write_params_file(case_id=case_id)
-
         LOG.info("Configs files written")

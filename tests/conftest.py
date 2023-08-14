@@ -2915,7 +2915,7 @@ def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
 
 @pytest.fixture
 def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
-    """Create samplesheet.csv file for testing"""
+    """Create CSV sample sheet file for testing."""
     Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
     Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet.csv").touch(
         exist_ok=True
@@ -2972,7 +2972,7 @@ def fixture_taxprofiler_housekeeper(
     taxprofiler_mock_fastq_files: List[Path],
     taxprofiler_sample_id: str,
 ):
-    """Create populated housekeeper that holds files for all mock samples."""
+    """Create populated Housekeeper sample bundle mock."""
 
     bundle_data: Dict[str, Any] = {
         "name": taxprofiler_sample_id,
