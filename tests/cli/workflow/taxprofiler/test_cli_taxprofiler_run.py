@@ -39,7 +39,7 @@ def test_with_missing_case(
     assert result.exit_code != EXIT_SUCCESS
     # THEN ERROR log should be printed containing invalid case_id
     assert case_id_does_not_exist in caplog.text
-    assert "could not be found" in caplog.text
+    assert f"{case_id_does_not_exist} could not be found" in caplog.text
 
 
 def test_with_config_use_nextflow(
