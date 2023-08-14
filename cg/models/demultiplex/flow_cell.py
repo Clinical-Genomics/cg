@@ -137,9 +137,9 @@ class FlowCellDirectoryData:
         self,
     ) -> str:
         """Return the BCL converter based on sequencer."""
-        if self.sequencer_type in [Sequencers.HISEQGA, Sequencers.HISEQX]:
-            return BclConverter.BCL2FASTQ
-        return BclConverter.DRAGEN
+        if self.sequencer_type in [Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
+            return BclConverter.DRAGEN
+        return BclConverter.BCL2FASTQ
 
     @property
     def rta_complete_path(self) -> Path:
