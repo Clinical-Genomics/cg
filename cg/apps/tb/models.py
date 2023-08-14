@@ -9,7 +9,7 @@ from pydantic import BaseModel, FieldValidationInfo, field_validator, ConfigDict
 class TrailblazerAnalysis(BaseModel):
     id: int
     family: str
-    case_id = Optional[str]
+    case_id: Optional[str]
 
     version: Optional[str]
     logged_at: Optional[str]
