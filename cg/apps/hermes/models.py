@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from pydantic.v1 import BaseModel, validator
+from pydantic import field_validator
 
 LOG = logging.getLogger(__name__)
 
@@ -23,6 +24,8 @@ class CGDeliverables(BaseModel):
     bundle_id: str
     files: List[CGTag]
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("files", each_item=True)
     def check_mandatory_exists(cls, file):
         if file.mandatory:
@@ -33,6 +36,7 @@ class CGDeliverables(BaseModel):
             return
         return file
 
-    @validator("files")
+    @field_validator("files")
+    @classmethod
     def remove_invalid(cls, value):
         return [item for item in value if item]

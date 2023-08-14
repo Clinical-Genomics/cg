@@ -10,6 +10,8 @@ from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool
 from cg.models.orders.sample_base import OrderSample
 from cg.store.models import Customer
+from pydantic import StringConstraints
+from typing_extensions import Annotated
 
 LOG = logging.getLogger(__name__)
 
@@ -20,9 +22,9 @@ class OrderformParser(BaseModel):
     samples: List[OrderSample] = []
     project_type: Optional[OrderType] = None
     delivery_type: Optional[DataDelivery] = None
-    customer_id: constr(
+    customer_id: Annotated[str, StringConstraints(
         min_length=1, max_length=Customer.internal_id.property.columns[0].type.length
-    ) = None
+    )] = None
     order_comment: Optional[str] = None
     order_name: Optional[str] = None
 

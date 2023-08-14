@@ -1,8 +1,9 @@
 from datetime import date
-from typing import Optional
+from typing import List, Optional
 
 from pydantic.v1 import BaseModel, conlist
-from typing_extensions import Literal
+from typing_extensions import Annotated, Literal
+from pydantic import Field
 
 
 class CrunchyFile(BaseModel):
@@ -14,4 +15,4 @@ class CrunchyFile(BaseModel):
 
 
 class CrunchyMetadata(BaseModel):
-    files: conlist(CrunchyFile, max_items=3, min_items=3)
+    files: Annotated[List[CrunchyFile], Field(max_length=3, min_length=3)]
