@@ -126,25 +126,23 @@ class FlowCellDirectoryData:
         """Return the sequencer type."""
         return sequencer_types[self.machine_name]
 
-    def set_bcl_converter(self, bcl_converter: str) -> str:
+    def get_bcl_converter(self, bcl_converter: str) -> str:
         """
-        Return the bcl converter to use.
-        Tries to fetch the bcl converter from the sequencer type if not provided.
+        Return the BCL converter to use.
+        Tries to get the BCL converter from the sequencer type if not provided.
         """
-        if bcl_converter:
-            return bcl_converter
-        return self.get_bcl_converter_by_sequencer()
+        return bcl_converter or self.get_bcl_converter_by_sequencer()
 
     def get_bcl_converter_by_sequencer(
         self,
     ) -> str:
-        """Return the bcl converter based on sequencer."""
+        """Return the BCL converter based on sequencer."""
         try:
             if self.sequencer_type in [Sequencers.HISEQGA, Sequencers.HISEQX]:
                 return BclConverter.BCL2FASTQ
         except KeyError:
             raise FlowCellError(
-                f"Could not determine bcl converter from sequencer type for machine name {self.machine_name}"
+                f"Could not determine BCL converter from sequencer type for sequencing machine name {self.machine_name}"
             )
         return BclConverter.DRAGEN
 
