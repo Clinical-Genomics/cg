@@ -28,7 +28,7 @@ class NextflowSample(BaseModel):
     def fastq_forward_reverse_length_match(cls, fastq_reverse: List[str], values: dict) -> str:
         """Verify that the number of fastq files is the same for R1 and R2."""
         assert len(fastq_reverse) == len(values.get("fastq_forward")) or len(fastq_reverse) == 0
-        return "Length of fastq_r1 and fastq_r2 do not match"
+        return "Fastq file length for forward and reverse do not match"
 
 
 class NextflowDeliverables(BaseModel):

@@ -59,14 +59,14 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     @staticmethod
     def build_samplesheet_content(
-        case_id: str, fastq_r1: List[str], fastq_r2: List[str], strandedness: str
+        case_id: str, fastq_forward: List[str], fastq_reverse: List[str], strandedness: str
     ) -> Dict[str, List[str]]:
         """Build samplesheet headers and lists"""
         try:
             RnafusionSample(
                 sample=case_id,
-                fastq_forward=fastq_r1,
-                fastq_reverse=fastq_r2,
+                fastq_forward=fastq_forward,
+                fastq_reverse=fastq_reverse,
                 strandedness=strandedness,
             )
         except ValidationError as error:
@@ -75,15 +75,15 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
         samples_full_list: list = []
         strandedness_full_list: list = []
-        # Complete sample and strandedness lists to the same length as fastq_r1:
-        for _ in range(len(fastq_r1)):
+        # Complete sample and strandedness lists to the same length as fastq_forward:
+        for _ in range(len(fastq_forward)):
             samples_full_list.append(case_id)
             strandedness_full_list.append(strandedness)
 
         samplesheet_content: dict = {
             NFX_SAMPLE_HEADER: samples_full_list,
-            NFX_READ1_HEADER: fastq_r1,
-            NFX_READ2_HEADER: fastq_r2,
+            NFX_READ1_HEADER: fastq_forward,
+            NFX_READ2_HEADER: fastq_reverse,
             RNAFUSION_STRANDEDNESS_HEADER: strandedness_full_list,
         }
         return samplesheet_content
