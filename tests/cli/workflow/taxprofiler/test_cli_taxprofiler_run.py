@@ -11,7 +11,7 @@ from cg.models.cg_config import CGConfig
 
 
 def test_without_options(cli_runner: CliRunner, taxprofiler_context: CGConfig):
-    """Test command without case_id argument."""
+    """Test command without case id argument."""
     # GIVEN no case_id
     # WHEN dry running without anything specified
     result = cli_runner.invoke(run, obj=taxprofiler_context)
