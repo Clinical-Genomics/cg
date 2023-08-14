@@ -55,7 +55,7 @@ def decrypt_flow_cell(
         root_dir=context.backup.root.dict(),
         dry_run=dry_run,
     )
-    flow_cell: Flowcell = status_api.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
+    flow_cell: Optional[Flowcell] = status_api.get_flow_cell_by_name(flow_cell_id)
     if not flow_cell and flow_cell_id:
         LOG.error(f"{flow_cell_id}: not found in database")
         raise click.Abort
