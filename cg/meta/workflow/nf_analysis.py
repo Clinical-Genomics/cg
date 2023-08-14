@@ -2,11 +2,11 @@ import logging
 import operator
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
-from cg.constants.nextflow import NFX_WORK_DIR
+from cg.constants.nextflow import NFX_SAMPLE_HEADER, NFX_WORK_DIR
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.yaml import write_yaml_nextflow_style
@@ -179,6 +179,19 @@ class NfAnalysisAPI(AnalysisAPI):
             content=pipeline_parameters,
             file_path=self.get_params_file_path(case_id=case_id),
         )
+
+    @staticmethod
+    def write_sample_sheet_csv(
+        samplesheet_content: Dict[str, List[str]],
+        headers: List[str],
+        config_path: Path,
+    ) -> None:
+        """Write sample sheet CSV file."""
+        with open(config_path, "w") as outfile:
+            outfile.write(",".join(headers))
+            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
+                outfile.write("\n")
+                outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
 
     @staticmethod
     def write_deliverables_bundle(
