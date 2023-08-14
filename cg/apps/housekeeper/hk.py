@@ -114,7 +114,7 @@ class HousekeeperAPI:
         self,
         *,
         bundle: str = None,
-        tags: Set[str] = None,
+        tags: List[str] = None,
         version: int = None,
         path: str = None,
     ) -> Query:
@@ -400,6 +400,8 @@ class HousekeeperAPI:
 
     def get_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[File]:
         """Returns all files from given bundle, with given tag, which have been archived."""
+        if tags is None:
+            tags = []
         return self._store.get_archived_files(bundle_name=bundle_name, tags=tags)
 
     def add_archives(self, files: List[Path], archive_task_id: int) -> None:

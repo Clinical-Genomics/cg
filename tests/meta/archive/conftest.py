@@ -246,6 +246,11 @@ def fixture_archive_store(
     return base_store
 
 
+@pytest.fixture(name="sample_with_spring_file")
+def fixture_sample_with_spring_file() -> str:
+    return "ADM1"
+
+
 @pytest.fixture(name="spring_archive_api")
 def fixture_spring_archive_api(
     populated_housekeeper_api: HousekeeperAPI,

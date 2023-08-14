@@ -53,11 +53,6 @@ class ArchiveHandler:
         pass
 
     @abstractmethod
-    def retrieve_sample(self, sample_and_housekeeper_destination: SampleAndHousekeeperDestination):
-        """Retrieves all files for the given sample."""
-        pass
-
-    @abstractmethod
     def retrieve_file(self, file_and_sample: FileAndSample):
         """Retrieves the specified archived file."""
         pass
