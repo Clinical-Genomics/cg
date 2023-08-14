@@ -171,7 +171,7 @@ class SpringArchiveAPI:
                     sample=sample, housekeeper_destination=housekeeper_destination
                 )
             ]
-        )
+        ).task_id
         spring_files: List[File] = self.housekeeper_api.get_archived_files(
             bundle_name=sample_internal_id
         )
@@ -190,7 +190,9 @@ class SpringArchiveAPI:
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[sample.archive_location](
             self.data_flow_config
         )
-        retrieval_task_id = archive_handler.retrieve_file(FileAndSample(file=file, sample=sample))
+        retrieval_task_id: int = archive_handler.retrieve_file(
+            FileAndSample(file=file, sample=sample)
+        )
         self.housekeeper_api.set_archive_retrieval_task_id(
             file_id=file.id, retrieval_task_id=retrieval_task_id
         )

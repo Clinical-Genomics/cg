@@ -104,7 +104,7 @@ class TransferPayload(BaseModel):
         payload["metadataList"] = []
         return payload
 
-    def post_request(self, url: str, headers: dict) -> int:
+    def post_request(self, url: str, headers: dict) -> "TransferJob":
         """Sends a request to the given url with, the given headers, and its own content as
         payload. Raises an error if the response code is not ok. Returns the job ID of the
         launched transfer task.
@@ -116,8 +116,7 @@ class TransferPayload(BaseModel):
             json=self.model_dump(),
         )
         response.raise_for_status()
-        parsed_response = TransferJob.model_validate_json(response.content)
-        return parsed_response.job_id
+        return TransferJob.model_validate_json(response.content)
 
 
 class AuthPayload(BaseModel):
@@ -219,11 +218,10 @@ class DDNDataFlowClient(ArchiveHandler):
         transfer_request: TransferPayload = self.create_transfer_request(
             miria_file_data=miria_file_data, is_archiving_request=True
         )
-        job_id: int = transfer_request.post_request(
+        return transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.ARCHIVE_FILES),
-        )
-        return job_id
+        ).job_id
 
     def retrieve_file(self, file_and_sample: FileAndSample) -> int:
         """Retrieves all folders provided, to their corresponding destination, as given by sources
@@ -238,11 +236,11 @@ class DDNDataFlowClient(ArchiveHandler):
         return transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
-        )
+        ).job_id
 
     def retrieve_samples(
         self, samples_and_housekeeper_destinations: List[SampleAndHousekeeperDestination]
-    ):
+    ) -> int:
         """Retrieves all archived files for the provided samples and stores them in the specified location in
         HouseKeeper."""
         miria_file_data: List[MiriaFile] = []
@@ -258,7 +256,7 @@ class DDNDataFlowClient(ArchiveHandler):
         return transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
-        )
+        ).job_id
 
     def create_transfer_request(
         self, miria_file_data: List[MiriaFile], is_archiving_request: bool
