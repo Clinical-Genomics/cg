@@ -14,23 +14,20 @@ from cg.constants.rnafusion import (
     RNAFUSION_METRIC_CONDITIONS,
     RNAFUSION_SAMPLESHEET_HEADERS,
     RNAFUSION_STRANDEDNESS_HEADER,
-    RnafusionDefaults,
 )
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, MetricsQCError, MissingMetrics
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.meta.workflow.nf_handlers import NfBaseHandler
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
     MetricsDeliverablesCondition,
     MultiqcDataJson,
 )
-from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
-from cg.models.rnafusion.analysis import RnafusionAnalysis
-from cg.models.rnafusion.rnafusion_sample import RnafusionSample
+from cg.models.nf_analysis import NextflowDeliverables, PipelineParameters
+from cg.models.rnafusion.rnafusion import RnafusionAnalysis, RnafusionParameters, RnafusionSample
 from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
@@ -62,12 +59,15 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     @staticmethod
     def build_samplesheet_content(
-        case_id: str, fastq_r1: List[str], fastq_r2: List[str], strandedness: str
+        case_id: str, fastq_forward: List[str], fastq_reverse: List[str], strandedness: str
     ) -> Dict[str, List[str]]:
         """Build samplesheet headers and lists"""
         try:
             RnafusionSample(
-                sample=case_id, fastq_r1=fastq_r1, fastq_r2=fastq_r2, strandedness=strandedness
+                sample=case_id,
+                fastq_forward=fastq_forward,
+                fastq_reverse=fastq_reverse,
+                strandedness=strandedness,
             )
         except ValidationError as error:
             LOG.error(error)
@@ -75,31 +75,18 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
         samples_full_list: list = []
         strandedness_full_list: list = []
-        # Complete sample and strandedness lists to the same length as fastq_r1:
-        for _ in range(len(fastq_r1)):
+        # Complete sample and strandedness lists to the same length as fastq_forward:
+        for _ in range(len(fastq_forward)):
             samples_full_list.append(case_id)
             strandedness_full_list.append(strandedness)
 
         samplesheet_content: dict = {
             NFX_SAMPLE_HEADER: samples_full_list,
-            NFX_READ1_HEADER: fastq_r1,
-            NFX_READ2_HEADER: fastq_r2,
+            NFX_READ1_HEADER: fastq_forward,
+            NFX_READ2_HEADER: fastq_reverse,
             RNAFUSION_STRANDEDNESS_HEADER: strandedness_full_list,
         }
         return samplesheet_content
-
-    @staticmethod
-    def write_samplesheet_csv(
-        samplesheet_content: Dict[str, List[str]],
-        headers: List[str],
-        config_path: Path,
-    ) -> None:
-        """Write sample sheet CSV file."""
-        with open(config_path, "w") as outfile:
-            outfile.write(",".join(headers))
-            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
-                outfile.write("\n")
-                outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
 
     def write_samplesheet(self, case_id: str, strandedness: str, dry_run: bool = False) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
@@ -123,63 +110,28 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             LOG.info(samplesheet_content)
             if dry_run:
                 continue
-            self.write_samplesheet_csv(
+            self.write_sample_sheet_csv(
                 samplesheet_content=samplesheet_content,
                 headers=RNAFUSION_SAMPLESHEET_HEADERS,
                 config_path=self.get_case_config_path(case_id=case_id),
             )
 
-    def write_params_file(
-        self, case_id: str, genomes_base: Optional[Path] = None, dry_run: bool = False
-    ) -> None:
-        """Write params-file for rnafusion analysis in case folder."""
-        default_options: Dict[str, str] = self.get_default_parameters(case_id=case_id)
-        if genomes_base:
-            default_options["genomes_base"] = genomes_base
-        LOG.info(default_options)
-        if dry_run:
-            return
-        NfBaseHandler.write_nextflow_yaml(
-            content=default_options,
-            file_path=self.get_params_file_path(case_id=case_id),
-        )
-
-    def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
-        """Write Tower IDs to a .YAML file used as the trailblazer config."""
-        config_path = self.get_trailblazer_config_path(case_id=case_id)
-        LOG.info(f"Writing Tower ID to {config_path.as_posix()}")
-        WriteFile.write_file_from_content(
-            content={case_id: [tower_id]},
-            file_format=FileFormat.YAML,
-            file_path=config_path,
+    def get_pipeline_parameters(
+        self, case_id: str, genomes_base: Optional[Path] = None
+    ) -> PipelineParameters:
+        """Get rnafusion parameters."""
+        return RnafusionParameters(
+            clusterOptions=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
+            genomes_base=genomes_base or self.get_references_path(),
+            input=self.get_case_config_path(case_id=case_id),
+            outdir=self.get_case_path(case_id=case_id),
+            priority=self.account,
         )
 
     def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
         if genomes_base:
             return genomes_base.absolute()
         return Path(self.references).absolute()
-
-    def get_default_parameters(self, case_id: str) -> Dict:
-        """Returns a dictionary with default RNAFusion parameters."""
-        return {
-            "input": self.get_case_config_path(case_id=case_id).as_posix(),
-            "outdir": self.get_case_path(case_id=case_id).as_posix(),
-            "genomes_base": self.get_references_path().as_posix(),
-            "trim": RnafusionDefaults.TRIM,
-            "fastp_trim": RnafusionDefaults.FASTP_TRIM,
-            "trim_tail": RnafusionDefaults.TRIM_TAIL,
-            "fusioninspector_filter": RnafusionDefaults.FUSIONINSPECTOR_FILTER,
-            "fusionreport_filter": RnafusionDefaults.FUSIONREPORT_FILTER,
-            "all": RnafusionDefaults.ALL,
-            "pizzly": RnafusionDefaults.PIZZLY,
-            "squid": RnafusionDefaults.SQUID,
-            "starfusion": RnafusionDefaults.STARFUSION,
-            "fusioncatcher": RnafusionDefaults.FUSIONCATCHER,
-            "arriba": RnafusionDefaults.ARRIBA,
-            "cram": RnafusionDefaults.CRAM,
-            "priority": self.account,
-            "clusterOptions": f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
-        }
 
     def config_case(
         self,
@@ -193,7 +145,13 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         LOG.info("Generating samplesheet")
         self.write_samplesheet(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
         LOG.info("Generating parameters file")
-        self.write_params_file(case_id=case_id, genomes_base=genomes_base, dry_run=dry_run)
+        self.write_params_file(
+            case_id=case_id,
+            pipeline_parameters=self.get_pipeline_parameters(
+                case_id=case_id, genomes_base=genomes_base
+            ).dict(),
+            dry_run=dry_run,
+        )
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
@@ -208,7 +166,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         try:
             for index, deliver_file in enumerate(deliverables_content):
                 NextflowDeliverables(deliverables=deliver_file)
-                deliverables_content[index] = replace_dict_values(
+                deliverables_content[index] = self.replace_dict_values(
                     self.get_replace_map(case_id=case_id),
                     deliver_file,
                 )

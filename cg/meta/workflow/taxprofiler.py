@@ -14,7 +14,7 @@ from cg.constants.taxprofiler import (
     TAXPROFILER_RUN_ACCESSION,
     TAXPROFILER_SAMPLE_SHEET_HEADERS,
 )
-from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
 from cg.store.models import Family
@@ -22,7 +22,7 @@ from cg.store.models import Family
 LOG = logging.getLogger(__name__)
 
 
-class TaxprofilerAnalysisAPI(AnalysisAPI):
+class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     """Handles communication between Taxprofiler processes
     and the rest of CG infrastructure."""
 
@@ -37,8 +37,8 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     @staticmethod
     def build_sample_sheet_content(
         sample_name: str,
-        fastq_r1: List[str],
-        fastq_r2: List[str],
+        fastq_forward: List[str],
+        fastq_reverse: List[str],
         instrument_platform: SequencingPlatform.ILLUMINA,
         fasta: Optional[str] = "",
     ) -> Dict[str, List[str]]:
@@ -46,25 +46,25 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         try:
             TaxprofilerSample(
                 sample=sample_name,
-                fastq_r1=fastq_r1,
-                fastq_r2=fastq_r2,
+                fastq_forward=fastq_forward,
+                fastq_reverse=fastq_reverse,
                 instrument_platform=instrument_platform,
             )
         except ValidationError as error:
             LOG.error(error)
             raise ValueError
 
-        # Complete sample lists to the same length as fastq_r1:
-        samples_full_list: List[str] = [sample_name] * len(fastq_r1)
-        instrument_full_list: List[str] = [instrument_platform] * len(fastq_r1)
-        fasta_full_list: List[str] = [fasta] * len(fastq_r1)
+        # Complete sample lists to the same length as fastq_forward:
+        samples_full_list: List[str] = [sample_name] * len(fastq_forward)
+        instrument_full_list: List[str] = [instrument_platform] * len(fastq_forward)
+        fasta_full_list: List[str] = [fasta] * len(fastq_forward)
 
         sample_sheet_content: Dict[str, List[str]] = {
             NFX_SAMPLE_HEADER: samples_full_list,
             TAXPROFILER_RUN_ACCESSION: samples_full_list,
             TAXPROFILER_INSTRUMENT_PLATFORM: instrument_full_list,
-            NFX_READ1_HEADER: fastq_r1,
-            NFX_READ2_HEADER: fastq_r2,
+            NFX_READ1_HEADER: fastq_forward,
+            NFX_READ2_HEADER: fastq_reverse,
             TAXPROFILER_FASTA_HEADER: fasta_full_list,
         }
 
@@ -83,16 +83,16 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         for link in case.links:
             sample_name: str = link.sample.name
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
-            fastq_r1: List[str] = self.extract_read_files(
+            fastq_forward: List[str] = self.extract_read_files(
                 metadata=sample_metadata, forward_read=True
             )
-            fastq_r2: List[str] = self.extract_read_files(
+            fastq_reverse: List[str] = self.extract_read_files(
                 metadata=sample_metadata, reverse_read=True
             )
             sample_content: Dict[str, List[str]] = self.build_sample_sheet_content(
                 sample_name=sample_name,
-                fastq_r1=fastq_r1,
-                fastq_r2=fastq_r2,
+                fastq_forward=fastq_forward,
+                fastq_reverse=fastq_reverse,
                 instrument_platform=instrument_platform,
                 fasta=fasta,
             )
@@ -101,7 +101,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 sample_sheet_content.setdefault(headers, []).extend(contents)
 
             LOG.info(sample_sheet_content)
-            self.create_samplesheet_csv(
+            self.write_sample_sheet_csv(
                 samplesheet_content=sample_sheet_content,
                 headers=TAXPROFILER_SAMPLE_SHEET_HEADERS,
                 config_path=self.get_case_config_path(case_id=case_id),
