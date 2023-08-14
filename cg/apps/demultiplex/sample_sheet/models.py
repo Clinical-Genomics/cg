@@ -1,9 +1,9 @@
 import logging
+from pydantic.v1 import BaseModel, Extra, Field
 from typing import List
 
 from cg.constants.constants import GenomeVersion
 from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections, SampleSheetNovaSeqXSections
-from pydantic import BaseModel, ConfigDict, Field
 
 LOG = logging.getLogger(__name__)
 
@@ -15,7 +15,10 @@ class FlowCellSample(BaseModel):
     sample_id: str
     index: str
     index2: str = ""
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+
+    class Config:
+        allow_population_by_field_name = True
+        extra = Extra.ignore
 
 
 class FlowCellSampleNovaSeq6000(FlowCellSample):

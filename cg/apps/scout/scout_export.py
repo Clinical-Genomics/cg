@@ -1,14 +1,19 @@
 """Schemas for scout serialisation"""
 
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import List, Optional, Dict
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic.v1 import BaseModel, Field, validator
 from typing_extensions import Literal
 
 from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.constants.subject import (
+    PlinkGender,
+    Gender,
+    PlinkPhenotypeStatus,
+    RelationshipStatus,
+)
 from cg.constants.pedigree import Pedigree
-from cg.constants.subject import Gender, PlinkGender, PlinkPhenotypeStatus, RelationshipStatus
 
 
 class Individual(BaseModel):
@@ -20,15 +25,13 @@ class Individual(BaseModel):
     phenotype: PlinkPhenotypeStatus
     analysis_type: str = "wgs"
 
-    @field_validator(Pedigree.FATHER, Pedigree.MOTHER)
-    @classmethod
+    @validator(Pedigree.FATHER, Pedigree.MOTHER)
     def convert_to_zero(cls, value):
         if value is None:
             return RelationshipStatus.HAS_NO_PARENT
         return value
 
-    @field_validator(Pedigree.SEX)
-    @classmethod
+    @validator(Pedigree.SEX)
     def convert_sex_to_zero(cls, value):
         if value == Gender.OTHER:
             return PlinkGender.UNKNOWN
@@ -77,8 +80,7 @@ class ScoutExportCase(BaseModel):
     diagnosis_phenotypes: Optional[List[DiagnosisPhenotypes]]
     diagnosis_genes: Optional[List[int]]
 
-    @field_validator("genome_build")
-    @classmethod
+    @validator("genome_build")
     def convert_genome_build(cls, value):
         if value is None:
             return GENOME_BUILD_37

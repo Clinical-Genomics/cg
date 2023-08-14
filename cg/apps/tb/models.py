@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional
 
 from dateutil.parser import parse as parse_datestr
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic.v1 import BaseModel, validator
 
 
 class TrailblazerAnalysis(BaseModel):
@@ -29,20 +29,21 @@ class TrailblazerAnalysis(BaseModel):
     ticket: Optional[str]
     uploaded_at: Optional[str]
 
-    @field_validator("case_id", mode="before")
+    @validator("case_id")
     def inherit_family_value(cls, value: str, values: dict) -> str:
         return values.get("family")
 
-    @field_validator("logged_at", "started_at", "completed_at")
-    @classmethod
+    @validator("logged_at", "started_at", "completed_at")
     def parse_str_to_datetime(cls, value: str) -> Optional[dt.datetime]:
         if value:
             return parse_datestr(value)
 
-    @field_validator("out_dir", "config_path")
-    @classmethod
+    @validator("out_dir", "config_path")
     def parse_str_to_path(cls, value: str) -> Optional[Path]:
         if value:
             return Path(value)
 
-    model_config = ConfigDict(extra="allow", validate_default=True, arbitrary_types_allowed=True)
+    class Config:
+        extra = "allow"
+        validate_all = True
+        arbitrary_types_allowed = True
