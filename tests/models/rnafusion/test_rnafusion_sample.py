@@ -20,8 +20,8 @@ def test_instantiate_rnafusion_sample(
     # WHEN instantiating a MipAnalysis object
     rnafusion_sample_object = RnafusionSample(
         sample=rnafusion_sample,
-        fastq_r1=rnafusion_fastq_r1,
-        fastq_r2=rnafusion_fastq_r2_same_length,
+        fastq_forward=rnafusion_fastq_r1,
+        fastq_reverse=rnafusion_fastq_r2_same_length,
         strandedness=rnafusion_strandedness_acceptable,
     )
 
@@ -46,8 +46,8 @@ def test_instantiate_rnafusion_sample_fastq_r1_r2_different_length(
     with pytest.raises(PydanticValidationError):
         RnafusionSample(
             sample=rnafusion_sample,
-            fastq_r1=rnafusion_fastq_r1,
-            fastq_r2=rnafusion_fastq_r2_not_same_length,
+            fastq_forward=rnafusion_fastq_r1,
+            fastq_reverse=rnafusion_fastq_r2_not_same_length,
             strandedness=rnafusion_strandedness_acceptable,
         )
 
@@ -67,8 +67,8 @@ def test_instantiate_rnafusion_sample_fastq_r2_empty(
     # WHEN instantiating a sample object
     rnafusion_sample_object: RnafusionSample = RnafusionSample(
         sample=rnafusion_sample,
-        fastq_r1=rnafusion_fastq_r1,
-        fastq_r2=rnafusion_fastq_r2_empty,
+        fastq_forward=rnafusion_fastq_r1,
+        fastq_reverse=rnafusion_fastq_r2_empty,
         strandedness=rnafusion_strandedness_acceptable,
     )
 
@@ -90,7 +90,7 @@ def test_instantiate_rnafusion_strandedness_not_acceptable(
     with pytest.raises(PydanticValidationError):
         RnafusionSample(
             sample=rnafusion_sample,
-            fastq_r1=rnafusion_fastq_r1,
-            fastq_r2=rnafusion_fastq_r2_same_length,
+            fastq_forward=rnafusion_fastq_r1,
+            fastq_reverse=rnafusion_fastq_r2_same_length,
             strandedness=rnafusion_strandedness_not_acceptable,
         )

@@ -64,7 +64,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Build samplesheet headers and lists"""
         try:
             RnafusionSample(
-                sample=case_id, fastq_r1=fastq_r1, fastq_r2=fastq_r2, strandedness=strandedness
+                sample=case_id,
+                fastq_forward=fastq_r1,
+                fastq_reverse=fastq_r2,
+                strandedness=strandedness,
             )
         except ValidationError as error:
             LOG.error(error)

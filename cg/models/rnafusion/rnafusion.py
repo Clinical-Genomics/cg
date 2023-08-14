@@ -68,9 +68,6 @@ class CommandArgs(BaseModel):
 class RnafusionSample(NextflowSample):
     """Rnafusion sample sheet model."""
 
-    sample: str
-    fastq_r1: List[str]
-    fastq_r2: List[str]
     strandedness: Strandedness
 
 
