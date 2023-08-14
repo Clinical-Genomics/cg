@@ -33,13 +33,13 @@ LOG = logging.getLogger(__name__)
 class FlowCellDirectoryData:
     """Class to collect information about flow cell directories and their particular files."""
 
-    def __init__(self, flow_cell_path: Path, bcl_converter: Optional[str] = "bcl2fastq"):
+    def __init__(self, flow_cell_path: Path, bcl_converter: Optional[str] = None):
         LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
         self.path: Path = flow_cell_path
-        self.bcl_converter: Optional[str] = bcl_converter
+        self.machine_name: str = ""
+        self.bcl_converter: Optional[str] = self.set_bcl_converter(bcl_converter)
         self._run_parameters: Optional[RunParameters] = None
         self.run_date: datetime.datetime = datetime.datetime.now()
-        self.machine_name: str = ""
         self.machine_number: int = 0
         self.base_name: str = ""  # Base name is flow cell-id + flow cell position
         self.id: str = ""
@@ -125,6 +125,30 @@ class FlowCellDirectoryData:
     ) -> Literal[Sequencers.HISEQX, Sequencers.HISEQGA, Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
         """Return the sequencer type."""
         return sequencer_types[self.machine_name]
+
+    def set_bcl_converter(self, bcl_converter: str) -> str:
+        """
+        Return the bcl converter to use.
+        Tries to fetch the bcl converter from the sequencer type if not provided.
+        Defaults to bcl2fastq if not found.
+        """
+        if bcl_converter:
+            return bcl_converter
+        else:
+            try:
+                bcl_converter = self.get_bcl_converter_by_sequencer()
+                return bcl_converter
+            except KeyError:
+                LOG.warning("Could not find bcl converter by sequencer.")
+        return BclConverter.BCL2FASTQ
+
+    def get_bcl_converter_by_sequencer(
+        self,
+    ) -> str:
+        """Return the bcl converter based on sequencer."""
+        if sequencer_types[self.machine_name] in [Sequencers.HISEQGA, Sequencers.HISEQX]:
+            return BclConverter.BCL2FASTQ
+        return BclConverter.DRAGEN
 
     @property
     def rta_complete_path(self) -> Path:
