@@ -148,7 +148,7 @@ def test_get_bcl_converter_by_sequencer(
         flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl2fastq)
     )
 
-    # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
+    # THEN it sets the converter to blc2fastq
     assert flow_cell.bcl_converter == BclConverter.BCL2FASTQ
 
 
@@ -157,6 +157,8 @@ def test_flow_cell_directory_data_with_set_bcl_converter(
 ):
     """Test that the bcl converter is set to the specified value."""
     # GIVEN a Bcl2Fastq flow cell directory
+
+    # GIVEN the bcl converter is set to dragen
 
     # WHEN instantiating a flow cell object
     flow_cell = FlowCellDirectoryData(
