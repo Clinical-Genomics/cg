@@ -468,7 +468,9 @@ class HousekeeperAPI:
         self.commit()
 
     def set_archive_task_archived_at(self, job_id: int) -> None:
+        """Updates all entries in Archive with the specified archiving_task_id to have been archived now."""
         pass
 
     def set_archive_task_retrieved_at(self, job_id: int) -> None:
+        """Updates all entries in Archive with the specified retrieval_task_id to have been retrieved now."""
         pass
