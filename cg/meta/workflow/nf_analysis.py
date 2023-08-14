@@ -263,3 +263,12 @@ class NfAnalysisAPI(AnalysisAPI):
                 tower_id = NfTowerHandler.get_tower_id(stdout_lines=self.process.stdout_lines())
                 self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
             LOG.info(self.process.stdout)
+
+    @staticmethod
+    def replace_dict_values(replace_map: dict, my_dict: dict) -> dict:
+        for str_to_replace, with_value in replace_map.items():
+            for key, value in my_dict.items():
+                if not value:
+                    value = "~"
+                my_dict.update({key: value.replace(str_to_replace, with_value)})
+        return my_dict

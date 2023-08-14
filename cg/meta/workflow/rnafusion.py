@@ -26,8 +26,7 @@ from cg.models.deliverables.metric_deliverables import (
     MetricsDeliverablesCondition,
     MultiqcDataJson,
 )
-from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
-from cg.models.nf_analysis import PipelineParameters
+from cg.models.nf_analysis import NextflowDeliverables, PipelineParameters
 from cg.models.rnafusion.rnafusion import RnafusionAnalysis, RnafusionParameters, RnafusionSample
 from cg.store.models import Family
 
@@ -177,7 +176,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         try:
             for index, deliver_file in enumerate(deliverables_content):
                 NextflowDeliverables(deliverables=deliver_file)
-                deliverables_content[index] = replace_dict_values(
+                deliverables_content[index] = self.replace_dict_values(
                     self.get_replace_map(case_id=case_id),
                     deliver_file,
                 )

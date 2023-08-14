@@ -5,8 +5,7 @@ from pydantic.v1 import BaseModel
 
 from cg.constants.constants import Strandedness
 from cg.models.analysis import AnalysisModel
-from cg.models.nextflow.sample import NextflowSample
-from cg.models.nf_analysis import PipelineParameters
+from cg.models.nf_analysis import NextflowSample, PipelineParameters
 
 
 class RnafusionQCMetrics(BaseModel):
