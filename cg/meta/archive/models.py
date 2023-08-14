@@ -55,6 +55,6 @@ class ArchiveHandler:
         pass
 
     @abstractmethod
-    def is_job_done(self, file_id: int, job_id: int) -> bool:
+    def is_job_done(self, job_id: int) -> bool:
         """Returns true if job has been completed, false otherwise."""
         pass

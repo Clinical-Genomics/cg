@@ -343,7 +343,7 @@ class DDNDataFlowClient(ArchiveHandler):
         )
         return False
 
-    def get_job_status(self, job_id: int):
+    def get_job_status(self, job_id: int) -> GetJobStatusResponse:
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url=DataflowEndpoints.GET_JOB_STATUS),

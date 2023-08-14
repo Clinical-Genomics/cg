@@ -445,7 +445,7 @@ class HousekeeperAPI:
             for file in self.get_all_non_archived_spring_files()
         ]
 
-    def set_archive_retrieved_at(self, file_id: int, retrieval_task_id: int):
+    def set_archive_file_retrieved_at(self, file_id: int, retrieval_task_id: int) -> None:
         file: File = self._store.get_file_by_id(file_id)
         archive: Archive = file.archive
         if archive.retrieval_task_id != retrieval_task_id:
@@ -456,7 +456,7 @@ class HousekeeperAPI:
         self._store.update_retrieval_time_stamp(archive=archive)
         self.commit()
 
-    def set_archive_archived_at(self, file_id: int, archiving_task_id: int):
+    def set_archive_file_archived_at(self, file_id: int, archiving_task_id: int) -> None:
         file: File = self._store.get_file_by_id(file_id)
         archive: Archive = file.archive
         if archive.archiving_task_id != archiving_task_id:
@@ -466,3 +466,9 @@ class HousekeeperAPI:
             )
         self._store.update_archiving_time_stamp(archive=archive)
         self.commit()
+
+    def set_archive_task_archived_at(self, job_id: int) -> None:
+        pass
+
+    def set_archive_task_retrieved_at(self, job_id: int) -> None:
+        pass
