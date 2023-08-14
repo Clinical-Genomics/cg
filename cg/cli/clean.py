@@ -31,6 +31,7 @@ from cg.exc import FlowCellError, HousekeeperBundleVersionMissingError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData as DemultiplexFlowCell
 from cg.store import Store
@@ -449,10 +450,10 @@ def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: i
 def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run: bool):
     """Removes flow cells from demultiplexed run directory."""
     status_db: Store = context.status_db
-    demux_api: DemultiplexingAPI = context.demultiplex_api
+    demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     trailblazer_api: TrailblazerAPI = context.trailblazer_api
-    for flow_cell_dir in demux_api.get_all_demultiplexed_flow_cell_dirs():
+    for flow_cell_dir in demux_post_processing_api.get_all_demultiplexed_flow_cell_dirs():
         try:
             flow_cell: DemultiplexFlowCell = DemultiplexFlowCell(flow_cell_path=flow_cell_dir)
         except FlowCellError:
