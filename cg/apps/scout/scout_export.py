@@ -3,7 +3,6 @@
 from datetime import datetime
 from typing import List, Optional, Dict
 
-from pydantic.v1 import BaseModel, Field, validator
 from typing_extensions import Literal
 
 from cg.constants.gene_panel import GENOME_BUILD_37
@@ -14,7 +13,7 @@ from cg.constants.subject import (
     RelationshipStatus,
 )
 from cg.constants.pedigree import Pedigree
-from pydantic import field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class Individual(BaseModel):
