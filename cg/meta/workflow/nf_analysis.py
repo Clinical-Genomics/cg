@@ -13,7 +13,7 @@ from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
-from cg.models.workflow.rnafusion import CommandArgs
+from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)

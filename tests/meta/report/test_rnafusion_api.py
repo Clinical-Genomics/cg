@@ -3,7 +3,7 @@ from typing import Dict
 
 from cg.meta.report.rnafusion import RnafusionReportAPI
 from cg.models.report.metadata import RnafusionSampleMetadataModel
-from cg.models.workflow.rnafusion import RnafusionAnalysis
+from cg.models.rnafusion.rnafusion import RnafusionAnalysis
 from cg.store.models import Family, Sample
 
 

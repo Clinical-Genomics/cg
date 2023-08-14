@@ -3,7 +3,7 @@ from typing import List
 import pytest
 from pydantic.v1 import ValidationError as PydanticValidationError
 
-from cg.models.workflow.rnafusion import RnafusionSample
+from cg.models.rnafusion.rnafusion import RnafusionSample
 
 
 def test_instantiate_rnafusion_sample(

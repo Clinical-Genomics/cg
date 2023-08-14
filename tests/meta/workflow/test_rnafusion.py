@@ -4,7 +4,7 @@ from typing import List
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
-from cg.models.workflow.rnafusion import RnafusionAnalysis
+from cg.models.rnafusion.rnafusion import RnafusionAnalysis
 
 
 def test_parse_analysis(
