@@ -1,10 +1,11 @@
 import logging
-from pydantic.v1 import BaseModel, Extra, Field
 from typing import List
+
+from pydantic import BaseModel, ConfigDict, Field
 
 from cg.constants.constants import GenomeVersion
 from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections, SampleSheetNovaSeqXSections
-from pydantic import ConfigDict
+
 
 LOG = logging.getLogger(__name__)
 

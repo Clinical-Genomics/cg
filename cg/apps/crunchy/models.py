@@ -1,9 +1,8 @@
 from datetime import date
 from typing import List, Optional
 
-from pydantic.v1 import BaseModel, conlist
 from typing_extensions import Annotated, Literal
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 
 class CrunchyFile(BaseModel):
