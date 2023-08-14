@@ -8,7 +8,7 @@ from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool
 from cg.models.orders.sample_base import OrderSample
 from cg.store.models import Customer
-from pydantic import constr, BaseModel
+from pydantic.v1 import constr, BaseModel
 
 
 LOG = logging.getLogger(__name__)

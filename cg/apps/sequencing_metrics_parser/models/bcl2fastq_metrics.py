@@ -18,8 +18,7 @@ class IndexMetric(BaseModel):
       respective frequencies.
     """
 
-    mismatch_counts: Dict[Annotated[str, int], Field(..., alias="MismatchCounts"), AfterValidator(check_non_negative)]
-
+    mistmatch_counts: Dict[str, Annotated[int, AfterValidator(check_non_negative)]]
 
 class ReadMetric(BaseModel):
     """
