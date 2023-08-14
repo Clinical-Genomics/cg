@@ -2951,6 +2951,7 @@ def fixture_taxprofiler_housekeeper_dir(tmpdir_factory, taxprofiler_dir: Path) -
 def fixture_taxprofiler_fastq_file_l_1_r_1(taxprofiler_housekeeper_dir: Path) -> Path:
     return Path(taxprofiler_housekeeper_dir,"forward_read.fastq.gz" )
 
+
 @pytest.fixture(name="taxprofiler_fastq_file_reverse")
 def fixture_taxprofiler_fastq_file_l_1_r_2(taxprofiler_housekeeper_dir: Path) -> Path:
     return Path(taxprofiler_housekeeper_dir,"reverse_read.fastq.gz")
