@@ -44,7 +44,7 @@ class FlowCellDirectoryData:
         self.id: str = ""
         self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_dir_name()
-        self.bcl_converter: Optional[str] = self.set_bcl_converter(bcl_converter)
+        self.bcl_converter: Optional[str] = self.get_bcl_converter(bcl_converter)
 
     def parse_flow_cell_dir_name(self):
         """Parse relevant information from flow cell name.
@@ -137,13 +137,8 @@ class FlowCellDirectoryData:
         self,
     ) -> str:
         """Return the BCL converter based on sequencer."""
-        try:
-            if self.sequencer_type in [Sequencers.HISEQGA, Sequencers.HISEQX]:
-                return BclConverter.BCL2FASTQ
-        except KeyError:
-            raise FlowCellError(
-                f"Could not determine BCL converter from sequencer type for sequencing machine name {self.machine_name}"
-            )
+        if self.sequencer_type in [Sequencers.HISEQGA, Sequencers.HISEQX]:
+            return BclConverter.BCL2FASTQ
         return BclConverter.DRAGEN
 
     @property
