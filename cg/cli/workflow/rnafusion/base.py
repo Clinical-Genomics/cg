@@ -32,7 +32,7 @@ from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.command_args import CommandArgs
+from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
