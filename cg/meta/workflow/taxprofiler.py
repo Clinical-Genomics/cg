@@ -81,19 +81,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
 
         return sample_sheet_content
 
-    @staticmethod
-    def write_samplesheet_csv(
-        samplesheet_content: Dict[str, List[str]],
-        headers: List[str],
-        config_path: Path,
-    ) -> None:
-        """Write sample sheet CSV file."""
-        with open(config_path, "w") as outfile:
-            outfile.write(",".join(headers))
-            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
-                outfile.write("\n")
-                outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
-
     def write_sample_sheet(
         self,
         case_id: str,
