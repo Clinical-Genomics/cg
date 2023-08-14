@@ -1,9 +1,9 @@
 from typing import Dict, Optional
 
-from pydantic.v1 import ValidationError as PydanticValidationError
 import pytest
+from pydantic.v1 import ValidationError as PydanticValidationError
 
-from cg.models.nextflow.deliverables import NextflowDeliverables
+from cg.models.nf_analysis import NextflowDeliverables
 
 
 def test_instantiate_nextflow_deliverables(

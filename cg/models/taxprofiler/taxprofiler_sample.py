@@ -1,5 +1,5 @@
 from cg.constants.sequencing import SequencingPlatform
-from cg.models.nextflow.sample import NextflowSample
+from cg.models.nf_analysis import NextflowSample
 
 
 class TaxprofilerSample(NextflowSample):

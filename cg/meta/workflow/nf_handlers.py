@@ -17,17 +17,7 @@ class NfBaseHandler:
     Parent class for handling the interaction with NF executors that are common to both Nextflow and NF-Tower.
     """
 
-    @classmethod
-    def write_nextflow_yaml(
-        cls,
-        content: Dict[str, Any],
-        file_path: str,
-    ) -> None:
-        """Write Nextflow file with non-quoted booleans and quoted strings."""
-        with open(file_path, "w") as outfile:
-            for key, value in content.items():
-                quotes = '"' if type(value) is str else ""
-                outfile.write(f"{key}: {quotes}{value}{quotes}\n")
+    pass
 
 
 class NfTowerHandler(NfBaseHandler):

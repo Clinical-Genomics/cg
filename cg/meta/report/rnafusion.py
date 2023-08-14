@@ -22,8 +22,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import RnafusionSampleMetadataModel
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
-from cg.models.rnafusion.analysis import RnafusionAnalysis
-from cg.models.rnafusion.metrics import RnafusionQCMetrics
+from cg.models.rnafusion.rnafusion import RnafusionAnalysis, RnafusionQCMetrics
 from cg.store.models import Family, Sample
 
 
