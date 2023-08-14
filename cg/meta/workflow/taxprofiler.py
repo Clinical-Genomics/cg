@@ -15,9 +15,9 @@ from cg.constants.taxprofiler import (
     TaxprofilerDefaults,
 )
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.meta.workflow.nf_handlers import NfBaseHandler
+from cg.models.nf_analysis import PipelineParameters
 from cg.models.cg_config import CGConfig
-from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSample
 from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
@@ -121,39 +121,17 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
                 config_path=self.get_case_config_path(case_id=case_id),
             )
 
-    def write_params_file(self, case_id: str) -> None:
-        """Write params-file for taxprofiler analysis in case folder."""
-        default_options: Dict[str, str] = self.get_default_parameters(case_id=case_id)
-        NfBaseHandler.write_nextflow_yaml(
-            content=default_options,
-            file_path=self.get_params_file_path(case_id=case_id),
+    def get_pipeline_parameters(
+        self,
+        case_id: str,
+    ) -> PipelineParameters:
+        """Get taxprofiler parameters."""
+        return TaxprofilerParameters(
+            clusterOptions=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
+            input=self.get_case_config_path(case_id=case_id),
+            outdir=self.get_case_path(case_id=case_id),
+            priority=self.account,
         )
-        LOG.info("Generating parameters file")
-
-    def get_default_parameters(self, case_id: str) -> Dict:
-        """Returns a dictionary with default Taxprofiler parameters."""
-        return {
-            "input": self.get_case_config_path(case_id=case_id).as_posix(),
-            "databases": self.databases,
-            "outdir": self.get_case_path(case_id=case_id).as_posix(),
-            "save_preprocessed_reads": TaxprofilerDefaults.SAVE_PREPROCESSED_READS,
-            "perform_shortread_qc": TaxprofilerDefaults.PERFORM_SHORTREAD_QC,
-            "perform_shortread_complexityfilter": TaxprofilerDefaults.PERFORM_SHORTREAD_COMPLEXITYFILTER,
-            "save_complexityfiltered_reads": TaxprofilerDefaults.SAVE_COMPLEXITYFILTERED_READS,
-            "perform_shortread_hostremoval": TaxprofilerDefaults.PERFORM_SHORTREAD_HOSTREMOVAL,
-            "hostremoval_reference": self.hostremoval_reference,
-            "save_hostremoval_index": TaxprofilerDefaults.SAVE_HOSTREMOVAL_INDEX,
-            "save_hostremoval_mapped": TaxprofilerDefaults.SAVE_HOSTREMOVAL_MAPPED,
-            "save_hostremoval_unmapped": TaxprofilerDefaults.SAVE_HOSTREMOVAL_UNMAPPED,
-            "perform_runmerging": TaxprofilerDefaults.PERFORM_RUNMERGING,
-            "run_kraken2": TaxprofilerDefaults.RUN_KRAKEN2,
-            "kraken2_save_reads": TaxprofilerDefaults.KRAKEN2_SAVE_READS,
-            "kraken2_save_readclassification": TaxprofilerDefaults.KRAKEN2_SAVE_READCLASSIFICATION,
-            "run_krona": TaxprofilerDefaults.RUN_KRONA,
-            "run_profile_standardisation": TaxprofilerDefaults.RUN_PROFILE_STANDARDISATION,
-            "priority": self.account,
-            "clusterOptions": f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
-        }
 
     def config_case(
         self,
@@ -165,8 +143,10 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Create sample sheet file for Taxprofiler analysis."""
         self.create_case_directory(case_id=case_id)
         LOG.info("Generating sample sheet")
-        self.write_sample_sheet(
-            case_id=case_id, instrument_platform=instrument_platform, fasta=fasta, dry_run=dry_run
+        self.write_params_file(
+            case_id=case_id,
+            pipeline_parameters=self.get_pipeline_parameters(case_id=case_id).dict(),
+            dry_run=dry_run,
         )
         LOG.info("Sample sheet written")
         if dry_run:
