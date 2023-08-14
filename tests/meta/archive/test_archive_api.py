@@ -223,10 +223,11 @@ def test_retrieve_file(
     retrieve_request_json,
     header_with_test_auth_token,
 ):
-    """Test archiving all non-archived SPRING files for Miria customers."""
+    """Test retrieving a SPRING file for a Miria customer."""
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
     # with the DDN customer having two samples, and the non-DDN having one sample.
 
+    # GIVEN a spring file which has not been archived
     file: File = spring_archive_api.housekeeper_api.files(tags=[SequencingFileTag.SPRING]).first()
 
     spring_archive_api.housekeeper_api.add_archives(
@@ -273,11 +274,10 @@ def test_retrieve_sample(
     header_with_test_auth_token,
     sample_with_spring_file: str,
 ):
-    """Test archiving all non-archived SPRING files for Miria customers."""
+    """Test retrieving all archived SPRING files tied to a sample for a Miria customer."""
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
     # with the DDN customer having two samples, and the non-DDN having one sample.
 
-    sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(sample_with_spring_file)
     files: List[File] = spring_archive_api.housekeeper_api.get_files(
         bundle=sample_with_spring_file, tags=[SequencingFileTag.SPRING]
     )
