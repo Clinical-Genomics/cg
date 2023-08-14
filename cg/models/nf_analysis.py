@@ -25,7 +25,7 @@ class NextflowSample(BaseModel):
     fastq_r2: List[str]
 
     @validator("fastq_r2")
-    def fastq1_fastq2_len_match(cls, value: List[str], values: dict) -> str:
+    def fastq_forward_reverse_length_match(cls, value: List[str], values: dict) -> str:
         """Verify that the number of fastq files is the same for R1 and R2."""
         assert len(value) == len(values.get("fastq_r1")) or len(value) == 0
         return "Length of fastq_r1 and fastq_r2 do not match"
@@ -35,7 +35,7 @@ class NextflowDeliverables(BaseModel):
     """Nextflow deliverables model
 
     Attributes:
-        deliverables: dictionary containing format, path, path_index, step, tag and id keys
+        deliverables: dictionary containing format, path, path_index, step, tag and id keys.
     """
 
     deliverables: dict
