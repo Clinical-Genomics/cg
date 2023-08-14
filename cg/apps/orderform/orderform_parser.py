@@ -2,16 +2,14 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Hashable, Iterable
 
-from pydantic.v1 import constr, BaseModel
-
 from cg.constants import DataDelivery
 from cg.exc import OrderFormError
 from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool
 from cg.models.orders.sample_base import OrderSample
 from cg.store.models import Customer
-from pydantic import StringConstraints
-from typing_extensions import Annotated
+from pydantic import constr, BaseModel
+
 
 LOG = logging.getLogger(__name__)
 
@@ -22,9 +20,9 @@ class OrderformParser(BaseModel):
     samples: List[OrderSample] = []
     project_type: Optional[OrderType] = None
     delivery_type: Optional[DataDelivery] = None
-    customer_id: Annotated[str, StringConstraints(
+    customer_id: constr(
         min_length=1, max_length=Customer.internal_id.property.columns[0].type.length
-    )] = None
+    ) = None
     order_comment: Optional[str] = None
     order_name: Optional[str] = None
 
