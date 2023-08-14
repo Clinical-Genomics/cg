@@ -26,7 +26,9 @@ def test_add_flowcell_cmd(
 
     # WHEN running the add flowcell command
     result = cli_runner.invoke(
-        add_flow_cell_cmd, [bcl2fastq_flow_cell.full_name], obj=demultiplex_context
+        add_flow_cell_cmd,
+        [bcl2fastq_flow_cell.full_name],
+        obj=demultiplex_context,
     )
 
     # THEN assert that the run was success

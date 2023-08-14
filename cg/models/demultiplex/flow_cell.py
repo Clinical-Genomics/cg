@@ -37,7 +37,6 @@ class FlowCellDirectoryData:
         LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
         self.path: Path = flow_cell_path
         self.machine_name: str = ""
-        self.bcl_converter: Optional[str] = self.set_bcl_converter(bcl_converter)
         self._run_parameters: Optional[RunParameters] = None
         self.run_date: datetime.datetime = datetime.datetime.now()
         self.machine_number: int = 0
@@ -45,6 +44,7 @@ class FlowCellDirectoryData:
         self.id: str = ""
         self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_dir_name()
+        self.bcl_converter: Optional[str] = self.set_bcl_converter(bcl_converter)
 
     def parse_flow_cell_dir_name(self):
         """Parse relevant information from flow cell name.
@@ -130,24 +130,22 @@ class FlowCellDirectoryData:
         """
         Return the bcl converter to use.
         Tries to fetch the bcl converter from the sequencer type if not provided.
-        Defaults to bcl2fastq if not found.
         """
         if bcl_converter:
             return bcl_converter
-        else:
-            try:
-                bcl_converter = self.get_bcl_converter_by_sequencer()
-                return bcl_converter
-            except KeyError:
-                LOG.warning("Could not find bcl converter by sequencer.")
-        return BclConverter.BCL2FASTQ
+        return self.get_bcl_converter_by_sequencer()
 
     def get_bcl_converter_by_sequencer(
         self,
     ) -> str:
         """Return the bcl converter based on sequencer."""
-        if sequencer_types[self.machine_name] in [Sequencers.HISEQGA, Sequencers.HISEQX]:
-            return BclConverter.BCL2FASTQ
+        try:
+            if self.sequencer_type in [Sequencers.HISEQGA, Sequencers.HISEQX]:
+                return BclConverter.BCL2FASTQ
+        except KeyError:
+            raise FlowCellError(
+                f"Could not determine bcl converter from sequencer type for machine name {self.machine_name}"
+            )
         return BclConverter.DRAGEN
 
     @property
