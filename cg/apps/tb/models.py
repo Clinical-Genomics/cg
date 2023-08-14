@@ -3,8 +3,7 @@ from pathlib import Path
 from typing import Optional
 
 from dateutil.parser import parse as parse_datestr
-from pydantic.v1 import BaseModel, validator
-from pydantic import field_validator, ConfigDict
+from pydantic import BaseModel, FieldValidationInfo, field_validator, ConfigDict
 
 
 class TrailblazerAnalysis(BaseModel):
@@ -30,11 +29,9 @@ class TrailblazerAnalysis(BaseModel):
     ticket: Optional[str]
     uploaded_at: Optional[str]
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("case_id")
-    def inherit_family_value(cls, value: str, values: dict) -> str:
-        return values.get("family")
+    @field_validator("case_id")
+    def inherit_family_value(cls, value: str, info: FieldValidationInfo) -> str:
+        return info.data.get("family")
 
     @field_validator("logged_at", "started_at", "completed_at")
     @classmethod
