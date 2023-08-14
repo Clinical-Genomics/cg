@@ -2972,7 +2972,7 @@ def fixture_taxprofiler_housekeeper(
     taxprofiler_mock_fastq_files: List[Path],
     taxprofiler_sample_id: str,
 ):
-    """Create populated housekeeper that holds files for all mock samples."""
+    """Create populated Housekeeper sample bundle mock."""
 
     bundle_data: Dict[str, Any] = {
         "name": taxprofiler_sample_id,
