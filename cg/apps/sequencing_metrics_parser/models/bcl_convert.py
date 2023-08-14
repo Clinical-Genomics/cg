@@ -1,4 +1,4 @@
-from pydantic.v1 import BaseModel, BaseConfig, Field
+from pydantic import BaseModel, BaseConfig, Field
 from cg.constants.bcl_convert_metrics import (
     BclConvertQualityMetricsColumnNames,
     BclConvertDemuxMetricsColumnNames,
