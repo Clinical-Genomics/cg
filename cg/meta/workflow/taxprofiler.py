@@ -121,9 +121,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
                 config_path=self.get_case_config_path(case_id=case_id),
             )
 
-    def get_pipeline_parameters(
-        self, case_id: str, instrument_platform: SequencingPlatform.ILLUMINA, fasta: str = ""
-    ) -> PipelineParameters:
+    def get_pipeline_parameters(self, case_id: str) -> PipelineParameters:
         """Get taxprofiler parameters."""
         return TaxprofilerParameters(
             clusterOptions=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
@@ -142,16 +140,17 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Create sample sheet file for Taxprofiler analysis."""
         self.create_case_directory(case_id=case_id)
         LOG.info("Generating sample sheet")
+        self.write_sample_sheet(
+            case_id=case_id, instrument_platform=instrument_platform, fasta=fasta, dry_run=dry_run
+        )
+        LOG.info("Generating parameters file")
         self.write_params_file(
             case_id=case_id,
-            pipeline_parameters=self.get_pipeline_parameters(
-                case_id=case_id, instrument_platform=instrument_platform, fasta=fasta
-            ).dict(),
+            pipeline_parameters=self.get_pipeline_parameters(case_id=case_id).dict(),
             dry_run=dry_run,
         )
-        LOG.info("Sample sheet written")
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
-        self.write_params_file(case_id=case_id)
+
         LOG.info("Configs files written")
