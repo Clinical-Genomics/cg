@@ -2976,7 +2976,7 @@ def fixture_taxprofiler_housekeeper(
 
     bundle_data: Dict[str, Any] = {
         "name": taxprofiler_sample_id,
-        "created": datetime.now(),
+        "created": fixture_timestamp_now,
         "version": "1.0",
         "files": [
             {"path": str(f), "tags": [SequencingFileTag.FASTQ], "archive": False}
