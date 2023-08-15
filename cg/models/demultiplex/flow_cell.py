@@ -130,6 +130,8 @@ class FlowCellDirectoryData:
         """
         Return the BCL converter to use.
         Tries to get the BCL converter from the sequencer type if not provided.
+        Note: bcl_converter can be used to override automatic selection.
+        Reason: Data reproducability.
         """
         return bcl_converter or self.get_bcl_converter_by_sequencer()
 
