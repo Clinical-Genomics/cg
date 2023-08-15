@@ -2998,8 +2998,8 @@ def fixture_taxprofiler_context(
     taxprofiler_housekeeper: HousekeeperAPI,
 ) -> CGConfig:
     """Context to use in cli."""
-    cg_context.housekeeper_api_ = taxprofiler_housekeeper
-    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.housekeeper_api_:HousekeeperAPI = taxprofiler_housekeeper
+    cg_context.trailblazer_api_:MockTB = trailblazer_api
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
     taxprofiler_case: Family = helpers.add_case(
