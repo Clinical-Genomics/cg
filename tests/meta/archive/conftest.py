@@ -65,6 +65,15 @@ def fixture_archive_request_json(
     }
 
 
+@pytest.fixture(name="get_job_status_request_json")
+def fixture_get_job_status_request_json(
+    remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
+) -> Dict:
+    return {
+        "job_id": 123,
+    }
+
+
 @pytest.fixture(name="header_with_test_auth_token")
 def fixture_header_with_test_auth_token() -> Dict:
     return {

@@ -12,7 +12,12 @@ from cg.meta.archive.archive import (
     SpringArchiveAPI,
     filter_files_on_archive_location,
 )
-from cg.meta.archive.ddn_dataflow import AuthToken, DDNDataFlowClient, MiriaFile
+from cg.meta.archive.ddn_dataflow import (
+    AuthToken,
+    DDNDataFlowClient,
+    GetJobStatusPayload,
+    MiriaFile,
+)
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
@@ -240,7 +245,7 @@ def test_get_job_status_done(
 
     mock_request_submitter.assert_called_with(
         api_method=APIMethods.POST,
-        url="getJobStatus",
+        url="some/api/getJobStatus",
         headers=header_with_test_auth_token,
-        json=archive_request_json,
+        json=GetJobStatusPayload(job_id=123).model_dump(),
     )

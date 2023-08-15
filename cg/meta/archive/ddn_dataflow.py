@@ -347,8 +347,8 @@ class DDNDataFlowClient(ArchiveHandler):
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url=DataflowEndpoints.GET_JOB_STATUS),
-            headers=self.headers,
+            headers=dict(self.headers, **self.auth_header),
             json=GetJobStatusPayload(job_id=job_id).model_dump(),
         )
         response.raise_for_status()
-        return GetJobStatusResponse.model_validate_json(response.content)
+        return GetJobStatusResponse.model_validate(response.json())
