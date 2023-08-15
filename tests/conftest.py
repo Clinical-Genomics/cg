@@ -2913,7 +2913,7 @@ def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
 ## Taxprofiler fixtures
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
     Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
@@ -2922,42 +2922,42 @@ def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     ).touch(exist_ok=True)
 
 
-@pytest.fixture(name="taxprofiler_case_id")
+@pytest.fixture(scope="session", name="taxprofiler_case_id")
 def fixture_taxprofiler_case_id() -> str:
     """Returns a taxprofiler case id."""
     return "taxprofiler_case"
 
 
-@pytest.fixture(name="taxprofiler_sample_id")
+@pytest.fixture(scope="session", name="taxprofiler_sample_id")
 def fixture_taxprofiler_sample_id() -> str:
     """Returns a Taxprofiler sample id."""
     return "taxprofiler_sample"
 
 
-@pytest.fixture(name="taxprofiler_dir")
+@pytest.fixture(scope="session", name="taxprofiler_dir")
 def fixture_taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> Path:
     """Return the path to the Taxprofiler directory."""
     taxprofiler_dir = tmpdir_factory.mktemp("taxprofiler")
     return Path(taxprofiler_dir).absolute()
 
 
-@pytest.fixture(name="taxprofiler_housekeeper_dir")
+@pytest.fixture(scope="session", name="taxprofiler_housekeeper_dir")
 def fixture_taxprofiler_housekeeper_dir(tmpdir_factory, taxprofiler_dir: Path) -> Path:
     """Return the path to the Taxprofiler Housekeeper bundle directory."""
     return tmpdir_factory.mktemp("bundles")
 
 
-@pytest.fixture(name="taxprofiler_fastq_file_forward")
+@pytest.fixture(scope="session", name="taxprofiler_fastq_file_forward")
 def fixture_taxprofiler_fastq_file_l_1_r_1(taxprofiler_housekeeper_dir: Path) -> Path:
     return Path(taxprofiler_housekeeper_dir, "forward_read.fastq.gz")
 
 
-@pytest.fixture(name="taxprofiler_fastq_file_reverse")
+@pytest.fixture(scope="session", name="taxprofiler_fastq_file_reverse")
 def fixture_taxprofiler_fastq_file_l_1_r_2(taxprofiler_housekeeper_dir: Path) -> Path:
     return Path(taxprofiler_housekeeper_dir, "reverse_read.fastq.gz")
 
 
-@pytest.fixture(name="taxprofiler_mock_fastq_files")
+@pytest.fixture(scope="session", name="taxprofiler_mock_fastq_files")
 def fixture_taxprofiler_mock_fastq_files(
     taxprofiler_fastq_file_forward: Path, taxprofiler_fastq_file_reverse: Path
 ) -> List[Path]:
