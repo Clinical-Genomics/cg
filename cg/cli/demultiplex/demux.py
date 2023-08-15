@@ -171,6 +171,10 @@ def delete_flow_cell(
         )
 
 @click.command(name="mark-complete")
-def mark_demultiplexed_flow_cells():
+def mark_demultiplexed_flow_cells(context: CGConfig):
     """Mark flow cells for which demultiplexing is completed."""
-    pass
+    out_directory: Path = context.demultiplex.out_dir
+
+
+def is_demultiplexed(flow_cell_run_directory: Path):
+    return True
