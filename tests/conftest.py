@@ -2943,7 +2943,7 @@ def fixture_taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> Path:
 
 @pytest.fixture(name="taxprofiler_housekeeper_dir")
 def fixture_taxprofiler_housekeeper_dir(tmpdir_factory, taxprofiler_dir: Path) -> Path:
-    """Return the path to the taxprofiler housekeeper bundle dir."""
+    """Return the path to the Taxprofiler Housekeeper bundle directory."""
     return tmpdir_factory.mktemp("bundles")
 
 
