@@ -14,7 +14,7 @@ class TaxprofilerParameters(PipelineParameters):
     perform_shortread_complexityfilter: bool = True
     save_complexityfiltered_reads: bool = True
     perform_shortread_hostremoval: bool = True
-    hostremoval_reference: bool = True
+    hostremoval_reference: Path
     save_hostremoval_index: bool = True
     save_hostremoval_mapped: bool = True
     save_hostremoval_unmapped: bool = True

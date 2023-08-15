@@ -128,6 +128,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             input=self.get_case_config_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             databases=self.databases,
+            hostremoval_reference=self.hostremoval_reference,
             priority=self.account,
         )
 
