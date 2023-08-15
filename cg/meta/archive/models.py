@@ -5,8 +5,7 @@ from typing import List
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
 from housekeeper.store.models import File
-from pydantic import BaseModel
-from pydantic.v1 import ConfigDict
+from pydantic import BaseModel, ConfigDict
 
 
 class FileAndSample(BaseModel):
@@ -16,6 +15,8 @@ class FileAndSample(BaseModel):
 
 
 class SampleAndHousekeeperDestination(BaseModel):
+    """Contains a sample and where in Housekeeper any retrieved files should be stored."""
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
     sample: Sample
     housekeeper_destination: str
@@ -26,7 +27,9 @@ class FileTransferData(BaseModel):
 
     @classmethod
     @abstractmethod
-    def from_file_and_sample(cls, file: File, sample: Sample, is_archiving: bool) -> "ArchiveFile":
+    def from_file_and_sample(
+        cls, file: File, sample: Sample, is_archiving: bool
+    ) -> "FileTransferData":
         """Instantiates the class from a File and Sample object."""
         pass
 

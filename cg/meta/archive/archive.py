@@ -190,7 +190,7 @@ class SpringArchiveAPI:
             sample_internal_id
         ).full_path.as_posix()
 
-    def set_archive_retrieval_task_ids(self, retrieval_task_id: int, files: List[File]):
+    def set_archive_retrieval_task_ids(self, retrieval_task_id: int, files: List[File]) -> None:
         for file in files:
             self.housekeeper_api.set_archive_retrieval_task_id(
                 file_id=file.id, retrieval_task_id=retrieval_task_id
