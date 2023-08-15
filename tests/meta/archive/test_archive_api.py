@@ -237,3 +237,10 @@ def test_get_job_status_done(
         spring_archive_api.update_ongoing_archival_task(
             task_id=123, archive_location=ArchiveLocations.KAROLINSKA_BUCKET, is_archival=True
         )
+
+    mock_request_submitter.assert_called_with(
+        api_method=APIMethods.POST,
+        url="getJobStatus",
+        headers=header_with_test_auth_token,
+        json=archive_request_json,
+    )
