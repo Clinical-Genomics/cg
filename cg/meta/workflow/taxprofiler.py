@@ -127,6 +127,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             clusterOptions=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
             input=self.get_case_config_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
+            databases=self.databases,
             priority=self.account,
         )
 
