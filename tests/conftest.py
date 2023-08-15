@@ -2930,7 +2930,7 @@ def fixture_taxprofiler_case_id() -> str:
 
 @pytest.fixture(name="taxprofiler_sample_id")
 def fixture_taxprofiler_sample_id() -> str:
-    """Returns a rnafusion sample id."""
+    """Returns a Taxprofiler sample id."""
     return "taxprofiler_sample"
 
 
