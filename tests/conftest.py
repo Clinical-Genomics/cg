@@ -2337,7 +2337,7 @@ def fixture_context_config(
             "compute_env": "nf_tower_compute_env",
             "root": taxprofiler_dir.as_posix(),
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
-            "conda_env": "S_TAXPROFILER",
+            "conda_env": "S_taxprofiler",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "pipeline_path": Path("pipeline", "path").as_posix(),
             "databases": Path("path", "to", "databases").as_posix(),
