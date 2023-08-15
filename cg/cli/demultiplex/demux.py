@@ -18,15 +18,12 @@ DRY_RUN = click.option("--dry-run", is_flag=True)
 
 
 @click.command(name="all")
-@OPTION_BCL_CONVERTER
 @DRY_RUN
 @click.option("--flow-cells-directory", type=click.Path(exists=True, file_okay=False))
 @click.pass_obj
-def demultiplex_all(
-    context: CGConfig, bcl_converter: str, flow_cells_directory: click.Path, dry_run: bool
-):
+def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run: bool):
     """Demultiplex all flow cells that are ready under the flow cells directory."""
-    LOG.info(f"Running cg demultiplex all, using {bcl_converter}.")
+    LOG.info("Running cg demultiplex all ...")
     if flow_cells_directory:
         flow_cells_directory: Path = Path(str(flow_cells_directory))
     else:
@@ -40,7 +37,8 @@ def demultiplex_all(
             continue
         LOG.info(f"Found directory {sub_dir}")
         try:
-            flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir, bcl_converter=bcl_converter)
+            flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir)
+            LOG.info(f"Using {flow_cell.bcl_converter} for demultiplexing.")
         except FlowCellError:
             continue
 
@@ -49,7 +47,7 @@ def demultiplex_all(
 
         if not flow_cell.validate_sample_sheet():
             LOG.warning(
-                f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}",
+                f"Malformed sample sheet. Run cg demultiplex sample sheet validate {flow_cell.sample_sheet_path}",
             )
             continue
 
