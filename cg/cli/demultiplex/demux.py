@@ -11,6 +11,7 @@ from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
+
 LOG = logging.getLogger(__name__)
 
 DRY_RUN = click.option("--dry-run", is_flag=True)
