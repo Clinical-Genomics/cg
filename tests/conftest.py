@@ -2917,9 +2917,9 @@ def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
 def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
     Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
-    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet.csv").touch(
-        exist_ok=True
-    )
+    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    ).touch(exist_ok=True)
 
 
 @pytest.fixture(name="taxprofiler_case_id")
