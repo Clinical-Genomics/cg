@@ -2,33 +2,32 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 
 import requests
-from housekeeper.store.models import File, Version
-from jinja2 import Environment, PackageLoader, select_autoescape, Template
-from sqlalchemy.orm import Query
-
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat, MAX_ITEMS_TO_RETRIEVE
+from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError
 from cg.io.controller import WriteStream
 from cg.meta.meta import MetaAPI
-from cg.meta.report.field_validators import get_missing_report_data, get_empty_report_data
+from cg.meta.report.field_validators import get_empty_report_data, get_missing_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import SampleMetadataModel
 from cg.models.report.report import (
-    ReportModel,
-    CustomerModel,
     CaseModel,
+    CustomerModel,
     DataAnalysisModel,
+    ReportModel,
     ScoutReportFiles,
 )
-from cg.models.report.sample import SampleModel, ApplicationModel, TimestampModel, MethodsModel
-from cg.store.models import Analysis, Application, Family, Sample, FamilySample
+from cg.models.report.sample import ApplicationModel, MethodsModel, SampleModel, TimestampModel
+from cg.store.models import Analysis, Application, Family, FamilySample, Sample
+from housekeeper.store.models import File, Version
+from jinja2 import Environment, PackageLoader, Template, select_autoescape
+from sqlalchemy.orm import Query
 
 LOG = logging.getLogger(__name__)
 
@@ -74,7 +73,6 @@ class ReportAPI(MetaAPI):
         file: File = self.housekeeper_api.add_file(
             path=delivery_report_file, version_obj=version, tags=[case_id, HK_DELIVERY_REPORT_TAG]
         )
-        self.housekeeper_api.include_file(file, version)
         self.housekeeper_api.add_commit(file)
         return file
 
