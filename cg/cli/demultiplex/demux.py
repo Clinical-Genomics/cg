@@ -169,3 +169,8 @@ def delete_flow_cell(
             run_dir=run_dir,
             status_db=status_db,
         )
+
+@click.command(name="mark-complete")
+def mark_demultiplexed_flow_cells():
+    """Mark flow cells for which demultiplexing is completed."""
+    pass
