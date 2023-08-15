@@ -138,7 +138,9 @@ class FlowCellDirectoryData:
     ) -> str:
         """Return the BCL converter based on the sequencer."""
         if self.sequencer_type in [Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
+            LOG.debug(f"Using BCL converter: {BclConverter.DRAGEN}")
             return BclConverter.DRAGEN
+        LOG.debug(f"Using BCL converter: {BclConverter.BCL2FASTQ}")
         return BclConverter.BCL2FASTQ
 
     @property
