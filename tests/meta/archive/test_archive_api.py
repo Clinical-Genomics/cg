@@ -204,7 +204,8 @@ def test_archive_all_non_archived_spring_files(
         json=archive_request_json,
     )
 
-    # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper
+    # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper while no other
+    # files should have an entry
     files: List[File] = spring_archive_api.housekeeper_api.files()
     for file in files:
         if SequencingFileTag.SPRING in [tag.name for tag in file.tags]:
@@ -213,6 +214,10 @@ def test_archive_all_non_archived_spring_files(
             )
             if sample and sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET:
                 assert file.archive
+            else:
+                assert not file.archive
+        else:
+            assert not file.archive
 
 
 def test_retrieve_file(
