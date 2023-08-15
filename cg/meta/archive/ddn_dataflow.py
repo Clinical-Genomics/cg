@@ -169,28 +169,28 @@ class SubJob(BaseModel):
 class GetJobStatusResponse(BaseModel):
     """Model representing the response fields from a get_job_status post."""
 
-    request_date: datetime
-    operation: str
+    request_date: Optional[datetime] = None
+    operation: Optional[str] = None
     job_id: int
-    type: str
-    status: int
+    type: Optional[str] = None
+    status: Optional[int] = None
     description: str
-    start_date: datetime
-    end_date: datetime
-    durationTime: int
-    priority: int
-    progress: float
-    subjobs: List[SubJob]
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    durationTime: Optional[int] = None
+    priority: Optional[int] = None
+    progress: Optional[float] = None
+    subjobs: Optional[List[SubJob]] = None
 
 
 class GetJobStatusPayload(BaseModel):
     """Model representing the payload for a get_job_status request."""
 
     job_id: int
-    subjob_id: Optional[int]
-    related_jobs: Optional[bool]
-    main_subjob: Optional[bool]
-    debug: Optional[bool]
+    subjob_id: Optional[int] = None
+    related_jobs: Optional[bool] = None
+    main_subjob: Optional[bool] = None
+    debug: Optional[bool] = None
 
     def post_request(self, url: str, headers: dict) -> int:
         """Sends a request to the given url with, the given headers, and its own content as

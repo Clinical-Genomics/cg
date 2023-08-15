@@ -11,7 +11,6 @@ from cg.store import Store
 from cg.store.models import Sample
 from housekeeper.store.models import File
 from pydantic import BaseModel, ConfigDict
-from requests import Response
 
 LOG = logging.getLogger(__name__)
 DEFAULT_SPRING_ARCHIVE_COUNT = 200

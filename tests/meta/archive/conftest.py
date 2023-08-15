@@ -42,6 +42,12 @@ def fixture_ok_ddn_response(ok_response: Response):
     return ok_response
 
 
+@pytest.fixture(name="ok_ddn_job_status_response")
+def fixture_ok_ddn_job_status_response(ok_response: Response):
+    ok_response._content = b'{"job_id": "123", "description": "Completed"}'
+    return ok_response
+
+
 @pytest.fixture(name="archive_request_json")
 def fixture_archive_request_json(
     remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str

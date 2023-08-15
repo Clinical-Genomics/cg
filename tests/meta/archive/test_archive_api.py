@@ -212,3 +212,28 @@ def test_archive_all_non_archived_spring_files(
             )
             if sample and sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET:
                 assert file.archive
+
+
+def test_get_job_status_done(
+    spring_archive_api: SpringArchiveAPI,
+    caplog,
+    ok_ddn_job_status_response,
+    archive_request_json,
+    header_with_test_auth_token,
+):
+    with mock.patch.object(
+        AuthToken,
+        "model_validate_json",
+        return_value=AuthToken(
+            access="test_auth_token",
+            expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
+            refresh="test_refresh_token",
+        ),
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_ddn_job_status_response,
+    ) as mock_request_submitter:
+        spring_archive_api.update_ongoing_archival_task(
+            task_id=123, archive_location=ArchiveLocations.KAROLINSKA_BUCKET, is_archival=True
+        )
