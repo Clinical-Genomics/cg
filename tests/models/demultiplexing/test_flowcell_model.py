@@ -171,7 +171,7 @@ def test_flow_cell_directory_data_with_set_bcl_converter(
 
 
 def test_flow_cell_directory_data_with_novaseq_flow_cell_directory(
-    flow_cell_directory_name_demultiplexed_with_bcl_convert: str, bcl_converter=BclConverter.DRAGEN
+    flow_cell_directory_name_demultiplexed_with_bcl_convert: str,
 ):
     """Test that the bcl converter is set to dragen when prodiving a novaseq flow cell directory."""
     # GIVEN a Bcl2Fastq flow cell directory
@@ -179,8 +179,7 @@ def test_flow_cell_directory_data_with_novaseq_flow_cell_directory(
     # WHEN instantiating a flow cell object
     flow_cell = FlowCellDirectoryData(
         flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl_convert),
-        bcl_converter=bcl_converter,
     )
 
     # THEN the bcl converter is dragen
-    assert flow_cell.bcl_converter == bcl_converter
+    assert flow_cell.bcl_converter == BclConverter.DRAGEN
