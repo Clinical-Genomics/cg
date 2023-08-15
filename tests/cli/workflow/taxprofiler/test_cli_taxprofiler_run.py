@@ -64,14 +64,11 @@ def test_with_config_use_nextflow(
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
 
-    assertions = {
-        "using nextflow": "Assertion failed: 'using nextflow' not found in caplog.text",
-        "path/to/bin/nextflow": "Assertion failed: 'path/to/bin/nextflow' not found in caplog.text",
-        "-work-dir": "Assertion failed: '-work-dir' not found in caplog.text",
-        "-params-file": "Assertion failed: '-params-file' not found in caplog.text",
-        "-resume": "Assertion failed: '-resume' not found in caplog.text",
-    }
-
-    # Loop through assertions
-    for text, error_message in assertions.items():
-        assert text in caplog.text, error_message
+    for message in [
+        "using nextflow",
+        "path/to/bin/nextflow",
+        "-work-dir",
+        "-params-file",
+        "-resume",
+    ]:
+        assert message in caplog.text
