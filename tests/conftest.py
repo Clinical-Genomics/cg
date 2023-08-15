@@ -2979,7 +2979,7 @@ def fixture_taxprofiler_housekeeper(
         "created": datetime.now(),
         "version": "1.0",
         "files": [
-            {"path": str(f), "tags": ["fastq"], "archive": False}
+            {"path": str(f), "tags": [SequencingFileTag.FASTQ], "archive": False}
             for f in taxprofiler_mock_fastq_files
         ],
     }
