@@ -136,7 +136,7 @@ class FlowCellDirectoryData:
     def get_bcl_converter_by_sequencer(
         self,
     ) -> str:
-        """Return the BCL converter based on sequencer."""
+        """Return the BCL converter based on the sequencer."""
         if self.sequencer_type in [Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
             return BclConverter.DRAGEN
         return BclConverter.BCL2FASTQ

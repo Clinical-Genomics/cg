@@ -63,7 +63,7 @@ def test_create_bcl2fastq_sample_sheet(
 ):
     # GIVEN a flowcell directory with some run parameters
     flowcell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_working_directory, bcl_converter=BclConverter.BCL2FASTQ
+        flow_cell_path=flow_cell_working_directory, bcl_converter=BclConverter.BCL2FASTQ
     )
     assert flowcell.run_parameters_path.exists()
 
