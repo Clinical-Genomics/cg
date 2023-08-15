@@ -2936,7 +2936,7 @@ def fixture_taxprofiler_sample_id() -> str:
 
 @pytest.fixture(name="taxprofiler_dir")
 def fixture_taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> Path:
-    """Return the path to the taxprofiler apps dir."""
+    """Return the path to the Taxprofiler directory."""
     taxprofiler_dir = tmpdir_factory.mktemp("taxprofiler")
     return Path(taxprofiler_dir).absolute()
 
