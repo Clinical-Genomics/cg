@@ -4,6 +4,7 @@ from typing import List
 from pydantic.v1 import BaseModel, validator
 
 from cg.constants.nextflow import DELIVER_FILE_HEADERS
+from cg.exc import SampleSheetError
 
 
 class PipelineParameters(BaseModel):
@@ -24,11 +25,19 @@ class NextflowSample(BaseModel):
     fastq_forward: List[str]
     fastq_reverse: List[str]
 
+    @validator("fastq_reverse", "fastq_forward")
+    def fastq_not_empty(cls, fastq) -> List[str]:
+        """Verify that fastq files are provided."""
+        if len(fastq) == 0:
+            raise SampleSheetError("Fastq files not provided")
+        return fastq
+
     @validator("fastq_reverse")
-    def fastq_forward_reverse_length_match(cls, fastq_reverse: List[str], values: dict) -> str:
+    def fastq_forward_reverse_length_match(cls, fastq_reverse, values: dict) -> List[str]:
         """Verify that the number of fastq files is the same for R1 and R2."""
-        assert len(fastq_reverse) == len(values.get("fastq_forward")) or len(fastq_reverse) == 0
-        return "Fastq file length for forward and reverse do not match"
+        if len(fastq_reverse) != len(values.get("fastq_forward")):
+            raise SampleSheetError("Fastq file length for forward and reverse do not match")
+        return fastq_reverse
 
 
 class NextflowDeliverables(BaseModel):
