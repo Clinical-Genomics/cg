@@ -2,22 +2,13 @@
 from typing import List, Optional, Set
 import logging
 
-from cg.store.models import Sample
-
-from cg.apps.sequencing_metrics_parser.api import (
-    create_sample_lane_sequencing_metrics_for_flow_cell,
-)
-
-from cg.meta.demultiplex.utils import (
-    get_q30_threshold,
-)
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_internal_ids_from_sample_sheet,
-)
-
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-from cg.store.models import Flowcell, SampleLaneSequencingMetrics
+from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+
+from cg.apps.sequencing_metrics_parser.api import create_sample_lane_sequencing_metrics_for_flow_cell
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_internal_ids_from_sample_sheet
+from cg.meta.demultiplex.utils import get_q30_threshold
 
 LOG = logging.getLogger(__name__)
 
