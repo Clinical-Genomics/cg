@@ -40,7 +40,6 @@ from cg.utils.date import get_date_days_ago, get_timedelta_from_date
 from cg.utils.dispatcher import Dispatcher
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import File, Version
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Query
 from tabulate import tabulate
 
@@ -437,7 +436,7 @@ def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: i
             )
 
 
-@clean.command("remove-old-demutliplexed-run-dirs")
+@clean.command("remove-old-demultiplexed-run-dirs")
 @click.option(
     "-o",
     "--days-old",
@@ -447,7 +446,7 @@ def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: i
 )
 @DRY_RUN
 @click.pass_obj
-def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run: bool):
+def remove_old_demultiplexed_run_dirs(context: CGConfig, days_old: int, dry_run: bool):
     """Removes flow cells from demultiplexed run directory."""
     status_db: Store = context.status_db
     demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
