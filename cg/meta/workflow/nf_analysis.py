@@ -2,7 +2,7 @@ import logging
 import operator
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
@@ -172,6 +172,7 @@ class NfAnalysisAPI(AnalysisAPI):
         self, case_id: str, pipeline_parameters: dict, dry_run: bool = False
     ) -> None:
         """Write params-file for analysis."""
+        LOG.info("Generating parameters file")
         LOG.info(pipeline_parameters)
         if dry_run:
             return
@@ -181,17 +182,24 @@ class NfAnalysisAPI(AnalysisAPI):
         )
 
     @staticmethod
-    def write_sample_sheet_csv(
-        samplesheet_content: Dict[str, List[str]],
-        headers: List[str],
-        config_path: Path,
+    def write_sample_sheet(
+        content: List[List[Any]],
+        file_path: Path,
+        header: Optional[List[str]],
+        dry_run: bool = False,
     ) -> None:
         """Write sample sheet CSV file."""
-        with open(config_path, "w") as outfile:
-            outfile.write(",".join(headers))
-            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
-                outfile.write("\n")
-                outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
+        LOG.info("Generating sample sheet")
+        LOG.info(content)
+        if dry_run:
+            return
+        if header:
+            content.insert(0, header)
+        WriteFile.write_file_from_content(
+            content=content,
+            file_format=FileFormat.CSV,
+            file_path=file_path,
+        )
 
     @staticmethod
     def write_deliverables_bundle(

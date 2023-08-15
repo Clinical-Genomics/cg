@@ -2,18 +2,19 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic.v1 import ValidationError
 
 from cg import resources
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, Strandedness
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.rnafusion import (
     RNAFUSION_METRIC_CONDITIONS,
     RNAFUSION_SAMPLESHEET_HEADERS,
     RNAFUSION_STRANDEDNESS_HEADER,
+    RnafusionSampleSheetHeaders,
 )
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, MetricsQCError, MissingMetrics
@@ -28,7 +29,7 @@ from cg.models.deliverables.metric_deliverables import (
 )
 from cg.models.nf_analysis import NextflowDeliverables, PipelineParameters
 from cg.models.rnafusion.rnafusion import RnafusionAnalysis, RnafusionParameters, RnafusionSample
-from cg.store.models import Family
+from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -57,64 +58,59 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.revision: str = config.rnafusion.revision
         self.nextflow_binary_path: str = config.rnafusion.binary_path
 
-    @staticmethod
-    def build_samplesheet_content(
-        case_id: str, fastq_forward: List[str], fastq_reverse: List[str], strandedness: str
-    ) -> Dict[str, List[str]]:
-        """Build samplesheet headers and lists"""
-        try:
-            RnafusionSample(
-                sample=case_id,
-                fastq_forward=fastq_forward,
-                fastq_reverse=fastq_reverse,
-                strandedness=strandedness,
+    @property
+    def sample_sheet_header(self):
+        # return RNAFUSION_SAMPLESHEET_HEADERS
+        return list(RnafusionSampleSheetHeaders)
+
+    def get_sample_sheet_content_per_sample(
+        self, sample: Sample, case_id: str, strandedness: Strandedness
+    ) -> RnafusionSample:
+        """Get sample sheet information per sample."""
+        sample_metadata: List[dict] = self.gather_file_metadata_for_sample(sample_obj=sample)
+        forward_read: List[str] = self.extract_read_files(
+            metadata=sample_metadata, forward_read=True
+        )
+        reverse_read: List[str] = self.extract_read_files(
+            metadata=sample_metadata, reverse_read=True
+        )
+
+        sample_sheet = RnafusionSample(
+            sample=case_id,
+            fastq_forward=forward_read,
+            fastq_reverse=reverse_read,
+            strandedness=strandedness,
+        )
+
+        LOG.info("-------")
+        LOG.info(sample_sheet)
+        LOG.info("-------")
+
+        return sample_sheet
+
+    def reformat_sample_content(self, sample_sheet: RnafusionSample) -> List[List[str]]:
+        """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
+        return [
+            [sample_sheet.sample, fastq_forward, fastq_reverse, str(sample_sheet.strandedness)]
+            for fastq_forward, fastq_reverse in zip(
+                sample_sheet.fastq_forward, sample_sheet.fastq_reverse
             )
-        except ValidationError as error:
-            LOG.error(error)
-            raise CgError("Error creating sample sheet")
+        ]
 
-        samples_full_list: list = []
-        strandedness_full_list: list = []
-        # Complete sample and strandedness lists to the same length as fastq_forward:
-        for _ in range(len(fastq_forward)):
-            samples_full_list.append(case_id)
-            strandedness_full_list.append(strandedness)
-
-        samplesheet_content: dict = {
-            NFX_SAMPLE_HEADER: samples_full_list,
-            NFX_READ1_HEADER: fastq_forward,
-            NFX_READ2_HEADER: fastq_reverse,
-            RNAFUSION_STRANDEDNESS_HEADER: strandedness_full_list,
-        }
-        return samplesheet_content
-
-    def write_samplesheet(self, case_id: str, strandedness: str, dry_run: bool = False) -> None:
-        """Write sample sheet for rnafusion analysis in case folder."""
+    def get_sample_sheet_content(self, case_id: str, strandedness: Strandedness) -> List[List[Any]]:
+        """Returns content for sample sheet."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         if len(case.links) != 1:
             raise NotImplementedError(
                 "Case objects are assumed to be related to a single sample (one link)"
             )
-
         for link in case.links:
-            sample_metadata: List[dict] = self.gather_file_metadata_for_sample(link.sample)
-            forward_read: List[str] = self.extract_read_files(
-                metadata=sample_metadata, forward_read=True
+            sample_sheet_content = self.reformat_sample_content(
+                sample_sheet=self.get_sample_sheet_content_per_sample(
+                    sample=link.sample, case_id=case_id, strandedness=strandedness
+                )
             )
-            reverse_read: List[str] = self.extract_read_files(
-                metadata=sample_metadata, reverse_read=True
-            )
-            samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
-                case_id, forward_read, reverse_read, strandedness
-            )
-            LOG.info(samplesheet_content)
-            if dry_run:
-                continue
-            self.write_sample_sheet_csv(
-                samplesheet_content=samplesheet_content,
-                headers=RNAFUSION_SAMPLESHEET_HEADERS,
-                config_path=self.get_case_config_path(case_id=case_id),
-            )
+            return sample_sheet_content
 
     def get_pipeline_parameters(
         self, case_id: str, genomes_base: Optional[Path] = None
@@ -136,15 +132,18 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def config_case(
         self,
         case_id: str,
-        strandedness: str,
+        strandedness: Strandedness,
         genomes_base: Path,
         dry_run: bool,
     ) -> None:
         """Create sample sheet file for RNAFUSION analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
-        LOG.info("Generating samplesheet")
-        self.write_samplesheet(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
-        LOG.info("Generating parameters file")
+        self.write_sample_sheet(
+            content=self.get_sample_sheet_content(case_id=case_id, strandedness=strandedness),
+            file_path=self.get_case_config_path(case_id=case_id),
+            header=self.sample_sheet_header,
+            dry_run=dry_run,
+        )
         self.write_params_file(
             case_id=case_id,
             pipeline_parameters=self.get_pipeline_parameters(
@@ -155,7 +154,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
-
         LOG.info("Configs files written")
 
     def report_deliver(self, case_id: str) -> None:

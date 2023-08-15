@@ -9,6 +9,7 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.rnafusion.base import config_case
 from cg.constants import EXIT_SUCCESS
+from cg.constants.constants import Strandedness
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
@@ -74,9 +75,8 @@ def test_strandedness(
     # GIVEN a VALID case_id and genome_version
     case_id: str = rnafusion_case_id
     option_key: str = "--strandedness"
-    option_values: List[str] = ["reverse", "forward", "unstranded"]
     # WHEN running with strandedness option specified
-    for option_value in option_values:
+    for option_value in list(Strandedness):
         result = cli_runner.invoke(
             config_case,
             [case_id, option_key, option_value],
@@ -130,7 +130,7 @@ def test_defaults(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN sample sheet file should be generated
-    assert "Generating samplesheet" in caplog.text
+    assert "Generating sample sheet" in caplog.text
 
     # THEN parameters file should be generated
     assert "Generating parameters file" in caplog.text
