@@ -18,8 +18,8 @@ DRY_RUN = click.option("--dry-run", is_flag=True)
 
 
 @click.command(name="all")
-@DRY_RUN
 @click.option("--flow-cells-directory", type=click.Path(exists=True, file_okay=False))
+@DRY_RUN
 @click.pass_obj
 def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run: bool):
     """Demultiplex all flow cells that are ready under the flow cells directory."""
