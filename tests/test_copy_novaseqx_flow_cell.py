@@ -14,7 +14,14 @@ def demultiplexed_novaseqx_flow_cell(tmp_path: Path, latest_analysis_version: st
     # Incomplete analysis version
     (tmp_path / "Analysis" / "1").mkdir(parents=True, exist_ok=True)
 
-    # Complete analysis version
+    # Complete analysis version - old
+    (tmp_path / "Analysis/0").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "Analysis/0" / "CopyComplete.txt").touch()
+
+    (tmp_path / "Analysis/0" / "Data").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "Analysis/0" / "Data" / "Secondary_Analysis_Complete.txt").touch()
+
+    # Complete analysis version - most recent
     (tmp_path / latest_analysis_version).mkdir(parents=True, exist_ok=True)
     (tmp_path / latest_analysis_version / "CopyComplete.txt").touch()
 
