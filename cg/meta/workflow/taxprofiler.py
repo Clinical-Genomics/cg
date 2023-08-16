@@ -12,7 +12,6 @@ from cg.constants.taxprofiler import (
     TAXPROFILER_RUN_ACCESSION,
     TAXPROFILER_SAMPLE_SHEET_HEADERS,
     TAXPROFILER_FASTA_HEADER,
-    TaxprofilerDefaults,
 )
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.nf_analysis import PipelineParameters
