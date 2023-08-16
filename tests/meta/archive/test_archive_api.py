@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import List
 from unittest import mock
 
@@ -226,6 +227,11 @@ def test_get_job_status_done(
     archive_request_json,
     header_with_test_auth_token,
 ):
+    # GIVEN a file with an ongoing archival
+    file: File = spring_archive_api.housekeeper_api.files().first()
+    spring_archive_api.housekeeper_api.add_archives(files=[Path(file.path)], archive_task_id=123)
+
+    # WHEN querying the task id and getting a "COMPLETED" response
     with mock.patch.object(
         AuthToken,
         "model_validate_json",
@@ -243,9 +249,14 @@ def test_get_job_status_done(
             task_id=123, archive_location=ArchiveLocations.KAROLINSKA_BUCKET, is_archival=True
         )
 
+    # THEN we should have sent a POST with the correct request
     mock_request_submitter.assert_called_with(
         api_method=APIMethods.POST,
         url="some/api/getJobStatus",
         headers=header_with_test_auth_token,
         json=GetJobStatusPayload(job_id=123).model_dump(),
     )
+
+    # THEN the file should have its archived_at timestamp set
+    files: List[File] = spring_archive_api.housekeeper_api.files()
+    assert [file for file in files if file.archive and file.archive.archived_at]
