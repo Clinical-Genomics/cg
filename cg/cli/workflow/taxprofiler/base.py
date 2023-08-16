@@ -112,7 +112,7 @@ def run(
             "revision": revision or analysis_api.revision,
             "wait": NfTowerStatus.SUBMITTED,
         }
-     )
+    )
     try:
         analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.check_analysis_ongoing(case_id)
