@@ -5,7 +5,7 @@ from cg.cli.demultiplex.demux import is_demultiplexed
 
 
 @pytest.fixture
-def novaseqx_flow_cell_analysis_incomplete(tmp_path: Path) -> Path:
+def demultiplexed_novaseqx_flow_cell(tmp_path: Path) -> Path:
     (tmp_path / "Analysis" / "1").mkdir(parents=True, exist_ok=True)
     (tmp_path / "Analysis" / "1" / "CopyComplete.txt").touch()
     
@@ -26,11 +26,11 @@ def demultiplex_not_complete_novaseqx_flow_cell(tmp_file) -> Path:
     return tmp_file
 
 
-def test_flow_cell_is_demultiplexed(novaseqx_flow_cell_analysis_incomplete: Path):
+def test_flow_cell_is_demultiplexed(demultiplexed_novaseqx_flow_cell: Path):
     # GIVEN a flow cell for which demultiplexing is completed
 
     # WHEN checking if the flow cell is demultiplexed
-    is_demultiplexing_completed = is_demultiplexed(novaseqx_flow_cell_analysis_incomplete)
+    is_demultiplexing_completed = is_demultiplexed(demultiplexed_novaseqx_flow_cell)
 
     # THEN the flow cell is demultiplexed
     assert is_demultiplexing_completed
