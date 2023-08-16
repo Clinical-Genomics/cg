@@ -200,7 +200,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
-        flow_cells_dir=cg_context.flow_cells_dir,
+        flow_cells_dir="cg_context.flow_cells_dir",
     )
 
     # WHEN no flow cell is specified, but a flow cell in status-db has the status "requested"
@@ -263,7 +263,7 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
-        flow_cells_dir=cg_context.flow_cells_dir,
+        flow_cells_dir="cg_context.flow_cells_dir",
     )
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
@@ -328,7 +328,7 @@ def test_fetch_flow_cell_pdc_retrieval_failed(
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock_pdc,
-        flow_cells_dir=cg_context.flow_cells_dir,
+        flow_cells_dir="cg_context.flow_cells_dir",
     )
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
