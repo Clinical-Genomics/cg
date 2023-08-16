@@ -18,15 +18,12 @@ DRY_RUN = click.option("--dry-run", is_flag=True)
 
 
 @click.command(name="all")
-@OPTION_BCL_CONVERTER
-@DRY_RUN
 @click.option("--flow-cells-directory", type=click.Path(exists=True, file_okay=False))
+@DRY_RUN
 @click.pass_obj
-def demultiplex_all(
-    context: CGConfig, bcl_converter: str, flow_cells_directory: click.Path, dry_run: bool
-):
+def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run: bool):
     """Demultiplex all flow cells that are ready under the flow cells directory."""
-    LOG.info(f"Running cg demultiplex all, using {bcl_converter}.")
+    LOG.info("Running cg demultiplex all ...")
     if flow_cells_directory:
         flow_cells_directory: Path = Path(str(flow_cells_directory))
     else:
@@ -40,7 +37,8 @@ def demultiplex_all(
             continue
         LOG.info(f"Found directory {sub_dir}")
         try:
-            flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir, bcl_converter=bcl_converter)
+            flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir)
+            LOG.info(f"Using {flow_cell.bcl_converter} for demultiplexing.")
         except FlowCellError:
             continue
 
@@ -157,8 +155,8 @@ def delete_flow_cell(
         f"Are you sure you want to delete the flow cell from the following databases:\n"
         f"cg-stats={True if status_db else cg_stats}\nDemultiplexing-dir={True if status_db else demultiplexing_dir}\n"
         f"Housekeeper={True if status_db else housekeeper}\nInit_files={True if status_db else init_files}\n"
-        f"Run-dir={True if status_db else run_dir}\nStatusdb={status_db}"
-        f"\nSample-lane-sequencing-metrics={True if sample_lane_sequencing_metrics else sample_lane_sequencing_metrics}\n"
+        f"Run-dir={True if status_db else run_dir}\nStatusdb={status_db}\n"
+        f"\nSample-lane-sequencing-metrics={True if sample_lane_sequencing_metrics else sample_lane_sequencing_metrics}"
     ):
         delete_demux_api.delete_flow_cell(
             cg_stats=cg_stats,
