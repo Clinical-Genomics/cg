@@ -24,6 +24,7 @@ from cg.cli.workflow.taxprofiler.options import (
     OPTION_INSTRUMENT_PLATFORM,
 )
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
+from cg.cli.workflow.taxprofiler.taxprofiler_command import get_command_args
 from cg.constants.nf_analysis import NfTowerStatus
 
 LOG = logging.getLogger(__name__)
@@ -93,25 +94,39 @@ def run(
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
-    command_args: CommandArgs = CommandArgs(
-        **{
-            "log": analysis_api.get_log_path(
-                case_id=case_id,
-                pipeline=analysis_api.pipeline,
-                log=log,
-            ),
-            "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
-            "resume": not from_start,
-            "profile": analysis_api.get_profile(profile=profile),
-            "config": analysis_api.get_nextflow_config_path(nextflow_config=config),
-            "params_file": analysis_api.get_params_file_path(
-                case_id=case_id, params_file=params_file
-            ),
-            "name": case_id,
-            "revision": revision or analysis_api.revision,
-            "wait": NfTowerStatus.SUBMITTED,
-        }
+    # command_args: CommandArgs = CommandArgs(
+    #    **{
+    #        "log": analysis_api.get_log_path(
+    #            case_id=case_id,
+    #            pipeline=analysis_api.pipeline,
+    #            log=log,
+    #        ),
+    #        "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
+    #        "resume": not from_start,
+    #        "profile": analysis_api.get_profile(profile=profile),
+    #        "config": analysis_api.get_nextflow_config_path(nextflow_config=config),
+    #        "params_file": analysis_api.get_params_file_path(
+    #            case_id=case_id, params_file=params_file
+    #        ),
+    #        "name": case_id,
+    #        "revision": revision or analysis_api.revision,
+    #        "wait": NfTowerStatus.SUBMITTED,
+    #    }
+    # )
+    command_args_dict = get_command_args(
+        analysis_api=analysis_api,
+        case_id=case_id,
+        log=log,
+        work_dir=work_dir,
+        from_start=from_start,
+        profile=profile,
+        config=config,
+        params_file=params_file,
+        revision=revision,
     )
+    command_args = CommandArgs(**command_args_dict.dict())
+    LOG.info(f"command_args: {command_args}.")
+
     try:
         analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.check_analysis_ongoing(case_id)
