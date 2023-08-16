@@ -834,13 +834,13 @@ def fixture_demultiplexed_flow_cell_finished_working_directory(
 
 @pytest.fixture(name="flow_cell_working_directory")
 def fixture_flow_cell_working_directory(
-    bcl2fastq_flow_cell_dir: Path, flow_cell_runs_working_directory: Path
+    bcl2fastq_flow_cell_dir: Path, flow_cells_dir: Path
 ) -> Path:
     """Return the path to a working directory that will be deleted after test is run.
 
     This is a path to a flow cell directory with the run parameters present.
     """
-    working_dir: Path = Path(flow_cell_runs_working_directory, bcl2fastq_flow_cell_dir.name)
+    working_dir: Path = Path(flow_cells_dir, bcl2fastq_flow_cell_dir.name)
     working_dir.mkdir(parents=True)
 
     existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
@@ -1102,14 +1102,14 @@ def fixture_demultiplex_context(
 
 @pytest.fixture(name="demultiplex_configs")
 def fixture_demultiplex_configs(
-    flow_cell_runs_working_directory: Path,
-    demultiplexed_flow_cells_working_directory: Path,
+    flow_cells_dir: Path,
+    demultiplexed_runs: Path,
 ) -> dict:
     """Return demultiplex configs."""
-    demultiplexed_flow_cells_working_directory.mkdir(parents=True, exist_ok=True)
+    demultiplexed_runs.mkdir(parents=True, exist_ok=True)
     return {
-        "flow_cells_dir": demultiplexed_flow_cells_working_directory.as_posix(),
-        "demultiplexed_flow_cells_dir": flow_cell_runs_working_directory.as_posix(),
+        "flow_cells_dir": flow_cells_dir.as_posix(),
+        "demultiplexed_flow_cells_dir": demultiplexed_runs.as_posix(),
         "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
 
