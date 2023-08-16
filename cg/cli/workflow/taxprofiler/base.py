@@ -61,7 +61,7 @@ def config_case(
         )
 
     except CgError as error:
-        LOG.error(f"{case_id} could not be found in StatusDB!")
+    LOG.error(f"Could not create sample sheet: {error}")
         raise click.Abort() from error
 
 
