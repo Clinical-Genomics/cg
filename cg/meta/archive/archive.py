@@ -116,6 +116,7 @@ class SpringArchiveAPI:
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
         is_job_done: bool = archive_handler.is_job_done(job_id=task_id)
         if is_job_done:
+            LOG.info(f"Job with id {task_id} has finished, updating Archive entries.")
             if is_archival:
                 self.housekeeper_api.set_archive_task_archived_at(task_id)
             else:
