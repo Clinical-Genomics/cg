@@ -2910,7 +2910,6 @@ def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
     return Path(shutil.copytree(original_dir, tmp_dir))
 
 
-## Taxprofiler fixtures
 
 
 @pytest.fixture(scope="session")
