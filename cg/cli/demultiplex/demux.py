@@ -171,6 +171,7 @@ def delete_flow_cell(
             status_db=status_db,
         )
 
+
 @click.command(name="copy-novaseqx")
 def copy_novaseqx_flow_cells(context: CGConfig):
     """Copy novaseqx flow cells ready for post processing to demultiplexed runs."""
@@ -182,8 +183,13 @@ def copy_novaseqx_flow_cells(context: CGConfig):
 
 
 def is_ready_for_post_processing(flow_cell_directory: Path):
-    copy_completed = is_copied(flow_cell_directory)
-    analysis_completed = is_analyzed(flow_cell_directory)
+    analysis_directory = get_latest_analysis_directory(flow_cell_directory)
+
+    if not analysis_directory:
+        return False
+
+    copy_completed = is_copied(analysis_directory)
+    analysis_completed = is_analyzed(analysis_directory)
     post_processed = is_post_processed(flow_cell_directory)
     return copy_completed and analysis_completed and not post_processed
 
@@ -193,15 +199,13 @@ def get_latest_analysis_directory(flow_cell_directory: Path) -> Optional[Path]:
 
     if not analysis_directory_exists(flow_cell_directory):
         return None
-    analysis_versions = get_sorted_analysis_versions(analysis_path)  
+    analysis_versions = get_sorted_analysis_versions(analysis_path)
     return analysis_versions[0] if analysis_versions else None
 
 
 def get_sorted_analysis_versions(analysis_path: Path) -> List[Path]:
     return sorted(
-        (d for d in analysis_path.iterdir() if d.is_dir()), 
-        key=lambda x: int(x.name), 
-        reverse=True
+        (d for d in analysis_path.iterdir() if d.is_dir()), key=lambda x: int(x.name), reverse=True
     )
 
 def analysis_directory_exists(flow_cell_directory: Path) -> bool:
@@ -209,12 +213,12 @@ def analysis_directory_exists(flow_cell_directory: Path) -> bool:
     return analysis_path.exists() and analysis_path.is_dir()
 
 
-def is_copied(flow_cell_directory: Path):
-    return (flow_cell_directory / "Analysis" / "1" / "CopyComplete.txt").exists()
+def is_copied(analysis_directory: Path):
+    return (analysis_directory / "CopyComplete.txt").exists()
 
 
-def is_analyzed(flow_cell_directory: Path):
-    return (flow_cell_directory / "Analysis" / "1" / "Data" / "Secondary_Analysis_Complete.txt").exists()
+def is_analyzed(analysis_directory: Path):
+    return (analysis_directory / "Data" / "Secondary_Analysis_Complete.txt").exists()
 
 
 def is_post_processed(flow_cell_directory: Path) -> bool:
