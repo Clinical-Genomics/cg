@@ -170,11 +170,15 @@ def delete_flow_cell(
             status_db=status_db,
         )
 
-@click.command(name="mark-complete")
-def mark_demultiplexed_flow_cells(context: CGConfig):
-    """Mark flow cells for which demultiplexing is completed."""
-    out_directory: Path = context.demultiplex.out_dir
+@click.command(name="copy-completed")
+def copy_demultiplexed_novaseqx_flow_cells(context: CGConfig):
+    """Copy novaseqx flow cells that have been demultiplexed to the demultiplexed directory."""
+    flow_cells_directory: Path = context.demultiplex.out_dir
+
+    for flow_cell_directory in flow_cells_directory.iterdir():
+        if is_demultiplexed(flow_cell_directory):
+            pass
 
 
-def is_demultiplexed(flow_cell_run_directory: Path):
+def is_demultiplexed(flow_cell_directory: Path):
     return True
