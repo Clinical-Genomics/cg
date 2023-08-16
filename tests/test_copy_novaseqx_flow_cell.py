@@ -5,8 +5,15 @@ from cg.cli.demultiplex.demux import is_demultiplexed
 
 
 @pytest.fixture
-def demultiplex_complete_novaseqx_flow_cell(tmp_file) -> Path:
-    return tmp_file
+def demultiplex_complete_novaseqx_flow_cell(tmp_path: Path) -> Path:
+    # Create the necessary directories and files
+    (tmp_path / "Analysis" / "1").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "Analysis" / "1" / "CopyComplete.txt").touch()
+    
+    (tmp_path / "Analysis" / "1" / "Data").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "Analysis" / "1" / "Data" / "Secondary_Analysis_Complete.txt").touch()
+    
+    return tmp_path
 
 
 @pytest.fixture
