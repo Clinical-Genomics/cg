@@ -226,6 +226,6 @@ def is_post_processed(flow_cell_directory: Path) -> bool:
     return (flow_cell_directory / "PostProcessed.txt").exists()
 
 
-def copy_flow_cell_analysis_data(flow_cell_directory: Path):
+def copy_flow_cell_analysis_data(flow_cell_directory: Path, destination: Path):
     """Copy flow cell analysis data to demultiplexed runs."""
     pass

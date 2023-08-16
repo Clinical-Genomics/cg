@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
 
-from cg.cli.demultiplex.demux import get_latest_analysis_directory, is_ready_for_post_processing
+from cg.cli.demultiplex.demux import copy_flow_cell_analysis_data, get_latest_analysis_directory, is_ready_for_post_processing
 
 
 @pytest.fixture
@@ -10,31 +10,35 @@ def latest_analysis_version() -> str:
 
 
 @pytest.fixture
-def demultiplexed_novaseqx_flow_cell(tmp_path: Path, latest_analysis_version: str) -> Path:
+def flow_cell_name() -> str:
+    return "20230427_LH00188_0001_B223YYCLT3"
+
+@pytest.fixture
+def novaseqx_flow_cell(tmp_path: Path, latest_analysis_version: str, flow_cell_name: str) -> Path:
     # Incomplete analysis version
-    (tmp_path / "Analysis" / "1").mkdir(parents=True, exist_ok=True)
+    (tmp_path / flow_cell_name / "Analysis" / "1").mkdir(parents=True, exist_ok=True)
 
     # Complete analysis version - old
-    (tmp_path / "Analysis/0").mkdir(parents=True, exist_ok=True)
-    (tmp_path / "Analysis/0" / "CopyComplete.txt").touch()
+    (tmp_path / flow_cell_name / "Analysis/0").mkdir(parents=True, exist_ok=True)
+    (tmp_path / flow_cell_name / "Analysis/0" / "CopyComplete.txt").touch()
 
-    (tmp_path / "Analysis/0" / "Data").mkdir(parents=True, exist_ok=True)
-    (tmp_path / "Analysis/0" / "Data" / "Secondary_Analysis_Complete.txt").touch()
+    (tmp_path / flow_cell_name / "Analysis/0" / "Data").mkdir(parents=True, exist_ok=True)
+    (tmp_path / flow_cell_name / "Analysis/0" / "Data" / "Secondary_Analysis_Complete.txt").touch()
 
     # Complete analysis version - most recent
-    (tmp_path / latest_analysis_version).mkdir(parents=True, exist_ok=True)
-    (tmp_path / latest_analysis_version / "CopyComplete.txt").touch()
+    (tmp_path / flow_cell_name / latest_analysis_version).mkdir(parents=True, exist_ok=True)
+    (tmp_path / flow_cell_name / latest_analysis_version / "CopyComplete.txt").touch()
 
-    (tmp_path / latest_analysis_version / "Data").mkdir(parents=True, exist_ok=True)
-    (tmp_path / latest_analysis_version / "Data" / "Secondary_Analysis_Complete.txt").touch()
+    (tmp_path / flow_cell_name / latest_analysis_version / "Data").mkdir(parents=True, exist_ok=True)
+    (tmp_path / flow_cell_name / latest_analysis_version / "Data" / "Secondary_Analysis_Complete.txt").touch()
 
     return tmp_path
 
 
 @pytest.fixture
-def post_processed_novaseqx_flow_cell(demultiplexed_novaseqx_flow_cell) -> Path:
-    (demultiplexed_novaseqx_flow_cell / "PostProcessed.txt").touch()
-    return demultiplexed_novaseqx_flow_cell
+def post_processed_novaseqx_flow_cell(novaseqx_flow_cell) -> Path:
+    (novaseqx_flow_cell / "PostProcessed.txt").touch()
+    return novaseqx_flow_cell
 
 
 @pytest.fixture
@@ -49,11 +53,11 @@ def demultiplex_not_complete_novaseqx_flow_cell(tmp_file) -> Path:
     return tmp_file
 
 
-def test_flow_cell_is_ready_for_post_processing(demultiplexed_novaseqx_flow_cell: Path):
-    # GIVEN a flow cell for which demultiplexing is completed
+def test_flow_cell_is_ready_for_post_processing(novaseqx_flow_cell: Path):
+    # GIVEN a flow cell which is ready for post processing
 
     # WHEN checking if the flow cell is ready for post processing
-    ready = is_ready_for_post_processing(demultiplexed_novaseqx_flow_cell)
+    ready = is_ready_for_post_processing(novaseqx_flow_cell)
 
     # THEN the flow cell is ready
     assert ready
@@ -90,12 +94,23 @@ def test_previously_post_processed_flow_cell_is_not_ready(post_processed_novaseq
 
 
 def test_get_latest_analysis_version_path(
-    demultiplexed_novaseqx_flow_cell: Path, latest_analysis_version: str
+    novaseqx_flow_cell: Path, latest_analysis_version: str,
 ):
     # GIVEN a flow cell which is ready to be post processed
 
     # WHEN extracting the latest analysis version path
-    analysis_directory = get_latest_analysis_directory(demultiplexed_novaseqx_flow_cell)
+    analysis_directory = get_latest_analysis_directory(novaseqx_flow_cell)
 
     # THEN the latest analysis version path is returned
-    assert analysis_directory == demultiplexed_novaseqx_flow_cell / latest_analysis_version
+    assert analysis_directory == novaseqx_flow_cell / latest_analysis_version
+
+
+def test_copy_novaseqx_flow_cell(tmp_path: Path, novaseqx_flow_cell: Path, flow_cell_name: str):
+    # GIVEN a destination directory
+    demultiplexed_runs_directory = tmp_path
+
+    # WHEN copying the flow cell analysis data to demultiplexed runs
+    copy_flow_cell_analysis_data(novaseqx_flow_cell, demultiplexed_runs_directory)
+
+    # THEN the flow cell analysis data is copied
+    assert (demultiplexed_runs_directory / flow_cell_name).exists()
