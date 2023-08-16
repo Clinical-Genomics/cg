@@ -7,9 +7,11 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
-from cg.constants.constants import FileFormat
+from cg.constants.constants import DRY_RUN, FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import FlowCellError
 from cg.io.controller import WriteFile, WriteStream
 from cg.models.cg_config import CGConfig
@@ -58,7 +60,7 @@ def validate_sample_sheet(
 @sample_sheet_commands.command(name="create")
 @click.argument("flow-cell-name")
 @OPTION_BCL_CONVERTER
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.option("--force", is_flag=True, help="Skips the validation of the sample sheet")
 @click.pass_obj
 def create_sheet(
@@ -72,6 +74,7 @@ def create_sheet(
 
     LOG.info(f"Creating sample sheet for flow cell {flow_cell_name}")
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
+    hk_api: HousekeeperAPI = context.housekeeper_api
     flow_cell_path: Path = Path(demultiplex_api.run_dir, flow_cell_name)
     if not flow_cell_path.exists():
         LOG.warning(f"Could not find flow cell {flow_cell_path}")
@@ -82,15 +85,16 @@ def create_sheet(
         )
     except FlowCellError as error:
         raise click.Abort from error
+    flow_cell_id: str = flow_cell.id
     lims_samples: List[FlowCellSample] = list(
         get_flow_cell_samples(
             lims=context.lims_api,
-            flow_cell_id=flow_cell.id,
+            flow_cell_id=flow_cell_id,
             flow_cell_sample_type=flow_cell.sample_type,
         )
     )
     if not lims_samples:
-        LOG.warning(f"Could not find any samples in lims for {flow_cell.id}")
+        LOG.warning(f"Could not find any samples in lims for {flow_cell_id}")
         raise click.Abort
     try:
         sample_sheet_content: List[List[str]] = create_sample_sheet(
@@ -112,11 +116,21 @@ def create_sheet(
         file_format=FileFormat.CSV,
         file_path=flow_cell.sample_sheet_path,
     )
+    LOG.info("Adding sample sheet to Housekeeper")
+    hk_api.create_new_bundle_and_version(name=flow_cell_id)
+    hk_api.add_and_include_file_to_latest_version(
+        bundle_name=flow_cell_id,
+        file=flow_cell.sample_sheet_path,
+        tags=[
+            SequencingFileTag.SAMPLE_SHEET,
+            flow_cell_id,
+        ],
+    )
 
 
 @sample_sheet_commands.command(name="create-all")
 @OPTION_BCL_CONVERTER
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.pass_obj
 def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
     """Command to create sample sheets for all flow cells that lack a sample sheet.
@@ -125,6 +139,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
     information.
     """
     demux_api: DemultiplexingAPI = context.demultiplex_api
+    hk_api: HousekeeperAPI = context.housekeeper_api
     flow_cells: Path = demux_api.run_dir
     for sub_dir in flow_cells.iterdir():
         if not sub_dir.is_dir():
@@ -138,15 +153,16 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             LOG.info("Sample sheet already exists")
             continue
         LOG.info(f"Creating sample sheet for flow cell {flow_cell.id}")
+        flow_cell_id: str = flow_cell.id
         lims_samples: List[FlowCellSample] = list(
             get_flow_cell_samples(
                 lims=context.lims_api,
-                flow_cell_id=flow_cell.id,
+                flow_cell_id=flow_cell_id,
                 flow_cell_sample_type=flow_cell.sample_type,
             )
         )
         if not lims_samples:
-            LOG.warning(f"Could not find any samples in lims for {flow_cell.id}")
+            LOG.warning(f"Could not find any samples in lims for {flow_cell_id}")
             continue
 
         try:
@@ -168,4 +184,14 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             content=sample_sheet_content,
             file_format=FileFormat.CSV,
             file_path=flow_cell.sample_sheet_path,
+        )
+        LOG.info("Adding sample sheet to Housekeeper")
+        hk_api.create_new_bundle_and_version(name=flow_cell_id)
+        hk_api.add_and_include_file_to_latest_version(
+            bundle_name=flow_cell_id,
+            file=flow_cell.sample_sheet_path,
+            tags=[
+                SequencingFileTag.SAMPLE_SHEET,
+                flow_cell_id,
+            ],
         )

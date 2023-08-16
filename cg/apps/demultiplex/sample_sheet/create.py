@@ -8,10 +8,8 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreatorV2,
 )
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.sequencing import Sequencers
 from cg.constants.demultiplexing import BclConverter
-from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import FlowCellError
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
@@ -59,14 +57,3 @@ def create_sample_sheet(
         f"Constructing a {bcl_converter} sample sheet for the {flow_cell.sequencer_type} flow cell {flow_cell.id}"
     )
     return sample_sheet_creator.construct_sample_sheet()
-
-
-def add_sample_sheet_to_hk(flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI):
-    """Add the sample sheet to Housekeeper given a flow cell."""
-    bundle_name: str = flow_cell.base_name
-    tag_names: List[str] = [SequencingFileTag.SAMPLE_SHEET, flow_cell.base_name]
-    hk_api.add_and_include_file_to_latest_version(
-        bundle_name=bundle_name,
-        file=flow_cell.sample_sheet_path,
-        tags=tag_names,
-    )
