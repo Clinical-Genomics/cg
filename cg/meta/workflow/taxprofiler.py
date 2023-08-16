@@ -85,7 +85,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         case_id: str,
         instrument_platform: SequencingPlatform.ILLUMINA,
         fasta: str = "",
-        dry_run: bool = False,
     ) -> None:
         """Write sample sheet for taxprofiler analysis in case folder."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -112,8 +111,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
                 sample_sheet_content.setdefault(headers, []).extend(contents)
 
             LOG.info(sample_sheet_content)
-            if dry_run:
-                continue
             self.write_sample_sheet_csv(
                 samplesheet_content=sample_sheet_content,
                 headers=TAXPROFILER_SAMPLE_SHEET_HEADERS,
@@ -145,13 +142,14 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             LOG.info("Dry run: Config files will not be written")
             return
         self.write_sample_sheet(
-            case_id=case_id, instrument_platform=instrument_platform, fasta=fasta, dry_run=dry_run
+            case_id=case_id,
+            instrument_platform=instrument_platform,
+            fasta=fasta,
         )
         LOG.info("Generating parameters file")
         self.write_params_file(
             case_id=case_id,
             pipeline_parameters=self.get_pipeline_parameters(case_id=case_id).dict(),
-            dry_run=dry_run,
         )
 
         LOG.info("Configs files written")

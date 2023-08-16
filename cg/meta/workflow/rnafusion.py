@@ -88,7 +88,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         }
         return samplesheet_content
 
-    def write_samplesheet(self, case_id: str, strandedness: str, dry_run: bool = False) -> None:
+    def write_samplesheet(self, case_id: str, strandedness: str) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         if len(case.links) != 1:
@@ -108,8 +108,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
                 case_id, forward_read, reverse_read, strandedness
             )
             LOG.info(samplesheet_content)
-            if dry_run:
-                continue
             self.write_sample_sheet_csv(
                 samplesheet_content=samplesheet_content,
                 headers=RNAFUSION_SAMPLESHEET_HEADERS,
@@ -146,14 +144,13 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
-        self.write_samplesheet(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
+        self.write_samplesheet(case_id=case_id, strandedness=strandedness)
         LOG.info("Generating parameters file")
         self.write_params_file(
             case_id=case_id,
             pipeline_parameters=self.get_pipeline_parameters(
                 case_id=case_id, genomes_base=genomes_base
             ).dict(),
-            dry_run=dry_run,
         )
 
         LOG.info("Configs files written")
