@@ -399,7 +399,7 @@ class HousekeeperAPI:
         return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags)
 
     def get_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[File]:
-        """Returns all files from given bundle, with given tag, which have been archived."""
+        """Returns all files from a given bundle and the given tags, which have been archived."""
         if tags is None:
             tags = []
         return self._store.get_archived_files(bundle_name=bundle_name, tags=tags)
@@ -447,8 +447,7 @@ class HousekeeperAPI:
         ]
 
     def set_archive_retrieved_at(self, file_id: int, retrieval_task_id: int):
-        file: File = self._store.get_file_by_id(file_id)
-        archive: Archive = file.archive
+        archive: Archive = self._store.get_file_by_id(file_id).archive
         if archive.retrieval_task_id != retrieval_task_id:
             raise ValueError(
                 f"Retrieval task id did not match database entry. Given task id was {retrieval_task_id}, "
@@ -458,8 +457,7 @@ class HousekeeperAPI:
         self.commit()
 
     def set_archive_archived_at(self, file_id: int, archiving_task_id: int):
-        file: File = self._store.get_file_by_id(file_id)
-        archive: Archive = file.archive
+        archive: Archive = self._store.get_file_by_id(file_id).archive
         if archive.archiving_task_id != archiving_task_id:
             raise ValueError(
                 f"Archiving task id did not match database entry. Given task id was {archiving_task_id}, "

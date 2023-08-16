@@ -43,7 +43,7 @@ def filter_samples_on_archive_location(
     archive_location: ArchiveLocations,
 ) -> List[SampleAndHousekeeperDestination]:
     """
-    Returns a list of FileAndSample where the associated sample has a specific archive location.
+    Returns a list of SampleAndHousekeeperDestinations where the associated sample has a specific archive location.
     """
     return [
         sample_and_housekeeper_destination
