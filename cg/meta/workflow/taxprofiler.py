@@ -141,6 +141,9 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Create sample sheet file for Taxprofiler analysis."""
         self.create_case_directory(case_id=case_id)
         LOG.info("Generating sample sheet")
+        if dry_run:
+            LOG.info("Dry run: Config files will not be written")
+            return
         self.write_sample_sheet(
             case_id=case_id, instrument_platform=instrument_platform, fasta=fasta, dry_run=dry_run
         )
@@ -150,8 +153,5 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             pipeline_parameters=self.get_pipeline_parameters(case_id=case_id).dict(),
             dry_run=dry_run,
         )
-        if dry_run:
-            LOG.info("Dry run: Config files will not be written")
-            return
 
         LOG.info("Configs files written")

@@ -143,6 +143,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Create sample sheet file for RNAFUSION analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
         LOG.info("Generating samplesheet")
+        if dry_run:
+            LOG.info("Dry run: Config files will not be written")
+            return
         self.write_samplesheet(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
         LOG.info("Generating parameters file")
         self.write_params_file(
@@ -152,9 +155,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             ).dict(),
             dry_run=dry_run,
         )
-        if dry_run:
-            LOG.info("Dry run: Config files will not be written")
-            return
 
         LOG.info("Configs files written")
 
