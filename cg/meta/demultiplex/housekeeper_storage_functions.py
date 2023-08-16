@@ -71,7 +71,6 @@ def add_sample_fastq_files_to_housekeeper(
     flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, store: Store
 ) -> None:
     """Add sample fastq files from flow cell to Housekeeper."""
-
     sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
         sample_sheet_path=flow_cell.sample_sheet_path,
         flow_cell_sample_type=flow_cell.sample_type,
