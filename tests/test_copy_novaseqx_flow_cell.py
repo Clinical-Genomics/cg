@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
 
-from cg.cli.demultiplex.demux import is_demultiplexed
+from cg.cli.demultiplex.demux import is_ready_for_post_processing
 
 
 @pytest.fixture
@@ -14,6 +14,10 @@ def demultiplexed_novaseqx_flow_cell(tmp_path: Path) -> Path:
     
     return tmp_path
 
+@pytest.fixture
+def post_processed_novaseqx_flow_cell(demultiplexed_novaseqx_flow_cell) -> Path:
+    (demultiplexed_novaseqx_flow_cell / "PostProcessed.txt").touch()
+    return demultiplexed_novaseqx_flow_cell
 
 @pytest.fixture
 def novaseqx_flow_cell_analysis_incomplete(tmp_path: Path) -> Path:
@@ -29,28 +33,38 @@ def demultiplex_not_complete_novaseqx_flow_cell(tmp_file) -> Path:
 def test_flow_cell_is_demultiplexed(demultiplexed_novaseqx_flow_cell: Path):
     # GIVEN a flow cell for which demultiplexing is completed
 
-    # WHEN checking if the flow cell is demultiplexed
-    is_demultiplexing_completed = is_demultiplexed(demultiplexed_novaseqx_flow_cell)
+    # WHEN checking if the flow cell is ready for post processing
+    ready = is_ready_for_post_processing(demultiplexed_novaseqx_flow_cell)
 
-    # THEN the flow cell is demultiplexed
-    assert is_demultiplexing_completed
+    # THEN the flow cell is ready for post processing
+    assert ready
 
 
 def test_is_demultiplexed_without_analysis(novaseqx_flow_cell_analysis_incomplete: Path):
     # GIVEN a flow cell for which analysis is not completed
 
-    # WHEN checking if the flow cell is demultiplexed
-    is_demultiplexing_completed = is_demultiplexed(novaseqx_flow_cell_analysis_incomplete)
+    # WHEN checking if the flow cell is ready for post processing
+    ready = is_ready_for_post_processing(novaseqx_flow_cell_analysis_incomplete)
 
     # THEN the flow cell is not demultiplexed
-    assert not is_demultiplexing_completed
+    assert not ready
 
 
 def test_flow_cell_is_not_demultiplexed(demultiplex_not_complete_novaseqx_flow_cell: Path):
     # GIVEN a flow cell for which demultiplexing is not completed
 
-    # WHEN checking if the flow cell is demultiplexed
-    is_demultiplexing_completed = is_demultiplexed(demultiplex_not_complete_novaseqx_flow_cell)
+    # WHEN checking if the flow cell is ready for post processing
+    ready = is_ready_for_post_processing(demultiplex_not_complete_novaseqx_flow_cell)
 
     # THEN the flow cell is not demultiplexed
-    assert not is_demultiplexing_completed
+    assert not ready
+
+
+def test_previously_post_processed_flow_cell(post_processed_novaseqx_flow_cell: Path):
+    # GIVEN a flow cell for which demultiplexing is completed and post processing is done
+
+    # WHEN checking if the flow cell is ready for post processing
+    ready = is_ready_for_post_processing(post_processed_novaseqx_flow_cell)
+
+    # THEN the flow cell is not ready for post processing
+    assert not ready
