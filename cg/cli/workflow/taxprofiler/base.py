@@ -24,7 +24,6 @@ from cg.cli.workflow.taxprofiler.options import (
     OPTION_INSTRUMENT_PLATFORM,
 )
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
-from cg.cli.workflow.taxprofiler.taxprofiler_command import get_command_args
 from cg.constants.nf_analysis import NfTowerStatus
 
 LOG = logging.getLogger(__name__)
@@ -61,7 +60,7 @@ def config_case(
         )
 
     except CgError as error:
-    LOG.error(f"Could not create sample sheet: {error}")
+        LOG.error(f"{case_id} could not be found in StatusDB!")
         raise click.Abort() from error
 
 
