@@ -89,7 +89,7 @@ def run(
     use_nextflow: bool,
     dry_run: bool,
 ) -> None:
-    """Run taxprofiler analysis for given CASE ID."""
+    """Run taxprofiler analysis for a case."""
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
