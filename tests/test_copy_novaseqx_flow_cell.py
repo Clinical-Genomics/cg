@@ -1,20 +1,25 @@
 from pathlib import Path
 import pytest
 
-from cg.cli.demultiplex.demux import is_ready_for_post_processing
+from cg.cli.demultiplex.demux import get_latest_analysis_directory, is_ready_for_post_processing
 
 
 @pytest.fixture
-def demultiplexed_novaseqx_flow_cell(tmp_path: Path) -> Path:
+def latest_analysis_version() -> str:
+    return "Analysis/2"
+
+
+@pytest.fixture
+def demultiplexed_novaseqx_flow_cell(tmp_path: Path, latest_analysis_version: str) -> Path:
     # Incomplete analysis version
     (tmp_path / "Analysis" / "1").mkdir(parents=True, exist_ok=True)
 
     # Complete analysis version
-    (tmp_path / "Analysis" / "2").mkdir(parents=True, exist_ok=True)
-    (tmp_path / "Analysis" / "2" / "CopyComplete.txt").touch()
+    (tmp_path / latest_analysis_version).mkdir(parents=True, exist_ok=True)
+    (tmp_path / latest_analysis_version / "CopyComplete.txt").touch()
 
-    (tmp_path / "Analysis" / "2" / "Data").mkdir(parents=True, exist_ok=True)
-    (tmp_path / "Analysis" / "2" / "Data" / "Secondary_Analysis_Complete.txt").touch()
+    (tmp_path / latest_analysis_version / "Data").mkdir(parents=True, exist_ok=True)
+    (tmp_path / latest_analysis_version / "Data" / "Secondary_Analysis_Complete.txt").touch()
 
     return tmp_path
 
@@ -75,3 +80,15 @@ def test_previously_post_processed_flow_cell_is_not_ready(post_processed_novaseq
 
     # THEN the flow cell is not ready
     assert not ready
+
+
+def test_get_latest_analysis_version_path(
+    demultiplexed_novaseqx_flow_cell: Path, latest_analysis_version: str
+):
+    # GIVEN a flow cell which is ready to be post processed
+
+    # WHEN extracting the latest analysis version path
+    analysis_directory = get_latest_analysis_directory(demultiplexed_novaseqx_flow_cell)
+
+    # THEN the latest analysis version path is returned
+    assert analysis_directory == demultiplexed_novaseqx_flow_cell / latest_analysis_version

@@ -188,6 +188,10 @@ def is_ready_for_post_processing(flow_cell_directory: Path):
     return copy_completed and analysis_completed and not post_processed
 
 
+def get_latest_analysis_directory(flow_cell_directory: Path) -> Path:
+    pass
+
+
 def is_copied(flow_cell_directory: Path):
     return (flow_cell_directory / "Analysis" / "1" / "CopyComplete.txt").exists()
 
