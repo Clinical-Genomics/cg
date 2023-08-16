@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import List, Optional
 
 import click
 
@@ -181,15 +182,31 @@ def copy_novaseqx_flow_cells(context: CGConfig):
 
 
 def is_ready_for_post_processing(flow_cell_directory: Path):
-    """Check if a flow cell has been demultiplexed."""
     copy_completed = is_copied(flow_cell_directory)
     analysis_completed = is_analyzed(flow_cell_directory)
     post_processed = is_post_processed(flow_cell_directory)
     return copy_completed and analysis_completed and not post_processed
 
 
-def get_latest_analysis_directory(flow_cell_directory: Path) -> Path:
-    pass
+def get_latest_analysis_directory(flow_cell_directory: Path) -> Optional[Path]:
+    analysis_path = flow_cell_directory / "Analysis"
+
+    if not analysis_directory_exists(flow_cell_directory):
+        return None
+    analysis_versions = get_sorted_analysis_versions(analysis_path)  
+    return analysis_versions[0] if analysis_versions else None
+
+
+def get_sorted_analysis_versions(analysis_path: Path) -> List[Path]:
+    return sorted(
+        (d for d in analysis_path.iterdir() if d.is_dir()), 
+        key=lambda x: int(x.name), 
+        reverse=True
+    )
+
+def analysis_directory_exists(flow_cell_directory: Path) -> bool:
+    analysis_path = flow_cell_directory / "Analysis"
+    return analysis_path.exists() and analysis_path.is_dir()
 
 
 def is_copied(flow_cell_directory: Path):
