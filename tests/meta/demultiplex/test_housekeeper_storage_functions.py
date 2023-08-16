@@ -163,12 +163,12 @@ def test_add_demux_logs_to_housekeeper(
     # GIVEN a demux log in the run directory
     demux_log_file_paths: List[Path] = [
         Path(
-            demux_post_processing_api.demux_api.run_dir,
+            demux_post_processing_api.demux_api.flow_cells_dir,
             f"{dragen_flow_cell.full_name}",
             f"{dragen_flow_cell.id}_demultiplex.stdout",
         ),
         Path(
-            demux_post_processing_api.demux_api.run_dir,
+            demux_post_processing_api.demux_api.flow_cells_dir,
             f"{dragen_flow_cell.full_name}",
             f"{dragen_flow_cell.id}_demultiplex.stderr",
         ),
@@ -180,7 +180,7 @@ def test_add_demux_logs_to_housekeeper(
     # WHEN adding the demux logs to housekeeper
     add_demux_logs_to_housekeeper(
         flow_cell=dragen_flow_cell,
-        flow_cell_run_dir=demux_post_processing_api.demux_api.run_dir,
+        flow_cell_run_dir=demux_post_processing_api.demux_api.flow_cells_dir,
         hk_api=demux_post_processing_api.hk_api,
     )
 

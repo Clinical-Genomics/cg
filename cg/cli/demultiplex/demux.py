@@ -79,7 +79,7 @@ def demultiplex_flow_cell(
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
     LOG.info(f"setting flow cell id to {flow_cell_name}")
-    LOG.info(f"setting out dir to {demultiplex_api.out_dir}")
+    LOG.info(f"setting out dir to {demultiplex_api.demultiplexed_runs_dir}")
 
     try:
         flow_cell = FlowCellDirectoryData(

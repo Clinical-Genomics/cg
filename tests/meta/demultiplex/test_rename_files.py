@@ -12,7 +12,9 @@ def test_rename_demux_result(
     bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     # GIVEN that this is the location of the demultiplex api
-    demultiplex_context.demultiplex_api_.out_dir = demultiplexed_flow_cell_working_directory
+    demultiplex_context.demultiplex_api_.demultiplexed_runs_dir = (
+        demultiplexed_flow_cell_working_directory
+    )
     post_demux_api: DemuxPostProcessingNovaseqAPI = DemuxPostProcessingNovaseqAPI(
         config=demultiplex_context
     )

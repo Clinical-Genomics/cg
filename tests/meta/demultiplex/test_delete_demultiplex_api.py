@@ -28,8 +28,8 @@ def test_initiate_delete_demux_api(
 
     # GIVEN a correct config
     config = cg_context
-    config.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    config.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    config.flow_cells_dir = tmp_flow_cell_run_base_path
+    config.demultiplexed_flow_cells_dir = tmp_flow_cell_run_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
         parents=True, exist_ok=True
     )
@@ -84,8 +84,8 @@ def test_set_dry_run_delete_demux_api(
 
     caplog.set_level(logging.DEBUG)
     cg_context.cg_stats_api_ = stats_api
-    cg_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    cg_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.demultiplexed_runs_dir = tmp_flow_cell_run_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
         parents=True, exist_ok=True
     )
@@ -181,8 +181,8 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
 
     caplog.set_level(logging.INFO)
 
-    cg_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    cg_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.demultiplexed_runs_dir = tmp_flow_cell_run_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
         parents=True, exist_ok=True
     )
@@ -226,8 +226,8 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
     caplog.set_level(logging.INFO)
     cg_context.housekeeper_api_ = flow_cell_name_housekeeper_api
     cg_context.status_db_ = populated_flow_cell_store
-    cg_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    cg_context.demultiplex_api.out_dir = tmp_flow_cell_demux_base_path
+    cg_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.demultiplexed_runs_dir = tmp_flow_cell_demux_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
         parents=True, exist_ok=True
     )

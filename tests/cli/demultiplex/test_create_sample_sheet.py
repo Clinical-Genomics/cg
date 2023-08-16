@@ -39,7 +39,7 @@ def test_create_sample_sheet_no_run_parameters(
 
     # GIVEN a demux API context
     demux_api: DemultiplexingAPI = sample_sheet_context.demultiplex_api
-    demux_api.run_dir: Path = flow_cell_working_directory_no_run_parameters.parent
+    demux_api.flow_cells_dir: Path = flow_cell_working_directory_no_run_parameters.parent
     sample_sheet_context.demultiplex_api_: DemultiplexingAPI = demux_api
 
     # WHEN running the create sample sheet command

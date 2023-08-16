@@ -512,11 +512,13 @@ def test_post_processing_of_flow_cell(
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a directory with a flow cell demultiplexed with BCL Convert
-    demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_tmp_directory
+    demux_post_processing_api.demux_api.demultiplexed_runs_dir = (
+        demultiplexed_flow_cells_tmp_directory
+    )
 
     # GIVEN that a sample sheet exists in the flow cell run directory
     path = Path(
-        demux_post_processing_api.demux_api.run_dir,
+        demux_post_processing_api.demux_api.flow_cells_dir,
         flow_cell_demultplexing_directory,
         DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
     )
@@ -561,7 +563,7 @@ def test_post_processing_of_flow_cell(
 
     # THEN a delivery file was created in the flow cell directory
     delivery_path = Path(
-        demux_post_processing_api.demux_api.out_dir,
+        demux_post_processing_api.demux_api.demultiplexed_runs_dir,
         flow_cell_demultplexing_directory,
         DemultiplexingDirsAndFiles.DELIVERY,
     )

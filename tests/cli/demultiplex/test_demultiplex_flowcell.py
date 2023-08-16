@@ -185,7 +185,7 @@ def test_demultiplex_all_novaseq(
         flow_cell_path=demultiplex_ready_flow_cell
     )
 
-    assert demux_api.run_dir == demultiplex_ready_flow_cell.parent
+    assert demux_api.flow_cells_dir == demultiplex_ready_flow_cell.parent
 
     # WHEN running the demultiplex all command
     result: testing.Result = cli_runner.invoke(
@@ -231,7 +231,7 @@ def test_delete_flow_cell_dry_run_cgstats(
     assert bcl2fastq_flow_cell_id in demultiplex_ready_flow_cell.name
 
     # GIVEN a path to the demux out dir for a flow cell
-    Path(demultiplex_context.demultiplex_api.out_dir, bcl2fastq_flow_cell_id).mkdir()
+    Path(demultiplex_context.demultiplex_api.demultiplexed_runs_dir, bcl2fastq_flow_cell_id).mkdir()
 
     # WHEN executing the commando to remove flow cell from cgstats in dry run mode
 
@@ -265,8 +265,8 @@ def test_delete_flow_cell_dry_run_status_db(
     """Test if logic work - call all true if status_db passed."""
     caplog.set_level(logging.DEBUG)
 
-    demultiplex_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    demultiplex_context.demultiplex_api.out_dir = tmp_flow_cell_demux_base_path
+    demultiplex_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
+    demultiplex_context.demultiplex_api.demultiplexed_runs_dir = tmp_flow_cell_demux_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
         parents=True, exist_ok=True
     )
@@ -305,7 +305,7 @@ def test_delete_flow_cell_dry_run_status_db(
     assert f"DeleteDemuxAPI-CGStats: Would remove {bcl2fastq_flow_cell_id}" in caplog.text
     assert (
         "DeleteDemuxAPI-Hasta: Would have removed the following directory: "
-        f"{demultiplex_context.demultiplex_api.out_dir / Path(f'some_prefix_1100_{bcl2fastq_flow_cell_id}')}\n"
-        f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_context.demultiplex_api.run_dir / Path(f'some_prefix_1100_{bcl2fastq_flow_cell_id}')}"
+        f"{demultiplex_context.demultiplex_api.demultiplexed_runs_dir / Path(f'some_prefix_1100_{bcl2fastq_flow_cell_id}')}\n"
+        f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_context.demultiplex_api.flow_cells_dir / Path(f'some_prefix_1100_{bcl2fastq_flow_cell_id}')}"
     ) in caplog.text
     assert "DeleteDemuxAPI-Init-files: Would have removed" not in caplog.text
