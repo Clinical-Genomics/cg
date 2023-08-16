@@ -48,7 +48,6 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
         if not flow_cell.validate_sample_sheet():
             LOG.warning(
                 f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}",
-
             )
             continue
 
@@ -156,8 +155,8 @@ def delete_flow_cell(
         f"Are you sure you want to delete the flow cell from the following databases:\n"
         f"cg-stats={True if status_db else cg_stats}\nDemultiplexing-dir={True if status_db else demultiplexing_dir}\n"
         f"Housekeeper={True if status_db else housekeeper}\nInit_files={True if status_db else init_files}\n"
-        f"Run-dir={True if status_db else run_dir}\nStatusdb={status_db}"
-        f"\nSample-lane-sequencing-metrics={True if sample_lane_sequencing_metrics else sample_lane_sequencing_metrics}\n"
+        f"Run-dir={True if status_db else run_dir}\nStatusdb={status_db}\n"
+        f"\nSample-lane-sequencing-metrics={True if sample_lane_sequencing_metrics else sample_lane_sequencing_metrics}"
     ):
         delete_demux_api.delete_flow_cell(
             cg_stats=cg_stats,
