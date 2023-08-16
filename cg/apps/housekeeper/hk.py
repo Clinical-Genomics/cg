@@ -445,28 +445,6 @@ class HousekeeperAPI:
             for file in self.get_all_non_archived_spring_files()
         ]
 
-    def set_archive_file_retrieved_at(self, file_id: int, retrieval_task_id: int) -> None:
-        file: File = self._store.get_file_by_id(file_id)
-        archive: Archive = file.archive
-        if archive.retrieval_task_id != retrieval_task_id:
-            raise ValueError(
-                f"Retrieval task id did not match database entry. Given task id was {retrieval_task_id}, "
-                f"while retrieval task id in Housekeeper is {archive.retrieval_task_id}."
-            )
-        self._store.update_retrieval_time_stamp(archive=archive)
-        self.commit()
-
-    def set_archive_file_archived_at(self, file_id: int, archiving_task_id: int) -> None:
-        file: File = self._store.get_file_by_id(file_id)
-        archive: Archive = file.archive
-        if archive.archiving_task_id != archiving_task_id:
-            raise ValueError(
-                f"Archiving task id did not match database entry. Given task id was {archiving_task_id}, "
-                f"while archiving task id in Housekeeper is {archive.archiving_task_id}."
-            )
-        self._store.update_archiving_time_stamp(archive=archive)
-        self.commit()
-
     def set_archive_task_archived_at(self, job_id: int) -> None:
         """Updates all entries in Archive with the specified archiving_task_id to have been archived now."""
         self._store.update_finished_archival_task(job_id)
