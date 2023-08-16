@@ -94,7 +94,7 @@ def create_sheet(
         )
     )
     if not lims_samples:
-        LOG.warning(f"Could not find any samples in lims for {flow_cell_id}")
+        LOG.warning(f"Could not find any samples in LIMS for {flow_cell_id}")
         raise click.Abort
     try:
         sample_sheet_content: List[List[str]] = create_sample_sheet(
@@ -162,7 +162,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             )
         )
         if not lims_samples:
-            LOG.warning(f"Could not find any samples in lims for {flow_cell_id}")
+            LOG.warning(f"Could not find any samples in LIMS for {flow_cell_id}")
             continue
 
         try:
