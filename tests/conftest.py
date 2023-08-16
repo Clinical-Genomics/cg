@@ -2910,8 +2910,6 @@ def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
     return Path(shutil.copytree(original_dir, tmp_dir))
 
 
-
-
 @pytest.fixture(scope="session")
 def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
