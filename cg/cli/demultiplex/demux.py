@@ -183,8 +183,13 @@ def copy_demultiplexed_novaseqx_flow_cells(context: CGConfig):
 def is_demultiplexed(flow_cell_directory: Path):
     """Check if a flow cell has been demultiplexed."""
     copy_completed = is_copied(flow_cell_directory)
-    return copy_completed
+    analysis_completed = is_analysis_complete(flow_cell_directory)
+    return copy_completed and analysis_completed
 
 
 def is_copied(flow_cell_directory: Path):
     return (flow_cell_directory / "Analysis" / "1" / "CopyComplete.txt").exists()
+
+
+def is_analysis_complete(flow_cell_directory: Path):
+    return (flow_cell_directory / "Analysis" / "1" / "Data" / "Secondary_Analysis_Complete.txt").exists()
