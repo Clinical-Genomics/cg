@@ -170,20 +170,20 @@ def delete_flow_cell(
             status_db=status_db,
         )
 
-@click.command(name="copy-completed")
-def copy_demultiplexed_novaseqx_flow_cells(context: CGConfig):
-    """Copy demultiplexed novaseqx flow cells ready for post processing to demultiplexed runs."""
+@click.command(name="copy-novaseqx")
+def copy_novaseqx_flow_cells(context: CGConfig):
+    """Copy novaseqx flow cells ready for post processing to demultiplexed runs."""
     flow_cells_directory: Path = context.demultiplex.out_dir
 
     for flow_cell_directory in flow_cells_directory.iterdir():
         if is_ready_for_post_processing(flow_cell_directory):
-            pass
+            copy_flow_cell_analysis_data()
 
 
 def is_ready_for_post_processing(flow_cell_directory: Path):
     """Check if a flow cell has been demultiplexed."""
     copy_completed = is_copied(flow_cell_directory)
-    analysis_completed = is_analysis_complete(flow_cell_directory)
+    analysis_completed = is_analyzed(flow_cell_directory)
     post_processed = is_post_processed(flow_cell_directory)
     return copy_completed and analysis_completed and not post_processed
 
@@ -192,9 +192,14 @@ def is_copied(flow_cell_directory: Path):
     return (flow_cell_directory / "Analysis" / "1" / "CopyComplete.txt").exists()
 
 
-def is_analysis_complete(flow_cell_directory: Path):
+def is_analyzed(flow_cell_directory: Path):
     return (flow_cell_directory / "Analysis" / "1" / "Data" / "Secondary_Analysis_Complete.txt").exists()
 
 
 def is_post_processed(flow_cell_directory: Path) -> bool:
     return (flow_cell_directory / "PostProcessed.txt").exists()
+
+
+def copy_flow_cell_analysis_data(flow_cell_directory: Path):
+    """Copy flow cell analysis data to demultiplexed runs."""
+    pass

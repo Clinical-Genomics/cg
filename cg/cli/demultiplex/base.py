@@ -7,7 +7,7 @@ from cg.cli.demultiplex.demux import (
     demultiplex_all,
     demultiplex_flow_cell,
     delete_flow_cell,
-    copy_demultiplexed_novaseqx_flow_cells,
+    copy_novaseqx_flow_cells,
 )
 from cg.cli.demultiplex.finish import finish_group
 from cg.cli.demultiplex.report import create_report_cmd
@@ -30,7 +30,7 @@ for sub_cmd in [
     demultiplex_flow_cell,
     demultiplex_all,
     finish_group,
-    copy_demultiplexed_novaseqx_flow_cells,
+    copy_novaseqx_flow_cells,
     sample_sheet_commands,
     select_project_cmd,
 ]:
