@@ -27,7 +27,6 @@ class TaxprofilerParameters(PipelineParameters):
 
 
 class TaxprofilerSample(NextflowSample):
-    """Taxprofiler sample model is used when building the sample sheet.
-    """
+    """Taxprofiler sample model is used when building the sample sheet."""
 
     instrument_platform: SequencingPlatform
