@@ -24,8 +24,10 @@ def flow_cell_directory(tmp_path: Path, flow_cell_name: str) -> Path:
 
 
 @pytest.fixture
-def demultiplexed_runs_directory(tmp_path: Path) -> Path:
-    return tmp_path / "demultiplexed_runs"
+def demultiplexed_runs(tmp_path: Path) -> Path:
+    demultiplexed_runs = Path(tmp_path, "demultiplexed_runs")
+    demultiplexed_runs.mkdir()
+    return demultiplexed_runs
 
 
 @pytest.fixture
@@ -70,41 +72,60 @@ def demultiplex_not_complete_novaseqx_flow_cell(tmp_file) -> Path:
     return tmp_file
 
 
-def test_flow_cell_is_ready_for_post_processing(novaseqx_flow_cell: Path):
+def test_flow_cell_is_ready_for_post_processing(novaseqx_flow_cell: Path, demultiplexed_runs: Path):
     # GIVEN a flow cell which is ready for post processing
 
     # WHEN checking if the flow cell is ready for post processing
-    ready = is_ready_for_post_processing(novaseqx_flow_cell)
+    ready = is_ready_for_post_processing(novaseqx_flow_cell, demultiplexed_runs)
 
     # THEN the flow cell is ready
     assert ready
 
 
-def test_is_not_ready_without_analysis(novaseqx_flow_cell_analysis_incomplete: Path):
+def test_is_not_ready_without_analysis(
+    novaseqx_flow_cell_analysis_incomplete: Path, demultiplexed_runs: Path
+):
     # GIVEN a flow cell for which analysis is not completed
 
     # WHEN checking if the flow cell is ready for post processing
-    ready = is_ready_for_post_processing(novaseqx_flow_cell_analysis_incomplete)
+    ready = is_ready_for_post_processing(novaseqx_flow_cell_analysis_incomplete, demultiplexed_runs)
 
     # THEN it is not ready
     assert not ready
 
 
-def test_flow_cell_is_not_demultiplexed(demultiplex_not_complete_novaseqx_flow_cell: Path):
+def test_flow_cell_is_not_demultiplexed(
+    demultiplex_not_complete_novaseqx_flow_cell: Path, demultiplexed_runs: Path
+):
     # GIVEN a flow cell for which demultiplexing is not completed
 
     # WHEN checking if the flow cell is ready for post processing
-    ready = is_ready_for_post_processing(demultiplex_not_complete_novaseqx_flow_cell)
+    ready = is_ready_for_post_processing(
+        demultiplex_not_complete_novaseqx_flow_cell, demultiplexed_runs
+    )
 
     # THEN it is not ready
     assert not ready
 
 
-def test_previously_post_processed_flow_cell_is_not_ready(post_processed_novaseqx_flow_cell: Path):
+def test_previously_post_processed_flow_cell_is_not_ready(
+    post_processed_novaseqx_flow_cell: Path, demultiplexed_runs: Path
+):
     # GIVEN a flow cell for which post processing is done
 
     # WHEN checking if the flow cell is ready for post processing
-    ready = is_ready_for_post_processing(post_processed_novaseqx_flow_cell)
+    ready = is_ready_for_post_processing(post_processed_novaseqx_flow_cell, demultiplexed_runs)
+
+    # THEN the flow cell is not ready
+    assert not ready
+
+
+def test_previously_copied_flow_cell_is_not_ready(novaseqx_flow_cell: Path, demultiplexed_runs: Path):
+    # GIVEN a flow cell which already exists in demultiplexed runs
+    Path(demultiplexed_runs, novaseqx_flow_cell.name).mkdir()
+
+    # WHEN checking if the flow cell is ready for post processing
+    ready = is_ready_for_post_processing(novaseqx_flow_cell, demultiplexed_runs)
 
     # THEN the flow cell is not ready
     assert not ready
@@ -124,12 +145,12 @@ def test_get_latest_analysis_version_path(
 
 
 def test_copy_novaseqx_flow_cell(
-    demultiplexed_runs_directory: Path, novaseqx_flow_cell: Path, flow_cell_name: str
+    demultiplexed_runs: Path, novaseqx_flow_cell: Path, flow_cell_name: str
 ):
     # GIVEN a destination directory
 
     # WHEN copying the flow cell analysis data to demultiplexed runs
-    copy_flow_cell_analysis_data(novaseqx_flow_cell, demultiplexed_runs_directory)
+    copy_flow_cell_analysis_data(novaseqx_flow_cell, demultiplexed_runs)
 
-    # THEN the flow cell analysis data is copied
-    assert (demultiplexed_runs_directory / flow_cell_name).exists()
+    # THEN the flow cell directory has been created
+    assert (demultiplexed_runs / flow_cell_name).exists()

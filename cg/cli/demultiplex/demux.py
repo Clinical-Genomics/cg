@@ -85,9 +85,7 @@ def demultiplex_flow_cell(
     LOG.info(f"setting out dir to {demultiplex_api.out_dir}")
 
     try:
-        flow_cell = FlowCellDirectoryData(
-            flow_cell_path=flow_cell, bcl_converter=bcl_converter
-        )
+        flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell, bcl_converter=bcl_converter)
     except FlowCellError as error:
         raise click.Abort from error
 
@@ -175,14 +173,15 @@ def delete_flow_cell(
 @click.command(name="copy-novaseqx")
 def copy_novaseqx_flow_cells(context: CGConfig):
     """Copy novaseqx flow cells ready for post processing to demultiplexed runs."""
-    flow_cells_directory: Path = context.demultiplex.out_dir
+    flow_cells: Path = context.demultiplex.out_dir
+    demultiplexed_runs: Path = context.demultiplex.run_dir
 
-    for flow_cell in flow_cells_directory.iterdir():
-        if is_ready_for_post_processing(flow_cell):
+    for flow_cell in flow_cells.iterdir():
+        if is_ready_for_post_processing(flow_cell, demultiplexed_runs):
             pass
 
 
-def is_ready_for_post_processing(flow_cell: Path) -> bool:
+def is_ready_for_post_processing(flow_cell: Path, demultiplexed_runs: Path) -> bool:
     """Check whether a novaseqx flow cell is ready for post processing."""
     analysis_directory = get_latest_analysis_directory(flow_cell)
 
@@ -191,8 +190,16 @@ def is_ready_for_post_processing(flow_cell: Path) -> bool:
 
     copy_completed = is_copied(analysis_directory)
     analysis_completed = is_analyzed(analysis_directory)
+    in_demultiplexed_runs = is_in_demultiplexed_runs(flow_cell.name, demultiplexed_runs)
     post_processed = is_post_processed(flow_cell)
-    return not post_processed and copy_completed and analysis_completed
+
+    return (
+        copy_completed and analysis_completed and not in_demultiplexed_runs and not post_processed
+    )
+
+
+def is_in_demultiplexed_runs(flow_cell_name: str, demultiplexed_runs: Path) -> bool:
+    return Path(demultiplexed_runs, flow_cell_name).exists()
 
 
 def get_latest_analysis_directory(flow_cell: Path) -> Optional[Path]:
@@ -235,9 +242,7 @@ def copy_flow_cell_analysis_data(flow_cell: Path, destination: Path):
     flow_cell_target.mkdir()
 
     # 2. Create directory with flow cell name in destination
-    
 
     # 3. Copy analysis directory to destination
-
 
     pass
