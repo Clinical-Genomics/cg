@@ -120,7 +120,9 @@ def test_previously_post_processed_flow_cell_is_not_ready(
     assert not ready
 
 
-def test_previously_copied_flow_cell_is_not_ready(novaseqx_flow_cell: Path, demultiplexed_runs: Path):
+def test_previously_copied_flow_cell_is_not_ready(
+    novaseqx_flow_cell: Path, demultiplexed_runs: Path
+):
     # GIVEN a flow cell which already exists in demultiplexed runs
     Path(demultiplexed_runs, novaseqx_flow_cell.name).mkdir()
 
@@ -154,3 +156,6 @@ def test_copy_novaseqx_flow_cell(
 
     # THEN the flow cell directory has been created
     assert (demultiplexed_runs / flow_cell_name).exists()
+
+    # THEN a data folder has been created
+    assert (demultiplexed_runs / flow_cell_name / "Data").exists()
