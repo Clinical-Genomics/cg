@@ -118,7 +118,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             )
 
     def get_pipeline_parameters(self, case_id: str) -> PipelineParameters:
-        """Get taxprofiler parameters."""
+        """Return Taxprofiler parameters."""
         return TaxprofilerParameters(
             clusterOptions=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
             input=self.get_case_config_path(case_id=case_id),
