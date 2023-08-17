@@ -7,11 +7,12 @@ from cg.cli.demultiplex.demux import (
     get_latest_analysis_directory,
     is_ready_for_post_processing,
 )
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 
 
 @pytest.fixture
 def latest_analysis_version() -> str:
-    return "Analysis/2"
+    return DemultiplexingDirsAndFiles.ANALYSIS + "/2"
 
 
 @pytest.fixture
@@ -34,40 +35,55 @@ def demultiplexed_runs(tmp_path: Path) -> Path:
 @pytest.fixture
 def novaseqx_flow_cell(flow_cell_directory: Path, latest_analysis_version: str) -> Path:
     # Incomplete analysis version
-    (flow_cell_directory / "Analysis" / "1").mkdir(parents=True, exist_ok=True)
+    (flow_cell_directory / DemultiplexingDirsAndFiles.ANALYSIS / "1").mkdir(
+        parents=True, exist_ok=True
+    )
 
     # Complete analysis version - old
-    old_analysis = flow_cell_directory / "Analysis/0"
+    old_analysis = Path(flow_cell_directory, "Analysis/0")
     old_analysis.mkdir(parents=True, exist_ok=True)
-    (old_analysis / "CopyComplete.txt").touch()
-    (old_analysis / "Data").mkdir(parents=True, exist_ok=True)
-    (old_analysis / "Data" / "Secondary_Analysis_Complete.txt").touch()
+    Path(old_analysis, DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
+    Path(old_analysis, DemultiplexingDirsAndFiles.DATA).mkdir(parents=True, exist_ok=True)
+    Path(
+        old_analysis, DemultiplexingDirsAndFiles.DATA, DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED
+    ).touch()
 
     # Complete analysis version - most recent
-    latest_analysis = flow_cell_directory / latest_analysis_version
+    latest_analysis = Path(flow_cell_directory, latest_analysis_version)
     latest_analysis.mkdir(parents=True, exist_ok=True)
-    (latest_analysis / "CopyComplete.txt").touch()
-    (latest_analysis / "Data").mkdir(parents=True, exist_ok=True)
-    (latest_analysis / "Data" / "Secondary_Analysis_Complete.txt").touch()
+    Path(latest_analysis, DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
+    Path(latest_analysis, DemultiplexingDirsAndFiles.DATA).mkdir(parents=True, exist_ok=True)
+    Path(
+        latest_analysis,
+        DemultiplexingDirsAndFiles.DATA,
+        DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED,
+    ).touch()
 
     return flow_cell_directory
 
 
 @pytest.fixture
-def post_processed_novaseqx_flow_cell(novaseqx_flow_cell) -> Path:
-    (novaseqx_flow_cell / "PostProcessingQueued.txt").touch()
+def post_processed_novaseqx_flow_cell(novaseqx_flow_cell: Path) -> Path:
+    Path(novaseqx_flow_cell, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING).touch()
     return novaseqx_flow_cell
 
 
 @pytest.fixture
 def novaseqx_flow_cell_analysis_incomplete(flow_cell_directory: Path) -> Path:
-    (flow_cell_directory / "Analysis" / "2").mkdir(parents=True, exist_ok=True)
-    (flow_cell_directory / "Analysis" / "2" / "CopyComplete.txt").touch()
+    Path(flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, "2").mkdir(
+        parents=True, exist_ok=True
+    )
+    Path(
+        flow_cell_directory,
+        DemultiplexingDirsAndFiles.ANALYSIS,
+        "2",
+        DemultiplexingDirsAndFiles.COPY_COMPLETE,
+    ).touch()
     return flow_cell_directory
 
 
 @pytest.fixture
-def demultiplex_not_complete_novaseqx_flow_cell(tmp_file) -> Path:
+def demultiplex_not_complete_novaseqx_flow_cell(tmp_file: Path) -> Path:
     return tmp_file
 
 
@@ -151,14 +167,14 @@ def test_copy_novaseqx_flow_cell(
     # GIVEN a destination directory
     flow_cell_run = Path(demultiplexed_runs, flow_cell_name)
     flow_cell_run.mkdir()
-    destination = Path(flow_cell_run, "Data")
+    destination = Path(flow_cell_run, DemultiplexingDirsAndFiles.DATA)
 
     # WHEN copying the flow cell analysis data to demultiplexed runs
     copy_flow_cell_analysis_data(novaseqx_flow_cell, destination)
 
     # THEN the data contains everything from the analysis folder
     analysis = get_latest_analysis_directory(novaseqx_flow_cell)
-    analysis_data = analysis / "Data"
+    analysis_data = analysis / DemultiplexingDirsAndFiles.DATA
 
     original_files = get_all_files(analysis_data)
     copied_files = get_all_files(destination)

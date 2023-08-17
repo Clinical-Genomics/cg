@@ -8,7 +8,7 @@ import shutil
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
@@ -207,7 +207,7 @@ def is_in_demultiplexed_runs(flow_cell_name: str, demultiplexed_runs: Path) -> b
 
 
 def get_latest_analysis_directory(flow_cell: Path) -> Optional[Path]:
-    analysis_path = flow_cell / "Analysis"
+    analysis_path = Path(flow_cell, DemultiplexingDirsAndFiles.ANALYSIS)
 
     if not analysis_path.exists():
         return None
@@ -222,30 +222,34 @@ def get_sorted_analysis_versions(analysis_path: Path) -> List[Path]:
 
 
 def is_copied(analysis_directory: Path):
-    return (analysis_directory / "CopyComplete.txt").exists()
+    return Path(analysis_directory, DemultiplexingDirsAndFiles.COPY_COMPLETE).exists()
 
 
 def is_analyzed(analysis_directory: Path):
-    return (analysis_directory / "Data" / "Secondary_Analysis_Complete.txt").exists()
+    return Path(
+        analysis_directory,
+        DemultiplexingDirsAndFiles.DATA,
+        DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED
+    ).exists()
 
 
 def is_queued_for_post_processing(flow_cell: Path) -> bool:
-    return (flow_cell / "PostProcessingQueued.txt").exists()
+    return Path(flow_cell, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING).exists()
 
 
 def copy_flow_cell_analysis_data(flow_cell: Path, destination: Path) -> None:
     analysis = get_latest_analysis_directory(flow_cell)
-    analysis_data = Path(analysis, "Data")
+    analysis_data = Path(analysis, DemultiplexingDirsAndFiles.DATA)
 
     hardlink_tree(src=analysis_data, dst=destination)
 
 
 def mark_flow_cell_as_demultiplexed(flow_cell: Path) -> None:
-    (flow_cell / "demuxcomplete.txt").touch()
+    Path(flow_cell, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
 
 
 def mark_flow_cell_as_queued_for_post_processing(flow_cell: Path) -> None:
-    (flow_cell / "PostProcessingQueued.txt").touch()
+    Path(flow_cell, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING).touch()
 
 
 def hardlink_tree(src: Path, dst: Path) -> None:
