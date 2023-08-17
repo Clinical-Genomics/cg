@@ -55,7 +55,7 @@ def novaseqx_flow_cell(flow_cell_directory: Path, latest_analysis_version: str) 
 
 @pytest.fixture
 def post_processed_novaseqx_flow_cell(novaseqx_flow_cell) -> Path:
-    (novaseqx_flow_cell / "PostProcessed.txt").touch()
+    (novaseqx_flow_cell / "PostProcessingQueued.txt").touch()
     return novaseqx_flow_cell
 
 

@@ -180,11 +180,13 @@ def copy_novaseqx_flow_cells(context: CGConfig):
 
     for flow_cell in flow_cells.iterdir():
         if is_ready_for_post_processing(flow_cell, demultiplexed_runs):
-            pass
+            copy_flow_cell_analysis_data(flow_cell, demultiplexed_runs)
+            demultiplexed_flow_cell = Path(demultiplexed_runs, flow_cell.name)
+            mark_flow_cell_as_demultiplexed(demultiplexed_flow_cell)
+            mark_flow_cell_as_queued_for_post_processing(flow_cell)
 
 
 def is_ready_for_post_processing(flow_cell: Path, demultiplexed_runs: Path) -> bool:
-    """Check whether a novaseqx flow cell is ready for post processing."""
     analysis_directory = get_latest_analysis_directory(flow_cell)
 
     if not analysis_directory:
@@ -193,7 +195,7 @@ def is_ready_for_post_processing(flow_cell: Path, demultiplexed_runs: Path) -> b
     copy_completed = is_copied(analysis_directory)
     analysis_completed = is_analyzed(analysis_directory)
     in_demultiplexed_runs = is_in_demultiplexed_runs(flow_cell.name, demultiplexed_runs)
-    post_processed = is_post_processed(flow_cell)
+    post_processed = is_queued_for_post_processing(flow_cell)
 
     return (
         copy_completed and analysis_completed and not in_demultiplexed_runs and not post_processed
@@ -207,7 +209,7 @@ def is_in_demultiplexed_runs(flow_cell_name: str, demultiplexed_runs: Path) -> b
 def get_latest_analysis_directory(flow_cell: Path) -> Optional[Path]:
     analysis_path = flow_cell / "Analysis"
 
-    if not analysis_directory_exists(flow_cell):
+    if not analysis_path.exists():
         return None
     analysis_versions = get_sorted_analysis_versions(analysis_path)
     return analysis_versions[0] if analysis_versions else None
@@ -219,11 +221,6 @@ def get_sorted_analysis_versions(analysis_path: Path) -> List[Path]:
     )
 
 
-def analysis_directory_exists(flow_cell: Path) -> bool:
-    analysis_path = flow_cell / "Analysis"
-    return analysis_path.exists() and analysis_path.is_dir()
-
-
 def is_copied(analysis_directory: Path):
     return (analysis_directory / "CopyComplete.txt").exists()
 
@@ -232,18 +229,24 @@ def is_analyzed(analysis_directory: Path):
     return (analysis_directory / "Data" / "Secondary_Analysis_Complete.txt").exists()
 
 
-def is_post_processed(flow_cell: Path) -> bool:
-    return (flow_cell / "PostProcessed.txt").exists()
+def is_queued_for_post_processing(flow_cell: Path) -> bool:
+    return (flow_cell / "PostProcessingQueued.txt").exists()
 
 
-def copy_flow_cell_analysis_data(flow_cell: Path, destination: Path):
-    """Copy flow cell analysis data to demultiplexed runs."""
-
+def copy_flow_cell_analysis_data(flow_cell: Path, destination: Path) -> None:
     analysis = get_latest_analysis_directory(flow_cell)
     analysis_data = Path(analysis, "Data")
 
     hardlink_tree(src=analysis_data, dst=destination)
 
 
-def hardlink_tree(src: Path, dst: Path):
+def mark_flow_cell_as_demultiplexed(flow_cell: Path) -> None:
+    (flow_cell / "demuxcomplete.txt").touch()
+
+
+def mark_flow_cell_as_queued_for_post_processing(flow_cell: Path) -> None:
+    (flow_cell / "PostProcessingQueued.txt").touch()
+
+
+def hardlink_tree(src: Path, dst: Path) -> None:
     shutil.copytree(src, dst, copy_function=os.link)
