@@ -1,10 +1,10 @@
 from pathlib import Path
 import pytest
 from typing import Set
+from cg.cli.demultiplex.copy_novaseqx_data import get_latest_analysis_directory
 
 from cg.cli.demultiplex.demux import (
     copy_flow_cell_analysis_data,
-    get_latest_analysis_directory,
     is_ready_for_post_processing,
 )
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
