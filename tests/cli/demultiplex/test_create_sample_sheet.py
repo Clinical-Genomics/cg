@@ -56,14 +56,15 @@ def test_create_sample_sheet_no_run_parameters(
 
 def test_create_bcl2fastq_sample_sheet(
     cli_runner: testing.CliRunner,
-    flow_cell_working_directory: Path,
+    tmp_flow_cells_directory_no_sample_sheet: Path,
     sample_sheet_context: CGConfig,
     lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
     flowcell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=flow_cell_working_directory, bcl_converter=BclConverter.BCL2FASTQ
+        flow_cell_path=tmp_flow_cells_directory_no_sample_sheet,
+        bcl_converter=BclConverter.BCL2FASTQ,
     )
     assert flowcell.run_parameters_path.exists()
 
@@ -80,7 +81,7 @@ def test_create_bcl2fastq_sample_sheet(
     # WHEN creating a sample sheet
     result = cli_runner.invoke(
         create_sheet,
-        [str(flow_cell_working_directory)],
+        [str(tmp_flow_cells_directory_no_sample_sheet)],
         obj=sample_sheet_context,
     )
 
@@ -96,14 +97,14 @@ def test_create_bcl2fastq_sample_sheet(
 
 def test_create_dragen_sample_sheet(
     cli_runner: testing.CliRunner,
-    flow_cell_working_directory: Path,
+    tmp_flow_cells_directory_no_sample_sheet: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_dragen_samples: List[FlowCellSampleNovaSeq6000Dragen],
+    lims_novaseq_bcl_convert_samples: List[FlowCellSampleNovaSeq6000Dragen],
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
     flowcell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_working_directory, bcl_converter=BclConverter.DRAGEN
+        tmp_flow_cells_directory_no_sample_sheet, bcl_converter=BclConverter.DRAGEN
     )
     assert flowcell.run_parameters_path.exists()
 
@@ -113,14 +114,14 @@ def test_create_dragen_sample_sheet(
     # GIVEN flow cell samples
     mocker.patch(
         FLOW_CELL_FUNCTION_NAME,
-        return_value=lims_novaseq_dragen_samples,
+        return_value=lims_novaseq_bcl_convert_samples,
     )
     # GIVEN a lims api that returns some samples
 
     # WHEN creating a sample sheet
     result = cli_runner.invoke(
         create_sheet,
-        [str(flow_cell_working_directory), "-b", BclConverter.DRAGEN],
+        [str(tmp_flow_cells_directory_no_sample_sheet), "-b", BclConverter.DRAGEN],
         obj=sample_sheet_context,
     )
 

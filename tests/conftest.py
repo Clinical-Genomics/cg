@@ -821,12 +821,32 @@ def fixture_flow_cell_working_directory_bclconvert(
     return working_dir
 
 
+@pytest.fixture(name="tmp_flow_cell_name_no_run_parameters")
+def fixture_tmp_flow_cell_name_no_run_parameters() -> str:
+    """This is the name of a flow cell directory with the run parameters missing."""
+    return "180522_ST-E00198_0301_BHLCKNCCXY"
+
+
+@pytest.fixture(name="tmp_flow_cell_name_no_sample_sheet")
+def fixture_tmp_flow_cell_name_no_sample_sheet() -> str:
+    """This is the name of a flow cell directory with the run parameters missing."""
+    return "170407_ST-E00198_0209_BHHKVCALXX"
+
+
 @pytest.fixture(name="tmp_flow_cells_directory_no_run_parameters")
 def fixture_tmp_flow_cells_directory_no_run_parameters(
-    bcl2fastq_flow_cell_dir: Path, tmp_flow_cells_directory: Path
+    tmp_flow_cell_name_no_run_parameters: str, tmp_flow_cells_directory: Path
 ) -> Path:
     """This is a path to a flow cell directory with the run parameters missing."""
-    return Path(tmp_flow_cells_directory, bcl2fastq_flow_cell_dir.name)
+    return Path(tmp_flow_cells_directory, tmp_flow_cell_name_no_run_parameters)
+
+
+@pytest.fixture(name="tmp_flow_cells_directory_no_sample_sheet")
+def fixture_tmp_flow_cells_directory_no_sample_sheet(
+    tmp_flow_cell_name_no_sample_sheet: str, tmp_flow_cells_directory: Path
+) -> Path:
+    """This is a path to a flow cell directory with the run parameters missing."""
+    return Path(tmp_flow_cells_directory, tmp_flow_cell_name_no_sample_sheet)
 
 
 # Temporary demultiplexed runs fixtures

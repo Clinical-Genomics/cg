@@ -90,7 +90,7 @@ def test_demultiplex_flow_cell(
 
 def test_demultiplex_bcl2fastq_flowcell(
     cli_runner: testing.CliRunner,
-    tmp_flow_cell_directory_bcl2fastq_bcl2fastq: Path,
+    tmp_flow_cell_directory_bcl2fastq: Path,
     demultiplex_context: CGConfig,
     caplog,
     mocker,
@@ -129,9 +129,9 @@ def test_demultiplex_bcl2fastq_flowcell(
 
 def test_demultiplex_dragen_flowcell(
     cli_runner: testing.CliRunner,
-    tmp_flow_cell_directory_bcl2fastq_dragen: Path,
+    tmp_flow_cell_directory_bclconvert: Path,
     demultiplex_context: CGConfig,
-    demultiplexed_flow_cells_working_directory: Path,
+    tmp_demultiplexed_runs_directory: Path,
     caplog,
     mocker,
 ):
