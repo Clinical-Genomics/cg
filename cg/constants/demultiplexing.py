@@ -33,7 +33,6 @@ class DemultiplexingDirsAndFiles(StrEnum):
     DATA: str = "Data"
 
 
-
 class RunParametersXMLNodes(StrEnum):
     """Define names of the used XML nodes in run parameters files."""
 

@@ -229,7 +229,7 @@ def is_analyzed(analysis_directory: Path):
     return Path(
         analysis_directory,
         DemultiplexingDirsAndFiles.DATA,
-        DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED
+        DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED,
     ).exists()
 
 
