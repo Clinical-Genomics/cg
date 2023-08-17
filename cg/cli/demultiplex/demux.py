@@ -237,12 +237,7 @@ def is_post_processed(flow_cell: Path) -> bool:
 def copy_flow_cell_analysis_data(flow_cell: Path, destination: Path):
     """Copy flow cell analysis data to demultiplexed runs."""
 
-    # 1. Create target directory
     flow_cell_target = Path(destination / flow_cell.name)
     flow_cell_target.mkdir()
 
-    # 2. Create directory with flow cell name in destination
-
-    # 3. Copy analysis directory to destination
-
-    pass
+    Path(flow_cell_target, "Data").mkdir()
