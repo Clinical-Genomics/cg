@@ -77,7 +77,7 @@ def demultiplex_flow_cell(
     """
 
     LOG.info(f"Running cg demultiplex flow cell, using {bcl_converter}")
-    flow_cell_directory: Path = Path(context.demultiplex.run_dir, flow_cell_name)
+    flow_cell: Path = Path(context.demultiplex.run_dir, flow_cell_name)
 
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
@@ -86,7 +86,7 @@ def demultiplex_flow_cell(
 
     try:
         flow_cell = FlowCellDirectoryData(
-            flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
+            flow_cell_path=flow_cell, bcl_converter=bcl_converter
         )
     except FlowCellError as error:
         raise click.Abort from error
@@ -177,28 +177,28 @@ def copy_novaseqx_flow_cells(context: CGConfig):
     """Copy novaseqx flow cells ready for post processing to demultiplexed runs."""
     flow_cells_directory: Path = context.demultiplex.out_dir
 
-    for flow_cell_directory in flow_cells_directory.iterdir():
-        if is_ready_for_post_processing(flow_cell_directory):
+    for flow_cell in flow_cells_directory.iterdir():
+        if is_ready_for_post_processing(flow_cell):
             pass
 
 
-def is_ready_for_post_processing(flow_cell_directory: Path) -> bool:
+def is_ready_for_post_processing(flow_cell: Path) -> bool:
     """Check whether a novaseqx flow cell is ready for post processing."""
-    analysis_directory = get_latest_analysis_directory(flow_cell_directory)
+    analysis_directory = get_latest_analysis_directory(flow_cell)
 
     if not analysis_directory:
         return False
 
     copy_completed = is_copied(analysis_directory)
     analysis_completed = is_analyzed(analysis_directory)
-    post_processed = is_post_processed(flow_cell_directory)
+    post_processed = is_post_processed(flow_cell)
     return not post_processed and copy_completed and analysis_completed
 
 
-def get_latest_analysis_directory(flow_cell_directory: Path) -> Optional[Path]:
-    analysis_path = flow_cell_directory / "Analysis"
+def get_latest_analysis_directory(flow_cell: Path) -> Optional[Path]:
+    analysis_path = flow_cell / "Analysis"
 
-    if not analysis_directory_exists(flow_cell_directory):
+    if not analysis_directory_exists(flow_cell):
         return None
     analysis_versions = get_sorted_analysis_versions(analysis_path)
     return analysis_versions[0] if analysis_versions else None
@@ -210,8 +210,8 @@ def get_sorted_analysis_versions(analysis_path: Path) -> List[Path]:
     )
 
 
-def analysis_directory_exists(flow_cell_directory: Path) -> bool:
-    analysis_path = flow_cell_directory / "Analysis"
+def analysis_directory_exists(flow_cell: Path) -> bool:
+    analysis_path = flow_cell / "Analysis"
     return analysis_path.exists() and analysis_path.is_dir()
 
 
@@ -223,10 +223,21 @@ def is_analyzed(analysis_directory: Path):
     return (analysis_directory / "Data" / "Secondary_Analysis_Complete.txt").exists()
 
 
-def is_post_processed(flow_cell_directory: Path) -> bool:
-    return (flow_cell_directory / "PostProcessed.txt").exists()
+def is_post_processed(flow_cell: Path) -> bool:
+    return (flow_cell / "PostProcessed.txt").exists()
 
 
-def copy_flow_cell_analysis_data(flow_cell_directory: Path, destination: Path):
+def copy_flow_cell_analysis_data(flow_cell: Path, destination: Path):
     """Copy flow cell analysis data to demultiplexed runs."""
+
+    # 1. Create target directory
+    flow_cell_target = Path(destination / flow_cell.name)
+    flow_cell_target.mkdir()
+
+    # 2. Create directory with flow cell name in destination
+    
+
+    # 3. Copy analysis directory to destination
+
+
     pass
