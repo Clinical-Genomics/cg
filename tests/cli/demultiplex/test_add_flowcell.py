@@ -11,11 +11,11 @@ def test_add_flowcell_cmd(
     bcl2fastq_flow_cell: FlowCellDirectoryData,
     demultiplex_context: CGConfig,
     demultiplexed_flow_cell_finished_working_directory: Path,
-    demultiplex_ready_flow_cell: Path,
+    tmp_flow_cell_directory_bcl2fastq: Path,
 ):
     # GIVEN a cgstats api and a demultiplex api
     # GIVEN that there is a flowcell in the run dir
-    assert demultiplex_ready_flow_cell.exists()
+    assert tmp_flow_cell_directory_bcl2fastq.exists()
     # GIVEN that there is a demultiplexed flowcell
     assert demultiplexed_flow_cell_finished_working_directory.exists()
 

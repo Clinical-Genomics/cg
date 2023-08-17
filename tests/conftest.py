@@ -751,11 +751,11 @@ def fixture_compression_object(
 # Demultiplex fixtures
 
 
-@pytest.fixture(name="lims_novaseq_dragen_samples")
-def fixture_lims_novaseq_dragen_samples(
+@pytest.fixture(name="lims_novaseq_bcl_convert_samples")
+def fixture_lims_novaseq_bcl_convert_samples(
     lims_novaseq_samples_raw: List[dict],
 ) -> List[FlowCellSampleNovaSeq6000Dragen]:
-    """Return a list of parsed Dragen flow cell samples"""
+    """Return a list of parsed bcl_convert flow cell samples"""
     return [FlowCellSampleNovaSeq6000Dragen(**sample) for sample in lims_novaseq_samples_raw]
 
 
@@ -784,34 +784,54 @@ def fixture_stats_api(project_dir: Path) -> StatsAPI:
     _store.drop_all()
 
 
-@pytest.fixture(name="flow_cells_directory")
-def fixture_flow_cells_directory(project_dir: Path) -> Path:
-    """Return the path to a working directory with flow cells ready for demux."""
-    working_dir: Path = Path(project_dir, "flow_cells")
-    working_dir.mkdir(parents=True)
-    return working_dir
-
-
+# Temporary flow cell runs fixtures
 @pytest.fixture(name="tmp_flow_cells_directory")
-def fixture_tmp_flow_cells_directory(tmp_path: Path, flow_cells_directory: Path) -> Path:
+def fixture_tmp_flow_cells_directory(tmp_path: Path, flow_cells_dir: Path) -> Path:
     """
     Return the path to a temporary flow-cells directory with flow cells ready for demultiplexing.
     Generates a copy of the original flow cells directory
     """
-    original_dir = flow_cells_directory
+    original_dir = flow_cells_dir
     tmp_dir = Path(tmp_path, "flow_cells")
 
     return Path(shutil.copytree(original_dir, tmp_dir))
 
 
-@pytest.fixture(name="demultiplexed_flow_cells_directory")
-def fixture_demultiplexed_flow_cells_directory(project_dir: Path) -> Path:
-    """Return the path to a demultiplexed-runs directory that contains demultiplexed flow cells."""
-    working_dir: Path = Path(project_dir, "demultiplexed-runs")
+@pytest.fixture(name="tmp_flow_cell_directory_bcl2fastq")
+def fixture_flow_cell_working_directory_bcl2fastq(
+    bcl2fastq_flow_cell_dir: Path, tmp_flow_cells_directory: Path
+) -> Path:
+    """Return the path to a working directory that will be deleted after test is run.
+
+    This is a path to a flow cell directory with the run parameters present.
+    """
+    working_dir: Path = Path(tmp_flow_cells_directory, bcl2fastq_flow_cell_dir.name)
+    return working_dir
+
+
+@pytest.fixture(name="tmp_flow_cell_directory_bclconvert")
+def fixture_flow_cell_working_directory_bclconvert(
+    bcl_convert_flow_cell_dir: Path, tmp_flow_cells_directory: Path
+) -> Path:
+    """Return the path to a working directory that will be deleted after test is run.
+
+    This is a path to a flow cell directory with the run parameters present.
+    """
+    working_dir: Path = Path(tmp_flow_cells_directory, bcl_convert_flow_cell_dir.name)
+    return working_dir
+
+
+@pytest.fixture(name="flow_cell_working_directory_no_run_parameters")
+def fixture_flow_cell_working_directory_no_run_parameters(
+    bcl2fastq_flow_cell_dir: Path, tmp_flow_cells_directory: Path
+) -> Path:
+    """This is a path to a flow cell directory with the run parameters missing."""
+    working_dir: Path = Path(tmp_flow_cells_directory, bcl2fastq_flow_cell_dir.name)
     working_dir.mkdir(parents=True)
     return working_dir
 
 
+# Temporary demultiplexed runs fixtures
 @pytest.fixture(name="tmp_demultiplexed_runs_directory")
 def fixture_tmp_demultiplexed_flow_cells_directory(
     tmp_path: Path, demultiplexed_runs: Path
@@ -824,10 +844,7 @@ def fixture_tmp_demultiplexed_flow_cells_directory(
     return Path(shutil.copytree(original_dir, tmp_dir))
 
 
-@pytest.fixture(name="demux_results_not_finished_dir")
-def fixture_demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a dir with demultiplexing results where demux has been done but nothing is cleaned."""
-    return Path(demultiplex_fixtures, "demultiplexed-runs-unfinished")
+# Temporary demultiplexed runs unfinished fixtures
 
 
 @pytest.fixture(name="tmp_demultiplexed_runs_not_finished_directory")
@@ -843,95 +860,13 @@ def fixture_tmp_demultiplexed_runs_not_finished_flow_cells_directory(
     return Path(shutil.copytree(original_dir, tmp_dir))
 
 
-@pytest.fixture(name="demultiplexed_flow_cell_working_directory")
-def fixture_demultiplexed_flow_cell_working_directory(
-    demux_results_not_finished_dir: Path,
-    demultiplexed_flow_cells_directory: Path,
+@pytest.fixture(name="demultiplexed_runs_unfinished_bcl2fastq_flow_cell_directory")
+def fixture_demultiplexed_runs_bcl2fastq_flow_cell_directory(
+    tmp_demultiplexed_runs_not_finished_directory: Path,
     bcl2fastq_flow_cell_full_name: str,
 ) -> Path:
     """Copy the content of a demultiplexed but not finished directory to a temporary location."""
-    source: Path = Path(demux_results_not_finished_dir, bcl2fastq_flow_cell_full_name)
-    destination: Path = Path(demultiplexed_flow_cells_directory, bcl2fastq_flow_cell_full_name)
-    shutil.copytree(src=source, dst=destination)
-    return destination
-
-
-@pytest.fixture(name="demultiplexed_flow_cell_finished_working_directory")
-def fixture_demultiplexed_flow_cell_finished_working_directory(
-    demultiplexed_runs: Path,
-    demultiplexed_flow_cells_directory: Path,
-    bcl2fastq_flow_cell_full_name: str,
-) -> Path:
-    """Copy the content of a demultiplexed but not finished directory to a temporary location."""
-    source: Path = Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
-    destination: Path = Path(demultiplexed_flow_cells_directory, bcl2fastq_flow_cell_full_name)
-    shutil.copytree(src=source, dst=destination)
-    return destination
-
-
-@pytest.fixture(name="tmp_flow_cell_directory_bcl2fastq")
-def fixture_flow_cell_working_directory_bcl2fastq(
-    bcl2fastq_flow_cell_dir: Path, tmp_flow_cells_directory: Path
-) -> Path:
-    """Return the path to a working directory that will be deleted after test is run.
-
-    This is a path to a flow cell directory with the run parameters present.
-    """
-    working_dir: Path = Path(tmp_flow_cells_directory, bcl2fastq_flow_cell_dir.name)
-    return working_dir
-
-
-@pytest.fixture(name="flow_cell_working_directory_dragen")
-def fixture_flow_cell_working_directory_dragen(
-    dragen_flow_cell_dir: Path, tmp_flow_cells_directory: Path
-) -> Path:
-    """Return the path to a working directory that will be deleted after test is run.
-
-    This is a path to a flow cell directory with the run parameters present.
-    """
-    working_dir: Path = Path(tmp_flow_cells_directory, dragen_flow_cell_dir.name)
-    return working_dir
-
-
-@pytest.fixture(name="flow_cell_working_directory_no_run_parameters")
-def fixture_flow_cell_working_directory_no_run_parameters(
-    bcl2fastq_flow_cell_dir: Path, tmp_flow_cells_directory: Path
-) -> Path:
-    """This is a path to a flow cell directory with the run parameters missing."""
-    working_dir: Path = Path(tmp_flow_cells_directory, bcl2fastq_flow_cell_dir.name)
-    working_dir.mkdir(parents=True)
-    return working_dir
-
-
-@pytest.fixture(name="demultiplex_ready_flow_cell")
-def fixture_demultiplex_ready_flow_cell(tmp_flow_cell_directory_bcl2fastq: Path) -> Path:
-    """Return the path to a working directory that is ready for demultiplexing.
-
-    This is a path to a flow cell directory with all the files necessary to start demultiplexing present.
-    """
-    return tmp_flow_cell_directory_bcl2fastq
-
-
-@pytest.fixture(name="demultiplex_ready_flow_cell_bcl2fastq")
-def fixture_demultiplex_ready_flow_cell_bcl2fastq(
-    tmp_flow_cells_directory: Path, bcl2fastq_flow_cell_full_name: str
-) -> Path:
-    """Return the path to a working directory that is ready for demultiplexing.
-
-    This is a path to a flow cell directory with all the files necessary to start demultiplexing present.
-    """
-    return Path(tmp_flow_cells_directory, bcl2fastq_flow_cell_full_name)
-
-
-@pytest.fixture(name="demultiplex_ready_flow_cell_dragen")
-def fixture_demultiplex_ready_flow_cell_dragen(
-    tmp_flow_cells_directory: Path, dragen_flow_cell_full_name: Path
-) -> Path:
-    """Return the path to a working directory that is ready for demultiplexing.
-
-    This is a path to a flow cell directory with all the files necessary to start demultiplexing present.
-    """
-    return Path(tmp_flow_cells_directory, dragen_flow_cell_full_name)
+    return Path(tmp_demultiplexed_runs_not_finished_directory, bcl2fastq_flow_cell_full_name)
 
 
 @pytest.fixture(name="sample_sheet_context")
@@ -1122,15 +1057,21 @@ def fixture_flow_cells_dir(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "flow_cells")
 
 
+@pytest.fixture(name="demux_results_not_finished_dir")
+def fixture_demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a dir with demultiplexing results where demux has been done but nothing is cleaned."""
+    return Path(demultiplex_fixtures, "demultiplexed-runs-unfinished")
+
+
 @pytest.fixture(name="bcl2fastq_flow_cell_full_name", scope="session")
 def fixture_flow_cell_full_name() -> str:
     """Return full flow cell name."""
     return "201203_A00689_0200_AHVKJCDRXX"
 
 
-@pytest.fixture(name="dragen_flow_cell_full_name", scope="session")
-def fixture_dragen_flow_cell_full_name() -> str:
-    """Return the full name of a dragen flow cell."""
+@pytest.fixture(name="bcl_convert_flow_cell_full_name", scope="session")
+def fixture_bcl_convert_flow_cell_full_name() -> str:
+    """Return the full name of a bcl_convert flow cell."""
     return "211101_A00187_0615_AHLG5GDRXY"
 
 
@@ -1148,10 +1089,12 @@ def fixture_bcl2fastq_flow_cell_dir(
     return Path(flow_cells_dir, bcl2fastq_flow_cell_full_name)
 
 
-@pytest.fixture(name="dragen_flow_cell_dir", scope="session")
-def fixture_dragen_flow_cell_path(flow_cells_dir: Path, dragen_flow_cell_full_name: str) -> Path:
-    """Return the path to the dragen flow cell demultiplex fixture directory."""
-    return Path(flow_cells_dir, dragen_flow_cell_full_name)
+@pytest.fixture(name="bcl_convert_flow_cell_dir", scope="session")
+def fixture_bcl_convert_flow_cell_path(
+    flow_cells_dir: Path, bcl_convert_flow_cell_full_name: str
+) -> Path:
+    """Return the path to the bcl_convert flow cell demultiplex fixture directory."""
+    return Path(flow_cells_dir, bcl_convert_flow_cell_full_name)
 
 
 @pytest.fixture(name="novaseq_x_flow_cell_dir", scope="session")
@@ -1168,10 +1111,10 @@ def fixture_novaseq_bcl2fastq_sample_sheet_path(bcl2fastq_flow_cell_dir: Path) -
     return Path(bcl2fastq_flow_cell_dir, "SampleSheet.csv")
 
 
-@pytest.fixture(name="novaseq_dragen_sample_sheet_path", scope="session")
-def fixture_novaseq_dragen_sample_sheet_path(dragen_flow_cell_dir: Path) -> Path:
-    """Return the path to a NovaSeq6000 dragen sample sheet."""
-    return Path(dragen_flow_cell_dir, "SampleSheet.csv")
+@pytest.fixture(name="novaseq_bcl_convert_sample_sheet_path", scope="session")
+def fixture_novaseq_bcl_convert_sample_sheet_path(bcl_convert_flow_cell_dir: Path) -> Path:
+    """Return the path to a NovaSeq6000 bcl_convert sample sheet."""
+    return Path(bcl_convert_flow_cell_dir, "SampleSheet.csv")
 
 
 @pytest.fixture(name="run_parameters_missing_versions_path", scope="session")
@@ -1236,11 +1179,11 @@ def fixture_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
     )
 
 
-@pytest.fixture(name="dragen_flow_cell", scope="session")
-def fixture_dragen_flow_cell(dragen_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Create a dragen flow cell object with flow cell that is demultiplexed."""
+@pytest.fixture(name="bcl_convert_flow_cell", scope="session")
+def fixture_bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> FlowCellDirectoryData:
+    """Create a bcl_convert flow cell object with flow cell that is demultiplexed."""
     return FlowCellDirectoryData(
-        flow_cell_path=dragen_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
+        flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
     )
 
 
@@ -1258,10 +1201,10 @@ def fixture_bcl2fast2_flow_cell_id(bcl2fastq_flow_cell: FlowCellDirectoryData) -
     return bcl2fastq_flow_cell.id
 
 
-@pytest.fixture(name="dragen_flow_cell_id", scope="session")
-def fixture_dragen_flow_cell_id(dragen_flow_cell: FlowCellDirectoryData) -> str:
-    """Return flow cell id from dragen flow cell object."""
-    return dragen_flow_cell.id
+@pytest.fixture(name="bcl_convert_flow_cell_id", scope="session")
+def fixture_bcl_convert_flow_cell_id(bcl_convert_flow_cell: FlowCellDirectoryData) -> str:
+    """Return flow cell id from bcl_convert flow cell object."""
+    return bcl_convert_flow_cell.id
 
 
 @pytest.fixture(name="demultiplexing_delivery_file")
