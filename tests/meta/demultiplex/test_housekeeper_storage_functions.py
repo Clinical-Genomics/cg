@@ -122,13 +122,13 @@ def test_add_fastq_files_without_sample_id(
 def test_add_existing_sample_sheet(
     demultiplex_context: CGConfig,
     bcl_convert_flow_cell: FlowCellDirectoryData,
-    flow_cell_working_directory: Path,
+    tmp_flow_cells_directory: Path,
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a flow cell directory and name
-    flow_cell_directory = Path(flow_cell_working_directory, bcl_convert_flow_cell.full_name)
+    flow_cell_directory = Path(tmp_flow_cells_directory, bcl_convert_flow_cell.full_name)
 
     # GIVEN that a flow cell bundle exists in Housekeeper
     add_bundle_and_version_if_non_existent(

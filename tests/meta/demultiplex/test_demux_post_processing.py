@@ -570,7 +570,9 @@ def test_post_processing_of_flow_cell(
 
 
 def test_get_all_demultiplexed_flow_cell_out_dirs(
-    demultiplex_context: CGConfig, tmp_demultiplexed_runs_directory: Path
+    demultiplex_context: CGConfig,
+    tmp_demultiplexed_runs_directory: Path,
+    tmp_demultiplexed_runs_bcl2fastq_directory: Path,
 ):
     """Test returning all flow cell directories from the demultiplexing run directory."""
     # GIVEN a demultiplex flow cell finished output directory that exist
@@ -582,4 +584,4 @@ def test_get_all_demultiplexed_flow_cell_out_dirs(
     demultiplex_flow_cell_dirs: List[Path] = demux_api.get_all_demultiplexed_flow_cell_dirs()
 
     # THEN the demultiplexed flow cells run directories should be returned
-    assert demultiplex_flow_cell_dirs[0] == demultiplexed_flow_cell_finished_working_directory
+    assert tmp_demultiplexed_runs_bcl2fastq_directory in demultiplex_flow_cell_dirs
