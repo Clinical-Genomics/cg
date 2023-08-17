@@ -19,7 +19,6 @@ from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
     get_bcl_converter_name,
     parse_flow_cell_directory_data,
-    copy_sample_sheet,
 )
 from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
 
@@ -114,11 +113,6 @@ class DemuxPostProcessingAPI:
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
             flow_cell_directory=flow_cell_out_directory,
             bcl_converter=bcl_converter,
-        )
-
-        copy_sample_sheet(
-            sample_sheet_source_directory=flow_cell_run_directory,
-            sample_sheet_destination_directory=flow_cell_out_directory,
         )
 
         try:
@@ -379,17 +373,6 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         with report_path.open("w") as report_file:
             report_file.write("\n".join(report_content))
 
-    @staticmethod
-    def copy_sample_sheet(demux_results: DemuxResults) -> None:
-        """Copy the sample sheet from run dir to demux dir"""
-        LOG.info(
-            f"Copy sample sheet {demux_results.sample_sheet_path} from flow cell to demuxed result dir {demux_results.demux_sample_sheet_path}"
-        )
-        shutil.copy(
-            demux_results.sample_sheet_path.as_posix(),
-            demux_results.demux_sample_sheet_path.as_posix(),
-        )
-
     def post_process_flow_cell(self, demux_results: DemuxResults) -> None:
         """Run all the necessary steps for post-processing a demultiplexed flow cell.
         This will
@@ -410,8 +393,6 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         if demux_results.bcl_converter == "bcl2fastq":
             # relevant - topUnknownbarcodes
             self.create_barcode_summary_report(demux_results=demux_results)
-        # moving not needed with new workflow   - on hold
-        self.copy_sample_sheet(demux_results=demux_results)
 
         self.transfer_flow_cell(
             flow_cell_dir=demux_results.flow_cell.path, flow_cell_id=demux_results.flow_cell.id
