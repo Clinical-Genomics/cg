@@ -1,5 +1,6 @@
 from pathlib import Path
 import pytest
+from typing import Set
 
 from cg.cli.demultiplex.demux import (
     copy_flow_cell_analysis_data,
@@ -36,20 +37,18 @@ def novaseqx_flow_cell(flow_cell_directory: Path, latest_analysis_version: str) 
     (flow_cell_directory / "Analysis" / "1").mkdir(parents=True, exist_ok=True)
 
     # Complete analysis version - old
-    (flow_cell_directory / "Analysis/0").mkdir(parents=True, exist_ok=True)
-    (flow_cell_directory / "Analysis/0" / "CopyComplete.txt").touch()
-
-    (flow_cell_directory / "Analysis/0" / "Data").mkdir(parents=True, exist_ok=True)
-    (flow_cell_directory / "Analysis/0" / "Data" / "Secondary_Analysis_Complete.txt").touch()
+    old_analysis = flow_cell_directory / "Analysis/0"
+    old_analysis.mkdir(parents=True, exist_ok=True)
+    (old_analysis / "CopyComplete.txt").touch()
+    (old_analysis / "Data").mkdir(parents=True, exist_ok=True)
+    (old_analysis / "Data" / "Secondary_Analysis_Complete.txt").touch()
 
     # Complete analysis version - most recent
-    (flow_cell_directory / latest_analysis_version).mkdir(parents=True, exist_ok=True)
-    (flow_cell_directory / latest_analysis_version / "CopyComplete.txt").touch()
-
-    (flow_cell_directory / latest_analysis_version / "Data").mkdir(parents=True, exist_ok=True)
-    (
-        flow_cell_directory / latest_analysis_version / "Data" / "Secondary_Analysis_Complete.txt"
-    ).touch()
+    latest_analysis = flow_cell_directory / latest_analysis_version
+    latest_analysis.mkdir(parents=True, exist_ok=True)
+    (latest_analysis / "CopyComplete.txt").touch()
+    (latest_analysis / "Data").mkdir(parents=True, exist_ok=True)
+    (latest_analysis / "Data" / "Secondary_Analysis_Complete.txt").touch()
 
     return flow_cell_directory
 
@@ -150,12 +149,23 @@ def test_copy_novaseqx_flow_cell(
     demultiplexed_runs: Path, novaseqx_flow_cell: Path, flow_cell_name: str
 ):
     # GIVEN a destination directory
+    flow_cell_run = Path(demultiplexed_runs, flow_cell_name)
+    flow_cell_run.mkdir()
+    destination = Path(flow_cell_run, "Data")
 
     # WHEN copying the flow cell analysis data to demultiplexed runs
-    copy_flow_cell_analysis_data(novaseqx_flow_cell, demultiplexed_runs)
+    copy_flow_cell_analysis_data(novaseqx_flow_cell, destination)
 
-    # THEN the flow cell directory has been created
-    assert (demultiplexed_runs / flow_cell_name).exists()
+    # THEN the data contains everything from the analysis folder
+    analysis = get_latest_analysis_directory(novaseqx_flow_cell)
+    analysis_data = analysis / "Data"
 
-    # THEN a data folder has been created
-    assert (demultiplexed_runs / flow_cell_name / "Data").exists()
+    original_files = get_all_files(analysis_data)
+    copied_files = get_all_files(destination)
+
+    assert original_files == copied_files
+
+
+def get_all_files(base_path: Path) -> Set[Path]:
+    """Get a set of all files relative to base_path."""
+    return {file.relative_to(base_path) for file in base_path.rglob("*") if file.is_file()}

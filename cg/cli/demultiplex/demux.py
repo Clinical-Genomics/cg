@@ -3,6 +3,8 @@ from pathlib import Path
 from typing import List, Optional
 
 import click
+import os
+import shutil
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.tb import TrailblazerAPI
@@ -237,7 +239,11 @@ def is_post_processed(flow_cell: Path) -> bool:
 def copy_flow_cell_analysis_data(flow_cell: Path, destination: Path):
     """Copy flow cell analysis data to demultiplexed runs."""
 
-    flow_cell_target = Path(destination / flow_cell.name)
-    flow_cell_target.mkdir()
+    analysis = get_latest_analysis_directory(flow_cell)
+    analysis_data = Path(analysis, "Data")
 
-    Path(flow_cell_target, "Data").mkdir()
+    hardlink_tree(src=analysis_data, dst=destination)
+
+
+def hardlink_tree(src: Path, dst: Path):
+    shutil.copytree(src, dst, copy_function=os.link)
