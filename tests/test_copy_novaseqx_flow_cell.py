@@ -24,6 +24,11 @@ def flow_cell_directory(tmp_path: Path, flow_cell_name: str) -> Path:
 
 
 @pytest.fixture
+def demultiplexed_runs_directory(tmp_path: Path) -> Path:
+    return tmp_path / "demultiplexed_runs"
+
+
+@pytest.fixture
 def novaseqx_flow_cell(flow_cell_directory: Path, latest_analysis_version: str) -> Path:
     # Incomplete analysis version
     (flow_cell_directory / "Analysis" / "1").mkdir(parents=True, exist_ok=True)
@@ -118,9 +123,10 @@ def test_get_latest_analysis_version_path(
     assert analysis_directory == novaseqx_flow_cell / latest_analysis_version
 
 
-def test_copy_novaseqx_flow_cell(tmp_path: Path, novaseqx_flow_cell: Path, flow_cell_name: str):
+def test_copy_novaseqx_flow_cell(
+    demultiplexed_runs_directory: Path, novaseqx_flow_cell: Path, flow_cell_name: str
+):
     # GIVEN a destination directory
-    demultiplexed_runs_directory = tmp_path
 
     # WHEN copying the flow cell analysis data to demultiplexed runs
     copy_flow_cell_analysis_data(novaseqx_flow_cell, demultiplexed_runs_directory)
