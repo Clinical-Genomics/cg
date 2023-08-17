@@ -179,7 +179,7 @@ def copy_novaseqx_flow_cells(context: CGConfig):
 
     for flow_cell_directory in flow_cells_directory.iterdir():
         if is_ready_for_post_processing(flow_cell_directory):
-            copy_flow_cell_analysis_data()
+            pass
 
 
 def is_ready_for_post_processing(flow_cell_directory: Path) -> bool:
@@ -208,6 +208,7 @@ def get_sorted_analysis_versions(analysis_path: Path) -> List[Path]:
     return sorted(
         (d for d in analysis_path.iterdir() if d.is_dir()), key=lambda x: int(x.name), reverse=True
     )
+
 
 def analysis_directory_exists(flow_cell_directory: Path) -> bool:
     analysis_path = flow_cell_directory / "Analysis"

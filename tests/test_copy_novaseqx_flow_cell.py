@@ -1,7 +1,11 @@
 from pathlib import Path
 import pytest
 
-from cg.cli.demultiplex.demux import copy_flow_cell_analysis_data, get_latest_analysis_directory, is_ready_for_post_processing
+from cg.cli.demultiplex.demux import (
+    copy_flow_cell_analysis_data,
+    get_latest_analysis_directory,
+    is_ready_for_post_processing,
+)
 
 
 @pytest.fixture
@@ -13,9 +17,11 @@ def latest_analysis_version() -> str:
 def flow_cell_name() -> str:
     return "20230427_LH00188_0001_B223YYCLT3"
 
+
 @pytest.fixture
 def flow_cell_directory(tmp_path: Path, flow_cell_name: str) -> Path:
     return tmp_path / flow_cell_name
+
 
 @pytest.fixture
 def novaseqx_flow_cell(flow_cell_directory: Path, latest_analysis_version: str) -> Path:
@@ -34,7 +40,9 @@ def novaseqx_flow_cell(flow_cell_directory: Path, latest_analysis_version: str) 
     (flow_cell_directory / latest_analysis_version / "CopyComplete.txt").touch()
 
     (flow_cell_directory / latest_analysis_version / "Data").mkdir(parents=True, exist_ok=True)
-    (flow_cell_directory / latest_analysis_version / "Data" / "Secondary_Analysis_Complete.txt").touch()
+    (
+        flow_cell_directory / latest_analysis_version / "Data" / "Secondary_Analysis_Complete.txt"
+    ).touch()
 
     return flow_cell_directory
 
@@ -98,7 +106,8 @@ def test_previously_post_processed_flow_cell_is_not_ready(post_processed_novaseq
 
 
 def test_get_latest_analysis_version_path(
-    novaseqx_flow_cell: Path, latest_analysis_version: str,
+    novaseqx_flow_cell: Path,
+    latest_analysis_version: str,
 ):
     # GIVEN a flow cell which is ready to be post processed
 
