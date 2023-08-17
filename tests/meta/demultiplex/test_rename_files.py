@@ -7,18 +7,16 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 def test_rename_demux_result(
-    demultiplexed_flow_cell_working_directory: Path,
+    tmp_demultiplexed_runs_directory: Path,
     demultiplex_context: CGConfig,
     bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     # GIVEN that this is the location of the demultiplex api
-    demultiplex_context.demultiplex_api_.demultiplexed_runs_dir = (
-        demultiplexed_flow_cell_working_directory
-    )
+    demultiplex_context.demultiplex_api_.demultiplexed_runs_dir = tmp_demultiplexed_runs_directory
     post_demux_api: DemuxPostProcessingNovaseqAPI = DemuxPostProcessingNovaseqAPI(
         config=demultiplex_context
     )
-    demux_dir: Path = demultiplexed_flow_cell_working_directory
+    demux_dir: Path = tmp_demultiplexed_runs_directory
     demux_results: DemuxResults = DemuxResults(
         demux_dir=demux_dir, flow_cell=bcl2fastq_flow_cell, bcl_converter="bcl2fastq"
     )

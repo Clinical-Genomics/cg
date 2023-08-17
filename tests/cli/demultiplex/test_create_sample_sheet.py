@@ -19,7 +19,7 @@ FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.get_flow_cell_sa
 
 def test_create_sample_sheet_no_run_parameters(
     cli_runner: testing.CliRunner,
-    flow_cell_working_directory_no_run_parameters: Path,
+    tmp_flow_cells_directory_no_run_parameters: Path,
     sample_sheet_context: CGConfig,
     lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
     caplog,
@@ -27,7 +27,7 @@ def test_create_sample_sheet_no_run_parameters(
 ):
     # GIVEN a folder with a non-existing sample sheet
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=flow_cell_working_directory_no_run_parameters
+        flow_cell_path=tmp_flow_cells_directory_no_run_parameters
     )
     assert flow_cell.run_parameters_path.exists() is False
 
@@ -39,7 +39,7 @@ def test_create_sample_sheet_no_run_parameters(
 
     # GIVEN a demux API context
     demux_api: DemultiplexingAPI = sample_sheet_context.demultiplex_api
-    demux_api.flow_cells_dir: Path = flow_cell_working_directory_no_run_parameters.parent
+    demux_api.flow_cells_dir: Path = tmp_flow_cells_directory_no_run_parameters.parent
     sample_sheet_context.demultiplex_api_: DemultiplexingAPI = demux_api
 
     # WHEN running the create sample sheet command

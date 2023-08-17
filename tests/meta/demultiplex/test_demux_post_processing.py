@@ -461,7 +461,7 @@ def test_finish_flow_cell(
 
 def test_finish_all_flowcells(
     caplog,
-    demultiplexed_flow_cell_working_directory: Path,
+    tmp_demultiplexed_runs_directory: Path,
     demultiplex_context: CGConfig,
     bcl2fastq_flow_cell: FlowCellDirectoryData,
     hiseq_x_copy_complete_file: Path,
@@ -570,7 +570,7 @@ def test_post_processing_of_flow_cell(
 
 
 def test_get_all_demultiplexed_flow_cell_out_dirs(
-    demultiplex_context: CGConfig, demultiplexed_flow_cell_finished_working_directory: Path
+    demultiplex_context: CGConfig, tmp_demultiplexed_runs_directory: Path
 ):
     """Test returning all flow cell directories from the demultiplexing run directory."""
     # GIVEN a demultiplex flow cell finished output directory that exist

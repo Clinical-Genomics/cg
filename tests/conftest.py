@@ -821,14 +821,12 @@ def fixture_flow_cell_working_directory_bclconvert(
     return working_dir
 
 
-@pytest.fixture(name="flow_cell_working_directory_no_run_parameters")
-def fixture_flow_cell_working_directory_no_run_parameters(
+@pytest.fixture(name="tmp_flow_cells_directory_no_run_parameters")
+def fixture_tmp_flow_cells_directory_no_run_parameters(
     bcl2fastq_flow_cell_dir: Path, tmp_flow_cells_directory: Path
 ) -> Path:
     """This is a path to a flow cell directory with the run parameters missing."""
-    working_dir: Path = Path(tmp_flow_cells_directory, bcl2fastq_flow_cell_dir.name)
-    working_dir.mkdir(parents=True)
-    return working_dir
+    return Path(tmp_flow_cells_directory, bcl2fastq_flow_cell_dir.name)
 
 
 # Temporary demultiplexed runs fixtures
@@ -842,6 +840,14 @@ def fixture_tmp_demultiplexed_flow_cells_directory(
     original_dir = demultiplexed_runs
     tmp_dir = Path(tmp_path, "demultiplexed-runs")
     return Path(shutil.copytree(original_dir, tmp_dir))
+
+
+@pytest.fixture(name="tmp_demultiplexed_runs_bcl2fastq_directory")
+def fixture_tmp_demultiplexed_runs_bcl2fastq_directory(
+    tmp_demultiplexed_runs_directory: Path, bcl2fastq_flow_cell_dir: Path
+) -> Path:
+    """Return the path to a temporary demultiplex-runs bcl2fastq flow cell directory."""
+    return Path(tmp_demultiplexed_runs_directory, bcl2fastq_flow_cell_dir.name)
 
 
 # Temporary demultiplexed runs unfinished fixtures
@@ -983,13 +989,13 @@ def fixture_demultiplex_context(
 @pytest.fixture(name="demultiplex_configs")
 def fixture_demultiplex_configs(
     tmp_flow_cells_directory: Path,
-    demultiplexed_flow_cells_directory: Path,
+    tmp_demultiplexed_runs_directory: Path,
 ) -> dict:
     """Return demultiplex configs."""
-    demultiplexed_flow_cells_directory.mkdir(parents=True, exist_ok=True)
+
     return {
         "flow_cells_dir": tmp_flow_cells_directory.as_posix(),
-        "demultiplexed_flow_cells_dir": demultiplexed_flow_cells_directory.as_posix(),
+        "demultiplexed_flow_cells_dir": tmp_demultiplexed_runs_directory.as_posix(),
         "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
 
