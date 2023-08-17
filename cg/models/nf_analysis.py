@@ -1,7 +1,7 @@
 import collections
 from typing import List
 
-from pydantic.v1 import BaseModel, validator
+from pydantic.v1 import BaseModel, conlist, validator
 
 from cg.constants.nextflow import DELIVER_FILE_HEADERS
 from cg.exc import SampleSheetError
@@ -22,19 +22,14 @@ class NextflowSample(BaseModel):
     """
 
     sample: str
-    fastq_forward: List[str]
-    fastq_reverse: List[str]
-
-    @validator("fastq_reverse", "fastq_forward")
-    def fastq_not_empty(cls, fastq) -> List[str]:
-        """Verify that fastq files are provided."""
-        if len(fastq) == 0:
-            raise SampleSheetError("Fastq files not provided")
-        return fastq
+    fastq_forward: conlist(str, min_items=1)
+    fastq_reverse: conlist(str, min_items=1)
 
     @validator("fastq_reverse")
-    def fastq_forward_reverse_length_match(cls, fastq_reverse, values: dict) -> List[str]:
-        """Verify that the number of fastq files is the same for R1 and R2."""
+    def fastq_forward_reverse_length_match(
+        cls, fastq_reverse: List[str], values: dict
+    ) -> List[str]:
+        """Verify that the number of fastq forward files is the same as for the reverse."""
         if len(fastq_reverse) != len(values.get("fastq_forward")):
             raise SampleSheetError("Fastq file length for forward and reverse do not match")
         return fastq_reverse

@@ -1,6 +1,7 @@
 from typing import List
 
 import pytest
+from pydantic.v1 import ValidationError
 from pydantic.v1 import ValidationError as PydanticValidationError
 
 from cg.exc import SampleSheetError
@@ -18,7 +19,7 @@ def test_instantiate_rnafusion_sample(
     """
     # GIVEN a sample with fastq files and strandedness
 
-    # WHEN instantiating a MipAnalysis object
+    # WHEN instantiating a rnafusion sample object
     rnafusion_sample_object = RnafusionSample(
         sample=rnafusion_sample,
         fastq_forward=rnafusion_fastq_forward,
@@ -66,7 +67,7 @@ def test_fastq_empty_list(
     # GIVEN a sample with fastq files and strandedness
 
     # WHEN instantiating a sample object
-    with pytest.raises(SampleSheetError):
+    with pytest.raises(ValidationError):
         RnafusionSample(
             sample=rnafusion_sample,
             fastq_forward=rnafusion_fastq_forward,
