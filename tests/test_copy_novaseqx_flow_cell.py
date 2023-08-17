@@ -14,25 +14,22 @@ def flow_cell_name() -> str:
     return "20230427_LH00188_0001_B223YYCLT3"
 
 @pytest.fixture
-def novaseqx_flow_cell(tmp_path: Path, latest_analysis_version: str, flow_cell_name: str) -> Path:
+def flow_cell_directory(tmp_path: Path, flow_cell_name: str) -> Path:
+    return tmp_path / flow_cell_name
+
+@pytest.fixture
+def novaseqx_flow_cell(flow_cell_directory: Path, latest_analysis_version: str) -> Path:
     # Incomplete analysis version
-    (tmp_path / flow_cell_name / "Analysis" / "1").mkdir(parents=True, exist_ok=True)
-
-    # Complete analysis version - old
-    (tmp_path / flow_cell_name / "Analysis/0").mkdir(parents=True, exist_ok=True)
-    (tmp_path / flow_cell_name / "Analysis/0" / "CopyComplete.txt").touch()
-
-    (tmp_path / flow_cell_name / "Analysis/0" / "Data").mkdir(parents=True, exist_ok=True)
-    (tmp_path / flow_cell_name / "Analysis/0" / "Data" / "Secondary_Analysis_Complete.txt").touch()
+    (flow_cell_directory / "Analysis" / "1").mkdir(parents=True, exist_ok=True)
 
     # Complete analysis version - most recent
-    (tmp_path / flow_cell_name / latest_analysis_version).mkdir(parents=True, exist_ok=True)
-    (tmp_path / flow_cell_name / latest_analysis_version / "CopyComplete.txt").touch()
+    (flow_cell_directory / latest_analysis_version).mkdir(parents=True, exist_ok=True)
+    (flow_cell_directory / latest_analysis_version / "CopyComplete.txt").touch()
 
-    (tmp_path / flow_cell_name / latest_analysis_version / "Data").mkdir(parents=True, exist_ok=True)
-    (tmp_path / flow_cell_name / latest_analysis_version / "Data" / "Secondary_Analysis_Complete.txt").touch()
+    (flow_cell_directory / latest_analysis_version / "Data").mkdir(parents=True, exist_ok=True)
+    (flow_cell_directory / latest_analysis_version / "Data" / "Secondary_Analysis_Complete.txt").touch()
 
-    return tmp_path
+    return flow_cell_directory
 
 
 @pytest.fixture
@@ -42,10 +39,10 @@ def post_processed_novaseqx_flow_cell(novaseqx_flow_cell) -> Path:
 
 
 @pytest.fixture
-def novaseqx_flow_cell_analysis_incomplete(tmp_path: Path) -> Path:
-    (tmp_path / "Analysis" / "2").mkdir(parents=True, exist_ok=True)
-    (tmp_path / "Analysis" / "2" / "CopyComplete.txt").touch()
-    return tmp_path
+def novaseqx_flow_cell_analysis_incomplete(flow_cell_directory: Path) -> Path:
+    (flow_cell_directory / "Analysis" / "2").mkdir(parents=True, exist_ok=True)
+    (flow_cell_directory / "Analysis" / "2" / "CopyComplete.txt").touch()
+    return flow_cell_directory
 
 
 @pytest.fixture

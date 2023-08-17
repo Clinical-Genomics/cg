@@ -182,7 +182,7 @@ def copy_novaseqx_flow_cells(context: CGConfig):
             copy_flow_cell_analysis_data()
 
 
-def is_ready_for_post_processing(flow_cell_directory: Path):
+def is_ready_for_post_processing(flow_cell_directory: Path) -> bool:
     """Check whether a novaseqx flow cell is ready for post processing."""
     analysis_directory = get_latest_analysis_directory(flow_cell_directory)
 
