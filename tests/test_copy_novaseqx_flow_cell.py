@@ -12,7 +12,7 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 
 @pytest.fixture
 def latest_analysis_version() -> str:
-    return DemultiplexingDirsAndFiles.ANALYSIS + "/2"
+    return "2"
 
 
 @pytest.fixture
@@ -32,33 +32,21 @@ def demultiplexed_runs(tmp_path: Path) -> Path:
     return demultiplexed_runs
 
 
+def add_analysis_data(flow_cell_directory: Path, analysis_version: str):
+    analysis_path = Path(flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, analysis_version)
+    analysis_path.mkdir(parents=True)
+    analysis_path.joinpath(DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
+    data_path = analysis_path.joinpath(DemultiplexingDirsAndFiles.DATA)
+    data_path.mkdir()
+    data_path.joinpath(DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED).touch()
+    return analysis_path
+
+
 @pytest.fixture
 def novaseqx_flow_cell(flow_cell_directory: Path, latest_analysis_version: str) -> Path:
-    # Incomplete analysis version
-    (flow_cell_directory / DemultiplexingDirsAndFiles.ANALYSIS / "1").mkdir(
-        parents=True, exist_ok=True
-    )
-
-    # Complete analysis version - old
-    old_analysis = Path(flow_cell_directory, "Analysis/0")
-    old_analysis.mkdir(parents=True, exist_ok=True)
-    Path(old_analysis, DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
-    Path(old_analysis, DemultiplexingDirsAndFiles.DATA).mkdir(parents=True, exist_ok=True)
-    Path(
-        old_analysis, DemultiplexingDirsAndFiles.DATA, DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED
-    ).touch()
-
-    # Complete analysis version - most recent
-    latest_analysis = Path(flow_cell_directory, latest_analysis_version)
-    latest_analysis.mkdir(parents=True, exist_ok=True)
-    Path(latest_analysis, DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
-    Path(latest_analysis, DemultiplexingDirsAndFiles.DATA).mkdir(parents=True, exist_ok=True)
-    Path(
-        latest_analysis,
-        DemultiplexingDirsAndFiles.DATA,
-        DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED,
-    ).touch()
-
+    add_analysis_data(flow_cell_directory, "0")
+    add_analysis_data(flow_cell_directory, "1")
+    add_analysis_data(flow_cell_directory, latest_analysis_version)
     return flow_cell_directory
 
 
@@ -69,14 +57,16 @@ def post_processed_novaseqx_flow_cell(novaseqx_flow_cell: Path) -> Path:
 
 
 @pytest.fixture
-def novaseqx_flow_cell_analysis_incomplete(flow_cell_directory: Path) -> Path:
-    Path(flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, "2").mkdir(
-        parents=True, exist_ok=True
+def novaseqx_flow_cell_analysis_incomplete(
+    flow_cell_directory: Path, latest_analysis_version: str
+) -> Path:
+    Path(flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, latest_analysis_version).mkdir(
+        parents=True
     )
     Path(
         flow_cell_directory,
         DemultiplexingDirsAndFiles.ANALYSIS,
-        "2",
+        latest_analysis_version,
         DemultiplexingDirsAndFiles.COPY_COMPLETE,
     ).touch()
     return flow_cell_directory
@@ -155,10 +145,13 @@ def test_get_latest_analysis_version_path(
     # GIVEN a flow cell which is ready to be post processed
 
     # WHEN extracting the latest analysis version path
-    analysis_directory = get_latest_analysis_directory(novaseqx_flow_cell)
+    analysis = get_latest_analysis_directory(novaseqx_flow_cell)
 
     # THEN the latest analysis version path is returned
-    assert analysis_directory == novaseqx_flow_cell / latest_analysis_version
+    latest_analysis = Path(
+        novaseqx_flow_cell, DemultiplexingDirsAndFiles.ANALYSIS, latest_analysis_version
+    )
+    assert analysis == latest_analysis
 
 
 def test_copy_novaseqx_flow_cell(
