@@ -1,19 +1,26 @@
 import logging
 from pathlib import Path
-from typing import List, Optional
 
 import click
-import os
-import shutil
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.cli.demultiplex.copy_novaseqx_data import (
+    copy_flow_cell_analysis_data,
+    get_latest_analysis_directory,
+    is_analyzed,
+    is_copied,
+    is_in_demultiplexed_runs,
+    is_queued_for_post_processing,
+    is_ready_for_post_processing,
+    mark_as_demultiplexed,
+    mark_flow_cell_as_queued_for_post_processing,
+)
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-
 
 LOG = logging.getLogger(__name__)
 
@@ -170,7 +177,8 @@ def delete_flow_cell(
         )
 
 
-@click.command(name="copy-novaseqx")
+@click.command(name="copy-completed")
+@click.pass_obj
 def copy_novaseqx_flow_cells(context: CGConfig):
     """Copy novaseqx flow cells ready for post processing to demultiplexed runs."""
     flow_cells: Path = context.demultiplex.out_dir
@@ -179,76 +187,5 @@ def copy_novaseqx_flow_cells(context: CGConfig):
     for flow_cell in flow_cells.iterdir():
         if is_ready_for_post_processing(flow_cell, demultiplexed_runs):
             copy_flow_cell_analysis_data(flow_cell, demultiplexed_runs)
-            demultiplexed_flow_cell = Path(demultiplexed_runs, flow_cell.name)
-            mark_flow_cell_as_demultiplexed(demultiplexed_flow_cell)
+            mark_as_demultiplexed(Path(demultiplexed_runs, flow_cell.name))
             mark_flow_cell_as_queued_for_post_processing(flow_cell)
-
-
-def is_ready_for_post_processing(flow_cell: Path, demultiplexed_runs: Path) -> bool:
-    analysis_directory = get_latest_analysis_directory(flow_cell)
-
-    if not analysis_directory:
-        return False
-
-    copy_completed = is_copied(analysis_directory)
-    analysis_completed = is_analyzed(analysis_directory)
-    in_demultiplexed_runs = is_in_demultiplexed_runs(flow_cell.name, demultiplexed_runs)
-    post_processed = is_queued_for_post_processing(flow_cell)
-
-    return (
-        copy_completed and analysis_completed and not in_demultiplexed_runs and not post_processed
-    )
-
-
-def is_in_demultiplexed_runs(flow_cell_name: str, demultiplexed_runs: Path) -> bool:
-    return Path(demultiplexed_runs, flow_cell_name).exists()
-
-
-def get_latest_analysis_directory(flow_cell: Path) -> Optional[Path]:
-    analysis_path = Path(flow_cell, DemultiplexingDirsAndFiles.ANALYSIS)
-
-    if not analysis_path.exists():
-        return None
-    analysis_versions = get_sorted_analysis_versions(analysis_path)
-    return analysis_versions[0] if analysis_versions else None
-
-
-def get_sorted_analysis_versions(analysis_path: Path) -> List[Path]:
-    return sorted(
-        (d for d in analysis_path.iterdir() if d.is_dir()), key=lambda x: int(x.name), reverse=True
-    )
-
-
-def is_copied(analysis_directory: Path):
-    return Path(analysis_directory, DemultiplexingDirsAndFiles.COPY_COMPLETE).exists()
-
-
-def is_analyzed(analysis_directory: Path):
-    return Path(
-        analysis_directory,
-        DemultiplexingDirsAndFiles.DATA,
-        DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED,
-    ).exists()
-
-
-def is_queued_for_post_processing(flow_cell: Path) -> bool:
-    return Path(flow_cell, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING).exists()
-
-
-def copy_flow_cell_analysis_data(flow_cell: Path, destination: Path) -> None:
-    analysis = get_latest_analysis_directory(flow_cell)
-    analysis_data = Path(analysis, DemultiplexingDirsAndFiles.DATA)
-
-    hardlink_tree(src=analysis_data, dst=destination)
-
-
-def mark_flow_cell_as_demultiplexed(flow_cell: Path) -> None:
-    Path(flow_cell, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
-
-
-def mark_flow_cell_as_queued_for_post_processing(flow_cell: Path) -> None:
-    Path(flow_cell, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING).touch()
-
-
-def hardlink_tree(src: Path, dst: Path) -> None:
-    shutil.copytree(src, dst, copy_function=os.link)
