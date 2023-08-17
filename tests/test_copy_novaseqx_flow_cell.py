@@ -22,6 +22,13 @@ def novaseqx_flow_cell(flow_cell_directory: Path, latest_analysis_version: str) 
     # Incomplete analysis version
     (flow_cell_directory / "Analysis" / "1").mkdir(parents=True, exist_ok=True)
 
+    # Complete analysis version - old
+    (flow_cell_directory / "Analysis/0").mkdir(parents=True, exist_ok=True)
+    (flow_cell_directory / "Analysis/0" / "CopyComplete.txt").touch()
+
+    (flow_cell_directory / "Analysis/0" / "Data").mkdir(parents=True, exist_ok=True)
+    (flow_cell_directory / "Analysis/0" / "Data" / "Secondary_Analysis_Complete.txt").touch()
+
     # Complete analysis version - most recent
     (flow_cell_directory / latest_analysis_version).mkdir(parents=True, exist_ok=True)
     (flow_cell_directory / latest_analysis_version / "CopyComplete.txt").touch()
