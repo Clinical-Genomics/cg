@@ -181,8 +181,8 @@ def delete_flow_cell(
 @click.pass_obj
 def copy_novaseqx_flow_cells(context: CGConfig):
     """Copy novaseqx flow cells ready for post processing to demultiplexed runs."""
-    flow_cells: Path = context.demultiplex.out_dir
-    demultiplexed_runs: Path = context.demultiplex.run_dir
+    flow_cells = Path(context.demultiplex.out_dir)
+    demultiplexed_runs = Path(context.demultiplex.run_dir)
 
     for flow_cell in flow_cells.iterdir():
         if is_ready_for_post_processing(flow_cell, demultiplexed_runs):
