@@ -14,6 +14,7 @@ from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import FlowCellError
 from cg.io.controller import WriteFile, WriteStream
+from cg.meta.demultiplex.housekeeper_storage_functions import add_bundle_and_version_if_non_existent
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from pydantic.v1 import ValidationError
@@ -117,7 +118,7 @@ def create_sheet(
         file_path=flow_cell.sample_sheet_path,
     )
     LOG.info("Adding sample sheet to Housekeeper")
-    hk_api.create_new_bundle_and_version(name=flow_cell_id)
+    add_bundle_and_version_if_non_existent(bundle_name=flow_cell_id, hk_api=hk_api)
     hk_api.add_and_include_file_to_latest_version(
         bundle_name=flow_cell_id,
         file=flow_cell.sample_sheet_path,
@@ -186,7 +187,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             file_path=flow_cell.sample_sheet_path,
         )
         LOG.info("Adding sample sheet to Housekeeper")
-        hk_api.create_new_bundle_and_version(name=flow_cell_id)
+        add_bundle_and_version_if_non_existent(bundle_name=flow_cell_id, hk_api=hk_api)
         hk_api.add_and_include_file_to_latest_version(
             bundle_name=flow_cell_id,
             file=flow_cell.sample_sheet_path,

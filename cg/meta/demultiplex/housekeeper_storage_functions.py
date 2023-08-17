@@ -178,6 +178,8 @@ def add_bundle_and_version_if_non_existent(bundle_name: str, hk_api: Housekeeper
     """Add bundle if it does not exist."""
     if not hk_api.bundle(name=bundle_name):
         hk_api.create_new_bundle_and_version(name=bundle_name)
+    else:
+        LOG.debug(f"Bundle with name {bundle_name} already exists")
 
 
 def add_tags_if_non_existent(tag_names: List[str], hk_api: HousekeeperAPI) -> None:
