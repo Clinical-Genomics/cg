@@ -12,7 +12,7 @@ from tests.store_helpers import StoreHelpers
 def test_archive_flow_cell_run_directory(
     caplog,
     real_housekeeper_api: HousekeeperAPI,
-    dragen_flow_cell_dir: Path,
+    bcl_convert_flow_cell_dir: Path,
     timestamp: datetime.datetime,
     base_store: Store,
     helpers: StoreHelpers,
@@ -25,13 +25,13 @@ def test_archive_flow_cell_run_directory(
 
     real_housekeeper_api.add_and_include_file_to_latest_version(
         bundle_name="HLG5GDRXY",
-        file=Path(dragen_flow_cell_dir, "SampleSheet.csv"),
+        file=Path(bcl_convert_flow_cell_dir, "SampleSheet.csv"),
         tags=["samplesheet", "HLG5GDRXY"],
     )
 
     # WHEN running archive_sample_sheet in the run directory
     run_dir_flow_cell: RunDirFlowCell = RunDirFlowCell(
-        flow_cell_dir=dragen_flow_cell_dir,
+        flow_cell_dir=bcl_convert_flow_cell_dir,
         status_db=base_store,
         housekeeper_api=real_housekeeper_api,
     )
@@ -44,7 +44,7 @@ def test_archive_flow_cell_run_directory(
 def test_filter_sample_sheets(
     caplog,
     real_housekeeper_api: HousekeeperAPI,
-    dragen_flow_cell_dir: Path,
+    bcl_convert_flow_cell_dir: Path,
     timestamp: datetime.datetime,
     base_store: Store,
     helpers: StoreHelpers,
@@ -63,7 +63,7 @@ def test_filter_sample_sheets(
 
     # WHEN filtering out files tagged with neither archived_sample_sheet nor samplesheet
     run_dir_flow_cell: RunDirFlowCell = RunDirFlowCell(
-        flow_cell_dir=dragen_flow_cell_dir,
+        flow_cell_dir=bcl_convert_flow_cell_dir,
         status_db=base_store,
         housekeeper_api=real_housekeeper_api,
     )

@@ -850,6 +850,17 @@ def fixture_tmp_demultiplexed_runs_bcl2fastq_directory(
     return Path(tmp_demultiplexed_runs_directory, bcl2fastq_flow_cell_dir.name)
 
 
+@pytest.fixture(name="tmp_bcl2fastq_flow_cell")
+def fixture_tmp_bcl2fastq_flow_cell(
+    tmp_demultiplexed_runs_bcl2fastq_directory: Path,
+) -> FlowCellDirectoryData:
+    """Create a flow cell object with flow cell that is demultiplexed."""
+    return FlowCellDirectoryData(
+        flow_cell_path=tmp_demultiplexed_runs_bcl2fastq_directory,
+        bcl_converter=BclConverter.BCL2FASTQ,
+    )
+
+
 # Temporary demultiplexed runs unfinished fixtures
 
 
@@ -873,6 +884,18 @@ def fixture_demultiplexed_runs_bcl2fastq_flow_cell_directory(
 ) -> Path:
     """Copy the content of a demultiplexed but not finished directory to a temporary location."""
     return Path(tmp_demultiplexed_runs_not_finished_directory, bcl2fastq_flow_cell_full_name)
+
+
+@pytest.fixture(name="tmp_unfinished_bcl2fastq_flow_cell")
+def fixture_unfinished_bcl2fastq_flow_cell(
+    demultiplexed_runs_unfinished_bcl2fastq_flow_cell_directory: Path,
+    bcl2fastq_flow_cell_full_name: str,
+) -> FlowCellDirectoryData:
+    """Copy the content of a demultiplexed but not finished directory to a temporary location."""
+    return FlowCellDirectoryData(
+        flow_cell_path=demultiplexed_runs_unfinished_bcl2fastq_flow_cell_directory,
+        bcl_converter=BclConverter.BCL2FASTQ,
+    )
 
 
 @pytest.fixture(name="sample_sheet_context")
