@@ -7,16 +7,11 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.demultiplex.copy_novaseqx_data import (
     copy_flow_cell_analysis_data,
-    get_latest_analysis_directory,
-    is_analyzed,
-    is_copied,
-    is_in_demultiplexed_runs,
-    is_queued_for_post_processing,
     is_ready_for_post_processing,
     mark_as_demultiplexed,
     mark_flow_cell_as_queued_for_post_processing,
 )
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
@@ -186,6 +181,7 @@ def copy_novaseqx_flow_cells(context: CGConfig):
 
     for flow_cell in flow_cells.iterdir():
         if is_ready_for_post_processing(flow_cell, demultiplexed_runs):
+            LOG.info(f"Copying {flow_cell.name} to {demultiplexed_runs}")
             copy_flow_cell_analysis_data(flow_cell, demultiplexed_runs)
             mark_as_demultiplexed(Path(demultiplexed_runs, flow_cell.name))
             mark_flow_cell_as_queued_for_post_processing(flow_cell)
