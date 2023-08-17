@@ -4,7 +4,7 @@ from cg.constants.sequencing import SequencingPlatform
 
 
 class TaxprofilerParameters(PipelineParameters):
-    """Rnafusion parameters."""
+    """Model for Taxprofiler parameters."""
 
     input: Path
     outdir: Path
