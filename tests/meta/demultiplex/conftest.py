@@ -66,7 +66,7 @@ def fixture_tmp_flow_cell_run_base_path(
 ) -> Path:
     """Flow cell run directory in temporary folder."""
 
-    tmp_flow_cell_run_path: Path = Path(project_dir, "flow_cell_run")
+    tmp_flow_cell_run_path: Path = Path(project_dir, "flow_cells")
     tmp_flow_cell_run_path.mkdir(exist_ok=True, parents=True)
 
     return tmp_flow_cell_run_path
@@ -78,7 +78,7 @@ def fixture_tmp_flow_cell_demux_base_path(
 ) -> Path:
     """Flow cell demux directory in temporary folder."""
 
-    tmp_flow_cell_demux_path: Path = Path(project_dir, "demultiplexing-runs")
+    tmp_flow_cell_demux_path: Path = Path(project_dir, "demultiplexed-runs")
     tmp_flow_cell_demux_path.mkdir(exist_ok=True, parents=True)
 
     return tmp_flow_cell_demux_path
@@ -344,13 +344,13 @@ def fixture_delete_demultiplex_api(
 
 @pytest.fixture(name="flow_cell_info_map", scope="session")
 def fixture_flow_cell_info_map(
-    flow_cell_directory_name_demultiplexed_with_bcl_convert_flat,
-    flow_cell_name_demultiplexed_with_bcl_convert,
-    flow_cell_name_demultiplexed_with_bcl2fastq,
     bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
     bcl2fastq_demultiplexed_flow_cell_sample_internal_ids,
+    flow_cell_directory_name_demultiplexed_with_bcl_convert_flat,
     flow_cell_directory_name_demultiplexed_with_bcl_convert,
+    flow_cell_name_demultiplexed_with_bcl_convert,
     flow_cell_directory_name_demultiplexed_with_bcl2fastq,
+    flow_cell_name_demultiplexed_with_bcl2fastq,
 ) -> Dict[str, FlowCellInfo]:
     """Returns a dict with the suitable fixtures for different demultiplexing softwares and
     settings. Keys are string, values are named tuples FlowCellInfo."""

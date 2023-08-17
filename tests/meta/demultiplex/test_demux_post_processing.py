@@ -498,7 +498,7 @@ def test_post_processing_of_flow_cell(
     demux_type: str,
     demultiplex_context: CGConfig,
     flow_cell_info_map: Dict[str, FlowCellInfo],
-    demultiplexed_flow_cells_tmp_directory: Path,
+    tmp_demultiplexed_runs_directory: Path,
 ):
     """Test adding a demultiplexed flow cell to the databases with. Runs on each type of
     demultiplexing software and setting used."""
@@ -512,9 +512,7 @@ def test_post_processing_of_flow_cell(
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a directory with a flow cell demultiplexed with BCL Convert
-    demux_post_processing_api.demux_api.demultiplexed_runs_dir = (
-        demultiplexed_flow_cells_tmp_directory
-    )
+    demux_post_processing_api.demux_api.demultiplexed_runs_dir = tmp_demultiplexed_runs_directory
 
     # GIVEN that a sample sheet exists in the flow cell run directory
     path = Path(
