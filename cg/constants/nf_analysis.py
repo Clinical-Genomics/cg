@@ -3,7 +3,7 @@ from cg.utils.enums import StrEnum
 
 
 class NfTowerStatus(StrEnum):
-    """Default parameters for nf-tower submission jobs."""
+    """NF-Tower job submission status."""
 
     SUBMITTED: str = "SUBMITTED"
     RUNNING: str = "RUNNING"
