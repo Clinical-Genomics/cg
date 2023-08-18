@@ -1211,7 +1211,7 @@ def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
 @pytest.fixture(name="flow_cells_dir", scope="session")
 def fixture_flow_cells_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the sequenced flow cells fixture directory."""
-    return Path(demultiplex_fixtures, "flow_cells")
+    return Path(demultiplex_fixtures, DemultiplexingDirsAndFiles.FLOW_CELLS_DIRECTORY_NAME)
 
 
 @pytest.fixture(name="flow_cells_demux_all_dir", scope="session")
