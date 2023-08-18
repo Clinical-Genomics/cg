@@ -1,18 +1,23 @@
 """Tests for running the demultiplex flowcell command"""
 import logging
+import mock
 from pathlib import Path
 
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell, delete_flow_cell
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.meta.demultiplex.housekeeper_storage_functions import add_bundle_and_version_if_non_existent
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from tests.meta.demultiplex.conftest import (
     fixture_tmp_flow_cell_demux_base_path,
     fixture_tmp_flow_cell_run_base_path,
 )
+from tests.mocks.hk_mock import MockFile
 
 
 def test_demultiplex_flow_cell_dry_run(
@@ -25,8 +30,15 @@ def test_demultiplex_flow_cell_dry_run(
 
     # GIVEN that all files are present for demultiplexing
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(demultiplex_ready_flow_cell)
-
-    # GIVEN a out dir that does not exist
+    add_bundle_and_version_if_non_existent(
+        bundle_name=flow_cell.id, hk_api=demultiplex_context.housekeeper_api
+    )
+    demultiplex_context.housekeeper_api.add_and_include_file_to_latest_version(
+        bundle_name=flow_cell.id,
+        file=flow_cell.sample_sheet_path,
+        tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET],
+    )
+    # GIVEN an out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
@@ -60,8 +72,16 @@ def test_demultiplex_flow_cell(
 
     # GIVEN that all files are present for demultiplexing
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(demultiplex_ready_flow_cell)
+    add_bundle_and_version_if_non_existent(
+        bundle_name=flow_cell.id, hk_api=demultiplex_context.housekeeper_api
+    )
+    demultiplex_context.housekeeper_api.add_and_include_file_to_latest_version(
+        bundle_name=flow_cell.id,
+        file=flow_cell.sample_sheet_path,
+        tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET],
+    )
 
-    # GIVEN a out dir that does not exist
+    # GIVEN an out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
@@ -99,6 +119,14 @@ def test_demultiplex_bcl2fastq_flowcell(
 
     # GIVEN that all files are present for bcl2fastq demultiplexing
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(demultiplex_ready_flow_cell_bcl2fastq)
+    add_bundle_and_version_if_non_existent(
+        bundle_name=flow_cell.id, hk_api=demultiplex_context.housekeeper_api
+    )
+    demultiplex_context.housekeeper_api.add_and_include_file_to_latest_version(
+        bundle_name=flow_cell.id,
+        file=flow_cell.sample_sheet_path,
+        tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET],
+    )
 
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
@@ -141,8 +169,16 @@ def test_demultiplex_dragen_flowcell(
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=demultiplex_ready_flow_cell_dragen, bcl_converter="dragen"
     )
+    add_bundle_and_version_if_non_existent(
+        bundle_name=flow_cell.id, hk_api=demultiplex_context.housekeeper_api
+    )
+    demultiplex_context.housekeeper_api.add_and_include_file_to_latest_version(
+        bundle_name=flow_cell.id,
+        file=flow_cell.sample_sheet_path,
+        tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET],
+    )
 
-    # GIVEN a out dir that does not exist
+    # GIVEN an out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
@@ -180,16 +216,27 @@ def test_demultiplex_all_novaseq(
     caplog.set_level(logging.INFO)
 
     # GIVEN a context with the path to a directory where at least one flowcell is ready for demux
-    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
+
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=demultiplex_ready_flow_cell
     )
-
+    add_bundle_and_version_if_non_existent(
+        bundle_name=flow_cell.id, hk_api=demultiplex_context.housekeeper_api
+    )
+    demultiplex_context.housekeeper_api.add_and_include_file_to_latest_version(
+        bundle_name=flow_cell.id,
+        file=flow_cell.sample_sheet_path,
+        tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET],
+    )
+    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
     assert demux_api.run_dir == demultiplex_ready_flow_cell.parent
+    assert demultiplex_context.housekeeper_api.last_version(bundle=flow_cell.id)
 
     # WHEN running the demultiplex all command
     result: testing.Result = cli_runner.invoke(
-        demultiplex_all, ["--dry-run"], obj=demultiplex_context
+        demultiplex_all,
+        ["--flow-cells-directory", str(demux_api.run_dir), "--dry-run"],
+        obj=demultiplex_context,
     )
 
     # THEN assert it exits without problems

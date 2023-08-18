@@ -29,9 +29,11 @@ class DemultiplexingAPI:
     This includes starting demultiplexing, creating sample sheets, creating base masks,
     """
 
-    def __init__(self, config: dict, out_dir: Optional[Path] = None):
+    def __init__(
+        self, config: dict, housekeeper_api: HousekeeperAPI, out_dir: Optional[Path] = None
+    ):
         self.slurm_api = SlurmAPI()
-        self.hk_api = HousekeeperAPI
+        self.hk_api = housekeeper_api
         self.slurm_account: str = config["demultiplex"]["slurm"]["account"]
         self.mail: str = config["demultiplex"]["slurm"]["mail_user"]
         self.run_dir: Path = Path(config["demultiplex"]["run_dir"])

@@ -1139,10 +1139,12 @@ def fixture_demultiplex_configs(
 
 @pytest.fixture(name="demultiplexing_api")
 def fixture_demultiplexing_api(
-    demultiplex_configs: dict, sbatch_process: Process
+    demultiplex_configs: dict, sbatch_process: Process, populated_housekeeper_api: HousekeeperAPI
 ) -> DemultiplexingAPI:
     """Return demultiplex API."""
-    demux_api = DemultiplexingAPI(config=demultiplex_configs)
+    demux_api = DemultiplexingAPI(
+        config=demultiplex_configs, housekeeper_api=populated_housekeeper_api
+    )
     demux_api.slurm_api.process = sbatch_process
     return demux_api
 
