@@ -154,7 +154,7 @@ def test_demultiplex_dragen_flowcell(
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
-    unaligned_dir: Path = demux_dir / "Unaligned"
+    unaligned_dir: Path = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
