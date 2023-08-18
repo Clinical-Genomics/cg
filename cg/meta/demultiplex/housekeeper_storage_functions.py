@@ -143,7 +143,7 @@ def check_if_fastq_path_should_be_stored_in_housekeeper(
     )
 
     if metric:
-        return metric.sample_base_percentage_passing_q30 >= q30_threshold / 100
+        return metric.sample_base_percentage_passing_q30 >= q30_threshold
 
     LOG.warning(
         f"Skipping fastq file {sample_fastq_path.name} as no metrics entry was found in status db."

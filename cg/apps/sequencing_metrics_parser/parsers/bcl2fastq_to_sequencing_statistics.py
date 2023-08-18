@@ -5,8 +5,8 @@ from typing import List
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import Bcl2FastqSampleLaneMetrics
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import parse_bcl2fastq_sequencing_metrics
 from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
-    average_quality_score,
-    q30_ratio,
+    calculate_average_quality_score,
+    calculate_q30_bases_percentage,
 )
 from cg.store.models import SampleLaneSequencingMetrics
 
@@ -54,11 +54,11 @@ def create_sample_lane_sequencing_metrics_from_bcl2fastq(
         in a lane on the flow cell.
     """
 
-    sample_base_percentage_passing_q30: float = q30_ratio(
+    sample_base_percentage_passing_q30: float = calculate_q30_bases_percentage(
         q30_yield=bcl2fastq_sample_metrics.sample_total_yield_q30_in_lane,
         total_yield=bcl2fastq_sample_metrics.sample_total_yield_in_lane,
     )
-    sample_base_mean_quality_score: float = average_quality_score(
+    sample_base_mean_quality_score: float = calculate_average_quality_score(
         total_quality_score=bcl2fastq_sample_metrics.sample_total_quality_score_in_lane,
         total_yield=bcl2fastq_sample_metrics.sample_total_yield_in_lane,
     )

@@ -1,16 +1,16 @@
-def q30_ratio(q30_yield: int, total_yield: int) -> float:
+def calculate_q30_bases_percentage(q30_yield: int, total_yield: int) -> float:
     """
-    Calculate the proportion of bases that have a Phred quality score of 30 or more.
+    Calculate the percentage of bases that have a Phred quality score of 30 or more.
     Args:
         q30_yield (int): The sum of all Q30 yields.
         total_yield (int): The total yield.
     Returns:
-        float: Proportion of bases with Q30.
+        float: Percentage of bases with Q30.
     """
-    return round(q30_yield / total_yield, 2)
+    return round(q30_yield / total_yield, 2) * 100
 
 
-def average_quality_score(total_quality_score: int, total_yield: int) -> float:
+def calculate_average_quality_score(total_quality_score: int, total_yield: int) -> float:
     """
     Calculate the average quality score of all bases.
     Args:
