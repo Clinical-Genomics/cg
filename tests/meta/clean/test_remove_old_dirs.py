@@ -12,7 +12,7 @@ from tests.store_helpers import StoreHelpers
 def test_archive_flow_cell_run_directory(
     caplog,
     real_housekeeper_api: HousekeeperAPI,
-    bcl_convert_flow_cell_dir: Path,
+    tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq: Path,
     timestamp: datetime.datetime,
     base_store: Store,
     helpers: StoreHelpers,
@@ -25,13 +25,13 @@ def test_archive_flow_cell_run_directory(
 
     real_housekeeper_api.add_and_include_file_to_latest_version(
         bundle_name="HLG5GDRXY",
-        file=Path(bcl_convert_flow_cell_dir, "SampleSheet.csv"),
+        file=Path(tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq, "SampleSheet.csv"),
         tags=["samplesheet", "HLG5GDRXY"],
     )
 
     # WHEN running archive_sample_sheet in the run directory
     run_dir_flow_cell: RunDirFlowCell = RunDirFlowCell(
-        flow_cell_dir=bcl_convert_flow_cell_dir,
+        flow_cell_dir=tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
         status_db=base_store,
         housekeeper_api=real_housekeeper_api,
     )

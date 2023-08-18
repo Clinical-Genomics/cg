@@ -81,7 +81,7 @@ def test_create_bcl2fastq_sample_sheet(
     # WHEN creating a sample sheet
     result = cli_runner.invoke(
         create_sheet,
-        [str(tmp_flow_cells_directory_no_sample_sheet)],
+        [str(tmp_flow_cells_directory_no_sample_sheet), "--bcl-converter", "bcl2fastq"],
         obj=sample_sheet_context,
     )
 
