@@ -13,7 +13,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
 from click.testing import CliRunner
-from pydantic.v1 import ValidationError
+from pydantic import ValidationError
 
 
 def test_without_options(cli_runner: CliRunner, balsamic_context: CGConfig):
@@ -113,12 +113,12 @@ def test_case_with_malformed_deliverables_file(
         # WHEN dry running with dry specified
         result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
 
-    # THEN command should NOT execute successfully
-    assert result.exit_code != EXIT_SUCCESS
+        # THEN command should NOT execute successfully
+        assert result.exit_code != EXIT_SUCCESS
 
-    # THEN information that the file is malformed should be communicated
-    assert "Deliverables file is malformed" in caplog.text
-    assert "field required" in caplog.text
+        # THEN information that the file is malformed should be communicated
+        assert "Deliverables file is malformed" in caplog.text
+        assert "field required" in caplog.text
 
 
 def test_valid_case(
