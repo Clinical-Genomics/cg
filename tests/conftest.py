@@ -787,7 +787,6 @@ def fixture_stats_api(project_dir: Path) -> StatsAPI:
     _store.drop_all()
 
 
-# Temporary flow cell runs fixtures
 @pytest.fixture(name="tmp_flow_cells_directory")
 def fixture_tmp_flow_cells_directory(tmp_path: Path, flow_cells_dir: Path) -> Path:
     """
@@ -1165,11 +1164,12 @@ def fixture_demultiplexing_api(
     return demux_api
 
 
-@pytest.fixture(name="populated_stats_api")
+@pytest.fixture(name="populated_stats_api", scope="session")
 def fixture_populated_stats_api(
     stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
 ) -> StatsAPI:
     create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
+    """Return a stats API with a populated database."""
     return stats_api
 
 
@@ -1404,6 +1404,7 @@ def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[di
 def fixture_demultiplexed_flow_cell(
     demultiplexed_runs: Path, bcl2fastq_flow_cell_full_name: str
 ) -> Path:
+    """Return the path to a demultiplexed flow cell with bcl2fastq."""
     return Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
 
 
@@ -1411,6 +1412,7 @@ def fixture_demultiplexed_flow_cell(
 def fixture_bcl2fastq_demux_results(
     demultiplexed_flow_cell: Path, bcl2fastq_flow_cell: FlowCellDirectoryData
 ) -> DemuxResults:
+    """Return a demux results object for a bcl2fastq demultiplexed flow cell."""
     return DemuxResults(
         demux_dir=demultiplexed_flow_cell,
         flow_cell=bcl2fastq_flow_cell,
