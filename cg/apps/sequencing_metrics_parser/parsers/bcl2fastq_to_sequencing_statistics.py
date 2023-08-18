@@ -54,7 +54,7 @@ def create_sample_lane_sequencing_metrics_from_bcl2fastq(
         in a lane on the flow cell.
     """
 
-    sample_base_fraction_passing_q30: float = q30_ratio(
+    sample_base_percentage_passing_q30: float = q30_ratio(
         q30_yield=bcl2fastq_sample_metrics.sample_total_yield_q30_in_lane,
         total_yield=bcl2fastq_sample_metrics.sample_total_yield_in_lane,
     )
@@ -68,7 +68,7 @@ def create_sample_lane_sequencing_metrics_from_bcl2fastq(
         flow_cell_lane_number=bcl2fastq_sample_metrics.flow_cell_lane_number,
         sample_internal_id=bcl2fastq_sample_metrics.sample_id,
         sample_total_reads_in_lane=bcl2fastq_sample_metrics.sample_total_reads_in_lane,
-        sample_base_fraction_passing_q30=sample_base_fraction_passing_q30,
+        sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
         sample_base_mean_quality_score=sample_base_mean_quality_score,
         created_at=datetime.now(),
     )

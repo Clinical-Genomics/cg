@@ -345,7 +345,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
 
         return sum(
-            [sample_lane.sample_base_fraction_passing_q30 for sample_lane in sample_lanes]
+            [sample_lane.sample_base_percentage_passing_q30 for sample_lane in sample_lanes]
         ) / len(sample_lanes)
 
     def get_average_fraction_passing_q30_for_flow_cell(self, flow_cell_name: str) -> float:

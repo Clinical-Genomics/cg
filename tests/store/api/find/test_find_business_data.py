@@ -866,7 +866,7 @@ def test_get_number_of_reads_for_sample_passing_q30_threshold(
     assert sample_metric
 
     # GIVEN a Q30 threshold that the sample will pass
-    q30_threshold = int(sample_metric.sample_base_fraction_passing_q30 / 2 * 100)
+    q30_threshold = int(sample_metric.sample_base_percentage_passing_q30 / 2 * 100)
 
     # WHEN getting the number of reads for the sample that pass the Q30 threshold
     number_of_reads: int = (
@@ -896,7 +896,7 @@ def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
     assert sample_metrics
 
     # GIVEN a Q30 threshold that some of the sample's metrics will not pass
-    q30_values = [int(metric.sample_base_fraction_passing_q30 * 100) for metric in sample_metrics]
+    q30_values = [int(metric.sample_base_percentage_passing_q30 * 100) for metric in sample_metrics]
     q30_threshold = sorted(q30_values)[len(q30_values) // 2]  # This is the median
 
     # WHEN getting the number of reads for the sample that pass the Q30 threshold

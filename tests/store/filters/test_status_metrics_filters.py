@@ -116,7 +116,7 @@ def test_filter_above_q30_threshold(store_with_sequencing_metrics: Store):
     assert metric
 
     # GIVEN a Q30 threshold that at least one metric will pass
-    q30_threshold = int(metric.sample_base_fraction_passing_q30 / 2 * 100)
+    q30_threshold = int(metric.sample_base_percentage_passing_q30 / 2 * 100)
 
     # WHEN filtering metrics above the Q30 threshold
     filtered_metrics: Query = filter_above_q30_threshold(
@@ -130,9 +130,9 @@ def test_filter_above_q30_threshold(store_with_sequencing_metrics: Store):
     # THEN assert that the query returns a list of filtered metrics
     assert filtered_metrics.all()
 
-    # THEN assert that all returned metrics have a sample_base_fraction_passing_q30 greater than the threshold
+    # THEN assert that all returned metrics have a sample_base_percentage_passing_q30 greater than the threshold
     for metric in filtered_metrics.all():
-        assert metric.sample_base_fraction_passing_q30 > q30_threshold / 100
+        assert metric.sample_base_percentage_passing_q30 > q30_threshold / 100
 
 
 def test_filter_metrics_by_flow_cell_name(
