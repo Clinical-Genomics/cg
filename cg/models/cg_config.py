@@ -169,6 +169,14 @@ class RnafusionConfig(CommonAppConfig):
 class TaxprofilerConfig(CommonAppConfig):
     root: str
     binary_path: str
+    conda_env: str
+    profile: str
+    pipeline_path: str
+    revision: str
+    conda_binary: Optional[str] = None
+    hostremoval_reference: str
+    databases: str
+    slurm: SlurmConfig
 
 
 class CGStatsConfig(BaseModel):
