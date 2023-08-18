@@ -306,6 +306,8 @@ def fixture_base_config_dict() -> dict:
         "database": "sqlite:///",
         "madeline_exe": "path/to/madeline",
         "delivery_path": "path/to/delivery",
+        "flow_cells_dir": "path/to/flow_cells",
+        "demultiplexed_flow_cells_dir": "path/to/demultiplexed_flow_cells_dir",
         "housekeeper": {
             "database": "sqlite:///",
             "root": "path/to/root",
@@ -2179,6 +2181,8 @@ def fixture_context_config(
     return {
         "database": cg_uri,
         "delivery_path": str(cg_dir),
+        "flow_cells_dir": "path/to/flow_cells",
+        "demultiplexed_flow_cells_dir": "path/to/demultiplexed_flow_cells_dir",
         "email_base_settings": {
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",

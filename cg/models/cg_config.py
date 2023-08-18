@@ -241,8 +241,8 @@ class CGConfig(BaseModel):
     delivery_path: str
     max_flowcells: Optional[int]
     email_base_settings: EmailBaseSettings
-    flow_cells_dir: Optional[str]
-    demultiplexed_flow_cells_dir: Optional[str]
+    flow_cells_dir: str
+    demultiplexed_flow_cells_dir: str
 
     # Base APIs that always should exist
     status_db_: Store = None
