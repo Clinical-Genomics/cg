@@ -98,9 +98,9 @@ def test_validate_correct_dragen_sample_sheet(
     bcl_convert_flow_cell_full_name: str,
     novaseq_bcl_convert_sample_sheet_path: Path,
 ):
-    """Test validate sample sheet when using a bcl_convert sample sheet."""
+    """Test validate sample sheet when using a BCLconvert sample sheet."""
 
-    # GIVEN the path to a bcl2fastq sample sheet that exists
+    # GIVEN the path to a Bcl2fastq sample sheet that exists
     sample_sheet: Path = novaseq_bcl_convert_sample_sheet_path
     assert sample_sheet.exists()
 

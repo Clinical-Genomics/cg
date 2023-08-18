@@ -102,8 +102,8 @@ def test_create_dragen_sample_sheet(
     lims_novaseq_bcl_convert_samples: List[FlowCellSampleNovaSeq6000Dragen],
     mocker,
 ):
-    # GIVEN a flowcell directory with some run parameters
-    flowcell: FlowCellDirectoryData = FlowCellDirectoryData(
+    # GIVEN a flow cell directory with some run parameters
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         tmp_flow_cells_directory_no_sample_sheet, bcl_converter=BclConverter.DRAGEN
     )
     assert flowcell.run_parameters_path.exists()
@@ -116,7 +116,7 @@ def test_create_dragen_sample_sheet(
         FLOW_CELL_FUNCTION_NAME,
         return_value=lims_novaseq_bcl_convert_samples,
     )
-    # GIVEN a lims api that returns some samples
+    # GIVEN a LIMS API that returns samples
 
     # WHEN creating a sample sheet
     result = cli_runner.invoke(

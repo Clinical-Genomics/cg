@@ -81,7 +81,8 @@ def test_demultiplex_flow_cell(
         obj=demultiplexing_context_for_demux,
     )
 
-    # THEN assert the command exits without problems
+    # THEN assert the command exits successfully
+
     assert result.exit_code == 0
 
     # THEN assert the results folder was created
@@ -92,7 +93,8 @@ def test_demultiplex_flow_cell(
     assert demux_api.demultiplex_sbatch_path(flow_cell).exists()
 
 
-def test_demultiplex_bcl2fastq_flowcell(
+def test_demultiplex_bcl2fastq_flow_cell(
+
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq: Path,
     demultiplexing_context_for_demux: CGConfig,
@@ -122,7 +124,8 @@ def test_demultiplex_bcl2fastq_flowcell(
         obj=demultiplexing_context_for_demux,
     )
 
-    # THEN assert the command exits without problems
+    # THEN assert the command exits sucessfully
+
     assert result.exit_code == 0
 
     # THEN assert the results folder was created
@@ -143,7 +146,8 @@ def test_demultiplex_dragen_flowcell(
 ):
     caplog.set_level(logging.INFO)
 
-    # GIVEN that all files are present for dragen demultiplexing
+    # GIVEN that all files are present for Dragen demultiplexing
+
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=tmp_flow_cell_directory_bclconvert, bcl_converter="dragen"
     )
@@ -185,7 +189,8 @@ def test_demultiplex_all_novaseq(
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN a context with the path to a directory where at least one flowcell is ready for demux
+    # GIVEN a context with the path to a directory where at least one flow cell is ready for demuliplexing
+
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=tmp_flow_cell_demux_all_directory_bclconvert
@@ -209,7 +214,8 @@ def test_demultiplex_all_novaseq(
 
 
 def test_is_demultiplexing_complete(tmp_flow_cell_directory_bcl2fastq: Path):
-    """Tests the is_demultiplexing_complete property of FlowCellDirectoryData"""
+    """Tests the is_demultiplexing_complete property of FlowCellDirectoryData."""
+
     # GIVEN a demultiplexing directory with no demuxcomplete.txt file
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=tmp_flow_cell_directory_bcl2fastq
