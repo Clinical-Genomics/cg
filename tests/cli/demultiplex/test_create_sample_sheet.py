@@ -29,7 +29,7 @@ def test_create_sample_sheet_no_run_parameters(
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=tmp_flow_cells_directory_no_run_parameters
     )
-    assert flow_cell.run_parameters_path.exists() is False
+    assert not flow_cell.run_parameters_path.exists()
 
     # GIVEN flow cell samples
     mocker.patch(
