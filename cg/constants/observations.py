@@ -42,7 +42,7 @@ class ObservationsFileWildcards(StrEnum):
 
     CLINICAL_SNV: str = "clinical_snv"
     CLINICAL_SV: str = "clinical_sv"
-    CANCER_ALL_SNV: str = "cancer_all_snv"
+    CANCER_GERMLINE_SNV: str = "cancer_germline_snv"
     CANCER_SOMATIC_SNV: str = "cancer_somatic_snv"
     CANCER_SOMATIC_SV: str = "cancer_somatic_sv"
 
@@ -69,7 +69,7 @@ class BalsamicObservationsAnalysisTag(StrEnum):
     """Cancer observations files analysis tags."""
 
     SNV_VCF: str = "vcf-snv"
-    SNV_ALL_VCF: str = "vcf-snv-germline-tumor"
+    SNV_GERMLINE_VCF: str = "vcf-snv-germline-tumor"
     SV_VCF: str = "vcf-sv"
     PROFILE_VCF: str = "vcf-snv-germline-tumor"
 

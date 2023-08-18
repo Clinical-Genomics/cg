@@ -57,7 +57,7 @@ def test_instantiate_balsamic_input_files_missing_field(
     """Tests input files against a pydantic BalsamicObservationsInputFiles with not existent field."""
 
     # GIVEN a dictionary with the basic input files and a file path that does not exist
-    balsamic_observations_input_files_raw["snv_all_vcf_path"] = file_does_not_exist
+    balsamic_observations_input_files_raw["snv_germline_vcf_path"] = file_does_not_exist
 
     # WHEN checking the observation file
 

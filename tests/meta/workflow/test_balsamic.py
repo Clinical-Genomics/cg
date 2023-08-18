@@ -114,7 +114,7 @@ def test_get_parsed_observation_file_paths_no_args(
     assert (
         args[ObservationsFileWildcards.CLINICAL_SV] == observations_clinical_sv_file_path.as_posix()
     )
-    assert args[ObservationsFileWildcards.CANCER_ALL_SNV] is None
+    assert args[ObservationsFileWildcards.CANCER_GERMLINE_SNV] is None
     assert (
         args[ObservationsFileWildcards.CANCER_SOMATIC_SNV]
         == observations_somatic_snv_file_path.as_posix()

@@ -34,7 +34,7 @@ def fixture_balsamic_observations_input_files_raw(case_id: str, filled_file: Pat
     """Return raw observations input files for cancer."""
     return {
         "snv_vcf_path": filled_file,
-        "snv_all_vcf_path": filled_file,
+        "snv_germline_vcf_path": filled_file,
         "sv_vcf_path": filled_file,
         "profile_vcf_path": filled_file,
     }

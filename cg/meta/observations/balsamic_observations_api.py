@@ -71,7 +71,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         is_somatic: bool = "somatic" in str(loqusdb_api.config_path)
         load_output: dict = loqusdb_api.load(
             case_id=case.internal_id,
-            snv_vcf_path=input_files.snv_vcf_path if is_somatic else input_files.snv_all_vcf_path,
+            snv_vcf_path=input_files.snv_vcf_path if is_somatic else input_files.snv_germline_vcf_path,
             sv_vcf_path=input_files.sv_vcf_path if is_somatic else None,
             qual_gq=True,
             gq_threshold=BalsamicLoadParameters.QUAL_THRESHOLD.value,
@@ -86,8 +86,8 @@ class BalsamicObservationsAPI(ObservationsAPI):
             "snv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_VCF]
             ).first(),
-            "snv_all_vcf_path": self.housekeeper_api.files(
-                version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_ALL_VCF]
+            "snv_germline_vcf_path": self.housekeeper_api.files(
+                version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_GERMLINE_VCF]
             ).first(),
             "sv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SV_VCF]
