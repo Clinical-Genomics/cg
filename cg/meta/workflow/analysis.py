@@ -472,3 +472,23 @@ class AnalysisAPI(MetaAPI):
             LOG.info(f"Cleaned {case_path}")
             self.clean_analyses(case_id=case_id)
             return EXIT_SUCCESS
+
+    def _are_all_flow_cells_available(self, case_id) -> bool:
+        self.status_db.are_all_flow_cells_on_disk(case_id)
+
+    def assure_fastq_files_are_available(self, case_id) -> None:
+        pass
+
+    def _is_flow_cell_check_applicable(self, case_id) -> bool:
+        return not (
+            self.status_db.is_case_down_sampled(case_id=case_id)
+            or self.status_db.is_case_external(case_id=case_id)
+        )
+
+    def ensure_flow_cells_on_disk(self, case_id: str):
+        """Check if flow cells are on disk for given case. If not, request flow cells and raise
+        FlowcellsNeededError."""
+        if not self._is_flow_cell_check_applicable(case_id):
+            return
+        if not self.status_db.are_all_flow_cells_on_disk(case_id=case_id):
+            self.status_db.request_flow_cells_for_case(case_id)

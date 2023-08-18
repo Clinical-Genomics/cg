@@ -4,7 +4,7 @@ from typing import List, Optional
 
 import click
 from cg.apps.environ import environ_email
-from cg.cli.workflow.commands import ensure_flow_cells_on_disk, link, resolve_compression
+from cg.cli.workflow.commands import link
 from cg.cli.workflow.mip.options import (
     ARGUMENT_CASE_ID,
     EMAIL_OPTION,
@@ -162,8 +162,7 @@ def start(
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     LOG.info(f"Starting full MIP analysis workflow for case {case_id}")
     try:
-        context.invoke(ensure_flow_cells_on_disk, case_id=case_id)
-        context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
+        analysis_api.assure_fastq_files_are_available(case_id)
         context.invoke(link, case_id=case_id, dry_run=dry_run)
         context.invoke(panel, case_id=case_id, dry_run=dry_run)
         context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)

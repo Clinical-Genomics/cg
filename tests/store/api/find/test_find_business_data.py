@@ -23,7 +23,6 @@ from cg.store.models import (
 )
 from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
-from tests.meta.demultiplex.conftest import fixture_flow_cell_name_demultiplexed_with_bcl_convert
 
 
 def test_get_analysis_by_case_entry_id_and_started_at(
@@ -232,7 +231,7 @@ def test_is_all_flow_cells_on_disk_when_no_flow_cell(
     caplog.set_level(logging.DEBUG)
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return false
     assert is_on_disk is False
@@ -268,7 +267,7 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
     )
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return false
     assert is_on_disk is False
@@ -305,7 +304,7 @@ def test_is_all_flow_cells_on_disk_when_requested(
     )
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return false
     assert is_on_disk is False
@@ -336,7 +335,7 @@ def test_is_all_flow_cells_on_disk(
     helpers.add_flowcell(store=base_store, flow_cell_name=dragen_flow_cell_id)
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return true
     assert is_on_disk is True

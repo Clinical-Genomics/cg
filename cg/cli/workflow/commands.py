@@ -52,7 +52,7 @@ def ensure_flow_cells_on_disk(context: CGConfig, case_id: str):
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     status_db: Store = context.status_db
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-    if not status_db.is_all_flow_cells_on_disk(case_id=case_id):
+    if not status_db.are_all_flow_cells_on_disk(case_id=case_id):
         if analysis_api.status_db.is_case_down_sampled(case_id=case_id):
             LOG.debug("All samples have been down sampled. Flow cell check not applicable")
             return

@@ -7,7 +7,6 @@ from cg.apps.housekeeper.models import InputBundle
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
 from cg.meta.compress import CompressAPI
-from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
@@ -16,7 +15,6 @@ from cg.store.api.find_business_data import FindBusinessDataHandler
 from cg.store.api.status import StatusHandler
 from cg.store.models import Family
 from tests.store_helpers import StoreHelpers
-from tests.store.conftest import fixture_case_obj
 
 
 @pytest.fixture(name="mip_dna_fixture_config_path")
@@ -192,4 +190,4 @@ def setup_mocks(
     MipDNAAnalysisAPI.get_panel_bed.return_value = "a_string"
 
     mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
-    FindBusinessDataHandler.is_all_flow_cells_on_disk.return_value = True
+    FindBusinessDataHandler.are_all_flow_cells_on_disk.return_value = True
