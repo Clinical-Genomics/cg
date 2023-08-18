@@ -94,7 +94,6 @@ def test_demultiplex_flow_cell(
 
 
 def test_demultiplex_bcl2fastq_flow_cell(
-
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq: Path,
     demultiplexing_context_for_demux: CGConfig,
