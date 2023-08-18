@@ -9,9 +9,9 @@ def fixture_rnafusion_sample() -> str:
     return "rnafusion_sample"
 
 
-@pytest.fixture(name="rnafusion_fastq_r1")
-def fixture_rnafusion_fastq_r1() -> List[str]:
-    """Return fastq_r1 list."""
+@pytest.fixture(name="rnafusion_fastq_forward")
+def fixture_rnafusion_fastq_forward() -> List[str]:
+    """Return fastq_forward list."""
     return [
         "dir/XXXXXXXX1_000000_S000_L001_R1_001.fastq.gz",
         "dir/XXXXXXXX2_000000_S000_L001_R1_001.fastq.gz",
@@ -20,9 +20,9 @@ def fixture_rnafusion_fastq_r1() -> List[str]:
     ]
 
 
-@pytest.fixture(name="rnafusion_fastq_r2_same_length")
-def fixture_rnafusion_fastq_r2_same_length() -> List[str]:
-    """Return fastq_r2 list, same length as fastq_r1."""
+@pytest.fixture(name="rnafusion_fastq_reverse_same_length")
+def fixture_rnafusion_fastq_reverse_same_length() -> List[str]:
+    """Return fastq_reverse list, same length as fastq_forward."""
     return [
         "dir/XXXXXXXX1_000000_S000_L001_R2_001.fastq.gz",
         "dir/XXXXXXXX2_000000_S000_L001_R2_001.fastq.gz",
@@ -31,9 +31,9 @@ def fixture_rnafusion_fastq_r2_same_length() -> List[str]:
     ]
 
 
-@pytest.fixture(name="rnafusion_fastq_r2_not_same_length")
-def fixture_rnafusion_fastq_r2_not_same_length() -> List[str]:
-    """Return fastq_r2 list, different length as fastq_r1."""
+@pytest.fixture(name="rnafusion_fastq_reverse_not_same_length")
+def fixture_rnafusion_fastq_reverse_not_same_length() -> List[str]:
+    """Return fastq_reverse list, different length as fastq_forward."""
     return [
         "dir/XXXXXXXX1_000000_S000_L001_R2_001.fastq.gz",
         "dir/XXXXXXXX2_000000_S000_L001_R2_001.fastq.gz",
@@ -41,9 +41,9 @@ def fixture_rnafusion_fastq_r2_not_same_length() -> List[str]:
     ]
 
 
-@pytest.fixture(name="rnafusion_fastq_r2_empty")
-def fixture_rnafusion_fastq_r2_empty() -> list:
-    """Return empty fastq_r2 list."""
+@pytest.fixture(name="rnafusion_fastq_reverse_empty")
+def fixture_rnafusion_fastq_reverse_empty() -> list:
+    """Return empty fastq_reverse list."""
     return []
 
 
