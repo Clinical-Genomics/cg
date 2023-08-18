@@ -53,7 +53,7 @@ def fixture_bcl_convert_reads_for_test_sample() -> int:
 @pytest.fixture(name="bcl_convert_test_q30_bases_percent", scope="session")
 def fixture_bcl_convert_test_q30_bases_percent() -> float:
     """Return the Q30 bases percent for the test sample."""
-    return 0.94
+    return 94
 
 
 @pytest.fixture(name="bcl_convert_test_mean_quality_score_per_lane", scope="session")

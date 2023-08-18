@@ -116,7 +116,7 @@ def test_filter_above_q30_threshold(store_with_sequencing_metrics: Store):
     assert metric
 
     # GIVEN a Q30 threshold that at least one metric will pass
-    q30_threshold = int(metric.sample_base_percentage_passing_q30 / 2 * 100)
+    q30_threshold = int(metric.sample_base_percentage_passing_q30 / 2)
 
     # WHEN filtering metrics above the Q30 threshold
     filtered_metrics: Query = filter_above_q30_threshold(
