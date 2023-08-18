@@ -3,8 +3,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from pydantic import AfterValidator, BaseModel, Field, field_validator
-from typing_extensions import Annotated
+from pydantic import BaseModel, field_validator
 
 LOG = logging.getLogger(__name__)
 
@@ -17,24 +16,24 @@ class CGTag(BaseModel):
     mandatory: Optional[bool] = False
 
 
-def check_mandatory_exists(file: CGTag):
-    if file.mandatory:
-        assert Path(file.path).exists(), f"Mandatory file cannot be found at {file.path}"
-        return file
-    if not Path(file.path).exists():
-        LOG.info("Optional file %s not found, removing from bundle", file.path)
-        return
-    return file
-
-
 class CGDeliverables(BaseModel):
     """Class that specifies the output from hermes"""
 
     pipeline: str
     bundle_id: str
-    files: List[Annotated[CGTag, AfterValidator(check_mandatory_exists)]]
+    files: List[CGTag]
 
     @classmethod
     @field_validator("files")
-    def remove_invalid(cls, value):
-        return [item for item in value if item]
+    def remove_missing_files(cls, files: List[CGTag]):
+        """Validates that the files in a suggested CGDeliverables object are correct.
+        I.e. if a file doesn't exist an error is raised if the file was mandatory,
+        otherwise it is simply removed from the list of files."""
+        filtered_files: List[CGTag] = files.copy()
+        for file in files:
+            if file.mandatory:
+                assert Path(file.path).exists(), f"Mandatory file cannot be found at {file.path}"
+            if not Path(file.path).exists():
+                LOG.info(f"Optional file {file.path} not found, removing from bundle.")
+                filtered_files.remove(file)
+        return filtered_files
