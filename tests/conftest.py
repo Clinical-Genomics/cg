@@ -33,12 +33,14 @@ from cg.io.yaml import write_yaml
 from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.store import Store
+from cg.utils import Process
 from cg.store.models import (
     Bed,
     BedVersion,
@@ -47,10 +49,13 @@ from cg.store.models import (
     Organism,
     Sample,
     SampleLaneSequencingMetrics,
+    Flowcell,
 )
+
 from cg.utils import Process
 from housekeeper.store.models import File, Version
 from requests import Response
+
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -1044,19 +1049,59 @@ def flow_cell_directory_name_demultiplexed_with_bcl2fastq(
     return f"170407_ST-E00198_0209_B{flow_cell_name_demultiplexed_with_bcl2fastq}"
 
 
+@pytest.fixture(name="flow_cell_name_demultiplexed_with_bcl_convert", scope="session")
+def fixture_flow_cell_name_demultiplexed_with_bcl_convert() -> str:
+    return "HY7FFDRX2"
+
+
+@pytest.fixture(name="flow_cell_directory_name_demultiplexed_with_bcl_convert", scope="session")
+def fixture_flow_cell_directory_name_demultiplexed_with_bcl_convert(
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
+):
+    return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
+
+
+@pytest.fixture(
+    name="flow_cell_directory_name_demultiplexed_with_bcl_convert_flat", scope="session"
+)
+def fixture_flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
+):
+    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert using a flat output directory structure."""
+    return f"230505_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
+
+
 @pytest.fixture
 def store_with_demultiplexed_samples(
     store: Store,
     helpers: StoreHelpers,
     bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
     bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
+    flow_cell_name_demultiplexed_with_bcl2fastq: str,
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
 ) -> Store:
     """Return a store with samples that have been demultiplexed with BCL Convert and BCL2Fastq."""
-    for i, sample_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_internal_ids):
-        helpers.add_sample(store, internal_id=sample_id, name=f"sample_bcl_convert_{i}")
+    helpers.add_flowcell(
+        store, flow_cell_name_demultiplexed_with_bcl_convert, sequencer_type="novaseq"
+    )
+    helpers.add_flowcell(
+        store, flow_cell_name_demultiplexed_with_bcl2fastq, sequencer_type="hiseqx"
+    )
+    for i, sample_internal_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_internal_ids):
+        helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl_convert_{i}")
+        helpers.add_sample_lane_sequencing_metrics(
+            store,
+            sample_internal_id=sample_internal_id,
+            flow_cell_name=flow_cell_name_demultiplexed_with_bcl_convert,
+        )
 
-    for i, sample_id in enumerate(bcl2fastq_demultiplexed_flow_cell_sample_internal_ids):
-        helpers.add_sample(store, internal_id=sample_id, name=f"sample_bcl2fastq_{i}")
+    for i, sample_internal_id in enumerate(bcl2fastq_demultiplexed_flow_cell_sample_internal_ids):
+        helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl2fastq_{i}")
+        helpers.add_sample_lane_sequencing_metrics(
+            store,
+            sample_internal_id=sample_internal_id,
+            flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
+        )
     return store
 
 
@@ -2017,11 +2062,6 @@ def fixture_balsamic_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("balsamic")
 
 
-@pytest.fixture(name="taxprofiler_dir", scope="session")
-def fixture_taxprofiler_dir(tmpdir_factory) -> Path:
-    return tmpdir_factory.mktemp("taxprofiler")
-
-
 @pytest.fixture(name="cg_dir", scope="session")
 def fixture_cg_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for cg testing."""
@@ -2294,7 +2334,20 @@ def fixture_context_config(
         "pdc": {"binary_path": "/bin/dsmc"},
         "taxprofiler": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
-            "root": str(taxprofiler_dir),
+            "compute_env": "nf_tower_compute_env",
+            "root": taxprofiler_dir.as_posix(),
+            "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
+            "conda_env": "S_taxprofiler",
+            "launch_directory": Path("path", "to", "launchdir").as_posix(),
+            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "databases": Path("path", "to", "databases").as_posix(),
+            "profile": "myprofile",
+            "hostremoval_reference": Path("path", "to", "hostremoval_reference").as_posix(),
+            "revision": "1.0.1",
+            "slurm": {
+                "account": "development",
+                "mail_user": "taxprofiler.email@scilifelab.se",
+            },
         },
         "scout": {
             "binary_path": "echo",
@@ -2581,7 +2634,7 @@ def fixture_rnafusion_housekeeper(
 ):
     """Create populated housekeeper that holds files for all mock samples."""
 
-    bundle_data = {
+    bundle_data: Dict[str, Any] = {
         "name": rnafusion_sample_id,
         "created": datetime.now(),
         "version": "1.0",
@@ -2765,42 +2818,86 @@ def fixture_flow_cell_name() -> str:
     return "HVKJCDRXX"
 
 
-@pytest.fixture(name="store_with_sequencing_metrics")
-def fixture_store_with_sequencing_metrics(
-    store: Store, sample_id: str, expected_total_reads: int, flow_cell_name: str
-) -> Generator[Store, None, None]:
-    """Return a store with multiple samples with sample lane sequencing metrics."""
+@pytest.fixture(name="expected_average_q30")
+def fixture_expected_average_q30() -> float:
+    """Return expected average Q30."""
+    return 90.50
 
+
+@pytest.fixture(name="expected_average_q30_for_sample")
+def fixture_expected_average_q30_for_sample() -> float:
+    """Return expected average Q30 for a sample."""
+    return (85.5 + 80.5) / 2
+
+
+@pytest.fixture(name="expected_average_q30_for_flow_cell")
+def fixture_expected_average_q30_for_flow_cell() -> float:
+    return (((85.5 + 80.5) / 2) + ((83.5 + 81.5) / 2)) / 2
+
+
+@pytest.fixture(name="expected_total_reads_flow_cell_bcl2fastq")
+def fixture_expected_total_reads_flow_cell_2() -> int:
+    """Return an expected read count"""
+    return 8_000_000
+
+
+@pytest.fixture
+def store_with_sequencing_metrics(
+    store: Store,
+    sample_id: str,
+    father_sample_id: str,
+    mother_sample_id: str,
+    expected_total_reads: int,
+    flow_cell_name: str,
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
+    flow_cell_name_demultiplexed_with_bcl2fastq: str,
+    helpers: StoreHelpers,
+) -> Store:
+    """Return a store with multiple samples with sample lane sequencing metrics."""
     sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
         (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
         (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
-        ("sample_2", "flow_cell_2", 2, 2_000_000, 85.5, 30),
-        ("sample_3", "flow_cell_3", 3, 1_500_000, 80.5, 33),
+        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 2, 2_000_000, 85.5, 30),
+        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 1, 2_000_000, 80.5, 30),
+        (father_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 2, 2_000_000, 83.5, 30),
+        (father_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 1, 2_000_000, 81.5, 30),
+        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 3, 1_500_000, 80.5, 33),
+        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 2, 1_500_000, 80.5, 33),
     ]
 
+    flow_cell: Flowcell = helpers.add_flowcell(
+        flow_cell_name=flow_cell_name,
+        store=store,
+    )
+    sample: Sample = helpers.add_sample(
+        name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
+    )
     sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
+
     for (
         sample_internal_id,
-        flow_cell_name,
+        flow_cell_name_,
         flow_cell_lane_number,
         sample_total_reads_in_lane,
         sample_base_fraction_passing_q30,
         sample_base_mean_quality_score,
     ) in sample_sequencing_metrics_details:
-        sequencing_metrics = SampleLaneSequencingMetrics(
+        helpers.add_sample_lane_sequencing_metrics(
+            store=store,
             sample_internal_id=sample_internal_id,
-            flow_cell_name=flow_cell_name,
+            flow_cell_name=flow_cell_name_,
             flow_cell_lane_number=flow_cell_lane_number,
             sample_total_reads_in_lane=sample_total_reads_in_lane,
             sample_base_fraction_passing_q30=sample_base_fraction_passing_q30,
             sample_base_mean_quality_score=sample_base_mean_quality_score,
-            created_at=datetime.now(),
         )
-        sample_lane_sequencing_metrics.append(sequencing_metrics)
 
+    store.session.add(flow_cell)
+    store.session.add(sample)
     store.session.add_all(sample_lane_sequencing_metrics)
     store.session.commit()
-    yield store
+
+    return store
 
 
 @pytest.fixture(name="demultiplexed_flow_cells_tmp_directory")
@@ -2811,3 +2908,114 @@ def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
     tmp_dir = Path(tmp_path, "tmp_run_dir")
 
     return Path(shutil.copytree(original_dir, tmp_dir))
+
+
+@pytest.fixture(scope="session")
+def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
+    """Create CSV sample sheet file for testing."""
+    Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
+    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    ).touch(exist_ok=True)
+
+
+@pytest.fixture(scope="session", name="taxprofiler_case_id")
+def fixture_taxprofiler_case_id() -> str:
+    """Returns a taxprofiler case id."""
+    return "taxprofiler_case"
+
+
+@pytest.fixture(scope="session", name="taxprofiler_sample_id")
+def fixture_taxprofiler_sample_id() -> str:
+    """Returns a Taxprofiler sample id."""
+    return "taxprofiler_sample"
+
+
+@pytest.fixture(scope="session", name="taxprofiler_dir")
+def fixture_taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> Path:
+    """Return the path to the Taxprofiler directory."""
+    taxprofiler_dir = tmpdir_factory.mktemp("taxprofiler")
+    return Path(taxprofiler_dir).absolute()
+
+
+@pytest.fixture(scope="session", name="taxprofiler_housekeeper_dir")
+def fixture_taxprofiler_housekeeper_dir(tmpdir_factory, taxprofiler_dir: Path) -> Path:
+    """Return the path to the Taxprofiler Housekeeper bundle directory."""
+    return tmpdir_factory.mktemp("bundles")
+
+
+@pytest.fixture(scope="session", name="taxprofiler_fastq_file_forward")
+def fixture_taxprofiler_fastq_file_l_1_r_1(taxprofiler_housekeeper_dir: Path) -> Path:
+    return Path(taxprofiler_housekeeper_dir, "forward_read.fastq.gz")
+
+
+@pytest.fixture(scope="session", name="taxprofiler_fastq_file_reverse")
+def fixture_taxprofiler_fastq_file_l_1_r_2(taxprofiler_housekeeper_dir: Path) -> Path:
+    return Path(taxprofiler_housekeeper_dir, "reverse_read.fastq.gz")
+
+
+@pytest.fixture(scope="session", name="taxprofiler_mock_fastq_files")
+def fixture_taxprofiler_mock_fastq_files(
+    taxprofiler_fastq_file_forward: Path, taxprofiler_fastq_file_reverse: Path
+) -> List[Path]:
+    """Return list of all mock fastq files to commit to mock housekeeper"""
+    return [taxprofiler_fastq_file_forward, taxprofiler_fastq_file_reverse]
+
+
+@pytest.fixture(scope="function", name="taxprofiler_housekeeper")
+def fixture_taxprofiler_housekeeper(
+    housekeeper_api: HousekeeperAPI,
+    helpers: StoreHelpers,
+    taxprofiler_mock_fastq_files: List[Path],
+    taxprofiler_sample_id: str,
+):
+    """Create populated Housekeeper sample bundle mock."""
+
+    bundle_data: Dict[str, Any] = {
+        "name": taxprofiler_sample_id,
+        "created": fixture_timestamp_now,
+        "version": "1.0",
+        "files": [
+            {"path": str(f), "tags": [SequencingFileTag.FASTQ], "archive": False}
+            for f in taxprofiler_mock_fastq_files
+        ],
+    }
+    helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
+    return housekeeper_api
+
+
+@pytest.fixture(scope="function", name="taxprofiler_context")
+def fixture_taxprofiler_context(
+    cg_context: CGConfig,
+    cg_dir: Path,
+    helpers: StoreHelpers,
+    taxprofiler_case_id: str,
+    taxprofiler_sample_id: str,
+    trailblazer_api: MockTB,
+    taxprofiler_housekeeper: HousekeeperAPI,
+) -> CGConfig:
+    """Context to use in cli."""
+    cg_context.housekeeper_api_: HousekeeperAPI = taxprofiler_housekeeper
+    cg_context.trailblazer_api_: MockTB = trailblazer_api
+    cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
+    status_db: Store = cg_context.status_db
+    taxprofiler_case: Family = helpers.add_case(
+        store=status_db,
+        internal_id=taxprofiler_case_id,
+        name=taxprofiler_case_id,
+        data_analysis=Pipeline.TAXPROFILER,
+    )
+
+    taxprofiler_sample: Sample = helpers.add_sample(
+        status_db,
+        internal_id=taxprofiler_sample_id,
+        sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=taxprofiler_case,
+        sample=taxprofiler_sample,
+    )
+
+    return cg_context
