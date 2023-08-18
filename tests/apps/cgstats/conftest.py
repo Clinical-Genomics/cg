@@ -125,19 +125,19 @@ def fixture_conversion_stats_path(bcl2fastq_demux_results: DemuxResults) -> Path
 @pytest.fixture(name="run_info_path")
 def fixture_run_info(context_config: Dict[str, str]) -> Path:
     return Path(context_config["demultiplex"]["out_dir"]).joinpath(
-        "211101_A00187_0615_AHLG5GDRXY/Unaligned/Reports/RunInfo.xml"
+        "211101_A00187_0615_AHLG5GDRZZ/Unaligned/Reports/RunInfo.xml"
     )
 
 
 @pytest.fixture(name="quality_metrics_path")
 def fixture_quality_metrics(context_config: Dict[str, str]) -> Path:
     return Path(context_config["demultiplex"]["out_dir"]).joinpath(
-        "211101_A00187_0615_AHLG5GDRXY/Unaligned/Reports/Quality_Metrics.csv"
+        "211101_A00187_0615_AHLG5GDRZZ/Unaligned/Reports/Quality_Metrics.csv"
     )
 
 
 @pytest.fixture(name="adapter_metrics_path")
 def fixture_adapter_metrics(context_config: Dict[str, str]) -> Path:
     return Path(context_config["demultiplex"]["out_dir"]).joinpath(
-        "211101_A00187_0615_AHLG5GDRXY/Unaligned/Reports/Adapter_Metrics.csv"
+        "211101_A00187_0615_AHLG5GDRZZ/Unaligned/Reports/Adapter_Metrics.csv"
     )

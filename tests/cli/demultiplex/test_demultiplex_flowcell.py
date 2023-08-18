@@ -17,17 +17,19 @@ from tests.meta.demultiplex.conftest import (
 
 def test_demultiplex_flow_cell_dry_run(
     cli_runner: testing.CliRunner,
-    tmp_flow_cell_directory_bcl2fastq: Path,
-    demultiplex_context: CGConfig,
+    tmp_flow_cells_directory_ready_for_demultiplexing: Path,
+    demultiplexing_context_for_demux: CGConfig,
     caplog,
 ):
     caplog.set_level(logging.INFO)
 
     # GIVEN that all files are present for demultiplexing
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(tmp_flow_cell_directory_bcl2fastq)
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        tmp_flow_cells_directory_ready_for_demultiplexing
+    )
 
     # GIVEN a out dir that does not exist
-    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
+    demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
@@ -37,8 +39,8 @@ def test_demultiplex_flow_cell_dry_run(
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
-        [str(tmp_flow_cell_directory_bcl2fastq), "--dry-run"],
-        obj=demultiplex_context,
+        [str(tmp_flow_cells_directory_ready_for_demultiplexing), "--dry-run"],
+        obj=demultiplexing_context_for_demux,
     )
 
     # THEN assert the command exits without problems
@@ -51,18 +53,20 @@ def test_demultiplex_flow_cell_dry_run(
 
 def test_demultiplex_flow_cell(
     cli_runner: testing.CliRunner,
-    tmp_flow_cell_directory_bcl2fastq: Path,
-    demultiplex_context: CGConfig,
+    tmp_flow_cells_directory_ready_for_demultiplexing: Path,
+    demultiplexing_context_for_demux: CGConfig,
     caplog,
     mocker,
 ):
     caplog.set_level(logging.INFO)
 
     # GIVEN that all files are present for demultiplexing
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(tmp_flow_cell_directory_bcl2fastq)
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        tmp_flow_cells_directory_ready_for_demultiplexing
+    )
 
     # GIVEN a out dir that does not exist
-    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
+    demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
@@ -73,8 +77,8 @@ def test_demultiplex_flow_cell(
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
-        [str(tmp_flow_cell_directory_bcl2fastq)],
-        obj=demultiplex_context,
+        [str(tmp_flow_cells_directory_ready_for_demultiplexing)],
+        obj=demultiplexing_context_for_demux,
     )
 
     # THEN assert the command exits without problems
@@ -90,18 +94,20 @@ def test_demultiplex_flow_cell(
 
 def test_demultiplex_bcl2fastq_flowcell(
     cli_runner: testing.CliRunner,
-    tmp_flow_cell_directory_bcl2fastq: Path,
-    demultiplex_context: CGConfig,
+    tmp_flow_cells_directory_ready_for_demultiplexing: Path,
+    demultiplexing_context_for_demux: CGConfig,
     caplog,
     mocker,
 ):
     caplog.set_level(logging.INFO)
 
     # GIVEN that all files are present for bcl2fastq demultiplexing
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(tmp_flow_cell_directory_bcl2fastq)
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        tmp_flow_cells_directory_ready_for_demultiplexing
+    )
 
     # GIVEN a out dir that does not exist
-    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
+    demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
@@ -112,8 +118,8 @@ def test_demultiplex_bcl2fastq_flowcell(
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
-        [str(tmp_flow_cell_directory_bcl2fastq)],
-        obj=demultiplex_context,
+        [str(tmp_flow_cells_directory_ready_for_demultiplexing)],
+        obj=demultiplexing_context_for_demux,
     )
 
     # THEN assert the command exits without problems
@@ -130,7 +136,7 @@ def test_demultiplex_bcl2fastq_flowcell(
 def test_demultiplex_dragen_flowcell(
     cli_runner: testing.CliRunner,
     tmp_flow_cell_directory_bclconvert: Path,
-    demultiplex_context: CGConfig,
+    demultiplexing_context_for_demux: CGConfig,
     tmp_demultiplexed_runs_directory: Path,
     caplog,
     mocker,
@@ -143,7 +149,7 @@ def test_demultiplex_dragen_flowcell(
     )
 
     # GIVEN a out dir that does not exist
-    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
+    demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
@@ -155,7 +161,7 @@ def test_demultiplex_dragen_flowcell(
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
         [str(tmp_flow_cell_directory_bclconvert), "-b", "dragen"],
-        obj=demultiplex_context,
+        obj=demultiplexing_context_for_demux,
     )
 
     # THEN assert the command exits without problems
@@ -171,8 +177,8 @@ def test_demultiplex_dragen_flowcell(
 
 def test_demultiplex_all_novaseq(
     cli_runner: testing.CliRunner,
-    demultiplex_context: CGConfig,
-    tmp_flow_cell_directory_bcl2fastq: Path,
+    demultiplexing_context_for_demux: CGConfig,
+    tmp_flow_cell_demux_all_directory_bclconvert: Path,
     caplog,
 ):
     """Test the demultiplex-all command on a directory with newly sequenced NovaSeq6000 flow cells."""
@@ -180,16 +186,16 @@ def test_demultiplex_all_novaseq(
     caplog.set_level(logging.INFO)
 
     # GIVEN a context with the path to a directory where at least one flowcell is ready for demux
-    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
+    demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_directory_bcl2fastq
+        flow_cell_path=tmp_flow_cell_demux_all_directory_bclconvert
     )
 
-    assert demux_api.flow_cells_dir == tmp_flow_cell_directory_bcl2fastq.parent
+    assert demux_api.flow_cells_dir == tmp_flow_cell_demux_all_directory_bclconvert.parent
 
     # WHEN running the demultiplex all command
     result: testing.Result = cli_runner.invoke(
-        demultiplex_all, ["--dry-run"], obj=demultiplex_context
+        demultiplex_all, ["--dry-run"], obj=demultiplexing_context_for_demux
     )
 
     # THEN assert it exits without problems
