@@ -396,6 +396,8 @@ class HousekeeperAPI:
 
     def get_non_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[File]:
         """Returns all files from a given bundle, tagged with the given tags, which have not been archived."""
+        if tags is None:
+            tags = []
         return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags)
 
     def get_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[File]:
@@ -469,5 +471,6 @@ class HousekeeperAPI:
     def set_archive_retrieval_task_id(self, file_id: int, retrieval_task_id: int) -> None:
         archive: Archive = self._store.get_file_by_id(file_id).archive
         if not archive:
-            LOG.warning(f"No archive entry found for file with id: {file_id}.")
+            raise ValueError(f"No Archive entry found for file with id {file_id}.")
         self._store.update_retrieval_task_id(archive=archive, retrieval_task_id=retrieval_task_id)
+        self.commit()

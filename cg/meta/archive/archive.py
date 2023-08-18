@@ -6,10 +6,10 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
 from cg.meta.archive.ddn_dataflow import DDNDataFlowClient
-from cg.meta.archive.models import ArchiveHandler, FileAndSample, SampleAndHousekeeperDestination
+from cg.meta.archive.models import ArchiveHandler, FileAndSample, SampleAndDestination
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
-from cg.store.models import Flowcell, Sample
+from cg.store.models import Sample
 from housekeeper.store.models import File
 from pydantic import BaseModel, ConfigDict
 
@@ -39,16 +39,16 @@ def filter_files_on_archive_location(
 
 
 def filter_samples_on_archive_location(
-    samples_and_housekeeper_destinations: List[SampleAndHousekeeperDestination],
+    samples_and_destinations: List[SampleAndDestination],
     archive_location: ArchiveLocations,
-) -> List[SampleAndHousekeeperDestination]:
+) -> List[SampleAndDestination]:
     """
     Returns a list of SampleAndHousekeeperDestinations where the associated sample has a specific archive location.
     """
     return [
-        sample_and_housekeeper_destination
-        for sample_and_housekeeper_destination in samples_and_housekeeper_destinations
-        if sample_and_housekeeper_destination.sample.archive_location == archive_location
+        sample_and_destination
+        for sample_and_destination in samples_and_destinations
+        if sample_and_destination.sample.archive_location == archive_location
     ]
 
 
@@ -72,10 +72,11 @@ class SpringArchiveAPI:
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
         return archive_handler.archive_files(files_and_samples=files)
 
-    def archive_archive_location(
+    def archive_single_archive_location(
         self, files_and_samples: List[FileAndSample], archive_location: ArchiveLocations
     ) -> None:
-        """Archives a collection of files in the specified location and adds corresponding entries in HouseKeeper."""
+        """Archives the subset of files which should be archived in the specified location and
+        adds corresponding entries in HouseKeeper."""
         selected_files: [List[FileAndSample]] = filter_files_on_archive_location(
             files_and_samples=files_and_samples, archive_location=archive_location
         )
@@ -98,22 +99,23 @@ class SpringArchiveAPI:
         files_and_samples: List[FileAndSample] = self.add_samples_to_files(files_to_archive)
 
         for archive_location in ArchiveLocations:
-            self.archive_archive_location(
+            self.archive_single_archive_location(
                 files_and_samples=files_and_samples,
                 archive_location=archive_location,
             )
 
-    def retrieve_flowcell(self, flowcell_name: str) -> None:
-        """Retrieves the archived spring files for all samples ran on the specified flowcell."""
-        flowcell: Flowcell = self.status_db.get_flow_cell_by_name(flowcell_name)
-        samples_to_fetch: List[SampleAndHousekeeperDestination] = self.get_samples_to_retrieve(
-            flowcell
-        )
+    def retrieve_samples(self, sample_internal_ids: List[str]) -> None:
+        """Retrieves the archived spring files for a list of samples."""
+        samples: List[Sample] = [
+            self.status_db.get_sample_by_internal_id(sample_internal_id)
+            for sample_internal_id in sample_internal_ids
+        ]
+        samples_and_destinations: List[
+            SampleAndDestination
+        ] = self.add_housekeeper_destinations_to_samples(samples)
         for archive_location in ArchiveLocations:
-            filtered_samples: List[
-                SampleAndHousekeeperDestination
-            ] = filter_samples_on_archive_location(
-                samples_and_housekeeper_destinations=samples_to_fetch,
+            filtered_samples: List[SampleAndDestination] = filter_samples_on_archive_location(
+                samples_and_destinations=samples_and_destinations,
                 archive_location=archive_location,
             )
             if filtered_samples:
@@ -139,25 +141,21 @@ class SpringArchiveAPI:
             )
         return files
 
-    def get_samples_to_retrieve(self, flowcell: Flowcell) -> List[SampleAndHousekeeperDestination]:
+    def add_housekeeper_destinations_to_samples(
+        self, samples: List[Sample]
+    ) -> List[SampleAndDestination]:
         """Gets all samples which were run on the specified flowcell and clumps it with the destination in
         Housekeeper where we want the retrieved files to be."""
-        samples_to_retrieve: List[SampleAndHousekeeperDestination] = []
-        for sample in flowcell.samples:
+        samples_to_retrieve: List[SampleAndDestination] = []
+        for sample in samples:
             LOG.info(f"Will try to retrieve sample: {sample.internal_id}.")
-            housekeeper_destination: str = self.get_destination_from_sample_internal_id(
-                sample.internal_id
-            )
-            samples_to_retrieve.append(
-                SampleAndHousekeeperDestination(
-                    sample=sample, housekeeper_destination=housekeeper_destination
-                )
-            )
+            destination: str = self.get_destination_from_sample_internal_id(sample.internal_id)
+            samples_to_retrieve.append(SampleAndDestination(sample=sample, destination=destination))
         return samples_to_retrieve
 
     def retrieve_samples_from_archive_location(
         self,
-        samples_and_destinations: List[SampleAndHousekeeperDestination],
+        samples_and_destinations: List[SampleAndDestination],
         archive_location: ArchiveLocations,
     ):
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
@@ -173,18 +171,14 @@ class SpringArchiveAPI:
             sample_internal_id
         )
         retrieval_task_id: int = archive_handler.retrieve_samples(
-            [
-                SampleAndHousekeeperDestination(
-                    sample=sample, housekeeper_destination=housekeeper_destination
-                )
-            ]
+            [SampleAndDestination(sample=sample, destination=housekeeper_destination)]
         )
         spring_files: List[File] = self.housekeeper_api.get_archived_files(
             bundle_name=sample_internal_id, tags=[SequencingFileTag.SPRING]
         )
         self.set_archive_retrieval_task_ids(retrieval_task_id=retrieval_task_id, files=spring_files)
 
-    def get_destination_from_sample_internal_id(self, sample_internal_id):
+    def get_destination_from_sample_internal_id(self, sample_internal_id) -> str:
         """Returns where in Housekeeper to put the retrieved spring files for the specified sample."""
         return self.housekeeper_api.get_latest_bundle_version(
             sample_internal_id

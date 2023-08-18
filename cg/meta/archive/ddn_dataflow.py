@@ -12,7 +12,7 @@ from cg.meta.archive.models import (
     ArchiveHandler,
     FileAndSample,
     FileTransferData,
-    SampleAndHousekeeperDestination,
+    SampleAndDestination,
 )
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
@@ -53,14 +53,14 @@ class MiriaFile(FileTransferData):
         return cls(destination=file.full_path, source=sample.internal_id)
 
     @classmethod
-    def from_housekeeper_destination_and_sample(
-        cls, housekeeper_destination: str, sample: Sample
+    def from_sample_and_destination(
+        cls, sample_and_destination: SampleAndDestination
     ) -> "MiriaFile":
         """Instantiates the class from a Sample object, i.e. when we want to fetch a folder containing all spring files
         for said sample."""
         return cls(
-            destination=housekeeper_destination,
-            source=sample.internal_id,
+            destination=sample_and_destination.destination,
+            source=sample_and_destination.sample.internal_id,
         )
 
     def trim_path(self, attribute_to_trim: str):
@@ -105,10 +105,18 @@ class TransferPayload(BaseModel):
         return payload
 
     def post_request(self, url: str, headers: dict) -> "TransferJob":
-        """Sends a request to the given url with, the given headers, and its own content as
-        payload. Raises an error if the response code is not ok. Returns the job ID of the
-        launched transfer task.
+        """Sends a request to the given url with, the given headers, and its own content as payload.
+
+        Arguments:
+            url: URL to which the POST goes to.
+            headers: Headers which are set in the request
+        Raises:
+            HTTPError if the response status is not okay.
+            ValidationError if the response does not conform to the expected response structure.
+        Returns:
+            The job ID of the launched transfer task.
         """
+
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=url,
@@ -224,11 +232,11 @@ class DDNDataFlowClient(ArchiveHandler):
         ).job_id
 
     def retrieve_file(self, file_and_sample: FileAndSample) -> int:
-        """Retrieves all folders provided, to their corresponding destination, as given by sources
-        and destination in TransferData. Returns the job ID of the retrieval task."""
+        """Retrieves a file to the Housekeeper bundle corresponding to the given sample.
+        Returns the job ID of the retrieval task."""
         housekeeper_destination = Path(file_and_sample.file.full_path).parent.as_posix()
-        miria_file_data: MiriaFile = MiriaFile.from_housekeeper_destination_and_sample(
-            housekeeper_destination=housekeeper_destination, sample=file_and_sample.sample
+        miria_file_data: MiriaFile = MiriaFile.from_sample_and_destination(
+            SampleAndDestination(destination=housekeeper_destination, sample=file_and_sample.sample)
         )
         transfer_request: TransferPayload = self.create_transfer_request(
             miria_file_data=[miria_file_data], is_archiving_request=False
@@ -238,16 +246,13 @@ class DDNDataFlowClient(ArchiveHandler):
             url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
         ).job_id
 
-    def retrieve_samples(
-        self, samples_and_housekeeper_destinations: List[SampleAndHousekeeperDestination]
-    ) -> int:
+    def retrieve_samples(self, samples_and_destinations: List[SampleAndDestination]) -> int:
         """Retrieves all archived files for the provided samples and stores them in the specified location in
         HouseKeeper."""
         miria_file_data: List[MiriaFile] = []
-        for sample_and_housekeeper_destination in samples_and_housekeeper_destinations:
-            miria_file: MiriaFile = MiriaFile.from_housekeeper_destination_and_sample(
-                housekeeper_destination=sample_and_housekeeper_destination.housekeeper_destination,
-                sample=sample_and_housekeeper_destination.sample,
+        for sample_and_housekeeper_destination in samples_and_destinations:
+            miria_file: MiriaFile = MiriaFile.from_sample_and_destination(
+                sample_and_housekeeper_destination
             )
             miria_file_data.append(miria_file)
         transfer_request: TransferPayload = self.create_transfer_request(

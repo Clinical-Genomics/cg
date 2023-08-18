@@ -14,12 +14,12 @@ class FileAndSample(BaseModel):
     sample: Sample
 
 
-class SampleAndHousekeeperDestination(BaseModel):
+class SampleAndDestination(BaseModel):
     """Contains a sample and where in Housekeeper any retrieved files should be stored."""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
     sample: Sample
-    housekeeper_destination: str
+    destination: str
 
 
 class FileTransferData(BaseModel):
@@ -49,9 +49,7 @@ class ArchiveHandler:
         pass
 
     @abstractmethod
-    def retrieve_samples(
-        self, samples_and_housekeeper_destinations: List[SampleAndHousekeeperDestination]
-    ):
+    def retrieve_samples(self, samples_and_destinations: List[SampleAndDestination]):
         """Retrieves all files for all samples for the given flowcell."""
         pass
 
