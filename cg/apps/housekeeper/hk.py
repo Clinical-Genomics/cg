@@ -93,7 +93,9 @@ class HousekeeperAPI:
 
         return file_obj
 
-    def add_file(self, path, version_obj: Version, tags: list, to_archive: bool = False) -> File:
+    def add_file(
+        self, path: str, version_obj: Version, tags: list, to_archive: bool = False
+    ) -> File:
         """Add a file to the database."""
         if isinstance(tags, str):
             tags: List[str] = [tags]

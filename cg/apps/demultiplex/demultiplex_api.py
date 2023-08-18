@@ -7,10 +7,12 @@ from typing_extensions import Literal
 
 from cgmodels.trailblazer.constants import AnalysisTypes
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.priority import SlurmQos
 from cg.io.controller import WriteFile
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -29,6 +31,7 @@ class DemultiplexingAPI:
 
     def __init__(self, config: dict, out_dir: Optional[Path] = None):
         self.slurm_api = SlurmAPI()
+        self.hk_api = HousekeeperAPI
         self.slurm_account: str = config["demultiplex"]["slurm"]["account"]
         self.mail: str = config["demultiplex"]["slurm"]["mail_user"]
         self.run_dir: Path = Path(config["demultiplex"]["run_dir"])
@@ -107,11 +110,20 @@ class DemultiplexingAPI:
         return Path(flow_cell.path, f"{DemultiplexingAPI.get_run_name(flow_cell)}.stdout")
 
     def flow_cell_out_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
-        """Create the path to where the demuliplexed result should be produced."""
+        """Create the path to where the demultiplexed result should be produced."""
         return Path(self.out_dir, flow_cell.path.name)
 
+    def sample_sheet_exists_in_hk(self, flow_cell: FlowCellDirectoryData) -> bool:
+        """Returns the sample sheet of the flow cell in housekeeper if exists."""
+        return (
+            self.hk_api.get_file_from_latest_version(
+                bundle_name=flow_cell.id, tags=[SequencingFileTag.SAMPLE_SHEET, flow_cell.id]
+            )
+            is not None
+        )
+
     def unaligned_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
-        """Create the path to where the demuliplexed result should be produced."""
+        """Create the path to where the demultiplexed result should be produced."""
         return Path(
             self.flow_cell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME
         )
@@ -126,7 +138,7 @@ class DemultiplexingAPI:
         )
 
     def is_demultiplexing_completed(self, flow_cell: FlowCellDirectoryData) -> bool:
-        """Check the path to where the demuliplexed result should be produced."""
+        """Check the path to where the demultiplexed result should be produced."""
         LOG.info(f"Check if demultiplexing is ready for {flow_cell.path}")
         logfile: Path = self.get_stderr_logfile(flow_cell)
         if not logfile.exists():
@@ -148,7 +160,11 @@ class DemultiplexingAPI:
             demultiplexing_possible = False
 
         if not flow_cell.sample_sheet_exists():
-            LOG.warning(f"Could not find sample sheet for {flow_cell.id}")
+            LOG.warning(f"Could not find sample sheet in flow cell for {flow_cell.id}")
+            demultiplexing_possible = False
+
+        if not self.sample_sheet_exists_in_hk(flow_cell=flow_cell):
+            LOG.warning(f"Could not find sample sheet in Housekeeper for {flow_cell.id}")
             demultiplexing_possible = False
 
         if flow_cell.is_demultiplexing_started():

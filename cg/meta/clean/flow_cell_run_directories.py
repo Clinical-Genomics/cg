@@ -39,8 +39,9 @@ class RunDirFlowCell:
         self._exists_in_statusdb: Optional[bool] = None
         self._sequenced_date: Optional[datetime] = None
         self._flow_cell_status: Optional[str] = None
-        self.sample_sheet_path: Path = (
-            self.flow_cell_dir / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        self.sample_sheet_path: Path = Path(
+            self.flow_cell_dir,
+            DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
         )
 
     @property
