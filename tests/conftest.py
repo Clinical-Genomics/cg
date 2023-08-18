@@ -33,6 +33,7 @@ from cg.io.yaml import write_yaml
 from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
@@ -2075,11 +2076,6 @@ def fixture_balsamic_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("balsamic")
 
 
-@pytest.fixture(name="taxprofiler_dir", scope="session")
-def fixture_taxprofiler_dir(tmpdir_factory) -> Path:
-    return tmpdir_factory.mktemp("taxprofiler")
-
-
 @pytest.fixture(name="cg_dir", scope="session")
 def fixture_cg_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for cg testing."""
@@ -2354,7 +2350,20 @@ def fixture_context_config(
         "pdc": {"binary_path": "/bin/dsmc"},
         "taxprofiler": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
-            "root": str(taxprofiler_dir),
+            "compute_env": "nf_tower_compute_env",
+            "root": taxprofiler_dir.as_posix(),
+            "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
+            "conda_env": "S_taxprofiler",
+            "launch_directory": Path("path", "to", "launchdir").as_posix(),
+            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "databases": Path("path", "to", "databases").as_posix(),
+            "profile": "myprofile",
+            "hostremoval_reference": Path("path", "to", "hostremoval_reference").as_posix(),
+            "revision": "1.0.1",
+            "slurm": {
+                "account": "development",
+                "mail_user": "taxprofiler.email@scilifelab.se",
+            },
         },
         "scout": {
             "binary_path": "echo",
@@ -2641,7 +2650,7 @@ def fixture_rnafusion_housekeeper(
 ):
     """Create populated housekeeper that holds files for all mock samples."""
 
-    bundle_data = {
+    bundle_data: Dict[str, Any] = {
         "name": rnafusion_sample_id,
         "created": datetime.now(),
         "version": "1.0",
@@ -2905,3 +2914,124 @@ def store_with_sequencing_metrics(
     store.session.commit()
 
     return store
+
+
+@pytest.fixture(name="demultiplexed_flow_cells_tmp_directory")
+def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
+    original_dir = Path(
+        Path(__file__).parent, "fixtures", "apps", "demultiplexing", "demultiplexed-runs"
+    )
+    tmp_dir = Path(tmp_path, "tmp_run_dir")
+
+    return Path(shutil.copytree(original_dir, tmp_dir))
+
+
+@pytest.fixture(scope="session")
+def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
+    """Create CSV sample sheet file for testing."""
+    Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
+    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    ).touch(exist_ok=True)
+
+
+@pytest.fixture(scope="session", name="taxprofiler_case_id")
+def fixture_taxprofiler_case_id() -> str:
+    """Returns a taxprofiler case id."""
+    return "taxprofiler_case"
+
+
+@pytest.fixture(scope="session", name="taxprofiler_sample_id")
+def fixture_taxprofiler_sample_id() -> str:
+    """Returns a Taxprofiler sample id."""
+    return "taxprofiler_sample"
+
+
+@pytest.fixture(scope="session", name="taxprofiler_dir")
+def fixture_taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> Path:
+    """Return the path to the Taxprofiler directory."""
+    taxprofiler_dir = tmpdir_factory.mktemp("taxprofiler")
+    return Path(taxprofiler_dir).absolute()
+
+
+@pytest.fixture(scope="session", name="taxprofiler_housekeeper_dir")
+def fixture_taxprofiler_housekeeper_dir(tmpdir_factory, taxprofiler_dir: Path) -> Path:
+    """Return the path to the Taxprofiler Housekeeper bundle directory."""
+    return tmpdir_factory.mktemp("bundles")
+
+
+@pytest.fixture(scope="session", name="taxprofiler_fastq_file_forward")
+def fixture_taxprofiler_fastq_file_l_1_r_1(taxprofiler_housekeeper_dir: Path) -> Path:
+    return Path(taxprofiler_housekeeper_dir, "forward_read.fastq.gz")
+
+
+@pytest.fixture(scope="session", name="taxprofiler_fastq_file_reverse")
+def fixture_taxprofiler_fastq_file_l_1_r_2(taxprofiler_housekeeper_dir: Path) -> Path:
+    return Path(taxprofiler_housekeeper_dir, "reverse_read.fastq.gz")
+
+
+@pytest.fixture(scope="session", name="taxprofiler_mock_fastq_files")
+def fixture_taxprofiler_mock_fastq_files(
+    taxprofiler_fastq_file_forward: Path, taxprofiler_fastq_file_reverse: Path
+) -> List[Path]:
+    """Return list of all mock fastq files to commit to mock housekeeper"""
+    return [taxprofiler_fastq_file_forward, taxprofiler_fastq_file_reverse]
+
+
+@pytest.fixture(scope="function", name="taxprofiler_housekeeper")
+def fixture_taxprofiler_housekeeper(
+    housekeeper_api: HousekeeperAPI,
+    helpers: StoreHelpers,
+    taxprofiler_mock_fastq_files: List[Path],
+    taxprofiler_sample_id: str,
+):
+    """Create populated Housekeeper sample bundle mock."""
+
+    bundle_data: Dict[str, Any] = {
+        "name": taxprofiler_sample_id,
+        "created": fixture_timestamp_now,
+        "version": "1.0",
+        "files": [
+            {"path": str(f), "tags": [SequencingFileTag.FASTQ], "archive": False}
+            for f in taxprofiler_mock_fastq_files
+        ],
+    }
+    helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
+    return housekeeper_api
+
+
+@pytest.fixture(scope="function", name="taxprofiler_context")
+def fixture_taxprofiler_context(
+    cg_context: CGConfig,
+    cg_dir: Path,
+    helpers: StoreHelpers,
+    taxprofiler_case_id: str,
+    taxprofiler_sample_id: str,
+    trailblazer_api: MockTB,
+    taxprofiler_housekeeper: HousekeeperAPI,
+) -> CGConfig:
+    """Context to use in cli."""
+    cg_context.housekeeper_api_: HousekeeperAPI = taxprofiler_housekeeper
+    cg_context.trailblazer_api_: MockTB = trailblazer_api
+    cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
+    status_db: Store = cg_context.status_db
+    taxprofiler_case: Family = helpers.add_case(
+        store=status_db,
+        internal_id=taxprofiler_case_id,
+        name=taxprofiler_case_id,
+        data_analysis=Pipeline.TAXPROFILER,
+    )
+
+    taxprofiler_sample: Sample = helpers.add_sample(
+        status_db,
+        internal_id=taxprofiler_sample_id,
+        sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=taxprofiler_case,
+        sample=taxprofiler_sample,
+    )
+
+    return cg_context
