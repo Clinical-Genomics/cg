@@ -3,7 +3,8 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from pydantic.v1 import BaseModel, validator
+from pydantic import AfterValidator, BaseModel, Field, field_validator
+from typing_extensions import Annotated
 
 LOG = logging.getLogger(__name__)
 
@@ -16,23 +17,24 @@ class CGTag(BaseModel):
     mandatory: Optional[bool] = False
 
 
+def check_mandatory_exists(file: CGTag):
+    if file.mandatory:
+        assert Path(file.path).exists(), f"Mandatory file cannot be found at {file.path}"
+        return file
+    if not Path(file.path).exists():
+        LOG.info("Optional file %s not found, removing from bundle", file.path)
+        return
+    return file
+
+
 class CGDeliverables(BaseModel):
     """Class that specifies the output from hermes"""
 
     pipeline: str
     bundle_id: str
-    files: List[CGTag]
+    files: List[Annotated[CGTag, AfterValidator(check_mandatory_exists)]]
 
-    @validator("files", each_item=True)
-    def check_mandatory_exists(cls, file):
-        if file.mandatory:
-            assert Path(file.path).exists(), f"Mandatory file cannot be found at {file.path}"
-            return file
-        if not Path(file.path).exists():
-            LOG.info("Optional file %s not found, removing from bundle", file.path)
-            return
-        return file
-
-    @validator("files")
+    @classmethod
+    @field_validator("files")
     def remove_invalid(cls, value):
         return [item for item in value if item]
