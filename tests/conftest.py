@@ -1164,7 +1164,7 @@ def fixture_demultiplexing_api(
     return demux_api
 
 
-@pytest.fixture(name="populated_stats_api", scope="session")
+@pytest.fixture(name="populated_stats_api")
 def fixture_populated_stats_api(
     stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
 ) -> StatsAPI:
@@ -1275,13 +1275,13 @@ def fixture_novaseq_x_flow_cell_path(
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_path", scope="session")
 def fixture_novaseq_bcl2fastq_sample_sheet_path(bcl2fastq_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeq6000 Bcl2fastq sample sheet."""
-    return Path(bcl2fastq_flow_cell_dir, "SampleSheet.csv")
+    return Path(bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
 
 
 @pytest.fixture(name="novaseq_bcl_convert_sample_sheet_path", scope="session")
 def fixture_novaseq_bcl_convert_sample_sheet_path(bcl_convert_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeq6000 bcl_convert sample sheet."""
-    return Path(bcl_convert_flow_cell_dir, "SampleSheet.csv")
+    return Path(bcl_convert_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
 
 
 @pytest.fixture(name="run_parameters_missing_versions_path", scope="session")

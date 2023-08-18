@@ -344,13 +344,13 @@ def fixture_delete_demultiplex_api(
 
 @pytest.fixture(name="flow_cell_info_map", scope="session")
 def fixture_flow_cell_info_map(
-    bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
-    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids,
-    flow_cell_directory_name_demultiplexed_with_bcl_convert_flat,
-    flow_cell_directory_name_demultiplexed_with_bcl_convert,
-    flow_cell_name_demultiplexed_with_bcl_convert,
-    flow_cell_directory_name_demultiplexed_with_bcl2fastq,
-    flow_cell_name_demultiplexed_with_bcl2fastq,
+    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
+    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
+    flow_cell_directory_name_demultiplexed_with_bcl_convert_flat: Path,
+    flow_cell_directory_name_demultiplexed_with_bcl_convert: Path,
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
+    flow_cell_directory_name_demultiplexed_with_bcl2fastq: Path,
+    flow_cell_name_demultiplexed_with_bcl2fastq: str,
 ) -> Dict[str, FlowCellInfo]:
     """Returns a dict with the suitable fixtures for different demultiplexing softwares and
     settings. Keys are string, values are named tuples FlowCellInfo."""

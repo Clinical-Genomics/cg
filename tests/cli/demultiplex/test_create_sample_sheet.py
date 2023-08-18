@@ -106,10 +106,10 @@ def test_create_dragen_sample_sheet(
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         tmp_flow_cells_directory_no_sample_sheet, bcl_converter=BclConverter.DRAGEN
     )
-    assert flowcell.run_parameters_path.exists()
+    assert flow_cell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet present
-    assert not flowcell.sample_sheet_exists()
+    assert not flow_cell.sample_sheet_exists()
 
     # GIVEN flow cell samples
     mocker.patch(
@@ -129,7 +129,7 @@ def test_create_dragen_sample_sheet(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN the sample sheet was created
-    assert flowcell.sample_sheet_exists()
+    assert flow_cell.sample_sheet_exists()
 
     # THEN the sample sheet is on the correct format
-    assert flowcell.validate_sample_sheet()
+    assert flow_cell.validate_sample_sheet()
