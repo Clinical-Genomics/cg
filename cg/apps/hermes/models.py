@@ -5,6 +5,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel, field_validator
 
+from cg.exc import CgDataError
+
 LOG = logging.getLogger(__name__)
 
 
@@ -31,8 +33,8 @@ class CGDeliverables(BaseModel):
         otherwise it is simply removed from the list of files."""
         filtered_files: List[CGTag] = files.copy()
         for file in files:
-            if file.mandatory:
-                assert Path(file.path).exists(), f"Mandatory file cannot be found at {file.path}"
+            if file.mandatory and not Path(file.path).exists():
+                raise CgDataError(f"Mandatory file cannot be found at {file.path}")
             if not Path(file.path).exists():
                 LOG.info(f"Optional file {file.path} not found, removing from bundle.")
                 filtered_files.remove(file)
