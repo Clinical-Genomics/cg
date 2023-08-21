@@ -2917,7 +2917,7 @@ def novaseqx_flow_cell_directory(tmp_path: Path, novaseqx_flow_cell_dir_name: st
 
 
 @pytest.fixture
-def demultiplexed_flow_cell_runs(tmp_path: Path) -> Path:
+def demultiplexed_flow_cell_run_directory(tmp_path: Path) -> Path:
     demultiplexed_runs = Path(tmp_path, "demultiplexed_runs")
     demultiplexed_runs.mkdir()
     return demultiplexed_runs

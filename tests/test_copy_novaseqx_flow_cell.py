@@ -10,25 +10,27 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 
 
 def test_flow_cell_is_ready_for_post_processing(
-    novaseqx_flow_cell_dir: Path, demultiplexed_flow_cell_runs: Path
+    novaseqx_flow_cell_dir: Path, demultiplexed_flow_cell_run_directory: Path
 ):
     # GIVEN a flow cell which is ready for post processing
 
     # WHEN checking if the flow cell is ready for post processing
-    ready = is_ready_for_post_processing(novaseqx_flow_cell_dir, demultiplexed_flow_cell_runs)
+    ready = is_ready_for_post_processing(
+        novaseqx_flow_cell_dir, demultiplexed_flow_cell_run_directory
+    )
 
     # THEN the flow cell is ready
     assert ready
 
 
 def test_is_not_ready_without_analysis(
-    novaseqx_flow_cell_analysis_incomplete: Path, demultiplexed_flow_cell_runs: Path
+    novaseqx_flow_cell_analysis_incomplete: Path, demultiplexed_flow_cell_run_directory: Path
 ):
     # GIVEN a flow cell for which analysis is not completed
 
     # WHEN checking if the flow cell is ready for post processing
     ready = is_ready_for_post_processing(
-        novaseqx_flow_cell_analysis_incomplete, demultiplexed_flow_cell_runs
+        novaseqx_flow_cell_analysis_incomplete, demultiplexed_flow_cell_run_directory
     )
 
     # THEN it is not ready
@@ -36,13 +38,13 @@ def test_is_not_ready_without_analysis(
 
 
 def test_flow_cell_is_not_demultiplexed(
-    demultiplex_not_complete_novaseqx_flow_cell: Path, demultiplexed_flow_cell_runs: Path
+    demultiplex_not_complete_novaseqx_flow_cell: Path, demultiplexed_flow_cell_run_directory: Path
 ):
     # GIVEN a flow cell for which demultiplexing is not completed
 
     # WHEN checking if the flow cell is ready for post processing
     ready = is_ready_for_post_processing(
-        demultiplex_not_complete_novaseqx_flow_cell, demultiplexed_flow_cell_runs
+        demultiplex_not_complete_novaseqx_flow_cell, demultiplexed_flow_cell_run_directory
     )
 
     # THEN it is not ready
@@ -50,13 +52,13 @@ def test_flow_cell_is_not_demultiplexed(
 
 
 def test_previously_post_processed_flow_cell_is_not_ready(
-    post_processed_novaseqx_flow_cell: Path, demultiplexed_flow_cell_runs: Path
+    post_processed_novaseqx_flow_cell: Path, demultiplexed_flow_cell_run_directory: Path
 ):
     # GIVEN a flow cell for which post processing is done
 
     # WHEN checking if the flow cell is ready for post processing
     ready = is_ready_for_post_processing(
-        post_processed_novaseqx_flow_cell, demultiplexed_flow_cell_runs
+        post_processed_novaseqx_flow_cell, demultiplexed_flow_cell_run_directory
     )
 
     # THEN the flow cell is not ready
@@ -64,13 +66,15 @@ def test_previously_post_processed_flow_cell_is_not_ready(
 
 
 def test_previously_copied_flow_cell_is_not_ready(
-    novaseqx_flow_cell_dir: Path, demultiplexed_flow_cell_runs: Path
+    novaseqx_flow_cell_dir: Path, demultiplexed_flow_cell_run_directory: Path
 ):
     # GIVEN a flow cell which already exists in demultiplexed runs
-    Path(demultiplexed_flow_cell_runs, novaseqx_flow_cell_dir.name).mkdir()
+    Path(demultiplexed_flow_cell_run_directory, novaseqx_flow_cell_dir.name).mkdir()
 
     # WHEN checking if the flow cell is ready for post processing
-    ready = is_ready_for_post_processing(novaseqx_flow_cell_dir, demultiplexed_flow_cell_runs)
+    ready = is_ready_for_post_processing(
+        novaseqx_flow_cell_dir, demultiplexed_flow_cell_run_directory
+    )
 
     # THEN the flow cell is not ready
     assert not ready
@@ -95,12 +99,12 @@ def test_get_latest_analysis_version_path(
 
 
 def test_copy_novaseqx_flow_cell(
-    demultiplexed_flow_cell_runs: Path,
+    demultiplexed_flow_cell_run_directory: Path,
     novaseqx_flow_cell_dir: Path,
     novaseqx_flow_cell_dir_name: str,
 ):
     # GIVEN a destination directory
-    flow_cell_run = Path(demultiplexed_flow_cell_runs, novaseqx_flow_cell_dir_name)
+    flow_cell_run = Path(demultiplexed_flow_cell_run_directory, novaseqx_flow_cell_dir_name)
     flow_cell_run.mkdir()
     destination = Path(flow_cell_run, DemultiplexingDirsAndFiles.DATA)
 
