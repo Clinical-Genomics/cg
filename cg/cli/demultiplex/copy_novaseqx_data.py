@@ -18,8 +18,8 @@ def is_analyzed(analysis_directory: Path) -> bool:
     ).exists()
 
 
-def is_in_demultiplexed_runs(flow_cell_name: str, demultiplexed_runs: Path) -> bool:
-    return Path(demultiplexed_runs, flow_cell_name).exists()
+def is_in_demultiplexed_runs(flow_cell: Path, demultiplexed_runs: Path) -> bool:
+    return Path(demultiplexed_runs, flow_cell.name).exists()
 
 
 def get_latest_analysis_directory(flow_cell: Path) -> Optional[Path]:
@@ -32,9 +32,12 @@ def get_latest_analysis_directory(flow_cell: Path) -> Optional[Path]:
 
 
 def get_sorted_analysis_versions(analysis_path: Path) -> List[Path]:
-    return sorted(
-        (d for d in analysis_path.iterdir() if d.is_dir()), key=lambda x: int(x.name), reverse=True
-    )
+    def sort_by_name(version: Path) -> int:
+        return int(version.name)
+
+    analysis_versions = [version for version in analysis_path.iterdir() if version.is_dir()]
+    sorted_versions = sorted(analysis_versions, key=sort_by_name, reverse=True)
+    return sorted_versions
 
 
 def is_queued_for_post_processing(flow_cell: Path) -> bool:
@@ -42,7 +45,7 @@ def is_queued_for_post_processing(flow_cell: Path) -> bool:
 
 
 def copy_flow_cell_analysis_data(flow_cell: Path, destination: Path) -> None:
-    analysis = get_latest_analysis_directory(flow_cell)
+    analysis: Path = get_latest_analysis_directory(flow_cell)
     analysis_data = Path(analysis, DemultiplexingDirsAndFiles.DATA)
 
     hardlink_tree(src=analysis_data, dst=destination)
@@ -61,14 +64,14 @@ def hardlink_tree(src: Path, dst: Path) -> None:
 
 
 def is_ready_for_post_processing(flow_cell: Path, demultiplexed_runs: Path) -> bool:
-    analysis_directory = get_latest_analysis_directory(flow_cell)
+    analysis: Path = get_latest_analysis_directory(flow_cell)
 
-    if not analysis_directory:
+    if not analysis:
         return False
 
-    copy_completed = is_copied(analysis_directory)
-    analysis_completed = is_analyzed(analysis_directory)
-    in_demultiplexed_runs = is_in_demultiplexed_runs(flow_cell.name, demultiplexed_runs)
+    copy_completed = is_copied(analysis)
+    analysis_completed = is_analyzed(analysis)
+    in_demultiplexed_runs = is_in_demultiplexed_runs(flow_cell, demultiplexed_runs)
     post_processed = is_queued_for_post_processing(flow_cell)
 
     return (
