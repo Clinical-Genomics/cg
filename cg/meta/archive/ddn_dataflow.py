@@ -120,7 +120,7 @@ class RefreshPayload(BaseModel):
 
 
 class AuthToken(BaseModel):
-    """Model representing th response fields from an access request to the Dataflow API."""
+    """Model representing the response fields from an access request to the Dataflow API."""
 
     access: str
     expire: int
@@ -167,7 +167,9 @@ class DDNDataFlowClient(ArchiveHandler):
         )
         if not response.ok:
             raise DdnDataflowAuthenticationError(message=response.text)
-        response_content: AuthToken = AuthToken.model_validate_json(response.content.decode())
+        response_content: AuthToken = AuthToken.model_validate_json(
+            json_data=response.content.decode()
+        )
         self.refresh_token: str = response_content.refresh
         self.auth_token: str = response_content.access
         self.token_expiration: datetime = datetime.fromtimestamp(response_content.expire)
@@ -192,8 +194,8 @@ class DDNDataFlowClient(ArchiveHandler):
             self._refresh_auth_token()
         return {"Authorization": f"Bearer {self.auth_token}"}
 
-    def archive_folders(self, files_and_samples: List[FileAndSample]) -> int:
-        """Archives all folders provided, to their corresponding destination, as given by sources
+    def archive_files(self, files_and_samples: List[FileAndSample]) -> int:
+        """Archives all files provided, to their corresponding destination, as given by sources
         and destination in TransferData. Returns the job ID of the archiving task."""
         miria_file_data: List[MiriaFile] = self.convert_into_transfer_data(
             files_and_samples, is_archiving=True
@@ -243,11 +245,13 @@ class DDNDataFlowClient(ArchiveHandler):
         transfer_request.add_repositories(
             source_prefix=source_prefix, destination_prefix=destination_prefix
         )
+
         return transfer_request
 
     def convert_into_transfer_data(
         self, files_and_samples: List[FileAndSample], is_archiving: bool = True
     ) -> List[MiriaFile]:
+        """Converts the provided files and samples to the format used for the request."""
         return [
             MiriaFile.from_file_and_sample(
                 file=file_and_sample.file, sample=file_and_sample.sample, is_archiving=is_archiving

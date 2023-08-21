@@ -28,13 +28,11 @@ from cg.cli.workflow.rnafusion.options import (
 from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV, OPTION_TOWER_RUN_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
-from cg.constants.tb import AnalysisStatus
-from cg.exc import CgError, DecompressionNeededError, MetricsQCError
+from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.command_args import CommandArgs
+from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -114,22 +112,19 @@ def run(
 
     command_args: CommandArgs = CommandArgs(
         **{
-            "log": NextflowAnalysisAPI.get_log_path(
+            "log": analysis_api.get_log_path(
                 case_id=case_id,
                 pipeline=analysis_api.pipeline,
-                root_dir=analysis_api.root_dir,
                 log=log,
             ),
-            "work_dir": NextflowAnalysisAPI.get_workdir_path(
-                case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
-            ),
+            "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
             "with_tower": with_tower,
             "stub": stub,
-            "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
-            "params_file": NextflowAnalysisAPI.get_params_file_path(
-                case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
+            "config": analysis_api.get_nextflow_config_path(nextflow_config=config),
+            "params_file": analysis_api.get_params_file_path(
+                case_id=case_id, params_file=params_file
             ),
             "name": case_id,
             "compute_env": compute_env or analysis_api.compute_env,

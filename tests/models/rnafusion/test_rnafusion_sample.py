@@ -1,15 +1,17 @@
 from typing import List
 
-from pydantic.v1 import ValidationError as PydanticValidationError
 import pytest
+from pydantic.v1 import ValidationError
+from pydantic.v1 import ValidationError as PydanticValidationError
 
-from cg.models.rnafusion.rnafusion_sample import RnafusionSample
+from cg.exc import SampleSheetError
+from cg.models.rnafusion.rnafusion import RnafusionSample
 
 
 def test_instantiate_rnafusion_sample(
     rnafusion_sample: str,
-    rnafusion_fastq_r1: List[str],
-    rnafusion_fastq_r2_same_length: List[str],
+    rnafusion_fastq_forward: List[str],
+    rnafusion_fastq_reverse_same_length: List[str],
     rnafusion_strandedness_acceptable: str,
 ):
     """
@@ -17,11 +19,11 @@ def test_instantiate_rnafusion_sample(
     """
     # GIVEN a sample with fastq files and strandedness
 
-    # WHEN instantiating a MipAnalysis object
+    # WHEN instantiating a rnafusion sample object
     rnafusion_sample_object = RnafusionSample(
         sample=rnafusion_sample,
-        fastq_r1=rnafusion_fastq_r1,
-        fastq_r2=rnafusion_fastq_r2_same_length,
+        fastq_forward=rnafusion_fastq_forward,
+        fastq_reverse=rnafusion_fastq_reverse_same_length,
         strandedness=rnafusion_strandedness_acceptable,
     )
 
@@ -29,68 +31,67 @@ def test_instantiate_rnafusion_sample(
     assert isinstance(rnafusion_sample_object, RnafusionSample)
 
 
-def test_instantiate_rnafusion_sample_fastq_r1_r2_different_length(
+def test_fastq_forward_reverse_different_length(
     rnafusion_sample: str,
-    rnafusion_fastq_r1: List[str],
-    rnafusion_fastq_r2_not_same_length: List[str],
+    rnafusion_fastq_forward: List[str],
+    rnafusion_fastq_reverse_not_same_length: List[str],
     rnafusion_strandedness_acceptable: str,
 ):
     """
-    Tests rnafusion sample with different fastq_r1 and fastq_r2 length.
+    Tests rnafusion sample with different fastq_forward and fastq_reverse length.
     """
+    # GIVEN a sample with fastq files of different lengths
 
-    # GIVEN a sample with fastq files and strandedness
+    # WHEN instantiating a sample object
 
-    # WHEN instantiating a sample object THEN throws a ValidationError
-
-    with pytest.raises(PydanticValidationError):
+    # THEN throws an error
+    with pytest.raises(SampleSheetError):
         RnafusionSample(
             sample=rnafusion_sample,
-            fastq_r1=rnafusion_fastq_r1,
-            fastq_r2=rnafusion_fastq_r2_not_same_length,
+            fastq_forward=rnafusion_fastq_forward,
+            fastq_reverse=rnafusion_fastq_reverse_not_same_length,
             strandedness=rnafusion_strandedness_acceptable,
         )
 
 
-def test_instantiate_rnafusion_sample_fastq_r2_empty(
+def test_fastq_empty_list(
     rnafusion_sample: str,
-    rnafusion_fastq_r1: List[str],
-    rnafusion_fastq_r2_empty: list,
+    rnafusion_fastq_forward: List[str],
+    rnafusion_fastq_reverse_empty: list,
     rnafusion_strandedness_acceptable: str,
 ):
     """
-    Tests rnafusion sample with fastq_r2 empty (single end).
+    Tests rnafusion sample with a fastq_reverse empty list (single end).
     """
 
     # GIVEN a sample with fastq files and strandedness
 
     # WHEN instantiating a sample object
-    rnafusion_sample_object: RnafusionSample = RnafusionSample(
-        sample=rnafusion_sample,
-        fastq_r1=rnafusion_fastq_r1,
-        fastq_r2=rnafusion_fastq_r2_empty,
-        strandedness=rnafusion_strandedness_acceptable,
-    )
-
-    # THEN assert that it was successfully created
-    assert isinstance(rnafusion_sample_object, RnafusionSample)
+    with pytest.raises(ValidationError):
+        RnafusionSample(
+            sample=rnafusion_sample,
+            fastq_forward=rnafusion_fastq_forward,
+            fastq_reverse=rnafusion_fastq_reverse_empty,
+            strandedness=rnafusion_strandedness_acceptable,
+        )
 
 
 def test_instantiate_rnafusion_strandedness_not_acceptable(
     rnafusion_sample: str,
-    rnafusion_fastq_r1: List[str],
-    rnafusion_fastq_r2_same_length: List[str],
+    rnafusion_fastq_forward: List[str],
+    rnafusion_fastq_reverse_same_length: List[str],
     rnafusion_strandedness_not_acceptable: str,
 ):
     """
     Tests rnafusion sample with unacceptable strandedness.
     """
+
     # WHEN instantiating a sample object THEN throws a ValidationError
 
     with pytest.raises(PydanticValidationError):
         RnafusionSample(
             sample=rnafusion_sample,
-            fastq_r1=rnafusion_fastq_r1,
-            fastq_r2=rnafusion_fastq_r2_same_length,
+            fastq_forward=rnafusion_fastq_forward,
+            fastq_reverse=rnafusion_fastq_reverse_same_length,
             strandedness=rnafusion_strandedness_not_acceptable,
         )
