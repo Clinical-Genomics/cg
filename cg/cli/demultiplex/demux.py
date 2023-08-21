@@ -79,15 +79,16 @@ def demultiplex_flow_cell(
     """
 
     LOG.info(f"Running cg demultiplex flow cell, using {bcl_converter}")
-    flow_cell: Path = Path(context.demultiplex.run_dir, flow_cell_name)
-
+    flow_cell_directory: Path = Path(context.demultiplex.run_dir, flow_cell_name)
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
     LOG.info(f"setting flow cell id to {flow_cell_name}")
     LOG.info(f"setting out dir to {demultiplex_api.out_dir}")
 
     try:
-        flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell, bcl_converter=bcl_converter)
+        flow_cell = FlowCellDirectoryData(
+            flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
+        )
     except FlowCellError as error:
         raise click.Abort from error
 
