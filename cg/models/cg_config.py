@@ -40,7 +40,6 @@ class FlowCellRunDirs(Sequencers):
 
 
 class BackupConfig(BaseModel):
-    root: Sequencers
     encrypt_dir: EncryptionDirs
 
 
