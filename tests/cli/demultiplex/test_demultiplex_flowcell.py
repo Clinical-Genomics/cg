@@ -1,6 +1,5 @@
 """Tests for running the demultiplex flowcell command"""
 import logging
-import mock
 from pathlib import Path
 
 from click import testing
@@ -8,7 +7,6 @@ from click import testing
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell, delete_flow_cell
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -16,7 +14,6 @@ from tests.meta.demultiplex.conftest import (
     fixture_tmp_flow_cell_demux_base_path,
     fixture_tmp_flow_cell_run_base_path,
 )
-from tests.mocks.hk_mock import MockFile
 
 
 def test_demultiplex_flow_cell_dry_run(
