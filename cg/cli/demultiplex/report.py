@@ -22,12 +22,12 @@ def create_report_cmd(context: CGConfig, flow_cell_name: str):
     demux_api: DemultiplexingAPI = context.demultiplex_api
     try:
         flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-            flow_cell_path=Path(demux_api.run_dir, flow_cell_name)
+            flow_cell_path=Path(demux_api.flow_cells_dir, flow_cell_name)
         )
     except FlowCellError as error:
         raise click.Abort from error
     demux_results: DemuxResults = DemuxResults(
-        demux_dir=Path(demux_api.out_dir, flow_cell_name, flow_cell=flow_cell)
+        demux_dir=Path(demux_api.demultiplexed_runs_dir, flow_cell_name, flow_cell=flow_cell)
     )
     conversion_stats: Path = demux_results.conversion_stats_path
     if not conversion_stats.exists():

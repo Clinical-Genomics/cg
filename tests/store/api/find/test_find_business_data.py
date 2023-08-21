@@ -86,7 +86,7 @@ def test_get_flow_cell(bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: S
 def test_get_flow_cells_by_case(
     base_store: Store,
     bcl2fastq_flow_cell_id: str,
-    dragen_flow_cell_id: str,
+    bcl_convert_flow_cell_id: str,
     case: Family,
     helpers: StoreHelpers,
     sample: Sample,
@@ -96,7 +96,7 @@ def test_get_flow_cells_by_case(
     # GIVEN a store with two flow cell
     helpers.add_flowcell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
 
-    helpers.add_flowcell(store=base_store, flow_cell_name=dragen_flow_cell_id)
+    helpers.add_flowcell(store=base_store, flow_cell_name=bcl_convert_flow_cell_id)
 
     # WHEN fetching the latest flow cell
     flow_cells: List[Flowcell] = base_store.get_flow_cells_by_case(case=case)
@@ -110,7 +110,9 @@ def test_get_flow_cells_by_case(
     assert flow_cells[0].name == bcl2fastq_flow_cell_id
 
 
-def test_get_flow_cells_by_statuses(dragen_flow_cell_id: str, re_sequenced_sample_store: Store):
+def test_get_flow_cells_by_statuses(
+    bcl_convert_flow_cell_id: str, re_sequenced_sample_store: Store
+):
     """Test returning the latest flow cell from the database by statuses."""
 
     # GIVEN a store with two flow cells
@@ -125,7 +127,7 @@ def test_get_flow_cells_by_statuses(dragen_flow_cell_id: str, re_sequenced_sampl
         assert flow_cell.status == FlowCellStatus.ON_DISK
 
     # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cells[0].name == dragen_flow_cell_id
+    assert flow_cells[0].name == bcl_convert_flow_cell_id
 
 
 def test_get_flow_cells_by_statuses_when_multiple_matches(re_sequenced_sample_store: Store):
@@ -244,7 +246,7 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
     base_store: Store,
     caplog,
     bcl2fastq_flow_cell_id: str,
-    dragen_flow_cell_id: str,
+    bcl_convert_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
@@ -261,7 +263,7 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
 
     another_flow_cell = helpers.add_flowcell(
         store=base_store,
-        flow_cell_name=dragen_flow_cell_id,
+        flow_cell_name=bcl_convert_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.RETRIEVED,
     )
@@ -281,7 +283,7 @@ def test_is_all_flow_cells_on_disk_when_requested(
     base_store: Store,
     caplog,
     bcl2fastq_flow_cell_id: str,
-    dragen_flow_cell_id: str,
+    bcl_convert_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
@@ -298,7 +300,7 @@ def test_is_all_flow_cells_on_disk_when_requested(
 
     another_flow_cell = helpers.add_flowcell(
         store=base_store,
-        flow_cell_name=dragen_flow_cell_id,
+        flow_cell_name=bcl_convert_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.REQUESTED,
     )
@@ -320,7 +322,7 @@ def test_is_all_flow_cells_on_disk(
     base_store: Store,
     caplog,
     bcl2fastq_flow_cell_id: str,
-    dragen_flow_cell_id: str,
+    bcl_convert_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
@@ -332,7 +334,7 @@ def test_is_all_flow_cells_on_disk(
         store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample]
     )
 
-    helpers.add_flowcell(store=base_store, flow_cell_name=dragen_flow_cell_id)
+    helpers.add_flowcell(store=base_store, flow_cell_name=bcl_convert_flow_cell_id)
 
     # WHEN fetching the latest flow cell
     is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
