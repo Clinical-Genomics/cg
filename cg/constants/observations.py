@@ -43,6 +43,7 @@ class ObservationsFileWildcards(StrEnum):
     CLINICAL_SNV: str = "clinical_snv"
     CLINICAL_SV: str = "clinical_sv"
     CANCER_GERMLINE_SNV: str = "cancer_germline_snv"
+    CANCER_GERMLINE_SV: str = "cancer_germline_sv"
     CANCER_SOMATIC_SNV: str = "cancer_somatic_snv"
     CANCER_SOMATIC_SV: str = "cancer_somatic_sv"
 

@@ -592,7 +592,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--swegen-sv": arguments.get("swegen_sv"),
                 "--clinical-snv-observations": arguments.get("clinical_snv"),
                 "--clinical-sv-observations": arguments.get("clinical_sv"),
-                "--cancer-all-snv-observations": arguments.get("cancer_germline_snv"),
+                "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
+                "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
                 "--cancer-somatic-sv-observations": arguments.get("cancer_somatic_sv"),
             }
