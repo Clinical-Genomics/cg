@@ -39,7 +39,7 @@ def validate_sample_sheet(
     flow-cell-name is the flow cell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
     """
 
-    flow_cell_path: Path = Path(context.demultiplex_api.run_dir, flow_cell_name)
+    flow_cell_path: Path = Path(context.demultiplex_api.flow_cells_dir, flow_cell_name)
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
     )
@@ -72,7 +72,7 @@ def create_sheet(
 
     LOG.info(f"Creating sample sheet for flow cell {flow_cell_name}")
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
-    flow_cell_path: Path = Path(demultiplex_api.run_dir, flow_cell_name)
+    flow_cell_path: Path = Path(demultiplex_api.flow_cells_dir, flow_cell_name)
     if not flow_cell_path.exists():
         LOG.warning(f"Could not find flow cell {flow_cell_path}")
         raise click.Abort
@@ -125,7 +125,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
     information.
     """
     demux_api: DemultiplexingAPI = context.demultiplex_api
-    flow_cells: Path = demux_api.run_dir
+    flow_cells: Path = demux_api.flow_cells_dir
     for sub_dir in flow_cells.iterdir():
         if not sub_dir.is_dir():
             continue

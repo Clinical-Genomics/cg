@@ -461,7 +461,7 @@ def test_finish_flow_cell(
 
 def test_finish_all_flowcells(
     caplog,
-    demultiplexed_flow_cell_working_directory: Path,
+    tmp_demultiplexed_runs_directory: Path,
     demultiplex_context: CGConfig,
     bcl2fastq_flow_cell: FlowCellDirectoryData,
     hiseq_x_copy_complete_file: Path,
@@ -498,7 +498,7 @@ def test_post_processing_of_flow_cell(
     demux_type: str,
     demultiplex_context: CGConfig,
     flow_cell_info_map: Dict[str, FlowCellInfo],
-    demultiplexed_flow_cells_tmp_directory: Path,
+    tmp_demultiplexed_runs_directory: Path,
 ):
     """Test adding a demultiplexed flow cell to the databases with. Runs on each type of
     demultiplexing software and setting used."""
@@ -512,11 +512,11 @@ def test_post_processing_of_flow_cell(
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a directory with a flow cell demultiplexed with BCL Convert
-    demux_post_processing_api.demux_api.out_dir = demultiplexed_flow_cells_tmp_directory
+    demux_post_processing_api.demux_api.demultiplexed_runs_dir = tmp_demultiplexed_runs_directory
 
     # GIVEN that a sample sheet exists in the flow cell run directory
     path = Path(
-        demux_post_processing_api.demux_api.run_dir,
+        demux_post_processing_api.demux_api.flow_cells_dir,
         flow_cell_demultplexing_directory,
         DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
     )
@@ -561,7 +561,7 @@ def test_post_processing_of_flow_cell(
 
     # THEN a delivery file was created in the flow cell directory
     delivery_path = Path(
-        demux_post_processing_api.demux_api.out_dir,
+        demux_post_processing_api.demux_api.demultiplexed_runs_dir,
         flow_cell_demultplexing_directory,
         DemultiplexingDirsAndFiles.DELIVERY,
     )
@@ -570,7 +570,9 @@ def test_post_processing_of_flow_cell(
 
 
 def test_get_all_demultiplexed_flow_cell_out_dirs(
-    demultiplex_context: CGConfig, demultiplexed_flow_cell_finished_working_directory: Path
+    demultiplex_context: CGConfig,
+    tmp_demultiplexed_runs_directory: Path,
+    tmp_demultiplexed_runs_bcl2fastq_directory: Path,
 ):
     """Test returning all flow cell directories from the demultiplexing run directory."""
     # GIVEN a demultiplex flow cell finished output directory that exist
@@ -582,4 +584,4 @@ def test_get_all_demultiplexed_flow_cell_out_dirs(
     demultiplex_flow_cell_dirs: List[Path] = demux_api.get_all_demultiplexed_flow_cell_dirs()
 
     # THEN the demultiplexed flow cells run directories should be returned
-    assert demultiplex_flow_cell_dirs[0] == demultiplexed_flow_cell_finished_working_directory
+    assert tmp_demultiplexed_runs_bcl2fastq_directory in demultiplex_flow_cell_dirs
