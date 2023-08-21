@@ -9,6 +9,7 @@ from sqlalchemy.orm import Query
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import CgError
 from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -214,7 +215,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         self, sample_sheet_housekeeper_path: Path, sample_sheet_workdir_path: Path
     ) -> None:
         """
-        Reads the fluffy samplesheet *.csv file as found in Housekeeper.
+        Reads the fluffy sample sheet *.csv file as found in Housekeeper.
         Edits column 'SampleName' to include customer name for sample.
         Edits column 'Sample_Project or Project' to include customer sample starlims id.
         Adds columns Library_nM, SequencingDate, Exclude and populates with orderform values
@@ -255,7 +256,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Returns the path to original samplesheet file that is added to Housekeeper
         """
         sample_sheet_query: list = self.housekeeper_api.files(
-            bundle=flowcell_name, tags=["samplesheet"]
+            bundle=flowcell_name, tags=[SequencingFileTag.SAMPLE_SHEET]
         ).all()
         if not sample_sheet_query:
             LOG.error(
