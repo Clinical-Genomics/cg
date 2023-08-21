@@ -2,7 +2,7 @@
 import logging
 from typing import Optional
 
-from pydantic.v1 import BaseModel, FilePath
+from pydantic import BaseModel, FilePath
 
 LOG = logging.getLogger(__name__)
 

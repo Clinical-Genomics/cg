@@ -2,7 +2,7 @@
 from pathlib import Path
 
 import pytest
-from pydantic.v1 import ValidationError
+from pydantic import ValidationError
 
 from cg.models.observations.input_files import (
     MipDNAObservationsInputFiles,
