@@ -194,13 +194,13 @@ def test_copy_sample_sheet(demultiplex_context: CGConfig):
 
     # GIVEN a sample sheet in the run directory
     sample_sheet_path = Path(
-        demux_post_processing_api.demux_api.run_dir,
+        demux_post_processing_api.demux_api.flow_cells_dir,
     )
     sample_sheet_path.mkdir(parents=True, exist_ok=True)
     Path(sample_sheet_path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME).touch()
 
     # GIVEN a sample sheet target path
-    target_sample_sheet_path = Path(demux_post_processing_api.demux_api.out_dir)
+    target_sample_sheet_path = Path(demux_post_processing_api.demux_api.demultiplexed_runs_dir)
 
     # WHEN copying the sample sheet
     copy_sample_sheet(

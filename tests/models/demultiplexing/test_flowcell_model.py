@@ -115,12 +115,12 @@ def test_get_sample_model_bcl2fastq(bcl2fastq_flow_cell: FlowCellDirectoryData):
     assert sample_model == FlowCellSampleNovaSeq6000Bcl2Fastq
 
 
-def test_get_sample_model_dragen(dragen_flow_cell: FlowCellDirectoryData):
+def test_get_sample_model_dragen(bcl_convert_flow_cell: FlowCellDirectoryData):
     """Test that the sample model of a dragen flow cell is FlowCellSampleNovaSeq6000Dragen."""
     # GIVEN a dragen flow cell
 
     # WHEN getting the sample model
-    sample_model: Type[FlowCellSampleNovaSeq6000Dragen] = dragen_flow_cell.sample_type
+    sample_model: Type[FlowCellSampleNovaSeq6000Dragen] = bcl_convert_flow_cell.sample_type
 
     # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
     assert sample_model == FlowCellSampleNovaSeq6000Dragen

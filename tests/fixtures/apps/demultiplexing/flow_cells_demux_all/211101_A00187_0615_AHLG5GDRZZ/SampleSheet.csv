@@ -1,0 +1,6 @@
+[Data]
+FCID,Lane,Sample_ID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,Sample_Project
+HLG5GDRXY,1,ACC8898A46,hg19,CAGAAGAT,CAATGTAC,anonymous_1,N,R1,script,843440
+HLG5GDRXY,1,ACC8898A44,hg19,TCACCAAT,GCGCCGTG,anonymous_2,N,R1,script,843440
+HLG5GDRXY,2,ACC8898A46,hg19,CAGAAGAT,CAATGTAC,anonymous_1,N,R1,script,843440
+HLG5GDRXY,2,ACC8898A44,hg19,TCACCAAT,GCGCCGTG,anonymous_2,N,R1,script,843440
