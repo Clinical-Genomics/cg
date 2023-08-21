@@ -22,7 +22,7 @@ def flow_cell_name() -> str:
 
 @pytest.fixture
 def flow_cell_directory(tmp_path: Path, flow_cell_name: str) -> Path:
-    return tmp_path / flow_cell_name
+    return Path(tmp_path, flow_cell_name)
 
 
 @pytest.fixture

@@ -60,7 +60,7 @@ def mark_flow_cell_as_queued_for_post_processing(flow_cell: Path) -> None:
 
 
 def hardlink_tree(src: Path, dst: Path) -> None:
-    shutil.copytree(src, dst, copy_function=os.link)
+    shutil.copytree(src=src, dst=dst, copy_function=os.link)
 
 
 def is_ready_for_post_processing(flow_cell: Path, demultiplexed_runs: Path) -> bool:
