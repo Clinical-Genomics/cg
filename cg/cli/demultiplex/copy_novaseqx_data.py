@@ -28,7 +28,7 @@ def get_latest_analysis_directory(flow_cell_dir: Path) -> Optional[Path]:
 
     if not analysis_path.exists():
         return None
-    analysis_version_paths: List[Paths] = get_sorted_analysis_versions(analysis_path)
+    analysis_versions: List[Path] = get_sorted_analysis_versions(analysis_path)
     return analysis_versions[0] if analysis_versions else None
 
 
