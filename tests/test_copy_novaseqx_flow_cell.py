@@ -21,7 +21,7 @@ def novaseqx_flow_cell_dir_name() -> str:
 
 
 @pytest.fixture
-def flow_cell_directory(tmp_path: Path, novaseqx_flow_cell_dir_name: str) -> Path:
+def novaseqx_flow_cell_directory(tmp_path: Path, novaseqx_flow_cell_dir_name: str) -> Path:
     return Path(tmp_path, novaseqx_flow_cell_dir_name)
 
 
@@ -32,24 +32,26 @@ def demultiplexed_runs(tmp_path: Path) -> Path:
     return demultiplexed_runs
 
 
-def add_novaseqx_analysis_data(flow_cell_directory: Path, analysis_version: str):
-    analysis_path = Path(flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, analysis_version)
-    analysis_path.mkdir(parents=True)
-    analysis_path.joinpath(DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
-    data_path = analysis_path.joinpath(DemultiplexingDirsAndFiles.DATA)
-    data_path.mkdir()
-    data_path.joinpath(DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED).touch()
-    return analysis_path
+def add_novaseqx_analysis_data(novaseqx_flow_cell_directory: Path, analysis_version: str):
+    analysis = Path(
+        novaseqx_flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, analysis_version
+    )
+    analysis.mkdir(parents=True)
+    analysis.joinpath(DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
+    data = analysis.joinpath(DemultiplexingDirsAndFiles.DATA)
+    data.mkdir()
+    data.joinpath(DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED).touch()
+    return analysis
 
 
 @pytest.fixture
 def novaseqx_flow_cell_dir(
-    flow_cell_directory: Path, novaseqx_latest_analysis_version: str
+    novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
 ) -> Path:
-    add_novaseqx_analysis_data(flow_cell_directory, "0")
-    add_novaseqx_analysis_data(flow_cell_directory, "1")
-    add_novaseqx_analysis_data(flow_cell_directory, novaseqx_latest_analysis_version)
-    return flow_cell_directory
+    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "0")
+    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "1")
+    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, novaseqx_latest_analysis_version)
+    return novaseqx_flow_cell_directory
 
 
 @pytest.fixture
@@ -60,18 +62,20 @@ def post_processed_novaseqx_flow_cell(novaseqx_flow_cell_dir: Path) -> Path:
 
 @pytest.fixture
 def novaseqx_flow_cell_analysis_incomplete(
-    flow_cell_directory: Path, novaseqx_latest_analysis_version: str
+    novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
 ) -> Path:
     Path(
-        flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, novaseqx_latest_analysis_version
+        novaseqx_flow_cell_directory,
+        DemultiplexingDirsAndFiles.ANALYSIS,
+        novaseqx_latest_analysis_version,
     ).mkdir(parents=True)
     Path(
-        flow_cell_directory,
+        novaseqx_flow_cell_directory,
         DemultiplexingDirsAndFiles.ANALYSIS,
         novaseqx_latest_analysis_version,
         DemultiplexingDirsAndFiles.COPY_COMPLETE,
     ).touch()
-    return flow_cell_directory
+    return novaseqx_flow_cell_directory
 
 
 @pytest.fixture
