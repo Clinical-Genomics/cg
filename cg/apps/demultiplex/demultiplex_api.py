@@ -31,8 +31,8 @@ class DemultiplexingAPI:
         self.slurm_api = SlurmAPI()
         self.slurm_account: str = config["demultiplex"]["slurm"]["account"]
         self.mail: str = config["demultiplex"]["slurm"]["mail_user"]
-        self.run_dir: Path = Path(config["demultiplex"]["run_dir"])
-        self.out_dir: Path = out_dir or Path(config["demultiplex"]["out_dir"])
+        self.flow_cells_dir: Path = Path(config["flow_cells_dir"])
+        self.demultiplexed_runs_dir: Path = out_dir or Path(config["demultiplexed_flow_cells_dir"])
         self.environment: str = config.get("environment", "stage")
         LOG.info(f"Set environment to {self.environment}")
         self.dry_run: bool = False
@@ -108,7 +108,7 @@ class DemultiplexingAPI:
 
     def flow_cell_out_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Create the path to where the demuliplexed result should be produced."""
-        return Path(self.out_dir, flow_cell.path.name)
+        return Path(self.demultiplexed_runs_dir, flow_cell.path.name)
 
     def unaligned_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Create the path to where the demuliplexed result should be produced."""

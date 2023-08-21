@@ -30,9 +30,9 @@ class DeleteDemuxAPI:
         self.stats_api: StatsAPI = config.cg_stats_api
         self.samples_on_flow_cell: List[Sample] = []
         self.demultiplexing_out_path: Path = self.get_path_for_flow_cell(
-            base_path=self.demux_api.out_dir
+            base_path=self.demux_api.demultiplexed_runs_dir
         )
-        self.run_path: Path = self.get_path_for_flow_cell(base_path=self.demux_api.run_dir)
+        self.run_path: Path = self.get_path_for_flow_cell(base_path=self.demux_api.flow_cells_dir)
         LOG.debug("DeleteDemuxAPI: API initiated")
 
     def get_path_for_flow_cell(

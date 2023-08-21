@@ -10,14 +10,14 @@ def test_add_flowcell_cmd(
     cli_runner: CliRunner,
     bcl2fastq_flow_cell: FlowCellDirectoryData,
     demultiplex_context: CGConfig,
-    demultiplexed_flow_cell_finished_working_directory: Path,
-    demultiplex_ready_flow_cell: Path,
+    tmp_demultiplexed_runs_directory: Path,
+    tmp_flow_cell_directory_bcl2fastq: Path,
 ):
     # GIVEN a cgstats api and a demultiplex api
-    # GIVEN that there is a flowcell in the run dir
-    assert demultiplex_ready_flow_cell.exists()
-    # GIVEN that there is a demultiplexed flowcell
-    assert demultiplexed_flow_cell_finished_working_directory.exists()
+    # GIVEN that there is a flow cell in the directory
+    assert tmp_flow_cell_directory_bcl2fastq.exists()
+    # GIVEN that there is a demultiplexed flow cell
+    assert tmp_demultiplexed_runs_directory.exists()
 
     # GIVEN that the flowcell does not exist in the cgstats database
     assert not demultiplex_context.cg_stats_api.find_handler.get_flow_cell_by_name(
