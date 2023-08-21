@@ -43,7 +43,7 @@ def add_analysis_data(flow_cell_directory: Path, analysis_version: str):
 
 
 @pytest.fixture
-def novaseqx_flow_cell(flow_cell_directory: Path, latest_analysis_version: str) -> Path:
+def novaseqx_flow_cell_dir(flow_cell_directory: Path, latest_analysis_version: str) -> Path:
     add_analysis_data(flow_cell_directory, "0")
     add_analysis_data(flow_cell_directory, "1")
     add_analysis_data(flow_cell_directory, latest_analysis_version)
@@ -51,9 +51,9 @@ def novaseqx_flow_cell(flow_cell_directory: Path, latest_analysis_version: str) 
 
 
 @pytest.fixture
-def post_processed_novaseqx_flow_cell(novaseqx_flow_cell: Path) -> Path:
-    Path(novaseqx_flow_cell, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING).touch()
-    return novaseqx_flow_cell
+def post_processed_novaseqx_flow_cell(novaseqx_flow_cell_dir: Path) -> Path:
+    Path(novaseqx_flow_cell_dir, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING).touch()
+    return novaseqx_flow_cell_dir
 
 
 @pytest.fixture
@@ -77,11 +77,13 @@ def demultiplex_not_complete_novaseqx_flow_cell(tmp_file: Path) -> Path:
     return tmp_file
 
 
-def test_flow_cell_is_ready_for_post_processing(novaseqx_flow_cell: Path, demultiplexed_runs: Path):
+def test_flow_cell_is_ready_for_post_processing(
+    novaseqx_flow_cell_dir: Path, demultiplexed_runs: Path
+):
     # GIVEN a flow cell which is ready for post processing
 
     # WHEN checking if the flow cell is ready for post processing
-    ready = is_ready_for_post_processing(novaseqx_flow_cell, demultiplexed_runs)
+    ready = is_ready_for_post_processing(novaseqx_flow_cell_dir, demultiplexed_runs)
 
     # THEN the flow cell is ready
     assert ready
@@ -126,36 +128,36 @@ def test_previously_post_processed_flow_cell_is_not_ready(
 
 
 def test_previously_copied_flow_cell_is_not_ready(
-    novaseqx_flow_cell: Path, demultiplexed_runs: Path
+    novaseqx_flow_cell_dir: Path, demultiplexed_runs: Path
 ):
     # GIVEN a flow cell which already exists in demultiplexed runs
-    Path(demultiplexed_runs, novaseqx_flow_cell.name).mkdir()
+    Path(demultiplexed_runs, novaseqx_flow_cell_dir.name).mkdir()
 
     # WHEN checking if the flow cell is ready for post processing
-    ready = is_ready_for_post_processing(novaseqx_flow_cell, demultiplexed_runs)
+    ready = is_ready_for_post_processing(novaseqx_flow_cell_dir, demultiplexed_runs)
 
     # THEN the flow cell is not ready
     assert not ready
 
 
 def test_get_latest_analysis_version_path(
-    novaseqx_flow_cell: Path,
+    novaseqx_flow_cell_dir: Path,
     latest_analysis_version: str,
 ):
     # GIVEN a flow cell which is ready to be post processed
 
     # WHEN extracting the latest analysis version path
-    analysis = get_latest_analysis_directory(novaseqx_flow_cell)
+    analysis: Path = get_latest_analysis_directory(novaseqx_flow_cell_dir)
 
     # THEN the latest analysis version path is returned
     latest_analysis = Path(
-        novaseqx_flow_cell, DemultiplexingDirsAndFiles.ANALYSIS, latest_analysis_version
+        novaseqx_flow_cell_dir, DemultiplexingDirsAndFiles.ANALYSIS, latest_analysis_version
     )
     assert analysis == latest_analysis
 
 
 def test_copy_novaseqx_flow_cell(
-    demultiplexed_runs: Path, novaseqx_flow_cell: Path, flow_cell_name: str
+    demultiplexed_runs: Path, novaseqx_flow_cell_dir: Path, flow_cell_name: str
 ):
     # GIVEN a destination directory
     flow_cell_run = Path(demultiplexed_runs, flow_cell_name)
@@ -163,10 +165,10 @@ def test_copy_novaseqx_flow_cell(
     destination = Path(flow_cell_run, DemultiplexingDirsAndFiles.DATA)
 
     # WHEN copying the flow cell analysis data to demultiplexed runs
-    copy_flow_cell_analysis_data(novaseqx_flow_cell, destination)
+    copy_flow_cell_analysis_data(novaseqx_flow_cell_dir, destination)
 
     # THEN the data contains everything from the analysis folder
-    analysis = get_latest_analysis_directory(novaseqx_flow_cell)
+    analysis: Path = get_latest_analysis_directory(novaseqx_flow_cell_dir)
     analysis_data = analysis / DemultiplexingDirsAndFiles.DATA
 
     original_files = get_all_files(analysis_data)

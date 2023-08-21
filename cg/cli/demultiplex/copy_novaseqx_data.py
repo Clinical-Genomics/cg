@@ -6,11 +6,12 @@ from typing import List, Optional
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 
 
-def is_copied(analysis_directory: Path) -> bool:
+def is_demultiplexing_copied(analysis_directory: Path) -> bool:
+    """Determine whether the demultiplexing has been copied for the latest analysis for a novaseqx flow cell."""
     return Path(analysis_directory, DemultiplexingDirsAndFiles.COPY_COMPLETE).exists()
 
 
-def is_analyzed(analysis_directory: Path) -> bool:
+def is_flow_cell_demultiplexed(analysis_directory: Path) -> bool:
     return Path(
         analysis_directory,
         DemultiplexingDirsAndFiles.DATA,
@@ -18,8 +19,8 @@ def is_analyzed(analysis_directory: Path) -> bool:
     ).exists()
 
 
-def is_in_demultiplexed_runs(flow_cell: Path, demultiplexed_runs: Path) -> bool:
-    return Path(demultiplexed_runs, flow_cell.name).exists()
+def is_flow_cell_in_demultiplexed_runs(flow_cell_name: str, demultiplexed_runs: Path) -> bool:
+    return Path(demultiplexed_runs, flow_cell_name).exists()
 
 
 def get_latest_analysis_directory(flow_cell_dir: Path) -> Optional[Path]:
@@ -69,9 +70,11 @@ def is_ready_for_post_processing(flow_cell_dir: Path, demultiplexed_runs: Path) 
     if not analysis:
         return False
 
-    copy_completed = is_copied(analysis)
-    analysis_completed = is_analyzed(analysis)
-    in_demultiplexed_runs = is_in_demultiplexed_runs(flow_cell_dir, demultiplexed_runs)
+    copy_completed = is_demultiplexing_copied(analysis)
+    analysis_completed = is_flow_cell_demultiplexed(analysis)
+    in_demultiplexed_runs = is_flow_cell_in_demultiplexed_runs(
+        flow_cell_name=flow_cell_dir.name, demultiplexed_runs=demultiplexed_runs
+    )
     post_processed = is_queued_for_post_processing(flow_cell_dir)
 
     return (
