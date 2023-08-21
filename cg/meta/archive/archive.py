@@ -125,30 +125,30 @@ class SpringArchiveAPI:
                 )
                 self.set_archive_retrieval_task_ids(
                     retrieval_task_id=job_id,
-                    files=self.get_spring_files_from_samples(
+                    files=self.get_archived_files_from_samples(
                         [sample.sample for sample in filtered_samples]
                     ),
                 )
 
-    def get_spring_files_from_samples(self, samples: List[Sample]) -> List[File]:
-        """Gets all spring files in Housekeeper in the bundles corresponding to the given list of samples."""
+    def get_archived_files_from_samples(self, samples: List[Sample]) -> List[File]:
+        """Gets archived spring files from the bundles corresponding to the given list of samples."""
         files: List[File] = []
         for sample in samples:
             files.extend(
-                self.housekeeper_api.get_files_from_latest_version(
+                self.housekeeper_api.get_archived_files(
                     bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING]
-                ).all()
+                )
             )
         return files
 
     def add_housekeeper_destinations_to_samples(
         self, samples: List[Sample]
     ) -> List[SampleAndDestination]:
-        """Gets all samples which were run on the specified flowcell and clumps it with the destination in
-        Housekeeper where we want the retrieved files to be."""
+        """Gets all samples and combines it with the destination in Housekeeper where we want the
+        retrieved files to be."""
         samples_to_retrieve: List[SampleAndDestination] = []
         for sample in samples:
-            LOG.info(f"Will try to retrieve sample: {sample.internal_id}.")
+            LOG.debug(f"Will try to retrieve sample: {sample.internal_id}.")
             destination: str = self.get_destination_from_sample_internal_id(sample.internal_id)
             samples_to_retrieve.append(SampleAndDestination(sample=sample, destination=destination))
         return samples_to_retrieve
@@ -161,23 +161,6 @@ class SpringArchiveAPI:
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
         return archive_handler.retrieve_samples(samples_and_destinations)
 
-    def retrieve_sample(self, sample_internal_id: str) -> None:
-        """Retrieves all archived spring files for the given sample."""
-        sample: Sample = self.status_db.get_sample_by_internal_id(sample_internal_id)
-        archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[sample.archive_location](
-            self.data_flow_config
-        )
-        housekeeper_destination: str = self.get_destination_from_sample_internal_id(
-            sample_internal_id
-        )
-        retrieval_task_id: int = archive_handler.retrieve_samples(
-            [SampleAndDestination(sample=sample, destination=housekeeper_destination)]
-        )
-        spring_files: List[File] = self.housekeeper_api.get_archived_files(
-            bundle_name=sample_internal_id, tags=[SequencingFileTag.SPRING]
-        )
-        self.set_archive_retrieval_task_ids(retrieval_task_id=retrieval_task_id, files=spring_files)
-
     def get_destination_from_sample_internal_id(self, sample_internal_id) -> str:
         """Returns where in Housekeeper to put the retrieved spring files for the specified sample."""
         return self.housekeeper_api.get_latest_bundle_version(
@@ -189,20 +172,6 @@ class SpringArchiveAPI:
             self.housekeeper_api.set_archive_retrieval_task_id(
                 file_id=file.id, retrieval_task_id=retrieval_task_id
             )
-
-    def retrieve_spring_file(self, file_path: str):
-        """Retrieves the archived spring file."""
-        file: File = self.housekeeper_api.files(path=file_path).first()
-        sample: Sample = self.status_db.get_sample_by_internal_id(file.version.bundle.name)
-        archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[sample.archive_location](
-            self.data_flow_config
-        )
-        retrieval_task_id: int = archive_handler.retrieve_file(
-            FileAndSample(file=file, sample=sample)
-        )
-        self.housekeeper_api.set_archive_retrieval_task_id(
-            file_id=file.id, retrieval_task_id=retrieval_task_id
-        )
 
     def get_sample(self, file: File) -> Optional[Sample]:
         """Fetches the Sample corresponding to a File and logs if a Sample is not found."""

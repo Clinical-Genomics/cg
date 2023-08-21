@@ -36,7 +36,7 @@ class DataflowEndpoints(str, Enum):
     RETRIEVE_FILES = "files/retrieve"
 
 
-class MiriaFile(FileTransferData):
+class MiriaObject(FileTransferData):
     """Model for representing a singular object transfer."""
 
     _metadata = None
@@ -46,7 +46,7 @@ class MiriaFile(FileTransferData):
     @classmethod
     def from_file_and_sample(
         cls, file: File, sample: Sample, is_archiving: bool = True
-    ) -> "MiriaFile":
+    ) -> "MiriaObject":
         """Instantiates the class from a File and Sample object."""
         if is_archiving:
             return cls(destination=sample.internal_id, source=file.full_path)
@@ -55,7 +55,7 @@ class MiriaFile(FileTransferData):
     @classmethod
     def from_sample_and_destination(
         cls, sample_and_destination: SampleAndDestination
-    ) -> "MiriaFile":
+    ) -> "MiriaObject":
         """Instantiates the class from a Sample object, i.e. when we want to fetch a folder containing all spring files
         for said sample."""
         return cls(
@@ -80,7 +80,7 @@ class MiriaFile(FileTransferData):
 class TransferPayload(BaseModel):
     """Model for representing a Dataflow transfer task."""
 
-    files_to_transfer: List[MiriaFile]
+    files_to_transfer: List[MiriaObject]
     osType: str = OSTYPE
     createFolder: bool = False
 
@@ -124,7 +124,7 @@ class TransferPayload(BaseModel):
             json=self.model_dump(),
         )
         response.raise_for_status()
-        return TransferJob.model_validate_json(response.content)
+        return TransferJob.model_validate(response.json())
 
 
 class AuthPayload(BaseModel):
@@ -190,9 +190,7 @@ class DDNDataFlowClient(ArchiveHandler):
         )
         if not response.ok:
             raise DdnDataflowAuthenticationError(message=response.text)
-        response_content: AuthToken = AuthToken.model_validate_json(
-            json_data=response.content.decode()
-        )
+        response_content: AuthToken = AuthToken.model_validate(response.json())
         self.refresh_token: str = response_content.refresh
         self.auth_token: str = response_content.access
         self.token_expiration: datetime = datetime.fromtimestamp(response_content.expire)
@@ -205,7 +203,7 @@ class DDNDataFlowClient(ArchiveHandler):
             headers=self.headers,
             json=RefreshPayload(refresh=self.refresh_token).model_dump(),
         )
-        response_content: AuthToken = AuthToken.model_validate_json(response.content)
+        response_content: AuthToken = AuthToken.model_validate(response.json())
         self.auth_token: str = response_content.access
         self.token_expiration: datetime = datetime.fromtimestamp(response_content.expire)
 
@@ -220,51 +218,36 @@ class DDNDataFlowClient(ArchiveHandler):
     def archive_files(self, files_and_samples: List[FileAndSample]) -> int:
         """Archives all files provided, to their corresponding destination, as given by sources
         and destination in TransferData. Returns the job ID of the archiving task."""
-        miria_file_data: List[MiriaFile] = self.convert_into_transfer_data(
+        miria_file_data: List[MiriaObject] = self.convert_into_transfer_data(
             files_and_samples, is_archiving=True
         )
-        transfer_request: TransferPayload = self.create_transfer_request(
+        archival_request: TransferPayload = self.create_transfer_request(
             miria_file_data=miria_file_data, is_archiving_request=True
         )
-        return transfer_request.post_request(
+        return archival_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.ARCHIVE_FILES),
-        ).job_id
-
-    def retrieve_file(self, file_and_sample: FileAndSample) -> int:
-        """Retrieves a file to the Housekeeper bundle corresponding to the given sample.
-        Returns the job ID of the retrieval task."""
-        housekeeper_destination = Path(file_and_sample.file.full_path).parent.as_posix()
-        miria_file_data: MiriaFile = MiriaFile.from_sample_and_destination(
-            SampleAndDestination(destination=housekeeper_destination, sample=file_and_sample.sample)
-        )
-        transfer_request: TransferPayload = self.create_transfer_request(
-            miria_file_data=[miria_file_data], is_archiving_request=False
-        )
-        return transfer_request.post_request(
-            headers=dict(self.headers, **self.auth_header),
-            url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
         ).job_id
 
     def retrieve_samples(self, samples_and_destinations: List[SampleAndDestination]) -> int:
         """Retrieves all archived files for the provided samples and stores them in the specified location in
         HouseKeeper."""
-        miria_file_data: List[MiriaFile] = []
+        miria_file_data: List[MiriaObject] = []
         for sample_and_housekeeper_destination in samples_and_destinations:
-            miria_file: MiriaFile = MiriaFile.from_sample_and_destination(
+            miria_object: MiriaObject = MiriaObject.from_sample_and_destination(
                 sample_and_housekeeper_destination
             )
-            miria_file_data.append(miria_file)
-        transfer_request: TransferPayload = self.create_transfer_request(
+            miria_file_data.append(miria_object)
+        retrieval_request: TransferPayload = self.create_transfer_request(
             miria_file_data=miria_file_data, is_archiving_request=False
         )
-        return transfer_request.post_request(
+        return retrieval_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
         ).job_id
 
     def create_transfer_request(
-        self, miria_file_data: List[MiriaFile], is_archiving_request: bool
+        self, miria_file_data: List[MiriaObject], is_archiving_request: bool
     ) -> TransferPayload:
         """Performs the necessary curation of paths for the request to be valid, depending on if
         it is an archiving or a retrieve request.
@@ -289,10 +272,10 @@ class DDNDataFlowClient(ArchiveHandler):
 
     def convert_into_transfer_data(
         self, files_and_samples: List[FileAndSample], is_archiving: bool = True
-    ) -> List[MiriaFile]:
+    ) -> List[MiriaObject]:
         """Converts the provided files and samples to the format used for the request."""
         return [
-            MiriaFile.from_file_and_sample(
+            MiriaObject.from_file_and_sample(
                 file=file_and_sample.file, sample=file_and_sample.sample, is_archiving=is_archiving
             )
             for file_and_sample in files_and_samples

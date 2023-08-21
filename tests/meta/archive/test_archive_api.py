@@ -13,7 +13,7 @@ from cg.meta.archive.archive import (
     SpringArchiveAPI,
     filter_files_on_archive_location,
 )
-from cg.meta.archive.ddn_dataflow import AuthToken, DDNDataFlowClient, MiriaFile
+from cg.meta.archive.ddn_dataflow import AuthToken, DDNDataFlowClient, MiriaObject
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
@@ -139,7 +139,7 @@ def test_convert_into_transfer_data(
     )
 
     # THEN the returned object should be of the correct type
-    assert isinstance(transferdata[0], MiriaFile)
+    assert isinstance(transferdata[0], MiriaObject)
 
 
 def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAPI, sample_id: str):
@@ -183,7 +183,7 @@ def test_archive_all_non_archived_spring_files(
     # WHEN archiving all available files
     with mock.patch.object(
         AuthToken,
-        "model_validate_json",
+        "model_validate",
         return_value=AuthToken(
             access="test_auth_token",
             expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
@@ -220,56 +220,7 @@ def test_archive_all_non_archived_spring_files(
             assert not file.archive
 
 
-def test_retrieve_file(
-    spring_archive_api: SpringArchiveAPI,
-    caplog,
-    ok_ddn_response,
-    trimmed_local_path,
-    retrieve_request_json,
-    header_with_test_auth_token,
-):
-    """Test retrieving a SPRING file for a Miria customer."""
-    # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
-    # with the DDN customer having two samples, and the non-DDN having one sample.
-
-    # GIVEN a spring file which has not been archived
-    file: File = spring_archive_api.housekeeper_api.files(tags=[SequencingFileTag.SPRING]).first()
-
-    spring_archive_api.housekeeper_api.add_archives(
-        files=[Path(file.full_path)], archive_task_id=123
-    )
-
-    assert not file.archive.retrieval_task_id
-
-    # WHEN archiving all available files
-    with mock.patch.object(
-        AuthToken,
-        "model_validate_json",
-        return_value=AuthToken(
-            access="test_auth_token",
-            expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
-            refresh="test_refresh_token",
-        ),
-    ), mock.patch.object(
-        APIRequest,
-        "api_request_from_content",
-        return_value=ok_ddn_response,
-    ) as mock_request_submitter:
-        spring_archive_api.retrieve_spring_file(file_path=file.full_path)
-
-    # THEN the DDN archiving function should have been called with the correct destination and source.
-    mock_request_submitter.assert_called_with(
-        api_method=APIMethods.POST,
-        url="some/api/files/retrieve",
-        headers=header_with_test_auth_token,
-        json=retrieve_request_json,
-    )
-
-    # THEN the Archive entry should have a retrieval task id set
-    assert file.archive.retrieval_task_id
-
-
-def test_retrieve_sample(
+def test_retrieve_samples(
     spring_archive_api: SpringArchiveAPI,
     caplog,
     ok_ddn_response,
@@ -296,18 +247,18 @@ def test_retrieve_sample(
     # WHEN archiving all available files
     with mock.patch.object(
         AuthToken,
-        "model_validate_json",
+        "model_validate",
         return_value=AuthToken(
             access="test_auth_token",
             expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
             refresh="test_refresh_token",
         ),
-    ), mock.patch.object(MiriaFile, "trim_path", return_value=True), mock.patch.object(
+    ), mock.patch.object(MiriaObject, "trim_path", return_value=True), mock.patch.object(
         APIRequest,
         "api_request_from_content",
         return_value=ok_ddn_response,
     ) as mock_request_submitter:
-        spring_archive_api.retrieve_sample(sample_with_spring_file)
+        spring_archive_api.retrieve_samples([sample_with_spring_file])
 
     retrieve_sample_request_json = retrieve_request_json.copy()
     retrieve_sample_request_json["pathInfo"][0]["destination"] = (
