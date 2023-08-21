@@ -1,9 +1,11 @@
+import cachecontrol
 import http
 import json
 import logging
 import tempfile
 from functools import wraps
 from pathlib import Path
+import requests
 from typing import Any, Dict, List, Optional
 
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
@@ -41,11 +43,13 @@ LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
 
 
+session = requests.session()
+cached_session = cachecontrol.CacheControl(session)
+
+
 def verify_google_token(token):
-    client_id: str = current_app.config["GOOGLE_OAUTH_CLIENT_ID"]
-    return id_token.verify_oauth2_token(
-        id_token=token, request=google_requests.Request(), audience=client_id
-    )
+    request = google_requests.Request(session=cached_session)
+    return id_token.verify_oauth2_token(id_token=token, request=request)
 
 
 def is_public(route_function):
