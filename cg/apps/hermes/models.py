@@ -3,9 +3,8 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from pydantic import BaseModel, field_validator
-
 from cg.exc import CgDataError
+from pydantic import BaseModel, field_validator
 
 LOG = logging.getLogger(__name__)
 
