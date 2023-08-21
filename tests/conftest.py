@@ -10,6 +10,9 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
+from housekeeper.store.models import File, Version
+from requests import Response
+
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -40,7 +43,6 @@ from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.store import Store
-from cg.utils import Process
 from cg.store.models import (
     Bed,
     BedVersion,
@@ -51,11 +53,7 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     Flowcell,
 )
-
 from cg.utils import Process
-from housekeeper.store.models import File, Version
-from requests import Response
-
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -710,7 +708,7 @@ def fixture_madeline_output(apps_dir: Path) -> Path:
 @pytest.fixture(name="file_does_not_exist")
 def fixture_file_does_not_exist() -> Path:
     """Return a file path that does not exist."""
-    return Path("file", "does", "not", "exist")
+    return Path("file", "does", "not", "exist.txt")
 
 
 # Compression fixtures

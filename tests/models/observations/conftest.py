@@ -1,5 +1,4 @@
 """ObservationsInputFiles test fixtures."""
-
 from pathlib import Path
 
 import pytest
@@ -14,9 +13,9 @@ from cg.models.observations.input_files import (
 def fixture_observations_input_files_raw(case_id: str, filled_file: Path) -> dict:
     """Return raw observations input files for rare diseases."""
     return {
-        "snv_vcf_path": filled_file,
-        "profile_vcf_path": filled_file,
         "family_ped_path": filled_file,
+        "profile_vcf_path": filled_file,
+        "snv_vcf_path": filled_file,
         "sv_vcf_path": None,
     }
 
@@ -33,10 +32,10 @@ def fixture_observations_input_files(
 def fixture_balsamic_observations_input_files_raw(case_id: str, filled_file: Path) -> dict:
     """Return raw observations input files for cancer."""
     return {
-        "snv_vcf_path": filled_file,
         "snv_germline_vcf_path": filled_file,
+        "snv_vcf_path": filled_file,
+        "sv_germline_vcf_path": filled_file,
         "sv_vcf_path": filled_file,
-        "profile_vcf_path": filled_file,
     }
 
 
