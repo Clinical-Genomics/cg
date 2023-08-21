@@ -30,11 +30,11 @@ def add_flow_cell_cmd(context: CGConfig, flow_cell_name: str, bcl_converter: str
     """Add a flow cell to the cgstats database."""
     stats_api: StatsAPI = context.cg_stats_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
-    flow_cell_run_path: Path = Path(demultiplex_api.run_dir, flow_cell_name)
+    flow_cell_run_path: Path = Path(demultiplex_api.flow_cells_dir, flow_cell_name)
     if not flow_cell_run_path.exists():
         LOG.warning(f"Could not find flow cell path {flow_cell_run_path}")
         raise click.Abort
-    demux_results_path: Path = Path(demultiplex_api.out_dir, flow_cell_name)
+    demux_results_path: Path = Path(demultiplex_api.demultiplexed_runs_dir, flow_cell_name)
     if not demux_results_path.exists():
         LOG.warning(f"Could not find demultiplex result path {demux_results_path}")
         raise click.Abort

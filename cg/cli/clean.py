@@ -270,14 +270,14 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
     trailblazer_api: TrailblazerAPI = context.trailblazer_api
     sample_sheets_dir: str = context.clean.flow_cells.sample_sheets_dir_name
     checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
-    search: str = f"%{demux_api.out_dir}%"
+    search: str = f"%{demux_api.demultiplexed_runs_dir}%"
     fastq_files_in_housekeeper: Query = housekeeper_api.files(
         tags=[SequencingFileTag.FASTQ]
     ).filter(File.path.like(search))
     spring_files_in_housekeeper: Query = housekeeper_api.files(
         tags=[SequencingFileTag.SPRING]
     ).filter(File.path.like(search))
-    for flow_cell_dir in demux_api.out_dir.iterdir():
+    for flow_cell_dir in demux_api.demultiplexed_runs_dir.iterdir():
         flow_cell: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
             flow_cell_path=flow_cell_dir,
             status_db=status_db,
