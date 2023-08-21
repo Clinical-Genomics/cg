@@ -114,7 +114,7 @@ class HousekeeperAPI:
         self,
         *,
         bundle: str = None,
-        tags: List[str] = None,
+        tags: Set[str] = None,
         version: int = None,
         path: str = None,
     ) -> Query:
