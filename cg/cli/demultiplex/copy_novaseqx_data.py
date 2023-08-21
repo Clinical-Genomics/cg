@@ -69,12 +69,12 @@ def is_ready_for_post_processing(flow_cell_dir: Path, demultiplexed_runs: Path) 
     if not analysis:
         return False
 
-    copy_completed = is_demultiplexing_copied(analysis)
-    analysis_completed = is_flow_cell_demultiplexed(analysis)
-    in_demultiplexed_runs = is_flow_cell_in_demultiplexed_runs(
+    copy_completed: bool = is_demultiplexing_copied(analysis)
+    analysis_completed: bool = is_flow_cell_demultiplexed(analysis)
+    in_demultiplexed_runs: bool = is_flow_cell_in_demultiplexed_runs(
         flow_cell_name=flow_cell_dir.name, demultiplexed_runs=demultiplexed_runs
     )
-    post_processed = is_queued_for_post_processing(flow_cell_dir)
+    post_processed: bool = is_queued_for_post_processing(flow_cell_dir)
 
     return (
         copy_completed and analysis_completed and not in_demultiplexed_runs and not post_processed
