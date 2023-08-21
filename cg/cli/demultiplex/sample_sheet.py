@@ -11,10 +11,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import DRY_RUN, FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
-from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import FlowCellError
 from cg.io.controller import WriteFile, WriteStream
-from cg.meta.demultiplex.housekeeper_storage_functions import add_bundle_and_version_if_non_existent
+from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from pydantic.v1 import ValidationError
@@ -118,14 +117,8 @@ def create_sheet(
         file_path=flow_cell.sample_sheet_path,
     )
     LOG.info("Adding sample sheet to Housekeeper")
-    add_bundle_and_version_if_non_existent(bundle_name=flow_cell_id, hk_api=hk_api)
-    hk_api.add_and_include_file_to_latest_version(
-        bundle_name=flow_cell_id,
-        file=flow_cell.sample_sheet_path,
-        tags=[
-            SequencingFileTag.SAMPLE_SHEET,
-            flow_cell_id,
-        ],
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=flow_cell_path, flow_cell_name=flow_cell_id, hk_api=hk_api
     )
 
 
@@ -187,12 +180,6 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             file_path=flow_cell.sample_sheet_path,
         )
         LOG.info("Adding sample sheet to Housekeeper")
-        add_bundle_and_version_if_non_existent(bundle_name=flow_cell_id, hk_api=hk_api)
-        hk_api.add_and_include_file_to_latest_version(
-            bundle_name=flow_cell_id,
-            file=flow_cell.sample_sheet_path,
-            tags=[
-                SequencingFileTag.SAMPLE_SHEET,
-                flow_cell_id,
-            ],
+        add_sample_sheet_path_to_housekeeper(
+            flow_cell_directory=sub_dir, flow_cell_name=flow_cell_id, hk_api=hk_api
         )

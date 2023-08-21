@@ -161,7 +161,7 @@ def add_sample_sheet_path_to_housekeeper(
         sample_sheet_file_path: Path = get_sample_sheet_path(
             flow_cell_directory=flow_cell_directory
         )
-
+        add_bundle_and_version_if_non_existent(bundle_name=flow_cell_name, hk_api=hk_api)
         add_file_to_bundle_if_non_existent(
             file_path=sample_sheet_file_path,
             bundle_name=flow_cell_name,

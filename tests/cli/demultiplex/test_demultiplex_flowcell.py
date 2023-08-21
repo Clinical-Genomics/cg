@@ -6,11 +6,10 @@ from pathlib import Path
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell, delete_flow_cell
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.meta.demultiplex.housekeeper_storage_functions import add_bundle_and_version_if_non_existent
+from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from tests.meta.demultiplex.conftest import (
@@ -29,15 +28,15 @@ def test_demultiplex_flow_cell_dry_run(
     caplog.set_level(logging.INFO)
 
     # GIVEN that all files are present for demultiplexing
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(demultiplex_ready_flow_cell)
-    add_bundle_and_version_if_non_existent(
-        bundle_name=flow_cell.id, hk_api=demultiplex_context.housekeeper_api
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=demultiplex_ready_flow_cell
     )
-    demultiplex_context.housekeeper_api.add_and_include_file_to_latest_version(
-        bundle_name=flow_cell.id,
-        file=flow_cell.sample_sheet_path,
-        tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET],
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=demultiplex_ready_flow_cell,
+        flow_cell_name=flow_cell.id,
+        hk_api=demultiplex_context.housekeeper_api,
     )
+
     # GIVEN an out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
@@ -72,13 +71,10 @@ def test_demultiplex_flow_cell(
 
     # GIVEN that all files are present for demultiplexing
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(demultiplex_ready_flow_cell)
-    add_bundle_and_version_if_non_existent(
-        bundle_name=flow_cell.id, hk_api=demultiplex_context.housekeeper_api
-    )
-    demultiplex_context.housekeeper_api.add_and_include_file_to_latest_version(
-        bundle_name=flow_cell.id,
-        file=flow_cell.sample_sheet_path,
-        tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET],
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=demultiplex_ready_flow_cell,
+        flow_cell_name=flow_cell.id,
+        hk_api=demultiplex_context.housekeeper_api,
     )
 
     # GIVEN an out dir that does not exist
@@ -119,13 +115,10 @@ def test_demultiplex_bcl2fastq_flowcell(
 
     # GIVEN that all files are present for bcl2fastq demultiplexing
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(demultiplex_ready_flow_cell_bcl2fastq)
-    add_bundle_and_version_if_non_existent(
-        bundle_name=flow_cell.id, hk_api=demultiplex_context.housekeeper_api
-    )
-    demultiplex_context.housekeeper_api.add_and_include_file_to_latest_version(
-        bundle_name=flow_cell.id,
-        file=flow_cell.sample_sheet_path,
-        tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET],
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=demultiplex_ready_flow_cell_bcl2fastq,
+        flow_cell_name=flow_cell.id,
+        hk_api=demultiplex_context.housekeeper_api,
     )
 
     # GIVEN a out dir that does not exist
@@ -169,13 +162,10 @@ def test_demultiplex_dragen_flowcell(
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=demultiplex_ready_flow_cell_dragen, bcl_converter="dragen"
     )
-    add_bundle_and_version_if_non_existent(
-        bundle_name=flow_cell.id, hk_api=demultiplex_context.housekeeper_api
-    )
-    demultiplex_context.housekeeper_api.add_and_include_file_to_latest_version(
-        bundle_name=flow_cell.id,
-        file=flow_cell.sample_sheet_path,
-        tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET],
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=demultiplex_ready_flow_cell_dragen,
+        flow_cell_name=flow_cell.id,
+        hk_api=demultiplex_context.housekeeper_api,
     )
 
     # GIVEN an out dir that does not exist
@@ -220,13 +210,10 @@ def test_demultiplex_all_novaseq(
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=demultiplex_ready_flow_cell
     )
-    add_bundle_and_version_if_non_existent(
-        bundle_name=flow_cell.id, hk_api=demultiplex_context.housekeeper_api
-    )
-    demultiplex_context.housekeeper_api.add_and_include_file_to_latest_version(
-        bundle_name=flow_cell.id,
-        file=flow_cell.sample_sheet_path,
-        tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET],
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=demultiplex_ready_flow_cell,
+        flow_cell_name=flow_cell.id,
+        hk_api=demultiplex_context.housekeeper_api,
     )
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
     assert demux_api.run_dir == demultiplex_ready_flow_cell.parent
