@@ -80,6 +80,7 @@ def demultiplex_flow_cell(
 
     LOG.info(f"Running cg demultiplex flow cell, using {bcl_converter}")
     flow_cell_directory: Path = Path(context.demultiplex.run_dir, flow_cell_name)
+
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
     LOG.info(f"setting flow cell id to {flow_cell_name}")
