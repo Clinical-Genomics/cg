@@ -192,7 +192,7 @@ class GetJobStatusPayload(BaseModel):
     main_subjob: Optional[bool] = None
     debug: Optional[bool] = None
 
-    def post_request(self, url: str, headers: dict) -> int:
+    def post_request(self, url: str, headers: dict) -> GetJobStatusResponse:
         """Sends a request to the given url with, the given headers, and its own content as
         payload. Raises an error if the response code is not ok. Returns the job ID of the
         launched transfer task.
@@ -204,8 +204,7 @@ class GetJobStatusPayload(BaseModel):
             json=self.model_dump(),
         )
         response.raise_for_status()
-        parsed_response = TransferJob.model_validate_json(response.content)
-        return parsed_response.job_id
+        return GetJobStatusResponse.model_validate(response.json())
 
 
 class DDNDataFlowClient(ArchiveHandler):
@@ -334,7 +333,11 @@ class DDNDataFlowClient(ArchiveHandler):
         ]
 
     def is_job_done(self, job_id: int) -> bool:
-        get_job_status_response: GetJobStatusResponse = self.get_job_status(job_id)
+        get_job_status_payload = GetJobStatusPayload(job_id=job_id)
+        get_job_status_response: GetJobStatusResponse = get_job_status_payload.post_request(
+            url=urljoin(self.url, DataflowEndpoints.GET_JOB_STATUS),
+            headers=dict(self.headers, **self.auth_header),
+        )
         if get_job_status_response.description == JobDescription.COMPLETED:
             return True
         LOG.info(
@@ -342,13 +345,3 @@ class DDNDataFlowClient(ArchiveHandler):
             f"Current job description is {get_job_status_response.description}"
         )
         return False
-
-    def get_job_status(self, job_id: int) -> GetJobStatusResponse:
-        response: Response = APIRequest.api_request_from_content(
-            api_method=APIMethods.POST,
-            url=urljoin(base=self.url, url=DataflowEndpoints.GET_JOB_STATUS),
-            headers=dict(self.headers, **self.auth_header),
-            json=GetJobStatusPayload(job_id=job_id).model_dump(),
-        )
-        response.raise_for_status()
-        return GetJobStatusResponse.model_validate(response.json())
