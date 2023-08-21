@@ -72,7 +72,7 @@ class SpringArchiveAPI:
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
         return archive_handler.archive_files(files_and_samples=files)
 
-    def archive_single_archive_location(
+    def archive_to_location(
         self, files_and_samples: List[FileAndSample], archive_location: ArchiveLocations
     ) -> None:
         """Archives the subset of files which should be archived in the specified location and
@@ -99,7 +99,7 @@ class SpringArchiveAPI:
         files_and_samples: List[FileAndSample] = self.add_samples_to_files(files_to_archive)
 
         for archive_location in ArchiveLocations:
-            self.archive_single_archive_location(
+            self.archive_to_location(
                 files_and_samples=files_and_samples,
                 archive_location=archive_location,
             )
