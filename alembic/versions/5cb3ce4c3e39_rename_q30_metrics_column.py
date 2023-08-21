@@ -21,6 +21,7 @@ def upgrade():
         "sample_lane_sequencing_metrics",
         "sample_base_fraction_passing_q30",
         new_column_name="sample_base_percentage_passing_q30",
+        type_=sa.Numeric(6, 2),
     )
 
 
@@ -29,4 +30,5 @@ def downgrade():
         "sample_lane_sequencing_metrics",
         "sample_base_percentage_passing_q30",
         new_column_name="sample_base_fraction_passing_q30",
+        type_=sa.Numeric(6, 2),
     )
