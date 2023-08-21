@@ -710,7 +710,7 @@ def fixture_madeline_output(apps_dir: Path) -> Path:
 @pytest.fixture(name="file_does_not_exist")
 def fixture_file_does_not_exist() -> Path:
     """Return a file path that does not exist."""
-    return Path("file", "does", "not", "exist.txt")
+    return Path("file", "does", "not", "exist")
 
 
 # Compression fixtures
