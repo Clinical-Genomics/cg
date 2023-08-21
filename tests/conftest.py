@@ -2995,7 +2995,8 @@ def novaseqx_flow_cell_analysis_incomplete(
 @pytest.fixture
 def demultiplex_not_complete_novaseqx_flow_cell(tmp_file: Path) -> Path:
     return tmp_file
-=======
+
+
 @pytest.fixture(scope="session")
 def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
