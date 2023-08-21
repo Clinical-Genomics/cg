@@ -34,7 +34,6 @@ class DemultiplexingDirsAndFiles(StrEnum):
     FLOW_CELLS_DIRECTORY_NAME: str = "flow_cells"
 
 
-
 class RunParametersXMLNodes(StrEnum):
     """Define names of the used XML nodes in run parameters files."""
 
