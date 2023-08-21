@@ -37,7 +37,7 @@ class BackupAPI:
         status: Store,
         tar_api: TarAPI,
         pdc_api: PdcAPI,
-        root_dir: Dict[str, str],
+        flow_cells_dir: str,
         dry_run: bool = False,
     ):
         self.encryption_api = encryption_api
@@ -45,7 +45,7 @@ class BackupAPI:
         self.status: Store = status
         self.tar_api: TarAPI = tar_api
         self.pdc: PdcAPI = pdc_api
-        self.root_dir: dict = root_dir
+        self.flow_cells_dir: str = flow_cells_dir
         self.dry_run: bool = dry_run
 
     def check_processing(self) -> bool:
@@ -107,7 +107,7 @@ class BackupAPI:
     ) -> float:
         """Process a flow cell from backup. Return elapsed time."""
         start_time: float = get_start_time()
-        run_dir: Path = Path(self.root_dir[flow_cell.sequencer_type])
+        run_dir: Path = Path(self.flow_cells_dir)
         self.retrieve_archived_key(archived_key=archived_key, flow_cell=flow_cell, run_dir=run_dir)
         self.retrieve_archived_flow_cell(
             archived_flow_cell=archived_flow_cell, flow_cell=flow_cell, run_dir=run_dir
