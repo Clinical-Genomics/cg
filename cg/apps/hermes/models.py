@@ -26,7 +26,7 @@ class CGDeliverables(BaseModel):
 
     @classmethod
     @field_validator("files")
-    def remove_missing_files(cls, files: List[CGTag]):
+    def remove_missing_files(cls, files: List[CGTag]) -> List[CGTag]:
         """Validates that the files in a suggested CGDeliverables object are correct.
         I.e. if a file doesn't exist an error is raised if the file was mandatory,
         otherwise it is simply removed from the list of files."""
