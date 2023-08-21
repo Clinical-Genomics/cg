@@ -2899,3 +2899,76 @@ def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
     tmp_dir = Path(tmp_path, "tmp_run_dir")
 
     return Path(shutil.copytree(original_dir, tmp_dir))
+
+
+@pytest.fixture
+def novaseqx_latest_analysis_version() -> str:
+    return "2"
+
+
+@pytest.fixture
+def novaseqx_flow_cell_dir_name() -> str:
+    return "20230427_LH00188_0001_B223YYCLT3"
+
+
+@pytest.fixture
+def novaseqx_flow_cell_directory(tmp_path: Path, novaseqx_flow_cell_dir_name: str) -> Path:
+    return Path(tmp_path, novaseqx_flow_cell_dir_name)
+
+
+@pytest.fixture
+def demultiplexed_flow_cell_runs(tmp_path: Path) -> Path:
+    demultiplexed_runs = Path(tmp_path, "demultiplexed_runs")
+    demultiplexed_runs.mkdir()
+    return demultiplexed_runs
+
+
+def add_novaseqx_analysis_data(novaseqx_flow_cell_directory: Path, analysis_version: str):
+    analysis = Path(
+        novaseqx_flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, analysis_version
+    )
+    analysis.mkdir(parents=True)
+    analysis.joinpath(DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
+    data = analysis.joinpath(DemultiplexingDirsAndFiles.DATA)
+    data.mkdir()
+    data.joinpath(DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED).touch()
+    return analysis
+
+
+@pytest.fixture
+def novaseqx_flow_cell_dir(
+    novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
+) -> Path:
+    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "0")
+    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "1")
+    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, novaseqx_latest_analysis_version)
+    return novaseqx_flow_cell_directory
+
+
+@pytest.fixture
+def post_processed_novaseqx_flow_cell(novaseqx_flow_cell_dir: Path) -> Path:
+    Path(novaseqx_flow_cell_dir, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING).touch()
+    return novaseqx_flow_cell_dir
+
+
+@pytest.fixture
+def novaseqx_flow_cell_analysis_incomplete(
+    novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
+) -> Path:
+    Path(
+        novaseqx_flow_cell_directory,
+        DemultiplexingDirsAndFiles.ANALYSIS,
+        novaseqx_latest_analysis_version,
+    ).mkdir(parents=True)
+    Path(
+        novaseqx_flow_cell_directory,
+        DemultiplexingDirsAndFiles.ANALYSIS,
+        novaseqx_latest_analysis_version,
+        DemultiplexingDirsAndFiles.COPY_COMPLETE,
+    ).touch()
+    return novaseqx_flow_cell_directory
+
+
+@pytest.fixture
+def demultiplex_not_complete_novaseqx_flow_cell(tmp_file: Path) -> Path:
+    return tmp_file
