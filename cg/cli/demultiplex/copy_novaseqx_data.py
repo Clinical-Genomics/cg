@@ -37,8 +37,7 @@ def get_sorted_analysis_versions(analysis_path: Path) -> List[Path]:
         return int(version.name)
 
     analysis_versions = [version for version in analysis_path.iterdir() if version.is_dir()]
-    sorted_versions = sorted(analysis_versions, key=sort_by_name, reverse=True)
-    return sorted_versions
+    return sorted(analysis_versions, key=sort_by_name, reverse=True)
 
 
 def is_queued_for_post_processing(flow_cell_dir: Path) -> bool:
