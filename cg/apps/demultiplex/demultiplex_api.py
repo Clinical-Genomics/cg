@@ -36,8 +36,8 @@ class DemultiplexingAPI:
         self.hk_api = housekeeper_api
         self.slurm_account: str = config["demultiplex"]["slurm"]["account"]
         self.mail: str = config["demultiplex"]["slurm"]["mail_user"]
-        self.run_dir: Path = Path(config["demultiplex"]["run_dir"])
-        self.out_dir: Path = out_dir or Path(config["demultiplex"]["out_dir"])
+        self.flow_cells_dir: Path = Path(config["flow_cells_dir"])
+        self.demultiplexed_runs_dir: Path = out_dir or Path(config["demultiplexed_flow_cells_dir"])
         self.environment: str = config.get("environment", "stage")
         LOG.info(f"Set environment to {self.environment}")
         self.dry_run: bool = False
@@ -113,7 +113,7 @@ class DemultiplexingAPI:
 
     def flow_cell_out_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Create the path to where the demultiplexed result should be produced."""
-        return Path(self.out_dir, flow_cell.path.name)
+        return Path(self.demultiplexed_runs_dir, flow_cell.path.name)
 
     def sample_sheet_exists_in_hk(self, flow_cell: FlowCellDirectoryData) -> bool:
         """Returns the sample sheet of the flow cell in housekeeper if exists."""

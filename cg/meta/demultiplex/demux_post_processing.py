@@ -95,8 +95,12 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
-        flow_cell_out_directory: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
-        flow_cell_run_directory: Path = Path(self.demux_api.run_dir, flow_cell_directory_name)
+        flow_cell_out_directory: Path = Path(
+            self.demux_api.demultiplexed_runs_dir, flow_cell_directory_name
+        )
+        flow_cell_run_directory: Path = Path(
+            self.demux_api.flow_cells_dir, flow_cell_directory_name
+        )
 
         try:
             is_flow_cell_ready_for_postprocessing(
@@ -145,14 +149,14 @@ class DemuxPostProcessingAPI:
         store_flow_cell_data_in_housekeeper(
             flow_cell=parsed_flow_cell,
             hk_api=self.hk_api,
-            flow_cell_run_dir=self.demux_api.run_dir,
+            flow_cell_run_dir=self.demux_api.flow_cells_dir,
             store=self.status_db,
         )
 
     def get_all_demultiplexed_flow_cell_dirs(self) -> List[Path]:
         """Return all demultiplex flow cell out directories."""
         demultiplex_flow_cells: List[Path] = []
-        for flow_cell_dir in self.demux_api.out_dir.iterdir():
+        for flow_cell_dir in self.demux_api.demultiplexed_runs_dir.iterdir():
             if flow_cell_dir.is_dir():
                 LOG.debug(f"Found directory {flow_cell_dir}")
                 demultiplex_flow_cells.append(flow_cell_dir)
@@ -255,7 +259,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         except FlowCellError:
             return
         demux_results: DemuxResults = DemuxResults(
-            demux_dir=Path(self.demux_api.out_dir, flow_cell_name),
+            demux_dir=Path(self.demux_api.demultiplexed_runs_dir, flow_cell_name),
             flow_cell=flow_cell,
             bcl_converter=bcl_converter,
         )
@@ -410,7 +414,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         )
         try:
             flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-                flow_cell_path=Path(self.demux_api.run_dir, flow_cell_name),
+                flow_cell_path=Path(self.demux_api.flow_cells_dir, flow_cell_name),
                 bcl_converter=bcl_converter,
             )
         except FlowCellError:
@@ -421,7 +425,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             return
 
         demux_results: DemuxResults = DemuxResults(
-            demux_dir=Path(self.demux_api.out_dir, flow_cell_name),
+            demux_dir=Path(self.demux_api.demultiplexed_runs_dir, flow_cell_name),
             flow_cell=flow_cell,
             bcl_converter=bcl_converter,
         )

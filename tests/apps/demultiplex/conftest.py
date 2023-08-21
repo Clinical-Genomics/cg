@@ -86,12 +86,12 @@ def fixture_novaseq_bcl2fastq_sample_sheet_creator(
 
 @pytest.fixture(name="novaseq_dragen_sample_sheet_creator")
 def fixture_novaseq_dragen_sample_sheet_creator(
-    dragen_flow_cell: FlowCellDirectoryData,
+    bcl_convert_flow_cell: FlowCellDirectoryData,
     lims_novaseq_dragen_samples: List[FlowCellSampleNovaSeq6000Dragen],
 ) -> SampleSheetCreatorV1:
     """Returns a sample sheet creator for version 1 sample sheets with dragen format."""
     return SampleSheetCreatorV1(
-        flow_cell=dragen_flow_cell,
+        flow_cell=bcl_convert_flow_cell,
         lims_samples=lims_novaseq_dragen_samples,
         bcl_converter=BclConverter.DRAGEN,
     )
