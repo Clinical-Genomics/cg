@@ -100,7 +100,7 @@ def test_add_tags_if_all_exist(demultiplex_context: CGConfig):
 
 
 def test_add_fastq_files_without_sample_id(
-    demultiplex_context: CGConfig, dragen_flow_cell: FlowCellDirectoryData
+    demultiplex_context: CGConfig, bcl_convert_flow_cell: FlowCellDirectoryData
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
@@ -110,7 +110,7 @@ def test_add_fastq_files_without_sample_id(
     # WHEN add_fastq_files is called
 
     add_sample_fastq_files_to_housekeeper(
-        flow_cell=dragen_flow_cell,
+        flow_cell=bcl_convert_flow_cell,
         hk_api=demux_post_processing_api.hk_api,
         store=demux_post_processing_api.status_db,
     )
@@ -120,57 +120,59 @@ def test_add_fastq_files_without_sample_id(
 
 
 def test_add_existing_sample_sheet(
-    demultiplex_context: CGConfig, dragen_flow_cell: FlowCellDirectoryData, novaseq_6000_dir: Path
+    demultiplex_context: CGConfig,
+    bcl_convert_flow_cell: FlowCellDirectoryData,
+    tmp_flow_cells_directory: Path,
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a flow cell directory and name
-    flow_cell_directory = Path(novaseq_6000_dir, dragen_flow_cell.full_name)
+    flow_cell_directory = Path(tmp_flow_cells_directory, bcl_convert_flow_cell.full_name)
 
     # GIVEN that a flow cell bundle exists in Housekeeper
     add_bundle_and_version_if_non_existent(
-        bundle_name=dragen_flow_cell.id, hk_api=demux_post_processing_api.hk_api
+        bundle_name=bcl_convert_flow_cell.id, hk_api=demux_post_processing_api.hk_api
     )
 
     # WHEN a sample sheet is added
     add_sample_sheet_path_to_housekeeper(
         flow_cell_directory=flow_cell_directory,
-        flow_cell_name=dragen_flow_cell.id,
+        flow_cell_name=bcl_convert_flow_cell.id,
         hk_api=demux_post_processing_api.hk_api,
     )
 
     # THEN a sample sheet file was added to the bundle
-    expected_tag_names = [SequencingFileTag.SAMPLE_SHEET, dragen_flow_cell.id]
+    expected_tag_names = [SequencingFileTag.SAMPLE_SHEET, bcl_convert_flow_cell.id]
 
     files = demux_post_processing_api.hk_api.get_files(
-        bundle=dragen_flow_cell.id, tags=expected_tag_names
+        bundle=bcl_convert_flow_cell.id, tags=expected_tag_names
     ).all()
     assert len(files) == 1
 
 
 def test_add_demux_logs_to_housekeeper(
-    demultiplex_context: CGConfig, dragen_flow_cell: FlowCellDirectoryData
+    demultiplex_context: CGConfig, bcl_convert_flow_cell: FlowCellDirectoryData
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a bundle and flow cell version exists in housekeeper
     add_bundle_and_version_if_non_existent(
-        bundle_name=dragen_flow_cell.id, hk_api=demux_post_processing_api.hk_api
+        bundle_name=bcl_convert_flow_cell.id, hk_api=demux_post_processing_api.hk_api
     )
 
     # GIVEN a demux log in the run directory
     demux_log_file_paths: List[Path] = [
         Path(
-            demux_post_processing_api.demux_api.run_dir,
-            f"{dragen_flow_cell.full_name}",
-            f"{dragen_flow_cell.id}_demultiplex.stdout",
+            demux_post_processing_api.demux_api.flow_cells_dir,
+            f"{bcl_convert_flow_cell.full_name}",
+            f"{bcl_convert_flow_cell.id}_demultiplex.stdout",
         ),
         Path(
-            demux_post_processing_api.demux_api.run_dir,
-            f"{dragen_flow_cell.full_name}",
-            f"{dragen_flow_cell.id}_demultiplex.stderr",
+            demux_post_processing_api.demux_api.flow_cells_dir,
+            f"{bcl_convert_flow_cell.full_name}",
+            f"{bcl_convert_flow_cell.id}_demultiplex.stderr",
         ),
     ]
     for file_path in demux_log_file_paths:
@@ -179,15 +181,15 @@ def test_add_demux_logs_to_housekeeper(
 
     # WHEN adding the demux logs to housekeeper
     add_demux_logs_to_housekeeper(
-        flow_cell=dragen_flow_cell,
-        flow_cell_run_dir=demux_post_processing_api.demux_api.run_dir,
+        flow_cell=bcl_convert_flow_cell,
+        flow_cell_run_dir=demux_post_processing_api.demux_api.flow_cells_dir,
         hk_api=demux_post_processing_api.hk_api,
     )
 
     # THEN the demux log was added to housekeeper
     files = demux_post_processing_api.hk_api.get_files(
         tags=[SequencingFileTag.DEMUX_LOG],
-        bundle=dragen_flow_cell.id,
+        bundle=bcl_convert_flow_cell.id,
     ).all()
 
     expected_file_names: List[str] = []

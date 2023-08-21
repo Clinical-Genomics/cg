@@ -31,6 +31,8 @@ class DemultiplexingDirsAndFiles(StrEnum):
     ANALYSIS_COMPLETED: str = "Secondary_Analysis_Complete.txt"
     ANALYSIS: str = "Analysis"
     DATA: str = "Data"
+    FLOW_CELLS_DIRECTORY_NAME: str = "flow_cells"
+
 
 
 class RunParametersXMLNodes(StrEnum):

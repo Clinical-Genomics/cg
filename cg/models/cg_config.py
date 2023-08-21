@@ -40,7 +40,6 @@ class FlowCellRunDirs(Sequencers):
 
 
 class BackupConfig(BaseModel):
-    root: Sequencers
     encrypt_dir: EncryptionDirs
 
 
@@ -69,8 +68,8 @@ class HousekeeperConfig(BaseModel):
 
 
 class DemultiplexConfig(BaseModel):
-    run_dir: str  # Base path to  un demultiplexed flowcells
-    out_dir: str  # Base path to where the demultiplexed results lives
+    run_dir: str
+    out_dir: str
     slurm: SlurmConfig
 
 
@@ -170,6 +169,14 @@ class RnafusionConfig(CommonAppConfig):
 class TaxprofilerConfig(CommonAppConfig):
     root: str
     binary_path: str
+    conda_env: str
+    profile: str
+    pipeline_path: str
+    revision: str
+    conda_binary: Optional[str] = None
+    hostremoval_reference: str
+    databases: str
+    slurm: SlurmConfig
 
 
 class CGStatsConfig(BaseModel):
@@ -241,8 +248,8 @@ class CGConfig(BaseModel):
     delivery_path: str
     max_flowcells: Optional[int]
     email_base_settings: EmailBaseSettings
-    flow_cells_dir: Optional[str]
-    demultiplexed_flow_cells_dir: Optional[str]
+    flow_cells_dir: str
+    demultiplexed_flow_cells_dir: str
 
     # Base APIs that always should exist
     status_db_: Store = None
