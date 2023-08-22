@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError, HousekeeperFileMissingError
