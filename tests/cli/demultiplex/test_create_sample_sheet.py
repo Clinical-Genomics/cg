@@ -11,13 +11,14 @@ from cg.apps.demultiplex.sample_sheet.models import (
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.get_flow_cell_samples"
 
 
-def test_create_sample_sheet_no_run_parameters(
+def test_create_sample_sheet_no_run_parameters_fails(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_no_run_parameters: Path,
     sample_sheet_context: CGConfig,
@@ -25,6 +26,7 @@ def test_create_sample_sheet_no_run_parameters(
     caplog,
     mocker,
 ):
+    """Test that creating a flow cell sample sheet fails if there is no run parameters file."""
     # GIVEN a folder with a non-existing sample sheet
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=tmp_flow_cells_directory_no_run_parameters
@@ -61,15 +63,16 @@ def test_create_bcl2fastq_sample_sheet(
     lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
     mocker,
 ):
+    """Test that creating a Bcl2fastq sample sheet works."""
     # GIVEN a flowcell directory with some run parameters
-    flowcell: FlowCellDirectoryData = FlowCellDirectoryData(
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=tmp_flow_cells_directory_no_sample_sheet,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
-    assert flowcell.run_parameters_path.exists()
+    assert flow_cell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet present
-    assert not flowcell.sample_sheet_exists()
+    assert not flow_cell.sample_sheet_exists()
 
     # GIVEN flow cell samples
     mocker.patch(
@@ -89,10 +92,15 @@ def test_create_bcl2fastq_sample_sheet(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN the sample sheet was created
-    assert flowcell.sample_sheet_exists()
+    assert flow_cell.sample_sheet_exists()
 
     # THEN the sample sheet is on the correct format
-    assert flowcell.validate_sample_sheet()
+    assert flow_cell.validate_sample_sheet()
+
+    # THEN the sample sheet is in Housekeeper
+    assert sample_sheet_context.housekeeper_api.get_latest_file(
+        bundle=flow_cell.id, tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET]
+    )
 
 
 def test_create_dragen_sample_sheet(
@@ -102,6 +110,7 @@ def test_create_dragen_sample_sheet(
     lims_novaseq_bcl_convert_samples: List[FlowCellSampleNovaSeq6000Dragen],
     mocker,
 ):
+    """Test that creating a Dragen sample sheet works."""
     # GIVEN a flow cell directory with some run parameters
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         tmp_flow_cells_directory_no_sample_sheet, bcl_converter=BclConverter.DRAGEN
@@ -133,3 +142,8 @@ def test_create_dragen_sample_sheet(
 
     # THEN the sample sheet is on the correct format
     assert flow_cell.validate_sample_sheet()
+
+    # THEN the sample sheet is in Housekeeper
+    assert sample_sheet_context.housekeeper_api.get_latest_file(
+        bundle=flow_cell.id, tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET]
+    )

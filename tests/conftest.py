@@ -982,9 +982,12 @@ def fixture_unfinished_bcl2fastq_flow_cell(
 
 
 @pytest.fixture(name="sample_sheet_context")
-def fixture_sample_sheet_context(cg_context: CGConfig, lims_api: LimsAPI) -> CGConfig:
-    """Return cg context with an added lims API."""
-    cg_context.lims_api_ = lims_api
+def fixture_sample_sheet_context(
+    cg_context: CGConfig, lims_api: LimsAPI, populated_housekeeper_api: HousekeeperAPI
+) -> CGConfig:
+    """Return cg context with added Lims and Housekeeper API."""
+    cg_context.lims_api_: LimsAPI = lims_api
+    cg_context.housekeeper_api_: HousekeeperAPI = populated_housekeeper_api
     return cg_context
 
 

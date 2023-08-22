@@ -86,6 +86,13 @@ def create_sheet(
     except FlowCellError as error:
         raise click.Abort from error
     flow_cell_id: str = flow_cell.id
+    if flow_cell.sample_sheet_exists():
+        LOG.info("Sample sheet already exists in flow cell directory")
+        LOG.info("Adding sample sheet to Housekeeper")
+        add_sample_sheet_path_to_housekeeper(
+            flow_cell_directory=flow_cell_path, flow_cell_name=flow_cell_id, hk_api=hk_api
+        )
+        return
     lims_samples: List[FlowCellSample] = list(
         get_flow_cell_samples(
             lims=context.lims_api,
@@ -142,11 +149,15 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
             flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir)
         except FlowCellError:
             continue
+        flow_cell_id: str = flow_cell.id
         if flow_cell.sample_sheet_exists():
-            LOG.info("Sample sheet already exists")
+            LOG.info("Sample sheet already exists in flow cell directory")
+            LOG.info("Adding sample sheet to Housekeeper")
+            add_sample_sheet_path_to_housekeeper(
+                flow_cell_directory=sub_dir, flow_cell_name=flow_cell_id, hk_api=hk_api
+            )
             continue
         LOG.info(f"Creating sample sheet for flow cell {flow_cell.id}")
-        flow_cell_id: str = flow_cell.id
         lims_samples: List[FlowCellSample] = list(
             get_flow_cell_samples(
                 lims=context.lims_api,
