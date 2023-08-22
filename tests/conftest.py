@@ -2698,9 +2698,7 @@ def fixture_rnafusion_context(
 
 
 @pytest.fixture(name="deliverable_data")
-def fixture_deliverables_data(
-    rnafusion_dir: Path, case_id: str, rnafusion_sample_id: str
-) -> dict:
+def fixture_deliverables_data(rnafusion_dir: Path, case_id: str, rnafusion_sample_id: str) -> dict:
     return {
         "files": [
             {
@@ -2775,12 +2773,8 @@ def mock_analysis_finish(
 ) -> None:
     """Create analysis_finish file for testing."""
     Path.mkdir(Path(rnafusion_dir, case_id, "pipeline_info"), parents=True, exist_ok=True)
-    Path(rnafusion_dir, case_id, "pipeline_info", "software_versions.yml").touch(
-        exist_ok=True
-    )
-    Path(rnafusion_dir, case_id, f"{case_id}_samplesheet.csv").touch(
-        exist_ok=True
-    )
+    Path(rnafusion_dir, case_id, "pipeline_info", "software_versions.yml").touch(exist_ok=True)
+    Path(rnafusion_dir, case_id, f"{case_id}_samplesheet.csv").touch(exist_ok=True)
     Path.mkdir(
         Path(rnafusion_dir, case_id, "multiqc", "multiqc_data"),
         parents=True,
@@ -2810,9 +2804,7 @@ def mock_analysis_finish(
 def mock_config(rnafusion_dir: Path, case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
     Path.mkdir(Path(rnafusion_dir, case_id), parents=True, exist_ok=True)
-    Path(rnafusion_dir, case_id, f"{case_id}_samplesheet.csv").touch(
-        exist_ok=True
-    )
+    Path(rnafusion_dir, case_id, f"{case_id}_samplesheet.csv").touch(exist_ok=True)
 
 
 @pytest.fixture(name="expected_total_reads", scope="session")
@@ -2922,10 +2914,9 @@ def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
 def taxprofiler_config(taxprofiler_dir: Path, case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
     Path.mkdir(Path(taxprofiler_dir, case_id), parents=True, exist_ok=True)
-    Path(taxprofiler_dir, case_id, f"{case_id}_samplesheet").with_suffix(
-        FileExtensions.CSV
-    ).touch(exist_ok=True)
-
+    Path(taxprofiler_dir, case_id, f"{case_id}_samplesheet").with_suffix(FileExtensions.CSV).touch(
+        exist_ok=True
+    )
 
 
 @pytest.fixture(scope="session", name="taxprofiler_sample_id")

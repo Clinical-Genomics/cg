@@ -17,9 +17,7 @@ def test_get_sample_metadata(
     """Test Rnafusion sample metadata extraction."""
 
     # GIVEN a Rnafusion case and associated sample
-    case: Family = report_api_rnafusion.status_db.get_case_by_internal_id(
-        internal_id=case_id
-    )
+    case: Family = report_api_rnafusion.status_db.get_case_by_internal_id(internal_id=case_id)
     sample: Sample = report_api_rnafusion.status_db.get_sample_by_internal_id(
         internal_id=rnafusion_sample_id
     )
