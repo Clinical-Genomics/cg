@@ -46,7 +46,7 @@ def decrypt_flow_cell(
     encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
     status_api: Store = context.status_db
-    backup_api = BackupAPI(
+    backup_api: BackupAPI = BackupAPI(
         encryption_api=encryption_api,
         encrypt_dir=context.backup.encrypt_dir.dict(),
         status=status_api,
@@ -62,8 +62,8 @@ def decrypt_flow_cell(
 
     backup_api._process_flow_cell(
         flow_cell=flow_cell,
-        archived_key=encrypted_key_path,
-        archived_flow_cell=encrypted_dir_path,
+        archived_key=Path(encrypted_key_path),
+        archived_flow_cell=Path(encrypted_dir_path),
         already_fetched=True,
     )
 
