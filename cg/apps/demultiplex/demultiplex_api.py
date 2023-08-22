@@ -123,7 +123,7 @@ class DemultiplexingAPI:
             bundle_name=flow_cell_id, tags=[SequencingFileTag.SAMPLE_SHEET, flow_cell_id]
         )
 
-    def sample_sheet_exists_in_hk(self, flow_cell_id: str) -> bool:
+    def is_sample_sheet_in_housekeeper(self, flow_cell_id: str) -> bool:
         """Returns True if the sample sheet for the flow cell exists in Housekeeper."""
         return self.get_sample_sheet(flow_cell_id=flow_cell_id) is not None
 
@@ -168,7 +168,7 @@ class DemultiplexingAPI:
             LOG.warning(f"Could not find sample sheet in flow cell directory for {flow_cell.id}")
             demultiplexing_possible = False
 
-        if not self.sample_sheet_exists_in_hk(flow_cell_id=flow_cell.id):
+        if not self.is_sample_sheet_in_housekeeper(flow_cell_id=flow_cell.id):
             LOG.warning(f"Could not find sample sheet in Housekeeper for {flow_cell.id}")
             demultiplexing_possible = False
 

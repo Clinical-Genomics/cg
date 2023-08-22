@@ -133,8 +133,8 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
     """
     demux_api: DemultiplexingAPI = context.demultiplex_api
     hk_api: HousekeeperAPI = context.housekeeper_api
-    flow_cells: Path = demux_api.flow_cells_dir
-    for sub_dir in flow_cells.iterdir():
+    flow_cell_dir: Path = demux_api.flow_cells_dir
+    for sub_dir in flow_cell_dir.iterdir():
         if not sub_dir.is_dir():
             continue
         LOG.info(f"Found directory {sub_dir}")
