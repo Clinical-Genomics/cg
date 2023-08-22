@@ -168,7 +168,7 @@ class DemultiplexingAPI:
             LOG.warning(f"Could not find sample sheet in flow cell directory for {flow_cell.id}")
             demultiplexing_possible = False
 
-        if not self.sample_sheet_exists_in_hk(flow_cell=flow_cell):
+        if not self.sample_sheet_exists_in_hk(flow_cell_id=flow_cell.id):
             LOG.warning(f"Could not find sample sheet in Housekeeper for {flow_cell.id}")
             demultiplexing_possible = False
 
