@@ -215,7 +215,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         self, sample_sheet_housekeeper_path: Path, sample_sheet_workdir_path: Path
     ) -> None:
         """
-        Reads the fluffy sample sheet *.csv file as found in Housekeeper.
+        Reads the Fluffy sample sheet *.csv file as found in Housekeeper.
         Edits column 'SampleName' to include customer name for sample.
         Edits column 'Sample_Project or Project' to include customer sample starlims id.
         Adds columns Library_nM, SequencingDate, Exclude and populates with orderform values

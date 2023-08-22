@@ -20,6 +20,8 @@ from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch, SbatchDragen
 from cgmodels.cg.constants import Pipeline
 
+from housekeeper.store.models import File
+
 LOG = logging.getLogger(__name__)
 
 
@@ -115,14 +117,15 @@ class DemultiplexingAPI:
         """Create the path to where the demultiplexed result should be produced."""
         return Path(self.demultiplexed_runs_dir, flow_cell.path.name)
 
-    def sample_sheet_exists_in_hk(self, flow_cell: FlowCellDirectoryData) -> bool:
-        """Returns the sample sheet of the flow cell in housekeeper if exists."""
-        return (
-            self.hk_api.get_file_from_latest_version(
-                bundle_name=flow_cell.id, tags=[SequencingFileTag.SAMPLE_SHEET, flow_cell.id]
-            )
-            is not None
+    def get_sample_sheet(self, flow_cell_id: str) -> Optional[File]:
+        """Returns the sample sheet of the flow cell in Housekeeper if exists."""
+        return self.hk_api.get_file_from_latest_version(
+            bundle_name=flow_cell_id, tags=[SequencingFileTag.SAMPLE_SHEET, flow_cell_id]
         )
+
+    def sample_sheet_exists_in_hk(self, flow_cell_id: str) -> bool:
+        """Returns True if the sample sheet for the flow cell exists in Housekeeper."""
+        return self.get_sample_sheet(flow_cell_id=flow_cell_id) is not None
 
     def get_flow_cell_unaligned_dir(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Create the path to where the demultiplexed result should be produced."""
@@ -162,7 +165,7 @@ class DemultiplexingAPI:
             demultiplexing_possible = False
 
         if not flow_cell.sample_sheet_exists():
-            LOG.warning(f"Could not find sample sheet in flow cell for {flow_cell.id}")
+            LOG.warning(f"Could not find sample sheet in flow cell directory for {flow_cell.id}")
             demultiplexing_possible = False
 
         if not self.sample_sheet_exists_in_hk(flow_cell=flow_cell):

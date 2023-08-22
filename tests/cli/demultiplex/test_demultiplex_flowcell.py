@@ -165,7 +165,7 @@ def test_demultiplex_all_novaseq(
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     assert demux_api.flow_cells_dir == tmp_flow_cells_demux_all_directory
 
-    # GIVEN sequenced flow cells with their sample sheet in housekeeper
+    # GIVEN sequenced flow cells with their sample sheet in Housekeeper
     for flow_cell_dir in tmp_flow_cells_demux_all_directory.iterdir():
         flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=flow_cell_dir)
         add_sample_sheet_path_to_housekeeper(
