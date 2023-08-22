@@ -117,9 +117,6 @@ def test_demultiplex_bcl2fastq_flow_cell(
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq
     )
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq
-    )
     add_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
         flow_cell_name=flow_cell.id,
