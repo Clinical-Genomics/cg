@@ -124,7 +124,7 @@ class DemultiplexingAPI:
             is not None
         )
 
-    def unaligned_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
+    def get_flow_cell_unaligned_dir(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Create the path to where the demultiplexed result should be produced."""
         return Path(
             self.flow_cell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME
@@ -224,7 +224,7 @@ class DemultiplexingAPI:
         """Start demultiplexing for a flow cell."""
         self.create_demultiplexing_started_file(flow_cell.demultiplexing_started_path)
         demux_dir: Path = self.flow_cell_out_dir_path(flow_cell=flow_cell)
-        unaligned_dir: Path = self.unaligned_dir_path(flow_cell=flow_cell)
+        unaligned_dir: Path = self.get_flow_cell_unaligned_dir(flow_cell=flow_cell)
         LOG.info(f"Demultiplexing to {unaligned_dir}")
         if not self.dry_run:
             LOG.info(f"Creating demux dir {unaligned_dir}")
