@@ -123,10 +123,9 @@ def create_sheet(
 
 
 @sample_sheet_commands.command(name="create-all")
-@OPTION_BCL_CONVERTER
 @DRY_RUN
 @click.pass_obj
-def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
+def create_all_sheets(context: CGConfig, dry_run: bool):
     """Command to create sample sheets for all flow cells that lack a sample sheet.
 
     Search flow cell directories for run parameters and create a sample sheets based on the
@@ -140,7 +139,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             continue
         LOG.info(f"Found directory {sub_dir}")
         try:
-            flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir, bcl_converter=bcl_converter)
+            flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir)
         except FlowCellError:
             continue
         if flow_cell.sample_sheet_exists():
@@ -161,7 +160,9 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
 
         try:
             sample_sheet_content: List[List[str]] = create_sample_sheet(
-                flow_cell=flow_cell, lims_samples=lims_samples, bcl_converter=bcl_converter
+                flow_cell=flow_cell,
+                lims_samples=lims_samples,
+                bcl_converter=flow_cell.bcl_converter,
             )
         except (FileNotFoundError, FileExistsError, ValidationError, FlowCellError):
             continue
