@@ -7,6 +7,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeqX,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.constants.demultiplexing import BclConverter
 
 
 def test_flowcell_id(bcl2fastq_flow_cell_dir: Path):
@@ -114,12 +115,12 @@ def test_get_sample_model_bcl2fastq(bcl2fastq_flow_cell: FlowCellDirectoryData):
     assert sample_model == FlowCellSampleNovaSeq6000Bcl2Fastq
 
 
-def test_get_sample_model_dragen(dragen_flow_cell: FlowCellDirectoryData):
+def test_get_sample_model_dragen(bcl_convert_flow_cell: FlowCellDirectoryData):
     """Test that the sample model of a dragen flow cell is FlowCellSampleNovaSeq6000Dragen."""
     # GIVEN a dragen flow cell
 
     # WHEN getting the sample model
-    sample_model: Type[FlowCellSampleNovaSeq6000Dragen] = dragen_flow_cell.sample_type
+    sample_model: Type[FlowCellSampleNovaSeq6000Dragen] = bcl_convert_flow_cell.sample_type
 
     # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
     assert sample_model == FlowCellSampleNovaSeq6000Dragen
@@ -134,3 +135,51 @@ def test_get_sample_model_novaseq_x(novaseq_x_flow_cell: FlowCellDirectoryData):
 
     # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
     assert sample_model == FlowCellSampleNovaSeqX
+
+
+def test_get_bcl_converter_by_sequencer(
+    flow_cell_directory_name_demultiplexed_with_bcl2fastq: str,
+):
+    """Test that the bcl converter of a bcl2fastq flow cell is bcl2fastq."""
+    # GIVEN a Bcl2Fastq flow cell directory
+
+    # WHEN instantiating a flow cell object
+    flow_cell = FlowCellDirectoryData(
+        flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl2fastq)
+    )
+
+    # THEN it sets the converter to blc2fastq
+    assert flow_cell.bcl_converter == BclConverter.BCL2FASTQ
+
+
+def test_flow_cell_directory_data_with_set_bcl_converter(
+    flow_cell_directory_name_demultiplexed_with_bcl2fastq: str, bcl_converter=BclConverter.DRAGEN
+):
+    """Test that the bcl converter is set to the specified value."""
+    # GIVEN a Bcl2Fastq flow cell directory
+
+    # GIVEN the bcl converter is set to dragen
+
+    # WHEN instantiating a flow cell object
+    flow_cell = FlowCellDirectoryData(
+        flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl2fastq),
+        bcl_converter=bcl_converter,
+    )
+
+    # THEN the bcl converter is dragen
+    assert flow_cell.bcl_converter == bcl_converter
+
+
+def test_flow_cell_directory_data_with_novaseq_flow_cell_directory(
+    flow_cell_directory_name_demultiplexed_with_bcl_convert: str,
+):
+    """Test that the bcl converter is set to dragen when prodiving a novaseq flow cell directory."""
+    # GIVEN a Bcl2Fastq flow cell directory
+
+    # WHEN instantiating a flow cell object
+    flow_cell = FlowCellDirectoryData(
+        flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl_convert),
+    )
+
+    # THEN the bcl converter is dragen
+    assert flow_cell.bcl_converter == BclConverter.DRAGEN

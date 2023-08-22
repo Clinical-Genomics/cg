@@ -97,6 +97,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             )
         ]
 
+
     def get_sample_sheet_content(self, case_id: str, strandedness: Strandedness) -> List[List[Any]]:
         """Returns content for sample sheet."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -149,7 +150,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             pipeline_parameters=self.get_pipeline_parameters(
                 case_id=case_id, genomes_base=genomes_base
             ).dict(),
-            dry_run=dry_run,
         )
         if dry_run:
             LOG.info("Dry run: Config files will not be written")

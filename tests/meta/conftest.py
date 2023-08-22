@@ -127,7 +127,7 @@ def fixture_binary_path() -> str:
 def fixture_stats_sample_data(
     sample_id: str,
     bcl2fastq_flow_cell_id: str,
-    dragen_flow_cell_id: str,
+    bcl_convert_flow_cell_id: str,
 ) -> dict:
     return {
         "samples": [
@@ -140,7 +140,7 @@ def fixture_stats_sample_data(
             {
                 "name": "ADM1136A3",
                 "index": "ACGTACAT",
-                "flowcell": dragen_flow_cell_id,
+                "flowcell": bcl_convert_flow_cell_id,
                 "type": Sequencers.NOVASEQ,
             },
         ]

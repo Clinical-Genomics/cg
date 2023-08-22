@@ -19,7 +19,7 @@ FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.get_flow_cell_sa
 
 def test_create_sample_sheet_no_run_parameters(
     cli_runner: testing.CliRunner,
-    flow_cell_working_directory_no_run_parameters: Path,
+    tmp_flow_cells_directory_no_run_parameters: Path,
     sample_sheet_context: CGConfig,
     lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
     caplog,
@@ -27,9 +27,9 @@ def test_create_sample_sheet_no_run_parameters(
 ):
     # GIVEN a folder with a non-existing sample sheet
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=flow_cell_working_directory_no_run_parameters
+        flow_cell_path=tmp_flow_cells_directory_no_run_parameters
     )
-    assert flow_cell.run_parameters_path.exists() is False
+    assert not flow_cell.run_parameters_path.exists()
 
     # GIVEN flow cell samples
     mocker.patch(
@@ -39,7 +39,7 @@ def test_create_sample_sheet_no_run_parameters(
 
     # GIVEN a demux API context
     demux_api: DemultiplexingAPI = sample_sheet_context.demultiplex_api
-    demux_api.run_dir: Path = flow_cell_working_directory_no_run_parameters.parent
+    demux_api.flow_cells_dir: Path = tmp_flow_cells_directory_no_run_parameters.parent
     sample_sheet_context.demultiplex_api_: DemultiplexingAPI = demux_api
 
     # WHEN running the create sample sheet command
@@ -56,13 +56,16 @@ def test_create_sample_sheet_no_run_parameters(
 
 def test_create_bcl2fastq_sample_sheet(
     cli_runner: testing.CliRunner,
-    flow_cell_working_directory: Path,
+    tmp_flow_cells_directory_no_sample_sheet: Path,
     sample_sheet_context: CGConfig,
     lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
-    flowcell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_working_directory)
+    flowcell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=tmp_flow_cells_directory_no_sample_sheet,
+        bcl_converter=BclConverter.BCL2FASTQ,
+    )
     assert flowcell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet present
@@ -78,7 +81,7 @@ def test_create_bcl2fastq_sample_sheet(
     # WHEN creating a sample sheet
     result = cli_runner.invoke(
         create_sheet,
-        [str(flow_cell_working_directory)],
+        [str(tmp_flow_cells_directory_no_sample_sheet), "--bcl-converter", "bcl2fastq"],
         obj=sample_sheet_context,
     )
 
@@ -94,31 +97,31 @@ def test_create_bcl2fastq_sample_sheet(
 
 def test_create_dragen_sample_sheet(
     cli_runner: testing.CliRunner,
-    flow_cell_working_directory: Path,
+    tmp_flow_cells_directory_no_sample_sheet: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_dragen_samples: List[FlowCellSampleNovaSeq6000Dragen],
+    lims_novaseq_bcl_convert_samples: List[FlowCellSampleNovaSeq6000Dragen],
     mocker,
 ):
-    # GIVEN a flowcell directory with some run parameters
-    flowcell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_working_directory, bcl_converter=BclConverter.DRAGEN
+    # GIVEN a flow cell directory with some run parameters
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        tmp_flow_cells_directory_no_sample_sheet, bcl_converter=BclConverter.DRAGEN
     )
-    assert flowcell.run_parameters_path.exists()
+    assert flow_cell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet present
-    assert not flowcell.sample_sheet_exists()
+    assert not flow_cell.sample_sheet_exists()
 
     # GIVEN flow cell samples
     mocker.patch(
         FLOW_CELL_FUNCTION_NAME,
-        return_value=lims_novaseq_dragen_samples,
+        return_value=lims_novaseq_bcl_convert_samples,
     )
-    # GIVEN a lims api that returns some samples
+    # GIVEN a LIMS API that returns samples
 
     # WHEN creating a sample sheet
     result = cli_runner.invoke(
         create_sheet,
-        [str(flow_cell_working_directory), "-b", BclConverter.DRAGEN],
+        [str(tmp_flow_cells_directory_no_sample_sheet), "-b", BclConverter.DRAGEN],
         obj=sample_sheet_context,
     )
 
@@ -126,7 +129,7 @@ def test_create_dragen_sample_sheet(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN the sample sheet was created
-    assert flowcell.sample_sheet_exists()
+    assert flow_cell.sample_sheet_exists()
 
     # THEN the sample sheet is on the correct format
-    assert flowcell.validate_sample_sheet()
+    assert flow_cell.validate_sample_sheet()

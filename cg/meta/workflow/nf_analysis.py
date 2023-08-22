@@ -168,14 +168,10 @@ class NfAnalysisAPI(AnalysisAPI):
         """Adds header to bundle content."""
         return {"files": deliverables_content}
 
-    def write_params_file(
-        self, case_id: str, pipeline_parameters: dict, dry_run: bool = False
-    ) -> None:
+    def write_params_file(self, case_id: str, pipeline_parameters: dict) -> None:
         """Write params-file for analysis."""
         LOG.info("Generating parameters file")
         LOG.info(pipeline_parameters)
-        if dry_run:
-            return
         write_yaml_nextflow_style(
             content=pipeline_parameters,
             file_path=self.get_params_file_path(case_id=case_id),
