@@ -10,13 +10,13 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 
 
 def test_flow_cell_is_ready_for_post_processing(
-    novaseqx_flow_cell_dir: Path, demultiplexed_flow_cell_run_directory: Path
+    novaseqx_flow_cell_dir_with_analysis_data: Path, demultiplexed_flow_cell_run_directory: Path
 ):
     # GIVEN a flow cell which is ready for post processing
 
     # WHEN checking if the flow cell is ready for post processing
     ready = is_ready_for_post_processing(
-        novaseqx_flow_cell_dir, demultiplexed_flow_cell_run_directory
+        novaseqx_flow_cell_dir_with_analysis_data, demultiplexed_flow_cell_run_directory
     )
 
     # THEN the flow cell is ready
@@ -66,14 +66,16 @@ def test_previously_post_processed_flow_cell_is_not_ready(
 
 
 def test_previously_copied_flow_cell_is_not_ready(
-    novaseqx_flow_cell_dir: Path, demultiplexed_flow_cell_run_directory: Path
+    novaseqx_flow_cell_dir_with_analysis_data: Path, demultiplexed_flow_cell_run_directory: Path
 ):
     # GIVEN a flow cell which already exists in demultiplexed runs
-    Path(demultiplexed_flow_cell_run_directory, novaseqx_flow_cell_dir.name).mkdir()
+    Path(
+        demultiplexed_flow_cell_run_directory, novaseqx_flow_cell_dir_with_analysis_data.name
+    ).mkdir()
 
     # WHEN checking if the flow cell is ready for post processing
     ready = is_ready_for_post_processing(
-        novaseqx_flow_cell_dir, demultiplexed_flow_cell_run_directory
+        novaseqx_flow_cell_dir_with_analysis_data, demultiplexed_flow_cell_run_directory
     )
 
     # THEN the flow cell is not ready
@@ -81,17 +83,17 @@ def test_previously_copied_flow_cell_is_not_ready(
 
 
 def test_get_latest_analysis_version_path(
-    novaseqx_flow_cell_dir: Path,
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
     novaseqx_latest_analysis_version: str,
 ):
     # GIVEN a flow cell which is ready to be post processed
 
     # WHEN extracting the latest analysis version path
-    analysis: Path = get_latest_analysis_directory(novaseqx_flow_cell_dir)
+    analysis: Path = get_latest_analysis_directory(novaseqx_flow_cell_dir_with_analysis_data)
 
     # THEN the latest analysis version path is returned
     latest_analysis = Path(
-        novaseqx_flow_cell_dir,
+        novaseqx_flow_cell_dir_with_analysis_data,
         DemultiplexingDirsAndFiles.ANALYSIS,
         novaseqx_latest_analysis_version,
     )
@@ -100,7 +102,7 @@ def test_get_latest_analysis_version_path(
 
 def test_copy_novaseqx_flow_cell(
     demultiplexed_flow_cell_run_directory: Path,
-    novaseqx_flow_cell_dir: Path,
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
     novaseqx_flow_cell_dir_name: str,
 ):
     # GIVEN a destination directory
@@ -109,10 +111,10 @@ def test_copy_novaseqx_flow_cell(
     destination = Path(flow_cell_run, DemultiplexingDirsAndFiles.DATA)
 
     # WHEN copying the flow cell analysis data to demultiplexed runs
-    hardlink_flow_cell_analysis_data(novaseqx_flow_cell_dir, destination)
+    hardlink_flow_cell_analysis_data(novaseqx_flow_cell_dir_with_analysis_data, destination)
 
     # THEN the data contains everything from the analysis folder
-    analysis: Path = get_latest_analysis_directory(novaseqx_flow_cell_dir)
+    analysis: Path = get_latest_analysis_directory(novaseqx_flow_cell_dir_with_analysis_data)
     analysis_data = analysis / DemultiplexingDirsAndFiles.DATA
 
     original_files = get_all_files(analysis_data)

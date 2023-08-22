@@ -32,6 +32,7 @@ class DemultiplexingDirsAndFiles(StrEnum):
     ANALYSIS: str = "Analysis"
     DATA: str = "Data"
     FLOW_CELLS_DIRECTORY_NAME: str = "flow_cells"
+    DEMULTIPLEXED_RUNS_DIRECTORY_NAME: str = "demultiplexed_runs"
 
 
 class RunParametersXMLNodes(StrEnum):
