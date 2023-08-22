@@ -29,16 +29,16 @@ def test_demultiplex_flow_cell_dry_run(
         tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq
     )
     add_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=demultiplex_ready_flow_cell,
+        flow_cell_directory=tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
         flow_cell_name=flow_cell.id,
-        hk_api=demultiplex_context.housekeeper_api,
+        hk_api=demultiplexing_context_for_demux.housekeeper_api,
     )
 
-    # GIVEN a out dir that does not exist
+    # GIVEN an out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
-    unaligned_dir: Path = demux_dir / "Unaligned"
+    unaligned_dir: Path = Path(demux_dir, "Unaligned")
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
 
@@ -71,12 +71,12 @@ def test_demultiplex_flow_cell(
         tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq
     )
     add_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=demultiplex_ready_flow_cell,
+        flow_cell_directory=tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
         flow_cell_name=flow_cell.id,
-        hk_api=demultiplex_context.housekeeper_api,
+        hk_api=demultiplexing_context_for_demux.housekeeper_api,
     )
 
-    # GIVEN a out dir that does not exist
+    # GIVEN an out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
@@ -114,16 +114,19 @@ def test_demultiplex_bcl2fastq_flow_cell(
     caplog.set_level(logging.INFO)
 
     # GIVEN that all files are present for bcl2fastq demultiplexing
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(demultiplex_ready_flow_cell_bcl2fastq)
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq
+    )
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq
     )
     add_sample_sheet_path_to_housekeeper(
-      flow_cell_directory=demultiplex_ready_flow_cell_bcl2fastq,
-      flow_cell_name=flow_cell.id,
-      hk_api=demultiplex_context.housekeeper_api,
+        flow_cell_directory=tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
+        flow_cell_name=flow_cell.id,
+        hk_api=demultiplexing_context_for_demux.housekeeper_api,
+    )
 
-    # GIVEN a out dir that does not exist
+    # GIVEN an out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
@@ -167,12 +170,12 @@ def test_demultiplex_dragen_flowcell(
         flow_cell_path=tmp_flow_cell_directory_bclconvert, bcl_converter="dragen"
     )
     add_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=demultiplex_ready_flow_cell_dragen,
+        flow_cell_directory=tmp_flow_cell_directory_bclconvert,
         flow_cell_name=flow_cell.id,
-        hk_api=demultiplex_context.housekeeper_api,
+        hk_api=demultiplexing_context_for_demux.housekeeper_api,
     )
 
-    # GIVEN a out dir that does not exist
+    # GIVEN an out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     unaligned_dir: Path = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
@@ -202,33 +205,31 @@ def test_demultiplex_dragen_flowcell(
 def test_demultiplex_all_novaseq(
     cli_runner: testing.CliRunner,
     demultiplexing_context_for_demux: CGConfig,
-    tmp_flow_cell_demux_all_directory_bclconvert: Path,
+    tmp_flow_cells_demux_all_directory: Path,
     caplog,
 ):
     """Test the demultiplex-all command on a directory with newly sequenced NovaSeq6000 flow cells."""
-
     caplog.set_level(logging.INFO)
 
-    # GIVEN a context with the path to a directory where at least one flow cell is ready for demuliplexing
-
+    # GIVEN a demultiplexing context with an API and correct structure
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_demux_all_directory_bclconvert
-    )
-    add_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=tmp_flow_cell_demux_all_directory_bclconvert,
-        flow_cell_name=flow_cell.id,
-        hk_api=demultiplex_context_for_demux.housekeeper_api,
-    )
-    demux_api: DemultiplexingAPI = demultiplex_context_for_demux.demultiplex_api
-    assert demux_api.flow_cells_dir == tmp_flow_cell_demux_all_directory_bclconvert.parent
-    assert demultiplex_context.housekeeper_api.last_version(bundle=flow_cell.id)
+    assert demux_api.flow_cells_dir == tmp_flow_cells_demux_all_directory
+
+    # GIVEN sequenced flow cells with their sample sheet in housekeeper
+    for flow_cell_dir in tmp_flow_cells_demux_all_directory.iterdir():
+        flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=flow_cell_dir)
+        add_sample_sheet_path_to_housekeeper(
+            flow_cell_directory=flow_cell_dir,
+            flow_cell_name=flow_cell.id,
+            hk_api=demultiplexing_context_for_demux.housekeeper_api,
+        )
+        assert demultiplexing_context_for_demux.housekeeper_api.last_version(bundle=flow_cell.id)
 
     # WHEN running the demultiplex all command
     result: testing.Result = cli_runner.invoke(
         demultiplex_all,
-        ["--flow-cells-directory", str(demux_api.run_dir), "--dry-run"],
-        obj=demultiplex_context,
+        ["--flow-cells-directory", str(demux_api.flow_cells_dir), "--dry-run"],
+        obj=demultiplexing_context_for_demux,
     )
 
     # THEN assert it exits without problems
