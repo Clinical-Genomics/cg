@@ -2990,7 +2990,10 @@ def post_processed_novaseqx_flow_cell(novaseqx_flow_cell_dir_with_analysis_data:
 def novaseqx_flow_cell_analysis_incomplete(
     novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
 ) -> Path:
-    """Return the path to a flow cell for which the analysis is not complete."""
+    """
+    Return the path to a flow cell for which the analysis is not complete.
+    It misses the ANALYSIS_COMPLETED file.
+    """
     Path(
         novaseqx_flow_cell_directory,
         DemultiplexingDirsAndFiles.ANALYSIS,
