@@ -78,4 +78,4 @@ class BalsamicObservationsAnalysisTag(StrEnum):
 class BalsamicLoadParameters(Enum):
     """Cancer Loqusdb load command parameters."""
 
-    QUAL_THRESHOLD: int = 10
+    QUAL_THRESHOLD: int = 0
