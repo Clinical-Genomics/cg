@@ -118,7 +118,7 @@ class DemultiplexingAPI:
         return Path(self.demultiplexed_runs_dir, flow_cell.path.name)
 
     def get_sample_sheet(self, flow_cell_id: str) -> Optional[File]:
-        """Returns the sample sheet of the flow cell in Housekeeper if exists."""
+        """Returns the sample sheet of the flow cell in Housekeeper if it exists."""
         return self.hk_api.get_file_from_latest_version(
             bundle_name=flow_cell_id, tags=[SequencingFileTag.SAMPLE_SHEET, flow_cell_id]
         )
