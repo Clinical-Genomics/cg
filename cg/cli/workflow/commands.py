@@ -73,11 +73,8 @@ def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
     """Handles cases where decompression is needed before starting analysis."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-    is_decompression_running: bool = analysis_api.resolve_decompression(
-        case_id=case_id, dry_run=dry_run
-    )
-    if is_decompression_running:
-        raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
+
+    analysis_api.resolve_decompression(case_id=case_id, dry_run=dry_run)
 
 
 @click.command("link")

@@ -18,7 +18,7 @@ from cg.cli.workflow.mip.options import (
     START_WITH_PROGRAM,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.exc import CgError, DecompressionNeededError, FlowCellsNeededError
+from cg.exc import CgError, DecompressionNeededError, FlowCellsNeededError, AnalysisNotReadyError
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
 
@@ -161,25 +161,22 @@ def start(
 
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     LOG.info(f"Starting full MIP analysis workflow for case {case_id}")
-    try:
-        analysis_api.assure_fastq_files_are_available(case_id)
-        context.invoke(link, case_id=case_id, dry_run=dry_run)
-        context.invoke(panel, case_id=case_id, dry_run=dry_run)
-        context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
-        context.invoke(
-            run,
-            case_id=case_id,
-            slurm_quality_of_service=slurm_quality_of_service,
-            email=email,
-            start_after=start_after,
-            start_with=start_with,
-            dry_run=dry_run,
-            mip_dry_run=mip_dry_run,
-            skip_evaluation=skip_evaluation,
-            use_bwa_mem=use_bwa_mem,
-        )
-    except (FlowCellsNeededError, DecompressionNeededError) as error:
-        LOG.error(error)
+    analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
+    context.invoke(link, case_id=case_id, dry_run=dry_run)
+    context.invoke(panel, case_id=case_id, dry_run=dry_run)
+    context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
+    context.invoke(
+        run,
+        case_id=case_id,
+        slurm_quality_of_service=slurm_quality_of_service,
+        email=email,
+        start_after=start_after,
+        start_with=start_with,
+        dry_run=dry_run,
+        mip_dry_run=mip_dry_run,
+        skip_evaluation=skip_evaluation,
+        use_bwa_mem=use_bwa_mem,
+    )
 
 
 @click.command("start-available")
@@ -194,6 +191,8 @@ def start_available(context: click.Context, dry_run: bool = False):
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+        except AnalysisNotReadyError as error:
+            LOG.error(error)
         except CgError as error:
             LOG.error(error)
             exit_code = EXIT_FAIL

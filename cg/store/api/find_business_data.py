@@ -466,7 +466,7 @@ class FindBusinessDataHandler(BaseHandler):
             if flow_cell.status == FlowCellStatus.REMOVED:
                 flow_cell.status = FlowCellStatus.REQUESTED
                 LOG.info(f"Setting status for {flow_cell.name} to {FlowCellStatus.REQUESTED}")
-                self.session.commit()
+        self.session.commit()
 
     def get_invoices_by_status(self, is_invoiced: bool = None) -> List[Invoice]:
         """Return invoices by invoiced status."""

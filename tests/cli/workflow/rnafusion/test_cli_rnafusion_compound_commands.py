@@ -10,6 +10,7 @@ from cg.cli.workflow.rnafusion.base import rnafusion, start, start_available, st
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
+from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
 
 def test_rnafusion_no_args(cli_runner: CliRunner, rnafusion_context: CGConfig):
@@ -33,6 +34,7 @@ def test_start(
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
+    mock_analysis_flow_cell,
 ):
     """Test to ensure all parts of start command will run successfully given ideal conditions."""
     caplog.set_level(logging.INFO)
@@ -129,6 +131,7 @@ def test_start_available(
     caplog: LogCaptureFixture,
     mocker,
     rnafusion_case_id: str,
+    mock_analysis_flow_cell,
 ):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones."""
@@ -166,7 +169,7 @@ def test_store_available(
     mock_config,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
-    Test that sore-available picks up eligible cases and does not pick up ineligible ones."""
+    Test that store-available picks up eligible cases and does not pick up ineligible ones."""
     caplog.set_level(logging.INFO)
 
     # GIVEN CASE ID of sample where read counts pass threshold

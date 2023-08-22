@@ -183,11 +183,11 @@ def setup_mocks(
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_running")
     PrepareFastqAPI.is_spring_decompression_running.return_value = is_spring_decompression_running
 
-    mocker.patch.object(PrepareFastqAPI, "check_fastq_links")
-    PrepareFastqAPI.check_fastq_links.return_value = None
+    mocker.patch.object(PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper")
+    PrepareFastqAPI.add_decompressed_fastq_files_to_housekeeper.return_value = None
 
     mocker.patch.object(MipDNAAnalysisAPI, "get_panel_bed")
     MipDNAAnalysisAPI.get_panel_bed.return_value = "a_string"
 
-    mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
+    mocker.patch.object(FindBusinessDataHandler, "are_all_flow_cells_on_disk")
     FindBusinessDataHandler.are_all_flow_cells_on_disk.return_value = True

@@ -60,8 +60,8 @@ class PrepareFastqAPI:
             for compression_object in compression_objects
         )
 
-    def check_fastq_links(self, case_id: str) -> None:
-        """Check if all FASTQ files are linked in Housekeeper."""
+    def add_decompressed_fastq_files_to_housekeeper(self, case_id: str) -> None:
+        """Adds decompressed FASTQ files to housekeeper for a case, if there are any."""
         case_obj: Family = self.store.get_case_by_internal_id(internal_id=case_id)
         for link in case_obj.links:
             sample_id = link.sample.internal_id

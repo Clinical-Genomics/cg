@@ -1,12 +1,19 @@
 import logging
 from pathlib import Path
+from unittest.mock import Mock
+
+import mock
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
+from cg.constants import FlowCellStatus
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
+
+from cg.store.api.find_business_data import FindBusinessDataHandler
+from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
 EXIT_SUCCESS = 0
 
@@ -25,16 +32,19 @@ def test_balsamic_no_args(cli_runner: CliRunner, balsamic_context: CGConfig):
     assert "help" in result.output
 
 
-def test_start(cli_runner: CliRunner, balsamic_context: CGConfig, mock_config, caplog, mocker):
+def test_start(
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+    mock_config,
+    caplog,
+    helpers,
+    mock_analysis_flow_cell,
+):
     """Test to ensure all parts of start command will run successfully given ideal conditions"""
     caplog.set_level(logging.INFO)
 
     # GIVEN case id for which we created a config file
     case_id = "balsamic_case_wgs_single"
-
-    # GIVEN decompression is not needed
-    mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression")
-    BalsamicAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=balsamic_context)

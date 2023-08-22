@@ -9,7 +9,7 @@ import click
 from cg.cli.workflow.commands import resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.constants.constants import FileFormat
-from cg.exc import CgError
+from cg.exc import CgError, AnalysisNotReadyError
 from cg.io.controller import WriteStream, WriteFile
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -189,7 +189,9 @@ def start(
 ) -> None:
     """Start whole microSALT workflow by providing case, ticket or sample id"""
     LOG.info("Starting Microsalt workflow for %s", unique_id)
-
+    if not (sample or ticket):
+        analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
+        analysis_api.prepare_fastq_files(case_id=unique_id, dry_run=dry_run)
     context.invoke(link, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
     context.invoke(config_case, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
     context.invoke(run, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
@@ -207,6 +209,8 @@ def start_available(context: click.Context, dry_run: bool = False):
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, unique_id=case_obj.internal_id, dry_run=dry_run)
+        except AnalysisNotReadyError as error:
+            LOG.error(error)
         except CgError as error:
             LOG.error(error)
             exit_code = EXIT_FAIL

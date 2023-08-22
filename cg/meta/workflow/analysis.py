@@ -13,7 +13,14 @@ from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import AnalysisType, WorkflowManager
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
-from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
+from cg.exc import (
+    BundleAlreadyAddedError,
+    CgDataError,
+    CgError,
+    FlowCellsNeededError,
+    DecompressionNeededError,
+    AnalysisNotReadyError,
+)
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
@@ -401,27 +408,18 @@ class AnalysisAPI(MetaAPI):
             self.set_statusdb_action(case_id=case_id, action="analyze")
         LOG.info("Decompression started for %s", case_id)
 
-    def resolve_decompression(self, case_id: str, dry_run: bool) -> bool:
+    def resolve_decompression(self, case_id: str, dry_run: bool) -> None:
         """
-        Handles decompression automatically for case.
-        Return True if decompression is running
+        Decompresses a case if needed and adds new fastq files to Housekeeper.
         """
         if self.prepare_fastq_api.is_spring_decompression_needed(case_id):
             self.decompress_case(case_id=case_id, dry_run=dry_run)
-            return True
+            return
 
         if self.prepare_fastq_api.is_spring_decompression_running(case_id):
-            self.set_statusdb_action(case_id=case_id, action="analyze")
-            return True
+            return
 
-        LOG.info("Linking fastq files in housekeeper for case %s", case_id)
-        self.prepare_fastq_api.check_fastq_links(case_id)
-
-        if self.prepare_fastq_api.is_spring_decompression_needed(case_id):
-            return True
-
-        LOG.info("Decompression for case %s not needed", case_id)
-        return False
+        self.prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
 
     @staticmethod
     def get_date_from_file_path(file_path: Path) -> dt.datetime.date:
@@ -473,22 +471,34 @@ class AnalysisAPI(MetaAPI):
             self.clean_analyses(case_id=case_id)
             return EXIT_SUCCESS
 
-    def _are_all_flow_cells_available(self, case_id) -> bool:
-        self.status_db.are_all_flow_cells_on_disk(case_id)
-
-    def assure_fastq_files_are_available(self, case_id) -> None:
-        pass
-
     def _is_flow_cell_check_applicable(self, case_id) -> bool:
         return not (
             self.status_db.is_case_down_sampled(case_id=case_id)
             or self.status_db.is_case_external(case_id=case_id)
         )
 
-    def ensure_flow_cells_on_disk(self, case_id: str):
-        """Check if flow cells are on disk for given case. If not, request flow cells and raise
-        FlowcellsNeededError."""
+    def ensure_flow_cells_on_disk(self, case_id: str) -> None:
+        """Check if flow cells are on disk for given case. If not, request flow cells."""
         if not self._is_flow_cell_check_applicable(case_id):
             return
         if not self.status_db.are_all_flow_cells_on_disk(case_id=case_id):
             self.status_db.request_flow_cells_for_case(case_id)
+
+    def is_case_ready_for_analysis(self, case_id: str) -> bool:
+        if not self.status_db.are_all_flow_cells_on_disk(case_id):
+            LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
+            return False
+        if self.prepare_fastq_api.is_spring_decompression_needed(
+            case_id
+        ) or self.prepare_fastq_api.is_spring_decompression_running(case_id):
+            LOG.warning(f"Case {case_id} is not ready - all files are not decompressed.")
+            return False
+        return True
+
+    def prepare_fastq_files(self, case_id: str, dry_run: bool) -> None:
+        """Retrieves or decompresses fastq files if needed, upon which an AnalysisNotReady error
+        is raised."""
+        self.ensure_flow_cells_on_disk(case_id)
+        self.resolve_decompression(case_id, dry_run=dry_run)
+        if not self.is_case_ready_for_analysis(case_id):
+            raise AnalysisNotReadyError("FASTQ file are not present for the analysis to start")
