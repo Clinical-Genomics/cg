@@ -44,6 +44,7 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
             continue
 
         if not demultiplex_api.is_demultiplexing_possible(flow_cell=flow_cell) and not dry_run:
+            LOG.warning(f"Can not start demultiplexing for flow cell {flow_cell.id}!")
             continue
 
         if not flow_cell.validate_sample_sheet():
