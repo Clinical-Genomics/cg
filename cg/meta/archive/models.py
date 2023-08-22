@@ -15,7 +15,7 @@ class FileAndSample(BaseModel):
 
 
 class SampleAndDestination(BaseModel):
-    """Contains a sample and where in Housekeeper any retrieved files should be stored."""
+    """Contains a sample and the path to the sample bundle in Housekeeper where any retrieved files should be stored."""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
     sample: Sample
