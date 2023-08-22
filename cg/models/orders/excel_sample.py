@@ -1,15 +1,16 @@
 from typing import List, Optional
-from pydantic.v1 import Field, validator
 
 from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
 from cg.models.orders.sample_base import OrderSample
+from pydantic import ConfigDict, Field, field_validator
 
 
 class ExcelSample(OrderSample):
+    model_config = ConfigDict(populate_by_name=True)
     age_at_sampling: str = Field(None, alias="UDF/age_at_sampling")
     application: str = Field(..., alias="UDF/Sequencing Analysis")
     capture_kit: str = Field(None, alias="UDF/Capture Library version")
-    cohorts: List[str] = Field(None, alias="UDF/cohorts")
+    cohorts: List[str] = Field(None, serialization_alias="UDF/cohorts")
     collection_date: str = Field(None, alias="UDF/Collection Date")
     comment: str = Field(None, alias="UDF/Comment")
     concentration: str = Field(None, alias="UDF/Concentration (nM)")
@@ -35,7 +36,7 @@ class ExcelSample(OrderSample):
     organism_other: str = Field(None, alias="UDF/Other species")
     original_lab: str = Field(None, alias="UDF/Original Lab")
     original_lab_address: str = Field(None, alias="UDF/Original Lab Address")
-    panels: List[str] = Field(None, alias="UDF/Gene List")
+    panels: List[str] = Field(None, serialization_alias="UDF/Gene List")
     pool: str = Field(None, alias="UDF/pool name")
     post_formalin_fixation_time: str = Field(None, alias="UDF/Post Formalin Fixation Time")
     pre_processing_method: str = Field(None, alias="UDF/Pre Processing Method")
@@ -61,7 +62,8 @@ class ExcelSample(OrderSample):
     well_position: str = Field(None, alias="Sample/Well Location")
     well_position_rml: str = Field(None, alias="UDF/RML well position")
 
-    @validator("data_analysis")
+    @classmethod
+    @field_validator("data_analysis")
     def validate_data_analysis(cls, value):
         data_analysis_alternatives = [
             "Balsamic",  # OF 1508
@@ -80,7 +82,8 @@ class ExcelSample(OrderSample):
             raise AttributeError(f"'{value}' is not a valid data analysis")
         return value
 
-    @validator("index_number", "volume", "quantity", "concentration", "concentration_sample")
+    @classmethod
+    @field_validator("index_number", "volume", "quantity", "concentration", "concentration_sample")
     def numeric_value(cls, value: Optional[str]):
         if not value:
             return None
@@ -89,26 +92,30 @@ class ExcelSample(OrderSample):
             return str_value
         raise AttributeError(f"Order contains non-numeric value '{value}'")
 
-    @validator("mother", "father")
+    @classmethod
+    @field_validator("mother", "father")
     def validate_parent(cls, value: str):
         if value == "0.0":
             return None
         return value
 
-    @validator("source")
+    @classmethod
+    @field_validator("source")
     def validate_source(cls, value: Optional[str]):
         if value not in SOURCE_TYPES:
             raise ValueError(f"'{value}' is not a valid source")
         return value
 
-    @validator("sex")
+    @classmethod
+    @field_validator("sex")
     def convert_sex(cls, value: Optional[str]):
         if not value:
             return None
         value = value.strip()
         return REV_SEX_MAP.get(value, "unknown")
 
-    @validator("panels", pre=True)
+    @classmethod
+    @field_validator("panels", mode="before")
     def parse_panels(cls, value):
         if not value:
             return None
@@ -117,22 +124,26 @@ class ExcelSample(OrderSample):
             separator = ":"
         return value.split(separator)
 
-    @validator("data_delivery")
+    @classmethod
+    @field_validator("data_delivery")
     def convert_data_delivery(cls, value: Optional[str]):
         return value.lower()
 
-    @validator("status", "priority")
+    @classmethod
+    @field_validator("status", "priority")
     def convert_to_lower(cls, value: Optional[str]):
         value = value.lower()
         return value
 
-    @validator("priority")
+    @classmethod
+    @field_validator("priority")
     def convert_to_priority(cls, value: Optional[str]):
         if value.lower() == "förtur":
             return "priority"
         return value
 
-    @validator("collection_date")
+    @classmethod
+    @field_validator("collection_date")
     def convert_to_date(cls, value: Optional[str]) -> Optional[str]:
         if not value:
             return None

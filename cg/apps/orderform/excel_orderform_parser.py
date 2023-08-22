@@ -1,25 +1,24 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Set
+from typing import Dict, List, Optional, Set, Tuple
 
 import openpyxl
-from openpyxl.cell.cell import Cell
-from openpyxl.workbook import Workbook
-from openpyxl.worksheet.worksheet import Worksheet
-from pydantic.v1 import parse_obj_as
-
 from cg.apps.orderform.orderform_parser import OrderformParser
 from cg.constants import DataDelivery
+from cg.constants.orderforms import ORDERFORM_VERSIONS, Orderform
 from cg.exc import OrderFormError
 from cg.models.orders.excel_sample import ExcelSample
 from cg.models.orders.order import OrderType
-
-from cg.constants.orderforms import Orderform, ORDERFORM_VERSIONS
+from openpyxl.cell.cell import Cell
+from openpyxl.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
+from pydantic import ConfigDict, TypeAdapter
 
 LOG = logging.getLogger(__name__)
 
 
 class ExcelOrderformParser(OrderformParser):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     NO_ANALYSIS: str = "no-analysis"
     NO_VALUE: str = "no_value"
     SHEET_NAMES: List[str] = ["Orderform", "orderform", "order form"]
@@ -87,8 +86,7 @@ class ExcelOrderformParser(OrderformParser):
         # skip empty rows
         if empty_row_found:
             raise OrderFormError(
-                f"Found data after empty lines. Please delete any "
-                f"non-sample data rows in between the samples"
+                "Found data after empty lines. Please delete any non-sample data rows in between the samples"
             )
 
         sample_dict = dict(zip(header_row, values))
@@ -196,7 +194,7 @@ class ExcelOrderformParser(OrderformParser):
 
         customers = {sample.customer for sample in self.samples}
         if len(customers) != 1:
-            raise OrderFormError("Invalid customer information: {}".format(customers))
+            raise OrderFormError(f"Invalid customer information: {customers}")
         return customers.pop()
 
     def parse_orderform(self, excel_path: str) -> None:
@@ -221,7 +219,10 @@ class ExcelOrderformParser(OrderformParser):
         if not raw_samples:
             raise OrderFormError("orderform doesn't contain any samples")
 
-        self.samples: List[ExcelSample] = parse_obj_as(List[ExcelSample], raw_samples)
+        ExcelSampleValidator = TypeAdapter(List[ExcelSample])
+        self.samples: List[ExcelSample] = ExcelSampleValidator.validate_python(
+            raw_samples, from_attributes=True, strict=False
+        )
         self.project_type: str = self.get_project_type(document_title)
         self.delivery_type = self.get_data_delivery()
         self.customer_id = self.get_customer_id()

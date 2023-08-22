@@ -1,8 +1,8 @@
-from typing import Optional, Any, List
+from typing import Any, List, Optional
 
 from cg.constants import DataDelivery, Pipeline
 from cg.models.orders.sample_base import OrderSample
-from pydantic.v1 import constr, validator
+from pydantic import constr, validator
 
 
 class JsonSample(OrderSample):
@@ -16,7 +16,7 @@ class JsonSample(OrderSample):
     panels: Optional[List[str]]
     quantity: Optional[str]
     synopsis: Optional[str]
-    well_position: Optional[constr(regex=r"[A-H]:[0-9]+")]
+    well_position: Optional[constr(pattern=r"[A-H]:[0-9]+")]
 
     @validator("synopsis", pre=True)
     def join_list(cls, value: Any):
