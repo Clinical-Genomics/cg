@@ -32,13 +32,13 @@ def test_start(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
 ):
     """Test to ensure all parts of start command will run successfully given ideal conditions."""
     caplog.set_level(logging.INFO)
 
     # GIVEN case id
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
 
     # GIVEN a mocked config
 
@@ -65,13 +65,13 @@ def test_store_success(
     caplog: LogCaptureFixture,
     hermes_deliverables: dict,
     mocker,
-    rnafusion_case_id: str,
+    case_id: str,
 ):
     """Test to ensure all parts of store command are run successfully given ideal conditions."""
     caplog.set_level(logging.INFO)
 
     # GIVEN case-id for which we created a config file, deliverables file, and analysis_finish file
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
 
     # Set Housekeeper to an empty real Housekeeper store
     rnafusion_context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
@@ -128,14 +128,14 @@ def test_start_available(
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
     mocker,
-    rnafusion_case_id: str,
+    case_id: str,
 ):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones."""
     caplog.set_level(logging.INFO)
 
     # GIVEN CASE ID of sample where read counts pass threshold
-    case_id_success: str = rnafusion_case_id
+    case_id_success: str = case_id
 
     # GIVEN a mocked config
 
@@ -162,7 +162,7 @@ def test_store_available(
     caplog: LogCaptureFixture,
     mocker,
     hermes_deliverables,
-    rnafusion_case_id: str,
+    case_id: str,
     mock_config,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
@@ -170,7 +170,7 @@ def test_store_available(
     caplog.set_level(logging.INFO)
 
     # GIVEN CASE ID of sample where read counts pass threshold
-    case_id_success: str = rnafusion_case_id
+    case_id_success: str = case_id
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")

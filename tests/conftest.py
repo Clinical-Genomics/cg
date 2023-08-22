@@ -2587,12 +2587,6 @@ def fixture_rnafusion_dir(tmpdir_factory, apps_dir: Path) -> str:
     return Path(rnafusion_dir).absolute().as_posix()
 
 
-@pytest.fixture(name="rnafusion_case_id")
-def fixture_rnafusion_case_id() -> str:
-    """Returns a rnafusion case id."""
-    return "rnafusion_case_enough_reads"
-
-
 @pytest.fixture(name="no_sample_case_id")
 def fixture_no_sample_case_id() -> str:
     """Returns a case id of a case with no samples."""
@@ -2668,7 +2662,7 @@ def fixture_rnafusion_context(
     trailblazer_api: MockTB,
     hermes_api: HermesApi,
     cg_dir: Path,
-    rnafusion_case_id: str,
+    case_id: str,
     rnafusion_sample_id: str,
     no_sample_case_id: str,
 ) -> CGConfig:
@@ -2684,8 +2678,8 @@ def fixture_rnafusion_context(
     # Create textbook case with enough reads
     case_enough_reads: Family = helpers.add_case(
         store=status_db,
-        internal_id=rnafusion_case_id,
-        name=rnafusion_case_id,
+        internal_id=case_id,
+        name=case_id,
         data_analysis=Pipeline.RNAFUSION,
     )
 
@@ -2705,16 +2699,16 @@ def fixture_rnafusion_context(
 
 @pytest.fixture(name="deliverable_data")
 def fixture_deliverables_data(
-    rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_sample_id: str
+    rnafusion_dir: Path, case_id: str, rnafusion_sample_id: str
 ) -> dict:
     return {
         "files": [
             {
-                "path": f"{rnafusion_dir}/{rnafusion_case_id}/multiqc/multiqc_report.html",
+                "path": f"{rnafusion_dir}/{case_id}/multiqc/multiqc_report.html",
                 "path_index": "",
                 "step": "report",
                 "tag": ["multiqc-html", "rna"],
-                "id": rnafusion_case_id,
+                "id": case_id,
                 "format": "html",
                 "mandatory": True,
             },
@@ -2723,15 +2717,15 @@ def fixture_deliverables_data(
 
 
 @pytest.fixture
-def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case_id: str) -> None:
+def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, case_id: str) -> None:
     """Create deliverable file with dummy data and files to deliver."""
     Path.mkdir(
-        Path(rnafusion_dir, rnafusion_case_id),
+        Path(rnafusion_dir, case_id),
         parents=True,
         exist_ok=True,
     )
     Path.mkdir(
-        Path(rnafusion_dir, rnafusion_case_id, "multiqc"),
+        Path(rnafusion_dir, case_id, "multiqc"),
         parents=True,
         exist_ok=True,
     )
@@ -2740,13 +2734,13 @@ def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case
     WriteFile.write_file_from_content(
         content=deliverable_data,
         file_format=FileFormat.JSON,
-        file_path=Path(rnafusion_dir, rnafusion_case_id, rnafusion_case_id + "_deliverables.yaml"),
+        file_path=Path(rnafusion_dir, case_id, case_id + "_deliverables.yaml"),
     )
 
 
 @pytest.fixture(name="hermes_deliverables")
-def fixture_hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
-    hermes_output: dict = {"pipeline": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
+def fixture_hermes_deliverables(deliverable_data: dict, case_id: str) -> dict:
+    hermes_output: dict = {"pipeline": "rnafusion", "bundle_id": case_id, "files": []}
     for file_info in deliverable_data["files"]:
         tags: List[str] = []
         if "html" in file_info["format"]:
@@ -2777,18 +2771,18 @@ def fixture_tower_id() -> int:
 
 @pytest.fixture
 def mock_analysis_finish(
-    rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_multiqc_json_metrics: dict, tower_id: int
+    rnafusion_dir: Path, case_id: str, rnafusion_multiqc_json_metrics: dict, tower_id: int
 ) -> None:
     """Create analysis_finish file for testing."""
-    Path.mkdir(Path(rnafusion_dir, rnafusion_case_id, "pipeline_info"), parents=True, exist_ok=True)
-    Path(rnafusion_dir, rnafusion_case_id, "pipeline_info", "software_versions.yml").touch(
+    Path.mkdir(Path(rnafusion_dir, case_id, "pipeline_info"), parents=True, exist_ok=True)
+    Path(rnafusion_dir, case_id, "pipeline_info", "software_versions.yml").touch(
         exist_ok=True
     )
-    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
+    Path(rnafusion_dir, case_id, f"{case_id}_samplesheet.csv").touch(
         exist_ok=True
     )
     Path.mkdir(
-        Path(rnafusion_dir, rnafusion_case_id, "multiqc", "multiqc_data"),
+        Path(rnafusion_dir, case_id, "multiqc", "multiqc_data"),
         parents=True,
         exist_ok=True,
     )
@@ -2796,27 +2790,27 @@ def mock_analysis_finish(
         content=rnafusion_multiqc_json_metrics,
         file_path=Path(
             rnafusion_dir,
-            rnafusion_case_id,
+            case_id,
             "multiqc",
             "multiqc_data",
             "multiqc_data",
         ).with_suffix(FileExtensions.JSON),
     )
     write_yaml(
-        content={rnafusion_case_id: [tower_id]},
+        content={case_id: [tower_id]},
         file_path=Path(
             rnafusion_dir,
-            rnafusion_case_id,
+            case_id,
             "tower_ids",
         ).with_suffix(FileExtensions.YAML),
     )
 
 
 @pytest.fixture
-def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
+def mock_config(rnafusion_dir: Path, case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
-    Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
-    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
+    Path.mkdir(Path(rnafusion_dir, case_id), parents=True, exist_ok=True)
+    Path(rnafusion_dir, case_id, f"{case_id}_samplesheet.csv").touch(
         exist_ok=True
     )
 
@@ -2925,18 +2919,13 @@ def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
 
 
 @pytest.fixture(scope="session")
-def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
+def taxprofiler_config(taxprofiler_dir: Path, case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
-    Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
-    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
+    Path.mkdir(Path(taxprofiler_dir, case_id), parents=True, exist_ok=True)
+    Path(taxprofiler_dir, case_id, f"{case_id}_samplesheet").with_suffix(
         FileExtensions.CSV
     ).touch(exist_ok=True)
 
-
-@pytest.fixture(scope="session", name="taxprofiler_case_id")
-def fixture_taxprofiler_case_id() -> str:
-    """Returns a taxprofiler case id."""
-    return "taxprofiler_case"
 
 
 @pytest.fixture(scope="session", name="taxprofiler_sample_id")
@@ -3003,7 +2992,7 @@ def fixture_taxprofiler_context(
     cg_context: CGConfig,
     cg_dir: Path,
     helpers: StoreHelpers,
-    taxprofiler_case_id: str,
+    case_id: str,
     taxprofiler_sample_id: str,
     trailblazer_api: MockTB,
     taxprofiler_housekeeper: HousekeeperAPI,
@@ -3015,8 +3004,8 @@ def fixture_taxprofiler_context(
     status_db: Store = cg_context.status_db
     taxprofiler_case: Family = helpers.add_case(
         store=status_db,
-        internal_id=taxprofiler_case_id,
-        name=taxprofiler_case_id,
+        internal_id=case_id,
+        name=case_id,
         data_analysis=Pipeline.TAXPROFILER,
     )
 

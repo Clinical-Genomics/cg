@@ -74,12 +74,12 @@ def test_dry_run(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
 ):
     """Test command with case_id and analysis_finish which should execute successfully."""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(report_deliver, [case_id, "--dry-run"], obj=rnafusion_context)

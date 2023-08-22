@@ -46,13 +46,13 @@ def test_with_config_use_nextflow(
     cli_runner: CliRunner,
     taxprofiler_context: CGConfig,
     caplog: LogCaptureFixture,
-    taxprofiler_case_id: str,
+    case_id: str,
     taxprofiler_config,
 ):
     """Test command with case_id and config file using nextflow."""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
-    case_id: str = taxprofiler_case_id
+    case_id: str = case_id
 
     # GIVEN a mocked config
 

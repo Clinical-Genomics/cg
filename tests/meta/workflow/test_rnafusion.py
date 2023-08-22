@@ -9,7 +9,7 @@ from cg.models.rnafusion.rnafusion import RnafusionAnalysis
 
 def test_parse_analysis(
     rnafusion_context: CGConfig,
-    rnafusion_case_id: str,
+    case_id: str,
     rnafusion_sample_id: str,
     rnafusion_multiqc_json_metrics: dict,
     rnafusion_metrics: dict,
@@ -19,7 +19,7 @@ def test_parse_analysis(
 
     # GIVEN a Rnafusion analysis API and a list of QC metrics
     analysis_api: RnafusionAnalysisAPI = rnafusion_context.meta_apis["analysis_api"]
-    qc_metrics: List[MetricsBase] = analysis_api.get_multiqc_json_metrics(case_id=rnafusion_case_id)
+    qc_metrics: List[MetricsBase] = analysis_api.get_multiqc_json_metrics(case_id=case_id)
 
     # WHEN extracting the analysis model
     analysis_model: RnafusionAnalysis = analysis_api.parse_analysis(qc_metrics_raw=qc_metrics)
@@ -29,7 +29,7 @@ def test_parse_analysis(
 
 
 def test_get_latest_metadata(
-    rnafusion_context: CGConfig, rnafusion_case_id: str, mock_analysis_finish
+    rnafusion_context: CGConfig, case_id: str, mock_analysis_finish
 ):
     """Test retrieval of Rnafusion latest metadata."""
 
@@ -37,7 +37,7 @@ def test_get_latest_metadata(
     analysis_api: RnafusionAnalysisAPI = rnafusion_context.meta_apis["analysis_api"]
 
     # WHEN collecting the latest metadata
-    latest_metadata: RnafusionAnalysis = analysis_api.get_latest_metadata(case_id=rnafusion_case_id)
+    latest_metadata: RnafusionAnalysis = analysis_api.get_latest_metadata(case_id=case_id)
 
     # THEN the latest metadata should have been parsed
     assert latest_metadata

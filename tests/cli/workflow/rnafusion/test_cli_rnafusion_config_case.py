@@ -67,12 +67,12 @@ def test_strandedness(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
 ):
     """Test command with --strandedness option."""
     caplog.set_level(logging.INFO)
     # GIVEN a VALID case_id and genome_version
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
     option_key: str = "--strandedness"
     option_values: List[str] = ["reverse", "forward", "unstranded"]
     # WHEN running with strandedness option specified
@@ -93,12 +93,12 @@ def test_wrong_strandedness(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
 ):
     """Test command with --strandedness option."""
     caplog.set_level(logging.INFO)
     # GIVEN a VALID case_id and genome_version
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
     option_key: str = "--strandedness"
     option_value: str = "unknown"
     # WHEN running with strandedness option specified
@@ -115,13 +115,13 @@ def test_params_file(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
 ):
     """Test that command generates default params_file."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a VALID case_id and genome_version
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
 
     # WHEN running config case
     result = cli_runner.invoke(config_case, [case_id], obj=rnafusion_context)
@@ -137,13 +137,13 @@ def test_reference(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
 ):
     """Test command with given reference directory."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a VALID case_id and reference dir
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
     reference_dir: str = Path("non", "default", "path", "to", "references").as_posix()
 
     # WHEN running config case

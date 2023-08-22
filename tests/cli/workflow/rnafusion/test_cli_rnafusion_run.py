@@ -65,12 +65,12 @@ def test_without_config_dry_run(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
 ):
     """Test command dry-run with case_id and no config file."""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
     # WHEN dry running with dry specified
     result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=rnafusion_context)
     # THEN command should execute successfully (dry-run)
@@ -81,12 +81,12 @@ def test_without_config(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
 ):
     """Test command with case_id and no config file."""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
     # WHEN dry running with dry specified
     result = cli_runner.invoke(run, [case_id], obj=rnafusion_context)
     # THEN command should NOT execute successfully
@@ -99,13 +99,13 @@ def test_with_config_use_nextflow(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
     mock_config,
 ):
     """Test command with case_id and config file using nextflow."""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
 
     # GIVEN a mocked config
 
@@ -128,13 +128,13 @@ def test_with_config(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
     mock_config,
 ):
     """Test command with case_id and config file using tower."""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
 
     # GIVEN a mocked config
 
@@ -154,13 +154,13 @@ def test_with_revision(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
     mock_config,
 ):
     """Test command with case_id and config file using tower and specifying a revision."""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
 
     # GIVEN a mocked config
 
@@ -180,7 +180,7 @@ def test_resume_with_id(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
     mock_config,
     tower_id,
 ):
@@ -193,7 +193,7 @@ def test_resume_with_id(
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(
-        run, [rnafusion_case_id, "--nf-tower-id", tower_id, "--dry-run"], obj=rnafusion_context
+        run, [case_id, "--nf-tower-id", tower_id, "--dry-run"], obj=rnafusion_context
     )
 
     # THEN command should execute successfully
@@ -208,7 +208,7 @@ def test_resume_without_id(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
     mock_config,
     mock_analysis_finish,
 ):
@@ -221,7 +221,7 @@ def test_resume_without_id(
     # GIVEN a mocked config
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [rnafusion_case_id, "--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=rnafusion_context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -235,7 +235,7 @@ def test_resume_without_id_error(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
     mock_config,
 ):
     """Test resume command without providing NF-Tower ID and without existing Trailblazer Tower config file."""
@@ -246,7 +246,7 @@ def test_resume_without_id_error(
     # GIVEN a mocked config
 
     # WHEN dry running with dry specified
-    cli_runner.invoke(run, [rnafusion_case_id, "--dry-run"], obj=rnafusion_context)
+    cli_runner.invoke(run, [case_id, "--dry-run"], obj=rnafusion_context)
 
     # THEN command should raise error
     assert "Could not resume analysis: No NF-Tower ID found for case" in caplog.text

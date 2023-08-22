@@ -62,12 +62,12 @@ def test_case_not_finished(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
 ):
     """Test command with case_id and config file but no analysis_finish."""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
 
     # WHEN running
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
@@ -85,7 +85,7 @@ def test_case_with_malformed_deliverables_file(
     rnafusion_context: CGConfig,
     malformed_hermes_deliverables: dict,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
 ):
     """Test command with case_id and config file and analysis_finish but malformed deliverables output."""
     caplog.set_level(logging.WARNING)
@@ -105,7 +105,7 @@ def test_case_with_malformed_deliverables_file(
         )
 
         # GIVEN case-id
-        case_id: str = rnafusion_case_id
+        case_id: str = case_id
 
         # WHEN running
         result = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
@@ -125,11 +125,11 @@ def test_valid_case(
     rnafusion_context: CGConfig,
     mock_deliverable,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN case-id
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
 
     # Make sure nothing is currently stored in Housekeeper
 
@@ -159,11 +159,11 @@ def test_valid_case_already_added(
     real_housekeeper_api: HousekeeperAPI,
     mock_deliverable,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN case-id
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
 
     # Make sure nothing is currently stored in Housekeeper
     rnafusion_context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
@@ -197,7 +197,7 @@ def test_dry_run(
     mock_deliverable: None,
     caplog: LogCaptureFixture,
     mocker: MockFixture,
-    rnafusion_case_id: str,
+    case_id: str,
     hermes_deliverables: dict,
     real_housekeeper_api: HousekeeperAPI,
 ):
@@ -205,7 +205,7 @@ def test_dry_run(
     caplog.set_level(logging.INFO)
 
     # GIVEN case-id for which we created a config file, deliverables file, and analysis_finish file
-    case_id: str = rnafusion_case_id
+    case_id: str = case_id
 
     # Set Housekeeper to an empty real Housekeeper store
     rnafusion_context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
