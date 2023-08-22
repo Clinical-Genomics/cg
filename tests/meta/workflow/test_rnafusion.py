@@ -28,9 +28,7 @@ def test_parse_analysis(
     assert analysis_model.sample_metrics[rnafusion_sample_id] == rnafusion_metrics
 
 
-def test_get_latest_metadata(
-    rnafusion_context: CGConfig, case_id: str, mock_analysis_finish
-):
+def test_get_latest_metadata(rnafusion_context: CGConfig, case_id: str, mock_analysis_finish):
     """Test retrieval of Rnafusion latest metadata."""
 
     # GIVEN a Rnafusion analysis API and a list of QC metrics
