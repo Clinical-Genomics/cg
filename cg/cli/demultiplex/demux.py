@@ -5,8 +5,8 @@ import click
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.cli.demultiplex.copy_novaseqx_data import (
-    copy_flow_cell_analysis_data,
+from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
+    hardlink_flow_cell_analysis_data,
     is_ready_for_post_processing,
     mark_as_demultiplexed,
     mark_flow_cell_as_queued_for_post_processing,
@@ -174,16 +174,23 @@ def delete_flow_cell(
         )
 
 
-@click.command(name="copy-completed")
+@click.command(name="copy-completed-flow-cell")
 @click.pass_obj
 def copy_novaseqx_flow_cells(context: CGConfig):
     """Copy novaseqx flow cells ready for post processing to demultiplexed runs."""
-    flow_cells = Path(context.flow_cells_dir)
-    demultiplexed_runs = Path(context.demultiplexed_flow_cells_dir)
+    flow_cells_dir: Path = Path(context.flow_cells_dir)
+    demultiplexed_runs_dir: Path = Path(context.demultiplexed_flow_cells_dir)
 
-    for flow_cell in flow_cells.iterdir():
-        if is_ready_for_post_processing(flow_cell, demultiplexed_runs):
-            LOG.info(f"Copying {flow_cell.name} to {demultiplexed_runs}")
-            copy_flow_cell_analysis_data(flow_cell, demultiplexed_runs)
-            mark_as_demultiplexed(Path(demultiplexed_runs, flow_cell.name))
-            mark_flow_cell_as_queued_for_post_processing(flow_cell)
+    for flow_cell_dir in flow_cells_dir.iterdir():
+        if is_ready_for_post_processing(
+            flow_cell_dir=flow_cell_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
+        ):
+            LOG.info(f"Copying {flow_cell_dir.name} to {demultiplexed_runs_dir}")
+            hardlink_flow_cell_analysis_data(
+                flow_cell_dir=flow_cell_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
+            )
+            demultiplexed_runs_flow_cell_dir: Path = Path(
+                demultiplexed_runs_dir, flow_cell_dir.name
+            )
+            mark_as_demultiplexed(demultiplexed_runs_flow_cell_dir)
+            mark_flow_cell_as_queued_for_post_processing(flow_cell_dir)

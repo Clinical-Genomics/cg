@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import Set
-from cg.cli.demultiplex.copy_novaseqx_data import get_latest_analysis_directory
+from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_directory
 
 from cg.cli.demultiplex.demux import (
-    copy_flow_cell_analysis_data,
+    hardlink_flow_cell_analysis_data,
     is_ready_for_post_processing,
 )
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
@@ -109,7 +109,7 @@ def test_copy_novaseqx_flow_cell(
     destination = Path(flow_cell_run, DemultiplexingDirsAndFiles.DATA)
 
     # WHEN copying the flow cell analysis data to demultiplexed runs
-    copy_flow_cell_analysis_data(novaseqx_flow_cell_dir, destination)
+    hardlink_flow_cell_analysis_data(novaseqx_flow_cell_dir, destination)
 
     # THEN the data contains everything from the analysis folder
     analysis: Path = get_latest_analysis_directory(novaseqx_flow_cell_dir)
