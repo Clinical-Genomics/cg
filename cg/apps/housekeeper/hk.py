@@ -395,16 +395,14 @@ class HousekeeperAPI:
         return all(sequencing_files_in_hk.values())
 
     def get_non_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[File]:
-        """Returns all files from a given bundle, tagged with the given tags, which have not been archived."""
-        if tags is None:
-            tags = []
-        return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags)
+        """Returns all files from a given bundle, tagged with the given tags, which have not been archived.
+        Since Housekeeper doesn't handle None as tags, we set [] if no tags were specified."""
+        return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags or [])
 
     def get_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[File]:
-        """Returns all files from a given bundle, tagged with the given tags, which have been archived."""
-        if tags is None:
-            tags = []
-        return self._store.get_archived_files(bundle_name=bundle_name, tags=tags)
+        """Returns all files from a given bundle, tagged with the given tags, which have been archived.
+        Since Housekeeper doesn't handle None as tags, we set [] if no tags were specified."""
+        return self._store.get_archived_files(bundle_name=bundle_name, tags=tags or [])
 
     def add_archives(self, files: List[Path], archive_task_id: int) -> None:
         """Creates an archive object for the given files, and adds the archive task id to them."""
