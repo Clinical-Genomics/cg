@@ -2924,22 +2924,22 @@ def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
     return Path(shutil.copytree(original_dir, tmp_dir))
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def novaseqx_latest_analysis_version() -> str:
     return "2"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def novaseqx_flow_cell_dir_name() -> str:
     return "20230427_LH00188_0001_B223YYCLT3"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def novaseqx_flow_cell_directory(tmp_path: Path, novaseqx_flow_cell_dir_name: str) -> Path:
     return Path(tmp_path, novaseqx_flow_cell_dir_name)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def demultiplexed_flow_cell_run_directory(tmp_path: Path) -> Path:
     demultiplexed_runs = Path(tmp_path, "demultiplexed_runs")
     demultiplexed_runs.mkdir()
@@ -2958,7 +2958,7 @@ def add_novaseqx_analysis_data(novaseqx_flow_cell_directory: Path, analysis_vers
     return analysis
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def novaseqx_flow_cell_dir(
     novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
 ) -> Path:
@@ -2968,13 +2968,13 @@ def novaseqx_flow_cell_dir(
     return novaseqx_flow_cell_directory
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def post_processed_novaseqx_flow_cell(novaseqx_flow_cell_dir: Path) -> Path:
     Path(novaseqx_flow_cell_dir, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING).touch()
     return novaseqx_flow_cell_dir
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def novaseqx_flow_cell_analysis_incomplete(
     novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
 ) -> Path:
@@ -2992,7 +2992,7 @@ def novaseqx_flow_cell_analysis_incomplete(
     return novaseqx_flow_cell_directory
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def demultiplex_not_complete_novaseqx_flow_cell(tmp_file: Path) -> Path:
     return tmp_file
 
