@@ -13,7 +13,7 @@ def test_finish_all_cmd_dry_run(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
-    demultiplexed_flow_cell_finished_working_directory: Path,
+    tmp_demultiplexed_runs_directory: Path,
 ):
     caplog.set_level(logging.INFO)
 
@@ -36,7 +36,7 @@ def test_finish_flow_cell_dry_run(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
-    demultiplexed_flow_cell_finished_working_directory: Path,
+    tmp_demultiplexed_runs_directory: Path,
     bcl2fastq_flow_cell_id: str,
 ):
     caplog.set_level(logging.INFO)
@@ -62,7 +62,7 @@ def test_finish_all_hiseq_x_dry_run(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
-    demultiplexed_flow_cell_finished_working_directory: Path,
+    tmp_demultiplexed_runs_directory: Path,
 ):
     caplog.set_level(logging.INFO)
 
@@ -85,7 +85,7 @@ def test_finish_all_hiseq_x(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
-    demultiplexed_flow_cell_finished_working_directory: Path,
+    tmp_demultiplexed_runs_directory: Path,
 ):
     caplog.set_level(logging.INFO)
 
