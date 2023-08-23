@@ -31,7 +31,6 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
     else:
         flow_cells_directory: Path = Path(demultiplex_api.flow_cells_dir)
 
-    tb_api: TrailblazerAPI = context.trailblazer_api
     LOG.info(f"Search for flow cells ready to demultiplex in {flow_cells_directory}")
     for sub_dir in flow_cells_directory.iterdir():
         if not sub_dir.is_dir():
@@ -43,7 +42,7 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
         except FlowCellError:
             continue
 
-        if not demultiplex_api.is_demultiplexing_possible(flow_cell=flow_cell) and not dry_run:
+        if not demultiplex_api.is_demultiplexing_possible(flow_cell=flow_cell):
             LOG.warning(f"Can not start demultiplexing for flow cell {flow_cell.id}!")
             continue
 
@@ -53,10 +52,12 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
             )
             continue
 
-        slurm_job_id: int = demultiplex_api.start_demultiplexing(flow_cell=flow_cell)
-        demultiplex_api.add_to_trailblazer(
-            tb_api=tb_api, slurm_job_id=slurm_job_id, flow_cell=flow_cell
-        )
+        if not dry_run:
+            slurm_job_id: int = demultiplex_api.start_demultiplexing(flow_cell=flow_cell)
+            tb_api: TrailblazerAPI = context.trailblazer_api
+            demultiplex_api.add_to_trailblazer(
+                tb_api=tb_api, slurm_job_id=slurm_job_id, flow_cell=flow_cell
+            )
 
 
 @click.command(name="flow-cell")
@@ -89,7 +90,7 @@ def demultiplex_flow_cell(
     except FlowCellError as error:
         raise click.Abort from error
 
-    if not demultiplex_api.is_demultiplexing_possible(flow_cell=flow_cell) and not dry_run:
+    if not demultiplex_api.is_demultiplexing_possible(flow_cell=flow_cell):
         LOG.warning("Can not start demultiplexing!")
         return
 
@@ -99,11 +100,12 @@ def demultiplex_flow_cell(
         )
         raise click.Abort
 
-    slurm_job_id: int = demultiplex_api.start_demultiplexing(flow_cell=flow_cell)
-    tb_api: TrailblazerAPI = context.trailblazer_api
-    demultiplex_api.add_to_trailblazer(
-        tb_api=tb_api, slurm_job_id=slurm_job_id, flow_cell=flow_cell
-    )
+    if not dry_run:
+        slurm_job_id: int = demultiplex_api.start_demultiplexing(flow_cell=flow_cell)
+        tb_api: TrailblazerAPI = context.trailblazer_api
+        demultiplex_api.add_to_trailblazer(
+            tb_api=tb_api, slurm_job_id=slurm_job_id, flow_cell=flow_cell
+        )
 
 
 @click.command(name="delete-flow-cell")
