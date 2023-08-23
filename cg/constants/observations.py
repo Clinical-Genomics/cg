@@ -79,3 +79,4 @@ class BalsamicLoadParameters(Enum):
     """Cancer Loqusdb load command parameters."""
 
     QUAL_THRESHOLD: int = 0
+    QUAL_GERMLINE_THRESHOLD: int = 10
