@@ -1,9 +1,12 @@
+import logging
 from pathlib import Path
 import os
 import shutil
 from typing import List, Optional
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+
+LOG = logging.getLogger(__name__)
 
 
 def is_demultiplexing_copied(analysis_directory: Path) -> bool:
@@ -88,15 +91,26 @@ def is_ready_for_post_processing(flow_cell_dir: Path, demultiplexed_runs_dir: Pa
     analysis_path: Path = get_latest_analysis_path(flow_cell_dir)
 
     if not analysis_path:
+        LOG.DEBUG(f"No analysis path found for flow cell {flow_cell_dir.name}.")
         return False
 
-    copy_completed: bool = is_demultiplexing_copied(analysis_path)
-    analysis_completed: bool = is_flow_cell_demultiplexed(analysis_path)
-    in_demultiplexed_runs: bool = is_flow_cell_in_demultiplexed_runs(
-        flow_cell_name=flow_cell_dir.name, demultiplexed_runs=demultiplexed_runs_dir
-    )
-    post_processed: bool = is_queued_for_post_processing(flow_cell_dir)
+    flow_cell_is_ready: bool = True
 
-    return (
-        copy_completed and analysis_completed and not in_demultiplexed_runs and not post_processed
-    )
+    if not is_demultiplexing_copied(analysis_path):
+        LOG.DEBUG(f"Demultiplexing has not been copied for flow cell {flow_cell_dir.name}.")
+        flow_cell_is_ready = False
+    if not is_flow_cell_demultiplexed(analysis_path):
+        LOG.DEBUG(f"Flow cell {flow_cell_dir.name} has not been demultiplexed.")
+        flow_cell_is_ready = False
+
+    if is_flow_cell_in_demultiplexed_runs(
+        flow_cell_name=flow_cell_dir.name, demultiplexed_runs=demultiplexed_runs_dir
+    ):
+        LOG.DEBUG(f"Flow cell {flow_cell_dir.name} is already in the demultiplexed runs directory.")
+        flow_cell_is_ready = False
+
+    if is_queued_for_post_processing(flow_cell_dir):
+        LOG.DEBUG(f"Flow cell {flow_cell_dir.name} is already queued for post processing.")
+        flow_cell_is_ready = False
+
+    return flow_cell_is_ready
