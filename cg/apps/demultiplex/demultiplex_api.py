@@ -15,6 +15,7 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.priority import SlurmQos
 from cg.io.controller import WriteFile
+from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch, SbatchDragen
@@ -118,10 +119,13 @@ class DemultiplexingAPI:
         return Path(self.demultiplexed_runs_dir, flow_cell.path.name)
 
     def get_sample_sheet(self, flow_cell_id: str) -> Optional[File]:
-        """Returns the sample sheet of the flow cell in Housekeeper if it exists."""
-        return self.hk_api.get_file_from_latest_version(
-            bundle_name=flow_cell_id, tags=[SequencingFileTag.SAMPLE_SHEET, flow_cell_id]
+        """Returns the latest sample sheet of the flow cell from Housekeeper if it exists."""
+        sample_sheets: List = get_sample_sheets_from_latest_version(
+            flow_cell_id=flow_cell_id, hk_api=self.hk_api
         )
+        if sample_sheets:
+            return sample_sheets[0]
+        return
 
     def is_sample_sheet_in_housekeeper(self, flow_cell_id: str) -> bool:
         """Returns True if the sample sheet for the flow cell exists in Housekeeper."""
