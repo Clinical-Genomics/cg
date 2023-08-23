@@ -72,7 +72,7 @@ def validate_sample_sheet(
 def create_sheet(
     context: CGConfig, flow_cell_name: str, bcl_converter: str, dry_run: bool, force: bool = False
 ):
-    """Creates a sample sheet or hard-links it from Housekeeper in the flow cell directory.
+    """Create a sample sheet or hard-link it from Housekeeper in the flow cell directory.
 
     flow-cell-name is the flow cell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
 
