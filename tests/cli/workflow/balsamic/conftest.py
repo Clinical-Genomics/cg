@@ -8,7 +8,7 @@ from typing import List
 import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat, PrepCategory
+from cg.constants.constants import FileFormat, PrepCategory, CaseActions
 from cg.io.controller import WriteFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig

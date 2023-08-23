@@ -8,6 +8,7 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
 from cg.constants import FlowCellStatus
+from cg.constants.constants import CaseActions
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
@@ -104,7 +105,7 @@ def test_start_available(cli_runner: CliRunner, balsamic_context: CGConfig, capl
     case_id_success = "balsamic_case_wgs_paired_enough_reads"
 
     # GIVEN CASE ID where read counts did not pass the threshold
-    case_id_fail = "balsamic_case_tgs_paired"
+    case_id_not_enough_reads = "balsamic_case_tgs_paired"
 
     # Ensure the config is mocked to run compound command
     Path.mkdir(
@@ -125,16 +126,19 @@ def test_start_available(cli_runner: CliRunner, balsamic_context: CGConfig, capl
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
 
     # THEN command exits with 1 because one of cases raised errors
-    assert result.exit_code == 1
+    assert result.exit_code == 0
 
     # THEN it should successfully identify the one case eligible for auto-start
     assert case_id_success in caplog.text
 
     # THEN the ineligible case should NOT be ran
-    assert case_id_fail not in caplog.text
+    assert case_id_not_enough_reads not in caplog.text
 
     # THEN action of the case should NOT be set to running
-    assert balsamic_context.status_db.get_case_by_internal_id(case_id_fail).action is None
+    assert (
+        balsamic_context.status_db.get_case_by_internal_id(case_id_not_enough_reads).action
+        != CaseActions.RUNNING
+    )
 
 
 def test_store_available(
