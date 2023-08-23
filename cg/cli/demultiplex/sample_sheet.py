@@ -108,7 +108,7 @@ def create_sheet(
             "Sample sheet already exists in Housekeeper. Hard-linking it to flow cell directory"
         )
         if not dry_run:
-            os.link(src=sample_sheets_hk[0].path, dst=flow_cell.sample_sheet_path)
+            os.link(src=sample_sheets_hk[0].full_path, dst=flow_cell.sample_sheet_path)
         return
     lims_samples: List[FlowCellSample] = list(
         get_flow_cell_samples(
@@ -182,7 +182,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
                 "Sample sheet already exists in Housekeeper. Copying it to flow cell directory"
             )
             if not dry_run:
-                os.link(src=sample_sheets_hk[0].path, dst=flow_cell.sample_sheet_path)
+                os.link(src=sample_sheets_hk[0].full_path, dst=flow_cell.sample_sheet_path)
             continue
         LOG.info(f"Creating sample sheet for flow cell {flow_cell.id}")
         lims_samples: List[FlowCellSample] = list(
