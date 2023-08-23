@@ -61,7 +61,8 @@ def hardlink_flow_cell_analysis_data(flow_cell_dir: Path, demultiplexed_runs_dir
     """Create hardlinks to the latest version of the analysis data for a Novaseqx flow cell."""
     analysis_path: Path = get_latest_analysis_path(flow_cell_dir)
     analysis_data_path: Path = Path(analysis_path, DemultiplexingDirsAndFiles.DATA)
-    hardlink_tree(src=analysis_data_path, dst=demultiplexed_runs_dir)
+    demultiplexed_runs_dir_flow_cell_dir = Path(demultiplexed_runs_dir, flow_cell_dir.name)
+    hardlink_tree(src=analysis_data_path, dst=demultiplexed_runs_dir_flow_cell_dir)
 
 
 def mark_as_demultiplexed(flow_cell_dir: Path) -> None:

@@ -105,22 +105,21 @@ def test_copy_novaseqx_flow_cell(
     novaseqx_flow_cell_dir_with_analysis_data: Path,
     novaseqx_flow_cell_dir_name: str,
 ):
-    # GIVEN a destination directory
-    demultiplexed_runs_novaseqx_dir = Path(
+    # GIVEN a demultiplexed runs directory for a NovaseqX flow cell
+    demultiplexed_runs_novaseqx_dir: Path = Path(
         demultiplexed_runs_flow_cell_directory, novaseqx_flow_cell_dir_name
     )
-    demultiplexed_runs_novaseqx_dir.mkdir()
-    destination = Path(demultiplexed_runs_novaseqx_dir, DemultiplexingDirsAndFiles.DATA)
-
-    # WHEN copying the flow cell analysis data to demultiplexed runs
-    hardlink_flow_cell_analysis_data(novaseqx_flow_cell_dir_with_analysis_data, destination)
+    # WHEN copying the flow cell analysis data to demultiplexed runs NovaseqX directory
+    hardlink_flow_cell_analysis_data(
+        novaseqx_flow_cell_dir_with_analysis_data, demultiplexed_runs_flow_cell_directory
+    )
 
     # THEN the data contains everything from the analysis folder
     analysis: Path = get_latest_analysis_path(novaseqx_flow_cell_dir_with_analysis_data)
     analysis_data_path: Path = Path(analysis / DemultiplexingDirsAndFiles.DATA)
 
     original_files = get_all_files_in_dir(analysis_data_path)
-    copied_files = get_all_files_in_dir(destination)
+    copied_files = get_all_files_in_dir(demultiplexed_runs_novaseqx_dir)
 
     # THEN the original files are the same as the copied files
     assert original_files == copied_files
