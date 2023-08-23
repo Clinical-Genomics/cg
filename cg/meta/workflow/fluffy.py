@@ -9,9 +9,9 @@ from sqlalchemy.orm import Query
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
-from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.exc import CgError
+from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import ReadFile
+from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Family, Flowcell, Sample
@@ -252,18 +252,16 @@ class FluffyAnalysisAPI(AnalysisAPI):
         )
 
     def get_sample_sheet_housekeeper_path(self, flowcell_name: str) -> Path:
-        """
-        Returns the path to original samplesheet file that is added to Housekeeper
-        """
-        sample_sheet_query: list = self.housekeeper_api.files(
-            bundle=flowcell_name, tags=[SequencingFileTag.SAMPLE_SHEET]
-        ).all()
-        if not sample_sheet_query:
+        """Returns the path to original sample sheet file that is added to Housekeeper."""
+        sample_sheet_files: list = get_sample_sheets_from_latest_version(
+            flow_cell_id=flowcell_name, hk_api=self.housekeeper_api
+        )
+        if not sample_sheet_files:
             LOG.error(
-                "Samplesheet file for flowcell %s could not be found in Housekeeper!", flowcell_name
+                f"Sample sheet file for flowcell {flowcell_name} could not be found in Housekeeper!"
             )
-            raise CgError
-        return Path(sample_sheet_query[0].full_path)
+            raise HousekeeperFileMissingError
+        return Path(sample_sheet_files[0].full_path)
 
     def make_sample_sheet(self, case_id: str, dry_run: bool) -> None:
         """

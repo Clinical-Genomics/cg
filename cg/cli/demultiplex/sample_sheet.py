@@ -1,5 +1,7 @@
 import logging
+import os
 from pathlib import Path
+from pydantic.v1 import ValidationError
 from typing import List
 
 import click
@@ -13,10 +15,14 @@ from cg.constants.constants import DRY_RUN, FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
 from cg.io.controller import WriteFile, WriteStream
-from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_sample_sheet_path_to_housekeeper,
+    get_sample_sheets_from_latest_version,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from pydantic.v1 import ValidationError
+
+from housekeeper.store.models import File
 
 LOG = logging.getLogger(__name__)
 
@@ -66,7 +72,8 @@ def validate_sample_sheet(
 def create_sheet(
     context: CGConfig, flow_cell_name: str, bcl_converter: str, dry_run: bool, force: bool = False
 ):
-    """Command to create a sample sheet.
+    """Creates a sample sheet or hard-links it from Housekeeper in the flow cell directory.
+
     flow-cell-name is the flow cell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
 
     Search the flow cell in the directory specified in config.
@@ -88,10 +95,20 @@ def create_sheet(
     flow_cell_id: str = flow_cell.id
     if flow_cell.sample_sheet_exists():
         LOG.info("Sample sheet already exists in flow cell directory")
-        LOG.info("Adding sample sheet to Housekeeper")
-        add_sample_sheet_path_to_housekeeper(
-            flow_cell_directory=flow_cell_path, flow_cell_name=flow_cell_id, hk_api=hk_api
+        if not dry_run:
+            add_sample_sheet_path_to_housekeeper(
+                flow_cell_directory=flow_cell_path, flow_cell_name=flow_cell_id, hk_api=hk_api
+            )
+        return
+    sample_sheets_hk: List[File] = get_sample_sheets_from_latest_version(
+        flow_cell_id=flow_cell_id, hk_api=hk_api
+    )
+    if sample_sheets_hk:
+        LOG.info(
+            "Sample sheet already exists in Housekeeper. Hard-linking it to flow cell directory"
         )
+        if not dry_run:
+            os.link(src=sample_sheets_hk[0].path, dst=flow_cell.sample_sheet_path)
         return
     lims_samples: List[FlowCellSample] = list(
         get_flow_cell_samples(
@@ -140,8 +157,8 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
     """
     demux_api: DemultiplexingAPI = context.demultiplex_api
     hk_api: HousekeeperAPI = context.housekeeper_api
-    flow_cell_dir: Path = demux_api.flow_cells_dir
-    for sub_dir in flow_cell_dir.iterdir():
+    flow_cell_runs_dir: Path = demux_api.flow_cells_dir
+    for sub_dir in flow_cell_runs_dir.iterdir():
         if not sub_dir.is_dir():
             continue
         LOG.info(f"Found directory {sub_dir}")
@@ -152,10 +169,20 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
         flow_cell_id: str = flow_cell.id
         if flow_cell.sample_sheet_exists():
             LOG.info("Sample sheet already exists in flow cell directory")
-            LOG.info("Adding sample sheet to Housekeeper")
-            add_sample_sheet_path_to_housekeeper(
-                flow_cell_directory=sub_dir, flow_cell_name=flow_cell_id, hk_api=hk_api
+            if not dry_run:
+                add_sample_sheet_path_to_housekeeper(
+                    flow_cell_directory=sub_dir, flow_cell_name=flow_cell_id, hk_api=hk_api
+                )
+            continue
+        sample_sheets_hk: List[File] = get_sample_sheets_from_latest_version(
+            flow_cell_id=flow_cell_id, hk_api=hk_api
+        )
+        if sample_sheets_hk:
+            LOG.info(
+                "Sample sheet already exists in Housekeeper. Copying it to flow cell directory"
             )
+            if not dry_run:
+                os.link(src=sample_sheets_hk[0].path, dst=flow_cell.sample_sheet_path)
             continue
         LOG.info(f"Creating sample sheet for flow cell {flow_cell.id}")
         lims_samples: List[FlowCellSample] = list(

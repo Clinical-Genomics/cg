@@ -455,8 +455,8 @@ def remove_old_demultiplexed_run_dirs(context: CGConfig, days_old: int, dry_run:
     for flow_cell_dir in demux_post_processing_api.get_all_demultiplexed_flow_cell_dirs():
         try:
             flow_cell: DemultiplexFlowCell = DemultiplexFlowCell(flow_cell_path=flow_cell_dir)
-        except FlowCellError:
-            LOG.info(f"Skipping flow cell in {flow_cell_dir} due to FlowCellError")
+        except FlowCellError as error:
+            LOG.info(f"Skipping flow cell in {flow_cell_dir} due to {error}")
             continue
 
         if not flow_cell.is_demultiplexing_complete:

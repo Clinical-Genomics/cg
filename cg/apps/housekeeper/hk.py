@@ -369,7 +369,11 @@ class HousekeeperAPI:
         return self.files(version=version.id, tags=tags).first()
 
     def get_files_from_latest_version(self, bundle_name: str, tags: List[str]) -> Query:
-        """Return files in the latest version of a bundle."""
+        """Return files in the latest version of a bundle.
+
+        Raises HousekeeperBundleVersionMissingError:
+        - When no version was found for the given bundle
+        """
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
             LOG.warning(f"Bundle: {bundle_name} not found in Housekeeper")

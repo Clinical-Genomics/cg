@@ -12,6 +12,7 @@ from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
@@ -71,8 +72,13 @@ def test_create_bcl2fastq_sample_sheet(
     )
     assert flow_cell.run_parameters_path.exists()
 
-    # GIVEN that there is no sample sheet present
+    # GIVEN that there is no sample sheet in the flow cell dir
     assert not flow_cell.sample_sheet_exists()
+
+    # GIVEN that there are no sample sheet in Housekeeper
+    assert not get_sample_sheets_from_latest_version(
+        flow_cell_id=flow_cell.id, hk_api=sample_sheet_context.housekeeper_api
+    )
 
     # GIVEN flow cell samples
     mocker.patch(
@@ -98,8 +104,8 @@ def test_create_bcl2fastq_sample_sheet(
     assert flow_cell.validate_sample_sheet()
 
     # THEN the sample sheet is in Housekeeper
-    assert sample_sheet_context.housekeeper_api.get_latest_file(
-        bundle=flow_cell.id, tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET]
+    assert get_sample_sheets_from_latest_version(
+        flow_cell_id=flow_cell.id, hk_api=sample_sheet_context.housekeeper_api
     )
 
 
@@ -117,8 +123,13 @@ def test_create_dragen_sample_sheet(
     )
     assert flow_cell.run_parameters_path.exists()
 
-    # GIVEN that there is no sample sheet present
+    # GIVEN that there is no sample sheet in the flow cell dir
     assert not flow_cell.sample_sheet_exists()
+
+    # GIVEN that there are no sample sheet in Housekeeper
+    assert not get_sample_sheets_from_latest_version(
+        flow_cell_id=flow_cell.id, hk_api=sample_sheet_context.housekeeper_api
+    )
 
     # GIVEN flow cell samples
     mocker.patch(
@@ -144,6 +155,6 @@ def test_create_dragen_sample_sheet(
     assert flow_cell.validate_sample_sheet()
 
     # THEN the sample sheet is in Housekeeper
-    assert sample_sheet_context.housekeeper_api.get_latest_file(
-        bundle=flow_cell.id, tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET]
+    assert get_sample_sheets_from_latest_version(
+        flow_cell_id=flow_cell.id, hk_api=sample_sheet_context.housekeeper_api
     )
