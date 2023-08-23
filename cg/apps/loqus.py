@@ -1,9 +1,8 @@
 """Module for Loqusdb API."""
-
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from cg.constants.constants import FileFormat
 from cg.exc import LoqusdbDeleteCaseError, CaseNotFoundError
@@ -31,6 +30,7 @@ class LoqusdbAPI:
         family_ped_path: Optional[Path] = None,
         window_size: Optional[int] = None,
         gq_threshold: Optional[int] = None,
+        qual_gq: Optional[bool] = False,
         hard_threshold: Optional[float] = None,
         soft_threshold: Optional[float] = None,
     ) -> Dict[str, int]:
@@ -46,7 +46,8 @@ class LoqusdbAPI:
             "--hard-threshold": str(hard_threshold) if hard_threshold else None,
             "--soft-threshold": str(soft_threshold) if soft_threshold else None,
         }
-        load_call_params: list = ["load"] + get_list_from_dictionary(load_params)
+        load_call_params: List[str] = ["load"] + get_list_from_dictionary(load_params)
+        load_call_params.append("--qual-gq") if qual_gq else None
         self.process.run_command(parameters=load_call_params)
         return self.get_nr_of_variants_in_file()
 
