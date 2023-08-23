@@ -91,26 +91,26 @@ def is_ready_for_post_processing(flow_cell_dir: Path, demultiplexed_runs_dir: Pa
     analysis_path: Path = get_latest_analysis_path(flow_cell_dir)
 
     if not analysis_path:
-        LOG.DEBUG(f"No analysis path found for flow cell {flow_cell_dir.name}.")
+        LOG.debug(f"No analysis path found for flow cell {flow_cell_dir.name}.")
         return False
 
     flow_cell_is_ready: bool = True
 
     if not is_demultiplexing_copied(analysis_path):
-        LOG.DEBUG(f"Demultiplexing has not been copied for flow cell {flow_cell_dir.name}.")
+        LOG.debug(f"Demultiplexing has not been copied for flow cell {flow_cell_dir.name}.")
         flow_cell_is_ready = False
     if not is_flow_cell_demultiplexed(analysis_path):
-        LOG.DEBUG(f"Flow cell {flow_cell_dir.name} has not been demultiplexed.")
+        LOG.debug(f"Flow cell {flow_cell_dir.name} has not been demultiplexed.")
         flow_cell_is_ready = False
 
     if is_flow_cell_in_demultiplexed_runs(
         flow_cell_name=flow_cell_dir.name, demultiplexed_runs=demultiplexed_runs_dir
     ):
-        LOG.DEBUG(f"Flow cell {flow_cell_dir.name} is already in the demultiplexed runs directory.")
+        LOG.debug(f"Flow cell {flow_cell_dir.name} is already in the demultiplexed runs directory.")
         flow_cell_is_ready = False
 
     if is_queued_for_post_processing(flow_cell_dir):
-        LOG.DEBUG(f"Flow cell {flow_cell_dir.name} is already queued for post processing.")
+        LOG.debug(f"Flow cell {flow_cell_dir.name} is already queued for post processing.")
         flow_cell_is_ready = False
 
     return flow_cell_is_ready
