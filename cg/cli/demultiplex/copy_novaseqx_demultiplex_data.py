@@ -25,7 +25,7 @@ def is_flow_cell_in_demultiplexed_runs(flow_cell_name: str, demultiplexed_runs: 
     return Path(demultiplexed_runs, flow_cell_name).exists()
 
 
-def get_latest_analysis_directory(flow_cell_dir: Path) -> Optional[Path]:
+def get_latest_analysis_path(flow_cell_dir: Path) -> Optional[Path]:
     """
     Get the latest analysis directory for a Novaseqx flow cell.
     The latest analysis directory is the one with the highest integer name.
@@ -56,7 +56,7 @@ def is_queued_for_post_processing(flow_cell_dir: Path) -> bool:
 
 def hardlink_flow_cell_analysis_data(flow_cell_dir: Path, demultiplexed_runs_dir: Path) -> None:
     """Create hardlinks to the latest version of the analysis data for a Novaseqx flow cell."""
-    analysis_path: Path = get_latest_analysis_directory(flow_cell_dir)
+    analysis_path: Path = get_latest_analysis_path(flow_cell_dir)
     analysis_data_path: Path = Path(analysis_path, DemultiplexingDirsAndFiles.DATA)
     hardlink_tree(src=analysis_data_path, dst=demultiplexed_runs_dir)
 
@@ -85,7 +85,7 @@ def is_ready_for_post_processing(flow_cell_dir: Path, demultiplexed_runs_dir: Pa
     - the flow cell is not in the demultiplexed runs directory
     - the flow cell is not queued for post processing
     """
-    analysis_path: Path = get_latest_analysis_directory(flow_cell_dir)
+    analysis_path: Path = get_latest_analysis_path(flow_cell_dir)
 
     if not analysis_path:
         return False

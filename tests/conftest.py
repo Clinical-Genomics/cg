@@ -2943,7 +2943,7 @@ def novaseqx_flow_cell_directory(tmp_path: Path, novaseqx_flow_cell_dir_name: st
 
 
 @pytest.fixture(scope="function")
-def demultiplexed_flow_cell_run_directory(tmp_path: Path) -> Path:
+def demultiplexed_runs_flow_cell_directory(tmp_path: Path) -> Path:
     """Return the path to a demultiplexed flow cell run directory."""
     demultiplexed_runs = Path(
         tmp_path, DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME
@@ -2969,7 +2969,7 @@ def add_novaseqx_analysis_data(novaseqx_flow_cell_directory: Path, analysis_vers
 def novaseqx_flow_cell_dir_with_analysis_data(
     novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
 ) -> Path:
-    """Return the path to a NovaseqX flow cell directory with analysis data."""
+    """Return the path to a NovaseqX flow cell directory with multiple analysis data directories."""
     add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "0")
     add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "1")
     add_novaseqx_analysis_data(novaseqx_flow_cell_directory, novaseqx_latest_analysis_version)
