@@ -177,6 +177,8 @@ class TaxprofilerConfig(CommonAppConfig):
     hostremoval_reference: str
     databases: str
     slurm: SlurmConfig
+    tower_binary_path: str
+    tower_pipeline: str
 
 
 class CGStatsConfig(BaseModel):
