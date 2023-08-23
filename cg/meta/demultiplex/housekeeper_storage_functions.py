@@ -2,22 +2,24 @@
 import logging
 from pathlib import Path
 from typing import List, Optional
+
 from housekeeper.store.models import File, Version
+
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_internal_ids_from_sample_sheet,
+)
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
 from cg.exc import HousekeeperBundleVersionMissingError
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.store import Store
 from cg.meta.demultiplex.utils import (
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_fastqs_from_flow_cell,
     get_sample_sheet_path,
 )
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_internal_ids_from_sample_sheet,
-)
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.store import Store
 from cg.utils.files import get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
