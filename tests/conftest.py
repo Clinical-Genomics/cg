@@ -2933,6 +2933,96 @@ def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
     return Path(shutil.copytree(original_dir, tmp_dir))
 
 
+@pytest.fixture(scope="function")
+def novaseqx_latest_analysis_version() -> str:
+    """Return the latest analysis version for NovaseqX analysis data directory."""
+    return "2"
+
+
+@pytest.fixture(scope="function")
+def novaseqx_flow_cell_dir_name() -> str:
+    """Return the flow cell full name for a NovaseqX flow cell."""
+    return "20230427_LH00188_0001_B223YYCLT3"
+
+
+@pytest.fixture(scope="function")
+def novaseqx_flow_cell_directory(tmp_path: Path, novaseqx_flow_cell_dir_name: str) -> Path:
+    """Return the path to a NovaseqX flow cell directory."""
+    return Path(tmp_path, novaseqx_flow_cell_dir_name)
+
+
+@pytest.fixture(scope="function")
+def demultiplexed_runs_flow_cell_directory(tmp_path: Path) -> Path:
+    """Return the path to a demultiplexed flow cell run directory."""
+    demultiplexed_runs = Path(
+        tmp_path, DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME
+    )
+    demultiplexed_runs.mkdir()
+    return demultiplexed_runs
+
+
+def add_novaseqx_analysis_data(novaseqx_flow_cell_directory: Path, analysis_version: str):
+    """Add NovaseqX analysis data to a flow cell directory."""
+    analysis_path: Path = Path(
+        novaseqx_flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, analysis_version
+    )
+    analysis_path.mkdir(parents=True)
+    analysis_path.joinpath(DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
+    data = analysis_path.joinpath(DemultiplexingDirsAndFiles.DATA)
+    data.mkdir()
+    data.joinpath(DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED).touch()
+    return analysis_path
+
+
+@pytest.fixture(scope="function")
+def novaseqx_flow_cell_dir_with_analysis_data(
+    novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
+) -> Path:
+    """Return the path to a NovaseqX flow cell directory with multiple analysis data directories."""
+    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "0")
+    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "1")
+    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, novaseqx_latest_analysis_version)
+    return novaseqx_flow_cell_directory
+
+
+@pytest.fixture(scope="function")
+def post_processed_novaseqx_flow_cell(novaseqx_flow_cell_dir_with_analysis_data: Path) -> Path:
+    """Return the path to a NovaseqX flow cell that is post processed."""
+    Path(
+        novaseqx_flow_cell_dir_with_analysis_data,
+        DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING,
+    ).touch()
+    return novaseqx_flow_cell_dir_with_analysis_data
+
+
+@pytest.fixture(scope="function")
+def novaseqx_flow_cell_analysis_incomplete(
+    novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
+) -> Path:
+    """
+    Return the path to a flow cell for which the analysis is not complete.
+    It misses the ANALYSIS_COMPLETED file.
+    """
+    Path(
+        novaseqx_flow_cell_directory,
+        DemultiplexingDirsAndFiles.ANALYSIS,
+        novaseqx_latest_analysis_version,
+    ).mkdir(parents=True)
+    Path(
+        novaseqx_flow_cell_directory,
+        DemultiplexingDirsAndFiles.ANALYSIS,
+        novaseqx_latest_analysis_version,
+        DemultiplexingDirsAndFiles.COPY_COMPLETE,
+    ).touch()
+    return novaseqx_flow_cell_directory
+
+
+@pytest.fixture(scope="function")
+def demultiplex_not_complete_novaseqx_flow_cell(tmp_file: Path) -> Path:
+    """Return the path to a NovaseqX flow cell for which demultiplexing is not complete."""
+    return tmp_file
+
+
 @pytest.fixture(scope="session")
 def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
