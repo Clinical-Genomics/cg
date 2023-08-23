@@ -125,7 +125,6 @@ class DemultiplexingAPI:
         )
         if sample_sheets:
             return sample_sheets[0]
-        return
 
     def is_sample_sheet_in_housekeeper(self, flow_cell_id: str) -> bool:
         """Returns True if the sample sheet for the flow cell exists in Housekeeper."""
