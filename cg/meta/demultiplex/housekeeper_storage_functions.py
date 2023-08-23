@@ -2,7 +2,7 @@
 import logging
 from pathlib import Path
 from typing import List, Optional
-from housekeeper.store.models import Version
+from housekeeper.store.models import File, Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.constants.housekeeper_tags import SequencingFileTag
@@ -218,3 +218,24 @@ def file_exists_in_latest_version_for_bundle(
     return any(
         file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
     )
+
+
+def get_sample_sheets_from_latest_version(flow_cell_id: str, hk_api: HousekeeperAPI) -> List[File]:
+    """Returns the files tagged with samplesheet or archived_sample_sheet for the given bundle."""
+    files: List[File] = hk_api.get_files_from_latest_version(
+        bundle_name=flow_cell_id, tags=[flow_cell_id]
+    ).all()
+    return filter_on_sample_sheets(files=files)
+
+
+def filter_on_sample_sheets(files: List[File]) -> List[File]:
+    """Filters the given list of Files to return only those tagged with samplesheet or archived_sample_sheet."""
+    files_with_a_sample_sheet_tag: List[File] = []
+    for file in files:
+        file_tag_names: List[str] = [tag.name for tag in file.tags]
+        if (
+            SequencingFileTag.SAMPLE_SHEET in file_tag_names
+            or SequencingFileTag.ARCHIVED_SAMPLE_SHEET in file_tag_names
+        ):
+            files_with_a_sample_sheet_tag.append(file)
+    return [*set(files_with_a_sample_sheet_tag)]
