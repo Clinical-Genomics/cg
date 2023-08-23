@@ -194,3 +194,5 @@ def copy_novaseqx_flow_cells(context: CGConfig):
             )
             mark_as_demultiplexed(demultiplexed_runs_flow_cell_dir)
             mark_flow_cell_as_queued_for_post_processing(flow_cell_dir)
+        else:
+            LOG.info(f"Flow cell {flow_cell_dir.name} is not ready for post processing, skipping.")
