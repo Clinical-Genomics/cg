@@ -52,7 +52,7 @@ class DemultiplexingAPI:
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run."""
-        LOG.debug(f"Set dry run to {dry_run}")
+        LOG.debug(f"DemultiplexingAPI: Set dry run to {dry_run}")
         self.dry_run = dry_run
         self.slurm_api.set_dry_run(dry_run=dry_run)
 
