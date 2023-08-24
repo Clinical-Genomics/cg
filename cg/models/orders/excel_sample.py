@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
-from cg.models.orders.sample_base import OrderSample
+from cg.models.orders.sample_base import OrderSample, PriorityEnum
 from pydantic import AfterValidator, BeforeValidator, Field
 from typing_extensions import Annotated
 
@@ -65,7 +65,8 @@ def convert_to_lower(value: Optional[str]):
 
 
 def convert_to_priority(priority: Optional[str]):
-    return "priority" if priority == "förtur" else priority
+    """Translates the Swedish 'förtur' to 'priority' if specified in the order."""
+    return PriorityEnum.priority if priority == "förtur" else priority
 
 
 def convert_to_date(date: Optional[str]) -> Optional[str]:
