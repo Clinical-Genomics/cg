@@ -87,7 +87,6 @@ def test_instantiate_rnafusion_strandedness_not_acceptable(
     """
 
     # WHEN instantiating a sample object THEN throws a ValidationError
-
     with pytest.raises(PydanticValidationError):
         RnafusionSample(
             sample=rnafusion_sample,

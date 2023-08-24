@@ -130,10 +130,10 @@ def test_defaults(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN sample sheet file should be generated
-    assert "Generating sample sheet" in caplog.text
+    assert "Getting sample sheet information" in caplog.text
 
     # THEN parameters file should be generated
-    assert "Generating parameters file" in caplog.text
+    assert "Getting parameters information" in caplog.text
 
 
 def test_reference(

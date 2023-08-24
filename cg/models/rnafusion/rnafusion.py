@@ -70,6 +70,11 @@ class RnafusionSample(NextflowSample):
 
     strandedness: Strandedness
 
+    @staticmethod
+    def headers() -> List[str]:
+        """Return sample sheet headers."""
+        return ["sample", "fastq_1", "fastq_2", "strandedness"]
+
 
 class RnafusionAnalysis(AnalysisModel):
     """Rnafusion analysis model.

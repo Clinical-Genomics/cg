@@ -62,7 +62,7 @@ def config_case(
 ) -> None:
     """Create sample sheet file and params file for a given case."""
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    LOG.info(f"Creating sample sheet file for {case_id}.")
+    LOG.info(f"Creating config files for {case_id}.")
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.config_case(
