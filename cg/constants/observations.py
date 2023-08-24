@@ -1,5 +1,4 @@
 """Loqusdb related constants."""
-
 from enum import Enum
 
 from cgmodels.cg.constants import Pipeline, StrEnum
@@ -43,7 +42,8 @@ class ObservationsFileWildcards(StrEnum):
 
     CLINICAL_SNV: str = "clinical_snv"
     CLINICAL_SV: str = "clinical_sv"
-    CANCER_ALL_SNV: str = "cancer_all_snv"
+    CANCER_GERMLINE_SNV: str = "cancer_germline_snv"
+    CANCER_GERMLINE_SV: str = "cancer_germline_sv"
     CANCER_SOMATIC_SNV: str = "cancer_somatic_snv"
     CANCER_SOMATIC_SV: str = "cancer_somatic_sv"
 
@@ -69,16 +69,14 @@ class MipDNALoadParameters(Enum):
 class BalsamicObservationsAnalysisTag(StrEnum):
     """Cancer observations files analysis tags."""
 
-    SNV_VCF: str = "vcf-snv"
-    SNV_ALL_VCF: str = "vcf-snv-germline-tumor"
-    SV_VCF: str = "vcf-sv"
-    PROFILE_VCF: str = "vcf-snv-germline-tumor"
+    SNV_GERMLINE_VCF: str = "vcf-snv-germline-tumor"
+    SNV_VCF: str = "vcf-snv-clinical"
+    SV_GERMLINE_VCF: str = "vcf-sv-germline-tumor"
+    SV_VCF: str = "vcf-sv-clinical"
 
 
 class BalsamicLoadParameters(Enum):
     """Cancer Loqusdb load command parameters."""
 
-    PROFILE_THRESHOLD: float = 0.95
-    GQ_THRESHOLD: int = 10
-    HARD_THRESHOLD: float = 0.95
-    SOFT_THRESHOLD: float = 0.90
+    QUAL_THRESHOLD: int = 0
+    QUAL_GERMLINE_THRESHOLD: int = 10
