@@ -95,9 +95,6 @@ def test_with_config_use_tower(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN command should use tower
-    assert "using tower" in caplog.text
-    assert "path/to/bin/tw launch" in caplog.text
-    assert "--work-dir" in caplog.text
 
     for message in [
         "using tower",
