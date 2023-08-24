@@ -91,31 +91,3 @@ def parse_flow_cell_directory_data(
 ) -> FlowCellDirectoryData:
     """Return flow cell data from the flow cell directory."""
     return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
-
-
-def copy_sample_sheet(
-    sample_sheet_source_directory: Path, sample_sheet_destination_directory: Path
-) -> None:
-    """Copy the sample sheet from the flow-cell-run dir to demultiplex-runs dir for a flow cell."""
-    sample_sheet_source: Path = Path(
-        sample_sheet_source_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-    )
-    sample_sheet_destination: Path = Path(
-        sample_sheet_destination_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-    )
-
-    if not sample_sheet_destination.exists():
-        LOG.debug(
-            f"Copy sample sheet {sample_sheet_source_directory} from flow cell to demuxed result dir {sample_sheet_destination_directory}"
-        )
-        try:
-            shutil.copy(
-                sample_sheet_source.as_posix(),
-                sample_sheet_destination.as_posix(),
-            )
-        except FileNotFoundError as e:
-            raise FileNotFoundError(
-                f"Could not copy sample sheet from {sample_sheet_source_directory} to {sample_sheet_destination_directory}: {e}"
-            )
-        return
-    LOG.warning(f"Sample sheet already exists: {sample_sheet_destination}, skipping copy.")
