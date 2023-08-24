@@ -1,7 +1,9 @@
 """API for uploading cancer observations."""
-
 import logging
+from pathlib import Path
 from typing import Dict, List
+
+from housekeeper.store.models import Version, File
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import (
@@ -12,15 +14,12 @@ from cg.constants.observations import (
     LOQUSDB_ID,
     LoqusdbBalsamicCustomers,
 )
-from cg.exc import LoqusdbUploadCaseError, CaseNotFoundError, LoqusdbDuplicateRecordError
-from cg.store.models import Family
-
-from housekeeper.store.models import Version, File
-
 from cg.constants.sequencing import SequencingMethod
+from cg.exc import LoqusdbUploadCaseError, CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
+from cg.store.models import Family
 from cg.utils.dict import get_full_path_dictionary
 
 LOG = logging.getLogger(__name__)
@@ -59,26 +58,35 @@ class BalsamicObservationsAPI(ObservationsAPI):
                 case=case, input_files=input_files, loqusdb_api=loqusdb_api
             )
 
-        # Update Statusb with a germline Loqusdb ID
+        # Update Statusdb with a germline Loqusdb ID
         loqusdb_id: str = str(self.loqusdb_tumor_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
 
-    @staticmethod
     def load_cancer_observations(
-        case: Family,
-        input_files: BalsamicObservationsInputFiles,
-        loqusdb_api: LoqusdbAPI,
+        self, case: Family, input_files: BalsamicObservationsInputFiles, loqusdb_api: LoqusdbAPI
     ) -> None:
         """Load cancer observations to a specific Loqusdb API."""
-        is_somatic: bool = "somatic" in str(loqusdb_api.config_path)
+        is_somatic_db: bool = "somatic" in str(loqusdb_api.config_path)
+        is_paired_analysis: bool = len(self.store.get_samples_by_case_id(case.internal_id)) == 2
+        if is_somatic_db:
+            if not is_paired_analysis:
+                return
+            LOG.info("Uploading somatic observations to Loqusdb")
+            snv_vcf_path: Path = input_files.snv_vcf_path
+            sv_vcf_path: Path = input_files.sv_vcf_path
+        else:
+            LOG.info("Uploading germline observations to Loqusdb")
+            snv_vcf_path: Path = input_files.snv_germline_vcf_path
+            sv_vcf_path: Path = input_files.sv_germline_vcf_path if is_paired_analysis else None
+
         load_output: dict = loqusdb_api.load(
             case_id=case.internal_id,
-            snv_vcf_path=input_files.snv_vcf_path if is_somatic else input_files.snv_all_vcf_path,
-            sv_vcf_path=input_files.sv_vcf_path if is_somatic else None,
-            profile_vcf_path=None,
-            gq_threshold=BalsamicLoadParameters.GQ_THRESHOLD.value,
-            hard_threshold=BalsamicLoadParameters.HARD_THRESHOLD.value,
-            soft_threshold=BalsamicLoadParameters.SOFT_THRESHOLD.value,
+            snv_vcf_path=snv_vcf_path,
+            sv_vcf_path=sv_vcf_path,
+            qual_gq=True,
+            gq_threshold=BalsamicLoadParameters.QUAL_THRESHOLD.value
+            if is_somatic_db
+            else BalsamicLoadParameters.QUAL_GERMLINE_THRESHOLD.value,
         )
         LOG.info(f"Uploaded {load_output['variants']} variants to {repr(loqusdb_api)}")
 
@@ -87,16 +95,18 @@ class BalsamicObservationsAPI(ObservationsAPI):
     ) -> BalsamicObservationsInputFiles:
         """Extract observations files given a housekeeper version for cancer."""
         input_files: Dict[str, File] = {
+            "snv_germline_vcf_path": self.housekeeper_api.files(
+                version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_GERMLINE_VCF]
+            ).first(),
             "snv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_VCF]
             ).first(),
-            "snv_all_vcf_path": self.housekeeper_api.files(
-                version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_ALL_VCF]
+            "sv_germline_vcf_path": self.housekeeper_api.files(
+                version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SV_GERMLINE_VCF]
             ).first(),
             "sv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SV_VCF]
             ).first(),
-            "profile_vcf_path": None,
         }
         return BalsamicObservationsInputFiles(**get_full_path_dictionary(input_files))
 
