@@ -197,9 +197,9 @@ def start(
     dry_run: bool,
 ):
     """Start full workflow for case ID."""
-    LOG.info(f"Starting analysis for {case_id}")
     analysis_api: BalsamicAnalysisAPI = context.obj.meta_apis["analysis_api"]
     analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
+    LOG.info(f"Starting analysis for {case_id}")
     context.invoke(link, case_id=case_id, dry_run=dry_run)
     context.invoke(
         config_case,

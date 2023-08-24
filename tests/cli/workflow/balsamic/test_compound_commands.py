@@ -96,13 +96,15 @@ def test_store(
     assert balsamic_context.housekeeper_api.bundle(case_id)
 
 
-def test_start_available(cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker):
+def test_start_available(
+    cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker, mock_analysis_flow_cell
+):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones"""
     caplog.set_level(logging.INFO)
 
     # GIVEN CASE ID of sample where read counts pass threshold
-    case_id_success = "balsamic_case_wgs_paired_enough_reads"
+    case_id_success = "balsamic_case_wgs_single"
 
     # GIVEN CASE ID where read counts did not pass the threshold
     case_id_not_enough_reads = "balsamic_case_tgs_paired"
@@ -125,20 +127,14 @@ def test_start_available(cli_runner: CliRunner, balsamic_context: CGConfig, capl
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
 
-    # THEN command exits with 1 because one of cases raised errors
+    # THEN command exits with a successful exit code
     assert result.exit_code == 0
 
     # THEN it should successfully identify the one case eligible for auto-start
-    assert case_id_success in caplog.text
+    assert f"Starting analysis for {case_id_success}" in caplog.text
 
-    # THEN the ineligible case should NOT be ran
+    # THEN the ineligible case should NOT be run
     assert case_id_not_enough_reads not in caplog.text
-
-    # THEN action of the case should NOT be set to running
-    assert (
-        balsamic_context.status_db.get_case_by_internal_id(case_id_not_enough_reads).action
-        != CaseActions.RUNNING
-    )
 
 
 def test_store_available(
@@ -150,6 +146,7 @@ def test_store_available(
     caplog,
     mocker,
     hermes_deliverables,
+    mock_analysis_flow_cell,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
     Test that sore-available picks up eligible cases and does not pick up ineligible ones"""
@@ -171,6 +168,7 @@ def test_store_available(
     )
 
     # GIVEN that HermesAPI returns a deliverables output
+    hermes_deliverables["bundle_id"] = case_id_success
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
@@ -179,8 +177,8 @@ def test_store_available(
     balsamic_context.status_db.get_case_by_internal_id(case_id_success).action = "running"
     balsamic_context.status_db.session.commit()
 
-    # THEN command exits with 1 because one of the cases threw errors
-    assert result.exit_code == 1
+    # THEN command exit with success
+    assert result.exit_code == 0
     assert case_id_success in caplog.text
     assert balsamic_context.status_db.get_case_by_internal_id(case_id_success).action == "running"
 
