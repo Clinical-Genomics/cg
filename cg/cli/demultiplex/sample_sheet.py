@@ -178,7 +178,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
             flow_cell_id=flow_cell_id, hk_api=hk_api
         )
         if sample_sheets_hk:
-            LOG.info(
+            LOG.debug(
                 "Sample sheet already exists in Housekeeper. Copying it to flow cell directory"
             )
             if not dry_run:
