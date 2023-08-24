@@ -2597,81 +2597,42 @@ def fixture_no_sample_case_id() -> str:
     return "no_sample_case"
 
 
-@pytest.fixture(name="rnafusion_sample_id")
-def fixture_rnafusion_sample_id() -> str:
-    """Returns a rnafusion sample id."""
-    return "sample_rnafusion_case_enough_reads"
-
-
-@pytest.fixture(name="rnafusion_housekeeper_dir")
-def fixture_rnafusion_housekeeper_dir(tmpdir_factory, rnafusion_dir: Path) -> Path:
-    """Return the path to the rnafusion housekeeper bundle dir."""
-    return tmpdir_factory.mktemp("bundles")
-
-
-@pytest.fixture(name="rnafusion_fastq_file_l_1_r_1")
-def fixture_rnafusion_fastq_file_l_1_r_1(rnafusion_housekeeper_dir: Path) -> str:
-    fastq_filename = Path(
-        rnafusion_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz"
-    ).as_posix()
+@pytest.fixture(name="fastq_file_forward")
+def fixture_fastq_file_forward(housekeeper_dir: Path) -> Path:
+    fastq_filename = Path(housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz")
     with gzip.open(fastq_filename, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
     return fastq_filename
 
 
-@pytest.fixture(name="rnafusion_fastq_file_l_1_r_2")
-def fixture_rnafusion_fastq_file_l_1_r_2(rnafusion_housekeeper_dir: Path) -> str:
-    fastq_filename = Path(
-        rnafusion_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
-    ).as_posix()
+@pytest.fixture(name="fastq_file_reverse")
+def fixture_fastq_file_reverse(housekeeper_dir: Path) -> Path:
+    fastq_filename = Path(housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz")
     with gzip.open(fastq_filename, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
     return fastq_filename
 
 
-@pytest.fixture(name="rnafusion_mock_fastq_files")
-def fixture_rnafusion_mock_fastq_files(
-    rnafusion_fastq_file_l_1_r_1: Path, rnafusion_fastq_file_l_1_r_2: Path
-) -> List[Path]:
-    """Return list of all mock fastq files to commit to mock housekeeper"""
-    return [rnafusion_fastq_file_l_1_r_1, rnafusion_fastq_file_l_1_r_2]
-
-
-@pytest.fixture(scope="function", name="rnafusion_housekeeper")
-def fixture_rnafusion_housekeeper(
-    housekeeper_api: HousekeeperAPI,
-    helpers: StoreHelpers,
-    rnafusion_mock_fastq_files: List[Path],
-    rnafusion_sample_id: str,
-):
-    """Create populated housekeeper that holds files for all mock samples."""
-
-    bundle_data: Dict[str, Any] = {
-        "name": rnafusion_sample_id,
-        "created": datetime.now(),
-        "version": "1.0",
-        "files": [
-            {"path": f, "tags": ["fastq"], "archive": False} for f in rnafusion_mock_fastq_files
-        ],
-    }
-    helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
-    return housekeeper_api
+@pytest.fixture(name="mock_fastq_files")
+def fixture_mock_fastq_files(fastq_file_forward: Path, fastq_file_reverse: Path) -> List[Path]:
+    """Return list of all mock fastq files to commit to mock housekeeper."""
+    return [fastq_file_forward, fastq_file_reverse]
 
 
 @pytest.fixture(scope="function", name="rnafusion_context")
 def fixture_rnafusion_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
-    rnafusion_housekeeper: HousekeeperAPI,
+    nf_analysis_housekeeper: HousekeeperAPI,
     trailblazer_api: MockTB,
     hermes_api: HermesApi,
     cg_dir: Path,
     rnafusion_case_id: str,
-    rnafusion_sample_id: str,
+    sample_id: str,
     no_sample_case_id: str,
 ) -> CGConfig:
     """context to use in cli"""
-    cg_context.housekeeper_api_ = rnafusion_housekeeper
+    cg_context.housekeeper_api_ = nf_analysis_housekeeper
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = RnafusionAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
@@ -2689,7 +2650,7 @@ def fixture_rnafusion_context(
 
     sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
         status_db,
-        internal_id=rnafusion_sample_id,
+        internal_id=sample_id,
         sequenced_at=datetime.now(),
     )
 
@@ -2702,9 +2663,7 @@ def fixture_rnafusion_context(
 
 
 @pytest.fixture(name="deliverable_data")
-def fixture_deliverables_data(
-    rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_sample_id: str
-) -> dict:
+def fixture_deliverables_data(rnafusion_dir: Path, rnafusion_case_id: str, sample_id: str) -> dict:
     return {
         "files": [
             {
@@ -3043,12 +3002,6 @@ def fixture_taxprofiler_case_id() -> str:
     return "taxprofiler_case"
 
 
-@pytest.fixture(scope="session", name="taxprofiler_sample_id")
-def fixture_taxprofiler_sample_id() -> str:
-    """Returns a Taxprofiler sample id."""
-    return "taxprofiler_sample"
-
-
 @pytest.fixture(scope="session", name="taxprofiler_dir")
 def fixture_taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> Path:
     """Return the path to the Taxprofiler directory."""
@@ -3056,46 +3009,42 @@ def fixture_taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> Path:
     return Path(taxprofiler_dir).absolute()
 
 
-@pytest.fixture(scope="session", name="taxprofiler_housekeeper_dir")
-def fixture_taxprofiler_housekeeper_dir(tmpdir_factory, taxprofiler_dir: Path) -> Path:
-    """Return the path to the Taxprofiler Housekeeper bundle directory."""
-    return tmpdir_factory.mktemp("bundles")
+@pytest.fixture(name="taxprofiler_sample_sheet_path")
+def fixture_taxprofiler_sample_sheet_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
+    """Path to sample sheet."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet"
+    ).with_suffix(FileExtensions.CSV)
 
 
-@pytest.fixture(scope="session", name="taxprofiler_fastq_file_forward")
-def fixture_taxprofiler_fastq_file_l_1_r_1(taxprofiler_housekeeper_dir: Path) -> Path:
-    return Path(taxprofiler_housekeeper_dir, "forward_read.fastq.gz")
+@pytest.fixture(name="taxprofiler_params_file_path")
+def fixture_taxprofiler_params_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
+    """Path to parameters file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_params_file"
+    ).with_suffix(FileExtensions.YAML)
 
 
-@pytest.fixture(scope="session", name="taxprofiler_fastq_file_reverse")
-def fixture_taxprofiler_fastq_file_l_1_r_2(taxprofiler_housekeeper_dir: Path) -> Path:
-    return Path(taxprofiler_housekeeper_dir, "reverse_read.fastq.gz")
-
-
-@pytest.fixture(scope="session", name="taxprofiler_mock_fastq_files")
-def fixture_taxprofiler_mock_fastq_files(
-    taxprofiler_fastq_file_forward: Path, taxprofiler_fastq_file_reverse: Path
-) -> List[Path]:
-    """Return list of all mock fastq files to commit to mock housekeeper"""
-    return [taxprofiler_fastq_file_forward, taxprofiler_fastq_file_reverse]
-
-
-@pytest.fixture(scope="function", name="taxprofiler_housekeeper")
-def fixture_taxprofiler_housekeeper(
+@pytest.fixture(scope="function", name="nf_analysis_housekeeper")
+def fixture_nf_analysis_housekeeper(
     housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
-    taxprofiler_mock_fastq_files: List[Path],
-    taxprofiler_sample_id: str,
+    mock_fastq_files: List[Path],
+    sample_id: str,
 ):
     """Create populated Housekeeper sample bundle mock."""
 
     bundle_data: Dict[str, Any] = {
-        "name": taxprofiler_sample_id,
+        "name": sample_id,
         "created": fixture_timestamp_now,
         "version": "1.0",
         "files": [
-            {"path": str(f), "tags": [SequencingFileTag.FASTQ], "archive": False}
-            for f in taxprofiler_mock_fastq_files
+            {
+                "path": fastq_file_path.as_posix(),
+                "tags": [SequencingFileTag.FASTQ],
+                "archive": False,
+            }
+            for fastq_file_path in mock_fastq_files
         ],
     }
     helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
@@ -3108,15 +3057,16 @@ def fixture_taxprofiler_context(
     cg_dir: Path,
     helpers: StoreHelpers,
     taxprofiler_case_id: str,
-    taxprofiler_sample_id: str,
+    sample_id: str,
     trailblazer_api: MockTB,
-    taxprofiler_housekeeper: HousekeeperAPI,
+    nf_analysis_housekeeper: HousekeeperAPI,
 ) -> CGConfig:
     """Context to use in cli."""
-    cg_context.housekeeper_api_: HousekeeperAPI = taxprofiler_housekeeper
+    cg_context.housekeeper_api_: HousekeeperAPI = nf_analysis_housekeeper
     cg_context.trailblazer_api_: MockTB = trailblazer_api
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
+
     taxprofiler_case: Family = helpers.add_case(
         store=status_db,
         internal_id=taxprofiler_case_id,
@@ -3126,7 +3076,7 @@ def fixture_taxprofiler_context(
 
     taxprofiler_sample: Sample = helpers.add_sample(
         status_db,
-        internal_id=taxprofiler_sample_id,
+        internal_id=sample_id,
         sequenced_at=datetime.now(),
     )
 
