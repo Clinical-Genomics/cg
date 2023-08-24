@@ -57,7 +57,8 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Return sample sheet headers."""
         return RnafusionSample.headers()
 
-    def reformat_sample_content(self, sample_sheet: RnafusionSample) -> List[List[str]]:
+    @staticmethod
+    def reformat_sample_content(sample_sheet: RnafusionSample) -> List[List[str]]:
         """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
         return [
             [sample_sheet.sample, fastq_forward, fastq_reverse, str(sample_sheet.strandedness)]
