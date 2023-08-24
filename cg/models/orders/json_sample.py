@@ -13,8 +13,7 @@ def join_list(potential_list: Any):
 
 
 def convert_well(value: str):
-    """Forces the format of the well position to separate rows and values with a ':', e.g. A:8, C:3 etc.
-    Allowed values begin with a letter A-H and ends with a number 1-12"""
+    """Forces the format of the well position to separate rows and values with a ':', e.g. A:8, C:3 etc."""
     if not value:
         return None
     return value if ":" in value else ":".join([value[0], value[1:]])
