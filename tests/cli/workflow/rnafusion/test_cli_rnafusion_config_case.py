@@ -80,7 +80,7 @@ def test_wrong_strandedness(
     rnafusion_strandedness_not_acceptable: str,
 ):
     """Test command with --strandedness option."""
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.ERROR)
 
     # GIVEN a VALID case_id and non-accepted strandedness option
 
