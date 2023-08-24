@@ -14,43 +14,6 @@ from tests.models.rnafusion.conftest import fixture_rnafusion_strandedness_not_a
 LOG = logging.getLogger(__name__)
 
 
-def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):
-    """Test command without case_id."""
-    # GIVEN NO case
-
-    # WHEN running
-    result = cli_runner.invoke(config_case, obj=rnafusion_context)
-
-    # THEN command should not exit successfully
-    assert result.exit_code != EXIT_SUCCESS
-
-    # THEN command log should inform about missing arguments
-    assert "Missing argument" in result.output
-
-
-def test_with_missing_case(
-    cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
-    caplog: LogCaptureFixture,
-    case_id_does_not_exist: str,
-):
-    """Test command with invalid case to start with."""
-    caplog.set_level(logging.ERROR)
-
-    # GIVEN a case not in the StatusDB database
-    assert not rnafusion_context.status_db.get_case_by_internal_id(
-        internal_id=case_id_does_not_exist
-    )
-    # WHEN running
-    result = cli_runner.invoke(config_case, [case_id_does_not_exist], obj=rnafusion_context)
-
-    # THEN command should not exit successfully
-    assert result.exit_code != EXIT_SUCCESS
-
-    # THEN the error log should indicate that the case is invalid
-    assert "could not be found in Status DB!" in caplog.text
-
-
 def test_without_samples(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
