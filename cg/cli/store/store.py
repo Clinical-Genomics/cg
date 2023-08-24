@@ -28,7 +28,7 @@ def store(context: CGConfig):
     crunchy_api: CrunchyAPI = context.crunchy_api
 
     compress_api = CompressAPI(
-        hk_api=housekeeper_api, crunchy_api=crunchy_api, demux_root=context.demultiplex.out_dir
+        hk_api=housekeeper_api, crunchy_api=crunchy_api, demux_root=context.flow_cells_dir
     )
     context.meta_apis["compress_api"] = compress_api
 

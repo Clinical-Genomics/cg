@@ -9,6 +9,7 @@ Click<7.0
 
 # server
 blinker
+cachecontrol
 Flask-Admin
 Flask-CORS
 Flask-Dance

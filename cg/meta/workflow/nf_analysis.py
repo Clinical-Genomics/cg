@@ -2,17 +2,18 @@ import logging
 import operator
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
-from cg.constants.nextflow import NFX_WORK_DIR
+from cg.constants.nextflow import NFX_SAMPLE_HEADER, NFX_WORK_DIR
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
+from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.command_args import CommandArgs
+from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -167,6 +168,27 @@ class NfAnalysisAPI(AnalysisAPI):
         """Adds header to bundle content."""
         return {"files": deliverables_content}
 
+    def write_params_file(self, case_id: str, pipeline_parameters: dict) -> None:
+        """Write params-file for analysis."""
+        LOG.info(pipeline_parameters)
+        write_yaml_nextflow_style(
+            content=pipeline_parameters,
+            file_path=self.get_params_file_path(case_id=case_id),
+        )
+
+    @staticmethod
+    def write_sample_sheet_csv(
+        samplesheet_content: Dict[str, List[str]],
+        headers: List[str],
+        config_path: Path,
+    ) -> None:
+        """Write sample sheet CSV file."""
+        with open(config_path, "w") as outfile:
+            outfile.write(",".join(headers))
+            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
+                outfile.write("\n")
+                outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
+
     @staticmethod
     def write_deliverables_bundle(
         deliverables_content: dict, file_path: Path, file_format=FileFormat.YAML
@@ -250,3 +272,12 @@ class NfAnalysisAPI(AnalysisAPI):
                 tower_id = NfTowerHandler.get_tower_id(stdout_lines=self.process.stdout_lines())
                 self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
             LOG.info(self.process.stdout)
+
+    @staticmethod
+    def replace_dict_values(replace_map: dict, my_dict: dict) -> dict:
+        for str_to_replace, with_value in replace_map.items():
+            for key, value in my_dict.items():
+                if not value:
+                    value = "~"
+                my_dict.update({key: value.replace(str_to_replace, with_value)})
+        return my_dict
