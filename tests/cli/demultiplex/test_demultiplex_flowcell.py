@@ -228,42 +228,6 @@ def test_is_demultiplexing_complete(tmp_flow_cell_directory_bcl2fastq: Path):
     assert flow_cell.is_demultiplexing_complete
 
 
-def test_delete_flow_cell_dry_run_cgstats(
-    cli_runner: testing.CliRunner,
-    tmp_flow_cell_directory_bcl2fastq: Path,
-    demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell_id: str,
-    caplog,
-):
-    """Test if logic work - call function in dry run."""
-    caplog.set_level(logging.DEBUG)
-
-    # GIVEN a flow cell to be deleted
-    assert bcl2fastq_flow_cell_id in tmp_flow_cell_directory_bcl2fastq.name
-
-    # GIVEN a path to the demux out dir for a flow cell
-    Path(demultiplex_context.demultiplex_api.demultiplexed_runs_dir, bcl2fastq_flow_cell_id).mkdir()
-
-    # WHEN executing the commando to remove flow cell from cgstats in dry run mode
-
-    # THEN the exit code should be fine
-    result: testing.Result = cli_runner.invoke(
-        delete_flow_cell,
-        [
-            "-f",
-            bcl2fastq_flow_cell_id,
-            "--cg-stats",
-            "--dry-run",
-            "--yes",
-        ],
-        obj=demultiplex_context,
-    )
-    assert result.exit_code == 0
-
-    # THEN the appropriate flow cell should be prompted for removal
-    assert f"DeleteDemuxAPI-CGStats: Would remove {bcl2fastq_flow_cell_id}" in caplog.text
-
-
 def test_delete_flow_cell_dry_run_status_db(
     cli_runner: testing.CliRunner,
     tmp_flow_cell_directory_bcl2fastq: Path,
@@ -313,7 +277,7 @@ def test_delete_flow_cell_dry_run_status_db(
         in caplog.text
     )
     assert f"DeleteDemuxAPI-StatusDB: Would remove {bcl2fastq_flow_cell_id}" in caplog.text
-    assert f"DeleteDemuxAPI-CGStats: Would remove {bcl2fastq_flow_cell_id}" in caplog.text
+
     assert (
         "DeleteDemuxAPI-Hasta: Would have removed the following directory: "
         f"{demultiplex_context.demultiplex_api.demultiplexed_runs_dir / Path(f'some_prefix_1100_{bcl2fastq_flow_cell_id}')}\n"
