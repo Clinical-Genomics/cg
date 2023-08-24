@@ -150,15 +150,9 @@ class ExcelOrderformParser(OrderformParser):
 
         analysis = self.parse_data_analysis()
         if Orderform.RML in document_title:
-            if analysis == self.NO_ANALYSIS:
-                return str(OrderType.RML)
-            return analysis
-
+            return str(OrderType.RML) if analysis == self.NO_ANALYSIS else analysis
         if Orderform.MIP_DNA in document_title:
-            if analysis == self.NO_ANALYSIS:
-                return str(OrderType.FASTQ)
-            return analysis
-
+            return str(OrderType.FASTQ) if analysis == self.NO_ANALYSIS else analysis
         raise OrderFormError(f"Undetermined project type in: {document_title}")
 
     def parse_data_analysis(self) -> str:
@@ -219,10 +213,8 @@ class ExcelOrderformParser(OrderformParser):
         if not raw_samples:
             raise OrderFormError("orderform doesn't contain any samples")
 
-        ExcelSampleValidator = TypeAdapter(List[ExcelSample])
-        self.samples: List[ExcelSample] = ExcelSampleValidator.validate_python(
-            raw_samples, from_attributes=True, strict=False
-        )
+        excel_sample_list_validator = TypeAdapter(List[ExcelSample])
+        self.samples: List[ExcelSample] = excel_sample_list_validator.validate_python(raw_samples)
         self.project_type: str = self.get_project_type(document_title)
         self.delivery_type = self.get_data_delivery()
         self.customer_id = self.get_customer_id()

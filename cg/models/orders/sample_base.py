@@ -3,7 +3,8 @@ from typing import List, Optional
 
 from cg.constants import DataDelivery, Pipeline
 from cg.store.models import Application, Customer, Family, Pool, Sample
-from pydantic import BaseModel, ConfigDict, constr, field_validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, constr
+from typing_extensions import Annotated
 
 
 class ControlEnum(str, Enum):
@@ -39,6 +40,10 @@ class StatusEnum(str, Enum):
 
 
 NAME_PATTERN = r"^[A-Za-z0-9-]*$"
+
+
+def snake_case(value: str):
+    return value.lower().replace(" ", "_")
 
 
 class OrderSample(BaseModel):
@@ -96,7 +101,7 @@ class OrderSample(BaseModel):
     pool: Optional[constr(max_length=Pool.name.property.columns[0].type.length)] = None
     post_formalin_fixation_time: Optional[int] = None
     pre_processing_method: Optional[str] = None
-    priority: PriorityEnum = PriorityEnum.standard
+    priority: Annotated[PriorityEnum, BeforeValidator(snake_case)] = PriorityEnum.standard
     quantity: Optional[int] = None
     reagent_label: Optional[str] = None
     reference_genome: Optional[
@@ -120,8 +125,3 @@ class OrderSample(BaseModel):
     volume: Optional[str] = None
     well_position: Optional[str] = None
     well_position_rml: Optional[str] = None
-
-    @classmethod
-    @field_validator("priority", mode="before")
-    def snake_case(cls, value: str):
-        return value.lower().replace(" ", "_")
