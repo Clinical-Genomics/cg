@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Iterable, List, Optional
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.cgstats.stats import StatsAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import DeleteDemuxError
 from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
