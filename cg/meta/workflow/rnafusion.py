@@ -94,7 +94,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         return RnafusionParameters(
             clusterOptions=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
             genomes_base=genomes_base or self.get_references_path(),
-            input=self.get_case_config_path(case_id=case_id),
+            input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             priority=self.account,
         )
@@ -124,7 +124,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             return
         self.write_sample_sheet(
             content=sample_sheet_content,
-            file_path=self.get_case_config_path(case_id=case_id),
+            file_path=self.get_sample_sheet_path(case_id=case_id),
             header=RnafusionSample.headers(),
         )
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters)

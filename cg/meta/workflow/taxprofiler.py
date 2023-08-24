@@ -92,7 +92,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         LOG.info("Getting parameters information")
         return TaxprofilerParameters(
             clusterOptions=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
-            input=self.get_case_config_path(case_id=case_id),
+            input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             databases=self.databases,
             hostremoval_reference=self.hostremoval_reference,
@@ -119,7 +119,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             return
         self.write_sample_sheet(
             content=sample_sheet_content,
-            file_path=self.get_case_config_path(case_id=case_id),
+            file_path=self.get_sample_sheet_path(case_id=case_id),
             header=TaxprofilerSample.headers(),
         )
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters)

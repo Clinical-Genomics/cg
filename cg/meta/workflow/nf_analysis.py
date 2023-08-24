@@ -67,7 +67,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Path to case working directory."""
         return Path(self.root_dir, case_id)
 
-    def get_case_config_path(self, case_id: str) -> Path:
+    def get_sample_sheet_path(self, case_id: str) -> Path:
         """Path to sample sheet."""
         return Path(self.get_case_path(case_id), f"{case_id}_samplesheet").with_suffix(
             FileExtensions.CSV
@@ -140,7 +140,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
         """Raise an error if config file is not found."""
-        if not dry_run and not Path(self.get_case_config_path(case_id=case_id)).exists():
+        if not dry_run and not Path(self.get_sample_sheet_path(case_id=case_id)).exists():
             raise ValueError(f"No config file found for case {case_id}")
 
     def verify_deliverables_file_exists(self, case_id: str) -> None:
