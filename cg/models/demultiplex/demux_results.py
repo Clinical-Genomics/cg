@@ -137,11 +137,6 @@ class DemuxResults:
         return Path(self.demux_dir, "lane_barcode_summary.csv")
 
     @property
-    def demux_sample_sheet_path(self) -> Path:
-        """Return the path to sample sheet in demuxed flowcell dir"""
-        return Path(self.results_dir, self.flow_cell.sample_sheet_path.name)
-
-    @property
     def copy_complete_path(self) -> Path:
         """Return the path to a file named copycomplete.txt used as flag that post processing is
         ready."""

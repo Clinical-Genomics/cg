@@ -7,8 +7,9 @@ from pathlib import Path
 from typing import Iterable, List, Optional
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import SequencingFileTag
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import DeleteDemuxError
+from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Sample, Flowcell
@@ -77,15 +78,17 @@ class DeleteDemuxAPI:
 
     def _delete_sample_sheet_housekeeper(self) -> None:
         """Delete the presence of all sample sheets related to a flow cell in Housekeeper."""
-        sample_sheet_files: Iterable[File] = self.housekeeper_api.files(
-            tags=[self.flow_cell_name, "samplesheet"]
+        sample_sheet_files: List[File] = get_sample_sheets_from_latest_version(
+            flow_cell_id=self.flow_cell_name, hk_api=self.housekeeper_api
         )
-        if any(sample_sheet_files):
+        if sample_sheet_files:
             for file in sample_sheet_files:
                 self.housekeeper_api.delete_file(file_id=file.id)
                 LOG.info(f"DeleteDemuxAPI-Housekeeper: Deleted {file.path} from housekeeper")
         else:
-            LOG.info(f"DeleteDemuxAPI-Housekeeper: No files found with tag: {self.flow_cell_name}")
+            LOG.info(
+                f"DeleteDemuxAPI-Housekeeper: No sample sheets found with tag: {self.flow_cell_name}"
+            )
 
     def _delete_files_if_related_in_housekeeper_by_tag(self, sample: Sample, tags: List[str]):
         """Delete any existing fastq related to sample"""
