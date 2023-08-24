@@ -40,7 +40,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
         return_value=lims_novaseq_bcl2fastq_samples,
     )
 
-    # GIVEN that the flow cell directory is in the context
+    # GIVEN that the context's flow cell directory holds the given flow cell
     sample_sheet_context.flow_cells_dir: str = (
         tmp_flow_cells_directory_no_run_parameters.parent.as_posix()
     )

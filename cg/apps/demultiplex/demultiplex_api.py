@@ -12,7 +12,6 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
-from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.priority import SlurmQos
 from cg.io.controller import WriteFile
 from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
@@ -20,8 +19,6 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch, SbatchDragen
 from cgmodels.cg.constants import Pipeline
-
-from housekeeper.store.models import File
 
 LOG = logging.getLogger(__name__)
 
