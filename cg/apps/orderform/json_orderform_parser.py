@@ -1,4 +1,4 @@
-from typing import List, Optional, Set
+from typing import List, Set
 
 from cg.apps.orderform.orderform_parser import OrderformParser
 from cg.constants import DataDelivery, Pipeline
