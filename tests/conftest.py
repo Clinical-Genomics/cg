@@ -10,6 +10,9 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
+from housekeeper.store.models import File, Version
+from requests import Response
+
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -40,22 +43,17 @@ from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.store import Store
-from cg.utils import Process
 from cg.store.models import (
     Bed,
     BedVersion,
     Customer,
     Family,
+    Flowcell,
     Organism,
     Sample,
     SampleLaneSequencingMetrics,
-    Flowcell,
 )
-
 from cg.utils import Process
-from housekeeper.store.models import File, Version
-from requests import Response
-
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -2767,6 +2765,22 @@ def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
 def fixture_rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
     """Returns the content of a mock Multiqc JSON file."""
     return read_json(file_path=Path(rnafusion_analysis_dir, "multiqc_data.json"))
+
+
+@pytest.fixture(name="rnafusion_sample_sheet_path")
+def fixture_rnafusion_sample_sheet_path(rnafusion_dir, rnafusion_case_id) -> Path:
+    """Path to sample sheet."""
+    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    )
+
+
+@pytest.fixture(name="rnafusion_params_file_path")
+def fixture_rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
+    """Path to parameters file."""
+    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_params_file").with_suffix(
+        FileExtensions.YAML
+    )
 
 
 @pytest.fixture(name="tower_id")
