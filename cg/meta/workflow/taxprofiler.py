@@ -46,64 +46,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.email: str = config.taxprofiler.slurm.mail_user
         self.nextflow_binary_path: str = config.taxprofiler.binary_path
 
-    @staticmethod
-    def build_sample_sheet_content(
-        sample_name: str,
-        fastq_forward: List[str],
-        fastq_reverse: List[str],
-        instrument_platform: SequencingPlatform.ILLUMINA,
-        fasta: str = "",
-    ) -> Dict[str, List[str]]:
-        """Build sample sheet headers and lists."""
-        try:
-            TaxprofilerSample(
-                sample=sample_name,
-                fastq_forward=fastq_forward,
-                fastq_reverse=fastq_reverse,
-                instrument_platform=instrument_platform,
-            )
-        except ValidationError as error:
-            LOG.error(error)
-            raise ValueError
-
-        # Complete sample lists to the same length as fastq_forward:
-        samples_full_list: List[str] = [sample_name] * len(fastq_forward)
-        instrument_full_list: List[str] = [instrument_platform] * len(fastq_forward)
-        fasta_full_list: List[str] = [fasta] * len(fastq_forward)
-
-        sample_sheet_content: Dict[str, List[str]] = {
-            NFX_SAMPLE_HEADER: samples_full_list,
-            TAXPROFILER_RUN_ACCESSION: samples_full_list,
-            TAXPROFILER_INSTRUMENT_PLATFORM: instrument_full_list,
-            NFX_READ1_HEADER: fastq_forward,
-            NFX_READ2_HEADER: fastq_reverse,
-            TAXPROFILER_FASTA_HEADER: fasta_full_list,
-        }
-
-        return sample_sheet_content
-
-    @property
-    def sample_sheet_header(self) -> List[str]:
-        """Return sample sheet headers."""
-        return TaxprofilerSample.headers()
-
-    @staticmethod
-    def reformat_sample_content(sample_sheet: TaxprofilerSample) -> List[List[str]]:
-        """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
-        return [
-            [
-                sample_sheet.sample,
-                sample_sheet.run_accession,
-                sample_sheet.instrument_platform,
-                fastq_forward,
-                fastq_reverse,
-                sample_sheet.fasta,
-            ]
-            for fastq_forward, fastq_reverse in zip(
-                sample_sheet.fastq_forward, sample_sheet.fastq_reverse
-            )
-        ]
-
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, instrument_platform: SequencingPlatform.ILLUMINA, fasta: str = ""
     ) -> List[List[str]]:
@@ -124,7 +66,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             fastq_reverse=reverse_read,
             fasta=fasta,
         )
-        return self.reformat_sample_content(sample_sheet=sample_sheet)
+        return sample_sheet.reformat_sample_content()
 
     def get_sample_sheet_content(
         self,
@@ -178,6 +120,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.write_sample_sheet(
             content=sample_sheet_content,
             file_path=self.get_case_config_path(case_id=case_id),
-            header=self.sample_sheet_header,
+            header=TaxprofilerSample.headers(),
         )
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters)

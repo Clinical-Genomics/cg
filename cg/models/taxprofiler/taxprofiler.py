@@ -46,3 +46,17 @@ class TaxprofilerSample(NextflowSample):
             "fastq_2",
             "fasta",
         ]
+
+    def reformat_sample_content(self) -> List[List[str]]:
+        """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
+        return [
+            [
+                self.sample,
+                self.run_accession,
+                self.instrument_platform,
+                fastq_forward,
+                fastq_reverse,
+                self.fasta,
+            ]
+            for fastq_forward, fastq_reverse in zip(self.fastq_forward, self.fastq_reverse)
+        ]
