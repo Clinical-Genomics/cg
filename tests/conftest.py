@@ -980,9 +980,12 @@ def fixture_unfinished_bcl2fastq_flow_cell(
 
 
 @pytest.fixture(name="sample_sheet_context")
-def fixture_sample_sheet_context(cg_context: CGConfig, lims_api: LimsAPI) -> CGConfig:
-    """Return cg context with an added lims API."""
-    cg_context.lims_api_ = lims_api
+def fixture_sample_sheet_context(
+    cg_context: CGConfig, lims_api: LimsAPI, populated_housekeeper_api: HousekeeperAPI
+) -> CGConfig:
+    """Return cg context with added Lims and Housekeeper API."""
+    cg_context.lims_api_: LimsAPI = lims_api
+    cg_context.housekeeper_api_: HousekeeperAPI = populated_housekeeper_api
     return cg_context
 
 
@@ -1084,14 +1087,13 @@ def store_with_demultiplexed_samples(
 def fixture_demultiplexing_context_for_demux(
     demultiplexing_api_for_demux: DemultiplexingAPI,
     stats_api: StatsAPI,
-    real_housekeeper_api: HousekeeperAPI,
     cg_context: CGConfig,
     store_with_demultiplexed_samples: Store,
 ) -> CGConfig:
     """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api_for_demux
     cg_context.cg_stats_api_ = stats_api
-    cg_context.housekeeper_api_ = real_housekeeper_api
+    cg_context.housekeeper_api_ = demultiplexing_api_for_demux.hk_api
     cg_context.status_db_ = store_with_demultiplexed_samples
     return cg_context
 
@@ -1140,20 +1142,27 @@ def fixture_demultiplex_configs(
 
 @pytest.fixture(name="demultiplexing_api_for_demux")
 def fixture_demultiplexing_api_for_demux(
-    demultiplex_configs_for_demux: dict, sbatch_process: Process
+    demultiplex_configs_for_demux: dict,
+    sbatch_process: Process,
+    populated_housekeeper_api: HousekeeperAPI,
 ) -> DemultiplexingAPI:
     """Return demultiplex API."""
-    demux_api = DemultiplexingAPI(config=demultiplex_configs_for_demux)
+    demux_api = DemultiplexingAPI(
+        config=demultiplex_configs_for_demux,
+        housekeeper_api=populated_housekeeper_api,
+    )
     demux_api.slurm_api.process = sbatch_process
     return demux_api
 
 
 @pytest.fixture(name="demultiplexing_api")
 def fixture_demultiplexing_api(
-    demultiplex_configs: dict, sbatch_process: Process
+    demultiplex_configs: dict, sbatch_process: Process, populated_housekeeper_api: HousekeeperAPI
 ) -> DemultiplexingAPI:
     """Return demultiplex API."""
-    demux_api = DemultiplexingAPI(config=demultiplex_configs)
+    demux_api = DemultiplexingAPI(
+        config=demultiplex_configs, housekeeper_api=populated_housekeeper_api
+    )
     demux_api.slurm_api.process = sbatch_process
     return demux_api
 
