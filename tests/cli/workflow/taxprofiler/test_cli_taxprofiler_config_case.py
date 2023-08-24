@@ -18,8 +18,10 @@ def test_without_options(cli_runner: CliRunner, taxprofiler_context: CGConfig):
     # WHEN dry running without anything specified
     result = cli_runner.invoke(config_case, obj=taxprofiler_context)
 
-    # THEN command should mention argument
+    # THEN command should not exit successfully
     assert result.exit_code != EXIT_SUCCESS
+
+    # THEN command log should inform about missing arguments
     assert "Missing argument" in result.output
 
 
@@ -41,5 +43,6 @@ def test_with_missing_case(
 
     # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
+
     # THEN ERROR log should be printed containing invalid case_id
     assert "could not be found in StatusDB!" in caplog.text
