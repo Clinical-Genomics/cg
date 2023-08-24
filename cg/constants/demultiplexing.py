@@ -27,6 +27,12 @@ class DemultiplexingDirsAndFiles(StrEnum):
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
     BCL2FASTQ_TILE_DIR_PATTERN: str = r"l\dt\d{2}"
+    QUEUED_FOR_POST_PROCESSING: str = "post_processing_queued.txt"
+    ANALYSIS_COMPLETED: str = "Secondary_Analysis_Complete.txt"
+    ANALYSIS: str = "Analysis"
+    DATA: str = "Data"
+    FLOW_CELLS_DIRECTORY_NAME: str = "flow_cells"
+    DEMULTIPLEXED_RUNS_DIRECTORY_NAME: str = "demultiplexed_runs"
 
 
 class RunParametersXMLNodes(StrEnum):

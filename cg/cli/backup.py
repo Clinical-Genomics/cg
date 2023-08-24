@@ -43,7 +43,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
         status=context.status_db,
         tar_api=tar_api,
         pdc_api=pdc_api,
-        root_dir=context.backup.root.dict(),
+        flow_cells_dir=context.flow_cells_dir,
         dry_run=dry_run,
     )
     backup_api: BackupAPI = context.meta_apis["backup_api"]

@@ -264,7 +264,7 @@ class FamilyView(BaseView):
     def set_action_for_cases(self, action: Union[CaseActions, None], case_entry_ids: List[str]):
         try:
             for entry_id in case_entry_ids:
-                family = self.get_case_by_entry_id(entry_id=entry_id)
+                family = db.get_case_by_entry_id(entry_id=entry_id)
                 if family:
                     family.action = action
 
