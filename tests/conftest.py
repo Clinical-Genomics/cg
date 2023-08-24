@@ -26,9 +26,10 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.api import LimsAPI
 from cg.constants import FileExtensions, Pipeline, SequencingFileTag
-from cg.constants.constants import CaseActions, FileFormat
+from cg.constants.constants import CaseActions, FileFormat, Strandedness
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
+from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Gender
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
@@ -2619,6 +2620,50 @@ def fixture_mock_fastq_files(fastq_file_forward: Path, fastq_file_reverse: Path)
     return [fastq_file_forward, fastq_file_reverse]
 
 
+@pytest.fixture(name="sequencing_platform")
+def fixture_sequencing_platform() -> str:
+    """Return a default sequencing platform."""
+    return SequencingPlatform.ILLUMINA
+
+
+@pytest.fixture(name="taxprofiler_sample_sheet_content")
+def fixture_taxprofiler_sample_sheet_content(
+    sample_name: str, sequencing_platform: str, fastq_file_forward: Path, fastq_file_reverse: Path
+) -> str:
+    """Return the expected sample sheet content  for taxprofiler."""
+    return ",".join(
+        [
+            sample_name,
+            sample_name,
+            sequencing_platform,
+            fastq_file_forward.as_posix(),
+            fastq_file_reverse.as_posix(),
+            "",
+        ]
+    )
+
+
+@pytest.fixture(name="strandedness")
+def fixture_strandedness() -> str:
+    """Return a default strandedness."""
+    return Strandedness.REVERSE
+
+
+@pytest.fixture(name="rnafusion_sample_sheet_content")
+def fixture_rnafusion_sample_sheet_content(
+    rnafusion_case_id: str, fastq_file_forward: Path, fastq_file_reverse: Path, strandedness: str
+) -> str:
+    """Return the expected sample sheet content  for rnafusion."""
+    return ",".join(
+        [
+            rnafusion_case_id,
+            fastq_file_forward.as_posix(),
+            fastq_file_reverse.as_posix(),
+            strandedness,
+        ]
+    )
+
+
 @pytest.fixture(scope="function", name="rnafusion_context")
 def fixture_rnafusion_context(
     cg_context: CGConfig,
@@ -3058,6 +3103,7 @@ def fixture_taxprofiler_context(
     helpers: StoreHelpers,
     taxprofiler_case_id: str,
     sample_id: str,
+    sample_name: str,
     trailblazer_api: MockTB,
     nf_analysis_housekeeper: HousekeeperAPI,
 ) -> CGConfig:
@@ -3078,6 +3124,7 @@ def fixture_taxprofiler_context(
         status_db,
         internal_id=sample_id,
         sequenced_at=datetime.now(),
+        name=sample_name,
     )
 
     helpers.add_relationship(

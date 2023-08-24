@@ -9,6 +9,7 @@ from click.testing import CliRunner
 from cg.cli.workflow.rnafusion.base import config_case
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
+from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSample
 from tests.models.rnafusion.conftest import fixture_rnafusion_strandedness_not_acceptable
 
 LOG = logging.getLogger(__name__)
@@ -63,10 +64,11 @@ def test_wrong_strandedness(
 def test_defaults(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
-    caplog: LogCaptureFixture,
     rnafusion_case_id: str,
     rnafusion_sample_sheet_path: Path,
     rnafusion_params_file_path: Path,
+    rnafusion_sample_sheet_content: str,
+    caplog: LogCaptureFixture,
 ):
     """Test that command generates default config files."""
     caplog.set_level(logging.INFO)
@@ -88,6 +90,18 @@ def test_defaults(
     assert "Writing parameters file" in caplog.text
     assert rnafusion_sample_sheet_path.is_file()
     assert rnafusion_params_file_path.is_file()
+
+    # THEN the sample sheet content should match the expected values
+    with rnafusion_sample_sheet_path.open("r") as file:
+        content = file.read()
+        assert ",".join(RnafusionSample.headers()) in content
+        assert rnafusion_sample_sheet_content in content
+
+    # THEN the params file should contain all parameters
+    with rnafusion_params_file_path.open("r") as file:
+        content = file.read()
+        for parameter in RnafusionParameters.__annotations__.keys():
+            assert parameter in content
 
 
 def test_dry_run(
