@@ -118,17 +118,11 @@ class DemultiplexingAPI:
         """Create the path to where the demultiplexed result should be produced."""
         return Path(self.demultiplexed_runs_dir, flow_cell.path.name)
 
-    def get_sample_sheet(self, flow_cell_id: str) -> Optional[File]:
-        """Returns the latest sample sheet of the flow cell from Housekeeper if it exists."""
-        sample_sheets: List = get_sample_sheets_from_latest_version(
-            flow_cell_id=flow_cell_id, hk_api=self.hk_api
-        )
-        if sample_sheets:
-            return sample_sheets[0]
-
     def is_sample_sheet_in_housekeeper(self, flow_cell_id: str) -> bool:
         """Returns True if the sample sheet for the flow cell exists in Housekeeper."""
-        return self.get_sample_sheet(flow_cell_id=flow_cell_id) is not None
+        return bool(
+            get_sample_sheets_from_latest_version(flow_cell_id=flow_cell_id, hk_api=self.hk_api)
+        )
 
     def get_flow_cell_unaligned_dir(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Returns the path to where the demultiplexed result are located."""
