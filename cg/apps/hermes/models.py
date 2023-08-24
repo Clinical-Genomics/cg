@@ -3,7 +3,8 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from pydantic.v1 import BaseModel, validator
+from cg.exc import CgDataError
+from pydantic import BaseModel, field_validator
 
 LOG = logging.getLogger(__name__)
 
@@ -23,16 +24,17 @@ class CGDeliverables(BaseModel):
     bundle_id: str
     files: List[CGTag]
 
-    @validator("files", each_item=True)
-    def check_mandatory_exists(cls, file):
-        if file.mandatory:
-            assert Path(file.path).exists(), f"Mandatory file cannot be found at {file.path}"
-            return file
-        if not Path(file.path).exists():
-            LOG.info("Optional file %s not found, removing from bundle", file.path)
-            return
-        return file
-
-    @validator("files")
-    def remove_invalid(cls, value):
-        return [item for item in value if item]
+    @classmethod
+    @field_validator("files")
+    def remove_missing_files(cls, files: List[CGTag]) -> List[CGTag]:
+        """Validates that the files in a suggested CGDeliverables object are correct.
+        I.e. if a file doesn't exist an error is raised if the file was mandatory,
+        otherwise it is simply removed from the list of files."""
+        filtered_files: List[CGTag] = files.copy()
+        for file in files:
+            if file.mandatory and not Path(file.path).exists():
+                raise CgDataError(f"Mandatory file cannot be found at {file.path}")
+            if not Path(file.path).exists():
+                LOG.info(f"Optional file {file.path} not found, removing from bundle.")
+                filtered_files.remove(file)
+        return filtered_files
