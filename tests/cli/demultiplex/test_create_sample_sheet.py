@@ -28,7 +28,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
     mocker,
 ):
     """Test that creating a flow cell sample sheet fails if there is no run parameters file."""
-    # GIVEN a folder with a non-existing sample sheet
+    # GIVEN a folder with a non-existing sample sheet nor RunParameters file
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=tmp_flow_cells_directory_no_run_parameters
     )
@@ -40,10 +40,10 @@ def test_create_sample_sheet_no_run_parameters_fails(
         return_value=lims_novaseq_bcl2fastq_samples,
     )
 
-    # GIVEN a demux API context
-    demux_api: DemultiplexingAPI = sample_sheet_context.demultiplex_api
-    demux_api.flow_cells_dir: Path = tmp_flow_cells_directory_no_run_parameters.parent
-    sample_sheet_context.demultiplex_api_: DemultiplexingAPI = demux_api
+    # GIVEN that the flow cell directory is in the context
+    sample_sheet_context.flow_cells_dir: str = (
+        tmp_flow_cells_directory_no_run_parameters.parent.as_posix()
+    )
 
     # WHEN running the create sample sheet command
     result: testing.Result = cli_runner.invoke(
