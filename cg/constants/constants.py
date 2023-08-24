@@ -1,4 +1,5 @@
 """Constants for cg."""
+from enum import Enum
 
 import click
 
@@ -140,7 +141,9 @@ class FileExtensions(StrEnum):
     GZIP: str = ".gz"
     JSON: str = ".json"
     KEY: str = ".key"
+    LOG: str = ".log"
     NO_EXTENSION: str = ""
+    SBATCH: str = ".sbatch"
     SPRING: str = ".spring"
     TAR: str = ".tar"
     TMP: str = ".tmp"
@@ -197,3 +200,11 @@ class MetaApis:
 class WorkflowManager(StrEnum):
     Slurm: str = "slurm"
     Tower: str = "nf_tower"
+
+
+class Strandedness(StrEnum):
+    """Strandedness types."""
+
+    FORWARD: str = "forward"
+    REVERSE: str = "reverse"
+    UNSTRANDED: str = "unstranded"

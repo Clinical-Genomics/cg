@@ -1,5 +1,4 @@
 """Test observations API methods."""
-
 import logging
 from typing import Dict
 
@@ -12,14 +11,12 @@ from cg.constants.sequencing import SequencingMethod
 from cg.exc import LoqusdbDuplicateRecordError, LoqusdbUploadCaseError, CaseNotFoundError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
-from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import (
     MipDNAObservationsInputFiles,
     BalsamicObservationsInputFiles,
 )
-from cg.store import Store
-from cg.store.models import Family
 from cg.store.models import Customer
+from cg.store.models import Family
 from tests.store_helpers import StoreHelpers
 
 
@@ -28,7 +25,6 @@ def test_observations_upload(
     mip_dna_observations_api: MipDNAObservationsAPI,
     observations_input_files: MipDNAObservationsInputFiles,
     nr_of_loaded_variants: int,
-    analysis_store: Store,
     caplog: LogCaptureFixture,
     mocker,
 ):
@@ -36,7 +32,7 @@ def test_observations_upload(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a mocked observations API and a list of mocked observations files
-    case: Family = analysis_store.get_case_by_internal_id(internal_id=case_id)
+    case: Family = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
     case.customer.internal_id = LoqusdbMipCustomers.KLINISK_IMMUNOLOGI.value
     mocker.patch.object(
         mip_dna_observations_api,
@@ -76,13 +72,12 @@ def test_is_duplicate(
     case_id: str,
     mip_dna_observations_api: MipDNAObservationsAPI,
     observations_input_files: MipDNAObservationsInputFiles,
-    analysis_store: Store,
     mocker,
 ):
     """Test duplicate extraction for a case that is not in Loqusdb."""
 
     # GIVEN a Loqusdb instance with no case duplicates
-    case: Family = analysis_store.get_case_by_internal_id(internal_id=case_id)
+    case: Family = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
     mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_case", return_value=None)
     mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_duplicate", return_value=False)
 
@@ -102,12 +97,11 @@ def test_is_duplicate_case_output(
     case_id: str,
     observations_input_files: MipDNAObservationsInputFiles,
     mip_dna_observations_api: MipDNAObservationsAPI,
-    analysis_store: Store,
 ):
     """Test duplicate extraction for a case that already exists in Loqusdb."""
 
     # GIVEN a Loqusdb instance with a duplicated case
-    case: Family = analysis_store.get_case_by_internal_id(internal_id=case_id)
+    case: Family = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
 
     # WHEN checking that a case has already been uploaded to Loqusdb
     is_duplicate: bool = mip_dna_observations_api.is_duplicate(
@@ -126,13 +120,12 @@ def test_is_duplicate_loqusdb_id(
     loqusdb_id: str,
     mip_dna_observations_api: MipDNAObservationsAPI,
     observations_input_files: MipDNAObservationsInputFiles,
-    analysis_store: Store,
     mocker,
 ):
     """Test duplicate extraction for a case that already exists in Loqusdb."""
 
     # GIVEN a Loqusdb instance with a duplicated case and whose samples already have a Loqusdb ID
-    case: Family = analysis_store.get_case_by_internal_id(internal_id=case_id)
+    case: Family = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
     case.links[0].sample.loqusdb_id = loqusdb_id
     mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_case", return_value=None)
     mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_duplicate", return_value=False)
@@ -206,7 +199,6 @@ def test_mip_dna_load_observations(
     mip_dna_observations_api: MipDNAObservationsAPI,
     observations_input_files: MipDNAObservationsInputFiles,
     nr_of_loaded_variants: int,
-    analysis_store: Store,
     caplog: LogCaptureFixture,
     mocker,
 ):
@@ -214,7 +206,7 @@ def test_mip_dna_load_observations(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a mock MIP DNA observations API and a list of observations input files
-    case: Family = analysis_store.get_case_by_internal_id(internal_id=case_id)
+    case: Family = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
     mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=False)
 
     # WHEN loading the case to Loqusdb
@@ -228,7 +220,6 @@ def test_mip_dna_load_observations_duplicate(
     case_id: str,
     mip_dna_observations_api: MipDNAObservationsAPI,
     observations_input_files: MipDNAObservationsInputFiles,
-    analysis_store: Store,
     caplog: LogCaptureFixture,
     mocker,
 ):
@@ -236,7 +227,7 @@ def test_mip_dna_load_observations_duplicate(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a mocked observations API and a case object that has already been uploaded to Loqusdb
-    case: Family = analysis_store.get_case_by_internal_id(internal_id=case_id)
+    case: Family = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
     mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=True)
 
     # WHEN uploading the case observations to Loqusdb
@@ -251,7 +242,6 @@ def test_mip_dna_load_observations_tumor_case(
     case_id: str,
     mip_dna_observations_api: MipDNAObservationsAPI,
     observations_input_files: MipDNAObservationsInputFiles,
-    analysis_store: Store,
     caplog: LogCaptureFixture,
     mocker,
 ):
@@ -259,7 +249,7 @@ def test_mip_dna_load_observations_tumor_case(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a MIP DNA observations API and a case object with a tumour sample
-    case: Family = analysis_store.get_case_by_internal_id(internal_id=case_id)
+    case: Family = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
     mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=False)
     case.links[0].sample.is_tumour = True
 
@@ -274,14 +264,13 @@ def test_mip_dna_load_observations_tumor_case(
 def test_mip_dna_delete_case(
     case_id: str,
     mip_dna_observations_api: MipDNAObservationsAPI,
-    analysis_store: Store,
     caplog: LogCaptureFixture,
 ):
     """Test delete case from Loqusdb."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a Loqusdb instance filled with a case
-    case: Family = analysis_store.get_case_by_internal_id(internal_id=case_id)
+    case: Family = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
 
     # WHEN deleting a case
     mip_dna_observations_api.delete_case(case)
@@ -291,19 +280,17 @@ def test_mip_dna_delete_case(
 
 
 def test_mip_dna_delete_case_not_found(
-    base_context: CGConfig,
     helpers: StoreHelpers,
     loqusdb_api: LoqusdbAPI,
     mip_dna_observations_api: MipDNAObservationsAPI,
     caplog: LogCaptureFixture,
 ):
     """Test delete case from Loqusdb that has not been uploaded."""
-    store: Store = base_context.status_db
 
     # GIVEN an observations instance and a case that has not been uploaded to Loqusdb
     loqusdb_api.process.stdout = None
     mip_dna_observations_api.loqusdb_api = loqusdb_api
-    case: Family = helpers.add_case(store)
+    case: Family = helpers.add_case(mip_dna_observations_api.store)
 
     # WHEN deleting a rare disease case that does not exist in Loqusdb
     with pytest.raises(CaseNotFoundError):
@@ -321,7 +308,6 @@ def test_balsamic_load_observations(
     balsamic_observations_api: BalsamicObservationsAPI,
     balsamic_observations_input_files: BalsamicObservationsInputFiles,
     nr_of_loaded_variants: int,
-    analysis_store: Store,
     caplog: LogCaptureFixture,
     mocker,
 ):
@@ -329,7 +315,7 @@ def test_balsamic_load_observations(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a mock BALSAMIC observations API and a list of observations input files
-    case: Family = analysis_store.get_case_by_internal_id(internal_id=case_id)
+    case: Family = balsamic_observations_api.store.get_case_by_internal_id(internal_id=case_id)
     mocker.patch.object(balsamic_observations_api, "is_duplicate", return_value=False)
 
     # WHEN loading the case to Loqusdb
@@ -343,7 +329,6 @@ def test_balsamic_load_observations_duplicate(
     case_id: str,
     mip_dna_observations_api: MipDNAObservationsAPI,
     observations_input_files: MipDNAObservationsInputFiles,
-    analysis_store: Store,
     caplog: LogCaptureFixture,
     mocker,
 ):
@@ -351,7 +336,7 @@ def test_balsamic_load_observations_duplicate(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a balsamic observations API and a case object that has already been uploaded to Loqusdb
-    case: Family = analysis_store.get_case_by_internal_id(internal_id=case_id)
+    case: Family = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
     mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=True)
 
     # WHEN uploading the case observations to Loqusdb
@@ -367,14 +352,13 @@ def test_balsamic_load_cancer_observations(
     balsamic_observations_api: BalsamicObservationsAPI,
     balsamic_observations_input_files: BalsamicObservationsInputFiles,
     nr_of_loaded_variants: int,
-    analysis_store: Store,
     caplog: LogCaptureFixture,
 ):
     """Test loading of case observations for cancer."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a mock BALSAMIC observations API and a list of observations input files
-    case: Family = analysis_store.get_case_by_internal_id(internal_id=case_id)
+    case: Family = balsamic_observations_api.store.get_case_by_internal_id(internal_id=case_id)
 
     # WHEN loading the case to a somatic Loqusdb instance
     balsamic_observations_api.load_cancer_observations(
@@ -389,14 +373,13 @@ def test_balsamic_load_cancer_observations(
 def test_balsamic_delete_case(
     case_id: str,
     balsamic_observations_api: BalsamicObservationsAPI,
-    analysis_store: Store,
     caplog: LogCaptureFixture,
 ):
     """Test delete balsamic case observations from Loqusdb."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a Loqusdb instance and a case that has been uploaded to both somatic and tumor instances
-    case: Family = analysis_store.get_case_by_internal_id(internal_id=case_id)
+    case: Family = balsamic_observations_api.store.get_case_by_internal_id(internal_id=case_id)
 
     # WHEN deleting the case
     balsamic_observations_api.delete_case(case)
@@ -406,20 +389,18 @@ def test_balsamic_delete_case(
 
 
 def test_balsamic_delete_case_not_found(
-    base_context: CGConfig,
     helpers: StoreHelpers,
     loqusdb_api: LoqusdbAPI,
     balsamic_observations_api: BalsamicObservationsAPI,
     caplog: LogCaptureFixture,
 ):
     """Test delete balsamic case observations from Loqusdb that have not been uploaded."""
-    store: Store = base_context.status_db
 
     # GIVEN empty Loqusdb instances
     loqusdb_api.process.stdout = None
     balsamic_observations_api.loqusdb_somatic_api = loqusdb_api
     balsamic_observations_api.loqusdb_tumor_api = loqusdb_api
-    case: Family = helpers.add_case(store)
+    case: Family = helpers.add_case(balsamic_observations_api.store)
 
     # WHEN deleting a cancer case that does not exist in Loqusdb
     with pytest.raises(CaseNotFoundError):

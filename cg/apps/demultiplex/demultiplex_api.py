@@ -31,8 +31,8 @@ class DemultiplexingAPI:
         self.slurm_api = SlurmAPI()
         self.slurm_account: str = config["demultiplex"]["slurm"]["account"]
         self.mail: str = config["demultiplex"]["slurm"]["mail_user"]
-        self.run_dir: Path = Path(config["demultiplex"]["run_dir"])
-        self.out_dir: Path = out_dir or Path(config["demultiplex"]["out_dir"])
+        self.flow_cells_dir: Path = Path(config["flow_cells_dir"])
+        self.demultiplexed_runs_dir: Path = out_dir or Path(config["demultiplexed_flow_cells_dir"])
         self.environment: str = config.get("environment", "stage")
         LOG.info(f"Set environment to {self.environment}")
         self.dry_run: bool = False
@@ -106,18 +106,9 @@ class DemultiplexingAPI:
         """Create the path to the stdout logfile."""
         return Path(flow_cell.path, f"{DemultiplexingAPI.get_run_name(flow_cell)}.stdout")
 
-    def get_all_demultiplexed_flow_cell_dirs(self) -> List[Path]:
-        """Return all demultiplex flow cell out directories."""
-        demultiplex_flow_cells: List[Path] = []
-        for flow_cell_dir in self.out_dir.iterdir():
-            if flow_cell_dir.is_dir():
-                LOG.debug(f"Found directory {flow_cell_dir}")
-                demultiplex_flow_cells.append(flow_cell_dir)
-        return demultiplex_flow_cells
-
     def flow_cell_out_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Create the path to where the demuliplexed result should be produced."""
-        return Path(self.out_dir, flow_cell.path.name)
+        return Path(self.demultiplexed_runs_dir, flow_cell.path.name)
 
     def unaligned_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Create the path to where the demuliplexed result should be produced."""

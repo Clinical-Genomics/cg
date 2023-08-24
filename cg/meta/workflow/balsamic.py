@@ -8,7 +8,7 @@ from housekeeper.store.models import Version, File
 from pydantic.v1 import ValidationError
 
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat, SampleType, AnalysisType
+from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.indexes import ListIndexes
 from cg.constants.observations import ObservationsFileWildcards
@@ -559,6 +559,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--clinical-snv-observations": arguments.get("clinical_snv"),
                 "--clinical-sv-observations": arguments.get("clinical_sv"),
                 "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
+                "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
                 "--cancer-somatic-sv-observations": arguments.get("cancer_somatic_sv"),
             }

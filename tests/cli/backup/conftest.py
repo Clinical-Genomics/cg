@@ -15,6 +15,6 @@ def fixture_backup_context(cg_context: CGConfig) -> CGConfig:
         status=cg_context.status_db,
         tar_api=TarAPI(binary_path=cg_context.tar.binary_path),
         pdc_api=PdcAPI(binary_path=cg_context.pdc.binary_path),
-        root_dir=cg_context.backup.root.dict(),
+        flow_cells_dir=cg_context.flow_cells_dir,
     )
     return cg_context

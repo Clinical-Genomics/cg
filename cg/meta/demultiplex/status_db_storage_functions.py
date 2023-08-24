@@ -1,5 +1,5 @@
 """Functions interacting with statusdb in the DemuxPostProcessingAPI."""
-from typing import List, Optional
+from typing import List, Optional, Set
 import logging
 
 from cg.store.models import Sample
@@ -25,19 +25,47 @@ LOG = logging.getLogger(__name__)
 def store_flow_cell_data_in_status_db(
     parsed_flow_cell: FlowCellDirectoryData, store: Store
 ) -> None:
-    """Create flow cell from the parsed and validated flow cell data."""
-    if not store.get_flow_cell_by_name(flow_cell_name=parsed_flow_cell.id):
+    """
+    Create flow cell from the parsed and validated flow cell data.
+    And add the samples on the flow cell to the model.
+    """
+    flow_cell: Optional[Flowcell] = store.get_flow_cell_by_name(flow_cell_name=parsed_flow_cell.id)
+    if not flow_cell:
         flow_cell: Flowcell = Flowcell(
             name=parsed_flow_cell.id,
             sequencer_type=parsed_flow_cell.sequencer_type,
             sequencer_name=parsed_flow_cell.machine_name,
             sequenced_at=parsed_flow_cell.run_date,
         )
-        store.session.add(flow_cell)
-        store.session.commit()
         LOG.info(f"Flow cell added to status db: {parsed_flow_cell.id}.")
     else:
-        LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}. Skipping.")
+        LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}.")
+    sample_internal_ids = get_sample_internal_ids_from_sample_sheet(
+        sample_sheet_path=parsed_flow_cell.sample_sheet_path,
+        flow_cell_sample_type=parsed_flow_cell.sample_type,
+    )
+    add_samples_to_flow_cell_in_status_db(
+        flow_cell=flow_cell,
+        sample_internal_ids=sample_internal_ids,
+        store=store,
+    )
+    LOG.info(f"Added samples to flow cell: {parsed_flow_cell.id}.")
+    store.session.add(flow_cell)
+    store.session.commit()
+
+
+def add_samples_to_flow_cell_in_status_db(
+    flow_cell: Flowcell, sample_internal_ids: List[str], store: Store
+) -> Flowcell:
+    """Adds samples to a flow cell in status db."""
+    samples: Set[Sample] = {
+        store.get_sample_by_internal_id(sample_internal_id)
+        for sample_internal_id in sample_internal_ids
+    }
+    for sample in samples:
+        if isinstance(sample, Sample) and sample not in flow_cell.samples:
+            flow_cell.samples.append(sample)
+    return flow_cell
 
 
 def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
@@ -111,13 +139,12 @@ def update_sample_read_counts_in_status_db(
 def update_sample_read_count(sample_id: str, q30_threshold: int, store: Store) -> None:
     """Update the read count for a sample in status db with all reads exceeding the q30 threshold from the sequencing metrics table."""
     sample: Optional[Sample] = store.get_sample_by_internal_id(sample_id)
-
     if sample:
         sample_read_count: int = store.get_number_of_reads_for_sample_passing_q30_threshold(
             sample_internal_id=sample_id,
             q30_threshold=q30_threshold,
         )
         LOG.debug(f"Updating sample {sample_id} with read count {sample_read_count}")
-        sample.calculated_read_count = sample_read_count
+        sample.reads = sample_read_count
     else:
         LOG.warning(f"Cannot find {sample_id} in status_db when adding read counts. Skipping.")

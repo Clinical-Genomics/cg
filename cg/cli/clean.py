@@ -31,6 +31,7 @@ from cg.exc import FlowCellError, HousekeeperBundleVersionMissingError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData as DemultiplexFlowCell
 from cg.store import Store
@@ -39,7 +40,6 @@ from cg.utils.date import get_date_days_ago, get_timedelta_from_date
 from cg.utils.dispatcher import Dispatcher
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import File, Version
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Query
 from tabulate import tabulate
 
@@ -270,14 +270,14 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
     trailblazer_api: TrailblazerAPI = context.trailblazer_api
     sample_sheets_dir: str = context.clean.flow_cells.sample_sheets_dir_name
     checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
-    search: str = f"%{demux_api.out_dir}%"
+    search: str = f"%{demux_api.demultiplexed_runs_dir}%"
     fastq_files_in_housekeeper: Query = housekeeper_api.files(
         tags=[SequencingFileTag.FASTQ]
     ).filter(File.path.like(search))
     spring_files_in_housekeeper: Query = housekeeper_api.files(
         tags=[SequencingFileTag.SPRING]
     ).filter(File.path.like(search))
-    for flow_cell_dir in demux_api.out_dir.iterdir():
+    for flow_cell_dir in demux_api.demultiplexed_runs_dir.iterdir():
         flow_cell: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
             flow_cell_path=flow_cell_dir,
             status_db=status_db,
@@ -436,7 +436,7 @@ def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: i
             )
 
 
-@clean.command("remove-old-demutliplexed-run-dirs")
+@clean.command("remove-old-demultiplexed-run-dirs")
 @click.option(
     "-o",
     "--days-old",
@@ -446,13 +446,13 @@ def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: i
 )
 @DRY_RUN
 @click.pass_obj
-def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run: bool):
+def remove_old_demultiplexed_run_dirs(context: CGConfig, days_old: int, dry_run: bool):
     """Removes flow cells from demultiplexed run directory."""
     status_db: Store = context.status_db
-    demux_api: DemultiplexingAPI = context.demultiplex_api
+    demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     trailblazer_api: TrailblazerAPI = context.trailblazer_api
-    for flow_cell_dir in demux_api.get_all_demultiplexed_flow_cell_dirs():
+    for flow_cell_dir in demux_post_processing_api.get_all_demultiplexed_flow_cell_dirs():
         try:
             flow_cell: DemultiplexFlowCell = DemultiplexFlowCell(flow_cell_path=flow_cell_dir)
         except FlowCellError:

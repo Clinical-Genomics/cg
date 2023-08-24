@@ -1,9 +1,6 @@
 import logging
 from typing import Optional
 
-from pydantic.v1 import BaseModel, EmailStr, Field
-from typing_extensions import Literal
-
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
@@ -21,6 +18,8 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.store import Store
+from pydantic.v1 import BaseModel, EmailStr, Field
+from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -41,7 +40,6 @@ class FlowCellRunDirs(Sequencers):
 
 
 class BackupConfig(BaseModel):
-    root: Sequencers
     encrypt_dir: EncryptionDirs
 
 
@@ -70,8 +68,8 @@ class HousekeeperConfig(BaseModel):
 
 
 class DemultiplexConfig(BaseModel):
-    run_dir: str  # Base path to  un demultiplexed flowcells
-    out_dir: str  # Base path to where the demultiplexed results lives
+    run_dir: str
+    out_dir: str
     slurm: SlurmConfig
 
 
@@ -171,6 +169,14 @@ class RnafusionConfig(CommonAppConfig):
 class TaxprofilerConfig(CommonAppConfig):
     root: str
     binary_path: str
+    conda_env: str
+    profile: str
+    pipeline_path: str
+    revision: str
+    conda_binary: Optional[str] = None
+    hostremoval_reference: str
+    databases: str
+    slurm: SlurmConfig
 
 
 class CGStatsConfig(BaseModel):
@@ -226,7 +232,7 @@ class ExternalConfig(BaseModel):
     caesar: str
 
 
-class DDNDataFlowConfig(BaseModel):
+class DataFlowConfig(BaseModel):
     database_name: str
     user: str
     password: str
@@ -242,6 +248,8 @@ class CGConfig(BaseModel):
     delivery_path: str
     max_flowcells: Optional[int]
     email_base_settings: EmailBaseSettings
+    flow_cells_dir: str
+    demultiplexed_flow_cells_dir: str
 
     # Base APIs that always should exist
     status_db_: Store = None
@@ -258,7 +266,7 @@ class CGConfig(BaseModel):
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
-    ddn: Optional[DDNDataFlowConfig] = None
+    data_flow_config: Optional[DataFlowConfig] = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Optional[CommonAppConfig] = None
