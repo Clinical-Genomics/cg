@@ -208,9 +208,9 @@ def add_file_to_bundle_if_non_existent(
             file=file_path,
             tags=tag_names,
         )
-        LOG.info(f"Sample sheet added to Housekeeper bundle {bundle_name}")
+        LOG.info(f"File added to Housekeeper bundle {bundle_name}")
     else:
-        LOG.info(f"Bundle {bundle_name} already has a sample sheet")
+        LOG.info(f"Bundle {bundle_name} already has a file with the same name as {file_path}")
 
 
 def file_exists_in_latest_version_for_bundle(
@@ -227,23 +227,13 @@ def file_exists_in_latest_version_for_bundle(
 def get_sample_sheets_from_latest_version(flow_cell_id: str, hk_api: HousekeeperAPI) -> List[File]:
     """Returns the files tagged with 'samplesheet' or 'archived_sample_sheet' for the given bundle."""
     try:
-        files: List[File] = hk_api.get_files_from_latest_version(
-            bundle_name=flow_cell_id, tags=[flow_cell_id]
+        sheets_with_normal_tag: List[File] = hk_api.get_files_from_latest_version(
+            bundle_name=flow_cell_id, tags=[flow_cell_id, SequencingFileTag.SAMPLE_SHEET]
         ).all()
-        sample_sheet_files: List[File] = filter_on_sample_sheets(files=files)
+        sheets_with_archive_tag: List[File] = hk_api.get_files_from_latest_version(
+            bundle_name=flow_cell_id, tags=[flow_cell_id, SequencingFileTag.ARCHIVED_SAMPLE_SHEET]
+        ).all()
+        sample_sheet_files: List[File] = sheets_with_normal_tag + sheets_with_archive_tag
     except HousekeeperBundleVersionMissingError:
         sample_sheet_files: List = []
     return sample_sheet_files
-
-
-def filter_on_sample_sheets(files: List[File]) -> List[File]:
-    """Filters the given list of Files to return only those tagged with samplesheet or archived_sample_sheet."""
-    files_with_a_sample_sheet_tag: List[File] = []
-    for file in files:
-        file_tag_names: List[str] = [tag.name for tag in file.tags]
-        if (
-            SequencingFileTag.SAMPLE_SHEET in file_tag_names
-            or SequencingFileTag.ARCHIVED_SAMPLE_SHEET in file_tag_names
-        ):
-            files_with_a_sample_sheet_tag.append(file)
-    return [*set(files_with_a_sample_sheet_tag)]

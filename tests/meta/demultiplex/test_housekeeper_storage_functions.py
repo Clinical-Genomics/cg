@@ -15,7 +15,6 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_sample_fastq_files_to_housekeeper,
     add_sample_sheet_path_to_housekeeper,
     add_demux_logs_to_housekeeper,
-    filter_on_sample_sheets,
 )
 from cg.store import Store
 from tests.store_helpers import StoreHelpers
@@ -204,33 +203,3 @@ def test_add_demux_logs_to_housekeeper(
     assert len(files) == 2
     for file in files:
         assert file.path.split("/")[-1] in expected_file_names
-
-
-def test_filter_sample_sheets(
-    caplog,
-    real_housekeeper_api: HousekeeperAPI,
-    bcl_convert_flow_cell_dir: Path,
-    timestamp: datetime.datetime,
-    base_store: Store,
-    helpers: StoreHelpers,
-):
-    archived_sample_sheet: Tag = Tag(id=1, name="archived_sample_sheet")
-    sample_sheet: Tag = Tag(id=2, name="samplesheet")
-    # GIVEN a list of files
-    file1: File = File(id=1, path="path/to/file1", tags=[])
-    file2: File = File(id=2, path="path/to/file2", tags=[archived_sample_sheet])
-    file3: File = File(id=3, path="path/to/file3", tags=[sample_sheet])
-    file4: File = File(id=4, path="path/to/file4", tags=[archived_sample_sheet, sample_sheet])
-    version: Version = Version(id=1, bundle_id=1, files=[file1, file2, file3, file4])
-
-    bundle_data: Dict = {"name": "HLG5GDRXY", "created": timestamp, "files": [], version: version}
-    helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=bundle_data)
-
-    # WHEN filtering out files tagged with neither archived_sample_sheet nor sample sheet
-    filtered_files: List[File] = filter_on_sample_sheets([file1, file2, file3, file4])
-
-    # THEN the list should contain file2, file3 and file4 but not file1
-    assert file1 not in filtered_files
-    assert file2 in filtered_files
-    assert file3 in filtered_files
-    assert file4 in filtered_files
