@@ -3,19 +3,21 @@
 import logging
 from pathlib import Path
 from typing import Dict, List
+
 from pydantic.v1 import ValidationError
+
 from cg.constants import Pipeline
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.taxprofiler import (
+    TAXPROFILER_FASTA_HEADER,
     TAXPROFILER_INSTRUMENT_PLATFORM,
     TAXPROFILER_RUN_ACCESSION,
     TAXPROFILER_SAMPLE_SHEET_HEADERS,
-    TAXPROFILER_FASTA_HEADER,
 )
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.models.nf_analysis import PipelineParameters
 from cg.models.cg_config import CGConfig
+from cg.models.nf_analysis import PipelineParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSample
 from cg.store.models import Family
 
@@ -80,7 +82,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
 
         return sample_sheet_content
 
-    def write_sample_sheet(
+    def generate_sample_sheet(
         self,
         case_id: str,
         instrument_platform: SequencingPlatform.ILLUMINA,
@@ -111,7 +113,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
                 sample_sheet_content.setdefault(headers, []).extend(contents)
 
             LOG.info(sample_sheet_content)
-            self.write_sample_sheet_csv(
+            self.write_sample_sheet(
                 samplesheet_content=sample_sheet_content,
                 headers=TAXPROFILER_SAMPLE_SHEET_HEADERS,
                 config_path=self.get_case_config_path(case_id=case_id),
@@ -141,7 +143,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
-        self.write_sample_sheet(
+        self.generate_sample_sheet(
             case_id=case_id,
             instrument_platform=instrument_platform,
             fasta=fasta,
