@@ -6,16 +6,16 @@ from pydantic import AfterValidator, BeforeValidator, Field
 from typing_extensions import Annotated
 
 
-def parse_panels(value: str):
-    if not value:
+def parse_panels(panels: str):
+    if not panels:
         return None
-    separator = ";" if ";" in value else None
-    if ":" in value:
+    separator = ";" if ";" in panels else None
+    if ":" in panels:
         separator = ":"
-    return value.split(separator)
+    return panels.split(separator)
 
 
-def validate_data_analysis(value):
+def validate_data_analysis(data_analysis):
     data_analysis_alternatives = [
         "Balsamic",  # OF 1508
         "Balsamic QC",  # OF 1508
@@ -29,9 +29,9 @@ def validate_data_analysis(value):
         "SARS-CoV-2",  # OF 2184
         "No analysis",  # OF 1508, 1604, 2184
     ]
-    if value not in data_analysis_alternatives:
-        raise AttributeError(f"'{value}' is not a valid data analysis")
-    return value
+    if data_analysis not in data_analysis_alternatives:
+        raise AttributeError(f"'{data_analysis}' is not a valid data analysis")
+    return data_analysis
 
 
 def numeric_value(value: Optional[str]):
@@ -43,33 +43,33 @@ def numeric_value(value: Optional[str]):
     raise AttributeError(f"Order contains non-numeric value '{value}'")
 
 
-def validate_parent(value: str):
-    return None if value == "0.0" else value
+def validate_parent(parent: str):
+    return None if parent == "0.0" else parent
 
 
-def validate_source(value: Optional[str]):
-    if value not in SOURCE_TYPES:
-        raise ValueError(f"'{value}' is not a valid source")
-    return value
+def validate_source(source: Optional[str]):
+    if source not in SOURCE_TYPES:
+        raise ValueError(f"'{source}' is not a valid source")
+    return source
 
 
-def convert_sex(value: Optional[str]):
-    if not value:
+def convert_sex(sex: Optional[str]):
+    if not sex:
         return None
-    value = value.strip()
-    return REV_SEX_MAP.get(value, "unknown")
+    sex = sex.strip()
+    return REV_SEX_MAP.get(sex, "unknown")
 
 
 def convert_to_lower(value: Optional[str]):
     return value.lower()
 
 
-def convert_to_priority(value: Optional[str]):
-    return "priority" if value == "förtur" else value
+def convert_to_priority(priority: Optional[str]):
+    return "priority" if priority == "förtur" else priority
 
 
-def convert_to_date(value: Optional[str]) -> Optional[str]:
-    return None if not value else value[:10]
+def convert_to_date(date: Optional[str]) -> Optional[str]:
+    return None if not date else date[:10]
 
 
 class ExcelSample(OrderSample):

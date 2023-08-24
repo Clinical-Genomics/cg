@@ -6,8 +6,10 @@ from pydantic import BeforeValidator, constr
 from typing_extensions import Annotated
 
 
-def join_list(value: Any):
-    return "".join(value) if isinstance(value, list) else value
+def join_list(potential_list: Any):
+    """If given a list, it is converted to a string by joining its entries.
+    Else the argument is returned as is."""
+    return "".join(potential_list) if isinstance(potential_list, list) else potential_list
 
 
 def convert_well(value: str):
