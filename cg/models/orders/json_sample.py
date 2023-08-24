@@ -13,6 +13,8 @@ def join_list(potential_list: Any):
 
 
 def convert_well(value: str):
+    """Forces the format of the well position to separate rows and values with a ':', e.g. A:8, C:3 etc.
+    Allowed values begin with a letter A-H and ends with a number 1-12"""
     if not value:
         return None
     return value if ":" in value else ":".join([value[0], value[1:]])
@@ -30,5 +32,5 @@ class JsonSample(OrderSample):
     quantity: Optional[str] = None
     synopsis: Annotated[Optional[str], BeforeValidator(join_list)] = None
     well_position: Annotated[
-        Optional[constr(pattern=r"[A-H]:[0-9]+")], BeforeValidator(convert_well)
+        Optional[constr(pattern=r"^[A-H]:(1[0-2]|[1-9])$")], BeforeValidator(convert_well)
     ] = None
