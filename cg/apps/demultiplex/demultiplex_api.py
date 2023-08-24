@@ -131,7 +131,7 @@ class DemultiplexingAPI:
         return self.get_sample_sheet(flow_cell_id=flow_cell_id) is not None
 
     def get_flow_cell_unaligned_dir(self, flow_cell: FlowCellDirectoryData) -> Path:
-        """Create the path to where the demultiplexed result should be produced."""
+        """Returns the path to where the demultiplexed result are located."""
         return Path(
             self.flow_cell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME
         )

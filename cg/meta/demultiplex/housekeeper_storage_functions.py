@@ -216,7 +216,7 @@ def add_file_to_bundle_if_non_existent(
 def file_exists_in_latest_version_for_bundle(
     file_path: Path, bundle_name: str, hk_api: HousekeeperAPI
 ) -> bool:
-    """Check if file exists in the latest version for bundle."""
+    """Check if a file exists in the latest version for bundle."""
     latest_version: Version = hk_api.get_latest_bundle_version(bundle_name=bundle_name)
 
     return any(

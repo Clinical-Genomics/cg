@@ -104,7 +104,7 @@ def create_sheet(
         flow_cell_id=flow_cell_id, hk_api=hk_api
     )
     if sample_sheets_hk:
-        LOG.info(
+        LOG.debug(
             "Sample sheet already exists in Housekeeper. Hard-linking it to flow cell directory"
         )
         if not dry_run:
@@ -161,14 +161,14 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
     for sub_dir in flow_cell_runs_dir.iterdir():
         if not sub_dir.is_dir():
             continue
-        LOG.info(f"Found directory {sub_dir}")
+        LOG.debug(f"Found directory {sub_dir}")
         try:
             flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir)
         except FlowCellError:
             continue
         flow_cell_id: str = flow_cell.id
         if flow_cell.sample_sheet_exists():
-            LOG.info("Sample sheet already exists in flow cell directory")
+            LOG.debug("Sample sheet already exists in flow cell directory")
             if not dry_run:
                 add_sample_sheet_path_to_housekeeper(
                     flow_cell_directory=sub_dir, flow_cell_name=flow_cell_id, hk_api=hk_api
