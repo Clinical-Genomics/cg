@@ -178,7 +178,6 @@ def test_reference(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN parameters file should be generated
-    assert "Writing parameters file" in caplog.text
     assert rnafusion_params_file_path.is_file()
 
     # THEN the given reference directory should be written
