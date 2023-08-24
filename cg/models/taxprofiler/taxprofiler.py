@@ -1,6 +1,8 @@
 from pathlib import Path
-from cg.models.nf_analysis import NextflowSample, PipelineParameters
+from typing import List
+
 from cg.constants.sequencing import SequencingPlatform
+from cg.models.nf_analysis import NextflowSample, PipelineParameters
 
 
 class TaxprofilerParameters(PipelineParameters):
@@ -30,3 +32,17 @@ class TaxprofilerSample(NextflowSample):
     """Taxprofiler sample model is used when building the sample sheet."""
 
     instrument_platform: SequencingPlatform
+    run_accession: str
+    fasta: str
+
+    @staticmethod
+    def headers() -> List[str]:
+        """Return sample sheet headers."""
+        return [
+            "sample",
+            "run_accession",
+            "instrument_platform",
+            "fastq_1",
+            "fastq_2",
+            "fasta",
+        ]
