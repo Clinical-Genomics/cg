@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from pydantic.v1 import ValidationError
 
@@ -19,7 +19,7 @@ from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import PipelineParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSample
-from cg.store.models import Family
+from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -82,45 +82,72 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
 
         return sample_sheet_content
 
-    def generate_sample_sheet(
+    @property
+    def sample_sheet_header(self) -> List[str]:
+        """Return sample sheet headers."""
+        return TaxprofilerSample.headers()
+
+    @staticmethod
+    def reformat_sample_content(sample_sheet: TaxprofilerSample) -> List[List[str]]:
+        """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
+        return [
+            [
+                sample_sheet.sample,
+                sample_sheet.run_accession,
+                sample_sheet.instrument_platform,
+                fastq_forward,
+                fastq_reverse,
+                sample_sheet.fasta,
+            ]
+            for fastq_forward, fastq_reverse in zip(
+                sample_sheet.fastq_forward, sample_sheet.fastq_reverse
+            )
+        ]
+
+    def get_sample_sheet_content_per_sample(
+        self, sample: Sample, instrument_platform: SequencingPlatform.ILLUMINA, fasta: str = ""
+    ) -> List[List[str]]:
+        """Get sample sheet information per sample."""
+        sample_name: str = sample.name
+        sample_metadata: List[str] = self.gather_file_metadata_for_sample(sample)
+        forward_read: List[str] = self.extract_read_files(
+            metadata=sample_metadata, forward_read=True
+        )
+        reverse_read: List[str] = self.extract_read_files(
+            metadata=sample_metadata, reverse_read=True
+        )
+        sample_sheet = TaxprofilerSample(
+            sample=sample_name,
+            run_accession=sample_name,
+            instrument_platform=instrument_platform,
+            fastq_forward=forward_read,
+            fastq_reverse=reverse_read,
+            fasta=fasta,
+        )
+        return self.reformat_sample_content(sample_sheet=sample_sheet)
+
+    def get_sample_sheet_content(
         self,
         case_id: str,
         instrument_platform: SequencingPlatform.ILLUMINA,
         fasta: str = "",
-    ) -> None:
+    ) -> List[List[Any]]:
         """Write sample sheet for taxprofiler analysis in case folder."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_sheet_content: Dict[str, List[str]] = {}
-
+        sample_sheet_content: List = []
+        LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
+        LOG.info("Getting sample sheet information")
         for link in case.links:
-            sample_name: str = link.sample.name
-            sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
-            fastq_forward: List[str] = self.extract_read_files(
-                metadata=sample_metadata, forward_read=True
+            sample_sheet_content.extend(
+                self.get_sample_sheet_content_per_sample(
+                    sample=link.sample, instrument_platform=instrument_platform, fasta=fasta
+                )
             )
-            fastq_reverse: List[str] = self.extract_read_files(
-                metadata=sample_metadata, reverse_read=True
-            )
-            sample_content: Dict[str, List[str]] = self.build_sample_sheet_content(
-                sample_name=sample_name,
-                fastq_forward=fastq_forward,
-                fastq_reverse=fastq_reverse,
-                instrument_platform=instrument_platform,
-                fasta=fasta,
-            )
-
-            for headers, contents in sample_content.items():
-                sample_sheet_content.setdefault(headers, []).extend(contents)
-
-            LOG.info(sample_sheet_content)
-            self.write_sample_sheet(
-                samplesheet_content=sample_sheet_content,
-                headers=TAXPROFILER_SAMPLE_SHEET_HEADERS,
-                config_path=self.get_case_config_path(case_id=case_id),
-            )
+        return sample_sheet_content
 
     def get_pipeline_parameters(self, case_id: str) -> PipelineParameters:
         """Return Taxprofiler parameters."""
+        LOG.info("Getting parameters information")
         return TaxprofilerParameters(
             clusterOptions=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
             input=self.get_case_config_path(case_id=case_id),
@@ -137,21 +164,20 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         dry_run: bool,
         fasta: str = "",
     ) -> None:
-        """Create sample sheet file for Taxprofiler analysis."""
-        self.create_case_directory(case_id=case_id)
-        LOG.info("Generating sample sheet")
-        if dry_run:
-            LOG.info("Dry run: Config files will not be written")
-            return
-        self.generate_sample_sheet(
+        """Create sample sheet file and parameters file for Taxprofiler analysis."""
+        self.create_case_directory(case_id=case_id, dry_run=dry_run)
+        sample_sheet_content: List[List[Any]] = self.get_sample_sheet_content(
             case_id=case_id,
             instrument_platform=instrument_platform,
             fasta=fasta,
         )
-        LOG.info("Generating parameters file")
-        self.write_params_file(
-            case_id=case_id,
-            pipeline_parameters=self.get_pipeline_parameters(case_id=case_id).dict(),
+        pipeline_parameters: dict = self.get_pipeline_parameters(case_id=case_id).dict()
+        if dry_run:
+            LOG.info("Dry run: Config files will not be written")
+            return
+        self.write_sample_sheet(
+            content=sample_sheet_content,
+            file_path=self.get_case_config_path(case_id=case_id),
+            header=self.sample_sheet_header,
         )
-
-        LOG.info("Configs files written")
+        self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters)

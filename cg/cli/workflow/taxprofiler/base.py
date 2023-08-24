@@ -1,15 +1,11 @@
 """CLI support to create config and/or start TAXPROFILER."""
 
 import logging
+
 import click
+from pydantic.v1 import ValidationError
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
-from cg.constants.constants import MetaApis, DRY_RUN, CaseActions
-from cg.constants.sequencing import SequencingPlatform
-from cg.meta.workflow.analysis import AnalysisAPI
-from cg.models.rnafusion.rnafusion import CommandArgs
-from cg.models.cg_config import CGConfig
-from cg.exc import CgError
 from cg.cli.workflow.nextflow.options import (
     OPTION_CONFIG,
     OPTION_LOG,
@@ -19,12 +15,15 @@ from cg.cli.workflow.nextflow.options import (
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
 )
-from cg.cli.workflow.taxprofiler.options import (
-    OPTION_FROM_START,
-    OPTION_INSTRUMENT_PLATFORM,
-)
-from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
+from cg.cli.workflow.taxprofiler.options import OPTION_FROM_START, OPTION_INSTRUMENT_PLATFORM
+from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.constants.nf_analysis import NfTowerStatus
+from cg.constants.sequencing import SequencingPlatform
+from cg.exc import CgError
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.models.rnafusion.rnafusion import CommandArgs
 
 LOG = logging.getLogger(__name__)
 
@@ -52,15 +51,14 @@ def config_case(
 ) -> None:
     """Create sample sheet file for Taxprofiler analysis for a given case."""
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.config_case(
             case_id=case_id, instrument_platform=instrument_platform, dry_run=dry_run
         )
 
-    except CgError as error:
-        LOG.error(f"{case_id} could not be found in StatusDB!")
+    except (CgError, ValidationError) as error:
+        LOG.error(f"Could not create config files for {case_id}: {error}")
         raise click.Abort() from error
 
 
