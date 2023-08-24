@@ -2,21 +2,24 @@
 import logging
 from pathlib import Path
 from typing import List, Optional
-from housekeeper.store.models import Version
+
+from housekeeper.store.models import File, Version
+
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_internal_ids_from_sample_sheet,
+)
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
-from cg.store import Store
+from cg.exc import HousekeeperBundleVersionMissingError
 from cg.meta.demultiplex.utils import (
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_fastqs_from_flow_cell,
     get_sample_sheet_path,
 )
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_internal_ids_from_sample_sheet,
-)
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.store import Store
 from cg.utils.files import get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
@@ -161,7 +164,7 @@ def add_sample_sheet_path_to_housekeeper(
         sample_sheet_file_path: Path = get_sample_sheet_path(
             flow_cell_directory=flow_cell_directory
         )
-
+        add_bundle_and_version_if_non_existent(bundle_name=flow_cell_name, hk_api=hk_api)
         add_file_to_bundle_if_non_existent(
             file_path=sample_sheet_file_path,
             bundle_name=flow_cell_name,
@@ -178,6 +181,8 @@ def add_bundle_and_version_if_non_existent(bundle_name: str, hk_api: Housekeeper
     """Add bundle if it does not exist."""
     if not hk_api.bundle(name=bundle_name):
         hk_api.create_new_bundle_and_version(name=bundle_name)
+    else:
+        LOG.debug(f"Bundle with name {bundle_name} already exists")
 
 
 def add_tags_if_non_existent(tag_names: List[str], hk_api: HousekeeperAPI) -> None:
@@ -203,14 +208,32 @@ def add_file_to_bundle_if_non_existent(
             file=file_path,
             tags=tag_names,
         )
+        LOG.info(f"File added to Housekeeper bundle {bundle_name}")
+    else:
+        LOG.info(f"Bundle {bundle_name} already has a file with the same name as {file_path}")
 
 
 def file_exists_in_latest_version_for_bundle(
     file_path: Path, bundle_name: str, hk_api: HousekeeperAPI
 ) -> bool:
-    """Check if file exists in latest version for bundle."""
+    """Check if a file exists in the latest version for bundle."""
     latest_version: Version = hk_api.get_latest_bundle_version(bundle_name=bundle_name)
 
     return any(
         file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
     )
+
+
+def get_sample_sheets_from_latest_version(flow_cell_id: str, hk_api: HousekeeperAPI) -> List[File]:
+    """Returns the files tagged with 'samplesheet' or 'archived_sample_sheet' for the given bundle."""
+    try:
+        sheets_with_normal_tag: List[File] = hk_api.get_files_from_latest_version(
+            bundle_name=flow_cell_id, tags=[flow_cell_id, SequencingFileTag.SAMPLE_SHEET]
+        ).all()
+        sheets_with_archive_tag: List[File] = hk_api.get_files_from_latest_version(
+            bundle_name=flow_cell_id, tags=[flow_cell_id, SequencingFileTag.ARCHIVED_SAMPLE_SHEET]
+        ).all()
+        sample_sheet_files: List[File] = sheets_with_normal_tag + sheets_with_archive_tag
+    except HousekeeperBundleVersionMissingError:
+        sample_sheet_files: List = []
+    return sample_sheet_files
