@@ -123,7 +123,6 @@ def demultiplex_flow_cell(
 @click.option(
     "--demultiplexing-dir", is_flag=True, help="Delete flow cell demultiplexed dir on file system"
 )
-@click.option("--cg-stats", is_flag=True, help="Delete flow cell in cg-stats")
 @click.option("--housekeeper", is_flag=True, help="Delete flow cell in housekeeper")
 @click.option("--init-files", is_flag=True, help="Delete flow cell init-files")
 @click.option("--run-dir", is_flag=True, help="Delete flow cell run on file system")
@@ -144,7 +143,6 @@ def delete_flow_cell(
     context: CGConfig,
     dry_run: bool,
     demultiplexing_dir: bool,
-    cg_stats: bool,
     housekeeper: bool,
     init_files: bool,
     run_dir: bool,
@@ -161,13 +159,11 @@ def delete_flow_cell(
 
     if yes or click.confirm(
         f"Are you sure you want to delete the flow cell from the following databases:\n"
-        f"cg-stats={True if status_db else cg_stats}\nDemultiplexing-dir={True if status_db else demultiplexing_dir}\n"
         f"Housekeeper={True if status_db else housekeeper}\nInit_files={True if status_db else init_files}\n"
         f"Run-dir={True if status_db else run_dir}\nStatusdb={status_db}\n"
         f"\nSample-lane-sequencing-metrics={True if sample_lane_sequencing_metrics else sample_lane_sequencing_metrics}"
     ):
         delete_demux_api.delete_flow_cell(
-            cg_stats=cg_stats,
             demultiplexing_dir=demultiplexing_dir,
             housekeeper=housekeeper,
             init_files=init_files,

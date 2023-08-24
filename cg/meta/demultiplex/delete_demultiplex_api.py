@@ -28,7 +28,6 @@ class DeleteDemuxAPI:
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.status_db: Store = config.status_db
         self.demux_api: DemultiplexingAPI = config.demultiplex_api
-        self.stats_api: StatsAPI = config.cg_stats_api
         self.samples_on_flow_cell: List[Sample] = []
         self.demultiplexing_out_path: Path = self.get_path_for_flow_cell(
             base_path=self.demux_api.demultiplexed_runs_dir
@@ -143,15 +142,6 @@ class DeleteDemuxAPI:
             self.status_db.delete_flow_cell(flow_cell_id=self.flow_cell_name)
             LOG.info(f"DeleteDemuxAPI-StatusDB: Deleted flowcell {self.flow_cell_name}")
 
-    def delete_flow_cell_cgstats(self) -> None:
-        """Delete any presence of a flow cell in cgstats"""
-        from cg.apps.cgstats.crud.delete import delete_flowcell
-
-        if self.dry_run:
-            LOG.info(f"DeleteDemuxAPI-CGStats: Would remove {self.flow_cell_name}")
-        else:
-            delete_flowcell(manager=self.stats_api, flowcell_name=self.flow_cell_name)
-
     def delete_flow_cell_sample_lane_sequencing_metrics(self) -> None:
         if self.dry_run:
             LOG.info(
@@ -260,7 +250,6 @@ class DeleteDemuxAPI:
 
     def delete_flow_cell(
         self,
-        cg_stats: bool,
         demultiplexing_dir: bool,
         run_dir: bool,
         housekeeper: bool,
@@ -275,7 +264,6 @@ class DeleteDemuxAPI:
                 demultiplexing_dir=True,
                 run_dir=True,
             )
-            self.delete_flow_cell_cgstats()
             self.delete_flow_cell_housekeeper()
             self.delete_flow_cell_in_status_db()
 
@@ -284,8 +272,6 @@ class DeleteDemuxAPI:
                 demultiplexing_dir=demultiplexing_dir,
                 run_dir=run_dir,
             )
-        if cg_stats:
-            self.delete_flow_cell_cgstats()
         if init_files and not run_dir:
             self.delete_demux_init_files()
         if housekeeper:
