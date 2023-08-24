@@ -52,21 +52,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.revision: str = config.rnafusion.revision
         self.nextflow_binary_path: str = config.rnafusion.binary_path
 
-    @property
-    def sample_sheet_header(self) -> List[str]:
-        """Return sample sheet headers."""
-        return RnafusionSample.headers()
-
-    @staticmethod
-    def reformat_sample_content(sample_sheet: RnafusionSample) -> List[List[str]]:
-        """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
-        return [
-            [sample_sheet.sample, fastq_forward, fastq_reverse, str(sample_sheet.strandedness)]
-            for fastq_forward, fastq_reverse in zip(
-                sample_sheet.fastq_forward, sample_sheet.fastq_reverse
-            )
-        ]
-
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, case_id: str, strandedness: Strandedness
     ) -> List[List[str]]:
@@ -85,7 +70,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             fastq_reverse=reverse_read,
             strandedness=strandedness,
         )
-        return self.reformat_sample_content(sample_sheet=sample_sheet)
+        return sample_sheet.reformat_sample_content()
 
     def get_sample_sheet_content(self, case_id: str, strandedness: Strandedness) -> List[List[Any]]:
         """Returns content for sample sheet."""
@@ -140,7 +125,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.write_sample_sheet(
             content=sample_sheet_content,
             file_path=self.get_case_config_path(case_id=case_id),
-            header=self.sample_sheet_header,
+            header=RnafusionSample.headers(),
         )
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters)
 

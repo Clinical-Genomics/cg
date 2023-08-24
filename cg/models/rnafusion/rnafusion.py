@@ -75,6 +75,13 @@ class RnafusionSample(NextflowSample):
         """Return sample sheet headers."""
         return ["sample", "fastq_1", "fastq_2", "strandedness"]
 
+    def reformat_sample_content(self) -> List[List[str]]:
+        """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
+        return [
+            [self.sample, fastq_forward, fastq_reverse, str(self.strandedness)]
+            for fastq_forward, fastq_reverse in zip(self.fastq_forward, self.fastq_reverse)
+        ]
+
 
 class RnafusionAnalysis(AnalysisModel):
     """Rnafusion analysis model.
