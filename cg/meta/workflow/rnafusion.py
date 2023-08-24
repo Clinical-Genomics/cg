@@ -86,9 +86,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         )
         return self.reformat_sample_content(sample_sheet=sample_sheet)
 
-
-
-
     def get_sample_sheet_content(self, case_id: str, strandedness: Strandedness) -> List[List[Any]]:
         """Returns content for sample sheet."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -99,9 +96,8 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         LOG.info("Getting sample sheet information")
         for link in case.links:
             content_per_sample = self.get_sample_sheet_content_per_sample(
-                    sample=link.sample, case_id=case_id, strandedness=strandedness
-                )
-            LOG.info(content_per_sample)
+                sample=link.sample, case_id=case_id, strandedness=strandedness
+            )
             return content_per_sample
 
     def get_pipeline_parameters(
@@ -131,15 +127,20 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     ) -> None:
         """Create config files (parameters and sample sheet) for rnafusion analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
-        sample_sheet_content: List[List[Any]] = self.get_sample_sheet_content(case_id=case_id, strandedness=strandedness)
-        pipeline_parameters: dict =self.get_pipeline_parameters(
-                case_id=case_id, genomes_base=genomes_base
-            ).dict()
+        sample_sheet_content: List[List[Any]] = self.get_sample_sheet_content(
+            case_id=case_id, strandedness=strandedness
+        )
+        pipeline_parameters: dict = self.get_pipeline_parameters(
+            case_id=case_id, genomes_base=genomes_base
+        ).dict()
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
-        self.write_sample_sheet(content=sample_sheet_content,file_path=self.get_case_config_path(case_id=case_id),
-            header=self.sample_sheet_header)
+        self.write_sample_sheet(
+            content=sample_sheet_content,
+            file_path=self.get_case_config_path(case_id=case_id),
+            header=self.sample_sheet_header,
+        )
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters)
 
     def report_deliver(self, case_id: str) -> None:

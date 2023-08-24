@@ -68,7 +68,7 @@ def config_case(
         analysis_api.config_case(
             case_id=case_id, strandedness=strandedness, genomes_base=genomes_base, dry_run=dry_run
         )
-    except CgError as error:
+    except (CgError, ValidationError) as error:
         LOG.error(f"Could not create config files for {case_id}: {error}")
         raise click.Abort() from error
 
