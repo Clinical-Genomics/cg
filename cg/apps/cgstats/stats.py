@@ -145,6 +145,8 @@ class StatsAPI(alchy.Manager):
         """Fetch FASTQ files for a sample."""
         base_pattern = "*{}/Unaligned*/Project_*/Sample_{}/*.fastq.gz"
         alt_pattern = "*{}/Unaligned*/Project_*/Sample_{}_*/*.fastq.gz"
-        for fastq_pattern in (base_pattern, alt_pattern):
+        bcl_convert_pattern = "*{}/Unaligned*/*/Sample_{}_*/*.fastq.gz"
+
+        for fastq_pattern in (base_pattern, alt_pattern, bcl_convert_pattern):
             pattern = fastq_pattern.format(flowcell, sample_obj.samplename)
             yield from self.root_dir.glob(pattern)
