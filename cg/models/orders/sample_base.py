@@ -2,6 +2,7 @@ from enum import Enum
 from typing import List, Optional
 
 from cg.constants import DataDelivery, Pipeline
+from cg.models.orders.validators.sample_base_validators import snake_case
 from cg.store.models import Application, Customer, Family, Pool, Sample
 from pydantic import BaseModel, BeforeValidator, ConfigDict, constr
 from typing_extensions import Annotated
@@ -40,10 +41,6 @@ class StatusEnum(str, Enum):
 
 
 NAME_PATTERN = r"^[A-Za-z0-9-]*$"
-
-
-def snake_case(value: str):
-    return value.lower().replace(" ", "_")
 
 
 class OrderSample(BaseModel):
