@@ -38,7 +38,7 @@ def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
 def get_sample_fastqs_from_flow_cell(
     flow_cell_directory: Path, sample_internal_id: str
 ) -> Optional[List[Path]]:
-    """Retrieve sample FastQs from a flow cell directory."""
+    """Retrieve all fastq files for a specific sample in a flow cell directory."""
 
     # The flat output structure for flow cells demultiplexed with bclconvert on the novaseqx machines
     root_pattern = f"{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
