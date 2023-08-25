@@ -3,18 +3,11 @@
 from datetime import datetime
 from typing import Dict, List, Optional
 
+from cg.apps.scout.validators import set_gender_if_other, set_parent_if_missing
 from cg.constants.gene_panel import GENOME_BUILD_37
-from cg.constants.subject import Gender, PlinkGender, PlinkPhenotypeStatus, RelationshipStatus
-from pydantic import BaseModel, BeforeValidator, Field, Strict
+from cg.constants.subject import Gender, PlinkGender, PlinkPhenotypeStatus
+from pydantic import BaseModel, BeforeValidator, Field
 from typing_extensions import Annotated, Literal
-
-
-def set_parent_if_missing(parent: str):
-    return RelationshipStatus.HAS_NO_PARENT if parent is None else parent
-
-
-def set_gender_if_other(gender: str):
-    return PlinkGender.UNKNOWN if gender == Gender.OTHER else gender
 
 
 class Individual(BaseModel):
@@ -62,8 +55,8 @@ class ScoutExportCase(BaseModel):
     causatives: Optional[List[str]] = None
     collaborators: List[str] = []
     individuals: List[Individual]
-    genome_build: Annotated[str, Strict()] = GENOME_BUILD_37
-    panels: Optional[List[Panel]]
+    genome_build: Annotated[str, BeforeValidator(str)] = GENOME_BUILD_37
+    panels: Optional[List[Panel]] = None
     rank_model_version: Optional[str] = None
     sv_rank_model_version: Optional[str] = None
     rank_score_threshold: int = 5
