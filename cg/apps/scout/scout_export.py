@@ -1,41 +1,33 @@
 """Schemas for scout serialisation"""
 
 from datetime import datetime
-from typing import List, Optional, Dict
-
-from pydantic.v1 import BaseModel, Field, validator
-from typing_extensions import Literal
+from typing import Dict, List, Optional
 
 from cg.constants.gene_panel import GENOME_BUILD_37
-from cg.constants.subject import (
-    PlinkGender,
-    Gender,
-    PlinkPhenotypeStatus,
-    RelationshipStatus,
-)
-from cg.constants.pedigree import Pedigree
+from cg.constants.subject import Gender, PlinkGender, PlinkPhenotypeStatus, RelationshipStatus
+from pydantic import BaseModel, BeforeValidator, Field, Strict
+from typing_extensions import Annotated, Literal
+
+
+def set_parent_if_missing(parent: str):
+    return RelationshipStatus.HAS_NO_PARENT if parent is None else parent
+
+
+def set_gender_if_other(gender: str):
+    return PlinkGender.UNKNOWN if gender == Gender.OTHER else gender
 
 
 class Individual(BaseModel):
     bam_file: Optional[str] = None
     individual_id: str
-    sex: Literal[PlinkGender.UNKNOWN, PlinkGender.MALE, PlinkGender.FEMALE, Gender.OTHER]
-    father: Optional[str]
-    mother: Optional[str]
+    sex: Annotated[
+        Literal[PlinkGender.UNKNOWN, PlinkGender.MALE, PlinkGender.FEMALE, Gender.OTHER],
+        BeforeValidator(set_gender_if_other),
+    ]
+    father: Annotated[str, BeforeValidator(set_parent_if_missing)]
+    mother: Annotated[str, BeforeValidator(set_parent_if_missing)]
     phenotype: PlinkPhenotypeStatus
     analysis_type: str = "wgs"
-
-    @validator(Pedigree.FATHER, Pedigree.MOTHER)
-    def convert_to_zero(cls, value):
-        if value is None:
-            return RelationshipStatus.HAS_NO_PARENT
-        return value
-
-    @validator(Pedigree.SEX)
-    def convert_sex_to_zero(cls, value):
-        if value == Gender.OTHER:
-            return PlinkGender.UNKNOWN
-        return value
 
 
 class Panel(BaseModel):
@@ -49,18 +41,18 @@ class Phenotype(BaseModel):
 
 class Gene(BaseModel):
     hgnc_id: int
-    hgnc_symbol: Optional[str]
-    region_annotation: Optional[str]
-    functional_annotation: Optional[str]
-    sift_prediction: Optional[str]
-    polyphen_prediction: Optional[str]
+    hgnc_symbol: Optional[str] = None
+    region_annotation: Optional[str] = None
+    functional_annotation: Optional[str] = None
+    sift_prediction: Optional[str] = None
+    polyphen_prediction: Optional[str] = None
 
 
 class DiagnosisPhenotypes(BaseModel):
     disease_nr: int
     disease_id: str
     description: str
-    individuals: Optional[List[Dict[str, str]]]
+    individuals: Optional[List[Dict[str, str]]] = None
 
 
 class ScoutExportCase(BaseModel):
@@ -70,21 +62,15 @@ class ScoutExportCase(BaseModel):
     causatives: Optional[List[str]] = None
     collaborators: List[str] = []
     individuals: List[Individual]
-    genome_build: Optional[str]
+    genome_build: Annotated[str, Strict()] = GENOME_BUILD_37
     panels: Optional[List[Panel]]
-    rank_model_version: Optional[str]
-    sv_rank_model_version: Optional[str]
+    rank_model_version: Optional[str] = None
+    sv_rank_model_version: Optional[str] = None
     rank_score_threshold: int = 5
-    phenotype_terms: Optional[List[Phenotype]]
-    phenotype_groups: Optional[List[Phenotype]]
-    diagnosis_phenotypes: Optional[List[DiagnosisPhenotypes]]
-    diagnosis_genes: Optional[List[int]]
-
-    @validator("genome_build")
-    def convert_genome_build(cls, value):
-        if value is None:
-            return GENOME_BUILD_37
-        return value
+    phenotype_terms: Optional[List[Phenotype]] = None
+    phenotype_groups: Optional[List[Phenotype]] = None
+    diagnosis_phenotypes: Optional[List[DiagnosisPhenotypes]] = None
+    diagnosis_genes: Optional[List[int]] = None
 
 
 class Genotype(BaseModel):
@@ -109,5 +95,5 @@ class Variant(BaseModel):
     rank_score: int
     category: str
     sub_category: str
-    genes: Optional[List[Gene]]
+    genes: Optional[List[Gene]] = None
     samples: List[Genotype]
