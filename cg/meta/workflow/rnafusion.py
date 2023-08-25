@@ -26,8 +26,13 @@ from cg.models.deliverables.metric_deliverables import (
     MetricsDeliverablesCondition,
     MultiqcDataJson,
 )
-from cg.models.nf_analysis import PipelineParameters, RnafusionDeliverables
-from cg.models.rnafusion.rnafusion import RnafusionAnalysis, RnafusionParameters, RnafusionSample
+from cg.models.nf_analysis import PipelineParameters
+from cg.models.rnafusion.rnafusion import (
+    RnafusionAnalysis,
+    RnafusionDeliverables,
+    RnafusionParameters,
+    RnafusionSample,
+)
 from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
