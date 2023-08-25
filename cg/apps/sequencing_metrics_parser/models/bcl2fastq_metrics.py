@@ -1,5 +1,6 @@
-from typing import List, Dict
-from pydantic.v1 import BaseModel, Field, validator
+from typing import Dict, List
+
+from pydantic import BaseModel, Field, NonNegativeInt
 
 
 class IndexMetric(BaseModel):
@@ -13,13 +14,7 @@ class IndexMetric(BaseModel):
       respective frequencies.
     """
 
-    mismatch_counts: Dict[str, int] = Field(..., alias="MismatchCounts")
-
-    @validator("mismatch_counts", each_item=True)
-    def check_non_negative(cls, value):
-        if value < 0:
-            raise ValueError("MismatchCounts must be non-negative")
-        return value
+    mismatch_counts: Dict[str, NonNegativeInt] = Field(..., alias="MismatchCounts")
 
 
 class ReadMetric(BaseModel):

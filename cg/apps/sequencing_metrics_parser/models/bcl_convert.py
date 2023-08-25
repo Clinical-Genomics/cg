@@ -1,10 +1,10 @@
-from pydantic.v1 import BaseModel, BaseConfig, Field
 from cg.constants.bcl_convert_metrics import (
-    BclConvertQualityMetricsColumnNames,
-    BclConvertDemuxMetricsColumnNames,
     BclConvertAdapterMetricsColumnNames,
+    BclConvertDemuxMetricsColumnNames,
+    BclConvertQualityMetricsColumnNames,
 )
 from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
+from pydantic import BaseConfig, BaseModel, Field
 
 
 class BclConvertQualityMetrics(BaseModel):
