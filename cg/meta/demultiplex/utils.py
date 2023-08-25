@@ -51,7 +51,7 @@ def get_sample_fastqs_from_flow_cell(
 
     # The default structure for flow cells demultiplexed with bclconvert
     bcl_convert_pattern = (
-        f"Unaligned*/*/Sample_{sample_internal_id}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+        f"Unaligned*/*/{sample_internal_id}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     )
 
     for pattern in [root_pattern, unaligned_pattern, unaligned_alt_pattern, bcl_convert_pattern]:

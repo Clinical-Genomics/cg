@@ -151,7 +151,7 @@ class StatsAPI(alchy.Manager):
         alt_pattern = "*{}/Unaligned*/Project_*/Sample_{}_*/*.fastq.gz"
 
         # The default structure for flow cells demultiplexed with bclconvert
-        bcl_convert_pattern = "*{}/Unaligned*/*/Sample_{}_*/*.fastq.gz"
+        bcl_convert_pattern = "*{}/Unaligned*/*/{}_*/*.fastq.gz"
 
         for fastq_pattern in (base_pattern, alt_pattern, bcl_convert_pattern):
             pattern = fastq_pattern.format(flowcell, sample_obj.samplename)
