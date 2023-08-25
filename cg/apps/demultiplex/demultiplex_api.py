@@ -13,6 +13,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
 from cg.constants.priority import SlurmQos
+from cg.constants.sequencing import Sequencers
 from cg.io.controller import WriteFile
 from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -145,6 +146,9 @@ class DemultiplexingAPI:
             return False
         return self.demultiplexing_completed_path(flow_cell).exists()
 
+    def is_novaseqx_flow_cell(self, flow_cell: FlowCellDirectoryData) -> bool:
+        return flow_cell.sequencer_type == Sequencers.NOVASEQX
+
     def is_demultiplexing_possible(self, flow_cell: FlowCellDirectoryData) -> bool:
         """Check if it is possible to start demultiplexing.
 
@@ -176,6 +180,10 @@ class DemultiplexingAPI:
 
         if self.is_demultiplexing_completed(flow_cell):
             LOG.warning(f"Demultiplexing is already completed for flow cell {flow_cell.id}")
+            demultiplexing_possible = False
+
+        if self.is_novaseqx_flow_cell(flow_cell):
+            LOG.warning(f"Novaseqx flow cell {flow_cell.id} is demultiplexed on the machine.")
             demultiplexing_possible = False
         return demultiplexing_possible
 
