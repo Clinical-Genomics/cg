@@ -39,8 +39,8 @@ class FileDeliverable(BaseModel):
 
     id: str
     format: str
-    path: Path  # FilePath
-    path_index: Optional[FilePath] = "'~'"
+    path: FilePath
+    path_index: Optional[FilePath] = "~"
     step: str
     tag: str
 
