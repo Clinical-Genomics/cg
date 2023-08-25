@@ -38,12 +38,23 @@ def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
 def get_sample_fastqs_from_flow_cell(
     flow_cell_directory: Path, sample_internal_id: str
 ) -> Optional[List[Path]]:
-    """Retrieve sample FastQs from a flow cell directory."""
+    """Retrieve all fastq files for a specific sample in a flow cell directory."""
+
+    # The flat output structure for flow cells demultiplexed with bclconvert on the novaseqx machines
     root_pattern = f"{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+
+    # The default structure for flow cells demultiplexed with bcl2fastq
     unaligned_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+
+    # Alternative structure for flow cells demultiplexed with bcl2fastq where the sample fastq files have a trailing sequence
     unaligned_alt_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
-    for pattern in [root_pattern, unaligned_pattern, unaligned_alt_pattern]:
+    # The default structure for flow cells demultiplexed with bclconvert
+    bcl_convert_pattern = (
+        f"Unaligned*/*/{sample_internal_id}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    )
+
+    for pattern in [root_pattern, unaligned_pattern, unaligned_alt_pattern, bcl_convert_pattern]:
         sample_fastqs: List[Path] = get_files_matching_pattern(
             directory=flow_cell_directory, pattern=pattern
         )
