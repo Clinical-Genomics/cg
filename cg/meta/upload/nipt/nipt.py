@@ -55,7 +55,7 @@ class NiptUploadAPI:
         """
         flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
         flow_cell_summary: FlowCellQ30AndReads = FlowCellQ30AndReads(
-            average_q30_across_samples=self.status_db.get_average_fraction_passing_q30_for_flow_cell(
+            average_q30_across_samples=self.status_db.get_average_percentage_passing_q30_for_flow_cell(
                 flow_cell_name=flow_cell.name
             ),
             total_reads_on_flow_cell=self.status_db.get_number_of_reads_for_flow_cell(
