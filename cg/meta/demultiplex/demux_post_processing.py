@@ -1,6 +1,5 @@
 """Post-processing Demultiiplex API."""
 import logging
-import shutil
 from contextlib import redirect_stdout
 from pathlib import Path
 from typing import Iterable, List, Optional
@@ -141,7 +140,9 @@ class DemuxPostProcessingAPI:
 
     def store_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Store data from the flow cell directory in status db and housekeeper."""
-        store_flow_cell_data_in_status_db(parsed_flow_cell=parsed_flow_cell, store=self.status_db)
+        store_flow_cell_data_in_status_db(
+            parsed_flow_cell=parsed_flow_cell, store=self.status_db, hk_api=self.hk_api
+        )
         store_sequencing_metrics_in_status_db(flow_cell=parsed_flow_cell, store=self.status_db)
         update_sample_read_counts_in_status_db(
             flow_cell_data=parsed_flow_cell, store=self.status_db

@@ -1,29 +1,31 @@
 """Functions interacting with statusdb in the DemuxPostProcessingAPI."""
-from typing import List, Optional, Set
 import logging
+from pathlib import Path
+from typing import List, Optional, Set
 
-from cg.store.models import Sample
-
-from cg.apps.sequencing_metrics_parser.api import (
-    create_sample_lane_sequencing_metrics_for_flow_cell,
-)
-
-from cg.meta.demultiplex.utils import (
-    get_q30_threshold,
-)
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_internal_ids_from_sample_sheet,
 )
-
+from cg.apps.sequencing_metrics_parser.api import (
+    create_sample_lane_sequencing_metrics_for_flow_cell,
+)
+from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
+from cg.meta.demultiplex.utils import get_q30_threshold
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
+from cg.store.models import Sample
+
+from housekeeper.store.models import File
 
 LOG = logging.getLogger(__name__)
 
 
 def store_flow_cell_data_in_status_db(
-    parsed_flow_cell: FlowCellDirectoryData, store: Store
+    parsed_flow_cell: FlowCellDirectoryData,
+    store: Store,
+    hk_api: HousekeeperAPI,
 ) -> None:
     """
     Create flow cell from the parsed and validated flow cell data.
@@ -40,8 +42,12 @@ def store_flow_cell_data_in_status_db(
         LOG.info(f"Flow cell added to status db: {parsed_flow_cell.id}.")
     else:
         LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}.")
+    sample_sheet: File = get_sample_sheets_from_latest_version(
+        flow_cell_id=parsed_flow_cell.id,
+        hk_api=hk_api,
+    )[0]
     sample_internal_ids = get_sample_internal_ids_from_sample_sheet(
-        sample_sheet_path=parsed_flow_cell.sample_sheet_path,
+        sample_sheet_path=Path(sample_sheet.full_path),
         flow_cell_sample_type=parsed_flow_cell.sample_type,
     )
     add_samples_to_flow_cell_in_status_db(
