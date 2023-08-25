@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError, HousekeeperFileMissingError
@@ -93,7 +93,9 @@ class HousekeeperAPI:
 
         return file_obj
 
-    def add_file(self, path, version_obj: Version, tags: list, to_archive: bool = False) -> File:
+    def add_file(
+        self, path: str, version_obj: Version, tags: list, to_archive: bool = False
+    ) -> File:
         """Add a file to the database."""
         if isinstance(tags, str):
             tags: List[str] = [tags]
@@ -367,7 +369,11 @@ class HousekeeperAPI:
         return self.files(version=version.id, tags=tags).first()
 
     def get_files_from_latest_version(self, bundle_name: str, tags: List[str]) -> Query:
-        """Return files in the latest version of a bundle."""
+        """Return files in the latest version of a bundle.
+
+        Raises HousekeeperBundleVersionMissingError:
+        - When no version was found for the given bundle
+        """
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
             LOG.warning(f"Bundle: {bundle_name} not found in Housekeeper")

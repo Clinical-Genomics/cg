@@ -10,6 +10,9 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
+from housekeeper.store.models import File, Version
+from requests import Response
+
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -40,7 +43,6 @@ from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.store import Store
-from cg.utils import Process
 from cg.store.models import (
     Bed,
     BedVersion,
@@ -51,11 +53,7 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     Flowcell,
 )
-
 from cg.utils import Process
-from housekeeper.store.models import File, Version
-from requests import Response
-
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -982,9 +980,12 @@ def fixture_unfinished_bcl2fastq_flow_cell(
 
 
 @pytest.fixture(name="sample_sheet_context")
-def fixture_sample_sheet_context(cg_context: CGConfig, lims_api: LimsAPI) -> CGConfig:
-    """Return cg context with an added lims API."""
-    cg_context.lims_api_ = lims_api
+def fixture_sample_sheet_context(
+    cg_context: CGConfig, lims_api: LimsAPI, populated_housekeeper_api: HousekeeperAPI
+) -> CGConfig:
+    """Return cg context with added Lims and Housekeeper API."""
+    cg_context.lims_api_: LimsAPI = lims_api
+    cg_context.housekeeper_api_: HousekeeperAPI = populated_housekeeper_api
     return cg_context
 
 
@@ -1086,14 +1087,13 @@ def store_with_demultiplexed_samples(
 def fixture_demultiplexing_context_for_demux(
     demultiplexing_api_for_demux: DemultiplexingAPI,
     stats_api: StatsAPI,
-    real_housekeeper_api: HousekeeperAPI,
     cg_context: CGConfig,
     store_with_demultiplexed_samples: Store,
 ) -> CGConfig:
     """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api_for_demux
     cg_context.cg_stats_api_ = stats_api
-    cg_context.housekeeper_api_ = real_housekeeper_api
+    cg_context.housekeeper_api_ = demultiplexing_api_for_demux.hk_api
     cg_context.status_db_ = store_with_demultiplexed_samples
     return cg_context
 
@@ -1142,20 +1142,27 @@ def fixture_demultiplex_configs(
 
 @pytest.fixture(name="demultiplexing_api_for_demux")
 def fixture_demultiplexing_api_for_demux(
-    demultiplex_configs_for_demux: dict, sbatch_process: Process
+    demultiplex_configs_for_demux: dict,
+    sbatch_process: Process,
+    populated_housekeeper_api: HousekeeperAPI,
 ) -> DemultiplexingAPI:
     """Return demultiplex API."""
-    demux_api = DemultiplexingAPI(config=demultiplex_configs_for_demux)
+    demux_api = DemultiplexingAPI(
+        config=demultiplex_configs_for_demux,
+        housekeeper_api=populated_housekeeper_api,
+    )
     demux_api.slurm_api.process = sbatch_process
     return demux_api
 
 
 @pytest.fixture(name="demultiplexing_api")
 def fixture_demultiplexing_api(
-    demultiplex_configs: dict, sbatch_process: Process
+    demultiplex_configs: dict, sbatch_process: Process, populated_housekeeper_api: HousekeeperAPI
 ) -> DemultiplexingAPI:
     """Return demultiplex API."""
-    demux_api = DemultiplexingAPI(config=demultiplex_configs)
+    demux_api = DemultiplexingAPI(
+        config=demultiplex_configs, housekeeper_api=populated_housekeeper_api
+    )
     demux_api.slurm_api.process = sbatch_process
     return demux_api
 
@@ -2922,6 +2929,96 @@ def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
     tmp_dir = Path(tmp_path, "tmp_run_dir")
 
     return Path(shutil.copytree(original_dir, tmp_dir))
+
+
+@pytest.fixture(scope="function")
+def novaseqx_latest_analysis_version() -> str:
+    """Return the latest analysis version for NovaseqX analysis data directory."""
+    return "2"
+
+
+@pytest.fixture(scope="function")
+def novaseqx_flow_cell_dir_name() -> str:
+    """Return the flow cell full name for a NovaseqX flow cell."""
+    return "20230427_LH00188_0001_B223YYCLT3"
+
+
+@pytest.fixture(scope="function")
+def novaseqx_flow_cell_directory(tmp_path: Path, novaseqx_flow_cell_dir_name: str) -> Path:
+    """Return the path to a NovaseqX flow cell directory."""
+    return Path(tmp_path, novaseqx_flow_cell_dir_name)
+
+
+@pytest.fixture(scope="function")
+def demultiplexed_runs_flow_cell_directory(tmp_path: Path) -> Path:
+    """Return the path to a demultiplexed flow cell run directory."""
+    demultiplexed_runs = Path(
+        tmp_path, DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME
+    )
+    demultiplexed_runs.mkdir()
+    return demultiplexed_runs
+
+
+def add_novaseqx_analysis_data(novaseqx_flow_cell_directory: Path, analysis_version: str):
+    """Add NovaseqX analysis data to a flow cell directory."""
+    analysis_path: Path = Path(
+        novaseqx_flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, analysis_version
+    )
+    analysis_path.mkdir(parents=True)
+    analysis_path.joinpath(DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
+    data = analysis_path.joinpath(DemultiplexingDirsAndFiles.DATA)
+    data.mkdir()
+    data.joinpath(DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED).touch()
+    return analysis_path
+
+
+@pytest.fixture(scope="function")
+def novaseqx_flow_cell_dir_with_analysis_data(
+    novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
+) -> Path:
+    """Return the path to a NovaseqX flow cell directory with multiple analysis data directories."""
+    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "0")
+    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "1")
+    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, novaseqx_latest_analysis_version)
+    return novaseqx_flow_cell_directory
+
+
+@pytest.fixture(scope="function")
+def post_processed_novaseqx_flow_cell(novaseqx_flow_cell_dir_with_analysis_data: Path) -> Path:
+    """Return the path to a NovaseqX flow cell that is post processed."""
+    Path(
+        novaseqx_flow_cell_dir_with_analysis_data,
+        DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING,
+    ).touch()
+    return novaseqx_flow_cell_dir_with_analysis_data
+
+
+@pytest.fixture(scope="function")
+def novaseqx_flow_cell_analysis_incomplete(
+    novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
+) -> Path:
+    """
+    Return the path to a flow cell for which the analysis is not complete.
+    It misses the ANALYSIS_COMPLETED file.
+    """
+    Path(
+        novaseqx_flow_cell_directory,
+        DemultiplexingDirsAndFiles.ANALYSIS,
+        novaseqx_latest_analysis_version,
+    ).mkdir(parents=True)
+    Path(
+        novaseqx_flow_cell_directory,
+        DemultiplexingDirsAndFiles.ANALYSIS,
+        novaseqx_latest_analysis_version,
+        DemultiplexingDirsAndFiles.COPY_COMPLETE,
+    ).touch()
+    return novaseqx_flow_cell_directory
+
+
+@pytest.fixture(scope="function")
+def demultiplex_not_complete_novaseqx_flow_cell(tmp_file: Path) -> Path:
+    """Return the path to a NovaseqX flow cell for which demultiplexing is not complete."""
+    return tmp_file
 
 
 @pytest.fixture(scope="session")

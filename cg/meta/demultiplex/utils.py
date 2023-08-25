@@ -38,12 +38,23 @@ def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
 def get_sample_fastqs_from_flow_cell(
     flow_cell_directory: Path, sample_internal_id: str
 ) -> Optional[List[Path]]:
-    """Retrieve sample FastQs from a flow cell directory."""
+    """Retrieve all fastq files for a specific sample in a flow cell directory."""
+
+    # The flat output structure for flow cells demultiplexed with bclconvert on the novaseqx machines
     root_pattern = f"{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+
+    # The default structure for flow cells demultiplexed with bcl2fastq
     unaligned_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+
+    # Alternative structure for flow cells demultiplexed with bcl2fastq where the sample fastq files have a trailing sequence
     unaligned_alt_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
-    for pattern in [root_pattern, unaligned_pattern, unaligned_alt_pattern]:
+    # The default structure for flow cells demultiplexed with bclconvert
+    bcl_convert_pattern = (
+        f"Unaligned*/*/{sample_internal_id}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    )
+
+    for pattern in [root_pattern, unaligned_pattern, unaligned_alt_pattern, bcl_convert_pattern]:
         sample_fastqs: List[Path] = get_files_matching_pattern(
             directory=flow_cell_directory, pattern=pattern
         )
@@ -91,31 +102,3 @@ def parse_flow_cell_directory_data(
 ) -> FlowCellDirectoryData:
     """Return flow cell data from the flow cell directory."""
     return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
-
-
-def copy_sample_sheet(
-    sample_sheet_source_directory: Path, sample_sheet_destination_directory: Path
-) -> None:
-    """Copy the sample sheet from the flow-cell-run dir to demultiplex-runs dir for a flow cell."""
-    sample_sheet_source: Path = Path(
-        sample_sheet_source_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-    )
-    sample_sheet_destination: Path = Path(
-        sample_sheet_destination_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-    )
-
-    if not sample_sheet_destination.exists():
-        LOG.debug(
-            f"Copy sample sheet {sample_sheet_source_directory} from flow cell to demuxed result dir {sample_sheet_destination_directory}"
-        )
-        try:
-            shutil.copy(
-                sample_sheet_source.as_posix(),
-                sample_sheet_destination.as_posix(),
-            )
-        except FileNotFoundError as e:
-            raise FileNotFoundError(
-                f"Could not copy sample sheet from {sample_sheet_source_directory} to {sample_sheet_destination_directory}: {e}"
-            )
-        return
-    LOG.warning(f"Sample sheet already exists: {sample_sheet_destination}, skipping copy.")
