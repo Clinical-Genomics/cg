@@ -9,18 +9,25 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.apps.housekeeper.hk import HousekeeperAPI
-
 from cg.constants.cgstats import STATS_HEADER
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    store_flow_cell_data_in_housekeeper,
+    get_sample_sheets_from_latest_version,
+)
+from cg.meta.demultiplex.status_db_storage_functions import (
+    store_flow_cell_data_in_status_db,
+    store_sequencing_metrics_in_status_db,
+    update_sample_read_counts_in_status_db,
+)
 from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
     get_bcl_converter_name,
     parse_flow_cell_directory_data,
 )
 from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
-
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
@@ -29,12 +36,6 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell
 from cg.utils import Process
-from cg.meta.demultiplex.status_db_storage_functions import (
-    store_flow_cell_data_in_status_db,
-    store_sequencing_metrics_in_status_db,
-    update_sample_read_counts_in_status_db,
-)
-from cg.meta.demultiplex.housekeeper_storage_functions import store_flow_cell_data_in_housekeeper
 
 LOG = logging.getLogger(__name__)
 
@@ -118,6 +119,13 @@ class DemuxPostProcessingAPI:
             bcl_converter=bcl_converter,
         )
 
+        sample_sheet_path: Path = Path(
+            get_sample_sheets_from_latest_version(
+                flow_cell_id=parsed_flow_cell.id, hk_api=self.hk_api
+            )[0].full_path
+        )
+        parsed_flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
+
         try:
             self.store_flow_cell_data(parsed_flow_cell)
         except Exception as e:
@@ -141,7 +149,8 @@ class DemuxPostProcessingAPI:
     def store_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Store data from the flow cell directory in status db and housekeeper."""
         store_flow_cell_data_in_status_db(
-            parsed_flow_cell=parsed_flow_cell, store=self.status_db, hk_api=self.hk_api
+            parsed_flow_cell=parsed_flow_cell,
+            store=self.status_db,
         )
         store_sequencing_metrics_in_status_db(flow_cell=parsed_flow_cell, store=self.status_db)
         update_sample_read_counts_in_status_db(
