@@ -137,5 +137,5 @@ def run(
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort() from error
-    if not dry_run:
+    if not dry_run and with_tower:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
