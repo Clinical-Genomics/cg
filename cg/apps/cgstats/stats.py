@@ -147,7 +147,7 @@ class StatsAPI(alchy.Manager):
         # The default structure for flow cells demultiplexed with bcl2fastq
         base_pattern = "*{}/Unaligned*/Project_*/Sample_{}/*.fastq.gz"
 
-        # Alternative structure for flow cells demultiplexed with bcl2fastq and where the sample has a trailing sequence
+        # Alternative structure for flow cells demultiplexed with bcl2fastq where the sample fastq files have a trailing sequence
         alt_pattern = "*{}/Unaligned*/Project_*/Sample_{}_*/*.fastq.gz"
 
         # The default structure for flow cells demultiplexed with bclconvert
