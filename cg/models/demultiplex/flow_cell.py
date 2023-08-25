@@ -45,6 +45,7 @@ class FlowCellDirectoryData:
         self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_dir_name()
         self.bcl_converter: Optional[str] = self.get_bcl_converter(bcl_converter)
+        self._sample_sheet_path_hk: Optional[Path] = None
 
     def parse_flow_cell_dir_name(self):
         """Parse relevant information from flow cell name.
@@ -80,6 +81,14 @@ class FlowCellDirectoryData:
         Return sample sheet path.
         """
         return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME.value)
+
+    def set_sample_sheet_path_hk(self, hk_path: Path):
+        self._sample_sheet_path_hk = hk_path
+
+    def get_sample_sheet_path_hk(self) -> Optional[Path]:
+        if not self._sample_sheet_path_hk:
+            raise FlowCellError("Attribute _sample_sheet_path_hk has not been assigned yet")
+        return self._sample_sheet_path_hk
 
     @property
     def run_parameters_path(self) -> Path:
