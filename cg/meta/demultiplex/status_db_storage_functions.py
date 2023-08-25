@@ -10,6 +10,7 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
 from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
 )
+from cg.exc import HousekeeperFileMissingError
 from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.meta.demultiplex.utils import get_q30_threshold
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -42,10 +43,14 @@ def store_flow_cell_data_in_status_db(
         LOG.info(f"Flow cell added to status db: {parsed_flow_cell.id}.")
     else:
         LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}.")
-    sample_sheet: File = get_sample_sheets_from_latest_version(
-        flow_cell_id=parsed_flow_cell.id,
-        hk_api=hk_api,
-    )[0]
+
+    try:
+        sample_sheet: File = get_sample_sheets_from_latest_version(
+            flow_cell_id=parsed_flow_cell.id,
+            hk_api=hk_api,
+        )[0]
+    except IndexError:
+        raise HousekeeperFileMissingError("Sample sheet not present in housekeeper")
     sample_internal_ids = get_sample_internal_ids_from_sample_sheet(
         sample_sheet_path=Path(sample_sheet.full_path),
         flow_cell_sample_type=parsed_flow_cell.sample_type,
