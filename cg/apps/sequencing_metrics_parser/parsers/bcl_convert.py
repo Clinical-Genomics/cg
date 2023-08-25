@@ -133,7 +133,7 @@ class BclConvertMetricsParser:
         mean_read_pair_q30_bases_percent: float = 0
         for metric in metrics:
             mean_read_pair_q30_bases_percent += metric.q30_bases_percent
-        return round(mean_read_pair_q30_bases_percent / SCALE_TO_READ_PAIRS, 2)
+        return round(mean_read_pair_q30_bases_percent / SCALE_TO_READ_PAIRS, 2) * 100
 
     @classmethod
     def calculate_mean_quality_score(cls, metrics: List[BclConvertQualityMetrics]) -> float:
