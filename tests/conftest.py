@@ -48,10 +48,10 @@ from cg.store.models import (
     BedVersion,
     Customer,
     Family,
+    Flowcell,
     Organism,
     Sample,
     SampleLaneSequencingMetrics,
-    Flowcell,
 )
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
@@ -2644,6 +2644,14 @@ def fixture_rnafusion_mock_fastq_files(
 ) -> List[Path]:
     """Return list of all mock fastq files to commit to mock housekeeper"""
     return [rnafusion_fastq_file_l_1_r_1, rnafusion_fastq_file_l_1_r_2]
+
+
+@pytest.fixture(name="rnafusion_deliverables_file_path")
+def fixture_rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
+    """Path to deliverables file."""
+    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_deliverables").with_suffix(
+        FileExtensions.YAML
+    )
 
 
 @pytest.fixture(scope="function", name="rnafusion_housekeeper")

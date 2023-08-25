@@ -148,26 +148,6 @@ class NfAnalysisAPI(AnalysisAPI):
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def get_replace_map(self, case_id: str) -> dict:
-        """Get a mapping to replace constants from template to create case deliverables."""
-        return {
-            "PATHTOCASE": str(self.get_case_path(case_id)),
-            "CASEID": case_id,
-        }
-
-    @staticmethod
-    def get_template_deliverables_file_content(file_bundle_template: Path) -> dict:
-        """Return deliverables file template content."""
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=file_bundle_template,
-        )
-
-    @staticmethod
-    def add_bundle_header(deliverables_content: dict) -> dict:
-        """Adds header to bundle content."""
-        return {"files": deliverables_content}
-
     def write_params_file(self, case_id: str, pipeline_parameters: dict) -> None:
         """Write params-file for analysis."""
         LOG.info(pipeline_parameters)
@@ -272,12 +252,3 @@ class NfAnalysisAPI(AnalysisAPI):
                 tower_id = NfTowerHandler.get_tower_id(stdout_lines=self.process.stdout_lines())
                 self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
             LOG.info(self.process.stdout)
-
-    @staticmethod
-    def replace_dict_values(replace_map: dict, my_dict: dict) -> dict:
-        for str_to_replace, with_value in replace_map.items():
-            for key, value in my_dict.items():
-                if not value:
-                    value = "~"
-                my_dict.update({key: value.replace(str_to_replace, with_value)})
-        return my_dict

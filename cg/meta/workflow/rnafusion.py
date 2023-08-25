@@ -26,7 +26,7 @@ from cg.models.deliverables.metric_deliverables import (
     MetricsDeliverablesCondition,
     MultiqcDataJson,
 )
-from cg.models.nf_analysis import NextflowDeliverables, PipelineParameters
+from cg.models.nf_analysis import PipelineParameters, RnafusionDeliverables
 from cg.models.rnafusion.rnafusion import RnafusionAnalysis, RnafusionParameters, RnafusionSample
 from cg.store.models import Family
 
@@ -156,23 +156,15 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         LOG.info("Configs files written")
 
     def report_deliver(self, case_id: str) -> None:
-        """Get a deliverables file template from resources, parse it and, then write the deliverables file."""
-        deliverables_content: dict = self.get_template_deliverables_file_content(
-            resources.RNAFUSION_BUNDLE_FILENAMES_PATH
+        """Create deliverables file."""
+        deliverables_content: RnafusionDeliverables = (
+            RnafusionDeliverables.get_deliverables_for_case(
+                case_id=case_id, case_path=self.get_case_path(case_id=case_id)
+            )
         )
-        try:
-            for index, deliver_file in enumerate(deliverables_content):
-                NextflowDeliverables(deliverables=deliver_file)
-                deliverables_content[index] = self.replace_dict_values(
-                    self.get_replace_map(case_id=case_id),
-                    deliver_file,
-                )
-        except ValidationError as error:
-            LOG.error(error)
-            raise ValueError
-        self.create_case_directory(case_id=case_id)
+        LOG.info(deliverables_content)
         self.write_deliverables_bundle(
-            deliverables_content=self.add_bundle_header(deliverables_content=deliverables_content),
+            deliverables_content=deliverables_content.dict(),
             file_path=self.get_deliverables_file_path(case_id=case_id),
         )
         LOG.info(
