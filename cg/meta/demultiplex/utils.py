@@ -42,8 +42,11 @@ def get_sample_fastqs_from_flow_cell(
     root_pattern = f"{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     unaligned_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     unaligned_alt_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    bcl_convert_pattern = (
+        f"Unaligned*/*/Sample_{sample_internal_id}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    )
 
-    for pattern in [root_pattern, unaligned_pattern, unaligned_alt_pattern]:
+    for pattern in [root_pattern, unaligned_pattern, unaligned_alt_pattern, bcl_convert_pattern]:
         sample_fastqs: List[Path] = get_files_matching_pattern(
             directory=flow_cell_directory, pattern=pattern
         )
