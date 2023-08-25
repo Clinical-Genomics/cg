@@ -4,9 +4,6 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Type, Union
 
-from pydantic.v1 import ValidationError
-from typing_extensions import Literal
-
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeq6000Bcl2Fastq,
     FlowCellSampleNovaSeq6000Dragen,
@@ -15,10 +12,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.constants.constants import LENGTH_LONG_DATE
-from cg.constants.demultiplexing import (
-    BclConverter,
-    DemultiplexingDirsAndFiles,
-)
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.exc import FlowCellError, SampleSheetError
 from cg.models.demultiplex.run_parameters import (
@@ -26,6 +20,8 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
+from pydantic.v1 import ValidationError
+from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -220,6 +216,16 @@ class FlowCellDirectoryData:
         except (SampleSheetError, ValidationError) as error:
             LOG.warning("Invalid sample sheet")
             LOG.warning(error)
+            if self.bcl_converter == BclConverter.BCL2FASTQ:
+                LOG.warning(
+                    "Ensure that the headers in the sample sheet follows the allowed bcl2fastq structure, i.e. \n"
+                    + "FCID,Lane,SampleID,SampleRef,index,SampleName,Control,Recipe,Operator,Project"
+                )
+            else:
+                LOG.warning(
+                    "Ensure that the headers in the sample sheet follows the allowed BCLConvert structure, i.e. \n"
+                    + "FCID,Lane,Sample_ID,SampleRef,index,SampleName,Control,Recipe,Operator,Sample_Project"
+                )
             return False
         return True
 
