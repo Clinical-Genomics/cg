@@ -87,7 +87,7 @@ class FlowCellDirectoryData:
 
     def get_sample_sheet_path_hk(self) -> Optional[Path]:
         if not self._sample_sheet_path_hk:
-            raise FlowCellError("Sample sheet path in Housekeeper not specified for flow cell")
+            raise FlowCellError("Attribute _sample_sheet_path_hk has not been assigned yet")
         return self._sample_sheet_path_hk
 
     @property
