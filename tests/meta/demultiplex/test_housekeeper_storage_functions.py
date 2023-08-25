@@ -1,15 +1,14 @@
 """Tests for the housekeeper storage functions of the demultiplexing post post-processing module."""
+import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 from mock import MagicMock, call
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-
 from cg.models.cg_config import CGConfig
-
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_bundle_and_version_if_non_existent,
     add_tags_if_non_existent,
@@ -17,6 +16,10 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_sample_sheet_path_to_housekeeper,
     add_demux_logs_to_housekeeper,
 )
+from cg.store import Store
+from tests.store_helpers import StoreHelpers
+
+from housekeeper.store.models import File, Tag, Version
 
 
 def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
