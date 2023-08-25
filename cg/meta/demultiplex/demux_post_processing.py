@@ -125,6 +125,7 @@ class DemuxPostProcessingAPI:
             )[0].full_path
         )
         parsed_flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
+        LOG.debug("Set path for Housekeeper sample sheet in flow cell")
 
         try:
             self.store_flow_cell_data(parsed_flow_cell)
