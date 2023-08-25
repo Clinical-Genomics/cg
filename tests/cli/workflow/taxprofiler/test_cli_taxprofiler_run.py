@@ -83,7 +83,7 @@ def test_with_config_use_tower(
 ):
     """Test command with case_id and config file using tower."""
     caplog.set_level(logging.INFO)
-    # GIVEN case-id
+    # GIVEN  a valid case
     case_id: str = taxprofiler_case_id
 
     # GIVEN a mocked config
