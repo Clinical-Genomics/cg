@@ -160,7 +160,7 @@ def fixture_re_sequenced_sample_store(
         flow_cell_name=bcl2fastq_flow_cell_id,
         flow_cell_lane_number=1,
         sample_total_reads_in_lane=120000000,
-        sample_base_fraction_passing_q30=0.9,
+        sample_base_percentage_passing_q30=90,
     )
     return re_sequenced_sample_store
 
@@ -213,7 +213,7 @@ def fixture_store_failing_sequencing_qc(
         flow_cell_name=bcl2fastq_flow_cell_id,
         flow_cell_lane_number=1,
         sample_total_reads_in_lane=5,
-        sample_base_fraction_passing_q30=0.3,
+        sample_base_percentage_passing_q30=30,
     )
     return store
 
