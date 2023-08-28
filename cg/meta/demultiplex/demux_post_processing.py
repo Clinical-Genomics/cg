@@ -421,7 +421,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         )
 
     def finish_flow_cell(
-        self, bcl_converter: str, flow_cell_name: str, force: bool = False
+        self, flow_cell_name: str, bcl_converter: str, force: bool = False
     ) -> None:
         """Go through the post-processing steps for a flow cell.
 
@@ -438,7 +438,6 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         except FlowCellError:
             LOG.warning(f"Could not find flow cell {flow_cell_name}")
             return
-        bcl_converter: str = flow_cell.bcl_converter
         if not self.demux_api.is_demultiplexing_completed(flow_cell=flow_cell):
             LOG.warning("Demultiplex is not ready for %s", flow_cell_name)
             return
