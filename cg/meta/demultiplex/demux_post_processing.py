@@ -274,7 +274,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         demux_results: DemuxResults = DemuxResults(
             demux_dir=Path(self.demux_api.demultiplexed_runs_dir, flow_cell_name),
             flow_cell=flow_cell,
-            bcl_converter=bcl_converter,
+            bcl_converter=flow_cell.bcl_converter,
         )
         if not demux_results.flow_cell.is_hiseq_x_copy_completed():
             LOG.info(f"{flow_cell_name} is not yet completely copied")
