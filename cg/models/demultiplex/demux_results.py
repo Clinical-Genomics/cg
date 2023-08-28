@@ -34,7 +34,7 @@ class DemuxResults:
         LOG.info(f"Instantiating DemuxResults with path {demux_dir}")
         self.demux_dir: Path = demux_dir
         self.flow_cell: FlowCellDirectoryData = flow_cell
-        self.bcl_converter = flow_cell.bcl_converter
+        self.bcl_converter = bcl_converter if bcl_converter else flow_cell.bcl_converter
         self._conversion_stats: Optional[ConversionStats] = None
         self._demultiplexing_stats: Optional[DragenDemultiplexingStats] = None
         self._adapter_metrics: Optional[AdapterMetrics] = None
