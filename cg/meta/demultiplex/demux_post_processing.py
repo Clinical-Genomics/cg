@@ -258,17 +258,14 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             flow_cell_dir=demux_results.flow_cell.path, flow_cell_id=demux_results.flow_cell.id
         )
 
-    def finish_flow_cell(
-        self, bcl_converter: str, flow_cell_name: str, flow_cell_path: Path
-    ) -> None:
+    def finish_flow_cell(self, flow_cell_name: str, flow_cell_path: Path) -> None:
         """Post-processing flow cell."""
         LOG.info(f"Check demultiplexed flow cell {flow_cell_name}")
         try:
-            flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-                flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
-            )
+            flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=flow_cell_path)
         except FlowCellError:
             return
+        bcl_converter: str = flow_cell.bcl_converter
         demux_results: DemuxResults = DemuxResults(
             demux_dir=Path(self.demux_api.demultiplexed_runs_dir, flow_cell_name),
             flow_cell=flow_cell,
@@ -286,12 +283,11 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         LOG.info(f"{flow_cell_name} copy is complete and delivery will start")
         self.post_process_flow_cell(demux_results=demux_results)
 
-    def finish_all_flow_cells(self, bcl_converter: str) -> None:
+    def finish_all_flow_cells(self) -> None:
         """Loop over all flow cells and post process those that need it."""
         for flow_cell_dir in self.get_all_demultiplexed_flow_cell_dirs():
             try:
                 self.finish_flow_cell(
-                    bcl_converter=bcl_converter,
                     flow_cell_name=flow_cell_dir.name,
                     flow_cell_path=flow_cell_dir,
                 )
@@ -417,9 +413,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             flow_cell_dir=demux_results.flow_cell.path, flow_cell_id=demux_results.flow_cell.id
         )
 
-    def finish_flow_cell(
-        self, flow_cell_name: str, bcl_converter: str, force: bool = False
-    ) -> None:
+    def finish_flow_cell(self, flow_cell_name: str, force: bool = False) -> None:
         """Go through the post-processing steps for a flow cell.
 
         Force is used to finish a flow cell even if the files are renamed already.
@@ -429,12 +423,12 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         )
         try:
             flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-                flow_cell_path=Path(self.demux_api.flow_cells_dir, flow_cell_name),
-                bcl_converter=bcl_converter,
+                flow_cell_path=Path(self.demux_api.flow_cells_dir, flow_cell_name)
             )
         except FlowCellError:
             LOG.warning(f"Could not find flow cell {flow_cell_name}")
             return
+        bcl_converter: str = flow_cell.bcl_converter
         if not self.demux_api.is_demultiplexing_completed(flow_cell=flow_cell):
             LOG.warning("Demultiplex is not ready for %s", flow_cell_name)
             return
@@ -456,13 +450,11 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             LOG.info("Post processing flow cell anyway")
         self.post_process_flow_cell(demux_results=demux_results)
 
-    def finish_all_flow_cells(self, bcl_converter: str) -> None:
+    def finish_all_flow_cells(self) -> None:
         """Loop over all flow cells and post-process those that need it."""
         for flow_cell_dir in self.get_all_demultiplexed_flow_cell_dirs():
             try:
-                self.finish_flow_cell(
-                    flow_cell_name=flow_cell_dir.name, bcl_converter=bcl_converter
-                )
+                self.finish_flow_cell(flow_cell_name=flow_cell_dir.name)
             except Exception as error:
                 LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(error)}")
                 continue
