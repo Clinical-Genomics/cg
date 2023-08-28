@@ -2,13 +2,12 @@
 import logging
 
 import click
-
 from cg.constants.constants import DRY_RUN
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, BclConverter
 from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
-    DemuxPostProcessingNovaseqAPI,
     DemuxPostProcessingHiseqXAPI,
+    DemuxPostProcessingNovaseqAPI,
 )
 from cg.models.cg_config import CGConfig
 
