@@ -87,7 +87,7 @@ class DemuxPostProcessingAPI:
             flow_cell_directory_name (str): The name of the flow cell directory to be finalized.
             force (bool): If True, the flow cell will be finalized even when it is already marked for delivery.
         Raises:
-            FlowCellError: If the flow cell directory or the data it contains is not valid.
+            FlowCellError: If the flow cell directory or the data it contains is invalid.
         """
         if self.dry_run:
             LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
