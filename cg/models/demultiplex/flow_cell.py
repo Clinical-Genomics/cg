@@ -25,6 +25,12 @@ from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
+SampleSheetHeader = {
+    BclConverter.BCL2FASTQ: "FCID,Lane,SampleID,SampleRef,index,SampleName,Control,Recipe,Operator,Project",
+    BclConverter.BCLCONVERT: "FCID,Lane,Sample_ID,SampleRef,index,SampleName,Control,Recipe,Operator,Sample_Project",
+    BclConverter.DRAGEN: "FCID,Lane,Sample_ID,SampleRef,index,SampleName,Control,Recipe,Operator,Sample_Project",
+}
+
 
 class FlowCellDirectoryData:
     """Class to collect information about flow cell directories and their particular files."""
@@ -225,16 +231,10 @@ class FlowCellDirectoryData:
         except (SampleSheetError, ValidationError) as error:
             LOG.warning("Invalid sample sheet")
             LOG.warning(error)
-            if self.bcl_converter == BclConverter.BCL2FASTQ:
-                LOG.warning(
-                    "Ensure that the headers in the sample sheet follows the allowed bcl2fastq structure, i.e. \n"
-                    + "FCID,Lane,SampleID,SampleRef,index,SampleName,Control,Recipe,Operator,Project"
-                )
-            else:
-                LOG.warning(
-                    "Ensure that the headers in the sample sheet follows the allowed BCLConvert structure, i.e. \n"
-                    + "FCID,Lane,Sample_ID,SampleRef,index,SampleName,Control,Recipe,Operator,Sample_Project"
-                )
+            LOG.warning(
+                f"Ensure that the headers in the sample sheet follows the allowed structure for {self.bcl_converter} i.e. \n"
+                + SampleSheetHeader[self.bcl_converter]
+            )
             return False
         return True
 
