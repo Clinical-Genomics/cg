@@ -853,9 +853,6 @@ class StatusHandler(BaseHandler):
 
             return o_a + a_u
 
-        if samples_received_at and samples_delivered_at:
-            return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
-
         return r_p + p_s + s_a + a_u + u_d
 
     @staticmethod
