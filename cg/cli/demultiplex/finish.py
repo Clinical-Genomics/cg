@@ -52,7 +52,6 @@ def finish_flow_cell(
 
     flow-cell-name is full flow cell name, e.g. '201203_D00483_0200_AHVKJCDRXX'.
     """
-
     demux_post_processing_api: DemuxPostProcessingNovaseqAPI = DemuxPostProcessingNovaseqAPI(
         config=context
     )

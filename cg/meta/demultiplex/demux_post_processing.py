@@ -440,7 +440,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         demux_results: DemuxResults = DemuxResults(
             demux_dir=Path(self.demux_api.demultiplexed_runs_dir, flow_cell_name),
             flow_cell=flow_cell,
-            bcl_converter=bcl_converter,
+            bcl_converter=flow_cell.bcl_converter,
         )
         if not demux_results.results_dir.exists():
             LOG.warning(f"Could not find results directory {demux_results.results_dir}")
