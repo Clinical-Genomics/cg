@@ -6,10 +6,9 @@ from typing import List, Optional
 
 
 from cg.constants.constants import FileExtensions
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.meta.demultiplex.validation import (
-    is_bcl2fastq_demux_folder_structure,
     is_valid_sample_fastq_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -75,12 +74,6 @@ def get_valid_sample_fastqs(fastq_paths: List[Path], sample_internal_id: str) ->
     ]
 
 
-def get_bcl_converter_name(flow_cell_directory: Path) -> str:
-    if is_bcl2fastq_demux_folder_structure(flow_cell_directory=flow_cell_directory):
-        return BclConverter.BCL2FASTQ
-    return BclConverter.BCLCONVERT
-
-
 def create_delivery_file_in_flow_cell_directory(flow_cell_directory: Path) -> None:
     Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
 
@@ -98,7 +91,7 @@ def get_sample_sheet_path(
 
 
 def parse_flow_cell_directory_data(
-    flow_cell_directory: Path, bcl_converter: str
+    flow_cell_directory: Path, bcl_converter: Optional[str] = None
 ) -> FlowCellDirectoryData:
     """Return flow cell data from the flow cell directory."""
     return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
