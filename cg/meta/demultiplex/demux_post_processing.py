@@ -180,7 +180,8 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
     def add_to_cgstats(self, flow_cell_path: Path) -> None:
         """Add flow cell to cgstats."""
         LOG.info(
-            f"{self.stats_api.binary} --database {self.stats_api.db_uri} add --machine X -u Unaligned {flow_cell_path.as_posix()}"
+            f"{self.stats_api.binary} --database {self.stats_api.db_uri}"
+            f"add --machine X -u Unaligned {flow_cell_path.as_posix()}"
         )
         if self.dry_run:
             LOG.info("Dry run will not add flow cell stats")
@@ -207,7 +208,8 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
                 flow_cell_path, "-".join(["stats", project_id, flow_cell_id]) + ".txt"
             )
             LOG.info(
-                f"{self.stats_api.binary} --database {self.stats_api.db_uri} select --project {project_id} {flow_cell_id}"
+                f"{self.stats_api.binary} --database {self.stats_api.db_uri}"
+                f"select --project {project_id} {flow_cell_id}"
             )
             if self.dry_run:
                 LOG.info("Dry run will not process selected project")
@@ -258,11 +260,15 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             flow_cell_dir=demux_results.flow_cell.path, flow_cell_id=demux_results.flow_cell.id
         )
 
-    def finish_flow_cell(self, flow_cell_name: str, flow_cell_path: Path) -> None:
+    def finish_flow_cell(
+        self, bcl_converter: str, flow_cell_name: str, flow_cell_path: Path
+    ) -> None:
         """Post-processing flow cell."""
         LOG.info(f"Check demultiplexed flow cell {flow_cell_name}")
         try:
-            flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=flow_cell_path)
+            flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+                flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
+            )
         except FlowCellError:
             return
         bcl_converter: str = flow_cell.bcl_converter
@@ -287,7 +293,9 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         """Loop over all flow cells and post process those that need it."""
         for flow_cell_dir in self.get_all_demultiplexed_flow_cell_dirs():
             try:
+                flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_dir)
                 self.finish_flow_cell(
+                    bcl_converter=flow_cell.bcl_converter,
                     flow_cell_name=flow_cell_dir.name,
                     flow_cell_path=flow_cell_dir,
                 )
@@ -413,7 +421,9 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             flow_cell_dir=demux_results.flow_cell.path, flow_cell_id=demux_results.flow_cell.id
         )
 
-    def finish_flow_cell(self, flow_cell_name: str, force: bool = False) -> None:
+    def finish_flow_cell(
+        self, bcl_converter: str, flow_cell_name: str, force: bool = False
+    ) -> None:
         """Go through the post-processing steps for a flow cell.
 
         Force is used to finish a flow cell even if the files are renamed already.
@@ -423,7 +433,8 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         )
         try:
             flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-                flow_cell_path=Path(self.demux_api.flow_cells_dir, flow_cell_name)
+                flow_cell_path=Path(self.demux_api.flow_cells_dir, flow_cell_name),
+                bcl_converter=bcl_converter,
             )
         except FlowCellError:
             LOG.warning(f"Could not find flow cell {flow_cell_name}")
@@ -454,7 +465,10 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         """Loop over all flow cells and post-process those that need it."""
         for flow_cell_dir in self.get_all_demultiplexed_flow_cell_dirs():
             try:
-                self.finish_flow_cell(flow_cell_name=flow_cell_dir.name)
+                flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_dir)
+                self.finish_flow_cell(
+                    flow_cell_name=flow_cell_dir.name, bcl_converter=flow_cell.bcl_converter
+                )
             except Exception as error:
                 LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(error)}")
                 continue

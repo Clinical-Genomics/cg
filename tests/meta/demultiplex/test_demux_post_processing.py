@@ -6,7 +6,7 @@ from typing import Dict, Generator, List
 import pytest
 
 
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
@@ -220,6 +220,7 @@ def test_finish_flow_cell_copy_not_completed(
 
     # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
+        bcl_converter=BclConverter.BCL2FASTQ,
         flow_cell_name=bcl2fastq_flow_cell.full_name,
         flow_cell_path=bcl2fastq_flow_cell.path,
     )
@@ -251,6 +252,7 @@ def test_finish_flow_cell_delivery_started(
 
     # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
+        bcl_converter=BclConverter.BCL2FASTQ,
         flow_cell_name=bcl2fastq_flow_cell.full_name,
         flow_cell_path=bcl2fastq_flow_cell.path,
     )
@@ -286,6 +288,7 @@ def test_finish_flow_cell_delivery_not_hiseq_x(
 
     # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
+        bcl_converter=BclConverter.BCL2FASTQ,
         flow_cell_name=bcl2fastq_flow_cell.full_name,
         flow_cell_path=bcl2fastq_flow_cell.path,
     )
@@ -327,6 +330,7 @@ def test_finish_flow_cell_ready(
 
     # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
+        bcl_converter=BclConverter.BCL2FASTQ,
         flow_cell_name=bcl2fastq_flow_cell.full_name,
         flow_cell_path=bcl2fastq_flow_cell.path,
     )
@@ -444,6 +448,7 @@ def test_finish_flow_cell(
 
     # When post-processing flow cell
     post_demux_api.finish_flow_cell(
+        bcl_converter=BclConverter.BCL2FASTQ,
         flow_cell_name=bcl2fastq_flow_cell.full_name,
         flow_cell_path=bcl2fastq_flow_cell.path,
     )
