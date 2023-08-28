@@ -23,11 +23,6 @@ def fixture_non_existing_file() -> str:
     return "PATHTOCASE/fusioncatcher/CASEID.fusioncatcher.fusion-genes.txt"
 
 
-@pytest.fixture(name="empty_field")
-def fixture_empty_field() -> str:
-    return "~"
-
-
 @pytest.fixture(name="existing_file")
 def fixture_existing_file(rnafusion_dir: Path) -> Path:
     """Return the path to an existing file."""

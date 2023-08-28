@@ -25,7 +25,7 @@ def test_file_deliverables(deliverable_id: str, file_format: str, step: str, exi
 
 
 def test_file_deliverables_missing_optional(
-    deliverable_id: str, file_format: str, step: str, existing_file: Path, empty_field: str
+    deliverable_id: str, file_format: str, step: str, existing_file: Path
 ):
     """Tests file delivery when an optional field is missing."""
     # GIVEN valid deliverables fields
@@ -41,9 +41,6 @@ def test_file_deliverables_missing_optional(
 
     # THEN assert that it was successfully created
     assert isinstance(file_deliverable, FileDeliverable)
-
-    # THEN assert that optional file value is correct
-    assert file_deliverable.path_index == empty_field
 
 
 def test_file_deliverables_missing_mandatory(

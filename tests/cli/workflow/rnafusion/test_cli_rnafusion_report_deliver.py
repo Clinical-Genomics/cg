@@ -2,14 +2,18 @@
 
 import logging
 from pathlib import Path
+from typing import List
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
 from cg.cli.workflow.rnafusion.base import report_deliver
 from cg.constants import EXIT_SUCCESS
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import FileDeliverable
+from cg.models.rnafusion.rnafusion import RnafusionDeliverables
 
 
 def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):
@@ -75,17 +79,26 @@ def test_without_samples(
 def test_successful(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
-    caplog: LogCaptureFixture,
     rnafusion_case_id: str,
     rnafusion_deliverables_file_path: Path,
+    deliverables_template_content: List[dict],
     mock_analysis_finish,
+    caplog: LogCaptureFixture,
+    mocker,
 ):
     """Test that deliverable files is properly created on a valid and successful run."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a successful run
 
-    # WHEN dry running with dry specified
+    # GIVEN a mocked deliverables template
+    mocker.patch.object(
+        RnafusionDeliverables,
+        "get_deliverables_template",
+        return_value=deliverables_template_content,
+    )
+
+    # WHEN dry running
     result = cli_runner.invoke(report_deliver, [rnafusion_case_id], obj=rnafusion_context)
 
     # THEN command should execute successfully
@@ -99,7 +112,5 @@ def test_successful(
         content = file.read()
         for field in FileDeliverable.__annotations__.keys():
             assert field in content
-        # Optional fields should be properly written
-        # TODO: fix this
-        # assert "null" not in content
-        # assert "'~'" in content
+        # Assess that missing fields are written
+        assert "path_index: null" in content
