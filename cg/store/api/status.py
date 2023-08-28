@@ -807,7 +807,7 @@ class StatusHandler(BaseHandler):
         ).all()
 
     def get_all_pools_to_deliver(self) -> List[Pool]:
-        """Return all pools that are received but have been not yet been delivered."""
+        """Return all pools that are received but have not yet been delivered."""
         records = self._get_query(table=Pool)
         pool_filter_functions: List[PoolFilter] = [
             PoolFilter.FILTER_IS_RECEIVED,
