@@ -5,7 +5,7 @@ from typing import Dict, Generator, List
 
 import pytest
 
-
+from cg.store.models import Sample
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import (
@@ -480,9 +480,7 @@ def test_finish_all_flowcells(
     hiseq_x_copy_complete_file.unlink()
 
     # When post-processing flow cell
-    post_demux_api.finish_all_flow_cells(
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
+    post_demux_api.finish_all_flow_cells()
 
     # Reinstate
     hiseq_x_copy_complete_file.touch()
@@ -509,6 +507,10 @@ def test_post_processing_of_flow_cell(
     flow_cell_demultiplexing_directory: str = flow_cell_info_map.get(demux_type).directory
     flow_cell_name: str = flow_cell_info_map.get(demux_type).name
     sample_internal_ids: List[str] = flow_cell_info_map.get(demux_type).sample_internal_ids
+
+    # GIVEN the sample_internal_ids are present in statusdb
+    for sample_internal_id in sample_internal_ids:
+        assert demultiplex_context.status_db.get_sample_by_internal_id(sample_internal_id)
 
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
@@ -546,9 +548,10 @@ def test_post_processing_of_flow_cell(
     )
     # THEN the read count was calculated for all samples in the flow cell directory
     for sample_internal_id in sample_internal_ids:
-        sample = demux_post_processing_api.status_db.get_sample_by_internal_id(sample_internal_id)
-        assert sample is not None
-        assert sample.reads
+        sample: Sample = demux_post_processing_api.status_db.get_sample_by_internal_id(
+            sample_internal_id
+        )
+        assert isinstance(sample.reads, int)
 
     # THEN a bundle was added to Housekeeper for the flow cell
     assert demux_post_processing_api.hk_api.bundle(flow_cell_name)

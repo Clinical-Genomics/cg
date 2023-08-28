@@ -54,7 +54,7 @@ class FlowCellDirectoryData:
 
         This will assume that the flow cell naming convention is used. If not we skip the flow cell.
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>
-        Example: '201203_A00689_0200_AHVKJCDRXX'.
+        Example: '201203_D00483_0200_AHVKJCDRXX'.
         """
 
         self.validate_flow_cell_dir_name()
@@ -205,7 +205,7 @@ class FlowCellDirectoryData:
         """
         Validate on the following criteria:
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>
-        Example: '201203_A00689_0200_AHVKJCDRXX'.
+        Example: '201203_D00483_0200_AHVKJCDRXX'.
         """
         if len(self.split_flow_cell_name) != 4:
             message = f"Flowcell {self.full_name} does not follow the flow cell naming convention"
