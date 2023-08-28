@@ -1,4 +1,4 @@
-"""Post-processing Demultiiplex API."""
+"""Post-processing Demultiplex API."""
 import logging
 from contextlib import redirect_stdout
 from pathlib import Path
