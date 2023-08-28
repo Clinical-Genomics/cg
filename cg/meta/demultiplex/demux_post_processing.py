@@ -271,7 +271,6 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             )
         except FlowCellError:
             return
-        bcl_converter: str = flow_cell.bcl_converter
         demux_results: DemuxResults = DemuxResults(
             demux_dir=Path(self.demux_api.demultiplexed_runs_dir, flow_cell_name),
             flow_cell=flow_cell,
