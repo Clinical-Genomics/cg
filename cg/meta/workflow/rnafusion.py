@@ -167,7 +167,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
                 case_id=case_id, case_path=self.get_case_path(case_id=case_id)
             )
         )
-        LOG.info(deliverables_content)
         self.write_deliverables_bundle(
             deliverables_content=deliverables_content.dict(),
             file_path=self.get_deliverables_file_path(case_id=case_id),
