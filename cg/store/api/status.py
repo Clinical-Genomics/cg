@@ -28,7 +28,7 @@ from cg.store.filters.status_application_filters import apply_application_filter
 
 
 class StatusHandler(BaseHandler):
-    """Handles status states for entities in the database."""
+    """Handles states for entities in the database."""
 
     def __init__(self, session: Session):
         super().__init__(session=session)
@@ -807,7 +807,7 @@ class StatusHandler(BaseHandler):
         ).all()
 
     def get_all_pools_to_deliver(self) -> List[Pool]:
-        """Return all pools that are received but have been not yet been delivered."""
+        """Return all pools that are received but have not yet been delivered."""
         records = self._get_query(table=Pool)
         pool_filter_functions: List[PoolFilter] = [
             PoolFilter.FILTER_IS_RECEIVED,
@@ -852,9 +852,6 @@ class StatusHandler(BaseHandler):
                 return self._calculate_date_delta(None, analysis_ordered_at, analysis_uploaded_at)
 
             return o_a + a_u
-
-        if samples_received_at and samples_delivered_at:
-            return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
 
         return r_p + p_s + s_a + a_u + u_d
 
