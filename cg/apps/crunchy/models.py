@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Optional
 
-from pydantic.v1 import BaseModel, conlist
+from pydantic import BaseModel, conlist
 from typing_extensions import Literal
 
 
