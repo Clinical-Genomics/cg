@@ -40,7 +40,7 @@ class FileDeliverable(BaseModel):
     id: str
     format: str
     path: FilePath
-    path_index: Optional[FilePath] = "~"
+    path_index: Optional[FilePath]
     step: str
     tag: str
 
