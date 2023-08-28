@@ -289,11 +289,15 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
     def finish_all_flow_cells(self, bcl_converter: str) -> None:
         """Loop over all flow cells and post process those that need it."""
         for flow_cell_dir in self.get_all_demultiplexed_flow_cell_dirs():
-            self.finish_flow_cell(
-                bcl_converter=bcl_converter,
-                flow_cell_name=flow_cell_dir.name,
-                flow_cell_path=flow_cell_dir,
-            )
+            try:
+                self.finish_flow_cell(
+                    bcl_converter=bcl_converter,
+                    flow_cell_name=flow_cell_dir.name,
+                    flow_cell_path=flow_cell_dir,
+                )
+            except Exception as error:
+                LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(error)}")
+                continue
 
 
 class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
@@ -455,4 +459,10 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
     def finish_all_flow_cells(self, bcl_converter: str) -> None:
         """Loop over all flow cells and post-process those that need it."""
         for flow_cell_dir in self.get_all_demultiplexed_flow_cell_dirs():
-            self.finish_flow_cell(flow_cell_name=flow_cell_dir.name, bcl_converter=bcl_converter)
+            try:
+                self.finish_flow_cell(
+                    flow_cell_name=flow_cell_dir.name, bcl_converter=bcl_converter
+                )
+            except Exception as error:
+                LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(error)}")
+                continue
