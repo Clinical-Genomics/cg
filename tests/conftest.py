@@ -1353,7 +1353,7 @@ def fixture_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
 def fixture__novaseq_flow_cell_demux_with_bcl2fastq(
     bcl_convert_flow_cell_dir: Path,
 ) -> FlowCellDirectoryData:
-    """Create a Novaseq6000 flow cell object with flow cell that is demultiplexed using bcl2fastq."""
+    """Create a Novaseq6000 flow cell object with flow cell that is demultiplexed using Bcl2fastq."""
     return FlowCellDirectoryData(
         flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
     )
