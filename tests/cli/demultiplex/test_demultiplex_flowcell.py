@@ -5,6 +5,7 @@ from pathlib import Path
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell, delete_flow_cell
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
@@ -264,3 +265,65 @@ def test_delete_flow_cell_dry_run_status_db(
         f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_context.demultiplex_api.flow_cells_dir / Path(f'some_prefix_1100_{bcl2fastq_flow_cell_id}')}"
     ) in caplog.text
     assert "DeleteDemuxAPI-Init-files: Would have removed" not in caplog.text
+
+
+def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bclconvert: Path):
+    # GIVEN a flow cell without a demuxstarted.txt file
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
+    assert not Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).exists()
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_locally()
+
+    # THEN the response should be False
+    assert not has_demux_started
+
+
+def test_has_demultiplexing_started_locally_true(
+    tmp_flow_cell_directory_bclconvert: Path,
+):
+    # GIVEN a flow cell with a demuxstarted.txt file
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
+    Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).touch()
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_locally()
+
+    # THEN the response should be True
+    assert has_demux_started
+
+
+def test_has_demultiplexing_started_on_deck_true(novaseqx_flow_cell_dir_with_analysis_data: Path):
+    # GIVEN a flow cell with a BCLConvert folder
+    flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_dir_with_analysis_data)
+    Path.mkdir(
+        Path(
+            flow_cell.path,
+            get_latest_analysis_path(flow_cell.path),
+            DemultiplexingDirsAndFiles.DATA,
+            DemultiplexingDirsAndFiles.BCL_CONVERT,
+        )
+    )
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_on_deck()
+
+    # THEN the response should be True
+    assert has_demux_started
+
+
+def test_has_demultiplexing_started_on_deck_false(novaseqx_flow_cell_dir_with_analysis_data: Path):
+    # GIVEN a flow cell without a BCLConvert folder
+    flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_dir_with_analysis_data)
+    assert not Path(
+        flow_cell.path,
+        get_latest_analysis_path(flow_cell.path),
+        DemultiplexingDirsAndFiles.DATA,
+        DemultiplexingDirsAndFiles.BCL_CONVERT,
+    ).exists()
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_on_deck()
+
+    # THEN the response should be False
+    assert not has_demux_started
