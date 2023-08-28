@@ -28,7 +28,7 @@ from cg.store.filters.status_application_filters import apply_application_filter
 
 
 class StatusHandler(BaseHandler):
-    """Handles status states for entities in the database."""
+    """Handles states for entities in the database."""
 
     def __init__(self, session: Session):
         super().__init__(session=session)
