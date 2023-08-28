@@ -1,12 +1,13 @@
 """Functions interacting with statusdb in the DemuxPostProcessingAPI."""
+import datetime
 import logging
 from pathlib import Path
 from typing import List, Optional, Set
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_internal_ids_from_sample_sheet,
 )
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
 )
@@ -14,9 +15,7 @@ from cg.exc import HousekeeperFileMissingError
 from cg.meta.demultiplex.utils import get_q30_threshold
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-from cg.store.models import Flowcell, SampleLaneSequencingMetrics
-from cg.store.models import Sample
-
+from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
 from housekeeper.store.models import File
 
 LOG = logging.getLogger(__name__)
@@ -146,7 +145,11 @@ def update_sample_read_count(sample_id: str, q30_threshold: int, store: Store) -
             sample_internal_id=sample_id,
             q30_threshold=q30_threshold,
         )
-        LOG.debug(f"Updating sample {sample_id} with read count {sample_read_count}")
+        LOG.debug(
+            f"Updating sample {sample_id} with read count {sample_read_count} and setting sequenced at."
+        )
         sample.reads = sample_read_count
+        if not sample.sequenced_at:
+            sample.sequenced_at = datetime.datetime.now()
     else:
         LOG.warning(f"Cannot find {sample_id} in status_db when adding read counts. Skipping.")
