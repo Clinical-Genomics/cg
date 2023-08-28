@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import AfterValidator, BaseModel
+from pydantic import AfterValidator, BaseModel, ConfigDict
 from typing_extensions import Annotated
 
 from cg.apps.tb.validators import inherit_family_value, parse_str_to_datetime, parse_str_to_path
@@ -28,7 +28,8 @@ class TrailblazerAnalysis(BaseModel):
     data_analysis: Optional[str]
     ticket: Optional[str]
     uploaded_at: Optional[str]
-
-    class Config:
-        validate_default = True
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        validate_default=True,
+        extra="allow",
+    )
