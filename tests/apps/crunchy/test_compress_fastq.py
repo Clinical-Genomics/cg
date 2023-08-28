@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List
 
 import pytest
-from pydantic.v1 import ValidationError
+from pydantic import ValidationError
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import (
