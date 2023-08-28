@@ -16,6 +16,7 @@ from cg.meta.demultiplex.validation import (
     validate_flow_cell_delivery_status,
     validate_sample_sheet_exists,
 )
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 def test_validate_sample_fastq_with_valid_file():
@@ -172,22 +173,29 @@ def test_is_flow_cell_ready_for_delivery_false(tmp_path: Path):
     assert result == False
 
 
-def test_validate_sample_sheet_exists_raises_error(tmp_path: Path):
-    # GIVEN a path with no sample sheet
-
+def test_validate_sample_sheet_exists_raises_error(bcl2fastq_flow_cell_dir: Path):
+    # GIVEN a flow cell without a sample sheet in housekeeper
+    flow_cell = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    flow_cell._sample_sheet_path_hk = None
     # WHEN validating the existence of the sample sheet
     # THEN it should raise a FlowCellError
     with pytest.raises(FlowCellError):
-        validate_sample_sheet_exists(tmp_path)
+        validate_sample_sheet_exists(flow_cell=flow_cell)
 
 
-def test_validate_sample_sheet_exists_no_error(tmp_path: Path):
+def test_validate_sample_sheet_exists_no_error(bcl2fastq_flow_cell_dir: Path):
     # GIVEN a path with a sample sheet
-    (tmp_path / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME).touch()
+    # GIVEN a flow cell without a sample sheet in housekeeper
+    flow_cell = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    sample_sheet_path = Path(
+        bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+    sample_sheet_path.touch()
+    flow_cell._sample_sheet_path_hk = sample_sheet_path
 
     # WHEN validating the existence of the sample sheet
     # THEN it should not raise an error
-    assert validate_sample_sheet_exists(tmp_path) is None
+    assert validate_sample_sheet_exists(flow_cell=flow_cell) is None
 
 
 def test_validate_demultiplexing_complete_raises_error(tmp_path: Path):

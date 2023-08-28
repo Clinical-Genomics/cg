@@ -1,9 +1,11 @@
 import re
 from pathlib import Path
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 def is_valid_sample_fastq_file(sample_fastq: Path, sample_internal_id: str) -> bool:
@@ -57,14 +59,10 @@ def is_flow_cell_ready_for_delivery(flow_cell_directory: Path) -> bool:
     return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).exists()
 
 
-def validate_sample_sheet_exists(flow_cell_run_directory: Path) -> None:
-    sample_sheet_path: Path = Path(
-        flow_cell_run_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-    )
+def validate_sample_sheet_exists(flow_cell: FlowCellDirectoryData) -> None:
+    sample_sheet_path: Path = flow_cell.get_sample_sheet_path_hk()
     if not sample_sheet_path.exists():
-        raise FlowCellError(
-            f"Sample sheet {sample_sheet_path} does not exist in flow cell run directory."
-        )
+        raise FlowCellError(f"Sample sheet {sample_sheet_path} does not exist in housekeeper.")
 
 
 def validate_demultiplexing_complete(flow_cell_output_directory: Path) -> None:
@@ -83,8 +81,10 @@ def validate_flow_cell_delivery_status(flow_cell_output_directory: Path, force: 
 
 
 def is_flow_cell_ready_for_postprocessing(
-    flow_cell_output_directory: Path, flow_cell_run_directory: Path, force: bool = False
+    flow_cell_output_directory: Path,
+    flow_cell: FlowCellDirectoryData,
+    force: bool = False,
 ) -> None:
-    validate_sample_sheet_exists(flow_cell_run_directory)
+    validate_sample_sheet_exists(flow_cell)
     validate_demultiplexing_complete(flow_cell_output_directory)
     validate_flow_cell_delivery_status(flow_cell_output_directory, force=force)
