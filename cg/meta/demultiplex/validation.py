@@ -49,14 +49,6 @@ def is_sample_id_in_file_name(sample_fastq: Path, sample_internal_id: str) -> bo
     return f"{sample_internal_id}_" in sample_fastq.name
 
 
-def is_bcl2fastq_demux_folder_structure(flow_cell_directory: Path) -> bool:
-    """Check if flow cell directory is a Bcl2fastq demux folder structure."""
-    for folder in flow_cell_directory.glob(pattern="*"):
-        if re.search(DemultiplexingDirsAndFiles.BCL2FASTQ_TILE_DIR_PATTERN.value, str(folder)):
-            return True
-    return False
-
-
 def is_demultiplexing_complete(flow_cell_directory: Path) -> bool:
     return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
 
