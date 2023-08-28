@@ -31,5 +31,5 @@ class TrailblazerAnalysis(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         validate_default=True,
-        extra="allow",
+        extra="ignore",
     )
