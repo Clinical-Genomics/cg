@@ -30,7 +30,7 @@ def create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell
                     sample_total_reads_in_lane=metrics_parser.calculate_total_reads_for_sample_in_lane(
                         sample_internal_id=sample_internal_id, lane=lane
                     ),
-                    sample_base_fraction_passing_q30=metrics_parser.get_q30_bases_percent_for_sample_in_lane(
+                    sample_base_percentage_passing_q30=metrics_parser.get_q30_bases_percent_for_sample_in_lane(
                         sample_internal_id=sample_internal_id, lane=lane
                     ),
                     sample_base_mean_quality_score=metrics_parser.get_mean_quality_score_for_sample_in_lane(
