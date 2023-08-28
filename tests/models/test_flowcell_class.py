@@ -12,7 +12,7 @@ def test_get_run_parameters_when_non_existing(fixtures_dir: Path):
         / "apps"
         / "demultiplexing"
         / "demultiplexed-runs"
-        / "201203_A00689_0200_AHVKJCDRXX"
+        / "201203_D00483_0200_AHVKJCDRXX"
     )
     flow_cell = FlowCellDirectoryData(flow_cell_path=flowcell_path)
     assert flow_cell.run_parameters_path.exists() is False

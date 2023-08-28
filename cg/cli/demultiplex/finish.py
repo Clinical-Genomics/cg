@@ -51,7 +51,7 @@ def finish_flow_cell(
 ) -> None:
     """Command to finish up a flow cell after demultiplexing.
 
-    flow-cell-name is full flow cell name, e.g. '201203_A00689_0200_AHVKJCDRXX'.
+    flow-cell-name is full flow cell name, e.g. '201203_D00483_0200_AHVKJCDRXX'.
     """
 
     demux_post_processing_api: DemuxPostProcessingNovaseqAPI = DemuxPostProcessingNovaseqAPI(
@@ -65,18 +65,21 @@ def finish_flow_cell(
     demux_post_processing_api_temp: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
     demux_post_processing_api_temp.set_dry_run(dry_run)
     demux_post_processing_api_temp.finish_flow_cell_temp(
-        flow_cell_directory_name=flow_cell_name, force=force
+        flow_cell_directory_name=flow_cell_name, bcl_converter=bcl_converter, force=force
     )
 
 
 @finish_group.command(name="temporary")
 @click.argument("flow-cell-directory-name")
+@OPTION_BCL_CONVERTER
 @click.option("--force", is_flag=True)
 @click.pass_obj
-def finish_flow_cell_temporary(context: CGConfig, flow_cell_directory_name: str, force: bool):
+def finish_flow_cell_temporary(
+    context: CGConfig, flow_cell_directory_name: str, bcl_converter: str, force: bool
+):
     demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
     demux_post_processing_api.finish_flow_cell_temp(
-        flow_cell_directory_name=flow_cell_directory_name, force=force
+        flow_cell_directory_name=flow_cell_directory_name, bcl_converter=bcl_converter, force=force
     )
 
 

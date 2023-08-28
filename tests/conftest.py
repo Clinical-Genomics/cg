@@ -878,7 +878,7 @@ def fixture_tmp_flow_cell_name_no_sample_sheet() -> str:
 @pytest.fixture(name="tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq")
 def fixture_tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq() -> str:
     """Returns the name of a flow cell directory ready for demultiplexing with bcl2fastq."""
-    return "211101_A00187_0615_AHLG5GDRXY"
+    return "211101_D00483_0615_AHLG5GDRXY"
 
 
 @pytest.fixture(name="tmp_flow_cells_directory_no_run_parameters")
@@ -1236,7 +1236,7 @@ def fixture_demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
 @pytest.fixture(name="bcl2fastq_flow_cell_full_name", scope="session")
 def fixture_flow_cell_full_name() -> str:
     """Return full flow cell name."""
-    return "201203_A00689_0200_AHVKJCDRXX"
+    return "201203_D00483_0200_AHVKJCDRXX"
 
 
 @pytest.fixture(name="bcl_convert_flow_cell_full_name", scope="session")
@@ -1346,6 +1346,16 @@ def fixture_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a flow cell object with flow cell that is demultiplexed."""
     return FlowCellDirectoryData(
         flow_cell_path=bcl2fastq_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
+    )
+
+
+@pytest.fixture(name="novaseq_flow_cell_demultiplexed_with_bcl2fastq", scope="session")
+def fixture__novaseq_flow_cell_demux_with_bcl2fastq(
+    bcl_convert_flow_cell_dir: Path,
+) -> FlowCellDirectoryData:
+    """Create a Novaseq6000 flow cell object with flow cell that is demultiplexed using bcl2fastq."""
+    return FlowCellDirectoryData(
+        flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
     )
 
 
