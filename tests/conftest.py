@@ -2910,7 +2910,7 @@ def store_with_sequencing_metrics(
         flow_cell_name_,
         flow_cell_lane_number,
         sample_total_reads_in_lane,
-        sample_base_fraction_passing_q30,
+        sample_base_percentage_passing_q30,
         sample_base_mean_quality_score,
     ) in sample_sequencing_metrics_details:
         helpers.add_sample_lane_sequencing_metrics(
@@ -2919,7 +2919,7 @@ def store_with_sequencing_metrics(
             flow_cell_name=flow_cell_name_,
             flow_cell_lane_number=flow_cell_lane_number,
             sample_total_reads_in_lane=sample_total_reads_in_lane,
-            sample_base_fraction_passing_q30=sample_base_fraction_passing_q30,
+            sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
             sample_base_mean_quality_score=sample_base_mean_quality_score,
         )
 

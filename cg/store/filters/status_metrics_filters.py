@@ -17,7 +17,7 @@ def filter_total_read_count_for_sample(metrics: Query, sample_internal_id: str, 
 def filter_above_q30_threshold(metrics: Query, q30_threshold: int, **kwargs) -> Query:
     """Filter metrics above Q30 threshold and return the ratio."""
     return metrics.filter(
-        SampleLaneSequencingMetrics.sample_base_fraction_passing_q30 > q30_threshold / 100,
+        SampleLaneSequencingMetrics.sample_base_percentage_passing_q30 > q30_threshold,
     )
 
 
