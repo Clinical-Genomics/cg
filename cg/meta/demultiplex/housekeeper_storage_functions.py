@@ -35,12 +35,9 @@ def store_flow_cell_data_in_housekeeper(
 
     add_bundle_and_version_if_non_existent(bundle_name=flow_cell.id, hk_api=hk_api)
 
-    tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell.id]
+    tags: List[str] = [SequencingFileTag.FASTQ, flow_cell.id]
     add_tags_if_non_existent(tag_names=tags, hk_api=hk_api)
 
-    add_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id, hk_api=hk_api
-    )
     add_sample_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api, store=store)
     add_demux_logs_to_housekeeper(
         flow_cell=flow_cell, hk_api=hk_api, flow_cell_run_dir=flow_cell_run_dir
@@ -75,7 +72,7 @@ def add_sample_fastq_files_to_housekeeper(
 ) -> None:
     """Add sample fastq files from flow cell to Housekeeper."""
     sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
-        sample_sheet_path=flow_cell.sample_sheet_path,
+        sample_sheet_path=flow_cell.get_sample_sheet_path_hk(),
         flow_cell_sample_type=flow_cell.sample_type,
     )
 
