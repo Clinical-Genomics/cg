@@ -55,19 +55,19 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, case_id: str, strandedness: Strandedness
     ) -> List[List[str]]:
-        """Get sample sheet information per sample."""
+        """Get sample sheet content per sample."""
         sample_metadata: List[dict] = self.gather_file_metadata_for_sample(sample_obj=sample)
-        forward_read: List[str] = self.extract_read_files(
+        forward_read_paths: List[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
         )
-        reverse_read: List[str] = self.extract_read_files(
+        reverse_read_paths: List[str] = self.extract_read_files(
             metadata=sample_metadata, reverse_read=True
         )
 
         sample_sheet = RnafusionSample(
             sample=case_id,
-            fastq_forward=forward_read,
-            fastq_reverse=reverse_read,
+            fastq_forward=forward_read_paths,
+            fastq_reverse=reverse_read_paths,
             strandedness=strandedness,
         )
         return sample_sheet.reformat_sample_content()
@@ -79,7 +79,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             raise NotImplementedError(
                 "Case objects are assumed to be related to a single sample (one link)"
             )
-        LOG.info("Getting sample sheet information")
+        LOG.debug("Getting sample sheet information")
         for link in case.links:
             content_per_sample = self.get_sample_sheet_content_per_sample(
                 sample=link.sample, case_id=case_id, strandedness=strandedness
@@ -89,7 +89,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def get_pipeline_parameters(
         self, case_id: str, genomes_base: Optional[Path] = None
     ) -> PipelineParameters:
-        """Get rnafusion parameters."""
+        """Get Rnafusion parameters."""
         LOG.info("Getting parameters information")
         return RnafusionParameters(
             clusterOptions=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
@@ -111,7 +111,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         genomes_base: Path,
         dry_run: bool,
     ) -> None:
-        """Create config files (parameters and sample sheet) for rnafusion analysis."""
+        """Create config files (parameters and sample sheet) for Rnafusion analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
         sample_sheet_content: List[List[Any]] = self.get_sample_sheet_content(
             case_id=case_id, strandedness=strandedness

@@ -1,4 +1,4 @@
-"""Tests cli common methods to create the case config for nf analyses."""
+"""Tests CLI common methods to create the case config for NF analyses."""
 
 import logging
 

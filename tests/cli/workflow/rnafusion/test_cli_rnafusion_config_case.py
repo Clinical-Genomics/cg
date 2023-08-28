@@ -1,4 +1,4 @@
-"""Tests cli methods to create the case config for rnafusion."""
+"""Tests cli methods to create the case config for Rnafusion."""
 
 import logging
 from pathlib import Path
@@ -71,7 +71,7 @@ def test_defaults(
     caplog: LogCaptureFixture,
 ):
     """Test that command generates default config files."""
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
 
     # GIVEN a valid case
 
@@ -111,7 +111,7 @@ def test_dry_run(
     rnafusion_case_id: str,
 ):
     """Test dry-run."""
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
 
     # GIVEN a valid case
 

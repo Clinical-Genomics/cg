@@ -40,21 +40,21 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, instrument_platform: SequencingPlatform.ILLUMINA, fasta: str = ""
     ) -> List[List[str]]:
-        """Get sample sheet information per sample."""
+        """Get sample sheet content per sample."""
         sample_name: str = sample.name
         sample_metadata: List[str] = self.gather_file_metadata_for_sample(sample)
-        forward_read: List[str] = self.extract_read_files(
+        forward_read_paths: List[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
         )
-        reverse_read: List[str] = self.extract_read_files(
+        reverse_read_paths: List[str] = self.extract_read_files(
             metadata=sample_metadata, reverse_read=True
         )
         sample_sheet = TaxprofilerSample(
             sample=sample_name,
             run_accession=sample_name,
             instrument_platform=instrument_platform,
-            fastq_forward=forward_read,
-            fastq_reverse=reverse_read,
+            fastq_forward=forward_read_paths,
+            fastq_reverse=reverse_read_paths,
             fasta=fasta,
         )
         return sample_sheet.reformat_sample_content()
@@ -65,11 +65,11 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         instrument_platform: SequencingPlatform.ILLUMINA,
         fasta: str = "",
     ) -> List[List[Any]]:
-        """Write sample sheet for taxprofiler analysis in case folder."""
+        """Write sample sheet for Taxprofiler analysis in case folder."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_sheet_content: List = []
         LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
-        LOG.info("Getting sample sheet information")
+        LOG.debug("Getting sample sheet information")
         for link in case.links:
             sample_sheet_content.extend(
                 self.get_sample_sheet_content_per_sample(
