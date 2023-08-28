@@ -167,7 +167,7 @@ OPTION_BCL_CONVERTER = click.option(
     type=click.Choice(["bcl2fastq", "dragen"]),
     default=None,
     help="Specify bcl conversion software. Choose between bcl2fastq and dragen. "
-    "If not specified, the software will be determined automatically.",
+    "If not specified, the software will be determined automatically using the sequencer type.",
 )
 
 
