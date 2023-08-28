@@ -24,7 +24,6 @@ from cg.meta.demultiplex.status_db_storage_functions import (
 )
 from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
-    get_bcl_converter_name,
     parse_flow_cell_directory_data,
 )
 from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
@@ -75,7 +74,12 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Flow cell added: {flow_cell}")
 
-    def finish_flow_cell_temp(self, flow_cell_directory_name: str, force: bool = False) -> None:
+    def finish_flow_cell_temp(
+        self,
+        flow_cell_directory_name: str,
+        bcl_converter: Optional[str] = None,
+        force: bool = False,
+    ) -> None:
         """Store data for the demultiplexed flow cell and mark it as ready for delivery.
         This function:
             - Stores the flow cell in the status database
@@ -111,8 +115,6 @@ class DemuxPostProcessingAPI:
         except FlowCellError as e:
             LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
             return
-
-        bcl_converter: str = get_bcl_converter_name(flow_cell_out_directory)
 
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
             flow_cell_directory=flow_cell_out_directory,
@@ -272,7 +274,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         demux_results: DemuxResults = DemuxResults(
             demux_dir=Path(self.demux_api.demultiplexed_runs_dir, flow_cell_name),
             flow_cell=flow_cell,
-            bcl_converter=bcl_converter,
+            bcl_converter=flow_cell.bcl_converter,
         )
         if not demux_results.flow_cell.is_hiseq_x_copy_completed():
             LOG.info(f"{flow_cell_name} is not yet completely copied")
@@ -438,7 +440,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         demux_results: DemuxResults = DemuxResults(
             demux_dir=Path(self.demux_api.demultiplexed_runs_dir, flow_cell_name),
             flow_cell=flow_cell,
-            bcl_converter=bcl_converter,
+            bcl_converter=flow_cell.bcl_converter,
         )
         if not demux_results.results_dir.exists():
             LOG.warning(f"Could not find results directory {demux_results.results_dir}")

@@ -78,7 +78,7 @@ def demultiplex_flow_cell(
 ):
     """Demultiplex a flow cell.
 
-    flow cell name is the flow cell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
+    flow cell name is the flow cell run directory name, e.g. '201203_D00483_0200_AHVKJCDRXX'
     """
 
     LOG.info(f"Running cg demultiplex flow cell, using {bcl_converter}")
