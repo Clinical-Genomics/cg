@@ -1,1 +1,0 @@
-"""Taxprofiler related constants."""
