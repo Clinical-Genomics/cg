@@ -37,7 +37,7 @@ def rename_file(file_path: Path, renamed_file_path: Path) -> None:
     """Rename the given fastq file path."""
     if renamed_file_path.exists():
         LOG.debug(
-            f"Fastq file {renamed_file_path} already exists. Skipping renaming of {renamed_file_path}."
+            f"File {renamed_file_path} already exists. Skipping renaming of {renamed_file_path}."
         )
         return
     shutil.move(src=file_path, dst=renamed_file_path)
