@@ -61,6 +61,10 @@ def finish_flow_cell_old_flow(
 def finish_flow_cell(
     context: CGConfig, flow_cell_directory_name: str, bcl_converter: str, force: bool
 ):
+    """Command to finish up a flow cell after demultiplexing.
+
+    flow-cell-name is full flow cell name, e.g. '201203_D00483_0200_AHVKJCDRXX'.
+    """
     demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
     demux_post_processing_api.finish_flow_cell_temp(
         flow_cell_directory_name=flow_cell_directory_name, bcl_converter=bcl_converter, force=force
@@ -71,7 +75,8 @@ def finish_flow_cell(
 @click.pass_obj
 @DRY_RUN
 def finish_all_cmd(context: CGConfig, dry_run: bool):
-    # Temporary finish flow cell logic will replace logic above when validated
+    """Command to finish up all demultiplexed flow cells."""
+
     demux_post_processing_api_temp: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
     demux_post_processing_api_temp.set_dry_run(dry_run=dry_run)
     demux_post_processing_api_temp.finish_all_flow_cells_temp()
