@@ -1,11 +1,12 @@
 import re
 from pathlib import Path
-
-from cg.apps.housekeeper.hk import HousekeeperAPI
+import logging
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+
+LOG = logging.getLogger(__name__)
 
 
 def is_valid_sample_fastq_file(sample_fastq: Path, sample_internal_id: str) -> bool:
@@ -63,6 +64,7 @@ def validate_sample_sheet_exists(flow_cell: FlowCellDirectoryData) -> None:
     sample_sheet_path: Path = flow_cell.get_sample_sheet_path_hk()
     if not sample_sheet_path.exists():
         raise FlowCellError(f"Sample sheet {sample_sheet_path} does not exist in housekeeper.")
+    LOG.debug(f"Found sample sheet {sample_sheet_path} in housekeeper.")
 
 
 def validate_demultiplexing_complete(flow_cell_output_directory: Path) -> None:
