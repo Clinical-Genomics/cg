@@ -17,13 +17,13 @@ from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSample
 LOG = logging.getLogger(__name__)
 
 
-def test_without_samples(
+def test_config_case_without_samples(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
     no_sample_case_id: str,
 ):
-    """Test command with case_id and no samples."""
+    """Test config_case with a case without samples."""
     caplog.set_level(logging.ERROR)
     # GIVEN a case
 
