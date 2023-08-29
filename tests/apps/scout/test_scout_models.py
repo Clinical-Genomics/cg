@@ -99,7 +99,7 @@ def test_set_parent_when_provided():
     """Test to validate that the parent value is not altered if a string is provided."""
 
     # GIVEN a valid parent
-    father: str = "father"
+    father: str = Pedigree.FATHER
 
     # WHEN running "set_parent_if_missing"
     validated_father: str = set_parent_if_missing(father)
@@ -113,6 +113,7 @@ def test_set_parent_when_not_provided():
 
     # GIVEN that no parent is provided
     parent = None
+
     # WHEN running "set_parent_if_missing"
     validated_parent: str = set_parent_if_missing(parent=parent)
 
@@ -125,6 +126,7 @@ def test_set_gender_if_provided():
 
     # GIVEN a gender which is not Gender.OTHER as input
     gender: PlinkGender = PlinkGender.FEMALE
+
     # WHEN running "set_gender_if_other"
     validated_gender: str = set_gender_if_other(gender)
 
@@ -137,6 +139,7 @@ def test_set_gender_if_other():
 
     # GIVEN Gender.OTHER as input
     gender: Gender = Gender.OTHER
+
     # WHEN running "set_gender_if_other"
     validated_gender: str = set_gender_if_other(gender)
 
