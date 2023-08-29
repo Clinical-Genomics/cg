@@ -102,9 +102,7 @@ class DemuxPostProcessingAPI:
         flow_cell_out_directory: Path = Path(
             self.demux_api.demultiplexed_runs_dir, flow_cell_directory_name
         )
-        flow_cell_run_directory: Path = Path(
-            self.demux_api.flow_cells_dir, flow_cell_directory_name
-        )
+
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
             flow_cell_directory=flow_cell_out_directory,
             bcl_converter=bcl_converter,
