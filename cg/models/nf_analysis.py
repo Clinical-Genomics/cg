@@ -19,8 +19,8 @@ class NextflowSample(BaseModel):
 
     Attributes:
         name: sample name, corresponds to case_id
-        fastq_forward_read_paths: list of all fastq read1 files corresponding to sample
-        fastq_reverse_read_paths: list of all fastq read2 files corresponding to sample
+        fastq_forward_read_paths: list of all fastq read1 file paths corresponding to sample
+        fastq_reverse_read_paths: list of all fastq read2 file paths corresponding to sample
     """
 
     name: str
@@ -28,7 +28,7 @@ class NextflowSample(BaseModel):
     fastq_reverse_read_paths: conlist(Path, min_items=1)
 
     @validator("fastq_reverse_read_paths")
-    def fastq_forward_reverse_length_match(
+    def validate_complete_fastq_file_pairs(
         cls, fastq_reverse: List[str], values: dict
     ) -> List[str]:
         """Verify that the number of fastq forward files is the same as for the reverse."""
@@ -38,7 +38,7 @@ class NextflowSample(BaseModel):
 
     @validator("fastq_forward_read_paths", "fastq_reverse_read_paths")
     def fastq_files_exist(cls, fastq_paths: List[str], values: dict) -> List[str]:
-        """Verify that the number of fastq forward files is the same as for the reverse."""
+        """Verify that fastq files exist."""
         for fastq_path in fastq_paths:
             if not fastq_path.is_file():
                 raise SampleSheetError(f"Fastq file does not exist: {str(fastq_path)}")

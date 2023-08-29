@@ -170,7 +170,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def write_params_file(self, case_id: str, pipeline_parameters: dict) -> None:
         """Write params-file for analysis."""
-        LOG.info("Writing parameters file")
+        LOG.debug("Writing parameters file")
         write_yaml_nextflow_style(
             content=pipeline_parameters,
             file_path=self.get_params_file_path(case_id=case_id),
@@ -183,7 +183,7 @@ class NfAnalysisAPI(AnalysisAPI):
         header: List[str],
     ) -> None:
         """Write sample sheet CSV file."""
-        LOG.info("Writing sample sheet")
+        LOG.debug("Writing sample sheet")
         if header:
             content.insert(0, header)
         WriteFile.write_file_from_content(
