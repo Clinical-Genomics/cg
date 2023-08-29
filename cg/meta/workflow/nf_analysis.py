@@ -138,8 +138,8 @@ class NfAnalysisAPI(AnalysisAPI):
         sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
         return [d["path"] for d in sorted_metadata if d["read"] == read_direction]
 
-    def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
-        """Raise an error if config file is not found."""
+    def verify_sample_sheet_exists(self, case_id: str, dry_run: bool = False) -> None:
+        """Raise an error if sample sheet file is not found."""
         if not dry_run and not Path(self.get_sample_sheet_path(case_id=case_id)).exists():
             raise ValueError(f"No config file found for case {case_id}")
 
