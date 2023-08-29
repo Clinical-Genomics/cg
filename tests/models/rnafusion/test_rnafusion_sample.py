@@ -96,3 +96,25 @@ def test_instantiate_rnafusion_strandedness_not_permitted(
             strandedness=strandedness_not_permitted,
         )
     assert "value is not a valid enumeration member" in str(error.value)
+
+
+def test_instantiate_rnafusion_non_existing_fastq(
+    sample_name: str,
+    fastq_forward_read_path: Path,
+    non_existing_file_path: Path,
+    strandedness: str,
+):
+    """
+    Tests Rnafusion sample with non existing files
+    """
+    # GIVEN a sample with a non existing file
+
+    # WHEN instantiating a sample object THEN throws an error
+    with pytest.raises(SampleSheetError) as error:
+        RnafusionSample(
+            name=sample_name,
+            fastq_forward_read_paths=[fastq_forward_read_path],
+            fastq_reverse_read_paths=[non_existing_file_path],
+            strandedness=strandedness,
+        )
+    assert "Fastq file does not exist" in str(error.value)
