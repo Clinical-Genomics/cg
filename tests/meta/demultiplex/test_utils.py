@@ -150,7 +150,7 @@ def test_add_flow_cell_name_to_fastq_file_path(bcl2fastq_flow_cell_id: str, fast
         fastq_file_path=fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
-    # THEN the fastq file path should be returned with the flow cell name appended
+    # THEN the fastq file path should be returned with the flow cell name added
     assert rename_fastq_file_path == Path(
         fastq_file_path.parent, f"{bcl2fastq_flow_cell_id}_{fastq_file_path.name}"
     )
@@ -169,5 +169,5 @@ def test_add_flow_cell_name_to_fastq_file_path_when_flow_cell_name_already_in_na
         fastq_file_path=fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
-    # THEN the fastq file path should be returned with the flow cell name appended
+    # THEN the fastq file path should be returned equal to the original fastq file path
     assert renamed_fastq_file_path == fastq_file_path
