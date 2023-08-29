@@ -3,7 +3,6 @@ from pathlib import Path
 import os
 from typing import List, Set
 import logging
-import shutil
 
 LOG = logging.getLogger(__name__)
 
@@ -34,11 +33,11 @@ def get_all_files_in_dir(base_path: Path) -> Set[Path]:
 
 
 def rename_file(file_path: Path, renamed_file_path: Path) -> None:
-    """Rename the given fastq file path."""
-    if renamed_file_path.exists():
-        LOG.debug(
-            f"File {renamed_file_path} already exists. Skipping renaming of {renamed_file_path}."
-        )
-        return
-    shutil.move(src=file_path, dst=renamed_file_path)
-    LOG.info(f"Renamed {file_path} to {renamed_file_path}.")
+    """Rename the given file path."""
+    file_path.rename(renamed_file_path)
+    LOG.debug(f"Renamed {file_path} to {renamed_file_path}.")
+
+
+def is_pattern_in_file_path(file_path: Path, pattern: str) -> bool:
+    """Check if a pattern is in a file path."""
+    return pattern in file_path.name

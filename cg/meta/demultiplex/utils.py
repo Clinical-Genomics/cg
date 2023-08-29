@@ -13,8 +13,11 @@ from cg.meta.demultiplex.validation import (
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
-from cg.utils.files import get_file_in_directory, get_files_matching_pattern
-
+from cg.utils.files import (
+    get_file_in_directory,
+    get_files_matching_pattern,
+    is_pattern_in_file_path,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -97,6 +100,12 @@ def parse_flow_cell_directory_data(
     return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
 
 
-def append_flow_cell_name_to_fastq_file_path(fastq_file_path: Path, flow_cell_name: str) -> Path:
-    """Append the flow cell name to the fastq file path."""
+def add_flow_cell_name_to_fastq_file_path(fastq_file_path: Path, flow_cell_name: str) -> Path:
+    """Add the flow cell name to the fastq file path if the flow cell name is not already in the given file path."""
+    if is_pattern_in_file_path(file_path=fastq_file_path, pattern=flow_cell_name):
+        LOG.debug(
+            f"Flow cell name {flow_cell_name} already in {fastq_file_path}. Skipping renaming."
+        )
+        return fastq_file_path
+    LOG.debug(f"Adding flow cell name {flow_cell_name} to {fastq_file_path}.")
     return Path(fastq_file_path.parent, f"{flow_cell_name}_{fastq_file_path.name}")

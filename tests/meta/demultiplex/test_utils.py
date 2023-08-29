@@ -12,7 +12,7 @@ from cg.meta.demultiplex.utils import (
     get_q30_threshold,
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
-    append_flow_cell_name_to_fastq_file_path,
+    add_flow_cell_name_to_fastq_file_path,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
@@ -142,17 +142,32 @@ def test_parse_flow_cell_directory_data_valid():
     assert result.bcl_converter == "dummy_bcl_converter"
 
 
-def test_append_flow_cell_name_to_fastq_file_path(
-    bcl2fastq_flow_cell_id: str, fastq_file_path: Path
-):
+def test_add_flow_cell_name_to_fastq_file_path(bcl2fastq_flow_cell_id: str, fastq_file_path: Path):
     # GIVEN a fastq file path and a flow cell name
 
-    # WHEN appending the flow cell name to the fastq file path
-    appended_fastq_file_path: Path = append_flow_cell_name_to_fastq_file_path(
+    # WHEN adding the flow cell name to the fastq file path
+    rename_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
         fastq_file_path=fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
     # THEN the fastq file path should be returned with the flow cell name appended
-    assert appended_fastq_file_path == Path(
+    assert rename_fastq_file_path == Path(
         fastq_file_path.parent, f"{bcl2fastq_flow_cell_id}_{fastq_file_path.name}"
     )
+
+
+def test_add_flow_cell_name_to_fastq_file_path_when_flow_cell_name_already_in_name(
+    bcl2fastq_flow_cell_id: str, fastq_file_path: Path
+):
+    # GIVEN a fastq file path and a flow cell name
+
+    # GIVEN that the flow cell name is already in the fastq file path
+    fastq_file_path = Path(f"{bcl2fastq_flow_cell_id}_{fastq_file_path.name}")
+
+    # WHEN adding the flow cell name to the fastq file path
+    renamed_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
+        fastq_file_path=fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
+    )
+
+    # THEN the fastq file path should be returned with the flow cell name appended
+    assert renamed_fastq_file_path == fastq_file_path
