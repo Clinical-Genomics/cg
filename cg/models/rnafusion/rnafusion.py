@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
+from pydantic import Field
 from pydantic.v1 import BaseModel
 
 from cg.constants.constants import Strandedness
@@ -30,7 +31,7 @@ class RnafusionParameters(PipelineParameters):
     """Rnafusion parameters."""
 
     genomes_base: Path
-    input: Path
+    input: Path = Field(..., alias="sample_sheet_path")
     outdir: Path
     all: bool = False
     arriba: bool = True

@@ -2,6 +2,7 @@ import collections
 from pathlib import Path
 from typing import List
 
+from pydantic import Field
 from pydantic.v1 import BaseModel, conlist, validator
 
 from cg.constants.nextflow import DELIVER_FILE_HEADERS
@@ -9,7 +10,7 @@ from cg.exc import SampleSheetError, ValidationError
 
 
 class PipelineParameters(BaseModel):
-    clusterOptions: str
+    clusterOptions: str = Field(..., alias="cluster_options")
     priority: str
 
 

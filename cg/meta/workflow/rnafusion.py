@@ -92,9 +92,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Get Rnafusion parameters."""
         LOG.info("Getting parameters information")
         return RnafusionParameters(
-            clusterOptions=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
+            cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
             genomes_base=genomes_base or self.get_references_path(),
-            input=self.get_sample_sheet_path(case_id=case_id),
+            sample_sheet_path=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             priority=self.account,
         )

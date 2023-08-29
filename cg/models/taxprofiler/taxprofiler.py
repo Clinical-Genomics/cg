@@ -1,5 +1,8 @@
+import collections
 from pathlib import Path
 from typing import List
+
+from pydantic import Field
 
 from cg.constants.sequencing import SequencingPlatform
 from cg.models.nf_analysis import NextflowSample, PipelineParameters
@@ -8,7 +11,7 @@ from cg.models.nf_analysis import NextflowSample, PipelineParameters
 class TaxprofilerParameters(PipelineParameters):
     """Model for Taxprofiler parameters."""
 
-    input: Path
+    input: Path = Field(..., alias="sample_sheet_path")
     outdir: Path
     databases: Path
     save_preprocessed_reads: bool = True
