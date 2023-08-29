@@ -17,7 +17,7 @@ LOG = logging.getLogger(__name__)
     "context",
     ["rnafusion_context", "taxprofiler_context"],
 )
-def test_without_options(cli_runner: CliRunner, context: CGConfig, request):
+def test_config_case_without_options(cli_runner: CliRunner, context: CGConfig, request):
     """Test command without options."""
     context = request.getfixturevalue(context)
 
@@ -35,7 +35,7 @@ def test_without_options(cli_runner: CliRunner, context: CGConfig, request):
     "context",
     ["rnafusion_context", "taxprofiler_context"],
 )
-def test_with_missing_case(
+def test_config_case_with_missing_case(
     cli_runner: CliRunner,
     caplog: LogCaptureFixture,
     case_id_does_not_exist: str,
