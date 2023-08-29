@@ -1,6 +1,8 @@
+import datetime as dt
+from pathlib import Path
 from typing import Optional
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, FieldValidationInfo, field_validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, FieldValidationInfo, field_validator
 from typing_extensions import Annotated
 
 from cg.apps.tb.validators import parse_str_to_datetime, parse_str_to_path
@@ -17,13 +19,13 @@ class TrailblazerAnalysis(BaseModel):
         return info.data.get("family")
 
     version: Optional[str] = None
-    logged_at: Annotated[Optional[str], AfterValidator(parse_str_to_datetime)]
-    started_at: Annotated[Optional[str], AfterValidator(parse_str_to_datetime)]
-    completed_at: Annotated[Optional[str], AfterValidator(parse_str_to_datetime)]
+    logged_at: Annotated[Optional[dt.datetime], BeforeValidator(parse_str_to_datetime)]
+    started_at: Annotated[Optional[dt.datetime], BeforeValidator(parse_str_to_datetime)]
+    completed_at: Annotated[Optional[dt.datetime], BeforeValidator(parse_str_to_datetime)]
     status: Optional[str] = None
     priority: Optional[str] = None
-    out_dir: Annotated[Optional[str], AfterValidator(parse_str_to_path)]
-    config_path: Annotated[Optional[str], AfterValidator(parse_str_to_path)]
+    out_dir: Annotated[Optional[Path], BeforeValidator(parse_str_to_path)]
+    config_path: Annotated[Optional[Path], BeforeValidator(parse_str_to_path)]
     comment: Optional[str] = None
     is_deleted: Optional[bool] = None
     is_visible: Optional[bool] = None
