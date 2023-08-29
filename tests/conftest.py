@@ -2607,26 +2607,34 @@ def fixture_no_sample_case_id() -> str:
     return "no_sample_case"
 
 
-@pytest.fixture(name="fastq_file_forward")
-def fixture_fastq_file_forward(housekeeper_dir: Path) -> Path:
-    fastq_filename = Path(housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz")
-    with gzip.open(fastq_filename, "wb") as wh:
+@pytest.fixture(name="fastq_forward_read_path")
+def fixture_fastq_forward_read_path(housekeeper_dir: Path) -> Path:
+    """Path to existing fastq forward read file."""
+    fastq_file_path = Path(housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001").with_suffix(
+        f"{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    )
+    with gzip.open(fastq_file_path, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
-    return fastq_filename
+    return fastq_file_path
 
 
-@pytest.fixture(name="fastq_file_reverse")
-def fixture_fastq_file_reverse(housekeeper_dir: Path) -> Path:
-    fastq_filename = Path(housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz")
-    with gzip.open(fastq_filename, "wb") as wh:
+@pytest.fixture(name="fastq_reverse_read_path")
+def fixture_fastq_reverse_read_path(housekeeper_dir: Path) -> Path:
+    """Path to existing fastq reverse read file."""
+    fastq_file_path = Path(
+        housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
+    ).with_suffix(f"{FileExtensions.FASTQ}{FileExtensions.GZIP}")
+    with gzip.open(fastq_file_path, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
-    return fastq_filename
+    return fastq_file_path
 
 
 @pytest.fixture(name="mock_fastq_files")
-def fixture_mock_fastq_files(fastq_file_forward: Path, fastq_file_reverse: Path) -> List[Path]:
+def fixture_mock_fastq_files(
+    fastq_forward_read_path: Path, fastq_reverse_read_path: Path
+) -> List[Path]:
     """Return list of all mock fastq files to commit to mock housekeeper."""
-    return [fastq_file_forward, fastq_file_reverse]
+    return [fastq_forward_read_path, fastq_reverse_read_path]
 
 
 @pytest.fixture(name="sequencing_platform")
@@ -2637,7 +2645,10 @@ def fixture_sequencing_platform() -> str:
 
 @pytest.fixture(name="taxprofiler_sample_sheet_content")
 def fixture_taxprofiler_sample_sheet_content(
-    sample_name: str, sequencing_platform: str, fastq_file_forward: Path, fastq_file_reverse: Path
+    sample_name: str,
+    sequencing_platform: str,
+    fastq_forward_read_path: Path,
+    fastq_reverse_read_path: Path,
 ) -> str:
     """Return the expected sample sheet content  for taxprofiler."""
     return ",".join(
@@ -2645,8 +2656,8 @@ def fixture_taxprofiler_sample_sheet_content(
             sample_name,
             sample_name,
             sequencing_platform,
-            fastq_file_forward.as_posix(),
-            fastq_file_reverse.as_posix(),
+            fastq_forward_read_path.as_posix(),
+            fastq_reverse_read_path.as_posix(),
             "",
         ]
     )
@@ -2660,14 +2671,17 @@ def fixture_strandedness() -> str:
 
 @pytest.fixture(name="rnafusion_sample_sheet_content")
 def fixture_rnafusion_sample_sheet_content(
-    rnafusion_case_id: str, fastq_file_forward: Path, fastq_file_reverse: Path, strandedness: str
+    rnafusion_case_id: str,
+    fastq_forward_read_path: Path,
+    fastq_reverse_read_path: Path,
+    strandedness: str,
 ) -> str:
     """Return the expected sample sheet content  for rnafusion."""
     return ",".join(
         [
             rnafusion_case_id,
-            fastq_file_forward.as_posix(),
-            fastq_file_reverse.as_posix(),
+            fastq_forward_read_path.as_posix(),
+            fastq_reverse_read_path.as_posix(),
             strandedness,
         ]
     )
