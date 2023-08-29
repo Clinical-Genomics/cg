@@ -41,6 +41,12 @@ def fixture_temp_fastq_paths(tmp_demulitplexing_dir: Path) -> List[Path]:
     return fastqs
 
 
+@pytest.fixture(name="fastq_file_path")
+def fixture_fastq_file_path() -> Path:
+    """Return a path to a fastq file."""
+    return Path("path/to/sample_internal_id_S1_L001_R1_001.fastq.gz")
+
+
 @pytest.fixture(name="tmp_sample_sheet_path")
 def fixture_tmp_samplesheet_path(tmp_demulitplexing_dir: Path) -> Path:
     """Return SampleSheet in temporary demuliplexing folder."""
