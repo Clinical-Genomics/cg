@@ -9,18 +9,12 @@ from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
-    get_bcl_converter_name,
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
 )
-from cg.meta.demultiplex.validation import is_bcl2fastq_demux_folder_structure
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.meta.demultiplex.demux_post_processing import (
-    DemuxPostProcessingAPI,
-)
-from cg.models.cg_config import CGConfig
 
 
 def test_get_lane_from_sample_fastq_file_path():
@@ -49,45 +43,6 @@ def test_get_lane_from_sample_fastq_file_path_no_flowcell():
 
     # THEN we should get the correct lane
     assert result == lane
-
-
-def test_is_bcl2fastq_folder_structure(bcl2fastq_folder_structure: Path):
-    # GIVEN a bcl2fastq folder structure
-    # WHEN checking if it is a bcl2fastq folder structure
-    is_bcl2fastq_folder_structure = is_bcl2fastq_demux_folder_structure(bcl2fastq_folder_structure)
-
-    # THEN it should be a bcl2fastq folder structure
-    assert is_bcl2fastq_folder_structure is True
-
-
-def test_is_not_bcl2fastq_folder_structure(not_bcl2fastq_folder_structure: Path):
-    # GIVEN not folder structure which is not formatted correctly for bcl2fastq
-
-    # WHEN checking if it is a bcl2fastq folder structure
-    is_bcl2fastq_folder_structure = is_bcl2fastq_demux_folder_structure(
-        not_bcl2fastq_folder_structure
-    )
-
-    # THEN it should not be a bcl2fastq folder structure
-    assert is_bcl2fastq_folder_structure is False
-
-
-def test_get_bcl_converter_bcl2fastq(bcl2fastq_folder_structure: Path):
-    # GIVEN a bcl2fastq folder structure
-    # WHEN getting the bcl converter
-    bcl_converter: str = get_bcl_converter_name(bcl2fastq_folder_structure)
-
-    # THEN it should be bcl2fastq
-    assert bcl_converter == BclConverter.BCL2FASTQ
-
-
-def test_get_bcl_converter_bclconvert():
-    # GIVEN any folder structure which is not bcl2fastq
-    # WHEN getting the bcl converter
-    bcl_converter: str = get_bcl_converter_name(Path())
-
-    # THEN it returns bclconvert
-    assert bcl_converter == BclConverter.BCLCONVERT
 
 
 def test_validate_demux_complete_flow_cell_directory_when_it_exists(tmp_path: Path):

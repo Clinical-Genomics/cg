@@ -44,7 +44,7 @@ def validate_sample_sheet(
     sheet: click.Path,
 ):
     """Validate a sample sheet.
-    flow-cell-name is the flow cell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
+    flow-cell-name is the flow cell run directory name, e.g. '201203_D00483_0200_AHVKJCDRXX'
     """
 
     flow_cell_path: Path = Path(context.demultiplex_api.flow_cells_dir, flow_cell_name)
@@ -74,7 +74,7 @@ def create_sheet(
 ):
     """Create a sample sheet or hard-link it from Housekeeper in the flow cell directory.
 
-    flow-cell-name is the flow cell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
+    flow-cell-name is the flow cell run directory name, e.g. '201203_D00483_0200_AHVKJCDRXX'
 
     Search the flow cell in the directory specified in config.
     """

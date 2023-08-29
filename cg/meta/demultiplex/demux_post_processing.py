@@ -1,6 +1,5 @@
-"""Post-processing Demultiiplex API."""
+"""Post-processing Demultiplex API."""
 import logging
-import shutil
 from contextlib import redirect_stdout
 from pathlib import Path
 from typing import Iterable, List, Optional
@@ -10,18 +9,24 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.apps.housekeeper.hk import HousekeeperAPI
-
 from cg.constants.cgstats import STATS_HEADER
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    store_flow_cell_data_in_housekeeper,
+    get_sample_sheets_from_latest_version,
+)
+from cg.meta.demultiplex.status_db_storage_functions import (
+    store_flow_cell_data_in_status_db,
+    store_sequencing_metrics_in_status_db,
+    update_sample_read_counts_in_status_db,
+)
 from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
-    get_bcl_converter_name,
     parse_flow_cell_directory_data,
 )
 from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
-
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
@@ -30,12 +35,6 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell
 from cg.utils import Process
-from cg.meta.demultiplex.status_db_storage_functions import (
-    store_flow_cell_data_in_status_db,
-    store_sequencing_metrics_in_status_db,
-    update_sample_read_counts_in_status_db,
-)
-from cg.meta.demultiplex.housekeeper_storage_functions import store_flow_cell_data_in_housekeeper
 
 LOG = logging.getLogger(__name__)
 
@@ -75,7 +74,12 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Flow cell added: {flow_cell}")
 
-    def finish_flow_cell_temp(self, flow_cell_directory_name: str, force: bool = False) -> None:
+    def finish_flow_cell_temp(
+        self,
+        flow_cell_directory_name: str,
+        bcl_converter: Optional[str] = None,
+        force: bool = False,
+    ) -> None:
         """Store data for the demultiplexed flow cell and mark it as ready for delivery.
         This function:
             - Stores the flow cell in the status database
@@ -112,12 +116,18 @@ class DemuxPostProcessingAPI:
             LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
             return
 
-        bcl_converter: str = get_bcl_converter_name(flow_cell_out_directory)
-
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
             flow_cell_directory=flow_cell_out_directory,
             bcl_converter=bcl_converter,
         )
+
+        sample_sheet_path: Path = Path(
+            get_sample_sheets_from_latest_version(
+                flow_cell_id=parsed_flow_cell.id, hk_api=self.hk_api
+            )[0].full_path
+        )
+        parsed_flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
+        LOG.debug("Set path for Housekeeper sample sheet in flow cell")
 
         try:
             self.store_flow_cell_data(parsed_flow_cell)
@@ -141,7 +151,10 @@ class DemuxPostProcessingAPI:
 
     def store_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Store data from the flow cell directory in status db and housekeeper."""
-        store_flow_cell_data_in_status_db(parsed_flow_cell=parsed_flow_cell, store=self.status_db)
+        store_flow_cell_data_in_status_db(
+            parsed_flow_cell=parsed_flow_cell,
+            store=self.status_db,
+        )
         store_sequencing_metrics_in_status_db(flow_cell=parsed_flow_cell, store=self.status_db)
         update_sample_read_counts_in_status_db(
             flow_cell_data=parsed_flow_cell, store=self.status_db
@@ -169,7 +182,8 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
     def add_to_cgstats(self, flow_cell_path: Path) -> None:
         """Add flow cell to cgstats."""
         LOG.info(
-            f"{self.stats_api.binary} --database {self.stats_api.db_uri} add --machine X -u Unaligned {flow_cell_path.as_posix()}"
+            f"{self.stats_api.binary} --database {self.stats_api.db_uri}"
+            f"add --machine X -u Unaligned {flow_cell_path.as_posix()}"
         )
         if self.dry_run:
             LOG.info("Dry run will not add flow cell stats")
@@ -196,7 +210,8 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
                 flow_cell_path, "-".join(["stats", project_id, flow_cell_id]) + ".txt"
             )
             LOG.info(
-                f"{self.stats_api.binary} --database {self.stats_api.db_uri} select --project {project_id} {flow_cell_id}"
+                f"{self.stats_api.binary} --database {self.stats_api.db_uri}"
+                f"select --project {project_id} {flow_cell_id}"
             )
             if self.dry_run:
                 LOG.info("Dry run will not process selected project")
@@ -261,7 +276,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         demux_results: DemuxResults = DemuxResults(
             demux_dir=Path(self.demux_api.demultiplexed_runs_dir, flow_cell_name),
             flow_cell=flow_cell,
-            bcl_converter=bcl_converter,
+            bcl_converter=flow_cell.bcl_converter,
         )
         if not demux_results.flow_cell.is_hiseq_x_copy_completed():
             LOG.info(f"{flow_cell_name} is not yet completely copied")
@@ -275,14 +290,19 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         LOG.info(f"{flow_cell_name} copy is complete and delivery will start")
         self.post_process_flow_cell(demux_results=demux_results)
 
-    def finish_all_flow_cells(self, bcl_converter: str) -> None:
+    def finish_all_flow_cells(self) -> None:
         """Loop over all flow cells and post process those that need it."""
         for flow_cell_dir in self.get_all_demultiplexed_flow_cell_dirs():
-            self.finish_flow_cell(
-                bcl_converter=bcl_converter,
-                flow_cell_name=flow_cell_dir.name,
-                flow_cell_path=flow_cell_dir,
-            )
+            try:
+                flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_dir)
+                self.finish_flow_cell(
+                    bcl_converter=flow_cell.bcl_converter,
+                    flow_cell_name=flow_cell_dir.name,
+                    flow_cell_path=flow_cell_dir,
+                )
+            except Exception as error:
+                LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(error)}")
+                continue
 
 
 class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
@@ -427,7 +447,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         demux_results: DemuxResults = DemuxResults(
             demux_dir=Path(self.demux_api.demultiplexed_runs_dir, flow_cell_name),
             flow_cell=flow_cell,
-            bcl_converter=bcl_converter,
+            bcl_converter=flow_cell.bcl_converter,
         )
         if not demux_results.results_dir.exists():
             LOG.warning(f"Could not find results directory {demux_results.results_dir}")
@@ -441,7 +461,14 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             LOG.info("Post processing flow cell anyway")
         self.post_process_flow_cell(demux_results=demux_results)
 
-    def finish_all_flow_cells(self, bcl_converter: str) -> None:
+    def finish_all_flow_cells(self) -> None:
         """Loop over all flow cells and post-process those that need it."""
         for flow_cell_dir in self.get_all_demultiplexed_flow_cell_dirs():
-            self.finish_flow_cell(flow_cell_name=flow_cell_dir.name, bcl_converter=bcl_converter)
+            try:
+                flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_dir)
+                self.finish_flow_cell(
+                    flow_cell_name=flow_cell_dir.name, bcl_converter=flow_cell.bcl_converter
+                )
+            except Exception as error:
+                LOG.error(f"Failed to finish flow cell {flow_cell_dir.name}: {str(error)}")
+                continue
