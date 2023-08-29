@@ -2740,7 +2740,7 @@ def fixture_rnafusion_parameters_default(
 ) -> RnafusionParameters:
     """Return Rnafusion parameters."""
     return RnafusionParameters(
-        cluster_options=f"--qos=normal",
+        cluster_options="--qos=normal",
         genomes_base=existing_directory,
         sample_sheet_path=rnafusion_sample_sheet_path,
         outdir=Path(rnafusion_dir, rnafusion_case_id),
@@ -2948,7 +2948,7 @@ def fixture_taxprofiler_parameters_default(
 ) -> TaxprofilerParameters:
     """Return Taxprofiler parameters."""
     return TaxprofilerParameters(
-        cluster_options=f"--qos=normal",
+        cluster_options="--qos=normal",
         sample_sheet_path=taxprofiler_sample_sheet_path,
         outdir=Path(taxprofiler_dir, taxprofiler_case_id),
         databases=existing_directory,
