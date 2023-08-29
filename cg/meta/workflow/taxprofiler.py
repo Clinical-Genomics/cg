@@ -49,7 +49,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         fastq_reverse_read_paths: List[str] = self.extract_read_files(
             metadata=sample_metadata, reverse_read=True
         )
-        sample_sheet = TaxprofilerSample(
+        sample_sheet_entry = TaxprofilerSample(
             name=sample_name,
             run_accession=sample_name,
             instrument_platform=instrument_platform,
@@ -57,7 +57,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             fastq_reverse_read_paths=fastq_reverse_read_paths,
             fasta=fasta,
         )
-        return sample_sheet.reformat_sample_content()
+        return sample_sheet_entry.reformat_sample_content()
 
     def get_sample_sheet_content(
         self,
