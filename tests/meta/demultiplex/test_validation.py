@@ -183,7 +183,7 @@ def test_validate_sample_sheet_exists_raises_error(bcl2fastq_flow_cell_dir: Path
         validate_sample_sheet_exists(flow_cell=flow_cell)
 
 
-def test_validate_sample_sheet_exists_no_error(bcl2fastq_flow_cell_dir: Path):
+def test_validate_sample_sheet_exists(bcl2fastq_flow_cell_dir: Path):
     # GIVEN a path with a sample sheet
     # GIVEN a flow cell without a sample sheet in housekeeper
     flow_cell = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
