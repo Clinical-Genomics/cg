@@ -78,7 +78,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             )
         return sample_sheet_content
 
-    def get_pipeline_parameters(self, case_id: str) -> PipelineParameters:
+    def get_pipeline_parameters(self, case_id: str) -> TaxprofilerParameters:
         """Return Taxprofiler parameters."""
         LOG.info("Getting parameters information")
         return TaxprofilerParameters(
@@ -104,7 +104,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             instrument_platform=instrument_platform,
             fasta=fasta,
         )
-        pipeline_parameters: dict = self.get_pipeline_parameters(case_id=case_id).dict()
+        pipeline_parameters: TaxprofilerParameters = self.get_pipeline_parameters(case_id=case_id)
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
@@ -113,4 +113,4 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             file_path=self.get_sample_sheet_path(case_id=case_id),
             header=TaxprofilerSample.headers(),
         )
-        self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters)
+        self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())

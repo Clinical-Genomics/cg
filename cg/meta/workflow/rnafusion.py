@@ -88,7 +88,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_pipeline_parameters(
         self, case_id: str, genomes_base: Optional[Path] = None
-    ) -> PipelineParameters:
+    ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
         LOG.info("Getting parameters information")
         return RnafusionParameters(
@@ -116,9 +116,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         sample_sheet_content: List[List[Any]] = self.get_sample_sheet_content(
             case_id=case_id, strandedness=strandedness
         )
-        pipeline_parameters: dict = self.get_pipeline_parameters(
+        pipeline_parameters: RnafusionParameters = self.get_pipeline_parameters(
             case_id=case_id, genomes_base=genomes_base
-        ).dict()
+        )
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
@@ -127,7 +127,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             file_path=self.get_sample_sheet_path(case_id=case_id),
             header=RnafusionSample.headers(),
         )
-        self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters)
+        self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
     def report_deliver(self, case_id: str) -> None:
         """Get a deliverables file template from resources, parse it and, then write the deliverables file."""
