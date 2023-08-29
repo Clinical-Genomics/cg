@@ -23,7 +23,9 @@ def finish_group():
 @DRY_RUN
 @click.pass_obj
 def finish_all_cmd_old_flow(context: CGConfig, dry_run: bool) -> None:
-    """Command to post-process all demultiplexed flow cells."""
+    """Command to post-process all demultiplexed flow cells.
+    The old flow uses the DemuxPostProcessingNovaseqAPI.
+    """
     demux_post_processing_api: DemuxPostProcessingNovaseqAPI = DemuxPostProcessingNovaseqAPI(
         config=context
     )
@@ -41,8 +43,8 @@ def finish_flow_cell_old_flow(
     context: CGConfig, flow_cell_name: str, bcl_converter: str, dry_run: bool, force: bool
 ) -> None:
     """Command to finish up a flow cell after demultiplexing.
-
     flow-cell-name is full flow cell name, e.g. '201203_D00483_0200_AHVKJCDRXX'.
+    The old flow uses the DemuxPostProcessingNovaseqAPI.
     """
     demux_post_processing_api: DemuxPostProcessingNovaseqAPI = DemuxPostProcessingNovaseqAPI(
         config=context
