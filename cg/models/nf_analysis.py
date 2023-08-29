@@ -21,7 +21,7 @@ class NextflowSample(BaseModel):
         fastq_reverse: list of all fastq read2 files corresponding to sample
     """
 
-    sample: str
+    name: str
     fastq_forward: conlist(str, min_items=1)
     fastq_reverse: conlist(str, min_items=1)
 

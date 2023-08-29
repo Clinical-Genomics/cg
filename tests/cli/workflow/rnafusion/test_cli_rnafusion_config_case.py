@@ -11,7 +11,6 @@ from cg.cli.workflow.rnafusion.base import config_case
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSample
-from tests.models.rnafusion.conftest import fixture_rnafusion_strandedness_not_acceptable
 
 LOG = logging.getLogger(__name__)
 

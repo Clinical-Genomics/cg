@@ -21,7 +21,7 @@ def test_instantiate_rnafusion_sample(
 
     # WHEN instantiating a rnafusion sample object
     rnafusion_sample_object = RnafusionSample(
-        sample=rnafusion_sample,
+        name=rnafusion_sample,
         fastq_forward=rnafusion_fastq_forward,
         fastq_reverse=rnafusion_fastq_reverse_same_length,
         strandedness=rnafusion_strandedness_acceptable,
@@ -47,7 +47,7 @@ def test_fastq_forward_reverse_different_length(
     # THEN throws an error
     with pytest.raises(SampleSheetError):
         RnafusionSample(
-            sample=rnafusion_sample,
+            name=rnafusion_sample,
             fastq_forward=rnafusion_fastq_forward,
             fastq_reverse=rnafusion_fastq_reverse_not_same_length,
             strandedness=rnafusion_strandedness_acceptable,
@@ -69,7 +69,7 @@ def test_fastq_empty_list(
     # WHEN instantiating a sample object
     with pytest.raises(ValidationError):
         RnafusionSample(
-            sample=rnafusion_sample,
+            name=rnafusion_sample,
             fastq_forward=rnafusion_fastq_forward,
             fastq_reverse=rnafusion_fastq_reverse_empty,
             strandedness=rnafusion_strandedness_acceptable,
@@ -89,7 +89,7 @@ def test_instantiate_rnafusion_strandedness_not_acceptable(
     # WHEN instantiating a sample object THEN throws a ValidationError
     with pytest.raises(PydanticValidationError):
         RnafusionSample(
-            sample=rnafusion_sample,
+            name=rnafusion_sample,
             fastq_forward=rnafusion_fastq_forward,
             fastq_reverse=rnafusion_fastq_reverse_same_length,
             strandedness=rnafusion_strandedness_not_acceptable,

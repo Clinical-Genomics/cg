@@ -50,7 +50,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             metadata=sample_metadata, reverse_read=True
         )
         sample_sheet = TaxprofilerSample(
-            sample=sample_name,
+            name=sample_name,
             run_accession=sample_name,
             instrument_platform=instrument_platform,
             fastq_forward=forward_read_paths,

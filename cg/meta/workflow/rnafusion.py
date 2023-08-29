@@ -65,7 +65,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         )
 
         sample_sheet = RnafusionSample(
-            sample=case_id,
+            name=case_id,
             fastq_forward=forward_read_paths,
             fastq_reverse=reverse_read_paths,
             strandedness=strandedness,

@@ -51,7 +51,7 @@ class TaxprofilerSample(NextflowSample):
         """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
         return [
             [
-                self.sample,
+                self.name,
                 self.run_accession,
                 self.instrument_platform,
                 fastq_forward,
