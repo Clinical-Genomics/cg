@@ -9,6 +9,7 @@ from cg.apps.tb.validators import parse_str_to_datetime, parse_str_to_path
 class TrailblazerAnalysis(BaseModel):
     id: int
     family: str
+    case_id: Optional[str] = None
 
     @field_validator("case_id")
     def inherit_family_value(cls, value: str, info: FieldValidationInfo) -> str:
