@@ -1,6 +1,6 @@
 import logging
 import re
-import shutil
+
 from pathlib import Path
 from typing import List, Optional
 
@@ -100,14 +100,3 @@ def parse_flow_cell_directory_data(
 def append_flow_cell_name_to_fastq_file_path(fastq_file_path: Path, flow_cell_name: str) -> Path:
     """Append the flow cell name to the fastq file path."""
     return Path(fastq_file_path.parent, f"{flow_cell_name}_{fastq_file_path.name}")
-
-
-def rename_fastq_file(fastq_file_path: Path, renamed_fastq_file_path: Path) -> None:
-    """Rename the given fastq file path."""
-    if renamed_fastq_file_path.exists():
-        LOG.debug(
-            f"Fastq file {renamed_fastq_file_path} already exists. Skipping renaming of {fastq_file_path}."
-        )
-        return
-    shutil.move(fastq_file_path, renamed_fastq_file_path)
-    LOG.info(f"Renamed {fastq_file_path} to {renamed_fastq_file_path}.")

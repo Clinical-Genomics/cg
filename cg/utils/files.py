@@ -2,6 +2,10 @@
 from pathlib import Path
 import os
 from typing import List, Set
+import logging
+import shutil
+
+LOG = logging.getLogger(__name__)
 
 
 def get_file_in_directory(directory: Path, file_name: str) -> Path:
@@ -27,3 +31,14 @@ def get_files_matching_pattern(directory: Path, pattern: str) -> List[Path]:
 def get_all_files_in_dir(base_path: Path) -> Set[Path]:
     """Get a set of all files relative to the given base path."""
     return {file.relative_to(base_path) for file in base_path.rglob("*") if file.is_file()}
+
+
+def rename_file(file_path: Path, renamed_file_path: Path) -> None:
+    """Rename the given fastq file path."""
+    if renamed_file_path.exists():
+        LOG.debug(
+            f"Fastq file {renamed_file_path} already exists. Skipping renaming of {renamed_file_path}."
+        )
+        return
+    shutil.move(file_path, file_path)
+    LOG.info(f"Renamed {file_path} to {renamed_file_path}.")

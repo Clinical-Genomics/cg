@@ -18,11 +18,10 @@ from cg.meta.demultiplex.utils import (
     get_sample_fastqs_from_flow_cell,
     get_sample_sheet_path,
     append_flow_cell_name_to_fastq_file_path,
-    rename_fastq_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-from cg.utils.files import get_files_matching_pattern
+from cg.utils.files import get_files_matching_pattern, rename_file
 
 LOG = logging.getLogger(__name__)
 
@@ -93,9 +92,7 @@ def add_sample_fastq_files_to_housekeeper(
             fastq_file_path_appended: Path = append_flow_cell_name_to_fastq_file_path(
                 fastq_file_path=sample_fastq_path, flow_cell_name=flow_cell.id
             )
-            rename_fastq_file(
-                fastq_file_path=sample_fastq_path, renamed_fastq_file_path=fastq_file_path_appended
-            )
+            rename_file(file_path=sample_fastq_path, renamed_file_path=fastq_file_path_appended)
             store_fastq_path_in_housekeeper(
                 sample_internal_id=sample_internal_id,
                 sample_fastq_path=fastq_file_path_appended,

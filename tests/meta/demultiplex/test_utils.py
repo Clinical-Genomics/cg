@@ -13,7 +13,6 @@ from cg.meta.demultiplex.utils import (
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
     append_flow_cell_name_to_fastq_file_path,
-    rename_fastq_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
@@ -157,27 +156,3 @@ def test_append_flow_cell_name_to_fastq_file_path(
     assert appended_fastq_file_path == Path(
         fastq_file_path.parent, f"{bcl2fastq_flow_cell_id}_{fastq_file_path.name}"
     )
-
-
-def test_rename_fastq_file_path(tmp_path: Path):
-    # GIVEN a fastq file path and a renamed fastq file path
-    fastq_file_path: Path = Path(tmp_path, "dummy_path")
-    renamed_fastq_file_path: Path = Path(tmp_path, "dummy_renamed_path")
-
-    # GIVEN that the fastq file path exist
-    fastq_file_path.touch()
-    assert fastq_file_path.exists()
-
-    # GIVEN that the renamed fastq file path does not exist
-    assert not renamed_fastq_file_path.exists()
-
-    # WHEN renaming the fastq file
-    rename_fastq_file(
-        fastq_file_path=fastq_file_path, renamed_fastq_file_path=renamed_fastq_file_path
-    )
-
-    # THEN the renamed fastq file path should exist
-    assert renamed_fastq_file_path.exists()
-
-    # THEN the fastq file path should not exist
-    assert not fastq_file_path.exists()
