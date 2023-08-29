@@ -22,6 +22,7 @@ def test_defaults(
     taxprofiler_sample_sheet_path: Path,
     taxprofiler_params_file_path: Path,
     taxprofiler_sample_sheet_content: str,
+    taxprofiler_parameters_default: TaxprofilerParameters,
     caplog: LogCaptureFixture,
 ):
     """Test that command generates default config files."""
@@ -60,7 +61,7 @@ def test_defaults(
     params_content: List[List[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.YAML, file_path=taxprofiler_params_file_path, read_to_string=True
     )
-    for parameter in TaxprofilerParameters.__annotations__.keys():
+    for parameter in vars(taxprofiler_parameters_default).keys():
         assert parameter in params_content
 
 

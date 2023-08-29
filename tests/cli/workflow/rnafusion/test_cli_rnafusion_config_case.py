@@ -70,6 +70,7 @@ def test_defaults(
     rnafusion_sample_sheet_path: Path,
     rnafusion_params_file_path: Path,
     rnafusion_sample_sheet_content: str,
+    rnafusion_parameters_default: RnafusionParameters,
     caplog: LogCaptureFixture,
 ):
     """Test that command generates default config files."""
@@ -108,7 +109,7 @@ def test_defaults(
     params_content: List[List[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.YAML, file_path=rnafusion_params_file_path, read_to_string=True
     )
-    for parameter in RnafusionParameters.__annotations__.keys():
+    for parameter in vars(rnafusion_parameters_default).keys():
         assert parameter in params_content
 
 

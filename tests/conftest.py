@@ -43,6 +43,8 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
+from cg.models.rnafusion.rnafusion import RnafusionParameters
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
 from cg.store.models import (
     Bed,
@@ -2663,6 +2665,24 @@ def fixture_taxprofiler_sample_sheet_content(
     )
 
 
+@pytest.fixture(name="taxprofiler_parameters_default")
+def fixture_taxprofiler_parameters_default(
+    taxprofiler_dir: Path,
+    taxprofiler_case_id: str,
+    taxprofiler_sample_sheet_path: Path,
+    existing_directory: Path,
+) -> TaxprofilerParameters:
+    """Return Taxprofiler parameters."""
+    return TaxprofilerParameters(
+        cluster_options=f"--qos=normal",
+        sample_sheet_path=taxprofiler_sample_sheet_path,
+        outdir=Path(taxprofiler_dir, taxprofiler_case_id),
+        databases=existing_directory,
+        hostremoval_reference=existing_directory,
+        priority="development",
+    )
+
+
 @pytest.fixture(name="strandedness")
 def fixture_strandedness() -> str:
     """Return a default strandedness."""
@@ -2690,6 +2710,76 @@ def fixture_rnafusion_sample_sheet_content(
             fastq_reverse_read_path.as_posix(),
             strandedness,
         ]
+    )
+
+
+@pytest.fixture(name="hermes_deliverables")
+def fixture_hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
+    hermes_output: dict = {"pipeline": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
+    for file_info in deliverable_data["files"]:
+        tags: List[str] = []
+        if "html" in file_info["format"]:
+            tags.append("multiqc-html")
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
+    return hermes_output
+
+
+@pytest.fixture(name="malformed_hermes_deliverables")
+def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
+    malformed_deliverable: dict = hermes_deliverables.copy()
+    malformed_deliverable.pop("pipeline")
+
+    return malformed_deliverable
+
+
+@pytest.fixture(name="rnafusion_multiqc_json_metrics")
+def fixture_rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
+    """Returns the content of a mock Multiqc JSON file."""
+    return read_json(file_path=Path(rnafusion_analysis_dir, "multiqc_data.json"))
+
+
+@pytest.fixture(name="rnafusion_sample_sheet_path")
+def fixture_rnafusion_sample_sheet_path(rnafusion_dir, rnafusion_case_id) -> Path:
+    """Path to sample sheet."""
+    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    )
+
+
+@pytest.fixture(name="rnafusion_params_file_path")
+def fixture_rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
+    """Path to parameters file."""
+    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_params_file").with_suffix(
+        FileExtensions.YAML
+    )
+
+
+@pytest.fixture(name="tower_id")
+def fixture_tower_id() -> int:
+    """Returns a NF-Tower ID."""
+    return 123456
+
+
+@pytest.fixture(name="existing_directory")
+def fixture_existing_directory(tmpdir_factory) -> Path:
+    """Path to existing temporary directory."""
+    return tmpdir_factory.mktemp("any_directory")
+
+
+@pytest.fixture(name="rnafusion_parameters_default")
+def fixture_rnafusion_parameters_default(
+    rnafusion_dir: Path,
+    rnafusion_case_id: str,
+    rnafusion_sample_sheet_path: Path,
+    existing_directory: Path,
+) -> RnafusionParameters:
+    """Return Rnafusion parameters."""
+    return RnafusionParameters(
+        cluster_options=f"--qos=normal",
+        genomes_base=existing_directory,
+        sample_sheet_path=rnafusion_sample_sheet_path,
+        outdir=Path(rnafusion_dir, rnafusion_case_id),
+        priority="development",
     )
 
 
@@ -2773,53 +2863,6 @@ def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case
         file_format=FileFormat.JSON,
         file_path=Path(rnafusion_dir, rnafusion_case_id, rnafusion_case_id + "_deliverables.yaml"),
     )
-
-
-@pytest.fixture(name="hermes_deliverables")
-def fixture_hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
-    hermes_output: dict = {"pipeline": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
-    for file_info in deliverable_data["files"]:
-        tags: List[str] = []
-        if "html" in file_info["format"]:
-            tags.append("multiqc-html")
-        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
-    return hermes_output
-
-
-@pytest.fixture(name="malformed_hermes_deliverables")
-def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
-    malformed_deliverable: dict = hermes_deliverables.copy()
-    malformed_deliverable.pop("pipeline")
-
-    return malformed_deliverable
-
-
-@pytest.fixture(name="rnafusion_multiqc_json_metrics")
-def fixture_rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
-    """Returns the content of a mock Multiqc JSON file."""
-    return read_json(file_path=Path(rnafusion_analysis_dir, "multiqc_data.json"))
-
-
-@pytest.fixture(name="rnafusion_sample_sheet_path")
-def fixture_rnafusion_sample_sheet_path(rnafusion_dir, rnafusion_case_id) -> Path:
-    """Path to sample sheet."""
-    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet").with_suffix(
-        FileExtensions.CSV
-    )
-
-
-@pytest.fixture(name="rnafusion_params_file_path")
-def fixture_rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
-    """Path to parameters file."""
-    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_params_file").with_suffix(
-        FileExtensions.YAML
-    )
-
-
-@pytest.fixture(name="tower_id")
-def fixture_tower_id() -> int:
-    """Returns a NF-Tower ID."""
-    return 123456
 
 
 @pytest.fixture
