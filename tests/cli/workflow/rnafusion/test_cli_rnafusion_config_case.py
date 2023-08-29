@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import List
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
@@ -81,13 +82,17 @@ def test_defaults(
     # THEN command should exit succesfully
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN sample sheet file should be generated
-    assert "Getting sample sheet information" in caplog.text
-    assert "Writing sample sheet" in caplog.text
+    # THEN logs should be as expected
+    expected_logs: List[str] = [
+        "Getting sample sheet information",
+        "Writing sample sheet",
+        "Getting parameters information",
+        "Writing parameters file",
+    ]
+    for expected_log in expected_logs:
+        assert expected_log in expected_logs
 
-    # THEN parameters file should be generated
-    assert "Getting parameters information" in caplog.text
-    assert "Writing parameters file" in caplog.text
+    # THEN files should be generated
     assert rnafusion_sample_sheet_path.is_file()
     assert rnafusion_params_file_path.is_file()
 
