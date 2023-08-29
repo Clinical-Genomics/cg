@@ -5,9 +5,11 @@ from typing import Any, Dict
 import yaml
 
 
-def read_yaml(file_path: Path) -> Any:
+def read_yaml(file_path: Path, read_to_string: bool = False) -> Any:
     """Read content in a yaml file"""
     with open(file_path, "r") as file:
+        if read_to_string:
+            return file.read()
         return yaml.safe_load(file)
 
 

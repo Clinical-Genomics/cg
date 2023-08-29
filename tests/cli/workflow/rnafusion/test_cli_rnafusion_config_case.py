@@ -9,8 +9,11 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.rnafusion.base import config_case
 from cg.constants import EXIT_SUCCESS
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSample
+from tests.models.rnafusion.conftest import fixture_rnafusion_strandedness_not_acceptable
 
 LOG = logging.getLogger(__name__)
 
@@ -96,16 +99,18 @@ def test_defaults(
     assert rnafusion_params_file_path.is_file()
 
     # THEN the sample sheet content should match the expected values
-    with rnafusion_sample_sheet_path.open("r") as file:
-        content = file.read()
-        assert ",".join(RnafusionSample.headers()) in content
-        assert rnafusion_sample_sheet_content in content
+    sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.CSV, file_path=rnafusion_sample_sheet_path, read_to_string=True
+    )
+    assert ",".join(RnafusionSample.headers()) in sample_sheet_content
+    assert rnafusion_sample_sheet_content in sample_sheet_content
 
     # THEN the params file should contain all parameters
-    with rnafusion_params_file_path.open("r") as file:
-        content = file.read()
-        for parameter in RnafusionParameters.__annotations__.keys():
-            assert parameter in content
+    params_content: List[List[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.YAML, file_path=rnafusion_params_file_path, read_to_string=True
+    )
+    for parameter in RnafusionParameters.__annotations__.keys():
+        assert parameter in params_content
 
 
 def test_dry_run(
@@ -162,6 +167,7 @@ def test_reference(
     assert rnafusion_params_file_path.is_file()
 
     # THEN the given reference directory should be written
-    with rnafusion_params_file_path.open("r") as file:
-        content = file.read()
-        assert reference_dir in content
+    params_content: List[List[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.YAML, file_path=rnafusion_params_file_path, read_to_string=True
+    )
+    assert reference_dir in params_content

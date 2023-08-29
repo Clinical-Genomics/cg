@@ -9,6 +9,8 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.taxprofiler.base import config_case
 from cg.constants import EXIT_SUCCESS
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSample
 
@@ -48,16 +50,18 @@ def test_defaults(
     assert taxprofiler_params_file_path.is_file()
 
     # THEN the sample sheet content should match the expected values
-    with taxprofiler_sample_sheet_path.open("r") as file:
-        content = file.read()
-        assert ",".join(TaxprofilerSample.headers()) in content
-        assert taxprofiler_sample_sheet_content in content
+    sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.CSV, file_path=taxprofiler_sample_sheet_path, read_to_string=True
+    )
+    assert ",".join(TaxprofilerSample.headers()) in sample_sheet_content
+    assert taxprofiler_sample_sheet_content in sample_sheet_content
 
     # THEN the params file should contain all parameters
-    with taxprofiler_params_file_path.open("r") as file:
-        content = file.read()
-        for parameter in TaxprofilerParameters.__annotations__.keys():
-            assert parameter in content
+    params_content: List[List[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.YAML, file_path=taxprofiler_params_file_path, read_to_string=True
+    )
+    for parameter in TaxprofilerParameters.__annotations__.keys():
+        assert parameter in params_content
 
 
 def test_dry_run(
