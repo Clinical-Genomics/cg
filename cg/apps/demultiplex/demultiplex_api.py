@@ -168,7 +168,7 @@ class DemultiplexingAPI:
 
         if (
             flow_cell.has_demultiplexing_started_locally()
-            or flow_cell.has_demultiplexing_started_on_deck()
+            or flow_cell.has_demultiplexing_started_on_sequencer()
         ):
             LOG.warning("Demultiplexing has already been started")
             demultiplexing_possible = False

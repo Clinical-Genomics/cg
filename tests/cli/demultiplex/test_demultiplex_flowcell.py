@@ -293,7 +293,9 @@ def test_has_demultiplexing_started_locally_true(
     assert has_demux_started
 
 
-def test_has_demultiplexing_started_on_deck_true(novaseqx_flow_cell_dir_with_analysis_data: Path):
+def test_has_demultiplexing_started_on_sequencer_true(
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+):
     # GIVEN a flow cell with a BCLConvert folder
     flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_dir_with_analysis_data)
     Path.mkdir(
@@ -306,13 +308,15 @@ def test_has_demultiplexing_started_on_deck_true(novaseqx_flow_cell_dir_with_ana
     )
 
     # WHEN checking if the flow cell has started demultiplexing
-    has_demux_started: bool = flow_cell.has_demultiplexing_started_on_deck()
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_on_sequencer()
 
     # THEN the response should be True
     assert has_demux_started
 
 
-def test_has_demultiplexing_started_on_deck_false(novaseqx_flow_cell_dir_with_analysis_data: Path):
+def test_has_demultiplexing_started_on_sequencer_false(
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+):
     # GIVEN a flow cell without a BCLConvert folder
     flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_dir_with_analysis_data)
     assert not Path(
@@ -323,7 +327,7 @@ def test_has_demultiplexing_started_on_deck_false(novaseqx_flow_cell_dir_with_an
     ).exists()
 
     # WHEN checking if the flow cell has started demultiplexing
-    has_demux_started: bool = flow_cell.has_demultiplexing_started_on_deck()
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_on_sequencer()
 
     # THEN the response should be False
     assert not has_demux_started

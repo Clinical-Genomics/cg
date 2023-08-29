@@ -215,8 +215,8 @@ class FlowCellDirectoryData:
         """Check if demultiplexing has started path exists on the cluster."""
         return self.demultiplexing_started_path.exists()
 
-    def has_demultiplexing_started_on_deck(self) -> bool:
-        """Check if demultiplexing has started on the NovaSeq x machine."""
+    def has_demultiplexing_started_on_sequencer(self) -> bool:
+        """Check if demultiplexing has started on the NovaSeqX machine."""
         latest_analysis: Path = get_latest_analysis_path(self.path)
         if not latest_analysis:
             return False
