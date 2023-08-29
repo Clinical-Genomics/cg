@@ -38,6 +38,6 @@ def rename_file(file_path: Path, renamed_file_path: Path) -> None:
     LOG.debug(f"Renamed {file_path} to {renamed_file_path}.")
 
 
-def is_pattern_in_file_path(file_path: Path, pattern: str) -> bool:
+def is_pattern_in_file_path_name(file_path: Path, pattern: str) -> bool:
     """Check if a pattern is in a file path."""
     return pattern in file_path.name
