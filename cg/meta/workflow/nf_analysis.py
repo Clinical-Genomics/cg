@@ -180,7 +180,7 @@ class NfAnalysisAPI(AnalysisAPI):
     def write_sample_sheet(
         content: List[List[Any]],
         file_path: Path,
-        header: Optional[List[str]],
+        header: List[str],
     ) -> None:
         """Write sample sheet CSV file."""
         LOG.info("Writing sample sheet")
