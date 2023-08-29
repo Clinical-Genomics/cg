@@ -13,7 +13,6 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSample
-from tests.models.rnafusion.conftest import fixture_rnafusion_strandedness_not_acceptable
 
 LOG = logging.getLogger(__name__)
 
@@ -44,7 +43,7 @@ def test_wrong_strandedness(
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
-    rnafusion_strandedness_not_acceptable: str,
+    strandedness_not_permitted: str,
 ):
     """Test command with --strandedness option."""
     caplog.set_level(logging.ERROR)
@@ -54,7 +53,7 @@ def test_wrong_strandedness(
     # WHEN running with strandedness option specified
     result = cli_runner.invoke(
         config_case,
-        [rnafusion_case_id, "--strandedness", rnafusion_strandedness_not_acceptable],
+        [rnafusion_case_id, "--strandedness", strandedness_not_permitted],
         obj=rnafusion_context,
     )
 

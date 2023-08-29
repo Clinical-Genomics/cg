@@ -57,17 +57,17 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     ) -> List[List[str]]:
         """Get sample sheet content per sample."""
         sample_metadata: List[dict] = self.gather_file_metadata_for_sample(sample_obj=sample)
-        forward_read_paths: List[str] = self.extract_read_files(
+        fastq_forward_read_paths: List[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
         )
-        reverse_read_paths: List[str] = self.extract_read_files(
+        fastq_reverse_read_paths: List[str] = self.extract_read_files(
             metadata=sample_metadata, reverse_read=True
         )
 
         sample_sheet = RnafusionSample(
             name=case_id,
-            fastq_forward=forward_read_paths,
-            fastq_reverse=reverse_read_paths,
+            fastq_forward_read_paths=fastq_forward_read_paths,
+            fastq_reverse_read_paths=fastq_reverse_read_paths,
             strandedness=strandedness,
         )
         return sample_sheet.reformat_sample_content()

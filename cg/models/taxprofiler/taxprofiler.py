@@ -58,5 +58,7 @@ class TaxprofilerSample(NextflowSample):
                 fastq_reverse,
                 self.fasta,
             ]
-            for fastq_forward, fastq_reverse in zip(self.fastq_forward, self.fastq_reverse)
+            for fastq_forward, fastq_reverse in zip(
+                self.fastq_forward_read_paths, self.fastq_reverse_read_paths
+            )
         ]

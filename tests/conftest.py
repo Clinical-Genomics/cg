@@ -2669,6 +2669,12 @@ def fixture_strandedness() -> str:
     return Strandedness.REVERSE
 
 
+@pytest.fixture(name="strandedness_not_permitted")
+def fixture_strandedness_not_permitted() -> str:
+    """Return a not permitted strandedness."""
+    return "double_stranded"
+
+
 @pytest.fixture(name="rnafusion_sample_sheet_content")
 def fixture_rnafusion_sample_sheet_content(
     rnafusion_case_id: str,

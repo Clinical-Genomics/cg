@@ -1,4 +1,5 @@
 import collections
+from pathlib import Path
 from typing import List
 
 from pydantic.v1 import BaseModel, conlist, validator
@@ -16,21 +17,21 @@ class NextflowSample(BaseModel):
     """Nextflow samplesheet model.
 
     Attributes:
-        sample: sample name, corresponds to case_id
-        fastq_forward: list of all fastq read1 files corresponding to sample
-        fastq_reverse: list of all fastq read2 files corresponding to sample
+        name: sample name, corresponds to case_id
+        fastq_forward_read_paths: list of all fastq read1 files corresponding to sample
+        fastq_reverse_read_paths: list of all fastq read2 files corresponding to sample
     """
 
     name: str
-    fastq_forward: conlist(str, min_items=1)
-    fastq_reverse: conlist(str, min_items=1)
+    fastq_forward_read_paths: conlist(Path, min_items=1)
+    fastq_reverse_read_paths: conlist(Path, min_items=1)
 
-    @validator("fastq_reverse")
+    @validator("fastq_reverse_read_paths")
     def fastq_forward_reverse_length_match(
         cls, fastq_reverse: List[str], values: dict
     ) -> List[str]:
         """Verify that the number of fastq forward files is the same as for the reverse."""
-        if len(fastq_reverse) != len(values.get("fastq_forward")):
+        if len(fastq_reverse) != len(values.get("fastq_forward_read_paths")):
             raise SampleSheetError("Fastq file length for forward and reverse do not match")
         return fastq_reverse
 

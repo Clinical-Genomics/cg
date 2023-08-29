@@ -79,7 +79,9 @@ class RnafusionSample(NextflowSample):
         """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
         return [
             [self.name, fastq_forward, fastq_reverse, str(self.strandedness)]
-            for fastq_forward, fastq_reverse in zip(self.fastq_forward, self.fastq_reverse)
+            for fastq_forward, fastq_reverse in zip(
+                self.fastq_forward_read_paths, self.fastq_reverse_read_paths
+            )
         ]
 
 
