@@ -1,10 +1,9 @@
 from pathlib import Path
-from mock import MagicMock, PropertyMock, patch
 
 import pytest
 
 from cg.constants.constants import FileExtensions
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.utils import (
