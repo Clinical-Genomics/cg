@@ -142,9 +142,17 @@ class StatsAPI(alchy.Manager):
         return flow_cell_reads_and_q30_summary
 
     def fastqs(self, flowcell: str, sample_obj: Sample) -> Iterator[Path]:
-        """Fetch FASTQ files for a sample."""
+        """Retrieve all fastq files for a specific sample in a flow cell directory."""
+
+        # The default structure for flow cells demultiplexed with bcl2fastq
         base_pattern = "*{}/Unaligned*/Project_*/Sample_{}/*.fastq.gz"
+
+        # Alternative structure for flow cells demultiplexed with bcl2fastq where the sample fastq files have a trailing sequence
         alt_pattern = "*{}/Unaligned*/Project_*/Sample_{}_*/*.fastq.gz"
-        for fastq_pattern in (base_pattern, alt_pattern):
+
+        # The default structure for flow cells demultiplexed with bclconvert
+        bcl_convert_pattern = "*{}/Unaligned*/*/{}_*/*.fastq.gz"
+
+        for fastq_pattern in (base_pattern, alt_pattern, bcl_convert_pattern):
             pattern = fastq_pattern.format(flowcell, sample_obj.samplename)
             yield from self.root_dir.glob(pattern)

@@ -1,26 +1,20 @@
 from pathlib import Path
-from mock import MagicMock, PropertyMock, patch
 
 import pytest
 
 from cg.constants.constants import FileExtensions
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
-    get_bcl_converter_name,
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
+    add_flow_cell_name_to_fastq_file_path,
 )
-from cg.meta.demultiplex.validation import is_bcl2fastq_demux_folder_structure
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.meta.demultiplex.demux_post_processing import (
-    DemuxPostProcessingAPI,
-)
-from cg.models.cg_config import CGConfig
 
 
 def test_get_lane_from_sample_fastq_file_path():
@@ -49,45 +43,6 @@ def test_get_lane_from_sample_fastq_file_path_no_flowcell():
 
     # THEN we should get the correct lane
     assert result == lane
-
-
-def test_is_bcl2fastq_folder_structure(bcl2fastq_folder_structure: Path):
-    # GIVEN a bcl2fastq folder structure
-    # WHEN checking if it is a bcl2fastq folder structure
-    is_bcl2fastq_folder_structure = is_bcl2fastq_demux_folder_structure(bcl2fastq_folder_structure)
-
-    # THEN it should be a bcl2fastq folder structure
-    assert is_bcl2fastq_folder_structure is True
-
-
-def test_is_not_bcl2fastq_folder_structure(not_bcl2fastq_folder_structure: Path):
-    # GIVEN not folder structure which is not formatted correctly for bcl2fastq
-
-    # WHEN checking if it is a bcl2fastq folder structure
-    is_bcl2fastq_folder_structure = is_bcl2fastq_demux_folder_structure(
-        not_bcl2fastq_folder_structure
-    )
-
-    # THEN it should not be a bcl2fastq folder structure
-    assert is_bcl2fastq_folder_structure is False
-
-
-def test_get_bcl_converter_bcl2fastq(bcl2fastq_folder_structure: Path):
-    # GIVEN a bcl2fastq folder structure
-    # WHEN getting the bcl converter
-    bcl_converter: str = get_bcl_converter_name(bcl2fastq_folder_structure)
-
-    # THEN it should be bcl2fastq
-    assert bcl_converter == BclConverter.BCL2FASTQ
-
-
-def test_get_bcl_converter_bclconvert():
-    # GIVEN any folder structure which is not bcl2fastq
-    # WHEN getting the bcl converter
-    bcl_converter: str = get_bcl_converter_name(Path())
-
-    # THEN it returns bclconvert
-    assert bcl_converter == BclConverter.BCLCONVERT
 
 
 def test_validate_demux_complete_flow_cell_directory_when_it_exists(tmp_path: Path):
@@ -185,3 +140,34 @@ def test_parse_flow_cell_directory_data_valid():
     # THEN the flow cell path and bcl converter should be set
     assert result.path == Path(flow_cell_run_directory)
     assert result.bcl_converter == "dummy_bcl_converter"
+
+
+def test_add_flow_cell_name_to_fastq_file_path(bcl2fastq_flow_cell_id: str, fastq_file_path: Path):
+    # GIVEN a fastq file path and a flow cell name
+
+    # WHEN adding the flow cell name to the fastq file path
+    rename_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
+        fastq_file_path=fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
+    )
+
+    # THEN the fastq file path should be returned with the flow cell name added
+    assert rename_fastq_file_path == Path(
+        fastq_file_path.parent, f"{bcl2fastq_flow_cell_id}_{fastq_file_path.name}"
+    )
+
+
+def test_add_flow_cell_name_to_fastq_file_path_when_flow_cell_name_already_in_name(
+    bcl2fastq_flow_cell_id: str, fastq_file_path: Path
+):
+    # GIVEN a fastq file path and a flow cell name
+
+    # GIVEN that the flow cell name is already in the fastq file path
+    fastq_file_path = Path(f"{bcl2fastq_flow_cell_id}_{fastq_file_path.name}")
+
+    # WHEN adding the flow cell name to the fastq file path
+    renamed_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
+        fastq_file_path=fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
+    )
+
+    # THEN the fastq file path should be returned equal to the original fastq file path
+    assert renamed_fastq_file_path == fastq_file_path

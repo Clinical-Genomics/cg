@@ -5,13 +5,14 @@ from typing import Dict, Generator, List
 
 import pytest
 
-
+from cg.store.models import Sample
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
     DemuxPostProcessingHiseqXAPI,
 )
+from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
@@ -479,9 +480,7 @@ def test_finish_all_flowcells(
     hiseq_x_copy_complete_file.unlink()
 
     # When post-processing flow cell
-    post_demux_api.finish_all_flow_cells(
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
+    post_demux_api.finish_all_flow_cells()
 
     # Reinstate
     hiseq_x_copy_complete_file.touch()
@@ -499,14 +498,19 @@ def test_post_processing_of_flow_cell(
     demultiplex_context: CGConfig,
     flow_cell_info_map: Dict[str, FlowCellInfo],
     tmp_demultiplexed_runs_directory: Path,
+    novaseq6000_bcl_convert_sample_sheet_path,
 ):
     """Test adding a demultiplexed flow cell to the databases with. Runs on each type of
     demultiplexing software and setting used."""
 
     # GIVEN a demultiplexed flow cell
-    flow_cell_demultplexing_directory: str = flow_cell_info_map.get(demux_type).directory
+    flow_cell_demultiplexing_directory: str = flow_cell_info_map.get(demux_type).directory
     flow_cell_name: str = flow_cell_info_map.get(demux_type).name
     sample_internal_ids: List[str] = flow_cell_info_map.get(demux_type).sample_internal_ids
+
+    # GIVEN the sample_internal_ids are present in statusdb
+    for sample_internal_id in sample_internal_ids:
+        assert demultiplex_context.status_db.get_sample_by_internal_id(sample_internal_id)
 
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
@@ -517,14 +521,23 @@ def test_post_processing_of_flow_cell(
     # GIVEN that a sample sheet exists in the flow cell run directory
     path = Path(
         demux_post_processing_api.demux_api.flow_cells_dir,
-        flow_cell_demultplexing_directory,
+        flow_cell_demultiplexing_directory,
         DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
     )
     os.makedirs(path.parent, exist_ok=True)
     path.touch()
 
-    # WHEN post processing the demultiplexed flow cell
-    demux_post_processing_api.finish_flow_cell_temp(flow_cell_demultplexing_directory)
+    # GIVEN that the sample sheet is in housekeeper
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=Path(
+            tmp_demultiplexed_runs_directory, flow_cell_demultiplexing_directory
+        ),
+        flow_cell_name=flow_cell_name,
+        hk_api=demux_post_processing_api.hk_api,
+    )
+
+    # WHEN post-processing the demultiplexed flow cell
+    demux_post_processing_api.finish_flow_cell_temp(flow_cell_demultiplexing_directory)
 
     # THEN a flow cell was created in statusdb
     assert demux_post_processing_api.status_db.get_flow_cell_by_name(flow_cell_name)
@@ -535,9 +548,10 @@ def test_post_processing_of_flow_cell(
     )
     # THEN the read count was calculated for all samples in the flow cell directory
     for sample_internal_id in sample_internal_ids:
-        sample = demux_post_processing_api.status_db.get_sample_by_internal_id(sample_internal_id)
-        assert sample is not None
-        assert sample.reads
+        sample: Sample = demux_post_processing_api.status_db.get_sample_by_internal_id(
+            sample_internal_id
+        )
+        assert isinstance(sample.reads, int)
 
     # THEN a bundle was added to Housekeeper for the flow cell
     assert demux_post_processing_api.hk_api.bundle(flow_cell_name)
@@ -562,7 +576,7 @@ def test_post_processing_of_flow_cell(
     # THEN a delivery file was created in the flow cell directory
     delivery_path = Path(
         demux_post_processing_api.demux_api.demultiplexed_runs_dir,
-        flow_cell_demultplexing_directory,
+        flow_cell_demultiplexing_directory,
         DemultiplexingDirsAndFiles.DELIVERY,
     )
 
