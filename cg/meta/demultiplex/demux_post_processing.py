@@ -105,17 +105,6 @@ class DemuxPostProcessingAPI:
         flow_cell_run_directory: Path = Path(
             self.demux_api.flow_cells_dir, flow_cell_directory_name
         )
-
-        try:
-            is_flow_cell_ready_for_postprocessing(
-                flow_cell_output_directory=flow_cell_out_directory,
-                flow_cell_run_directory=flow_cell_run_directory,
-                force=force,
-            )
-        except FlowCellError as e:
-            LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
-            return
-
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
             flow_cell_directory=flow_cell_out_directory,
             bcl_converter=bcl_converter,
@@ -128,6 +117,16 @@ class DemuxPostProcessingAPI:
         )
         parsed_flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
         LOG.debug("Set path for Housekeeper sample sheet in flow cell")
+
+        try:
+            is_flow_cell_ready_for_postprocessing(
+                flow_cell_output_directory=flow_cell_out_directory,
+                flow_cell=parsed_flow_cell,
+                force=force,
+            )
+        except FlowCellError as e:
+            LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
+            return
 
         try:
             self.store_flow_cell_data(parsed_flow_cell)
