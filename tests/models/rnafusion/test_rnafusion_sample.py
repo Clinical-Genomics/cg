@@ -30,7 +30,7 @@ def test_instantiate_rnafusion_sample(
     assert isinstance(rnafusion_sample_object, RnafusionSample)
 
 
-def test_fastq_forward_reverse_different_length(
+def test_incomplete_fastq_file_pairs(
     sample_name: str,
     fastq_forward_read_path: Path,
     fastq_reverse_read_path: Path,
@@ -67,6 +67,8 @@ def test_fastq_empty_list(
     # GIVEN a sample with fastq files and strandedness
 
     # WHEN instantiating a sample object
+
+    # THEN throws an error
     with pytest.raises(ValidationError) as error:
         RnafusionSample(
             name=sample_name,
@@ -77,7 +79,7 @@ def test_fastq_empty_list(
     assert "ensure this value has at least 1 items" in str(error.value)
 
 
-def test_instantiate_rnafusion_strandedness_not_permitted(
+def test_strandedness_not_permitted(
     sample_name: str,
     fastq_forward_read_path: Path,
     fastq_reverse_read_path: Path,
@@ -98,7 +100,7 @@ def test_instantiate_rnafusion_strandedness_not_permitted(
     assert "value is not a valid enumeration member" in str(error.value)
 
 
-def test_instantiate_rnafusion_non_existing_fastq(
+def test_non_existing_fastq_file(
     sample_name: str,
     fastq_forward_read_path: Path,
     non_existing_file_path: Path,

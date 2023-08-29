@@ -38,7 +38,7 @@ def test_config_case_without_samples(
     assert "has no samples" in caplog.text
 
 
-def test_wrong_strandedness(
+def test_config_case_wrong_strandedness(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
@@ -63,7 +63,7 @@ def test_wrong_strandedness(
     assert "validation error" in caplog.text
 
 
-def test_defaults(
+def test_config_case_default_parameters(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     rnafusion_case_id: str,
@@ -113,7 +113,7 @@ def test_defaults(
         assert parameter in params_content
 
 
-def test_dry_run(
+def test_config_case_dry_run(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
@@ -140,7 +140,7 @@ def test_dry_run(
     assert "Writing parameters file" not in caplog.text
 
 
-def test_reference(
+def test_config_case_with_reference(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,

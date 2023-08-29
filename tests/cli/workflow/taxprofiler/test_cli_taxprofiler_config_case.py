@@ -15,7 +15,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSample
 
 
-def test_defaults(
+def test_config_case_default_parameters(
     cli_runner: CliRunner,
     taxprofiler_context: CGConfig,
     taxprofiler_case_id: str,
@@ -65,7 +65,7 @@ def test_defaults(
         assert parameter in params_content
 
 
-def test_dry_run(
+def test_config_case_dry_run(
     cli_runner: CliRunner,
     taxprofiler_context: CGConfig,
     caplog: LogCaptureFixture,
