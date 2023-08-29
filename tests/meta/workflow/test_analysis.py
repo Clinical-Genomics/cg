@@ -2,11 +2,13 @@
 from typing import List
 
 import pytest
-
-from cg.constants import Priority, GenePanelMasterList
+from cg.constants import GenePanelMasterList, Priority
 from cg.constants.priority import SlurmQos
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.store import Store
+from cg.store.models import Family
+from cgmodels.cg.constants import Pipeline
 
 
 @pytest.mark.parametrize(
@@ -63,3 +65,58 @@ def test_gene_panels_not_added(customer_id):
     assert set(list_of_gene_panels_used) == set(
         default_panels_not_included + [GenePanelMasterList.OMIM_AUTO]
     )
+
+
+def test_is_flow_cell_check_applicable(cg_context, analysis_store: Store):
+    """Tests that a check for flow cells being present on disk is applicable when given a case which has no
+    down-sampled nor external samples."""
+
+    mip_analysis_api = MipAnalysisAPI(cg_context, Pipeline.MIP_DNA)
+
+    # GIVEN a case
+    case: Family = analysis_store.get_cases()[0]
+
+    # GIVEN that no samples are down-sampled nor external
+    for sample in case.samples:
+        assert not sample.from_sample
+        assert not sample.is_external
+
+    # WHEN checking if a flow cell check is applicable
+    # THEN the method should return True
+    assert mip_analysis_api._is_flow_cell_check_applicable(case_id=case.internal_id)
+
+
+def test_is_flow_cell_check_not_applicable_when_external(cg_context, analysis_store: Store):
+    """Tests that a check for flow cells being present on disk is applicable when given a case which has no
+    down-sampled nor external samples."""
+
+    mip_analysis_api = MipAnalysisAPI(cg_context, Pipeline.MIP_DNA)
+
+    # GIVEN a case
+    case: Family = analysis_store.get_cases()[0]
+
+    # WHEN marking all of its samples as external
+    for sample in case.samples:
+        sample.application_version.application.is_external = True
+
+    # WHEN checking if a flow cell check is applicable
+    # THEN the method should return False
+    assert not mip_analysis_api._is_flow_cell_check_applicable(case_id=case.internal_id)
+
+
+def test_is_flow_cell_check_not_applicable_when_down_sampled(cg_context, analysis_store: Store):
+    """Tests that a check for flow cells being present on disk is applicable when given a case which has no
+    down-sampled nor external samples."""
+
+    mip_analysis_api = MipAnalysisAPI(cg_context, Pipeline.MIP_DNA)
+
+    # GIVEN a case
+    case: Family = analysis_store.get_cases()[0]
+
+    # WHEN marking all of its samples as down sampled from TestSample
+    for sample in case.samples:
+        sample.from_sample = "TestSample"
+
+    # WHEN checking if a flow cell check is applicable
+    # THEN the method should return False
+    assert not mip_analysis_api._is_flow_cell_check_applicable(case_id=case.internal_id)
