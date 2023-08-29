@@ -12,6 +12,7 @@ class TrailblazerAnalysis(BaseModel):
     case_id: Optional[str] = None
 
     @field_validator("case_id")
+    @classmethod
     def inherit_family_value(cls, value: str, info: FieldValidationInfo) -> str:
         return info.data.get("family")
 
