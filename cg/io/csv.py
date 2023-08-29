@@ -8,14 +8,10 @@ from cg.constants import FileExtensions
 from cg.io.validate_path import validate_file_suffix
 
 
-def read_csv(
-    file_path: Path, read_to_dict: bool = False, read_to_string: bool = False
-) -> Union[List[List[str]], List[dict], str]:
+def read_csv(file_path: Path, read_to_dict: bool = False) -> Union[List[List[str]], List[dict]]:
     """Read content in a CSV file to a list of list, list of dict or a single string."""
     validate_file_suffix(path_to_validate=file_path, target_suffix=FileExtensions.CSV)
     with open(file_path, "r") as file:
-        if read_to_string:
-            return file.read()
         csv_reader = csv.DictReader(file) if read_to_dict else csv.reader(file)
         return list(csv_reader)
 

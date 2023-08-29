@@ -100,14 +100,14 @@ def test_config_case_default_parameters(
 
     # THEN the sample sheet content should match the expected values
     sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=rnafusion_sample_sheet_path, read_to_string=True
+        file_format=FileFormat.TXT, file_path=rnafusion_sample_sheet_path, read_to_string=True
     )
     assert ",".join(RnafusionSample.headers()) in sample_sheet_content
     assert rnafusion_sample_sheet_content in sample_sheet_content
 
     # THEN the params file should contain all parameters
     params_content: List[List[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.YAML, file_path=rnafusion_params_file_path, read_to_string=True
+        file_format=FileFormat.TXT, file_path=rnafusion_params_file_path, read_to_string=True
     )
     for parameter in vars(rnafusion_parameters_default).keys():
         assert parameter in params_content
@@ -168,6 +168,6 @@ def test_config_case_with_reference(
 
     # THEN the given reference directory should be written
     params_content: List[List[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.YAML, file_path=rnafusion_params_file_path, read_to_string=True
+        file_format=FileFormat.TXT, file_path=rnafusion_params_file_path, read_to_string=True
     )
     assert reference_dir in params_content
