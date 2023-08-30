@@ -1,8 +1,7 @@
-import collections
 from pathlib import Path
 from typing import List
 
-from pydantic import Field
+from pydantic.v1 import Field
 
 from cg.constants.sequencing import SequencingPlatform
 from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters

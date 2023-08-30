@@ -1,8 +1,7 @@
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-from pydantic import Field
-from pydantic.v1 import BaseModel
+from pydantic.v1 import BaseModel, Field
 
 from cg.constants.constants import Strandedness
 from cg.models.analysis import AnalysisModel
