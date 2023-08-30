@@ -4,7 +4,6 @@ import pytest
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
     ConversionResult,
     DemuxResult,
-    IndexMetric,
     ReadMetric,
 )
 
@@ -29,12 +28,6 @@ def valid_bcl2fastq_metrics_data() -> Dict:
                     {
                         "SampleId": "S1",
                         "SampleName": "Sample1",
-                        "IndexMetrics": [
-                            {
-                                "IndexSequence": "ATGC",
-                                "MismatchCounts": {"0": 24470341, "1": 5093729},
-                            }
-                        ],
                         "NumberReads": 1,
                         "Yield": 100,
                         "ReadMetrics": [
@@ -56,9 +49,6 @@ def conversion_result() -> ConversionResult:
             DemuxResult(
                 SampleId="S1",
                 SampleName="Sample1",
-                IndexMetrics=[
-                    IndexMetric(IndexSequence="ATGC", MismatchCounts={"0": 24470341, "1": 5093729})
-                ],
                 NumberReads=1,
                 Yield=100,
                 ReadMetrics=[ReadMetric(ReadNumber=1, Yield=100, YieldQ30=90, QualityScoreSum=100)],

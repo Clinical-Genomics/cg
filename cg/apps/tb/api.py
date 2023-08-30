@@ -93,9 +93,9 @@ class TrailblazerAPI:
         response = self.query_trailblazer(command="query-analyses", request_body=request_body)
         if response:
             if isinstance(response, list):
-                return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
+                return [TrailblazerAnalysis.model_validate(analysis) for analysis in response]
             if isinstance(response, dict):
-                return [TrailblazerAnalysis.parse_obj(response)]
+                return [TrailblazerAnalysis.model_validate(response)]
         return response
 
     def get_latest_analysis(self, case_id: str) -> Optional[TrailblazerAnalysis]:
@@ -104,7 +104,7 @@ class TrailblazerAPI:
         }
         response = self.query_trailblazer(command="get-latest-analysis", request_body=request_body)
         if response:
-            return TrailblazerAnalysis.parse_obj(response)
+            return TrailblazerAnalysis.model_validate(response)
 
     def get_latest_analysis_status(self, case_id: str) -> Optional[str]:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
@@ -133,9 +133,9 @@ class TrailblazerAPI:
         )
         if response:
             if isinstance(response, list):
-                return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
+                return [TrailblazerAnalysis.model_validate(analysis) for analysis in response]
             if isinstance(response, dict):
-                return [TrailblazerAnalysis.parse_obj(response)]
+                return [TrailblazerAnalysis.model_validate(response)]
 
     def add_pending_analysis(
         self,
@@ -163,7 +163,7 @@ class TrailblazerAPI:
         LOG.debug("Submitting job to Trailblazer: %s", request_body)
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
         if response:
-            return TrailblazerAnalysis.parse_obj(response)
+            return TrailblazerAnalysis.model_validate(response)
 
     def set_analysis_uploaded(self, case_id: str, uploaded_at: datetime) -> None:
         """Set a uploaded at date for a trailblazer analysis."""
