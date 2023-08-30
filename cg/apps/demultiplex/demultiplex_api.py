@@ -166,7 +166,10 @@ class DemultiplexingAPI:
             LOG.warning(f"Could not find sample sheet in Housekeeper for {flow_cell.id}")
             demultiplexing_possible = False
 
-        if flow_cell.is_demultiplexing_started():
+        if (
+            flow_cell.has_demultiplexing_started_locally()
+            or flow_cell.has_demultiplexing_started_on_sequencer()
+        ):
             LOG.warning("Demultiplexing has already been started")
             demultiplexing_possible = False
 
