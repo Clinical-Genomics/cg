@@ -9,7 +9,7 @@ from cg.exc import SampleSheetError
 
 
 class PipelineParameters(BaseModel):
-    clusterOptions: str = Field(alias="cluster_options")
+    clusterOptions: str = Field(..., alias="cluster_options")
     priority: str
 
 
