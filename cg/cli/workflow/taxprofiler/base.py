@@ -3,14 +3,9 @@
 import logging
 from typing import Optional
 import click
+from pydantic.v1 import ValidationError
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
-from cg.constants.constants import MetaApis, DRY_RUN, CaseActions
-from cg.constants.sequencing import SequencingPlatform
-from cg.meta.workflow.analysis import AnalysisAPI
-from cg.models.rnafusion.rnafusion import CommandArgs
-from cg.models.cg_config import CGConfig
-from cg.exc import CgError
 from cg.cli.workflow.nextflow.options import (
     OPTION_CONFIG,
     OPTION_LOG,
@@ -27,7 +22,15 @@ from cg.cli.workflow.taxprofiler.options import (
 )
 from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV, OPTION_TOWER_RUN_ID
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
+from cg.cli.workflow.taxprofiler.options import OPTION_FROM_START, OPTION_INSTRUMENT_PLATFORM
+from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.constants.nf_analysis import NfTowerStatus
+from cg.constants.sequencing import SequencingPlatform
+from cg.exc import CgError
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.models.rnafusion.rnafusion import CommandArgs
 
 LOG = logging.getLogger(__name__)
 
@@ -53,17 +56,16 @@ taxprofiler.add_command(resolve_compression)
 def config_case(
     context: CGConfig, case_id: str, instrument_platform: SequencingPlatform, dry_run: bool
 ) -> None:
-    """Create sample sheet file for Taxprofiler analysis for a given case."""
+    """Create sample sheet and parameter file for Taxprofiler analysis for a given case."""
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.config_case(
             case_id=case_id, instrument_platform=instrument_platform, dry_run=dry_run
         )
 
-    except CgError as error:
-        LOG.error(f"{case_id} could not be found in StatusDB!")
+    except (CgError, ValidationError) as error:
+        LOG.error(f"Could not create config files for {case_id}: {error}")
         raise click.Abort() from error
 
 
@@ -125,7 +127,7 @@ def run(
         }
     )
     try:
-        analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
+        analysis_api.verify_sample_sheet_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.check_analysis_ongoing(case_id)
         LOG.info(f"Running Taxprofiler analysis for {case_id}")
         analysis_api.run_analysis(
