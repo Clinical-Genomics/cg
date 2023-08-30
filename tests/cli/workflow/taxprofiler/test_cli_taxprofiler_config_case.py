@@ -12,7 +12,7 @@ from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSample
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 
 
 def test_config_case_default_parameters(
@@ -54,7 +54,7 @@ def test_config_case_default_parameters(
     sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.TXT, file_path=taxprofiler_sample_sheet_path, read_to_string=True
     )
-    assert ",".join(TaxprofilerSample.headers()) in sample_sheet_content
+    assert ",".join(TaxprofilerSampleSheetEntry.headers()) in sample_sheet_content
     assert taxprofiler_sample_sheet_content in sample_sheet_content
 
     # THEN the params file should contain all parameters

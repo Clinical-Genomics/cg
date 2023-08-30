@@ -6,7 +6,7 @@ from pydantic.v1 import BaseModel
 
 from cg.constants.constants import Strandedness
 from cg.models.analysis import AnalysisModel
-from cg.models.nf_analysis import NextflowSample, PipelineParameters
+from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters
 
 
 class RnafusionQCMetrics(BaseModel):
@@ -66,7 +66,7 @@ class CommandArgs(BaseModel):
     params_file: Optional[Union[str, Path]]
 
 
-class RnafusionSample(NextflowSample):
+class RnafusionSampleSheetEntry(NextflowSampleSheetEntry):
     """Rnafusion sample sheet model."""
 
     strandedness: Strandedness

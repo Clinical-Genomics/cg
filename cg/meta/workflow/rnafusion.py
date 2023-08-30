@@ -22,7 +22,11 @@ from cg.models.deliverables.metric_deliverables import (
     MultiqcDataJson,
 )
 from cg.models.nf_analysis import NextflowDeliverables, PipelineParameters
-from cg.models.rnafusion.rnafusion import RnafusionAnalysis, RnafusionParameters, RnafusionSample
+from cg.models.rnafusion.rnafusion import (
+    RnafusionAnalysis,
+    RnafusionParameters,
+    RnafusionSampleSheetEntry,
+)
 from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
@@ -64,7 +68,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             metadata=sample_metadata, reverse_read=True
         )
 
-        sample_sheet_entry = RnafusionSample(
+        sample_sheet_entry = RnafusionSampleSheetEntry(
             name=case_id,
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
@@ -125,7 +129,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.write_sample_sheet(
             content=sample_sheet_content,
             file_path=self.get_sample_sheet_path(case_id=case_id),
-            header=RnafusionSample.headers(),
+            header=RnafusionSampleSheetEntry.headers(),
         )
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 

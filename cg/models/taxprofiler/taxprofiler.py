@@ -5,7 +5,7 @@ from typing import List
 from pydantic import Field
 
 from cg.constants.sequencing import SequencingPlatform
-from cg.models.nf_analysis import NextflowSample, PipelineParameters
+from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters
 
 
 class TaxprofilerParameters(PipelineParameters):
@@ -31,7 +31,7 @@ class TaxprofilerParameters(PipelineParameters):
     run_profile_standardisation: bool = True
 
 
-class TaxprofilerSample(NextflowSample):
+class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
     """Taxprofiler sample model is used when building the sample sheet."""
 
     instrument_platform: SequencingPlatform

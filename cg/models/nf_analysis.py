@@ -14,7 +14,7 @@ class PipelineParameters(BaseModel):
     priority: str
 
 
-class NextflowSample(BaseModel):
+class NextflowSampleSheetEntry(BaseModel):
     """Nextflow samplesheet model.
 
     Attributes:

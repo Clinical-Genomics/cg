@@ -9,7 +9,7 @@ from cg.constants.sequencing import SequencingPlatform
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import PipelineParameters
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSample
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         fastq_reverse_read_paths: List[str] = self.extract_read_files(
             metadata=sample_metadata, reverse_read=True
         )
-        sample_sheet_entry = TaxprofilerSample(
+        sample_sheet_entry = TaxprofilerSampleSheetEntry(
             name=sample_name,
             run_accession=sample_name,
             instrument_platform=instrument_platform,
@@ -111,6 +111,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.write_sample_sheet(
             content=sample_sheet_content,
             file_path=self.get_sample_sheet_path(case_id=case_id),
-            header=TaxprofilerSample.headers(),
+            header=TaxprofilerSampleSheetEntry.headers(),
         )
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
