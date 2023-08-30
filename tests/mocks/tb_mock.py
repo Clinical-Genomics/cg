@@ -31,13 +31,13 @@ class MockTB:
 
     def ensure_analyses_response(self, analyses_list: list) -> None:
         self.analyses_response = [
-            TrailblazerAnalysis.parse_obj(analysis) for analysis in analyses_list
+            TrailblazerAnalysis.model_validate(analysis) for analysis in analyses_list
         ]
 
     def ensure_get_latest_analysis_response(self, analysis_dict: dict) -> None:
-        self.get_latest_analysis_response[analysis_dict["family"]] = TrailblazerAnalysis.parse_obj(
-            analysis_dict
-        )
+        self.get_latest_analysis_response[
+            analysis_dict["family"]
+        ] = TrailblazerAnalysis.model_validate(analysis_dict)
 
     def is_latest_analysis_completed(self, case_id: str):
         return True
