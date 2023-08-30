@@ -17,6 +17,7 @@ from cg.meta.demultiplex.utils import (
     get_q30_threshold,
     get_sample_fastqs_from_flow_cell,
     get_sample_sheet_path,
+    rename_fastq_file_if_needed,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
@@ -88,6 +89,9 @@ def add_sample_fastq_files_to_housekeeper(
             continue
 
         for sample_fastq_path in sample_fastq_paths:
+            sample_fastq_path: Path = rename_fastq_file_if_needed(
+                fastq_file_path=sample_fastq_path, flow_cell_name=flow_cell.id
+            )
             store_fastq_path_in_housekeeper(
                 sample_internal_id=sample_internal_id,
                 sample_fastq_path=sample_fastq_path,

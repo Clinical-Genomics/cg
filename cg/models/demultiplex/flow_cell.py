@@ -11,7 +11,11 @@ from cg.apps.demultiplex.sample_sheet.models import (
     SampleSheet,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+
 from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
+
+from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
+
 from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers, sequencer_types
@@ -207,9 +211,18 @@ class FlowCellDirectoryData:
             LOG.warning(message)
             raise FlowCellError(message)
 
-    def is_demultiplexing_started(self) -> bool:
-        """Check if demultiplexing started path exists."""
+    def has_demultiplexing_started_locally(self) -> bool:
+        """Check if demultiplexing has started path exists on the cluster."""
         return self.demultiplexing_started_path.exists()
+
+    def has_demultiplexing_started_on_sequencer(self) -> bool:
+        """Check if demultiplexing has started on the NovaSeqX machine."""
+        latest_analysis: Path = get_latest_analysis_path(self.path)
+        if not latest_analysis:
+            return False
+        return Path(
+            latest_analysis, DemultiplexingDirsAndFiles.DATA, DemultiplexingDirsAndFiles.BCL_CONVERT
+        ).exists()
 
     def sample_sheet_exists(self) -> bool:
         """Check if sample sheet exists."""
