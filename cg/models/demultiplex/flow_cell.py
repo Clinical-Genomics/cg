@@ -11,6 +11,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     SampleSheet,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers, sequencer_types
@@ -24,12 +25,6 @@ from pydantic.v1 import ValidationError
 from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
-
-SampleSheetHeader = {
-    BclConverter.BCL2FASTQ: "FCID,Lane,SampleID,SampleRef,index,SampleName,Control,Recipe,Operator,Project",
-    BclConverter.BCLCONVERT: "FCID,Lane,Sample_ID,SampleRef,index,SampleName,Control,Recipe,Operator,Sample_Project",
-    BclConverter.DRAGEN: "FCID,Lane,Sample_ID,SampleRef,index,SampleName,Control,Recipe,Operator,Sample_Project",
-}
 
 
 class FlowCellDirectoryData:
@@ -233,7 +228,7 @@ class FlowCellDirectoryData:
             LOG.warning(error)
             LOG.warning(
                 f"Ensure that the headers in the sample sheet follows the allowed structure for {self.bcl_converter} i.e. \n"
-                + SampleSheetHeader[self.bcl_converter]
+                + SAMPLE_SHEET_HEADER[self.bcl_converter]
             )
             return False
         return True

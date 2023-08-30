@@ -1,7 +1,8 @@
 """This module contains constants for the BCLConvert metrics files."""
 
 from enum import Enum
-from pathlib import Path
+
+from cg.constants.demultiplexing import BclConverter, SampleSheetNovaSeq6000Sections
 
 
 class BclConvertQualityMetricsColumnNames(Enum):
@@ -15,6 +16,19 @@ class BclConvertQualityMetricsColumnNames(Enum):
     QUALITY_SCORE_SUM: str = "QualityScoreSum"
     MEAN_QUALITY_SCORE_Q30: str = "Mean Quality Score (PF)"
     Q30_BASES_PERCENT: str = "% Q30"
+
+
+SAMPLE_SHEET_HEADER = {
+    BclConverter.BCL2FASTQ: ",".join(
+        SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[BclConverter.BCL2FASTQ]
+    ),
+    BclConverter.BCLCONVERT: ",".join(
+        SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[BclConverter.DRAGEN]
+    ),
+    BclConverter.DRAGEN: ",".join(
+        SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[BclConverter.DRAGEN]
+    ),
+}
 
 
 class BclConvertDemuxMetricsColumnNames(Enum):
