@@ -3,16 +3,16 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from cg.constants import SequencingFileTag
-from cg.exc import HousekeeperBundleVersionMissingError
+from cg.exc import HousekeeperBundleVersionMissingError, HousekeeperFileMissingError
 from sqlalchemy.orm import Query
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
-from housekeeper.store.models import Bundle, File, Version
+from housekeeper.store.models import Archive, Bundle, File, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class HousekeeperAPI:
 
     def get_file(self, file_id: int) -> Optional[File]:
         """Get a file based on file id."""
-        LOG.info("Fetching file %s", file_id)
+        LOG.info(f"Return file: {file_id}")
         file_obj: File = self._store.get_file_by_id(file_id=file_id)
         if not file_obj:
             LOG.info("file not found")
@@ -93,7 +93,9 @@ class HousekeeperAPI:
 
         return file_obj
 
-    def add_file(self, path, version_obj: Version, tags: list, to_archive: bool = False) -> File:
+    def add_file(
+        self, path: str, version_obj: Version, tags: list, to_archive: bool = False
+    ) -> File:
         """Add a file to the database."""
         if isinstance(tags, str):
             tags: List[str] = [tags]
@@ -159,7 +161,7 @@ class HousekeeperAPI:
 
     def get_files(
         self, bundle: str, tags: Optional[list] = None, version: Optional[int] = None
-    ) -> Iterable[File]:
+    ) -> Query:
         """Get all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version.
         """
@@ -227,7 +229,7 @@ class HousekeeperAPI:
 
     def version(self, bundle: str, date: dt.datetime) -> Version:
         """Fetch a version."""
-        LOG.info("Fetch version %s from bundle %s", date, bundle)
+        LOG.debug(f"Return version: {date}, from {bundle}")
         return self._store.get_version_by_date_and_bundle_name(
             bundle_name=bundle, version_date=date
         )
@@ -242,6 +244,10 @@ class HousekeeperAPI:
             .order_by(models.Version.created_at.desc())
             .first()
         )
+
+    def get_all_non_archived_spring_files(self) -> List[File]:
+        """Return all spring files which are not marked as archived in Housekeeper."""
+        return self._store.get_all_non_archived_files(tag_names=[SequencingFileTag.SPRING])
 
     def get_latest_bundle_version(self, bundle_name: str) -> Optional[Version]:
         """Get the latest version of a Housekeeper bundle."""
@@ -325,7 +331,7 @@ class HousekeeperAPI:
         """Adds and includes a file in the latest version of a bundle."""
         version: Version = self.last_version(bundle_name)
         if not version:
-            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
+            LOG.warning(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperBundleVersionMissingError
         hk_file: File = self.add_file(version_obj=version, tags=tags, path=str(file.absolute()))
         self.include_file(version_obj=version, file_obj=hk_file)
@@ -358,15 +364,19 @@ class HousekeeperAPI:
         """Return a file in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
-            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
+            LOG.warning(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperBundleVersionMissingError
         return self.files(version=version.id, tags=tags).first()
 
     def get_files_from_latest_version(self, bundle_name: str, tags: List[str]) -> Query:
-        """Return files in the latest version of a bundle."""
+        """Return files in the latest version of a bundle.
+
+        Raises HousekeeperBundleVersionMissingError:
+        - When no version was found for the given bundle
+        """
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
-            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
+            LOG.warning(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperBundleVersionMissingError
         return self.files(version=version.id, tags=tags)
 
@@ -390,6 +400,26 @@ class HousekeeperAPI:
             )
         return all(sequencing_files_in_hk.values())
 
+    def get_non_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[File]:
+        """Returns all files from given bundle, with given tag, which have not been archived."""
+        return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags)
+
+    def get_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[File]:
+        """Returns all files from given bundle, with given tag, which have been archived."""
+        return self._store.get_archived_files(bundle_name=bundle_name, tags=tags)
+
+    def add_archives(self, files: List[Path], archive_task_id: int) -> None:
+        """Creates an archive object for the given files, and adds the archive task id to them."""
+        for file in files:
+            archived_file: Optional[File] = self._store.get_files(file_path=file.as_posix()).first()
+            if not archived_file:
+                raise HousekeeperFileMissingError(f"No file in housekeeper with the path {file}")
+            archive: Archive = self._store.create_archive(
+                archived_file.id, archiving_task_id=archive_task_id
+            )
+            self._store.session.add(archive)
+        self.commit()
+
     def is_fastq_or_spring_on_disk_in_all_bundles(self, bundle_names: List[str]) -> bool:
         """Return whether or not all FASTQ/SPRING files are on disk for the given bundles."""
         sequencing_files_on_disk: Dict[str, bool] = {}
@@ -411,3 +441,11 @@ class HousekeeperAPI:
                 all(sample_file_on_disk) if sample_file_on_disk else False
             )
         return all(sequencing_files_on_disk.values())
+
+    def get_non_archived_spring_path_and_bundle_name(self) -> List[Tuple[str, str]]:
+        """Return a list of bundles with corresponding file paths for all non-archived SPRING
+        files."""
+        return [
+            (file.version.bundle.name, file.path)
+            for file in self.get_all_non_archived_spring_files()
+        ]

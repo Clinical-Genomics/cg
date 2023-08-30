@@ -23,6 +23,7 @@ from cg.store.models import (
 )
 from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
+from tests.meta.demultiplex.conftest import fixture_flow_cell_name_demultiplexed_with_bcl_convert
 
 
 def test_get_analysis_by_case_entry_id_and_started_at(
@@ -86,7 +87,7 @@ def test_get_flow_cell(bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: S
 def test_get_flow_cells_by_case(
     base_store: Store,
     bcl2fastq_flow_cell_id: str,
-    dragen_flow_cell_id: str,
+    bcl_convert_flow_cell_id: str,
     case: Family,
     helpers: StoreHelpers,
     sample: Sample,
@@ -96,7 +97,7 @@ def test_get_flow_cells_by_case(
     # GIVEN a store with two flow cell
     helpers.add_flowcell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
 
-    helpers.add_flowcell(store=base_store, flow_cell_name=dragen_flow_cell_id)
+    helpers.add_flowcell(store=base_store, flow_cell_name=bcl_convert_flow_cell_id)
 
     # WHEN fetching the latest flow cell
     flow_cells: List[Flowcell] = base_store.get_flow_cells_by_case(case=case)
@@ -110,7 +111,9 @@ def test_get_flow_cells_by_case(
     assert flow_cells[0].name == bcl2fastq_flow_cell_id
 
 
-def test_get_flow_cells_by_statuses(dragen_flow_cell_id: str, re_sequenced_sample_store: Store):
+def test_get_flow_cells_by_statuses(
+    bcl_convert_flow_cell_id: str, re_sequenced_sample_store: Store
+):
     """Test returning the latest flow cell from the database by statuses."""
 
     # GIVEN a store with two flow cells
@@ -125,7 +128,7 @@ def test_get_flow_cells_by_statuses(dragen_flow_cell_id: str, re_sequenced_sampl
         assert flow_cell.status == FlowCellStatus.ON_DISK
 
     # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cells[0].name == dragen_flow_cell_id
+    assert flow_cells[0].name == bcl_convert_flow_cell_id
 
 
 def test_get_flow_cells_by_statuses_when_multiple_matches(re_sequenced_sample_store: Store):
@@ -244,7 +247,7 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
     base_store: Store,
     caplog,
     bcl2fastq_flow_cell_id: str,
-    dragen_flow_cell_id: str,
+    bcl_convert_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
@@ -261,7 +264,7 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
 
     another_flow_cell = helpers.add_flowcell(
         store=base_store,
-        flow_cell_name=dragen_flow_cell_id,
+        flow_cell_name=bcl_convert_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.RETRIEVED,
     )
@@ -281,7 +284,7 @@ def test_is_all_flow_cells_on_disk_when_requested(
     base_store: Store,
     caplog,
     bcl2fastq_flow_cell_id: str,
-    dragen_flow_cell_id: str,
+    bcl_convert_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
@@ -298,7 +301,7 @@ def test_is_all_flow_cells_on_disk_when_requested(
 
     another_flow_cell = helpers.add_flowcell(
         store=base_store,
-        flow_cell_name=dragen_flow_cell_id,
+        flow_cell_name=bcl_convert_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.REQUESTED,
     )
@@ -320,7 +323,7 @@ def test_is_all_flow_cells_on_disk(
     base_store: Store,
     caplog,
     bcl2fastq_flow_cell_id: str,
-    dragen_flow_cell_id: str,
+    bcl_convert_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
@@ -332,7 +335,7 @@ def test_is_all_flow_cells_on_disk(
         store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample]
     )
 
-    helpers.add_flowcell(store=base_store, flow_cell_name=dragen_flow_cell_id)
+    helpers.add_flowcell(store=base_store, flow_cell_name=bcl_convert_flow_cell_id)
 
     # WHEN fetching the latest flow cell
     is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
@@ -771,20 +774,18 @@ def test_get_cases_not_analysed_by_sample_internal_id_multiple_cases(
         assert any(sample.internal_id == sample_id_in_multiple_cases for sample in case.samples)
 
 
-def test_get_total_read_counts(
+def test_get_total_counts_passing_q30(
     store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads: int
 ):
     # GIVEN a store with sequencing metrics
 
-    # WHEN getting total read counts for a sample
-    total_reads_count: int = (
+    total_reads_count_passing_q30 = (
         store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
             sample_internal_id=sample_id, q30_threshold=0
         )
     )
-
     # THEN assert that the total read count is correct
-    assert total_reads_count == expected_total_reads
+    assert total_reads_count_passing_q30 == expected_total_reads
 
 
 def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
@@ -803,6 +804,56 @@ def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
     assert metrics_entry.sample_internal_id == sample_id
 
 
+def test_get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
+    store_with_sequencing_metrics: Store,
+    flow_cell_name_demultiplexed_with_bcl2fastq: str,
+    expected_total_reads_flow_cell_bcl2fastq: int,
+):
+    # GIVEN a store with sequencing metrics
+    # WHEN getting total read counts for a flow cell
+    reads = store_with_sequencing_metrics.get_number_of_reads_for_flow_cell(
+        flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq
+    )
+    # THEN assert that the total read count is correct
+    assert reads == expected_total_reads_flow_cell_bcl2fastq
+
+
+def test_get_average_bases_above_q30_for_sample_from_metrics(
+    store_with_sequencing_metrics: Store,
+    expected_average_q30_for_sample: float,
+    mother_sample_id: str,
+    flow_cell_name_demultiplexed_with_bcl2fastq: str,
+):
+    # GIVEN a store with sequencing metrics
+
+    # WHEN getting average bases above q30 for a sample
+    average_bases_above_q30 = store_with_sequencing_metrics.get_average_q30_for_sample_on_flow_cell(
+        sample_internal_id=mother_sample_id,
+        flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
+    )
+
+    # THEN assert that the average bases above q30 is correct
+    assert average_bases_above_q30 == expected_average_q30_for_sample
+
+
+def test_get_average_passing_q30_for_sample_from_metrics(
+    store_with_sequencing_metrics: Store,
+    expected_average_q30_for_flow_cell: float,
+    flow_cell_name_demultiplexed_with_bcl2fastq: str,
+):
+    # GIVEN a store with sequencing metrics
+
+    # WHEN getting average passing q30 for a sample
+    average_passing_q30 = (
+        store_with_sequencing_metrics.get_average_percentage_passing_q30_for_flow_cell(
+            flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
+        )
+    )
+
+    # THEN assert that the average passing q30 is correct
+    assert average_passing_q30 == expected_average_q30_for_flow_cell
+
+
 def test_get_number_of_reads_for_sample_passing_q30_threshold(
     store_with_sequencing_metrics: Store,
     sample_id: str,
@@ -817,7 +868,7 @@ def test_get_number_of_reads_for_sample_passing_q30_threshold(
     assert sample_metric
 
     # GIVEN a Q30 threshold that the sample will pass
-    q30_threshold = int(sample_metric.sample_base_fraction_passing_q30 / 2 * 100)
+    q30_threshold = int(sample_metric.sample_base_percentage_passing_q30 / 2)
 
     # WHEN getting the number of reads for the sample that pass the Q30 threshold
     number_of_reads: int = (
@@ -847,7 +898,7 @@ def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
     assert sample_metrics
 
     # GIVEN a Q30 threshold that some of the sample's metrics will not pass
-    q30_values = [int(metric.sample_base_fraction_passing_q30 * 100) for metric in sample_metrics]
+    q30_values = [metric.sample_base_percentage_passing_q30 for metric in sample_metrics]
     q30_threshold = sorted(q30_values)[len(q30_values) // 2]  # This is the median
 
     # WHEN getting the number of reads for the sample that pass the Q30 threshold
@@ -860,3 +911,21 @@ def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
     # THEN assert that the number of reads is less than the total number of reads for the sample
     total_sample_reads = sum([metric.sample_total_reads_in_lane for metric in sample_metrics])
     assert number_of_reads < total_sample_reads
+
+
+def test_get_sample_lane_sequencing_metrics_by_flow_cell_name(
+    store_with_sequencing_metrics: Store, flow_cell_name: str
+):
+    # GIVEN a store with sequencing metrics
+
+    # WHEN getting sequencing metrics for a flow cell
+    metrics: List[
+        SampleLaneSequencingMetrics
+    ] = store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=flow_cell_name
+    )
+
+    # THEN assert that the metrics are returned
+    assert metrics
+    for metric in metrics:
+        assert metric.flow_cell_name == flow_cell_name

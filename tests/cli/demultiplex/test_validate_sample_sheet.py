@@ -2,7 +2,7 @@ from pathlib import Path
 
 from click.testing import CliRunner, Result
 
-from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeq6000Bcl2Fastq,
     FlowCellSampleNovaSeq6000Dragen,
@@ -95,13 +95,13 @@ def test_validate_correct_bcl2fastq_sample_sheet(
 def test_validate_correct_dragen_sample_sheet(
     cli_runner: CliRunner,
     sample_sheet_context: dict,
-    dragen_flow_cell_full_name: str,
-    novaseq_dragen_sample_sheet_path: Path,
+    bcl_convert_flow_cell_full_name: str,
+    novaseq_bcl_convert_sample_sheet_path: Path,
 ):
-    """Test validate sample sheet when using a Dragen sample sheet."""
+    """Test validate sample sheet when using a BCLconvert sample sheet."""
 
-    # GIVEN the path to a bcl2fastq sample sheet that exists
-    sample_sheet: Path = novaseq_dragen_sample_sheet_path
+    # GIVEN the path to a Bcl2fastq sample sheet that exists
+    sample_sheet: Path = novaseq_bcl_convert_sample_sheet_path
     assert sample_sheet.exists()
 
     # GIVEN that the sample sheet is correct
@@ -112,7 +112,7 @@ def test_validate_correct_dragen_sample_sheet(
     # WHEN validating the sample sheet
     result: Result = cli_runner.invoke(
         validate_sample_sheet,
-        [dragen_flow_cell_full_name, str(sample_sheet), "-b", BclConverter.DRAGEN.value],
+        [bcl_convert_flow_cell_full_name, str(sample_sheet), "-b", BclConverter.DRAGEN.value],
         obj=sample_sheet_context,
     )
 

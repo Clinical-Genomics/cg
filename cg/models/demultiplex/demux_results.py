@@ -4,7 +4,7 @@ import socket
 from pathlib import Path
 from typing import Iterable, Optional, Union
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 from typing_extensions import Literal
 
 from cg.apps.cgstats.parsers.adapter_metrics import AdapterMetrics
@@ -34,7 +34,7 @@ class DemuxResults:
         LOG.info(f"Instantiating DemuxResults with path {demux_dir}")
         self.demux_dir: Path = demux_dir
         self.flow_cell: FlowCellDirectoryData = flow_cell
-        self.bcl_converter = bcl_converter
+        self.bcl_converter = bcl_converter if bcl_converter else flow_cell.bcl_converter
         self._conversion_stats: Optional[ConversionStats] = None
         self._demultiplexing_stats: Optional[DragenDemultiplexingStats] = None
         self._adapter_metrics: Optional[AdapterMetrics] = None
@@ -137,11 +137,6 @@ class DemuxResults:
         return Path(self.demux_dir, "lane_barcode_summary.csv")
 
     @property
-    def demux_sample_sheet_path(self) -> Path:
-        """Return the path to sample sheet in demuxed flowcell dir"""
-        return Path(self.results_dir, self.flow_cell.sample_sheet_path.name)
-
-    @property
     def copy_complete_path(self) -> Path:
         """Return the path to a file named copycomplete.txt used as flag that post processing is
         ready."""
@@ -202,7 +197,7 @@ class DemuxResults:
             "dragen": self.get_dragen_logfile_parameters,
         }
 
-        return get_logfile_parameters[self.bcl_converter]()
+        return get_logfile_parameters[self.flow_cell.bcl_converter]()
 
     def get_dragen_logfile_parameters(self) -> LogfileParameters:
         err_log_path: Path = self.stderr_log_path

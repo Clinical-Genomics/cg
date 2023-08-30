@@ -4,7 +4,7 @@ import pytest
 from pathlib import Path
 from typing import List, Optional
 
-from cg.apps.cgstats.db import models
+
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import DeleteDemuxError
@@ -28,8 +28,8 @@ def test_initiate_delete_demux_api(
 
     # GIVEN a correct config
     config = cg_context
-    config.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    config.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    config.flow_cells_dir = tmp_flow_cell_run_base_path
+    config.demultiplexed_flow_cells_dir = tmp_flow_cell_run_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
         parents=True, exist_ok=True
     )
@@ -84,8 +84,8 @@ def test_set_dry_run_delete_demux_api(
 
     caplog.set_level(logging.DEBUG)
     cg_context.cg_stats_api_ = stats_api
-    cg_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    cg_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.demultiplexed_runs_dir = tmp_flow_cell_run_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
         parents=True, exist_ok=True
     )
@@ -98,7 +98,7 @@ def test_set_dry_run_delete_demux_api(
 
     # THEN the dry run parameter should be set to True and it should be logged
     assert delete_demultiplex_api.dry_run
-    assert f"DeleteDemuxAPI: Setting dry run mode to True" in caplog.text
+    assert "DeleteDemuxAPI: Setting dry run mode to True" in caplog.text
 
 
 def test_no_active_samples_on_flow_cell(
@@ -181,8 +181,8 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
 
     caplog.set_level(logging.INFO)
 
-    cg_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    cg_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.demultiplexed_runs_dir = tmp_flow_cell_run_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
         parents=True, exist_ok=True
     )
@@ -203,7 +203,7 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
     # THEN you should be notified that there are no files on flow cell names
 
     assert (
-        f"Housekeeper: No files found with tag: {delete_demultiplex_api.flow_cell_name}"
+        f"Housekeeper: No sample sheets found with tag: {delete_demultiplex_api.flow_cell_name}"
         in caplog.text
     )
 
@@ -226,8 +226,8 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
     caplog.set_level(logging.INFO)
     cg_context.housekeeper_api_ = flow_cell_name_housekeeper_api
     cg_context.status_db_ = populated_flow_cell_store
-    cg_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    cg_context.demultiplex_api.out_dir = tmp_flow_cell_demux_base_path
+    cg_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.demultiplexed_runs_dir = tmp_flow_cell_demux_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
         parents=True, exist_ok=True
     )
@@ -335,47 +335,6 @@ def test_delete_flow_cell_hasta(
     assert flow_cell_obj.status == "removed"
 
 
-def test_delete_flow_cell_cgstats(
-    caplog,
-    populated_delete_demux_context: CGConfig,
-    populated_delete_demultiplex_api: DeleteDemuxAPI,
-    bcl2fastq_flow_cell_id: str,
-):
-    """Test if function to remove objects from cg-stats is working."""
-
-    caplog.set_level(logging.INFO)
-    delete_demux_api: DeleteDemuxAPI = populated_delete_demultiplex_api
-    delete_demux_api.set_dry_run(dry_run=False)
-
-    # GIVEN an existing object in cg-stags database
-
-    existing_object: models.Flowcell = (
-        populated_delete_demux_context.cg_stats_api.query(models.Flowcell)
-        .filter(models.Flowcell.flowcellname == bcl2fastq_flow_cell_id)
-        .first()
-    )
-
-    assert existing_object
-
-    # WHEN wiping the existence of said object
-
-    delete_demux_api.delete_flow_cell_cgstats()
-
-    # THEN the user should be notified that the object was removed
-
-    assert f"Removing entry {bcl2fastq_flow_cell_id} in from cgstats" in caplog.text
-
-    # AND the object should no longer exist
-
-    existing_object: models.Flowcell = (
-        populated_delete_demux_context.cg_stats_api.query(models.Flowcell)
-        .filter(models.Flowcell.flowcellname == bcl2fastq_flow_cell_id)
-        .first()
-    )
-
-    assert not existing_object
-
-
 def test_delete_demultiplexing_init_files(
     caplog, demultiplexing_init_files: List[Path], populated_delete_demultiplex_api: DeleteDemuxAPI
 ):
@@ -394,3 +353,36 @@ def test_delete_demultiplexing_init_files(
     # THEN the files should no longer exist
 
     assert not any(init_file.exists() for init_file in demultiplexing_init_files)
+
+
+def test_delete_flow_cell_sample_lane_sequencing_metrics(
+    caplog,
+    populated_sample_lane_sequencing_metrics_demultiplex_api: DeleteDemuxAPI,
+    populated_sample_lane_seq_demux_context: CGConfig,
+    flow_cell_name: str,
+):
+    """Test removing objects from sample lane sequencing metrics."""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a delete demultiplex API with a sequencing metric object
+
+    wipe_demux_api: DeleteDemuxAPI = populated_sample_lane_sequencing_metrics_demultiplex_api
+    wipe_demux_api.set_dry_run(dry_run=False)
+    assert wipe_demux_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=flow_cell_name
+    )
+
+    # WHEN wiping the existence of said object
+
+    wipe_demux_api.delete_flow_cell_sample_lane_sequencing_metrics()
+
+    # THEN the object should not exist anymore and the user should be notified
+
+    assert not wipe_demux_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=flow_cell_name
+    )
+    assert (
+        f"Delete entries for Flow Cell: {flow_cell_name} in the Sample Lane Sequencing Metrics table"
+        in caplog.text
+    )

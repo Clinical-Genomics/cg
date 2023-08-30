@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Dict
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 LOG = logging.getLogger(__name__)
 

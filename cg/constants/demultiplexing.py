@@ -27,6 +27,13 @@ class DemultiplexingDirsAndFiles(StrEnum):
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
     BCL2FASTQ_TILE_DIR_PATTERN: str = r"l\dt\d{2}"
+    QUEUED_FOR_POST_PROCESSING: str = "post_processing_queued.txt"
+    ANALYSIS_COMPLETED: str = "Secondary_Analysis_Complete.txt"
+    ANALYSIS: str = "Analysis"
+    DATA: str = "Data"
+    BCL_CONVERT: str = "BCLConvert"
+    FLOW_CELLS_DIRECTORY_NAME: str = "flow_cells"
+    DEMULTIPLEXED_RUNS_DIRECTORY_NAME: str = "demultiplexed_runs"
 
 
 class RunParametersXMLNodes(StrEnum):
@@ -159,9 +166,9 @@ OPTION_BCL_CONVERTER = click.option(
     "-b",
     "--bcl-converter",
     type=click.Choice(["bcl2fastq", "dragen"]),
-    default="bcl2fastq",
-    help="Specify bcl conversion software. Choose between bcl2fastq and dragen. Default is "
-    "bcl2fastq.",
+    default=None,
+    help="Specify bcl conversion software. Choose between bcl2fastq and dragen. "
+    "If not specified, the software will be determined automatically using the sequencer type.",
 )
 
 

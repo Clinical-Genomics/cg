@@ -21,7 +21,9 @@ from datetime import datetime
 @pytest.fixture(name="bcl_convert_metrics_dir_path", scope="session")
 def fixture_bcl_convert_metrics_dir_path() -> Path:
     """Return a path to a BCLConvert metrics directory."""
-    return Path("tests", "fixtures", "apps", "sequencing_metrics_parser")
+    return Path(
+        "tests", "fixtures", "apps", "sequencing_metrics_parser", "230622_A00621_0864_AHY7FFDRX2"
+    )
 
 
 @pytest.fixture(name="test_sample_internal_id", scope="session")
@@ -51,7 +53,7 @@ def fixture_bcl_convert_reads_for_test_sample() -> int:
 @pytest.fixture(name="bcl_convert_test_q30_bases_percent", scope="session")
 def fixture_bcl_convert_test_q30_bases_percent() -> float:
     """Return the Q30 bases percent for the test sample."""
-    return 0.94
+    return 94
 
 
 @pytest.fixture(name="bcl_convert_test_mean_quality_score_per_lane", scope="session")
@@ -134,7 +136,7 @@ def fixture_bcl_convert_sample_sheet_model_with_data(
             SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value: "HY7FFDRX2",
             SampleSheetNovaSeq6000Sections.Data.LANE.value: test_lane,
             SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCLCONVERT.value: test_sample_internal_id,
-            SampleSheetNovaSeq6000Sections.Data.SAMPLE_NAME.value: "p023BCR",
+            SampleSheetNovaSeq6000Sections.Data.SAMPLE_NAME.value: "anonymous_1",
             SampleSheetNovaSeq6000Sections.Data.CONTROL.value: "N",
             SampleSheetNovaSeq6000Sections.Data.SAMPLE_PROJECT_BCLCONVERT.value: test_sample_project,
         }
@@ -162,6 +164,6 @@ def fixture_parsed_sequencing_statistics_from_bcl_convert(
         flow_cell_name=bcl_convert_test_flow_cell_name,
         sample_total_reads_in_lane=bcl_convert_reads_for_test_sample * 2,
         sample_base_mean_quality_score=bcl_convert_test_mean_quality_score_per_lane,
-        sample_base_fraction_passing_q30=bcl_convert_test_q30_bases_percent_per_lane,
+        sample_base_percentage_passing_q30=bcl_convert_test_q30_bases_percent_per_lane,
         created_at=datetime.now(),
     )

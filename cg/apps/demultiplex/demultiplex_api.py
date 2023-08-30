@@ -7,12 +7,14 @@ from typing_extensions import Literal
 
 from cgmodels.trailblazer.constants import AnalysisTypes
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
 from cg.constants.priority import SlurmQos
 from cg.io.controller import WriteFile
+from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch, SbatchDragen
@@ -27,12 +29,15 @@ class DemultiplexingAPI:
     This includes starting demultiplexing, creating sample sheets, creating base masks,
     """
 
-    def __init__(self, config: dict, out_dir: Optional[Path] = None):
+    def __init__(
+        self, config: dict, housekeeper_api: HousekeeperAPI, out_dir: Optional[Path] = None
+    ):
         self.slurm_api = SlurmAPI()
+        self.hk_api = housekeeper_api
         self.slurm_account: str = config["demultiplex"]["slurm"]["account"]
         self.mail: str = config["demultiplex"]["slurm"]["mail_user"]
-        self.run_dir: Path = Path(config["demultiplex"]["run_dir"])
-        self.out_dir: Path = out_dir or Path(config["demultiplex"]["out_dir"])
+        self.flow_cells_dir: Path = Path(config["flow_cells_dir"])
+        self.demultiplexed_runs_dir: Path = out_dir or Path(config["demultiplexed_flow_cells_dir"])
         self.environment: str = config.get("environment", "stage")
         LOG.info(f"Set environment to {self.environment}")
         self.dry_run: bool = False
@@ -44,7 +49,7 @@ class DemultiplexingAPI:
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run."""
-        LOG.debug(f"Set dry run to {dry_run}")
+        LOG.debug(f"DemultiplexingAPI: Set dry run to {dry_run}")
         self.dry_run = dry_run
         self.slurm_api.set_dry_run(dry_run=dry_run)
 
@@ -106,21 +111,18 @@ class DemultiplexingAPI:
         """Create the path to the stdout logfile."""
         return Path(flow_cell.path, f"{DemultiplexingAPI.get_run_name(flow_cell)}.stdout")
 
-    def get_all_demultiplexed_flow_cell_dirs(self) -> List[Path]:
-        """Return all demultiplex flow cell out directories."""
-        demultiplex_flow_cells: List[Path] = []
-        for flow_cell_dir in self.out_dir.iterdir():
-            if flow_cell_dir.is_dir():
-                LOG.debug(f"Found directory {flow_cell_dir}")
-                demultiplex_flow_cells.append(flow_cell_dir)
-        return demultiplex_flow_cells
-
     def flow_cell_out_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
-        """Create the path to where the demuliplexed result should be produced."""
-        return Path(self.out_dir, flow_cell.path.name)
+        """Create the path to where the demultiplexed result should be produced."""
+        return Path(self.demultiplexed_runs_dir, flow_cell.path.name)
 
-    def unaligned_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
-        """Create the path to where the demuliplexed result should be produced."""
+    def is_sample_sheet_in_housekeeper(self, flow_cell_id: str) -> bool:
+        """Returns True if the sample sheet for the flow cell exists in Housekeeper."""
+        return bool(
+            get_sample_sheets_from_latest_version(flow_cell_id=flow_cell_id, hk_api=self.hk_api)
+        )
+
+    def get_flow_cell_unaligned_dir(self, flow_cell: FlowCellDirectoryData) -> Path:
+        """Returns the path to where the demultiplexed result are located."""
         return Path(
             self.flow_cell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME
         )
@@ -135,11 +137,11 @@ class DemultiplexingAPI:
         )
 
     def is_demultiplexing_completed(self, flow_cell: FlowCellDirectoryData) -> bool:
-        """Check the path to where the demuliplexed result should be produced."""
+        """Check the path to where the demultiplexed result should be produced."""
         LOG.info(f"Check if demultiplexing is ready for {flow_cell.path}")
         logfile: Path = self.get_stderr_logfile(flow_cell)
         if not logfile.exists():
-            LOG.warning("Could not find logfile!")
+            LOG.warning(f"Could not find logfile: {logfile}!")
             return False
         return self.demultiplexing_completed_path(flow_cell).exists()
 
@@ -157,10 +159,17 @@ class DemultiplexingAPI:
             demultiplexing_possible = False
 
         if not flow_cell.sample_sheet_exists():
-            LOG.warning(f"Could not find sample sheet for {flow_cell.id}")
+            LOG.warning(f"Could not find sample sheet in flow cell directory for {flow_cell.id}")
             demultiplexing_possible = False
 
-        if flow_cell.is_demultiplexing_started():
+        if not self.is_sample_sheet_in_housekeeper(flow_cell_id=flow_cell.id):
+            LOG.warning(f"Could not find sample sheet in Housekeeper for {flow_cell.id}")
+            demultiplexing_possible = False
+
+        if (
+            flow_cell.has_demultiplexing_started_locally()
+            or flow_cell.has_demultiplexing_started_on_sequencer()
+        ):
             LOG.warning("Demultiplexing has already been started")
             demultiplexing_possible = False
 
@@ -215,7 +224,7 @@ class DemultiplexingAPI:
         """Start demultiplexing for a flow cell."""
         self.create_demultiplexing_started_file(flow_cell.demultiplexing_started_path)
         demux_dir: Path = self.flow_cell_out_dir_path(flow_cell=flow_cell)
-        unaligned_dir: Path = self.unaligned_dir_path(flow_cell=flow_cell)
+        unaligned_dir: Path = self.get_flow_cell_unaligned_dir(flow_cell=flow_cell)
         LOG.info(f"Demultiplexing to {unaligned_dir}")
         if not self.dry_run:
             LOG.info(f"Creating demux dir {unaligned_dir}")

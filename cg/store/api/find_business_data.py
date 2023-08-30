@@ -1,7 +1,7 @@
 """Handler to find business data objects."""
 import datetime as dt
 import logging
-from typing import Callable, List, Optional, Iterator, Union, Dict
+from typing import Callable, List, Optional, Iterator, Union, Dict, Set
 
 
 from sqlalchemy.orm import Query, Session
@@ -330,6 +330,65 @@ class FindBusinessDataHandler(BaseHandler):
         reads_count: Optional[int] = total_reads_query.scalar()
         return reads_count if reads_count else 0
 
+    def get_average_q30_for_sample_on_flow_cell(
+        self, sample_internal_id: str, flow_cell_name: str
+    ) -> float:
+        """Calculates the average q30 across lanes for a sample on a flow cell."""
+        sample_lanes: List[SampleLaneSequencingMetrics] = apply_metrics_filter(
+            metrics=self._get_query(table=SampleLaneSequencingMetrics),
+            filter_functions=[
+                SequencingMetricsFilter.FILTER_BY_FLOW_CELL_NAME,
+                SequencingMetricsFilter.FILTER_BY_SAMPLE_INTERNAL_ID,
+            ],
+            sample_internal_id=sample_internal_id,
+            flow_cell_name=flow_cell_name,
+        ).all()
+
+        return sum(
+            [sample_lane.sample_base_percentage_passing_q30 for sample_lane in sample_lanes]
+        ) / len(sample_lanes)
+
+    def get_average_percentage_passing_q30_for_flow_cell(self, flow_cell_name: str) -> float:
+        """Calculates the average q30 for each sample on a flow cell and returns the average between the samples."""
+        sequencing_metrics: List[
+            SampleLaneSequencingMetrics
+        ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
+        unique_sample_internal_ids: Set[str] = {
+            sequencing_metric.sample_internal_id for sequencing_metric in sequencing_metrics
+        }
+
+        sum_average_q30_across_samples: float = 0
+        for sample_internal_id in unique_sample_internal_ids:
+            sum_average_q30_across_samples += self.get_average_q30_for_sample_on_flow_cell(
+                sample_internal_id=sample_internal_id,
+                flow_cell_name=flow_cell_name,
+            )
+        return (
+            sum_average_q30_across_samples / len(unique_sample_internal_ids)
+            if sum_average_q30_across_samples and unique_sample_internal_ids
+            else 0
+        )
+
+    def get_number_of_reads_for_flow_cell(self, flow_cell_name: str) -> int:
+        """Get total number of reads for a flow cell from sample lane sequencing metrics."""
+        sequencing_metrics: List[
+            SampleLaneSequencingMetrics
+        ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
+        read_count: int = 0
+        for sequencing_metric in sequencing_metrics:
+            read_count += sequencing_metric.sample_total_reads_in_lane
+        return read_count
+
+    def get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        self, flow_cell_name: str
+    ) -> List[SampleLaneSequencingMetrics]:
+        """Return sample lane sequencing metrics for a flow cell."""
+        return apply_metrics_filter(
+            metrics=self._get_query(table=SampleLaneSequencingMetrics),
+            filter_functions=[SequencingMetricsFilter.FILTER_BY_FLOW_CELL_NAME],
+            flow_cell_name=flow_cell_name,
+        ).all()
+
     def get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
         self, flow_cell_name: str, sample_internal_id: str, lane: int
     ) -> SampleLaneSequencingMetrics:
@@ -337,7 +396,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_metrics_filter(
             metrics=self._get_query(table=SampleLaneSequencingMetrics),
             filter_functions=[
-                SequencingMetricsFilter.FILTER_METRICS_FOR_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE
+                SequencingMetricsFilter.FILTER_BY_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE
             ],
             flow_cell_name=flow_cell_name,
             sample_internal_id=sample_internal_id,

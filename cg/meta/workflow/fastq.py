@@ -14,7 +14,6 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 
-
 LOG = logging.getLogger(__name__)
 
 DEFAULT_DATE_STR = (
@@ -167,15 +166,19 @@ class FastqHandler:
     @staticmethod
     def create_fastq_name(
         lane: str,
-        flowcell: str,
+        flow_cell: str,
         sample: str,
         read: str,
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
         undetermined: Optional[str] = None,
         meta: Optional[str] = None,
-    ):
-        raise NotImplementedError
+    ) -> str:
+        """Name a FASTQ file with standard conventions and
+        no naming constrains from pipeline."""
+        flow_cell: str = f"{flow_cell}-undetermined" if undetermined else flow_cell
+        date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
+        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read}.fastq.gz"
 
 
 class BalsamicFastqHandler(FastqHandler):
@@ -285,42 +288,3 @@ class MutantFastqHandler(FastqHandler):
                 "flowcell": header_info["flowcell"],
             }
             return data
-
-
-class RnafusionFastqHandler(FastqHandler):
-    @staticmethod
-    def create_fastq_name(
-        lane: str,
-        flow_cell: str,
-        sample: str,
-        read: str,
-        date: dt.datetime = DEFAULT_DATE_STR,
-        index: str = DEFAULT_INDEX,
-        undetermined: Optional[str] = None,
-        meta: Optional[str] = None,
-    ) -> str:
-        """Name a FASTQ file following MIP conventions,
-        no naming constrains from pipeline."""
-        flow_cell: str = f"{flow_cell}-undetermined" if undetermined else flow_cell
-        date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
-        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read}.fastq.gz"
-
-
-class TaxprofilerFastqHandler(FastqHandler):
-    """Handles Taxprofiler fastq file linking."""
-
-    @staticmethod
-    def create_fastq_name(
-        lane: str,
-        flow_cell: str,
-        sample: str,
-        read: str,
-        date: dt.datetime = DEFAULT_DATE_STR,
-        index: str = DEFAULT_INDEX,
-        undetermined: Optional[str] = None,
-        meta: Optional[str] = None,
-    ) -> str:
-        """Name a FASTQ file, no naming constrains from pipeline."""
-        flow_cell: str = f"{flow_cell}-undetermined" if undetermined else flow_cell
-        date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
-        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read}.fastq.gz"

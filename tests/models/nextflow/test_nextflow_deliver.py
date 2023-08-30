@@ -1,9 +1,9 @@
 from typing import Dict, Optional
 
-import pydantic
 import pytest
+from pydantic.v1 import ValidationError as PydanticValidationError
 
-from cg.models.nextflow.deliverables import NextflowDeliverables
+from cg.models.nf_analysis import NextflowDeliverables
 
 
 def test_instantiate_nextflow_deliverables(
@@ -30,7 +30,7 @@ def test_instantiate_nextflow_deliverables_with_empty_entry(
     Tests nextflow delivery object with empty entry.
     """
     # WHEN instantiating a deliverables object with an empty entry THEN assert that it was successfully created
-    with pytest.raises(pydantic.ValidationError):
+    with pytest.raises(PydanticValidationError):
         NextflowDeliverables(deliverables=nextflow_deliverables_with_empty_entry)
 
 
@@ -41,5 +41,5 @@ def test_instantiate_nextflow_deliverables_with_faulty_entry(
     Tests nextflow delivery object with empty entry.
     """
     # WHEN instantiating a deliverables object with an empty entry THEN assert that it was successfully created
-    with pytest.raises(pydantic.ValidationError):
+    with pytest.raises(PydanticValidationError):
         NextflowDeliverables(deliverables=nextflow_deliverables_with_faulty_entry)

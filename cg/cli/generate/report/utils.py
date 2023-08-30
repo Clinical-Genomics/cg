@@ -4,14 +4,13 @@ from datetime import datetime
 from typing import Optional, List, Dict
 
 import click
-from cg.meta.report.rnafusion import RnafusionReportAPI
-from cgmodels.cg.constants import Pipeline
 
-from cg.constants import REPORT_SUPPORTED_PIPELINES, REPORT_SUPPORTED_DATA_DELIVERY
-from cg.meta.report.report_api import ReportAPI
+from cg.constants import REPORT_SUPPORTED_PIPELINES, REPORT_SUPPORTED_DATA_DELIVERY, Pipeline
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
+from cg.meta.report.report_api import ReportAPI
+from cg.meta.report.rnafusion import RnafusionReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -50,7 +49,7 @@ def get_report_case(context: click.Context, case_id: str) -> Family:
         else:
             LOG.error("Provide one of the following case IDs:")
             for case in cases_without_delivery_report:
-                click.echo(f"{case.internal_id} ({ case.data_analysis})")
+                click.echo(f"{case.internal_id} ({case.data_analysis})")
         raise click.Abort
     if case.data_analysis not in REPORT_SUPPORTED_PIPELINES:
         LOG.error(

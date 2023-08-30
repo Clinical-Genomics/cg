@@ -1,32 +1,45 @@
-"""Test demultiplex API."""
-from pathlib import Path
-from typing import List
+"""Tests for functions of DemultiplexAPI."""
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
 from cg.models.cg_config import CGConfig
-
-from tests.apps.cgstats.conftest import fixture_populated_stats_api, fixture_stats_api
-from tests.cli.demultiplex.conftest import (
-    fixture_demultiplexing_api,
-    fixture_demultiplex_configs,
-    fixture_flow_cell_runs_working_directory,
-    fixture_demultiplexed_flow_cells_working_directory,
-    fixture_demultiplex_context,
-    fixture_demultiplexed_flow_cell_finished_working_directory,
-)
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
-def test_get_all_demultiplexed_flow_cell_out_dirs(
-    demultiplex_context: CGConfig, demultiplexed_flow_cell_finished_working_directory: Path
+def test_is_sample_sheet_in_housekeeper_exists(
+    demultiplexing_context_for_demux: CGConfig, tmp_bcl2fastq_flow_cell: FlowCellDirectoryData
 ):
-    """Test returning all flow cell directories from the demultiplexing run directory."""
-    # GIVEN a demultiplex flow cell finished output directory that exist
+    """Test that checking the existence of an existing sample sheet in Housekeeper returns True."""
+    # GIVEN a DemultiplexAPI and a flow cell with a sample sheet
+    demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
+    demultiplexing_context_for_demux.flow_cells_dir = tmp_bcl2fastq_flow_cell.path.parent
 
-    # GIVEN a demultiplex context
-    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
+    # GIVEN that the sample sheet is in Housekeeper
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=tmp_bcl2fastq_flow_cell.path,
+        flow_cell_name=tmp_bcl2fastq_flow_cell.id,
+        hk_api=demultiplexing_context_for_demux.housekeeper_api,
+    )
 
-    # WHEN calling get_all_demultiplexed_flow_cell_dirs
-    demultiplex_flow_cell_dirs: List[Path] = demux_api.get_all_demultiplexed_flow_cell_dirs()
+    # WHEN testing if the sample sheet is in Housekeeper
+    result: bool = demux_api.is_sample_sheet_in_housekeeper(flow_cell_id=tmp_bcl2fastq_flow_cell.id)
 
-    # THEN the demultiplexed flow cells run directories should be returned
-    assert demultiplex_flow_cell_dirs[0] == demultiplexed_flow_cell_finished_working_directory
+    # THEN the sample sheet should be in Housekeeper
+    assert result
+
+
+def test_is_sample_sheet_in_housekeeper_not_in_hk(
+    demultiplexing_context_for_demux: CGConfig, tmp_bcl2fastq_flow_cell: FlowCellDirectoryData
+):
+    """Test that checking the existence of a non-existing sample sheet in Housekeeper returns False."""
+    # GIVEN a DemultiplexAPI and a flow cell with a sample sheet
+    demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
+    demultiplexing_context_for_demux.flow_cells_dir = tmp_bcl2fastq_flow_cell.path.parent
+
+    # GIVEN that the sample sheet is not in Housekeeper
+
+    # WHEN testing if the sample sheet is in Housekeeper
+    result: bool = demux_api.is_sample_sheet_in_housekeeper(flow_cell_id=tmp_bcl2fastq_flow_cell.id)
+
+    # THEN the sample sheet should be in Housekeeper
+    assert not result

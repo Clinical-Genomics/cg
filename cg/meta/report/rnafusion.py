@@ -1,8 +1,6 @@
 """RNAfusion delivery report API."""
 from typing import List, Optional
 
-from cgmodels.cg.constants import Pipeline
-
 from cg.constants import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -13,6 +11,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_RNAFUSION_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
+    Pipeline,
 )
 from cg.constants.constants import GenomeVersion
 from cg.meta.report.field_validators import get_million_read_pairs
@@ -23,8 +22,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import RnafusionSampleMetadataModel
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
-from cg.models.rnafusion.analysis import RnafusionAnalysis
-from cg.models.rnafusion.metrics import RnafusionQCMetrics
+from cg.models.rnafusion.rnafusion import RnafusionAnalysis, RnafusionQCMetrics
 from cg.store.models import Family, Sample
 
 

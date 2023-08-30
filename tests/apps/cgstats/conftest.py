@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict
 
 import pytest
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.db.models import Supportparams, Sample, Project, Datasource, Demux
@@ -11,7 +11,7 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from tests.models.demultiplexing.conftest import (
-    fixture_demultiplexed_dragen_flow_cell,
+    fixture_demultiplexed_bcl_convert_flow_cell,
     fixture_dragen_demux_results,
 )
 
@@ -64,23 +64,6 @@ class MockDemuxSample(BaseModel):
     lane: int = 1
 
 
-@pytest.fixture(name="stats_api")
-def fixture_stats_api(project_dir: Path) -> StatsAPI:
-    """Setup base CGStats store."""
-    _store = StatsAPI(
-        {
-            "cgstats": {
-                "binary_path": "echo",
-                "database": "sqlite://",
-                "root": "tests/fixtures/DEMUX",
-            }
-        }
-    )
-    _store.create_all()
-    yield _store
-    _store.drop_all()
-
-
 @pytest.fixture(name="nipt_stats_api")
 def fixture_nipt_stats_api(
     stats_api: StatsAPI,
@@ -129,14 +112,6 @@ def fixture_nipt_stats_api(
     return nipt_stats_api
 
 
-@pytest.fixture(name="populated_stats_api")
-def fixture_populated_stats_api(
-    stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
-) -> StatsAPI:
-    create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
-    return stats_api
-
-
 @pytest.fixture(name="demultiplexing_stats_path")
 def fixture_demultiplexing_stats_path(bcl2fastq_demux_results: DemuxResults) -> Path:
     return bcl2fastq_demux_results.demux_stats_path
@@ -147,22 +122,25 @@ def fixture_conversion_stats_path(bcl2fastq_demux_results: DemuxResults) -> Path
     return bcl2fastq_demux_results.conversion_stats_path
 
 
-@pytest.fixture(name="run_info_path")
+@pytest.fixture(name="run_info_path", scope="function")
 def fixture_run_info(context_config: Dict[str, str]) -> Path:
+    """Return path to RunInfo.xml"""
     return Path(context_config["demultiplex"]["out_dir"]).joinpath(
-        "211101_A00187_0615_AHLG5GDRXY/Unaligned/Reports/RunInfo.xml"
+        "211101_A00187_0615_AHLG5GDRZZ", "Unaligned", "Reports", "RunInfo.xml"
     )
 
 
-@pytest.fixture(name="quality_metrics_path")
+@pytest.fixture(name="quality_metrics_path", scope="function")
 def fixture_quality_metrics(context_config: Dict[str, str]) -> Path:
+    """Return path to Quality_Metrics.csv"""
     return Path(context_config["demultiplex"]["out_dir"]).joinpath(
-        "211101_A00187_0615_AHLG5GDRXY/Unaligned/Reports/Quality_Metrics.csv"
+        "211101_A00187_0615_AHLG5GDRZZ", "Unaligned", "Reports", "Quality_Metrics.csv"
     )
 
 
-@pytest.fixture(name="adapter_metrics_path")
+@pytest.fixture(name="adapter_metrics_path", scope="function")
 def fixture_adapter_metrics(context_config: Dict[str, str]) -> Path:
+    """Return path to Adapter_Metrics.csv"""
     return Path(context_config["demultiplex"]["out_dir"]).joinpath(
-        "211101_A00187_0615_AHLG5GDRXY/Unaligned/Reports/Adapter_Metrics.csv"
+        "211101_A00187_0615_AHLG5GDRZZ", "Unaligned", "Reports", "Adapter_Metrics.csv"
     )

@@ -1,8 +1,9 @@
 import pytest
 
+from collections import namedtuple
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -12,29 +13,17 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store.api import Store
 from cg.store.models import Sample, Family
-
-from tests.apps.cgstats.conftest import fixture_populated_stats_api
-from tests.cli.demultiplex.conftest import (
-    fixture_demultiplex_configs,
-    fixture_demultiplex_context,
-    fixture_demultiplexed_flow_cell_working_directory,
-    fixture_demultiplexed_flow_cells_working_directory,
-    fixture_demultiplexing_api,
-    fixture_demux_results_not_finished_dir,
-    fixture_flow_cell_runs_working_directory,
-    fixture_stats_api,
-)
 from tests.store_helpers import StoreHelpers
+
+FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_internal_ids")
 
 
 @pytest.fixture(name="tmp_demulitplexing_dir")
 def fixture_tmp_demulitplexing_dir(
-    demultiplexed_flow_cells_working_directory: Path, bcl2fastq_flow_cell_full_name: str
+    demultiplexed_runs: Path, bcl2fastq_flow_cell_full_name: str
 ) -> Path:
     """Return a tmp directory in demultiplexed-runs."""
-    tmp_demulitplexing_dir: Path = Path(
-        demultiplexed_flow_cells_working_directory, bcl2fastq_flow_cell_full_name
-    )
+    tmp_demulitplexing_dir: Path = Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
     tmp_demulitplexing_dir.mkdir(exist_ok=True, parents=True)
     return tmp_demulitplexing_dir
 
@@ -50,6 +39,12 @@ def fixture_temp_fastq_paths(tmp_demulitplexing_dir: Path) -> List[Path]:
         with fastq.open("w+") as fh:
             fh.write("content")
     return fastqs
+
+
+@pytest.fixture(name="fastq_file_path")
+def fixture_fastq_file_path() -> Path:
+    """Return a path to a fastq file."""
+    return Path("path/to/sample_internal_id_S1_L001_R1_001.fastq.gz")
 
 
 @pytest.fixture(name="tmp_sample_sheet_path")
@@ -77,7 +72,7 @@ def fixture_tmp_flow_cell_run_base_path(
 ) -> Path:
     """Flow cell run directory in temporary folder."""
 
-    tmp_flow_cell_run_path: Path = Path(project_dir, "flow_cell_run")
+    tmp_flow_cell_run_path: Path = Path(project_dir, "flow_cells")
     tmp_flow_cell_run_path.mkdir(exist_ok=True, parents=True)
 
     return tmp_flow_cell_run_path
@@ -89,7 +84,7 @@ def fixture_tmp_flow_cell_demux_base_path(
 ) -> Path:
     """Flow cell demux directory in temporary folder."""
 
-    tmp_flow_cell_demux_path: Path = Path(project_dir, "demultiplexing-runs")
+    tmp_flow_cell_demux_path: Path = Path(project_dir, "demultiplexed-runs")
     tmp_flow_cell_demux_path.mkdir(exist_ok=True, parents=True)
 
     return tmp_flow_cell_demux_path
@@ -249,6 +244,21 @@ def fixture_populated_delete_demux_context(
     return populated_delete_demux_context
 
 
+@pytest.fixture(name="populated_sample_lane_seq_demux_context")
+def fixture_populated_sample_lane_seq_demux_context(
+    cg_context: CGConfig,
+    flow_cell_name_housekeeper_api: HousekeeperAPI,
+    store_with_sequencing_metrics: Store,
+    populated_stats_api: StatsAPI,
+) -> CGConfig:
+    """Return a populated context to remove flow cells from using the DeleteDemuxAPI."""
+    populated_wipe_demux_context = cg_context
+    populated_wipe_demux_context.status_db_ = store_with_sequencing_metrics
+    populated_wipe_demux_context.cg_stats_api_ = populated_stats_api
+    populated_wipe_demux_context.housekeeper_api_ = flow_cell_name_housekeeper_api
+    return populated_wipe_demux_context
+
+
 @pytest.fixture(name="active_delete_demux_context")
 def fixture_active_delete_demux_context(
     cg_context: CGConfig, active_flow_cell_store: Store, tmp_flow_cell_run_base_path: Path
@@ -256,8 +266,8 @@ def fixture_active_delete_demux_context(
     """Return a populated context to remove flow cells from using the DeleteDemuxAPI."""
     active_delete_demux_context = cg_context
     active_delete_demux_context.status_db_ = active_flow_cell_store
-    active_delete_demux_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    active_delete_demux_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    active_delete_demux_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
+    active_delete_demux_context.demultiplex_api.demultiplexed_runs_dir = tmp_flow_cell_run_base_path
     return active_delete_demux_context
 
 
@@ -269,8 +279,10 @@ def fixture_populated_delete_demultiplex_api(
     tmp_flow_cell_demux_base_path: Path,
 ) -> DeleteDemuxAPI:
     """Return an initialized populated DeleteDemuxAPI."""
-    populated_delete_demux_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    populated_delete_demux_context.demultiplex_api.out_dir = tmp_flow_cell_demux_base_path
+    populated_delete_demux_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
+    populated_delete_demux_context.demultiplex_api.demultiplexed_runs_dir = (
+        tmp_flow_cell_demux_base_path
+    )
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
         parents=True, exist_ok=True
     )
@@ -284,6 +296,18 @@ def fixture_populated_delete_demultiplex_api(
     )
 
 
+@pytest.fixture(name="populated_sample_lane_sequencing_metrics_demultiplex_api")
+def fixture_populated_sample_lane_sequencing_metrics_demultiplex_api(
+    populated_sample_lane_seq_demux_context: CGConfig, bcl2fastq_flow_cell_id
+) -> DeleteDemuxAPI:
+    """Return an initialized populated DeleteDemuxAPI."""
+    return DeleteDemuxAPI(
+        config=populated_sample_lane_seq_demux_context,
+        dry_run=False,
+        flow_cell_name=bcl2fastq_flow_cell_id,
+    )
+
+
 @pytest.fixture(name="active_delete_demultiplex_api")
 def fixture_active_delete_demultiplex_api(
     active_delete_demux_context: CGConfig,
@@ -291,8 +315,8 @@ def fixture_active_delete_demultiplex_api(
     tmp_flow_cell_run_base_path: Path,
 ) -> DeleteDemuxAPI:
     """Return an instantiated DeleteDemuxAPI with active samples on a flow cell."""
-    active_delete_demux_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    active_delete_demux_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    active_delete_demux_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
+    active_delete_demux_context.demultiplex_api.demultiplexed_runs_dir = tmp_flow_cell_run_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
         parents=True, exist_ok=True
     )
@@ -312,8 +336,8 @@ def fixture_delete_demultiplex_api(
 ) -> DeleteDemuxAPI:
     """Return an initialized DeleteDemuxAPI."""
     cg_context.cg_stats_api_ = stats_api
-    cg_context.demultiplex_api.run_dir = tmp_flow_cell_run_base_path
-    cg_context.demultiplex_api.out_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
+    cg_context.demultiplex_api.demultiplexed_runs_dir = tmp_flow_cell_run_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
         parents=True, exist_ok=True
     )
@@ -322,6 +346,59 @@ def fixture_delete_demultiplex_api(
         dry_run=False,
         flow_cell_name=bcl2fastq_flow_cell_id,
     )
+
+
+@pytest.fixture(name="flow_cell_info_map", scope="session")
+def fixture_flow_cell_info_map(
+    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
+    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
+    flow_cell_directory_name_demultiplexed_with_bcl_convert_flat: Path,
+    flow_cell_directory_name_demultiplexed_with_bcl_convert: Path,
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
+    flow_cell_directory_name_demultiplexed_with_bcl2fastq: Path,
+    flow_cell_name_demultiplexed_with_bcl2fastq: str,
+) -> Dict[str, FlowCellInfo]:
+    """Returns a dict with the suitable fixtures for different demultiplexing softwares and
+    settings. Keys are string, values are named tuples FlowCellInfo."""
+    return {
+        "BCL2FASTQ_TREE": FlowCellInfo(
+            directory=flow_cell_directory_name_demultiplexed_with_bcl2fastq,
+            name=flow_cell_name_demultiplexed_with_bcl2fastq,
+            sample_internal_ids=bcl2fastq_demultiplexed_flow_cell_sample_internal_ids,
+        ),
+        "BCLCONVERT_FLAT": FlowCellInfo(
+            directory=flow_cell_directory_name_demultiplexed_with_bcl_convert_flat,
+            name=flow_cell_name_demultiplexed_with_bcl_convert,
+            sample_internal_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
+        ),
+        "BCLCONVERT_TREE": FlowCellInfo(
+            directory=flow_cell_directory_name_demultiplexed_with_bcl_convert,
+            name=flow_cell_name_demultiplexed_with_bcl_convert,
+            sample_internal_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
+        ),
+    }
+
+
+@pytest.fixture(name="flow_cell_name_demultiplexed_with_bcl_convert", scope="session")
+def fixture_flow_cell_name_demultiplexed_with_bcl_convert() -> str:
+    return "HY7FFDRX2"
+
+
+@pytest.fixture(name="flow_cell_directory_name_demultiplexed_with_bcl_convert", scope="session")
+def fixture_flow_cell_directory_name_demultiplexed_with_bcl_convert(
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
+):
+    return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
+
+
+@pytest.fixture(
+    name="flow_cell_directory_name_demultiplexed_with_bcl_convert_flat", scope="session"
+)
+def fixture_flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
+):
+    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert using a flat output directory structure."""
+    return f"230505_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
 
 
 @pytest.fixture(name="demultiplexing_init_files")

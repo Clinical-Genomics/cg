@@ -14,5 +14,5 @@ class InputFile(BaseModel):
 class InputBundle(BaseModel):
     name: str
     created: datetime = datetime.now()
-    expires: Optional[datetime]
+    expires: Optional[datetime] = None
     files: List[InputFile]

@@ -1,26 +1,44 @@
 import copy
+from typing import Dict
+
+from cg.models.report.metadata import BalsamicTargetedSampleMetadataModel
+
+from cg.store import Store
+
+from cg.meta.report.balsamic import BalsamicReportAPI
+
+from cg.models.balsamic.analysis import BalsamicAnalysis
+
+from cg.store.models import BedVersion, Sample, Family
+from tests.store_helpers import StoreHelpers
 
 
-def test_get_sample_metadata(report_api_balsamic, case_balsamic, helpers, sample_store):
-    """Tests sample metadata extraction."""
+def test_get_sample_metadata(
+    report_api_balsamic: BalsamicReportAPI,
+    case_balsamic: Family,
+    helpers: StoreHelpers,
+    sample_store: Store,
+):
+    """Test sample metadata extraction."""
 
-    # GIVEN a mock tumor sample and the latest metadata
-    sample = helpers.add_sample(sample_store)
+    # GIVEN a tumor sample, a bed version, and the latest metadata
+    sample: Sample = helpers.add_sample(store=sample_store)
     sample.internal_id = "ACC0000A1"
-    sample.capture_kit = "gicfdna_3.1_hg19_design.bed"
     sample.reads = 20000000
-
-    balsamic_metadata = report_api_balsamic.analysis_api.get_latest_metadata(
+    bed_name: str = "GIcfDNA"
+    bed_version: BedVersion = helpers.ensure_bed_version(store=sample_store, bed_name=bed_name)
+    bed_version.filename = "gicfdna_3.1_hg19_design.bed"
+    balsamic_metadata: BalsamicAnalysis = report_api_balsamic.analysis_api.get_latest_metadata(
         case_balsamic.internal_id
     )
 
     # GIVEN the expected output
-    expected_metadata = {
+    expected_metadata: Dict[str, str] = {
         "million_read_pairs": "10.0",
         "duplicates": "93.1",
         "mean_insert_size": "178.19",
         "fold_80": "1.16",
-        "bait_set": "gicfdna_3.1_hg19_design.bed",
+        "bait_set": bed_name,
         "bait_set_version": "3.1",
         "median_target_coverage": "5323.0",
         "pct_250x": "N/A",
@@ -28,12 +46,12 @@ def test_get_sample_metadata(report_api_balsamic, case_balsamic, helpers, sample
     }
 
     # WHEN retrieving the sample metadata
-    sample_metadata = report_api_balsamic.get_sample_metadata(
-        case_balsamic, sample, balsamic_metadata
+    sample_metadata: BalsamicTargetedSampleMetadataModel = report_api_balsamic.get_sample_metadata(
+        case=case_balsamic, sample=sample, analysis_metadata=balsamic_metadata
     )
 
     # THEN check that the sample metadata is correctly retrieved
-    assert sample_metadata == expected_metadata
+    assert sample_metadata.dict() == expected_metadata
 
 
 def test_get_variant_callers(report_api_balsamic, case_id):

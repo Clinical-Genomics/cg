@@ -1,21 +1,24 @@
 import logging
-import os
 import re
-from pathlib import Path
-from typing import List
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
+from pathlib import Path
+from typing import List, Optional
+
+
 from cg.constants.constants import FileExtensions
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
-from cg.exc import FlowCellError
 from cg.meta.demultiplex.validation import (
-    is_bcl2fastq_demux_folder_structure,
-    is_flow_cell_directory_valid,
-    is_valid_sample_id,
-    validate_sample_fastq_file,
+    is_valid_sample_fastq_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+
+from cg.utils.files import (
+    get_file_in_directory,
+    get_files_matching_pattern,
+    is_pattern_in_file_path_name,
+    rename_file,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -35,97 +38,85 @@ def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
     raise ValueError(f"Could not extract lane number from fastq file name {sample_fastq_path.name}")
 
 
-def get_sample_id_from_sample_fastq(sample_fastq: Path) -> str:
-    """
-    Extract sample id from fastq file path.
+def get_sample_fastqs_from_flow_cell(
+    flow_cell_directory: Path, sample_internal_id: str
+) -> Optional[List[Path]]:
+    """Retrieve all fastq files for a specific sample in a flow cell directory."""
 
-    Pre-condition:
-        - The parent directory name contains the sample id formatted as Sample_<sample_id>
-    """
+    # The flat output structure for flow cells demultiplexed with bclconvert on the novaseqx machines
+    root_pattern = f"{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
-    sample_parent_match = re.search(r"Sample_(\w+)", sample_fastq.parent.name)
+    # The default structure for flow cells demultiplexed with bcl2fastq
+    unaligned_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
-    if sample_parent_match:
-        return sample_parent_match.group(1)
-    else:
-        raise ValueError("Parent directory name does not contain 'Sample_<sample_id>'.")
+    # Alternative structure for flow cells demultiplexed with bcl2fastq where the sample fastq files have a trailing sequence
+    unaligned_alt_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
-
-def get_sample_fastq_paths_from_flow_cell(flow_cell_directory: Path) -> List[Path]:
-    fastq_sample_pattern: str = (
-        f"Unaligned*/Project_*/Sample_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    # The default structure for flow cells demultiplexed with bclconvert
+    bcl_convert_pattern = (
+        f"Unaligned*/*/{sample_internal_id}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     )
-    return list(flow_cell_directory.glob(fastq_sample_pattern))
+
+    for pattern in [root_pattern, unaligned_pattern, unaligned_alt_pattern, bcl_convert_pattern]:
+        sample_fastqs: List[Path] = get_files_matching_pattern(
+            directory=flow_cell_directory, pattern=pattern
+        )
+        valid_sample_fastqs: List[Path] = get_valid_sample_fastqs(
+            fastq_paths=sample_fastqs, sample_internal_id=sample_internal_id
+        )
+
+        if valid_sample_fastqs:
+            return valid_sample_fastqs
 
 
-def get_bcl_converter_name(flow_cell_directory: Path) -> str:
-    if is_bcl2fastq_demux_folder_structure(flow_cell_directory=flow_cell_directory):
-        return BclConverter.BCL2FASTQ
-    return BclConverter.BCLCONVERT
+def get_valid_sample_fastqs(fastq_paths: List[Path], sample_internal_id: str) -> List[Path]:
+    """Return a list of valid fastq files."""
+    return [
+        fastq
+        for fastq in fastq_paths
+        if is_valid_sample_fastq_file(sample_fastq=fastq, sample_internal_id=sample_internal_id)
+    ]
 
 
 def create_delivery_file_in_flow_cell_directory(flow_cell_directory: Path) -> None:
     Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
 
 
-def get_sample_ids_from_sample_sheet(flow_cell_data: FlowCellDirectoryData) -> List[str]:
-    samples: List[FlowCellSample] = flow_cell_data.get_sample_sheet().samples
-    return get_valid_sample_ids(samples)
-
-
-def get_valid_sample_ids(samples: List[FlowCellSample]) -> List[str]:
-    """Get all valid sample ids from sample sheet."""
-    valid_sample_ids = [
-        sample.sample_id for sample in samples if is_valid_sample_id(sample.sample_id)
-    ]
-    formatted_sample_ids = [sample_id_index.split("_")[0] for sample_id_index in valid_sample_ids]
-    return formatted_sample_ids
-
-
 def get_q30_threshold(sequencer_type: Sequencers) -> int:
     return FLOWCELL_Q30_THRESHOLD[sequencer_type]
 
 
-def get_valid_sample_fastq_paths(flow_cell_directory: Path) -> List[Path]:
-    """Get all valid sample fastq file paths from flow cell directory."""
-    fastq_file_paths: List[Path] = get_sample_fastq_paths_from_flow_cell(flow_cell_directory)
-    valid_sample_fastq_paths: List[Path] = []
-
-    for fastq_path in fastq_file_paths:
-        try:
-            validate_sample_fastq_file(fastq_path)
-            valid_sample_fastq_paths.append(fastq_path)
-        except ValueError as e:
-            LOG.warning(f"Skipping invalid sample fastq file {fastq_path.name}: {e}")
-
-    return valid_sample_fastq_paths
-
-
-def get_sample_sheet_path(flow_cell_directory: Path) -> Path:
-    """
-    Recursively searches for the given sample sheet file in the provided flow cell directory.
-
-    Raises:
-        FileNotFoundError: If the sample sheet file is not found in the flow cell directory.
-    """
-    for directory_path, _, files in os.walk(flow_cell_directory):
-        if DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME in files:
-            LOG.info(f"Found sample sheet in {directory_path}")
-            return Path(directory_path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
-
-    raise FileNotFoundError(
-        f"Sample sheet not found in given flow cell directory: {flow_cell_directory}"
-    )
+def get_sample_sheet_path(
+    flow_cell_directory: Path,
+    sample_sheet_file_name: str = DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
+) -> Path:
+    """Return the path to the sample sheet in the flow cell directory."""
+    return get_file_in_directory(directory=flow_cell_directory, file_name=sample_sheet_file_name)
 
 
 def parse_flow_cell_directory_data(
-    flow_cell_directory: Path, bcl_converter: str
+    flow_cell_directory: Path, bcl_converter: Optional[str] = None
 ) -> FlowCellDirectoryData:
-    """Parse flow cell data from the flow cell directory."""
-
-    try:
-        is_flow_cell_directory_valid(flow_cell_directory)
-    except FlowCellError as e:
-        raise FlowCellError(f"Flow cell directory was not valid: {flow_cell_directory}, {e}")
-
+    """Return flow cell data from the flow cell directory."""
     return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
+
+
+def add_flow_cell_name_to_fastq_file_path(fastq_file_path: Path, flow_cell_name: str) -> Path:
+    """Add the flow cell name to the fastq file path if the flow cell name is not already in the given file path."""
+    if is_pattern_in_file_path_name(file_path=fastq_file_path, pattern=flow_cell_name):
+        LOG.debug(
+            f"Flow cell name {flow_cell_name} already in {fastq_file_path}. Skipping renaming."
+        )
+        return fastq_file_path
+    LOG.debug(f"Adding flow cell name {flow_cell_name} to {fastq_file_path}.")
+    return Path(fastq_file_path.parent, f"{flow_cell_name}_{fastq_file_path.name}")
+
+
+def rename_fastq_file_if_needed(fastq_file_path: Path, flow_cell_name: str) -> Path:
+    """Rename the given fastq file path if the renamed fastq file path does not exist."""
+    renamed_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
+        fastq_file_path=fastq_file_path, flow_cell_name=flow_cell_name
+    )
+    if fastq_file_path != renamed_fastq_file_path:
+        rename_file(file_path=fastq_file_path, renamed_file_path=renamed_fastq_file_path)
+    return renamed_fastq_file_path
