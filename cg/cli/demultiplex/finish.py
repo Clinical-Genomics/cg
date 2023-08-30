@@ -81,7 +81,9 @@ def finish_all_cmd(context: CGConfig, dry_run: bool):
 
     demux_post_processing_api_temp: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
     demux_post_processing_api_temp.set_dry_run(dry_run=dry_run)
-    demux_post_processing_api_temp.finish_all_flow_cells_temp()
+    is_error_raised: bool = demux_post_processing_api_temp.finish_all_flow_cells_temp()
+    if is_error_raised:
+        raise click.Abort
 
 
 @finish_group.command(name="all-hiseq-x")
