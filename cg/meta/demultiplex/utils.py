@@ -58,14 +58,14 @@ def get_sample_fastqs_from_flow_cell(
     )
 
     # The pattern for novaseqx flow cells demultiplexed on board of the dragen
-    dragen_pattern = f"BCLConvert/fastq/{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    demux_on_sequencer_pattern = f"BCLConvert/fastq/{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
     for pattern in [
         root_pattern,
         unaligned_pattern,
         unaligned_alt_pattern,
         bcl_convert_pattern,
-        dragen_pattern,
+        demux_on_sequencer_pattern,
     ]:
         sample_fastqs: List[Path] = get_files_matching_pattern(
             directory=flow_cell_directory, pattern=pattern
