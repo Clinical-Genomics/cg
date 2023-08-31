@@ -43,7 +43,7 @@ def get_sample_fastqs_from_flow_cell(
 ) -> Optional[List[Path]]:
     """Retrieve all fastq files for a specific sample in a flow cell directory."""
 
-    # The flat output structure for flow cells demultiplexed with bclconvert on the novaseqx machines
+    # The flat output structure for NovaseqX flow cells demultiplexed with bclconvert on hasta
     root_pattern = f"{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
     # The default structure for flow cells demultiplexed with bcl2fastq
@@ -57,7 +57,16 @@ def get_sample_fastqs_from_flow_cell(
         f"Unaligned*/*/{sample_internal_id}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     )
 
-    for pattern in [root_pattern, unaligned_pattern, unaligned_alt_pattern, bcl_convert_pattern]:
+    # The pattern for novaseqx flow cells demultiplexed on board of the dragen
+    demux_on_sequencer_pattern = f"BCLConvert/fastq/{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+
+    for pattern in [
+        root_pattern,
+        unaligned_pattern,
+        unaligned_alt_pattern,
+        bcl_convert_pattern,
+        demux_on_sequencer_pattern,
+    ]:
         sample_fastqs: List[Path] = get_files_matching_pattern(
             directory=flow_cell_directory, pattern=pattern
         )
