@@ -26,17 +26,15 @@ class Reviewer(BaseModel):
 class ScoutIndividual(BaseModel):
     alignment_path: Optional[str] = None
     analysis_type: Annotated[
-        Optional[
-            Literal[
-                "external",
-                "mixed",
-                "panel",
-                "panel-umi",
-                "unknown",
-                "wes",
-                "wgs",
-                "wts",
-            ]
+        Literal[
+            "external",
+            "mixed",
+            "panel",
+            "panel-umi",
+            "unknown",
+            "wes",
+            "wgs",
+            "wts",
         ],
         BeforeValidator(field_not_none),
     ] = None
