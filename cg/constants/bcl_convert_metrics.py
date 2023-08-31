@@ -20,13 +20,31 @@ class BclConvertQualityMetricsColumnNames(Enum):
 
 SAMPLE_SHEET_HEADER = {
     BclConverter.BCL2FASTQ: ",".join(
-        SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[BclConverter.BCL2FASTQ]
+        [
+            column
+            for column in SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[
+                BclConverter.BCL2FASTQ
+            ]
+            if column != "index2"
+        ]
     ),
     BclConverter.BCLCONVERT: ",".join(
-        SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[BclConverter.DRAGEN]
+        [
+            column
+            for column in SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[
+                BclConverter.DRAGEN
+            ]
+            if column != "index2"
+        ]
     ),
     BclConverter.DRAGEN: ",".join(
-        SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[BclConverter.DRAGEN]
+        [
+            column
+            for column in SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[
+                BclConverter.DRAGEN
+            ]
+            if column != "index2"
+        ]
     ),
 }
 
