@@ -1702,15 +1702,6 @@ def fixture_analysis_store(
         app_tag=wgs_application_tag,
         started_at=timestamp_yesterday,
     )
-    helpers.add_flowcell(
-        base_store,
-        flow_cell_name="flowcell_test",
-        archived_at=datetime.now(),
-        sequencer_type=Sequencers.NOVASEQ,
-        samples=base_store.get_samples_by_case_id(analysis_family["internal_id"]),
-        status=FlowCellStatus.ON_DISK,
-        date=datetime.now(),
-    )
     yield base_store
 
 

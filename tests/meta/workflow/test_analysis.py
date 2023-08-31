@@ -1,15 +1,18 @@
 """Test for analysis"""
+from datetime import datetime
 from typing import List
 
 import mock
 import pytest
 from cg.constants import FlowCellStatus, GenePanelMasterList, Priority
 from cg.constants.priority import SlurmQos
+from cg.constants.sequencing import Sequencers
+from cg.exc import AnalysisNotReadyError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store
-from cg.store.models import Family, Flowcell
-from cgmodels.cg.constants import Pipeline
+from cg.store.models import Family
 
 
 @pytest.mark.parametrize(
@@ -119,7 +122,9 @@ def test_is_flow_cell_check_not_applicable_when_down_sampled(
     assert not mip_analysis_api._is_flow_cell_check_applicable(case_id=case.internal_id)
 
 
-def test_ensure_flow_cells_on_disk(mip_analysis_api, analysis_store: Store, caplog):
+def test_ensure_flow_cells_on_disk_check_not_applicable(
+    mip_analysis_api, analysis_store: Store, caplog
+):
     """Tests that ensure_flow_cells_on_disk do not perform any action
     when is_flow_cell_check_applicable returns false."""
 
@@ -142,13 +147,23 @@ def test_ensure_flow_cells_on_disk(mip_analysis_api, analysis_store: Store, capl
 
 
 def test_ensure_flow_cells_on_disk_does_not_request_flow_cells(
-    mip_analysis_api, analysis_store: Store
+    mip_analysis_api, analysis_store: Store, helpers
 ):
     """Tests that ensure_flow_cells_on_disk do not perform any action
     when is_flow_cell_check_applicable returns false."""
 
     # GIVEN a case
     case: Family = analysis_store.get_cases()[0]
+
+    helpers.add_flowcell(
+        analysis_store,
+        flow_cell_name="flow_cell_test",
+        archived_at=datetime.now(),
+        sequencer_type=Sequencers.NOVASEQ,
+        samples=analysis_store.get_samples_by_case_id(case.internal_id),
+        status=FlowCellStatus.ON_DISK,
+        date=datetime.now(),
+    )
 
     # WHEN _is_flow_cell_check_available returns True and the attached flow cell is ON_DISK
     with mock.patch.object(
@@ -164,14 +179,23 @@ def test_ensure_flow_cells_on_disk_does_not_request_flow_cells(
     assert request_checker.call_count == 0
 
 
-def test_ensure_flow_cells_on_disk_does_request_flow_cells(mip_analysis_api, analysis_store: Store):
-    """Tests that ensure_flow_cells_on_disk do not perform any action
+def test_ensure_flow_cells_on_disk_does_request_flow_cells(
+    mip_analysis_api, analysis_store: Store, helpers
+):
+    """Tests that ensure_flow_cells_on_disk does not perform any action
     when is_flow_cell_check_applicable returns false."""
 
     # GIVEN a case with a REMOVED flow cell
     case: Family = analysis_store.get_cases()[0]
-    flow_cell: Flowcell = analysis_store.get_flow_cells_by_case(case)[0]
-    flow_cell.status = FlowCellStatus.REMOVED
+    helpers.add_flowcell(
+        analysis_store,
+        flow_cell_name="flow_cell_test",
+        archived_at=datetime.now(),
+        sequencer_type=Sequencers.NOVASEQ,
+        samples=analysis_store.get_samples_by_case_id(case.internal_id),
+        status=FlowCellStatus.REMOVED,
+        date=datetime.now(),
+    )
 
     # WHEN _is_flow_cell_check_available returns True
     with mock.patch.object(
@@ -182,4 +206,88 @@ def test_ensure_flow_cells_on_disk_does_request_flow_cells(mip_analysis_api, ana
         mip_analysis_api.ensure_flow_cells_on_disk(case.internal_id)
 
     # THEN flow cells should be requested for the case
-    assert flow_cell.status == FlowCellStatus.REQUESTED
+    assert analysis_store.get_flow_cell_by_name("flow_cell_test").status == FlowCellStatus.REQUESTED
+
+
+def test_is_case_ready_for_analysis_true(mip_analysis_api, analysis_store, helpers):
+    """Tests that is_case_ready_for_analysis returns true for a case whose flow cells are all ON_DISK and whose
+    files need no decompression nor are being decompressed currently."""
+
+    case: Family = analysis_store.get_cases()[0]
+    helpers.add_flowcell(
+        analysis_store,
+        flow_cell_name="flowcell_test",
+        archived_at=datetime.now(),
+        sequencer_type=Sequencers.NOVASEQ,
+        samples=analysis_store.get_samples_by_case_id(case.internal_id),
+        status=FlowCellStatus.ON_DISK,
+        date=datetime.now(),
+    )
+    with mock.patch.object(
+        PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
+    ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False):
+        assert mip_analysis_api.is_case_ready_for_analysis(case_id=case.internal_id)
+
+
+def test_is_case_ready_for_analysis_decompression_needed(mip_analysis_api, analysis_store):
+    """Tests that is_case_ready_for_analysis returns true for a case whose flow cells are all ON_DISK and whose
+    files need no decompression nor are being decompressed currently."""
+
+    case: Family = analysis_store.get_cases()[0]
+    with mock.patch.object(
+        PrepareFastqAPI, "is_spring_decompression_needed", return_value=True
+    ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False):
+        assert not mip_analysis_api.is_case_ready_for_analysis(case_id=case.internal_id)
+
+
+def test_is_case_ready_for_analysis_decompression_running(
+    mip_analysis_api, analysis_store, helpers
+):
+    """Tests that is_case_ready_for_analysis returns true for a case whose flow cells are all ON_DISK and whose
+    files need no decompression nor are being decompressed currently."""
+
+    case: Family = analysis_store.get_cases()[0]
+    helpers.add_flowcell(
+        analysis_store,
+        flow_cell_name="flowcell_test",
+        archived_at=datetime.now(),
+        sequencer_type=Sequencers.NOVASEQ,
+        samples=analysis_store.get_samples_by_case_id(case.internal_id),
+        status=FlowCellStatus.ON_DISK,
+        date=datetime.now(),
+    )
+    with mock.patch.object(
+        PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
+    ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=True):
+        assert not mip_analysis_api.is_case_ready_for_analysis(case_id=case.internal_id)
+
+
+def test_prepare_fastq_files_success(mip_analysis_api, analysis_store):
+    case: Family = analysis_store.get_cases()[0]
+    with mock.patch.object(
+        MipAnalysisAPI, "ensure_flow_cells_on_disk", return_value=None
+    ) as ensure_flow_cells_mock, mock.patch.object(
+        MipAnalysisAPI, "resolve_decompression", return_value=None
+    ) as resolve_decompression_mock, mock.patch.object(
+        MipAnalysisAPI, "is_case_ready_for_analysis", return_value=True
+    ) as is_case_ready_mock:
+        mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
+        assert ensure_flow_cells_mock.assert_called_once()
+        assert resolve_decompression_mock.assert_called_once()
+        assert is_case_ready_mock.assert_called_once()
+
+
+def test_prepare_fastq_files_failure(mip_analysis_api, analysis_store):
+    case: Family = analysis_store.get_cases()[0]
+    with mock.patch.object(
+        MipAnalysisAPI, "ensure_flow_cells_on_disk", return_value=None
+    ) as ensure_flow_cells_mock, mock.patch.object(
+        MipAnalysisAPI, "resolve_decompression", return_value=None
+    ) as resolve_decompression_mock, mock.patch.object(
+        MipAnalysisAPI, "is_case_ready_for_analysis", return_value=False
+    ) as is_case_ready_mock:
+        with pytest.raises(AnalysisNotReadyError):
+            mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
+            assert ensure_flow_cells_mock.assert_called_once()
+            assert resolve_decompression_mock.assert_called_once()
+            assert is_case_ready_mock.assert_called_once()
