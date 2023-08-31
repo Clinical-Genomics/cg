@@ -26,15 +26,17 @@ class Reviewer(BaseModel):
 class ScoutIndividual(BaseModel):
     alignment_path: Optional[str] = None
     analysis_type: Annotated[
-        Literal[
-            "external",
-            "mixed",
-            "panel",
-            "panel-umi",
-            "unknown",
-            "wes",
-            "wgs",
-            "wts",
+        Optional[
+            Literal[
+                "external",
+                "mixed",
+                "panel",
+                "panel-umi",
+                "unknown",
+                "wes",
+                "wgs",
+                "wts",
+            ]
         ],
         BeforeValidator(field_not_none),
     ] = None
@@ -89,7 +91,7 @@ class ScoutLoadConfig(BaseModel):
     rank_model_version: Optional[str] = None
     rank_score_threshold: int = None
     sv_rank_model_version: Optional[str] = None
-    analysis_date: datetime = None
+    analysis_date: Optional[datetime] = None
     samples: List[ScoutIndividual] = []
 
     delivery_report: Optional[str] = None
