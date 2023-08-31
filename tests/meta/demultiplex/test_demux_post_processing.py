@@ -491,7 +491,7 @@ def test_finish_all_flowcells(
 
 @pytest.mark.parametrize(
     "demux_type",
-    ["BCL2FASTQ_TREE", "BCLCONVERT_TREE", "BCLCONVERT_FLAT"],
+    ["BCL2FASTQ_TREE", "BCLCONVERT_TREE", "BCLCONVERT_FLAT", "BCLCONVERT_ON_SEQUENCER"],
 )
 def test_post_processing_of_flow_cell(
     demux_type: str,
@@ -518,15 +518,6 @@ def test_post_processing_of_flow_cell(
     # GIVEN a directory with a flow cell demultiplexed with BCL Convert
     demux_post_processing_api.demux_api.demultiplexed_runs_dir = tmp_demultiplexed_runs_directory
 
-    # GIVEN that a sample sheet exists in the flow cell run directory
-    path = Path(
-        demux_post_processing_api.demux_api.flow_cells_dir,
-        flow_cell_demultiplexing_directory,
-        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
-    )
-    os.makedirs(path.parent, exist_ok=True)
-    path.touch()
-
     # GIVEN that the sample sheet is in housekeeper
     add_sample_sheet_path_to_housekeeper(
         flow_cell_directory=Path(
@@ -536,6 +527,10 @@ def test_post_processing_of_flow_cell(
         hk_api=demux_post_processing_api.hk_api,
     )
 
+    # THEN the sample sheet is in housekeeper
+    assert demux_post_processing_api.hk_api.get_files(
+        bundle=flow_cell_name, tags=[SequencingFileTag.SAMPLE_SHEET]
+    ).all()
     # WHEN post-processing the demultiplexed flow cell
     demux_post_processing_api.finish_flow_cell_temp(flow_cell_demultiplexing_directory)
 
