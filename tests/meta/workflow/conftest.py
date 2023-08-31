@@ -1,28 +1,27 @@
 """Fixtures for the workflow tests."""
 import datetime
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 import pytest
-from cgmodels.cg.constants import Pipeline
-
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
-from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
-
 from cg.meta.compress.compress import CompressAPI
-from cg.models.compression_data import CompressionData
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.compression_data import CompressionData
 from cg.store.models import Family, Sample
-from tests.store_helpers import StoreHelpers
-from tests.conftest import fixture_base_store
-from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
-from tests.meta.upload.scout.conftest import fixture_another_sample_id
+from cgmodels.cg.constants import Pipeline
 from tests.cli.workflow.balsamic.conftest import (
+    balsamic_housekeeper_dir,
     fastq_file_l_1_r_1,
     fastq_file_l_2_r_1,
     fastq_file_l_2_r_2,
-    balsamic_housekeeper_dir,
 )
+from tests.conftest import fixture_base_store
+from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
+from tests.meta.upload.scout.conftest import fixture_another_sample_id
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(scope="function", name="populated_compress_spring_api")
@@ -226,3 +225,8 @@ def fixture_rnafusion_metrics() -> Dict[str, float]:
         "reads_aligned": 72391566.0,
         "uniquely_mapped_percent": 91.02,
     }
+
+
+@pytest.fixture(name="mip_analysis_api")
+def fixture_mip_analysis_api(cg_context: CGConfig) -> MipAnalysisAPI:
+    return MipAnalysisAPI(cg_context, Pipeline.MIP_DNA)

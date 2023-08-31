@@ -1,13 +1,14 @@
 """Test for analysis"""
 from typing import List
 
+import mock
 import pytest
-from cg.constants import GenePanelMasterList, Priority
+from cg.constants import FlowCellStatus, GenePanelMasterList, Priority
 from cg.constants.priority import SlurmQos
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Family, Flowcell
 from cgmodels.cg.constants import Pipeline
 
 
@@ -67,11 +68,9 @@ def test_gene_panels_not_added(customer_id):
     )
 
 
-def test_is_flow_cell_check_applicable(cg_context, analysis_store: Store):
+def test_is_flow_cell_check_applicable(mip_analysis_api, analysis_store: Store):
     """Tests that a check for flow cells being present on disk is applicable when given a case which has no
     down-sampled nor external samples."""
-
-    mip_analysis_api = MipAnalysisAPI(cg_context, Pipeline.MIP_DNA)
 
     # GIVEN a case
     case: Family = analysis_store.get_cases()[0]
@@ -86,11 +85,9 @@ def test_is_flow_cell_check_applicable(cg_context, analysis_store: Store):
     assert mip_analysis_api._is_flow_cell_check_applicable(case_id=case.internal_id)
 
 
-def test_is_flow_cell_check_not_applicable_when_external(cg_context, analysis_store: Store):
+def test_is_flow_cell_check_not_applicable_when_external(mip_analysis_api, analysis_store: Store):
     """Tests that a check for flow cells being present on disk is applicable when given a case which has no
     down-sampled nor external samples."""
-
-    mip_analysis_api = MipAnalysisAPI(cg_context, Pipeline.MIP_DNA)
 
     # GIVEN a case
     case: Family = analysis_store.get_cases()[0]
@@ -104,11 +101,11 @@ def test_is_flow_cell_check_not_applicable_when_external(cg_context, analysis_st
     assert not mip_analysis_api._is_flow_cell_check_applicable(case_id=case.internal_id)
 
 
-def test_is_flow_cell_check_not_applicable_when_down_sampled(cg_context, analysis_store: Store):
+def test_is_flow_cell_check_not_applicable_when_down_sampled(
+    mip_analysis_api, analysis_store: Store
+):
     """Tests that a check for flow cells being present on disk is applicable when given a case which has no
     down-sampled nor external samples."""
-
-    mip_analysis_api = MipAnalysisAPI(cg_context, Pipeline.MIP_DNA)
 
     # GIVEN a case
     case: Family = analysis_store.get_cases()[0]
@@ -120,3 +117,69 @@ def test_is_flow_cell_check_not_applicable_when_down_sampled(cg_context, analysi
     # WHEN checking if a flow cell check is applicable
     # THEN the method should return False
     assert not mip_analysis_api._is_flow_cell_check_applicable(case_id=case.internal_id)
+
+
+def test_ensure_flow_cells_on_disk(mip_analysis_api, analysis_store: Store, caplog):
+    """Tests that ensure_flow_cells_on_disk do not perform any action
+    when is_flow_cell_check_applicable returns false."""
+
+    # GIVEN a case
+    case: Family = analysis_store.get_cases()[0]
+
+    # WHEN _is_flow_cell_check_available returns False
+    with mock.patch.object(
+        AnalysisAPI,
+        "_is_flow_cell_check_applicable",
+        return_value=False,
+    ):
+        mip_analysis_api.ensure_flow_cells_on_disk(case.internal_id)
+
+    # THEN a warning should be logged
+    assert (
+        "Flow cell check is not applicable - ensure that the case is neither down sampled nor external."
+        in caplog.text
+    )
+
+
+def test_ensure_flow_cells_on_disk_does_not_request_flow_cells(
+    mip_analysis_api, analysis_store: Store
+):
+    """Tests that ensure_flow_cells_on_disk do not perform any action
+    when is_flow_cell_check_applicable returns false."""
+
+    # GIVEN a case
+    case: Family = analysis_store.get_cases()[0]
+
+    # WHEN _is_flow_cell_check_available returns True and the attached flow cell is ON_DISK
+    with mock.patch.object(
+        AnalysisAPI,
+        "_is_flow_cell_check_applicable",
+        return_value=True,
+    ), mock.patch.object(
+        Store, "request_flow_cells_for_case", return_value=None
+    ) as request_checker:
+        mip_analysis_api.ensure_flow_cells_on_disk(case.internal_id)
+
+    # THEN flow cells should not be requested for the case
+    assert request_checker.call_count == 0
+
+
+def test_ensure_flow_cells_on_disk_does_request_flow_cells(mip_analysis_api, analysis_store: Store):
+    """Tests that ensure_flow_cells_on_disk do not perform any action
+    when is_flow_cell_check_applicable returns false."""
+
+    # GIVEN a case with a REMOVED flow cell
+    case: Family = analysis_store.get_cases()[0]
+    flow_cell: Flowcell = analysis_store.get_flow_cells_by_case(case)[0]
+    flow_cell.status = FlowCellStatus.REMOVED
+
+    # WHEN _is_flow_cell_check_available returns True
+    with mock.patch.object(
+        AnalysisAPI,
+        "_is_flow_cell_check_applicable",
+        return_value=True,
+    ):
+        mip_analysis_api.ensure_flow_cells_on_disk(case.internal_id)
+
+    # THEN flow cells should be requested for the case
+    assert flow_cell.status == FlowCellStatus.REQUESTED

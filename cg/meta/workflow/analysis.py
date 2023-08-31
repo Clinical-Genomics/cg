@@ -7,25 +7,24 @@ from subprocess import CalledProcessError
 from typing import List, Optional, Tuple, Union
 
 import click
-from housekeeper.store.models import Bundle, Version
-
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import AnalysisType, WorkflowManager
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import (
+    AnalysisNotReadyError,
     BundleAlreadyAddedError,
     CgDataError,
     CgError,
-    FlowCellsNeededError,
     DecompressionNeededError,
-    AnalysisNotReadyError,
+    FlowCellsNeededError,
 )
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, BedVersion, Family, FamilySample, Sample
+from housekeeper.store.models import Bundle, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -480,6 +479,10 @@ class AnalysisAPI(MetaAPI):
     def ensure_flow_cells_on_disk(self, case_id: str) -> None:
         """Check if flow cells are on disk for given case. If not, request flow cells."""
         if not self._is_flow_cell_check_applicable(case_id):
+            LOG.warning(
+                "Flow cell check is not applicable - "
+                "ensure that the case is neither down sampled nor external."
+            )
             return
         if not self.status_db.are_all_flow_cells_on_disk(case_id=case_id):
             self.status_db.request_flow_cells_for_case(case_id)

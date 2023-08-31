@@ -23,9 +23,10 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.api import LimsAPI
 from cg.constants import FileExtensions, Pipeline, SequencingFileTag
-from cg.constants.constants import CaseActions, FileFormat
+from cg.constants.constants import CaseActions, FileFormat, FlowCellStatus
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
+from cg.constants.sequencing import Sequencers
 from cg.constants.subject import Gender
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
@@ -40,22 +41,19 @@ from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.store import Store
-from cg.utils import Process
 from cg.store.models import (
     Bed,
     BedVersion,
     Customer,
     Family,
+    Flowcell,
     Organism,
     Sample,
     SampleLaneSequencingMetrics,
-    Flowcell,
 )
-
 from cg.utils import Process
 from housekeeper.store.models import File, Version
 from requests import Response
-
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -1703,6 +1701,15 @@ def fixture_analysis_store(
         case_info=analysis_family,
         app_tag=wgs_application_tag,
         started_at=timestamp_yesterday,
+    )
+    helpers.add_flowcell(
+        base_store,
+        flow_cell_name="flowcell_test",
+        archived_at=datetime.now(),
+        sequencer_type=Sequencers.NOVASEQ,
+        samples=base_store.get_samples_by_case_id(analysis_family["internal_id"]),
+        status=FlowCellStatus.ON_DISK,
+        date=datetime.now(),
     )
     yield base_store
 
