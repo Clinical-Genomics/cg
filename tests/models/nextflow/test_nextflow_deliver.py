@@ -54,7 +54,7 @@ def test_file_deliverables_missing_mandatory(
     # WHEN instantiating a deliverables object
     # THEN assert that an error is raised
     with pytest.raises(PydanticValidationError) as error:
-        file_deliverable: FileDeliverable = FileDeliverable(
+        FileDeliverable(
             id=deliverable_id,
             path=existing_file,
             step=step,
@@ -99,7 +99,7 @@ def test_file_deliverables_non_existing_file(
     # WHEN instantiating a deliverables object
     # THEN assert that an error is raised
     with pytest.raises(PydanticValidationError) as error:
-        file_deliverable: FileDeliverable = FileDeliverable(
+        FileDeliverable(
             format=file_format,
             id=deliverable_id,
             path=non_existing_file,
