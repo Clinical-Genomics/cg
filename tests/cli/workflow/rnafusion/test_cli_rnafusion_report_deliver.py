@@ -9,10 +9,7 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.rnafusion.base import report_deliver
 from cg.constants import EXIT_SUCCESS
-from cg.constants.constants import FileFormat
-from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.models.nf_analysis import FileDeliverable
 from cg.models.rnafusion.rnafusion import RnafusionDeliverables
 
 
@@ -110,7 +107,7 @@ def test_successful(
     # THEN deliverables content should match the expected values
     with rnafusion_deliverables_file_path.open("r") as file:
         content = file.read()
-        for field in FileDeliverable.__annotations__.keys():
+        for field in deliverables_template_content[0].keys():
             assert field in content
         # Assess that missing fields are written
         assert "path_index: null" in content

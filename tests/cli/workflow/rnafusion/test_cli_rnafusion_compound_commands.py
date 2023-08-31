@@ -100,7 +100,8 @@ def test_store_success(
 
     # WHEN running command
     result = cli_runner.invoke(store, [rnafusion_case_id], obj=rnafusion_context)
-    # THEN bundle should be successfully added to HK and STATUSDB
+
+    # THEN bundle should be successfully added to Housekeeper and StatusDB
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
     assert "Analysis successfully stored in StatusDB" in caplog.text
@@ -150,13 +151,14 @@ def test_store_available(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     real_housekeeper_api,
-    mock_deliverable,
-    mock_analysis_finish,
-    caplog: LogCaptureFixture,
-    mocker,
     hermes_deliverables,
     rnafusion_case_id: str,
+    deliverables_template_content: List[dict],
+    mock_deliverable,
+    mock_analysis_finish,
     mock_config,
+    mocker,
+    caplog: LogCaptureFixture,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
     Test that sore-available picks up eligible cases and does not pick up ineligible ones."""
