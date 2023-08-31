@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
-
 from cg.apps.cgstats.db.models import (
     Datasource,
     Flowcell,
@@ -16,18 +15,16 @@ from cg.apps.cgstats.db.models import (
 )
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
-from cg.constants.sequencing import Sequencers
-from cg.meta.transfer import TransferFlowCell
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-from cg.store import Store
-from cg.store.models import Customer, ApplicationVersion, Invoice, Sample
-from tests.mocks.hk_mock import MockHousekeeperAPI
-from tests.store_helpers import StoreHelpers
-from tests.mocks.limsmock import MockLimsAPI
 from cg.constants.invoice import CustomerNames
+from cg.constants.sequencing import Sequencers
 from cg.meta.invoice import InvoiceAPI
+from cg.meta.transfer import TransferFlowCell
+from cg.store import Store
+from cg.store.models import ApplicationVersion, Customer, Invoice, Sample
+from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.mocks.limsmock import MockLimsAPI
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(scope="function", name="mip_hk_store")
@@ -106,15 +103,6 @@ def fixture_mip_hk_store(
     helpers.ensure_hk_bundle(real_housekeeper_api, empty_deliver_hk_bundle_data, include=True)
 
     return real_housekeeper_api
-
-
-@pytest.fixture()
-def mip_analysis_api(context_config, mip_hk_store, analysis_store):
-    """Return a MIP analysis API."""
-    analysis_api = MipDNAAnalysisAPI(context_config)
-    analysis_api.housekeeper_api = mip_hk_store
-    analysis_api.status_db = analysis_store
-    return analysis_api
 
 
 @pytest.fixture(name="binary_path")

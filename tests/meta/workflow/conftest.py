@@ -8,6 +8,7 @@ from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.compression_data import CompressionData
 from cg.store.models import Family, Sample
@@ -228,5 +229,11 @@ def fixture_rnafusion_metrics() -> Dict[str, float]:
 
 
 @pytest.fixture(name="mip_analysis_api")
-def fixture_mip_analysis_api(cg_context: CGConfig) -> MipAnalysisAPI:
-    return MipAnalysisAPI(cg_context, Pipeline.MIP_DNA)
+def fixture_mip_analysis_api(
+    cg_context: CGConfig, mip_hk_store, analysis_store
+) -> MipDNAAnalysisAPI:
+    """Return a MIP analysis API."""
+    analysis_api = MipDNAAnalysisAPI(cg_context)
+    analysis_api.housekeeper_api = mip_hk_store
+    analysis_api.status_db = analysis_store
+    return analysis_api

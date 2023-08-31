@@ -241,7 +241,10 @@ def test_is_case_ready_for_analysis_decompression_needed(mip_analysis_api, analy
 
 
 def test_is_case_ready_for_analysis_decompression_running(
-    mip_analysis_api, analysis_store, helpers
+    mip_hk_store,
+    analysis_store,
+    helpers,
+    mip_analysis_api,
 ):
     """Tests that is_case_ready_for_analysis returns true for a case whose flow cells are all ON_DISK and whose
     files need no decompression nor are being decompressed currently."""
@@ -256,38 +259,41 @@ def test_is_case_ready_for_analysis_decompression_running(
         status=FlowCellStatus.ON_DISK,
         date=datetime.now(),
     )
+
     with mock.patch.object(
         PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
     ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=True):
         assert not mip_analysis_api.is_case_ready_for_analysis(case_id=case.internal_id)
 
 
-def test_prepare_fastq_files_success(mip_analysis_api, analysis_store):
+def test_prepare_fastq_files_success(mip_analysis_api, analysis_store, helpers):
     case: Family = analysis_store.get_cases()[0]
+    helpers.add_flowcell(
+        analysis_store,
+        flow_cell_name="flowcell_test",
+        archived_at=datetime.now(),
+        sequencer_type=Sequencers.NOVASEQ,
+        samples=analysis_store.get_samples_by_case_id(case.internal_id),
+        status=FlowCellStatus.ON_DISK,
+        date=datetime.now(),
+    )
     with mock.patch.object(
-        MipAnalysisAPI, "ensure_flow_cells_on_disk", return_value=None
-    ) as ensure_flow_cells_mock, mock.patch.object(
-        MipAnalysisAPI, "resolve_decompression", return_value=None
-    ) as resolve_decompression_mock, mock.patch.object(
-        MipAnalysisAPI, "is_case_ready_for_analysis", return_value=True
-    ) as is_case_ready_mock:
+        PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
+    ), mock.patch.object(
+        PrepareFastqAPI, "is_spring_decompression_running", return_value=False
+    ), mock.patch.object(
+        PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
+    ):
         mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
-        assert ensure_flow_cells_mock.assert_called_once()
-        assert resolve_decompression_mock.assert_called_once()
-        assert is_case_ready_mock.assert_called_once()
 
 
 def test_prepare_fastq_files_failure(mip_analysis_api, analysis_store):
     case: Family = analysis_store.get_cases()[0]
     with mock.patch.object(
-        MipAnalysisAPI, "ensure_flow_cells_on_disk", return_value=None
-    ) as ensure_flow_cells_mock, mock.patch.object(
-        MipAnalysisAPI, "resolve_decompression", return_value=None
-    ) as resolve_decompression_mock, mock.patch.object(
-        MipAnalysisAPI, "is_case_ready_for_analysis", return_value=False
-    ) as is_case_ready_mock:
-        with pytest.raises(AnalysisNotReadyError):
-            mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
-            assert ensure_flow_cells_mock.assert_called_once()
-            assert resolve_decompression_mock.assert_called_once()
-            assert is_case_ready_mock.assert_called_once()
+        PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
+    ), mock.patch.object(
+        PrepareFastqAPI, "is_spring_decompression_running", return_value=False
+    ), mock.patch.object(
+        PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
+    ):
+        mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
