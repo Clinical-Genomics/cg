@@ -345,10 +345,10 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
 
         return sum(
-            [sample_lane.sample_base_fraction_passing_q30 for sample_lane in sample_lanes]
+            [sample_lane.sample_base_percentage_passing_q30 for sample_lane in sample_lanes]
         ) / len(sample_lanes)
 
-    def get_average_fraction_passing_q30_for_flow_cell(self, flow_cell_name: str) -> float:
+    def get_average_percentage_passing_q30_for_flow_cell(self, flow_cell_name: str) -> float:
         """Calculates the average q30 for each sample on a flow cell and returns the average between the samples."""
         sequencing_metrics: List[
             SampleLaneSequencingMetrics

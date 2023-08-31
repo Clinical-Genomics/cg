@@ -2,7 +2,7 @@ import logging
 import operator
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
@@ -67,7 +67,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Path to case working directory."""
         return Path(self.root_dir, case_id)
 
-    def get_case_config_path(self, case_id: str) -> Path:
+    def get_sample_sheet_path(self, case_id: str) -> Path:
         """Path to sample sheet."""
         return Path(self.get_case_path(case_id), f"{case_id}_samplesheet").with_suffix(
             FileExtensions.CSV
@@ -138,9 +138,9 @@ class NfAnalysisAPI(AnalysisAPI):
         sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
         return [d["path"] for d in sorted_metadata if d["read"] == read_direction]
 
-    def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
-        """Raise an error if config file is not found."""
-        if not dry_run and not Path(self.get_case_config_path(case_id=case_id)).exists():
+    def verify_sample_sheet_exists(self, case_id: str, dry_run: bool = False) -> None:
+        """Raise an error if sample sheet file is not found."""
+        if not dry_run and not Path(self.get_sample_sheet_path(case_id=case_id)).exists():
             raise ValueError(f"No config file found for case {case_id}")
 
     def verify_deliverables_file_exists(self, case_id: str) -> None:
@@ -150,24 +150,27 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def write_params_file(self, case_id: str, pipeline_parameters: dict) -> None:
         """Write params-file for analysis."""
-        LOG.info(pipeline_parameters)
+        LOG.debug("Writing parameters file")
         write_yaml_nextflow_style(
             content=pipeline_parameters,
             file_path=self.get_params_file_path(case_id=case_id),
         )
 
     @staticmethod
-    def write_sample_sheet_csv(
-        samplesheet_content: Dict[str, List[str]],
-        headers: List[str],
-        config_path: Path,
+    def write_sample_sheet(
+        content: List[List[Any]],
+        file_path: Path,
+        header: List[str],
     ) -> None:
         """Write sample sheet CSV file."""
-        with open(config_path, "w") as outfile:
-            outfile.write(",".join(headers))
-            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
-                outfile.write("\n")
-                outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
+        LOG.debug("Writing sample sheet")
+        if header:
+            content.insert(0, header)
+        WriteFile.write_file_from_content(
+            content=content,
+            file_format=FileFormat.CSV,
+            file_path=file_path,
+        )
 
     @staticmethod
     def write_deliverables_bundle(
