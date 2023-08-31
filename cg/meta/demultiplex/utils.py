@@ -43,7 +43,7 @@ def get_sample_fastqs_from_flow_cell(
 ) -> Optional[List[Path]]:
     """Retrieve all fastq files for a specific sample in a flow cell directory."""
 
-    # The flat output structure for flow cells demultiplexed with bclconvert on the novaseqx machines
+    # The flat output structure for NovaseqX flow cells demultiplexed with bclconvert on hasta
     root_pattern = f"{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
     # The default structure for flow cells demultiplexed with bcl2fastq
