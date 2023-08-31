@@ -1,8 +1,7 @@
 import pytest
-from pydantic.v1 import ValidationError
-
 from cg.constants import DataDelivery
 from cg.models.orders.excel_sample import ExcelSample
+from pydantic import ValidationError
 
 
 def test_excel_minimal_sample_schema(minimal_excel_sample: dict):
