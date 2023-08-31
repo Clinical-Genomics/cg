@@ -46,9 +46,6 @@ def get_sample_fastqs_from_flow_cell(
     # The flat output structure for flow cells demultiplexed with bclconvert on the novaseqx machines
     root_pattern = f"{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
-    # The pattern for novaseqx flow cells demultiplexed on board of the dragen
-    dragen_pattern = f"BCLConvert/fastq/{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-
     # The default structure for flow cells demultiplexed with bcl2fastq
     unaligned_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
