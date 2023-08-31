@@ -1,9 +1,12 @@
 import re
 from pathlib import Path
-
+import logging
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+
+LOG = logging.getLogger(__name__)
 
 
 def is_valid_sample_fastq_file(sample_fastq: Path, sample_internal_id: str) -> bool:
@@ -49,14 +52,6 @@ def is_sample_id_in_file_name(sample_fastq: Path, sample_internal_id: str) -> bo
     return f"{sample_internal_id}_" in sample_fastq.name
 
 
-def is_bcl2fastq_demux_folder_structure(flow_cell_directory: Path) -> bool:
-    """Check if flow cell directory is a Bcl2fastq demux folder structure."""
-    for folder in flow_cell_directory.glob(pattern="*"):
-        if re.search(DemultiplexingDirsAndFiles.BCL2FASTQ_TILE_DIR_PATTERN.value, str(folder)):
-            return True
-    return False
-
-
 def is_demultiplexing_complete(flow_cell_directory: Path) -> bool:
     return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
 
@@ -65,14 +60,11 @@ def is_flow_cell_ready_for_delivery(flow_cell_directory: Path) -> bool:
     return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).exists()
 
 
-def validate_sample_sheet_exists(flow_cell_run_directory: Path) -> None:
-    sample_sheet_path: Path = Path(
-        flow_cell_run_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-    )
-    if not sample_sheet_path.exists():
-        raise FlowCellError(
-            f"Sample sheet {sample_sheet_path} does not exist in flow cell run directory."
-        )
+def validate_sample_sheet_exists(flow_cell: FlowCellDirectoryData) -> None:
+    sample_sheet_path: Path = flow_cell.get_sample_sheet_path_hk()
+    if not sample_sheet_path or not sample_sheet_path.exists():
+        raise FlowCellError(f"Sample sheet {sample_sheet_path} does not exist in housekeeper.")
+    LOG.debug(f"Found sample sheet {sample_sheet_path} in housekeeper.")
 
 
 def validate_demultiplexing_complete(flow_cell_output_directory: Path) -> None:
@@ -91,8 +83,10 @@ def validate_flow_cell_delivery_status(flow_cell_output_directory: Path, force: 
 
 
 def is_flow_cell_ready_for_postprocessing(
-    flow_cell_output_directory: Path, flow_cell_run_directory: Path, force: bool = False
+    flow_cell_output_directory: Path,
+    flow_cell: FlowCellDirectoryData,
+    force: bool = False,
 ) -> None:
-    validate_sample_sheet_exists(flow_cell_run_directory)
+    validate_sample_sheet_exists(flow_cell)
     validate_demultiplexing_complete(flow_cell_output_directory)
     validate_flow_cell_delivery_status(flow_cell_output_directory, force=force)

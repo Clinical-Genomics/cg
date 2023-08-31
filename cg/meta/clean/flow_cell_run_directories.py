@@ -11,10 +11,11 @@ from cg.constants import FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.symbols import UNDERSCORE
+from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.store import Store
 from cg.store.models import Flowcell
 from cg.utils.date import get_timedelta_from_date
-from housekeeper.store.models import Bundle, File
+from housekeeper.store.models import File
 
 FLOW_CELL_DATE_POSITION = 0
 FLOW_CELL_IDENTIFIER_POSITION = -1
@@ -39,8 +40,9 @@ class RunDirFlowCell:
         self._exists_in_statusdb: Optional[bool] = None
         self._sequenced_date: Optional[datetime] = None
         self._flow_cell_status: Optional[str] = None
-        self.sample_sheet_path: Path = (
-            self.flow_cell_dir / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        self.sample_sheet_path: Path = Path(
+            self.flow_cell_dir,
+            DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
         )
 
     @property
@@ -102,12 +104,12 @@ class RunDirFlowCell:
             LOG.warning("Sample sheet does not exists!")
             return
         LOG.info("Sample sheet found!")
-        hk_bundle: Bundle = self.hk.bundle(name=self.id)
-        if hk_bundle is None:
+        if self.hk.bundle(name=self.id) is None:
             LOG.info(f"Creating bundle with name {self.id}")
-            hk_bundle = self.hk.create_new_bundle_and_version(name=self.id)
-        sample_sheets_from_latest_version: List[File] = self.get_sample_sheets_from_latest_version(
-            hk_bundle_name=hk_bundle.name
+            self.hk.create_new_bundle_and_version(name=self.id)
+        sample_sheets_from_latest_version: List[File] = get_sample_sheets_from_latest_version(
+            flow_cell_id=self.id,
+            hk_api=self.hk,
         )
         for file in sample_sheets_from_latest_version:
             if file.is_included:
@@ -119,23 +121,3 @@ class RunDirFlowCell:
             file=self.sample_sheet_path,
             tags=hk_tags,
         )
-
-    def get_sample_sheets_from_latest_version(self, hk_bundle_name: str) -> List[File]:
-        """Returns the files tagged with samplesheet or archived_sample_sheet for the given bundle."""
-        files: List[File] = self.hk.get_files_from_latest_version(
-            bundle_name=hk_bundle_name, tags=[self.id]
-        ).all()
-        return self.filter_on_sample_sheets(files=files)
-
-    @staticmethod
-    def filter_on_sample_sheets(files: List[File]) -> List[File]:
-        """Filters the given list of Files to return only those tagged with samplesheet or archived_sample_sheet."""
-        files_with_a_sample_sheet_tag: List[File] = []
-        for file in files:
-            file_tag_names: List[str] = [tag.name for tag in file.tags]
-            if (
-                SequencingFileTag.SAMPLE_SHEET in file_tag_names
-                or SequencingFileTag.ARCHIVED_SAMPLE_SHEET in file_tag_names
-            ):
-                files_with_a_sample_sheet_tag.append(file)
-        return [*set(files_with_a_sample_sheet_tag)]

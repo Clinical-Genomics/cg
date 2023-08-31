@@ -62,13 +62,13 @@ def config_case(
 ) -> None:
     """Create sample sheet file and params file for a given case."""
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    LOG.info(f"Creating sample sheet file for {case_id}.")
+    LOG.info(f"Creating config files for {case_id}.")
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.config_case(
             case_id=case_id, strandedness=strandedness, genomes_base=genomes_base, dry_run=dry_run
         )
-    except CgError as error:
+    except (CgError, ValidationError) as error:
         LOG.error(f"Could not create config files for {case_id}: {error}")
         raise click.Abort() from error
 
@@ -135,7 +135,7 @@ def run(
     )
 
     try:
-        analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
+        analysis_api.verify_sample_sheet_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.check_analysis_ongoing(case_id)
         LOG.info(f"Running RNAFUSION analysis for {case_id}")
         analysis_api.run_analysis(

@@ -362,7 +362,9 @@ class CGConfig(BaseModel):
         demultiplex_api = self.__dict__.get("demultiplex_api_")
         if demultiplex_api is None:
             LOG.debug("Instantiating demultiplexing api")
-            demultiplex_api = DemultiplexingAPI(config=self.dict())
+            demultiplex_api = DemultiplexingAPI(
+                config=self.dict(), housekeeper_api=self.housekeeper_api
+            )
             self.demultiplex_api_ = demultiplex_api
         return demultiplex_api
 

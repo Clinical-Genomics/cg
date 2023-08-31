@@ -3,10 +3,6 @@ from pathlib import Path
 
 import pytest
 from _pytest.logging import LogCaptureFixture
-from click.testing import CliRunner
-from pydantic.v1 import ValidationError
-from pytest_mock import MockFixture
-
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -17,6 +13,9 @@ from cg.io.controller import WriteStream
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
+from click.testing import CliRunner
+from pydantic import ValidationError
+from pytest_mock import MockFixture
 
 
 def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):

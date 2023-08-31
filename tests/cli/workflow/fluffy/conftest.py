@@ -114,7 +114,11 @@ def fluffy_samplesheet_bundle_data(samplesheet_fixture_path) -> dict:
         "created": dt.datetime.now(),
         "version": "1.0",
         "files": [
-            {"path": str(samplesheet_fixture_path), "tags": ["samplesheet"], "archive": False}
+            {
+                "path": str(samplesheet_fixture_path),
+                "tags": ["flowcell", "samplesheet"],
+                "archive": False,
+            }
         ],
     }
 
