@@ -119,6 +119,6 @@ class OrderSample(BaseModel):
     tumour: bool = False
     tumour_purity: Optional[int] = None
     verified_organism: Optional[bool] = None
-    volume: Optional[int] = None
+    volume: Annotated[Optional[int], BeforeValidator(lambda x: str(x))] = None
     well_position: Optional[str] = None
     well_position_rml: Optional[str] = None
