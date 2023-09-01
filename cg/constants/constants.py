@@ -1,5 +1,4 @@
 """Constants for cg."""
-from enum import Enum
 
 import click
 
@@ -147,6 +146,7 @@ class FileExtensions(StrEnum):
     SPRING: str = ".spring"
     TAR: str = ".tar"
     TMP: str = ".tmp"
+    TSV: str = ".tsv"
     VCF: str = ".vcf"
     XML: str = ".xml"
     YAML: str = ".yaml"
