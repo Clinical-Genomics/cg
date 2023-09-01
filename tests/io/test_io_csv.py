@@ -14,12 +14,14 @@ from tests.io.conftest import FileRepresentation
         "\t",
     ],
 )
-def test_get_content_from_file(delimiter: str, file_delimiter_map: Dict[str, FileRepresentation]):
+def test_get_content_from_file(
+    delimiter: str, delimiter_fixture_map: Dict[str, FileRepresentation]
+):
     """
     Tests reading a file with the given separator.
     """
     # GIVEN a file with the given delimiter
-    file_path = file_delimiter_map[delimiter].filepath
+    file_path = delimiter_fixture_map[delimiter].filepath
 
     # WHEN reading the file
     raw_csv_content: List[List[str]] = read_csv(file_path=file_path, delimiter=delimiter)
@@ -39,13 +41,13 @@ def test_get_content_from_file(delimiter: str, file_delimiter_map: Dict[str, Fil
     ],
 )
 def test_get_content_from_file_to_dict(
-    delimiter: str, file_delimiter_map: Dict[str, FileRepresentation]
+    delimiter: str, delimiter_fixture_map: Dict[str, FileRepresentation]
 ):
     """
     Tests reading a delimited file into a list of dictionaries.
     """
     # GIVEN a file with the given delimiter
-    file_path = file_delimiter_map[delimiter].filepath
+    file_path = delimiter_fixture_map[delimiter].filepath
 
     # WHEN reading the file
     raw_csv_content: List[List[str]] = read_csv(
@@ -67,12 +69,14 @@ def test_get_content_from_file_to_dict(
         "\t",
     ],
 )
-def test_get_content_from_stream(delimiter: str, file_delimiter_map: Dict[str, FileRepresentation]):
+def test_get_content_from_stream(
+    delimiter: str, delimiter_fixture_map: Dict[str, FileRepresentation]
+):
     """
     Tests reading a delimited stream.
     """
     # GIVEN a string separated by the given delimiter
-    stream = file_delimiter_map[delimiter].content
+    stream = delimiter_fixture_map[delimiter].content
 
     # WHEN reading the content in string
     raw_content: List[List[str]] = read_csv_stream(stream=stream, delimiter=delimiter)
@@ -92,15 +96,15 @@ def test_get_content_from_stream(delimiter: str, file_delimiter_map: Dict[str, F
         "\t",
     ],
 )
-def test_write_csv(delimiter: str, file_delimiter_map: Dict[str, FileRepresentation]):
+def test_write_csv(delimiter: str, delimiter_fixture_map: Dict[str, FileRepresentation]):
     """
     Tests writing content to a file with each delimiter.
     """
     # GIVEN a file with the given delimiter
 
     # GIVEN a file path to write to
-    file_path = file_delimiter_map[delimiter].filepath
-    output_file = file_delimiter_map[delimiter].output_file
+    file_path = delimiter_fixture_map[delimiter].filepath
+    output_file = delimiter_fixture_map[delimiter].output_file
     # WHEN reading the file
     raw_csv_content: List[List[str]] = read_csv(file_path=file_path, delimiter=delimiter)
 
@@ -124,12 +128,12 @@ def test_write_csv(delimiter: str, file_delimiter_map: Dict[str, FileRepresentat
         "\t",
     ],
 )
-def test_write_csv_stream(delimiter: str, file_delimiter_map: Dict[str, FileRepresentation]):
+def test_write_csv_stream(delimiter: str, delimiter_fixture_map: Dict[str, FileRepresentation]):
     """
     Tests writing content to a stream with each delimiter.
     """
     # GIVEN a list of lists
-    stream = file_delimiter_map[delimiter].content
+    stream = delimiter_fixture_map[delimiter].content
     # WHEN writing the stream
     written_stream: str = write_csv_stream(
         content=[["Lorem", "ipsum", "sit", "amet"]], delimiter=delimiter

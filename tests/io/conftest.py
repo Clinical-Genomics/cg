@@ -7,9 +7,11 @@ FileRepresentation = namedtuple("FileRepresentation", "filepath content output_f
 
 
 @pytest.fixture()
-def file_delimiter_map(
+def delimiter_fixture_map(
     csv_file_path, csv_stream, csv_temp_path, tsv_file_path, tsv_stream, tsv_temp_path
 ):
+    """Returns a dict where each entry links a delimeter linked to named tuple containing
+    relevant fixtures for that delimter."""
     return {
         ",": FileRepresentation(csv_file_path, csv_stream, csv_temp_path),
         "\t": FileRepresentation(tsv_file_path, tsv_stream, tsv_temp_path),
@@ -49,13 +51,13 @@ def fixture_yaml_stream() -> str:
 @pytest.fixture(name="csv_file_path")
 def fixture_csv_file_path(fixtures_dir: Path) -> Path:
     """Return a file path to example CSV file."""
-    return Path(fixtures_dir, "io", "example_csv.csv")
+    return Path(fixtures_dir, "io", "example.csv")
 
 
 @pytest.fixture()
 def tsv_file_path(fixtures_dir: Path) -> Path:
     """Return a file path to example TSV file."""
-    return Path(fixtures_dir, "io", "example_tsv.tsv")
+    return Path(fixtures_dir, "io", "example.tsv")
 
 
 @pytest.fixture()
