@@ -3,11 +3,10 @@ import logging
 import click
 from cg.cli.workflow.commands import link, resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.exc import CgError, DecompressionNeededError, AnalysisNotReadyError
+from cg.exc import AnalysisNotReadyError, CgError, DecompressionNeededError
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.meta.workflow.analysis import AnalysisAPI
-
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", "dry_run", help="Print command to console without executing", is_flag=True
@@ -92,7 +91,6 @@ def start(
     """
     Starts full Fluffy analysis workflow
     """
-    # TODO remove try-except
     LOG.info("Starting full Fluffy workflow for %s", case_id)
     if dry_run:
         LOG.info("Dry run: the executed commands will not produce output!")
