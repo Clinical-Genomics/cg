@@ -6,7 +6,7 @@ import click
 from pydantic.v1 import ValidationError
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
-from cg.cli.workflow.nextflow.options import (
+from cg.cli.workflow.nf_analysis import (
     OPTION_CONFIG,
     OPTION_LOG,
     OPTION_PARAMS_FILE,

@@ -9,7 +9,8 @@ from pydantic.v1 import ValidationError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
-from cg.cli.workflow.nextflow.options import (
+from cg.cli.workflow.nf_analysis import (
+    OPTION_COMPUTE_ENV,
     OPTION_CONFIG,
     OPTION_LOG,
     OPTION_PARAMS_FILE,
@@ -17,6 +18,7 @@ from cg.cli.workflow.nextflow.options import (
     OPTION_REVISION,
     OPTION_STUB,
     OPTION_TOWER,
+    OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
 )
@@ -25,7 +27,6 @@ from cg.cli.workflow.rnafusion.options import (
     OPTION_REFERENCES,
     OPTION_STRANDEDNESS,
 )
-from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV, OPTION_TOWER_RUN_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.exc import CgError, DecompressionNeededError
