@@ -7,16 +7,14 @@ from typing import List, Optional, Set
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_internal_ids_from_sample_sheet,
 )
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
 )
-from cg.exc import HousekeeperFileMissingError
-from cg.meta.demultiplex.utils import get_q30_threshold
+from cg.exc import MissingFilesError
+from cg.meta.demultiplex.utils import get_q30_threshold, get_sample_fastqs_from_flow_cell
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
-from housekeeper.store.models import File
 
 LOG = logging.getLogger(__name__)
 
@@ -41,10 +39,11 @@ def store_flow_cell_data_in_status_db(
     else:
         LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}.")
 
-    sample_internal_ids = get_sample_internal_ids_from_sample_sheet(
+    sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
         sample_sheet_path=parsed_flow_cell.get_sample_sheet_path_hk(),
         flow_cell_sample_type=parsed_flow_cell.sample_type,
     )
+    check_if_samples_have_files()
     add_samples_to_flow_cell_in_status_db(
         flow_cell=flow_cell,
         sample_internal_ids=sample_internal_ids,
@@ -53,6 +52,19 @@ def store_flow_cell_data_in_status_db(
     LOG.info(f"Added samples to flow cell: {parsed_flow_cell.id}.")
     store.session.add(flow_cell)
     store.session.commit()
+
+
+def check_if_samples_have_files(flow_cell_path: Path, sample_ids: List[str]) -> None:
+    """Check if all samples have already fastq files in the demultiplex directory.
+    Raises: MissingFilesError
+        When one of the samples has no fastq files in the flow cell
+    """
+    for sample_id in sample_ids:
+        fastq_files: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
+            flow_cell_directory=flow_cell_path, sample_internal_id=sample_id
+        )
+        if not fastq_files:
+            raise MissingFilesError(f"Sample {sample_id} has no fastq files in flow cell")
 
 
 def add_samples_to_flow_cell_in_status_db(
