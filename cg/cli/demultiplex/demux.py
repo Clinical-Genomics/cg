@@ -198,20 +198,17 @@ def copy_novaseqx_flow_cells(context: CGConfig):
             LOG.info(f"Flow cell {flow_cell_dir.name} is not ready for post processing, skipping.")
 
 
-@click.command(name="mark-transferred-flow-cell")
+@click.command(name="confirm-flow-cell-sync")
 @click.option(
-    "-m",
-    "--mounted-storage",
+    "--source",
     required=True,
-    help="The path to where the cg-nas is mounted",
+    help="The path from where the syncing is done.",
 )
 @click.pass_obj
-def mark_transferred_flow_cell(context: CGConfig, cg_nas_path: str):
-    flow_cells_dir: Path = Path(context.flow_cells_dir)
-
-    for nas_dir in Path(cg_nas_path).iterdir():
-        if is_syncing_complete(nas_dir, Path(flow_cells_dir, nas_dir.name)):
-            Path(flow_cells_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
-
-        else:
-            LOG.info(f"Flow cell {nas_dir.name} is not ready for post processing, skipping.")
+def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
+    """Checks if all relevant files for the demultiplexing have been parsed"""
+    local_flow_cells_dir: Path = Path(context.flow_cells_dir)
+    for remote_flow_cell in Path(source_directory).iterdir():
+        if is_syncing_complete(remote_flow_cell, Path(local_flow_cells_dir, remote_flow_cell.name)):
+            Path(local_flow_cells_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
+            continue

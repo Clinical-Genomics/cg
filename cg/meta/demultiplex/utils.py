@@ -96,12 +96,14 @@ def parse_flow_cell_directory_data(
 
 
 def parse_manifest_file(manifest_file):
-    lines: List[List[str]] = read_csv(manifest_file, delimiter="\t")
-    file_paths = [Path(entry[0]) for entry in lines]
+    """Returns a list with the first entry of each row of the given TSV file."""
+    files: List[List[str]] = read_csv(manifest_file, delimiter="\t")
+    file_paths = [Path(file[0]) for file in files]
     return file_paths
 
 
 def is_file_relevant(file: Path) -> bool:
+    """Returns whether a file is relevant for demultiplexing."""
     relevant_directories = [DemultiplexingDirsAndFiles.INTER_OP, DemultiplexingDirsAndFiles.DATA]
     for relevant_directory in relevant_directories:
         if relevant_directory in file:
@@ -109,12 +111,21 @@ def is_file_relevant(file: Path) -> bool:
     return False
 
 
-def is_syncing_complete(source_directory, target_directory) -> bool:
+def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
+    """Returns wheter all relevant files for demultiplexing have been synced from the source to
+    the destination."""
     manifest_file = Path(source_directory, DemultiplexingDirsAndFiles.FILE_MANIFEST)
     if not manifest_file.exists():
+        LOG.debug(
+            f"{source_directory} does not contain a "
+            f"{DemultiplexingDirsAndFiles.FILE_MANIFEST} file. Skipping."
+        )
         return False
     files_at_source: List[Path] = parse_manifest_file(manifest_file)
     for file in files_at_source:
-        if not is_file_relevant(file) and not Path(target_directory, file).exists():
+        if is_file_relevant(file) and not Path(target_directory, file).exists():
+            LOG.info(
+                f"All files have not been transferred from {target_directory} to {source_directory}"
+            )
             return False
     return True
