@@ -66,28 +66,3 @@ OPTION_TOWER_RUN_ID = click.option(
     default=None,
     help="NF-Tower ID of run to relaunch. If not provided the latest NF-Tower ID for a case will be used.",
 )
-
-
-###
-OPTION_INPUT = click.option(
-    "--input", type=click.Path(exists=True), help="Path to samplesheet containing fastq files"
-)
-OPTION_OUTDIR = click.option(
-    "--outdir", type=click.Path(), help="Path to output folder containing analysis files"
-)
-
-
-OPTION_TOWER = click.option(
-    "--with-tower",
-    is_flag=True,
-    default=False,
-    show_default=True,
-    help="Monitor workflow execution with Seqera Tower service",
-)
-OPTION_STUB = click.option(
-    "--stub",
-    is_flag=True,
-    default=False,
-    show_default=True,
-    help="Execute the workflow replacing process scripts with command stubs",
-)
