@@ -267,6 +267,10 @@ def test_is_case_ready_for_analysis_decompression_running(
 
 
 def test_prepare_fastq_files_success(mip_analysis_api, analysis_store, helpers):
+    """Tests that no error is thrown when running prepare_fastq_files when its flow cells are all ON_DISK,
+    and no spring decompression is needed nor is running."""
+
+    # GIVEN a case with a flow cell ON_DISK
     case: Family = analysis_store.get_cases()[0]
     helpers.add_flowcell(
         analysis_store,
@@ -277,6 +281,8 @@ def test_prepare_fastq_files_success(mip_analysis_api, analysis_store, helpers):
         status=FlowCellStatus.ON_DISK,
         date=datetime.now(),
     )
+
+    # GIVEN that no decompression is or running and adding the files to Housekeeper goes well
     with mock.patch.object(
         PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
     ), mock.patch.object(
@@ -284,16 +290,69 @@ def test_prepare_fastq_files_success(mip_analysis_api, analysis_store, helpers):
     ), mock.patch.object(
         PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
     ):
+        # WHEN running prepare_fastq_files
+
+        # THEN no error should be raised
         mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
 
 
-def test_prepare_fastq_files_failure(mip_analysis_api, analysis_store):
+def test_prepare_fastq_files_decompression_needed(mip_analysis_api, analysis_store, helpers):
+    """Tests that an AnalysisNotReady error is raised when decompression of spring files is needed
+    wghen running prepare_fastq_files."""
+
+    # GIVEN a case with its flow cell with status ON_DISK
     case: Family = analysis_store.get_cases()[0]
+    helpers.add_flowcell(
+        analysis_store,
+        flow_cell_name="flowcell_test",
+        archived_at=datetime.now(),
+        sequencer_type=Sequencers.NOVASEQ,
+        samples=analysis_store.get_samples_by_case_id(case.internal_id),
+        status=FlowCellStatus.ON_DISK,
+        date=datetime.now(),
+    )
+
+    # GIVEN that spring decompression is needed, and decompression is started successfully.
     with mock.patch.object(
-        PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
-    ), mock.patch.object(
+        PrepareFastqAPI, "is_spring_decompression_needed", return_value=True
+    ), mock.patch.object(MipAnalysisAPI, "decompress_case", return_value=None), mock.patch.object(
         PrepareFastqAPI, "is_spring_decompression_running", return_value=False
     ), mock.patch.object(
         PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
     ):
-        mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
+        with pytest.raises(AnalysisNotReadyError):
+            # WHEN running prepare_fastq_files
+
+            # THEN an AnalysisNotReadyError should be raised.
+            mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
+
+
+def test_prepare_fastq_files_decompression_running(mip_analysis_api, analysis_store, helpers):
+    """Tests that an AnalysisNotReady error is raised when decompression of spring files is running
+    wghen running prepare_fastq_files."""
+
+    # GIVEN a case with all its flow cells being ON_DISK
+    case: Family = analysis_store.get_cases()[0]
+    helpers.add_flowcell(
+        analysis_store,
+        flow_cell_name="flowcell_test",
+        archived_at=datetime.now(),
+        sequencer_type=Sequencers.NOVASEQ,
+        samples=analysis_store.get_samples_by_case_id(case.internal_id),
+        status=FlowCellStatus.ON_DISK,
+        date=datetime.now(),
+    )
+
+    # GIVEN that decompression of spring files is running.
+    with mock.patch.object(
+        PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
+    ), mock.patch.object(
+        PrepareFastqAPI, "is_spring_decompression_running", return_value=True
+    ), mock.patch.object(
+        PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
+    ):
+        with pytest.raises(AnalysisNotReadyError):
+            # WHEN running prepare_fastq_files
+
+            # THEN an AnalysisNotReadyError should be thrown
+            mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)

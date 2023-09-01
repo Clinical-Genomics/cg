@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Dict, List
 
 import pytest
-
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
