@@ -9,37 +9,84 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.taxprofiler.base import config_case
 from cg.constants import EXIT_SUCCESS
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 
 
-def test_without_options(cli_runner: CliRunner, taxprofiler_context: CGConfig):
-    """Test command without options."""
+def test_config_case_default_parameters(
+    cli_runner: CliRunner,
+    taxprofiler_context: CGConfig,
+    taxprofiler_case_id: str,
+    taxprofiler_sample_sheet_path: Path,
+    taxprofiler_params_file_path: Path,
+    taxprofiler_sample_sheet_content: str,
+    taxprofiler_parameters_default: TaxprofilerParameters,
+    caplog: LogCaptureFixture,
+):
+    """Test that command generates default config files."""
+    caplog.set_level(logging.DEBUG)
 
-    # WHEN dry running without anything specified
-    result = cli_runner.invoke(config_case, obj=taxprofiler_context)
+    # GIVEN a valid case
 
-    # THEN command should mention argument
-    assert result.exit_code != EXIT_SUCCESS
-    assert "Missing argument" in result.output
+    # WHEN running config case
+    result = cli_runner.invoke(config_case, [taxprofiler_case_id], obj=taxprofiler_context)
+
+    # THEN command should exit successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN logs should be as expected
+    expected_logs: List[str] = [
+        "Getting sample sheet information",
+        "Writing sample sheet",
+        "Getting parameters information",
+        "Writing parameters file",
+    ]
+    for expected_log in expected_logs:
+        assert expected_log in expected_logs
+
+    # THEN files should be generated
+    assert taxprofiler_sample_sheet_path.is_file()
+    assert taxprofiler_params_file_path.is_file()
+
+    # THEN the sample sheet content should match the expected values
+    sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.TXT, file_path=taxprofiler_sample_sheet_path, read_to_string=True
+    )
+    assert ",".join(TaxprofilerSampleSheetEntry.headers()) in sample_sheet_content
+    assert taxprofiler_sample_sheet_content in sample_sheet_content
+
+    # THEN the params file should contain all parameters
+    params_content: List[List[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.TXT, file_path=taxprofiler_params_file_path, read_to_string=True
+    )
+    for parameter in vars(taxprofiler_parameters_default).keys():
+        assert parameter in params_content
 
 
-def test_with_missing_case(
+def test_config_case_dry_run(
     cli_runner: CliRunner,
     taxprofiler_context: CGConfig,
     caplog: LogCaptureFixture,
-    case_id_does_not_exist: str,
+    taxprofiler_case_id: str,
 ):
-    """Test command with invalid case to start with."""
-    caplog.set_level(logging.ERROR)
-    # GIVEN case id not in database
-    assert not taxprofiler_context.status_db.get_case_by_internal_id(
-        internal_id=case_id_does_not_exist
-    )
+    """Test dry-run."""
+    caplog.set_level(logging.DEBUG)
 
-    # WHEN running
-    result = cli_runner.invoke(config_case, [case_id_does_not_exist], obj=taxprofiler_context)
+    # GIVEN a valid case
 
-    # THEN command should NOT successfully call the command it creates
-    assert result.exit_code != EXIT_SUCCESS
-    # THEN ERROR log should be printed containing invalid case_id
-    assert "could not be found in StatusDB!" in caplog.text
+    # WHEN performing a dry-run
+    result = cli_runner.invoke(config_case, [taxprofiler_case_id, "-d"], obj=taxprofiler_context)
+
+    # THEN command should should exit succesfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN sample sheet and parameters information should be collected
+    assert "Getting sample sheet information" in caplog.text
+    assert "Getting parameters information" in caplog.text
+
+    # THEN sample sheet and parameters information files should not be written
+    assert "Dry run: Config files will not be written" in caplog.text
+    assert "Writing sample sheet" not in caplog.text
+    assert "Writing parameters file" not in caplog.text

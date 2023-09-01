@@ -1,22 +1,26 @@
 """Tests for the housekeeper storage functions of the demultiplexing post post-processing module."""
+import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 from mock import MagicMock, call
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-
 from cg.models.cg_config import CGConfig
-
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_bundle_and_version_if_non_existent,
     add_tags_if_non_existent,
     add_sample_fastq_files_to_housekeeper,
     add_sample_sheet_path_to_housekeeper,
     add_demux_logs_to_housekeeper,
+    get_sample_sheets_from_latest_version,
 )
+from cg.store import Store
+from tests.store_helpers import StoreHelpers
+
+from housekeeper.store.models import File, Tag, Version
 
 
 def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
@@ -106,6 +110,19 @@ def test_add_fastq_files_without_sample_id(
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     demux_post_processing_api.add_file_to_bundle_if_non_existent = MagicMock()
+
+    # GIVEN that the sample sheet exists in housekeeper and the path is in the flow cell
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=bcl_convert_flow_cell.path,
+        flow_cell_name=bcl_convert_flow_cell.id,
+        hk_api=demultiplex_context.housekeeper_api,
+    )
+    sample_sheet_path: Path = Path(
+        get_sample_sheets_from_latest_version(
+            flow_cell_id=bcl_convert_flow_cell.id, hk_api=demultiplex_context.housekeeper_api
+        )[0].full_path
+    )
+    bcl_convert_flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
 
     # WHEN add_fastq_files is called
 
