@@ -1,20 +1,18 @@
 import logging
 import re
-import shutil
 from pathlib import Path
 from typing import List, Optional
-
 
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
+from cg.io.csv import read_csv
 from cg.meta.demultiplex.validation import (
     is_valid_sample_fastq_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 from cg.utils.files import get_file_in_directory, get_files_matching_pattern
-
 
 LOG = logging.getLogger(__name__)
 
@@ -95,3 +93,28 @@ def parse_flow_cell_directory_data(
 ) -> FlowCellDirectoryData:
     """Return flow cell data from the flow cell directory."""
     return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
+
+
+def parse_manifest_file(manifest_file):
+    lines: List[List[str]] = read_csv(manifest_file, delimiter="\t")
+    file_paths = [Path(entry[0]) for entry in lines]
+    return file_paths
+
+
+def is_file_relevant(file: Path) -> bool:
+    relevant_directories = [DemultiplexingDirsAndFiles.INTER_OP, DemultiplexingDirsAndFiles.DATA]
+    for relevant_directory in relevant_directories:
+        if relevant_directory in file:
+            return True
+    return False
+
+
+def is_syncing_complete(source_directory, target_directory) -> bool:
+    manifest_file = Path(source_directory, DemultiplexingDirsAndFiles.FILE_MANIFEST)
+    if not manifest_file.exists():
+        return False
+    files_at_source: List[Path] = parse_manifest_file(manifest_file)
+    for file in files_at_source:
+        if not is_file_relevant(file) and not Path(target_directory, file).exists():
+            return False
+    return True

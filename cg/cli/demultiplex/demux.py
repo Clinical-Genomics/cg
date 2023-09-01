@@ -11,9 +11,10 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     mark_as_demultiplexed,
     mark_flow_cell_as_queued_for_post_processing,
 )
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
+from cg.meta.demultiplex.utils import is_syncing_complete
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
@@ -195,3 +196,22 @@ def copy_novaseqx_flow_cells(context: CGConfig):
             mark_flow_cell_as_queued_for_post_processing(flow_cell_dir)
         else:
             LOG.info(f"Flow cell {flow_cell_dir.name} is not ready for post processing, skipping.")
+
+
+@click.command(name="mark-transferred-flow-cell")
+@click.option(
+    "-m",
+    "--mounted-storage",
+    required=True,
+    help="The path to where the cg-nas is mounted",
+)
+@click.pass_obj
+def mark_transferred_flow_cell(context: CGConfig, cg_nas_path: str):
+    flow_cells_dir: Path = Path(context.flow_cells_dir)
+
+    for nas_dir in Path(cg_nas_path).iterdir():
+        if is_syncing_complete(nas_dir, Path(flow_cells_dir, nas_dir.name)):
+            Path(flow_cells_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
+
+        else:
+            LOG.info(f"Flow cell {nas_dir.name} is not ready for post processing, skipping.")
