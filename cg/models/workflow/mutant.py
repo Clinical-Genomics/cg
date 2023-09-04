@@ -1,4 +1,4 @@
-from pydantic import BaseModel, BeforeValidator
+from pydantic import BaseModel, AfterValidator
 from typing_extensions import Annotated
 
 from cg.models.workflow.validators import get_first_word
@@ -8,8 +8,8 @@ class MutantSampleConfig(BaseModel):
     CG_ID_project: str
     CG_ID_sample: str
     case_ID: str
-    region_code: Annotated[str, BeforeValidator(get_first_word)]
-    lab_code: Annotated[str, BeforeValidator(get_first_word)]
+    region_code: Annotated[str, AfterValidator(get_first_word)]
+    lab_code: Annotated[str, AfterValidator(get_first_word)]
     priority: str
     Customer_ID_project: int
     Customer_ID_sample: str
