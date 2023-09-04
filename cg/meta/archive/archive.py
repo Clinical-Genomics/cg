@@ -110,9 +110,9 @@ class SpringArchiveAPI:
             self.status_db.get_sample_by_internal_id(sample_internal_id)
             for sample_internal_id in sample_internal_ids
         ]
-        samples_and_destinations: List[
-            SampleAndDestination
-        ] = self.add_housekeeper_destinations_to_samples(samples)
+        samples_and_destinations: List[SampleAndDestination] = self.join_destinations_and_samples(
+            samples
+        )
         for archive_location in ArchiveLocations:
             filtered_samples: List[SampleAndDestination] = filter_samples_on_archive_location(
                 samples_and_destinations=samples_and_destinations,
@@ -141,9 +141,7 @@ class SpringArchiveAPI:
             )
         return files
 
-    def add_housekeeper_destinations_to_samples(
-        self, samples: List[Sample]
-    ) -> List[SampleAndDestination]:
+    def join_destinations_and_samples(self, samples: List[Sample]) -> List[SampleAndDestination]:
         """Gets all samples and combines it with the destination in Housekeeper where we want the
         retrieved files to be."""
         samples_to_retrieve: List[SampleAndDestination] = []
