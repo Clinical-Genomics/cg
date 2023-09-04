@@ -15,6 +15,7 @@ from cg.meta.demultiplex.utils import (
     add_flow_cell_name_to_fastq_file_path,
     is_file_relevant,
     parse_manifest_file,
+    is_syncing_complete,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
@@ -175,8 +176,36 @@ def test_is_file_relevant(file: Path, expected_result: bool):
     assert result == expected_result
 
 
-def test_is_syncing_complete():
-    assert False
+def test_is_syncing_complete_true(lsyncd_source_directory: Path, lsyncd_target_directory: Path):
+    # GIVEN a source directory with a manifest file
+
+    # GIVEN a target directory with all relevant files
+
+    # WHEN checking if the syncing is complete
+    is_directory_synced: bool = is_syncing_complete(
+        source_directory=lsyncd_source_directory, target_directory=lsyncd_target_directory
+    )
+
+    # THEN the syncing should be deemed complete
+    assert is_directory_synced
+
+
+def test_is_syncing_complete_false(
+    lsyncd_source_directory: Path, lsyncd_target_directory: Path, base_call_file: Path
+):
+    """Tests if the syncing is not complete when a file is missing."""
+    # GIVEN a source directory with a manifest file
+
+    # GIVEN a target directory without all relevant files
+    Path(lsyncd_target_directory, base_call_file).unlink()
+
+    # WHEN checking if the syncing is complete
+    is_directory_synced: bool = is_syncing_complete(
+        source_directory=lsyncd_source_directory, target_directory=lsyncd_target_directory
+    )
+
+    # THEN the syncing should not be deemed complete
+    assert not is_directory_synced
 
 
 def test_add_flow_cell_name_to_fastq_file_path(bcl2fastq_flow_cell_id: str, fastq_file_path: Path):

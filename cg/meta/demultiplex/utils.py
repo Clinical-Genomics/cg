@@ -131,11 +131,10 @@ def rename_fastq_file_if_needed(fastq_file_path: Path, flow_cell_name: str) -> P
     return renamed_fastq_file_path
 
 
-def parse_manifest_file(manifest_file):
+def parse_manifest_file(manifest_file) -> List[Path]:
     """Returns a list with the first entry of each row of the given TSV file."""
     files: List[List[str]] = read_csv(manifest_file, delimiter="\t")
-    file_paths = [Path(file[0]) for file in files]
-    return file_paths
+    return [Path(file[0]) for file in files]
 
 
 def is_file_relevant(file: Path) -> bool:
