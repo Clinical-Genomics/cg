@@ -9,7 +9,7 @@ from cg.store.models import Family, Sample
 
 def test_get_sample_metadata(
     report_api_rnafusion: RnafusionReportAPI,
-    rnafusion_sample_id: str,
+    sample_id: str,
     rnafusion_case_id: str,
     rnafusion_validated_metrics: Dict[str, str],
     mock_analysis_finish,
@@ -20,9 +20,7 @@ def test_get_sample_metadata(
     case: Family = report_api_rnafusion.status_db.get_case_by_internal_id(
         internal_id=rnafusion_case_id
     )
-    sample: Sample = report_api_rnafusion.status_db.get_sample_by_internal_id(
-        internal_id=rnafusion_sample_id
-    )
+    sample: Sample = report_api_rnafusion.status_db.get_sample_by_internal_id(internal_id=sample_id)
 
     # GIVEN an analysis metadata object
     latest_metadata: RnafusionAnalysis = report_api_rnafusion.analysis_api.get_latest_metadata(

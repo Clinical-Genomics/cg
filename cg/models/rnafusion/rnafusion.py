@@ -1,11 +1,11 @@
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-from pydantic.v1 import BaseModel
+from pydantic.v1 import BaseModel, Field
 
 from cg.constants.constants import Strandedness
 from cg.models.analysis import AnalysisModel
-from cg.models.nf_analysis import NextflowSample, PipelineParameters
+from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters
 
 
 class RnafusionQCMetrics(BaseModel):
@@ -30,7 +30,7 @@ class RnafusionParameters(PipelineParameters):
     """Rnafusion parameters."""
 
     genomes_base: Path
-    input: Path
+    input: Path = Field(..., alias="sample_sheet_path")
     outdir: Path
     all: bool = False
     arriba: bool = True
@@ -65,10 +65,24 @@ class CommandArgs(BaseModel):
     params_file: Optional[Union[str, Path]]
 
 
-class RnafusionSample(NextflowSample):
+class RnafusionSampleSheetEntry(NextflowSampleSheetEntry):
     """Rnafusion sample sheet model."""
 
     strandedness: Strandedness
+
+    @staticmethod
+    def headers() -> List[str]:
+        """Return sample sheet headers."""
+        return ["sample", "fastq_1", "fastq_2", "strandedness"]
+
+    def reformat_sample_content(self) -> List[List[str]]:
+        """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
+        return [
+            [self.name, fastq_forward_read_path, fastq_reverse_read_path, str(self.strandedness)]
+            for fastq_forward_read_path, fastq_reverse_read_path in zip(
+                self.fastq_forward_read_paths, self.fastq_reverse_read_paths
+            )
+        ]
 
 
 class RnafusionAnalysis(AnalysisModel):
