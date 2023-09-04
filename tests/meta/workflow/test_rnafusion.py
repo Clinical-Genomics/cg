@@ -10,7 +10,7 @@ from cg.models.rnafusion.rnafusion import RnafusionAnalysis
 def test_parse_analysis(
     rnafusion_context: CGConfig,
     rnafusion_case_id: str,
-    rnafusion_sample_id: str,
+    sample_id: str,
     rnafusion_multiqc_json_metrics: dict,
     rnafusion_metrics: dict,
     mock_analysis_finish,
@@ -25,7 +25,7 @@ def test_parse_analysis(
     analysis_model: RnafusionAnalysis = analysis_api.parse_analysis(qc_metrics_raw=qc_metrics)
 
     # THEN the analysis model and its content should have been correctly extracted
-    assert analysis_model.sample_metrics[rnafusion_sample_id] == rnafusion_metrics
+    assert analysis_model.sample_metrics[sample_id] == rnafusion_metrics
 
 
 def test_get_latest_metadata(

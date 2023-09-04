@@ -1,8 +1,8 @@
 """Module for reading and writing comma separated values (CSV) formatted files."""
 import csv
 import io
-from typing import Any, List, Union
 from pathlib import Path
+from typing import Any, List, Union
 
 from cg.constants import FileExtensions
 from cg.io.validate_path import validate_file_suffix
@@ -13,7 +13,10 @@ DELIMITER_TO_SUFFIX = {",": FileExtensions.CSV, "\t": FileExtensions.TSV}
 def read_csv(
     file_path: Path, read_to_dict: bool = False, delimiter: str = ","
 ) -> Union[List[List[str]], List[dict]]:
-    """Read content in a CSV file to a list of list or list of dict."""
+    """
+    Read content in a CSV file to a list of list or list of dict.
+    The delimiter parameter can be used to read TSV files.
+    """
     validate_file_suffix(path_to_validate=file_path, target_suffix=DELIMITER_TO_SUFFIX[delimiter])
     with open(file_path, "r") as file:
         csv_reader = (

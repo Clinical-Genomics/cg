@@ -68,7 +68,9 @@ class JsonOrderformParser(OrderformParser):
     def parse_orderform(self, order_data: dict) -> None:
         """Parse order form in JSON format."""
 
-        self.samples = [JsonSample(**sample_data) for sample_data in order_data.get("samples", [])]
+        self.samples: List[JsonSample] = [
+            JsonSample.model_validate(sample_data) for sample_data in order_data.get("samples", [])
+        ]
         if not self.samples:
             raise OrderFormError("orderform doesn't contain any samples")
 

@@ -1,5 +1,6 @@
 import logging
 import re
+
 from pathlib import Path
 from typing import List, Optional
 
@@ -11,6 +12,11 @@ from cg.meta.demultiplex.validation import (
     is_valid_sample_fastq_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+
+from cg.utils.files import (
+    is_pattern_in_file_path_name,
+    rename_file,
+)
 
 from cg.utils.files import get_file_in_directory, get_files_matching_pattern
 
@@ -37,7 +43,7 @@ def get_sample_fastqs_from_flow_cell(
 ) -> Optional[List[Path]]:
     """Retrieve all fastq files for a specific sample in a flow cell directory."""
 
-    # The flat output structure for flow cells demultiplexed with bclconvert on the novaseqx machines
+    # The flat output structure for NovaseqX flow cells demultiplexed with bclconvert on hasta
     root_pattern = f"{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
     # The default structure for flow cells demultiplexed with bcl2fastq
@@ -51,7 +57,16 @@ def get_sample_fastqs_from_flow_cell(
         f"Unaligned*/*/{sample_internal_id}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     )
 
-    for pattern in [root_pattern, unaligned_pattern, unaligned_alt_pattern, bcl_convert_pattern]:
+    # The pattern for novaseqx flow cells demultiplexed on board of the dragen
+    demux_on_sequencer_pattern = f"BCLConvert/fastq/{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+
+    for pattern in [
+        root_pattern,
+        unaligned_pattern,
+        unaligned_alt_pattern,
+        bcl_convert_pattern,
+        demux_on_sequencer_pattern,
+    ]:
         sample_fastqs: List[Path] = get_files_matching_pattern(
             directory=flow_cell_directory, pattern=pattern
         )
@@ -93,6 +108,27 @@ def parse_flow_cell_directory_data(
 ) -> FlowCellDirectoryData:
     """Return flow cell data from the flow cell directory."""
     return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
+
+
+def add_flow_cell_name_to_fastq_file_path(fastq_file_path: Path, flow_cell_name: str) -> Path:
+    """Add the flow cell name to the fastq file path if the flow cell name is not already in the given file path."""
+    if is_pattern_in_file_path_name(file_path=fastq_file_path, pattern=flow_cell_name):
+        LOG.debug(
+            f"Flow cell name {flow_cell_name} already in {fastq_file_path}. Skipping renaming."
+        )
+        return fastq_file_path
+    LOG.debug(f"Adding flow cell name {flow_cell_name} to {fastq_file_path}.")
+    return Path(fastq_file_path.parent, f"{flow_cell_name}_{fastq_file_path.name}")
+
+
+def rename_fastq_file_if_needed(fastq_file_path: Path, flow_cell_name: str) -> Path:
+    """Rename the given fastq file path if the renamed fastq file path does not exist."""
+    renamed_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
+        fastq_file_path=fastq_file_path, flow_cell_name=flow_cell_name
+    )
+    if fastq_file_path != renamed_fastq_file_path:
+        rename_file(file_path=fastq_file_path, renamed_file_path=renamed_fastq_file_path)
+    return renamed_fastq_file_path
 
 
 def parse_manifest_file(manifest_file):

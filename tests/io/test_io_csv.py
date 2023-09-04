@@ -111,7 +111,7 @@ def test_write_csv(delimiter: str, delimiter_fixture_map: Dict[str, FileRepresen
     # WHEN writing the content
     write_csv(content=raw_csv_content, file_path=output_file, delimiter=delimiter)
 
-    # THEN  a file was successfully created
+    # THEN a file was successfully created
     assert Path.exists(output_file)
 
     # WHEN reading it again
