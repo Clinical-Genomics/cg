@@ -4,8 +4,6 @@ from pathlib import Path
 from typing import Dict, Generator, List
 
 import pytest
-
-from cg.store.models import Sample
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import (
@@ -18,7 +16,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-
+from cg.store.models import Sample
 from tests.meta.demultiplex.conftest import FlowCellInfo
 
 
@@ -500,7 +498,7 @@ def test_post_processing_of_flow_cell(
     tmp_demultiplexed_runs_directory: Path,
     novaseq6000_bcl_convert_sample_sheet_path,
 ):
-    """Test adding a demultiplexed flow cell to the databases with. Runs on each type of
+    """Test adding a demultiplexed flow cell to the databases. Runs on each type of
     demultiplexing software and setting used."""
 
     # GIVEN a demultiplexed flow cell
