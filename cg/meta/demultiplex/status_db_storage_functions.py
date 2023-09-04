@@ -17,6 +17,7 @@ from cg.store import Store
 from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
 
 LOG = logging.getLogger(__name__)
+NUMBER_FASTQ_FILES_PER_SAMPLE: int = 8
 
 
 def store_flow_cell_data_in_status_db(
@@ -43,9 +44,7 @@ def store_flow_cell_data_in_status_db(
         sample_sheet_path=parsed_flow_cell.get_sample_sheet_path_hk(),
         flow_cell_sample_type=parsed_flow_cell.sample_type,
     )
-    check_if_samples_have_files(
-        flow_cell_path=parsed_flow_cell.path, sample_ids=sample_internal_ids
-    )
+    check_if_samples_have_files(flow_cell=parsed_flow_cell)
     add_samples_to_flow_cell_in_status_db(
         flow_cell=flow_cell,
         sample_internal_ids=sample_internal_ids,
@@ -56,17 +55,22 @@ def store_flow_cell_data_in_status_db(
     store.session.commit()
 
 
-def check_if_samples_have_files(flow_cell_path: Path, sample_ids: List[str]) -> None:
-    """Check if all samples have already fastq files in the demultiplex directory.
+def check_if_samples_have_files(flow_cell: FlowCellDirectoryData) -> None:
+    """Check if all samples have already all the fastq files in the demultiplex directory.
     Raises: MissingFilesError
-        When one of the samples has no fastq files in the flow cell
+        When one of the samples does not have enough fastq files in the flow cell
     """
+    sample_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
+        sample_sheet_path=flow_cell.get_sample_sheet_path_hk(),
+        flow_cell_sample_type=flow_cell.sample_type,
+    )
     for sample_id in sample_ids:
         fastq_files: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
-            flow_cell_directory=flow_cell_path, sample_internal_id=sample_id
+            flow_cell_directory=flow_cell.path, sample_internal_id=sample_id
         )
-        if not fastq_files:
-            raise MissingFilesError(f"Sample {sample_id} has no fastq files in flow cell")
+        if not fastq_files or len(fastq_files) != NUMBER_FASTQ_FILES_PER_SAMPLE:
+            error_msg: str = f"Sample {sample_id} does not have the correct number of fastq files"
+            raise MissingFilesError(error_msg)
 
 
 def add_samples_to_flow_cell_in_status_db(
@@ -107,7 +111,8 @@ def add_sequencing_metrics_to_statusdb(
         )
         if not metric_exists and metric_has_sample:
             LOG.debug(
-                f"Adding sample lane sequencing metrics for {metric.flow_cell_name}, {metric.sample_internal_id}, and {metric.flow_cell_lane_number}."
+                f"Adding sample lane sequencing metrics for {metric.flow_cell_name},"
+                f"{metric.sample_internal_id}, and {metric.flow_cell_lane_number}."
             )
             store.session.add(metric)
     store.session.commit()
@@ -132,7 +137,8 @@ def metric_exists_in_status_db(metric: SampleLaneSequencingMetrics, store: Store
     )
     if existing_metrics_entry:
         LOG.warning(
-            f"Sample lane sequencing metrics already exist for {metric.flow_cell_name}, {metric.sample_internal_id}, and lane {metric.flow_cell_lane_number}. Skipping."
+            f"Sample lane sequencing metrics already exist for {metric.flow_cell_name},"
+            f" {metric.sample_internal_id}, and lane {metric.flow_cell_lane_number}. Skipping."
         )
     return bool(existing_metrics_entry)
 

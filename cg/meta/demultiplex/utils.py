@@ -1,18 +1,13 @@
 import logging
 import re
-
 from pathlib import Path
 from typing import List, Optional
-
 
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
-from cg.meta.demultiplex.validation import (
-    is_valid_sample_fastq_file,
-)
+from cg.meta.demultiplex.validation import is_valid_sample_fastq_file
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-
 from cg.utils.files import (
     get_file_in_directory,
     get_files_matching_pattern,
@@ -49,7 +44,7 @@ def get_sample_fastqs_from_flow_cell(
     # The default structure for flow cells demultiplexed with bcl2fastq
     unaligned_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
-    # Alternative structure for flow cells demultiplexed with bcl2fastq where the sample fastq files have a trailing sequence
+    # Alternative structure for bcl2fastq flow cells where the sample fastq files have a trailing sequence
     unaligned_alt_pattern = f"Unaligned*/Project_*/Sample_{sample_internal_id}_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
     # The default structure for flow cells demultiplexed with bclconvert
