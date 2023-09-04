@@ -1,5 +1,5 @@
 import logging
-from pydantic import ConfigDict, BaseModel, Field
+from pydantic import ConfigDict, BaseModel, Extra, Field
 from typing import List
 
 from cg.constants.constants import GenomeVersion
@@ -15,7 +15,7 @@ class FlowCellSample(BaseModel):
     sample_id: str
     index: str
     index2: str = ""
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(populate_by_name=True, extra=Extra.ignore)
 
 
 class FlowCellSampleNovaSeq6000(FlowCellSample):
