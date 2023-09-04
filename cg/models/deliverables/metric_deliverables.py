@@ -1,10 +1,12 @@
 import operator
 from typing import Any, Callable, Dict, List, Optional
+from typing_extensions import Annotated
 
-from pydantic.v1 import BaseModel, Field, validator
+from pydantic import BaseModel, BeforeValidator, Field, FieldValidationInfo, field_validator
 
 from cg.constants import PRECISION
 from cg.exc import CgError, MetricsQCError
+from cg.models.deliverables.validators import validate_operator
 
 
 def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> Any:
@@ -57,31 +59,20 @@ class MetricCondition(BaseModel):
         threshold: validation cut off
     """
 
-    norm: str
+    norm: Annotated[str, BeforeValidator(validate_operator)]
     threshold: float
-
-    @validator("norm")
-    def validate_operator(cls, norm: str) -> str:
-        """Validate that an operator is accepted."""
-        try:
-            getattr(operator, norm)
-        except AttributeError as error:
-            raise CgError(
-                f"{norm} is not an accepted operator for QC metric conditions."
-            ) from error
-        return norm
 
 
 class MetricsBase(BaseModel):
     """Definition for elements in deliverables metrics file."""
 
-    header: Optional[str]
+    header: Optional[str] = None
     id: str
     input: str
     name: str
     step: str
-    value: Any
-    condition: Optional[MetricCondition]
+    value: Any = None
+    condition: Optional[MetricCondition] = None
 
 
 class SampleMetric(BaseModel):
@@ -94,12 +85,7 @@ class SampleMetric(BaseModel):
 class MeanInsertSize(SampleMetric):
     """Definition of insert size metric"""
 
-    value: float
-
-    @validator("value", always=True)
-    def convert_mean_insert_size(cls, value) -> int:
-        """Convert raw value from float to int"""
-        return int(value)
+    value: Annotated[float, BeforeValidator(lambda x: int(x))]
 
 
 class MedianTargetCoverage(SampleMetric):
@@ -122,13 +108,13 @@ class MetricsDeliverables(BaseModel):
     """Specification for a metric general deliverables file"""
 
     metrics_: List[MetricsBase] = Field(..., alias="metrics")
-    sample_ids: Optional[set]
+    sample_ids: Optional[set] = None
 
-    @validator("sample_ids", always=True)
-    def set_sample_ids(cls, _, values: dict) -> set:
+    @field_validator("sample_ids", always=True)
+    def set_sample_ids(cls, _, info: FieldValidationInfo) -> set:
         """Set sample_ids gathered from all metrics"""
         sample_ids: list = []
-        raw_metrics: list = values.get("metrics_")
+        raw_metrics: list = info.data.get("metrics_")
         for metric in raw_metrics:
             sample_ids.append(metric.id)
         return set(sample_ids)
@@ -139,7 +125,8 @@ class MetricsDeliverablesCondition(BaseModel):
 
     metrics: List[MetricsBase]
 
-    @validator("metrics")
+    @field_validator("metrics")
+    @classmethod
     def validate_metrics(cls, metrics: List[MetricsBase]) -> List[MetricsBase]:
         """Verify that metrics met QC conditions."""
         failed_metrics: List = []
@@ -161,5 +148,5 @@ class MetricsDeliverablesCondition(BaseModel):
 class MultiqcDataJson(BaseModel):
     """Multiqc data json model."""
 
-    report_general_stats_data: Optional[List[Dict]]
-    report_data_sources: Optional[Dict]
+    report_general_stats_data: Optional[List[Dict]] = None
+    report_data_sources: Optional[Dict] = None
