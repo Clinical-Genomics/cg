@@ -18,7 +18,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.store import Store
-from pydantic.v1 import BaseModel, EmailStr, Field
+from pydantic import ConfigDict, BaseModel, EmailStr, Field
 from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
@@ -54,11 +54,11 @@ class CleanConfig(BaseModel):
 
 class SlurmConfig(BaseModel):
     account: str
-    hours: Optional[int]
+    hours: Optional[int] = None
     mail_user: EmailStr
-    memory: Optional[int]
-    number_tasks: Optional[int]
-    conda_env: Optional[str]
+    memory: Optional[int] = None
+    number_tasks: Optional[int] = None
+    conda_env: Optional[str] = None
     qos: SlurmQos = SlurmQos.LOW
 
 
@@ -80,7 +80,7 @@ class TrailblazerConfig(BaseModel):
 
 
 class StatinaConfig(BaseModel):
-    host: Optional[str]
+    host: Optional[str] = None
     user: str
     key: str
     api_url: str
@@ -90,7 +90,7 @@ class StatinaConfig(BaseModel):
 
 class CommonAppConfig(BaseModel):
     binary_path: str
-    config_path: Optional[str]
+    config_path: Optional[str] = None
 
 
 class FluffyUploadConfig(BaseModel):
@@ -206,7 +206,7 @@ class GisaidConfig(CommonAppConfig):
 class DataDeliveryConfig(BaseModel):
     destination_path: str
     covid_destination_path: str
-    covid_source_path = str
+    covid_source_path: Optional[str] = None
     covid_report_path: str
     account: str
     base_path: str
@@ -248,7 +248,7 @@ class CGConfig(BaseModel):
     environment: Literal["production", "stage"] = "stage"
     madeline_exe: str
     delivery_path: str
-    max_flowcells: Optional[int]
+    max_flowcells: Optional[int] = None
     email_base_settings: EmailBaseSettings
     flow_cells_dir: str
     demultiplexed_flow_cells_dir: str
@@ -311,26 +311,23 @@ class CGConfig(BaseModel):
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
-
-    class Config:
-        arbitrary_types_allowed = True
-        fields = {
-            "cg_stats_api_": "cg_stats_api",
-            "chanjo_api_": "chanjo_api",
-            "crunchy_api_": "crunchy_api",
-            "demultiplex_api_": "demultiplex_api",
-            "genotype_api_": "genotype_api",
-            "gens_api_": "gens_api",
-            "hermes_api_": "hermes_api",
-            "housekeeper_api_": "housekeeper_api",
-            "lims_api_": "lims_api",
-            "loqusdb_api_": "loqusdb_api",
-            "madeline_api_": "madeline_api",
-            "mutacc_auto_api_": "mutacc_auto_api",
-            "scout_api_": "scout_api",
-            "status_db_": "status_db",
-            "trailblazer_api_": "trailblazer_api",
-        }
+    model_config = ConfigDict(arbitrary_types_allowed=True, fields={
+        "cg_stats_api_": "cg_stats_api",
+        "chanjo_api_": "chanjo_api",
+        "crunchy_api_": "crunchy_api",
+        "demultiplex_api_": "demultiplex_api",
+        "genotype_api_": "genotype_api",
+        "gens_api_": "gens_api",
+        "hermes_api_": "hermes_api",
+        "housekeeper_api_": "housekeeper_api",
+        "lims_api_": "lims_api",
+        "loqusdb_api_": "loqusdb_api",
+        "madeline_api_": "madeline_api",
+        "mutacc_auto_api_": "mutacc_auto_api",
+        "scout_api_": "scout_api",
+        "status_db_": "status_db",
+        "trailblazer_api_": "trailblazer_api",
+    })
 
     @property
     def chanjo_api(self) -> ChanjoAPI:
