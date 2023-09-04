@@ -5,7 +5,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from housekeeper.store.models import Bundle, Version
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FlowCellStatus
@@ -13,7 +12,8 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.models.cgstats.flowcell import StatsFlowcell
 from cg.store import Store
-from cg.store.models import Sample, Flowcell
+from cg.store.models import Flowcell, Sample
+from housekeeper.store.models import Bundle, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -22,11 +22,11 @@ def _set_status_db_sample_sequenced_at(
     status_db_sample: Sample, flow_cell_sequenced_at: datetime
 ) -> None:
     """Set sequenced at for sample in status db."""
-    is_newer_date: datetime = (status_db_sample.sequenced_at is None) or (
-        flow_cell_sequenced_at > status_db_sample.sequenced_at
+    is_newer_date: datetime = (status_db_sample.reads_updated_at is None) or (
+        flow_cell_sequenced_at > status_db_sample.reads_updated_at
     )
     if is_newer_date:
-        status_db_sample.sequenced_at: datetime = flow_cell_sequenced_at
+        status_db_sample.reads_updated_at: datetime = flow_cell_sequenced_at
 
 
 def log_enough_reads(

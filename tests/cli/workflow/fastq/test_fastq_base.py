@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from cg.cli.workflow.fastq.base import store_fastq_analysis, store_available_fastq_analysis
+from cg.cli.workflow.fastq.base import store_available_fastq_analysis, store_fastq_analysis
 from cg.store.models import Analysis, Family, Sample
 
 
@@ -35,7 +35,7 @@ def test_store_available_fastq_analysis(
     case_obj: Family = fastq_context.status_db.get_case_by_internal_id(internal_id=case_id)
     case_obj.analyses = []
     sample_obj: Sample = fastq_context.status_db.get_sample_by_internal_id(internal_id=sample_id)
-    sample_obj.sequenced_at = datetime.now()
+    sample_obj.reads_updated_at = datetime.now()
 
     # WHEN the store_available_fastq_analysis command is invoked
     cli_runner.invoke(store_available_fastq_analysis, ["--dry-run"], obj=fastq_context)

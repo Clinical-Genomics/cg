@@ -8,7 +8,7 @@ import click
 from cg.cli.get import get_case as print_case
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.store import Store
-from cg.store.models import Sample, Family
+from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -110,7 +110,7 @@ def _log_sample_process_information(sample: Sample):
     LOG.info("Can NOT delete processed sample: %s", sample.internal_id)
     LOG.info("Sample was received: %s", sample.received_at)
     LOG.info("Sample was prepared: %s", sample.prepared_at)
-    LOG.info("Sample was sequenced: %s", sample.sequenced_at)
+    LOG.info("Sample's reads were updated: %s", sample.reads_updated_at)
     LOG.info("Sample was delivered: %s", sample.delivered_at)
     LOG.info("Sample has invoice: %s", sample.invoice_id)
 
@@ -128,7 +128,7 @@ def _has_sample_been_lab_processed(sample: Sample) -> datetime.datetime:
     return (
         sample.received_at
         or sample.prepared_at
-        or sample.sequenced_at
+        or sample.reads_updated_at
         or sample.delivered_at
         or sample.invoice_id
     )

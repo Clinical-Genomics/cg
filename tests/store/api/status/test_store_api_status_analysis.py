@@ -1,14 +1,13 @@
 """This script tests the cli methods to add cases to status-db"""
-from typing import List, Union
-
-from sqlalchemy.orm import Query
 from datetime import datetime
+from typing import List, Union
 
 from cg.constants import Pipeline
 from cg.constants.constants import CaseActions
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
 from cg.store.models import Analysis, Family, Sample
+from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
 
 
@@ -108,7 +107,7 @@ def test_that_cases_can_have_many_samples(
 
     # GIVEN a sequnced sample
     test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
-    assert test_sample.sequenced_at
+    assert test_sample.reads_updated_at
 
     # GIVEN a case with one sample
     case_with_one: Family = helpers.add_case(base_store, "case_with_one_sample")
@@ -316,7 +315,7 @@ def test_one_of_one_sequenced_samples(
 
     # GIVEN a database with a case with a sequenced samples and no analysis
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
-    assert test_sample.sequenced_at is not None
+    assert test_sample.reads_updated_at is not None
 
     # WHEN getting cases to analyse
     cases: List[Family] = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)

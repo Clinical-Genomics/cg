@@ -1,16 +1,16 @@
 import datetime as dt
-import pytest
-
 from typing import List
+
+import pytest
+from cg.constants import Pipeline
 from cg.constants.constants import PrepCategory
+from cg.constants.invoice import CustomerNames
 from cg.constants.priority import PriorityTerms
+from cg.constants.subject import PhenotypeStatus
 from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.store import Store
 from tests.meta.demultiplex.conftest import fixture_populated_flow_cell_store
 from tests.store_helpers import StoreHelpers
-from cg.constants.invoice import CustomerNames
-from cg.constants.subject import PhenotypeStatus
-from cg.constants import Pipeline
 
 
 @pytest.fixture(name="microbial_store")
@@ -134,7 +134,7 @@ def fixture_re_sequenced_sample_store(
         reads=1200000000,
         store=re_sequenced_sample_store,
         original_ticket=ticket_id,
-        sequenced_at=timestamp_now,
+        reads_updated_at=timestamp_now,
     )
 
     one_day_ahead_of_now = timestamp_now + dt.timedelta(days=1)
@@ -195,7 +195,7 @@ def fixture_store_failing_sequencing_qc(
         reads=5,
         store=store,
         original_ticket=ticket_id,
-        sequenced_at=timestamp_now,
+        reads_updated_at=timestamp_now,
         customer_id="fluffy_customer",
     )
 

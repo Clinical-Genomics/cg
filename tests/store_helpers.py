@@ -1,9 +1,7 @@
 """Utility functions to simply add test data in a cg store."""
 import logging
 from datetime import datetime
-from typing import List, Optional, Dict
-
-from housekeeper.store.models import Bundle, Version
+from typing import Dict, List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Pipeline
@@ -28,9 +26,10 @@ from cg.store.models import (
     Panel,
     Pool,
     Sample,
-    User,
     SampleLaneSequencingMetrics,
+    User,
 )
+from housekeeper.store.models import Bundle, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -710,7 +709,7 @@ class StoreHelpers:
 
         samples: List[Sample] = cls.add_samples(store=base_store, nr_samples=nr_samples)
         for sample in samples:
-            sample.sequenced_at: datetime = sequenced_at
+            sample.reads_updated_at: datetime = sequenced_at
         case: Family = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
         cls.relate_samples(base_store=base_store, case=case, samples=samples)
         return case

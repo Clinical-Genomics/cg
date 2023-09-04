@@ -1,9 +1,10 @@
+import datetime as dt
+
 from cg.cli.workflow.fluffy.base import create_samplesheet
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
-import datetime as dt
 
 
 def test_create_samplesheet_dry(
@@ -81,7 +82,7 @@ def test_create_samplesheet_success(
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_starlims_id")
     FluffyAnalysisAPI.get_sample_starlims_id.return_value = 12345678
 
-    # GIVEN every sample in SampleSheet sequenced_at set in StatusDB
+    # GIVEN every sample in SampleSheet reads_updated_at set in StatusDB
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_sequenced_date")
     FluffyAnalysisAPI.get_sample_sequenced_date.return_value = dt.datetime.now().date()
 

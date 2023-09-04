@@ -1,11 +1,9 @@
 """Tests for transfer flow cell data."""
-from datetime import datetime
 import logging
 import warnings
+from datetime import datetime
 from pathlib import Path
 from typing import Generator
-
-from sqlalchemy import exc as sa_exc
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FlowCellStatus, SequencingFileTag
@@ -15,6 +13,7 @@ from cg.models.cgstats.flowcell import StatsFlowcell
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.store import Store
 from cg.store.models import Flowcell, Sample
+from sqlalchemy import exc as sa_exc
 from tests.store_helpers import StoreHelpers
 
 
@@ -284,10 +283,10 @@ def test_set_status_db_sample_sequenced_at_when_first_sequenced(
 ):
     """Test setting sample sequenced at with no previous sequencing."""
     # GIVEN a status db sample
-    sample: Sample = helpers.add_sample(base_store, sequenced_at=None)
+    sample: Sample = helpers.add_sample(base_store, reads_updated_at=None)
 
     # Given no previous sequencing
-    assert sample.sequenced_at is None
+    assert sample.reads_updated_at is None
 
     # WHEN setting sequenced at for the sample
     _set_status_db_sample_sequenced_at(
@@ -295,7 +294,7 @@ def test_set_status_db_sample_sequenced_at_when_first_sequenced(
     )
 
     # THEN the sample sequenced at should be set
-    assert sample.sequenced_at == timestamp_now
+    assert sample.reads_updated_at == timestamp_now
 
 
 def test_set_status_db_sample_sequenced_at_when_sequenced_again(
@@ -306,7 +305,7 @@ def test_set_status_db_sample_sequenced_at_when_sequenced_again(
 ):
     """Test setting sample sequenced at when sequenced again."""
     # GIVEN a status db sample sequenced yesterday
-    sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_yesterday)
+    sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_yesterday)
 
     # WHEN setting sequenced at for the sample
     _set_status_db_sample_sequenced_at(
@@ -314,7 +313,7 @@ def test_set_status_db_sample_sequenced_at_when_sequenced_again(
     )
 
     # THEN the sample sequenced at should be set to today
-    assert sample.sequenced_at == timestamp_now
+    assert sample.reads_updated_at == timestamp_now
 
 
 def test_log_enough_reads_when_enough_reads(caplog, sample_name: str):
@@ -450,7 +449,7 @@ def test_transfer(
     assert isinstance(flow_cell.id, int)
     assert flow_cell.name == bcl2fastq_flow_cell_id
     status_sample = flowcell_store._get_query(table=Sample).first()
-    assert isinstance(status_sample.sequenced_at, datetime)
+    assert isinstance(status_sample.reads_updated_at, datetime)
 
     # ... and it should store the fastq files and samplesheet for the sample in housekeeper
     hk_bundle = housekeeper_api.bundle(name=status_sample.internal_id)

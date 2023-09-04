@@ -10,9 +10,6 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
-from housekeeper.store.models import File, Version
-from requests import Response
-
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -57,6 +54,8 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
 )
 from cg.utils import Process
+from housekeeper.store.models import File, Version
+from requests import Response
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -2018,7 +2017,7 @@ def sample_store(base_store: Store) -> Store:
             sex=Gender.MALE,
             received=datetime.now(),
             prepared_at=datetime.now(),
-            sequenced_at=datetime.now(),
+            reads_updated_at=datetime.now(),
             reads=(310 * 1000000),
         ),
         base_store.add_sample(
@@ -2031,12 +2030,12 @@ def sample_store(base_store: Store) -> Store:
         base_store.add_sample(
             name="to-deliver",
             sex=Gender.MALE,
-            sequenced_at=datetime.now(),
+            reads_updated_at=datetime.now(),
         ),
         base_store.add_sample(
             name="delivered",
             sex=Gender.MALE,
-            sequenced_at=datetime.now(),
+            reads_updated_at=datetime.now(),
             delivered_at=datetime.now(),
             no_invoice=False,
         ),
@@ -2790,7 +2789,7 @@ def fixture_rnafusion_context(
     sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        sequenced_at=datetime.now(),
+        reads_updated_at=datetime.now(),
     )
 
     helpers.add_relationship(
@@ -3020,7 +3019,7 @@ def fixture_taxprofiler_context(
     taxprofiler_sample: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        sequenced_at=datetime.now(),
+        reads_updated_at=datetime.now(),
         name=sample_name,
     )
 

@@ -151,7 +151,7 @@ def fluffy_context(
         is_tumour=False,
         application_type="tgs",
         reads=100,
-        sequenced_at=dt.datetime.now(),
+        reads_updated_at=dt.datetime.now(),
     )
     helpers.add_flowcell(
         fluffy_analysis_api.status_db, flow_cell_name="flowcell", samples=[example_fluffy_sample]
