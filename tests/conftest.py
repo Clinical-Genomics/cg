@@ -2381,6 +2381,8 @@ def fixture_context_config(
                 "account": "development",
                 "mail_user": "taxprofiler.email@scilifelab.se",
             },
+            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
+            "tower_pipeline": "taxprofiler",
         },
         "scout": {
             "binary_path": "echo",
