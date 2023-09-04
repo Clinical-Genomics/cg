@@ -6,7 +6,7 @@ from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
 from housekeeper.store.models import File
 from pydantic import BaseModel
-from pydantic.v1 import ConfigDict
+from pydantic import ConfigDict
 
 
 class FileAndSample(BaseModel):
