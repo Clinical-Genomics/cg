@@ -1,7 +1,7 @@
 import logging
 import os
 from pathlib import Path
-from pydantic.v1 import ValidationError
+from pydantic import ValidationError
 from typing import List
 
 import click
