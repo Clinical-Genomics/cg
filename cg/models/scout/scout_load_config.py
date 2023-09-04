@@ -3,10 +3,8 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict
-from typing_extensions import Annotated, Literal
-
-from cg.models.scout.validators import field_not_none
+from pydantic import BaseModel, ConfigDict
+from typing_extensions import Literal
 
 
 class ChromographImages(BaseModel):
@@ -25,28 +23,25 @@ class Reviewer(BaseModel):
 
 class ScoutIndividual(BaseModel):
     alignment_path: Optional[str] = None
-    analysis_type: Annotated[
-        Literal[
-            "external",
-            "mixed",
-            "panel",
-            "panel-umi",
-            "unknown",
-            "wes",
-            "wgs",
-            "wts",
-        ],
-        BeforeValidator(field_not_none),
-    ] = None
+    analysis_type: Literal[
+        "external",
+        "mixed",
+        "panel",
+        "panel-umi",
+        "unknown",
+        "wes",
+        "wgs",
+        "wts",
+    ]
     capture_kit: Optional[str] = None
     confirmed_parent: Optional[bool] = None
     confirmed_sex: Optional[bool] = None
     father: Optional[str] = None
     mother: Optional[str] = None
     phenotype: Optional[str] = None
-    sample_id: Annotated[str, BeforeValidator(field_not_none)] = None
+    sample_id: str
     sample_name: Optional[str] = None
-    sex: Annotated[Optional[str], BeforeValidator(field_not_none)] = None
+    sex: str
     subject_id: Optional[str] = None
     tissue_type: Optional[str] = None
 
@@ -75,8 +70,8 @@ class ScoutCancerIndividual(ScoutIndividual):
 
 
 class ScoutLoadConfig(BaseModel):
-    owner: Annotated[str, BeforeValidator(field_not_none)] = None
-    family: Annotated[str, BeforeValidator(field_not_none)] = None
+    owner: str
+    family: str
     family_name: Optional[str] = None
     synopsis: Optional[str] = None
     phenotype_terms: Optional[List[str]] = None
@@ -103,7 +98,7 @@ class ScoutLoadConfig(BaseModel):
 
 class BalsamicLoadConfig(ScoutLoadConfig):
     madeline: Optional[str] = None
-    vcf_cancer: Annotated[str, BeforeValidator(field_not_none)] = None
+    vcf_cancer: str
     vcf_cancer_sv: Optional[str] = None
     vcf_cancer_research: Optional[str] = None
     vcf_cancer_sv_research: Optional[str] = None
@@ -126,11 +121,11 @@ class MipLoadConfig(ScoutLoadConfig):
     variant_catalog: Optional[str] = None
     vcf_mei: Optional[str] = None
     vcf_mei_research: Optional[str] = None
-    vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
-    vcf_snv_research: Annotated[Optional[str], BeforeValidator(field_not_none)] = None
+    vcf_snv: str
+    vcf_snv_research: str
     vcf_str: Optional[str] = None
-    vcf_sv: Annotated[Optional[str], BeforeValidator(field_not_none)] = None
-    vcf_sv_research: Annotated[Optional[str], BeforeValidator(field_not_none)] = None
+    vcf_sv: str
+    vcf_sv_research: str
 
 
 class RnafusionLoadConfig(ScoutLoadConfig):
