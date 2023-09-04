@@ -99,6 +99,7 @@ class FileFormat(StrEnum):
     YAML: str = "yaml"
     CSV: str = "csv"
     XML: str = "xml"
+    TXT: str = "txt"
 
 
 class GenomeVersion(StrEnum):

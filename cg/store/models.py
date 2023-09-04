@@ -129,9 +129,9 @@ class Application(Model):
         return self.target_reads * self.percent_reads_guaranteed / 100
 
     @property
-    def analysis_type(self):
+    def analysis_type(self) -> str:
         if self.prep_category == PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
-            return self.prep_category
+            return PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
 
         return (
             PrepCategory.WHOLE_GENOME_SEQUENCING.value

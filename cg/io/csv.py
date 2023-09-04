@@ -1,8 +1,8 @@
 """Module for reading and writing comma separated values (CSV) formatted files."""
 import csv
 import io
-from typing import Any, List, Union
 from pathlib import Path
+from typing import Any, List, Union
 
 from cg.constants import FileExtensions
 from cg.io.validate_path import validate_file_suffix

@@ -42,7 +42,7 @@ except FileNotFoundError:
 
 setup(
     name=NAME,
-    version="44.0.2",
+    version="45.0.13",
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
@@ -52,7 +52,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     packages=find_packages(exclude=("tests*", "docs", "examples")),
-    entry_points={"console_scripts": ["cg=cg.cli:base"]},
+    entry_points={"console_scripts": ["cg=cg.cli.base:base"]},
     install_requires=parse_requirements(),
     tests_require=parse_requirements("requirements-dev.txt"),
     classifiers=[
