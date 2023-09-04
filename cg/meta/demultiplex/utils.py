@@ -106,13 +106,13 @@ def is_file_relevant(file: Path) -> bool:
     """Returns whether a file is relevant for demultiplexing."""
     relevant_directories = [DemultiplexingDirsAndFiles.INTER_OP, DemultiplexingDirsAndFiles.DATA]
     for relevant_directory in relevant_directories:
-        if relevant_directory in file:
+        if relevant_directory in file.parts:
             return True
     return False
 
 
 def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
-    """Returns wheter all relevant files for demultiplexing have been synced from the source to
+    """Returns whether all relevant files for demultiplexing have been synced from the source to
     the destination."""
     manifest_file = Path(source_directory, DemultiplexingDirsAndFiles.FILE_MANIFEST)
     if not manifest_file.exists():

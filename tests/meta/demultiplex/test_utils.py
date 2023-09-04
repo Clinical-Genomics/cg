@@ -1,10 +1,10 @@
 from pathlib import Path
-from mock import MagicMock, PropertyMock, patch
+from typing import List
 
 import pytest
 
 from cg.constants.constants import FileExtensions
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.utils import (
@@ -13,6 +13,8 @@ from cg.meta.demultiplex.utils import (
     get_q30_threshold,
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
+    parse_manifest_file,
+    is_file_relevant,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
@@ -140,3 +142,38 @@ def test_parse_flow_cell_directory_data_valid():
     # THEN the flow cell path and bcl converter should be set
     assert result.path == Path(flow_cell_run_directory)
     assert result.bcl_converter == "dummy_bcl_converter"
+
+
+def test_parse_manifest_file(novaseq_x_manifest_file: Path):
+    # GIVEN a manifest file
+
+    # WHEN parsing the manifest file
+    files_at_source: List[Path] = parse_manifest_file(novaseq_x_manifest_file)
+
+    # THEN paths should be returned
+    # THEN the paths should be Path objects
+    assert files_at_source
+    assert isinstance(files_at_source, list)
+    assert all(isinstance(file, Path) for file in files_at_source)
+
+
+@pytest.mark.parametrize(
+    "file, expected_result",
+    [
+        (Path("flow_cell_dir", DemultiplexingDirsAndFiles.DATA, "some_file.txt"), True),
+        (Path("flow_cell_dir", DemultiplexingDirsAndFiles.INTER_OP, "some_file.txt"), True),
+        (Path("flow_cell_dir", "Thumbnail_Images", "some_file.txt"), False),
+    ],
+)
+def test_is_file_relevant(file: Path, expected_result: bool):
+    # GIVEN a file path
+
+    # WHEN checking if the file is relevant
+    result = is_file_relevant(file)
+
+    # THEN the correct result should be returned
+    assert result == expected_result
+
+
+def test_is_syncing_complete():
+    assert False

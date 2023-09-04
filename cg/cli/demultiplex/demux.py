@@ -206,9 +206,16 @@ def copy_novaseqx_flow_cells(context: CGConfig):
 )
 @click.pass_obj
 def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
-    """Checks if all relevant files for the demultiplexing have been parsed"""
+    """Checks if all relevant files for the demultiplexing have been synced.
+    If so it creates a file to show that that is the case."""
     local_flow_cells_dir: Path = Path(context.flow_cells_dir)
     for remote_flow_cell in Path(source_directory).iterdir():
-        if is_syncing_complete(remote_flow_cell, Path(local_flow_cells_dir, remote_flow_cell.name)):
-            Path(local_flow_cells_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
-            continue
+        if is_syncing_complete(
+            source_directory=remote_flow_cell,
+            target_directory=Path(local_flow_cells_dir, remote_flow_cell.name),
+        ):
+            Path(
+                local_flow_cells_dir,
+                remote_flow_cell.name,
+                DemultiplexingDirsAndFiles.COPY_COMPLETE,
+            ).touch()
