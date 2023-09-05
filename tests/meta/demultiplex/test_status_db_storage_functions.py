@@ -1,4 +1,4 @@
-"""Tests for the status_db_storage_functions module."""
+"""Tests for the status_db_storage_functions module of the demultiplexing post post-processing module."""
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.status_db_storage_functions import (
     add_samples_to_flow_cell_in_status_db,
