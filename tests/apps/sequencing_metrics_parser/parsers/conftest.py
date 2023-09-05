@@ -1,12 +1,6 @@
 from typing import Dict
 import pytest
 
-from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
-    ConversionResult,
-    DemuxResult,
-    ReadMetric,
-)
-
 
 @pytest.fixture
 def valid_bcl2fastq_metrics_data() -> Dict:
@@ -29,20 +23,3 @@ def valid_bcl2fastq_metrics_data() -> Dict:
             }
         ],
     }
-
-
-@pytest.fixture
-def conversion_result() -> ConversionResult:
-    return ConversionResult(
-        LaneNumber=1,
-        Yield=1000,
-        DemuxResults=[
-            DemuxResult(
-                SampleId="S1",
-                SampleName="Sample1",
-                NumberReads=1,
-                Yield=100,
-                ReadMetrics=[ReadMetric(ReadNumber=1, Yield=100, YieldQ30=90, QualityScoreSum=100)],
-            )
-        ],
-    )
