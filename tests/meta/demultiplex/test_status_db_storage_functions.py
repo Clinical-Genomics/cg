@@ -1,21 +1,65 @@
-"""Tests for the status_db_storage_functions module of the demultiplexing post post-processing module."""
+"""Tests for the status_db_storage_functions module."""
+from pathlib import Path
+
+import pytest
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.exc import MissingFilesError
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
+from cg.meta.demultiplex.status_db_storage_functions import (
+    add_samples_to_flow_cell_in_status_db,
+    add_sequencing_metrics_to_statusdb,
+    check_if_samples_have_files,
+    metric_has_sample_in_statusdb,
+    update_sample_read_count,
+)
+from cg.models.cg_config import CGConfig
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.store import Store
 from mock import MagicMock
 
-from cg.meta.demultiplex.demux_post_processing import (
-    DemuxPostProcessingAPI,
-)
 
-from cg.models.cg_config import CGConfig
+def test_check_if_samples_have_files_passes(mocker, novaseqx_demultiplexed_flow_cell: Path):
+    """Test the check of a flow cells with fastq files does not raise an error."""
+    # GIVEN a demultiplexed flow cell with fastq files
+    flow_cell_with_fastq = FlowCellDirectoryData(flow_cell_path=novaseqx_demultiplexed_flow_cell)
 
-from cg.store import Store
+    # GIVEN a that the flow cell has a sample sheet in Housekeeper
+    sample_sheet_path = Path(
+        novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+    mocker.patch.object(
+        flow_cell_with_fastq, "get_sample_sheet_path_hk", return_value=sample_sheet_path
+    )
+    assert flow_cell_with_fastq.get_sample_sheet_path_hk()
+
+    # WHEN checking if the flow cell has fastq files for teh samples
+    check_if_samples_have_files(flow_cell=flow_cell_with_fastq)
+
+    # THEN no error is raised
 
 
-from cg.meta.demultiplex.status_db_storage_functions import (
-    add_sequencing_metrics_to_statusdb,
-    update_sample_read_count,
-    metric_has_sample_in_statusdb,
-    add_samples_to_flow_cell_in_status_db,
-)
+def test_check_if_samples_have_files_fails(
+    mocker, bcl_convert_demultiplexed_flow_cell: Path, bcl_convert_flow_cell_dir: Path
+):
+    """Test the check of a flow cells with no fastq files raises an error."""
+    # GIVEN a demultiplexed flow cell with no fastq files
+    flow_cell_without_fastq = FlowCellDirectoryData(
+        flow_cell_path=bcl_convert_demultiplexed_flow_cell
+    )
+
+    # GIVEN a that the flow cell has a sample sheet in Housekeeper
+    sample_sheet_path = Path(
+        bcl_convert_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+    mocker.patch.object(
+        flow_cell_without_fastq, "get_sample_sheet_path_hk", return_value=sample_sheet_path
+    )
+    assert flow_cell_without_fastq.get_sample_sheet_path_hk()
+
+    # WHEN checking if the flow cell has fastq files for teh samples
+    with pytest.raises(MissingFilesError):
+        # THEN an error is raised
+        check_if_samples_have_files(flow_cell=flow_cell_without_fastq)
 
 
 def test_add_single_sequencing_metrics_entry_to_statusdb(

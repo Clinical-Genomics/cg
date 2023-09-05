@@ -17,7 +17,6 @@ from cg.store import Store
 from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
 
 LOG = logging.getLogger(__name__)
-NUMBER_FASTQ_FILES_PER_SAMPLE: int = 8
 
 
 def store_flow_cell_data_in_status_db(

@@ -10,9 +10,6 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
-from housekeeper.store.models import File, Version
-from requests import Response
-
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -57,6 +54,8 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
 )
 from cg.utils import Process
+from housekeeper.store.models import File, Version
+from requests import Response
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -1422,6 +1421,22 @@ def fixture_demultiplexed_flow_cell(
 ) -> Path:
     """Return the path to a demultiplexed flow cell with bcl2fastq."""
     return Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
+
+
+@pytest.fixture(name="bcl_convert_demultiplexed_flow_cell")
+def fixture_bcl_convert_demultiplexed_flow_cell(
+    demultiplexed_runs: Path, bcl_convert_flow_cell_full_name: str
+) -> Path:
+    """Return the path to a demultiplexed flow cell with BCLConvert."""
+    return Path(demultiplexed_runs, bcl_convert_flow_cell_full_name)
+
+
+@pytest.fixture(name="novaseqx_demultiplexed_flow_cell")
+def fixture_novaseqx_demultiplexed_flow_cell(
+    demultiplexed_runs: Path, novaseq_x_flow_cell_full_name: str
+):
+    """Return the path to a demultiplexed NovaSeqX flow cell."""
+    return Path(demultiplexed_runs, novaseq_x_flow_cell_full_name)
 
 
 @pytest.fixture(name="bcl2fastq_demux_results")
