@@ -13,7 +13,7 @@ from cg.meta.demultiplex.utils import (
     get_sample_sheet_path,
     parse_flow_cell_directory_data,
     add_flow_cell_name_to_fastq_file_path,
-    is_file_relevant,
+    is_file_relevant_for_demultiplexing,
     parse_manifest_file,
     is_syncing_complete,
 )
@@ -166,11 +166,11 @@ def test_parse_manifest_file(novaseq_x_manifest_file: Path):
         (Path("flow_cell_dir", "Thumbnail_Images", "some_file.txt"), False),
     ],
 )
-def test_is_file_relevant(file: Path, expected_result: bool):
+def test_is_file_relevant_for_demultiplexing(file: Path, expected_result: bool):
     # GIVEN a file path
 
     # WHEN checking if the file is relevant
-    result = is_file_relevant(file)
+    result = is_file_relevant_for_demultiplexing(file)
 
     # THEN the correct result should be returned
     assert result == expected_result

@@ -482,7 +482,7 @@ def base_call_file() -> Path:
 
 @pytest.fixture()
 def inter_op_file() -> Path:
-    return Path("InterOp", "AlignmentMetricsOut.bin")
+    return Path(DemultiplexingDirsAndFiles.INTER_OP, "AlignmentMetricsOut.bin")
 
 
 @pytest.fixture()

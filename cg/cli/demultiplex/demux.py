@@ -208,14 +208,14 @@ def copy_novaseqx_flow_cells(context: CGConfig):
 def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
     """Checks if all relevant files for the demultiplexing have been synced.
     If so it creates a CopyComplete.txt file to show that that is the case."""
-    local_flow_cells_dir: Path = Path(context.flow_cells_dir)
-    for remote_flow_cell in Path(source_directory).iterdir():
+    target_flow_cells_dir = Path(context.flow_cells_dir)
+    for source_flow_cell in Path(source_directory).iterdir():
         if is_syncing_complete(
-            source_directory=remote_flow_cell,
-            target_directory=Path(local_flow_cells_dir, remote_flow_cell.name),
+            source_directory=source_flow_cell,
+            target_directory=Path(target_flow_cells_dir, source_flow_cell.name),
         ):
             Path(
-                local_flow_cells_dir,
-                remote_flow_cell.name,
+                target_flow_cells_dir,
+                source_flow_cell.name,
                 DemultiplexingDirsAndFiles.COPY_COMPLETE,
             ).touch()
