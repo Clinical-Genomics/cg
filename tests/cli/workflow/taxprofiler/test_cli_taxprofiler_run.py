@@ -72,3 +72,58 @@ def test_with_config_use_nextflow(
         "-resume",
     ]:
         assert message in caplog.text
+
+
+def test_with_config_use_tower(
+    cli_runner: CliRunner,
+    taxprofiler_context: CGConfig,
+    caplog: LogCaptureFixture,
+    taxprofiler_case_id: str,
+    taxprofiler_config,
+):
+    """Test command with case_id and config file using tower."""
+    caplog.set_level(logging.INFO)
+    # GIVEN  a valid case
+    case_id: str = taxprofiler_case_id
+
+    # GIVEN a mocked config
+
+    # WHEN dry running with dry specified
+    result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=taxprofiler_context)
+
+    # THEN command should execute successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN command should use tower
+
+    for message in [
+        "using tower",
+        "path/to/bin/tw launch",
+    ]:
+        assert message in caplog.text
+
+
+def test_with_config_use_tower_resume(
+    cli_runner: CliRunner,
+    taxprofiler_context: CGConfig,
+    caplog: LogCaptureFixture,
+    taxprofiler_case_id: str,
+    taxprofiler_config,
+    tower_id,
+):
+    """Test resume command with tower to use tw run instead of tw launch."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a taxprofiler case-id and mocked config
+
+    # WHEN dry running with dry specified
+    result = cli_runner.invoke(
+        run, [taxprofiler_case_id, "--nf-tower-id", tower_id, "--dry-run"], obj=taxprofiler_context
+    )
+
+    # THEN command should execute successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN command should use tower for relaunch
+    assert "Pipeline will be resumed from run" in caplog.text
+    assert "path/to/bin/tw runs relaunch" in caplog.text
