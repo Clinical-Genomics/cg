@@ -7,14 +7,16 @@ from typing import List, Optional, Set
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_internal_ids_from_sample_sheet,
 )
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
 )
-from cg.exc import MissingFilesError
-from cg.meta.demultiplex.utils import get_q30_threshold, get_sample_fastqs_from_flow_cell
+from cg.exc import HousekeeperFileMissingError
+from cg.meta.demultiplex.utils import get_q30_threshold
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
+from housekeeper.store.models import File
 
 LOG = logging.getLogger(__name__)
 
@@ -39,11 +41,10 @@ def store_flow_cell_data_in_status_db(
     else:
         LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}.")
 
-    sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
+    sample_internal_ids = get_sample_internal_ids_from_sample_sheet(
         sample_sheet_path=parsed_flow_cell.get_sample_sheet_path_hk(),
         flow_cell_sample_type=parsed_flow_cell.sample_type,
     )
-    check_if_samples_have_files(flow_cell=parsed_flow_cell)
     add_samples_to_flow_cell_in_status_db(
         flow_cell=flow_cell,
         sample_internal_ids=sample_internal_ids,
@@ -92,8 +93,7 @@ def add_sequencing_metrics_to_statusdb(
         )
         if not metric_exists and metric_has_sample:
             LOG.debug(
-                f"Adding sample lane sequencing metrics for {metric.flow_cell_name},"
-                f"{metric.sample_internal_id}, and {metric.flow_cell_lane_number}."
+                f"Adding sample lane sequencing metrics for {metric.flow_cell_name}, {metric.sample_internal_id}, and {metric.flow_cell_lane_number}."
             )
             store.session.add(metric)
     store.session.commit()
@@ -118,8 +118,7 @@ def metric_exists_in_status_db(metric: SampleLaneSequencingMetrics, store: Store
     )
     if existing_metrics_entry:
         LOG.warning(
-            f"Sample lane sequencing metrics already exist for {metric.flow_cell_name},"
-            f" {metric.sample_internal_id}, and lane {metric.flow_cell_lane_number}. Skipping."
+            f"Sample lane sequencing metrics already exist for {metric.flow_cell_name}, {metric.sample_internal_id}, and lane {metric.flow_cell_lane_number}. Skipping."
         )
     return bool(existing_metrics_entry)
 
