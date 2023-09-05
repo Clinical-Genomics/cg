@@ -475,17 +475,17 @@ def fixture_not_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Pa
     return base_dir
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def base_call_file() -> Path:
     return Path("Data", "Intensities", "BaseCalls", "L001", "C1.1", "L001_1.cbcl")
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def inter_op_file() -> Path:
     return Path(DemultiplexingDirsAndFiles.INTER_OP, "AlignmentMetricsOut.bin")
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def thumbnail_file() -> Path:
     return Path("Thumbnail_Images", "L001", "C1.1", "s_1_1105_green.png")
 
