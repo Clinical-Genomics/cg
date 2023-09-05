@@ -639,12 +639,6 @@ def fixture_rnafusion_analysis_dir(analysis_dir: Path) -> Path:
     return Path(analysis_dir, "rnafusion")
 
 
-@pytest.fixture(name="taxprofiler_analysis_dir")
-def fixture_taxprofiler_analysis_dir(analysis_dir: Path) -> Path:
-    """Return the path to the directory with taxprofiler analysis files."""
-    return Path(analysis_dir, "taxprofiler")
-
-
 @pytest.fixture(name="sample_cram")
 def fixture_sample_cram(mip_dna_analysis_dir: Path) -> Path:
     """Return the path to the cram file for a sample."""
