@@ -311,23 +311,26 @@ class CGConfig(BaseModel):
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
-    model_config = ConfigDict(arbitrary_types_allowed=True, fields={
-        "cg_stats_api_": "cg_stats_api",
-        "chanjo_api_": "chanjo_api",
-        "crunchy_api_": "crunchy_api",
-        "demultiplex_api_": "demultiplex_api",
-        "genotype_api_": "genotype_api",
-        "gens_api_": "gens_api",
-        "hermes_api_": "hermes_api",
-        "housekeeper_api_": "housekeeper_api",
-        "lims_api_": "lims_api",
-        "loqusdb_api_": "loqusdb_api",
-        "madeline_api_": "madeline_api",
-        "mutacc_auto_api_": "mutacc_auto_api",
-        "scout_api_": "scout_api",
-        "status_db_": "status_db",
-        "trailblazer_api_": "trailblazer_api",
-    })
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        fields={
+            "cg_stats_api_": "cg_stats_api",
+            "chanjo_api_": "chanjo_api",
+            "crunchy_api_": "crunchy_api",
+            "demultiplex_api_": "demultiplex_api",
+            "genotype_api_": "genotype_api",
+            "gens_api_": "gens_api",
+            "hermes_api_": "hermes_api",
+            "housekeeper_api_": "housekeeper_api",
+            "lims_api_": "lims_api",
+            "loqusdb_api_": "loqusdb_api",
+            "madeline_api_": "madeline_api",
+            "mutacc_auto_api_": "mutacc_auto_api",
+            "scout_api_": "scout_api",
+            "status_db_": "status_db",
+            "trailblazer_api_": "trailblazer_api",
+        },
+    )
 
     @property
     def chanjo_api(self) -> ChanjoAPI:
