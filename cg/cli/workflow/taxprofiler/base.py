@@ -1,7 +1,7 @@
 """CLI support to create config and/or start TAXPROFILER."""
 
 import logging
-
+from typing import Optional
 import click
 from pydantic.v1 import ValidationError
 
@@ -14,7 +14,14 @@ from cg.cli.workflow.nextflow.options import (
     OPTION_REVISION,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
+    OPTION_TOWER,
 )
+from cg.cli.workflow.taxprofiler.options import (
+    OPTION_FROM_START,
+    OPTION_INSTRUMENT_PLATFORM,
+)
+from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV, OPTION_TOWER_RUN_ID
+from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.cli.workflow.taxprofiler.options import OPTION_FROM_START, OPTION_INSTRUMENT_PLATFORM
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.constants.nf_analysis import NfTowerStatus
@@ -71,7 +78,9 @@ def config_case(
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
 @OPTION_REVISION
+@OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
+@OPTION_TOWER_RUN_ID
 @DRY_RUN
 @click.pass_obj
 def run(
@@ -84,7 +93,9 @@ def run(
     config: str,
     params_file: str,
     revision: str,
+    compute_env: str,
     use_nextflow: bool,
+    nf_tower_id: Optional[str],
     dry_run: bool,
 ) -> None:
     """Run taxprofiler analysis for a case."""
@@ -106,8 +117,10 @@ def run(
                 case_id=case_id, params_file=params_file
             ),
             "name": case_id,
+            "compute_env": compute_env or analysis_api.compute_env,
             "revision": revision or analysis_api.revision,
             "wait": NfTowerStatus.SUBMITTED,
+            "id": nf_tower_id,
         }
     )
     try:
@@ -123,3 +136,5 @@ def run(
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort() from error
+    if not dry_run and not use_nextflow:
+        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
