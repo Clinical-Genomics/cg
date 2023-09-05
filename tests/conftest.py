@@ -872,6 +872,14 @@ def fixture_tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert() -> str:
     return "211101_A00187_0615_AHLG5GDRZZ"
 
 
+@pytest.fixture(name="tmp_flow_cell_name_malformed_sample_sheet")
+def fixture_tmp_flow_cell_name_malformed_sample_sheet() -> str:
+    """ "Returns the name of a flow cell directory ready for demultiplexing with BCL convert.
+    Contains a sample sheet with malformed headers.
+    """
+    return "201203_A00689_0200_AHVKJCDRXY"
+
+
 @pytest.fixture(name="tmp_flow_cell_name_no_sample_sheet")
 def fixture_tmp_flow_cell_name_no_sample_sheet() -> str:
     """This is the name of a flow cell directory with the run parameters and sample sheet missing."""
@@ -898,6 +906,14 @@ def fixture_tmp_flow_cells_directory_no_sample_sheet(
 ) -> Path:
     """This is a path to a flow cell directory with the sample sheet and run parameters missing."""
     return Path(tmp_flow_cells_directory, tmp_flow_cell_name_no_sample_sheet)
+
+
+@pytest.fixture(name="tmp_flow_cells_directory_malformed_sample_sheet")
+def fixture_tmp_flow_cells_directory_malformed_sample_sheet(
+    tmp_flow_cell_name_malformed_sample_sheet: str, tmp_flow_cells_directory: Path
+) -> Path:
+    """This is a path to a flow cell directory with a sample sheet with malformed headers."""
+    return Path(tmp_flow_cells_directory, tmp_flow_cell_name_malformed_sample_sheet)
 
 
 @pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert")
