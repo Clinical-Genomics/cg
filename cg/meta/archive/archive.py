@@ -76,7 +76,7 @@ class SpringArchiveAPI:
         self, files_and_samples: List[FileAndSample], archive_location: ArchiveLocations
     ) -> None:
         """Archives the subset of files which should be archived in the specified location and
-        adds corresponding entries in HouseKeeper."""
+        adds corresponding entries in Housekeeper."""
         selected_files: [List[FileAndSample]] = filter_files_on_archive_location(
             files_and_samples=files_and_samples, archive_location=archive_location
         )
