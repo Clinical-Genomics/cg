@@ -200,6 +200,7 @@ def copy_novaseqx_flow_cells(context: CGConfig):
 
 @click.command(name="confirm-flow-cell-sync")
 @click.option(
+    "-s",
     "--source",
     required=True,
     help="The path from where the syncing is done.",
