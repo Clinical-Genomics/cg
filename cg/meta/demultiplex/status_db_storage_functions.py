@@ -54,23 +54,6 @@ def store_flow_cell_data_in_status_db(
     store.session.commit()
 
 
-def check_if_samples_have_files(flow_cell: FlowCellDirectoryData) -> None:
-    """Check if all samples have already all the fastq files in the demultiplex directory.
-    Raises: MissingFilesError
-        When one of the samples does not have enough fastq files in the flow cell
-    """
-    sample_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
-        sample_sheet_path=flow_cell.get_sample_sheet_path_hk(),
-        flow_cell_sample_type=flow_cell.sample_type,
-    )
-    for sample_id in sample_ids:
-        fastq_files: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
-            flow_cell_directory=flow_cell.path, sample_internal_id=sample_id
-        )
-        if not fastq_files:
-            raise MissingFilesError(f"Sample {sample_id} has no fastq files in flow cell")
-
-
 def add_samples_to_flow_cell_in_status_db(
     flow_cell: Flowcell, sample_internal_ids: List[str], store: Store
 ) -> Flowcell:
