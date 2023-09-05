@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic.v1 import BaseModel
+from pydantic import BaseModel
 
 from cg.constants.constants import HastaSlurmPartitions
 from cg.constants.priority import SlurmQos
@@ -16,10 +16,10 @@ class Sbatch(BaseModel):
     minutes: str = "00"
     quality_of_service: SlurmQos = SlurmQos.LOW
     commands: str
-    error: Optional[str]
+    error: Optional[str] = None
     exclude: Optional[str] = ""
-    number_tasks: Optional[int]
-    memory: Optional[int]
+    number_tasks: Optional[int] = None
+    memory: Optional[int] = None
 
 
 class SbatchDragen(Sbatch):

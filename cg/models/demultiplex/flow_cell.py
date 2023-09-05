@@ -4,6 +4,9 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Type, Union
 
+from pydantic import ValidationError
+from typing_extensions import Literal
+
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeq6000Bcl2Fastq,
     FlowCellSampleNovaSeq6000Dragen,
