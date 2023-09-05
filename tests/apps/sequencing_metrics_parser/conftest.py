@@ -118,25 +118,6 @@ def fixture_bcl_convert_quality_metric_model_with_data(
     )
 
 
-@pytest.fixture(name="bcl_convert_sample_sheet_model_with_data", scope="session")
-def fixture_bcl_convert_sample_sheet_model_with_data(
-    test_lane,
-    test_sample_internal_id,
-    test_sample_project,
-) -> BclConvertSampleSheetData:
-    """Return a BclConvertSampleSheetData model with data."""
-    return BclConvertSampleSheetData(
-        **{
-            SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value: "HY7FFDRX2",
-            SampleSheetNovaSeq6000Sections.Data.LANE.value: test_lane,
-            SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCLCONVERT.value: test_sample_internal_id,
-            SampleSheetNovaSeq6000Sections.Data.SAMPLE_NAME.value: "anonymous_1",
-            SampleSheetNovaSeq6000Sections.Data.CONTROL.value: "N",
-            SampleSheetNovaSeq6000Sections.Data.SAMPLE_PROJECT_BCLCONVERT.value: test_sample_project,
-        }
-    )
-
-
 @pytest.fixture(name="parsed_bcl_convert_metrics", scope="session")
 def fixture_parsed_bcl_convert_metrics(bcl_convert_metrics_dir_path) -> BclConvertMetricsParser:
     """Return an object with parsed BCLConvert metrics."""

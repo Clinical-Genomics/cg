@@ -56,16 +56,6 @@ def fixture_tmp_samplesheet_path(tmp_demulitplexing_dir: Path) -> Path:
     return tmp_sample_sheet_path
 
 
-@pytest.fixture(name="tmp_flow_cell_run_path")
-def fixture_tmp_flow_cell_run_path(project_dir: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
-    """Flow cell run directory in temporary folder."""
-
-    tmp_flow_cell_run_path: Path = Path(project_dir, "flow_cell_run", bcl2fastq_flow_cell_full_name)
-    tmp_flow_cell_run_path.mkdir(exist_ok=True, parents=True)
-
-    return tmp_flow_cell_run_path
-
-
 @pytest.fixture(name="tmp_flow_cell_run_base_path")
 def fixture_tmp_flow_cell_run_base_path(
     project_dir: Path, bcl2fastq_flow_cell_full_name: str
