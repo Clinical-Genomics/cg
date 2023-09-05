@@ -2,7 +2,8 @@ import collections
 from pathlib import Path
 from typing import List
 
-from pydantic.v1 import BaseModel, Field, conlist, validator
+from pydantic import BaseModel, Field, FieldValidationInfo, conlist, field_validator
+from typing_extensions import Annotated
 
 from cg.constants.nextflow import DELIVER_FILE_HEADERS
 from cg.exc import SampleSheetError
@@ -23,20 +24,20 @@ class NextflowSampleSheetEntry(BaseModel):
     """
 
     name: str
-    fastq_forward_read_paths: conlist(Path, min_items=1)
-    fastq_reverse_read_paths: conlist(Path, min_items=1)
+    fastq_forward_read_paths: Annotated[List[Path], Field(min_length=1)]
+    fastq_reverse_read_paths: Annotated[List[Path], Field(min_length=1)]
 
-    @validator("fastq_reverse_read_paths")
+    @field_validator("fastq_reverse_read_paths")
     def validate_complete_fastq_file_pairs(
-        cls, fastq_reverse: List[str], values: dict
+        cls, fastq_reverse: List[str], info: FieldValidationInfo
     ) -> List[str]:
         """Verify that the number of fastq forward files is the same as for the reverse."""
-        if len(fastq_reverse) != len(values.get("fastq_forward_read_paths")):
+        if len(fastq_reverse) != len(info.data.get("fastq_forward_read_paths")):
             raise SampleSheetError("Fastq file length for forward and reverse do not match")
         return fastq_reverse
 
-    @validator("fastq_forward_read_paths", "fastq_reverse_read_paths")
-    def fastq_files_exist(cls, fastq_paths: List[str], values: dict) -> List[str]:
+    @field_validator("fastq_forward_read_paths", "fastq_reverse_read_paths")
+    def fastq_files_exist(cls, fastq_paths: List[str]) -> List[str]:
         """Verify that fastq files exist."""
         for fastq_path in fastq_paths:
             if not fastq_path.is_file():
@@ -53,7 +54,8 @@ class NextflowDeliverables(BaseModel):
 
     deliverables: dict
 
-    @validator("deliverables")
+    @field_validator("deliverables")
+    @classmethod
     def headers(cls, v: dict) -> None:
         """Validate header format."""
         if collections.Counter(list(v.keys())) != collections.Counter(DELIVER_FILE_HEADERS):
