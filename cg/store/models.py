@@ -129,9 +129,9 @@ class Application(Model):
         return self.target_reads * self.percent_reads_guaranteed / 100
 
     @property
-    def analysis_type(self):
+    def analysis_type(self) -> str:
         if self.prep_category == PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
-            return self.prep_category
+            return PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
 
         return (
             PrepCategory.WHOLE_GENOME_SEQUENCING.value
@@ -788,7 +788,7 @@ class SampleLaneSequencingMetrics(Model):
 
     sample_internal_id = Column(types.String(32), ForeignKey("sample.internal_id"), nullable=False)
     sample_total_reads_in_lane = Column(types.BigInteger)
-    sample_base_fraction_passing_q30 = Column(types.Numeric(6, 2))
+    sample_base_percentage_passing_q30 = Column(types.Numeric(6, 2))
     sample_base_mean_quality_score = Column(types.Numeric(6, 2))
 
     created_at = Column(types.DateTime)

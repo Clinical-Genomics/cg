@@ -203,7 +203,7 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
     # THEN you should be notified that there are no files on flow cell names
 
     assert (
-        f"Housekeeper: No files found with tag: {delete_demultiplex_api.flow_cell_name}"
+        f"Housekeeper: No sample sheets found with tag: {delete_demultiplex_api.flow_cell_name}"
         in caplog.text
     )
 

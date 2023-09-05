@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Type, Union
 
-from pydantic.v1 import ValidationError
+from pydantic import ValidationError
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.models import (
@@ -14,6 +14,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     SampleSheet,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import (
     BclConverter,
@@ -45,13 +46,14 @@ class FlowCellDirectoryData:
         self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_dir_name()
         self.bcl_converter: Optional[str] = self.get_bcl_converter(bcl_converter)
+        self._sample_sheet_path_hk: Optional[Path] = None
 
     def parse_flow_cell_dir_name(self):
         """Parse relevant information from flow cell name.
 
         This will assume that the flow cell naming convention is used. If not we skip the flow cell.
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>
-        Example: '201203_A00689_0200_AHVKJCDRXX'.
+        Example: '201203_D00483_0200_AHVKJCDRXX'.
         """
 
         self.validate_flow_cell_dir_name()
@@ -80,6 +82,14 @@ class FlowCellDirectoryData:
         Return sample sheet path.
         """
         return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME.value)
+
+    def set_sample_sheet_path_hk(self, hk_path: Path):
+        self._sample_sheet_path_hk = hk_path
+
+    def get_sample_sheet_path_hk(self) -> Optional[Path]:
+        if not self._sample_sheet_path_hk:
+            raise FlowCellError("Attribute _sample_sheet_path_hk has not been assigned yet")
+        return self._sample_sheet_path_hk
 
     @property
     def run_parameters_path(self) -> Path:
@@ -194,16 +204,25 @@ class FlowCellDirectoryData:
         """
         Validate on the following criteria:
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>
-        Example: '201203_A00689_0200_AHVKJCDRXX'.
+        Example: '201203_D00483_0200_AHVKJCDRXX'.
         """
         if len(self.split_flow_cell_name) != 4:
             message = f"Flowcell {self.full_name} does not follow the flow cell naming convention"
             LOG.warning(message)
             raise FlowCellError(message)
 
-    def is_demultiplexing_started(self) -> bool:
-        """Check if demultiplexing started path exists."""
+    def has_demultiplexing_started_locally(self) -> bool:
+        """Check if demultiplexing has started path exists on the cluster."""
         return self.demultiplexing_started_path.exists()
+
+    def has_demultiplexing_started_on_sequencer(self) -> bool:
+        """Check if demultiplexing has started on the NovaSeqX machine."""
+        latest_analysis: Path = get_latest_analysis_path(self.path)
+        if not latest_analysis:
+            return False
+        return Path(
+            latest_analysis, DemultiplexingDirsAndFiles.DATA, DemultiplexingDirsAndFiles.BCL_CONVERT
+        ).exists()
 
     def sample_sheet_exists(self) -> bool:
         """Check if sample sheet exists."""
