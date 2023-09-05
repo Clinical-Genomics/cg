@@ -1,8 +1,8 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Optional, Union
 
-from pydantic.v1 import BaseModel, validator
+from pydantic import BaseModel, FieldValidationInfo, field_validator
 
 
 class BalsamicConfigAnalysis(BaseModel):
@@ -48,16 +48,17 @@ class BalsamicConfigReference(BaseModel):
     """
 
     reference_genome: Path
-    reference_genome_version: Optional[str]
+    reference_genome_version: Optional[str] = None
 
-    @validator("reference_genome_version", always=True)
-    def extract_genome_version_from_path(cls, value: Optional[str], values: dict) -> str:
+    @field_validator("reference_genome_version")
+    @classmethod
+    def extract_genome_version_from_path(cls, _, info: FieldValidationInfo) -> str:
         """
         Returns the genome version from the reference path:
         /home/proj/stage/cancer/balsamic_cache/X.X.X/hg19/genome/human_g1k_v37.fasta
         """
 
-        return str(values["reference_genome"]).split("/")[-3]
+        return str(info.data.get("reference_genome")).split("/")[-3]
 
 
 class BalsamicConfigPanel(BaseModel):
@@ -70,20 +71,20 @@ class BalsamicConfigPanel(BaseModel):
     """
 
     capture_kit: str
-    capture_kit_version: Optional[str]
+    capture_kit_version: Optional[str] = None
     chrom: List[str]
 
-    @validator("capture_kit", pre=True)
+    @field_validator("capture_kit", mode="before")
+    @classmethod
     def extract_capture_kit_name_from_path(cls, capture_kit: str) -> str:
         """Return the base name of the provided capture kit path."""
         return Path(capture_kit).name
 
-    @validator("capture_kit_version", always=True)
-    def extract_capture_kit_name_from_name(
-        cls, capture_kit_version: Optional[str], values: dict
-    ) -> str:
+    @field_validator("capture_kit_version")
+    @classmethod
+    def extract_capture_kit_name_from_name(cls, _, info: FieldValidationInfo) -> str:
         """Return the panel bed version from its filename (e.g. gicfdna_3.1_hg19_design.bed)."""
-        return values["capture_kit"].split("_")[-3]
+        return info.data.get("capture_kit").split("_")[-3]
 
 
 class BalsamicConfigQC(BaseModel):
@@ -100,12 +101,12 @@ class BalsamicConfigQC(BaseModel):
     """
 
     picard_rmdup: bool
-    adapter: Optional[str]
+    adapter: Optional[str] = None
     quality_trim: bool
     adapter_trim: bool
     umi_trim: bool
-    min_seq_length: Optional[str]
-    umi_trim_length: Optional[str]
+    min_seq_length: Optional[str] = None
+    umi_trim_length: Optional[str] = None
 
 
 class BalsamicVarCaller(BaseModel):
@@ -139,7 +140,7 @@ class BalsamicConfigJSON(BaseModel):
     analysis: BalsamicConfigAnalysis
     samples: Dict[str, BalsamicConfigSample]
     reference: BalsamicConfigReference
-    panel: Optional[BalsamicConfigPanel]
+    panel: Optional[BalsamicConfigPanel] = None
     QC: BalsamicConfigQC
     vcf: Dict[str, BalsamicVarCaller]
     bioinfo_tools_version: Dict[str, List[str]]

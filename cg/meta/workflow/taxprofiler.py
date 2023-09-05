@@ -8,7 +8,6 @@ from cg.constants import Pipeline
 from cg.constants.sequencing import SequencingPlatform
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.nf_analysis import PipelineParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.store.models import Family, Sample
 

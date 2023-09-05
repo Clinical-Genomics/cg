@@ -1,11 +1,12 @@
 from typing import Optional
 
-from pydantic.v1 import BaseModel, validator
+from pydantic import BaseModel, BeforeValidator
+from typing_extensions import Annotated
 
 from cg.models.deliverables.metric_deliverables import MetricCondition, MetricsBase
 
 
-def percent_value_validation(cls, value: float) -> float:
+def convert_to_percent(value: float) -> float:
     """Converts a raw float value to percent"""
 
     return value * 100
@@ -24,50 +25,31 @@ class BalsamicMetricsBase(MetricsBase):
 class BalsamicQCMetrics(BaseModel):
     """BALSAMIC common QC metrics"""
 
-    mean_insert_size: Optional[float]
-    fold_80_base_penalty: Optional[float]
+    mean_insert_size: Optional[float] = None
+    fold_80_base_penalty: Optional[float] = None
 
 
 class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
     """BALSAMIC targeted QC metrics"""
 
-    mean_target_coverage: Optional[float]
-    median_target_coverage: Optional[float]
-    percent_duplication: Optional[float]
-    pct_target_bases_50x: Optional[float]
-    pct_target_bases_100x: Optional[float]
-    pct_target_bases_250x: Optional[float]
-    pct_target_bases_500x: Optional[float]
-    pct_target_bases_1000x: Optional[float]
-    pct_off_bait: Optional[float]
-
-    _pct_values = validator(
-        "percent_duplication",
-        "pct_target_bases_50x",
-        "pct_target_bases_100x",
-        "pct_target_bases_250x",
-        "pct_target_bases_500x",
-        "pct_target_bases_1000x",
-        "pct_off_bait",
-        allow_reuse=True,
-    )(percent_value_validation)
+    mean_target_coverage: Optional[float] = None
+    median_target_coverage: Optional[float] = None
+    percent_duplication: Annotated[Optional[float], BeforeValidator(convert_to_percent)] = None
+    pct_target_bases_50x: Annotated[Optional[float], BeforeValidator(convert_to_percent)] = None
+    pct_target_bases_100x: Annotated[Optional[float], BeforeValidator(convert_to_percent)] = None
+    pct_target_bases_250x: Annotated[Optional[float], BeforeValidator(convert_to_percent)] = None
+    pct_target_bases_500x: Annotated[Optional[float], BeforeValidator(convert_to_percent)] = None
+    pct_target_bases_1000x: Annotated[Optional[float], BeforeValidator(convert_to_percent)] = None
+    pct_off_bait: Annotated[Optional[float], BeforeValidator(convert_to_percent)] = None
 
 
 class BalsamicWGSQCMetrics(BalsamicQCMetrics):
     """BALSAMIC WGS QC metrics"""
 
-    median_coverage: Optional[float]
-    percent_duplication_r1: Optional[float]
-    percent_duplication_r2: Optional[float]
-    pct_15x: Optional[float]
-    pct_30x: Optional[float]
-    pct_60x: Optional[float]
-    pct_100x: Optional[float]
-
-    _pct_values = validator(
-        "pct_15x",
-        "pct_30x",
-        "pct_60x",
-        "pct_100x",
-        allow_reuse=True,
-    )(percent_value_validation)
+    median_coverage: Optional[float] = None
+    percent_duplication_r1: Optional[float] = None
+    percent_duplication_r2: Optional[float] = None
+    pct_15x: Annotated[Optional[float], BeforeValidator(convert_to_percent)] = None
+    pct_30x: Annotated[Optional[float], BeforeValidator(convert_to_percent)] = None
+    pct_60x: Annotated[Optional[float], BeforeValidator(convert_to_percent)] = None
+    pct_100x: Annotated[Optional[float], BeforeValidator(convert_to_percent)] = None

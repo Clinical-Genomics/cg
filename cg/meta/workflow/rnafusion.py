@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from pydantic.v1 import ValidationError
+from pydantic import ValidationError
 
 from cg import resources
 from cg.constants import Pipeline
