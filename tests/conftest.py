@@ -2991,6 +2991,7 @@ def fixture_flow_cell_name() -> str:
     """Return flow cell name."""
     return "HVKJCDRXX"
 
+
 @pytest.fixture(name="expected_average_q30_for_sample")
 def fixture_expected_average_q30_for_sample() -> float:
     """Return expected average Q30 for a sample."""
