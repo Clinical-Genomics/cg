@@ -160,8 +160,8 @@ def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
     for file in files_at_source:
         if is_file_relevant_for_demultiplexing(file) and not Path(target_directory, file).exists():
             LOG.info(
-                f"File: {file}, has not been transferred from {target_directory} "
-                f"to {source_directory}"
+                f"File: {file}, has not been transferred from {source_directory} "
+                f"to {target_directory}"
             )
             return False
     return True
