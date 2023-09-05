@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 from typing import Dict, List, Type
-from pydantic import TypeAdapter
+from pydantic.v1 import parse_obj_as
 
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
 from cg.constants.constants import FileFormat
@@ -65,8 +65,7 @@ def get_validated_sample_sheet(
 ) -> SampleSheet:
     """Return a validated sample sheet object."""
     raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
-    adapter = TypeAdapter(List[sample_type])
-    samples = adapter.validate_python(raw_samples)
+    samples = parse_obj_as(List[sample_type], raw_samples)
     validate_samples_unique_per_lane(samples=samples)
     return SampleSheet(samples=samples)
 

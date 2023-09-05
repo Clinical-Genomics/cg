@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Type, Union
 
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.models import (
