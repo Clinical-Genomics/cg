@@ -44,7 +44,7 @@ def validate_flow_cell_delivery_status(flow_cell_output_directory: Path, force: 
 
 
 def validate_samples_have_fastq_files(flow_cell: FlowCellDirectoryData) -> None:
-    """Check if all samples have already all the fastq files in the demultiplex directory.
+    """Check if all samples have already a fastq files in the demultiplex directory.
     Raises: MissingFilesError
         When one of the samples does not have enough fastq files in the flow cell
     """
