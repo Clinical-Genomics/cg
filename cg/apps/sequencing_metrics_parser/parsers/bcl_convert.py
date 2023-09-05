@@ -83,9 +83,7 @@ class BclConvertMetricsParser:
 
     def get_metrics_for_sample_and_lane(
         self,
-        metrics: List[
-            Union[BclConvertQualityMetrics, BclConvertDemuxMetrics]
-        ],
+        metrics: List[Union[BclConvertQualityMetrics, BclConvertDemuxMetrics]],
         sample_internal_id: str,
         lane: int,
     ) -> Union[BclConvertQualityMetrics, BclConvertDemuxMetrics]:
