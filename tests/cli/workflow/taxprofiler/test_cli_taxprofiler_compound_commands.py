@@ -4,6 +4,7 @@ from click.testing import CliRunner
 from cg.cli.workflow.taxprofiler.base import (
     taxprofiler,
     start,
+    start_available,
 )
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
@@ -49,3 +50,31 @@ def test_taxprofiler_start(
 
     # THEN command should not include resume flag
     assert "-resume" not in caplog.text
+
+
+def test_taxprofiler_start_available(
+    cli_runner: CliRunner,
+    taxprofiler_context: CGConfig,
+    caplog: LogCaptureFixture,
+    taxprofiler_case_id: str,
+):
+    """Test to ensure all parts of compound start-available command are executed given ideal conditions
+    Test that start-available picks up eligible cases and does not pick up ineligible ones."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN case id with enough reads
+    case_id_enough_reads: str = taxprofiler_case_id
+
+    # GIVEN a mocked config
+
+    # GIVEN decompression is not needed
+    TaxprofilerAnalysisAPI.resolve_decompression.return_value = None
+
+    # WHEN running command
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=taxprofiler_context)
+
+    # THEN command exits with 0
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN it should successfully identify the one case eligible for auto-start
+    assert case_id_enough_reads in caplog.text

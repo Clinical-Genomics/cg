@@ -29,6 +29,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.rnafusion import CommandArgs
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 
 LOG = logging.getLogger(__name__)
 
@@ -189,3 +190,25 @@ def start(
         use_nextflow=use_nextflow,
         dry_run=dry_run,
     )
+
+
+@taxprofiler.command("start-available")
+@DRY_RUN
+@click.pass_context
+def start_available(context: click.Context, dry_run: bool = False) -> None:
+    """Start full workflow for all cases available for analysis."""
+
+    analysis_api: AnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
+
+    exit_code: int = EXIT_SUCCESS
+    for case_obj in analysis_api.get_cases_to_analyze():
+        try:
+            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+        except CgError as error:
+            LOG.error(error)
+            exit_code = EXIT_FAIL
+        except Exception as error:
+            LOG.error(f"Unspecified error occurred: {error}")
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort
