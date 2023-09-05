@@ -56,8 +56,8 @@ class MiriaObject(FileTransferData):
     def from_sample_and_destination(
         cls, sample_and_destination: SampleAndDestination
     ) -> "MiriaObject":
-        """Instantiates the class from a Sample object, i.e. when we want to fetch a folder containing all spring files
-        for said sample."""
+        """Instantiates the class from a SampleAndDestination object,
+        i.e. when we want to fetch a folder containing all spring files for said sample."""
         return cls(
             destination=sample_and_destination.destination,
             source=sample_and_destination.sample.internal_id,
@@ -231,7 +231,7 @@ class DDNDataFlowClient(ArchiveHandler):
 
     def retrieve_samples(self, samples_and_destinations: List[SampleAndDestination]) -> int:
         """Retrieves all archived files for the provided samples and stores them in the specified location in
-        HouseKeeper."""
+        Housekeeper."""
         miria_file_data: List[MiriaObject] = []
         for sample_and_housekeeper_destination in samples_and_destinations:
             miria_object: MiriaObject = MiriaObject.from_sample_and_destination(

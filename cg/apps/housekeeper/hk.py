@@ -401,13 +401,11 @@ class HousekeeperAPI:
         return all(sequencing_files_in_hk.values())
 
     def get_non_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[File]:
-        """Returns all files from a given bundle, tagged with the given tags, which have not been archived.
-        Since Housekeeper doesn't handle None as tags, we set [] if no tags were specified."""
+        """Returns all non-archived_files from a given bundle, tagged with the given tags"""
         return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags or [])
 
     def get_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[File]:
-        """Returns all files from a given bundle, tagged with the given tags, which have been archived.
-        Since Housekeeper doesn't handle None as tags, we set [] if no tags were specified."""
+        """Returns all archived_files from a given bundle, tagged with the given tags"""
         return self._store.get_archived_files(bundle_name=bundle_name, tags=tags or [])
 
     def add_archives(self, files: List[Path], archive_task_id: int) -> None:
@@ -453,6 +451,8 @@ class HousekeeperAPI:
         ]
 
     def set_archive_retrieved_at(self, file_id: int, retrieval_task_id: int):
+        """Sets the retrieved_at value for an Archive entry. Raises a ValueError if the given retrieval task id
+        is not found in Housekeeper."""
         archive: Archive = self._store.get_file_by_id(file_id).archive
         if archive.retrieval_task_id != retrieval_task_id:
             raise ValueError(
@@ -463,6 +463,8 @@ class HousekeeperAPI:
         self.commit()
 
     def set_archive_archived_at(self, file_id: int, archiving_task_id: int):
+        """Sets the archived_at value for an Archive entry. Raises a ValueError if the given archiving task id
+        is not found in Housekeeper."""
         archive: Archive = self._store.get_file_by_id(file_id).archive
         if archive.archiving_task_id != archiving_task_id:
             raise ValueError(
@@ -473,6 +475,8 @@ class HousekeeperAPI:
         self.commit()
 
     def set_archive_retrieval_task_id(self, file_id: int, retrieval_task_id: int) -> None:
+        """Sets the retrieval_task_id for an Archive entry. Raises a ValueError if the given retrieval task id
+        is not found in Housekeeper."""
         archive: Archive = self._store.get_file_by_id(file_id).archive
         if not archive:
             raise ValueError(f"No Archive entry found for file with id {file_id}.")

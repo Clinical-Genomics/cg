@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List
 from unittest import mock
 
 import pytest
@@ -67,7 +67,8 @@ def fixture_archive_request_json(
 @pytest.fixture(name="retrieve_request_json")
 def fixture_retrieve_request_json(
     remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
-) -> Dict:
+) -> Dict[str, Any]:
+    """Returns the body for a retrieval http post towards the DDN Miria API."""
     return {
         "osType": "Unix/MacOS",
         "createFolder": False,
