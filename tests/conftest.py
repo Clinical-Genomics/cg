@@ -2232,6 +2232,7 @@ def fixture_context_config(
             "balsamic_cache": "hello",
             "bed_path": str(cg_dir),
             "binary_path": "echo",
+            "cadd_path": str(cg_dir),
             "conda_env": "S_Balsamic",
             "loqusdb_path": str(cg_dir),
             "pon_path": str(cg_dir),

@@ -126,6 +126,7 @@ class BalsamicConfig(CommonAppConfig):
     balsamic_cache: str
     bed_path: str
     binary_path: str
+    cadd_path: str
     conda_env: str
     loqusdb_path: str
     pon_path: str

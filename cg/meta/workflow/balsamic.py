@@ -45,14 +45,15 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         pipeline: Pipeline = Pipeline.BALSAMIC,
     ):
         super().__init__(config=config, pipeline=pipeline)
-        self.root_dir = config.balsamic.root
         self.account = config.balsamic.slurm.account
         self.balsamic_cache = config.balsamic.balsamic_cache
-        self.email = config.balsamic.slurm.mail_user
-        self.qos = config.balsamic.slurm.qos
         self.bed_path = config.balsamic.bed_path
-        self.pon_path = config.balsamic.pon_path
+        self.cadd_path = config.balsamic.cadd_path
+        self.email = config.balsamic.slurm.mail_user
         self.loqusdb_path = config.balsamic.loqusdb_path
+        self.pon_path = config.balsamic.pon_path
+        self.qos = config.balsamic.slurm.qos
+        self.root_dir = config.balsamic.root
         self.swegen_path = config.balsamic.swegen_path
 
     @property
@@ -554,6 +555,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--umi-trim-length": arguments.get("umi_trim_length"),
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),
+                "--cadd-annotations": self.cadd_path,
                 "--swegen-snv": arguments.get("swegen_snv"),
                 "--swegen-sv": arguments.get("swegen_sv"),
                 "--clinical-snv-observations": arguments.get("clinical_snv"),
