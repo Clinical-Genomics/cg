@@ -165,7 +165,7 @@ def start(
     nf_tower_id: Optional[str],
     dry_run: bool,
 ) -> None:
-    """Start full workflow for CASE ID."""
+    """Start full workflow for case id."""
     LOG.info(f"Starting analysis for {case_id}")
 
     try:
