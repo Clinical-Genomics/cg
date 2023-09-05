@@ -61,8 +61,7 @@ def test_taxprofiler_start_available(
     mocker,
     taxprofiler_case_id: str,
 ):
-    """Test to ensure all parts of compound start-available command are executed given ideal conditions
-    Test that start-available picks up eligible cases and does not pick up ineligible ones."""
+    """Test that start-available picks up the available cases that are ready for analysis."""
     caplog.set_level(logging.INFO)
 
     # GIVEN case id with enough reads
