@@ -1,4 +1,4 @@
-from pydantic.v1 import BaseModel, BaseConfig, Field
+from pydantic import BaseModel, Field
 from cg.constants.bcl_convert_metrics import (
     BclConvertQualityMetricsColumnNames,
     BclConvertDemuxMetricsColumnNames,
@@ -73,7 +73,3 @@ class BclConvertSampleSheetData(BaseModel):
     )
     sample_name: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_NAME.value)
     control: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.CONTROL.value)
-
-
-class CustomConfig(BaseConfig):
-    arbitrary_types_allowed = True
