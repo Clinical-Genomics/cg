@@ -1,15 +1,12 @@
 from pathlib import Path
 from typing import List
 
-from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeq6000Bcl2Fastq,
     FlowCellSampleNovaSeq6000Dragen,
-    SampleSheet,
 )
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
-from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.process import EXIT_SUCCESS
 from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.models.cg_config import CGConfig
@@ -41,7 +38,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
     )
 
     # GIVEN that the context's flow cell directory holds the given flow cell
-    sample_sheet_context.flow_cells_dir: str = (
+    sample_sheet_context.flow_cells_dir = (
         tmp_flow_cells_directory_no_run_parameters.parent.as_posix()
     )
 
@@ -183,7 +180,7 @@ def test_incorrect_bcl2fastq_headers_samplesheet(
     # GIVEN a lims api that returns some samples
 
     # WHEN creating a sample sheet
-    result = cli_runner.invoke(
+    cli_runner.invoke(
         create_sheet,
         [str(tmp_flow_cells_directory_malformed_sample_sheet), "--bcl-converter", "bcl2fastq"],
         obj=sample_sheet_context,
@@ -192,10 +189,11 @@ def test_incorrect_bcl2fastq_headers_samplesheet(
     # THEN the sample sheet was created
     assert flow_cell.sample_sheet_exists()
 
-    # THEN the sample sheet is on the correct format
+    # THEN the sample sheet is not in the correct format
     assert not flow_cell.validate_sample_sheet()
 
-    # THEN the sample sheet is in Housekeeper
-    assert get_sample_sheets_from_latest_version(
-        flow_cell_id=flow_cell.id, hk_api=sample_sheet_context.housekeeper_api
+    # THEN the expected headers should have been logged
+    assert (
+        "Ensure that the headers in the sample sheet follows the allowed structure for bcl2fastq"
+        in caplog.text
     )
