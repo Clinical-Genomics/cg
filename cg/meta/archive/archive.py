@@ -142,8 +142,7 @@ class SpringArchiveAPI:
         return files
 
     def join_destinations_and_samples(self, samples: List[Sample]) -> List[SampleAndDestination]:
-        """Gets all samples and combines it with the destination in Housekeeper where we want the
-        retrieved files to be."""
+        """Gets all samples and combines them with their desired destination in Housekeeper."""
         samples_to_retrieve: List[SampleAndDestination] = []
         for sample in samples:
             LOG.debug(f"Will try to retrieve sample: {sample.internal_id}.")
