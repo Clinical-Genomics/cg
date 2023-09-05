@@ -2,11 +2,18 @@ import collections
 from pathlib import Path
 from typing import List
 
-from pydantic import BaseModel, Field, FieldValidationInfo, conlist, field_validator
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    Field,
+    FieldValidationInfo,
+    field_validator,
+)
 from typing_extensions import Annotated
 
 from cg.constants.nextflow import DELIVER_FILE_HEADERS
 from cg.exc import SampleSheetError
+from cg.models.validators import fastq_files_exist
 
 
 class PipelineParameters(BaseModel):
@@ -24,8 +31,12 @@ class NextflowSampleSheetEntry(BaseModel):
     """
 
     name: str
-    fastq_forward_read_paths: Annotated[List[Path], Field(min_length=1)]
-    fastq_reverse_read_paths: Annotated[List[Path], Field(min_length=1)]
+    fastq_forward_read_paths: Annotated[
+        List[Path], Field(min_length=1), BeforeValidator(fastq_files_exist)
+    ]
+    fastq_reverse_read_paths: Annotated[
+        List[Path], Field(min_length=1), BeforeValidator(fastq_files_exist)
+    ]
 
     @field_validator("fastq_reverse_read_paths")
     def validate_complete_fastq_file_pairs(
@@ -35,14 +46,6 @@ class NextflowSampleSheetEntry(BaseModel):
         if len(fastq_reverse) != len(info.data.get("fastq_forward_read_paths")):
             raise SampleSheetError("Fastq file length for forward and reverse do not match")
         return fastq_reverse
-
-    @field_validator("fastq_forward_read_paths", "fastq_reverse_read_paths")
-    def fastq_files_exist(cls, fastq_paths: List[str]) -> List[str]:
-        """Verify that fastq files exist."""
-        for fastq_path in fastq_paths:
-            if not fastq_path.is_file():
-                raise SampleSheetError(f"Fastq file does not exist: {str(fastq_path)}")
-        return fastq_paths
 
 
 class NextflowDeliverables(BaseModel):
