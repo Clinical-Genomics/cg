@@ -68,9 +68,8 @@ def check_if_samples_have_files(flow_cell: FlowCellDirectoryData) -> None:
         fastq_files: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
             flow_cell_directory=flow_cell.path, sample_internal_id=sample_id
         )
-        if not fastq_files or len(fastq_files) != NUMBER_FASTQ_FILES_PER_SAMPLE:
-            error_msg: str = f"Sample {sample_id} does not have the correct number of fastq files"
-            raise MissingFilesError(error_msg)
+        if not fastq_files:
+            raise MissingFilesError(f"Sample {sample_id} has no fastq files in flow cell")
 
 
 def add_samples_to_flow_cell_in_status_db(
