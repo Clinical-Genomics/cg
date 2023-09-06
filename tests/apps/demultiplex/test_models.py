@@ -6,7 +6,7 @@ def test_get_single_samples_no_samples():
     sample_sheet = SampleSheet(samples=[])
 
     # WHEN retrieving any non pooled samples
-    samples = sample_sheet.get_non_pooled_samples() == []
+    samples = sample_sheet.get_non_pooled_samples()
 
     # THEN no samples should be returned
     assert not samples
