@@ -56,16 +56,6 @@ def fixture_tmp_samplesheet_path(tmp_demulitplexing_dir: Path) -> Path:
     return tmp_sample_sheet_path
 
 
-@pytest.fixture(name="tmp_flow_cell_run_path")
-def fixture_tmp_flow_cell_run_path(project_dir: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
-    """Flow cell run directory in temporary folder."""
-
-    tmp_flow_cell_run_path: Path = Path(project_dir, "flow_cell_run", bcl2fastq_flow_cell_full_name)
-    tmp_flow_cell_run_path.mkdir(exist_ok=True, parents=True)
-
-    return tmp_flow_cell_run_path
-
-
 @pytest.fixture(name="tmp_flow_cell_run_base_path")
 def fixture_tmp_flow_cell_run_base_path(
     project_dir: Path, bcl2fastq_flow_cell_full_name: str
@@ -445,29 +435,3 @@ def tmp_demultiplexing_init_files(
     for file in demultiplexing_init_files:
         file.touch()
     return demultiplexing_init_files
-
-
-@pytest.fixture(name="bcl2fastq_folder_structure", scope="session")
-def fixture_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
-    """Return a folder structure that resembles a bcl2fastq run folder."""
-    base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "bcl2fastq")))
-    folders: List[str] = ["l1t21", "l1t11", "l2t11", "l2t21"]
-
-    for folder in folders:
-        new_dir: Path = Path(base_dir, folder)
-        new_dir.mkdir()
-
-    return base_dir
-
-
-@pytest.fixture(name="not_bcl2fastq_folder_structure", scope="function")
-def fixture_not_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
-    """Return a folder structure that does not resemble a bcl2fastq run folder."""
-    base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "not_bcl2fastq")))
-    folders: List[str] = ["just", "some", "folders"]
-
-    for folder in folders:
-        new_dir: Path = Path(base_dir, folder)
-        new_dir.mkdir()
-
-    return base_dir
