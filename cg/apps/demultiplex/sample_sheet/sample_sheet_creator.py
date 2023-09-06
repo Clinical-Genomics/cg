@@ -20,7 +20,7 @@ from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.constants.demultiplexing import (
     BclConverter,
     SampleSheetNovaSeq6000Sections,
-    SampleSheetNovaSeqXSections,
+    SampleSheetV2Sections,
 )
 from cg.exc import SampleSheetError
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -136,7 +136,7 @@ class SampleSheetCreator:
 
 
 class SampleSheetCreatorV1(SampleSheetCreator):
-    """Create a raw sample sheet for NovaSeq6000 flow cells."""
+    """Create a raw sample sheet for flow cells."""
 
     def add_dummy_samples(self) -> None:
         """Add all dummy samples with non-existing indexes to samples.
@@ -199,41 +199,41 @@ class SampleSheetCreatorV2(SampleSheetCreator):
     def get_additional_sections_sample_sheet(self) -> List[List[str]]:
         """Return all sections of the sample sheet that are not the data section."""
         header_section: List[List[str]] = [
-            [SampleSheetNovaSeqXSections.Header.HEADER.value],
-            SampleSheetNovaSeqXSections.Header.FILE_FORMAT.value,
-            [SampleSheetNovaSeqXSections.Header.RUN_NAME.value, self.flow_cell_id],
-            SampleSheetNovaSeqXSections.Header.INSTRUMENT_PLATFORM.value,
-            SampleSheetNovaSeqXSections.Header.INDEX_ORIENTATION_FORWARD.value,
+            [SampleSheetV2Sections.Header.HEADER.value],
+            SampleSheetV2Sections.Header.FILE_FORMAT.value,
+            [SampleSheetV2Sections.Header.RUN_NAME.value, self.flow_cell_id],
+            SampleSheetV2Sections.Header.INSTRUMENT_PLATFORM.value,
+            SampleSheetV2Sections.Header.INDEX_ORIENTATION_FORWARD.value,
         ]
         reads_section: List[List[str]] = [
-            [SampleSheetNovaSeqXSections.Reads.HEADER.value],
+            [SampleSheetV2Sections.Reads.HEADER.value],
             [
-                SampleSheetNovaSeqXSections.Reads.READ_CYCLES_1.value,
+                SampleSheetV2Sections.Reads.READ_CYCLES_1.value,
                 self.run_parameters.get_read_1_cycles(),
             ],
             [
-                SampleSheetNovaSeqXSections.Reads.READ_CYCLES_2.value,
+                SampleSheetV2Sections.Reads.READ_CYCLES_2.value,
                 self.run_parameters.get_read_2_cycles(),
             ],
             [
-                SampleSheetNovaSeqXSections.Reads.INDEX_CYCLES_1.value,
+                SampleSheetV2Sections.Reads.INDEX_CYCLES_1.value,
                 self.run_parameters.get_index_1_cycles(),
             ],
             [
-                SampleSheetNovaSeqXSections.Reads.INDEX_CYCLES_2.value,
+                SampleSheetV2Sections.Reads.INDEX_CYCLES_2.value,
                 self.run_parameters.get_index_2_cycles(),
             ],
         ]
         settings_section: List[List[str]] = [
-            [SampleSheetNovaSeqXSections.Settings.HEADER.value],
-            SampleSheetNovaSeqXSections.Settings.SOFTWARE_VERSION.value,
-            SampleSheetNovaSeqXSections.Settings.FASTQ_COMPRESSION_FORMAT.value,
+            [SampleSheetV2Sections.Settings.HEADER.value],
+            SampleSheetV2Sections.Settings.SOFTWARE_VERSION.value,
+            SampleSheetV2Sections.Settings.FASTQ_COMPRESSION_FORMAT.value,
         ]
         return header_section + reads_section + settings_section
 
     def get_data_section_header_and_columns(self) -> List[List[str]]:
         """Return the header and column names of the data section of the sample sheet."""
         return [
-            [SampleSheetNovaSeqXSections.Data.HEADER.value],
-            SampleSheetNovaSeqXSections.Data.COLUMN_NAMES.value,
+            [SampleSheetV2Sections.Data.HEADER.value],
+            SampleSheetV2Sections.Data.COLUMN_NAMES.value,
         ]

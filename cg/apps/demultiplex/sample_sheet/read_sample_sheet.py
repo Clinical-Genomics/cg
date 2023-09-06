@@ -7,7 +7,7 @@ from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import (
     SampleSheetNovaSeq6000Sections,
-    SampleSheetNovaSeqXSections,
+    SampleSheetV2Sections,
 )
 
 from cg.exc import SampleSheetError
@@ -82,7 +82,7 @@ def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str
             continue
         if line[0] in [
             SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value,
-            SampleSheetNovaSeqXSections.Data.LANE.value,
+            SampleSheetV2Sections.Data.LANE.value,
         ]:
             header = line
             continue

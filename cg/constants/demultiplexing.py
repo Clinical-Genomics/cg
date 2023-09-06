@@ -117,8 +117,8 @@ class SampleSheetNovaSeq6000Sections:
         }
 
 
-class SampleSheetNovaSeqXSections:
-    """Class with all necessary constants for building a NovaSeqX sample sheet."""
+class SampleSheetV2Sections:
+    """Class with all necessary constants for building a version 2 sample sheet."""
 
     class Header(Enum):
         HEADER: str = "[Header]"
@@ -136,7 +136,7 @@ class SampleSheetNovaSeqXSections:
 
     class Settings(Enum):
         HEADER: str = "[BCLConvert_Settings]"
-        SOFTWARE_VERSION: List[str] = ["SoftwareVersion", "4.1.5"]
+        SOFTWARE_VERSION: List[str] = ["SoftwareVersion", "4.1.7"]
         FASTQ_COMPRESSION_FORMAT: List[str] = ["FastqCompressionFormat", "gzip"]
 
     class Data(Enum):

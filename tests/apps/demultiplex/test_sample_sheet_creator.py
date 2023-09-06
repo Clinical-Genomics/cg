@@ -10,9 +10,8 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
 )
 from cg.apps.demultiplex.sample_sheet.models import (
     SampleSheet,
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeq6000Dragen,
-    FlowCellSampleNovaSeqX,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_validated_sample_sheet
 from cg.constants.demultiplexing import BclConverter
@@ -21,7 +20,8 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 def test_v2_sample_sheet_fails_with_bcl2fastq(
-    novaseq_x_flow_cell: FlowCellDirectoryData, lims_novaseq_x_samples: List[FlowCellSampleNovaSeqX]
+    novaseq_x_flow_cell: FlowCellDirectoryData,
+    lims_novaseq_x_samples: List[FlowCellSampleBCLConvert],
 ):
     """Test that creating a v2 sample sheet fails if the bcl converter is Bcl2fastq."""
     # GIVEN a NovaSeqX flow cell and samples
@@ -38,12 +38,12 @@ def test_v2_sample_sheet_fails_with_bcl2fastq(
 
 
 def test_add_dummy_samples_for_sample_sheet_v1(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
     bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     """Test that dummy samples are added when needed for a NovaSeq6000 sample sheet."""
     # GIVEN a list of one NovaSeq6000 sample and a sample sheet creator with the sample
-    samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq] = [novaseq6000_flow_cell_sample_1]
+    samples: List[FlowCellSampleBcl2Fastq] = [novaseq6000_flow_cell_sample_1]
     assert len(samples) == 1
     sample_sheet_creator = SampleSheetCreatorV1(
         flow_cell=bcl2fastq_flow_cell, lims_samples=samples, bcl_converter=BclConverter.BCL2FASTQ
@@ -71,7 +71,7 @@ def test_construct_bcl2fastq_sheet(
     # THEN a correctly formatted sample sheet was created
     sample_sheet: SampleSheet = get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_content,
-        sample_type=FlowCellSampleNovaSeq6000Bcl2Fastq,
+        sample_type=FlowCellSampleBcl2Fastq,
     )
     assert sample_sheet.samples
 
@@ -91,7 +91,7 @@ def test_construct_dragen_sheet(
     # THEN a correctly formatted sample sheet was created
     sample_sheet: SampleSheet = get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_content,
-        sample_type=FlowCellSampleNovaSeq6000Dragen,
+        sample_type=FlowCellSampleBCLConvert,
     )
     assert sample_sheet.samples
 
@@ -109,13 +109,13 @@ def test_construct_novaseq_x_sheet(
     # THEN a correctly formatted sample sheet was created
     sample_sheet: SampleSheet = get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_content,
-        sample_type=FlowCellSampleNovaSeqX,
+        sample_type=FlowCellSampleBCLConvert,
     )
     assert sample_sheet.samples
 
 
 def test_remove_unwanted_samples_dual_index(
-    novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleBcl2Fastq,
     bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     """Test that a sample with dual index is not removed."""
@@ -134,7 +134,7 @@ def test_remove_unwanted_samples_dual_index(
 
 
 def test_remove_unwanted_samples_no_dual_index(
-    novaseq6000_flow_cell_sample_no_dual_index: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_no_dual_index: FlowCellSampleBcl2Fastq,
     bcl2fastq_flow_cell: FlowCellDirectoryData,
     caplog,
 ):

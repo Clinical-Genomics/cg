@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import List
 
 import pytest
@@ -9,9 +8,8 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreatorV2,
 )
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeq6000Dragen,
-    FlowCellSampleNovaSeqX,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
 )
 from cg.constants.demultiplexing import BclConverter, SampleSheetNovaSeq6000Sections
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -26,31 +24,31 @@ def fixture_valid_index_() -> Index:
 @pytest.fixture(name="lims_novaseq_bcl2fastq_samples")
 def fixture_lims_novaseq_bcl2fastq_samples(
     lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleNovaSeq6000Bcl2Fastq]:
+) -> List[FlowCellSampleBcl2Fastq]:
     """Return a list of parsed Bcl2fastq flow cell samples"""
-    return [FlowCellSampleNovaSeq6000Bcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
+    return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture(name="lims_novaseq_dragen_samples")
 def fixture_lims_novaseq_dragen_samples(
     lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleNovaSeq6000Dragen]:
+) -> List[FlowCellSampleBCLConvert]:
     """Return a list of parsed Dragen flow cell samples"""
-    return [FlowCellSampleNovaSeq6000Dragen(**sample) for sample in lims_novaseq_samples_raw]
+    return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture(name="lims_novaseq_x_samples")
 def fixture_lims_novaseq_x_samples(
     lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleNovaSeqX]:
+) -> List[FlowCellSampleBCLConvert]:
     """Return a list of parsed NovaSeqX flow cell samples"""
-    return [FlowCellSampleNovaSeqX(**sample) for sample in lims_novaseq_samples_raw]
+    return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_creator")
 def fixture_novaseq_bcl2fastq_sample_sheet_creator(
     bcl2fastq_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
 ) -> SampleSheetCreatorV1:
     """Returns a sample sheet creator for version 1 sample sheets with bcl2fastq format."""
     return SampleSheetCreatorV1(
@@ -63,10 +61,10 @@ def fixture_novaseq_bcl2fastq_sample_sheet_creator(
 @pytest.fixture(name="novaseq_dragen_sample_sheet_creator")
 def fixture_novaseq_dragen_sample_sheet_creator(
     bcl_convert_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_dragen_samples: List[FlowCellSampleNovaSeq6000Dragen],
-) -> SampleSheetCreatorV1:
-    """Returns a sample sheet creator for version 1 sample sheets with dragen format."""
-    return SampleSheetCreatorV1(
+    lims_novaseq_dragen_samples: List[FlowCellSampleBCLConvert],
+) -> SampleSheetCreatorV2:
+    """Returns a sample sheet creator for version 2 sample sheets with dragen format."""
+    return SampleSheetCreatorV2(
         flow_cell=bcl_convert_flow_cell,
         lims_samples=lims_novaseq_dragen_samples,
         bcl_converter=BclConverter.DRAGEN,
@@ -76,7 +74,7 @@ def fixture_novaseq_dragen_sample_sheet_creator(
 @pytest.fixture(name="novaseq_x_sample_sheet_creator")
 def fixture_novaseq_x_sample_sheet_creator(
     novaseq_x_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_x_samples: List[FlowCellSampleNovaSeqX],
+    lims_novaseq_x_samples: List[FlowCellSampleBCLConvert],
 ) -> SampleSheetCreatorV2:
     """Returns a sample sheet creator for version 2 sample sheets."""
     return SampleSheetCreatorV2(
@@ -261,9 +259,9 @@ def fixture_sample_sheet_dragen_duplicate_different_lane(
 
 
 @pytest.fixture(name="novaseq6000_flow_cell_sample_1")
-def fixture_novaseq6000_flow_cell_sample_1() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
+def fixture_novaseq6000_flow_cell_sample_1() -> FlowCellSampleBcl2Fastq:
     """Return a NovaSeq sample."""
-    return FlowCellSampleNovaSeq6000Bcl2Fastq(
+    return FlowCellSampleBcl2Fastq(
         FCID="HWHMWDMXX",
         Lane=1,
         SampleID="ACC7628A68",
@@ -279,9 +277,9 @@ def fixture_novaseq6000_flow_cell_sample_1() -> FlowCellSampleNovaSeq6000Bcl2Fas
 
 
 @pytest.fixture(name="novaseq6000_flow_cell_sample_2")
-def fixture_novaseq6000_flow_cell_sample_2() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
+def fixture_novaseq6000_flow_cell_sample_2() -> FlowCellSampleBcl2Fastq:
     """Return a NovaSeq sample."""
-    return FlowCellSampleNovaSeq6000Bcl2Fastq(
+    return FlowCellSampleBcl2Fastq(
         FCID="HWHMWDMXX",
         Lane=2,
         SampleID="ACC7628A1",
@@ -297,9 +295,9 @@ def fixture_novaseq6000_flow_cell_sample_2() -> FlowCellSampleNovaSeq6000Bcl2Fas
 
 
 @pytest.fixture(name="novaseq_x_flow_cell_sample_before_adapt_indexes")
-def fixture_novaseq_x_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleNovaSeqX:
+def fixture_novaseq_x_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBCLConvert:
     """Return a NovaSeqX sample."""
-    return FlowCellSampleNovaSeqX(
+    return FlowCellSampleBCLConvert(
         Lane=2,
         Sample_ID="ACC7628A1",
         index="ATTCCACACT-TGGTCTTGTT",
@@ -307,9 +305,9 @@ def fixture_novaseq_x_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleN
 
 
 @pytest.fixture(name="novaseq6000_flow_cell_sample_no_dual_index")
-def fixture_novaseq6000_flow_cell_sample_no_dual_index() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
+def fixture_novaseq6000_flow_cell_sample_no_dual_index() -> FlowCellSampleBcl2Fastq:
     """Return a NovaSeq sample without dual indexes."""
-    return FlowCellSampleNovaSeq6000Bcl2Fastq(
+    return FlowCellSampleBcl2Fastq(
         FCID="HWHMWDMXX",
         Lane=2,
         SampleID="ACC7628A1",
@@ -320,11 +318,9 @@ def fixture_novaseq6000_flow_cell_sample_no_dual_index() -> FlowCellSampleNovaSe
 
 
 @pytest.fixture(name="novaseq6000_flow_cell_sample_before_adapt_indexes")
-def fixture_novaseq6000_flow_cell_sample_before_adapt_indexes() -> (
-    FlowCellSampleNovaSeq6000Bcl2Fastq
-):
+def fixture_novaseq6000_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBcl2Fastq:
     """Return a NovaSeq sample without dual indexes."""
-    return FlowCellSampleNovaSeq6000Bcl2Fastq(
+    return FlowCellSampleBcl2Fastq(
         FCID="HWHMWDMXX",
         Lane=2,
         SampleID="ACC7628A1",

@@ -8,9 +8,7 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreatorV2,
 )
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
-from cg.constants.sequencing import Sequencers
 from cg.constants.demultiplexing import BclConverter
-from cg.exc import FlowCellError
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
@@ -22,22 +20,14 @@ def get_sample_sheet_creator(
     lims_samples: List[FlowCellSample],
     force: bool,
 ) -> SampleSheetCreator:
-    """Returns an initialised sample sheet creator according to the flow cell sequencer."""
-    sequencer: str = flow_cell.sequencer_type
-    if sequencer == Sequencers.NOVASEQ:
+    """Returns an initialised sample sheet creator according to the software used for demultiplexing."""
+    if bcl_converter == BclConverter.BCL2FASTQ:
         return SampleSheetCreatorV1(
             bcl_converter=bcl_converter, flow_cell=flow_cell, lims_samples=lims_samples, force=force
         )
-    elif sequencer == Sequencers.NOVASEQX:
-        return SampleSheetCreatorV2(
-            bcl_converter=bcl_converter, flow_cell=flow_cell, lims_samples=lims_samples, force=force
-        )
-    else:
-        message: str = (
-            "Only NovaSeq and NovaSeqX sample sheets are currently supported."
-            + f"Found sequencer type: {sequencer}"
-        )
-        raise FlowCellError(message)
+    return SampleSheetCreatorV2(
+        bcl_converter=bcl_converter, flow_cell=flow_cell, lims_samples=lims_samples, force=force
+    )
 
 
 def create_sample_sheet(
