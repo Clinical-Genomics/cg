@@ -39,7 +39,7 @@ def validate_flow_cell_delivery_status(flow_cell_output_directory: Path, force: 
     if is_flow_cell_ready_for_delivery(flow_cell_output_directory) and not force:
         raise FlowCellError(
             f"Flow cell output directory {flow_cell_output_directory}"
-            "has already been processed and is ready for delivery."
+            " has already been processed and is ready for delivery."
         )
 
 
@@ -58,6 +58,7 @@ def validate_samples_have_fastq_files(flow_cell: FlowCellDirectoryData) -> None:
         )
         if not fastq_files:
             raise MissingFilesError(f"Sample {sample_id} has no fastq files in flow cell")
+    LOG.debug("Flow cell has fastq files for all samples anc can be finished")
 
 
 def is_flow_cell_ready_for_postprocessing(
