@@ -136,7 +136,7 @@ class SampleSheetCreator:
 
 
 class SampleSheetCreatorV1(SampleSheetCreator):
-    """Create a raw sample sheet for flow cells."""
+    """Create a raw sample sheet for flow cells to be demultiplexed with Bcl2fastq."""
 
     def add_dummy_samples(self) -> None:
         """Add all dummy samples with non-existing indexes to samples.
