@@ -1199,6 +1199,12 @@ def fixture_novaseq_x_flow_cell_full_name() -> str:
     return "20230508_LH00188_0003_A22522YLT3"
 
 
+@pytest.fixture()
+def novaseq_x_manifest_file(novaseq_x_flow_cell_dir: Path) -> Path:
+    """Return the path to a NovaSeqX manifest file."""
+    return Path(novaseq_x_flow_cell_dir, "Manifest.tsv")
+
+
 @pytest.fixture(name="bcl2fastq_flow_cell_dir", scope="session")
 def fixture_bcl2fastq_flow_cell_dir(
     flow_cells_dir: Path, bcl2fastq_flow_cell_full_name: str
