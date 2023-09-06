@@ -1,7 +1,7 @@
 """CLI support to create config and/or start TAXPROFILER."""
 
 import logging
-
+from typing import Optional
 import click
 from pydantic.v1 import ValidationError
 
@@ -15,11 +15,16 @@ from cg.cli.workflow.nextflow.options import (
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
 )
+from cg.cli.workflow.taxprofiler.options import (
+    OPTION_FROM_START,
+    OPTION_INSTRUMENT_PLATFORM,
+)
+from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV, OPTION_TOWER_RUN_ID
 from cg.cli.workflow.taxprofiler.options import OPTION_FROM_START, OPTION_INSTRUMENT_PLATFORM
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.sequencing import SequencingPlatform
-from cg.exc import CgError
+from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -71,7 +76,9 @@ def config_case(
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
 @OPTION_REVISION
+@OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
+@OPTION_TOWER_RUN_ID
 @DRY_RUN
 @click.pass_obj
 def run(
@@ -84,7 +91,9 @@ def run(
     config: str,
     params_file: str,
     revision: str,
+    compute_env: str,
     use_nextflow: bool,
+    nf_tower_id: Optional[str],
     dry_run: bool,
 ) -> None:
     """Run taxprofiler analysis for a case."""
@@ -106,8 +115,10 @@ def run(
                 case_id=case_id, params_file=params_file
             ),
             "name": case_id,
+            "compute_env": compute_env or analysis_api.compute_env,
             "revision": revision or analysis_api.revision,
             "wait": NfTowerStatus.SUBMITTED,
+            "id": nf_tower_id,
         }
     )
     try:
@@ -123,3 +134,58 @@ def run(
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort() from error
+    if not dry_run and not use_nextflow:
+        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
+
+
+@taxprofiler.command("start")
+@ARGUMENT_CASE_ID
+@OPTION_LOG
+@OPTION_WORKDIR
+@OPTION_PROFILE
+@OPTION_CONFIG
+@OPTION_PARAMS_FILE
+@OPTION_REVISION
+@OPTION_COMPUTE_ENV
+@OPTION_USE_NEXTFLOW
+@OPTION_TOWER_RUN_ID
+@DRY_RUN
+@click.pass_context
+def start(
+    context: CGConfig,
+    case_id: str,
+    log: str,
+    work_dir: str,
+    profile: str,
+    config: str,
+    params_file: str,
+    revision: str,
+    compute_env: str,
+    use_nextflow: bool,
+    nf_tower_id: Optional[str],
+    dry_run: bool,
+) -> None:
+    """Start full workflow for case id."""
+    LOG.info(f"Starting analysis for {case_id}")
+
+    try:
+        context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
+    except DecompressionNeededError as error:
+        LOG.error(error)
+        raise click.Abort() from error
+    context.invoke(config_case, case_id=case_id, dry_run=dry_run)
+    context.invoke(
+        run,
+        case_id=case_id,
+        log=log,
+        work_dir=work_dir,
+        from_start=True,
+        profile=profile,
+        nf_tower_id=nf_tower_id,
+        config=config,
+        params_file=params_file,
+        revision=revision,
+        compute_env=compute_env,
+        use_nextflow=use_nextflow,
+        dry_run=dry_run,
+    )
