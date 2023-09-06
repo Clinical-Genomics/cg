@@ -73,7 +73,7 @@ class DemultiplexingAPI:
     @staticmethod
     def get_sbatch_command(
         run_dir: Path,
-        unaligned_dir: Path,
+        demux_dir: Path,
         sample_sheet: Path,
         demux_completed: Path,
         flow_cell: FlowCellDirectoryData,
@@ -83,8 +83,7 @@ class DemultiplexingAPI:
         LOG.info("Creating the sbatch command string")
         command_parameters: SbatchCommand = SbatchCommand(
             run_dir=run_dir.as_posix(),
-            demux_dir=unaligned_dir.parent.as_posix(),
-            unaligned_dir=unaligned_dir.as_posix(),
+            demux_dir=demux_dir.as_posix(),
             sample_sheet=sample_sheet.as_posix(),
             demux_completed_file=demux_completed.as_posix(),
             environment=environment,
@@ -119,12 +118,6 @@ class DemultiplexingAPI:
         """Returns True if the sample sheet for the flow cell exists in Housekeeper."""
         return bool(
             get_sample_sheets_from_latest_version(flow_cell_id=flow_cell_id, hk_api=self.hk_api)
-        )
-
-    def get_flow_cell_unaligned_dir(self, flow_cell: FlowCellDirectoryData) -> Path:
-        """Returns the path to where the demultiplexed result are located."""
-        return Path(
-            self.flow_cell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME
         )
 
     def demultiplexing_completed_path(self, flow_cell: FlowCellDirectoryData) -> Path:
@@ -224,11 +217,10 @@ class DemultiplexingAPI:
         """Start demultiplexing for a flow cell."""
         self.create_demultiplexing_started_file(flow_cell.demultiplexing_started_path)
         demux_dir: Path = self.flow_cell_out_dir_path(flow_cell=flow_cell)
-        unaligned_dir: Path = self.get_flow_cell_unaligned_dir(flow_cell=flow_cell)
-        LOG.info(f"Demultiplexing to {unaligned_dir}")
+        LOG.info(f"Demultiplexing to {demux_dir}")
         if not self.dry_run:
-            LOG.info(f"Creating demux dir {unaligned_dir}")
-            unaligned_dir.mkdir(exist_ok=False, parents=True)
+            LOG.info(f"Creating demux dir {demux_dir}")
+            demux_dir.mkdir(exist_ok=False, parents=True)
 
         log_path: Path = self.get_stderr_logfile(flow_cell=flow_cell)
         error_function: str = self.get_sbatch_error(
@@ -236,7 +228,7 @@ class DemultiplexingAPI:
         )
         commands: str = self.get_sbatch_command(
             run_dir=flow_cell.path,
-            unaligned_dir=unaligned_dir,
+            demux_dir=demux_dir,
             sample_sheet=flow_cell.sample_sheet_path,
             demux_completed=self.demultiplexing_completed_path(flow_cell=flow_cell),
             flow_cell=flow_cell,
