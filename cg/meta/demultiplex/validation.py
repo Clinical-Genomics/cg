@@ -68,7 +68,6 @@ def is_flow_cell_ready_for_postprocessing(
 ) -> None:
     validate_sample_sheet_exists(flow_cell)
     validate_demultiplexing_complete(flow_cell_output_directory)
-    validate_samples_have_fastq_files(flow_cell)
     validate_flow_cell_delivery_status(
         flow_cell_output_directory=flow_cell_output_directory, force=force
     )
