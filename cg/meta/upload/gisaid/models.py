@@ -17,11 +17,13 @@ class GisaidAccession(BaseModel):
     sample_id: Optional[str] = None
 
     @field_validator("accession_nr")
-    def parse_accession(cls, v: str, info: FieldValidationInfo):
+    @classmethod
+    def parse_accession(cls, _, info: FieldValidationInfo):
         return info.data.get("log_message").split(";")[-1]
 
     @field_validator("sample_id")
-    def parse_sample_id(cls, v: str, info: FieldValidationInfo):
+    @classmethod
+    def parse_sample_id(cls, _, info: FieldValidationInfo):
         return info.data.get("log_message").split("/")[2].split("_")[2]
 
 
@@ -56,17 +58,20 @@ class GisaidSample(BaseModel):
     covv_authors: Optional[str] = " ,".join(AUTHORS)
 
     @field_validator("covv_location")
-    def parse_location(cls, info: FieldValidationInfo):
+    @classmethod
+    def parse_location(cls, _, info: FieldValidationInfo):
         region: str = info.data.get("region")
         return f"Europe/Sweden/{region}"
 
     @field_validator("covv_subm_sample_id")
-    def parse_subm_sample_id(cls, v: str, info: FieldValidationInfo):
+    @classmethod
+    def parse_subm_sample_id(cls, _, info: FieldValidationInfo):
         region_code = info.data.get("region_code")
         return f"{region_code}_SE100_{v}"
 
     @field_validator("covv_virus_name")
-    def parse_virus_name(cls, v, info: FieldValidationInfo):
+    @classmethod
+    def parse_virus_name(cls, _, info: FieldValidationInfo):
         sample_name = info.data.get("covv_subm_sample_id")
         date = info.data.get("covv_collection_date")
         datetime_date = datetime.strptime(date, "%Y-%m-%d")
