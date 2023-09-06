@@ -17,30 +17,6 @@ from cg.constants.demultiplexing import BclConverter, SampleSheetNovaSeq6000Sect
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
-@pytest.fixture(name="output_dirs_bcl2fastq")
-def fixture_output_dirs_bcl2fastq(demultiplexed_runs: Path) -> Path:
-    """Return the output path a dir with flow cells that have finished demultiplexing using
-    bcl2fastq."""
-    return Path(demultiplexed_runs, BclConverter.BCL2FASTQ)
-
-
-@pytest.fixture(name="demux_run_dir_bcl2fastq")
-def fixture_demux_run_dir_bcl2fastq(flow_cell_runs_dir: Path) -> Path:
-    """Return the path to a dir with flowcells ready for demultiplexing"""
-    return Path(flow_cell_runs_dir, BclConverter.BCL2FASTQ)
-
-
-@pytest.fixture(name="demux_run_dir_dragen")
-def fixture_demux_run_dir_dragen(flow_cell_runs_dir: Path) -> Path:
-    """Return the path to a dir with flowcells ready for demultiplexing"""
-    return Path(flow_cell_runs_dir, BclConverter.DRAGEN)
-
-
-@pytest.fixture(name="index_obj")
-def fixture_index_obj() -> Index:
-    return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
-
-
 @pytest.fixture(name="valid_index")
 def fixture_valid_index_() -> Index:
     """Return a valid index."""
@@ -282,18 +258,6 @@ def fixture_sample_sheet_dragen_duplicate_different_lane(
         ]
     )
     return valid_sample_sheet_dragen
-
-
-@pytest.fixture(name="valid_sample_sheet_bcl2fastq_path")
-def fixture_valid_sample_sheet_bcl2fastq_path() -> Path:
-    """Return the path to a NovaSeq S2 sample sheet, used in bcl2fastq demultiplexing."""
-    return Path("tests", "fixtures", "apps", "demultiplexing", "SampleSheetS2_Bcl2Fastq.csv")
-
-
-@pytest.fixture(name="valid_sample_sheet_dragen_path")
-def fixture_valid_sample_sheet_dragen_path() -> Path:
-    """Return the path to a NovaSeq S2 sample sheet, used in dragen demultiplexing."""
-    return Path("tests", "fixtures", "apps", "demultiplexing", "SampleSheetS2_Dragen.csv")
 
 
 @pytest.fixture(name="novaseq6000_flow_cell_sample_1")
