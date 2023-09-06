@@ -60,7 +60,7 @@ class DemultiplexingAPI:
         demux_dir: Path,
     ) -> str:
         """Create the sbatch error string."""
-        LOG.info("Creating the sbatch error string")
+        LOG.debug("Creating the sbatch error string")
         error_parameters: SbatchError = SbatchError(
             flow_cell_id=flow_cell.id,
             email=email,
@@ -83,7 +83,7 @@ class DemultiplexingAPI:
         Return sbatch command.
         The unaligned_dir is only used for Bcl2Fastq.
         """
-        LOG.info("Creating the sbatch command string")
+        LOG.debug("Creating the sbatch command string")
         unaligned_dir: Path = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
         command_parameters: SbatchCommand = SbatchCommand(
             run_dir=run_dir.as_posix(),
@@ -287,7 +287,7 @@ class DemultiplexingAPI:
     def create_demultiplexing_output_dir(
         flow_cell: FlowCellDirectoryData, demux_dir: Path, unaligned_dir: Path
     ) -> None:
-        LOG.info(f"Creating demux dir {unaligned_dir}")
+        LOG.debug(f"Creating demux dir {unaligned_dir}")
         demux_dir.mkdir(exist_ok=False, parents=True)
         if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
             unaligned_dir.mkdir(exist_ok=False, parents=False)
