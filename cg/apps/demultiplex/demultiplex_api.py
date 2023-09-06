@@ -16,11 +16,7 @@ from cg.constants.priority import SlurmQos
 from cg.io.controller import WriteFile
 from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.models.demultiplex.sbatch import (
-    SbatchError,
-    SbatchCommandBcl2Fastq,
-    SbatchCommandBCLConvert,
-)
+from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch, SbatchDragen
 from cgmodels.cg.constants import Pipeline
 
@@ -77,31 +73,26 @@ class DemultiplexingAPI:
     @staticmethod
     def get_sbatch_command(
         run_dir: Path,
+        demux_dir: Path,
         sample_sheet: Path,
         demux_completed: Path,
         flow_cell: FlowCellDirectoryData,
         environment: Literal["production", "stage"] = "stage",
-        demux_dir: Optional[Path] = None,
-        unaligned_dir: Optional[Path] = None,
     ) -> str:
-        """Return sbatch command."""
+        """
+        Return sbatch command.
+        The unaligned_dir is only used for Bcl2Fastq.
+        """
         LOG.info("Creating the sbatch command string")
-        if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
-            command_parameters: SbatchCommandBcl2Fastq = SbatchCommandBcl2Fastq(
-                run_dir=run_dir.as_posix(),
-                unaligned_dir=unaligned_dir.as_posix(),
-                sample_sheet=sample_sheet.as_posix(),
-                demux_completed_file=demux_completed.as_posix(),
-                environment=environment,
-            )
-        else:
-            command_parameters: SbatchCommandBCLConvert = SbatchCommandBCLConvert(
-                run_dir=run_dir.as_posix(),
-                demux_dir=demux_dir.as_posix(),
-                sample_sheet=sample_sheet.as_posix(),
-                demux_completed_file=demux_completed.as_posix(),
-                environment=environment,
-            )
+        unaligned_dir: Path = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
+        command_parameters: SbatchCommand = SbatchCommand(
+            run_dir=run_dir.as_posix(),
+            demux_dir=demux_dir.as_posix(),
+            unaligned_dir=unaligned_dir.as_posix(),
+            sample_sheet=sample_sheet.as_posix(),
+            demux_completed_file=demux_completed.as_posix(),
+            environment=environment,
+        )
         return DEMULTIPLEX_COMMAND[flow_cell.bcl_converter].format(**command_parameters.dict())
 
     @staticmethod
@@ -237,25 +228,27 @@ class DemultiplexingAPI:
         """Start demultiplexing for a flow cell."""
         self.create_demultiplexing_started_file(flow_cell.demultiplexing_started_path)
         demux_dir: Path = self.flow_cell_out_dir_path(flow_cell=flow_cell)
-        LOG.info(f"Demultiplexing to {demux_dir}")
+        unaligned_dir: Path = self.get_flow_cell_unaligned_dir(flow_cell=flow_cell)
+        LOG.info(f"Demultiplexing to {unaligned_dir}")
         if not self.dry_run:
-            LOG.info(f"Creating demux dir {demux_dir}")
-            demux_dir.mkdir(exist_ok=False, parents=True)
+            self.create_demultiplexing_output_dir(
+                flow_cell=flow_cell, demux_dir=demux_dir, unaligned_dir=unaligned_dir
+            )
 
         log_path: Path = self.get_stderr_logfile(flow_cell=flow_cell)
         error_function: str = self.get_sbatch_error(
             flow_cell=flow_cell, email=self.mail, demux_dir=demux_dir
         )
+        commands: str = self.get_sbatch_command(
+            run_dir=flow_cell.path,
+            demux_dir=demux_dir,
+            sample_sheet=flow_cell.sample_sheet_path,
+            demux_completed=self.demultiplexing_completed_path(flow_cell=flow_cell),
+            flow_cell=flow_cell,
+            environment=self.environment,
+        )
 
         if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
-            commands: str = self.get_sbatch_command(
-                run_dir=flow_cell.path,
-                demux_dir=demux_dir,
-                sample_sheet=flow_cell.sample_sheet_path,
-                demux_completed=self.demultiplexing_completed_path(flow_cell=flow_cell),
-                flow_cell=flow_cell,
-                environment=self.environment,
-            )
             sbatch_parameters: Sbatch = Sbatch(
                 account=self.slurm_account,
                 commands=commands,
@@ -289,3 +282,12 @@ class DemultiplexingAPI:
         )
         LOG.info(f"Demultiplexing running as job {sbatch_number}")
         return sbatch_number
+
+    @staticmethod
+    def create_demultiplexing_output_dir(
+        flow_cell: FlowCellDirectoryData, demux_dir: Path, unaligned_dir: Path
+    ) -> None:
+        LOG.info(f"Creating demux dir {unaligned_dir}")
+        demux_dir.mkdir(exist_ok=False, parents=True)
+        if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
+            unaligned_dir.mkdir(exist_ok=False, parents=False)

@@ -904,6 +904,17 @@ def fixture_tmp_bcl2fastq_flow_cell(
     )
 
 
+@pytest.fixture(name="tmp_bcl_convert_flow_cell")
+def fixture_tmp_bcl_convert_flow_cell(
+    tmp_flow_cell_directory_bclconvert: Path,
+) -> FlowCellDirectoryData:
+    """Create a flow cell object with flow cell that is demultiplexed."""
+    return FlowCellDirectoryData(
+        flow_cell_path=tmp_flow_cell_directory_bclconvert,
+        bcl_converter=BclConverter.DRAGEN,
+    )
+
+
 @pytest.fixture(name="tmp_demultiplexed_runs_not_finished_directory")
 def fixture_tmp_demultiplexed_runs_not_finished_flow_cells_directory(
     tmp_path: Path, demux_results_not_finished_dir: Path
