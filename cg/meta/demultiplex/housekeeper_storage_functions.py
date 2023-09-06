@@ -62,13 +62,24 @@ def add_undetermined_fastq_files_to_housekeeper(
         )
 
         for fastq_path in undetermined_fastqs:
-            add_bundle_and_version_if_non_existent(bundle_name=sample.sample_id, hk_api=hk_api)
-            add_file_to_bundle_if_non_existent(
-                file_path=fastq_path,
-                bundle_name=sample.sample_id,
-                tag_names=[SequencingFileTag.FASTQ, flow_cell.id],
+            add_fastq_file_to_housekeeper(
+                sample_id=sample.sample_id,
+                flow_cell_id=flow_cell.id,
+                fastq_path=fastq_path,
                 hk_api=hk_api,
             )
+
+
+def add_fastq_file_to_housekeeper(
+    sample_id: str, flow_cell_id: str, fastq_path: Path, hk_api: HousekeeperAPI
+) -> None:
+    add_bundle_and_version_if_non_existent(bundle_name=sample_id, hk_api=hk_api)
+    add_file_to_bundle_if_non_existent(
+        file_path=fastq_path,
+        bundle_name=sample_id,
+        tag_names=[SequencingFileTag.FASTQ, flow_cell_id],
+        hk_api=hk_api,
+    )
 
 
 def add_demux_logs_to_housekeeper(
