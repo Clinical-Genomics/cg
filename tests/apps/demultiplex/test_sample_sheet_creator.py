@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import List
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreator,
-    SampleSheetCreatorV1,
-    SampleSheetCreatorV2,
+    SampleSheetCreatorBcl2Fastq,
+    SampleSheetCreatorBCLConvert,
 )
 from cg.apps.demultiplex.sample_sheet.models import (
     SampleSheet,
@@ -24,14 +24,14 @@ def test_v2_sample_sheet_fails_with_bcl2fastq(
     lims_novaseq_x_samples: List[FlowCellSampleBCLConvert],
 ):
     """Test that creating a v2 sample sheet fails if the bcl converter is Bcl2fastq."""
-    # GIVEN a NovaSeqX flow cell and samples
+    # GIVEN a NovaSeqX flow cell and samples and the bcl converter is Bcl2fastq
+    novaseq_x_flow_cell.bcl_converter = BclConverter.BCL2FASTQ
 
-    # WHEN trying to instantiate a SampleSheetCreatorV2 with bcl2fastq as bcl_converter
+    # WHEN trying to instantiate a SampleSheetCreatorV2 with Bcl2fastq as bcl_converter
     with pytest.raises(SampleSheetError) as exc_info:
-        SampleSheetCreatorV2(
+        SampleSheetCreatorBCLConvert(
             flow_cell=novaseq_x_flow_cell,
             lims_samples=lims_novaseq_x_samples,
-            bcl_converter=BclConverter.BCL2FASTQ,
         )
         # THEN an error is raised
         assert str(exc_info.value) == f"Can't use {BclConverter.BCL2FASTQ} with sample sheet v2"
@@ -45,8 +45,8 @@ def test_add_dummy_samples_for_sample_sheet_v1(
     # GIVEN a list of one NovaSeq6000 sample and a sample sheet creator with the sample
     samples: List[FlowCellSampleBcl2Fastq] = [novaseq6000_flow_cell_sample_1]
     assert len(samples) == 1
-    sample_sheet_creator = SampleSheetCreatorV1(
-        flow_cell=bcl2fastq_flow_cell, lims_samples=samples, bcl_converter=BclConverter.BCL2FASTQ
+    sample_sheet_creator = SampleSheetCreatorBcl2Fastq(
+        flow_cell=bcl2fastq_flow_cell, lims_samples=samples
     )
 
     # WHEN adding dummy samples
@@ -120,10 +120,9 @@ def test_remove_unwanted_samples_dual_index(
 ):
     """Test that a sample with dual index is not removed."""
     # GIVEN a sample sheet creator with a sample with dual index
-    sample_sheet_creator: SampleSheetCreatorV1 = SampleSheetCreatorV1(
+    sample_sheet_creator: SampleSheetCreatorBcl2Fastq = SampleSheetCreatorBcl2Fastq(
         flow_cell=bcl2fastq_flow_cell,
         lims_samples=[novaseq6000_flow_cell_sample_before_adapt_indexes],
-        bcl_converter=BclConverter.BCL2FASTQ,
     )
 
     # WHEN removing unwanted samples
@@ -140,10 +139,9 @@ def test_remove_unwanted_samples_no_dual_index(
 ):
     """Test that samples with no dual index are removed."""
     # GIVEN a sample sheet creator with a sample without dual indexes
-    sample_sheet_creator: SampleSheetCreatorV1 = SampleSheetCreatorV1(
+    sample_sheet_creator: SampleSheetCreatorBcl2Fastq = SampleSheetCreatorBcl2Fastq(
         flow_cell=bcl2fastq_flow_cell,
         lims_samples=[novaseq6000_flow_cell_sample_no_dual_index],
-        bcl_converter=BclConverter.BCL2FASTQ,
     )
 
     # WHEN removing unwanted samples

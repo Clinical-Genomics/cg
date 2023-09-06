@@ -3,7 +3,6 @@ from pathlib import Path
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertDemuxMetrics,
     BclConvertQualityMetrics,
-    BclConvertSampleSheetData,
     BclConvertAdapterMetrics,
 )
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
@@ -13,9 +12,6 @@ from cg.constants.bcl_convert_metrics import (
     BclConvertDemuxMetricsColumnNames,
     BclConvertAdapterMetricsColumnNames,
 )
-from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
-from cg.store.models import SampleLaneSequencingMetrics
-from datetime import datetime
 
 
 @pytest.fixture(name="bcl_convert_metrics_dir_path", scope="session")

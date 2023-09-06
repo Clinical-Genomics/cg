@@ -5,7 +5,6 @@ from pydantic import ValidationError
 from typing import List
 
 import click
-from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
@@ -120,7 +119,9 @@ def create_sheet(
         raise click.Abort
     try:
         sample_sheet_content: List[List[str]] = create_sample_sheet(
-            bcl_converter=bcl_converter, flow_cell=flow_cell, lims_samples=lims_samples, force=force
+            flow_cell=flow_cell,
+            lims_samples=lims_samples,
+            force=force,
         )
     except (FileNotFoundError, FileExistsError, FlowCellError) as error:
         raise click.Abort from error
