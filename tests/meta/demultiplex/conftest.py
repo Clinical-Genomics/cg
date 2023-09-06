@@ -1,3 +1,5 @@
+import shutil
+
 import pytest
 
 from collections import namedtuple
@@ -435,3 +437,71 @@ def tmp_demultiplexing_init_files(
     for file in demultiplexing_init_files:
         file.touch()
     return demultiplexing_init_files
+
+
+@pytest.fixture(name="bcl2fastq_folder_structure", scope="session")
+def fixture_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
+    """Return a folder structure that resembles a bcl2fastq run folder."""
+    base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "bcl2fastq")))
+    folders: List[str] = ["l1t21", "l1t11", "l2t11", "l2t21"]
+
+    for folder in folders:
+        new_dir: Path = Path(base_dir, folder)
+        new_dir.mkdir()
+
+    return base_dir
+
+
+@pytest.fixture(name="not_bcl2fastq_folder_structure", scope="function")
+def fixture_not_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
+    """Return a folder structure that does not resemble a bcl2fastq run folder."""
+    base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "not_bcl2fastq")))
+    folders: List[str] = ["just", "some", "folders"]
+
+    for folder in folders:
+        new_dir: Path = Path(base_dir, folder)
+        new_dir.mkdir()
+
+    return base_dir
+
+
+@pytest.fixture(scope="session")
+def base_call_file() -> Path:
+    return Path("Data", "Intensities", "BaseCalls", "L001", "C1.1", "L001_1.cbcl")
+
+
+@pytest.fixture(scope="session")
+def inter_op_file() -> Path:
+    return Path(DemultiplexingDirsAndFiles.INTER_OP, "AlignmentMetricsOut.bin")
+
+
+@pytest.fixture(scope="session")
+def thumbnail_file() -> Path:
+    return Path("Thumbnail_Images", "L001", "C1.1", "s_1_1105_green.png")
+
+
+@pytest.fixture()
+def lsyncd_source_directory(
+    tmp_path_factory,
+    novaseq_x_manifest_file: Path,
+    base_call_file: Path,
+    inter_op_file: Path,
+    thumbnail_file: Path,
+) -> Path:
+    """Return a temporary directory with a manifest file and three dummy files."""
+    source_directory = Path(tmp_path_factory.mktemp("source"))
+    shutil.copy(novaseq_x_manifest_file, source_directory)
+    for file in [base_call_file, inter_op_file, thumbnail_file]:
+        full_path = Path(source_directory, file)
+        full_path.parent.mkdir(parents=True)
+        full_path.touch()
+    return source_directory
+
+
+@pytest.fixture()
+def lsyncd_target_directory(lsyncd_source_directory: Path, tmp_path_factory) -> Path:
+    """Return a copy of the temporary source directory."""
+    temp_target_directory = Path(tmp_path_factory.mktemp("tmp_target"))
+    target_directory = Path(lsyncd_source_directory.parent, Path(temp_target_directory, "target"))
+    shutil.copytree(lsyncd_source_directory, target_directory)
+    return target_directory
