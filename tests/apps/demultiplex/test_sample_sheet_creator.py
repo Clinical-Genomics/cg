@@ -19,25 +19,28 @@ from cg.exc import SampleSheetError
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
-def test_v2_sample_sheet_fails_with_bcl2fastq(
+def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
     novaseq_x_flow_cell: FlowCellDirectoryData,
     lims_novaseq_x_samples: List[FlowCellSampleBCLConvert],
 ):
-    """Test that creating a v2 sample sheet fails if the bcl converter is Bcl2fastq."""
+    """Test that creating a BCL Convert sample sheet fails if the bcl converter is Bcl2fastq."""
     # GIVEN a NovaSeqX flow cell and samples and the bcl converter is Bcl2fastq
     novaseq_x_flow_cell.bcl_converter = BclConverter.BCL2FASTQ
 
-    # WHEN trying to instantiate a SampleSheetCreatorV2 with Bcl2fastq as bcl_converter
+    # WHEN trying to instantiate a SampleSheetCreatorBCLConvert with Bcl2fastq as bcl_converter
     with pytest.raises(SampleSheetError) as exc_info:
         SampleSheetCreatorBCLConvert(
             flow_cell=novaseq_x_flow_cell,
             lims_samples=lims_novaseq_x_samples,
         )
         # THEN an error is raised
-        assert str(exc_info.value) == f"Can't use {BclConverter.BCL2FASTQ} with sample sheet v2"
+        assert (
+            str(exc_info.value)
+            == f"Can't use {BclConverter.BCL2FASTQ} with BCL Convert sample sheet"
+        )
 
 
-def test_add_dummy_samples_for_sample_sheet_v1(
+def test_add_dummy_samples_for_bcl2fastq_sample_sheet(
     novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
     bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
@@ -57,16 +60,14 @@ def test_add_dummy_samples_for_sample_sheet_v1(
 
 
 def test_construct_bcl2fastq_sheet(
-    novaseq_bcl2fastq_sample_sheet_creator: SampleSheetCreator, project_dir: Path
+    bcl2fastq_sample_sheet_creator: SampleSheetCreator, project_dir: Path
 ):
     """Test that a created Bcl2fastq sample sheet has samples."""
-    # GIVEN a V1 sample sheet creator populated with Bcl2fastq samples
-    assert novaseq_bcl2fastq_sample_sheet_creator.lims_samples
+    # GIVEN a Bcl2fastq sample sheet creator populated with Bcl2fastq samples
+    assert bcl2fastq_sample_sheet_creator.lims_samples
 
     # WHEN building the sample sheet
-    sample_sheet_content: List[
-        List[str]
-    ] = novaseq_bcl2fastq_sample_sheet_creator.construct_sample_sheet()
+    sample_sheet_content: List[List[str]] = bcl2fastq_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
     sample_sheet: SampleSheet = get_validated_sample_sheet(
@@ -76,35 +77,17 @@ def test_construct_bcl2fastq_sheet(
     assert sample_sheet.samples
 
 
-def test_construct_dragen_sheet(
-    novaseq_dragen_sample_sheet_creator: SampleSheetCreator, project_dir: Path
+def test_construct_bcl_convert_sheet(
+    bcl_convert_sample_sheet_creator: SampleSheetCreator, project_dir: Path
 ):
-    """Test that a created Dragen sample sheet has samples."""
-    # GIVEN a V1 sample sheet creator populated with Dragen samples
-    assert novaseq_dragen_sample_sheet_creator.lims_samples
+    """Test that a created BCL Convert sample sheet has samples."""
+    # GIVEN a BCL convert sample sheet creator populated with BCL convert samples
+    assert bcl_convert_sample_sheet_creator.lims_samples
 
     # WHEN building the sample sheet
     sample_sheet_content: List[
         List[str]
-    ] = novaseq_dragen_sample_sheet_creator.construct_sample_sheet()
-
-    # THEN a correctly formatted sample sheet was created
-    sample_sheet: SampleSheet = get_validated_sample_sheet(
-        sample_sheet_content=sample_sheet_content,
-        sample_type=FlowCellSampleBCLConvert,
-    )
-    assert sample_sheet.samples
-
-
-def test_construct_novaseq_x_sheet(
-    novaseq_x_sample_sheet_creator: SampleSheetCreator, project_dir: Path
-):
-    """Test that a created NovaSeqX sample sheet has samples."""
-    # GIVEN a V2 sample sheet creator populated with Dragen samples
-    assert novaseq_x_sample_sheet_creator.lims_samples
-
-    # WHEN building the sample sheet
-    sample_sheet_content: List[List[str]] = novaseq_x_sample_sheet_creator.construct_sample_sheet()
+    ] = bcl_convert_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
     sample_sheet: SampleSheet = get_validated_sample_sheet(

@@ -1327,7 +1327,7 @@ def fixture_bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> FlowCellDi
     )
 
 
-@pytest.fixture(name="novaseq_x_flow_cell", scope="session")
+@pytest.fixture(name="novaseq_x_flow_cell", scope="function")
 def fixture_novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a NovaSeqX flow cell object with flow cell that is demultiplexed."""
     return FlowCellDirectoryData(

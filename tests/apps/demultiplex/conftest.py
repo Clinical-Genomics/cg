@@ -45,7 +45,7 @@ def fixture_lims_novaseq_x_samples(
     return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
 
 
-@pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_creator")
+@pytest.fixture(name="bcl2fastq_sample_sheet_creator")
 def fixture_novaseq_bcl2fastq_sample_sheet_creator(
     bcl2fastq_flow_cell: FlowCellDirectoryData,
     lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
@@ -57,7 +57,7 @@ def fixture_novaseq_bcl2fastq_sample_sheet_creator(
     )
 
 
-@pytest.fixture(name="novaseq_dragen_sample_sheet_creator")
+@pytest.fixture(name="bcl_convert_sample_sheet_creator")
 def fixture_novaseq_dragen_sample_sheet_creator(
     bcl_convert_flow_cell: FlowCellDirectoryData,
     lims_novaseq_dragen_samples: List[FlowCellSampleBCLConvert],
@@ -66,18 +66,6 @@ def fixture_novaseq_dragen_sample_sheet_creator(
     return SampleSheetCreatorBCLConvert(
         flow_cell=bcl_convert_flow_cell,
         lims_samples=lims_novaseq_dragen_samples,
-    )
-
-
-@pytest.fixture(name="novaseq_x_sample_sheet_creator")
-def fixture_novaseq_x_sample_sheet_creator(
-    novaseq_x_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_x_samples: List[FlowCellSampleBCLConvert],
-) -> SampleSheetCreatorBCLConvert:
-    """Returns a sample sheet creator for version 2 sample sheets."""
-    return SampleSheetCreatorBCLConvert(
-        flow_cell=novaseq_x_flow_cell,
-        lims_samples=lims_novaseq_x_samples,
     )
 
 
