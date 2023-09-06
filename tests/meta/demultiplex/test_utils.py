@@ -297,18 +297,18 @@ def test_add_flow_cell_name_to_fastq_file_path_when_flow_cell_name_already_in_na
 
 
 def test_get_undetermined_fastqs_no_matching_files(tmp_path):
-    # GIVEN: An empty directory and a lane number
+    # GIVEN a lane and a flow cell with no undetermined fastq files
     lane = 1
 
-    # WHEN: Calling get_undetermined_fastqs
+    # WHEN reetrieving undetermined fastqs for the lane
     result = get_undetermined_fastqs(lane, tmp_path)
 
-    # THEN: An empty list should be returned
+    # THEN no undetermined fastq files should be returned
     assert result == []
 
 
 def test_get_undetermined_fastqs_single_matching_file(tmp_path):
-    # GIVEN a flow cell with one undertermined fastq file
+    # GIVEN a flow cell with one undetermined fastq file
     lane = 1
     expected_file: Path = Path(tmp_path, f"Undetermined_L001_R1.fastq.gz")
     expected_file.touch()
@@ -321,7 +321,7 @@ def test_get_undetermined_fastqs_single_matching_file(tmp_path):
 
 
 def test_get_undetermined_fastqs_multiple_matching_files(tmp_path):
-    # GIVEN a flow cell with multiple undertermined fastq files for a lane
+    # GIVEN a flow cell with multiple undetermined fastq files for a lane
     lane = 1
     expected_files = [
         Path(tmp_path, "Undetermined_L001_R1.fastq.gz"),
