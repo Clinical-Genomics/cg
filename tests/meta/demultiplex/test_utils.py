@@ -25,10 +25,12 @@ def test_validate_sample_fastq_with_valid_file():
     sample_fastq = Path("Sample_123/sample_L0002.fastq.gz")
 
     # WHEN validating the sample fastq file
-    is_valid = is_valid_sample_fastq_file(sample_fastq=sample_fastq, sample_internal_id="sample")
+    is_valid_fastq: bool = is_valid_sample_fastq_file(
+        sample_fastq=sample_fastq, sample_internal_id="sample"
+    )
 
     # THEN it should be valid
-    assert is_valid
+    assert is_valid_fastq
 
 
 def test_validate_sample_fastq_without_sample_id_in_parent_directory_name():
@@ -36,7 +38,7 @@ def test_validate_sample_fastq_without_sample_id_in_parent_directory_name():
     sample_fastq = Path("L0002.fastq.gz")
 
     # WHEN validating the sample fastq file
-    is_valid_fastq = is_valid_sample_fastq_file(
+    is_valid_fastq: bool = is_valid_sample_fastq_file(
         sample_fastq=sample_fastq, sample_internal_id="sample_id"
     )
 
@@ -49,7 +51,7 @@ def test_validate_sample_fastq_without_lane_number_in_path():
     sample_fastq = Path("Sample_123/sample_id.fastq.gz")
 
     # WHEN validating the sample fastq file
-    is_valid_fastq = is_valid_sample_fastq_file(sample_fastq, sample_internal_id="sample_id")
+    is_valid_fastq: bool = is_valid_sample_fastq_file(sample_fastq, sample_internal_id="sample_id")
 
     # THEN it should not be valid
     assert not is_valid_fastq
@@ -60,7 +62,7 @@ def test_validate_sample_fastq_with_invalid_file_extension():
     sample_fastq = Path("Sample_123/123_L0002.fastq")
 
     # WHEN validating the sample fastq file
-    is_valid_fastq = is_valid_sample_fastq_file(sample_fastq, sample_internal_id="123")
+    is_valid_fastq: bool = is_valid_sample_fastq_file(sample_fastq, sample_internal_id="123")
 
     # THEN it should not be valid
     assert not is_valid_fastq
@@ -71,10 +73,10 @@ def test_is_file_path_compressed_fastq_with_valid_file():
     file_path = Path("sample_L0002.fastq.gz")
 
     # WHEN checking if the file path is a compressed fastq file
-    result = is_file_path_compressed_fastq(file_path)
+    is_file_compressed: bool = is_file_path_compressed_fastq(file_path)
 
     # THEN the result should be True
-    assert result is True
+    assert is_file_compressed
 
 
 def test_is_file_path_compressed_fastq_with_invalid_file():
@@ -82,10 +84,10 @@ def test_is_file_path_compressed_fastq_with_invalid_file():
     file_path = Path("sample_L0002.fastq")
 
     # WHEN checking if the file path is a compressed fastq file
-    result = is_file_path_compressed_fastq(file_path)
+    is_file_compressed: bool = is_file_path_compressed_fastq(file_path)
 
     # THEN the result should be False
-    assert result is False
+    assert not is_file_compressed
 
 
 def test_is_lane_in_fastq_file_name_with_valid_file():
@@ -93,10 +95,10 @@ def test_is_lane_in_fastq_file_name_with_valid_file():
     file_path = Path("sample_L0002.fastq.gz")
 
     # WHEN checking if the lane number is in the fastq file name
-    result = is_lane_in_fastq_file_name(file_path)
+    is_lane_in_name: bool = is_lane_in_fastq_file_name(file_path)
 
     # THEN the result should be True
-    assert result is True
+    assert is_lane_in_name
 
 
 def test_is_lane_in_fastq_file_name_with_invalid_file():
@@ -104,10 +106,10 @@ def test_is_lane_in_fastq_file_name_with_invalid_file():
     file_path = Path("sample.fastq.gz")
 
     # WHEN checking if the lane number is in the fastq file name
-    result = is_lane_in_fastq_file_name(file_path)
+    is_lane_in_name: bool = is_lane_in_fastq_file_name(file_path)
 
     # THEN the result should be False
-    assert result is False
+    assert not is_lane_in_name
 
 
 def test_is_sample_id_in_directory_name_with_valid_directory():
@@ -115,10 +117,12 @@ def test_is_sample_id_in_directory_name_with_valid_directory():
     directory = Path("Sample_123")
 
     # WHEN checking if the sample id is in the directory name
-    result = is_sample_id_in_directory_name(directory=directory, sample_internal_id="123")
+    is_sample_id_in_dir: bool = is_sample_id_in_directory_name(
+        directory=directory, sample_internal_id="123"
+    )
 
     # THEN the result should be True
-    assert result is True
+    assert is_sample_id_in_dir
 
 
 def test_is_sample_id_in_directory_name_with_invalid_directory():
@@ -126,43 +130,46 @@ def test_is_sample_id_in_directory_name_with_invalid_directory():
     directory = Path("sample/123_L0002.fastq.gz")
 
     # WHEN checking if the sample id is in the directory name
-    result = is_sample_id_in_directory_name(directory=directory, sample_internal_id="sample_id")
+    is_sample_id_in_dir: bool = is_sample_id_in_directory_name(
+        directory=directory, sample_internal_id="sample_id"
+    )
 
     # THEN the result should be False
-    assert result is False
+    assert is_sample_id_in_dir is False
 
 
 def test_get_lane_from_sample_fastq_file_path():
     # GIVEN a sample fastq path
-    lane = 4
+    initial_lane: int = 4
     sample_fastq_path = Path(
-        f"H5CYFDSX7_ACC12164A17_S367_L00{lane}_R1_001{FileExtensions.FASTQ}{FileExtensions.GZIP}",
+        f"H5CYFDSX7_ACC12164A17_S367_L00{initial_lane}"
+        f"_R1_001{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     )
 
     # WHEN we get lane from the sample fastq file path
-    result = get_lane_from_sample_fastq(sample_fastq_path)
+    result_lane: int = get_lane_from_sample_fastq(sample_fastq_path)
 
     # THEN we should get the correct lane
-    assert result == lane
+    assert result_lane == initial_lane
 
 
 def test_get_lane_from_sample_fastq_file_path_no_flowcell():
     # GIVEN a sample fastq path without a flow cell id
-    lane = 4
+    initial_lane: int = 4
     sample_fastq_path = Path(
-        f"ACC12164A17_S367_L00{lane}_R1_001{FileExtensions.FASTQ}{FileExtensions.GZIP}",
+        f"ACC12164A17_S367_L00{initial_lane}_R1_001{FileExtensions.FASTQ}{FileExtensions.GZIP}",
     )
 
     # WHEN we get lane from the sample fastq file path
-    result = get_lane_from_sample_fastq(sample_fastq_path)
+    result_lane: int = get_lane_from_sample_fastq(sample_fastq_path)
 
     # THEN we should get the correct lane
-    assert result == lane
+    assert result_lane == initial_lane
 
 
 def test_validate_demux_complete_flow_cell_directory_when_it_exists(tmp_path: Path):
     # GIVEN a temporary directory as the flow cell directory with a demux complete file
-    flow_cell_directory = tmp_path
+    flow_cell_directory: Path = tmp_path
     Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
 
     # WHEN the create_delivery_file_in_flow_cell_directory function is called
@@ -174,7 +181,7 @@ def test_validate_demux_complete_flow_cell_directory_when_it_exists(tmp_path: Pa
 
 def test_validate_demux_complete_flow_cell_directory_when_it_does_not_exist(tmp_path: Path):
     # GIVEN a temporary directory as the flow cell directory without a demux complete file
-    flow_cell_directory = tmp_path
+    flow_cell_directory: Path = tmp_path
 
     # WHEN the create_delivery_file_in_flow_cell_directory function is called
     create_delivery_file_in_flow_cell_directory(flow_cell_directory)
@@ -185,10 +192,10 @@ def test_validate_demux_complete_flow_cell_directory_when_it_does_not_exist(tmp_
 
 def test_get_q30_threshold():
     # GIVEN a specific sequencer type
-    sequencer_type = Sequencers.HISEQGA
+    sequencer_type: Sequencers = Sequencers.HISEQGA
 
     # WHEN getting the Q30 threshold for the sequencer type
-    q30_threshold = get_q30_threshold(sequencer_type)
+    q30_threshold: int = get_q30_threshold(sequencer_type)
 
     # THEN the correct Q30 threshold should be returned
     assert q30_threshold == FLOWCELL_Q30_THRESHOLD[sequencer_type]
@@ -196,14 +203,14 @@ def test_get_q30_threshold():
 
 def test_get_sample_sheet_path_found(tmp_path: Path):
     # GIVEN a temporary directory as the flow cell directory
-    flow_cell_directory = tmp_path
+    flow_cell_directory: Path = tmp_path
 
     # GIVEN a sample sheet file in the flow cell directory
     sample_sheet_path = Path(flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
     sample_sheet_path.touch()
 
     # WHEN the sample sheet is retrieved
-    found_sample_sheet_path = get_sample_sheet_path(flow_cell_directory)
+    found_sample_sheet_path: Path = get_sample_sheet_path(flow_cell_directory)
 
     # THEN the path to the sample sheet file should be returned
     assert found_sample_sheet_path == sample_sheet_path
@@ -211,7 +218,7 @@ def test_get_sample_sheet_path_found(tmp_path: Path):
 
 def test_get_sample_sheet_path_found_in_nested_directory(tmp_path: Path):
     # GIVEN a temporary directory as the flow cell directory
-    flow_cell_directory = tmp_path
+    flow_cell_directory: Path = tmp_path
 
     # GIVEN a nested directory within the flow cell directory
     nested_directory = Path(flow_cell_directory, "nested")
@@ -222,7 +229,7 @@ def test_get_sample_sheet_path_found_in_nested_directory(tmp_path: Path):
     sample_sheet_path.touch()
 
     # WHEN the sample sheet is retrieved
-    found_sample_sheet_path = get_sample_sheet_path(flow_cell_directory)
+    found_sample_sheet_path: Path = get_sample_sheet_path(flow_cell_directory)
 
     # THEN the path to the sample sheet file should be returned
     assert found_sample_sheet_path == sample_sheet_path
@@ -230,7 +237,7 @@ def test_get_sample_sheet_path_found_in_nested_directory(tmp_path: Path):
 
 def test_get_sample_sheet_path_not_found(tmp_path: Path):
     # GIVEN a temporary directory as the flow cell directory without a sample sheet file
-    flow_cell_directory = tmp_path
+    flow_cell_directory: Path = tmp_path
 
     # WHEN the sample sheet is retrieved
     # THEN a FileNotFoundError should be raised
