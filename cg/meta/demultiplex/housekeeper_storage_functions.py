@@ -56,9 +56,8 @@ def add_undetermined_fastq_files_to_housekeeper(
     single_samples: List[FlowCellSample] = sample_sheet.get_non_pooled_samples()
 
     for sample in single_samples:
-        lane: int = sample.lane
         undetermined_fastqs: List[Path] = get_undetermined_fastqs(
-            lane=lane, flow_cell_path=flow_cell.path
+            lane=sample.lane, flow_cell_path=flow_cell.path
         )
 
         for fastq_path in undetermined_fastqs:
