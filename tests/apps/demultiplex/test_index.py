@@ -20,8 +20,8 @@ from cg.apps.demultiplex.sample_sheet.index import (
     update_barcode_mismatch_values_for_sample,
 )
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeqX,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
 )
 from cg.models.demultiplex.run_parameters import RunParameters
 
@@ -65,8 +65,8 @@ def test_index_exists_for_non_existent_index():
 
 
 def test_get_indexes_by_lane(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
-    novaseq6000_flow_cell_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
+    novaseq6000_flow_cell_sample_2: FlowCellSampleBcl2Fastq,
 ):
     """Test that getting indexes by lane groups indexes correctly."""
     # GIVEN two samples on different lanes
@@ -109,7 +109,7 @@ def test_get_reagent_kit_version_all_possible_versions():
 
 
 def test_get_index_pair_valid_cases(
-    novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleBcl2Fastq,
 ):
     """Test that getting individual indexes from valid dual indexes works."""
     # GIVEN a list of dual indexes and their correct separation into individual indexes
@@ -148,8 +148,8 @@ def test_get_reverse_complement_not_dna(caplog):
 
 
 def test_adapt_barcode_mismatch_values(
-    lims_novaseq_x_samples: List[FlowCellSampleNovaSeqX],
-    novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeqX,
+    lims_novaseq_x_samples: List[FlowCellSampleBCLConvert],
+    novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
 ):
     """Test that the barcode mismatch values are updated for a sample."""
     # GIVEN a list of NovaSeqX samples
@@ -171,13 +171,13 @@ def test_adapt_barcode_mismatch_values(
 
 
 def test_adapt_barcode_mismatch_values_repeated_sample(
-    novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeqX,
+    novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
 ):
     """Test that a sample does not compare to itself when adapting barcode mismatching values."""
     # GIVEN a list of repeated unadapted NovaSeqX samples
     assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_1 == 1
     assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_2 == 1
-    samples: List[FlowCellSampleNovaSeqX] = [
+    samples: List[FlowCellSampleBCLConvert] = [
         novaseq_x_flow_cell_sample_before_adapt_indexes for _ in range(3)
     ]
 
@@ -195,13 +195,13 @@ def test_adapt_barcode_mismatch_values_repeated_sample(
 
 def test_adapt_indexes_for_sample_reverse_complement_padding(
     novaseq_6000_run_parameters: RunParameters,
-    novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleBcl2Fastq,
 ):
     """Test that adapting indexes for a sample that needs padding and reverse complement works."""
     # GIVEN a run parameters file that needs reverse complement of indexes
     assert is_reverse_complement(run_parameters=novaseq_6000_run_parameters)
     # GIVEN a sample that needs padding
-    sample: FlowCellSampleNovaSeq6000Bcl2Fastq = novaseq6000_flow_cell_sample_before_adapt_indexes
+    sample: FlowCellSampleBcl2Fastq = novaseq6000_flow_cell_sample_before_adapt_indexes
     assert novaseq_6000_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
     sample.index = "ATTCCACA-TGGTCTTG"
 
@@ -222,13 +222,13 @@ def test_adapt_indexes_for_sample_reverse_complement_padding(
 
 def test_adapt_indexes_for_sample_reverse_complement_no_padding(
     novaseq_6000_run_parameters: RunParameters,
-    novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleBcl2Fastq,
 ):
     """Test that adapting indexes of a sample that needs reverse complement but no padding works."""
     # GIVEN a run parameters file that needs reverse complement of indexes
     assert is_reverse_complement(run_parameters=novaseq_6000_run_parameters)
     # GIVEN a sample that does not need padding
-    sample: FlowCellSampleNovaSeq6000Bcl2Fastq = novaseq6000_flow_cell_sample_before_adapt_indexes
+    sample: FlowCellSampleBcl2Fastq = novaseq6000_flow_cell_sample_before_adapt_indexes
     assert novaseq_6000_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
     assert len(sample.index) >= 2 * LONG_INDEX_CYCLE_NR
     initial_indexes: List[str] = sample.index.split("-")
@@ -252,13 +252,13 @@ def test_adapt_indexes_for_sample_reverse_complement_no_padding(
 
 def test_adapt_indexes_for_sample_no_reverse_complement_no_padding(
     novaseq_x_run_parameters: RunParameters,
-    novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeqX,
+    novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
 ):
     """Test that adapting indexes of a sample that does not need reverse complement nor padding works."""
     # GIVEN a run parameters file that does not need reverse complement of indexes
     assert not is_reverse_complement(run_parameters=novaseq_x_run_parameters)
     # GIVEN a sample that does not need padding
-    sample: FlowCellSampleNovaSeqX = novaseq_x_flow_cell_sample_before_adapt_indexes
+    sample: FlowCellSampleBCLConvert = novaseq_x_flow_cell_sample_before_adapt_indexes
     assert novaseq_x_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
     assert len(sample.index) >= 2 * LONG_INDEX_CYCLE_NR
     initial_indexes: List[str] = sample.index.split("-")

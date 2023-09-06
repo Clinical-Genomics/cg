@@ -1,6 +1,6 @@
 """Constants related to demultiplexing."""
 from pathlib import Path
-from typing import List, Dict
+from typing import List
 import click
 from cg.utils.enums import Enum, StrEnum
 
@@ -65,7 +65,7 @@ class RunParametersXMLNodes(StrEnum):
     UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
 
 
-class SampleSheetNovaSeq6000Sections:
+class SampleSheetBcl2FastqSections:
     """Class with all necessary constants for building a NovaSeqX sample sheet."""
 
     class Settings(Enum):
@@ -78,7 +78,6 @@ class SampleSheetNovaSeq6000Sections:
         FLOW_CELL_ID: str = "FCID"
         LANE: str = "Lane"
         SAMPLE_INTERNAL_ID_BCL2FASTQ: str = "SampleID"
-        SAMPLE_INTERNAL_ID_BCLCONVERT: str = "Sample_ID"
         SAMPLE_REFERENCE: str = "SampleRef"
         INDEX_1: str = "index"
         INDEX_2: str = "index2"
@@ -87,40 +86,24 @@ class SampleSheetNovaSeq6000Sections:
         RECIPE: str = "Recipe"
         OPERATOR: str = "Operator"
         SAMPLE_PROJECT_BCL2FASTQ: str = "Project"
-        SAMPLE_PROJECT_BCLCONVERT: str = "Sample_Project"
 
-        COLUMN_NAMES: Dict[str, List[str]] = {
-            BclConverter.BCL2FASTQ.value: [
-                FLOW_CELL_ID,
-                LANE,
-                SAMPLE_INTERNAL_ID_BCL2FASTQ,
-                SAMPLE_REFERENCE,
-                INDEX_1,
-                INDEX_2,
-                SAMPLE_NAME,
-                CONTROL,
-                RECIPE,
-                OPERATOR,
-                SAMPLE_PROJECT_BCL2FASTQ,
-            ],
-            BclConverter.DRAGEN.value: [
-                FLOW_CELL_ID,
-                LANE,
-                SAMPLE_INTERNAL_ID_BCLCONVERT,
-                SAMPLE_REFERENCE,
-                INDEX_1,
-                INDEX_2,
-                SAMPLE_NAME,
-                CONTROL,
-                RECIPE,
-                OPERATOR,
-                SAMPLE_PROJECT_BCLCONVERT,
-            ],
-        }
+        COLUMN_NAMES: List[str] = [
+            FLOW_CELL_ID,
+            LANE,
+            SAMPLE_INTERNAL_ID_BCL2FASTQ,
+            SAMPLE_REFERENCE,
+            INDEX_1,
+            INDEX_2,
+            SAMPLE_NAME,
+            CONTROL,
+            RECIPE,
+            OPERATOR,
+            SAMPLE_PROJECT_BCL2FASTQ,
+        ]
 
 
-class SampleSheetNovaSeqXSections:
-    """Class with all necessary constants for building a NovaSeqX sample sheet."""
+class SampleSheetBCLConvertSections:
+    """Class with all necessary constants for building a version 2 sample sheet."""
 
     class Header(Enum):
         HEADER: str = "[Header]"
@@ -138,7 +121,7 @@ class SampleSheetNovaSeqXSections:
 
     class Settings(Enum):
         HEADER: str = "[BCLConvert_Settings]"
-        SOFTWARE_VERSION: List[str] = ["SoftwareVersion", "4.1.5"]
+        SOFTWARE_VERSION: List[str] = ["SoftwareVersion", "4.1.7"]
         FASTQ_COMPRESSION_FORMAT: List[str] = ["FastqCompressionFormat", "gzip"]
 
     class Data(Enum):
