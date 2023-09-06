@@ -1,6 +1,8 @@
 import logging
-from pydantic import ConfigDict, BaseModel, Extra, Field
+from collections import defaultdict
 from typing import List
+
+from pydantic import BaseModel, ConfigDict, Extra, Field
 
 from cg.constants.constants import GenomeVersion
 from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections, SampleSheetNovaSeqXSections
@@ -75,6 +77,15 @@ class FlowCellSampleNovaSeq6000Dragen(FlowCellSampleNovaSeq6000):
 
 class SampleSheet(BaseModel):
     samples: List[FlowCellSample]
+
+    def get_single_samples(self):
+        """Get samples that are alone in their lane."""
+        lane_samples = defaultdict(list)
+        for sample in self.samples:
+            lane: int = sample.lane
+            lane_samples[lane].append(sample)
+
+        return [samples[0] for _, samples in lane_samples.items() if len(samples) == 1]
 
 
 class SampleSheetBcl2Fastq(SampleSheet):
