@@ -57,7 +57,9 @@ def add_undetermined_fastq_files_to_housekeeper(
 
     for sample in single_samples:
         lane: int = sample.lane
-        undetermined_fastqs: List[Path] = get_undetermined_fastqs(lane)
+        undetermined_fastqs: List[Path] = get_undetermined_fastqs(
+            lane=lane, flow_cell_path=flow_cell.path
+        )
 
         for fastq_path in undetermined_fastqs:
             add_bundle_and_version_if_non_existent(bundle_name=sample.sample_id, hk_api=hk_api)
