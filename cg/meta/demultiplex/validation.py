@@ -58,7 +58,7 @@ def validate_samples_have_fastq_files(flow_cell: FlowCellDirectoryData) -> None:
         )
         if not fastq_files:
             raise MissingFilesError(f"Sample {sample_id} has no fastq files in flow cell")
-    LOG.debug("Flow cell has fastq files for all samples anc can be finished")
+    LOG.debug("Flow cell has fastq files for all samples and can be finished")
 
 
 def is_flow_cell_ready_for_postprocessing(
