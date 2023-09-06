@@ -198,7 +198,6 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
             sample_sheet_content: List[List[str]] = create_sample_sheet(
                 flow_cell=flow_cell,
                 lims_samples=lims_samples,
-                bcl_converter=flow_cell.bcl_converter,
             )
         except (FileNotFoundError, FileExistsError, ValidationError, FlowCellError):
             continue
