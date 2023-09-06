@@ -78,7 +78,7 @@ class FlowCellSampleNovaSeq6000Dragen(FlowCellSampleNovaSeq6000):
 class SampleSheet(BaseModel):
     samples: List[FlowCellSample]
 
-    def get_single_samples(self):
+    def get_single_samples(self) -> List[FlowCellSample]:
         """Get samples that are alone in their lane."""
         lane_samples = defaultdict(list)
         for sample in self.samples:
