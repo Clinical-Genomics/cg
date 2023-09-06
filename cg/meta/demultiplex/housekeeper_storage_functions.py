@@ -49,7 +49,6 @@ def store_flow_cell_data_in_housekeeper(
     add_undetermined_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api)
 
 
-
 def add_undetermined_fastq_files_to_housekeeper(
     flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI
 ) -> None:
