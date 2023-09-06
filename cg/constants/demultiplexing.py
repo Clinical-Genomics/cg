@@ -34,6 +34,8 @@ class DemultiplexingDirsAndFiles(StrEnum):
     BCL_CONVERT: str = "BCLConvert"
     FLOW_CELLS_DIRECTORY_NAME: str = "flow_cells"
     DEMULTIPLEXED_RUNS_DIRECTORY_NAME: str = "demultiplexed_runs"
+    OUTPUT_FILE_MANIFEST: str = "Manifest.tsv"
+    INTER_OP: str = "InterOp"
 
 
 class RunParametersXMLNodes(StrEnum):
