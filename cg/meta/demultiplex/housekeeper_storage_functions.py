@@ -53,7 +53,7 @@ def add_undetermined_fastq_files_to_housekeeper(
     flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI
 ) -> None:
     sample_sheet: SampleSheet = get_sample_sheet(flow_cell)
-    single_samples: List[FlowCellSample] = sample_sheet.get_single_samples()
+    single_samples: List[FlowCellSample] = sample_sheet.get_non_pooled_samples()
 
     for sample in single_samples:
         lane: int = sample.lane
