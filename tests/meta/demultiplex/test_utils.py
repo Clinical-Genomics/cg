@@ -310,7 +310,7 @@ def test_get_undetermined_fastqs_no_matching_files(tmp_path):
 def test_get_undetermined_fastqs_single_matching_file(tmp_path):
     # GIVEN a flow cell with one undetermined fastq file
     lane = 1
-    expected_file: Path = Path(tmp_path, f"Undetermined_L001_R1.fastq.gz")
+    expected_file: Path = Path(tmp_path, "Undetermined_L001_R1.fastq.gz")
     expected_file.touch()
 
     # WHEN retrieving undetermined fastqs for the lane
