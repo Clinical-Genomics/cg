@@ -190,8 +190,8 @@ def get_sample_sheet(flow_cell: FlowCellDirectoryData) -> SampleSheet:
 
 def get_undetermined_fastqs(lane: int, flow_cell_path: Path) -> List[Path]:
     """Get the undetermined fastq files for a specific lane on a flow cell."""
-    unaligned_pattern = f"Undetermined*_L00{lane}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    undetermined_pattern = f"Undetermined*_L00{lane}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     return get_files_matching_pattern(
         directory=flow_cell_path,
-        pattern=unaligned_pattern,
+        pattern=undetermined_pattern,
     )
