@@ -46,7 +46,7 @@ def parse_bcl2fastq_raw_tile_metrics(
 def aggregate_tile_metrics_per_sample_and_lane(
     tile_metrics: List[Bcl2FastqSampleLaneTileMetrics],
 ) -> List[Bcl2FastqSampleLaneMetrics]:
-    """Aggregate the tile metrics resolved per sample and lane instead."""
+    """Aggregate the tile metrics per sample and lane instead."""
     metrics = {}
 
     for tile_metric in tile_metrics:
@@ -90,10 +90,10 @@ def discard_index_sequence(sample_id_with_index: str) -> str:
 def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
     """Find metrics files in Bcl2fastq demultiplex result directory."""
     stats_json_paths = []
-    lane_tile_dir_pattern = re.compile(r"l\d+t\d+")
+    pattern = re.compile(r"l\d+t\d+")
 
     for subdir in os.listdir(demultiplex_result_directory):
-        if lane_tile_dir_pattern.match(subdir):
+        if pattern.match(subdir):
             stats_json_path = (
                 demultiplex_result_directory
                 / subdir
@@ -103,8 +103,4 @@ def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
             if stats_json_path.is_file():
                 stats_json_paths.append(stats_json_path)
 
-    if not stats_json_paths:
-        raise FileNotFoundError(
-            f"Could not find any stats.json files in {demultiplex_result_directory}."
-        )
     return stats_json_paths
