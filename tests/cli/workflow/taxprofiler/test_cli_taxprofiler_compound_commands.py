@@ -28,7 +28,6 @@ def test_taxprofiler_start(
     cli_runner: CliRunner,
     taxprofiler_context: CGConfig,
     caplog: LogCaptureFixture,
-    mocker,
     taxprofiler_case_id: str,
 ):
     """Test to ensure all parts of start command will run successfully given ideal conditions."""
@@ -39,8 +38,6 @@ def test_taxprofiler_start(
 
     # GIVEN a mocked config
 
-    # GIVEN decompression is not needed
-    mocker.patch.object(TaxprofilerAnalysisAPI, "resolve_decompression")
     TaxprofilerAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN dry running with dry specified
@@ -58,7 +55,6 @@ def test_taxprofiler_start_available(
     cli_runner: CliRunner,
     taxprofiler_context: CGConfig,
     caplog: LogCaptureFixture,
-    mocker,
     taxprofiler_case_id: str,
 ):
     """Test that start-available picks up the available cases that are ready for analysis."""
@@ -70,7 +66,6 @@ def test_taxprofiler_start_available(
     # GIVEN a mocked config
 
     # GIVEN decompression is not needed
-    mocker.patch.object(TaxprofilerAnalysisAPI, "resolve_decompression")
     TaxprofilerAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN running command
