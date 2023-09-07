@@ -1,7 +1,7 @@
 from typing import Optional
 
-from pydantic import field_validator, BaseModel
-from typing_extensions import Literal
+from pydantic import BeforeValidator, field_validator, BaseModel
+from typing_extensions import Annotated, Literal
 
 from cg.constants import Priority
 
@@ -13,8 +13,8 @@ class Udf(BaseModel):
     capture_kit: Optional[str] = None
     collection_date: Optional[str] = None
     comment: Optional[str] = None
-    concentration: Optional[str] = None
-    concentration_sample: Optional[str] = None
+    concentration: Annotated[Optional[str], BeforeValidator(lambda v: str(v))] = None
+    concentration_sample: Annotated[Optional[str], BeforeValidator(lambda v: str(v))] = None
     customer: str
     control: Optional[str] = None
     data_analysis: Optional[str] = None
@@ -22,7 +22,7 @@ class Udf(BaseModel):
     elution_buffer: Optional[str] = None
     extraction_method: Optional[str] = None
     family_name: str = "NA"
-    formalin_fixation_time: Optional[str] = None
+    formalin_fixation_time: Annotated[Optional[str], BeforeValidator(lambda v: str(v))] = None
     index: Optional[str] = None
     index_number: Optional[str] = None
     lab_code: Optional[str] = None
@@ -31,11 +31,11 @@ class Udf(BaseModel):
     original_lab: Optional[str] = None
     original_lab_address: Optional[str] = None
     pool: Optional[str] = None
-    post_formalin_fixation_time: Optional[str] = None
+    post_formalin_fixation_time: Annotated[Optional[str], BeforeValidator(lambda v: str(v))] = None
     pre_processing_method: Optional[str] = None
     primer: Optional[str] = None
     priority: str = Priority.standard.name
-    quantity: Optional[str] = None
+    quantity: Annotated[Optional[str], BeforeValidator(lambda v: str(v))] = None
     reference_genome: Optional[str] = None
     region: Optional[str] = None
     region_code: Optional[str] = None
@@ -47,8 +47,8 @@ class Udf(BaseModel):
     source: str = "NA"
     tissue_block_size: Optional[str] = None
     tumour: Optional[bool] = False
-    tumour_purity: Optional[str] = None
-    volume: Optional[str] = None
+    tumour_purity: Annotated[Optional[str], BeforeValidator(lambda v: str(v))] = None
+    volume: Annotated[Optional[str], BeforeValidator(lambda v: str(v))] = None
     well_position_rml: Optional[str] = None
     verified_organism: Optional[bool] = None
 

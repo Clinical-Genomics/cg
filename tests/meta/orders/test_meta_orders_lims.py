@@ -139,7 +139,7 @@ def test_to_lims_balsamic(balsamic_order_to_submit, project):
     container_names = {sample.container_name for sample in samples if sample.container_name}
 
     # ... and pick out relevant UDFs
-    first_sample = samples[0].dict()
+    first_sample = samples[0].model_dump()
     assert first_sample["name"] == "s1"
     assert {sample.container for sample in samples} == set(["96 well plate"])
     assert first_sample["udfs"]["data_analysis"] in [
