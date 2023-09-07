@@ -4,7 +4,6 @@ from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetr
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertQualityMetrics,
     BclConvertDemuxMetrics,
-    BclConvertAdapterMetrics,
 )
 from pathlib import Path
 from typing import List
@@ -26,9 +25,6 @@ def test_parse_bcl_convert_metrics(
     assert isinstance(bcl_convert_metrics_parser.quality_metrics[0], BclConvertQualityMetrics)
     assert bcl_convert_metrics_parser.demux_metrics
     assert isinstance(bcl_convert_metrics_parser.demux_metrics[0], BclConvertDemuxMetrics)
-
-    assert bcl_convert_metrics_parser.adapter_metrics
-    assert isinstance(bcl_convert_metrics_parser.adapter_metrics[0], BclConvertAdapterMetrics)
 
 
 def test_parse_metrics_files_not_existing():
@@ -55,24 +51,6 @@ def test_parse_bcl_convert_quality_metrics(
     # ASSERT that the parsed quality metrics has the correct values
     for attr_name, attr_value in quality_metrics_model.dict().items():
         assert getattr(bcl_convert_quality_metric_model_with_data, attr_name) == attr_value
-
-
-def test_parse_bcl_convert_adapter_metrics(
-    parsed_bcl_convert_metrics: BclConvertMetricsParser,
-    bcl_convert_adapter_metric_model_with_data: BclConvertAdapterMetrics,
-):
-    """Test to parse BCLConvert adapter metrics."""
-    # GIVEN a parsed BCLConvert metrics
-
-    # ASSERT that the parsed adapter metrics are correct
-    adapter_metrics_model: BclConvertAdapterMetrics = parsed_bcl_convert_metrics.adapter_metrics[0]
-
-    # ASSERT that the parsed adapter metrics are of the correct type
-    assert isinstance(adapter_metrics_model, BclConvertAdapterMetrics)
-
-    # ASSERT that the parsed adapter metrics has the correct values
-    for attr_name, attr_value in adapter_metrics_model.dict().items():
-        assert getattr(bcl_convert_adapter_metric_model_with_data, attr_name) == attr_value
 
 
 def test_parse_bcl_convert_demux_metrics(

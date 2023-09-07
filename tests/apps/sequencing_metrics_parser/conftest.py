@@ -3,14 +3,12 @@ from pathlib import Path
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertDemuxMetrics,
     BclConvertQualityMetrics,
-    BclConvertAdapterMetrics,
 )
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
 import pytest
 from cg.constants.bcl_convert_metrics import (
     BclConvertQualityMetricsColumnNames,
     BclConvertDemuxMetricsColumnNames,
-    BclConvertAdapterMetricsColumnNames,
 )
 
 
@@ -69,28 +67,7 @@ def fixture_bcl_convert_demux_metric_model_with_data(
         **{
             BclConvertDemuxMetricsColumnNames.LANE.value: test_lane,
             BclConvertDemuxMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
-            BclConvertDemuxMetricsColumnNames.SAMPLE_PROJECT.value: test_sample_project,
             BclConvertDemuxMetricsColumnNames.READ_PAIR_COUNT.value: 15962796,
-            BclConvertDemuxMetricsColumnNames.PERFECT_INDEX_READS_COUNT.value: 15962796,
-            BclConvertDemuxMetricsColumnNames.PERFECT_INDEX_READS_PERCENT.value: 1.0000,
-            BclConvertDemuxMetricsColumnNames.ONE_MISMATCH_INDEX_READS_COUNT.value: 0,
-            BclConvertDemuxMetricsColumnNames.TWO_MISMATCH_INDEX_READS_COUNT.value: 0,
-        }
-    )
-
-
-@pytest.fixture(name="bcl_convert_adapter_metric_model_with_data", scope="session")
-def fixture_bcl_convert_adapter_metric_model_with_data(
-    test_lane, test_sample_internal_id, test_sample_project
-) -> BclConvertAdapterMetrics:
-    """Return a BclConvertAdapterMetrics model with data."""
-    return BclConvertAdapterMetrics(
-        **{
-            BclConvertAdapterMetricsColumnNames.LANE.value: test_lane,
-            BclConvertAdapterMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
-            BclConvertAdapterMetricsColumnNames.SAMPLE_PROJECT.value: test_sample_project,
-            BclConvertAdapterMetricsColumnNames.READ_NUMBER.value: 1,
-            BclConvertAdapterMetricsColumnNames.SAMPLE_BASES.value: 415032696,
         }
     )
 
@@ -104,10 +81,6 @@ def fixture_bcl_convert_quality_metric_model_with_data(
         **{
             BclConvertQualityMetricsColumnNames.LANE.value: test_lane,
             BclConvertQualityMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
-            BclConvertQualityMetricsColumnNames.READ_PAIR_NUMBER.value: 1,
-            BclConvertQualityMetricsColumnNames.YIELD_BASES.value: 415032696,
-            BclConvertQualityMetricsColumnNames.YIELD_Q30.value: 393745856,
-            BclConvertQualityMetricsColumnNames.QUALITY_SCORE_SUM.value: 15004333259,
             BclConvertQualityMetricsColumnNames.MEAN_QUALITY_SCORE_Q30.value: 36.15,
             BclConvertQualityMetricsColumnNames.Q30_BASES_PERCENT.value: 0.95,
         }
