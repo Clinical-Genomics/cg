@@ -106,7 +106,9 @@ class RunDirFlowCell:
         if self.hk.bundle(name=self.id) is None:
             LOG.info(f"Creating bundle with name {self.id}")
             self.hk.create_new_bundle_and_version(name=self.id)
-        sample_sheets_from_latest_version: List[File] = self.hk.get_sample_sheets_from_latest_version(
+        sample_sheets_from_latest_version: List[
+            File
+        ] = self.hk.get_sample_sheets_from_latest_version(
             flow_cell_id=self.id,
         )
         for file in sample_sheets_from_latest_version:
