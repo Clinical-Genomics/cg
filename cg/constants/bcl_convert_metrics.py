@@ -9,7 +9,6 @@ from cg.constants.demultiplexing import (
 )
 
 
-
 class BclConvertQualityMetricsColumnNames(Enum):
     """Column names for the BCLConvert quality metrics file."""
 
