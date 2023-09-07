@@ -60,15 +60,3 @@ class BclConvertAdapterMetrics(BaseModel):
     )
     read_number: int = Field(..., alias=BclConvertAdapterMetricsColumnNames.READ_NUMBER.value)
     sample_bases: int = Field(..., alias=BclConvertAdapterMetricsColumnNames.SAMPLE_BASES.value)
-
-
-class BclConvertSampleSheetData(BaseModel):
-    """Model for the BCL Convert sample sheet."""
-
-    flow_cell_name: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value)
-    lane: int = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.LANE.value)
-    sample_internal_id: str = Field(
-        ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCLCONVERT.value
-    )
-    sample_name: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_NAME.value)
-    control: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.CONTROL.value)
