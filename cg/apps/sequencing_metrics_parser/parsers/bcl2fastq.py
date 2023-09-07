@@ -67,8 +67,6 @@ def parse_bcl2fastq_raw_tile_metrics(
     )
 
     for stats_json_path in stats_json_paths:
-        if not stats_json_path.exists():
-            raise FileNotFoundError(f"File {stats_json_path} does not exist.")
         LOG.debug(f"Parsing stats.json file {stats_json_path}")
         sequencing_metrics = Bcl2FastqSampleLaneTileMetrics.parse_file(stats_json_path)
         tile_sequencing_metrics.append(sequencing_metrics)
@@ -151,5 +149,7 @@ def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
             if stats_json_path.is_file():
                 stats_json_paths.append(stats_json_path)
     if not stats_json_paths:
-        raise FileNotFoundError(f"No stats.json files found in {demultiplex_result_directory}.")
+        raise FileNotFoundError(
+            f"No {BCL2FASTQ_METRICS_FILE_NAME} file found in {demultiplex_result_directory}."
+        )
     return stats_json_paths
