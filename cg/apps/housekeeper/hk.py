@@ -482,3 +482,11 @@ class HousekeeperAPI:
             raise ValueError(f"No Archive entry found for file with id {file_id}.")
         self._store.update_retrieval_task_id(archive=archive, retrieval_task_id=retrieval_task_id)
         self.commit()
+
+    def file_exists_in_latest_version_for_bundle(self, file_path: Path, bundle_name: str) -> bool:
+        """Check if a file exists in the latest version for bundle."""
+        latest_version: Version = self.get_latest_bundle_version(bundle_name)
+
+        return any(
+            file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
+        )
