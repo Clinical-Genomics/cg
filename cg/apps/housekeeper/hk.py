@@ -401,12 +401,12 @@ class HousekeeperAPI:
         return all(sequencing_files_in_hk.values())
 
     def get_non_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[File]:
-        """Returns all files from given bundle, with given tag, which have not been archived."""
-        return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags)
+        """Returns all non-archived_files from a given bundle, tagged with the given tags"""
+        return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags or [])
 
     def get_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[File]:
-        """Returns all files from given bundle, with given tag, which have been archived."""
-        return self._store.get_archived_files(bundle_name=bundle_name, tags=tags)
+        """Returns all archived_files from a given bundle, tagged with the given tags"""
+        return self._store.get_archived_files(bundle_name=bundle_name, tags=tags or [])
 
     def add_archives(self, files: List[Path], archive_task_id: int) -> None:
         """Creates an archive object for the given files, and adds the archive task id to them."""
@@ -449,3 +449,36 @@ class HousekeeperAPI:
             (file.version.bundle.name, file.path)
             for file in self.get_all_non_archived_spring_files()
         ]
+
+    def set_archive_retrieved_at(self, file_id: int, retrieval_task_id: int):
+        """Sets the retrieved_at value for an Archive entry. Raises a ValueError if the given retrieval task id
+        is not found in Housekeeper."""
+        archive: Archive = self._store.get_file_by_id(file_id).archive
+        if archive.retrieval_task_id != retrieval_task_id:
+            raise ValueError(
+                f"Retrieval task id did not match database entry. Given task id was {retrieval_task_id}, "
+                f"while retrieval task id in Housekeeper is {archive.retrieval_task_id}."
+            )
+        self._store.update_retrieval_time_stamp(archive=archive)
+        self.commit()
+
+    def set_archive_archived_at(self, file_id: int, archiving_task_id: int):
+        """Sets the archived_at value for an Archive entry. Raises a ValueError if the given archiving task id
+        is not found in Housekeeper."""
+        archive: Archive = self._store.get_file_by_id(file_id).archive
+        if archive.archiving_task_id != archiving_task_id:
+            raise ValueError(
+                f"Archiving task id did not match database entry. Given task id was {archiving_task_id}, "
+                f"while archiving task id in Housekeeper is {archive.archiving_task_id}."
+            )
+        self._store.update_archiving_time_stamp(archive=archive)
+        self.commit()
+
+    def set_archive_retrieval_task_id(self, file_id: int, retrieval_task_id: int) -> None:
+        """Sets the retrieval_task_id for an Archive entry. Raises a ValueError if the given retrieval task id
+        is not found in Housekeeper."""
+        archive: Archive = self._store.get_file_by_id(file_id).archive
+        if not archive:
+            raise ValueError(f"No Archive entry found for file with id {file_id}.")
+        self._store.update_retrieval_task_id(archive=archive, retrieval_task_id=retrieval_task_id)
+        self.commit()

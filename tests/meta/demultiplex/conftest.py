@@ -1,3 +1,5 @@
+import shutil
+
 import pytest
 
 from collections import namedtuple
@@ -54,16 +56,6 @@ def fixture_tmp_samplesheet_path(tmp_demulitplexing_dir: Path) -> Path:
     with tmp_sample_sheet_path.open("w+") as fh:
         fh.write("content")
     return tmp_sample_sheet_path
-
-
-@pytest.fixture(name="tmp_flow_cell_run_path")
-def fixture_tmp_flow_cell_run_path(project_dir: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
-    """Flow cell run directory in temporary folder."""
-
-    tmp_flow_cell_run_path: Path = Path(project_dir, "flow_cell_run", bcl2fastq_flow_cell_full_name)
-    tmp_flow_cell_run_path.mkdir(exist_ok=True, parents=True)
-
-    return tmp_flow_cell_run_path
 
 
 @pytest.fixture(name="tmp_flow_cell_run_base_path")
@@ -471,3 +463,45 @@ def fixture_not_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Pa
         new_dir.mkdir()
 
     return base_dir
+
+
+@pytest.fixture(scope="session")
+def base_call_file() -> Path:
+    return Path("Data", "Intensities", "BaseCalls", "L001", "C1.1", "L001_1.cbcl")
+
+
+@pytest.fixture(scope="session")
+def inter_op_file() -> Path:
+    return Path(DemultiplexingDirsAndFiles.INTER_OP, "AlignmentMetricsOut.bin")
+
+
+@pytest.fixture(scope="session")
+def thumbnail_file() -> Path:
+    return Path("Thumbnail_Images", "L001", "C1.1", "s_1_1105_green.png")
+
+
+@pytest.fixture()
+def lsyncd_source_directory(
+    tmp_path_factory,
+    novaseq_x_manifest_file: Path,
+    base_call_file: Path,
+    inter_op_file: Path,
+    thumbnail_file: Path,
+) -> Path:
+    """Return a temporary directory with a manifest file and three dummy files."""
+    source_directory = Path(tmp_path_factory.mktemp("source"))
+    shutil.copy(novaseq_x_manifest_file, source_directory)
+    for file in [base_call_file, inter_op_file, thumbnail_file]:
+        full_path = Path(source_directory, file)
+        full_path.parent.mkdir(parents=True)
+        full_path.touch()
+    return source_directory
+
+
+@pytest.fixture()
+def lsyncd_target_directory(lsyncd_source_directory: Path, tmp_path_factory) -> Path:
+    """Return a copy of the temporary source directory."""
+    temp_target_directory = Path(tmp_path_factory.mktemp("tmp_target"))
+    target_directory = Path(lsyncd_source_directory.parent, Path(temp_target_directory, "target"))
+    shutil.copytree(lsyncd_source_directory, target_directory)
+    return target_directory
