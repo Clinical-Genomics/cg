@@ -18,8 +18,7 @@ depends_on = None
 
 def upgrade():
     op.alter_column(
-        schema="cg-stage",
-        table_name="Sample",
+        table_name="sample",
         column_name="sequenced_at",
         new_column_name="reads_updated_at",
         existing_type=types.DateTime,
@@ -28,8 +27,7 @@ def upgrade():
 
 def downgrade():
     op.alter_column(
-        schema="cg-stage",
-        table_name="Sample",
+        table_name="sample",
         column_name="reads_updated_at",
         new_column_name="sequenced_at",
         existing_type=types.DateTime,
