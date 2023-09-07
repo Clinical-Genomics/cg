@@ -1,7 +1,7 @@
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
 
 
-def test_get_single_samples_no_samples():
+def test_get_non_pooled_samples_when_no_samples():
     # GIVEN a sample sheet with no samples
     sample_sheet = SampleSheet(samples=[])
 
@@ -12,7 +12,7 @@ def test_get_single_samples_no_samples():
     assert not samples
 
 
-def test_get_single_samples_multiple_samples_same_lane():
+def test_get_non_pooled_samples_when_multiple_samples_same_lane():
     # GIVEN a sample sheet with multiple samples on the same lane
     sample1 = FlowCellSample(lane=1, sample_id="S1", index="A")
     sample2 = FlowCellSample(lane=1, sample_id="S2", index="A")
@@ -25,7 +25,7 @@ def test_get_single_samples_multiple_samples_same_lane():
     assert not samples
 
 
-def test_get_single_samples_single_sample_one_lane():
+def test_get_non_pooled_samples_when_single_sample_one_lane():
     # GIVEN a sample sheet with a single sample on one lane
     non_pooled_sample = FlowCellSample(lane=1, sample_id="S1", index="A")
     sample_sheet = SampleSheet(samples=[non_pooled_sample])
@@ -37,7 +37,7 @@ def test_get_single_samples_single_sample_one_lane():
     assert samples == [non_pooled_sample]
 
 
-def test_get_single_samples_multiple_lanes_one_single():
+def test_get_non_pooled_samples_when_multiple_lanes_one_single():
     # GIVEN a sample sheet with multiple lanes and a single sample in one lane
     sample1 = FlowCellSample(lane=1, sample_id="S1", index="A")
     sample2 = FlowCellSample(lane=1, sample_id="S2", index="A")

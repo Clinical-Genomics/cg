@@ -79,7 +79,7 @@ class SampleSheet(BaseModel):
     samples: List[FlowCellSample]
 
     def get_non_pooled_samples(self) -> List[FlowCellSample]:
-        """Get samples that are alone in their lane."""
+        """Return samples that are sequenced solo in their lane."""
         lane_samples = defaultdict(list)
         for sample in self.samples:
             lane: int = sample.lane
