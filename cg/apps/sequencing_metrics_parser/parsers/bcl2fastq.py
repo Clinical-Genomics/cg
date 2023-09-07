@@ -14,9 +14,7 @@ from cg.constants.demultiplexing import (
 
 
 def parse_bcl2fastq_sequencing_metrics(flow_cell_dir: Path) -> List[Bcl2FastqSampleLaneMetrics]:
-    """
-    Parse metrics for a flow cell demultiplexed with Bcl2fastq.
-    """
+    """Parse metrics for a flow cell demultiplexed with Bcl2fastq."""
     tile_sequencing_metrics: List[
         Bcl2FastqSampleLaneTileMetrics
     ] = parse_bcl2fastq_raw_tile_metrics(flow_cell_dir)
