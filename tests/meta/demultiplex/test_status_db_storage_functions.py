@@ -3,7 +3,6 @@ from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.status_db_storage_functions import (
     add_samples_to_flow_cell_in_status_db,
     add_sequencing_metrics_to_statusdb,
-    metric_has_sample_in_statusdb,
     update_sample_read_count,
 )
 from cg.models.cg_config import CGConfig
@@ -84,8 +83,8 @@ def test_metric_has_sample_in_statusdb(demultiplex_context: CGConfig):
     sample_internal_id = "does_not_exist"
 
     # WHEN checking if the sample exists in statusdb
-    assert not metric_has_sample_in_statusdb(
-        sample_internal_id=sample_internal_id, store=demux_post_processing_api.status_db
+    assert not demux_post_processing_api.status_db.metric_has_sample_in_statusdb(
+        sample_internal_id=sample_internal_id
     )
 
 
