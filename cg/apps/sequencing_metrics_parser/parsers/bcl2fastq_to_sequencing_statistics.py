@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import List
@@ -9,6 +10,8 @@ from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
     calculate_q30_bases_percentage,
 )
 from cg.store.models import SampleLaneSequencingMetrics
+
+LOG = logging.getLogger(__name__)
 
 
 def create_sample_lane_sequencing_metrics_from_bcl2fastq_for_flow_cell(
@@ -32,6 +35,7 @@ def create_sample_lane_sequencing_metrics_from_bcl2fastq_for_flow_cell(
     )
 
     for raw_sample_metrics in sample_and_lane_metrics:
+        LOG.debug(f"Creating SampleLaneSequencingMetrics for sample {raw_sample_metrics.sample_id}")
         metrics: SampleLaneSequencingMetrics = create_sample_lane_sequencing_metrics_from_bcl2fastq(
             bcl2fastq_sample_metrics=raw_sample_metrics
         )

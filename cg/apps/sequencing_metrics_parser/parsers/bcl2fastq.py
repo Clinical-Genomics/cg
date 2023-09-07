@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 from pathlib import Path
@@ -12,6 +13,7 @@ from cg.constants.demultiplexing import (
     BCL2FASTQ_METRICS_FILE_NAME,
 )
 
+LOG = logging.getLogger(__name__)
 
 def parse_bcl2fastq_sequencing_metrics(
     flow_cell_dir: Path,
@@ -66,6 +68,7 @@ def parse_bcl2fastq_raw_tile_metrics(
     for stats_json_path in stats_json_paths:
         if not stats_json_path.exists():
             raise FileNotFoundError(f"File {stats_json_path} does not exist.")
+        LOG.debug(f"Parsing stats.json file {stats_json_path}")
         sequencing_metrics = Bcl2FastqSampleLaneTileMetrics.parse_file(stats_json_path)
         tile_sequencing_metrics.append(sequencing_metrics)
 
@@ -98,6 +101,7 @@ def aggregate_tile_metrics_per_sample_and_lane(
                         sample_total_yield_q30_in_lane=0,
                         sample_total_quality_score_in_lane=0,
                     )
+                LOG.debug(f"Adding metrics for sample {sample_lane_key[1]} in lane {sample_lane_key[0]}")
                 # Double the total reads since they are reported in pairs
                 metrics[sample_lane_key].sample_total_reads_in_lane += demux_result.number_reads * 2
                 metrics[sample_lane_key].sample_total_yield_in_lane += demux_result.yield_
