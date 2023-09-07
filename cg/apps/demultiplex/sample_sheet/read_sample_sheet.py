@@ -6,8 +6,8 @@ from pydantic import TypeAdapter
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import (
-    SampleSheetNovaSeq6000Sections,
-    SampleSheetNovaSeqXSections,
+    SampleSheetBcl2FastqSections,
+    SampleSheetBCLConvertSections,
 )
 
 from cg.exc import SampleSheetError
@@ -81,8 +81,8 @@ def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str
         if len(line) <= 5:
             continue
         if line[0] in [
-            SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value,
-            SampleSheetNovaSeqXSections.Data.LANE.value,
+            SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID.value,
+            SampleSheetBCLConvertSections.Data.LANE.value,
         ]:
             header = line
             continue

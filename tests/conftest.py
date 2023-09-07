@@ -10,15 +10,12 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
-from housekeeper.store.models import File, Version
-from requests import Response
-
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeq6000Dragen,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
 )
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
@@ -641,12 +638,6 @@ def fixture_rnafusion_analysis_dir(analysis_dir: Path) -> Path:
     return Path(analysis_dir, "rnafusion")
 
 
-@pytest.fixture(name="taxprofiler_analysis_dir")
-def fixture_taxprofiler_analysis_dir(analysis_dir: Path) -> Path:
-    """Return the path to the directory with taxprofiler analysis files."""
-    return Path(analysis_dir, "taxprofiler")
-
-
 @pytest.fixture(name="sample_cram")
 def fixture_sample_cram(mip_dna_analysis_dir: Path) -> Path:
     """Return the path to the cram file for a sample."""
@@ -760,17 +751,17 @@ def fixture_compression_object(
 @pytest.fixture(name="lims_novaseq_bcl_convert_samples")
 def fixture_lims_novaseq_bcl_convert_samples(
     lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleNovaSeq6000Dragen]:
+) -> List[FlowCellSampleBCLConvert]:
     """Return a list of parsed flow cell samples demultiplexed with BCL convert."""
-    return [FlowCellSampleNovaSeq6000Dragen(**sample) for sample in lims_novaseq_samples_raw]
+    return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture(name="lims_novaseq_bcl2fastq_samples")
 def fixture_lims_novaseq_bcl2fastq_samples(
     lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleNovaSeq6000Bcl2Fastq]:
+) -> List[FlowCellSampleBcl2Fastq]:
     """Return a list of parsed Bcl2fastq flow cell samples"""
-    return [FlowCellSampleNovaSeq6000Bcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
+    return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture(name="stats_api")
@@ -838,40 +829,10 @@ def fixture_flow_cell_working_directory_bclconvert(
     return Path(tmp_flow_cells_directory, bcl_convert_flow_cell_dir.name)
 
 
-@pytest.fixture(name="tmp_flow_cell_demux_all_directory_bcl2fastq")
-def fixture_flow_cell_demux_all_directory_bcl2fastq(
-    bcl2fastq_flow_cell_dir: Path, tmp_flow_cells_demux_all_directory: Path
-) -> Path:
-    """Return the path to a working directory that will be deleted after test is run.
-    Used to test functions in demultiplex flow cell.
-    This is a path to a flow cell directory with the run parameters present.
-    """
-    return Path(tmp_flow_cells_demux_all_directory, bcl2fastq_flow_cell_dir.name)
-
-
-@pytest.fixture(name="tmp_flow_cell_demux_all_directory_bclconvert")
-def fixture_flow_cell_demux_all_directory_bclconvert(
-    bcl_convert_flow_cell_dir: Path, tmp_flow_cells_demux_all_directory: Path
-) -> Path:
-    """Return the path to a working directory that will be deleted after test is run.
-    Used to test functions in demultiplex flow cell.
-    This is a path to a flow cell directory with the run parameters present.
-    """
-    return Path(tmp_flow_cells_demux_all_directory, bcl_convert_flow_cell_dir.name)
-
-
 @pytest.fixture(name="tmp_flow_cell_name_no_run_parameters")
 def fixture_tmp_flow_cell_name_no_run_parameters() -> str:
     """This is the name of a flow cell directory with the run parameters missing."""
     return "180522_A00689_0200_BHLCKNCCXY"
-
-
-@pytest.fixture(name="tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert")
-def fixture_tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert() -> str:
-    """ "Returns the name of a flow cell directory ready for demultiplexing with BCL convert.
-    Contains a sample sheet that is BCL convert compliant
-    """
-    return "211101_A00187_0615_AHLG5GDRZZ"
 
 
 @pytest.fixture(name="tmp_flow_cell_name_no_sample_sheet")
@@ -900,14 +861,6 @@ def fixture_tmp_flow_cells_directory_no_sample_sheet(
 ) -> Path:
     """This is a path to a flow cell directory with the sample sheet and run parameters missing."""
     return Path(tmp_flow_cells_directory, tmp_flow_cell_name_no_sample_sheet)
-
-
-@pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert")
-def fixture_tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert(
-    tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert: str, tmp_flow_cells_directory: Path
-) -> Path:
-    """This is a path to a flow cell directory with the run parameters missing."""
-    return Path(tmp_flow_cells_directory, tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert)
 
 
 @pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq")
@@ -947,6 +900,17 @@ def fixture_tmp_bcl2fastq_flow_cell(
     return FlowCellDirectoryData(
         flow_cell_path=tmp_demultiplexed_runs_bcl2fastq_directory,
         bcl_converter=BclConverter.BCL2FASTQ,
+    )
+
+
+@pytest.fixture(name="tmp_bcl_convert_flow_cell")
+def fixture_tmp_bcl_convert_flow_cell(
+    tmp_flow_cell_directory_bclconvert: Path,
+) -> FlowCellDirectoryData:
+    """Create a flow cell object with flow cell that is demultiplexed."""
+    return FlowCellDirectoryData(
+        flow_cell_path=tmp_flow_cell_directory_bclconvert,
+        bcl_converter=BclConverter.DRAGEN,
     )
 
 
@@ -1036,16 +1000,6 @@ def fixture_flow_cell_directory_name_demultiplexed_with_bcl_convert(
     flow_cell_name_demultiplexed_with_bcl_convert: str,
 ):
     return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
-
-
-@pytest.fixture(
-    name="flow_cell_directory_name_demultiplexed_with_bcl_convert_flat", scope="session"
-)
-def fixture_flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-):
-    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert using a flat output directory structure."""
-    return f"230505_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
 
 
 # Fixtures for test demultiplex flow cell
@@ -1256,6 +1210,12 @@ def fixture_novaseq_x_flow_cell_full_name() -> str:
     return "20230508_LH00188_0003_A22522YLT3"
 
 
+@pytest.fixture()
+def novaseq_x_manifest_file(novaseq_x_flow_cell_dir: Path) -> Path:
+    """Return the path to a NovaSeqX manifest file."""
+    return Path(novaseq_x_flow_cell_dir, "Manifest.tsv")
+
+
 @pytest.fixture(name="bcl2fastq_flow_cell_dir", scope="session")
 def fixture_bcl2fastq_flow_cell_dir(
     flow_cells_dir: Path, bcl2fastq_flow_cell_full_name: str
@@ -1372,7 +1332,7 @@ def fixture_bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> FlowCellDi
     )
 
 
-@pytest.fixture(name="novaseq_x_flow_cell", scope="session")
+@pytest.fixture(name="novaseq_x_flow_cell", scope="function")
 def fixture_novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a NovaSeqX flow cell object with flow cell that is demultiplexed."""
     return FlowCellDirectoryData(
@@ -1424,6 +1384,22 @@ def fixture_demultiplexed_flow_cell(
 ) -> Path:
     """Return the path to a demultiplexed flow cell with bcl2fastq."""
     return Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
+
+
+@pytest.fixture(name="bcl_convert_demultiplexed_flow_cell")
+def fixture_bcl_convert_demultiplexed_flow_cell(
+    demultiplexed_runs: Path, bcl_convert_flow_cell_full_name: str
+) -> Path:
+    """Return the path to a demultiplexed flow cell with BCLConvert."""
+    return Path(demultiplexed_runs, bcl_convert_flow_cell_full_name)
+
+
+@pytest.fixture(name="novaseqx_demultiplexed_flow_cell")
+def fixture_novaseqx_demultiplexed_flow_cell(
+    demultiplexed_runs: Path, novaseq_x_flow_cell_full_name: str
+):
+    """Return the path to a demultiplexed NovaSeqX flow cell."""
+    return Path(demultiplexed_runs, novaseq_x_flow_cell_full_name)
 
 
 @pytest.fixture(name="bcl2fastq_demux_results")
@@ -3048,12 +3024,6 @@ def fixture_flow_cell_name() -> str:
     return "HVKJCDRXX"
 
 
-@pytest.fixture(name="expected_average_q30")
-def fixture_expected_average_q30() -> float:
-    """Return expected average Q30."""
-    return 90.50
-
-
 @pytest.fixture(name="expected_average_q30_for_sample")
 def fixture_expected_average_q30_for_sample() -> float:
     """Return expected average Q30 for a sample."""
@@ -3128,16 +3098,6 @@ def store_with_sequencing_metrics(
     store.session.commit()
 
     return store
-
-
-@pytest.fixture(name="demultiplexed_flow_cells_tmp_directory")
-def fixture_demultiplexed_flow_cells_tmp_directory(tmp_path) -> Path:
-    original_dir = Path(
-        Path(__file__).parent, "fixtures", "apps", "demultiplexing", "demultiplexed-runs"
-    )
-    tmp_dir = Path(tmp_path, "tmp_run_dir")
-
-    return Path(shutil.copytree(original_dir, tmp_dir))
 
 
 @pytest.fixture(scope="function")

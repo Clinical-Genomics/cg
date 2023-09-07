@@ -2,9 +2,8 @@ from pathlib import Path
 from typing import Type
 
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeq6000Dragen,
-    FlowCellSampleNovaSeqX,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.constants.demultiplexing import BclConverter
@@ -109,21 +108,21 @@ def test_get_sample_model_bcl2fastq(bcl2fastq_flow_cell: FlowCellDirectoryData):
     # GIVEN a Bcl2Fastq flow cell
 
     # WHEN getting the sample model
-    sample_model: Type[FlowCellSampleNovaSeq6000Bcl2Fastq] = bcl2fastq_flow_cell.sample_type
+    sample_model: Type[FlowCellSampleBcl2Fastq] = bcl2fastq_flow_cell.sample_type
 
     # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
-    assert sample_model == FlowCellSampleNovaSeq6000Bcl2Fastq
+    assert sample_model == FlowCellSampleBcl2Fastq
 
 
 def test_get_sample_model_dragen(bcl_convert_flow_cell: FlowCellDirectoryData):
-    """Test that the sample model of a dragen flow cell is FlowCellSampleNovaSeq6000Dragen."""
+    """Test that the sample model of a dragen flow cell is FlowCellSampleBCLConvert."""
     # GIVEN a dragen flow cell
 
     # WHEN getting the sample model
-    sample_model: Type[FlowCellSampleNovaSeq6000Dragen] = bcl_convert_flow_cell.sample_type
+    sample_model: Type[FlowCellSampleBCLConvert] = bcl_convert_flow_cell.sample_type
 
     # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
-    assert sample_model == FlowCellSampleNovaSeq6000Dragen
+    assert sample_model == FlowCellSampleBCLConvert
 
 
 def test_get_sample_model_novaseq_x(novaseq_x_flow_cell: FlowCellDirectoryData):
@@ -131,10 +130,10 @@ def test_get_sample_model_novaseq_x(novaseq_x_flow_cell: FlowCellDirectoryData):
     # GIVEN a NovaSeqX flow cell
 
     # WHEN getting the sample model
-    sample_model: Type[FlowCellSampleNovaSeqX] = novaseq_x_flow_cell.sample_type
+    sample_model: Type[FlowCellSampleBCLConvert] = novaseq_x_flow_cell.sample_type
 
     # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
-    assert sample_model == FlowCellSampleNovaSeqX
+    assert sample_model == FlowCellSampleBCLConvert
 
 
 def test_get_bcl_converter_by_sequencer(
