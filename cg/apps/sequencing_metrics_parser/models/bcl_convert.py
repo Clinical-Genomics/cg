@@ -1,4 +1,4 @@
-from pydantic.v1 import BaseModel, BaseConfig, Field
+from pydantic import BaseModel, Field
 from cg.constants.bcl_convert_metrics import (
     BclConvertQualityMetricsColumnNames,
     BclConvertDemuxMetricsColumnNames,
@@ -60,7 +60,3 @@ class BclConvertAdapterMetrics(BaseModel):
     )
     read_number: int = Field(..., alias=BclConvertAdapterMetricsColumnNames.READ_NUMBER.value)
     sample_bases: int = Field(..., alias=BclConvertAdapterMetricsColumnNames.SAMPLE_BASES.value)
-
-
-class CustomConfig(BaseConfig):
-    arbitrary_types_allowed = True
