@@ -6,8 +6,8 @@ from cg.exc import SampleSheetError
 from cg.apps.demultiplex.sample_sheet.models import (
     SampleSheet,
     FlowCellSample,
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeq6000Dragen,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     validate_samples_are_unique,
@@ -20,8 +20,8 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
 
 
 def test_validate_samples_are_unique(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
-    novaseq6000_flow_cell_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
+    novaseq6000_flow_cell_sample_2: FlowCellSampleBcl2Fastq,
 ):
     """Test that validating two different samples finishes successfully."""
     # GIVEN two different NovaSeq samples
@@ -36,7 +36,7 @@ def test_validate_samples_are_unique(
 
 
 def test_validate_samples_are_unique_when_not_unique(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq, caplog
+    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq, caplog
 ):
     """Test that validating two identical samples fails."""
     # GIVEN two identical NovaSeq samples
@@ -56,8 +56,8 @@ def test_validate_samples_are_unique_when_not_unique(
 
 
 def test_is_valid_sample_internal_id(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
-    novaseq6000_flow_cell_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
+    novaseq6000_flow_cell_sample_2: FlowCellSampleBcl2Fastq,
 ):
     """Test that validating two different samples finishes successfully."""
     # GIVEN two different NovaSeq samples with valid internal IDs
@@ -69,8 +69,8 @@ def test_is_valid_sample_internal_id(
 
 
 def test_is_valid_sample_internal_id_invalid_sample_internal_ids(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
-    novaseq6000_flow_cell_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
+    novaseq6000_flow_cell_sample_2: FlowCellSampleBcl2Fastq,
 ):
     """Test that validating two different samples finishes successfully."""
     # GIVEN two different NovaSeq samples with valid internal IDs
@@ -86,8 +86,8 @@ def test_is_valid_sample_internal_id_invalid_sample_internal_ids(
 
 
 def test_get_samples_by_lane(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
-    novaseq6000_flow_cell_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
+    novaseq6000_flow_cell_sample_2: FlowCellSampleBcl2Fastq,
 ):
     """Test that grouping two samples with different lanes returns two groups."""
     # GIVEN two samples on two different lanes
@@ -157,7 +157,7 @@ def test_get_sample_sheet_bcl2fastq_duplicate_same_lane(
         # THEN a sample sheet error is raised
         get_validated_sample_sheet(
             sample_sheet_content=sample_sheet_bcl2fastq_duplicate_same_lane,
-            sample_type=FlowCellSampleNovaSeq6000Bcl2Fastq,
+            sample_type=FlowCellSampleBcl2Fastq,
         )
 
 
@@ -172,7 +172,7 @@ def test_get_sample_sheet_dragen_duplicate_same_lane(
         # THEN a sample sheet error is raised
         get_validated_sample_sheet(
             sample_sheet_content=sample_sheet_dragen_duplicate_same_lane,
-            sample_type=FlowCellSampleNovaSeq6000Dragen,
+            sample_type=FlowCellSampleBCLConvert,
         )
 
 
@@ -185,7 +185,7 @@ def test_get_sample_sheet_bcl2fastq_duplicate_different_lanes(
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_bcl2fastq_duplicate_different_lane,
-        sample_type=FlowCellSampleNovaSeq6000Bcl2Fastq,
+        sample_type=FlowCellSampleBcl2Fastq,
     )
 
     # THEN a sample sheet is returned with samples in it
@@ -201,7 +201,7 @@ def test_get_sample_sheet_dragen_duplicate_different_lanes(
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_dragen_duplicate_different_lane,
-        sample_type=FlowCellSampleNovaSeq6000Dragen,
+        sample_type=FlowCellSampleBCLConvert,
     )
 
     # THEN a sample sheet is returned with samples in it
@@ -210,7 +210,7 @@ def test_get_sample_sheet_dragen_duplicate_different_lanes(
 
 def test_get_sample_internal_ids_from_sample_sheet(
     novaseq6000_bcl_convert_sample_sheet_path: Path,
-    flow_cell_type: Type[FlowCellSample] = FlowCellSampleNovaSeq6000Dragen,
+    flow_cell_type: Type[FlowCellSample] = FlowCellSampleBCLConvert,
 ):
     """Test that getting sample internal ids from a sample sheet returns a unique list of strings."""
     # GIVEN a path to a sample sheet with only valid samples

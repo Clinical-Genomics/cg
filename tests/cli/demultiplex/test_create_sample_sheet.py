@@ -1,9 +1,11 @@
 from pathlib import Path
 from typing import List
 
+from click import testing
+
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeq6000Dragen,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
 )
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
@@ -20,7 +22,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_no_run_parameters: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
     caplog,
     mocker,
 ):
@@ -58,7 +60,7 @@ def test_create_bcl2fastq_sample_sheet(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_no_sample_sheet: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
     mocker,
 ):
     """Test that creating a Bcl2fastq sample sheet works."""
@@ -110,7 +112,7 @@ def test_create_dragen_sample_sheet(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_no_sample_sheet: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl_convert_samples: List[FlowCellSampleNovaSeq6000Dragen],
+    lims_novaseq_bcl_convert_samples: List[FlowCellSampleBCLConvert],
     mocker,
 ):
     """Test that creating a Dragen sample sheet works."""

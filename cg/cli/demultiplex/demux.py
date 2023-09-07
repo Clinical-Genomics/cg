@@ -10,9 +10,10 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     mark_as_demultiplexed,
     mark_flow_cell_as_queued_for_post_processing,
 )
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
+from cg.meta.demultiplex.utils import is_syncing_complete
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
@@ -194,3 +195,27 @@ def copy_novaseqx_flow_cells(context: CGConfig):
             mark_flow_cell_as_queued_for_post_processing(flow_cell_dir)
         else:
             LOG.info(f"Flow cell {flow_cell_dir.name} is not ready for post processing, skipping.")
+
+
+@click.command(name="confirm-flow-cell-sync")
+@click.option(
+    "-s",
+    "--source-directory",
+    required=True,
+    help="The path from where the syncing is done.",
+)
+@click.pass_obj
+def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
+    """Checks if all relevant files for the demultiplexing have been synced.
+    If so it creates a CopyComplete.txt file to show that that is the case."""
+    target_flow_cells_dir = Path(context.flow_cells_dir)
+    for source_flow_cell in Path(source_directory).iterdir():
+        if is_syncing_complete(
+            source_directory=source_flow_cell,
+            target_directory=Path(target_flow_cells_dir, source_flow_cell.name),
+        ):
+            Path(
+                target_flow_cells_dir,
+                source_flow_cell.name,
+                DemultiplexingDirsAndFiles.COPY_COMPLETE,
+            ).touch()
