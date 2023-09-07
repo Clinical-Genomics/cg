@@ -746,3 +746,33 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID],
             internal_id=sample_internal_id,
         ).all()
+
+    def get_sample_by_internal_id(self, internal_id: str) -> Optional[Sample]:
+        """Return a sample by lims id."""
+        return apply_sample_filter(
+            filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID],
+            samples=self._get_query(table=Sample),
+            internal_id=internal_id,
+        ).first()
+
+    def metric_exists_in_status_db(self, metric: SampleLaneSequencingMetrics) -> bool:
+        existing_metrics_entry: Optional[
+            SampleLaneSequencingMetrics
+        ] = self.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+            flow_cell_name=metric.flow_cell_name,
+            sample_internal_id=metric.sample_internal_id,
+            lane=metric.flow_cell_lane_number,
+        )
+        if existing_metrics_entry:
+            LOG.warning(
+                f"Sample lane sequencing metrics already exist for {metric.flow_cell_name}, {metric.sample_internal_id}, and lane {metric.flow_cell_lane_number}. Skipping."
+            )
+        return bool(existing_metrics_entry)
+
+    def metric_has_sample_in_statusdb(self, sample_internal_id: str) -> bool:
+        """Check if a sample exists in status db for the sample lane sequencing metrics."""
+        sample: Sample = self.get_sample_by_internal_id(sample_internal_id)
+        if sample:
+            return True
+        LOG.warning(f"Sample {sample_internal_id} does not exist in status db. Skipping.")
+        return False
