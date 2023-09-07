@@ -188,12 +188,6 @@ def fixture_full_remote_path(remote_storage_repository: str, remote_path: Path) 
     return remote_storage_repository + remote_path.as_posix()
 
 
-@pytest.fixture(name="full_local_path")
-def fixture_full_local_path(local_storage_repository: str, trimmed_local_directory: Path) -> str:
-    """Returns the merged local repository and trimmed path."""
-    return local_storage_repository + trimmed_local_directory.as_posix()
-
-
 @pytest.fixture(name="archive_store")
 def fixture_archive_store(
     base_store: Store,

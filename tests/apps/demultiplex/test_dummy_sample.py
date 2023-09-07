@@ -3,7 +3,7 @@ from cg.apps.demultiplex.sample_sheet.dummy_sample import get_dummy_sample, get_
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSample,
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleBcl2Fastq,
 )
 
 
@@ -29,7 +29,7 @@ def test_get_dummy_sample(bcl2fastq_flow_cell_id: str, valid_index: Index):
         dummy_index=valid_index.sequence,
         lane=1,
         name=valid_index.name,
-        sample_type=FlowCellSampleNovaSeq6000Bcl2Fastq,
+        sample_type=FlowCellSampleBcl2Fastq,
     )
 
     # THEN the sample id was correct
