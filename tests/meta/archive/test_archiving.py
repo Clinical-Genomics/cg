@@ -355,7 +355,7 @@ def test_retrieve_samples(
 def test_create_transfer_request_archiving(
     ddn_dataflow_client: DDNDataFlowClient, miria_file_archive: MiriaObject
 ):
-    """Tests creating a archiving request."""
+    """Tests creating an archiving request."""
     # GIVEN a TransferData object with an untrimmed source path, and without the source and
     # destination repositories pre-pended
     assert miria_file_archive.source.startswith(ROOT_TO_TRIM)
