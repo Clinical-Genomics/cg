@@ -1,11 +1,8 @@
 import logging
-import os
 from pathlib import Path
 from typing import Dict, Generator, List
 
 import pytest
-
-from cg.store.models import Sample
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import (
@@ -18,7 +15,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-
+from cg.store.models import Sample
 from tests.meta.demultiplex.conftest import FlowCellInfo
 
 

@@ -14,7 +14,6 @@ from cg.constants.bcl_convert_metrics import (
     ADAPTER_METRICS_FILE_NAME,
 )
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
-    BclConvertAdapterMetrics,
     BclConvertDemuxMetrics,
     BclConvertQualityMetrics,
 )
@@ -50,19 +49,13 @@ class BclConvertMetricsParser:
             metrics_file_path=self.demux_metrics_path,
             metrics_model=BclConvertDemuxMetrics,
         )
-        self.adapter_metrics: List[BclConvertAdapterMetrics] = self.parse_metrics_file(
-            self.adapter_metrics_path,
-            metrics_model=BclConvertAdapterMetrics,
-        )
 
     def parse_metrics_file(
         self, metrics_file_path, metrics_model: Callable
-    ) -> List[Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]]:
+    ) -> List[Union[BclConvertQualityMetrics, BclConvertDemuxMetrics]]:
         """Parse specified BCL convert metrics file."""
         LOG.info(f"Parsing BCLConvert metrics file: {metrics_file_path}")
-        parsed_metrics: List[
-            Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]
-        ] = []
+        parsed_metrics: List[Union[BclConvertQualityMetrics, BclConvertDemuxMetrics]] = []
         metrics_content: List[Dict] = ReadFile.get_content_from_file(
             file_format=FileFormat.CSV, file_path=metrics_file_path, read_to_dict=True
         )
@@ -90,12 +83,10 @@ class BclConvertMetricsParser:
 
     def get_metrics_for_sample_and_lane(
         self,
-        metrics: List[
-            Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]
-        ],
+        metrics: List[Union[BclConvertQualityMetrics, BclConvertDemuxMetrics]],
         sample_internal_id: str,
         lane: int,
-    ) -> Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]:
+    ) -> Union[BclConvertQualityMetrics, BclConvertDemuxMetrics]:
         """Return the metrics for a sample by sample internal id."""
         for metric in metrics:
             if metric.sample_internal_id == sample_internal_id and metric.lane == lane:
