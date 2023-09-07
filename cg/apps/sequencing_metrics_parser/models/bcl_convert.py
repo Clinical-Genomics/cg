@@ -4,7 +4,6 @@ from cg.constants.bcl_convert_metrics import (
     BclConvertDemuxMetricsColumnNames,
     BclConvertAdapterMetricsColumnNames,
 )
-from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
 
 
 class BclConvertQualityMetrics(BaseModel):
