@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List
 from unittest import mock
 
 import pytest
@@ -11,7 +11,12 @@ from cg.constants.constants import FileFormat
 from cg.constants.subject import Gender
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
-from cg.meta.archive.ddn_dataflow import ROOT_TO_TRIM, DDNDataFlowClient, MiriaFile, TransferPayload
+from cg.meta.archive.ddn_dataflow import (
+    ROOT_TO_TRIM,
+    DDNDataFlowClient,
+    MiriaObject,
+    TransferPayload,
+)
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
@@ -59,6 +64,25 @@ def fixture_archive_request_json(
     }
 
 
+@pytest.fixture(name="retrieve_request_json")
+def fixture_retrieve_request_json(
+    remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
+) -> Dict[str, Any]:
+    """Returns the body for a retrieval http post towards the DDN Miria API."""
+    return {
+        "osType": "Unix/MacOS",
+        "createFolder": False,
+        "pathInfo": [
+            {
+                "destination": local_storage_repository
+                + Path(trimmed_local_path).parent.as_posix(),
+                "source": f"{remote_storage_repository}ADM1",
+            }
+        ],
+        "metadataList": [],
+    }
+
+
 @pytest.fixture(name="header_with_test_auth_token")
 def fixture_header_with_test_auth_token() -> Dict:
     return {
@@ -95,9 +119,9 @@ def fixture_ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataF
 
 
 @pytest.fixture(name="miria_file_archive")
-def fixture_miria_file(local_directory: Path, remote_path: Path) -> MiriaFile:
-    """Return a MiriaFile for archiving."""
-    return MiriaFile(source=local_directory.as_posix(), destination=remote_path.as_posix())
+def fixture_miria_file(local_directory: Path, remote_path: Path) -> MiriaObject:
+    """Return a MiriaObject for archiving."""
+    return MiriaObject(source=local_directory.as_posix(), destination=remote_path.as_posix())
 
 
 @pytest.fixture(name="file_and_sample")
@@ -115,14 +139,14 @@ def fixture_trimmed_local_path(spring_archive_api: SpringArchiveAPI, sample_id: 
 
 
 @pytest.fixture(name="miria_file_retrieve")
-def fixture_miria_file_retrieve(local_directory: Path, remote_path: Path) -> MiriaFile:
-    """Return a MiriaFile for retrieval."""
-    return MiriaFile(source=remote_path.as_posix(), destination=local_directory.as_posix())
+def fixture_miria_file_retrieve(local_directory: Path, remote_path: Path) -> MiriaObject:
+    """Return a MiriaObject for retrieval."""
+    return MiriaObject(source=remote_path.as_posix(), destination=local_directory.as_posix())
 
 
 @pytest.fixture(name="transfer_payload")
-def fixture_transfer_payload(miria_file_archive: MiriaFile) -> TransferPayload:
-    """Return a TransferPayload object containing two identical MiriaFile object."""
+def fixture_transfer_payload(miria_file_archive: MiriaObject) -> TransferPayload:
+    """Return a TransferPayload object containing two identical MiriaObject object."""
     return TransferPayload(
         files_to_transfer=[miria_file_archive, miria_file_archive.copy(deep=True)]
     )
@@ -220,6 +244,11 @@ def fixture_archive_store(
     base_store.session.add_all(new_samples)
     base_store.session.commit()
     return base_store
+
+
+@pytest.fixture(name="sample_with_spring_file")
+def fixture_sample_with_spring_file() -> str:
+    return "ADM1"
 
 
 @pytest.fixture(name="spring_archive_api")
