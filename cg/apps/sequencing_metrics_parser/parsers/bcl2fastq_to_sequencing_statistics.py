@@ -29,11 +29,11 @@ def create_sample_lane_sequencing_metrics_from_bcl2fastq_for_flow_cell(
     """
 
     sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
-
+    LOG.debug(f"Parsing Bcl2fastq sequencing metrics for flow cell {flow_cell_dir}")
     sample_and_lane_metrics: List[Bcl2FastqSampleLaneMetrics] = parse_bcl2fastq_sequencing_metrics(
         flow_cell_dir=flow_cell_dir
     )
-
+    LOG.debug(f"List to check is: {sample_lane_sequencing_metrics}")
     for raw_sample_metrics in sample_and_lane_metrics:
         LOG.debug(f"Creating SampleLaneSequencingMetrics for sample {raw_sample_metrics.sample_id}")
         metrics: SampleLaneSequencingMetrics = create_sample_lane_sequencing_metrics_from_bcl2fastq(
