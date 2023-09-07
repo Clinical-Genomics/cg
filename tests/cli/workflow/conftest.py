@@ -4,8 +4,7 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
-
-from cg.constants import Pipeline, DataDelivery, FlowCellStatus
+from cg.constants import DataDelivery, FlowCellStatus, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.api.find_business_data import FindBusinessDataHandler
@@ -247,7 +246,7 @@ def tb_api():
 
 @pytest.fixture()
 def mock_analysis_flow_cell(mocker) -> None:
-    """Mocks the get_flow_cells_by_case method to return a list containing an object whose status is
+    """Mocks the get_flow_cells_by_case method to return a list containing a flow cell whose status is
     on disk."""
     flow_cell = Mock()
     flow_cell.status = FlowCellStatus.ON_DISK

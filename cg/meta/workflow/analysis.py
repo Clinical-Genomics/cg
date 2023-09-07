@@ -471,6 +471,7 @@ class AnalysisAPI(MetaAPI):
             return EXIT_SUCCESS
 
     def _is_flow_cell_check_applicable(self, case_id) -> bool:
+        """Returns true if the case is neither down sampled nor external."""
         return not (
             self.status_db.is_case_down_sampled(case_id=case_id)
             or self.status_db.is_case_external(case_id=case_id)

@@ -1,20 +1,12 @@
 import logging
 from pathlib import Path
-from unittest.mock import Mock
-
-import mock
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
-from cg.constants import FlowCellStatus
-from cg.constants.constants import CaseActions
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
-
-from cg.store.api.find_business_data import FindBusinessDataHandler
-from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
 EXIT_SUCCESS = 0
 
@@ -47,7 +39,7 @@ def test_start(
     # GIVEN case id for which we created a config file
     case_id = "balsamic_case_wgs_single"
 
-    # WHEN dry running with dry specified
+    # WHEN dry running
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=balsamic_context)
 
     # THEN command should execute successfully
@@ -128,7 +120,7 @@ def test_start_available(
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
 
     # THEN command exits with a successful exit code
-    assert result.exit_code == 0
+    assert result.exit_code == EXIT_SUCCESS
 
     # THEN it should successfully identify the one case eligible for auto-start
     assert f"Starting analysis for {case_id_success}" in caplog.text
@@ -189,7 +181,7 @@ def test_store_available(
     result = cli_runner.invoke(store_available, obj=balsamic_context)
 
     # THEN command exits successfully
-    assert result.exit_code == 0
+    assert result.exit_code == EXIT_SUCCESS
 
     # THEN case id with analysis_finish gets picked up
     assert case_id_success in caplog.text

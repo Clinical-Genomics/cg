@@ -128,7 +128,7 @@ def test_is_flow_cell_check_not_applicable_when_down_sampled(
 def test_ensure_flow_cells_on_disk_check_not_applicable(
     mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, caplog
 ):
-    """Tests that ensure_flow_cells_on_disk do not perform any action
+    """Tests that ensure_flow_cells_on_disk does not perform any action
     when is_flow_cell_check_applicable returns false."""
 
     # GIVEN a case
@@ -152,8 +152,8 @@ def test_ensure_flow_cells_on_disk_check_not_applicable(
 def test_ensure_flow_cells_on_disk_does_not_request_flow_cells(
     mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, helpers
 ):
-    """Tests that ensure_flow_cells_on_disk do not perform any action
-    when is_flow_cell_check_applicable returns false."""
+    """Tests that ensure_flow_cells_on_disk does not perform any action
+    when is_flow_cell_check_applicable returns True and all flow cells are ON_DISK already."""
 
     # GIVEN a case
     case: Family = analysis_store.get_cases()[0]
@@ -185,8 +185,8 @@ def test_ensure_flow_cells_on_disk_does_not_request_flow_cells(
 def test_ensure_flow_cells_on_disk_does_request_flow_cells(
     mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, helpers
 ):
-    """Tests that ensure_flow_cells_on_disk does not perform any action
-    when is_flow_cell_check_applicable returns false."""
+    """Tests that ensure_flow_cells_on_disk requests a removed flow cell
+    when is_flow_cell_check_applicable returns True.."""
 
     # GIVEN a case with a REMOVED flow cell
     case: Family = analysis_store.get_cases()[0]

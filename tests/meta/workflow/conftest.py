@@ -7,7 +7,6 @@ import pytest
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
-from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.compression_data import CompressionData
@@ -19,7 +18,6 @@ from tests.cli.workflow.balsamic.conftest import (
     fastq_file_l_2_r_1,
     fastq_file_l_2_r_2,
 )
-from tests.conftest import fixture_base_store
 from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
 from tests.meta.upload.scout.conftest import fixture_another_sample_id
 from tests.store_helpers import StoreHelpers
