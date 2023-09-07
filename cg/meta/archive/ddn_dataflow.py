@@ -44,7 +44,7 @@ class MiriaObject(FileTransferData):
     source: str
 
     @classmethod
-    def from_file_and_sample(
+    def create_from_file_and_sample(
         cls, file: File, sample: Sample, is_archiving: bool = True
     ) -> "MiriaObject":
         """Instantiates the class from a File and Sample object."""
@@ -53,7 +53,7 @@ class MiriaObject(FileTransferData):
         return cls(destination=file.full_path, source=sample.internal_id)
 
     @classmethod
-    def from_sample_and_destination(
+    def create_from_sample_and_destination(
         cls, sample_and_destination: SampleAndDestination
     ) -> "MiriaObject":
         """Instantiates the class from a SampleAndDestination object,
@@ -234,7 +234,7 @@ class DDNDataFlowClient(ArchiveHandler):
         Housekeeper."""
         miria_file_data: List[MiriaObject] = []
         for sample_and_housekeeper_destination in samples_and_destinations:
-            miria_object: MiriaObject = MiriaObject.from_sample_and_destination(
+            miria_object: MiriaObject = MiriaObject.create_from_sample_and_destination(
                 sample_and_housekeeper_destination
             )
             miria_file_data.append(miria_object)
@@ -275,7 +275,7 @@ class DDNDataFlowClient(ArchiveHandler):
     ) -> List[MiriaObject]:
         """Converts the provided files and samples to the format used for the request."""
         return [
-            MiriaObject.from_file_and_sample(
+            MiriaObject.create_from_file_and_sample(
                 file=file_and_sample.file, sample=file_and_sample.sample, is_archiving=is_archiving
             )
             for file_and_sample in files_and_samples

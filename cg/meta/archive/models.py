@@ -27,7 +27,7 @@ class FileTransferData(BaseModel):
 
     @classmethod
     @abstractmethod
-    def from_file_and_sample(
+    def create_from_file_and_sample(
         cls, file: File, sample: Sample, is_archiving: bool
     ) -> "FileTransferData":
         """Instantiates the class from a File and Sample object."""
