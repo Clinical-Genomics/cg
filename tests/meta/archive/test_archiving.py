@@ -19,10 +19,9 @@ from cg.meta.archive.ddn_dataflow import (
 )
 from cg.meta.archive.models import FileAndSample, SampleAndDestination
 from cg.models.cg_config import DataFlowConfig
-from requests import Response
-
 from cg.store import Store
 from cg.store.models import Sample
+from requests import Response
 
 FUNCTION_TO_MOCK = "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content"
 
@@ -314,7 +313,6 @@ def test_retrieve_samples(
     archive_store: Store,
     trimmed_local_path: str,
     sample_id: str,
-    full_local_path: str,
     ok_ddn_response: Response,
 ):
     """Tests that the retrieve function correctly formats the input and sends API request."""
