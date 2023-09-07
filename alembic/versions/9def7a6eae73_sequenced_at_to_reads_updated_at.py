@@ -5,6 +5,7 @@ Revises: 5cb3ce4c3e39
 Create Date: 2023-09-04 15:26:12.607703
 
 """
+import types
 
 from alembic import op
 
@@ -17,11 +18,17 @@ depends_on = None
 
 def upgrade():
     op.alter_column(
-        table_name="Sample", column_name="sequenced_at", new_column_name="reads_updated_at"
+        table_name="Sample",
+        column_name="sequenced_at",
+        new_column_name="reads_updated_at",
+        existing_type=types.DateTime,
     )
 
 
 def downgrade():
     op.alter_column(
-        table_name="Sample", column_name="reads_updated_at", new_column_name="sequenced_at"
+        table_name="Sample",
+        column_name="reads_updated_at",
+        new_column_name="sequenced_at",
+        existing_type=types.DateTime,
     )
