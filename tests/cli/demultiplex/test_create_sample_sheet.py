@@ -197,3 +197,8 @@ def test_incorrect_bcl2fastq_headers_samplesheet(
         "Ensure that the headers in the sample sheet follows the allowed structure for bcl2fastq"
         in caplog.text
     )
+
+    assert (
+        "FCID,Lane,SampleID,SampleRef,index,SampleName,Control,Recipe,Operator,Project"
+        in caplog.text
+    )
