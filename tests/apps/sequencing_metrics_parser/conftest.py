@@ -10,9 +10,6 @@ from cg.constants.bcl_convert_metrics import (
     BclConvertQualityMetricsColumnNames,
     BclConvertDemuxMetricsColumnNames,
 )
-from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
-from cg.store.models import SampleLaneSequencingMetrics
-from datetime import datetime
 
 
 @pytest.fixture(name="bcl_convert_metrics_dir_path", scope="session")
@@ -59,12 +56,6 @@ def fixture_bcl_convert_test_mean_quality_score() -> float:
     return 36.02
 
 
-@pytest.fixture(name="bcl_convert_test_flow_cell_name", scope="session")
-def fixture_bcl_convert_test_flow_cell_name() -> str:
-    """Return the flow cell name for the test sample."""
-    return "HY7FFDRX2"
-
-
 @pytest.fixture(name="bcl_convert_demux_metric_model_with_data", scope="session")
 def fixture_bcl_convert_demux_metric_model_with_data(
     test_lane,
@@ -100,23 +91,3 @@ def fixture_bcl_convert_quality_metric_model_with_data(
 def fixture_parsed_bcl_convert_metrics(bcl_convert_metrics_dir_path) -> BclConvertMetricsParser:
     """Return an object with parsed BCLConvert metrics."""
     return BclConvertMetricsParser(bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path)
-
-
-@pytest.fixture(name="parsed_sequencing_statistics_from_bcl_convert", scope="session")
-def fixture_parsed_sequencing_statistics_from_bcl_convert(
-    test_sample_internal_id: str,
-    test_lane: int,
-    bcl_convert_test_flow_cell_name: str,
-    bcl_convert_reads_for_test_sample: int,
-    bcl_convert_test_mean_quality_score_per_lane: float,
-    bcl_convert_test_q30_bases_percent_per_lane: float,
-) -> SampleLaneSequencingMetrics:
-    return SampleLaneSequencingMetrics(
-        sample_internal_id=test_sample_internal_id,
-        flow_cell_lane_number=test_lane,
-        flow_cell_name=bcl_convert_test_flow_cell_name,
-        sample_total_reads_in_lane=bcl_convert_reads_for_test_sample * 2,
-        sample_base_mean_quality_score=bcl_convert_test_mean_quality_score_per_lane,
-        sample_base_percentage_passing_q30=bcl_convert_test_q30_bases_percent_per_lane,
-        created_at=datetime.now(),
-    )
