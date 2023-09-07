@@ -1,5 +1,5 @@
-from typing import List, Dict
-from pydantic.v1 import BaseModel, Field, validator
+from typing import List
+from pydantic import BaseModel, Field
 
 
 class ReadMetric(BaseModel):

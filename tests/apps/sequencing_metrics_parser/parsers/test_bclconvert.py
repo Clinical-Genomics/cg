@@ -4,10 +4,8 @@ from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetr
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertQualityMetrics,
     BclConvertDemuxMetrics,
-    BclConvertSampleSheetData,
     BclConvertAdapterMetrics,
 )
-from cg.constants.demultiplexing import INDEX_CHECK, UNDETERMINED
 from pathlib import Path
 from typing import List
 import pytest
