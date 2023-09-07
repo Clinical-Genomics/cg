@@ -12,7 +12,7 @@ from cg.meta.demultiplex.validation import (
     is_flow_cell_ready_for_delivery,
     validate_demultiplexing_complete,
     validate_flow_cell_delivery_status,
-    validate_flow_cell_has_sample_files,
+    validate_flow_cell_has_fastq_files,
     validate_sample_sheet_exists,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -155,7 +155,7 @@ def test_validate_samples_have_fastq_files_passes(
     fastq_file_path.touch(exist_ok=True)
 
     # WHEN checking if the flow cell has fastq files for the samples
-    validate_flow_cell_has_sample_files(flow_cell=novaseqx_flow_cell_with_sample_sheet_no_fastq)
+    validate_flow_cell_has_fastq_files(flow_cell=novaseqx_flow_cell_with_sample_sheet_no_fastq)
 
     # THEN no error is raised
 
@@ -172,4 +172,4 @@ def test_validate_samples_have_fastq_files_fails(
     # WHEN checking if the flow cell has fastq files for the samples
     with pytest.raises(MissingFilesError):
         # THEN an error is raised
-        validate_flow_cell_has_sample_files(flow_cell=novaseqx_flow_cell_with_sample_sheet_no_fastq)
+        validate_flow_cell_has_fastq_files(flow_cell=novaseqx_flow_cell_with_sample_sheet_no_fastq)

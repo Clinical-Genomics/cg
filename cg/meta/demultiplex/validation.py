@@ -43,7 +43,7 @@ def validate_flow_cell_delivery_status(flow_cell_output_directory: Path, force: 
         )
 
 
-def validate_flow_cell_has_sample_files(flow_cell: FlowCellDirectoryData) -> None:
+def validate_flow_cell_has_fastq_files(flow_cell: FlowCellDirectoryData) -> None:
     """Check if any sample from the flow cell has fastq files.
     Raises: MissingFilesError
         When all samples have missing fastq files in the flow cell
@@ -72,4 +72,4 @@ def is_flow_cell_ready_for_postprocessing(
     )
     validate_sample_sheet_exists(flow_cell)
     validate_demultiplexing_complete(flow_cell_output_directory)
-    validate_flow_cell_has_sample_files(flow_cell)
+    validate_flow_cell_has_fastq_files(flow_cell)
