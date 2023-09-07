@@ -203,7 +203,7 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
     exit_code: int = EXIT_SUCCESS
     for case in analysis_api.get_cases_to_analyze():
         try:
-            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+            context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except CgError as error:
             LOG.error(error)
             exit_code = EXIT_FAIL
