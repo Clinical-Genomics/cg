@@ -14,12 +14,22 @@ class FileAndSample(BaseModel):
     sample: Sample
 
 
+class SampleAndDestination(BaseModel):
+    """Contains a sample and the path to the sample bundle in Housekeeper where any retrieved files should be stored."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    sample: Sample
+    destination: str
+
+
 class FileTransferData(BaseModel):
     """Base class for classes representing files to be archived."""
 
     @classmethod
     @abstractmethod
-    def from_file_and_sample(cls, file: File, sample: Sample, is_archiving: bool) -> "ArchiveFile":
+    def create_from_file_and_sample(
+        cls, file: File, sample: Sample, is_archiving: bool
+    ) -> "FileTransferData":
         """Instantiates the class from a File and Sample object."""
         pass
 
@@ -39,9 +49,13 @@ class ArchiveHandler:
         pass
 
     @abstractmethod
-    def retrieve_folders(self, sources_and_destinations: List[FileTransferData]):
-        """Retrieves all folders provided, to their corresponding destination, as given by the
-        sources and destination parameter."""
+    def retrieve_samples(self, samples_and_destinations: List[SampleAndDestination]):
+        """Retrieves all files for all samples for the given flowcell."""
+        pass
+
+    @abstractmethod
+    def retrieve_file(self, file_and_sample: FileAndSample):
+        """Retrieves the specified archived file."""
         pass
 
     @abstractmethod
