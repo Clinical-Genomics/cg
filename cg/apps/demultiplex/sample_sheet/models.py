@@ -82,10 +82,9 @@ class SampleSheet(BaseModel):
         """Return samples that are sequenced solo in their lane."""
         lane_samples = defaultdict(list)
         for sample in self.samples:
-            lane: int = sample.lane
-            lane_samples[lane].append(sample)
+            lane_samples[sample.lane].append(sample)
 
-        return [samples[0] for _, samples in lane_samples.items() if len(samples) == 1]
+        return [samples[0] for samples in lane_samples.values() if len(samples) == 1]
 
 
 class SampleSheetBcl2Fastq(SampleSheet):
