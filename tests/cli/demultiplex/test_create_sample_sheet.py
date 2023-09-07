@@ -1,8 +1,6 @@
 from pathlib import Path
 from typing import List
 
-from click import testing
-
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
@@ -163,7 +161,7 @@ def test_incorrect_bcl2fastq_headers_samplesheet(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_malformed_sample_sheet: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
     mocker,
     caplog,
 ):

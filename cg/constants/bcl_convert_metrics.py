@@ -2,7 +2,11 @@
 
 from enum import Enum
 
-from cg.constants.demultiplexing import BclConverter, SampleSheetNovaSeq6000Sections
+from cg.constants.demultiplexing import (
+    BclConverter,
+    SampleSheetBcl2FastqSections,
+    SampleSheetBCLConvertSections,
+)
 
 
 class BclConvertQualityMetricsColumnNames(Enum):
@@ -22,27 +26,21 @@ SAMPLE_SHEET_HEADER = {
     BclConverter.BCL2FASTQ: ",".join(
         [
             column
-            for column in SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[
-                BclConverter.BCL2FASTQ
-            ]
+            for column in SampleSheetBcl2FastqSections.Data.COLUMN_NAMES.value
             if column != "index2"
         ]
     ),
     BclConverter.BCLCONVERT: ",".join(
         [
             column
-            for column in SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[
-                BclConverter.DRAGEN
-            ]
+            for column in SampleSheetBCLConvertSections.Data.COLUMN_NAMES.value
             if column != "index2"
         ]
     ),
     BclConverter.DRAGEN: ",".join(
         [
             column
-            for column in SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[
-                BclConverter.DRAGEN
-            ]
+            for column in SampleSheetBCLConvertSections.Data.COLUMN_NAMES.value
             if column != "index2"
         ]
     ),

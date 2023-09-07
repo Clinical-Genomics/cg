@@ -894,6 +894,7 @@ def fixture_tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert(
     """This is a path to a flow cell directory with the run parameters missing."""
     return Path(tmp_flow_cells_directory, tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert)
 
+
 @pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq")
 def fixture_tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq(
     tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq: str, tmp_flow_cells_directory: Path
