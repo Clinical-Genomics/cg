@@ -170,7 +170,7 @@ def test_store_available(
     balsamic_context.status_db.session.commit()
 
     # THEN command exit with success
-    assert result.exit_code == 0
+    assert result.exit_code == EXIT_SUCCESS
     assert case_id_success in caplog.text
     assert balsamic_context.status_db.get_case_by_internal_id(case_id_success).action == "running"
 
