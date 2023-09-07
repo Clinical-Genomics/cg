@@ -1,6 +1,10 @@
 from pathlib import Path
 
 import pytest
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_internal_ids_from_sample_sheet,
+)
+from cg.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError, MissingFilesError
 from cg.meta.demultiplex.validation import (
@@ -8,8 +12,8 @@ from cg.meta.demultiplex.validation import (
     is_flow_cell_ready_for_delivery,
     validate_demultiplexing_complete,
     validate_flow_cell_delivery_status,
+    validate_flow_cell_has_sample_files,
     validate_sample_sheet_exists,
-    validate_samples_have_fastq_files,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
@@ -130,45 +134,57 @@ def test_validate_flow_cell_delivery_status_forced(tmp_path: Path):
     )
 
 
-def test_validate_samples_have_fastq_files_passes(mocker, novaseqx_demultiplexed_flow_cell: Path):
-    """Test the check of a flow cells with fastq files does not raise an error."""
-    # GIVEN a demultiplexed flow cell with fastq files
-    flow_cell_with_fastq = FlowCellDirectoryData(flow_cell_path=novaseqx_demultiplexed_flow_cell)
+def test_validate_samples_have_fastq_files_passes(
+    mocker, novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
+):
+    """Test the check of a flow cells with one sample fastq file does not raise an error."""
+    # GIVEN a demultiplexed flow cell with no fastq files
+    novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)
+    flow_cell_without_fastq = FlowCellDirectoryData(flow_cell_path=novaseqx_flow_cell_directory)
 
     # GIVEN a that the flow cell has a sample sheet in Housekeeper
     sample_sheet_path = Path(
         novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
     mocker.patch.object(
-        flow_cell_with_fastq, "get_sample_sheet_path_hk", return_value=sample_sheet_path
+        flow_cell_without_fastq, "get_sample_sheet_path_hk", return_value=sample_sheet_path
     )
-    assert flow_cell_with_fastq.get_sample_sheet_path_hk()
+    assert flow_cell_without_fastq.get_sample_sheet_path_hk()
 
-    # WHEN checking if the flow cell has fastq files for teh samples
-    validate_samples_have_fastq_files(flow_cell=flow_cell_with_fastq)
+    # WHEN creating a sample fastq file to the directory
+    sample_id: str = get_sample_internal_ids_from_sample_sheet(
+        sample_sheet_path=sample_sheet_path,
+        flow_cell_sample_type=flow_cell_without_fastq.sample_type,
+    )[0]
+    fastq_file_path = Path(
+        novaseqx_flow_cell_directory,
+        f"{sample_id}_S11_L1_R1_{FileExtensions.FASTQ}{FileExtensions.GZIP}",
+    )
+    fastq_file_path.touch(exist_ok=True)
+
+    # WHEN checking if the flow cell has fastq files for the samples
+    validate_flow_cell_has_sample_files(flow_cell=flow_cell_without_fastq)
 
     # THEN no error is raised
 
 
 def test_validate_samples_have_fastq_files_fails(
-    mocker, bcl_convert_demultiplexed_flow_cell: Path, bcl_convert_flow_cell_dir: Path
+    mocker, novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
 ):
-    """Test the check of a flow cells with no fastq files raises an error."""
+    """Test the check of a flow cells with one sample fastq file does not raise an error."""
     # GIVEN a demultiplexed flow cell with no fastq files
-    flow_cell_without_fastq = FlowCellDirectoryData(
-        flow_cell_path=bcl_convert_demultiplexed_flow_cell
-    )
+    flow_cell_without_fastq = FlowCellDirectoryData(flow_cell_path=novaseqx_flow_cell_directory)
 
     # GIVEN a that the flow cell has a sample sheet in Housekeeper
     sample_sheet_path = Path(
-        bcl_convert_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
     mocker.patch.object(
         flow_cell_without_fastq, "get_sample_sheet_path_hk", return_value=sample_sheet_path
     )
     assert flow_cell_without_fastq.get_sample_sheet_path_hk()
 
-    # WHEN checking if the flow cell has fastq files for teh samples
+    # WHEN checking if the flow cell has fastq files for the samples
     with pytest.raises(MissingFilesError):
         # THEN an error is raised
-        validate_samples_have_fastq_files(flow_cell=flow_cell_without_fastq)
+        validate_flow_cell_has_sample_files(flow_cell=flow_cell_without_fastq)

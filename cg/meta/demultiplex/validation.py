@@ -43,10 +43,10 @@ def validate_flow_cell_delivery_status(flow_cell_output_directory: Path, force: 
         )
 
 
-def validate_samples_have_fastq_files(flow_cell: FlowCellDirectoryData) -> None:
-    """Check if all samples have already a fastq files in the demultiplex directory.
+def validate_flow_cell_has_sample_files(flow_cell: FlowCellDirectoryData) -> None:
+    """Check if any sample from the flow cell has fastq files.
     Raises: MissingFilesError
-        When one of the samples does not have enough fastq files in the flow cell
+        When all samples have missing fastq files in the flow cell
     """
     sample_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
         sample_sheet_path=flow_cell.get_sample_sheet_path_hk(),
@@ -56,9 +56,10 @@ def validate_samples_have_fastq_files(flow_cell: FlowCellDirectoryData) -> None:
         fastq_files: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
             flow_cell_directory=flow_cell.path, sample_internal_id=sample_id
         )
-        if not fastq_files:
-            raise MissingFilesError(f"Sample {sample_id} has no fastq files in flow cell")
-    LOG.debug("Flow cell has fastq files for all samples")
+        if fastq_files:
+            LOG.debug(f"Flow cell {flow_cell.id} has at least one sample with fastq files")
+            return
+    raise MissingFilesError(f"No fastq files were found for any sample in flow cell {flow_cell.id}")
 
 
 def is_flow_cell_ready_for_postprocessing(
@@ -66,8 +67,9 @@ def is_flow_cell_ready_for_postprocessing(
     flow_cell: FlowCellDirectoryData,
     force: bool = False,
 ) -> None:
-    validate_sample_sheet_exists(flow_cell)
-    validate_demultiplexing_complete(flow_cell_output_directory)
     validate_flow_cell_delivery_status(
         flow_cell_output_directory=flow_cell_output_directory, force=force
     )
+    validate_sample_sheet_exists(flow_cell)
+    validate_demultiplexing_complete(flow_cell_output_directory)
+    validate_flow_cell_has_sample_files(flow_cell)
