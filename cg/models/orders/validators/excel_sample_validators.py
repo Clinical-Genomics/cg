@@ -62,6 +62,10 @@ def convert_to_lower(value: Optional[str]):
     return value.lower()
 
 
+def replace_spaces_with_underscores(value: Optional[str]):
+    return value.replace(" ", "_")
+
+
 def convert_to_priority(priority: Optional[str]):
     """Translates the Swedish 'förtur' to 'priority' if specified in the order."""
     return PriorityEnum.priority if priority == "förtur" else priority
