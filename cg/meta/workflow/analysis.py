@@ -494,7 +494,7 @@ class AnalysisAPI(MetaAPI):
         if self.prepare_fastq_api.is_spring_decompression_needed(
             case_id
         ) or self.prepare_fastq_api.is_spring_decompression_running(case_id):
-            LOG.warning(f"Case {case_id} is not ready - all files are not decompressed.")
+            LOG.warning(f"Case {case_id} is not ready - not all files are decompressed.")
             return False
         return True
 

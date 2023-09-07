@@ -10,6 +10,7 @@ from cg.constants.sequencing import Sequencers
 from cg.exc import AnalysisNotReadyError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store
 from cg.store.models import Family
@@ -71,7 +72,7 @@ def test_gene_panels_not_added(customer_id):
     )
 
 
-def test_is_flow_cell_check_applicable(mip_analysis_api, analysis_store: Store):
+def test_is_flow_cell_check_applicable(mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store):
     """Tests that a check for flow cells being present on disk is applicable when given a case which has no
     down-sampled nor external samples."""
 
@@ -88,7 +89,9 @@ def test_is_flow_cell_check_applicable(mip_analysis_api, analysis_store: Store):
     assert mip_analysis_api._is_flow_cell_check_applicable(case_id=case.internal_id)
 
 
-def test_is_flow_cell_check_not_applicable_when_external(mip_analysis_api, analysis_store: Store):
+def test_is_flow_cell_check_not_applicable_when_external(
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store
+):
     """Tests that a check for flow cells being present on disk is applicable when given a case which has no
     down-sampled nor external samples."""
 
@@ -105,7 +108,7 @@ def test_is_flow_cell_check_not_applicable_when_external(mip_analysis_api, analy
 
 
 def test_is_flow_cell_check_not_applicable_when_down_sampled(
-    mip_analysis_api, analysis_store: Store
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store
 ):
     """Tests that a check for flow cells being present on disk is applicable when given a case which has no
     down-sampled nor external samples."""
@@ -123,7 +126,7 @@ def test_is_flow_cell_check_not_applicable_when_down_sampled(
 
 
 def test_ensure_flow_cells_on_disk_check_not_applicable(
-    mip_analysis_api, analysis_store: Store, caplog
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, caplog
 ):
     """Tests that ensure_flow_cells_on_disk do not perform any action
     when is_flow_cell_check_applicable returns false."""
@@ -147,7 +150,7 @@ def test_ensure_flow_cells_on_disk_check_not_applicable(
 
 
 def test_ensure_flow_cells_on_disk_does_not_request_flow_cells(
-    mip_analysis_api, analysis_store: Store, helpers
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, helpers
 ):
     """Tests that ensure_flow_cells_on_disk do not perform any action
     when is_flow_cell_check_applicable returns false."""
@@ -180,7 +183,7 @@ def test_ensure_flow_cells_on_disk_does_not_request_flow_cells(
 
 
 def test_ensure_flow_cells_on_disk_does_request_flow_cells(
-    mip_analysis_api, analysis_store: Store, helpers
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, helpers
 ):
     """Tests that ensure_flow_cells_on_disk does not perform any action
     when is_flow_cell_check_applicable returns false."""
@@ -205,14 +208,17 @@ def test_ensure_flow_cells_on_disk_does_request_flow_cells(
     ):
         mip_analysis_api.ensure_flow_cells_on_disk(case.internal_id)
 
-    # THEN flow cells should be requested for the case
+    # THEN the flow cell's status should be set to REQUESTED for the case
     assert analysis_store.get_flow_cell_by_name("flow_cell_test").status == FlowCellStatus.REQUESTED
 
 
-def test_is_case_ready_for_analysis_true(mip_analysis_api, analysis_store, helpers):
+def test_is_case_ready_for_analysis_true(
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store, helpers
+):
     """Tests that is_case_ready_for_analysis returns true for a case whose flow cells are all ON_DISK and whose
     files need no decompression nor are being decompressed currently."""
 
+    # GIVEN a case and a flow cell with status ON_DISK
     case: Family = analysis_store.get_cases()[0]
     helpers.add_flowcell(
         analysis_store,
@@ -223,20 +229,40 @@ def test_is_case_ready_for_analysis_true(mip_analysis_api, analysis_store, helpe
         status=FlowCellStatus.ON_DISK,
         date=datetime.now(),
     )
+
+    # GIVEN that no decompression is needed nor running
     with mock.patch.object(
         PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
     ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False):
+        # WHEN running is_case_ready_for_analysis
+        # THEN the result should be true
         assert mip_analysis_api.is_case_ready_for_analysis(case_id=case.internal_id)
 
 
-def test_is_case_ready_for_analysis_decompression_needed(mip_analysis_api, analysis_store):
-    """Tests that is_case_ready_for_analysis returns true for a case whose flow cells are all ON_DISK and whose
-    files need no decompression nor are being decompressed currently."""
+def test_is_case_ready_for_analysis_decompression_needed(
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store, helpers
+):
+    """Tests that is_case_ready_for_analysis returns false for a case whose flow cells are all ON_DISK but whose
+    files need decompression."""
 
+    # GIVEN a case and a flow cell
     case: Family = analysis_store.get_cases()[0]
+    helpers.add_flowcell(
+        analysis_store,
+        flow_cell_name="flowcell_test",
+        archived_at=datetime.now(),
+        sequencer_type=Sequencers.NOVASEQ,
+        samples=analysis_store.get_samples_by_case_id(case.internal_id),
+        status=FlowCellStatus.ON_DISK,
+        date=datetime.now(),
+    )
+
+    # GIVEN that some files need to be decompressed
     with mock.patch.object(
         PrepareFastqAPI, "is_spring_decompression_needed", return_value=True
     ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False):
+        # WHEN running is_case_ready_for_analysis
+        # THEN the result should be false
         assert not mip_analysis_api.is_case_ready_for_analysis(case_id=case.internal_id)
 
 
@@ -244,11 +270,12 @@ def test_is_case_ready_for_analysis_decompression_running(
     mip_hk_store,
     analysis_store,
     helpers,
-    mip_analysis_api,
+    mip_analysis_api: MipDNAAnalysisAPI,
 ):
-    """Tests that is_case_ready_for_analysis returns true for a case whose flow cells are all ON_DISK and whose
-    files need no decompression nor are being decompressed currently."""
+    """Tests that is_case_ready_for_analysis returns false for a case whose flow cells are all ON_DISK but whose
+    files are being decompressed currently."""
 
+    # GIVEN a case and a flow cell
     case: Family = analysis_store.get_cases()[0]
     helpers.add_flowcell(
         analysis_store,
@@ -260,13 +287,16 @@ def test_is_case_ready_for_analysis_decompression_running(
         date=datetime.now(),
     )
 
+    # GIVEN that some files are being decompressed
     with mock.patch.object(
         PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
     ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=True):
+        # WHEN running is_case_ready_for_analysis
+        # THEN the result should be false
         assert not mip_analysis_api.is_case_ready_for_analysis(case_id=case.internal_id)
 
 
-def test_prepare_fastq_files_success(mip_analysis_api, analysis_store, helpers):
+def test_prepare_fastq_files_success(mip_analysis_api: MipDNAAnalysisAPI, analysis_store, helpers):
     """Tests that no error is thrown when running prepare_fastq_files when its flow cells are all ON_DISK,
     and no spring decompression is needed nor is running."""
 
@@ -291,14 +321,15 @@ def test_prepare_fastq_files_success(mip_analysis_api, analysis_store, helpers):
         PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
     ):
         # WHEN running prepare_fastq_files
-
         # THEN no error should be raised
         mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
 
 
-def test_prepare_fastq_files_decompression_needed(mip_analysis_api, analysis_store, helpers):
+def test_prepare_fastq_files_decompression_needed(
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store, helpers
+):
     """Tests that an AnalysisNotReady error is raised when decompression of spring files is needed
-    wghen running prepare_fastq_files."""
+    when running prepare_fastq_files."""
 
     # GIVEN a case with its flow cell with status ON_DISK
     case: Family = analysis_store.get_cases()[0]
@@ -322,14 +353,15 @@ def test_prepare_fastq_files_decompression_needed(mip_analysis_api, analysis_sto
     ):
         with pytest.raises(AnalysisNotReadyError):
             # WHEN running prepare_fastq_files
-
             # THEN an AnalysisNotReadyError should be raised.
             mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
 
 
-def test_prepare_fastq_files_decompression_running(mip_analysis_api, analysis_store, helpers):
+def test_prepare_fastq_files_decompression_running(
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store, helpers
+):
     """Tests that an AnalysisNotReady error is raised when decompression of spring files is running
-    wghen running prepare_fastq_files."""
+    when running prepare_fastq_files."""
 
     # GIVEN a case with all its flow cells being ON_DISK
     case: Family = analysis_store.get_cases()[0]
@@ -353,6 +385,5 @@ def test_prepare_fastq_files_decompression_running(mip_analysis_api, analysis_st
     ):
         with pytest.raises(AnalysisNotReadyError):
             # WHEN running prepare_fastq_files
-
             # THEN an AnalysisNotReadyError should be thrown
             mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)

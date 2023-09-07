@@ -26,7 +26,7 @@ class AnalysisAlreadyUploadedError(CgError):
 
 class AnalysisNotReadyError(CgError):
     """
-    Exception raised when all FASTQ file are not present for an analysis to start.
+    Exception raised when some FASTQ file are missing when starting an analysis.
     """
 
 
