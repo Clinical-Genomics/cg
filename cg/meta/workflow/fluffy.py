@@ -11,7 +11,6 @@ from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import ReadFile
-from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Family, Flowcell, Sample
@@ -253,8 +252,8 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
     def get_sample_sheet_housekeeper_path(self, flowcell_name: str) -> Path:
         """Returns the path to original sample sheet file that is added to Housekeeper."""
-        sample_sheet_files: list = get_sample_sheets_from_latest_version(
-            flow_cell_id=flowcell_name, hk_api=self.housekeeper_api
+        sample_sheet_files: list = self.housekeeper_api.get_sample_sheets_from_latest_version(
+            flow_cell_id=flowcell_name
         )
         if not sample_sheet_files:
             LOG.error(

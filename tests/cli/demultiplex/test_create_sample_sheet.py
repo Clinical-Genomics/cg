@@ -10,7 +10,6 @@ from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
 
-from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
@@ -74,8 +73,8 @@ def test_create_bcl2fastq_sample_sheet(
     assert not flow_cell.sample_sheet_exists()
 
     # GIVEN that there are no sample sheet in Housekeeper
-    assert not get_sample_sheets_from_latest_version(
-        flow_cell_id=flow_cell.id, hk_api=sample_sheet_context.housekeeper_api
+    assert not sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(
+        flow_cell_id=flow_cell.id
     )
 
     # GIVEN flow cell samples
@@ -102,8 +101,8 @@ def test_create_bcl2fastq_sample_sheet(
     assert flow_cell.validate_sample_sheet()
 
     # THEN the sample sheet is in Housekeeper
-    assert get_sample_sheets_from_latest_version(
-        flow_cell_id=flow_cell.id, hk_api=sample_sheet_context.housekeeper_api
+    assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(
+        flow_cell_id=flow_cell.id
     )
 
 
@@ -125,8 +124,8 @@ def test_create_dragen_sample_sheet(
     assert not flow_cell.sample_sheet_exists()
 
     # GIVEN that there are no sample sheet in Housekeeper
-    assert not get_sample_sheets_from_latest_version(
-        flow_cell_id=flow_cell.id, hk_api=sample_sheet_context.housekeeper_api
+    assert not sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(
+        flow_cell_id=flow_cell.id
     )
 
     # GIVEN flow cell samples
@@ -153,6 +152,6 @@ def test_create_dragen_sample_sheet(
     assert flow_cell.validate_sample_sheet()
 
     # THEN the sample sheet is in Housekeeper
-    assert get_sample_sheets_from_latest_version(
-        flow_cell_id=flow_cell.id, hk_api=sample_sheet_context.housekeeper_api
+    assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(
+        flow_cell_id=flow_cell.id
     )

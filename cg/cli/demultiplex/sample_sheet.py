@@ -16,7 +16,6 @@ from cg.exc import FlowCellError
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_sample_sheet_path_to_housekeeper,
-    get_sample_sheets_from_latest_version,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -90,9 +89,7 @@ def create_sheet(
     except FlowCellError as error:
         raise click.Abort from error
     flow_cell_id: str = flow_cell.id
-    sample_sheets_hk: List[File] = get_sample_sheets_from_latest_version(
-        flow_cell_id=flow_cell_id, hk_api=hk_api
-    )
+    sample_sheets_hk: List[File] = hk_api.get_sample_sheets_from_latest_version(flow_cell_id)
     if flow_cell.sample_sheet_exists():
         LOG.info("Sample sheet already exists in flow cell directory")
         if not dry_run:
@@ -165,9 +162,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
         except FlowCellError:
             continue
         flow_cell_id: str = flow_cell.id
-        sample_sheets_hk: List[File] = get_sample_sheets_from_latest_version(
-            flow_cell_id=flow_cell_id, hk_api=hk_api
-        )
+        sample_sheets_hk: List[File] = hk_api.get_sample_sheets_from_latest_version(flow_cell_id)
         if flow_cell.sample_sheet_exists():
             LOG.debug("Sample sheet already exists in flow cell directory")
             if not dry_run:

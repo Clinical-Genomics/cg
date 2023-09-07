@@ -11,7 +11,6 @@ from cg.constants import FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.symbols import UNDERSCORE
-from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.store import Store
 from cg.store.models import Flowcell
 from cg.utils.date import get_timedelta_from_date
@@ -107,9 +106,8 @@ class RunDirFlowCell:
         if self.hk.bundle(name=self.id) is None:
             LOG.info(f"Creating bundle with name {self.id}")
             self.hk.create_new_bundle_and_version(name=self.id)
-        sample_sheets_from_latest_version: List[File] = get_sample_sheets_from_latest_version(
+        sample_sheets_from_latest_version: List[File] = self.hk.get_sample_sheets_from_latest_version(
             flow_cell_id=self.id,
-            hk_api=self.hk,
         )
         for file in sample_sheets_from_latest_version:
             if file.is_included:

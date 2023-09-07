@@ -223,18 +223,3 @@ def file_exists_in_latest_version_for_bundle(
     return any(
         file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
     )
-
-
-def get_sample_sheets_from_latest_version(flow_cell_id: str, hk_api: HousekeeperAPI) -> List[File]:
-    """Returns the files tagged with 'samplesheet' or 'archived_sample_sheet' for the given bundle."""
-    try:
-        sheets_with_normal_tag: List[File] = hk_api.get_files_from_latest_version(
-            bundle_name=flow_cell_id, tags=[flow_cell_id, SequencingFileTag.SAMPLE_SHEET]
-        ).all()
-        sheets_with_archive_tag: List[File] = hk_api.get_files_from_latest_version(
-            bundle_name=flow_cell_id, tags=[flow_cell_id, SequencingFileTag.ARCHIVED_SAMPLE_SHEET]
-        ).all()
-        sample_sheet_files: List[File] = sheets_with_normal_tag + sheets_with_archive_tag
-    except HousekeeperBundleVersionMissingError:
-        sample_sheet_files: List = []
-    return sample_sheet_files

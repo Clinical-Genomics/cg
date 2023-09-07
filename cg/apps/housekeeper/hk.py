@@ -482,3 +482,18 @@ class HousekeeperAPI:
             raise ValueError(f"No Archive entry found for file with id {file_id}.")
         self._store.update_retrieval_task_id(archive=archive, retrieval_task_id=retrieval_task_id)
         self.commit()
+
+    def get_sample_sheets_from_latest_version(self, flow_cell_id: str) -> List[File]:
+        """Returns the files tagged with 'samplesheet' or 'archived_sample_sheet' for the given bundle."""
+        try:
+            sheets_with_normal_tag: List[File] = self.get_files_from_latest_version(
+                bundle_name=flow_cell_id, tags=[flow_cell_id, SequencingFileTag.SAMPLE_SHEET]
+            ).all()
+            sheets_with_archive_tag: List[File] = self.get_files_from_latest_version(
+                bundle_name=flow_cell_id,
+                tags=[flow_cell_id, SequencingFileTag.ARCHIVED_SAMPLE_SHEET],
+            ).all()
+            sample_sheet_files: List[File] = sheets_with_normal_tag + sheets_with_archive_tag
+        except HousekeeperBundleVersionMissingError:
+            sample_sheet_files: List = []
+        return sample_sheet_files
