@@ -11,9 +11,9 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBCLConvert,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
     validate_samples_are_unique,
     get_samples_by_lane,
-    get_sample_internal_ids_from_sample_sheet,
     get_validated_sample_sheet,
     get_raw_samples,
 )
@@ -184,12 +184,13 @@ def test_get_sample_internal_ids_from_sample_sheet(
 ):
     """Test that getting sample internal ids from a sample sheet returns a unique list of strings."""
     # GIVEN a path to a sample sheet with only valid samples
-
-    # WHEN getting the valid sample internal ids
-    sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
-        sample_sheet_path=novaseq6000_bcl_convert_sample_sheet_path,
+    sample_sheet: SampleSheet = get_sample_sheet_from_file(
+        infile=novaseq6000_bcl_convert_sample_sheet_path,
         flow_cell_sample_type=flow_cell_type,
     )
+
+    # WHEN getting the valid sample internal ids
+    sample_internal_ids: List[str] = sample_sheet.get_sample_ids()
 
     # THEN the returned value is a list
     assert isinstance(sample_internal_ids, List)
