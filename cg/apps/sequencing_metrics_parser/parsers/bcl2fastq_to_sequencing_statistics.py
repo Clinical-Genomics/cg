@@ -16,13 +16,6 @@ def create_sample_lane_sequencing_metrics_from_bcl2fastq_for_flow_cell(
 ) -> List[SampleLaneSequencingMetrics]:
     """
     Parses the Bcl2fastq generated stats.json files and aggregates and calculates metrics for each sample in each lane.
-
-    Args:
-        flow_cell_dir (Path): Demultiplexed flow cell directory containing output from bcl2fastq
-
-    Returns:
-        List[SampleLaneSequencingMetrics]: A list of SampleLaneSequencingMetrics representing the sequencing
-        metrics for each sample in each lane on the flow cell.
     """
 
     sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
@@ -42,16 +35,7 @@ def create_sample_lane_sequencing_metrics_from_bcl2fastq_for_flow_cell(
 def create_sample_lane_sequencing_metrics_from_bcl2fastq(
     bcl2fastq_sample_metrics: Bcl2FastqSampleLaneMetrics,
 ) -> SampleLaneSequencingMetrics:
-    """
-    Generates a SampleLaneSequencingMetrics based on the provided raw results.
-
-    Args:
-        raw_sample_metrics: Bcl2FastqSampleLaneMetrics: The raw sequencing metrics for a sample in a lane.
-
-    Returns:
-        SampleLaneSequencingMetrics: SampleLaneSequencingMetrics encapsulates the statistics for a sample
-        in a lane on the flow cell.
-    """
+    """Generates a SampleLaneSequencingMetrics based on the provided raw results."""
 
     sample_base_percentage_passing_q30: float = calculate_q30_bases_percentage(
         q30_yield=bcl2fastq_sample_metrics.sample_total_yield_q30_in_lane,

@@ -17,7 +17,7 @@ from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertDemuxMetrics,
     BclConvertQualityMetrics,
 )
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+from cg.apps.demultiplex.sample_sheet.validators import (
     is_valid_sample_internal_id,
 )
 from cg.utils.files import get_file_in_directory

@@ -12,11 +12,11 @@ from cg.apps.demultiplex.sample_sheet.index import (
     is_dual_index,
     is_reverse_complement,
 )
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_samples_by_lane,
     get_validated_sample_sheet,
 )
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.constants.demultiplexing import (
     BclConverter,
     SampleSheetBcl2FastqSections,
@@ -92,13 +92,9 @@ class SampleSheetCreator:
     def create_sample_sheet_content(self) -> List[List[str]]:
         """Create sample sheet content with samples."""
         LOG.info("Creating sample sheet content")
-        sample_sheet_content: List[List[str]] = []
-        if (
-            self.flow_cell.sequencer_type == Sequencers.NOVASEQ
-            and self.bcl_converter == BclConverter.BCL2FASTQ
-        ):
-            sample_sheet_content: List[List[str]] = self.get_additional_sections_sample_sheet()
-        sample_sheet_content += self.get_data_section_header_and_columns()
+        sample_sheet_content: List[List[str]] = (
+            self.get_additional_sections_sample_sheet() + self.get_data_section_header_and_columns()
+        )
         for sample in self.lims_samples:
             sample_sheet_content.append(
                 self.convert_sample_to_header_dict(
@@ -209,7 +205,12 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
             [SampleSheetBCLConvertSections.Header.HEADER.value],
             SampleSheetBCLConvertSections.Header.FILE_FORMAT.value,
             [SampleSheetBCLConvertSections.Header.RUN_NAME.value, self.flow_cell_id],
-            SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM.value,
+            [
+                SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM_TITLE.value,
+                SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM_VALUE.value[
+                    self.flow_cell.sequencer_type
+                ],
+            ],
             SampleSheetBCLConvertSections.Header.INDEX_ORIENTATION_FORWARD.value,
         ]
         reads_section: List[List[str]] = [
