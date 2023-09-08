@@ -23,6 +23,20 @@ LOG = logging.getLogger(__name__)
 
 
 def get_data_header_key(sample_sheet: Dict[str, List[str]]) -> str:
+    """
+    Get the data header key from a sample sheet.
+
+    The data header key is the key in the sample sheet dictionary that corresponds to the data section of the sample sheet.
+
+    Args:
+        sample_sheet: A dictionary representing the sample sheet.
+
+    Returns:
+        The data header key.
+
+    Raises:
+        ValueError: If the data header key cannot be found in the sample sheet.
+    """
     sample_sheet_headers: List[List[str]] = [
         SampleSheetBCLConvertSections.Data.HEADER.value,
         SampleSheetBcl2FastqSections.Data.HEADER.value,
@@ -37,12 +51,29 @@ def get_data_header_key(sample_sheet: Dict[str, List[str]]) -> str:
     return data_header_key
 
 
+def get_column_names(sample_sheet: Dict[str, List[str]], data_header_key: str) -> List[str]:
+    """
+    Get the column names from a sample sheet data section.
+
+    Args:
+        sample_sheet: A dictionary representing the sample sheet.
+        data_header_key: The key in the sample sheet dictionary that corresponds to the data section.
+
+    Returns:
+        A list of column names from the sample sheet data section.
+    """
+    return sample_sheet[data_header_key][0]
+
+
 def validate_sample_sheet_column_names(sample_sheet_column_names: List[str]) -> None:
     """Validate that the sample sheet columns matches the expected format."""
-
-    if (
-        SampleSheetBCLConvertSections.Data.COLUMN_NAMES.value != sample_sheet_column_names
-        or SampleSheetBcl2FastqSections.Data.COLUMN_NAMES.value != sample_sheet_column_names
+    expected_column_names = [
+        set(SampleSheetBCLConvertSections.Data.COLUMN_NAMES.value),
+        set(SampleSheetBcl2FastqSections.Data.COLUMN_NAMES.value),
+    ]
+    if all(
+        set(sample_sheet_column_names) != expected
+        for expected in expected_column_names
     ):
         LOG.error("Sample sheet data header does not match expected format!")
         raise ValueError
@@ -162,9 +193,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Generate a Fluffy sample sheet for a case.
         """
 
-        sample_sheet = read_sample_sheet(sample_sheet_housekeeper_path)
-        data_header_key = get_data_header_key(sample_sheet)
-        sample_sheet_column_names = sample_sheet[data_header_key][0]
+        sample_sheet: Dict[str, List[str]] = read_sample_sheet(sample_sheet_housekeeper_path)
+        data_header_key: str = get_data_header_key(sample_sheet)
+        sample_sheet_column_names: List[str] = get_column_names(sample_sheet=sample_sheet, data_header_key=data_header_key)
         validate_sample_sheet_column_names(sample_sheet_column_names)
 
         sample_data = [

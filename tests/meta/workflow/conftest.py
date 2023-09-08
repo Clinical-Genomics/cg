@@ -12,6 +12,7 @@ from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.compress.compress import CompressAPI
 from cg.models.compression_data import CompressionData
 from cg.models.cg_config import CGConfig
+from cg.io.sample_sheet import read_sample_sheet
 from cg.store.models import Family, Sample
 from tests.store_helpers import StoreHelpers
 from tests.conftest import fixture_base_store
@@ -225,4 +226,40 @@ def fixture_rnafusion_metrics() -> Dict[str, float]:
         "pct_duplication": 14.8643,
         "reads_aligned": 72391566.0,
         "uniquely_mapped_percent": 91.02,
+    }
+
+
+@pytest.fixture
+def bcl_2_fastq_sample_sheet_path() -> Path:
+    """Return the path to a Bcl2Fastq sample sheet."""
+    return Path(
+        "tests/fixtures/apps/demultiplexing/demultiplexed-runs/230505_A00689_0804_BHY7FFDRX2/SampleSheet.csv"
+    )
+
+
+@pytest.fixture
+def bcl_convert_sample_sheet_path() -> Path:
+    """Return the path to a BclConvert sample sheet."""
+    return Path(
+        "tests/fixtures/apps/demultiplexing/demultiplexed-runs/20230508_LH00188_0003_A22522YLT3/SampleSheet.csv"
+    )
+
+
+@pytest.fixture
+def incorrect_sample_sheet_structure() -> Dict[str, List[str]]:
+    """Return a sample sheet structure with incorrect column names."""
+    return {"incorrect_key": ["incorrect_value"]}
+
+
+@pytest.fixture
+def sample_sheet_structures(
+    bcl_2_fastq_sample_sheet_path,
+    bcl_convert_sample_sheet_path,
+    incorrect_sample_sheet_structure: Dict[str, List[str]],
+) -> Dict[str, Dict[str, List[str]]]:
+    """Return a sample sheet structure with correct column names."""
+    return {
+        "bcl_convert_sample_sheet": read_sample_sheet(bcl_convert_sample_sheet_path),
+        "bcl_2_fastq_sample_sheet": read_sample_sheet(bcl_2_fastq_sample_sheet_path),
+        "incorrect_sample_sheet_structure": incorrect_sample_sheet_structure,
     }

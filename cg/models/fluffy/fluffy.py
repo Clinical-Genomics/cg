@@ -49,7 +49,7 @@ class FluffySampleSheetEntry(BaseModel):
 class FluffySampleSheet(BaseModel):
     """Class that represents a Fluffy sample sheet."""
 
-    header: FluffySampleSheetHeader
+    header: List[FluffySampleSheetHeader]
     entries: List[FluffySampleSheetEntry]
 
     def write_sample_sheet(self, out_path: Path) -> None:
@@ -57,4 +57,4 @@ class FluffySampleSheet(BaseModel):
         with out_path.open("w") as outfile:
             outfile.write(",".join([column.value for column in self.header]) + "\n")
             for entry in self.entries:
-                outfile.write(",".join([entry.model_dump()[column.value] for column in self.header]) + "\n")
+                outfile.write(",".join(str(value) for value in entry.model_dump().values()) + "\n")
