@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional
-from pydantic import BaseModel, FieldValidationInfo, field_validator
+from typing_extensions import Annotated
+from pydantic import BaseModel, BeforeValidator, FieldValidationInfo, field_validator
 from datetime import datetime
 
 from cg.meta.upload.gisaid.constants import AUTHORS
@@ -49,7 +50,7 @@ class GisaidSample(BaseModel):
     covv_location: Optional[str] = None
     covv_host: Optional[str] = "Human"
     covv_gender: Optional[str] = "unknown"
-    covv_patient_age: Optional[str] = "unknown"
+    covv_patient_age: Annotated[Optional[str], BeforeValidator(lambda v: str(v))] = "unknown"
     covv_patient_status: Optional[str] = "unknown"
     covv_seq_technology: Optional[str] = "Illumina NovaSeq"
     covv_orig_lab_addr: Optional[str] = None
@@ -65,7 +66,7 @@ class GisaidSample(BaseModel):
 
     @field_validator("covv_subm_sample_id")
     @classmethod
-    def parse_subm_sample_id(cls, _, info: FieldValidationInfo):
+    def parse_subm_sample_id(cls, v: str, info: FieldValidationInfo):
         region_code = info.data.get("region_code")
         return f"{region_code}_SE100_{v}"
 
