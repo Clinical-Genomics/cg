@@ -2,22 +2,50 @@ import datetime as dt
 import logging
 import shutil
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import pandas as pd
 from sqlalchemy.orm import Query
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import SampleSheetBCLConvertSections
+from cg.constants.demultiplexing import SampleSheetBCLConvertSections, SampleSheetBcl2FastqSections
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import ReadFile
 from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.fluffy import FluffySampleSheet, FluffySampleSheetEntry, FluffySampleSheetHeader
 from cg.store.models import Family, Flowcell, Sample
 from cg.utils import Process
+from cg.io.sample_sheet import read_sample_sheet
 
 LOG = logging.getLogger(__name__)
+
+
+def get_data_header_key(sample_sheet: Dict[str, List[str]]) -> str:
+    sample_sheet_headers: List[List[str]] = [
+        SampleSheetBCLConvertSections.Data.HEADER.value,
+        SampleSheetBcl2FastqSections.Data.HEADER.value,
+    ]
+    data_header_key = next((key for key in sample_sheet if key in sample_sheet_headers), None)
+    if not data_header_key:
+        LOG.error(
+            f"Sample sheet data header is missing!\n"
+            f"Cannot find any of {sample_sheet_headers} in the samplesheet!"
+        )
+        raise ValueError
+    return data_header_key
+
+
+def validate_sample_sheet_column_names(sample_sheet_column_names: List[str]) -> None:
+    """Validate that the sample sheet columns matches the expected format."""
+
+    if (
+        SampleSheetBCLConvertSections.Data.COLUMN_NAMES.value != sample_sheet_column_names
+        or SampleSheetBcl2FastqSections.Data.COLUMN_NAMES.value != sample_sheet_column_names
+    ):
+        LOG.error("Sample sheet data header does not match expected format!")
+        raise ValueError
 
 
 class FluffyAnalysisAPI(AnalysisAPI):
@@ -121,134 +149,51 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """Get sample concentration from LIMS"""
         return self.lims_api.get_sample_attribute(lims_id=sample_id, key="concentration_sample")
 
-    def get_sample_starlims_id(self, sample_id: str) -> str:
-        sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
-        return sample_obj.order
-
-    def get_sample_sequenced_date(self, sample_id: str) -> Optional[dt.date]:
-        sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
-        sequenced_at: dt.datetime = sample_obj.sequenced_at
-        if sequenced_at:
-            return sequenced_at.date()
-
     def get_sample_control_status(self, sample_id: str) -> bool:
         sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
         return bool(sample_obj.control)
 
-    def get_nr_of_header_lines_in_sample_sheet(
+    def generate_fluffy_sample_sheet(
         self,
+        flow_cell_id: str,
         sample_sheet_housekeeper_path: Path,
-    ) -> int:
-        """
-        Return the number of header lines in a Fluffy sample sheet.
-        Any lines before and including the line starting with [Data] is considered the header.
-
-        Returns:
-        int: The number of lines before the sample sheet data header
-        """
-        sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
-            file_format=FileFormat.CSV, file_path=sample_sheet_housekeeper_path
-        )
-        header_line_count: int = 1
-        for line in sample_sheet_content:
-            if SampleSheetBCLConvertSections.Data.HEADER.value in line:
-                break
-            header_line_count += 1
-        return header_line_count
-
-    def read_sample_sheet_data(self, sample_sheet_housekeeper_path: Path) -> pd.DataFrame:
-        """
-        Read in a sample sheet starting from the sample sheet data header.
-
-        Args:
-                        sample_sheet_housekeeper_path (Path): Path to the housekeeper sample sheet file
-
-        Returns:
-                        pd.DataFrame: A pandas dataframe of the sample sheet
-        """
-        header_line_count: int = self.get_nr_of_header_lines_in_sample_sheet(
-            sample_sheet_housekeeper_path=sample_sheet_housekeeper_path
-        )
-        return pd.read_csv(sample_sheet_housekeeper_path, index_col=None, header=header_line_count)
-
-    def add_sample_sheet_column(
-        self, sample_sheet_df: pd.DataFrame, new_column: str, to_add: list
-    ) -> pd.DataFrame:
-        """Add columns to the sample sheet.
-        Returns:
-                        pd.DataFrame: Sample sheet pd.DataFrame.
-        """
-        try:
-            sample_sheet_df[new_column] = to_add
-        except ValueError:
-            LOG.error(
-                f"Error when trying to add the column: {new_column} to sample sheet with data: {to_add}."
-            )
-        return sample_sheet_df
-
-    def column_has_alias(self, sample_sheet_df: pd.DataFrame, alias: str) -> bool:
-        return alias in sample_sheet_df.columns
-
-    def set_column_alias(self, sample_sheet_df: pd.DataFrame, alias: str, alternative: str) -> str:
-        """Return column alias from the sample sheet or set to alternative.
-        Returns: str: column name alias
-        """
-        return (
-            alias
-            if self.column_has_alias(sample_sheet_df=sample_sheet_df, alias=alias)
-            else alternative
-        )
-
-    def write_sample_sheet_csv(
-        self, sample_sheet_df: pd.DataFrame, sample_sheet_workdir_path: Path
-    ):
-        """
-        Write the sample sheet as a csv file
-        """
-        sample_sheet_df.to_csv(
-            sample_sheet_workdir_path,
-            sep=",",
-            index=False,
-        )
-
-    def populate_sample_sheet(
-        self, sample_sheet_housekeeper_path: Path, sample_sheet_workdir_path: Path
     ) -> None:
         """
-        Reads the Fluffy sample sheet *.csv file as found in Housekeeper.
-        Edits column 'SampleName' to include customer name for sample.
-        Edits column 'Sample_Project or Project' to include customer sample starlims id.
-        Adds columns Library_nM, SequencingDate, Exclude and populates with orderform values
+        Generate a Fluffy sample sheet for a case.
         """
-        sample_sheet_df = self.read_sample_sheet_data(
-            sample_sheet_housekeeper_path=sample_sheet_housekeeper_path
-        )
 
-        sample_id_column_alias = self.set_column_alias(
-            sample_sheet_df=sample_sheet_df, alias="Sample_ID", alternative="SampleID"
-        )
+        sample_sheet = read_sample_sheet(sample_sheet_housekeeper_path)
+        data_header_key = get_data_header_key(sample_sheet)
+        sample_sheet_column_names = sample_sheet[data_header_key][0]
+        validate_sample_sheet_column_names(sample_sheet_column_names)
 
-        sample_project_column_alias = self.set_column_alias(
-            sample_sheet_df=sample_sheet_df, alias="Sample_Project", alternative="Project"
-        )
+        sample_data = [
+            dict(zip(sample_sheet_column_names, sample))
+            for sample in sample_sheet[data_header_key][1:]
+        ]
 
-        column_to_value_map: dict = {
-            "Exclude": lambda x: self.get_sample_control_status(sample_id=x),
-            "SampleName": lambda x: self.get_sample_name_from_lims_id(lims_id=x),
-            "Library_nM": lambda x: self.get_concentrations_from_lims(sample_id=x),
-            "SequencingDate": lambda x: self.get_sample_sequenced_date(sample_id=x),
-            sample_project_column_alias: lambda x: self.get_sample_starlims_id(sample_id=x),
-        }
-
-        for column, value in column_to_value_map.items():
-            sample_sheet_df = self.add_sample_sheet_column(
-                sample_sheet_df=sample_sheet_df,
-                new_column=column,
-                to_add=sample_sheet_df[sample_id_column_alias].apply(value),
+        fluffy_sample_sheet_data_entries = []
+        for sample in sample_data:
+            sample_internal_id = sample.get("Sample_ID") or sample.get("SampleID")
+            statusdb_sample = self.status_db.get_sample_by_internal_id(sample_internal_id)
+            fluffy_sample_sheet_data_entry = {
+                "sample_internal_id": sample_internal_id,
+                "flow_cell_id": flow_cell_id,
+                "lane": sample["Lane"],
+                "index": sample.get("index") or sample.get("Index"),
+                "index2": sample.get("index2") or sample.get("Index2"),
+                "sample_name": statusdb_sample.name,
+                "sample_project": statusdb_sample.order,
+                "exclude": self.get_sample_control_status(sample_id=sample_internal_id),
+                "library_nM": self.get_concentrations_from_lims(sample_id=sample_internal_id),
+                "sequencing_date": statusdb_sample.sequencing_date.date(),
+            }
+            fluffy_sample_sheet_data_entries.append(
+                FluffySampleSheetEntry(**fluffy_sample_sheet_data_entry)
             )
 
-        self.write_sample_sheet_csv(
-            sample_sheet_df=sample_sheet_df, sample_sheet_workdir_path=sample_sheet_workdir_path
+        return FluffySampleSheet(
+            header=FluffySampleSheetHeader, entries=fluffy_sample_sheet_data_entries
         )
 
     def get_sample_sheet_housekeeper_path(self, flowcell_name: str) -> Path:
@@ -279,10 +224,16 @@ class FluffyAnalysisAPI(AnalysisAPI):
         )
         if not dry_run:
             Path(self.root_dir, case_id).mkdir(parents=True, exist_ok=True)
-            self.populate_sample_sheet(
+            fluffy_sample_sheet: FluffySampleSheet = self.generate_fluffy_sample_sheet(
+                flow_cell_id=latest_flow_cell.name,
                 sample_sheet_housekeeper_path=sample_sheet_housekeeper_path,
-                sample_sheet_workdir_path=sample_sheet_workdir_path,
             )
+            LOG.info(
+                "Writing modified csv from %s to %s",
+                sample_sheet_housekeeper_path,
+                sample_sheet_workdir_path,
+            )
+            fluffy_sample_sheet.write_sample_sheet(sample_sheet_workdir_path)
 
     def run_fluffy(
         self, case_id: str, dry_run: bool, workflow_config: str, external_ref: bool = False
