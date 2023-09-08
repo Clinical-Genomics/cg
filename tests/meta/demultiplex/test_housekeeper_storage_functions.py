@@ -122,7 +122,7 @@ def test_add_fastq_files_without_sample_id(
             flow_cell_id=bcl_convert_flow_cell.id, hk_api=demultiplex_context.housekeeper_api
         )[0].full_path
     )
-    bcl_convert_flow_cell.sample_sheet_path = sample_sheet_path
+    bcl_convert_flow_cell.sample_sheet_path_hk = sample_sheet_path
 
     # WHEN add_fastq_files is called
 

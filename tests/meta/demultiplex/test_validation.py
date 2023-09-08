@@ -59,7 +59,7 @@ def test_is_flow_cell_ready_for_delivery_false(tmp_path: Path):
 def test_validate_sample_sheet_exists_raises_error(bcl2fastq_flow_cell_dir: Path):
     # GIVEN a flow cell without a sample sheet in housekeeper
     flow_cell = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
-    flow_cell.sample_sheet_path = None
+    flow_cell.sample_sheet_path_hk = None
     # WHEN validating the existence of the sample sheet
     # THEN it should raise a FlowCellError
     with pytest.raises(FlowCellError):
@@ -74,7 +74,7 @@ def test_validate_sample_sheet_exists(bcl2fastq_flow_cell_dir: Path):
         bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
     sample_sheet_path.touch()
-    flow_cell.sample_sheet_path = sample_sheet_path
+    flow_cell.sample_sheet_path_hk = sample_sheet_path
 
     # WHEN validating the existence of the sample sheet
     # THEN it should not raise an error
@@ -139,7 +139,7 @@ def test_validate_samples_have_fastq_files_passes(novaseqx_demultiplexed_flow_ce
     sample_sheet_path = Path(
         novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
-    flow_cell_with_fastq.sample_sheet_path = sample_sheet_path
+    flow_cell_with_fastq.sample_sheet_path_hk = sample_sheet_path
 
     # WHEN checking if the flow cell has fastq files for teh samples
     validate_samples_have_fastq_files(flow_cell=flow_cell_with_fastq)
@@ -160,7 +160,7 @@ def test_validate_samples_have_fastq_files_fails(
     sample_sheet_path = Path(
         bcl_convert_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
-    flow_cell_without_fastq.sample_sheet_path = sample_sheet_path
+    flow_cell_without_fastq.sample_sheet_path_hk = sample_sheet_path
 
     # WHEN checking if the flow cell has fastq files for teh samples
     with pytest.raises(MissingFilesError):

@@ -50,7 +50,7 @@ class FlowCellDirectoryData:
         self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_dir_name()
         self.bcl_converter: Optional[str] = self.get_bcl_converter(bcl_converter)
-        self.sample_sheet_path: Optional[Path] = sample_sheet_path
+        self.sample_sheet_path_hk: Optional[Path] = sample_sheet_path
 
     def parse_flow_cell_dir_name(self):
         """Parse relevant information from flow cell name.
@@ -83,16 +83,16 @@ class FlowCellDirectoryData:
     @property
     def sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
-        if not self.sample_sheet_path:
+        if not self.sample_sheet_path_hk:
             raise FlowCellError("Sample sheet path not set")
 
         return get_sample_sheet_from_file(
-            infile=self.sample_sheet_path,
+            infile=self.sample_sheet_path_hk,
             flow_cell_sample_type=self.sample_type,
         )
 
     @property
-    def run_dir_sample_sheet_path(self) -> Path:
+    def sample_sheet_path(self) -> Path:
         """
         Return sample sheet path.
         """
@@ -225,13 +225,13 @@ class FlowCellDirectoryData:
     def sample_sheet_exists(self) -> bool:
         """Check if sample sheet exists."""
         LOG.info("Check if sample sheet exists")
-        return self.run_dir_sample_sheet_path.exists()
+        return self.sample_sheet_path.exists()
 
     def validate_sample_sheet(self) -> bool:
         """Validate if sample sheet is on correct format."""
         try:
             get_sample_sheet_from_file(
-                infile=self.run_dir_sample_sheet_path,
+                infile=self.sample_sheet_path,
                 flow_cell_sample_type=self.sample_type,
             )
         except (SampleSheetError, ValidationError) as error:
@@ -243,7 +243,7 @@ class FlowCellDirectoryData:
     def get_sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
         return get_sample_sheet_from_file(
-            infile=self.run_dir_sample_sheet_path,
+            infile=self.sample_sheet_path,
             flow_cell_sample_type=self.sample_type,
         )
 

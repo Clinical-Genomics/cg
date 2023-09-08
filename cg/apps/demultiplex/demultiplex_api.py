@@ -242,7 +242,7 @@ class DemultiplexingAPI:
         commands: str = self.get_sbatch_command(
             run_dir=flow_cell.path,
             demux_dir=demux_dir,
-            sample_sheet=flow_cell.run_dir_sample_sheet_path,
+            sample_sheet=flow_cell.sample_sheet_path,
             demux_completed=self.demultiplexing_completed_path(flow_cell=flow_cell),
             flow_cell=flow_cell,
             environment=self.environment,

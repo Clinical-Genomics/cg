@@ -105,7 +105,7 @@ def create_sheet(
             "Sample sheet already exists in Housekeeper. Hard-linking it to flow cell directory"
         )
         if not dry_run:
-            os.link(src=sample_sheets_hk[0].full_path, dst=flow_cell.run_dir_sample_sheet_path)
+            os.link(src=sample_sheets_hk[0].full_path, dst=flow_cell.sample_sheet_path)
         return
     lims_samples: List[FlowCellSample] = list(
         get_flow_cell_samples(
@@ -133,11 +133,11 @@ def create_sheet(
             )
         )
         return
-    LOG.info(f"Writing sample sheet to {flow_cell.run_dir_sample_sheet_path.resolve()}")
+    LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
     WriteFile.write_file_from_content(
         content=sample_sheet_content,
         file_format=FileFormat.CSV,
-        file_path=flow_cell.run_dir_sample_sheet_path,
+        file_path=flow_cell.sample_sheet_path,
     )
     LOG.info("Adding sample sheet to Housekeeper")
     add_sample_sheet_path_to_housekeeper(
@@ -180,7 +180,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
                 "Sample sheet already exists in Housekeeper. Copying it to flow cell directory"
             )
             if not dry_run:
-                os.link(src=sample_sheets_hk[0].full_path, dst=flow_cell.run_dir_sample_sheet_path)
+                os.link(src=sample_sheets_hk[0].full_path, dst=flow_cell.sample_sheet_path)
             continue
         LOG.info(f"Creating sample sheet for flow cell {flow_cell.id}")
         lims_samples: List[FlowCellSample] = list(
@@ -209,11 +209,11 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
                 )
             )
             continue
-        LOG.info(f"Writing sample sheet to {flow_cell.run_dir_sample_sheet_path.resolve()}")
+        LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
         WriteFile.write_file_from_content(
             content=sample_sheet_content,
             file_format=FileFormat.CSV,
-            file_path=flow_cell.run_dir_sample_sheet_path,
+            file_path=flow_cell.sample_sheet_path,
         )
         LOG.info("Adding sample sheet to Housekeeper")
         add_sample_sheet_path_to_housekeeper(
