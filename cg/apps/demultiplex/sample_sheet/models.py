@@ -64,12 +64,12 @@ class SampleSheet(BaseModel):
 
     def get_sample_ids(self) -> List[str]:
         """Return ids for samples in sheet."""
-        sample_ids: List[str] = []
+        sample_internal_ids: List[str] = []
         for sample in self.samples:
-            sample_id: str = sample.sample_id.split("_")[0]
-            if is_valid_sample_internal_id(sample_id):
-                sample_ids.append(sample_id)
-        return list(set(sample_ids))
+            sample_internal_id: str = sample.sample_id.split("_")[0]
+            if is_valid_sample_internal_id(sample_internal_id):
+                sample_internal_ids.append(sample_internal_id)
+        return list(set(sample_internal_ids))
 
 
 class SampleSheetBcl2Fastq(SampleSheet):
