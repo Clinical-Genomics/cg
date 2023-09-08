@@ -92,7 +92,7 @@ class FlowCellDirectoryData:
         )
 
     @property
-    def old_sample_sheet_path(self) -> Path:
+    def run_dir_sample_sheet_path(self) -> Path:
         """
         Return sample sheet path.
         """
@@ -225,13 +225,13 @@ class FlowCellDirectoryData:
     def sample_sheet_exists(self) -> bool:
         """Check if sample sheet exists."""
         LOG.info("Check if sample sheet exists")
-        return self.old_sample_sheet_path.exists()
+        return self.run_dir_sample_sheet_path.exists()
 
     def validate_sample_sheet(self) -> bool:
         """Validate if sample sheet is on correct format."""
         try:
             get_sample_sheet_from_file(
-                infile=self.old_sample_sheet_path,
+                infile=self.run_dir_sample_sheet_path,
                 flow_cell_sample_type=self.sample_type,
             )
         except (SampleSheetError, ValidationError) as error:
@@ -243,7 +243,7 @@ class FlowCellDirectoryData:
     def get_sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
         return get_sample_sheet_from_file(
-            infile=self.old_sample_sheet_path,
+            infile=self.run_dir_sample_sheet_path,
             flow_cell_sample_type=self.sample_type,
         )
 

@@ -129,7 +129,7 @@ class DemuxResults:
     @property
     def sample_sheet_path(self) -> Path:
         """Return the path to where the original sample sheet is"""
-        return self.flow_cell.old_sample_sheet_path
+        return self.flow_cell.run_dir_sample_sheet_path
 
     @property
     def barcode_report(self) -> Path:
