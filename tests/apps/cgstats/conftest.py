@@ -122,24 +122,24 @@ def conversion_stats_path(bcl2fastq_demux_results: DemuxResults) -> Path:
     return bcl2fastq_demux_results.conversion_stats_path
 
 
-@pytest.fixture(name="run_info_path", scope="function")
-def run_info(context_config: Dict[str, str]) -> Path:
+@pytest.fixture(scope="function")
+def run_info_path(context_config: Dict[str, str]) -> Path:
     """Return path to RunInfo.xml"""
     return Path(context_config["demultiplex"]["out_dir"]).joinpath(
         "211101_A00187_0615_AHLG5GDRZZ", "Unaligned", "Reports", "RunInfo.xml"
     )
 
 
-@pytest.fixture(name="quality_metrics_path", scope="function")
-def quality_metrics(context_config: Dict[str, str]) -> Path:
+@pytest.fixture(scope="function")
+def quality_metrics_path(context_config: Dict[str, str]) -> Path:
     """Return path to Quality_Metrics.csv"""
     return Path(context_config["demultiplex"]["out_dir"]).joinpath(
         "211101_A00187_0615_AHLG5GDRZZ", "Unaligned", "Reports", "Quality_Metrics.csv"
     )
 
 
-@pytest.fixture(name="adapter_metrics_path", scope="function")
-def adapter_metrics(context_config: Dict[str, str]) -> Path:
+@pytest.fixture(scope="function")
+def adapter_metrics_path(context_config: Dict[str, str]) -> Path:
     """Return path to Adapter_Metrics.csv"""
     return Path(context_config["demultiplex"]["out_dir"]).joinpath(
         "211101_A00187_0615_AHLG5GDRZZ", "Unaligned", "Reports", "Adapter_Metrics.csv"

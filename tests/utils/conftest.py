@@ -31,13 +31,13 @@ def stderr_output():
     return lines
 
 
-@pytest.fixture(name="some_file", scope="session")
+@pytest.fixture(scope="session")
 def some_file() -> str:
     """Return a file."""
     return "some_file.txt"
 
 
-@pytest.fixture(name="nested_directory_with_file", scope="session")
+@pytest.fixture(scope="session")
 def nested_directory_with_file(tmp_path_factory, some_file: str) -> Path:
     """Return a nested directory with a file."""
     directory = tmp_path_factory.mktemp("nested_directory_with_file")

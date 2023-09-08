@@ -25,8 +25,8 @@ class MockLims(LimsAPI):
         """Override the get_deliverymethod"""
 
 
-@pytest.fixture(name="lims_mock", scope="function")
-def lims_api():
+@pytest.fixture(scope="function")
+def lims_mock():
     """Returns a Lims api mock"""
     _lims_api = MockLims()
     return _lims_api

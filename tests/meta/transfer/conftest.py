@@ -16,7 +16,7 @@ def transfer_lims_api(sample_store: Store) -> Generator[TransferLims, None, None
     yield TransferLims(sample_store, MockLimsAPI(config=""))
 
 
-@pytest.fixture(name="external_data_directory", scope="session")
+@pytest.fixture(scope="session")
 def external_data_directory(
     tmpdir_factory, customer_id: str, cust_sample_id: str, ticket_id: str
 ) -> Path:

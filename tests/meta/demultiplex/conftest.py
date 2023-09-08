@@ -334,7 +334,7 @@ def delete_demultiplex_api(
     )
 
 
-@pytest.fixture(name="flow_cell_info_map", scope="session")
+@pytest.fixture(scope="session")
 def flow_cell_info_map(
     bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
     bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
@@ -372,12 +372,12 @@ def flow_cell_info_map(
     }
 
 
-@pytest.fixture(name="flow_cell_name_demultiplexed_with_bcl_convert", scope="session")
+@pytest.fixture(scope="session")
 def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
     return "HY7FFDRX2"
 
 
-@pytest.fixture(name="flow_cell_directory_name_demultiplexed_with_bcl_convert", scope="session")
+@pytest.fixture(scope="session")
 def flow_cell_directory_name_demultiplexed_with_bcl_convert(
     flow_cell_name_demultiplexed_with_bcl_convert: str,
 ):
@@ -385,7 +385,7 @@ def flow_cell_directory_name_demultiplexed_with_bcl_convert(
 
 
 @pytest.fixture(
-    name="flow_cell_directory_name_demultiplexed_with_bcl_convert_flat", scope="session"
+    scope="session"
 )
 def flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
     flow_cell_name_demultiplexed_with_bcl_convert: str,
@@ -395,16 +395,16 @@ def flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
 
 
 @pytest.fixture(
-    name="flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer", scope="session"
+    scope="session"
 )
-def flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequenver(
+def flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer(
     flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer: str,
 ):
     """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert on the NovaseqX sequencer."""
     return f"20230508_LH00188_0003_A{flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer}"
 
 
-@pytest.fixture(name="flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer", scope="session")
+@pytest.fixture(scope="session")
 def flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer() -> str:
     """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert on the NovaseqX sequencer."""
     return "22522YLT3"
@@ -433,7 +433,7 @@ def tmp_demultiplexing_init_files(
     return demultiplexing_init_files
 
 
-@pytest.fixture(name="bcl2fastq_folder_structure", scope="session")
+@pytest.fixture(scope="session")
 def bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
     """Return a folder structure that resembles a bcl2fastq run folder."""
     base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "bcl2fastq")))
@@ -446,7 +446,7 @@ def bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
     return base_dir
 
 
-@pytest.fixture(name="not_bcl2fastq_folder_structure", scope="function")
+@pytest.fixture(scope="function")
 def not_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
     """Return a folder structure that does not resemble a bcl2fastq run folder."""
     base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "not_bcl2fastq")))

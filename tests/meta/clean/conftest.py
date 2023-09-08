@@ -3,31 +3,31 @@ from pathlib import Path
 import pytest
 
 
-@pytest.fixture(name="correct_flow_cell_name", scope="function")
+@pytest.fixture(scope="function")
 def correct_flow_cell_name(bcl2fastq_flow_cell_full_name: str) -> str:
     """Correct flow cell name."""
     return bcl2fastq_flow_cell_full_name
 
 
-@pytest.fixture(name="incorrect_flow_cell_too_long", scope="function")
+@pytest.fixture(scope="function")
 def incorrect_flow_cell_too_long(correct_flow_cell_name: str) -> str:
     """Incorrect flow cell name."""
     return correct_flow_cell_name + "_r"
 
 
-@pytest.fixture(name="incorrect_flow_cell_extension", scope="function")
+@pytest.fixture(scope="function")
 def incorrect_flow_cell_extension(correct_flow_cell_name: str) -> str:
     """Incorrect flow cell name."""
     return correct_flow_cell_name + ".someextension"
 
 
-@pytest.fixture(name="incorrect_flow_cell_name", scope="function")
+@pytest.fixture(scope="function")
 def incorrect_flow_cell_name() -> str:
     """Incorrect flow cell name."""
     return "201203_A00689_0200_AZZZZZZZZZ"
 
 
-@pytest.fixture(name="correct_flow_cell_path", scope="function")
+@pytest.fixture(scope="function")
 def correct_flow_cell_path(
     tmp_demultiplexed_runs_directory: Path, correct_flow_cell_name: str
 ) -> Path:
@@ -35,7 +35,7 @@ def correct_flow_cell_path(
     return Path(tmp_demultiplexed_runs_directory, correct_flow_cell_name)
 
 
-@pytest.fixture(name="incorrect_flow_cell_path_too_long", scope="function")
+@pytest.fixture(scope="function")
 def incorrect_flow_cell_path_too_long(
     tmp_demultiplexed_runs_directory: Path, incorrect_flow_cell_too_long: str
 ) -> Path:
@@ -43,7 +43,7 @@ def incorrect_flow_cell_path_too_long(
     return Path(tmp_demultiplexed_runs_directory, incorrect_flow_cell_too_long)
 
 
-@pytest.fixture(name="incorrect_flow_cell_path_extension", scope="function")
+@pytest.fixture(scope="function")
 def incorrect_flow_cell_path_extension(
     tmp_demultiplexed_runs_directory: Path, incorrect_flow_cell_extension: str
 ) -> Path:
