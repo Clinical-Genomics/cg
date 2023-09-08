@@ -15,6 +15,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     get_sample_sheets_from_latest_version,
 )
 
+
 def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
