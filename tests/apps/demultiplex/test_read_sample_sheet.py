@@ -183,7 +183,7 @@ def test_get_sample_internal_ids_from_sample_sheet(
     flow_cell_type: Type[FlowCellSample] = FlowCellSampleBCLConvert,
 ):
     """Test that getting sample internal ids from a sample sheet returns a unique list of strings."""
-    # GIVEN a path to a sample sheet with only valid samples
+    # GIVEN a sample sheet with only valid samples
     sample_sheet: SampleSheet = get_sample_sheet_from_file(
         infile=novaseq6000_bcl_convert_sample_sheet_path,
         flow_cell_sample_type=flow_cell_type,
