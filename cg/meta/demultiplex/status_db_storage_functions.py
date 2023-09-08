@@ -3,7 +3,6 @@ import datetime
 import logging
 from typing import List, Optional, Set
 
-
 from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
 )
