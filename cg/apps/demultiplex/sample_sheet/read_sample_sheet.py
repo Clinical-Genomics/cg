@@ -110,6 +110,5 @@ def get_sample_internal_ids_from_sample_sheet(
     """Return the sample internal ids for samples in the sample sheet."""
     sample_sheet = get_sample_sheet_from_file(
         infile=sample_sheet_path, flow_cell_sample_type=flow_cell_sample_type
-    )    
+    )
     return sample_sheet.get_sample_ids()
-
