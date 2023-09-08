@@ -6,7 +6,7 @@ from cg.models.slurm.sbatch import Sbatch
 from tests.mocks.process_mock import ProcessMock
 
 
-@pytest.fixture(name="sbatch_parameters")
+@pytest.fixture()
 def sbatch_parameters(email_adress: str, slurm_account: str) -> Sbatch:
     """Return sbatch parameters."""
     config = {
@@ -22,14 +22,14 @@ def sbatch_parameters(email_adress: str, slurm_account: str) -> Sbatch:
     return Sbatch.parse_obj(config)
 
 
-@pytest.fixture(name="sbatch_content")
+@pytest.fixture()
 def sbatch_content(sbatch_parameters: Sbatch) -> str:
     """Return sbatch content."""
     api = SlurmAPI()
     return api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
 
 
-@pytest.fixture(name="slurm_api")
+@pytest.fixture()
 def slurm_api(sbatch_process: ProcessMock) -> SlurmAPI:
     """Return a slurm API with the process mocked."""
     api = SlurmAPI()
@@ -37,7 +37,7 @@ def slurm_api(sbatch_process: ProcessMock) -> SlurmAPI:
     return api
 
 
-@pytest.fixture(name="sbatch_path")
+@pytest.fixture()
 def sbatch_path(project_dir: Path) -> Path:
     """Return sbatch path."""
     return Path(project_dir, "sbatch_file.sh")

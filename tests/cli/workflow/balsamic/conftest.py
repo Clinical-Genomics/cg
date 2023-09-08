@@ -18,39 +18,39 @@ from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.fixture(name="balsamic_dir")
+@pytest.fixture()
 def balsamic_dir(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the balsamic apps dir"""
     balsamic_dir = tmpdir_factory.mktemp("balsamic")
     return Path(balsamic_dir).absolute().as_posix()
 
 
-@pytest.fixture(name="balsamic_case_id")
+@pytest.fixture()
 def balsamic_case_id() -> str:
     return "balsamic_case_wgs_single"
 
 
-@pytest.fixture(name="balsamic_housekeeper_dir")
+@pytest.fixture()
 def balsamic_housekeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
     """Return the path to the balsamic housekeeper bundle dir."""
     return tmpdir_factory.mktemp("bundles")
 
 
-@pytest.fixture(name="balsamic_pon_1_path")
+@pytest.fixture()
 def balsamic_pon_1_path(balsamic_dir: Path) -> str:
     balsamic_reference_path = Path(balsamic_dir, "balsamic_bed_1_case_PON_reference.cnn")
     balsamic_reference_path.touch(exist_ok=True)
     return balsamic_reference_path.as_posix()
 
 
-@pytest.fixture(name="balsamic_bed_1_path")
+@pytest.fixture()
 def balsamic_bed_1_path(balsamic_dir: Path) -> str:
     balsamic_bed_1_path = Path(balsamic_dir, "balsamic_bed_1.bed")
     balsamic_bed_1_path.touch(exist_ok=True)
     return balsamic_bed_1_path.as_posix()
 
 
-@pytest.fixture(name="balsamic_bed_2_path")
+@pytest.fixture()
 def balsamic_bed_2_path(balsamic_dir: Path) -> str:
     balsamic_bed_2_path = Path(balsamic_dir, "balsamic_bed_2.bed")
     balsamic_bed_2_path.touch(exist_ok=True)
@@ -201,7 +201,7 @@ def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files: li
     return housekeeper_api
 
 
-@pytest.fixture(name="balsamic_lims")
+@pytest.fixture()
 def balsamic_lims(context_config: dict) -> MockLimsAPI:
     """Create populated mock LIMS api to mimic all functionality of LIMS used by BALSAMIC"""
 
@@ -766,8 +766,8 @@ def mock_config(balsamic_dir: Path, balsamic_case_id: str) -> None:
     )
 
 
-@pytest.fixture(name="deliverable_data")
-def deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict:
+@pytest.fixture()
+def deliverable_data(balsamic_dir: Path, balsamic_case_id: str) -> dict:
     samples = [
         "sample_case_wgs_single_tumor",
     ]
@@ -812,7 +812,7 @@ def deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict:
     }
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_deliverable(balsamic_dir: Path, deliverable_data: dict, balsamic_case_id: str) -> None:
     """Create deliverable file with dummy data and files to deliver"""
     Path.mkdir(
@@ -831,7 +831,7 @@ def mock_deliverable(balsamic_dir: Path, deliverable_data: dict, balsamic_case_i
     )
 
 
-@pytest.fixture(name="hermes_deliverables")
+@pytest.fixture()
 def hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -> dict:
     hermes_output: dict = {"pipeline": "balsamic", "bundle_id": balsamic_case_id, "files": []}
     for file_info in deliverable_data["files"]:
@@ -846,7 +846,7 @@ def hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -> dict:
     return hermes_output
 
 
-@pytest.fixture(name="malformed_hermes_deliverables")
+@pytest.fixture()
 def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     malformed_deliverable = hermes_deliverables.copy()
     malformed_deliverable.pop("pipeline")

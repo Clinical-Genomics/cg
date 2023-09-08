@@ -18,26 +18,26 @@ def delimiter_map(
     }
 
 
-@pytest.fixture(name="json_stream")
+@pytest.fixture()
 def json_stream() -> str:
     """Return string with json format"""
     _content = """{"Lorem": {"ipsum": "sit"}}"""
     return _content
 
 
-@pytest.fixture(name="json_file_path")
+@pytest.fixture()
 def json_file_path(fixtures_dir: Path) -> Path:
     """Return a file path to example json file"""
     return Path(fixtures_dir, "io", "example_json.json")
 
 
-@pytest.fixture(name="json_temp_path")
+@pytest.fixture()
 def json_temp_path(cg_dir: Path) -> Path:
     """Return a temp file path to use when writing json"""
     return Path(cg_dir, "write_json.json")
 
 
-@pytest.fixture(name="yaml_stream")
+@pytest.fixture()
 def yaml_stream() -> str:
     """Return string with yaml format"""
     _content = """- Lorem
@@ -48,7 +48,7 @@ def yaml_stream() -> str:
     return _content
 
 
-@pytest.fixture(name="csv_file_path")
+@pytest.fixture()
 def csv_file_path(fixtures_dir: Path) -> Path:
     """Return a file path to example CSV file."""
     return Path(fixtures_dir, "io", "example.csv")
@@ -66,7 +66,7 @@ def tsv_stream() -> str:
     return """Lorem	ipsum	sit	amet"""
 
 
-@pytest.fixture(name="csv_stream")
+@pytest.fixture()
 def csv_stream() -> str:
     """Return string with CSV format."""
     return """Lorem,ipsum,sit,amet"""
@@ -84,13 +84,13 @@ def tsv_temp_path(cg_dir: Path) -> Path:
     return Path(cg_dir, "write.tsv")
 
 
-@pytest.fixture(name="xml_file_path")
+@pytest.fixture()
 def xml_file_path(fixtures_dir: Path) -> Path:
     """Return a file path to example XML file."""
     return Path(fixtures_dir, "io", "example_xml.xml")
 
 
-@pytest.fixture(name="xml_temp_path")
+@pytest.fixture()
 def xml_temp_path(cg_dir: Path) -> Path:
     """Return a temp file path to use when writing xml."""
     return Path(cg_dir, "write_xml.xml")

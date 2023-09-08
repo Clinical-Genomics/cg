@@ -84,7 +84,7 @@ def base_context(cg_context: CGConfig, helpers: StoreHelpers, lims_api):
     return cg_context
 
 
-@pytest.fixture(name="microbial_sample_id")
+@pytest.fixture()
 def microbial_sample_id():
     """Define a name for a microbial sample"""
     return "microbial_sample_id"

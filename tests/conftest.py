@@ -227,8 +227,8 @@ def sbatch_process(sbatch_job_number: int) -> ProcessMock:
     return slurm_process
 
 
-@pytest.fixture(name="analysis_family_single_case")
-def analysis_family_single(case_id: str, family_name: str, sample_id: str, ticket_id: str) -> dict:
+@pytest.fixture()
+def analysis_family_single_case(case_id: str, family_name: str, sample_id: str, ticket_id: str) -> dict:
     """Build an example case."""
     return {
         "name": family_name,
@@ -251,7 +251,7 @@ def analysis_family_single(case_id: str, family_name: str, sample_id: str, ticke
     }
 
 
-@pytest.fixture(name="analysis_family")
+@pytest.fixture()
 def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: str) -> dict:
     """Return a dictionary with information from a analysis case."""
     return {
@@ -298,7 +298,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
 # Config fixtures
 
 
-@pytest.fixture(name="base_config_dict")
+@pytest.fixture()
 def base_config_dict() -> dict:
     """Returns the basic configs necessary for running CG."""
     return {
@@ -336,19 +336,19 @@ def base_config_dict() -> dict:
     }
 
 
-@pytest.fixture(name="cg_config_object")
+@pytest.fixture()
 def cg_config_object(base_config_dict: dict) -> CGConfig:
     """Return a CG config."""
     return CGConfig(**base_config_dict)
 
 
-@pytest.fixture(name="chanjo_config")
+@pytest.fixture()
 def chanjo_config() -> Dict[str, Dict[str, str]]:
     """Return Chanjo config."""
     return {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 
 
-@pytest.fixture(name="crunchy_config")
+@pytest.fixture()
 def crunchy_config() -> Dict[str, Dict[str, Any]]:
     """Return Crunchy config."""
     return {
@@ -367,7 +367,7 @@ def crunchy_config() -> Dict[str, Dict[str, Any]]:
     }
 
 
-@pytest.fixture(name="hk_config_dict")
+@pytest.fixture()
 def hk_config_dict(root_path: Path):
     """Housekeeper configs."""
     return {
@@ -378,7 +378,7 @@ def hk_config_dict(root_path: Path):
     }
 
 
-@pytest.fixture(name="genotype_config")
+@pytest.fixture()
 def genotype_config() -> dict:
     """Genotype config fixture."""
     return {
@@ -390,7 +390,7 @@ def genotype_config() -> dict:
     }
 
 
-@pytest.fixture(name="gens_config")
+@pytest.fixture()
 def gens_config() -> Dict[str, Dict[str, str]]:
     """Gens config fixture."""
     return {
@@ -404,19 +404,19 @@ def gens_config() -> Dict[str, Dict[str, str]]:
 # Api fixtures
 
 
-@pytest.fixture(name="rsync_api")
+@pytest.fixture()
 def rsync_api(cg_context: CGConfig) -> RsyncAPI:
     """RsyncAPI fixture."""
     return RsyncAPI(config=cg_context)
 
 
-@pytest.fixture(name="external_data_api")
+@pytest.fixture()
 def external_data_api(analysis_store, cg_context: CGConfig) -> ExternalDataAPI:
     """ExternalDataAPI fixture."""
     return ExternalDataAPI(config=cg_context)
 
 
-@pytest.fixture(name="genotype_api")
+@pytest.fixture()
 def genotype_api(genotype_config: dict) -> GenotypeAPI:
     """Genotype API fixture."""
     _genotype_api = GenotypeAPI(genotype_config)
@@ -424,7 +424,7 @@ def genotype_api(genotype_config: dict) -> GenotypeAPI:
     return _genotype_api
 
 
-@pytest.fixture(name="gens_api")
+@pytest.fixture()
 def gens_api(gens_config: dict) -> GensAPI:
     """Gens API fixture."""
     _gens_api = GensAPI(gens_config)
@@ -446,8 +446,8 @@ def ticket_id() -> str:
     return "123456"
 
 
-@pytest.fixture(name="osticket")
-def os_ticket(ticket_id: str) -> MockOsTicket:
+@pytest.fixture()
+def osticket(ticket_id: str) -> MockOsTicket:
     """Return a api that mock the os ticket api."""
     api = MockOsTicket()
     api.set_ticket_nr(ticket_id)
@@ -459,19 +459,19 @@ def os_ticket(ticket_id: str) -> MockOsTicket:
 # Common file name fixtures
 
 
-@pytest.fixture(name="snv_vcf_file")
+@pytest.fixture()
 def snv_vcf_file() -> str:
     """Return a single nucleotide variant file name."""
     return f"snv{FileExtensions.VCF}"
 
 
-@pytest.fixture(name="sv_vcf_file")
+@pytest.fixture()
 def sv_vcf_file() -> str:
     """Return a structural variant file name."""
     return f"sv{FileExtensions.VCF}"
 
 
-@pytest.fixture(name="snv_research_vcf_file")
+@pytest.fixture()
 def snv_research_vcf_file() -> str:
     #    """Return a single nucleotide variant research file name."""
     return f"snv_research{FileExtensions.VCF}"
@@ -2758,7 +2758,7 @@ def rnafusion_context(
 
 
 @pytest.fixture(name="deliverable_data", scope="function")
-def deliverables_data(rnafusion_dir: Path, rnafusion_case_id: str, sample_id: str) -> dict:
+def deliverable_data(rnafusion_dir: Path, rnafusion_case_id: str, sample_id: str) -> dict:
     return {
         "files": [
             {

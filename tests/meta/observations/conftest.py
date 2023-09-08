@@ -14,7 +14,7 @@ from cg.store import Store
 
 from tests.cli.conftest import base_context
 from tests.apps.loqus.conftest import (
-    loqusdb_config,
+    loqusdb_config_dict,
     nr_of_loaded_variants,
     loqusdb_binary_path,
     loqusdb_config_path,

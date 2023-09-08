@@ -14,22 +14,22 @@ from tests.store_helpers import StoreHelpers
 # Paths
 
 
-@pytest.fixture(name="delivery_inbox")
+@pytest.fixture()
 def delivery_inbox(project_dir: Path, customer_id: Path, ticket_id: str) -> Path:
     return Path(project_dir, customer_id, INBOX_NAME, ticket_id)
 
 
-@pytest.fixture(name="deliver_vcf_path")
+@pytest.fixture()
 def deliver_vcf_path(delivery_inbox: Path, family_name: str, case_id: str, vcf_file: Path) -> Path:
     return Path(delivery_inbox, family_name, vcf_file.name.replace(case_id, family_name))
 
 
-@pytest.fixture(name="deliver_fastq_path")
+@pytest.fixture()
 def deliver_fastq_path(delivery_inbox: Path, cust_sample_id: str) -> Path:
     return Path(delivery_inbox, cust_sample_id, "dummy_run_R1_001.fastq.gz")
 
 
-@pytest.fixture(name="base_context")
+@pytest.fixture()
 def base_context(
     base_context: CGConfig, project_dir: Path, real_housekeeper_api: HousekeeperAPI
 ) -> CGConfig:
@@ -38,7 +38,7 @@ def base_context(
     return base_context
 
 
-@pytest.fixture(name="mip_delivery_bundle")
+@pytest.fixture()
 def mip_delivery_bundle(
     case_hk_bundle_no_files: dict,
     sample_cram_files: List[Path],
@@ -56,7 +56,7 @@ def mip_delivery_bundle(
     return case_hk_bundle_no_files
 
 
-@pytest.fixture(name="fastq_delivery_bundle")
+@pytest.fixture()
 def fastq_delivery_bundle(
     sample_hk_bundle_no_files: dict, fastq_file: Path, sample_id: str
 ) -> dict:
@@ -68,7 +68,7 @@ def fastq_delivery_bundle(
     return sample_hk_bundle_no_files
 
 
-@pytest.fixture(name="mip_dna_housekeeper")
+@pytest.fixture()
 def mip_dna_housekeeper(
     real_housekeeper_api: HousekeeperAPI,
     mip_delivery_bundle: dict,
@@ -86,7 +86,7 @@ def mip_dna_housekeeper(
     return real_housekeeper_api
 
 
-@pytest.fixture(name="populated_mip_context")
+@pytest.fixture()
 def populated_mip_context(
     base_context: CGConfig,
     analysis_store: Store,
@@ -99,7 +99,7 @@ def populated_mip_context(
     return base_context
 
 
-@pytest.fixture(name="context_with_missing_bundle")
+@pytest.fixture()
 def context_with_missing_bundle(
     cg_context: CGConfig,
     analysis_store: Store,

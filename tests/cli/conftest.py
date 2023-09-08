@@ -15,19 +15,19 @@ from tests.cli.compress.conftest import CaseInfo
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.fixture(name="cli_runner")
+@pytest.fixture()
 def cli_runner() -> CliRunner:
     """Create a CliRunner"""
     return CliRunner()
 
 
-@pytest.fixture(name="application_tag")
+@pytest.fixture()
 def application_tag() -> str:
     """Return a dummy tag"""
     return "dummy_tag"
 
 
-@pytest.fixture(name="base_context")
+@pytest.fixture()
 def base_context(
     base_store: Store, housekeeper_api: HousekeeperAPI, cg_config_object: CGConfig
 ) -> CGConfig:
@@ -37,13 +37,13 @@ def base_context(
     return cg_config_object
 
 
-@pytest.fixture(name="before_date")
+@pytest.fixture()
 def before_date() -> str:
     """Return a before date string"""
     return "1999-12-31"
 
 
-@pytest.fixture(name="disk_store")
+@pytest.fixture()
 def disk_store(base_context: CGConfig) -> Store:
     """context to use in cli"""
     return base_context.status_db
@@ -76,14 +76,14 @@ class MockCompressAPI(CompressAPI):
         return self.spring_decompression_success
 
 
-@pytest.fixture(name="compress_api")
+@pytest.fixture()
 def compress_api():
     """Return a compress API context."""
     return MockCompressAPI()
 
 
-@pytest.fixture(name="compress_context")
-def base_compress_context(
+@pytest.fixture()
+def compress_context(
     compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
 ) -> CGConfig:
     """Return a compress context."""
@@ -92,7 +92,7 @@ def base_compress_context(
     return cg_config_object
 
 
-@pytest.fixture(name="compress_case_info")
+@pytest.fixture()
 def compress_case_info(
     case_id,
     family_name,
@@ -110,7 +110,7 @@ def compress_case_info(
     )
 
 
-@pytest.fixture(name="populated_compress_store")
+@pytest.fixture()
 def populated_compress_store(store, helpers, compress_case_info, analysis_family):
     """Return a store populated with a completed analysis."""
     # Make sure that there is a case where analysis is completed
@@ -124,7 +124,7 @@ def populated_compress_store(store, helpers, compress_case_info, analysis_family
     return store
 
 
-@pytest.fixture(name="populated_compress_context")
+@pytest.fixture()
 def populated_compress_context(
     compress_api: CompressAPI, populated_compress_store: Store, cg_config_object: CGConfig
 ) -> CGConfig:
@@ -135,7 +135,7 @@ def populated_compress_context(
     return cg_config_object
 
 
-@pytest.fixture(name="real_crunchy_api")
+@pytest.fixture()
 def real_crunchy_api(crunchy_config: Dict[str, Dict[str, Any]]):
     """Return Crunchy API."""
     _api = CrunchyAPI(crunchy_config)
@@ -143,7 +143,7 @@ def real_crunchy_api(crunchy_config: Dict[str, Dict[str, Any]]):
     yield _api
 
 
-@pytest.fixture(name="real_compress_api")
+@pytest.fixture()
 def real_compress_api(
     demultiplexed_runs: Path, housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
 ) -> CompressAPI:
@@ -155,7 +155,7 @@ def real_compress_api(
     )
 
 
-@pytest.fixture(name="real_populated_compress_fastq_api")
+@pytest.fixture()
 def real_populated_compress_fastq_api(
     real_compress_api: CompressAPI, compress_hk_fastq_bundle: dict, helpers: StoreHelpers
 ) -> CompressAPI:
@@ -165,7 +165,7 @@ def real_populated_compress_fastq_api(
     return real_compress_api
 
 
-@pytest.fixture(name="real_populated_compress_context")
+@pytest.fixture()
 def real_populated_compress_context(
     real_populated_compress_fastq_api: CompressAPI,
     populated_compress_store: Store,

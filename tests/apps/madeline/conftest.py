@@ -9,13 +9,13 @@ from tests.mocks.process_mock import ProcessMock
 from cg.apps.madeline.api import MadelineAPI
 
 
-@pytest.fixture(name="madeline_output")
+@pytest.fixture()
 def madeline_output(apps_dir: Path) -> Path:
     """Path to madeline output"""
     return apps_dir / "madeline" / "madeline.xml"
 
 
-@pytest.fixture(name="madeline_columns")
+@pytest.fixture()
 def madeline_columns() -> Dict[str, str]:
     """return a dictionary with madeline columns"""
     columns = {
@@ -31,7 +31,7 @@ def madeline_columns() -> Dict[str, str]:
     return columns
 
 
-@pytest.fixture(name="mother")
+@pytest.fixture()
 def mother() -> Dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {
@@ -43,7 +43,7 @@ def mother() -> Dict[str, Optional[str]]:
     return ind_info
 
 
-@pytest.fixture(name="father")
+@pytest.fixture()
 def father() -> Dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {
@@ -55,7 +55,7 @@ def father() -> Dict[str, Optional[str]]:
     return ind_info
 
 
-@pytest.fixture(name="proband")
+@pytest.fixture()
 def proband() -> Dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {

@@ -42,7 +42,7 @@ from tests.cli.workflow.mip.conftest import (
 LOG = logging.getLogger(__name__)
 
 
-@pytest.fixture(name="upload_genotypes_hk_bundle")
+@pytest.fixture()
 def upload_genotypes_hk_bundle(
     case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path
 ) -> dict:
@@ -62,7 +62,7 @@ def upload_genotypes_hk_bundle(
     }
 
 
-@pytest.fixture(name="analysis_obj")
+@pytest.fixture()
 def analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers
 ) -> Analysis:
@@ -70,7 +70,7 @@ def analysis_obj(
     return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
 
 
-@pytest.fixture(name="upload_genotypes_hk_api")
+@pytest.fixture()
 def upload_genotypes_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     upload_genotypes_hk_bundle: dict,
@@ -84,7 +84,7 @@ def upload_genotypes_hk_api(
     return real_housekeeper_api
 
 
-@pytest.fixture(name="upload_gens_hk_bundle")
+@pytest.fixture()
 def upload_gens_hk_bundle(
     case_id: str,
     gens_coverage_path: Path,
@@ -113,7 +113,7 @@ def upload_gens_hk_bundle(
     }
 
 
-@pytest.fixture(name="upload_gens_hk_api")
+@pytest.fixture()
 def upload_gens_hk_api(
     case_id: str,
     helpers: StoreHelpers,
@@ -127,7 +127,7 @@ def upload_gens_hk_api(
     return real_housekeeper_api
 
 
-@pytest.fixture(name="upload_gens_context")
+@pytest.fixture()
 def upload_gens_context(
     analysis_store_trio: Store,
     base_context: CGConfig,
@@ -141,7 +141,7 @@ def upload_gens_context(
     return base_context
 
 
-@pytest.fixture(name="upload_report_hk_bundle")
+@pytest.fixture()
 def upload_report_hk_bundle(case_id: str, delivery_report_html: Path, timestamp) -> dict:
     """Returns a dictionary including the delivery report html file"""
 
@@ -154,7 +154,7 @@ def upload_report_hk_bundle(case_id: str, delivery_report_html: Path, timestamp)
     }
 
 
-@pytest.fixture(name="upload_report_hk_api")
+@pytest.fixture()
 def upload_report_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     upload_report_hk_bundle: dict,
@@ -169,7 +169,7 @@ def upload_report_hk_api(
     return real_housekeeper_api
 
 
-@pytest.fixture(name="base_context")
+@pytest.fixture()
 def base_context(
     analysis_store: Store,
     housekeeper_api: HousekeeperAPI,
@@ -188,7 +188,7 @@ def base_context(
     return cg_context
 
 
-@pytest.fixture(name="fastq_context")
+@pytest.fixture()
 def fastq_context(
     base_context,
     analysis_store: Store,
@@ -299,7 +299,7 @@ class MockLims:
         return None
 
 
-@pytest.fixture(name="upload_context")
+@pytest.fixture()
 def upload_context(cg_context: CGConfig) -> CGConfig:
     analysis_api = MipDNAAnalysisAPI(config=cg_context)
     cg_context.meta_apis["analysis_api"] = analysis_api
