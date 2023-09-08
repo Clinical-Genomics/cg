@@ -30,7 +30,7 @@ class MockCoverage(ChanjoAPI):
     """Mock chanjo coverage api."""
 
 
-@pytest.fixture(name="upload_genotypes_hk_bundle")
+@pytest.fixture()
 def upload_genotypes_hk_bundle(
     case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path
 ) -> dict:
@@ -51,7 +51,7 @@ def upload_genotypes_hk_bundle(
     return data
 
 
-@pytest.fixture(name="analysis_obj")
+@pytest.fixture()
 def analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers: StoreHelpers
 ) -> Analysis:
@@ -61,7 +61,7 @@ def analysis_obj(
     return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
 
 
-@pytest.fixture(name="upload_genotypes_api")
+@pytest.fixture()
 def upload_genotypes_api(
     real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle, helpers: StoreHelpers
 ) -> UploadGenotypesAPI:

@@ -228,7 +228,9 @@ def sbatch_process(sbatch_job_number: int) -> ProcessMock:
 
 
 @pytest.fixture()
-def analysis_family_single_case(case_id: str, family_name: str, sample_id: str, ticket_id: str) -> dict:
+def analysis_family_single_case(
+    case_id: str, family_name: str, sample_id: str, ticket_id: str
+) -> dict:
     """Build an example case."""
     return {
         "name": family_name,
@@ -477,7 +479,7 @@ def snv_research_vcf_file() -> str:
     return f"snv_research{FileExtensions.VCF}"
 
 
-@pytest.fixture(name="sv_research_vcf_file")
+@pytest.fixture()
 def sv_research_vcf_file() -> str:
     """Return a structural variant research file name."""
     return f"sv_research{FileExtensions.VCF}"
@@ -514,19 +516,19 @@ def cgweb_orders_dir(fixtures_dir: Path) -> Path:
     return Path(fixtures_dir, "cgweb_orders")
 
 
-@pytest.fixture(name="fastq_dir")
+@pytest.fixture()
 def fastq_dir(demultiplexed_runs: Path) -> Path:
     """Return the path to the fastq files dir."""
     return Path(demultiplexed_runs, "fastq")
 
 
-@pytest.fixture(name="spring_dir")
+@pytest.fixture()
 def spring_dir(demultiplexed_runs: Path) -> Path:
     """Return the path to the fastq files dir."""
     return Path(demultiplexed_runs, "spring")
 
 
-@pytest.fixture(name="project_dir")
+@pytest.fixture()
 def project_dir(tmpdir_factory) -> Generator[Path, None, None]:
     """Path to a temporary directory where intermediate files can be stored."""
     yield Path(tmpdir_factory.mktemp("data"))
@@ -538,7 +540,7 @@ def tmp_file(project_dir) -> Path:
     return Path(project_dir, "test")
 
 
-@pytest.fixture(name="non_existing_file_path")
+@pytest.fixture()
 def non_existing_file_path(project_dir: Path) -> Path:
     """Return the path to a non-existing file."""
     return Path(project_dir, "a_file.txt")
@@ -556,7 +558,7 @@ def content() -> str:
     )
 
 
-@pytest.fixture(name="filled_file")
+@pytest.fixture()
 def filled_file(non_existing_file_path: Path, content: str) -> Path:
     """Return the path to a existing file with some content."""
     with open(non_existing_file_path, "w") as outfile:
@@ -570,73 +572,73 @@ def orderforms(fixtures_dir: Path) -> Path:
     return Path(fixtures_dir, "orderforms")
 
 
-@pytest.fixture(name="hk_file")
+@pytest.fixture()
 def hk_file(filled_file, case_id) -> File:
     """Return a housekeeper File object."""
     return File(id=case_id, path=filled_file)
 
 
-@pytest.fixture(name="mip_dna_store_files")
+@pytest.fixture()
 def mip_dna_store_files(apps_dir: Path) -> Path:
     """Return the path to the directory with mip dna store files."""
     return Path(apps_dir, "mip", "dna", "store")
 
 
-@pytest.fixture(name="case_qc_sample_info_path")
+@pytest.fixture()
 def case_qc_sample_info_path(mip_dna_store_files: Path) -> Path:
     """Return path to case_qc_sample_info.yaml."""
     return Path(mip_dna_store_files, "case_qc_sample_info.yaml")
 
 
-@pytest.fixture(name="delivery_report_html")
+@pytest.fixture()
 def delivery_report_html(mip_dna_store_files: Path) -> Path:
     """Return the path to a qc metrics deliverables file with case data."""
     return Path(mip_dna_store_files, "empty_delivery_report.html")
 
 
-@pytest.fixture(name="mip_deliverables_file")
-def mip_deliverables_files(mip_dna_store_files: Path) -> Path:
+@pytest.fixture()
+def mip_deliverables_file(mip_dna_store_files: Path) -> Path:
     """Fixture for general deliverables file in mip."""
     return Path(mip_dna_store_files, "case_id_deliverables.yaml")
 
 
-@pytest.fixture(name="case_qc_metrics_deliverables")
+@pytest.fixture()
 def case_qc_metrics_deliverables(apps_dir: Path) -> Path:
     """Return the path to a qc metrics deliverables file with case data."""
     return Path(apps_dir, "mip", "case_metrics_deliverables.yaml")
 
 
-@pytest.fixture(name="mip_analysis_dir")
+@pytest.fixture()
 def mip_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with mip analysis files."""
     return Path(analysis_dir, "mip")
 
 
-@pytest.fixture(name="balsamic_analysis_dir")
+@pytest.fixture()
 def balsamic_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files."""
     return Path(analysis_dir, "balsamic")
 
 
-@pytest.fixture(name="balsamic_wgs_analysis_dir")
+@pytest.fixture()
 def balsamic_wgs_analysis_dir(balsamic_analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files."""
     return Path(balsamic_analysis_dir, "tn_wgs")
 
 
-@pytest.fixture(name="mip_dna_analysis_dir")
+@pytest.fixture()
 def mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
     """Return the path to the directory with mip dna analysis files."""
     return Path(mip_analysis_dir, "dna")
 
 
-@pytest.fixture(name="rnafusion_analysis_dir")
+@pytest.fixture()
 def rnafusion_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with rnafusion analysis files."""
     return Path(analysis_dir, "rnafusion")
 
 
-@pytest.fixture(name="sample_cram")
+@pytest.fixture()
 def sample_cram(mip_dna_analysis_dir: Path) -> Path:
     """Return the path to the cram file for a sample."""
     return Path(mip_dna_analysis_dir, "adm1.cram")

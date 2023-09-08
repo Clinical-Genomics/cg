@@ -46,7 +46,7 @@ def get_nr_samples_excel(orderform_path: str) -> int:
     return nr_samples
 
 
-@pytest.fixture(name="minimal_excel_sample")
+@pytest.fixture()
 def minimal_excel_sample() -> dict:
     return {
         "Sample/Name": "missingwell",
@@ -88,25 +88,25 @@ def microbial_order_parser(microbial_orderform: str) -> ExcelOrderformParser:
     return order_form_parser
 
 
-@pytest.fixture(name="nr_samples_mip_orderform")
+@pytest.fixture()
 def nr_samples_mip_orderform(mip_orderform: str) -> int:
     """Return the number of samples in the mip orderform."""
     return get_nr_samples_excel(mip_orderform)
 
 
-@pytest.fixture(name="nr_samples_rml_orderform")
+@pytest.fixture()
 def nr_samples_rml_orderform(rml_orderform: str) -> int:
     """Return the number of samples in the RML orderform."""
     return get_nr_samples_excel(rml_orderform)
 
 
-@pytest.fixture(name="nr_samples_fastq_orderform")
+@pytest.fixture()
 def nr_samples_fastq_orderform(fastq_orderform: str) -> int:
     """Return the number of samples in the RML orderform."""
     return get_nr_samples_excel(fastq_orderform)
 
 
-@pytest.fixture(name="mip_rna_orderform_sample")
+@pytest.fixture()
 def mip_rna_orderform_sample() -> dict:
     """Return a raw parsed mip RNA sample in excel format."""
     return {

@@ -70,13 +70,13 @@ def proband() -> Dict[str, Optional[str]]:
     return ind_info
 
 
-@pytest.fixture(name="trio")
+@pytest.fixture()
 def trio(proband: dict, mother: dict, father: dict) -> List[Dict[str, Optional[str]]]:
     """return a list with a trio"""
     return [proband, mother, father]
 
 
-@pytest.fixture(name="madeline_api")
+@pytest.fixture()
 def madeline_api() -> MadelineAPI:
     """Return a madeline API with mocked process"""
     binary_path = "madeline"
@@ -87,7 +87,7 @@ def madeline_api() -> MadelineAPI:
     return madeline_api
 
 
-@pytest.fixture(name="populated_madeline_api")
+@pytest.fixture()
 def populated_madeline_api(madeline_output: Path, madeline_api: MadelineAPI) -> MadelineAPI:
     """Return a madeline API populated with some output"""
     with open(madeline_output, "r") as output:
