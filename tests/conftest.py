@@ -1218,55 +1218,55 @@ def bcl_convert_flow_cell_dir(flow_cells_dir: Path, bcl_convert_flow_cell_full_n
     return Path(flow_cells_dir, bcl_convert_flow_cell_full_name)
 
 
-@pytest.fixture(name="novaseq_x_flow_cell_dir", scope="session")
-def novaseq_x_flow_cell_path(flow_cells_dir: Path, novaseq_x_flow_cell_full_name: str) -> Path:
+@pytest.fixture(scope="session")
+def novaseq_x_flow_cell_dir(flow_cells_dir: Path, novaseq_x_flow_cell_full_name: str) -> Path:
     """Return the path to the NovaSeqX flow cell demultiplex fixture directory."""
     return Path(flow_cells_dir, novaseq_x_flow_cell_full_name)
 
 
-@pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_path", scope="session")
+@pytest.fixture(scope="session")
 def novaseq_bcl2fastq_sample_sheet_path(bcl2fastq_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeq6000 Bcl2fastq sample sheet."""
     return Path(bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
 
 
-@pytest.fixture(name="novaseq_bcl_convert_sample_sheet_path", scope="session")
+@pytest.fixture(scope="session")
 def novaseq_bcl_convert_sample_sheet_path(bcl_convert_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeq6000 bcl_convert sample sheet."""
     return Path(bcl_convert_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
 
 
-@pytest.fixture(name="run_parameters_missing_versions_path", scope="session")
+@pytest.fixture(scope="session")
 def run_parameters_missing_versions_path(run_parameters_dir: Path) -> Path:
     """Return a NovaSeq6000 run parameters file path without software and reagent kit versions."""
     return Path(run_parameters_dir, "RunParameters_novaseq_no_software_nor_reagent_version.xml")
 
 
-@pytest.fixture(name="novaseq_6000_run_parameters_path", scope="session")
+@pytest.fixture(scope="session")
 def novaseq_6000_run_parameters_path(bcl2fastq_flow_cell_dir: Path) -> Path:
     """Return the path to a file with NovaSeq6000 run parameters."""
     return Path(bcl2fastq_flow_cell_dir, "RunParameters.xml")
 
 
-@pytest.fixture(name="novaseq_x_run_parameters_path", scope="session")
+@pytest.fixture(scope="session")
 def novaseq_x_run_parameters_path(novaseq_x_flow_cell_dir: Path) -> Path:
     """Return the path to a file with NovaSeqX run parameters."""
     return Path(novaseq_x_flow_cell_dir, "RunParameters.xml")
 
 
-@pytest.fixture(name="run_parameters_novaseq_6000_different_index_path", scope="module")
+@pytest.fixture(scope="module")
 def run_parameters_novaseq_6000_different_index_path(run_parameters_dir: Path) -> Path:
     """Return the path to a NovaSeq6000 run parameters file with different index cycles."""
     return Path(run_parameters_dir, "RunParameters_novaseq_6000_different_index_cycles.xml")
 
 
-@pytest.fixture(name="run_parameters_novaseq_x_different_index_path", scope="module")
+@pytest.fixture(scope="module")
 def run_parameters_novaseq_x_different_index_path(run_parameters_dir: Path) -> Path:
     """Return the path to a NovaSeqX run parameters file with different index cycles."""
     return Path(run_parameters_dir, "RunParameters_novaseq_X_different_index_cycles.xml")
 
 
-@pytest.fixture(name="run_parameters_missing_versions", scope="module")
+@pytest.fixture(scope="module")
 def run_parameters_missing_versions(
     run_parameters_missing_versions_path: Path,
 ) -> RunParametersNovaSeq6000:
@@ -1274,7 +1274,7 @@ def run_parameters_missing_versions(
     return RunParametersNovaSeq6000(run_parameters_path=run_parameters_missing_versions_path)
 
 
-@pytest.fixture(name="novaseq_6000_run_parameters", scope="session")
+@pytest.fixture(scope="session")
 def novaseq_6000_run_parameters(
     novaseq_6000_run_parameters_path: Path,
 ) -> RunParametersNovaSeq6000:
@@ -1282,7 +1282,7 @@ def novaseq_6000_run_parameters(
     return RunParametersNovaSeq6000(run_parameters_path=novaseq_6000_run_parameters_path)
 
 
-@pytest.fixture(name="novaseq_x_run_parameters", scope="session")
+@pytest.fixture(scope="session")
 def novaseq_x_run_parameters(
     novaseq_x_run_parameters_path: Path,
 ) -> RunParametersNovaSeqX:
@@ -1290,16 +1290,16 @@ def novaseq_x_run_parameters(
     return RunParametersNovaSeqX(run_parameters_path=novaseq_x_run_parameters_path)
 
 
-@pytest.fixture(name="bcl2fastq_flow_cell", scope="session")
-def flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
+@pytest.fixture(scope="session")
+def bcl2fastq_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a flow cell object with flow cell that is demultiplexed."""
     return FlowCellDirectoryData(
         flow_cell_path=bcl2fastq_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
     )
 
 
-@pytest.fixture(name="novaseq_flow_cell_demultiplexed_with_bcl2fastq", scope="session")
-def novaseq_flow_cell_demux_with_bcl2fastq(
+@pytest.fixture(scope="session")
+def novaseq_flow_cell_demultiplexed_with_bcl2fastq(
     bcl_convert_flow_cell_dir: Path,
 ) -> FlowCellDirectoryData:
     """Create a Novaseq6000 flow cell object with flow cell that is demultiplexed using Bcl2fastq."""
@@ -1308,7 +1308,7 @@ def novaseq_flow_cell_demux_with_bcl2fastq(
     )
 
 
-@pytest.fixture(name="bcl_convert_flow_cell", scope="session")
+@pytest.fixture(scope="session")
 def bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a bcl_convert flow cell object with flow cell that is demultiplexed."""
     return FlowCellDirectoryData(
@@ -1316,7 +1316,7 @@ def bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> FlowCellDirectoryD
     )
 
 
-@pytest.fixture(name="novaseq_x_flow_cell", scope="function")
+@pytest.fixture(scope="function")
 def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a NovaSeqX flow cell object with flow cell that is demultiplexed."""
     return FlowCellDirectoryData(
@@ -1324,13 +1324,13 @@ def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
     )
 
 
-@pytest.fixture(name="bcl2fastq_flow_cell_id", scope="session")
-def bcl2fast2_flow_cell_id(bcl2fastq_flow_cell: FlowCellDirectoryData) -> str:
+@pytest.fixture(scope="session")
+def bcl2fastq_flow_cell_id(bcl2fastq_flow_cell: FlowCellDirectoryData) -> str:
     """Return flow cell id from bcl2fastq flow cell object."""
     return bcl2fastq_flow_cell.id
 
 
-@pytest.fixture(name="bcl_convert_flow_cell_id", scope="session")
+@pytest.fixture(scope="session")
 def bcl_convert_flow_cell_id(bcl_convert_flow_cell: FlowCellDirectoryData) -> str:
     """Return flow cell id from bcl_convert flow cell object."""
     return bcl_convert_flow_cell.id
@@ -1430,7 +1430,7 @@ def bed_file(analysis_dir) -> Path:
 # Helper fixtures
 
 
-@pytest.fixture(name="helpers", scope="session")
+@pytest.fixture(scope="session")
 def helpers() -> StoreHelpers:
     """Return a class with helper functions for the stores."""
     return StoreHelpers()
@@ -2008,49 +2008,49 @@ def sample_store(base_store: Store) -> Store:
     return base_store
 
 
-@pytest.fixture(name="trailblazer_api", scope="session")
+@pytest.fixture(scope="session")
 def trailblazer_api() -> MockTB:
     """Return a mock Trailblazer API."""
     return MockTB()
 
 
-@pytest.fixture(name="lims_api", scope="session")
+@pytest.fixture(scope="session")
 def lims_api() -> MockLimsAPI:
     """Return a mock LIMS API."""
     return MockLimsAPI()
 
 
-@pytest.fixture(name="config_root_dir", scope="session")
+@pytest.fixture(scope="session")
 def config_root_dir() -> Path:
     """Return a path to the config root directory."""
     return Path("tests", "fixtures", "data")
 
 
-@pytest.fixture(name="housekeeper_dir", scope="session")
+@pytest.fixture(scope="session")
 def housekeeper_dir(tmpdir_factory):
     """Return a temporary directory for Housekeeper testing."""
     return tmpdir_factory.mktemp("housekeeper")
 
 
-@pytest.fixture(name="mip_dir", scope="session")
+@pytest.fixture(scope="session")
 def mip_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for MIP testing."""
     return tmpdir_factory.mktemp("mip")
 
 
-@pytest.fixture(name="fluffy_dir", scope="session")
+@pytest.fixture(scope="session")
 def fluffy_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Fluffy testing."""
     return tmpdir_factory.mktemp("fluffy")
 
 
-@pytest.fixture(name="balsamic_dir", scope="session")
+@pytest.fixture(scope="session")
 def balsamic_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Balsamic testing."""
     return tmpdir_factory.mktemp("balsamic")
 
 
-@pytest.fixture(name="cg_dir", scope="session")
+@pytest.fixture(scope="session")
 def cg_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for cg testing."""
     return tmpdir_factory.mktemp("cg")
@@ -2114,7 +2114,7 @@ def custom_observations_clinical_snv_file_path(observations_dir: Path) -> Path:
     return Path(observations_dir, "clinical_snv_export-19990101-.vcf.gz")
 
 
-@pytest.fixture(name="microsalt_dir", scope="session")
+@pytest.fixture(scope="session")
 def microsalt_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Microsalt testing."""
     return tmpdir_factory.mktemp("microsalt")
@@ -2373,31 +2373,31 @@ def cg_context(
     return cg_config
 
 
-@pytest.fixture(name="case_id_with_single_sample", scope="session")
+@pytest.fixture(scope="session")
 def case_id_with_single_sample():
     """Return a case id that should only be associated with one sample."""
     return "exhaustedcrocodile"
 
 
-@pytest.fixture(name="case_id_with_multiple_samples", scope="session")
+@pytest.fixture(scope="session")
 def case_id_with_multiple_samples():
     """Return a case id that should be associated with multiple samples."""
     return "righteouspanda"
 
 
-@pytest.fixture(name="case_id_without_samples", scope="session")
+@pytest.fixture(scope="session")
 def case_id_without_samples():
     """Return a case id that should not be associated with any samples."""
     return "confusedtrout"
 
 
-@pytest.fixture(name="sample_id_in_single_case", scope="session")
+@pytest.fixture(scope="session")
 def sample_id_in_single_case():
     """Return a sample id that should be associated with a single case."""
     return "ASM1"
 
 
-@pytest.fixture(name="sample_id_in_multiple_cases", scope="session")
+@pytest.fixture(scope="session")
 def sample_id_in_multiple_cases():
     """Return a sample id that should be associated with multiple cases."""
     return "ASM2"
@@ -2558,25 +2558,25 @@ def store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store
 # NF analysis fixtures
 
 
-@pytest.fixture(name="no_sample_case_id", scope="session")
+@pytest.fixture(scope="session")
 def no_sample_case_id() -> str:
     """Returns a case id of a case with no samples."""
     return "no_sample_case"
 
 
-@pytest.fixture(name="strandedness", scope="session")
+@pytest.fixture(scope="session")
 def strandedness() -> str:
     """Return a default strandedness."""
     return Strandedness.REVERSE
 
 
-@pytest.fixture(name="strandedness_not_permitted", scope="session")
+@pytest.fixture(scope="session")
 def strandedness_not_permitted() -> str:
     """Return a not permitted strandedness."""
     return "double_stranded"
 
 
-@pytest.fixture(name="fastq_forward_read_path", scope="session")
+@pytest.fixture(scope="session")
 def fastq_forward_read_path(housekeeper_dir: Path) -> Path:
     """Path to existing fastq forward read file."""
     fastq_file_path = Path(housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001").with_suffix(
@@ -2587,7 +2587,7 @@ def fastq_forward_read_path(housekeeper_dir: Path) -> Path:
     return fastq_file_path
 
 
-@pytest.fixture(name="fastq_reverse_read_path", scope="session")
+@pytest.fixture(scope="session")
 def fastq_reverse_read_path(housekeeper_dir: Path) -> Path:
     """Path to existing fastq reverse read file."""
     fastq_file_path = Path(
@@ -2598,13 +2598,13 @@ def fastq_reverse_read_path(housekeeper_dir: Path) -> Path:
     return fastq_file_path
 
 
-@pytest.fixture(name="mock_fastq_files", scope="session")
+@pytest.fixture(scope="session")
 def mock_fastq_files(fastq_forward_read_path: Path, fastq_reverse_read_path: Path) -> List[Path]:
     """Return list of all mock fastq files to commit to mock housekeeper."""
     return [fastq_forward_read_path, fastq_reverse_read_path]
 
 
-@pytest.fixture(name="sequencing_platform", scope="session")
+@pytest.fixture(scope="session")
 def sequencing_platform() -> str:
     """Return a default sequencing platform."""
     return SequencingPlatform.ILLUMINA
@@ -2613,20 +2613,20 @@ def sequencing_platform() -> str:
 # Rnafusion fixtures
 
 
-@pytest.fixture(name="rnafusion_dir", scope="function")
+@pytest.fixture(scope="function")
 def rnafusion_dir(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the rnafusion apps dir."""
     rnafusion_dir = tmpdir_factory.mktemp("rnafusion")
     return Path(rnafusion_dir).absolute().as_posix()
 
 
-@pytest.fixture(name="rnafusion_case_id", scope="session")
+@pytest.fixture(scope="session")
 def rnafusion_case_id() -> str:
     """Returns a rnafusion case id."""
     return "rnafusion_case_enough_reads"
 
 
-@pytest.fixture(name="rnafusion_sample_sheet_content", scope="session")
+@pytest.fixture(scope="session")
 def rnafusion_sample_sheet_content(
     rnafusion_case_id: str,
     fastq_forward_read_path: Path,
@@ -2644,7 +2644,7 @@ def rnafusion_sample_sheet_content(
     )
 
 
-@pytest.fixture(name="hermes_deliverables", scope="function")
+@pytest.fixture(scope="function")
 def hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
     hermes_output: dict = {"pipeline": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
     for file_info in deliverable_data["files"]:
@@ -2655,7 +2655,7 @@ def hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
     return hermes_output
 
 
-@pytest.fixture(name="malformed_hermes_deliverables", scope="function")
+@pytest.fixture(scope="function")
 def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     malformed_deliverable: dict = hermes_deliverables.copy()
     malformed_deliverable.pop("pipeline")
@@ -2663,13 +2663,13 @@ def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     return malformed_deliverable
 
 
-@pytest.fixture(name="rnafusion_multiqc_json_metrics", scope="function")
+@pytest.fixture(scope="function")
 def rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
     """Returns the content of a mock Multiqc JSON file."""
     return read_json(file_path=Path(rnafusion_analysis_dir, "multiqc_data.json"))
 
 
-@pytest.fixture(name="rnafusion_sample_sheet_path", scope="function")
+@pytest.fixture(scope="function")
 def rnafusion_sample_sheet_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to sample sheet."""
     return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet").with_suffix(
@@ -2677,7 +2677,7 @@ def rnafusion_sample_sheet_path(rnafusion_dir, rnafusion_case_id) -> Path:
     )
 
 
-@pytest.fixture(name="rnafusion_params_file_path", scope="function")
+@pytest.fixture(scope="function")
 def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to parameters file."""
     return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_params_file").with_suffix(
@@ -2685,19 +2685,19 @@ def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     )
 
 
-@pytest.fixture(name="tower_id", scope="session")
+@pytest.fixture(scope="session")
 def tower_id() -> int:
     """Returns a NF-Tower ID."""
     return 123456
 
 
-@pytest.fixture(name="existing_directory", scope="session")
+@pytest.fixture(scope="session")
 def existing_directory(tmpdir_factory) -> Path:
     """Path to existing temporary directory."""
     return tmpdir_factory.mktemp("any_directory")
 
 
-@pytest.fixture(name="rnafusion_parameters_default", scope="function")
+@pytest.fixture(scope="function")
 def rnafusion_parameters_default(
     rnafusion_dir: Path,
     rnafusion_case_id: str,
@@ -2757,7 +2757,7 @@ def rnafusion_context(
     return cg_context
 
 
-@pytest.fixture(name="deliverable_data", scope="function")
+@pytest.fixture(scope="function")
 def deliverable_data(rnafusion_dir: Path, rnafusion_case_id: str, sample_id: str) -> dict:
     return {
         "files": [
@@ -2774,7 +2774,7 @@ def deliverable_data(rnafusion_dir: Path, rnafusion_case_id: str, sample_id: str
     }
 
 
-@pytest.fixture(name="mock_deliverable", scope="function")
+@pytest.fixture(scope="function")
 def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case_id: str) -> None:
     """Create deliverable file with dummy data and files to deliver."""
     Path.mkdir(
@@ -2796,7 +2796,7 @@ def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case
     )
 
 
-@pytest.fixture(name="mock_analysis_finish", scope="function")
+@pytest.fixture(scope="function")
 def mock_analysis_finish(
     rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_multiqc_json_metrics: dict, tower_id: int
 ) -> None:
@@ -2833,7 +2833,7 @@ def mock_analysis_finish(
     )
 
 
-@pytest.fixture(name="mock_config", scope="function")
+@pytest.fixture(scope="function")
 def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
     Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
@@ -2987,7 +2987,7 @@ def taxprofiler_context(
     return cg_context
 
 
-@pytest.fixture(name="expected_total_reads", scope="session")
+@pytest.fixture(scope="session")
 def expected_total_reads() -> int:
     return 1_000_000
 
