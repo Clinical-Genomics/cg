@@ -56,14 +56,13 @@ def test_is_flow_cell_ready_for_delivery_false(tmp_path: Path):
     assert result == False
 
 
-def test_validate_sample_sheet_exists_raises_error(bcl2fastq_flow_cell_dir: Path):
+def test_validate_sample_sheet_exists_raises_error():
     # GIVEN a flow cell without a sample sheet in housekeeper
-    flow_cell = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
-    flow_cell._sample_sheet_path_hk = None
+    sample_sheet_path = None
     # WHEN validating the existence of the sample sheet
     # THEN it should raise a FlowCellError
     with pytest.raises(FlowCellError):
-        validate_sample_sheet_exists(flow_cell=flow_cell)
+        validate_sample_sheet_exists(sample_sheet_path)
 
 
 def test_validate_sample_sheet_exists(bcl2fastq_flow_cell_dir: Path):
@@ -74,11 +73,11 @@ def test_validate_sample_sheet_exists(bcl2fastq_flow_cell_dir: Path):
         bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
     sample_sheet_path.touch()
-    flow_cell._sample_sheet_path_hk = sample_sheet_path
+    flow_cell.sample_sheet_path = sample_sheet_path
 
     # WHEN validating the existence of the sample sheet
     # THEN it should not raise an error
-    assert validate_sample_sheet_exists(flow_cell=flow_cell) is None
+    assert validate_sample_sheet_exists(sample_sheet_path) is None
 
 
 def test_validate_demultiplexing_complete_raises_error(tmp_path: Path):
@@ -139,10 +138,7 @@ def test_validate_samples_have_fastq_files_passes(mocker, novaseqx_demultiplexed
     sample_sheet_path = Path(
         novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
-    mocker.patch.object(
-        flow_cell_with_fastq, "get_sample_sheet_path_hk", return_value=sample_sheet_path
-    )
-    assert flow_cell_with_fastq.get_sample_sheet_path_hk()
+    flow_cell_with_fastq.sample_sheet_path = sample_sheet_path
 
     # WHEN checking if the flow cell has fastq files for teh samples
     validate_samples_have_fastq_files(flow_cell=flow_cell_with_fastq)
@@ -163,10 +159,7 @@ def test_validate_samples_have_fastq_files_fails(
     sample_sheet_path = Path(
         bcl_convert_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
-    mocker.patch.object(
-        flow_cell_without_fastq, "get_sample_sheet_path_hk", return_value=sample_sheet_path
-    )
-    assert flow_cell_without_fastq.get_sample_sheet_path_hk()
+    flow_cell_without_fastq.sample_sheet_path = sample_sheet_path
 
     # WHEN checking if the flow cell has fastq files for teh samples
     with pytest.raises(MissingFilesError):

@@ -1,10 +1,7 @@
 """Tests for the housekeeper storage functions of the demultiplexing post post-processing module."""
-import datetime
 from pathlib import Path
-from typing import List, Dict
 from mock import MagicMock, call
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.models.cg_config import CGConfig
@@ -17,11 +14,6 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_demux_logs_to_housekeeper,
     get_sample_sheets_from_latest_version,
 )
-from cg.store import Store
-from tests.store_helpers import StoreHelpers
-
-from housekeeper.store.models import File, Tag, Version
-
 
 def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
     # GIVEN a DemuxPostProcessing API
@@ -122,7 +114,7 @@ def test_add_fastq_files_without_sample_id(
             flow_cell_id=bcl_convert_flow_cell.id, hk_api=demultiplex_context.housekeeper_api
         )[0].full_path
     )
-    bcl_convert_flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
+    bcl_convert_flow_cell.sample_sheet_path = sample_sheet_path
 
     # WHEN add_fastq_files is called
 

@@ -7,7 +7,6 @@ from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.io.csv import read_csv
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.utils.files import (
     is_pattern_in_file_path_name,
     rename_file,
@@ -150,21 +149,9 @@ def get_sample_sheet_path(
     return get_file_in_directory(directory=flow_cell_directory, file_name=sample_sheet_file_name)
 
 
-def parse_flow_cell_directory_data(
-    flow_cell_directory: Path, sample_sheet_path: Path, bcl_converter: Optional[str] = None
-) -> FlowCellDirectoryData:
-    """Return flow cell data from the flow cell directory."""
-
-    return FlowCellDirectoryData(
-        flow_cell_path=flow_cell_directory,
-        bcl_converter=bcl_converter,
-        sample_sheet_path=sample_sheet_path,
-    )
-
-
 def get_flow_cell_id(flow_cell_dir_name: str) -> str:
     """Return the flow cell id from the flow cell directory."""
-    return flow_cell_dir_name.split("_")[1:]
+    return flow_cell_dir_name.split("_")[-1][1:]
 
 
 def add_flow_cell_name_to_fastq_file_path(fastq_file_path: Path, flow_cell_name: str) -> Path:

@@ -26,7 +26,6 @@ from cg.meta.demultiplex.status_db_storage_functions import (
 from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
     get_flow_cell_id,
-    parse_flow_cell_directory_data,
 )
 from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
 from cg.meta.transfer import TransferFlowCell
@@ -90,23 +89,23 @@ class DemuxPostProcessingAPI:
             - Stores the flow cell data in the housekeeper database
             - Creates a delivery file in the flow cell directory
         """
+        LOG.info(f"Finish flow cell {flow_cell_directory_name}")
+
         if self.dry_run:
             LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
             return
 
-        LOG.info(f"Finish flow cell {flow_cell_directory_name}")
-
-        flow_cell_out_directory: Path = self.get_flow_cell_directory(flow_cell_directory_name)
+        flow_cell_path: Path = self.get_flow_cell_path(flow_cell_directory_name)
         sample_sheet_path: Path = self.get_sample_sheet_path(flow_cell_directory_name)
 
         is_flow_cell_ready_for_postprocessing(
-            flow_cell_output_directory=flow_cell_out_directory,
+            flow_cell_output_directory=flow_cell_path,
             sample_sheet_path=sample_sheet_path,
             force=force,
         )
 
-        parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
-            flow_cell_directory=flow_cell_out_directory,
+        parsed_flow_cell = FlowCellDirectoryData(
+            flow_cell_path=flow_cell_path,
             bcl_converter=bcl_converter,
             sample_sheet_path=sample_sheet_path,
         )
@@ -116,9 +115,9 @@ class DemuxPostProcessingAPI:
         except Exception as e:
             LOG.error(f"Failed to store flow cell data: {str(e)}")
             raise
-        create_delivery_file_in_flow_cell_directory(flow_cell_out_directory)
+        create_delivery_file_in_flow_cell_directory(flow_cell_path)
 
-    def get_flow_cell_directory(self, flow_cell_dir_name: str) -> Path:
+    def get_flow_cell_path(self, flow_cell_dir_name: str) -> Path:
         return Path(self.demux_api.demultiplexed_runs_dir, flow_cell_dir_name)
 
     def get_sample_sheet_path(self, flow_cell_dir_name: str) -> Path:

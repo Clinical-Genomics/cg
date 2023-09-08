@@ -48,7 +48,7 @@ def validate_samples_have_fastq_files(flow_cell: FlowCellDirectoryData) -> None:
         When one of the samples does not have enough fastq files in the flow cell
     """
     sample_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
-        sample_sheet_path=flow_cell.get_sample_sheet_path_hk(),
+        sample_sheet_path=flow_cell.sample_sheet_path,
         flow_cell_sample_type=flow_cell.sample_type,
     )
     for sample_id in sample_ids:
