@@ -321,7 +321,7 @@ def create_samples(
     """dispatches sample object and unaligned object creation for samples based on the
     bcl-converter used in demultiplexing."""
     LOG.info(f"Creating samples for flow cell {demux_results.flow_cell.full_name}")
-    sample_sheet: SampleSheet = demux_results.flow_cell.get_sample_sheet()
+    sample_sheet: SampleSheet = demux_results.flow_cell.get_sample_sheet_old()
 
     create_samples_function = {
         BclConverter.DRAGEN.value: _create_dragen_samples,

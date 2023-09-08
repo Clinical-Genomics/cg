@@ -52,9 +52,9 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
             LOG.warning(f"Can not start demultiplexing for flow cell {flow_cell.id}!")
             continue
 
-        if not flow_cell.validate_sample_sheet():
+        if not flow_cell.validate_sample_sheet_old():
             LOG.warning(
-                f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}",
+                f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path_old}",
             )
             continue
 
@@ -100,9 +100,9 @@ def demultiplex_flow_cell(
         LOG.warning("Can not start demultiplexing!")
         return
 
-    if not flow_cell.validate_sample_sheet():
+    if not flow_cell.validate_sample_sheet_old():
         LOG.warning(
-            f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}"
+            f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path_old}"
         )
         raise click.Abort
 

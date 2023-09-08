@@ -21,8 +21,7 @@ def is_flow_cell_ready_for_delivery(flow_cell_directory: Path) -> bool:
     return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).exists()
 
 
-def validate_sample_sheet_exists(flow_cell: FlowCellDirectoryData) -> None:
-    sample_sheet_path: Path = flow_cell.get_sample_sheet_path_hk()
+def validate_sample_sheet_exists(sample_sheet_path: Path) -> None:
     if not sample_sheet_path or not sample_sheet_path.exists():
         raise FlowCellError(f"Sample sheet {sample_sheet_path} does not exist in housekeeper.")
     LOG.debug(f"Found sample sheet {sample_sheet_path} in housekeeper.")
@@ -63,10 +62,10 @@ def validate_samples_have_fastq_files(flow_cell: FlowCellDirectoryData) -> None:
 
 def is_flow_cell_ready_for_postprocessing(
     flow_cell_output_directory: Path,
-    flow_cell: FlowCellDirectoryData,
+    sample_sheet_path: Path,
     force: bool = False,
 ) -> None:
-    validate_sample_sheet_exists(flow_cell)
+    validate_sample_sheet_exists(sample_sheet_path)
     validate_demultiplexing_complete(flow_cell_output_directory)
     validate_flow_cell_delivery_status(
         flow_cell_output_directory=flow_cell_output_directory, force=force

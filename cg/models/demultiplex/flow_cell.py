@@ -33,19 +33,24 @@ LOG = logging.getLogger(__name__)
 class FlowCellDirectoryData:
     """Class to collect information about flow cell directories and their particular files."""
 
-    def __init__(self, flow_cell_path: Path, bcl_converter: Optional[str] = None):
+    def __init__(
+        self,
+        flow_cell_path: Path,
+        bcl_converter: Optional[str] = None,
+        sample_sheet_path: Optional[Path] = None,
+    ):
         LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
         self.path: Path = flow_cell_path
         self.machine_name: str = ""
         self._run_parameters: Optional[RunParameters] = None
         self.run_date: datetime.datetime = datetime.datetime.now()
-        self.machine_number: int = 0
         self.base_name: str = ""  # Base name is flow cell-id + flow cell position
         self.id: str = ""
         self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_dir_name()
         self.bcl_converter: Optional[str] = self.get_bcl_converter(bcl_converter)
         self._sample_sheet_path_hk: Optional[Path] = None
+        self.sample_sheet_path = sample_sheet_path
 
     def parse_flow_cell_dir_name(self):
         """Parse relevant information from flow cell name.
@@ -58,7 +63,6 @@ class FlowCellDirectoryData:
         self.validate_flow_cell_dir_name()
         self.run_date = self._parse_date()
         self.machine_name = self.split_flow_cell_name[1]
-        self.machine_number = int(self.split_flow_cell_name[2])
         base_name: str = self.split_flow_cell_name[-1]
         self.base_name = base_name
         LOG.debug(f"Set flow cell id to {base_name}")
@@ -76,7 +80,17 @@ class FlowCellDirectoryData:
         return self.path.name
 
     @property
-    def sample_sheet_path(self) -> Path:
+    def sample_sheet(self) -> SampleSheet:
+        """Return sample sheet object."""
+        if not self.sample_sheet_path:
+            raise FlowCellError("No sample sheet path provided")
+        return get_sample_sheet_from_file(
+            infile=self.sample_sheet_path,
+            flow_cell_sample_type=self.sample_type,
+        )
+
+    @property
+    def sample_sheet_path_old(self) -> Path:
         """
         Return sample sheet path.
         """
@@ -214,16 +228,16 @@ class FlowCellDirectoryData:
             latest_analysis, DemultiplexingDirsAndFiles.DATA, DemultiplexingDirsAndFiles.BCL_CONVERT
         ).exists()
 
-    def sample_sheet_exists(self) -> bool:
+    def sample_sheet_exists_old(self) -> bool:
         """Check if sample sheet exists."""
         LOG.info("Check if sample sheet exists")
-        return self.sample_sheet_path.exists()
+        return self.sample_sheet_path_old.exists()
 
-    def validate_sample_sheet(self) -> bool:
+    def validate_sample_sheet_old(self) -> bool:
         """Validate if sample sheet is on correct format."""
         try:
             get_sample_sheet_from_file(
-                infile=self.sample_sheet_path,
+                infile=self.sample_sheet_path_old,
                 flow_cell_sample_type=self.sample_type,
             )
         except (SampleSheetError, ValidationError) as error:
@@ -232,10 +246,10 @@ class FlowCellDirectoryData:
             return False
         return True
 
-    def get_sample_sheet(self) -> SampleSheet:
+    def get_sample_sheet_old(self) -> SampleSheet:
         """Return sample sheet object."""
         return get_sample_sheet_from_file(
-            infile=self.sample_sheet_path,
+            infile=self.sample_sheet_path_old,
             flow_cell_sample_type=self.sample_type,
         )
 

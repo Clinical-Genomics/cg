@@ -71,7 +71,7 @@ def test_create_bcl2fastq_sample_sheet(
     assert flow_cell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet in the flow cell dir
-    assert not flow_cell.sample_sheet_exists()
+    assert not flow_cell.sample_sheet_exists_old()
 
     # GIVEN that there are no sample sheet in Housekeeper
     assert not get_sample_sheets_from_latest_version(
@@ -96,10 +96,10 @@ def test_create_bcl2fastq_sample_sheet(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN the sample sheet was created
-    assert flow_cell.sample_sheet_exists()
+    assert flow_cell.sample_sheet_exists_old()
 
     # THEN the sample sheet is on the correct format
-    assert flow_cell.validate_sample_sheet()
+    assert flow_cell.validate_sample_sheet_old()
 
     # THEN the sample sheet is in Housekeeper
     assert get_sample_sheets_from_latest_version(
@@ -122,7 +122,7 @@ def test_create_dragen_sample_sheet(
     assert flow_cell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet in the flow cell dir
-    assert not flow_cell.sample_sheet_exists()
+    assert not flow_cell.sample_sheet_exists_old()
 
     # GIVEN that there are no sample sheet in Housekeeper
     assert not get_sample_sheets_from_latest_version(
@@ -147,10 +147,10 @@ def test_create_dragen_sample_sheet(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN the sample sheet was created
-    assert flow_cell.sample_sheet_exists()
+    assert flow_cell.sample_sheet_exists_old()
 
     # THEN the sample sheet is on the correct format
-    assert flow_cell.validate_sample_sheet()
+    assert flow_cell.validate_sample_sheet_old()
 
     # THEN the sample sheet is in Housekeeper
     assert get_sample_sheets_from_latest_version(

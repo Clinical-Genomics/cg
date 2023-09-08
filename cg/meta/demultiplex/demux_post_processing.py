@@ -8,13 +8,15 @@ from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
+from cg.apps.demultiplex.sample_sheet.models import SampleSheet
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.cgstats import STATS_HEADER
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError, MissingFilesError
 from cg.meta.demultiplex import files
 from cg.meta.demultiplex.housekeeper_storage_functions import (
-    get_sample_sheets_from_latest_version,
+    get_sample_sheet_path,
+    get_sample_sheet_path_hk,
     store_flow_cell_data_in_housekeeper,
 )
 from cg.meta.demultiplex.status_db_storage_functions import (
@@ -24,6 +26,7 @@ from cg.meta.demultiplex.status_db_storage_functions import (
 )
 from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
+    get_flow_cell_id,
     parse_flow_cell_directory_data,
 )
 from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
@@ -103,28 +106,26 @@ class DemuxPostProcessingAPI:
             self.demux_api.demultiplexed_runs_dir, flow_cell_directory_name
         )
 
-        parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
-            flow_cell_directory=flow_cell_out_directory,
-            bcl_converter=bcl_converter,
+        flow_cell_id: str = get_flow_cell_id(flow_cell_out_directory)
+        sample_sheet_path: Path = get_sample_sheet_path_hk(
+            flow_cell_id=flow_cell_id, hk_api=self.hk_api
         )
-
-        sample_sheet_path: Path = Path(
-            get_sample_sheets_from_latest_version(
-                flow_cell_id=parsed_flow_cell.id, hk_api=self.hk_api
-            )[0].full_path
-        )
-        parsed_flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
-        LOG.debug("Set path for Housekeeper sample sheet in flow cell")
 
         try:
             is_flow_cell_ready_for_postprocessing(
                 flow_cell_output_directory=flow_cell_out_directory,
-                flow_cell=parsed_flow_cell,
+                sample_sheet_path=sample_sheet_path,
                 force=force,
             )
         except (FlowCellError, MissingFilesError) as e:
             LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
             return
+
+        parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
+            flow_cell_directory=flow_cell_out_directory,
+            bcl_converter=bcl_converter,
+            sample_sheet_path=sample_sheet_path,
+        )
 
         try:
             self.store_flow_cell_data(parsed_flow_cell)
