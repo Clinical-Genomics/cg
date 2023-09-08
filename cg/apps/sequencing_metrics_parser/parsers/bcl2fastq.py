@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 from pathlib import Path
 from typing import List
 
@@ -126,8 +125,7 @@ def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
     Identify and return paths to stats.json files in Bcl2fastq demultiplex result directory.
 
     This function looks through subdirectories in the given demultiplex directory,
-    matching specific naming pattern (l<num>t<num>), and collects paths
-    to any stats.json files found within a "Stats" subdirectory.
+    finding all stats-file paths in correctly named directories.
 
     Parameters:
     demultiplex_result_directory (Path): Path to the demultiplexing results.
@@ -136,20 +134,18 @@ def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
     List[Path]: List of paths to identified stats.json files.
     """
     stats_json_paths = []
-    pattern = re.compile(r"l\d+t\d+")
 
-    for subdir in os.listdir(demultiplex_result_directory):
-        if pattern.match(subdir):
-            stats_json_path = (
-                demultiplex_result_directory
-                / subdir
-                / BCL2FASTQ_METRICS_DIRECTORY_NAME
-                / BCL2FASTQ_METRICS_FILE_NAME
+    for root, dirs, files in os.walk(demultiplex_result_directory):
+        if BCL2FASTQ_METRICS_FILE_NAME in files:
+            stats_json_path = Path(
+                root, BCL2FASTQ_METRICS_DIRECTORY_NAME, BCL2FASTQ_METRICS_FILE_NAME
             )
             if stats_json_path.is_file():
                 stats_json_paths.append(stats_json_path)
+
     if not stats_json_paths:
         raise FileNotFoundError(
-            f"No {BCL2FASTQ_METRICS_FILE_NAME} file found in {demultiplex_result_directory}."
+            f"Could not find any stats.json files in {demultiplex_result_directory}"
         )
+
     return stats_json_paths
