@@ -384,9 +384,7 @@ def flow_cell_directory_name_demultiplexed_with_bcl_convert(
     return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
 
 
-@pytest.fixture(
-    scope="session"
-)
+@pytest.fixture(scope="session")
 def flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
     flow_cell_name_demultiplexed_with_bcl_convert: str,
 ):
@@ -394,9 +392,7 @@ def flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
     return f"230505_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
 
 
-@pytest.fixture(
-    scope="session"
-)
+@pytest.fixture(scope="session")
 def flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer(
     flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer: str,
 ):
