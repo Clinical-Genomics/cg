@@ -162,9 +162,9 @@ def parse_flow_cell_directory_data(
     )
 
 
-def get_flow_cell_id(flow_cell_directory: Path) -> str:
+def get_flow_cell_id(flow_cell_dir_name: str) -> str:
     """Return the flow cell id from the flow cell directory."""
-    return flow_cell_directory.name.split("_")[1:]
+    return flow_cell_dir_name.split("_")[1:]
 
 
 def add_flow_cell_name_to_fastq_file_path(fastq_file_path: Path, flow_cell_name: str) -> Path:

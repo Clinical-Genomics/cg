@@ -15,7 +15,6 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError, MissingFilesError
 from cg.meta.demultiplex import files
 from cg.meta.demultiplex.housekeeper_storage_functions import (
-    get_sample_sheet_path,
     get_sample_sheet_path_hk,
     store_flow_cell_data_in_housekeeper,
 )
@@ -90,11 +89,6 @@ class DemuxPostProcessingAPI:
             - Updates sample read counts in the status database
             - Stores the flow cell data in the housekeeper database
             - Creates a delivery file in the flow cell directory
-        Args:
-            flow_cell_directory_name (str): The name of the flow cell directory to be finalized.
-            force (bool): If True, the flow cell will be finalized even when it is already marked for delivery.
-        Raises:
-            FlowCellError: If the flow cell directory or the data it contains is not valid.
         """
         if self.dry_run:
             LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
@@ -102,24 +96,14 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
-        flow_cell_out_directory: Path = Path(
-            self.demux_api.demultiplexed_runs_dir, flow_cell_directory_name
-        )
+        flow_cell_out_directory: Path = self.get_flow_cell_directory(flow_cell_directory_name)
+        sample_sheet_path: Path = self.get_sample_sheet_path(flow_cell_directory_name)
 
-        flow_cell_id: str = get_flow_cell_id(flow_cell_out_directory)
-        sample_sheet_path: Path = get_sample_sheet_path_hk(
-            flow_cell_id=flow_cell_id, hk_api=self.hk_api
+        is_flow_cell_ready_for_postprocessing(
+            flow_cell_output_directory=flow_cell_out_directory,
+            sample_sheet_path=sample_sheet_path,
+            force=force,
         )
-
-        try:
-            is_flow_cell_ready_for_postprocessing(
-                flow_cell_output_directory=flow_cell_out_directory,
-                sample_sheet_path=sample_sheet_path,
-                force=force,
-            )
-        except (FlowCellError, MissingFilesError) as e:
-            LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
-            return
 
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
             flow_cell_directory=flow_cell_out_directory,
@@ -133,6 +117,13 @@ class DemuxPostProcessingAPI:
             LOG.error(f"Failed to store flow cell data: {str(e)}")
             raise
         create_delivery_file_in_flow_cell_directory(flow_cell_out_directory)
+
+    def get_flow_cell_directory(self, flow_cell_dir_name: str) -> Path:
+        return Path(self.demux_api.demultiplexed_runs_dir, flow_cell_dir_name)
+
+    def get_sample_sheet_path(self, flow_cell_dir_name: str) -> Path:
+        flow_cell_id: str = get_flow_cell_id(flow_cell_dir_name)
+        return get_sample_sheet_path_hk(flow_cell_id=flow_cell_id, hk_api=self.hk_api)
 
     def finish_all_flow_cells_temp(self) -> bool:
         """Finish all flow cells that need it."""
