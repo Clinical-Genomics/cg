@@ -2,6 +2,7 @@ import logging
 from typing import List, Dict, Type
 import pytest
 from pathlib import Path
+from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 from cg.exc import SampleSheetError
 from cg.apps.demultiplex.sample_sheet.models import (
     SampleSheet,
@@ -11,7 +12,6 @@ from cg.apps.demultiplex.sample_sheet.models import (
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     validate_samples_are_unique,
-    is_valid_sample_internal_id,
     get_samples_by_lane,
     get_sample_internal_ids_from_sample_sheet,
     get_validated_sample_sheet,

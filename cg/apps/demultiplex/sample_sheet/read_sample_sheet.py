@@ -4,6 +4,7 @@ from typing import Dict, List, Type
 from pydantic import TypeAdapter
 
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
+from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import (
     SampleSheetBcl2FastqSections,
@@ -35,14 +36,6 @@ def validate_samples_unique_per_lane(samples: List[FlowCellSample]) -> None:
     for lane, lane_samples in sample_by_lane.items():
         LOG.debug(f"Validate that samples are unique in lane: {lane}")
         validate_samples_are_unique(samples=lane_samples)
-
-
-def is_valid_sample_internal_id(sample_internal_id: str) -> bool:
-    """
-    Check if a sample internal id has the correct structure:
-    starts with three letters followed by at least three digits.
-    """
-    return bool(re.search(r"^[A-Za-z]{3}\d{3}", sample_internal_id))
 
 
 def get_sample_sheet_from_file(

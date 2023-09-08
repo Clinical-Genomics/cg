@@ -4,6 +4,7 @@ from typing import List
 
 from cg.constants.constants import GenomeVersion
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
+from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 
 LOG = logging.getLogger(__name__)
 
@@ -60,6 +61,15 @@ class FlowCellSampleBCLConvert(FlowCellSample):
 
 class SampleSheet(BaseModel):
     samples: List[FlowCellSample]
+
+    def get_sample_ids(self) -> List[str]:
+        """Return ids for samples in sheet."""
+        sample_ids: List[str] = []
+        for sample in self.samples:
+            sample_id: str = sample.sample_id.split("_")[0]
+            if is_valid_sample_internal_id(sample_id):
+                sample_ids.append(sample_id)
+        return list(set(sample_ids))
 
 
 class SampleSheetBcl2Fastq(SampleSheet):
