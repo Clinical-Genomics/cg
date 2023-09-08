@@ -205,7 +205,12 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
             [SampleSheetBCLConvertSections.Header.HEADER.value],
             SampleSheetBCLConvertSections.Header.FILE_FORMAT.value,
             [SampleSheetBCLConvertSections.Header.RUN_NAME.value, self.flow_cell_id],
-            SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM.value,
+            [
+                SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM_TITLE.value,
+                SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM_VALUE.value[
+                    self.flow_cell.sequencer_type
+                ],
+            ],
             SampleSheetBCLConvertSections.Header.INDEX_ORIENTATION_FORWARD.value,
         ]
         reads_section: List[List[str]] = [
