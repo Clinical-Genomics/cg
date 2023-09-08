@@ -1,7 +1,9 @@
 """Constants related to demultiplexing."""
 from pathlib import Path
-from typing import List
+from typing import Dict, List
+
 import click
+from cg.constants.sequencing import Sequencers
 from cg.utils.enums import Enum, StrEnum
 
 
@@ -109,7 +111,11 @@ class SampleSheetBCLConvertSections:
         HEADER: str = "[Header]"
         FILE_FORMAT: List[str] = ["FileFormatVersion", "2"]
         RUN_NAME: str = "RunName"
-        INSTRUMENT_PLATFORM: List[str] = ["InstrumentPlatform", "NovaSeqXSeries"]
+        INSTRUMENT_PLATFORM_TITLE: str = "InstrumentPlatform"
+        INSTRUMENT_PLATFORM_VALUE: Dict[str, str] = {
+            Sequencers.NOVASEQ: "NovaSeq6000",
+            Sequencers.NOVASEQX: "NovaSeqXSeries",
+        }
         INDEX_ORIENTATION_FORWARD: List[str] = ["IndexOrientation", "Forward"]
 
     class Reads(StrEnum):
