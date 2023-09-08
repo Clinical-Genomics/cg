@@ -14,7 +14,7 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError, MissingFilesError
 from cg.meta.demultiplex import files
 from cg.meta.demultiplex.housekeeper_storage_functions import (
-    get_sample_sheets_from_latest_version,
+    get_sample_sheet_path_hk,
     store_flow_cell_data_in_housekeeper,
 )
 from cg.meta.demultiplex.status_db_storage_functions import (
@@ -24,7 +24,7 @@ from cg.meta.demultiplex.status_db_storage_functions import (
 )
 from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
-    parse_flow_cell_directory_data,
+    get_flow_cell_id,
 )
 from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
 from cg.meta.transfer import TransferFlowCell
@@ -99,22 +99,14 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
-        flow_cell_out_directory: Path = Path(
-            self.demux_api.demultiplexed_runs_dir, flow_cell_directory_name
-        )
+        flow_cell_out_directory: Path = self.get_flow_cell_path(flow_cell_directory_name)
+        sample_sheet_path: Path = self.get_sample_sheet_path(flow_cell_directory_name)
 
-        parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
-            flow_cell_directory=flow_cell_out_directory,
+        parsed_flow_cell = FlowCellDirectoryData(
+            flow_cell_path=flow_cell_out_directory,
             bcl_converter=bcl_converter,
+            sample_sheet_path=sample_sheet_path,
         )
-
-        sample_sheet_path: Path = Path(
-            get_sample_sheets_from_latest_version(
-                flow_cell_id=parsed_flow_cell.id, hk_api=self.hk_api
-            )[0].full_path
-        )
-        parsed_flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
-        LOG.debug("Set path for Housekeeper sample sheet in flow cell")
 
         try:
             is_flow_cell_ready_for_postprocessing(
@@ -171,6 +163,13 @@ class DemuxPostProcessingAPI:
                 LOG.debug(f"Found directory {flow_cell_dir}")
                 demultiplex_flow_cells.append(flow_cell_dir)
         return demultiplex_flow_cells
+
+    def get_sample_sheet_path(self, flow_cell_dir_name: str) -> Path:
+        flow_cell_id: str = get_flow_cell_id(flow_cell_dir_name)
+        return get_sample_sheet_path_hk(flow_cell_id=flow_cell_id, hk_api=self.hk_api)
+
+    def get_flow_cell_path(self, flow_cell_dir_name: str) -> Path:
+        return Path(self.demux_api.demultiplexed_runs_dir, flow_cell_dir_name)
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):

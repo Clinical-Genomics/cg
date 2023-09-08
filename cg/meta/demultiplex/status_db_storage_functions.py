@@ -38,7 +38,7 @@ def store_flow_cell_data_in_status_db(
         LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}.")
 
     sample_internal_ids = get_sample_internal_ids_from_sample_sheet(
-        sample_sheet_path=parsed_flow_cell.get_sample_sheet_path_hk(),
+        sample_sheet_path=parsed_flow_cell.sample_sheet_path,
         flow_cell_sample_type=parsed_flow_cell.sample_type,
     )
     add_samples_to_flow_cell_in_status_db(
@@ -125,7 +125,7 @@ def update_sample_read_counts_in_status_db(
     """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
     q30_threshold: int = get_q30_threshold(flow_cell_data.sequencer_type)
     sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
-        sample_sheet_path=flow_cell_data.get_sample_sheet_path_hk(),
+        sample_sheet_path=flow_cell_data.sample_sheet_path,
         flow_cell_sample_type=flow_cell_data.sample_type,
     )
     for sample_id in sample_internal_ids:

@@ -73,7 +73,7 @@ def add_sample_fastq_files_to_housekeeper(
 ) -> None:
     """Add sample fastq files from flow cell to Housekeeper."""
     sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
-        sample_sheet_path=flow_cell.get_sample_sheet_path_hk(),
+        sample_sheet_path=flow_cell.sample_sheet_path,
         flow_cell_sample_type=flow_cell.sample_type,
     )
 
@@ -238,3 +238,13 @@ def get_sample_sheets_from_latest_version(flow_cell_id: str, hk_api: Housekeeper
     except HousekeeperBundleVersionMissingError:
         sample_sheet_files: List = []
     return sample_sheet_files
+
+
+def get_sample_sheet_path_hk(flow_cell_id: str, hk_api: HousekeeperAPI) -> Path:
+    """Returns the path to the sample sheet for the given bundle."""
+    sample_sheet_files: List[File] = get_sample_sheets_from_latest_version(
+        flow_cell_id=flow_cell_id, hk_api=hk_api
+    )
+    if not sample_sheet_files:
+        raise FileNotFoundError(f"No sample sheet found for flow cell {flow_cell_id}")
+    return Path(sample_sheet_files[0].full_path)

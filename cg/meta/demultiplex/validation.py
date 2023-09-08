@@ -22,7 +22,7 @@ def is_flow_cell_ready_for_delivery(flow_cell_directory: Path) -> bool:
 
 
 def validate_sample_sheet_exists(flow_cell: FlowCellDirectoryData) -> None:
-    sample_sheet_path: Path = flow_cell.get_sample_sheet_path_hk()
+    sample_sheet_path: Path = flow_cell.sample_sheet_path
     if not sample_sheet_path or not sample_sheet_path.exists():
         raise FlowCellError(f"Sample sheet {sample_sheet_path} does not exist in housekeeper.")
     LOG.debug(f"Found sample sheet {sample_sheet_path} in housekeeper.")
@@ -49,7 +49,7 @@ def validate_samples_have_fastq_files(flow_cell: FlowCellDirectoryData) -> None:
         When one of the samples does not have enough fastq files in the flow cell
     """
     sample_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
-        sample_sheet_path=flow_cell.get_sample_sheet_path_hk(),
+        sample_sheet_path=flow_cell.sample_sheet_path,
         flow_cell_sample_type=flow_cell.sample_type,
     )
     for sample_id in sample_ids:
