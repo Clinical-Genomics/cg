@@ -4,7 +4,6 @@ from typing import Dict, List, Type
 from pydantic import TypeAdapter
 
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
-from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import (
     SampleSheetBcl2FastqSections,
@@ -13,7 +12,6 @@ from cg.constants.demultiplexing import (
 
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
-import re
 
 LOG = logging.getLogger(__name__)
 
@@ -112,10 +110,6 @@ def get_sample_internal_ids_from_sample_sheet(
     """Return the sample internal ids for samples in the sample sheet."""
     sample_sheet = get_sample_sheet_from_file(
         infile=sample_sheet_path, flow_cell_sample_type=flow_cell_sample_type
-    )
-    sample_internal_ids: List[str] = []
-    for sample in sample_sheet.samples:
-        sample_internal_id = sample.sample_id.split("_")[0]
-        if is_valid_sample_internal_id(sample_internal_id=sample_internal_id):
-            sample_internal_ids.append(sample_internal_id)
-    return list(set(sample_internal_ids))
+    )    
+    return sample_sheet.get_sample_ids()
+
