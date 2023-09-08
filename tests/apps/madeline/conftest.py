@@ -10,13 +10,13 @@ from cg.apps.madeline.api import MadelineAPI
 
 
 @pytest.fixture(name="madeline_output")
-def fixture_madeline_output(apps_dir: Path) -> Path:
+def madeline_output(apps_dir: Path) -> Path:
     """Path to madeline output"""
     return apps_dir / "madeline" / "madeline.xml"
 
 
 @pytest.fixture(name="madeline_columns")
-def fixture_madeline_columns() -> Dict[str, str]:
+def madeline_columns() -> Dict[str, str]:
     """return a dictionary with madeline columns"""
     columns = {
         "case": "FamilyId",
@@ -32,7 +32,7 @@ def fixture_madeline_columns() -> Dict[str, str]:
 
 
 @pytest.fixture(name="mother")
-def fixture_mother() -> Dict[str, Optional[str]]:
+def mother() -> Dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "mother",
@@ -44,7 +44,7 @@ def fixture_mother() -> Dict[str, Optional[str]]:
 
 
 @pytest.fixture(name="father")
-def fixture_father() -> Dict[str, Optional[str]]:
+def father() -> Dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "father",
@@ -56,7 +56,7 @@ def fixture_father() -> Dict[str, Optional[str]]:
 
 
 @pytest.fixture(name="proband")
-def fixture_proband() -> Dict[str, Optional[str]]:
+def proband() -> Dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "proband",
@@ -71,13 +71,13 @@ def fixture_proband() -> Dict[str, Optional[str]]:
 
 
 @pytest.fixture(name="trio")
-def fixture_trio(proband: dict, mother: dict, father: dict) -> List[Dict[str, Optional[str]]]:
+def trio(proband: dict, mother: dict, father: dict) -> List[Dict[str, Optional[str]]]:
     """return a list with a trio"""
     return [proband, mother, father]
 
 
 @pytest.fixture(name="madeline_api")
-def fixture_madeline_api() -> MadelineAPI:
+def madeline_api() -> MadelineAPI:
     """Return a madeline API with mocked process"""
     binary_path = "madeline"
     config = {"madeline_exe": binary_path}
@@ -88,7 +88,7 @@ def fixture_madeline_api() -> MadelineAPI:
 
 
 @pytest.fixture(name="populated_madeline_api")
-def fixture_populated_madeline_api(madeline_output: Path, madeline_api: MadelineAPI) -> MadelineAPI:
+def populated_madeline_api(madeline_output: Path, madeline_api: MadelineAPI) -> MadelineAPI:
     """Return a madeline API populated with some output"""
     with open(madeline_output, "r") as output:
         madeline_content = output.read()

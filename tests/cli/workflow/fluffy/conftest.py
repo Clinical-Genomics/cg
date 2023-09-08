@@ -42,21 +42,21 @@ def fluffy_success_output_aberrations(tmpdir_factory):
 
 
 @pytest.fixture(scope="function")
-def samplesheet_fixture_path():
+def samplesheet_path():
     return Path("tests/fixtures/data/SampleSheet.csv").absolute()
 
 
 @pytest.fixture(scope="function")
-def fastq_file_fixture_path(config_root_dir):
-    fixture_path = Path(config_root_dir)
-    fixture_path.mkdir(parents=True, exist_ok=True)
-    fixture_fastq_path = Path(fixture_path, "fastq.fastq.gz")
-    fixture_fastq_path.touch(exist_ok=True)
-    return fixture_fastq_path
+def fastq_file_path(config_root_dir):
+    path = Path(config_root_dir)
+    path.mkdir(parents=True, exist_ok=True)
+    fastq_path = Path(path, "fastq.fastq.gz")
+    fastq_path.touch(exist_ok=True)
+    return fastq_path
 
 
 @pytest.fixture(scope="function")
-def deliverables_yaml_fixture_path():
+def deliverables_yaml_path():
     return Path("tests/fixtures/apps/fluffy/deliverables.yaml")
 
 
@@ -92,14 +92,14 @@ def fluffy_hermes_deliverables_response_data(
 
 
 @pytest.fixture(scope="function")
-def fluffy_fastq_hk_bundle_data(fastq_file_fixture_path, fluffy_sample_lims_id) -> dict:
+def fluffy_fastq_hk_bundle_data(fastq_file_path, fluffy_sample_lims_id) -> dict:
     return {
         "name": fluffy_sample_lims_id,
         "created": dt.datetime.now(),
         "version": "1.0",
         "files": [
             {
-                "path": fastq_file_fixture_path.as_posix(),
+                "path": fastq_file_path.as_posix(),
                 "tags": ["fastq", "flowcell"],
                 "archive": False,
             }
@@ -108,14 +108,14 @@ def fluffy_fastq_hk_bundle_data(fastq_file_fixture_path, fluffy_sample_lims_id) 
 
 
 @pytest.fixture(scope="function")
-def fluffy_samplesheet_bundle_data(samplesheet_fixture_path) -> dict:
+def fluffy_samplesheet_bundle_data(samplesheet_path) -> dict:
     return {
         "name": "flowcell",
         "created": dt.datetime.now(),
         "version": "1.0",
         "files": [
             {
-                "path": str(samplesheet_fixture_path),
+                "path": str(samplesheet_path),
                 "tags": ["flowcell", "samplesheet"],
                 "archive": False,
             }

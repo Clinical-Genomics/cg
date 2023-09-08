@@ -10,7 +10,7 @@ from cg.io.controller import WriteStream
 
 
 @pytest.fixture(name="genotype_export_sample_output")
-def fixture_genotype_export_sample_output(genotype_config: dict) -> str:
+def genotype_export_sample_output(genotype_config: dict) -> str:
     """
     genotype API fixture
     """
@@ -32,7 +32,7 @@ def fixture_genotype_export_sample_output(genotype_config: dict) -> str:
 
 
 @pytest.fixture(name="genotype_export_sample_analysis_output")
-def fixture_genotype_export_sample_analysis_output() -> str:
+def genotype_export_sample_analysis_output() -> str:
     """Return some output from a sample analysis export"""
     sample_analysis_output = {
         "ACC6987A15": {

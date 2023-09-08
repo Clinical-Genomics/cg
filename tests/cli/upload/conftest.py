@@ -31,19 +31,19 @@ from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.report import MockMipDNAReportAPI
 from tests.store_helpers import StoreHelpers
 
-from tests.meta.upload.scout.conftest import fixture_mip_load_config
+from tests.meta.upload.scout.conftest import mip_load_config
 from tests.cli.workflow.mip.conftest import (
-    fixture_mip_rna_context,
-    fixture_mip_dna_context,
-    fixture_mip_case_ids,
-    fixture_mip_case_id,
+    mip_rna_context,
+    mip_dna_context,
+    mip_case_ids,
+    mip_case_id,
 )
 
 LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(name="upload_genotypes_hk_bundle")
-def fixture_upload_genotypes_hk_bundle(
+def upload_genotypes_hk_bundle(
     case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path
 ) -> dict:
     """Returns a dictionary in hk format with files used in upload gt process"""
@@ -63,7 +63,7 @@ def fixture_upload_genotypes_hk_bundle(
 
 
 @pytest.fixture(name="analysis_obj")
-def fixture_analysis_obj(
+def analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers
 ) -> Analysis:
     """Return a analysis object with a trio"""
@@ -71,7 +71,7 @@ def fixture_analysis_obj(
 
 
 @pytest.fixture(name="upload_genotypes_hk_api")
-def fixture_upload_genotypes_hk_api(
+def upload_genotypes_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     upload_genotypes_hk_bundle: dict,
     analysis_obj: Analysis,
@@ -85,7 +85,7 @@ def fixture_upload_genotypes_hk_api(
 
 
 @pytest.fixture(name="upload_gens_hk_bundle")
-def fixture_upload_gens_hk_bundle(
+def upload_gens_hk_bundle(
     case_id: str,
     gens_coverage_path: Path,
     gens_fracsnp_path: Path,
@@ -114,7 +114,7 @@ def fixture_upload_gens_hk_bundle(
 
 
 @pytest.fixture(name="upload_gens_hk_api")
-def fixture_upload_gens_hk_api(
+def upload_gens_hk_api(
     case_id: str,
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
@@ -128,7 +128,7 @@ def fixture_upload_gens_hk_api(
 
 
 @pytest.fixture(name="upload_gens_context")
-def fixture_upload_gens_context(
+def upload_gens_context(
     analysis_store_trio: Store,
     base_context: CGConfig,
     gens_api: GensAPI,
@@ -142,7 +142,7 @@ def fixture_upload_gens_context(
 
 
 @pytest.fixture(name="upload_report_hk_bundle")
-def fixture_upload_report_hk_bundle(case_id: str, delivery_report_html: Path, timestamp) -> dict:
+def upload_report_hk_bundle(case_id: str, delivery_report_html: Path, timestamp) -> dict:
     """Returns a dictionary including the delivery report html file"""
 
     return {
@@ -155,7 +155,7 @@ def fixture_upload_report_hk_bundle(case_id: str, delivery_report_html: Path, ti
 
 
 @pytest.fixture(name="upload_report_hk_api")
-def fixture_upload_report_hk_api(
+def upload_report_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     upload_report_hk_bundle: dict,
     analysis_obj: Analysis,
@@ -170,7 +170,7 @@ def fixture_upload_report_hk_api(
 
 
 @pytest.fixture(name="base_context")
-def fixture_base_context(
+def base_context(
     analysis_store: Store,
     housekeeper_api: HousekeeperAPI,
     upload_scout_api: UploadScoutAPI,
@@ -189,7 +189,7 @@ def fixture_base_context(
 
 
 @pytest.fixture(name="fastq_context")
-def fixture_fastq_context(
+def fastq_context(
     base_context,
     analysis_store: Store,
     housekeeper_api: HousekeeperAPI,
@@ -212,8 +212,8 @@ def fixture_fastq_context(
     return base_context
 
 
-@pytest.fixture(scope="function", name="upload_scout_api")
-def fixture_upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_config: ScoutLoadConfig):
+@pytest.fixture(scope="function")
+def upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_config: ScoutLoadConfig):
     """Return a upload scout api"""
     api = MockScoutUploadApi()
     api.housekeeper = housekeeper_api

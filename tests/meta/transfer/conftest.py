@@ -11,7 +11,7 @@ from tests.mocks.limsmock import MockLimsAPI
 
 
 @pytest.fixture(name="transfer_lims_api")
-def fixture_transfer_lims_api(sample_store: Store) -> Generator[TransferLims, None, None]:
+def transfer_lims_api(sample_store: Store) -> Generator[TransferLims, None, None]:
     """Setup LIMS transfer API."""
     yield TransferLims(sample_store, MockLimsAPI(config=""))
 
@@ -34,7 +34,7 @@ def external_data_directory(
 
 
 @pytest.fixture(name="sample_sheet_path")
-def fixture_sample_sheet_path(tmpdir_factory) -> Generator[Path, None, None]:
+def sample_sheet_path(tmpdir_factory) -> Generator[Path, None, None]:
     """Create and return path to sample sheet."""
     sample_sheet_path_dir: Path = Path(tmpdir_factory.mktemp("DEMUX"), "HVKJCDRXX", "NAADM1")
     sample_sheet_path_dir.mkdir(parents=True, exist_ok=True)
@@ -46,7 +46,7 @@ def fixture_sample_sheet_path(tmpdir_factory) -> Generator[Path, None, None]:
 
 
 @pytest.fixture(name="cgstats_log_path")
-def fixture_cgstats_log_path(tmpdir_factory) -> Generator[Path, None, None]:
+def cgstats_log_path(tmpdir_factory) -> Generator[Path, None, None]:
     """Create and return path to cgstats log file."""
     cgstats_log_path_dir: Path = Path(tmpdir_factory.mktemp("DEMUX"), "HVKJCDRXX", "NAADM1")
     cgstats_log_path_dir.mkdir(parents=True, exist_ok=True)

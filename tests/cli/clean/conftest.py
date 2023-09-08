@@ -13,13 +13,13 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(name="balsamic_case_clean")
-def fixture_balsamic_case_clean() -> str:
+def balsamic_case_clean() -> str:
     """Return a balsamic case to clean"""
     return "balsamic_case_clean"
 
 
 @pytest.fixture(name="balsamic_case_not_clean")
-def fixture_balsamic_case_not_clean() -> str:
+def balsamic_case_not_clean() -> str:
     """Return a balsamic case to clean"""
     return "balsamic_case_not_clean"
 
@@ -96,7 +96,7 @@ def clean_context(
 
 
 @pytest.fixture(name="rsync_process")
-def fixture_rsync_process(project_dir: Path) -> Path:
+def rsync_process(project_dir: Path) -> Path:
     """Return a rsync process after ensuing that is is created"""
 
     rsync_process = project_dir / "rsync" / "rsync_process"
@@ -106,13 +106,13 @@ def fixture_rsync_process(project_dir: Path) -> Path:
 
 
 @pytest.fixture(name="microsalt_case_clean_dry")
-def fixture_microsalt_case_clean_dry() -> str:
+def microsalt_case_clean_dry() -> str:
     """Return a microsalt case to clean in dry-run"""
     return "microsalt_case_clean_dry"
 
 
 @pytest.fixture(name="microsalt_case_clean")
-def fixture_microsalt_case_not_clean() -> str:
+def microsalt_case_not_clean() -> str:
     """Return a microsalt case to clean"""
     return "microsalt_case_clean"
 

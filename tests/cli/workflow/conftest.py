@@ -18,15 +18,13 @@ def base_context(cg_context: CGConfig, analysis_store: Store) -> CGConfig:
 
 
 @pytest.fixture(name="workflow_case_id")
-def fixture_workflow_case_id() -> str:
+def workflow_case_id() -> str:
     """Return a special case id"""
     return "dna_case"
 
 
-@pytest.fixture(scope="function", name="analysis_store")
-def fixture_analysis_store(
-    base_store: Store, workflow_case_id: str, helpers: StoreHelpers
-) -> Store:
+@pytest.fixture(scope="function")
+def analysis_store(base_store: Store, workflow_case_id: str, helpers: StoreHelpers) -> Store:
     """Store to be used in tests"""
     _store = base_store
 
@@ -51,7 +49,7 @@ def fixture_analysis_store(
 
 
 @pytest.fixture(name="fastq_context")
-def fixture_fastq_context(
+def fastq_context(
     base_context,
     cg_context: CGConfig,
     fastq_case,
@@ -68,7 +66,7 @@ def fixture_fastq_context(
 
 
 @pytest.fixture(name="fastq_case")
-def fixture_fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_id: str) -> dict:
+def fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_id: str) -> dict:
     """Returns a dict describing a fastq case"""
     return {
         "name": family_name,
@@ -114,7 +112,7 @@ def dna_rna_mix_case(analysis_store, helpers) -> Family:
 
 
 @pytest.fixture(name="create_multiqc_html_file")
-def fixture_create_multiqc_html_file(tmpdir_factory) -> Path:
+def create_multiqc_html_file(tmpdir_factory) -> Path:
     output_dir = tmpdir_factory.mktemp("output")
     file_path = Path(output_dir, "multiqc_report.html")
     file_path.touch(exist_ok=True)
@@ -122,7 +120,7 @@ def fixture_create_multiqc_html_file(tmpdir_factory) -> Path:
 
 
 @pytest.fixture(name="create_multiqc_json_file")
-def fixture_create_multiqc_json_file(tmpdir_factory) -> Path:
+def create_multiqc_json_file(tmpdir_factory) -> Path:
     output_dir = tmpdir_factory.mktemp("output")
     file_path = Path(output_dir, "multiqc_report.json")
     file_path.touch(exist_ok=True)

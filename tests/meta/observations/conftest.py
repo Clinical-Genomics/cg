@@ -12,20 +12,20 @@ from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
-from tests.cli.conftest import fixture_base_context
+from tests.cli.conftest import base_context
 from tests.apps.loqus.conftest import (
-    fixture_loqusdb_config,
-    fixture_nr_of_loaded_variants,
-    fixture_loqusdb_binary_path,
-    fixture_loqusdb_config_path,
-    fixture_loqusdb_process,
-    fixture_loqusdb_api,
+    loqusdb_config,
+    nr_of_loaded_variants,
+    loqusdb_binary_path,
+    loqusdb_config_path,
+    loqusdb_process,
+    loqusdb_api,
 )
 from tests.models.observations.conftest import (
-    fixture_observations_input_files_raw,
-    fixture_observations_input_files,
-    fixture_balsamic_observations_input_files_raw,
-    fixture_balsamic_observations_input_files,
+    observations_input_files_raw,
+    observations_input_files,
+    balsamic_observations_input_files_raw,
+    balsamic_observations_input_files,
 )
 
 
@@ -65,13 +65,13 @@ class MockLoqusdbAPI(LoqusdbAPI):
 
 
 @pytest.fixture(name="mock_loqusdb_api")
-def fixture_mock_loqusdb_api(filled_file) -> MockLoqusdbAPI:
+def mock_loqusdb_api(filled_file) -> MockLoqusdbAPI:
     """Mock Loqusdb API."""
     return MockLoqusdbAPI(binary_path=filled_file, config_path=filled_file)
 
 
 @pytest.fixture(name="mip_dna_observations_api")
-def fixture_mip_dna_observations_api(
+def mip_dna_observations_api(
     cg_config_object: CGConfig, mock_loqusdb_api: MockLoqusdbAPI, analysis_store: Store
 ) -> MipDNAObservationsAPI:
     """Rare diseases observations API fixture."""
@@ -84,7 +84,7 @@ def fixture_mip_dna_observations_api(
 
 
 @pytest.fixture(name="balsamic_observations_api")
-def fixture_balsamic_observations_api(
+def balsamic_observations_api(
     cg_config_object: CGConfig, mock_loqusdb_api: MockLoqusdbAPI, analysis_store: Store
 ) -> BalsamicObservationsAPI:
     """Rare diseases observations API fixture."""

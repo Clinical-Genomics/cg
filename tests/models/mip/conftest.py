@@ -7,13 +7,13 @@ from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 
 
 @pytest.fixture(name="mip_case_config_dna")
-def fixture_mip_case_config_dna(fixtures_dir) -> Path:
+def mip_case_config_dna(fixtures_dir) -> Path:
     """Return path to MIP DNA case_config.yaml"""
     return Path(fixtures_dir, "apps", "mip", "dna", "store", "case_config.yaml")
 
 
 @pytest.fixture(name="mip_analysis_config_dna_raw")
-def fixture_mip_analysis_config_dna_raw() -> dict:
+def mip_analysis_config_dna_raw() -> dict:
     """Raw MIP DNA analysis config"""
     return {
         "analysis_type": {"sample_id": "wgs"},
@@ -32,21 +32,19 @@ def fixture_mip_analysis_config_dna_raw() -> dict:
 
 
 @pytest.fixture(name="mip_rank_model_version")
-def fixture_mip_rank_model_version() -> str:
+def mip_rank_model_version() -> str:
     """Return mip rank model version"""
     return "v1.0"
 
 
 @pytest.fixture(name="mip_sv_rank_model_version")
-def fixture_mip_sv_rank_model_version() -> str:
+def mip_sv_rank_model_version() -> str:
     """Return mip sv rank model version"""
     return "v1.2.0"
 
 
 @pytest.fixture(name="sample_info_dna_raw")
-def fixture_sample_info_dna_raw(
-    mip_rank_model_version: str, mip_sv_rank_model_version: str
-) -> dict:
+def sample_info_dna_raw(mip_rank_model_version: str, mip_sv_rank_model_version: str) -> dict:
     """Raw sample_info fixture"""
     return {
         "analysisrunstatus": "finished",
@@ -67,7 +65,7 @@ def fixture_sample_info_dna_raw(
 
 
 @pytest.fixture(name="mip_metrics_deliverables_raw")
-def fixture_mip_metrics_deliverables_raw() -> dict:
+def mip_metrics_deliverables_raw() -> dict:
     """Raw MIP metrics deliverables"""
     return {
         "metrics": [
@@ -188,12 +186,12 @@ def fixture_mip_metrics_deliverables_raw() -> dict:
 
 
 @pytest.fixture(name="mip_metrics_deliverables")
-def fixture_mip_metrics_deliverables(mip_metrics_deliverables_raw: dict) -> MIPMetricsDeliverables:
+def mip_metrics_deliverables(mip_metrics_deliverables_raw: dict) -> MIPMetricsDeliverables:
     return MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
 
 @pytest.fixture(name="mip_analysis_raw")
-def fixture_mip_analysis_raw(
+def mip_analysis_raw(
     case_id: str,
     mip_metrics_deliverables: MIPMetricsDeliverables,
     mip_rank_model_version: str,

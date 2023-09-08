@@ -33,42 +33,42 @@ def lims_api():
 
 
 @pytest.fixture(name="reagent")
-def fixture_reagent() -> MockReagentType:
+def reagent() -> MockReagentType:
     """Return a valid MockReagentType."""
     return MockReagentType(label="A702-A506 (ACAGTGGT-CTAGAACA)", sequence="ACAGTGGT-CTAGAACA")
 
 
 @pytest.fixture(name="reagent_label")
-def fixture_reagent_label(reagent: MockReagentType) -> str:
+def reagent_label(reagent: MockReagentType) -> str:
     """Returns a reagent label."""
     return reagent.label
 
 
 @pytest.fixture(name="reagent_sequence")
-def fixture_reagent_sequence(reagent: MockReagentType) -> str:
+def reagent_sequence(reagent: MockReagentType) -> str:
     """Returns a reagent sequence."""
     return reagent.sequence
 
 
 @pytest.fixture(name="invalid_reagent")
-def fixture_invalid_reagent() -> MockReagentType:
+def invalid_reagent() -> MockReagentType:
     """Return a MockReagentType with invalid data."""
     return MockReagentType(label="A702-A506 (ACAGTGGT-CTAGAACA)", sequence="CTAGAACA-ACAGTGGT")
 
 
 @pytest.fixture(name="invalid_reagent_label")
-def fixture_invalid_reagent_label(invalid_reagent: MockReagentType) -> str:
+def invalid_reagent_label(invalid_reagent: MockReagentType) -> str:
     """Returns a reagent label."""
     return invalid_reagent.label
 
 
 @pytest.fixture(name="invalid_reagent_sequence")
-def fixture_invalid_reagent_sequence(invalid_reagent: MockReagentType) -> str:
+def invalid_reagent_sequence(invalid_reagent: MockReagentType) -> str:
     """Returns a reagent sequence."""
     return invalid_reagent.sequence
 
 
 @pytest.fixture(name="label_no_parentheses")
-def fixture_label_no_parentheses() -> str:
+def label_no_parentheses() -> str:
     """Returns a reagent label."""
     return "ACAGTGGT-CTAGAACA"

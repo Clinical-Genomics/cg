@@ -16,13 +16,13 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 @pytest.fixture(name="valid_index")
-def fixture_valid_index_() -> Index:
+def valid_index_() -> Index:
     """Return a valid index."""
     return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
 
 
 @pytest.fixture(name="lims_novaseq_bcl2fastq_samples")
-def fixture_lims_novaseq_bcl2fastq_samples(
+def lims_novaseq_bcl2fastq_samples(
     lims_novaseq_samples_raw: List[dict],
 ) -> List[FlowCellSampleBcl2Fastq]:
     """Return a list of parsed Bcl2fastq flow cell samples"""
@@ -30,7 +30,7 @@ def fixture_lims_novaseq_bcl2fastq_samples(
 
 
 @pytest.fixture(name="lims_novaseq_dragen_samples")
-def fixture_lims_novaseq_dragen_samples(
+def lims_novaseq_dragen_samples(
     lims_novaseq_samples_raw: List[dict],
 ) -> List[FlowCellSampleBCLConvert]:
     """Return a list of parsed Dragen flow cell samples"""
@@ -38,7 +38,7 @@ def fixture_lims_novaseq_dragen_samples(
 
 
 @pytest.fixture(name="lims_novaseq_x_samples")
-def fixture_lims_novaseq_x_samples(
+def lims_novaseq_x_samples(
     lims_novaseq_samples_raw: List[dict],
 ) -> List[FlowCellSampleBCLConvert]:
     """Return a list of parsed NovaSeqX flow cell samples"""
@@ -46,7 +46,7 @@ def fixture_lims_novaseq_x_samples(
 
 
 @pytest.fixture(name="bcl2fastq_sample_sheet_creator")
-def fixture_novaseq_bcl2fastq_sample_sheet_creator(
+def novaseq_bcl2fastq_sample_sheet_creator(
     bcl2fastq_flow_cell: FlowCellDirectoryData,
     lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
 ) -> SampleSheetCreatorBcl2Fastq:
@@ -58,7 +58,7 @@ def fixture_novaseq_bcl2fastq_sample_sheet_creator(
 
 
 @pytest.fixture(name="bcl_convert_sample_sheet_creator")
-def fixture_novaseq_dragen_sample_sheet_creator(
+def novaseq_dragen_sample_sheet_creator(
     bcl_convert_flow_cell: FlowCellDirectoryData,
     lims_novaseq_dragen_samples: List[FlowCellSampleBCLConvert],
 ) -> SampleSheetCreatorBCLConvert:
@@ -73,7 +73,7 @@ def fixture_novaseq_dragen_sample_sheet_creator(
 
 
 @pytest.fixture(name="sample_sheet_line_sample_1")
-def fixture_sample_sheet_line_sample_1() -> List[str]:
+def sample_sheet_line_sample_1() -> List[str]:
     """Return the line in the sample sheet corresponding to a sample."""
     return [
         "HWHMWDMXX",
@@ -91,7 +91,7 @@ def fixture_sample_sheet_line_sample_1() -> List[str]:
 
 
 @pytest.fixture(name="sample_sheet_line_sample_2")
-def fixture_sample_sheet_line_sample_2() -> List[str]:
+def sample_sheet_line_sample_2() -> List[str]:
     """Return the line in the sample sheet corresponding to a sample."""
     return [
         "HWHMWDMXX",
@@ -109,7 +109,7 @@ def fixture_sample_sheet_line_sample_2() -> List[str]:
 
 
 @pytest.fixture(name="sample_sheet_bcl2fastq_data_header")
-def fixture_sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
+def sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
     """Return the content of a Bcl2fastq sample sheet data header without samples."""
     return [
         [SampleSheetBcl2FastqSections.Data.HEADER],
@@ -130,7 +130,7 @@ def fixture_sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
 
 
 @pytest.fixture(name="sample_sheet_samples_no_header")
-def fixture_sample_sheet_no_sample_header(
+def sample_sheet_no_sample_header(
     sample_sheet_line_sample_1: List[str], sample_sheet_line_sample_2: List[str]
 ) -> List[List[str]]:
     """Return the content of a sample sheet with samples but without a sample header."""
@@ -142,7 +142,7 @@ def fixture_sample_sheet_no_sample_header(
 
 
 @pytest.fixture(name="valid_sample_sheet_bcl2fastq")
-def fixture_valid_sample_sheet_bcl2fastq(
+def valid_sample_sheet_bcl2fastq(
     sample_sheet_bcl2fastq_data_header: List[List[str]],
     sample_sheet_line_sample_1: List[str],
     sample_sheet_line_sample_2: List[str],
@@ -155,7 +155,7 @@ def fixture_valid_sample_sheet_bcl2fastq(
 
 
 @pytest.fixture(name="sample_sheet_bcl2fastq_duplicate_same_lane")
-def fixture_sample_sheet_bcl2fastq_duplicate_same_lane(
+def sample_sheet_bcl2fastq_duplicate_same_lane(
     valid_sample_sheet_bcl2fastq: List[List[str]], sample_sheet_line_sample_2: List[str]
 ) -> List[List[str]]:
     """Return the content of a Bcl2fastq sample sheet with a duplicated sample in the same lane."""
@@ -164,7 +164,7 @@ def fixture_sample_sheet_bcl2fastq_duplicate_same_lane(
 
 
 @pytest.fixture(name="sample_sheet_bcl2fastq_duplicate_different_lane")
-def fixture_sample_sheet_bcl2fastq_duplicate_different_lane(
+def sample_sheet_bcl2fastq_duplicate_different_lane(
     valid_sample_sheet_bcl2fastq: List[List[str]],
 ) -> List[List[str]]:
     """Return the content of a Bcl2fastq sample sheet with a duplicated sample in a different lane."""
@@ -187,7 +187,7 @@ def fixture_sample_sheet_bcl2fastq_duplicate_different_lane(
 
 
 @pytest.fixture(name="valid_sample_sheet_dragen")
-def fixture_valid_sample_sheet_dragen(
+def valid_sample_sheet_dragen(
     sample_sheet_line_sample_1: List[str], sample_sheet_line_sample_2: List[str]
 ) -> List[List[str]]:
     """Return the content of a valid Dragen sample sheet."""
@@ -212,7 +212,7 @@ def fixture_valid_sample_sheet_dragen(
 
 
 @pytest.fixture(name="sample_sheet_dragen_duplicate_same_lane")
-def fixture_sample_sheet_dragen_duplicate_same_lane(
+def sample_sheet_dragen_duplicate_same_lane(
     valid_sample_sheet_dragen: List[List[str]], sample_sheet_line_sample_2: List[str]
 ) -> List[List[str]]:
     """Return the content of a Dragen sample sheet with a duplicated sample in the same lane."""
@@ -221,7 +221,7 @@ def fixture_sample_sheet_dragen_duplicate_same_lane(
 
 
 @pytest.fixture(name="sample_sheet_dragen_duplicate_different_lane")
-def fixture_sample_sheet_dragen_duplicate_different_lane(
+def sample_sheet_dragen_duplicate_different_lane(
     valid_sample_sheet_dragen: List[List[str]],
 ) -> List[List[str]]:
     """Return the content of a Dragen sample sheet with a duplicated sample in a different lane."""
@@ -244,7 +244,7 @@ def fixture_sample_sheet_dragen_duplicate_different_lane(
 
 
 @pytest.fixture(name="novaseq6000_flow_cell_sample_1")
-def fixture_novaseq6000_flow_cell_sample_1() -> FlowCellSampleBcl2Fastq:
+def novaseq6000_flow_cell_sample_1() -> FlowCellSampleBcl2Fastq:
     """Return a NovaSeq sample."""
     return FlowCellSampleBcl2Fastq(
         FCID="HWHMWDMXX",
@@ -262,7 +262,7 @@ def fixture_novaseq6000_flow_cell_sample_1() -> FlowCellSampleBcl2Fastq:
 
 
 @pytest.fixture(name="novaseq6000_flow_cell_sample_2")
-def fixture_novaseq6000_flow_cell_sample_2() -> FlowCellSampleBcl2Fastq:
+def novaseq6000_flow_cell_sample_2() -> FlowCellSampleBcl2Fastq:
     """Return a NovaSeq sample."""
     return FlowCellSampleBcl2Fastq(
         FCID="HWHMWDMXX",
@@ -280,7 +280,7 @@ def fixture_novaseq6000_flow_cell_sample_2() -> FlowCellSampleBcl2Fastq:
 
 
 @pytest.fixture(name="novaseq_x_flow_cell_sample_before_adapt_indexes")
-def fixture_novaseq_x_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBCLConvert:
+def novaseq_x_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBCLConvert:
     """Return a NovaSeqX sample."""
     return FlowCellSampleBCLConvert(
         Lane=2,
@@ -290,7 +290,7 @@ def fixture_novaseq_x_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleB
 
 
 @pytest.fixture(name="novaseq6000_flow_cell_sample_no_dual_index")
-def fixture_novaseq6000_flow_cell_sample_no_dual_index() -> FlowCellSampleBcl2Fastq:
+def novaseq6000_flow_cell_sample_no_dual_index() -> FlowCellSampleBcl2Fastq:
     """Return a NovaSeq sample without dual indexes."""
     return FlowCellSampleBcl2Fastq(
         FCID="HWHMWDMXX",
@@ -303,7 +303,7 @@ def fixture_novaseq6000_flow_cell_sample_no_dual_index() -> FlowCellSampleBcl2Fa
 
 
 @pytest.fixture(name="novaseq6000_flow_cell_sample_before_adapt_indexes")
-def fixture_novaseq6000_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBcl2Fastq:
+def novaseq6000_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBcl2Fastq:
     """Return a NovaSeq sample without dual indexes."""
     return FlowCellSampleBcl2Fastq(
         FCID="HWHMWDMXX",

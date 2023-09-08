@@ -26,7 +26,7 @@ def balsamic_dir(tmpdir_factory, apps_dir: Path) -> str:
 
 
 @pytest.fixture(name="balsamic_case_id")
-def fixture_balsamic_case_id() -> str:
+def balsamic_case_id() -> str:
     return "balsamic_case_wgs_single"
 
 
@@ -161,7 +161,7 @@ def balsamic_mock_fastq_files(
     ]
 
 
-@pytest.fixture(scope="function", name="balsamic_housekeeper")
+@pytest.fixture(scope="function")
 def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files: list):
     """Create populated housekeeper that holds files for all mock samples"""
 
@@ -287,8 +287,8 @@ def balsamic_lims(context_config: dict) -> MockLimsAPI:
     return balsamic_lims
 
 
-@pytest.fixture(scope="function", name="balsamic_context")
-def fixture_balsamic_context(
+@pytest.fixture(scope="function")
+def balsamic_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     balsamic_lims: MockLimsAPI,
@@ -767,7 +767,7 @@ def mock_config(balsamic_dir: Path, balsamic_case_id: str) -> None:
 
 
 @pytest.fixture(name="deliverable_data")
-def fixture_deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict:
+def deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict:
     samples = [
         "sample_case_wgs_single_tumor",
     ]
@@ -832,7 +832,7 @@ def mock_deliverable(balsamic_dir: Path, deliverable_data: dict, balsamic_case_i
 
 
 @pytest.fixture(name="hermes_deliverables")
-def fixture_hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -> dict:
+def hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -> dict:
     hermes_output: dict = {"pipeline": "balsamic", "bundle_id": balsamic_case_id, "files": []}
     for file_info in deliverable_data["files"]:
         tags: List[str] = []
@@ -847,7 +847,7 @@ def fixture_hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -
 
 
 @pytest.fixture(name="malformed_hermes_deliverables")
-def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
+def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     malformed_deliverable = hermes_deliverables.copy()
     malformed_deliverable.pop("pipeline")
 

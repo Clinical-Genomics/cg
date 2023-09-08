@@ -10,7 +10,7 @@ from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 from housekeeper.store.models import Version
 from tests.cli.workflow.conftest import dna_case
 from tests.mocks.hk_mock import MockHousekeeperAPI
-from tests.store.conftest import fixture_sample_obj
+from tests.store.conftest import sample_obj
 
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_id: str):
