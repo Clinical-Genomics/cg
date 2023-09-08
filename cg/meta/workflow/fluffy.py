@@ -8,7 +8,7 @@ import pandas as pd
 from sqlalchemy.orm import Query
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
+from cg.constants.demultiplexing import SampleSheetBCLConvertSections
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import ReadFile
 from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
@@ -151,7 +151,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         )
         header_line_count: int = 1
         for line in sample_sheet_content:
-            if SampleSheetBcl2FastqSections.Data.HEADER.value in line:
+            if SampleSheetBCLConvertSections.Data.HEADER.value in line:
                 break
             header_line_count += 1
         return header_line_count
