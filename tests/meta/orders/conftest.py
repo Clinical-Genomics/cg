@@ -125,6 +125,6 @@ def orders_api(base_store, osticket: MockOsTicket, lims_api: MockLimsAPI):
     return OrdersAPI(lims=lims_api, status=base_store, osticket=osticket)
 
 
-@pytest.fixture()
+@pytest.fixture
 def ticket_handler(store: Store, osticket: MockOsTicket) -> TicketHandler:
     return TicketHandler(status_db=store, osticket_api=osticket)

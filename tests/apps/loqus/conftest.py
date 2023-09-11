@@ -96,7 +96,7 @@ LOQUSDB_DELETE_NONEXISTING_STDERR = b"""2022-09-22 11:40:04 username loqusdb.com
 2022-09-22 11:40:04 username loqusdb.commands.delete[19944] WARNING Case yellowhog does not exist in database"""
 
 
-@pytest.fixture()
+@pytest.fixture
 def loqusdb_config_dict() -> Dict[LoqusdbInstance, dict]:
     """Return Loqusdb config dictionary."""
     return {
@@ -107,7 +107,7 @@ def loqusdb_config_dict() -> Dict[LoqusdbInstance, dict]:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def cg_config_locusdb(
     loqusdb_config_dict: Dict[LoqusdbInstance, dict], cg_config_object: CGConfig
 ) -> CGConfig:
@@ -121,31 +121,31 @@ def cg_config_locusdb(
     return cg_config_object
 
 
-@pytest.fixture()
+@pytest.fixture
 def loqusdb_binary_path(loqusdb_config_dict: Dict[LoqusdbInstance, dict]) -> str:
     """Return Loqusdb binary path."""
     return loqusdb_config_dict[LoqusdbInstance.WGS]["binary_path"]
 
 
-@pytest.fixture()
+@pytest.fixture
 def loqusdb_config_path(loqusdb_config_dict: Dict[LoqusdbInstance, dict]) -> str:
     """Return Loqusdb config dictionary."""
     return loqusdb_config_dict[LoqusdbInstance.WGS]["config_path"]
 
 
-@pytest.fixture()
+@pytest.fixture
 def loqusdb_process(loqusdb_binary_path: str, loqusdb_config_path: str) -> ProcessMock:
     """Return mocked process instance."""
     return ProcessMock(binary=loqusdb_binary_path, config=loqusdb_config_path)
 
 
-@pytest.fixture()
+@pytest.fixture
 def loqusdb_process_exception(loqusdb_binary_path: str, loqusdb_config_path: str) -> ProcessMock:
     """Return error process instance."""
     return ProcessMock(binary=loqusdb_binary_path, config=loqusdb_config_path, error=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def loqusdb_api(
     loqusdb_binary_path: str, loqusdb_config_path: str, loqusdb_process: ProcessMock
 ) -> LoqusdbAPI:
@@ -155,7 +155,7 @@ def loqusdb_api(
     return loqusdb_api
 
 
-@pytest.fixture()
+@pytest.fixture
 def loqusdb_api_exception(
     loqusdb_binary_path: str, loqusdb_config_path: str, loqusdb_process_exception: ProcessMock
 ) -> LoqusdbAPI:
@@ -165,37 +165,37 @@ def loqusdb_api_exception(
     return loqusdb_api
 
 
-@pytest.fixture()
+@pytest.fixture
 def loqusdb_load_stderr() -> bytes:
     """Return Loqusdb stderr for a successful load."""
     return LOQUSDB_OUTPUT
 
 
-@pytest.fixture()
+@pytest.fixture
 def loqusdb_case_output() -> bytes:
     """Return Loqusdb output for a 'loqusdb cases -c <case_id> --to-json' command."""
     return LOQUSDB_CASE_OUTPUT
 
 
-@pytest.fixture()
+@pytest.fixture
 def loqusdb_duplicate_output() -> bytes:
     """Return Loqusdb output for a 'loqusdb profile --check-vcf' command."""
     return LOQUSDB_DUPLICATE_OUTPUT
 
 
-@pytest.fixture()
+@pytest.fixture
 def loqusdb_delete_stderr() -> bytes:
     """Return Loqusdb STDERR for a successful delete."""
     return LOQUSDB_DELETE_STDERR
 
 
-@pytest.fixture()
+@pytest.fixture
 def loqusdb_delete_non_existing_stderr() -> bytes:
     """Return Loqusdb delete STDERR for non existing case."""
     return LOQUSDB_DELETE_NONEXISTING_STDERR
 
 
-@pytest.fixture()
+@pytest.fixture
 def nr_of_loaded_variants() -> int:
     """Return number of loaded variants."""
     return 15

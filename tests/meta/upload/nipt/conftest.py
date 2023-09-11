@@ -17,14 +17,14 @@ from tests.store.api.conftest import re_sequenced_sample_store
 from cg.store.models import Application
 
 
-@pytest.fixture()
+@pytest.fixture
 def nipt_upload_api_context(cg_context: CGConfig, re_sequenced_sample_store: Store) -> CGConfig:
     cg_context.status_db_ = re_sequenced_sample_store
 
     return cg_context
 
 
-@pytest.fixture()
+@pytest.fixture
 def nipt_upload_api_failed_fc_context(
     nipt_upload_api_context: CGConfig, sample_id: str, store_failing_sequencing_qc: Store
 ) -> CGConfig:

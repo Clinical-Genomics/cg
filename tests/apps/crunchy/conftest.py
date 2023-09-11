@@ -13,13 +13,13 @@ from cg.models import CompressionData
 LOG = logging.getLogger(__name__)
 
 
-@pytest.fixture()
+@pytest.fixture
 def real_spring_metadata_path(apps_dir: Path) -> Path:
     """Return the path to a SPRING metadata file."""
     return Path(apps_dir, "crunchy", "spring_metadata.json")
 
 
-@pytest.fixture()
+@pytest.fixture
 def spring_metadata(compression_object: CompressionData) -> List[dict]:
     """Return meta data information."""
     return [
@@ -39,13 +39,13 @@ def spring_metadata(compression_object: CompressionData) -> List[dict]:
     ]
 
 
-@pytest.fixture()
+@pytest.fixture
 def crunchy_metadata_object(spring_metadata: List[dict]) -> CrunchyMetadata:
     """Return Crunchy metadata."""
     return CrunchyMetadata(files=spring_metadata)
 
 
-@pytest.fixture()
+@pytest.fixture
 def spring_metadata_file(compression_object: CompressionData, spring_metadata: List[dict]) -> Path:
     """Return the path to a populated SPRING metadata file."""
     metadata_path = compression_object.spring_metadata_path

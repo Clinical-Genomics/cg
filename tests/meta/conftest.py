@@ -108,7 +108,7 @@ def mip_hk_store(
     return real_housekeeper_api
 
 
-@pytest.fixture()
+@pytest.fixture
 def mip_analysis_api(context_config, mip_hk_store, analysis_store):
     """Return a MIP analysis API."""
     analysis_api = MipDNAAnalysisAPI(context_config)
@@ -117,13 +117,13 @@ def mip_analysis_api(context_config, mip_hk_store, analysis_store):
     return analysis_api
 
 
-@pytest.fixture()
+@pytest.fixture
 def binary_path() -> str:
     """Return the string of a path to a (fake) binary."""
     return Path("usr", "bin", "binary").as_posix()
 
 
-@pytest.fixture()
+@pytest.fixture
 def stats_sample_data(
     sample_id: str,
     bcl2fastq_flow_cell_id: str,
@@ -147,7 +147,7 @@ def stats_sample_data(
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def store_stats() -> Generator[StatsAPI, None, None]:
     """Setup base CGStats store."""
     _store: StatsAPI = StatsAPI(
@@ -164,7 +164,7 @@ def store_stats() -> Generator[StatsAPI, None, None]:
     _store.drop_all()
 
 
-@pytest.fixture()
+@pytest.fixture
 def base_store_stats(
     store_stats: StatsAPI, stats_sample_data: dict
 ) -> Generator[StatsAPI, None, None]:
@@ -208,7 +208,7 @@ def base_store_stats(
     yield store_stats
 
 
-@pytest.fixture()
+@pytest.fixture
 def flowcell_store(base_store: Store, stats_sample_data: dict) -> Generator[Store, None, None]:
     """Setup store with sample data for testing flow cell transfer."""
     for sample_data in stats_sample_data["samples"]:
@@ -228,7 +228,7 @@ def flowcell_store(base_store: Store, stats_sample_data: dict) -> Generator[Stor
     yield base_store
 
 
-@pytest.fixture()
+@pytest.fixture
 def transfer_flow_cell_api(
     flowcell_store: Store, housekeeper_api: MockHousekeeperAPI, base_store_stats: StatsAPI
 ) -> Generator[TransferFlowCell, None, None]:
@@ -236,7 +236,7 @@ def transfer_flow_cell_api(
     yield TransferFlowCell(db=flowcell_store, stats_api=base_store_stats, hk_api=housekeeper_api)
 
 
-@pytest.fixture()
+@pytest.fixture
 def get_invoice_api_sample(
     store: Store,
     lims_api: MockLimsAPI,

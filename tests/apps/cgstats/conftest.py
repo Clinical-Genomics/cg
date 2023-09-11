@@ -64,7 +64,7 @@ class MockDemuxSample(BaseModel):
     lane: int = 1
 
 
-@pytest.fixture()
+@pytest.fixture
 def nipt_stats_api(
     stats_api: StatsAPI,
     bcl2fastq_flow_cell_full_name: str,
@@ -112,12 +112,12 @@ def nipt_stats_api(
     return nipt_stats_api
 
 
-@pytest.fixture()
+@pytest.fixture
 def demultiplexing_stats_path(bcl2fastq_demux_results: DemuxResults) -> Path:
     return bcl2fastq_demux_results.demux_stats_path
 
 
-@pytest.fixture()
+@pytest.fixture
 def conversion_stats_path(bcl2fastq_demux_results: DemuxResults) -> Path:
     return bcl2fastq_demux_results.conversion_stats_path
 

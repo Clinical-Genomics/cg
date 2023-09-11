@@ -9,13 +9,13 @@ from tests.mocks.process_mock import ProcessMock
 from cg.apps.madeline.api import MadelineAPI
 
 
-@pytest.fixture()
+@pytest.fixture
 def madeline_output(apps_dir: Path) -> Path:
     """Path to madeline output"""
     return apps_dir / "madeline" / "madeline.xml"
 
 
-@pytest.fixture()
+@pytest.fixture
 def madeline_columns() -> Dict[str, str]:
     """return a dictionary with madeline columns"""
     columns = {
@@ -31,7 +31,7 @@ def madeline_columns() -> Dict[str, str]:
     return columns
 
 
-@pytest.fixture()
+@pytest.fixture
 def mother() -> Dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {
@@ -43,7 +43,7 @@ def mother() -> Dict[str, Optional[str]]:
     return ind_info
 
 
-@pytest.fixture()
+@pytest.fixture
 def father() -> Dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {
@@ -55,7 +55,7 @@ def father() -> Dict[str, Optional[str]]:
     return ind_info
 
 
-@pytest.fixture()
+@pytest.fixture
 def proband() -> Dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {
@@ -70,13 +70,13 @@ def proband() -> Dict[str, Optional[str]]:
     return ind_info
 
 
-@pytest.fixture()
+@pytest.fixture
 def trio(proband: dict, mother: dict, father: dict) -> List[Dict[str, Optional[str]]]:
     """return a list with a trio"""
     return [proband, mother, father]
 
 
-@pytest.fixture()
+@pytest.fixture
 def madeline_api() -> MadelineAPI:
     """Return a madeline API with mocked process"""
     binary_path = "madeline"
@@ -87,7 +87,7 @@ def madeline_api() -> MadelineAPI:
     return madeline_api
 
 
-@pytest.fixture()
+@pytest.fixture
 def populated_madeline_api(madeline_output: Path, madeline_api: MadelineAPI) -> MadelineAPI:
     """Return a madeline API populated with some output"""
     with open(madeline_output, "r") as output:

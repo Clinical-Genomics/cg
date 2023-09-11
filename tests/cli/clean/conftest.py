@@ -12,19 +12,19 @@ from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.fixture()
+@pytest.fixture
 def balsamic_case_clean() -> str:
     """Return a balsamic case to clean"""
     return "balsamic_case_clean"
 
 
-@pytest.fixture()
+@pytest.fixture
 def balsamic_case_not_clean() -> str:
     """Return a balsamic case to clean"""
     return "balsamic_case_not_clean"
 
 
-@pytest.fixture()
+@pytest.fixture
 def clean_context(
     balsamic_case_clean: str,
     balsamic_case_not_clean: str,
@@ -95,7 +95,7 @@ def clean_context(
     return cg_context
 
 
-@pytest.fixture()
+@pytest.fixture
 def rsync_process(project_dir: Path) -> Path:
     """Return a rsync process after ensuing that is is created"""
 
@@ -105,13 +105,13 @@ def rsync_process(project_dir: Path) -> Path:
     return rsync_process
 
 
-@pytest.fixture()
+@pytest.fixture
 def microsalt_case_clean_dry() -> str:
     """Return a microsalt case to clean in dry-run"""
     return "microsalt_case_clean_dry"
 
 
-@pytest.fixture()
+@pytest.fixture
 def microsalt_case_clean() -> str:
     """Return a microsalt case to clean"""
     return "microsalt_case_clean"

@@ -7,7 +7,7 @@ from cg.models.cg_config import CGConfig
 from cgmodels.cg.constants import Pipeline
 
 
-@pytest.fixture()
+@pytest.fixture
 def mutant_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> Family:
     """Return mutant case"""
     case = helpers.add_case(
@@ -19,7 +19,7 @@ def mutant_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> 
     return case
 
 
-@pytest.fixture()
+@pytest.fixture
 def microsalt_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> Family:
     """Return mutant case"""
     case = helpers.add_case(
@@ -31,7 +31,7 @@ def microsalt_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) 
     return case
 
 
-@pytest.fixture()
+@pytest.fixture
 def destination_path() -> Path:
     """Retyrbs a dummy path."""
     return Path("path", "to", "destination")

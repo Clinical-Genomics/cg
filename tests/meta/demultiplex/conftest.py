@@ -470,7 +470,7 @@ def thumbnail_file() -> Path:
     return Path("Thumbnail_Images", "L001", "C1.1", "s_1_1105_green.png")
 
 
-@pytest.fixture()
+@pytest.fixture
 def lsyncd_source_directory(
     tmp_path_factory,
     novaseq_x_manifest_file: Path,
@@ -488,7 +488,7 @@ def lsyncd_source_directory(
     return source_directory
 
 
-@pytest.fixture()
+@pytest.fixture
 def lsyncd_target_directory(lsyncd_source_directory: Path, tmp_path_factory) -> Path:
     """Return a copy of the temporary source directory."""
     temp_target_directory = Path(tmp_path_factory.mktemp("tmp_target"))

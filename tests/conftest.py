@@ -227,7 +227,7 @@ def sbatch_process(sbatch_job_number: int) -> ProcessMock:
     return slurm_process
 
 
-@pytest.fixture()
+@pytest.fixture
 def analysis_family_single_case(
     case_id: str, family_name: str, sample_id: str, ticket_id: str
 ) -> dict:
@@ -253,7 +253,7 @@ def analysis_family_single_case(
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: str) -> dict:
     """Return a dictionary with information from a analysis case."""
     return {
@@ -300,7 +300,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
 # Config fixtures
 
 
-@pytest.fixture()
+@pytest.fixture
 def base_config_dict() -> dict:
     """Returns the basic configs necessary for running CG."""
     return {
@@ -338,19 +338,19 @@ def base_config_dict() -> dict:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def cg_config_object(base_config_dict: dict) -> CGConfig:
     """Return a CG config."""
     return CGConfig(**base_config_dict)
 
 
-@pytest.fixture()
+@pytest.fixture
 def chanjo_config() -> Dict[str, Dict[str, str]]:
     """Return Chanjo config."""
     return {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 
 
-@pytest.fixture()
+@pytest.fixture
 def crunchy_config() -> Dict[str, Dict[str, Any]]:
     """Return Crunchy config."""
     return {
@@ -369,7 +369,7 @@ def crunchy_config() -> Dict[str, Dict[str, Any]]:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def hk_config_dict(root_path: Path):
     """Housekeeper configs."""
     return {
@@ -380,7 +380,7 @@ def hk_config_dict(root_path: Path):
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def genotype_config() -> dict:
     """Genotype config fixture."""
     return {
@@ -392,7 +392,7 @@ def genotype_config() -> dict:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def gens_config() -> Dict[str, Dict[str, str]]:
     """Gens config fixture."""
     return {
@@ -406,19 +406,19 @@ def gens_config() -> Dict[str, Dict[str, str]]:
 # Api fixtures
 
 
-@pytest.fixture()
+@pytest.fixture
 def rsync_api(cg_context: CGConfig) -> RsyncAPI:
     """RsyncAPI fixture."""
     return RsyncAPI(config=cg_context)
 
 
-@pytest.fixture()
+@pytest.fixture
 def external_data_api(analysis_store, cg_context: CGConfig) -> ExternalDataAPI:
     """ExternalDataAPI fixture."""
     return ExternalDataAPI(config=cg_context)
 
 
-@pytest.fixture()
+@pytest.fixture
 def genotype_api(genotype_config: dict) -> GenotypeAPI:
     """Genotype API fixture."""
     _genotype_api = GenotypeAPI(genotype_config)
@@ -426,7 +426,7 @@ def genotype_api(genotype_config: dict) -> GenotypeAPI:
     return _genotype_api
 
 
-@pytest.fixture()
+@pytest.fixture
 def gens_api(gens_config: dict) -> GensAPI:
     """Gens API fixture."""
     _gens_api = GensAPI(gens_config)
@@ -434,7 +434,7 @@ def gens_api(gens_config: dict) -> GensAPI:
     return _gens_api
 
 
-@pytest.fixture()
+@pytest.fixture
 def madeline_api(madeline_output) -> MockMadelineAPI:
     """madeline_api fixture."""
     _api = MockMadelineAPI()
@@ -448,7 +448,7 @@ def ticket_id() -> str:
     return "123456"
 
 
-@pytest.fixture()
+@pytest.fixture
 def osticket(ticket_id: str) -> MockOsTicket:
     """Return a api that mock the os ticket api."""
     api = MockOsTicket()
@@ -461,25 +461,25 @@ def osticket(ticket_id: str) -> MockOsTicket:
 # Common file name fixtures
 
 
-@pytest.fixture()
+@pytest.fixture
 def snv_vcf_file() -> str:
     """Return a single nucleotide variant file name."""
     return f"snv{FileExtensions.VCF}"
 
 
-@pytest.fixture()
+@pytest.fixture
 def sv_vcf_file() -> str:
     """Return a structural variant file name."""
     return f"sv{FileExtensions.VCF}"
 
 
-@pytest.fixture()
+@pytest.fixture
 def snv_research_vcf_file() -> str:
     #    """Return a single nucleotide variant research file name."""
     return f"snv_research{FileExtensions.VCF}"
 
 
-@pytest.fixture()
+@pytest.fixture
 def sv_research_vcf_file() -> str:
     """Return a structural variant research file name."""
     return f"sv_research{FileExtensions.VCF}"
@@ -516,31 +516,31 @@ def cgweb_orders_dir(fixtures_dir: Path) -> Path:
     return Path(fixtures_dir, "cgweb_orders")
 
 
-@pytest.fixture()
+@pytest.fixture
 def fastq_dir(demultiplexed_runs: Path) -> Path:
     """Return the path to the fastq files dir."""
     return Path(demultiplexed_runs, "fastq")
 
 
-@pytest.fixture()
+@pytest.fixture
 def spring_dir(demultiplexed_runs: Path) -> Path:
     """Return the path to the fastq files dir."""
     return Path(demultiplexed_runs, "spring")
 
 
-@pytest.fixture()
+@pytest.fixture
 def project_dir(tmpdir_factory) -> Generator[Path, None, None]:
     """Path to a temporary directory where intermediate files can be stored."""
     yield Path(tmpdir_factory.mktemp("data"))
 
 
-@pytest.fixture()
+@pytest.fixture
 def tmp_file(project_dir) -> Path:
     """Return a temp file path."""
     return Path(project_dir, "test")
 
 
-@pytest.fixture()
+@pytest.fixture
 def non_existing_file_path(project_dir: Path) -> Path:
     """Return the path to a non-existing file."""
     return Path(project_dir, "a_file.txt")
@@ -558,7 +558,7 @@ def content() -> str:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def filled_file(non_existing_file_path: Path, content: str) -> Path:
     """Return the path to a existing file with some content."""
     with open(non_existing_file_path, "w") as outfile:
@@ -572,73 +572,73 @@ def orderforms(fixtures_dir: Path) -> Path:
     return Path(fixtures_dir, "orderforms")
 
 
-@pytest.fixture()
+@pytest.fixture
 def hk_file(filled_file, case_id) -> File:
     """Return a housekeeper File object."""
     return File(id=case_id, path=filled_file)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mip_dna_store_files(apps_dir: Path) -> Path:
     """Return the path to the directory with mip dna store files."""
     return Path(apps_dir, "mip", "dna", "store")
 
 
-@pytest.fixture()
+@pytest.fixture
 def case_qc_sample_info_path(mip_dna_store_files: Path) -> Path:
     """Return path to case_qc_sample_info.yaml."""
     return Path(mip_dna_store_files, "case_qc_sample_info.yaml")
 
 
-@pytest.fixture()
+@pytest.fixture
 def delivery_report_html(mip_dna_store_files: Path) -> Path:
     """Return the path to a qc metrics deliverables file with case data."""
     return Path(mip_dna_store_files, "empty_delivery_report.html")
 
 
-@pytest.fixture()
+@pytest.fixture
 def mip_deliverables_file(mip_dna_store_files: Path) -> Path:
     """Fixture for general deliverables file in mip."""
     return Path(mip_dna_store_files, "case_id_deliverables.yaml")
 
 
-@pytest.fixture()
+@pytest.fixture
 def case_qc_metrics_deliverables(apps_dir: Path) -> Path:
     """Return the path to a qc metrics deliverables file with case data."""
     return Path(apps_dir, "mip", "case_metrics_deliverables.yaml")
 
 
-@pytest.fixture()
+@pytest.fixture
 def mip_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with mip analysis files."""
     return Path(analysis_dir, "mip")
 
 
-@pytest.fixture()
+@pytest.fixture
 def balsamic_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files."""
     return Path(analysis_dir, "balsamic")
 
 
-@pytest.fixture()
+@pytest.fixture
 def balsamic_wgs_analysis_dir(balsamic_analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files."""
     return Path(balsamic_analysis_dir, "tn_wgs")
 
 
-@pytest.fixture()
+@pytest.fixture
 def mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
     """Return the path to the directory with mip dna analysis files."""
     return Path(mip_analysis_dir, "dna")
 
 
-@pytest.fixture()
+@pytest.fixture
 def rnafusion_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with rnafusion analysis files."""
     return Path(analysis_dir, "rnafusion")
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_cram(mip_dna_analysis_dir: Path) -> Path:
     """Return the path to the cram file for a sample."""
     return Path(mip_dna_analysis_dir, "adm1.cram")
@@ -1202,7 +1202,7 @@ def novaseq_x_flow_cell_full_name() -> str:
     return "20230508_LH00188_0003_A22522YLT3"
 
 
-@pytest.fixture()
+@pytest.fixture
 def novaseq_x_manifest_file(novaseq_x_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeqX manifest file."""
     return Path(novaseq_x_flow_cell_dir, "Manifest.tsv")
@@ -1957,7 +1957,7 @@ def base_store(
     yield store
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_store(base_store: Store) -> Store:
     """Populate store with samples."""
     new_samples = [
@@ -2122,13 +2122,13 @@ def microsalt_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("microsalt")
 
 
-@pytest.fixture()
+@pytest.fixture
 def current_encryption_dir() -> Path:
     """Return a temporary directory for current encryption testing."""
     return Path("home", "ENCRYPT")
 
 
-@pytest.fixture()
+@pytest.fixture
 def legacy_encryption_dir() -> Path:
     """Return a temporary directory for current encryption testing."""
     return Path("home", "TO_PDC")

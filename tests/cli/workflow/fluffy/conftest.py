@@ -60,7 +60,7 @@ def deliverables_yaml_path():
     return Path("tests/fixtures/apps/fluffy/deliverables.yaml")
 
 
-@pytest.fixture()
+@pytest.fixture
 def fluffy_hermes_deliverables_response_data(
     create_multiqc_html_file,
     fluffy_case_id_existing,
