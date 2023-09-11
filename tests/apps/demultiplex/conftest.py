@@ -117,7 +117,6 @@ def sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
             SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID.value,
             SampleSheetBcl2FastqSections.Data.LANE.value,
             SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value,
-            SampleSheetBcl2FastqSections.Data.SAMPLE_REFERENCE.value,
             SampleSheetBcl2FastqSections.Data.INDEX_1.value,
             SampleSheetBcl2FastqSections.Data.INDEX_2.value,
             SampleSheetBcl2FastqSections.Data.SAMPLE_NAME.value,

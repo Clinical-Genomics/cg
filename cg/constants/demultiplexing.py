@@ -80,7 +80,6 @@ class SampleSheetBcl2FastqSections:
         FLOW_CELL_ID: str = "FCID"
         LANE: str = "Lane"
         SAMPLE_INTERNAL_ID_BCL2FASTQ: str = "SampleID"
-        SAMPLE_REFERENCE: str = "SampleRef"
         INDEX_1: str = "index"
         INDEX_2: str = "index2"
         SAMPLE_NAME: str = "SampleName"
@@ -93,7 +92,6 @@ class SampleSheetBcl2FastqSections:
             FLOW_CELL_ID,
             LANE,
             SAMPLE_INTERNAL_ID_BCL2FASTQ,
-            SAMPLE_REFERENCE,
             INDEX_1,
             INDEX_2,
             SAMPLE_NAME,

@@ -24,9 +24,6 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
 
     flowcell_id: str = Field("", alias=SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID.value)
     lane: int = Field(..., alias=SampleSheetBcl2FastqSections.Data.LANE.value)
-    sample_ref: str = Field(
-        GenomeVersion.hg19.value, alias=SampleSheetBcl2FastqSections.Data.SAMPLE_REFERENCE.value
-    )
     index: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.INDEX_1.value)
     index2: str = Field("", alias=SampleSheetBcl2FastqSections.Data.INDEX_2.value)
     sample_name: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_NAME.value)
