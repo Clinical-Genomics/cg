@@ -27,8 +27,8 @@ from tests.mocks.limsmock import MockLimsAPI
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.fixture(scope="function", name="mip_hk_store")
-def fixture_mip_hk_store(
+@pytest.fixture(scope="function")
+def mip_hk_store(
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
     timestamp: datetime,
@@ -105,14 +105,24 @@ def fixture_mip_hk_store(
     return real_housekeeper_api
 
 
-@pytest.fixture(name="binary_path")
-def fixture_binary_path() -> str:
+
+@pytest.fixture
+def mip_analysis_api(context_config, mip_hk_store, analysis_store):
+    """Return a MIP analysis API."""
+    analysis_api = MipDNAAnalysisAPI(context_config)
+    analysis_api.housekeeper_api = mip_hk_store
+    analysis_api.status_db = analysis_store
+    return analysis_api
+
+
+@pytest.fixture
+def binary_path() -> str:
     """Return the string of a path to a (fake) binary."""
     return Path("usr", "bin", "binary").as_posix()
 
 
-@pytest.fixture(name="stats_sample_data")
-def fixture_stats_sample_data(
+@pytest.fixture
+def stats_sample_data(
     sample_id: str,
     bcl2fastq_flow_cell_id: str,
     bcl_convert_flow_cell_id: str,
@@ -135,8 +145,8 @@ def fixture_stats_sample_data(
     }
 
 
-@pytest.fixture(name="store_stats")
-def fixture_store_stats() -> Generator[StatsAPI, None, None]:
+@pytest.fixture
+def store_stats() -> Generator[StatsAPI, None, None]:
     """Setup base CGStats store."""
     _store: StatsAPI = StatsAPI(
         {
@@ -152,8 +162,8 @@ def fixture_store_stats() -> Generator[StatsAPI, None, None]:
     _store.drop_all()
 
 
-@pytest.fixture(name="base_store_stats")
-def fixture_base_store_stats(
+@pytest.fixture
+def base_store_stats(
     store_stats: StatsAPI, stats_sample_data: dict
 ) -> Generator[StatsAPI, None, None]:
     """Setup CGStats store with sample data."""
@@ -196,10 +206,8 @@ def fixture_base_store_stats(
     yield store_stats
 
 
-@pytest.fixture(name="flowcell_store")
-def fixture_flowcell_store(
-    base_store: Store, stats_sample_data: dict
-) -> Generator[Store, None, None]:
+@pytest.fixture
+def flowcell_store(base_store: Store, stats_sample_data: dict) -> Generator[Store, None, None]:
     """Setup store with sample data for testing flow cell transfer."""
     for sample_data in stats_sample_data["samples"]:
         customer: Customer = (base_store.get_customers())[0]
@@ -218,16 +226,16 @@ def fixture_flowcell_store(
     yield base_store
 
 
-@pytest.fixture(name="transfer_flow_cell_api")
-def fixture_transfer_flow_cell_api(
+@pytest.fixture
+def transfer_flow_cell_api(
     flowcell_store: Store, housekeeper_api: MockHousekeeperAPI, base_store_stats: StatsAPI
 ) -> Generator[TransferFlowCell, None, None]:
     """Setup transfer flow cell API."""
     yield TransferFlowCell(db=flowcell_store, stats_api=base_store_stats, hk_api=housekeeper_api)
 
 
-@pytest.fixture(name="get_invoice_api_sample")
-def fixture_invoice_api_sample(
+@pytest.fixture
+def get_invoice_api_sample(
     store: Store,
     lims_api: MockLimsAPI,
     helpers: StoreHelpers,
@@ -246,7 +254,7 @@ def fixture_invoice_api_sample(
 
 
 @pytest.fixture(name="get_invoice_api_nipt_customer")
-def fixture_invoice_api_nipt_customer(
+def invoice_api_nipt_customer(
     store: Store,
     lims_api: MockLimsAPI,
     helpers: StoreHelpers,
@@ -265,7 +273,7 @@ def fixture_invoice_api_nipt_customer(
 
 
 @pytest.fixture(name="get_invoice_api_pool_generic_customer")
-def fixture_invoice_api_pool_generic_customer(
+def invoice_api_pool_generic_customer(
     store: Store,
     lims_api: MockLimsAPI,
     helpers: StoreHelpers,

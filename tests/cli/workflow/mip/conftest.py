@@ -15,25 +15,26 @@ from cg.store.api.find_business_data import FindBusinessDataHandler
 from cg.store.api.status import StatusHandler
 from cg.store.models import Family
 from tests.store_helpers import StoreHelpers
+from tests.store.conftest import case_obj
 
 
-@pytest.fixture(name="mip_dna_fixture_config_path")
-def fixture_mip_dna_fixture_config_path() -> str:
+@pytest.fixture
+def mip_dna_config_path() -> str:
     return "tests/fixtures/apps/mip/dna/case_config.yaml"
 
 
-@pytest.fixture(name="mip_case_id")
-def fixture_mip_case_id() -> str:
+@pytest.fixture
+def mip_case_id() -> str:
     return "yellowhog"
 
 
-@pytest.fixture(name="mip_case_id_non_existing")
-def fixture_mip_case_id_non_existing() -> str:
+@pytest.fixture
+def mip_case_id_non_existing() -> str:
     return "this_case_id_does_not_exist"
 
 
-@pytest.fixture(name="mip_case_ids")
-def fixture_mip_case_ids(mip_case_id: str) -> dict:
+@pytest.fixture
+def mip_case_ids(mip_case_id: str) -> dict:
     """Dictionary of case ids, connected samples, their name and if they should fail (textbook or not)"""
 
     return {
@@ -55,8 +56,8 @@ def fixture_mip_case_ids(mip_case_id: str) -> dict:
     }
 
 
-@pytest.fixture(name="mip_case_dirs")
-def fixture_mip_case_dirs(mip_case_ids: dict, project_dir: Path) -> dict:
+@pytest.fixture
+def mip_case_dirs(mip_case_ids: dict, project_dir: Path) -> dict:
     """Create case directories and return a dictionary of the tmpdir paths"""
 
     mip_case_dirs = {}
@@ -69,8 +70,8 @@ def fixture_mip_case_dirs(mip_case_ids: dict, project_dir: Path) -> dict:
     return mip_case_dirs
 
 
-@pytest.fixture(name="mip_hermes_dna_deliverables_response_data")
-def fixture_mip_dna_hermes_deliverables_response_data(
+@pytest.fixture
+def mip_hermes_dna_deliverables_response_data(
     create_multiqc_html_file,
     create_multiqc_json_file,
     mip_case_id,
@@ -94,8 +95,8 @@ def fixture_mip_dna_hermes_deliverables_response_data(
     )
 
 
-@pytest.fixture(name="mip_rna_context")
-def fixture_mip_rna_context(
+@pytest.fixture
+def mip_rna_context(
     cg_context: CGConfig,
     analysis_family_single_case: dict,
     helpers: StoreHelpers,
@@ -115,8 +116,8 @@ def fixture_mip_rna_context(
     return cg_context
 
 
-@pytest.fixture(name="mip_dna_context")
-def fixture_mip_dna_context(
+@pytest.fixture
+def mip_dna_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     mip_case_ids: dict,

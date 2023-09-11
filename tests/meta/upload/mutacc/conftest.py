@@ -48,7 +48,7 @@ class MockScoutApi:
 
 
 @pytest.fixture(name="scout_export_case_data")
-def fixture_scout_export_case_data(customer_id: str) -> dict:
+def scout_export_case_data(customer_id: str) -> dict:
     """Return information in the form of a scout export case"""
     case_data = {
         "_id": "internal_id",
@@ -86,14 +86,14 @@ def fixture_scout_export_case_data(customer_id: str) -> dict:
 
 
 @pytest.fixture(name="scout_export_case")
-def fixture_scout_export_case(scout_export_case_data: dict) -> ScoutExportCase:
+def scout_export_case(scout_export_case_data: dict) -> ScoutExportCase:
     """Returns a export case object"""
 
     return ScoutExportCase.model_validate(scout_export_case_data)
 
 
 @pytest.fixture(name="scout_export_case_missing_bam")
-def fixture_scout_export_case_missing_bam(scout_export_case_data: dict) -> ScoutExportCase:
+def scout_export_case_missing_bam(scout_export_case_data: dict) -> ScoutExportCase:
     """Returns a export case object where one individual is missing bam file"""
     scout_export_case_data["individuals"][1].pop("bam_file")
 
@@ -101,7 +101,7 @@ def fixture_scout_export_case_missing_bam(scout_export_case_data: dict) -> Scout
 
 
 @pytest.fixture(name="scout_export_case_no_causatives")
-def fixture_scout_export_case_no_causatives(scout_export_case_data: dict) -> ScoutExportCase:
+def scout_export_case_no_causatives(scout_export_case_data: dict) -> ScoutExportCase:
     """Returns a export case object without causatives"""
     scout_export_case_data.pop("causatives")
 
