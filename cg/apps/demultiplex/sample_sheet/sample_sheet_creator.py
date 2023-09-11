@@ -229,26 +229,18 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
     def add_override_cycles_to_samples(self) -> None:
         """Add override cycles attribute to samples."""
         flow_cell_index_len: int = self.run_parameters.index_length
-        read1_str: str = "Y" + str(self.run_parameters.get_read_1_cycles()) + ";"
-        read2_str: str = "Y" + str(self.run_parameters.get_read_2_cycles()) + ";"
-        index1_str: str = "I" + str(self.run_parameters.get_index_1_cycles()) + ";"
-        index2_str: str = "I" + str(self.run_parameters.get_index_2_cycles()) + ";"
+        read1_str: str = f"Y{str(self.run_parameters.get_read_1_cycles())};"
+        read2_str: str = f"Y{str(self.run_parameters.get_read_2_cycles())};"
         for sample in self.lims_samples:
+            index1_str: str = f"I{str(self.run_parameters.get_index_1_cycles())};"
+            index2_str: str = f"I{str(self.run_parameters.get_index_2_cycles())};"
             sample_index_len: int = len(sample.index)
             if sample_index_len < flow_cell_index_len:
                 index1_str = (
-                    "I"
-                    + str(sample_index_len)
-                    + "N"
-                    + str(flow_cell_index_len - sample_index_len)
-                    + ";"
+                    f"I{str(sample_index_len)}N{str(flow_cell_index_len - sample_index_len)};"
                 )
                 index2_str = (
-                    "N"
-                    + str(flow_cell_index_len - sample_index_len)
-                    + "I"
-                    + str(sample_index_len)
-                    + ";"
+                    f"N{str(flow_cell_index_len - sample_index_len)}I{str(sample_index_len)};"
                 )
             sample.override_cycles = read1_str + index1_str + index2_str + read2_str
 

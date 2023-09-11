@@ -150,16 +150,20 @@ def get_hamming_distance_index_1(sequence_1: str, sequence_2: str) -> int:
     """Get the hamming distance between two index 1 sequences.
     In the case that one sequence is longer than the other, the distance is calculated between
     the shortest sequence and the first segment of equal length of the longest sequence."""
-    limit: int = min(len(sequence_1), len(sequence_2))
-    return get_hamming_distance(str_1=sequence_1[:limit], str_2=sequence_2[:limit])
+    shortest_index_length: int = min(len(sequence_1), len(sequence_2))
+    return get_hamming_distance(
+        str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
+    )
 
 
 def get_hamming_distance_index_2(sequence_1: str, sequence_2: str) -> int:
     """Get the hamming distance between two index 2 sequences.
     In the case that one sequence is longer than the other, the distance is calculated between
     the shortest sequence and the last segment of equal length of the longest sequence."""
-    limit: int = min(len(sequence_1), len(sequence_2))
-    return get_hamming_distance(str_1=sequence_1[-limit:], str_2=sequence_2[-limit:])
+    shortest_index_length: int = min(len(sequence_1), len(sequence_2))
+    return get_hamming_distance(
+        str_1=sequence_1[-shortest_index_length:], str_2=sequence_2[-shortest_index_length:]
+    )
 
 
 def update_barcode_mismatch_values_for_sample(
@@ -202,13 +206,13 @@ def pad_and_reverse_complement_sample_indexes(
     3. Assigns the indexes to the sample attributes index1 and index2."""
     index1, index2 = get_index_pair(sample=sample)
     index_length = len(index1)
-    if type(sample) == FlowCellSampleBcl2Fastq and is_padding_needed(
+    if isinstance(sample, FlowCellSampleBcl2Fastq) and is_padding_needed(
         index_cycles=index_cycles, sample_index_length=index_length
     ):
         LOG.debug("Padding indexes")
         index1 = pad_index_one(index_string=index1)
         index2 = pad_index_two(index_string=index2, reverse_complement=reverse_complement)
-    LOG.debug("Padding not necessary for sample")
+    LOG.debug(f"Padding not necessary for sample {sample.sample_id}")
     if reverse_complement:
         index2 = get_reverse_complement_dna_seq(index2)
     sample.index = index1
