@@ -92,10 +92,8 @@ def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
 
     for root, dirs, files in os.walk(demultiplex_result_directory):
         if BCL2FASTQ_METRICS_FILE_NAME in files:
-            stats_json_path = Path(
-                root, BCL2FASTQ_METRICS_DIRECTORY_NAME, BCL2FASTQ_METRICS_FILE_NAME
-            )
-            if stats_json_path.is_file():
+            stats_json_path = Path(root, BCL2FASTQ_METRICS_FILE_NAME)
+            if root.endswith(BCL2FASTQ_METRICS_DIRECTORY_NAME):
                 stats_json_paths.append(stats_json_path)
 
     if not stats_json_paths:
