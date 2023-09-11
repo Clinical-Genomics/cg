@@ -11,6 +11,7 @@ from cg.models.orders.validators.excel_sample_validators import (
     validate_data_analysis,
     validate_parent,
     validate_source,
+    replace_spaces_with_underscores,
 )
 from pydantic import AfterValidator, BeforeValidator, Field
 from typing_extensions import Annotated
@@ -69,6 +70,7 @@ class ExcelSample(OrderSample):
         str,
         AfterValidator(convert_to_lower),
         AfterValidator(convert_to_priority),
+        AfterValidator(replace_spaces_with_underscores),
     ] = Field(None, alias="UDF/priority")
     quantity: Annotated[str, AfterValidator(numeric_value)] = Field(None, alias="UDF/Quantity")
     reagent_label: str = Field(None, alias="Sample/Reagent Label")
