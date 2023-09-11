@@ -105,7 +105,6 @@ def mip_hk_store(
     return real_housekeeper_api
 
 
-
 @pytest.fixture
 def mip_analysis_api(context_config, mip_hk_store, analysis_store):
     """Return a MIP analysis API."""

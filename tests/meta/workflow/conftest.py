@@ -12,18 +12,14 @@ from cg.models.cg_config import CGConfig
 from cg.models.compression_data import CompressionData
 from cg.store.models import Family, Sample
 from cgmodels.cg.constants import Pipeline
-from tests.store_helpers import StoreHelpers
-from tests.conftest import base_store
-from tests.meta.compress.conftest import compress_api, real_crunchy_api
-from tests.meta.upload.scout.conftest import another_sample_id
 from tests.cli.workflow.balsamic.conftest import (
     balsamic_housekeeper_dir,
     fastq_file_l_1_r_1,
     fastq_file_l_2_r_1,
     fastq_file_l_2_r_2,
 )
-from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
-from tests.meta.upload.scout.conftest import fixture_another_sample_id
+from tests.meta.compress.conftest import compress_api, real_crunchy_api
+from tests.meta.upload.scout.conftest import another_sample_id
 from tests.store_helpers import StoreHelpers
 
 

@@ -11,7 +11,7 @@ from cg.store.models import Family
 from click.testing import CliRunner
 from pytest_mock import MockFixture
 from tests.cli.workflow.mip.conftest import setup_mocks
-from tests.store.conftest import fixture_case_obj
+from tests.store.conftest import case_obj
 
 
 def test_spring_decompression_needed_and_started(
