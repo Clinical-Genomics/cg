@@ -4,22 +4,16 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Type, Union
 
-from pydantic import ValidationError
-from typing_extensions import Literal
-
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeq6000Dragen,
-    FlowCellSampleNovaSeqX,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
     SampleSheet,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
+from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
-from cg.constants.demultiplexing import (
-    BclConverter,
-    DemultiplexingDirsAndFiles,
-)
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.exc import FlowCellError, SampleSheetError
 from cg.models.demultiplex.run_parameters import (
@@ -27,6 +21,8 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
+from pydantic import ValidationError
+from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -114,20 +110,11 @@ class FlowCellDirectoryData:
     @property
     def sample_type(
         self,
-    ) -> Union[
-        Type[FlowCellSampleNovaSeq6000Bcl2Fastq],
-        Type[FlowCellSampleNovaSeq6000Dragen],
-        Type[FlowCellSampleNovaSeqX],
-    ]:
+    ) -> Union[Type[FlowCellSampleBcl2Fastq], Type[FlowCellSampleBCLConvert]]:
         """Return the sample class used in the flow cell."""
-        if self.sequencer_type == Sequencers.NOVASEQX:
-            return FlowCellSampleNovaSeqX
-        if (
-            self.bcl_converter == BclConverter.DRAGEN
-            or self.bcl_converter == BclConverter.BCLCONVERT
-        ):
-            return FlowCellSampleNovaSeq6000Dragen
-        return FlowCellSampleNovaSeq6000Bcl2Fastq
+        if self.bcl_converter == BclConverter.BCL2FASTQ:
+            return FlowCellSampleBcl2Fastq
+        return FlowCellSampleBCLConvert
 
     @property
     def sequencer_type(
@@ -239,6 +226,10 @@ class FlowCellDirectoryData:
         except (SampleSheetError, ValidationError) as error:
             LOG.warning("Invalid sample sheet")
             LOG.warning(error)
+            LOG.warning(
+                f"Ensure that the headers in the sample sheet follows the allowed structure for {self.bcl_converter} i.e. \n"
+                + SAMPLE_SHEET_HEADER[self.bcl_converter]
+            )
             return False
         return True
 

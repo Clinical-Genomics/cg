@@ -2,7 +2,7 @@
 import logging
 from typing import Dict, List, Set, Tuple
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, FlowCellSampleNovaSeqX
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, FlowCellSampleBCLConvert
 from cg.constants.constants import FileFormat
 from cg.constants.sequencing import Sequencers
 from cg.io.controller import ReadFile
@@ -151,7 +151,8 @@ def get_hamming_distance_for_indexes(sequence_1: str, sequence_2: str) -> int:
 
 
 def update_barcode_mismatch_values_for_sample(
-    sample_to_update: FlowCellSampleNovaSeqX, samples_to_compare_to: List[FlowCellSampleNovaSeqX]
+    sample_to_update: FlowCellSampleBCLConvert,
+    samples_to_compare_to: List[FlowCellSampleBCLConvert],
 ) -> None:
     """Updates the sample's barcode mismatch values.
     If a sample index has a hamming distance to any other sample lower than the threshold
