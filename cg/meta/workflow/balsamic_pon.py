@@ -1,20 +1,16 @@
 """Module for Balsamic PON Analysis API."""
-
 import logging
 from pathlib import Path
 from typing import List
 
-from cg.store.models import Family
-
-from cg.utils.utils import build_command_from_dict
+from cgmodels.cg.constants import Pipeline
 
 from cg.constants.indexes import ListIndexes
 from cg.exc import BalsamicStartError
-from cgmodels.cg.constants import Pipeline
-
-from cg.models.cg_config import CGConfig
-
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.store.models import Family
+from cg.utils.utils import build_command_from_dict
 
 LOG = logging.getLogger(__name__)
 
@@ -37,6 +33,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
         panel_bed: str,
         pon_cnn: str,
         observations: List[str],
+        cache_version: str,
         dry_run: bool = False,
     ) -> None:
         """Creates a config file for BALSAMIC PON analysis."""
@@ -56,6 +53,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
                 "--panel-bed": verified_panel_bed,
                 "--genome-version": genome_version,
                 "--balsamic-cache": self.balsamic_cache,
+                "--cache-version": cache_version,
                 "--version": self.get_next_pon_version(verified_panel_bed),
             }
         )

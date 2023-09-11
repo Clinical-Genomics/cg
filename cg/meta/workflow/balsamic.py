@@ -1,5 +1,4 @@
 """Module for Balsamic Analysis API"""
-
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Union
@@ -527,6 +526,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         panel_bed: str,
         pon_cnn: str,
         observations: List[str],
+        cache_version: str,
         dry_run: bool = False,
     ) -> None:
         """Create config file for BALSAMIC analysis"""
@@ -543,6 +543,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             {
                 "--analysis-dir": self.root_dir,
                 "--balsamic-cache": self.balsamic_cache,
+                "--cache-version": cache_version,
                 "--fastq-path": self.get_sample_fastq_destination_dir(
                     self.status_db.get_case_by_internal_id(case_id)
                 ),

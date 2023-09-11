@@ -1,9 +1,10 @@
 """CLI support to create config and/or start BALSAMIC."""
-
 import logging
 from typing import List
 
 import click
+from pydantic.v1 import ValidationError
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.options import (
     OPTION_PANEL_BED,
@@ -13,6 +14,7 @@ from cg.cli.workflow.balsamic.options import (
     OPTION_PON_CNN,
     OPTION_GENDER,
     OPTION_OBSERVATIONS,
+    OPTION_CACHE_VERSION,
 )
 from cg.cli.workflow.commands import link, resolve_compression, ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -22,8 +24,6 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from pydantic.v1 import ValidationError
-
 
 LOG = logging.getLogger(__name__)
 
@@ -51,6 +51,7 @@ balsamic.add_command(link)
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
 @OPTION_OBSERVATIONS
+@OPTION_CACHE_VERSION
 @DRY_RUN
 @click.pass_obj
 def config_case(
@@ -61,6 +62,7 @@ def config_case(
     panel_bed: str,
     pon_cnn: click.Path,
     observations: List[click.Path],
+    cache_version: str,
     dry_run: bool,
 ):
     """Create config file for BALSAMIC analysis for a given CASE_ID."""
@@ -76,6 +78,7 @@ def config_case(
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
             observations=observations,
+            cache_version=cache_version,
             dry_run=dry_run,
         )
     except CgError as error:
