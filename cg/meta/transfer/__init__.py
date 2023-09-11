@@ -1,1 +1,1 @@
-from .lims import PoolState, SampleState, TransferLims
+from cg.meta.transfer.lims import PoolState, SampleState, TransferLims
