@@ -192,7 +192,7 @@ def update_barcode_mismatch_values_for_sample(
             sample_to_update.barcode_mismatches_2 = 0
 
 
-def pad_and_reverse_complement_indexes(
+def pad_and_reverse_complement_sample_indexes(
     sample: FlowCellSample, index_cycles: int, reverse_complement: bool
 ) -> None:
     """Adapts the indexes of sample.
@@ -222,7 +222,7 @@ def update_indexes_for_samples(
     """Updates the values to the fields index1 and index 2 of samples."""
     index_cycles: int = run_parameters.index_length
     for sample in samples:
-        pad_and_reverse_complement_indexes(
+        pad_and_reverse_complement_sample_indexes(
             sample=sample,
             index_cycles=index_cycles,
             reverse_complement=reverse_complement,
