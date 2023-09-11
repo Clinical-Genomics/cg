@@ -11,7 +11,7 @@ from cg.apps.demultiplex.sample_sheet.index import (
     is_dual_index,
     is_reverse_complement,
     update_barcode_mismatch_values_for_sample,
-    update_indexes_for_all_samples,
+    update_indexes_for_samples,
 )
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, FlowCellSampleBCLConvert
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
@@ -127,7 +127,7 @@ class SampleSheetCreator:
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
             LOG.info(f"Adapting index and barcode mismatch values for samples in lane {lane}")
             self.update_barcode_mismatch_values_for_samples(samples_in_lane)
-            update_indexes_for_all_samples(
+            update_indexes_for_samples(
                 samples=samples_in_lane,
                 run_parameters=self.run_parameters,
                 reverse_complement=reverse_complement,

@@ -208,7 +208,7 @@ def adapt_indexes_for_sample(
     sample.index2 = index2
 
 
-def update_indexes_for_all_samples(
+def update_indexes_for_samples(
     samples: List[FlowCellSample],
     run_parameters: RunParameters,
     reverse_complement: bool,
