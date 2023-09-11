@@ -71,10 +71,7 @@ def validate_sample_sheet_column_names(sample_sheet_column_names: List[str]) -> 
         set(SampleSheetBCLConvertSections.Data.COLUMN_NAMES.value),
         set(SampleSheetBcl2FastqSections.Data.COLUMN_NAMES.value),
     ]
-    if all(
-        set(sample_sheet_column_names) != expected
-        for expected in expected_column_names
-    ):
+    if all(set(sample_sheet_column_names) != expected for expected in expected_column_names):
         LOG.error("Sample sheet data header does not match expected format!")
         raise ValueError
 
@@ -195,7 +192,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
         sample_sheet: Dict[str, List[str]] = read_sample_sheet(sample_sheet_housekeeper_path)
         data_header_key: str = get_data_header_key(sample_sheet)
-        sample_sheet_column_names: List[str] = get_column_names(sample_sheet=sample_sheet, data_header_key=data_header_key)
+        sample_sheet_column_names: List[str] = get_column_names(
+            sample_sheet=sample_sheet, data_header_key=data_header_key
+        )
         validate_sample_sheet_column_names(sample_sheet_column_names)
 
         sample_data = [
