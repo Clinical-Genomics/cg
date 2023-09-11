@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 
 import click
-
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
