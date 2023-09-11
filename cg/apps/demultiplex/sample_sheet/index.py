@@ -142,12 +142,20 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
     return index_string + INDEX_TWO_PAD_SEQUENCE
 
 
-def get_hamming_distance_for_indexes(sequence_1: str, sequence_2: str) -> int:
-    """Get the hamming distance between two index sequences.
+def get_hamming_distance_index_1(sequence_1: str, sequence_2: str) -> int:
+    """Get the hamming distance between two index 1 sequences.
     In the case that one sequence is longer than the other, the distance is calculated between
     the shortest sequence and the first segment of equal length of the longest sequence."""
     limit: int = min(len(sequence_1), len(sequence_2))
     return get_hamming_distance(str_1=sequence_1[:limit], str_2=sequence_2[:limit])
+
+
+def get_hamming_distance_index_2(sequence_1: str, sequence_2: str) -> int:
+    """Get the hamming distance between two index 2 sequences.
+    In the case that one sequence is longer than the other, the distance is calculated between
+    the shortest sequence and the last segment of equal length of the longest sequence."""
+    limit: int = min(len(sequence_1), len(sequence_2))
+    return get_hamming_distance(str_1=sequence_1[-limit:], str_2=sequence_2[-limit:])
 
 
 def update_barcode_mismatch_values_for_sample(
@@ -163,9 +171,7 @@ def update_barcode_mismatch_values_for_sample(
             continue
         index_1, index_2 = get_index_pair(sample=sample_to_compare_to)
         if (
-            get_hamming_distance_for_indexes(
-                sequence_1=index_1_sample_to_update, sequence_2=index_1
-            )
+            get_hamming_distance_index_1(sequence_1=index_1_sample_to_update, sequence_2=index_1)
             < MINIMUM_HAMMING_DISTANCE
         ):
             LOG.debug(
@@ -173,9 +179,7 @@ def update_barcode_mismatch_values_for_sample(
             )
             sample_to_update.barcode_mismatches_1 = 0
         if (
-            get_hamming_distance_for_indexes(
-                sequence_1=index_2_sample_to_update, sequence_2=index_2
-            )
+            get_hamming_distance_index_2(sequence_1=index_2_sample_to_update, sequence_2=index_2)
             < MINIMUM_HAMMING_DISTANCE
         ):
             LOG.debug(
@@ -204,18 +208,14 @@ def adapt_indexes_for_sample(
     sample.index2 = index2
 
 
-def adapt_samples(
+def update_indexes_for_all_samples(
     samples: List[FlowCellSample],
     run_parameters: RunParameters,
     reverse_complement: bool,
 ) -> None:
-    """Adapt the indexes and updates the barcode mismatch values of the samples."""
+    """Updates the values to the fields index1 and index 2 of samples."""
     index_cycles: int = run_parameters.index_length
     for sample in samples:
-        if run_parameters.sequencer == Sequencers.NOVASEQX:
-            update_barcode_mismatch_values_for_sample(
-                sample_to_update=sample, samples_to_compare_to=samples
-            )
         adapt_indexes_for_sample(
             sample=sample,
             index_cycles=index_cycles,

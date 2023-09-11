@@ -2,14 +2,14 @@
 from typing import Dict, List, Set, Tuple
 
 import pytest
-
 from cg.apps.demultiplex.sample_sheet.index import (
     INDEX_ONE_PAD_SEQUENCE,
     INDEX_TWO_PAD_SEQUENCE,
     LONG_INDEX_CYCLE_NR,
     Index,
     adapt_indexes_for_sample,
-    get_hamming_distance_for_indexes,
+    get_hamming_distance_index_1,
+    get_hamming_distance_index_2,
     get_index_pair,
     get_indexes_by_lane,
     get_reagent_kit_version,
@@ -280,7 +280,7 @@ def test_adapt_indexes_for_sample_no_reverse_complement_no_padding(
     assert sample.index2 == initial_index2
 
 
-def test_get_hamming_distance_index_different_lengths():
+def test_get_hamming_distance_index_1_different_lengths():
     """Test that the hamming distance between indexes with same prefix but different lengths is zero."""
     # GIVEN two index_1 sequences with the same prefixes but different lengths
     sequence_1: str = "GATTACA"
@@ -289,17 +289,17 @@ def test_get_hamming_distance_index_different_lengths():
     # WHEN getting the hamming distance between them in any order
 
     # THEN the distance is zero
-    assert get_hamming_distance_for_indexes(sequence_1=sequence_1, sequence_2=sequence_2) == 0
-    assert get_hamming_distance_for_indexes(sequence_1=sequence_2, sequence_2=sequence_1) == 0
+    assert get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_2) == 0
+    assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_1) == 0
 
     # WHEN getting the hamming distance between themselves
 
     # THEN the distance is zero
-    assert get_hamming_distance_for_indexes(sequence_1=sequence_1, sequence_2=sequence_1) == 0
-    assert get_hamming_distance_for_indexes(sequence_1=sequence_2, sequence_2=sequence_2) == 0
+    assert get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_1) == 0
+    assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_2) == 0
 
 
-def test_get_hamming_distance_index_different_prefixes():
+def test_get_hamming_distance_index_1_different_prefixes():
     """Test that the hamming distance between indexes with different prefixes is greater than zero."""
     # GIVEN two index_1 sequences with the same suffixes but different prefixes
     sequence_1: str = "GATTACA"
@@ -308,5 +308,37 @@ def test_get_hamming_distance_index_different_prefixes():
     # WHEN getting the hamming distance between them in any order
 
     # THEN the distance is greater than zero
-    assert get_hamming_distance_for_indexes(sequence_1=sequence_1, sequence_2=sequence_2) > 0
-    assert get_hamming_distance_for_indexes(sequence_1=sequence_2, sequence_2=sequence_1) > 0
+    assert get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_2) > 0
+    assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_1) > 0
+
+
+def test_get_hamming_distance_index_2_different_lengths():
+    """Test that the hamming distance between indexes with same suffix but different lengths is zero."""
+    # GIVEN two index_2 sequences with the same suffixes but different lengths
+    sequence_1: str = "GATTACA"
+    sequence_2: str = "XXGATTACA"
+
+    # WHEN getting the hamming distance between them in any order
+
+    # THEN the distance is zero
+    assert get_hamming_distance_index_2(sequence_1=sequence_1, sequence_2=sequence_2) == 0
+    assert get_hamming_distance_index_2(sequence_1=sequence_2, sequence_2=sequence_1) == 0
+
+    # WHEN getting the hamming distance between themselves
+
+    # THEN the distance is zero
+    assert get_hamming_distance_index_2(sequence_1=sequence_1, sequence_2=sequence_1) == 0
+    assert get_hamming_distance_index_2(sequence_1=sequence_2, sequence_2=sequence_2) == 0
+
+
+def test_get_hamming_distance_index_2_different_prefixes():
+    """Test that the hamming distance between indexes with different suffixes is greater than zero."""
+    # GIVEN two index_2 sequences with the same prefixes but different suffixes
+    sequence_1: str = "GATTACA"
+    sequence_2: str = "GATTACAXX"
+
+    # WHEN getting the hamming distance between them in any order
+
+    # THEN the distance is greater than zero
+    assert get_hamming_distance_index_2(sequence_1=sequence_1, sequence_2=sequence_2) > 0
+    assert get_hamming_distance_index_2(sequence_1=sequence_2, sequence_2=sequence_1) > 0

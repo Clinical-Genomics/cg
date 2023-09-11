@@ -5,14 +5,15 @@ from typing import Dict, List, Optional, Set, Type
 from cg.apps.demultiplex.sample_sheet.dummy_sample import get_dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import (
     Index,
-    adapt_samples,
     get_indexes_by_lane,
     get_valid_indexes,
     index_exists,
     is_dual_index,
     is_reverse_complement,
+    update_barcode_mismatch_values_for_sample,
+    update_indexes_for_all_samples,
 )
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, FlowCellSampleBCLConvert
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_samples_by_lane,
     get_validated_sample_sheet,
@@ -22,7 +23,6 @@ from cg.constants.demultiplexing import (
     SampleSheetBcl2FastqSections,
     SampleSheetBCLConvertSections,
 )
-from cg.constants.sequencing import Sequencers
 from cg.exc import SampleSheetError
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParameters
@@ -59,6 +59,16 @@ class SampleSheetCreator:
         """Add all dummy samples with non-existing indexes to samples if applicable."""
         raise NotImplementedError("Impossible to add dummy samples in parent class")
 
+    def update_barcode_mismatch_values_for_samples(self, *args) -> None:
+        """Updates barcode mismatch values for samples if applicable."""
+        raise NotImplementedError(
+            "Impossible to update sample barcode mismatches from parent class"
+        )
+
+    def add_override_cycles_to_samples(self) -> None:
+        """Add override cycles attribute to samples if sample sheet is v2."""
+        raise NotImplementedError("Impossible to add override cycles to samples from parent class")
+
     def remove_unwanted_samples(self) -> None:
         """Filter out samples with single indexes."""
         LOG.info("Removing all samples without dual indexes")
@@ -78,7 +88,7 @@ class SampleSheetCreator:
     ) -> List[str]:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
         LOG.debug(f"Use sample sheet header {data_column_names}")
-        sample_dict = sample.dict(by_alias=True)
+        sample_dict = sample.model_dump(by_alias=True)
         return [str(sample_dict[column]) for column in data_column_names]
 
     def get_additional_sections_sample_sheet(self) -> Optional[List]:
@@ -115,14 +125,14 @@ class SampleSheetCreator:
         samples_in_lane: List[FlowCellSample]
         reverse_complement: bool = is_reverse_complement(run_parameters=self.run_parameters)
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
-            LOG.info(
-                f"Adapting index and barcode mismatch values (if applicable) for samples in lane {lane}"
-            )
-            adapt_samples(
+            LOG.info(f"Adapting index and barcode mismatch values for samples in lane {lane}")
+            self.update_barcode_mismatch_values_for_samples(samples_in_lane)
+            update_indexes_for_all_samples(
                 samples=samples_in_lane,
                 run_parameters=self.run_parameters,
                 reverse_complement=reverse_complement,
             )
+        self.add_override_cycles_to_samples()
 
     def construct_sample_sheet(self) -> List[List[str]]:
         """Construct and validate the sample sheet."""
@@ -166,6 +176,14 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
                 LOG.debug(f"Adding dummy sample {dummy_flow_cell_sample} to lane {lane}")
                 self.lims_samples.append(dummy_flow_cell_sample)
 
+    def update_barcode_mismatch_values_for_samples(self, *args) -> None:
+        """Return None for flow cells to be demultiplexed with Bcl2fastq."""
+        LOG.debug("No barcode mismatch updating for Bcl2fastq flow cell")
+
+    def add_override_cycles_to_samples(self) -> None:
+        """Return None for flow cells to be demultiplexed with Bcl2fastq."""
+        LOG.debug("No adding of override cycles for Bcl2fastq flow cell")
+
     def get_additional_sections_sample_sheet(self) -> List[List[str]]:
         """Return all sections of the sample sheet that are not the data section."""
         return [
@@ -183,7 +201,7 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
 
 
 class SampleSheetCreatorBCLConvert(SampleSheetCreator):
-    """Create a raw sample sheet for NovaSeqX flow cells."""
+    """Create a raw sample sheet for BCLConvert flow cells."""
 
     def __init__(
         self,
@@ -196,8 +214,43 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
             raise SampleSheetError(f"Can't use {BclConverter.BCL2FASTQ} with sample sheet v2")
 
     def add_dummy_samples(self) -> None:
-        """Return None for sample sheet v2."""
-        return
+        """Return None for flow cells to be demultiplexed with BCLConvert."""
+        LOG.debug("No adding of dummy samples for for BCLConvert flow cell")
+
+    def update_barcode_mismatch_values_for_samples(
+        self, samples: List[FlowCellSampleBCLConvert]
+    ) -> None:
+        """Update barcode mismatch values for both indexes of given samples."""
+        for sample in samples:
+            update_barcode_mismatch_values_for_sample(
+                sample_to_update=sample, samples_to_compare_to=samples
+            )
+
+    def add_override_cycles_to_samples(self) -> None:
+        """Add override cycles attribute to samples."""
+        flow_cell_index_len: int = self.run_parameters.index_length
+        read1_str: str = "Y" + str(self.run_parameters.get_read_1_cycles()) + ";"
+        read2_str: str = "Y" + str(self.run_parameters.get_read_2_cycles()) + ";"
+        index1_str: str = "I" + str(self.run_parameters.get_index_1_cycles()) + ";"
+        index2_str: str = "I" + str(self.run_parameters.get_index_2_cycles()) + ";"
+        for sample in self.lims_samples:
+            sample_index_len: int = len(sample.index)
+            if sample_index_len != flow_cell_index_len:
+                index1_str = (
+                    "I"
+                    + str(sample_index_len)
+                    + "N"
+                    + str(flow_cell_index_len - sample_index_len)
+                    + ";"
+                )
+                index2_str = (
+                    "N"
+                    + str(flow_cell_index_len - sample_index_len)
+                    + "I"
+                    + str(sample_index_len)
+                    + ";"
+                )
+            sample.override_cycles = read1_str + index1_str + index2_str + read2_str
 
     def get_additional_sections_sample_sheet(self) -> List[List[str]]:
         """Return all sections of the sample sheet that are not the data section."""
