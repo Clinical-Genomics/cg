@@ -51,18 +51,18 @@ def validate_source(source: Optional[str]):
     return source
 
 
-def convert_sex(sex: Optional[str]):
+def convert_sex(sex: str) -> Optional[str]:
     if not sex:
         return None
     sex = sex.strip()
     return REV_SEX_MAP.get(sex, "unknown")
 
 
-def convert_to_lower(value: Optional[str]):
+def convert_to_lower(value: str) -> str:
     return value.lower()
 
 
-def replace_spaces_with_underscores(value: Optional[str]):
+def replace_spaces_with_underscores(value: str) -> str:
     return value.replace(" ", "_")
 
 
