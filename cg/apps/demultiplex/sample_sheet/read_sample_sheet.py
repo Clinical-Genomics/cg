@@ -1,18 +1,17 @@
 import logging
 from pathlib import Path
 from typing import Dict, List, Type
-from pydantic.v1 import parse_obj_as
+from pydantic import TypeAdapter
 
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import (
-    SampleSheetNovaSeq6000Sections,
-    SampleSheetNovaSeqXSections,
+    SampleSheetBcl2FastqSections,
+    SampleSheetBCLConvertSections,
 )
 
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
-import re
 
 LOG = logging.getLogger(__name__)
 
@@ -37,14 +36,6 @@ def validate_samples_unique_per_lane(samples: List[FlowCellSample]) -> None:
         validate_samples_are_unique(samples=lane_samples)
 
 
-def is_valid_sample_internal_id(sample_internal_id: str) -> bool:
-    """
-    Check if a sample internal id has the correct structure:
-    starts with three letters followed by at least three digits.
-    """
-    return bool(re.search(r"^[A-Za-z]{3}\d{3}", sample_internal_id))
-
-
 def get_sample_sheet_from_file(
     infile: Path,
     flow_cell_sample_type: Type[FlowCellSample],
@@ -65,7 +56,8 @@ def get_validated_sample_sheet(
 ) -> SampleSheet:
     """Return a validated sample sheet object."""
     raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
-    samples = parse_obj_as(List[sample_type], raw_samples)
+    adapter = TypeAdapter(List[sample_type])
+    samples = adapter.validate_python(raw_samples)
     validate_samples_unique_per_lane(samples=samples)
     return SampleSheet(samples=samples)
 
@@ -80,8 +72,8 @@ def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str
         if len(line) <= 5:
             continue
         if line[0] in [
-            SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value,
-            SampleSheetNovaSeqXSections.Data.LANE.value,
+            SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID.value,
+            SampleSheetBCLConvertSections.Data.LANE.value,
         ]:
             header = line
             continue
@@ -119,9 +111,4 @@ def get_sample_internal_ids_from_sample_sheet(
     sample_sheet = get_sample_sheet_from_file(
         infile=sample_sheet_path, flow_cell_sample_type=flow_cell_sample_type
     )
-    sample_internal_ids: List[str] = []
-    for sample in sample_sheet.samples:
-        sample_internal_id = sample.sample_id.split("_")[0]
-        if is_valid_sample_internal_id(sample_internal_id=sample_internal_id):
-            sample_internal_ids.append(sample_internal_id)
-    return list(set(sample_internal_ids))
+    return sample_sheet.get_sample_ids()

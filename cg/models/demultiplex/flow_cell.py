@@ -4,13 +4,12 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Type, Union
 
-from pydantic.v1 import ValidationError
+from pydantic import ValidationError
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeq6000Dragen,
-    FlowCellSampleNovaSeqX,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
     SampleSheet,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
@@ -114,20 +113,11 @@ class FlowCellDirectoryData:
     @property
     def sample_type(
         self,
-    ) -> Union[
-        Type[FlowCellSampleNovaSeq6000Bcl2Fastq],
-        Type[FlowCellSampleNovaSeq6000Dragen],
-        Type[FlowCellSampleNovaSeqX],
-    ]:
+    ) -> Union[Type[FlowCellSampleBcl2Fastq], Type[FlowCellSampleBCLConvert]]:
         """Return the sample class used in the flow cell."""
-        if self.sequencer_type == Sequencers.NOVASEQX:
-            return FlowCellSampleNovaSeqX
-        if (
-            self.bcl_converter == BclConverter.DRAGEN
-            or self.bcl_converter == BclConverter.BCLCONVERT
-        ):
-            return FlowCellSampleNovaSeq6000Dragen
-        return FlowCellSampleNovaSeq6000Bcl2Fastq
+        if self.bcl_converter == BclConverter.BCL2FASTQ:
+            return FlowCellSampleBcl2Fastq
+        return FlowCellSampleBCLConvert
 
     @property
     def sequencer_type(

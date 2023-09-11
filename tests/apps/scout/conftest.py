@@ -9,6 +9,7 @@ from cg.constants.constants import FileFormat
 from cg.constants.pedigree import Pedigree
 from cg.constants.subject import Gender, PhenotypeStatus, RelationshipStatus
 from cg.io.controller import ReadFile
+from cg.models.scout.scout_load_config import Reviewer
 from tests.mocks.process_mock import ProcessMock
 
 SCOUT_INDIVIDUAL: dict = {
@@ -17,12 +18,12 @@ SCOUT_INDIVIDUAL: dict = {
     "capture_kit": None,
     "mitodel_file": Path("path", "to", "mitodel.txt").as_posix(),
     "mt_bam": Path("path", "to", "reduced_mt.bam").as_posix(),
-    "reviewer": {
-        "alignment": Path("path", "to", "expansionhunter.bam").as_posix(),
-        "alignment_index": Path("path", "to", "expansionhunter.bam.bai").as_posix(),
-        "catalog": Path("path", "to", "variant_catalog.json").as_posix(),
-        "vcf": Path("path", "to", "expansionhunter.vcf").as_posix(),
-    },
+    "reviewer": Reviewer(
+        alignment=Path("path", "to", "expansionhunter.bam").as_posix(),
+        alignment_index=Path("path", "to", "expansionhunter.bam.bai").as_posix(),
+        catalog=Path("path", "to", "variant_catalog.json").as_posix(),
+        vcf=Path("path", "to", "expansionhunter.vcf").as_posix(),
+    ),
     "sample_id": "sample_id",
     "sample_name": "sample_name",
     "tissue_type": "unknown",
