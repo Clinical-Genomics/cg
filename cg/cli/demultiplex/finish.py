@@ -19,17 +19,21 @@ def finish_group():
 @click.argument("flow-cell-directory-name")
 @OPTION_BCL_CONVERTER
 @click.option("--force", is_flag=True)
+@DRY_RUN
 @click.pass_obj
 def finish_flow_cell(
-    context: CGConfig, flow_cell_directory_name: str, bcl_converter: str, force: bool
+    context: CGConfig, flow_cell_directory_name: str, bcl_converter: str, force: bool, dry_run: bool
 ):
     """Command to finish up a flow cell after demultiplexing.
 
     flow-cell-name is full flow cell name, e.g. '201203_D00483_0200_AHVKJCDRXX'.
     """
     demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
+    demux_post_processing_api.set_dry_run(dry_run=dry_run)
     demux_post_processing_api.finish_flow_cell(
-        flow_cell_directory_name=flow_cell_directory_name, bcl_converter=bcl_converter, force=force
+        flow_cell_directory_name=flow_cell_directory_name,
+        bcl_converter=bcl_converter,
+        force=force,
     )
 
 

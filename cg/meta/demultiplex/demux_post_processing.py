@@ -36,7 +36,7 @@ class DemuxPostProcessingAPI:
         self.demux_api: DemultiplexingAPI = config.demultiplex_api
         self.status_db: Store = config.status_db
         self.hk_api: HousekeeperAPI = config.housekeeper_api
-        self.dry_run = False
+        self.dry_run: bool = False
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run."""
