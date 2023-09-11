@@ -95,7 +95,7 @@ class DemuxPostProcessingAPI:
                 force=force,
             )
         except (FlowCellError, MissingFilesError) as e:
-            LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
+            LOG.warning(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
             return
 
         try:
