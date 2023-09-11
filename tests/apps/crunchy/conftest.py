@@ -13,14 +13,14 @@ from cg.models import CompressionData
 LOG = logging.getLogger(__name__)
 
 
-@pytest.fixture(name="real_spring_metadata_path")
-def fixture_real_spring_metadata_path(apps_dir: Path) -> Path:
+@pytest.fixture
+def real_spring_metadata_path(apps_dir: Path) -> Path:
     """Return the path to a SPRING metadata file."""
     return Path(apps_dir, "crunchy", "spring_metadata.json")
 
 
-@pytest.fixture(name="spring_metadata")
-def fixture_spring_metadata(compression_object: CompressionData) -> List[dict]:
+@pytest.fixture
+def spring_metadata(compression_object: CompressionData) -> List[dict]:
     """Return meta data information."""
     return [
         {
@@ -39,16 +39,14 @@ def fixture_spring_metadata(compression_object: CompressionData) -> List[dict]:
     ]
 
 
-@pytest.fixture(name="crunchy_metadata_object")
-def fixture_crunchy_metadata_object(spring_metadata: List[dict]) -> CrunchyMetadata:
+@pytest.fixture
+def crunchy_metadata_object(spring_metadata: List[dict]) -> CrunchyMetadata:
     """Return Crunchy metadata."""
     return CrunchyMetadata(files=spring_metadata)
 
 
-@pytest.fixture(name="spring_metadata_file")
-def fixture_spring_metadata_file(
-    compression_object: CompressionData, spring_metadata: List[dict]
-) -> Path:
+@pytest.fixture
+def spring_metadata_file(compression_object: CompressionData, spring_metadata: List[dict]) -> Path:
     """Return the path to a populated SPRING metadata file."""
     metadata_path = compression_object.spring_metadata_path
     WriteFile.write_file_from_content(

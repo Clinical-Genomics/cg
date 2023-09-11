@@ -38,7 +38,7 @@ def test_start_available(
     fluffy_context: CGConfig,
     caplog,
     mocker,
-    samplesheet_fixture_path: str,
+    samplesheet_path: str,
 ):
     caplog.set_level("INFO")
 
