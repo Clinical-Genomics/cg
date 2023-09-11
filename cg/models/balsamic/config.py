@@ -4,6 +4,8 @@ from typing import Dict, List, Union, Optional
 
 from pydantic.v1 import BaseModel, validator
 
+from cg.constants.constants import SampleType
+
 
 class BalsamicConfigAnalysis(BaseModel):
     """Balsamic analysis model
@@ -32,7 +34,9 @@ class BalsamicConfigSample(BaseModel):
         type (str): sample type (tumor or normal)
     """
 
-    type: str
+    type: SampleType
+    name: str
+    fastq_info: Dict[str, Dict[str, Path]]
 
 
 class BalsamicConfigReference(BaseModel):
@@ -133,7 +137,7 @@ class BalsamicConfigJSON(BaseModel):
     """
 
     analysis: BalsamicConfigAnalysis
-    samples: Dict[str, BalsamicConfigSample]
+    samples: List[BalsamicConfigSample]
     reference: BalsamicConfigReference
     panel: Optional[BalsamicConfigPanel]
     QC: BalsamicConfigQC
