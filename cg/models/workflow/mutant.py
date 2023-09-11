@@ -1,12 +1,15 @@
-from pydantic.v1 import BaseModel, validator
+from pydantic import BaseModel, AfterValidator
+from typing_extensions import Annotated
+
+from cg.models.workflow.validators import get_first_word
 
 
 class MutantSampleConfig(BaseModel):
     CG_ID_project: str
     CG_ID_sample: str
     case_ID: str
-    region_code: str
-    lab_code: str
+    region_code: Annotated[str, AfterValidator(get_first_word)]
+    lab_code: Annotated[str, AfterValidator(get_first_word)]
     priority: str
     Customer_ID_project: int
     Customer_ID_sample: str
@@ -20,7 +23,3 @@ class MutantSampleConfig(BaseModel):
     sequencing_qc_pass: bool
     selection_criteria: str
     primer: str
-
-    @validator("region_code", "lab_code")
-    def sanitize_values(cls, value):
-        return value.split(" ")[0]

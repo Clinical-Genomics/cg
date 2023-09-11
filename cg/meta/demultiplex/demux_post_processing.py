@@ -5,12 +5,11 @@ from typing import List, Optional
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 
-
-from cg.exc import FlowCellError
+from cg.exc import FlowCellError, MissingFilesError
 
 from cg.meta.demultiplex.housekeeper_storage_functions import (
-    store_flow_cell_data_in_housekeeper,
     get_sample_sheets_from_latest_version,
+    store_flow_cell_data_in_housekeeper,
 )
 from cg.meta.demultiplex.status_db_storage_functions import (
     store_flow_cell_data_in_status_db,
@@ -75,9 +74,7 @@ class DemuxPostProcessingAPI:
         flow_cell_out_directory: Path = Path(
             self.demux_api.demultiplexed_runs_dir, flow_cell_directory_name
         )
-        flow_cell_run_directory: Path = Path(
-            self.demux_api.flow_cells_dir, flow_cell_directory_name
-        )
+
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
             flow_cell_directory=flow_cell_out_directory,
             bcl_converter=bcl_converter,
@@ -97,7 +94,7 @@ class DemuxPostProcessingAPI:
                 flow_cell=parsed_flow_cell,
                 force=force,
             )
-        except FlowCellError as e:
+        except (FlowCellError, MissingFilesError) as e:
             LOG.error(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
             return
 

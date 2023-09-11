@@ -160,7 +160,7 @@ class ScoutAPI:
             file_format=FileFormat.JSON, stream=self.process.stdout
         ):
             LOG.info(f"Validating case {case_export.get('_id')}")
-            cases.append(ScoutExportCase(**case_export))
+            cases.append(ScoutExportCase.model_validate(case_export))
         return cases
 
     def get_solved_cases(self, days_ago: int) -> List[ScoutExportCase]:

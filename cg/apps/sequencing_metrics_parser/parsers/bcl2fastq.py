@@ -13,50 +13,19 @@ from cg.constants.demultiplexing import (
 )
 
 
-def parse_bcl2fastq_sequencing_metrics(
-    flow_cell_dir: Path,
-) -> List[Bcl2FastqSampleLaneMetrics]:
-    """
-    Parse stats.json files in specified Bcl2fastq demultiplex result directory.
-
-    This function navigates through subdirectories in the given path, identifies
-    and parses the Stats.json files from Bcl2fastq specifying metrics per sample, lane and tile
-    on the flow cell and returns a list of parsed sequencing metrics resolved per tile.
-
-    Parameters:
-    demultiplex_result_directory (Path): Path to the demultiplexing results.
-
-    Returns:
-    List[Bcl2FastqSampleLaneMetrics]: List of parsed sequencing metrics per sample and lane.
-    """
+def parse_bcl2fastq_sequencing_metrics(flow_cell_dir: Path) -> List[Bcl2FastqSampleLaneMetrics]:
+    """Parse metrics for a flow cell demultiplexed with Bcl2fastq."""
     tile_sequencing_metrics: List[
         Bcl2FastqSampleLaneTileMetrics
-    ] = parse_bcl2fastq_raw_tile_metrics(demultiplex_result_directory=flow_cell_dir)
+    ] = parse_bcl2fastq_raw_tile_metrics(flow_cell_dir)
 
-    sample_lane_sequencing_metrics: List[
-        Bcl2FastqSampleLaneMetrics
-    ] = aggregate_tile_metrics_per_sample_and_lane(tile_metrics=tile_sequencing_metrics)
-
-    return sample_lane_sequencing_metrics
+    return aggregate_tile_metrics_per_sample_and_lane(tile_sequencing_metrics)
 
 
 def parse_bcl2fastq_raw_tile_metrics(
     demultiplex_result_directory: Path,
 ) -> List[Bcl2FastqSampleLaneTileMetrics]:
-    """
-    Parse stats.json files in specified Bcl2fastq demultiplex result directory.
-
-    This function navigates through subdirectories in the given path, identifies
-    and parses the Stats.json files from Bcl2fastq specifying metrics per sample, lane and tile
-    on the flow cell and returns a list of parsed sequencing metrics resolved per tile.
-
-    Parameters:
-    demultiplex_result_directory (Path): Path to the demultiplexing results.
-
-    Returns:
-    List[Bcl2FastqTileSequencingMetrics]: List of parsed sequencing metrics per tile.
-    """
-
+    """Parse metrics for each tile on a flow cell demultiplexed with Bcl2fastq."""
     tile_sequencing_metrics: List[Bcl2FastqSampleLaneTileMetrics] = []
 
     stats_json_paths: List[Path] = get_bcl2fastq_stats_paths(
@@ -75,7 +44,7 @@ def parse_bcl2fastq_raw_tile_metrics(
 def aggregate_tile_metrics_per_sample_and_lane(
     tile_metrics: List[Bcl2FastqSampleLaneTileMetrics],
 ) -> List[Bcl2FastqSampleLaneMetrics]:
-    """Aggregate the metrics parsed per sample and tile to be per sample and lane instead."""
+    """Aggregate the tile metrics per sample and lane instead."""
     metrics = {}
 
     for tile_metric in tile_metrics:
@@ -117,19 +86,7 @@ def discard_index_sequence(sample_id_with_index: str) -> str:
 
 
 def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
-    """
-    Identify and return paths to stats.json files in Bcl2fastq demultiplex result directory.
-
-    This function looks through subdirectories in the given demultiplex directory,
-    matching specific naming pattern (l<num>t<num>), and collects paths
-    to any stats.json files found within a "Stats" subdirectory.
-
-    Parameters:
-    demultiplex_result_directory (Path): Path to the demultiplexing results.
-
-    Returns:
-    List[Path]: List of paths to identified stats.json files.
-    """
+    """Find metrics files in Bcl2fastq demultiplex result directory."""
     stats_json_paths = []
     pattern = re.compile(r"l\d+t\d+")
 

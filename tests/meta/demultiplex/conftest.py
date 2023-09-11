@@ -1,3 +1,5 @@
+import shutil
+
 import pytest
 
 from collections import namedtuple
@@ -54,16 +56,6 @@ def fixture_tmp_samplesheet_path(tmp_demulitplexing_dir: Path) -> Path:
     with tmp_sample_sheet_path.open("w+") as fh:
         fh.write("content")
     return tmp_sample_sheet_path
-
-
-@pytest.fixture(name="tmp_flow_cell_run_path")
-def fixture_tmp_flow_cell_run_path(project_dir: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
-    """Flow cell run directory in temporary folder."""
-
-    tmp_flow_cell_run_path: Path = Path(project_dir, "flow_cell_run", bcl2fastq_flow_cell_full_name)
-    tmp_flow_cell_run_path.mkdir(exist_ok=True, parents=True)
-
-    return tmp_flow_cell_run_path
 
 
 @pytest.fixture(name="tmp_flow_cell_run_base_path")
@@ -354,6 +346,8 @@ def fixture_flow_cell_info_map(
     bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
     flow_cell_directory_name_demultiplexed_with_bcl_convert_flat: Path,
     flow_cell_directory_name_demultiplexed_with_bcl_convert: Path,
+    flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer: Path,
+    flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer: str,
     flow_cell_name_demultiplexed_with_bcl_convert: str,
     flow_cell_directory_name_demultiplexed_with_bcl2fastq: Path,
     flow_cell_name_demultiplexed_with_bcl2fastq: str,
@@ -374,6 +368,11 @@ def fixture_flow_cell_info_map(
         "BCLCONVERT_TREE": FlowCellInfo(
             directory=flow_cell_directory_name_demultiplexed_with_bcl_convert,
             name=flow_cell_name_demultiplexed_with_bcl_convert,
+            sample_internal_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
+        ),
+        "BCLCONVERT_ON_SEQUENCER": FlowCellInfo(
+            directory=flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer,
+            name=flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer,
             sample_internal_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
         ),
     }
@@ -399,6 +398,22 @@ def fixture_flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
 ):
     """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert using a flat output directory structure."""
     return f"230505_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
+
+
+@pytest.fixture(
+    name="flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer", scope="session"
+)
+def fixture_flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequenver(
+    flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer: str,
+):
+    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert on the NovaseqX sequencer."""
+    return f"20230508_LH00188_0003_A{flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer}"
+
+
+@pytest.fixture(name="flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer", scope="session")
+def fixture_flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer() -> str:
+    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert on the NovaseqX sequencer."""
+    return "22522YLT3"
 
 
 @pytest.fixture(name="demultiplexing_init_files")
@@ -448,3 +463,45 @@ def fixture_not_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Pa
         new_dir.mkdir()
 
     return base_dir
+
+
+@pytest.fixture(scope="session")
+def base_call_file() -> Path:
+    return Path("Data", "Intensities", "BaseCalls", "L001", "C1.1", "L001_1.cbcl")
+
+
+@pytest.fixture(scope="session")
+def inter_op_file() -> Path:
+    return Path(DemultiplexingDirsAndFiles.INTER_OP, "AlignmentMetricsOut.bin")
+
+
+@pytest.fixture(scope="session")
+def thumbnail_file() -> Path:
+    return Path("Thumbnail_Images", "L001", "C1.1", "s_1_1105_green.png")
+
+
+@pytest.fixture()
+def lsyncd_source_directory(
+    tmp_path_factory,
+    novaseq_x_manifest_file: Path,
+    base_call_file: Path,
+    inter_op_file: Path,
+    thumbnail_file: Path,
+) -> Path:
+    """Return a temporary directory with a manifest file and three dummy files."""
+    source_directory = Path(tmp_path_factory.mktemp("source"))
+    shutil.copy(novaseq_x_manifest_file, source_directory)
+    for file in [base_call_file, inter_op_file, thumbnail_file]:
+        full_path = Path(source_directory, file)
+        full_path.parent.mkdir(parents=True)
+        full_path.touch()
+    return source_directory
+
+
+@pytest.fixture()
+def lsyncd_target_directory(lsyncd_source_directory: Path, tmp_path_factory) -> Path:
+    """Return a copy of the temporary source directory."""
+    temp_target_directory = Path(tmp_path_factory.mktemp("tmp_target"))
+    target_directory = Path(lsyncd_source_directory.parent, Path(temp_target_directory, "target"))
+    shutil.copytree(lsyncd_source_directory, target_directory)
+    return target_directory

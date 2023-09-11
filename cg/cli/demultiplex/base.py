@@ -7,6 +7,7 @@ from cg.cli.demultiplex.demux import (
     demultiplex_flow_cell,
     delete_flow_cell,
     copy_novaseqx_flow_cells,
+    confirm_flow_cell_sync,
 )
 from cg.cli.demultiplex.finish import finish_group
 from cg.cli.demultiplex.report import create_report_cmd
@@ -24,6 +25,7 @@ def demultiplex_cmd_group():
 demultiplex_cmd_group: click.Group
 for sub_cmd in [
     create_report_cmd,
+    confirm_flow_cell_sync,
     delete_flow_cell,
     demultiplex_flow_cell,
     demultiplex_all,

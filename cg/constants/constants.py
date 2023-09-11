@@ -1,5 +1,4 @@
 """Constants for cg."""
-from enum import Enum
 
 import click
 
@@ -100,6 +99,7 @@ class FileFormat(StrEnum):
     YAML: str = "yaml"
     CSV: str = "csv"
     XML: str = "xml"
+    TXT: str = "txt"
 
 
 class GenomeVersion(StrEnum):
@@ -147,6 +147,7 @@ class FileExtensions(StrEnum):
     SPRING: str = ".spring"
     TAR: str = ".tar"
     TMP: str = ".tmp"
+    TSV: str = ".tsv"
     VCF: str = ".vcf"
     XML: str = ".xml"
     YAML: str = ".yaml"
