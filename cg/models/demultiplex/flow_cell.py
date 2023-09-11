@@ -51,6 +51,7 @@ class FlowCellDirectoryData:
         self.parse_flow_cell_dir_name()
         self.bcl_converter: Optional[str] = self.get_bcl_converter(bcl_converter)
         self.sample_sheet_path_hk: Optional[Path] = sample_sheet_path
+        self._sample_sheet: Optional[SampleSheet] = None
 
     def parse_flow_cell_dir_name(self):
         """Parse relevant information from flow cell name.
@@ -83,9 +84,13 @@ class FlowCellDirectoryData:
     @property
     def sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
+        if not self._sample_sheet:
+            self._sample_sheet = self._read_sample_sheet()
+        return self._sample_sheet
+
+    def _read_sample_sheet(self) -> SampleSheet:
         if not self.sample_sheet_path_hk:
             raise FlowCellError("Sample sheet path not set")
-
         return get_sample_sheet_from_file(
             infile=self.sample_sheet_path_hk,
             flow_cell_sample_type=self.sample_type,
