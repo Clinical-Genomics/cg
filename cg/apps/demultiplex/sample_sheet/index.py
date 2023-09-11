@@ -203,7 +203,7 @@ def pad_and_reverse_complement_sample_indexes(
     1. Pad indexes if needed so that all indexes have a length equal to the number of index reads
     2. Takes the reverse complement of index 2 in case of the new NovaSeq software control version
     (1.7) in combination with the new reagent kit (version 1.5).
-    3. Assigns the indexes to the sample attributes index1 and index2."""
+    3. Assigns the indexes to the sample attributes index and index2."""
     index1, index2 = get_index_pair(sample=sample)
     index_length = len(index1)
     if isinstance(sample, FlowCellSampleBcl2Fastq) and is_padding_needed(
