@@ -1,8 +1,12 @@
 """Functions that deal with modifications of the indexes."""
 import logging
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Set, Tuple, Union
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, FlowCellSampleBCLConvert
+from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSample,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
+)
 from cg.constants.constants import FileFormat
 from cg.constants.sequencing import Sequencers
 from cg.io.controller import ReadFile
@@ -198,7 +202,9 @@ def adapt_indexes_for_sample(
     3. Assigns the indexes to the sample attributes index1 and index2."""
     index1, index2 = get_index_pair(sample=sample)
     index_length = len(index1)
-    if is_padding_needed(index_cycles=index_cycles, sample_index_length=index_length):
+    if type(sample) == FlowCellSampleBcl2Fastq and is_padding_needed(
+        index_cycles=index_cycles, sample_index_length=index_length
+    ):
         LOG.debug("Padding indexes")
         index1 = pad_index_one(index_string=index1)
         index2 = pad_index_two(index_string=index2, reverse_complement=reverse_complement)
@@ -209,7 +215,7 @@ def adapt_indexes_for_sample(
 
 
 def update_indexes_for_samples(
-    samples: List[FlowCellSample],
+    samples: List[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]],
     run_parameters: RunParameters,
     reverse_complement: bool,
 ) -> None:

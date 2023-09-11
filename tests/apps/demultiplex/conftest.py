@@ -1,15 +1,14 @@
 from typing import List
 
 import pytest
-
 from cg.apps.demultiplex.sample_sheet.index import Index
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
-    SampleSheetCreatorBcl2Fastq,
-    SampleSheetCreatorBCLConvert,
-)
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
+)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
+    SampleSheetCreatorBcl2Fastq,
+    SampleSheetCreatorBCLConvert,
 )
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -19,30 +18,6 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 def valid_index() -> Index:
     """Return a valid index."""
     return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
-
-
-@pytest.fixture
-def lims_novaseq_bcl2fastq_samples(
-    lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleBcl2Fastq]:
-    """Return a list of parsed Bcl2fastq flow cell samples"""
-    return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
-
-
-@pytest.fixture
-def lims_novaseq_dragen_samples(
-    lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleBCLConvert]:
-    """Return a list of parsed Dragen flow cell samples"""
-    return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
-
-
-@pytest.fixture
-def lims_novaseq_x_samples(
-    lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleBCLConvert]:
-    """Return a list of parsed NovaSeqX flow cell samples"""
-    return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture
@@ -60,12 +35,12 @@ def bcl2fastq_sample_sheet_creator(
 @pytest.fixture
 def bcl_convert_sample_sheet_creator(
     bcl_convert_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_dragen_samples: List[FlowCellSampleBCLConvert],
+    lims_novaseq_bcl_convert_samples: List[FlowCellSampleBCLConvert],
 ) -> SampleSheetCreatorBCLConvert:
     """Returns a sample sheet creator for version 2 sample sheets with dragen format."""
     return SampleSheetCreatorBCLConvert(
         flow_cell=bcl_convert_flow_cell,
-        lims_samples=lims_novaseq_dragen_samples,
+        lims_samples=lims_novaseq_bcl_convert_samples,
     )
 
 

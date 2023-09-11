@@ -148,12 +148,12 @@ def test_get_reverse_complement_not_dna(caplog):
 
 
 def test_adapt_barcode_mismatch_values(
-    lims_novaseq_x_samples: List[FlowCellSampleBCLConvert],
+    lims_novaseq_bcl_convert_samples: List[FlowCellSampleBCLConvert],
     novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
 ):
     """Test that the barcode mismatch values are updated for a sample."""
     # GIVEN a list of NovaSeqX samples
-    present_index: str = lims_novaseq_x_samples[0].index
+    present_index: str = lims_novaseq_bcl_convert_samples[0].index
     # GIVEN a sample
     novaseq_x_flow_cell_sample_before_adapt_indexes.index = present_index
     assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_1 == 1
@@ -162,7 +162,7 @@ def test_adapt_barcode_mismatch_values(
     # WHEN adapting the barcode mismatch values
     update_barcode_mismatch_values_for_sample(
         sample_to_update=novaseq_x_flow_cell_sample_before_adapt_indexes,
-        samples_to_compare_to=lims_novaseq_x_samples,
+        samples_to_compare_to=lims_novaseq_bcl_convert_samples,
     )
 
     # THEN the barcode mismatch values have been updated
