@@ -87,14 +87,16 @@ def discard_index_sequence(sample_id_with_index: str) -> str:
 
 
 def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
-    """Find metrics files in Bcl2fastq demultiplex result directory."""
+    """
+    Finds metrics files in Bcl2fastq demultiplex result directory.
+    Raises:
+        FileNotFoundError: If no stats.json files are found in the demultiplex result directory.
+    """
     stats_json_paths = []
 
-    for root, dirs, files in os.walk(demultiplex_result_directory):
-        if BCL2FASTQ_METRICS_FILE_NAME in files:
-            stats_json_path = Path(root, BCL2FASTQ_METRICS_FILE_NAME)
-            if root.endswith(BCL2FASTQ_METRICS_DIRECTORY_NAME):
-                stats_json_paths.append(stats_json_path)
+    for root, _, files in os.walk(demultiplex_result_directory):
+        if root.endswith(BCL2FASTQ_METRICS_DIRECTORY_NAME) and BCL2FASTQ_METRICS_FILE_NAME in files:
+            stats_json_paths.append(Path(root, BCL2FASTQ_METRICS_FILE_NAME))
 
     if not stats_json_paths:
         raise FileNotFoundError(
