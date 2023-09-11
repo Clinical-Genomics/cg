@@ -1,21 +1,19 @@
 """CLI support to start microsalt"""
 
-import datetime as dt
 import logging
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List
 
 import click
 from cg.cli.workflow.commands import resolve_compression, store, store_available
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Analysis, Sample
-from housekeeper.store.models import File
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 

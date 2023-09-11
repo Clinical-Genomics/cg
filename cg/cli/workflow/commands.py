@@ -5,12 +5,10 @@ from pathlib import Path
 from typing import List, Union
 
 import click
-from dateutil.parser import parse as parse_date
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
-from cg.exc import DecompressionNeededError, FlowCellsNeededError
+from cg.exc import FlowCellsNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -25,6 +23,7 @@ from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
+from dateutil.parser import parse as parse_date
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", help="Simulate process without executing", is_flag=True

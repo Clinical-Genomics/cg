@@ -11,14 +11,7 @@ from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import AnalysisType, WorkflowManager
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
-from cg.exc import (
-    AnalysisNotReadyError,
-    BundleAlreadyAddedError,
-    CgDataError,
-    CgError,
-    DecompressionNeededError,
-    FlowCellsNeededError,
-)
+from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
@@ -473,8 +466,7 @@ class AnalysisAPI(MetaAPI):
     def _is_flow_cell_check_applicable(self, case_id) -> bool:
         """Returns true if the case is neither down sampled nor external."""
         return not (
-            self.status_db.is_case_down_sampled(case_id=case_id)
-            or self.status_db.is_case_external(case_id=case_id)
+            self.status_db.is_case_down_sampled(case_id) or self.status_db.is_case_external(case_id)
         )
 
     def ensure_flow_cells_on_disk(self, case_id: str) -> None:
