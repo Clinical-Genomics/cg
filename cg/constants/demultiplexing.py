@@ -85,7 +85,6 @@ class SampleSheetBcl2FastqSections:
         SAMPLE_NAME: str = "SampleName"
         CONTROL: str = "Control"
         RECIPE: str = "Recipe"
-        OPERATOR: str = "Operator"
         SAMPLE_PROJECT_BCL2FASTQ: str = "Project"
 
         COLUMN_NAMES: List[str] = [
@@ -97,7 +96,6 @@ class SampleSheetBcl2FastqSections:
             SAMPLE_NAME,
             CONTROL,
             RECIPE,
-            OPERATOR,
             SAMPLE_PROJECT_BCL2FASTQ,
         ]
 

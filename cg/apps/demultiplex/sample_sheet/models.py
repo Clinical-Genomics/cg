@@ -29,7 +29,6 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
     sample_name: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_NAME.value)
     control: str = Field("N", alias=SampleSheetBcl2FastqSections.Data.CONTROL.value)
     recipe: str = Field("R1", alias=SampleSheetBcl2FastqSections.Data.RECIPE.value)
-    operator: str = Field("script", alias=SampleSheetBcl2FastqSections.Data.OPERATOR.value)
 
     sample_id: str = Field(
         ..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value

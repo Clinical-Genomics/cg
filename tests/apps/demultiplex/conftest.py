@@ -122,7 +122,6 @@ def sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
             SampleSheetBcl2FastqSections.Data.SAMPLE_NAME.value,
             SampleSheetBcl2FastqSections.Data.CONTROL.value,
             SampleSheetBcl2FastqSections.Data.RECIPE.value,
-            SampleSheetBcl2FastqSections.Data.OPERATOR.value,
             SampleSheetBcl2FastqSections.Data.SAMPLE_PROJECT_BCL2FASTQ.value,
         ],
     ]
