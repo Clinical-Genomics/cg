@@ -14,6 +14,32 @@ from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
+class MockRunParameters:
+    """."""
+
+    index_length: int = 10
+
+    @staticmethod
+    def get_read_1_cycles() -> int:
+        return 151
+
+    @staticmethod
+    def get_read_2_cycles() -> int:
+        return 151
+
+    @staticmethod
+    def get_index_1_cycles() -> int:
+        return 10
+
+    @staticmethod
+    def get_index_2_cycles() -> int:
+        return 10
+
+
+class MockSampleSheetCreatorBCLConvert:
+    """."""
+
+
 @pytest.fixture
 def valid_index() -> Index:
     """Return a valid index."""
