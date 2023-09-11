@@ -57,7 +57,7 @@ def test_create_samplesheet_success(
     cli_runner: CliRunner,
     fluffy_case_id_existing,
     fluffy_context: CGConfig,
-    samplesheet_fixture_path,
+    samplesheet_path,
     caplog,
     mocker,
 ):
@@ -67,7 +67,7 @@ def test_create_samplesheet_success(
 
     # GIVEN an existing samplesheet in Housekeeper
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_sheet_housekeeper_path")
-    FluffyAnalysisAPI.get_sample_sheet_housekeeper_path.return_value = samplesheet_fixture_path
+    FluffyAnalysisAPI.get_sample_sheet_housekeeper_path.return_value = samplesheet_path
 
     # GIVEN Concentrations are set in LIMS on sample level
     mocker.patch.object(FluffyAnalysisAPI, "get_concentrations_from_lims")
