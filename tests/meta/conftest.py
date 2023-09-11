@@ -19,11 +19,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.constants.sequencing import Sequencers
-from cg.meta.transfer import TransferFlowCell
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
 from cg.store.models import Customer, ApplicationVersion, Invoice, Sample
-from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
 from tests.mocks.limsmock import MockLimsAPI
 from cg.constants.invoice import CustomerNames
@@ -226,14 +224,6 @@ def flowcell_store(base_store: Store, stats_sample_data: dict) -> Generator[Stor
         base_store.session.add(sample)
     base_store.session.commit()
     yield base_store
-
-
-@pytest.fixture
-def transfer_flow_cell_api(
-    flowcell_store: Store, housekeeper_api: MockHousekeeperAPI, base_store_stats: StatsAPI
-) -> Generator[TransferFlowCell, None, None]:
-    """Setup transfer flow cell API."""
-    yield TransferFlowCell(db=flowcell_store, stats_api=base_store_stats, hk_api=housekeeper_api)
 
 
 @pytest.fixture
