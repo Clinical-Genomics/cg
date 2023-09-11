@@ -2,14 +2,12 @@
 import logging
 import click
 
-from pathlib import Path
-
 
 from cg.apps.lims import LimsAPI
 from cg.meta.transfer import PoolState, SampleState, TransferLims
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Flowcell
+
 
 LOG = logging.getLogger(__name__)
 
@@ -21,34 +19,6 @@ def transfer_group(context: CGConfig):
     lims_api: LimsAPI = context.lims_api
     status_db: Store = context.status_db
     context.meta_apis["transfer_lims_api"] = TransferLims(status=status_db, lims=lims_api)
-
-
-@transfer_group.command("flow-cell")
-@click.argument("flow-cell-id")
-@click.option(
-    "-d",
-    "--flow-cell-dir",
-    type=click.Path(exists=True, file_okay=False),
-    required=True,
-    help="Path to demultiplexed flow cell output directory",
-)
-@click.option(
-    "--store/--no-store", default=True, help="Store sample bundles of flow cell in Housekeeper"
-)
-@click.pass_obj
-def populate_flow_cell(
-    context: CGConfig, flow_cell_dir: str, flow_cell_id: str, store: bool = True
-):
-    """Populate results from a flow cell."""
-    flow_cell_dir: Path = Path(flow_cell_dir)
-    status_db: Store = context.status_db
-    transfer_api: TransferFlowCell = context.meta_apis["transfer_flow_cell_api"]
-    new_record: Flowcell = transfer_api.transfer(
-        flow_cell_dir=flow_cell_dir, flow_cell_id=flow_cell_id, store=store
-    )
-    status_db.session.add(new_record)
-    status_db.session.commit()
-    LOG.info(f"flow cell added: {new_record}")
 
 
 @transfer_group.command("lims")
