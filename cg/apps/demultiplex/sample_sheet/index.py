@@ -208,6 +208,7 @@ def pad_and_reverse_complement_sample_indexes(
         LOG.debug("Padding indexes")
         index1 = pad_index_one(index_string=index1)
         index2 = pad_index_two(index_string=index2, reverse_complement=reverse_complement)
+    LOG.debug("Padding not necessary for sample")
     if reverse_complement:
         index2 = get_reverse_complement_dna_seq(index2)
     sample.index = index1
