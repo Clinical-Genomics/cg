@@ -28,7 +28,7 @@ def finish_flow_cell(
 
     flow-cell-name is full flow cell name, e.g. '201203_D00483_0200_AHVKJCDRXX'.
     """
-    demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
+    demux_post_processing_api = DemuxPostProcessingAPI(config=context)
     demux_post_processing_api.set_dry_run(dry_run=dry_run)
     demux_post_processing_api.finish_flow_cell(
         flow_cell_directory_name=flow_cell_directory_name,
@@ -43,7 +43,7 @@ def finish_flow_cell(
 def finish_all_cmd(context: CGConfig, dry_run: bool):
     """Command to finish up all demultiplexed flow cells."""
 
-    demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
+    demux_post_processing_api = DemuxPostProcessingAPI(config=context)
     demux_post_processing_api.set_dry_run(dry_run=dry_run)
     is_error_raised: bool = demux_post_processing_api.finish_all_flow_cells()
     if is_error_raised:
