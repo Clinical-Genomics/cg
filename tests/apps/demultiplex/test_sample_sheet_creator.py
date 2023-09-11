@@ -143,7 +143,7 @@ def test_add_override_cycles_to_samples(
     bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
     override_cycles_for_samples_with_updated_indexes: List[str],
 ):
-    """."""
+    """Test that the OverrideCycles values are generated correctly."""
     # GIVEN a SampleSheetCreator with samples without Override Cycles added
     sample_sheet_creator = SampleSheetCreatorBCLConvert(
         flow_cell=novaseq_x_flow_cell, lims_samples=bcl_convert_samples_with_updated_indexes
