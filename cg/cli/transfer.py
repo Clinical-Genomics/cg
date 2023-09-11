@@ -4,10 +4,9 @@ import click
 
 from pathlib import Path
 
-from cg.apps.cgstats.stats import StatsAPI
-from cg.apps.housekeeper.hk import HousekeeperAPI
+
 from cg.apps.lims import LimsAPI
-from cg.meta.transfer import PoolState, SampleState, TransferFlowCell, TransferLims
+from cg.meta.transfer import PoolState, SampleState, TransferLims
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Flowcell
@@ -21,11 +20,6 @@ def transfer_group(context: CGConfig):
     """Transfer results to the status interface."""
     lims_api: LimsAPI = context.lims_api
     status_db: Store = context.status_db
-    hk_api: HousekeeperAPI = context.housekeeper_api
-    stats_api: StatsAPI = context.cg_stats_api
-    context.meta_apis["transfer_flow_cell_api"] = TransferFlowCell(
-        db=status_db, stats_api=stats_api, hk_api=hk_api
-    )
     context.meta_apis["transfer_lims_api"] = TransferLims(status=status_db, lims=lims_api)
 
 
