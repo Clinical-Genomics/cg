@@ -199,6 +199,6 @@ def test_incorrect_bcl2fastq_headers_samplesheet(
     )
 
     assert (
-        "FCID,Lane,SampleID,index,SampleName,Recipe,Project"
+        "FCID,Lane,SampleID,index,SampleName,Project"
         in caplog.text
     )

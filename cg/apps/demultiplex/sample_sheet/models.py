@@ -27,7 +27,6 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
     index: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.INDEX_1.value)
     index2: str = Field("", alias=SampleSheetBcl2FastqSections.Data.INDEX_2.value)
     sample_name: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_NAME.value)
-    recipe: str = Field("R1", alias=SampleSheetBcl2FastqSections.Data.RECIPE.value)
 
     sample_id: str = Field(
         ..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value

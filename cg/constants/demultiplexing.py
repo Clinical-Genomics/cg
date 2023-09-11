@@ -83,7 +83,6 @@ class SampleSheetBcl2FastqSections:
         INDEX_1: str = "index"
         INDEX_2: str = "index2"
         SAMPLE_NAME: str = "SampleName"
-        RECIPE: str = "Recipe"
         SAMPLE_PROJECT_BCL2FASTQ: str = "Project"
 
         COLUMN_NAMES: List[str] = [
@@ -93,7 +92,6 @@ class SampleSheetBcl2FastqSections:
             INDEX_1,
             INDEX_2,
             SAMPLE_NAME,
-            RECIPE,
             SAMPLE_PROJECT_BCL2FASTQ,
         ]
 
