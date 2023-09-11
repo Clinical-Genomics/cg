@@ -83,7 +83,6 @@ class SampleSheetBcl2FastqSections:
         INDEX_1: str = "index"
         INDEX_2: str = "index2"
         SAMPLE_NAME: str = "SampleName"
-        CONTROL: str = "Control"
         RECIPE: str = "Recipe"
         SAMPLE_PROJECT_BCL2FASTQ: str = "Project"
 
@@ -94,7 +93,6 @@ class SampleSheetBcl2FastqSections:
             INDEX_1,
             INDEX_2,
             SAMPLE_NAME,
-            CONTROL,
             RECIPE,
             SAMPLE_PROJECT_BCL2FASTQ,
         ]
