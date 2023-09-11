@@ -7,7 +7,6 @@ from cg.apps.demultiplex.sample_sheet.index import (
     INDEX_TWO_PAD_SEQUENCE,
     LONG_INDEX_CYCLE_NR,
     Index,
-    adapt_indexes_for_sample,
     get_hamming_distance_index_1,
     get_hamming_distance_index_2,
     get_index_pair,
@@ -17,6 +16,7 @@ from cg.apps.demultiplex.sample_sheet.index import (
     get_valid_indexes,
     index_exists,
     is_reverse_complement,
+    pad_and_reverse_complement_indexes,
     update_barcode_mismatch_values_for_sample,
 )
 from cg.apps.demultiplex.sample_sheet.models import (
@@ -206,7 +206,7 @@ def test_adapt_indexes_for_sample_reverse_complement_padding(
     sample.index = "ATTCCACA-TGGTCTTG"
 
     # WHEN adapting the indexes of the sample
-    adapt_indexes_for_sample(
+    pad_and_reverse_complement_indexes(
         sample=sample,
         index_cycles=novaseq_6000_run_parameters.index_length,
         reverse_complement=is_reverse_complement(run_parameters=novaseq_6000_run_parameters),
@@ -236,7 +236,7 @@ def test_adapt_indexes_for_sample_reverse_complement_no_padding(
     initial_index2: str = initial_indexes[1]
 
     # WHEN adapting the indexes of the sample
-    adapt_indexes_for_sample(
+    pad_and_reverse_complement_indexes(
         sample=sample,
         index_cycles=novaseq_6000_run_parameters.index_length,
         reverse_complement=is_reverse_complement(run_parameters=novaseq_6000_run_parameters),
@@ -266,7 +266,7 @@ def test_adapt_indexes_for_sample_no_reverse_complement_no_padding(
     initial_index2: str = initial_indexes[1]
 
     # WHEN adapting the indexes of the sample
-    adapt_indexes_for_sample(
+    pad_and_reverse_complement_indexes(
         sample=sample,
         index_cycles=novaseq_x_run_parameters.index_length,
         reverse_complement=is_reverse_complement(run_parameters=novaseq_x_run_parameters),
