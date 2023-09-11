@@ -235,7 +235,7 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         index2_str: str = "I" + str(self.run_parameters.get_index_2_cycles()) + ";"
         for sample in self.lims_samples:
             sample_index_len: int = len(sample.index)
-            if sample_index_len != flow_cell_index_len:
+            if sample_index_len < flow_cell_index_len:
                 index1_str = (
                     "I"
                     + str(sample_index_len)
