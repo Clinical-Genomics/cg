@@ -1388,7 +1388,7 @@ def lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
     return Path(raw_lims_sample_dir, "raw_samplesheet_novaseq.json")
 
 
-@pytest.fixture()
+@pytest.fixture
 def lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[dict]:
     """Return a list of raw flow cell samples."""
     return ReadFile.get_content_from_file(
