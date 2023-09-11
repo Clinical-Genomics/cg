@@ -4,7 +4,7 @@ from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Family
 from tests.cli.workflow.balsamic.conftest import (
-    fixture_balsamic_context,
+    balsamic_context,
     balsamic_lims,
     balsamic_housekeeper,
     balsamic_mock_fastq_files,
