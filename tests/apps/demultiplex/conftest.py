@@ -14,30 +14,25 @@ from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
-class MockRunParameters:
-    """."""
-
-    index_length: int = 10
-
-    @staticmethod
-    def get_read_1_cycles() -> int:
-        return 151
-
-    @staticmethod
-    def get_read_2_cycles() -> int:
-        return 151
-
-    @staticmethod
-    def get_index_1_cycles() -> int:
-        return 10
-
-    @staticmethod
-    def get_index_2_cycles() -> int:
-        return 10
+@pytest.fixture()
+def bcl_convert_samples_with_updated_indexes() -> List[FlowCellSampleBCLConvert]:
+    """Return a list of three FlowCellSampleBCLConvert with updated indexes."""
+    sample_1 = FlowCellSampleBCLConvert(
+        lane=1, sample_id="sample 1", index="CAGAAGAT", index2="CAATGTAC"
+    )
+    sample_2 = FlowCellSampleBCLConvert(
+        lane=1, sample_id="sample 2", index="CAGAAGAG", index2="CAATGTAT"
+    )
+    sample_3 = FlowCellSampleBCLConvert(
+        lane=2, sample_id="sample 3", index="AAGCGATAGA", index2="AACCGCAACA"
+    )
+    return [sample_1, sample_2, sample_3]
 
 
-class MockSampleSheetCreatorBCLConvert:
-    """."""
+@pytest.fixture()
+def override_cycles_for_samples_with_updated_indexes() -> List[str]:
+    """Return the correspondent Override Cycles values for three samples."""
+    return ["Y151;I8N2;N2I8;Y151", "Y151;I8N2;N2I8;Y151", "Y151;I10;I10;Y151"]
 
 
 @pytest.fixture

@@ -1,5 +1,4 @@
 """Tests for the SampleSheetCreator classes."""
-import re
 from pathlib import Path
 from typing import List
 
@@ -140,18 +139,24 @@ def test_remove_unwanted_samples_no_dual_index(
 
 
 def test_add_override_cycles_to_samples(
-    bcl_convert_sample_sheet_creator: SampleSheetCreatorBCLConvert,
+    novaseq_x_flow_cell: FlowCellDirectoryData,
+    bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
+    override_cycles_for_samples_with_updated_indexes: List[str],
 ):
     """."""
     # GIVEN a SampleSheetCreator with samples without Override Cycles added
-    samples: List[FlowCellSampleBCLConvert] = bcl_convert_sample_sheet_creator.lims_samples
-
-    assert all(sample.override_cycles == "" for sample in samples)
+    sample_sheet_creator = SampleSheetCreatorBCLConvert(
+        flow_cell=novaseq_x_flow_cell, lims_samples=bcl_convert_samples_with_updated_indexes
+    )
+    assert all(sample.override_cycles == "" for sample in sample_sheet_creator.lims_samples)
 
     # WHEN adding the correct values of override samples
-    bcl_convert_sample_sheet_creator.process_samples_for_sample_sheet()
-    samples: List[FlowCellSampleBCLConvert] = bcl_convert_sample_sheet_creator.lims_samples
+    sample_sheet_creator.add_override_cycles_to_samples()
 
     # THEN the Override Cycles attribute is added to all samples
-    pattern: str = r"^Y.*I.*I.*Y.*$"
-    assert all(re.match(pattern, sample.override_cycles) for sample in samples)
+    assert all(
+        sample.override_cycles == override_cycles_value
+        for sample, override_cycles_value in zip(
+            sample_sheet_creator.lims_samples, override_cycles_for_samples_with_updated_indexes
+        )
+    )
