@@ -5,7 +5,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List, Optional
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
@@ -15,7 +15,7 @@ from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
 from cg.store.models import Sample
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -262,11 +262,13 @@ class CompressAPI:
     def add_fastq_hk(self, sample_obj: Sample, fastq_first: Path, fastq_second: Path) -> None:
         """Add FASTQ files to Housekeeper."""
 
+        flow_cell_id: str = self.get_flow_cell_id_from_sample(
+            file_path=fastq_first, sample=sample_obj
+        )
         if not sample_obj.application_version.application.is_external:
-            flow_cell_id: str = self.get_flow_cell_id(fastq_path=fastq_first)
             fastq_tags: List[str] = [flow_cell_id, SequencingFileTag.FASTQ]
         else:
-            fastq_tags: List[str] = [sample_obj.internal_id, SequencingFileTag.FASTQ]
+            fastq_tags: List[str] = [flow_cell_id, sample_obj.internal_id, SequencingFileTag.FASTQ]
         LOG.info(
             f"Adds {fastq_first}, {fastq_second} to bundle {sample_obj.internal_id} with tags {fastq_tags}"
         )
@@ -279,6 +281,12 @@ class CompressAPI:
                 bundle_name=sample_obj.internal_id, file=fastq, tags=fastq_tags
             )
         self.hk_api.commit()
+
+    @staticmethod
+    def get_flow_cell_id_from_sample(file_path: Path, sample: Sample) -> Optional[str]:
+        for flow_cell_name in [flow_cell.name for flow_cell in sample.flowcells]:
+            if flow_cell_name in str(file_path):
+                return flow_cell_name
 
     # Methods to remove files from disc
     def remove_fastq(self, fastq_first: Path, fastq_second: Path):
