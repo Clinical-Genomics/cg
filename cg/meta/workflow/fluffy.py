@@ -5,21 +5,20 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Optional
 
-import pandas as pd
+
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBCLConvert, SampleSheet
+from cg.apps.demultiplex.sample_sheet.models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-    get_sample_type_from_sequencer_type,
-)
+    get_sample_sheet_from_file, get_sample_type_from_sequencer_type)
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import ReadFile
-from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
+from cg.meta.demultiplex.housekeeper_storage_functions import \
+    get_sample_sheets_from_latest_version
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Family, Flowcell, Sample
@@ -204,61 +203,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
                 break
             header_line_count += 1
         return header_line_count
-
-    def read_sample_sheet_data(self, sample_sheet_housekeeper_path: Path) -> pd.DataFrame:
-        """
-        Read in a sample sheet starting from the sample sheet data header.
-
-        Args:
-                        sample_sheet_housekeeper_path (Path): Path to the housekeeper sample sheet file
-
-        Returns:
-                        pd.DataFrame: A pandas dataframe of the sample sheet
-        """
-        header_line_count: int = self.get_nr_of_header_lines_in_sample_sheet(
-            sample_sheet_housekeeper_path=sample_sheet_housekeeper_path
-        )
-        return pd.read_csv(sample_sheet_housekeeper_path, index_col=None, header=header_line_count)
-
-    def add_sample_sheet_column(
-        self, sample_sheet_df: pd.DataFrame, new_column: str, to_add: list
-    ) -> pd.DataFrame:
-        """Add columns to the sample sheet.
-        Returns:
-                        pd.DataFrame: Sample sheet pd.DataFrame.
-        """
-        try:
-            sample_sheet_df[new_column] = to_add
-        except ValueError:
-            LOG.error(
-                f"Error when trying to add the column: {new_column} to sample sheet with data: {to_add}."
-            )
-        return sample_sheet_df
-
-    def column_has_alias(self, sample_sheet_df: pd.DataFrame, alias: str) -> bool:
-        return alias in sample_sheet_df.columns
-
-    def set_column_alias(self, sample_sheet_df: pd.DataFrame, alias: str, alternative: str) -> str:
-        """Return column alias from the sample sheet or set to alternative.
-        Returns: str: column name alias
-        """
-        return (
-            alias
-            if self.column_has_alias(sample_sheet_df=sample_sheet_df, alias=alias)
-            else alternative
-        )
-
-    def write_sample_sheet_csv(
-        self, sample_sheet_df: pd.DataFrame, sample_sheet_workdir_path: Path
-    ):
-        """
-        Write the sample sheet as a csv file
-        """
-        sample_sheet_df.to_csv(
-            sample_sheet_workdir_path,
-            sep=",",
-            index=False,
-        )
 
     def create_fluffy_sample_sheet(
         self,
