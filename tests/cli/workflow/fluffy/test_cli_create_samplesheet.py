@@ -55,7 +55,7 @@ def test_create_samplesheet_dry_no_case(
 
 def test_create_samplesheet_success(
     cli_runner: CliRunner,
-    fluffy_case_id_existing,
+    fluffy_case_id_existing: str,
     fluffy_context: CGConfig,
     samplesheet_path,
     sample: Sample,
@@ -104,7 +104,7 @@ def test_create_samplesheet_success(
 
 def test_create_fluffy_samplesheet_from_bcl_convert_sample_sheet(
     cli_runner: CliRunner,
-    fluffy_case_id_existing,
+    fluffy_case_id_existing: str,
     fluffy_context: CGConfig,
     bcl_convert_samplesheet_path: Path,
     sample: Sample,
