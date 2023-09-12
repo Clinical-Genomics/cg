@@ -15,7 +15,7 @@ from cg.apps.demultiplex.sample_sheet.index import (
     get_reverse_complement_dna_seq,
     get_valid_indexes,
     index_exists,
-    is_reverse_complement,
+    is_reverse_complement_needed,
     pad_and_reverse_complement_sample_indexes,
     update_barcode_mismatch_values_for_sample,
 )
@@ -199,7 +199,7 @@ def test_adapt_indexes_for_sample_reverse_complement_padding(
 ):
     """Test that adapting indexes for a sample that needs padding and reverse complement works."""
     # GIVEN a run parameters file that needs reverse complement of indexes
-    assert is_reverse_complement(run_parameters=novaseq_6000_run_parameters)
+    assert is_reverse_complement_needed(run_parameters=novaseq_6000_run_parameters)
     # GIVEN a sample that needs padding
     sample: FlowCellSampleBcl2Fastq = novaseq6000_flow_cell_sample_before_adapt_indexes
     assert novaseq_6000_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
@@ -209,7 +209,9 @@ def test_adapt_indexes_for_sample_reverse_complement_padding(
     pad_and_reverse_complement_sample_indexes(
         sample=sample,
         index_cycles=novaseq_6000_run_parameters.index_length,
-        reverse_complement=is_reverse_complement(run_parameters=novaseq_6000_run_parameters),
+        is_reverse_complement=is_reverse_complement_needed(
+            run_parameters=novaseq_6000_run_parameters
+        ),
     )
 
     # THEN the first index was correctly adapted
@@ -226,7 +228,7 @@ def test_adapt_indexes_for_sample_reverse_complement_no_padding(
 ):
     """Test that adapting indexes of a sample that needs reverse complement but no padding works."""
     # GIVEN a run parameters file that needs reverse complement of indexes
-    assert is_reverse_complement(run_parameters=novaseq_6000_run_parameters)
+    assert is_reverse_complement_needed(run_parameters=novaseq_6000_run_parameters)
     # GIVEN a sample that does not need padding
     sample: FlowCellSampleBcl2Fastq = novaseq6000_flow_cell_sample_before_adapt_indexes
     assert novaseq_6000_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
@@ -239,7 +241,9 @@ def test_adapt_indexes_for_sample_reverse_complement_no_padding(
     pad_and_reverse_complement_sample_indexes(
         sample=sample,
         index_cycles=novaseq_6000_run_parameters.index_length,
-        reverse_complement=is_reverse_complement(run_parameters=novaseq_6000_run_parameters),
+        is_reverse_complement=is_reverse_complement_needed(
+            run_parameters=novaseq_6000_run_parameters
+        ),
     )
 
     # THEN the first index was correctly adapted
@@ -256,7 +260,7 @@ def test_adapt_indexes_for_sample_no_reverse_complement_no_padding(
 ):
     """Test adapting indexes of a sample that does not need reverse complement nor padding works."""
     # GIVEN a run parameters file that does not need reverse complement of indexes
-    assert not is_reverse_complement(run_parameters=novaseq_x_run_parameters)
+    assert not is_reverse_complement_needed(run_parameters=novaseq_x_run_parameters)
     # GIVEN a sample that does not need padding
     sample: FlowCellSampleBCLConvert = novaseq_x_flow_cell_sample_before_adapt_indexes
     assert novaseq_x_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
@@ -269,7 +273,7 @@ def test_adapt_indexes_for_sample_no_reverse_complement_no_padding(
     pad_and_reverse_complement_sample_indexes(
         sample=sample,
         index_cycles=novaseq_x_run_parameters.index_length,
-        reverse_complement=is_reverse_complement(run_parameters=novaseq_x_run_parameters),
+        is_reverse_complement=is_reverse_complement_needed(run_parameters=novaseq_x_run_parameters),
     )
 
     # THEN the first index was correctly adapted
@@ -300,16 +304,17 @@ def test_get_hamming_distance_index_1_different_lengths():
 
 
 def test_get_hamming_distance_index_1_different_prefixes():
-    """Test that hamming distance between indexes with different prefixes is greater than zero."""
-    # GIVEN two index_1 sequences with the same suffixes but different prefixes
-    sequence_1: str = "GATTACA"
-    sequence_2: str = "XXGATTACA"
+    """Test that hamming distance for index 1 counts different characters from the left."""
+    # GIVEN two index_1 sequences with different lengths differing by two characters
+    # when aligned to the left
+    sequence_1: str = "GATXX"
+    sequence_2: str = "GATTACA"
 
     # WHEN getting the hamming distance between them in any order
 
-    # THEN the distance is greater than zero
-    assert get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_2) > 0
-    assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_1) > 0
+    # THEN the distance is equal to the number of different characters
+    assert get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_2) == 2
+    assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_1) == 2
 
 
 def test_get_hamming_distance_index_2_different_lengths():
@@ -332,13 +337,14 @@ def test_get_hamming_distance_index_2_different_lengths():
 
 
 def test_get_hamming_distance_index_2_different_prefixes():
-    """Test that hamming distance between indexes with different suffixes is greater than zero."""
-    # GIVEN two index_2 sequences with the same prefixes but different suffixes
-    sequence_1: str = "GATTACA"
-    sequence_2: str = "GATTACAXX"
+    """Test that hamming distance for index 2 counts different characters from the right."""
+    # GIVEN two index_2 sequences different lengths differing by two characters
+    # when aligned to the right
+    sequence_1: str = "XXACA"
+    sequence_2: str = "GATTACA"
 
     # WHEN getting the hamming distance between them in any order
 
-    # THEN the distance is greater than zero
-    assert get_hamming_distance_index_2(sequence_1=sequence_1, sequence_2=sequence_2) > 0
-    assert get_hamming_distance_index_2(sequence_1=sequence_2, sequence_2=sequence_1) > 0
+    # THEN the distance is equal to the number of different characters
+    assert get_hamming_distance_index_2(sequence_1=sequence_1, sequence_2=sequence_2) == 2
+    assert get_hamming_distance_index_2(sequence_1=sequence_2, sequence_2=sequence_1) == 2

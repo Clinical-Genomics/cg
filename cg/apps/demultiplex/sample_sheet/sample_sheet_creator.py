@@ -10,7 +10,7 @@ from cg.apps.demultiplex.sample_sheet.index import (
     get_valid_indexes,
     index_exists,
     is_dual_index,
-    is_reverse_complement,
+    is_reverse_complement_needed,
     update_barcode_mismatch_values_for_sample,
     update_indexes_for_samples,
 )
@@ -130,14 +130,16 @@ class SampleSheetCreator:
             LOG.info("Skipped adding dummy samples since they are not needed")
         self.remove_unwanted_samples()
         samples_in_lane: List[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]]
-        reverse_complement: bool = is_reverse_complement(run_parameters=self.run_parameters)
+        is_reverse_complement: bool = is_reverse_complement_needed(
+            run_parameters=self.run_parameters
+        )
         self.add_override_cycles_to_samples()
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
             LOG.info(f"Adapting index and barcode mismatch values for samples in lane {lane}")
             update_indexes_for_samples(
                 samples=samples_in_lane,
-                run_parameters=self.run_parameters,
-                reverse_complement=reverse_complement,
+                index_cycles=self.run_parameters.index_length,
+                is_reverse_complement=is_reverse_complement,
             )
             self.update_barcode_mismatch_values_for_samples(samples_in_lane)
 
@@ -236,20 +238,16 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
     def add_override_cycles_to_samples(self) -> None:
         """Add override cycles attribute to samples."""
         flow_cell_index_len: int = self.run_parameters.index_length
-        read1_str: str = f"Y{str(self.run_parameters.get_read_1_cycles())};"
-        read2_str: str = f"Y{str(self.run_parameters.get_read_2_cycles())}"
+        read1_cycles: str = f"Y{self.run_parameters.get_read_1_cycles()};"
+        read2_cycles: str = f"Y{self.run_parameters.get_read_2_cycles()}"
         for sample in self.lims_samples:
-            index1_str: str = f"I{str(self.run_parameters.get_index_1_cycles())};"
-            index2_str: str = f"I{str(self.run_parameters.get_index_2_cycles())};"
+            index1_cycles: str = f"I{self.run_parameters.get_index_1_cycles()};"
+            index2_cycles: str = f"I{self.run_parameters.get_index_2_cycles()};"
             sample_index_len: int = len(get_index_pair(sample)[0])
             if sample_index_len < flow_cell_index_len:
-                index1_str = (
-                    f"I{str(sample_index_len)}N{str(flow_cell_index_len - sample_index_len)};"
-                )
-                index2_str = (
-                    f"N{str(flow_cell_index_len - sample_index_len)}I{str(sample_index_len)};"
-                )
-            sample.override_cycles = read1_str + index1_str + index2_str + read2_str
+                index1_cycles = f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
+                index2_cycles = f"N{flow_cell_index_len - sample_index_len}I{sample_index_len};"
+            sample.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
     def get_additional_sections_sample_sheet(self) -> List[List[str]]:
         """Return all sections of the sample sheet that are not the data section."""

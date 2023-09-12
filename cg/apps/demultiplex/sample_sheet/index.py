@@ -89,7 +89,7 @@ def get_index_pair(sample: FlowCellSample) -> Tuple[str, str]:
     return sample.index, sample.index2
 
 
-def is_reverse_complement(run_parameters: RunParameters) -> bool:
+def is_reverse_complement_needed(run_parameters: RunParameters) -> bool:
     """Return True if the second index requires reverse complement.
 
     If the run used the new NovaSeq control software version (NEW_CONTROL_SOFTWARE_VERSION)
@@ -197,7 +197,7 @@ def update_barcode_mismatch_values_for_sample(
 
 
 def pad_and_reverse_complement_sample_indexes(
-    sample: FlowCellSample, index_cycles: int, reverse_complement: bool
+    sample: FlowCellSample, index_cycles: int, is_reverse_complement: bool
 ) -> None:
     """Adapts the indexes of sample.
     1. Pad indexes if needed so that all indexes have a length equal to the number of index reads
@@ -211,9 +211,9 @@ def pad_and_reverse_complement_sample_indexes(
     ):
         LOG.debug("Padding indexes")
         index1 = pad_index_one(index_string=index1)
-        index2 = pad_index_two(index_string=index2, reverse_complement=reverse_complement)
+        index2 = pad_index_two(index_string=index2, reverse_complement=is_reverse_complement)
     LOG.debug(f"Padding not necessary for sample {sample.sample_id}")
-    if reverse_complement:
+    if is_reverse_complement:
         index2 = get_reverse_complement_dna_seq(index2)
     sample.index = index1
     sample.index2 = index2
@@ -221,14 +221,13 @@ def pad_and_reverse_complement_sample_indexes(
 
 def update_indexes_for_samples(
     samples: List[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]],
-    run_parameters: RunParameters,
-    reverse_complement: bool,
+    index_cycles: int,
+    is_reverse_complement: bool,
 ) -> None:
     """Updates the values to the fields index1 and index 2 of samples."""
-    index_cycles: int = run_parameters.index_length
     for sample in samples:
         pad_and_reverse_complement_sample_indexes(
             sample=sample,
             index_cycles=index_cycles,
-            reverse_complement=reverse_complement,
+            is_reverse_complement=is_reverse_complement,
         )
