@@ -1,10 +1,12 @@
 import datetime as dt
+from enum import StrEnum
 import logging
 import shutil
 from pathlib import Path
 from typing import List, Optional
 
 import pandas as pd
+from pydantic import BaseModel
 from sqlalchemy.orm import Query
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq, SampleSheet
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
@@ -20,6 +22,50 @@ from cg.store.models import Family, Flowcell, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
+
+
+class FluffySampleSheetHeaders(StrEnum):
+    flow_cell_id: str = "FCID"
+    lane: str = "Lane"
+    sample_internal_id: str = "Sample_ID"
+    sample_reference: str = "SampleRef"
+    index: str = "index"
+    index2: str = "index2"
+    sample_name: str = "SampleName"
+    control: str = "Control"
+    recipe: str = "Recipe"
+    operator: str = "Operator"
+    sample_project: str = "SampleProject"
+    exclude: str = "Exclude"
+    library_nM: str = "Library_nM"
+    sequencing_date: str = "SequencingDate"
+
+
+class FluffySampleSheetEntry(BaseModel):
+    flow_cell_id: str
+    lane: int
+    sample_internal_id: str
+    sample_reference: str = "hg19"
+    index: str
+    index2: str
+    sample_name: str
+    control: Optional[str] = "N"
+    recipe: Optional[str] = "R1"
+    operator: Optional[str] = "script"
+    sample_project: str
+    exclude: bool
+    library_nM: float
+    sequencing_date: dt.date
+
+
+class FluffySampleSheet(BaseModel):
+    entries: List[FluffySampleSheetEntry]
+
+    def write_sample_sheet(self, out_path: Path) -> None:
+        with out_path.open("w") as outfile:
+            outfile.write(",".join([header.value for header in FluffySampleSheetHeaders]) + "\n")
+            for entry in self.entries:
+                outfile.write(",".join(str(value) for value in entry.model_dump().values()) + "\n")
 
 
 class FluffyAnalysisAPI(AnalysisAPI):
@@ -229,9 +275,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Edits column 'Sample_Project or Project' to include customer sample starlims id.
         Adds columns Library_nM, SequencingDate, Exclude and populates with orderform values
         """
-        sample_sheet_df = self.read_sample_sheet_data(
-            sample_sheet_housekeeper_path=sample_sheet_housekeeper_path
-        )
 
         # TODO: resolve actual sample type somehow or refactor get_sample_sheet_from_file
         sample_sheet: SampleSheet = get_sample_sheet_from_file(
@@ -239,22 +282,28 @@ class FluffyAnalysisAPI(AnalysisAPI):
             flow_cell_sample_type=FlowCellSampleBcl2Fastq,
         )
 
+        fluffy_sample_sheet_rows = []
+
         for sample in sample_sheet.samples:
             sample_id: str = sample.sample_id
+            db_sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
 
-            fluffy_sample_config = {
-                "sample_internal_id": sample_id,
-                "flow_cell_id": flow_cell_id,
-                "lane": sample.lane,
-                "index": sample.index,
-                "index2": sample.index2,
-                "sample_name": self.get_sample_name_from_lims_id(sample_id),
-                "sample_project": self.get_sample_order(sample_id),
-                "exclude": self.get_sample_control_status(sample_id),
-                "library_nM": self.get_concentrations_from_lims(sample_id),
-                "sequencing_date": self.get_sample_sequenced_date(sample_id),
-            }
-    
+            sample_sheet_row = FluffySampleSheetEntry(
+                flow_cell_id=flow_cell_id,
+                lane=sample.lane,
+                sample_internal_id=sample_id,
+                index=sample.index,
+                index2=sample.index2,
+                sample_name=db_sample.name,
+                sample_project=db_sample.order,
+                exclude=self.get_sample_control_status(sample_id),
+                library_nM=self.get_concentrations_from_lims(sample_id),
+                sequencing_date=self.get_sample_sequenced_date(sample_id),
+            )
+            fluffy_sample_sheet_rows.append(sample_sheet_row)
+        
+        fluffy_sample_sheet = FluffySampleSheet(fluffy_sample_sheet_rows)
+        fluffy_sample_sheet.write_sample_sheet(sample_sheet_workdir_path)
 
     def get_sample_sheet_housekeeper_path(self, flowcell_name: str) -> Path:
         """Returns the path to original sample sheet file that is added to Housekeeper."""
