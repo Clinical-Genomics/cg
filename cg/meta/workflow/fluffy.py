@@ -6,11 +6,9 @@ from typing import List, Optional
 
 import pandas as pd
 from sqlalchemy.orm import Query
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
+from cg.constants.demultiplexing import SampleSheetBCLConvertSections, SampleSheetBcl2FastqSections
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import ReadFile
 from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
@@ -153,7 +151,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
         )
         header_line_count: int = 1
         for line in sample_sheet_content:
-            if SampleSheetBcl2FastqSections.Data.HEADER.value in line:
+            if (
+                SampleSheetBcl2FastqSections.Data.HEADER.value
+                or SampleSheetBCLConvertSections.Data.HEADER.value in line
+            ):
                 break
             header_line_count += 1
         return header_line_count
@@ -222,19 +223,36 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Edits column 'Sample_Project or Project' to include customer sample starlims id.
         Adds columns Library_nM, SequencingDate, Exclude and populates with orderform values
         """
-        sample_sheet: SampleSheet = get_sample_sheet_from_file(
-            infile=sample_sheet_housekeeper_path,
-            flow_cell_sample_type=FlowCellSample,  # TODO: resolve type here or refactor existing get_sample_sheet_from_file
+        sample_sheet_df = self.read_sample_sheet_data(
+            sample_sheet_housekeeper_path=sample_sheet_housekeeper_path
         )
 
-        # Write header to csv
-        for sample in sample_sheet.samples:
-            control_status = self.get_sample_control_status(sample.sample_id)
-            name = self.get_sample_name_from_lims_id(sample.sample_id)
-            concentration = self.get_concentrations_from_lims(sample.sample_id)
-            sequenced_at = self.get_sample_sequenced_date(sample.sample_id)
+        sample_id_column_alias = self.set_column_alias(
+            sample_sheet_df=sample_sheet_df, alias="Sample_ID", alternative="SampleID"
+        )
 
-            # Write row to csv
+        sample_project_column_alias = self.set_column_alias(
+            sample_sheet_df=sample_sheet_df, alias="Sample_Project", alternative="Project"
+        )
+
+        column_to_value_map: dict = {
+            "Exclude": lambda x: self.get_sample_control_status(sample_id=x),
+            "SampleName": lambda x: self.get_sample_name_from_lims_id(lims_id=x),
+            "Library_nM": lambda x: self.get_concentrations_from_lims(sample_id=x),
+            "SequencingDate": lambda x: self.get_sample_sequenced_date(sample_id=x),
+            sample_project_column_alias: lambda x: self.get_sample_starlims_id(sample_id=x),
+        }
+
+        for column, value in column_to_value_map.items():
+            sample_sheet_df = self.add_sample_sheet_column(
+                sample_sheet_df=sample_sheet_df,
+                new_column=column,
+                to_add=sample_sheet_df[sample_id_column_alias].apply(value),
+            )
+
+        self.write_sample_sheet_csv(
+            sample_sheet_df=sample_sheet_df, sample_sheet_workdir_path=sample_sheet_workdir_path
+        )
 
     def get_sample_sheet_housekeeper_path(self, flowcell_name: str) -> Path:
         """Returns the path to original sample sheet file that is added to Housekeeper."""
