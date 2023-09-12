@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 import pytest
 from cg.apps.demultiplex.sample_sheet.index import Index
@@ -14,7 +14,7 @@ from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
-@pytest.fixture()
+@pytest.fixture
 def bcl_convert_samples_with_updated_indexes() -> List[FlowCellSampleBCLConvert]:
     """Return a list of three FlowCellSampleBCLConvert with updated indexes."""
     sample_1 = FlowCellSampleBCLConvert(
@@ -29,10 +29,16 @@ def bcl_convert_samples_with_updated_indexes() -> List[FlowCellSampleBCLConvert]
     return [sample_1, sample_2, sample_3]
 
 
-@pytest.fixture()
+@pytest.fixture
 def override_cycles_for_samples_with_updated_indexes() -> List[str]:
     """Return the correspondent Override Cycles values for three samples."""
     return ["Y151;I8N2;N2I8;Y151", "Y151;I8N2;N2I8;Y151", "Y151;I10;I10;Y151"]
+
+
+@pytest.fixture
+def barcode_mismatch_values_for_samples_with_updated_indexes() -> List[Tuple[int, int]]:
+    """."""
+    return [(0, 0), (0, 0), (1, 1)]
 
 
 @pytest.fixture

@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Set, Type, Union
 from cg.apps.demultiplex.sample_sheet.dummy_sample import get_dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import (
     Index,
+    get_index_pair,
     get_indexes_by_lane,
     get_valid_indexes,
     index_exists,
@@ -130,15 +131,15 @@ class SampleSheetCreator:
         self.remove_unwanted_samples()
         samples_in_lane: List[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]]
         reverse_complement: bool = is_reverse_complement(run_parameters=self.run_parameters)
+        self.add_override_cycles_to_samples()
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
             LOG.info(f"Adapting index and barcode mismatch values for samples in lane {lane}")
-            self.update_barcode_mismatch_values_for_samples(samples_in_lane)
             update_indexes_for_samples(
                 samples=samples_in_lane,
                 run_parameters=self.run_parameters,
                 reverse_complement=reverse_complement,
             )
-        self.add_override_cycles_to_samples()
+            self.update_barcode_mismatch_values_for_samples(samples_in_lane)
 
     def construct_sample_sheet(self) -> List[List[str]]:
         """Construct and validate the sample sheet."""
@@ -240,7 +241,7 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         for sample in self.lims_samples:
             index1_str: str = f"I{str(self.run_parameters.get_index_1_cycles())};"
             index2_str: str = f"I{str(self.run_parameters.get_index_2_cycles())};"
-            sample_index_len: int = len(sample.index)
+            sample_index_len: int = len(get_index_pair(sample)[0])
             if sample_index_len < flow_cell_index_len:
                 index1_str = (
                     f"I{str(sample_index_len)}N{str(flow_cell_index_len - sample_index_len)};"

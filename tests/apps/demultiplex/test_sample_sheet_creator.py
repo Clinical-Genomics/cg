@@ -1,6 +1,6 @@
 """Tests for the SampleSheetCreator classes."""
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import pytest
 from cg.apps.demultiplex.sample_sheet.models import (
@@ -160,3 +160,30 @@ def test_add_override_cycles_to_samples(
             sample_sheet_creator.lims_samples, override_cycles_for_samples_with_updated_indexes
         )
     )
+
+
+def test_update_barcode_mismatch_values_for_samples(
+    novaseq_x_flow_cell: FlowCellDirectoryData,
+    bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
+    barcode_mismatch_values_for_samples_with_updated_indexes: List[Tuple[int, int]],
+):
+    """."""
+    # GIVEN a sample sheet creator with samples with barcode mismatch values equal to 1
+    sample_sheet_creator = SampleSheetCreatorBCLConvert(
+        flow_cell=novaseq_x_flow_cell, lims_samples=bcl_convert_samples_with_updated_indexes
+    )
+    assert all(
+        sample.barcode_mismatches_1 == 1 and sample.barcode_mismatches_2 == 1
+        for sample in sample_sheet_creator.lims_samples
+    )
+
+    # WHEN updating the barcode mismatch values
+    sample_sheet_creator.update_barcode_mismatch_values_for_samples(
+        sample_sheet_creator.lims_samples
+    )
+
+    # THEN exactly two samples have barcode mismatches equal to zero
+    for sample, barcode_mismatch_tuple in zip(
+        sample_sheet_creator.lims_samples, barcode_mismatch_values_for_samples_with_updated_indexes
+    ):
+        assert (sample.barcode_mismatches_1, sample.barcode_mismatches_2) == barcode_mismatch_tuple
