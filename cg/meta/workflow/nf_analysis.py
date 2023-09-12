@@ -257,6 +257,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
             LOG.info(self.process.stdout)
 
+    @staticmethod
     def get_deliverables_template_content(self) -> List[dict]:
         """Return deliverables file template content."""
         raise NotImplementedError
