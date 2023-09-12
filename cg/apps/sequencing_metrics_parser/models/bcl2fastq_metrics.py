@@ -18,7 +18,7 @@ class DemuxResult(BaseModel):
     """
 
     sample_id: str = Field(..., alias="SampleId", min_length=1)
-    number_reads: int = Field(..., alias="NumberReads", gt=0)
+    number_reads: int = Field(..., alias="NumberReads", ge=0)
     yield_: int = Field(..., alias="Yield", ge=0)
     read_metrics: List[ReadMetric] = Field(..., alias="ReadMetrics")
 
