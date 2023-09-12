@@ -5,6 +5,8 @@ from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
 import datetime as dt
 
+from cg.store.models import Sample
+
 
 def test_start_available_dry(
     cli_runner: CliRunner, fluffy_case_id_existing: str, fluffy_context: CGConfig, caplog
@@ -38,7 +40,7 @@ def test_start_available(
     fluffy_context: CGConfig,
     caplog,
     mocker,
-    samplesheet_path: str,
+    sample: Sample,
 ):
     caplog.set_level("INFO")
 
@@ -67,6 +69,10 @@ def test_start_available(
     # GIVEN every sample in SampleSheet has control status ""
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_control_status")
     FluffyAnalysisAPI.get_sample_control_status.return_value = False
+
+    # GIVEN a mocked response from status_db.get_sample_by_internal_id
+    mocker.patch.object(fluffy_context.status_db, "get_sample_by_internal_id")
+    fluffy_context.status_db.get_sample_by_internal_id.return_value = sample
 
     # WHEN running command
     result = cli_runner.invoke(start_available, [], obj=fluffy_context)
