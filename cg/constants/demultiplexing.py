@@ -126,8 +126,6 @@ class SampleSheetBCLConvertSections:
         SAMPLE_INTERNAL_ID: str = "Sample_ID"
         INDEX_1: str = "Index"
         INDEX_2: str = "Index2"
-        ADAPTER_READ_1: str = "AdapterRead1"
-        ADAPTER_READ_2: str = "AdapterRead2"
         BARCODE_MISMATCHES_1: str = "BarcodeMismatchesIndex1"
         BARCODE_MISMATCHES_2: str = "BarcodeMismatchesIndex2"
 
@@ -136,8 +134,6 @@ class SampleSheetBCLConvertSections:
             SAMPLE_INTERNAL_ID,
             INDEX_1,
             INDEX_2,
-            ADAPTER_READ_1,
-            ADAPTER_READ_2,
             BARCODE_MISMATCHES_1,
             BARCODE_MISMATCHES_2,
         ]
