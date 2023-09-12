@@ -1385,6 +1385,20 @@ def novaseqx_demultiplexed_flow_cell(demultiplexed_runs: Path, novaseq_x_flow_ce
     return Path(demultiplexed_runs, novaseq_x_flow_cell_full_name)
 
 
+@pytest.fixture()
+def novaseqx_flow_cell_with_sample_sheet_no_fastq(
+    mocker, novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
+) -> FlowCellDirectoryData:
+    """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
+    novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)
+    flow_cell = FlowCellDirectoryData(flow_cell_path=novaseqx_flow_cell_directory)
+    sample_sheet_path = Path(
+        novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+    mocker.patch.object(flow_cell, "get_sample_sheet_path_hk", return_value=sample_sheet_path)
+    return flow_cell
+
+
 # Genotype file fixture
 
 
@@ -3073,15 +3087,9 @@ def novaseqx_latest_analysis_version() -> str:
 
 
 @pytest.fixture(scope="function")
-def novaseqx_flow_cell_dir_name() -> str:
-    """Return the flow cell full name for a NovaseqX flow cell."""
-    return "20230427_LH00188_0001_B223YYCLT3"
-
-
-@pytest.fixture(scope="function")
-def novaseqx_flow_cell_directory(tmp_path: Path, novaseqx_flow_cell_dir_name: str) -> Path:
+def novaseqx_flow_cell_directory(tmp_path: Path, novaseq_x_flow_cell_full_name: str) -> Path:
     """Return the path to a NovaseqX flow cell directory."""
-    return Path(tmp_path, novaseqx_flow_cell_dir_name)
+    return Path(tmp_path, novaseq_x_flow_cell_full_name)
 
 
 @pytest.fixture(scope="function")
