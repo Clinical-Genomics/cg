@@ -218,7 +218,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
         )
 
     def populate_sample_sheet(
-        self, sample_sheet_housekeeper_path: Path, sample_sheet_workdir_path: Path
+        self,
+        sample_sheet_housekeeper_path: Path,
+        sample_sheet_workdir_path: Path,
+        flow_cell_id: str,
     ) -> None:
         """
         Reads the Fluffy sample sheet *.csv file as found in Housekeeper.
@@ -241,7 +244,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
             fluffy_sample_config = {
                 "sample_internal_id": sample_id,
-                "flow_cell_id": "flow_cell_id",
+                "flow_cell_id": flow_cell_id,
                 "lane": sample.lane,
                 "index": sample.index,
                 "index2": sample.index2,
@@ -251,33 +254,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
                 "library_nM": self.get_concentrations_from_lims(sample_id),
                 "sequencing_date": self.get_sample_sequenced_date(sample_id),
             }
-
-        sample_id_column_alias = self.set_column_alias(
-            sample_sheet_df=sample_sheet_df, alias="Sample_ID", alternative="SampleID"
-        )
-
-        sample_project_column_alias = self.set_column_alias(
-            sample_sheet_df=sample_sheet_df, alias="Sample_Project", alternative="Project"
-        )
-
-        column_to_value_map: dict = {
-            "Exclude": lambda x: self.get_sample_control_status(sample_id=x),
-            "SampleName": lambda x: self.get_sample_name_from_lims_id(lims_id=x),
-            "Library_nM": lambda x: self.get_concentrations_from_lims(sample_id=x),
-            "SequencingDate": lambda x: self.get_sample_sequenced_date(sample_id=x),
-            sample_project_column_alias: lambda x: self.get_sample_starlims_id(sample_id=x),
-        }
-
-        for column, value in column_to_value_map.items():
-            sample_sheet_df = self.add_sample_sheet_column(
-                sample_sheet_df=sample_sheet_df,
-                new_column=column,
-                to_add=sample_sheet_df[sample_id_column_alias].apply(value),
-            )
-
-        self.write_sample_sheet_csv(
-            sample_sheet_df=sample_sheet_df, sample_sheet_workdir_path=sample_sheet_workdir_path
-        )
+    
 
     def get_sample_sheet_housekeeper_path(self, flowcell_name: str) -> Path:
         """Returns the path to original sample sheet file that is added to Housekeeper."""
@@ -295,11 +272,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         Create SampleSheet.csv file in working directory and add desired values to the file
         """
-        latest_flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
-        sample_sheet_housekeeper_path = self.get_sample_sheet_housekeeper_path(
-            flowcell_name=latest_flow_cell.name
-        )
-        sample_sheet_workdir_path = Path(self.get_sample_sheet_path(case_id=case_id))
+        flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(case_id)
+        sample_sheet_housekeeper_path = self.get_sample_sheet_housekeeper_path(flow_cell.name)
+        sample_sheet_workdir_path = Path(self.get_sample_sheet_path(case_id))
+
         LOG.info(
             "Writing modified csv from %s to %s",
             sample_sheet_housekeeper_path,
@@ -310,6 +286,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
             self.populate_sample_sheet(
                 sample_sheet_housekeeper_path=sample_sheet_housekeeper_path,
                 sample_sheet_workdir_path=sample_sheet_workdir_path,
+                flow_cell_id=flow_cell.name,
             )
 
     def run_fluffy(
