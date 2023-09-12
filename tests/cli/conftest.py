@@ -75,6 +75,12 @@ class MockCompressAPI(CompressAPI):
 
 
 @pytest.fixture
+def compress_api():
+    """Return a compress API context."""
+    return MockCompressAPI()
+
+
+@pytest.fixture
 def compress_context(
     compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
 ) -> CGConfig:

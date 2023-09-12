@@ -42,6 +42,12 @@ class MockCompressAPI(CompressAPI):
 
 
 @pytest.fixture
+def compress_api() -> MockCompressAPI:
+    """Return a Compress context."""
+    return MockCompressAPI()
+
+
+@pytest.fixture
 def real_crunchy_api(
     crunchy_config: Dict[str, Dict[str, Any]]
 ) -> Generator[CrunchyAPI, None, None]:
