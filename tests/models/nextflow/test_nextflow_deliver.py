@@ -4,6 +4,7 @@ import pytest
 from pydantic.v1 import ValidationError as PydanticValidationError
 
 from cg.constants.constants import FileFormat
+from cg.exc import ValidationError
 from cg.models.nf_analysis import FileDeliverable
 
 
@@ -92,7 +93,7 @@ def test_file_deliverables_non_existing_file(
     # WHEN instantiating a deliverables object
 
     # THEN assert that an error is raised
-    with pytest.raises(PydanticValidationError) as error:
+    with pytest.raises(ValidationError) as error:
         FileDeliverable(
             format=FileFormat.TSV,
             id=any_string,
@@ -101,4 +102,4 @@ def test_file_deliverables_non_existing_file(
             tag=any_string,
         )
     # THEN assert the error message
-    assert "value_error.path.not_exists" in str(error.value)
+    assert f"Path {str(non_existing_file_path)} does not exist" in str(error.value)

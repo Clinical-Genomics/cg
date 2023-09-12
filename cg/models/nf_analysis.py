@@ -1,9 +1,9 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
-from pydantic.v1 import BaseModel, Field, FilePath, conlist, validator
+from pydantic.v1 import BaseModel, Field, conlist, validator
 
-from cg.exc import SampleSheetError
+from cg.exc import SampleSheetError, ValidationError
 
 
 class PipelineParameters(BaseModel):
@@ -47,16 +47,19 @@ class FileDeliverable(BaseModel):
 
     id: str
     format: str
-    path: FilePath
-    path_index: Optional[FilePath]
+    path: str
+    path_index: Optional[str]
     step: str
     tag: str
 
-    @validator("path", "path_index")
-    def convert_path_to_string(cls, file_path: Path) -> str:
-        if file_path and isinstance(file_path, Path):
-            return str(file_path)
-        return file_path
+    @validator("path", "path_index", pre=True)
+    def path_exist(cls, file_path: Union[str, Path]) -> str:
+        if file_path is not None:
+            path = Path(file_path)
+            if not path.exists():
+                raise ValidationError(f"Path {file_path} does not exist")
+            return str(path)
+        return None
 
 
 class PipelineDeliverables(BaseModel):
