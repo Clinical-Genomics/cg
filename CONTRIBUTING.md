@@ -185,13 +185,7 @@ Internal app for opening tickets in SupportSystems. We use this mainly to link a
 #### Scout (scoutapi)
 
 Interface to Scout. For uploading analysis results to Scout. It's also used to access the generation of gene panels files used in the analysis pipeline.
-
-#### CGStats (stats)
-
-Interface to CGStats. Used to handle things related to flowcells:
-
-- this is where we find out how many reads a sample have been sequened
-- getting paths to FASTQ files for samples/flowcells
+~~~~
 
 ### Cli
 

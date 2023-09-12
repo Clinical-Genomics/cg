@@ -1,12 +1,7 @@
-"""CLI support for nextflow pipelines."""
+"""CLI options for Nextflow and NF-Tower."""
 
 import click
 
-OPTION_LOG = click.option(
-    "--log",
-    type=click.Path(),
-    help="Set nextflow log file path",
-)
 OPTION_WORKDIR = click.option(
     "--work-dir",
     type=click.Path(),
@@ -26,27 +21,12 @@ OPTION_PROFILE = click.option(
     show_default=True,
     help="Choose a configuration profile",
 )
-OPTION_TOWER = click.option(
-    "--with-tower",
-    is_flag=True,
-    default=False,
-    show_default=True,
-    help="Monitor workflow execution with Seqera Tower service",
-)
-OPTION_STUB = click.option(
-    "--stub",
-    is_flag=True,
-    default=False,
-    show_default=True,
-    help="Execute the workflow replacing process scripts with command stubs",
-)
-OPTION_INPUT = click.option(
-    "--input", type=click.Path(exists=True), help="Path to samplesheet containing fastq files"
-)
-OPTION_OUTDIR = click.option(
-    "--outdir", type=click.Path(), help="Path to output folder containing analysis files"
-)
 
+OPTION_LOG = click.option(
+    "--log",
+    type=click.Path(),
+    help="Set nextflow log file path",
+)
 
 OPTION_CONFIG = click.option(
     "--config",
@@ -73,4 +53,16 @@ OPTION_REVISION = click.option(
     "--revision",
     type=str,
     help="Revision of workflow to run (either a git branch, tag or commit SHA number)",
+)
+OPTION_COMPUTE_ENV = click.option(
+    "--compute-env",
+    type=str,
+    help="Compute environment name. If not specified the primary compute environment will be used.",
+)
+OPTION_TOWER_RUN_ID = click.option(
+    "--nf-tower-id",
+    type=str,
+    is_flag=False,
+    default=None,
+    help="NF-Tower ID of run to relaunch. If not provided the latest NF-Tower ID for a case will be used.",
 )
