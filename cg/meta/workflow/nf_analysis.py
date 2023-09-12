@@ -264,7 +264,7 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_deliverables_for_case(self, case_id: str) -> PipelineDeliverables:
         """Return PipelineDeliverables for a given case."""
         deliverable_template: List[dict] = self.get_deliverables_template_content()
-        files: list = []
+        files: List[FileDeliverable] = []
         for file in deliverable_template:
             for deliverable_field, deliverable_value in file.items():
                 if deliverable_value is None:
