@@ -15,7 +15,9 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_type_from_sequencer_type,
 )
 from cg.constants import Pipeline
+from cg.constants.constants import FileFormat
 from cg.exc import HousekeeperFileMissingError
+from cg.io.controller import WriteFile
 from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -64,10 +66,10 @@ class FluffySampleSheet(BaseModel):
 
     def write_sample_sheet(self, out_path: Path) -> None:
         LOG.info(f"Writing fluffy sample sheet to {out_path}")
-        with out_path.open("w") as outfile:
-            outfile.write(",".join([header.value for header in FluffySampleSheetHeaders]) + "\n")
-            for entry in self.entries:
-                outfile.write(",".join(str(value) for value in entry.model_dump().values()) + "\n")
+        headers = [header.value for header in FluffySampleSheetHeaders]
+        entries = [entry.model_dump().values() for entry in self.entries]
+        content = [headers] + entries
+        WriteFile.write_file_from_content(content, FileFormat.CSV, out_path)
 
 
 class FluffyAnalysisAPI(AnalysisAPI):
