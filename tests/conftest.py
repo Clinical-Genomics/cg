@@ -743,7 +743,7 @@ def compression_object(fastq_stub: Path, original_fastq_data: CompressionData) -
 # Demultiplex fixtures
 
 
-@pytest.fixture(name="lims_novaseq_bcl_convert_samples")
+@pytest.fixture
 def lims_novaseq_bcl_convert_samples(
     lims_novaseq_samples_raw: List[dict],
 ) -> List[FlowCellSampleBCLConvert]:
@@ -751,7 +751,7 @@ def lims_novaseq_bcl_convert_samples(
     return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
 
 
-@pytest.fixture(name="lims_novaseq_bcl2fastq_samples")
+@pytest.fixture
 def lims_novaseq_bcl2fastq_samples(
     lims_novaseq_samples_raw: List[dict],
 ) -> List[FlowCellSampleBcl2Fastq]:
@@ -1357,7 +1357,7 @@ def lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
     return Path(raw_lims_sample_dir, "raw_samplesheet_novaseq.json")
 
 
-@pytest.fixture(name="lims_novaseq_samples_raw")
+@pytest.fixture
 def lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[dict]:
     """Return a list of raw flow cell samples."""
     return ReadFile.get_content_from_file(
