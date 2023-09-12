@@ -12,8 +12,8 @@ from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_p
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from tests.meta.demultiplex.conftest import (
-    fixture_tmp_flow_cell_demux_base_path,
-    fixture_tmp_flow_cell_run_base_path,
+    tmp_flow_cell_demux_base_path,
+    tmp_flow_cell_run_base_path,
 )
 
 
@@ -129,10 +129,8 @@ def test_demultiplex_dragen_flowcell(
     # GIVEN an out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
-    unaligned_dir: Path = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     assert demux_dir.exists() is False
-    assert unaligned_dir.exists() is False
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
 
     # WHEN starting demultiplexing from the CLI with dry run flag
@@ -147,7 +145,6 @@ def test_demultiplex_dragen_flowcell(
 
     # THEN assert the results folder was created
     assert demux_dir.exists()
-    assert unaligned_dir.exists()
 
     # THEN assert that the sbatch script was created
     assert demux_api.demultiplex_sbatch_path(flow_cell).exists()

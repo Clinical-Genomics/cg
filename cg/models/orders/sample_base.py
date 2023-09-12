@@ -45,7 +45,9 @@ NAME_PATTERN = r"^[A-Za-z0-9-]*$"
 
 class OrderSample(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True, populate_by_name=True)
-    age_at_sampling: Optional[str] = None
+    age_at_sampling: Annotated[
+        Optional[str], BeforeValidator(lambda x: str(x) if x else None)
+    ] = None
     application: constr(max_length=Application.tag.property.columns[0].type.length)
     capture_kit: Optional[str] = None
     collection_date: Optional[str] = None
@@ -119,6 +121,6 @@ class OrderSample(BaseModel):
     tumour: bool = False
     tumour_purity: Optional[int] = None
     verified_organism: Optional[bool] = None
-    volume: Optional[str] = None
+    volume: Annotated[Optional[str], BeforeValidator(lambda x: str(x))] = None
     well_position: Optional[str] = None
     well_position_rml: Optional[str] = None

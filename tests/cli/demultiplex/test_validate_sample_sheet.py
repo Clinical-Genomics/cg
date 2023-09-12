@@ -4,8 +4,8 @@ from click.testing import CliRunner, Result
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeq6000Dragen,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
 )
 from cg.cli.demultiplex.sample_sheet import validate_sample_sheet
 
@@ -78,7 +78,7 @@ def test_validate_correct_bcl2fastq_sample_sheet(
     # GIVEN that the sample sheet is correct
     get_sample_sheet_from_file(
         infile=sample_sheet,
-        flow_cell_sample_type=FlowCellSampleNovaSeq6000Bcl2Fastq,
+        flow_cell_sample_type=FlowCellSampleBcl2Fastq,
     )
 
     # WHEN validating the sample sheet
@@ -105,9 +105,7 @@ def test_validate_correct_dragen_sample_sheet(
     assert sample_sheet.exists()
 
     # GIVEN that the sample sheet is correct
-    get_sample_sheet_from_file(
-        infile=sample_sheet, flow_cell_sample_type=FlowCellSampleNovaSeq6000Dragen
-    )
+    get_sample_sheet_from_file(infile=sample_sheet, flow_cell_sample_type=FlowCellSampleBCLConvert)
 
     # WHEN validating the sample sheet
     result: Result = cli_runner.invoke(

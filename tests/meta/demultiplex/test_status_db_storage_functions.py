@@ -1,21 +1,14 @@
 """Tests for the status_db_storage_functions module of the demultiplexing post post-processing module."""
-from mock import MagicMock
-
-from cg.meta.demultiplex.demux_post_processing import (
-    DemuxPostProcessingAPI,
-)
-
-from cg.models.cg_config import CGConfig
-
-from cg.store import Store
-
-
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.status_db_storage_functions import (
-    add_sequencing_metrics_to_statusdb,
-    update_sample_read_count,
-    metric_has_sample_in_statusdb,
     add_samples_to_flow_cell_in_status_db,
+    add_sequencing_metrics_to_statusdb,
+    metric_has_sample_in_statusdb,
+    update_sample_read_count,
 )
+from cg.models.cg_config import CGConfig
+from cg.store import Store
+from mock import MagicMock
 
 
 def test_add_single_sequencing_metrics_entry_to_statusdb(
