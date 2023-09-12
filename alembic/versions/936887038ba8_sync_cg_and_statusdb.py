@@ -34,6 +34,12 @@ def upgrade():
 
     op.drop_index("customer_invoice_pk", table_name="invoice")
     op.create_foreign_key(None, "invoice", "customer", ["customer_id"], ["id"])
+    op.alter_column(
+        table_name="pool",
+        column_name="invoice_id",
+        existing_type=mysql.INTEGER(),
+        type_=mysql.INTEGER(unsigned=True),
+    )
     op.create_foreign_key(None, "pool", "invoice", ["invoice_id"], ["id"])
     op.alter_column(
         "sample",
