@@ -74,17 +74,6 @@ def tmp_flow_cell_demux_base_path(project_dir: Path, bcl2fastq_flow_cell_full_na
     return tmp_flow_cell_demux_path
 
 
-@pytest.fixture(name="cgstats_select_project_log_file")
-def cgstats_select_project_log_file(
-    bcl2fastq_flow_cell: FlowCellDirectoryData, flow_cell_project_id: int
-) -> Path:
-    """Return cgstats select project out file."""
-    return Path(
-        bcl2fastq_flow_cell.path,
-        "-".join(["stats", str(flow_cell_project_id), bcl2fastq_flow_cell.id]) + ".txt",
-    )
-
-
 @pytest.fixture(name="flow_cell_project_id")
 def flow_cell_project_id() -> int:
     """Return flow cell run project id."""

@@ -64,12 +64,6 @@ Internal app for opening tickets in SupportSystems. We use this mainly to link a
 
 Interface to Scout. For uploading analysis results to Scout. It's also used to access the generation of gene panels files used in the analysis pipeline.
 
-#### stats
-
-Interface to CGStats. Used to handle things related to flowcells:
-
-- this is where we find out how many reads a sample have been sequened
-- getting paths to FASTQ files for samples/flowcells
 
 ### `cli`
 
@@ -152,10 +146,10 @@ And similarly for filling in the delivery date:
 cg transfer lims --status delivered
 ```
 
-Another common task is to transfer data and FASTQ files from the demux/cgstats interface when a demultiplexing task completes. This is as easy as determining the flowcell of interest and running:
+Another common task is to transfer data and FASTQ files from the demultiplexed-runs folder when a demultiplexing task completes. This is as easy as determining the flowcell of interest and running:
 
 ```bash
-cg transfer flowcell HGF2KBCXX
+cg demultiplex finish flow-cell <flow-cell-demultiplexed-runs-dir-name>
 ```
 
 The command will update the _total_ read counts of each sample and check against the application for the sample if it has been fully sequenced. It will also make sure to link the related FASTQ files to Housekeeper. You can run the command over and over - only additional information will be updated.

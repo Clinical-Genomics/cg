@@ -180,12 +180,6 @@ class TaxprofilerConfig(CommonAppConfig):
     tower_pipeline: str
 
 
-class CGStatsConfig(BaseModel):
-    binary_path: str
-    database: str
-    root: str
-
-
 class MicrosaltConfig(BaseModel):
     binary_path: str
     conda_binary: Optional[str] = None
@@ -259,7 +253,6 @@ class CGConfig(BaseModel):
 
     # App APIs that can be instantiated in CGConfig
     backup: BackupConfig = None
-    cgstats: CGStatsConfig = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
     clean: Optional[CleanConfig] = None

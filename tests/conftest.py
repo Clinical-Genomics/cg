@@ -2190,7 +2190,6 @@ def context_config(
             },
             "swegen_path": str(cg_dir),
         },
-        "cgstats": {"binary_path": "echo", "database": "sqlite:///./cgstats", "root": str(cg_dir)},
         "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
         "crunchy": {
             "conda_binary": "a_conda_binary",
