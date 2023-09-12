@@ -204,17 +204,6 @@ It opens a ticket using the `osticket` API for each order which it links with th
 
 This interface has a few related roles:
 
-##### flowcell
-
-Includes: `stats`, `hk`, `status`
-
-The API accepts the name of a flowcell which will be looked up in `stats`. For all samples on the flowcell it will:
-
-1. check if the quality (Q30) is good enough to include the sequencing results.
-1. update the number of reads that the sample has been sequenced _overall_ and match this with the requirement given by the application.
-1. accordingly, the interface will look up FASTQ files and store them using `hk`.
-1. if a sample has sufficient number of reads, the `sequenced_at` date will be filled in (`status`) according to the sequencing date of the most recent flowcell.
-
 ##### lims
 
 Includes: `status`, `lims`
