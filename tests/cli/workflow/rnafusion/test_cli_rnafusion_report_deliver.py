@@ -112,5 +112,5 @@ def test_report_deliver_successful(
     )
     for field in deliverables_template_content[0].keys():
         assert field in deliverables_content
-    # Assess that missing fields are written
+    # THEN assess that missing fields are written
     assert "path_index: null" in deliverables_content

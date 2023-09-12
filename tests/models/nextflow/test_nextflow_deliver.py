@@ -3,16 +3,17 @@ from pathlib import Path
 import pytest
 from pydantic.v1 import ValidationError as PydanticValidationError
 
+from cg.constants.constants import FileFormat
 from cg.models.nf_analysis import FileDeliverable
 
 
-def test_file_deliverables(deliverable_id: str, file_format: str, step: str, existing_file: Path):
+def test_file_deliverables(deliverable_id: str, step: str, existing_file: Path):
     """Tests file delivery."""
     # GIVEN valid deliverables fields
 
     # WHEN instantiating a deliverables object
     file_deliverable: FileDeliverable = FileDeliverable(
-        format=file_format,
+        format=FileFormat.TSV,
         id=deliverable_id,
         path=existing_file,
         path_index=existing_file,
@@ -28,15 +29,13 @@ def test_file_deliverables(deliverable_id: str, file_format: str, step: str, exi
     assert isinstance(file_deliverable.path_index, str)
 
 
-def test_file_deliverables_missing_optional(
-    deliverable_id: str, file_format: str, step: str, existing_file: Path
-):
+def test_file_deliverables_missing_optional(deliverable_id: str, step: str, existing_file: Path):
     """Tests file delivery when an optional field is missing."""
     # GIVEN valid deliverables fields
 
     # WHEN instantiating a deliverables object
     file_deliverable: FileDeliverable = FileDeliverable(
-        format=file_format,
+        format=FileFormat.TSV,
         id=deliverable_id,
         path=existing_file,
         step=step,
@@ -69,19 +68,19 @@ def test_file_deliverables_missing_mandatory(
 
 
 def test_file_deliverables_non_existing_attribute(
-    deliverable_id: str, file_format: str, step: str, existing_file: Path
+    deliverable_id: str, step: str, existing_file: Path
 ):
     """Tests file delivery when a non existing attribute is given."""
     # GIVEN valid deliverables fields
 
     # WHEN instantiating a deliverables object
     file_deliverable: FileDeliverable = FileDeliverable(
-        format=file_format,
+        format=FileFormat.TSV,
         id=deliverable_id,
         path=existing_file,
         step=step,
         tag=step,
-        nonexisting=file_format,
+        nonexisting=FileFormat.TSV,
     )
 
     # THEN assert that it was successfully created
@@ -93,7 +92,6 @@ def test_file_deliverables_non_existing_attribute(
 
 def test_file_deliverables_non_existing_file(
     deliverable_id: str,
-    file_format: str,
     step: str,
     non_existing_file: Path,
 ):
@@ -104,7 +102,7 @@ def test_file_deliverables_non_existing_file(
     # THEN assert that an error is raised
     with pytest.raises(PydanticValidationError) as error:
         FileDeliverable(
-            format=file_format,
+            format=FileFormat.TSV,
             id=deliverable_id,
             path=non_existing_file,
             step=step,

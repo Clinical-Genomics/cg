@@ -8,11 +8,6 @@ def fixture_deliverable_id() -> str:
     return "CASEID"
 
 
-@pytest.fixture(name="file_format")
-def fixture_file_format() -> str:
-    return "tsv"
-
-
 @pytest.fixture(name="step")
 def fixture_step() -> str:
     return "fusioncatcher"
