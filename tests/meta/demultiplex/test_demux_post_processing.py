@@ -55,7 +55,7 @@ def test_post_processing_of_flow_cell(
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a directory with a flow cell demultiplexed with BCL Convert
-    demux_post_processing_api.demux_api.demultiplexed_runs_dir = tmp_demultiplexed_runs_directory
+    demux_post_processing_api.demultiplexed_runs_dir = tmp_demultiplexed_runs_directory
 
     # GIVEN that the sample sheet is in housekeeper
     add_sample_sheet_path_to_housekeeper(
@@ -109,7 +109,7 @@ def test_post_processing_of_flow_cell(
 
     # THEN a delivery file was created in the flow cell directory
     delivery_path = Path(
-        demux_post_processing_api.demux_api.demultiplexed_runs_dir,
+        demux_post_processing_api.demultiplexed_runs_dir,
         flow_cell_demultiplexing_directory,
         DemultiplexingDirsAndFiles.DELIVERY,
     )
@@ -127,9 +127,10 @@ def test_get_all_demultiplexed_flow_cell_out_dirs(
 
     # GIVEN a demultiplex context
     demux_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=demultiplex_context)
+    demux_api.demultiplexed_runs_dir = tmp_demultiplexed_runs_directory
 
     # WHEN calling get_all_demultiplexed_flow_cell_dirs
-    demultiplex_flow_cell_dirs: List[Path] = demux_api.get_all_demultiplexed_flow_cell_dirs()
+    demultiplexed_flow_cell_dirs: List[Path] = demux_api.get_all_demultiplexed_flow_cell_dirs()
 
     # THEN the demultiplexed flow cells run directories should be returned
-    assert tmp_demultiplexed_runs_bcl2fastq_directory in demultiplex_flow_cell_dirs
+    assert tmp_demultiplexed_runs_bcl2fastq_directory in demultiplexed_flow_cell_dirs
