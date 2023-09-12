@@ -184,27 +184,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
         sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
         return bool(sample_obj.control)
 
-    def get_nr_of_header_lines_in_sample_sheet(
-        self,
-        sample_sheet_housekeeper_path: Path,
-    ) -> int:
-        """
-        Return the number of header lines in a Fluffy sample sheet.
-        Any lines before and including the line starting with [Data] is considered the header.
-
-        Returns:
-        int: The number of lines before the sample sheet data header
-        """
-        sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
-            file_format=FileFormat.CSV, file_path=sample_sheet_housekeeper_path
-        )
-        header_line_count: int = 1
-        for line in sample_sheet_content:
-            if SampleSheetBcl2FastqSections.Data.HEADER.value in line:
-                break
-            header_line_count += 1
-        return header_line_count
-
     def create_fluffy_sample_sheet(
         self,
         sample_sheet: SampleSheet,
