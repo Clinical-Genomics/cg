@@ -12,7 +12,7 @@ def test_file_deliverables(any_string: str, filled_file: Path):
     # GIVEN valid deliverables fields
 
     # WHEN instantiating a deliverables object
-    file_deliverable: FileDeliverable(
+    file_deliverable = FileDeliverable(
         format=FileFormat.TSV,
         id=any_string,
         path=filled_file,
@@ -34,7 +34,7 @@ def test_file_deliverables_missing_optional(any_string: str, filled_file: Path):
     # GIVEN valid deliverables fields
 
     # WHEN instantiating a deliverables object
-    file_deliverable: FileDeliverable(
+    file_deliverable = FileDeliverable(
         format=FileFormat.TSV,
         id=any_string,
         path=filled_file,
@@ -51,9 +51,8 @@ def test_file_deliverables_missing_mandatory(
     filled_file: Path,
 ):
     """Tests file delivery when a mandatory field is missing."""
-    # GIVEN valid deliverables fields
+    # WHEN instantiating a deliverables object with a missing field
 
-    # WHEN instantiating a deliverables object
     # THEN assert that an error is raised
     with pytest.raises(PydanticValidationError) as error:
         FileDeliverable(
@@ -68,10 +67,8 @@ def test_file_deliverables_missing_mandatory(
 
 def test_file_deliverables_non_existing_attribute(any_string: str, filled_file: Path):
     """Tests file delivery when a non existing attribute is given."""
-    # GIVEN valid deliverables fields
-
-    # WHEN instantiating a deliverables object
-    file_deliverable: FileDeliverable(
+    # WHEN instantiating a deliverables object with additional attributes not present in the model
+    file_deliverable = FileDeliverable(
         format=FileFormat.TSV,
         id=any_string,
         path=filled_file,
@@ -92,9 +89,8 @@ def test_file_deliverables_non_existing_file(
     non_existing_file_path: Path,
 ):
     """Tests file delivery when a mandatory file does not exist."""
-    # GIVEN valid deliverables fields
-
     # WHEN instantiating a deliverables object
+
     # THEN assert that an error is raised
     with pytest.raises(PydanticValidationError) as error:
         FileDeliverable(
