@@ -120,7 +120,9 @@ def test_create_fluffy_samplesheet_from_bcl_convert_sample_sheet(
     # GIVEN a case_id that does exist in database
 
     # GIVEN the flow cell for the case was sequenced on a novaseqx machine
-    flow_cell: Flowcell = fluffy_context.status_db.get_latest_flow_cell_on_case(fluffy_case_id_existing)
+    flow_cell: Flowcell = fluffy_context.status_db.get_latest_flow_cell_on_case(
+        fluffy_case_id_existing
+    )
     flow_cell.sequencer_type = "novaseqx"
 
     # GIVEN an existing samplesheet in Housekeeper
