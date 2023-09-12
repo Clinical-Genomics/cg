@@ -50,7 +50,9 @@ class SampleSheetCreator:
             Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]
         ] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
-        self.sample_type: Type[FlowCellSample] = flow_cell.sample_type
+        self.sample_type: Type[
+            Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]
+        ] = flow_cell.sample_type
         self.force: bool = force
 
     @property
@@ -175,7 +177,9 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
                 if index_exists(index=index.sequence, indexes=lane_indexes):
                     LOG.debug(f"Index {index.sequence} already in use")
                     continue
-                dummy_flow_cell_sample: FlowCellSample = get_dummy_sample(
+                dummy_flow_cell_sample: Union[
+                    FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq
+                ] = get_dummy_sample(
                     flow_cell_id=self.flow_cell_id,
                     dummy_index=index.sequence,
                     lane=lane,
