@@ -37,7 +37,7 @@ def override_cycles_for_samples_with_updated_indexes() -> List[str]:
 
 @pytest.fixture
 def barcode_mismatch_values_for_samples_with_updated_indexes() -> List[Tuple[int, int]]:
-    """."""
+    """Return the pairs of barcode mismatch values corresponding to three samples."""
     return [(0, 0), (0, 0), (1, 1)]
 
 
