@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import List
 from unittest import mock
 
@@ -12,7 +13,7 @@ from cg.meta.archive.archive import (
     SpringArchiveAPI,
     filter_files_on_archive_location,
 )
-from cg.meta.archive.ddn_dataflow import AuthToken, DDNDataFlowClient, MiriaFile
+from cg.meta.archive.ddn_dataflow import AuthToken, DDNDataFlowClient, MiriaObject
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
@@ -138,7 +139,7 @@ def test_convert_into_transfer_data(
     )
 
     # THEN the returned object should be of the correct type
-    assert isinstance(transferdata[0], MiriaFile)
+    assert isinstance(transferdata[0], MiriaObject)
 
 
 def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAPI, sample_id: str):
@@ -182,7 +183,7 @@ def test_archive_all_non_archived_spring_files(
     # WHEN archiving all available files
     with mock.patch.object(
         AuthToken,
-        "model_validate_json",
+        "model_validate",
         return_value=AuthToken(
             access="test_auth_token",
             expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
@@ -203,7 +204,8 @@ def test_archive_all_non_archived_spring_files(
         json=archive_request_json,
     )
 
-    # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper
+    # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper while no other
+    # files should have an entry
     files: List[File] = spring_archive_api.housekeeper_api.files()
     for file in files:
         if SequencingFileTag.SPRING in [tag.name for tag in file.tags]:
@@ -212,3 +214,65 @@ def test_archive_all_non_archived_spring_files(
             )
             if sample and sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET:
                 assert file.archive
+            else:
+                assert not file.archive
+        else:
+            assert not file.archive
+
+
+def test_retrieve_samples(
+    spring_archive_api: SpringArchiveAPI,
+    caplog,
+    ok_ddn_response,
+    trimmed_local_path,
+    local_storage_repository,
+    retrieve_request_json,
+    header_with_test_auth_token,
+    sample_with_spring_file: str,
+):
+    """Test retrieving all archived SPRING files tied to a sample for a Miria customer."""
+    # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
+    # with the DDN customer having two samples, and the non-DDN having one sample.
+
+    files: List[File] = spring_archive_api.housekeeper_api.get_files(
+        bundle=sample_with_spring_file, tags=[SequencingFileTag.SPRING]
+    )
+    for file in files:
+        spring_archive_api.housekeeper_api.add_archives(
+            files=[Path(file.full_path)], archive_task_id=123
+        )
+        assert not file.archive.retrieval_task_id
+        assert file.archive
+
+    # WHEN archiving all available files
+    with mock.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=AuthToken(
+            access="test_auth_token",
+            expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
+            refresh="test_refresh_token",
+        ),
+    ), mock.patch.object(MiriaObject, "trim_path", return_value=True), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_ddn_response,
+    ) as mock_request_submitter:
+        spring_archive_api.retrieve_samples([sample_with_spring_file])
+
+    retrieve_sample_request_json = retrieve_request_json.copy()
+    retrieve_sample_request_json["pathInfo"][0]["destination"] = (
+        local_storage_repository + files[0].version.full_path.as_posix()
+    )
+
+    # THEN the DDN archiving function should have been called with the correct destination and source.
+    mock_request_submitter.assert_called_with(
+        api_method=APIMethods.POST,
+        url="some/api/files/retrieve",
+        headers=header_with_test_auth_token,
+        json=retrieve_sample_request_json,
+    )
+
+    # THEN the Archive entry should have a retrieval task id set
+    for file in files:
+        assert file.archive.retrieval_task_id
