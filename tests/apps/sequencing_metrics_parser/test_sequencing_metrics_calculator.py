@@ -23,17 +23,17 @@ def test_calculate_bases_with_q30_percentage(
 
 
 @pytest.mark.parametrize(
-    "total_quality, total_yield, expected_result", [(100, 200, 100 / 200), (0, 0, 0)]
+    "total_quality_score, total_yield, expected_result", [(100, 200, 100 / 200), (0, 0, 0)]
 )
 def test_calculate_lane_mean_quality_score(
-    total_quality: int, total_yield: int, expected_result: float
+    total_quality_score: int, total_yield: int, expected_result: float
 ):
     """Test calculating the average quality score."""
     # GIVEN a total quality score and a total yield
 
     # WHEN calculating the average quality score
     avg_quality_score: float = calculate_average_quality_score(
-        total_quality_score=total_quality, total_yield=total_yield
+        total_quality_score=total_quality_score, total_yield=total_yield
     )
 
     # THEN the average quality score should be the total quality score divided by the total yield
