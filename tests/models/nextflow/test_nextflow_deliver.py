@@ -12,7 +12,7 @@ def test_file_deliverables(any_string: str, filled_file: Path):
     # GIVEN valid deliverables fields
 
     # WHEN instantiating a deliverables object
-    file_deliverable: FileDeliverable = FileDeliverable(
+    file_deliverable: FileDeliverable(
         format=FileFormat.TSV,
         id=any_string,
         path=filled_file,
@@ -34,7 +34,7 @@ def test_file_deliverables_missing_optional(any_string: str, filled_file: Path):
     # GIVEN valid deliverables fields
 
     # WHEN instantiating a deliverables object
-    file_deliverable: FileDeliverable = FileDeliverable(
+    file_deliverable: FileDeliverable(
         format=FileFormat.TSV,
         id=any_string,
         path=filled_file,
@@ -71,7 +71,7 @@ def test_file_deliverables_non_existing_attribute(any_string: str, filled_file: 
     # GIVEN valid deliverables fields
 
     # WHEN instantiating a deliverables object
-    file_deliverable: FileDeliverable = FileDeliverable(
+    file_deliverable: FileDeliverable(
         format=FileFormat.TSV,
         id=any_string,
         path=filled_file,
