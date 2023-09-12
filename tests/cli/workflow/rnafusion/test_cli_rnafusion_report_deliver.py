@@ -97,7 +97,7 @@ def test_report_deliver_successful(
         return_value=deliverables_template_content,
     )
 
-    # WHEN dry running
+    # WHEN running
     result = cli_runner.invoke(report_deliver, [rnafusion_case_id], obj=rnafusion_context)
 
     # THEN command should execute successfully
