@@ -254,7 +254,7 @@ def test_adapt_indexes_for_sample_no_reverse_complement_no_padding(
     novaseq_x_run_parameters: RunParameters,
     novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
 ):
-    """Test that adapting indexes of a sample that does not need reverse complement nor padding works."""
+    """Test adapting indexes of a sample that does not need reverse complement nor padding works."""
     # GIVEN a run parameters file that does not need reverse complement of indexes
     assert not is_reverse_complement(run_parameters=novaseq_x_run_parameters)
     # GIVEN a sample that does not need padding
@@ -281,7 +281,7 @@ def test_adapt_indexes_for_sample_no_reverse_complement_no_padding(
 
 
 def test_get_hamming_distance_index_1_different_lengths():
-    """Test that the hamming distance between indexes with same prefix but different lengths is zero."""
+    """Test that hamming distance between indexes with same prefix but different lengths is zero."""
     # GIVEN two index_1 sequences with the same prefixes but different lengths
     sequence_1: str = "GATTACA"
     sequence_2: str = "GATTACAXX"
@@ -300,7 +300,7 @@ def test_get_hamming_distance_index_1_different_lengths():
 
 
 def test_get_hamming_distance_index_1_different_prefixes():
-    """Test that the hamming distance between indexes with different prefixes is greater than zero."""
+    """Test that hamming distance between indexes with different prefixes is greater than zero."""
     # GIVEN two index_1 sequences with the same suffixes but different prefixes
     sequence_1: str = "GATTACA"
     sequence_2: str = "XXGATTACA"
@@ -313,7 +313,7 @@ def test_get_hamming_distance_index_1_different_prefixes():
 
 
 def test_get_hamming_distance_index_2_different_lengths():
-    """Test that the hamming distance between indexes with same suffix but different lengths is zero."""
+    """Test that hamming distance between indexes with same suffix but different lengths is zero."""
     # GIVEN two index_2 sequences with the same suffixes but different lengths
     sequence_1: str = "GATTACA"
     sequence_2: str = "XXGATTACA"
@@ -332,7 +332,7 @@ def test_get_hamming_distance_index_2_different_lengths():
 
 
 def test_get_hamming_distance_index_2_different_prefixes():
-    """Test that the hamming distance between indexes with different suffixes is greater than zero."""
+    """Test that hamming distance between indexes with different suffixes is greater than zero."""
     # GIVEN two index_2 sequences with the same prefixes but different suffixes
     sequence_1: str = "GATTACA"
     sequence_2: str = "GATTACAXX"
