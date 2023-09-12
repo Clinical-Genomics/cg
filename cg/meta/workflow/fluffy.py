@@ -1,13 +1,14 @@
 import datetime as dt
-from enum import StrEnum
 import logging
 import shutil
+from enum import Enum
 from pathlib import Path
 from typing import List, Optional
 
 import pandas as pd
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
+
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBCLConvert, SampleSheet
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.constants import Pipeline
@@ -24,7 +25,7 @@ from cg.utils import Process
 LOG = logging.getLogger(__name__)
 
 
-class FluffySampleSheetHeaders(StrEnum):
+class FluffySampleSheetHeaders(Enum):
     flow_cell_id: str = "FCID"
     lane: str = "Lane"
     sample_internal_id: str = "Sample_ID"
