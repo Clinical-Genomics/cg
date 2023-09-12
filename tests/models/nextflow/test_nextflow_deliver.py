@@ -23,6 +23,10 @@ def test_file_deliverables(deliverable_id: str, file_format: str, step: str, exi
     # THEN assert that it was successfully created
     assert isinstance(file_deliverable, FileDeliverable)
 
+    # THEN assert that paths are returned as strings
+    assert isinstance(file_deliverable.path, str)
+    assert isinstance(file_deliverable.path_index, str)
+
 
 def test_file_deliverables_missing_optional(
     deliverable_id: str, file_format: str, step: str, existing_file: Path

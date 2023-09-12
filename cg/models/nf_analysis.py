@@ -53,7 +53,7 @@ class FileDeliverable(BaseModel):
     tag: str
 
     @validator("path", "path_index")
-    def convert_path_to_string(cls, file_path):
+    def convert_path_to_string(cls, file_path: Path):
         if file_path and isinstance(file_path, Path):
             return str(file_path)
         return file_path
