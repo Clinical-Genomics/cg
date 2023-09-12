@@ -8,7 +8,7 @@ from cg.models.nf_analysis import FileDeliverable
 
 
 def test_file_deliverables(any_string: str, filled_file: Path):
-    """Tests file delivery."""
+    """Tests that file deliverable model is successfully created."""
     # GIVEN valid deliverables fields
 
     # WHEN instantiating a deliverables object
