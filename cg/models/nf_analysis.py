@@ -53,7 +53,7 @@ class FileDeliverable(BaseModel):
     tag: str
 
     @validator("path", "path_index", pre=True)
-    def path_exist(cls, file_path: Union[str, Path]) -> str:
+    def path_exist(cls, file_path: Union[str, Path]) -> Optional[str]:
         if file_path is not None:
             path = Path(file_path)
             if not path.exists():
