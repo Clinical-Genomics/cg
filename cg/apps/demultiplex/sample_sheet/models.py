@@ -1,10 +1,10 @@
 import logging
-from pydantic import ConfigDict, BaseModel, Extra, Field
 from typing import List
 
+from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 from cg.constants.constants import GenomeVersion
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
-from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
+from pydantic import BaseModel, ConfigDict, Extra, Field
 
 LOG = logging.getLogger(__name__)
 
@@ -49,6 +49,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
     sample_id: str = Field(..., alias=SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID.value)
     index: str = Field(..., alias=SampleSheetBCLConvertSections.Data.INDEX_1.value)
     index2: str = Field("", alias=SampleSheetBCLConvertSections.Data.INDEX_2.value)
+    override_cycles: str = Field("", alias=SampleSheetBCLConvertSections.Data.OVERRIDE_CYCLES.value)
     adapter_read_1: str = Field("", alias=SampleSheetBCLConvertSections.Data.ADAPTER_READ_1.value)
     adapter_read_2: str = Field("", alias=SampleSheetBCLConvertSections.Data.ADAPTER_READ_2.value)
     barcode_mismatches_1: int = Field(
