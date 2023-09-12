@@ -2,7 +2,6 @@
 import logging
 from pathlib import Path
 from typing import List, Optional
-from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 
 from cg.exc import FlowCellError, MissingFilesError
@@ -33,7 +32,8 @@ class DemuxPostProcessingAPI:
     """Post demultiplexing API class."""
 
     def __init__(self, config: CGConfig) -> None:
-        self.demux_api: DemultiplexingAPI = config.demultiplex_api
+        self.flow_cells_dir: Path = Path(config.flow_cells_dir)
+        self.demultiplexed_runs_dir: Path = Path(config.demultiplexed_flow_cells_dir)
         self.status_db: Store = config.status_db
         self.hk_api: HousekeeperAPI = config.housekeeper_api
         self.dry_run: bool = False
@@ -42,8 +42,6 @@ class DemuxPostProcessingAPI:
         """Set dry run."""
         LOG.debug(f"Set dry run to {dry_run}")
         self.dry_run = dry_run
-        if dry_run:
-            self.demux_api.set_dry_run(dry_run=dry_run)
 
     def finish_flow_cell(
         self,
@@ -71,9 +69,7 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
-        flow_cell_out_directory: Path = Path(
-            self.demux_api.demultiplexed_runs_dir, flow_cell_directory_name
-        )
+        flow_cell_out_directory: Path = Path(self.demultiplexed_runs_dir, flow_cell_directory_name)
 
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
             flow_cell_directory=flow_cell_out_directory,
@@ -131,14 +127,14 @@ class DemuxPostProcessingAPI:
         store_flow_cell_data_in_housekeeper(
             flow_cell=parsed_flow_cell,
             hk_api=self.hk_api,
-            flow_cell_run_dir=self.demux_api.flow_cells_dir,
+            flow_cell_run_dir=self.flow_cells_dir,
             store=self.status_db,
         )
 
     def get_all_demultiplexed_flow_cell_dirs(self) -> List[Path]:
         """Return all demultiplex flow cell out directories."""
         demultiplex_flow_cells: List[Path] = []
-        for flow_cell_dir in self.demux_api.demultiplexed_runs_dir.iterdir():
+        for flow_cell_dir in self.demultiplexed_runs_dir.iterdir():
             if flow_cell_dir.is_dir():
                 LOG.debug(f"Found directory {flow_cell_dir}")
                 demultiplex_flow_cells.append(flow_cell_dir)

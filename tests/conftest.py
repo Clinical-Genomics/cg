@@ -2196,13 +2196,15 @@ def context_config(
     microsalt_dir: Path,
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
+    flow_cells_dir: Path,
+    demultiplexed_runs: Path,
 ) -> dict:
     """Return a context config."""
     return {
         "database": cg_uri,
         "delivery_path": str(cg_dir),
-        "flow_cells_dir": "path/to/flow_cells",
-        "demultiplexed_flow_cells_dir": "path/to/demultiplexed_flow_cells_dir",
+        "flow_cells_dir": str(flow_cells_dir),
+        "demultiplexed_flow_cells_dir": str(demultiplexed_runs),
         "email_base_settings": {
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",
