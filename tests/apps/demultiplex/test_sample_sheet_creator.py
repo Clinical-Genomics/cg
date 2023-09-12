@@ -1,19 +1,19 @@
 """Tests for the SampleSheetCreator classes."""
-from pathlib import Path
-from typing import List, Tuple
-
 import pytest
-from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-    SampleSheet,
-)
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_validated_sample_sheet
+
+from pathlib import Path
+from typing import List
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreator,
     SampleSheetCreatorBcl2Fastq,
     SampleSheetCreatorBCLConvert,
 )
+from cg.apps.demultiplex.sample_sheet.models import (
+    SampleSheet,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
+)
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_validated_sample_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.exc import SampleSheetError
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -21,7 +21,7 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
     novaseq_x_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_bcl_convert_samples: List[FlowCellSampleBCLConvert],
+    lims_novaseq_x_samples: List[FlowCellSampleBCLConvert],
 ):
     """Test that creating a BCL Convert sample sheet fails if the bcl converter is Bcl2fastq."""
     # GIVEN a NovaSeqX flow cell and samples and the bcl converter is Bcl2fastq
@@ -31,7 +31,7 @@ def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
     with pytest.raises(SampleSheetError) as exc_info:
         SampleSheetCreatorBCLConvert(
             flow_cell=novaseq_x_flow_cell,
-            lims_samples=lims_novaseq_bcl_convert_samples,
+            lims_samples=lims_novaseq_x_samples,
         )
         # THEN an error is raised
         assert (
@@ -136,54 +136,3 @@ def test_remove_unwanted_samples_no_dual_index(
         f"Removing sample {novaseq6000_flow_cell_sample_no_dual_index} since it does not have dual index"
         in caplog.text
     )
-
-
-def test_add_override_cycles_to_samples(
-    novaseq_x_flow_cell: FlowCellDirectoryData,
-    bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
-    override_cycles_for_samples_with_updated_indexes: List[str],
-):
-    """Test that the OverrideCycles values are generated correctly."""
-    # GIVEN a SampleSheetCreator with samples without Override Cycles added
-    sample_sheet_creator = SampleSheetCreatorBCLConvert(
-        flow_cell=novaseq_x_flow_cell, lims_samples=bcl_convert_samples_with_updated_indexes
-    )
-    assert all(sample.override_cycles == "" for sample in sample_sheet_creator.lims_samples)
-
-    # WHEN adding the correct values of override samples
-    sample_sheet_creator.add_override_cycles_to_samples()
-
-    # THEN the Override Cycles attribute is added to all samples
-    assert all(
-        sample.override_cycles == override_cycles_value
-        for sample, override_cycles_value in zip(
-            sample_sheet_creator.lims_samples, override_cycles_for_samples_with_updated_indexes
-        )
-    )
-
-
-def test_update_barcode_mismatch_values_for_samples(
-    novaseq_x_flow_cell: FlowCellDirectoryData,
-    bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
-    barcode_mismatch_values_for_samples_with_updated_indexes: List[Tuple[int, int]],
-):
-    """."""
-    # GIVEN a sample sheet creator with samples with barcode mismatch values equal to 1
-    sample_sheet_creator = SampleSheetCreatorBCLConvert(
-        flow_cell=novaseq_x_flow_cell, lims_samples=bcl_convert_samples_with_updated_indexes
-    )
-    assert all(
-        sample.barcode_mismatches_1 == 1 and sample.barcode_mismatches_2 == 1
-        for sample in sample_sheet_creator.lims_samples
-    )
-
-    # WHEN updating the barcode mismatch values
-    sample_sheet_creator.update_barcode_mismatch_values_for_samples(
-        sample_sheet_creator.lims_samples
-    )
-
-    # THEN exactly two samples have barcode mismatches equal to zero
-    for sample, barcode_mismatch_tuple in zip(
-        sample_sheet_creator.lims_samples, barcode_mismatch_values_for_samples_with_updated_indexes
-    ):
-        assert (sample.barcode_mismatches_1, sample.barcode_mismatches_2) == barcode_mismatch_tuple
