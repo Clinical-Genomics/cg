@@ -2,13 +2,13 @@ import logging
 import operator
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
-from cg.constants.nextflow import NFX_SAMPLE_HEADER, NFX_WORK_DIR
+from cg.constants.nextflow import NFX_WORK_DIR
 from cg.exc import CgError
-from cg.io.controller import ReadFile, WriteFile
+from cg.io.controller import WriteFile
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
