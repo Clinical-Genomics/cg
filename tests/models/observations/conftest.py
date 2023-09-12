@@ -10,7 +10,7 @@ from cg.models.observations.input_files import (
 
 
 @pytest.fixture(name="observations_input_files_raw")
-def fixture_observations_input_files_raw(case_id: str, filled_file: Path) -> dict:
+def observations_input_files_raw(case_id: str, filled_file: Path) -> dict:
     """Return raw observations input files for rare diseases."""
     return {
         "family_ped_path": filled_file,
@@ -21,7 +21,7 @@ def fixture_observations_input_files_raw(case_id: str, filled_file: Path) -> dic
 
 
 @pytest.fixture(name="observations_input_files")
-def fixture_observations_input_files(
+def observations_input_files(
     observations_input_files_raw: dict,
 ) -> MipDNAObservationsInputFiles:
     """Return raw observations input files for rare diseases WES analysis."""
@@ -29,7 +29,7 @@ def fixture_observations_input_files(
 
 
 @pytest.fixture(name="balsamic_observations_input_files_raw")
-def fixture_balsamic_observations_input_files_raw(case_id: str, filled_file: Path) -> dict:
+def balsamic_observations_input_files_raw(case_id: str, filled_file: Path) -> dict:
     """Return raw observations input files for cancer."""
     return {
         "snv_germline_vcf_path": filled_file,
@@ -40,7 +40,7 @@ def fixture_balsamic_observations_input_files_raw(case_id: str, filled_file: Pat
 
 
 @pytest.fixture(name="balsamic_observations_input_files")
-def fixture_balsamic_observations_input_files(
+def balsamic_observations_input_files(
     balsamic_observations_input_files_raw: dict,
 ) -> BalsamicObservationsInputFiles:
     """Return raw observations input files for cancer WGS analysis."""

@@ -7,8 +7,8 @@ from cg.constants.observations import LoqusdbInstance
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from tests.mocks.process_mock import ProcessMock
 from tests.models.observations.conftest import (
-    fixture_observations_input_files_raw,
-    fixture_observations_input_files,
+    observations_input_files_raw,
+    observations_input_files,
 )
 
 LOQUSDB_OUTPUT = (
@@ -96,8 +96,8 @@ LOQUSDB_DELETE_NONEXISTING_STDERR = b"""2022-09-22 11:40:04 username loqusdb.com
 2022-09-22 11:40:04 username loqusdb.commands.delete[19944] WARNING Case yellowhog does not exist in database"""
 
 
-@pytest.fixture(name="loqusdb_config_dict")
-def fixture_loqusdb_config() -> Dict[LoqusdbInstance, dict]:
+@pytest.fixture
+def loqusdb_config_dict() -> Dict[LoqusdbInstance, dict]:
     """Return Loqusdb config dictionary."""
     return {
         LoqusdbInstance.WGS: {"binary_path": "binary", "config_path": "config"},
@@ -107,8 +107,8 @@ def fixture_loqusdb_config() -> Dict[LoqusdbInstance, dict]:
     }
 
 
-@pytest.fixture(name="cg_config_locusdb")
-def fixture_cg_config_locusdb(
+@pytest.fixture
+def cg_config_locusdb(
     loqusdb_config_dict: Dict[LoqusdbInstance, dict], cg_config_object: CGConfig
 ) -> CGConfig:
     """Return CG config for Loqusdb."""
@@ -121,34 +121,32 @@ def fixture_cg_config_locusdb(
     return cg_config_object
 
 
-@pytest.fixture(name="loqusdb_binary_path")
-def fixture_loqusdb_binary_path(loqusdb_config_dict: Dict[LoqusdbInstance, dict]) -> str:
+@pytest.fixture
+def loqusdb_binary_path(loqusdb_config_dict: Dict[LoqusdbInstance, dict]) -> str:
     """Return Loqusdb binary path."""
     return loqusdb_config_dict[LoqusdbInstance.WGS]["binary_path"]
 
 
-@pytest.fixture(name="loqusdb_config_path")
-def fixture_loqusdb_config_path(loqusdb_config_dict: Dict[LoqusdbInstance, dict]) -> str:
+@pytest.fixture
+def loqusdb_config_path(loqusdb_config_dict: Dict[LoqusdbInstance, dict]) -> str:
     """Return Loqusdb config dictionary."""
     return loqusdb_config_dict[LoqusdbInstance.WGS]["config_path"]
 
 
-@pytest.fixture(name="loqusdb_process")
-def fixture_loqusdb_process(loqusdb_binary_path: str, loqusdb_config_path: str) -> ProcessMock:
+@pytest.fixture
+def loqusdb_process(loqusdb_binary_path: str, loqusdb_config_path: str) -> ProcessMock:
     """Return mocked process instance."""
     return ProcessMock(binary=loqusdb_binary_path, config=loqusdb_config_path)
 
 
-@pytest.fixture(name="loqusdb_process_exception")
-def fixture_loqusdb_process_exception(
-    loqusdb_binary_path: str, loqusdb_config_path: str
-) -> ProcessMock:
+@pytest.fixture
+def loqusdb_process_exception(loqusdb_binary_path: str, loqusdb_config_path: str) -> ProcessMock:
     """Return error process instance."""
     return ProcessMock(binary=loqusdb_binary_path, config=loqusdb_config_path, error=True)
 
 
-@pytest.fixture(name="loqusdb_api")
-def fixture_loqusdb_api(
+@pytest.fixture
+def loqusdb_api(
     loqusdb_binary_path: str, loqusdb_config_path: str, loqusdb_process: ProcessMock
 ) -> LoqusdbAPI:
     """Return Loqusdb API."""
@@ -157,8 +155,8 @@ def fixture_loqusdb_api(
     return loqusdb_api
 
 
-@pytest.fixture(name="loqusdb_api_exception")
-def fixture_loqusdb_api_exception(
+@pytest.fixture
+def loqusdb_api_exception(
     loqusdb_binary_path: str, loqusdb_config_path: str, loqusdb_process_exception: ProcessMock
 ) -> LoqusdbAPI:
     """Return Loqusdb API with mocked error process."""
@@ -167,37 +165,37 @@ def fixture_loqusdb_api_exception(
     return loqusdb_api
 
 
-@pytest.fixture(name="loqusdb_load_stderr")
-def fixture_loqusdb_load_stderr() -> bytes:
+@pytest.fixture
+def loqusdb_load_stderr() -> bytes:
     """Return Loqusdb stderr for a successful load."""
     return LOQUSDB_OUTPUT
 
 
-@pytest.fixture(name="loqusdb_case_output")
-def fixture_loqusdb_case_output() -> bytes:
+@pytest.fixture
+def loqusdb_case_output() -> bytes:
     """Return Loqusdb output for a 'loqusdb cases -c <case_id> --to-json' command."""
     return LOQUSDB_CASE_OUTPUT
 
 
-@pytest.fixture(name="loqusdb_duplicate_output")
-def fixture_loqusdb_duplicate_output() -> bytes:
+@pytest.fixture
+def loqusdb_duplicate_output() -> bytes:
     """Return Loqusdb output for a 'loqusdb profile --check-vcf' command."""
     return LOQUSDB_DUPLICATE_OUTPUT
 
 
-@pytest.fixture(name="loqusdb_delete_stderr")
-def fixture_loqusdb_delete_stderr() -> bytes:
+@pytest.fixture
+def loqusdb_delete_stderr() -> bytes:
     """Return Loqusdb STDERR for a successful delete."""
     return LOQUSDB_DELETE_STDERR
 
 
-@pytest.fixture(name="loqusdb_delete_non_existing_stderr")
-def fixture_loqusdb_delete_non_existing_stderr() -> bytes:
+@pytest.fixture
+def loqusdb_delete_non_existing_stderr() -> bytes:
     """Return Loqusdb delete STDERR for non existing case."""
     return LOQUSDB_DELETE_NONEXISTING_STDERR
 
 
-@pytest.fixture(name="nr_of_loaded_variants")
-def fixture_nr_of_loaded_variants() -> int:
+@pytest.fixture
+def nr_of_loaded_variants() -> int:
     """Return number of loaded variants."""
     return 15

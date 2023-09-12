@@ -1,7 +1,9 @@
 """Constants related to demultiplexing."""
 from pathlib import Path
-from typing import List
+from typing import Dict, List
+
 import click
+from cg.constants.sequencing import Sequencers
 from cg.utils.enums import Enum, StrEnum
 
 
@@ -109,7 +111,11 @@ class SampleSheetBCLConvertSections:
         HEADER: str = "[Header]"
         FILE_FORMAT: List[str] = ["FileFormatVersion", "2"]
         RUN_NAME: str = "RunName"
-        INSTRUMENT_PLATFORM: List[str] = ["InstrumentPlatform", "NovaSeqXSeries"]
+        INSTRUMENT_PLATFORM_TITLE: str = "InstrumentPlatform"
+        INSTRUMENT_PLATFORM_VALUE: Dict[str, str] = {
+            Sequencers.NOVASEQ: "NovaSeq6000",
+            Sequencers.NOVASEQX: "NovaSeqXSeries",
+        }
         INDEX_ORIENTATION_FORWARD: List[str] = ["IndexOrientation", "Forward"]
 
     class Reads(StrEnum):
@@ -130,6 +136,7 @@ class SampleSheetBCLConvertSections:
         SAMPLE_INTERNAL_ID: str = "Sample_ID"
         INDEX_1: str = "Index"
         INDEX_2: str = "Index2"
+        OVERRIDE_CYCLES: str = "OverrideCycles"
         ADAPTER_READ_1: str = "AdapterRead1"
         ADAPTER_READ_2: str = "AdapterRead2"
         BARCODE_MISMATCHES_1: str = "BarcodeMismatchesIndex1"
@@ -140,6 +147,7 @@ class SampleSheetBCLConvertSections:
             SAMPLE_INTERNAL_ID,
             INDEX_1,
             INDEX_2,
+            OVERRIDE_CYCLES,
             ADAPTER_READ_1,
             ADAPTER_READ_2,
             BARCODE_MISMATCHES_1,

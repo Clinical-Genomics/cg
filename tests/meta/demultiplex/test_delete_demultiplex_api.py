@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import List, Optional
 
 
-from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import DeleteDemuxError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
@@ -77,13 +76,11 @@ def test_set_dry_run_delete_demux_api(
     caplog,
     cg_context: CGConfig,
     bcl2fastq_flow_cell_id: str,
-    stats_api: StatsAPI,
     tmp_flow_cell_run_base_path: Path,
 ):
     """Test to test function to set the API to run in dry run mode"""
 
     caplog.set_level(logging.DEBUG)
-    cg_context.cg_stats_api_ = stats_api
     cg_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
     cg_context.demultiplex_api.demultiplexed_runs_dir = tmp_flow_cell_run_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(

@@ -9,12 +9,12 @@ from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus
 from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.store import Store
-from tests.meta.demultiplex.conftest import fixture_populated_flow_cell_store
+from tests.meta.demultiplex.conftest import populated_flow_cell_store
 from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(name="microbial_store")
-def fixture_microbial_store(store: Store, helpers: StoreHelpers) -> Store:
+def microbial_store(store: Store, helpers: StoreHelpers) -> Store:
     """Populate a store with microbial application tags"""
     microbial_active_apptags = ["MWRNXTR003", "MWGNXTR003", "MWMNXTR003", "MWLNXTR003"]
     microbial_inactive_apptags = ["MWXNXTR003", "VWGNXTR001", "VWLNXTR001"]
@@ -29,7 +29,7 @@ def fixture_microbial_store(store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture(name="rml_pool_store")
-def fixture_rml_pool_store(
+def rml_pool_store(
     case_id: str,
     customer_id: str,
     helpers,
@@ -107,7 +107,7 @@ def fixture_rml_pool_store(
 
 
 @pytest.fixture(name="re_sequenced_sample_store")
-def fixture_re_sequenced_sample_store(
+def re_sequenced_sample_store(
     store: Store,
     bcl_convert_flow_cell_id: str,
     case_id: str,
@@ -166,13 +166,13 @@ def fixture_re_sequenced_sample_store(
 
 
 @pytest.fixture(name="max_nr_of_cases")
-def fixture_max_nr_of_cases() -> int:
+def max_nr_of_cases() -> int:
     """Return the number of maximum number of cases"""
     return 50
 
 
 @pytest.fixture(name="store_failing_sequencing_qc")
-def fixture_store_failing_sequencing_qc(
+def store_failing_sequencing_qc(
     bcl2fastq_flow_cell_id: str,
     sample_id: str,
     ticket_id: str,
@@ -219,27 +219,25 @@ def fixture_store_failing_sequencing_qc(
 
 
 @pytest.fixture(name="max_nr_of_samples")
-def fixture_max_nr_of_samples() -> int:
+def max_nr_of_samples() -> int:
     """Return the number of maximum number of samples"""
     return 50
 
 
 @pytest.fixture(name="EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS")
-def fixture_expected_number_of_not_archived_applications() -> int:
+def expected_number_of_not_archived_applications() -> int:
     """Return the number of expected number of not archived applications"""
     return 4
 
 
 @pytest.fixture(name="EXPECTED_NUMBER_OF_APPLICATIONS")
-def fixture_expected_number_of_applications() -> int:
+def expected_number_of_applications() -> int:
     """Return the number of expected number of applications with prep category"""
     return 7
 
 
 @pytest.fixture(name="store_with_samples_that_have_names")
-def store_with_samples_that_have_names(
-    store: Store, helpers: StoreHelpers, name="sample_1"
-) -> Store:
+def store_with_samples_that_have_names(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with two samples of which one has a name"""
     for index in range(1, 4):
         helpers.add_sample(
@@ -256,19 +254,19 @@ def store_with_samples_that_have_names(
 
 
 @pytest.fixture(name="cust123")
-def fixture_cust123() -> str:
+def cust123() -> str:
     """Return a customer id"""
     return "cust123"
 
 
 @pytest.fixture(name="test_subject")
-def fixture_test_subject() -> str:
+def test_subject() -> str:
     """Return a subject id"""
     return "test_subject"
 
 
 @pytest.fixture(name="store_with_samples_subject_id_and_tumour_status")
-def fixture_store_with_samples_subject_id_and_tumour_status(
+def store_with_samples_subject_id_and_tumour_status(
     store: Store,
     helpers: StoreHelpers,
     cust123: str,
@@ -296,7 +294,7 @@ def fixture_store_with_samples_subject_id_and_tumour_status(
 
 
 @pytest.fixture(name="store_with_samples_and_tumour_status_missing_subject_id")
-def fixture_store_with_samples_and_tumour_status_missing_subject_id(
+def store_with_samples_and_tumour_status_missing_subject_id(
     store: Store,
     helpers: StoreHelpers,
     cust123: str,
@@ -346,19 +344,19 @@ def store_with_samples_customer_id_and_subject_id_and_tumour_status(
 
 
 @pytest.fixture(name="pool_name_1")
-def fixture_pool_name_1() -> str:
+def pool_name_1() -> str:
     """Return the name of the first pool."""
     return "pool_1"
 
 
 @pytest.fixture(name="pool_order_1")
-def fixture_pool_order_1() -> str:
+def pool_order_1() -> str:
     """Return the order of the first pool."""
     return "pool_order_1"
 
 
 @pytest.fixture(name="store_with_multiple_pools_for_customer")
-def fixture_store_with_multiple_pools_for_customer(
+def store_with_multiple_pools_for_customer(
     store: Store,
     helpers: StoreHelpers,
     customer_id: str = CustomerNames.cust132,
@@ -375,7 +373,7 @@ def fixture_store_with_multiple_pools_for_customer(
 
 
 @pytest.fixture(name="store_with_active_sample_analyze")
-def fixture_store_with_active_sample_analyze(store: Store, helpers: StoreHelpers) -> Store:
+def store_with_active_sample_analyze(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with an active sample with action analyze."""
     # GIVEN a store with a sample that is active
     case = helpers.add_case(
@@ -390,7 +388,7 @@ def fixture_store_with_active_sample_analyze(store: Store, helpers: StoreHelpers
 
 
 @pytest.fixture(name="store_with_active_sample_running")
-def fixture_store_with_active_sample_running(store: Store, helpers: StoreHelpers) -> Store:
+def store_with_active_sample_running(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with an active sample with action running."""
     # GIVEN a store with a sample that is active
     case = helpers.add_case(
@@ -405,19 +403,19 @@ def fixture_store_with_active_sample_running(store: Store, helpers: StoreHelpers
 
 
 @pytest.fixture(name="three_customer_ids")
-def fixture_three_customer_ids() -> List[str]:
+def three_customer_ids() -> List[str]:
     """Return three customer ids."""
     yield ["".join(["cust00", str(number)]) for number in range(3)]
 
 
 @pytest.fixture(name="three_pool_names")
-def fixture_three_pool_names() -> List[str]:
+def three_pool_names() -> List[str]:
     """Return three customer ids."""
     yield ["_".join(["test_pool", str(number)]) for number in range(3)]
 
 
 @pytest.fixture(name="store_with_samples_for_multiple_customers")
-def fixture_store_with_samples_for_multiple_customers(
+def store_with_samples_for_multiple_customers(
     store: Store, helpers: StoreHelpers, timestamp_now: dt.datetime
 ) -> Store:
     """Return a store with two samples for three different customers."""
@@ -433,7 +431,7 @@ def fixture_store_with_samples_for_multiple_customers(
 
 
 @pytest.fixture(name="store_with_pools_for_multiple_customers")
-def fixture_store_with_pools_for_multiple_customers(
+def store_with_pools_for_multiple_customers(
     store: Store, helpers: StoreHelpers, timestamp_now: dt.datetime
 ) -> Store:
     """Return a store with two samples for three different customers."""
@@ -449,7 +447,7 @@ def fixture_store_with_pools_for_multiple_customers(
 
 
 @pytest.fixture(name="store_with_analyses_for_cases")
-def fixture_store_with_analyses_for_cases(
+def store_with_analyses_for_cases(
     analysis_store: Store,
     helpers: StoreHelpers,
     timestamp_now: dt.datetime,
@@ -488,7 +486,7 @@ def fixture_store_with_analyses_for_cases(
 
 
 @pytest.fixture(name="store_with_analyses_for_cases_not_uploaded_fluffy")
-def fixture_store_with_analyses_for_cases_not_uploaded_fluffy(
+def store_with_analyses_for_cases_not_uploaded_fluffy(
     analysis_store: Store,
     helpers: StoreHelpers,
     timestamp_now: dt.datetime,
@@ -526,7 +524,7 @@ def fixture_store_with_analyses_for_cases_not_uploaded_fluffy(
 
 
 @pytest.fixture(name="store_with_analyses_for_cases_not_uploaded_microsalt")
-def fixture_store_with_analyses_for_cases_not_uploaded_microsalt(
+def store_with_analyses_for_cases_not_uploaded_microsalt(
     analysis_store: Store,
     helpers: StoreHelpers,
     timestamp_now: dt.datetime,
@@ -565,7 +563,7 @@ def fixture_store_with_analyses_for_cases_not_uploaded_microsalt(
 
 
 @pytest.fixture(name="store_with_analyses_for_cases_to_deliver")
-def fixture_store_with_analyses_for_cases_to_deliver(
+def store_with_analyses_for_cases_to_deliver(
     analysis_store: Store,
     helpers: StoreHelpers,
     timestamp_now: dt.datetime,

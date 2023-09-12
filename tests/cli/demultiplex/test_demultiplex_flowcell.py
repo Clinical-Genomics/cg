@@ -12,8 +12,8 @@ from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_p
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from tests.meta.demultiplex.conftest import (
-    fixture_tmp_flow_cell_demux_base_path,
-    fixture_tmp_flow_cell_run_base_path,
+    tmp_flow_cell_demux_base_path,
+    tmp_flow_cell_run_base_path,
 )
 
 

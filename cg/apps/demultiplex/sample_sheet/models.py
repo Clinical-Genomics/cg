@@ -1,9 +1,10 @@
 import logging
-from pydantic import ConfigDict, BaseModel, Extra, Field
 from typing import List
 
+from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 from cg.constants.constants import GenomeVersion
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
+from pydantic import BaseModel, ConfigDict, Extra, Field
 
 LOG = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
     sample_id: str = Field(..., alias=SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID.value)
     index: str = Field(..., alias=SampleSheetBCLConvertSections.Data.INDEX_1.value)
     index2: str = Field("", alias=SampleSheetBCLConvertSections.Data.INDEX_2.value)
+    override_cycles: str = Field("", alias=SampleSheetBCLConvertSections.Data.OVERRIDE_CYCLES.value)
     adapter_read_1: str = Field("", alias=SampleSheetBCLConvertSections.Data.ADAPTER_READ_1.value)
     adapter_read_2: str = Field("", alias=SampleSheetBCLConvertSections.Data.ADAPTER_READ_2.value)
     barcode_mismatches_1: int = Field(
@@ -60,6 +62,15 @@ class FlowCellSampleBCLConvert(FlowCellSample):
 
 class SampleSheet(BaseModel):
     samples: List[FlowCellSample]
+
+    def get_sample_ids(self) -> List[str]:
+        """Return ids for samples in sheet."""
+        sample_internal_ids: List[str] = []
+        for sample in self.samples:
+            sample_internal_id: str = sample.sample_id.split("_")[0]
+            if is_valid_sample_internal_id(sample_internal_id):
+                sample_internal_ids.append(sample_internal_id)
+        return list(set(sample_internal_ids))
 
 
 class SampleSheetBcl2Fastq(SampleSheet):

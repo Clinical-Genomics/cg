@@ -7,8 +7,8 @@ from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
 
 
-@pytest.fixture(name="backup_context")
-def fixture_backup_context(cg_context: CGConfig) -> CGConfig:
+@pytest.fixture
+def backup_context(cg_context: CGConfig) -> CGConfig:
     cg_context.meta_apis["backup_api"] = BackupAPI(
         encryption_api=EncryptionAPI(binary_path=cg_context.encryption.binary_path),
         encrypt_dir=cg_context.backup.encrypt_dir.dict(),
