@@ -6,8 +6,6 @@ from collections import namedtuple
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict
-
-from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
@@ -220,11 +218,9 @@ def populated_delete_demux_context(
     cg_context: CGConfig,
     flow_cell_name_housekeeper_api: HousekeeperAPI,
     populated_flow_cell_store: Store,
-    populated_stats_api: StatsAPI,
 ) -> CGConfig:
     """Return a populated context to remove flow cells from using the DeleteDemuxAPI."""
     populated_delete_demux_context = cg_context
-    populated_delete_demux_context.cg_stats_api_ = populated_stats_api
     populated_delete_demux_context.status_db_ = populated_flow_cell_store
     populated_delete_demux_context.housekeeper_api_ = flow_cell_name_housekeeper_api
     return populated_delete_demux_context
@@ -235,12 +231,10 @@ def populated_sample_lane_seq_demux_context(
     cg_context: CGConfig,
     flow_cell_name_housekeeper_api: HousekeeperAPI,
     store_with_sequencing_metrics: Store,
-    populated_stats_api: StatsAPI,
 ) -> CGConfig:
     """Return a populated context to remove flow cells from using the DeleteDemuxAPI."""
     populated_wipe_demux_context = cg_context
     populated_wipe_demux_context.status_db_ = store_with_sequencing_metrics
-    populated_wipe_demux_context.cg_stats_api_ = populated_stats_api
     populated_wipe_demux_context.housekeeper_api_ = flow_cell_name_housekeeper_api
     return populated_wipe_demux_context
 
@@ -317,11 +311,9 @@ def active_delete_demultiplex_api(
 def delete_demultiplex_api(
     cg_context: CGConfig,
     bcl2fastq_flow_cell_id: str,
-    stats_api: StatsAPI,
     tmp_flow_cell_run_base_path: Path,
 ) -> DeleteDemuxAPI:
     """Return an initialized DeleteDemuxAPI."""
-    cg_context.cg_stats_api_ = stats_api
     cg_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
     cg_context.demultiplex_api.demultiplexed_runs_dir = tmp_flow_cell_run_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(

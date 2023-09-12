@@ -10,8 +10,6 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
-from cg.apps.cgstats.crud import create
-from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
@@ -37,7 +35,6 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.models.rnafusion.rnafusion import RnafusionParameters
@@ -762,23 +759,6 @@ def lims_novaseq_bcl2fastq_samples(
     return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
 
 
-@pytest.fixture(name="stats_api")
-def stats_api(project_dir: Path) -> StatsAPI:
-    """Setup base CGStats store."""
-    _store = StatsAPI(
-        {
-            "cgstats": {
-                "binary_path": "echo",
-                "database": "sqlite://",
-                "root": "tests/fixtures/DEMUX",
-            }
-        }
-    )
-    _store.create_all()
-    yield _store
-    _store.drop_all()
-
-
 @pytest.fixture(name="tmp_flow_cells_directory")
 def tmp_flow_cells_directory(tmp_path: Path, flow_cells_dir: Path) -> Path:
     """
@@ -1071,13 +1051,11 @@ def store_with_demultiplexed_samples(
 @pytest.fixture(name="demultiplexing_context_for_demux")
 def demultiplexing_context_for_demux(
     demultiplexing_api_for_demux: DemultiplexingAPI,
-    stats_api: StatsAPI,
     cg_context: CGConfig,
     store_with_demultiplexed_samples: Store,
 ) -> CGConfig:
     """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api_for_demux
-    cg_context.cg_stats_api_ = stats_api
     cg_context.housekeeper_api_ = demultiplexing_api_for_demux.hk_api
     cg_context.status_db_ = store_with_demultiplexed_samples
     return cg_context
@@ -1086,14 +1064,12 @@ def demultiplexing_context_for_demux(
 @pytest.fixture(name="demultiplex_context")
 def demultiplex_context(
     demultiplexing_api: DemultiplexingAPI,
-    stats_api: StatsAPI,
     real_housekeeper_api: HousekeeperAPI,
     cg_context: CGConfig,
     store_with_demultiplexed_samples: Store,
 ) -> CGConfig:
     """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api
-    cg_context.cg_stats_api_ = stats_api
     cg_context.housekeeper_api_ = real_housekeeper_api
     cg_context.status_db_ = store_with_demultiplexed_samples
     return cg_context
@@ -1150,13 +1126,6 @@ def demultiplexing_api(
     )
     demux_api.slurm_api.process = sbatch_process
     return demux_api
-
-
-@pytest.fixture(name="populated_stats_api")
-def populated_stats_api(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults) -> StatsAPI:
-    create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
-    """Return a stats API with a populated database."""
-    return stats_api
 
 
 @pytest.fixture(name="novaseq6000_bcl_convert_sample_sheet_path")
@@ -1414,18 +1383,6 @@ def bcl_convert_demultiplexed_flow_cell(
 def novaseqx_demultiplexed_flow_cell(demultiplexed_runs: Path, novaseq_x_flow_cell_full_name: str):
     """Return the path to a demultiplexed NovaSeqX flow cell."""
     return Path(demultiplexed_runs, novaseq_x_flow_cell_full_name)
-
-
-@pytest.fixture(name="bcl2fastq_demux_results")
-def bcl2fastq_demux_results(
-    demultiplexed_flow_cell: Path, bcl2fastq_flow_cell: FlowCellDirectoryData
-) -> DemuxResults:
-    """Return a demux results object for a bcl2fastq demultiplexed flow cell."""
-    return DemuxResults(
-        demux_dir=demultiplexed_flow_cell,
-        flow_cell=bcl2fastq_flow_cell,
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
 
 
 # Genotype file fixture

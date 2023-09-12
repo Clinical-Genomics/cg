@@ -1,7 +1,6 @@
 import logging
 from typing import Optional
 
-from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -261,7 +260,6 @@ class CGConfig(BaseModel):
     # App APIs that can be instantiated in CGConfig
     backup: BackupConfig = None
     cgstats: CGStatsConfig = None
-    cg_stats_api_: StatsAPI = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
     clean: Optional[CleanConfig] = None
@@ -339,15 +337,6 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating chanjo api")
             api = ChanjoAPI(config=self.dict())
             self.chanjo_api_ = api
-        return api
-
-    @property
-    def cg_stats_api(self) -> StatsAPI:
-        api = self.__dict__.get("cg_stats_api_")
-        if api is None:
-            LOG.debug("Instantiating cg_stats api")
-            api = StatsAPI(config=self.dict())
-            self.cg_stats_api_ = api
         return api
 
     @property
