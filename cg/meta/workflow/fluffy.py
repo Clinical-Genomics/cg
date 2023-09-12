@@ -44,7 +44,7 @@ class FluffySampleSheetHeaders(Enum):
     sequencing_date: str = "SequencingDate"
 
 
-class FluffySampleSheetEntry(BaseModel):
+class FluffySample(BaseModel):
     flow_cell_id: str
     lane: int
     sample_internal_id: str
@@ -62,12 +62,12 @@ class FluffySampleSheetEntry(BaseModel):
 
 
 class FluffySampleSheet(BaseModel):
-    entries: List[FluffySampleSheetEntry]
+    samples: List[FluffySample]
 
     def write_sample_sheet(self, out_path: Path) -> None:
         LOG.info(f"Writing fluffy sample sheet to {out_path}")
         headers = [header.value for header in FluffySampleSheetHeaders]
-        entries = [entry.model_dump().values() for entry in self.entries]
+        entries = [entry.model_dump().values() for entry in self.samples]
         content = [headers] + entries
         WriteFile.write_file_from_content(content, FileFormat.CSV, out_path)
 
@@ -194,7 +194,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
             sample_id: str = sample.sample_id
             db_sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
 
-            sample_sheet_row = FluffySampleSheetEntry(
+            sample_sheet_row = FluffySample(
                 flow_cell_id=flow_cell_id,
                 lane=sample.lane,
                 sample_internal_id=sample_id,
@@ -208,7 +208,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
             )
             fluffy_sample_sheet_rows.append(sample_sheet_row)
 
-        return FluffySampleSheet(entries=fluffy_sample_sheet_rows)
+        return FluffySampleSheet(samples=fluffy_sample_sheet_rows)
 
     def get_sample_sheet_housekeeper_path(self, flowcell_name: str) -> Path:
         """Returns the path to original sample sheet file that is added to Housekeeper."""
