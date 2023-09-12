@@ -173,7 +173,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
 
     @staticmethod
-    def write_deliverables_bundle(
+    def write_deliverables_file(
         deliverables_content: dict, file_path: Path, file_format=FileFormat.YAML
     ) -> None:
         """Write deliverables file."""
