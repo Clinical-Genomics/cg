@@ -6,6 +6,8 @@ from typing import List, Optional
 
 import pandas as pd
 from sqlalchemy.orm import Query
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq, SampleSheet
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
@@ -135,6 +137,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
         sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
         return bool(sample_obj.control)
 
+    def get_sample_order(self, sample_id: str) -> str:
+        sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
+        return sample_obj.order
+
     def get_nr_of_header_lines_in_sample_sheet(
         self,
         sample_sheet_housekeeper_path: Path,
@@ -223,6 +229,28 @@ class FluffyAnalysisAPI(AnalysisAPI):
         sample_sheet_df = self.read_sample_sheet_data(
             sample_sheet_housekeeper_path=sample_sheet_housekeeper_path
         )
+
+        # TODO: resolve actual sample type somehow or refactor get_sample_sheet_from_file
+        sample_sheet: SampleSheet = get_sample_sheet_from_file(
+            infile=sample_sheet_housekeeper_path,
+            flow_cell_sample_type=FlowCellSampleBcl2Fastq,
+        )
+
+        for sample in sample_sheet.samples:
+            sample_id: str = sample.sample_id
+
+            fluffy_sample_config = {
+                "sample_internal_id": sample_id,
+                "flow_cell_id": "flow_cell_id",
+                "lane": sample.lane,
+                "index": sample.index,
+                "index2": sample.index2,
+                "sample_name": self.get_sample_name_from_lims_id(sample_id),
+                "sample_project": self.get_sample_order(sample_id),
+                "exclude": self.get_sample_control_status(sample_id),
+                "library_nM": self.get_concentrations_from_lims(sample_id),
+                "sequencing_date": self.get_sample_sequenced_date(sample_id),
+            }
 
         sample_id_column_alias = self.set_column_alias(
             sample_sheet_df=sample_sheet_df, alias="Sample_ID", alternative="SampleID"
