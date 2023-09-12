@@ -258,7 +258,7 @@ class NfAnalysisAPI(AnalysisAPI):
             LOG.info(self.process.stdout)
 
     @staticmethod
-    def get_deliverables_template_content(self) -> List[dict]:
+    def get_deliverables_template_content() -> List[dict]:
         """Return deliverables file template content."""
         raise NotImplementedError
 
