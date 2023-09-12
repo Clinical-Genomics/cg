@@ -1384,6 +1384,21 @@ def novaseqx_demultiplexed_flow_cell(demultiplexed_runs: Path, novaseq_x_flow_ce
     """Return the path to a demultiplexed NovaSeqX flow cell."""
     return Path(demultiplexed_runs, novaseq_x_flow_cell_full_name)
 
+
+@pytest.fixture()
+def novaseqx_flow_cell_with_sample_sheet_no_fastq(
+    mocker, novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
+) -> FlowCellDirectoryData:
+    """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
+    novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)
+    flow_cell = FlowCellDirectoryData(flow_cell_path=novaseqx_flow_cell_directory)
+    sample_sheet_path = Path(
+        novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+    mocker.patch.object(flow_cell, "get_sample_sheet_path_hk", return_value=sample_sheet_path)
+    return flow_cell
+
+
 # Genotype file fixture
 
 
