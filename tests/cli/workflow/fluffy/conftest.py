@@ -46,6 +46,11 @@ def samplesheet_path():
     return Path("tests/fixtures/data/SampleSheet.csv").absolute()
 
 
+@pytest.fixture
+def bcl_convert_samplesheet_path() -> Path:
+    return Path("tests/fixtures/data/bcl_convert_sample_sheet.csv").absolute()
+
+
 @pytest.fixture(scope="function")
 def fastq_file_path(config_root_dir):
     path = Path(config_root_dir)
