@@ -23,13 +23,13 @@ from tests.apps.orderform.conftest import (
     mip_order_to_submit,
     mip_rna_order_to_submit,
     rml_order_to_submit,
-    fixture_rnafusion_order_to_submit,
+    rnafusion_order_to_submit,
     sarscov2_order_to_submit,
 )
 
 
-@pytest.fixture(scope="session", name="all_orders_to_submit")
-def fixture_all_orders_to_submit(
+@pytest.fixture(scope="session")
+def all_orders_to_submit(
     balsamic_order_to_submit: dict,
     fastq_order_to_submit: dict,
     metagenome_order_to_submit: dict,
@@ -125,6 +125,6 @@ def orders_api(base_store, osticket: MockOsTicket, lims_api: MockLimsAPI):
     return OrdersAPI(lims=lims_api, status=base_store, osticket=osticket)
 
 
-@pytest.fixture(name="ticket_handler")
-def fixture_ticket_handler(store: Store, osticket: MockOsTicket) -> TicketHandler:
+@pytest.fixture
+def ticket_handler(store: Store, osticket: MockOsTicket) -> TicketHandler:
     return TicketHandler(status_db=store, osticket_api=osticket)

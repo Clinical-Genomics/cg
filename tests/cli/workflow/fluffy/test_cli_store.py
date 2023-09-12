@@ -32,7 +32,7 @@ def test_cli_store_dry_no_case(
 def test_cli_store(
     cli_runner: CliRunner,
     fluffy_case_id_existing: str,
-    deliverables_yaml_fixture_path,
+    deliverables_yaml_path,
     fluffy_hermes_deliverables_response_data,
     fluffy_context: CGConfig,
     timestamp_yesterday,
@@ -49,7 +49,7 @@ def test_cli_store(
 
     # GIVEN deliverables were generated and could be found
     mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_file_path")
-    FluffyAnalysisAPI.get_deliverables_file_path.return_value = deliverables_yaml_fixture_path
+    FluffyAnalysisAPI.get_deliverables_file_path.return_value = deliverables_yaml_path
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
     mocker.patch.object(FluffyAnalysisAPI, "get_date_from_file_path")
@@ -78,7 +78,7 @@ def test_cli_store(
 def test_cli_store_bundle_already_added(
     cli_runner: CliRunner,
     fluffy_case_id_existing,
-    deliverables_yaml_fixture_path,
+    deliverables_yaml_path,
     fluffy_hermes_deliverables_response_data,
     fluffy_context: CGConfig,
     timestamp_yesterday,
@@ -90,7 +90,7 @@ def test_cli_store_bundle_already_added(
 
     # GIVEN deliverables were generated and could be found
     mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_file_path")
-    FluffyAnalysisAPI.get_deliverables_file_path.return_value = deliverables_yaml_fixture_path
+    FluffyAnalysisAPI.get_deliverables_file_path.return_value = deliverables_yaml_path
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
     mocker.patch.object(FluffyAnalysisAPI, "get_date_from_file_path")
@@ -116,7 +116,7 @@ def test_cli_store_bundle_already_added(
 def test_cli_store_available_case_is_running(
     cli_runner: CliRunner,
     fluffy_case_id_existing,
-    deliverables_yaml_fixture_path,
+    deliverables_yaml_path,
     fluffy_hermes_deliverables_response_data,
     fluffy_context: CGConfig,
     timestamp_yesterday,
@@ -133,7 +133,7 @@ def test_cli_store_available_case_is_running(
 
     # GIVEN deliverables were generated and could be found
     mocker.patch.object(FluffyAnalysisAPI, "get_analysis_finish_path")
-    FluffyAnalysisAPI.get_analysis_finish_path.return_value = deliverables_yaml_fixture_path
+    FluffyAnalysisAPI.get_analysis_finish_path.return_value = deliverables_yaml_path
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
     mocker.patch.object(FluffyAnalysisAPI, "get_date_from_file_path")
@@ -165,7 +165,7 @@ def test_cli_store_available_case_is_running(
 def test_cli_store_available_case_not_running(
     cli_runner: CliRunner,
     fluffy_case_id_existing,
-    deliverables_yaml_fixture_path,
+    deliverables_yaml_path,
     fluffy_hermes_deliverables_response_data,
     fluffy_context: CGConfig,
     timestamp_yesterday,
@@ -185,7 +185,7 @@ def test_cli_store_available_case_not_running(
 
     # GIVEN deliverables were generated and could be found
     mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_file_path")
-    FluffyAnalysisAPI.get_deliverables_file_path.return_value = deliverables_yaml_fixture_path
+    FluffyAnalysisAPI.get_deliverables_file_path.return_value = deliverables_yaml_path
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
     mocker.patch.object(FluffyAnalysisAPI, "get_date_from_file_path")
