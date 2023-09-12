@@ -6,7 +6,7 @@ from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
 import datetime as dt
 
-from cg.store.models import Sample
+from cg.store.models import Flowcell, Sample
 
 
 def test_create_samplesheet_dry(
@@ -99,9 +99,6 @@ def test_create_samplesheet_success(
     # WHEN running command to create samplesheet
     result = cli_runner.invoke(create_samplesheet, [fluffy_case_id_existing], obj=fluffy_context)
 
-    # THEN log text is output
-    assert "Writing modified csv" in caplog.text
-
     # THEN command terminates successfully
     assert result.exit_code == EXIT_SUCCESS
 
@@ -121,6 +118,10 @@ def test_create_fluffy_samplesheet_from_bcl_convert_sample_sheet(
     caplog.set_level("INFO")
     fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
     # GIVEN a case_id that does exist in database
+
+    # GIVEN the flow cell for the case was sequenced on a novaseqx machine
+    flow_cell: Flowcell = fluffy_context.status_db.get_latest_flow_cell_on_case(fluffy_case_id_existing)
+    flow_cell.sequencer_type = "novaseqx"
 
     # GIVEN an existing samplesheet in Housekeeper
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_sheet_housekeeper_path")
@@ -152,8 +153,6 @@ def test_create_fluffy_samplesheet_from_bcl_convert_sample_sheet(
 
     # WHEN running command to create samplesheet
     result = cli_runner.invoke(create_samplesheet, [fluffy_case_id_existing], obj=fluffy_context)
-    # THEN log text is output
-    #assert "Writing modified csv" in caplog.text
 
     # THEN command terminates successfully
     assert result.exit_code == EXIT_SUCCESS

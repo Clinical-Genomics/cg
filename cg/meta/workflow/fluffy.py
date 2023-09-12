@@ -66,6 +66,7 @@ class FluffySampleSheet(BaseModel):
     entries: List[FluffySampleSheetEntry]
 
     def write_sample_sheet(self, out_path: Path) -> None:
+        LOG.info("Writing fluffy sample sheet to {sample_sheet_out_path}")
         with out_path.open("w") as outfile:
             outfile.write(",".join([header.value for header in FluffySampleSheetHeaders]) + "\n")
             for entry in self.entries:
@@ -327,7 +328,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
             )
 
             sample_sheet_out_path = Path(self.get_sample_sheet_path(case_id))
-            LOG.info("Writing fluffy sample sheet config to {sample_sheet_out_path}")
             fluffy_sample_sheet.write_sample_sheet(sample_sheet_out_path)
 
     def run_fluffy(
