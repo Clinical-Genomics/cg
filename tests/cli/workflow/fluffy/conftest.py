@@ -7,6 +7,7 @@ from cg.apps.housekeeper.models import InputBundle
 from cg.constants import Pipeline
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store.models import Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -44,6 +45,16 @@ def fluffy_success_output_aberrations(tmpdir_factory):
 @pytest.fixture
 def bcl_convert_samplesheet_path() -> Path:
     return Path("tests", "fixtures", "data", "bcl_convert_sample_sheet.csv")
+
+
+@pytest.fixture
+def sample() -> Sample:
+    return Sample(
+        name="sample_name",
+        order="sample_project",
+        control="positive",
+        sequenced_at=dt.datetime.now(),
+    )
 
 
 @pytest.fixture(scope="function")

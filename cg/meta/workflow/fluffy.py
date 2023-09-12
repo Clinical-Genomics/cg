@@ -10,7 +10,10 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBCLConvert, SampleSheet
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+    get_sample_type_from_sequencer_type,
+)
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
@@ -289,7 +292,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
             )
             fluffy_sample_sheet_rows.append(sample_sheet_row)
 
-        return FluffySampleSheet(fluffy_sample_sheet_rows)
+        return FluffySampleSheet(entries=fluffy_sample_sheet_rows)
 
     def get_sample_sheet_housekeeper_path(self, flowcell_name: str) -> Path:
         """Returns the path to original sample sheet file that is added to Housekeeper."""
@@ -309,9 +312,11 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(case_id)
         sample_sheet_housekeeper_path: Path = self.get_sample_sheet_housekeeper_path(flow_cell.name)
+        flow_cell_sample_type = get_sample_type_from_sequencer_type(flow_cell.sequencer_type)
+
         sample_sheet: SampleSheet = get_sample_sheet_from_file(
             infile=sample_sheet_housekeeper_path,
-            flow_cell_sample_type=FlowCellSampleBCLConvert,
+            flow_cell_sample_type=flow_cell_sample_type,
         )
 
         if not dry_run:
