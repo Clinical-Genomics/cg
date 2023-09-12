@@ -2681,16 +2681,16 @@ def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     )
 
 
-@pytest.fixture(name="rnafusion_deliverables_file_path")
-def fixture_rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
+@pytest.fixture(scope="function")
+def rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to deliverables file."""
     return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_deliverables").with_suffix(
         FileExtensions.YAML
     )
 
 
-@pytest.fixture(name="tower_id", scope="session")
-def fixture_tower_id() -> int:
+@pytest.fixture(scope="session")
+def tower_id() -> int:
     """Returns a NF-Tower ID."""
     return 123456
 

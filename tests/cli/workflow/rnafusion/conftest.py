@@ -6,8 +6,8 @@ import pytest
 from cg.constants import FileExtensions
 
 
-@pytest.fixture(name="deliverables_template_content", scope="session")
-def fixture_deliverables_template_content() -> List[dict]:
+@pytest.fixture(scope="session")
+def deliverables_template_content() -> List[dict]:
     return [
         {
             "format": "yml",
