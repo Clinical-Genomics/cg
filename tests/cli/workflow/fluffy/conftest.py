@@ -41,6 +41,10 @@ def fluffy_success_output_aberrations(tmpdir_factory):
     return file_path
 
 
+@pytest.fixture
+def bcl_convert_samplesheet_path() -> Path:
+    return Path("tests", "fixtures", "data", "bcl_convert_sample_sheet.csv")
+
 @pytest.fixture(scope="function")
 def samplesheet_path():
     return Path("tests/fixtures/data/SampleSheet.csv").absolute()
