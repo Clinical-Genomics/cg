@@ -3,16 +3,9 @@ from typing import Dict, List, Optional, Union
 
 from pydantic.v1 import BaseModel, Field
 
-from cg import resources
-from cg.constants.constants import FileFormat, Strandedness
-from cg.io.controller import ReadFile
+from cg.constants.constants import Strandedness
 from cg.models.analysis import AnalysisModel
-from cg.models.nf_analysis import (
-    FileDeliverable,
-    NextflowSampleSheetEntry,
-    PipelineDeliverables,
-    PipelineParameters,
-)
+from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters
 
 
 class RnafusionQCMetrics(BaseModel):
@@ -100,31 +93,3 @@ class RnafusionAnalysis(AnalysisModel):
     """
 
     sample_metrics: Dict[str, RnafusionQCMetrics]
-
-
-class RnafusionDeliverables(PipelineDeliverables):
-    """Specification for pipeline deliverables."""
-
-    @staticmethod
-    def get_deliverables_template() -> List[dict]:
-        """Return deliverables file template content."""
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=resources.RNAFUSION_BUNDLE_FILENAMES_PATH,
-        )
-
-    @classmethod
-    def get_deliverables_for_case(cls, case_id: str, case_path: Path):
-        """Return RnafusionDeliverables for a given case."""
-        deliverable_templates: List[dict] = cls.get_deliverables_template()
-        files: list = []
-        for file in deliverable_templates:
-            for deliverable_field, deliverable_value in file.items():
-                if deliverable_value is None:
-                    continue
-                file[deliverable_field] = file[deliverable_field].replace("CASEID", case_id)
-                file[deliverable_field] = file[deliverable_field].replace(
-                    "PATHTOCASE", str(case_path)
-                )
-            files.append(FileDeliverable(**file))
-        return cls(files=files)

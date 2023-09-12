@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from cg import resources
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, Strandedness
 from cg.constants.rnafusion import RNAFUSION_METRIC_CONDITIONS
@@ -18,9 +19,9 @@ from cg.models.deliverables.metric_deliverables import (
     MetricsDeliverablesCondition,
     MultiqcDataJson,
 )
+from cg.models.nf_analysis import PipelineDeliverables
 from cg.models.rnafusion.rnafusion import (
     RnafusionAnalysis,
-    RnafusionDeliverables,
     RnafusionParameters,
     RnafusionSampleSheetEntry,
 )
@@ -52,6 +53,14 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.compute_env: str = config.rnafusion.compute_env
         self.revision: str = config.rnafusion.revision
         self.nextflow_binary_path: str = config.rnafusion.binary_path
+
+    @staticmethod
+    def get_deliverables_template_content() -> List[dict]:
+        """Return deliverables file template content."""
+        return ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML,
+            file_path=resources.RNAFUSION_BUNDLE_FILENAMES_PATH,
+        )
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, case_id: str, strandedness: Strandedness
@@ -132,11 +141,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def report_deliver(self, case_id: str) -> None:
         """Create deliverables file."""
-        deliverables_content: RnafusionDeliverables = (
-            RnafusionDeliverables.get_deliverables_for_case(
-                case_id=case_id, case_path=self.get_case_path(case_id=case_id)
-            )
-        )
+        deliverables_content: PipelineDeliverables = self.get_deliverables_for_case(case_id=case_id)
         self.write_deliverables_file(
             deliverables_content=deliverables_content.dict(),
             file_path=self.get_deliverables_file_path(case_id=case_id),

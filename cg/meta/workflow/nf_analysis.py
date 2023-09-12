@@ -13,6 +13,7 @@ from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
+from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.utils import Process
 
@@ -255,3 +256,22 @@ class NfAnalysisAPI(AnalysisAPI):
                 tower_id = NfTowerHandler.get_tower_id(stdout_lines=self.process.stdout_lines())
                 self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
             LOG.info(self.process.stdout)
+
+    def get_deliverables_template_content(self) -> List[dict]:
+        """Return deliverables file template content."""
+        raise NotImplementedError
+
+    def get_deliverables_for_case(self, case_id: str) -> PipelineDeliverables:
+        """Return PipelineDeliverables for a given case."""
+        deliverable_template: List[dict] = self.get_deliverables_template_content()
+        files: list = []
+        for file in deliverable_template:
+            for deliverable_field, deliverable_value in file.items():
+                if deliverable_value is None:
+                    continue
+                file[deliverable_field] = file[deliverable_field].replace("CASEID", case_id)
+                file[deliverable_field] = file[deliverable_field].replace(
+                    "PATHTOCASE", str(self.get_case_path(case_id=case_id))
+                )
+            files.append(FileDeliverable(**file))
+        return PipelineDeliverables(files=files)

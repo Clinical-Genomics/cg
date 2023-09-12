@@ -11,8 +11,8 @@ from cg.cli.workflow.rnafusion.base import report_deliver
 from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.rnafusion import RnafusionDeliverables
 
 
 def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):
@@ -92,8 +92,8 @@ def test_report_deliver_successful(
 
     # GIVEN a mocked deliverables template
     mocker.patch.object(
-        RnafusionDeliverables,
-        "get_deliverables_template",
+        RnafusionAnalysisAPI,
+        "get_deliverables_template_content",
         return_value=deliverables_template_content,
     )
 

@@ -11,7 +11,6 @@ from cg.cli.workflow.rnafusion.base import rnafusion, start, start_available, st
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.rnafusion import RnafusionDeliverables
 
 
 def test_rnafusion_no_args(cli_runner: CliRunner, rnafusion_context: CGConfig):
@@ -77,8 +76,8 @@ def test_store_success(
 
     # GIVEN a mocked deliverables template
     mocker.patch.object(
-        RnafusionDeliverables,
-        "get_deliverables_template",
+        RnafusionAnalysisAPI,
+        "get_deliverables_template_content",
         return_value=deliverables_template_content,
     )
 
@@ -128,8 +127,8 @@ def test_store_fail(
 
     # GIVEN a mocked deliverables template
     mocker.patch.object(
-        RnafusionDeliverables,
-        "get_deliverables_template",
+        RnafusionAnalysisAPI,
+        "get_deliverables_template_content",
         return_value=deliverables_template_content,
     )
 
@@ -169,8 +168,8 @@ def test_store_available(
 
     # GIVEN a mocked deliverables template
     mocker.patch.object(
-        RnafusionDeliverables,
-        "get_deliverables_template",
+        RnafusionAnalysisAPI,
+        "get_deliverables_template_content",
         return_value=deliverables_template_content,
     )
 
