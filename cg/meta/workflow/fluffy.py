@@ -8,7 +8,7 @@ from typing import List, Optional
 import pandas as pd
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq, SampleSheet
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBCLConvert, SampleSheet
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
@@ -263,25 +263,11 @@ class FluffyAnalysisAPI(AnalysisAPI):
             index=False,
         )
 
-    def populate_sample_sheet(
+    def create_fluffy_sample_sheet(
         self,
-        sample_sheet_housekeeper_path: Path,
-        sample_sheet_workdir_path: Path,
+        sample_sheet: SampleSheet,
         flow_cell_id: str,
-    ) -> None:
-        """
-        Reads the Fluffy sample sheet *.csv file as found in Housekeeper.
-        Edits column 'SampleName' to include customer name for sample.
-        Edits column 'Sample_Project or Project' to include customer sample starlims id.
-        Adds columns Library_nM, SequencingDate, Exclude and populates with orderform values
-        """
-
-        # TODO: resolve actual sample type somehow or refactor get_sample_sheet_from_file
-        sample_sheet: SampleSheet = get_sample_sheet_from_file(
-            infile=sample_sheet_housekeeper_path,
-            flow_cell_sample_type=FlowCellSampleBcl2Fastq,
-        )
-
+    ) -> FluffySampleSheet:
         fluffy_sample_sheet_rows = []
 
         for sample in sample_sheet.samples:
@@ -301,9 +287,8 @@ class FluffyAnalysisAPI(AnalysisAPI):
                 sequencing_date=self.get_sample_sequenced_date(sample_id),
             )
             fluffy_sample_sheet_rows.append(sample_sheet_row)
-        
-        fluffy_sample_sheet = FluffySampleSheet(fluffy_sample_sheet_rows)
-        fluffy_sample_sheet.write_sample_sheet(sample_sheet_workdir_path)
+
+        return FluffySampleSheet(fluffy_sample_sheet_rows)
 
     def get_sample_sheet_housekeeper_path(self, flowcell_name: str) -> Path:
         """Returns the path to original sample sheet file that is added to Housekeeper."""
@@ -322,21 +307,22 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Create SampleSheet.csv file in working directory and add desired values to the file
         """
         flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(case_id)
-        sample_sheet_housekeeper_path = self.get_sample_sheet_housekeeper_path(flow_cell.name)
-        sample_sheet_workdir_path = Path(self.get_sample_sheet_path(case_id))
-
-        LOG.info(
-            "Writing modified csv from %s to %s",
-            sample_sheet_housekeeper_path,
-            sample_sheet_workdir_path,
+        sample_sheet_housekeeper_path: Path = self.get_sample_sheet_housekeeper_path(flow_cell.name)
+        sample_sheet: SampleSheet = get_sample_sheet_from_file(
+            infile=sample_sheet_housekeeper_path,
+            flow_cell_sample_type=FlowCellSampleBCLConvert,
         )
+
         if not dry_run:
             Path(self.root_dir, case_id).mkdir(parents=True, exist_ok=True)
-            self.populate_sample_sheet(
-                sample_sheet_housekeeper_path=sample_sheet_housekeeper_path,
-                sample_sheet_workdir_path=sample_sheet_workdir_path,
+            fluffy_sample_sheet: FluffySampleSheet = self.create_fluffy_sample_sheet(
+                sample_sheet=sample_sheet,
                 flow_cell_id=flow_cell.name,
             )
+
+            sample_sheet_out_path = Path(self.get_sample_sheet_path(case_id))
+            LOG.info("Writing fluffy sample sheet config to {sample_sheet_out_path}")
+            fluffy_sample_sheet.write_sample_sheet(sample_sheet_out_path)
 
     def run_fluffy(
         self, case_id: str, dry_run: bool, workflow_config: str, external_ref: bool = False
