@@ -9,6 +9,8 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.rnafusion.base import report_deliver
 from cg.constants import EXIT_SUCCESS
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.rnafusion import RnafusionDeliverables
 
@@ -73,7 +75,7 @@ def test_without_samples(
     assert "no samples" in caplog.text
 
 
-def test_successful(
+def test_report_deliver_successful(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     rnafusion_case_id: str,
@@ -105,9 +107,10 @@ def test_successful(
     assert rnafusion_deliverables_file_path.is_file()
 
     # THEN deliverables content should match the expected values
-    with rnafusion_deliverables_file_path.open("r") as file:
-        content = file.read()
-        for field in deliverables_template_content[0].keys():
-            assert field in content
-        # Assess that missing fields are written
-        assert "path_index: null" in content
+    deliverables_content: str = ReadFile.get_content_from_file(
+        file_format=FileFormat.TXT, file_path=rnafusion_deliverables_file_path, read_to_string=True
+    )
+    for field in deliverables_template_content[0].keys():
+        assert field in deliverables_content
+    # Assess that missing fields are written
+    assert "path_index: null" in deliverables_content

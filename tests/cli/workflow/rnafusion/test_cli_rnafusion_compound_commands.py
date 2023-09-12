@@ -73,7 +73,7 @@ def test_store_success(
     """Test to ensure all parts of store command are run successfully given ideal conditions."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN a valid and successful case
+    # GIVEN a case for which we mocked files created after a successful run
 
     # GIVEN a mocked deliverables template
     mocker.patch.object(
