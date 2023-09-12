@@ -116,13 +116,15 @@ class RnafusionDeliverables(PipelineDeliverables):
     @classmethod
     def get_deliverables_for_case(cls, case_id: str, case_path: Path):
         """Return RnafusionDeliverables for a given case."""
-        template: List[dict] = cls.get_deliverables_template()
+        deliverable_templates: List[dict] = cls.get_deliverables_template()
         files: list = []
-        for file in template:
-            for key, value in file.items():
-                if value is None:
+        for file in deliverable_templates:
+            for deliverable_field, deliverable_value in file.items():
+                if deliverable_value is None:
                     continue
-                file[key] = file[key].replace("CASEID", case_id)
-                file[key] = file[key].replace("PATHTOCASE", str(case_path))
+                file[deliverable_field] = file[deliverable_field].replace("CASEID", case_id)
+                file[deliverable_field] = file[deliverable_field].replace(
+                    "PATHTOCASE", str(case_path)
+                )
             files.append(FileDeliverable(**file))
         return cls(files=files)
