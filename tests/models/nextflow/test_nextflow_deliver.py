@@ -7,18 +7,18 @@ from cg.constants.constants import FileFormat
 from cg.models.nf_analysis import FileDeliverable
 
 
-def test_file_deliverables(deliverable_id: str, step: str, existing_file: Path):
+def test_file_deliverables(any_string: str, filled_file: Path):
     """Tests file delivery."""
     # GIVEN valid deliverables fields
 
     # WHEN instantiating a deliverables object
     file_deliverable: FileDeliverable = FileDeliverable(
         format=FileFormat.TSV,
-        id=deliverable_id,
-        path=existing_file,
-        path_index=existing_file,
-        step=step,
-        tag=step,
+        id=any_string,
+        path=filled_file,
+        path_index=filled_file,
+        step=any_string,
+        tag=any_string,
     )
 
     # THEN assert that it was successfully created
@@ -29,17 +29,17 @@ def test_file_deliverables(deliverable_id: str, step: str, existing_file: Path):
     assert isinstance(file_deliverable.path_index, str)
 
 
-def test_file_deliverables_missing_optional(deliverable_id: str, step: str, existing_file: Path):
+def test_file_deliverables_missing_optional(any_string: str, filled_file: Path):
     """Tests file delivery when an optional field is missing."""
     # GIVEN valid deliverables fields
 
     # WHEN instantiating a deliverables object
     file_deliverable: FileDeliverable = FileDeliverable(
         format=FileFormat.TSV,
-        id=deliverable_id,
-        path=existing_file,
-        step=step,
-        tag=step,
+        id=any_string,
+        path=filled_file,
+        step=any_string,
+        tag=any_string,
     )
 
     # THEN assert that it was successfully created
@@ -47,9 +47,8 @@ def test_file_deliverables_missing_optional(deliverable_id: str, step: str, exis
 
 
 def test_file_deliverables_missing_mandatory(
-    deliverable_id: str,
-    step: str,
-    existing_file: Path,
+    any_string: str,
+    filled_file: Path,
 ):
     """Tests file delivery when a mandatory field is missing."""
     # GIVEN valid deliverables fields
@@ -58,28 +57,26 @@ def test_file_deliverables_missing_mandatory(
     # THEN assert that an error is raised
     with pytest.raises(PydanticValidationError) as error:
         FileDeliverable(
-            id=deliverable_id,
-            path=existing_file,
-            step=step,
-            tag=step,
+            id=any_string,
+            path=filled_file,
+            step=any_string,
+            tag=any_string,
         )
     # THEN assert the error message
     assert "field required (type=value_error.missing)" in str(error.value)
 
 
-def test_file_deliverables_non_existing_attribute(
-    deliverable_id: str, step: str, existing_file: Path
-):
+def test_file_deliverables_non_existing_attribute(any_string: str, filled_file: Path):
     """Tests file delivery when a non existing attribute is given."""
     # GIVEN valid deliverables fields
 
     # WHEN instantiating a deliverables object
     file_deliverable: FileDeliverable = FileDeliverable(
         format=FileFormat.TSV,
-        id=deliverable_id,
-        path=existing_file,
-        step=step,
-        tag=step,
+        id=any_string,
+        path=filled_file,
+        step=any_string,
+        tag=any_string,
         nonexisting=FileFormat.TSV,
     )
 
@@ -91,9 +88,8 @@ def test_file_deliverables_non_existing_attribute(
 
 
 def test_file_deliverables_non_existing_file(
-    deliverable_id: str,
-    step: str,
-    non_existing_file: Path,
+    any_string: str,
+    non_existing_file_path: Path,
 ):
     """Tests file delivery when a mandatory file does not exist."""
     # GIVEN valid deliverables fields
@@ -103,10 +99,10 @@ def test_file_deliverables_non_existing_file(
     with pytest.raises(PydanticValidationError) as error:
         FileDeliverable(
             format=FileFormat.TSV,
-            id=deliverable_id,
-            path=non_existing_file,
-            step=step,
-            tag=step,
+            id=any_string,
+            path=non_existing_file_path,
+            step=any_string,
+            tag=any_string,
         )
     # THEN assert the error message
     assert "value_error.path.not_exists" in str(error.value)

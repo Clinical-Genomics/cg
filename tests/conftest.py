@@ -117,6 +117,11 @@ def timestamp_in_2_weeks(timestamp_now: datetime) -> datetime:
 
 
 @pytest.fixture(scope="session")
+def any_string() -> str:
+    return "any_string"
+
+
+@pytest.fixture(scope="session")
 def slurm_account() -> str:
     """Return a SLURM account."""
     return "super_account"
