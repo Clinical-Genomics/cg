@@ -26,7 +26,6 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
     lane: int = Field(..., alias=SampleSheetBcl2FastqSections.Data.LANE.value)
     index: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.INDEX_1.value)
     index2: str = Field("", alias=SampleSheetBcl2FastqSections.Data.INDEX_2.value)
-    sample_name: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_NAME.value)
 
     sample_id: str = Field(
         ..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value
