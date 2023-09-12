@@ -152,7 +152,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         header_line_count: int = 1
         for line in sample_sheet_content:
             if (
-                SampleSheetBcl2FastqSections.Data.HEADER.value
+                SampleSheetBcl2FastqSections.Data.HEADER.value in line
                 or SampleSheetBCLConvertSections.Data.HEADER.value in line
             ):
                 break
