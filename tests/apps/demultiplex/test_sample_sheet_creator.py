@@ -39,6 +39,7 @@ def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
             == f"Can't use {BclConverter.BCL2FASTQ} with BCL Convert sample sheet"
         )
 
+
 def test_construct_bcl2fastq_sheet(
     bcl2fastq_sample_sheet_creator: SampleSheetCreator, project_dir: Path
 ):
