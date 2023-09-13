@@ -37,10 +37,10 @@ class ConversionResult(BaseModel):
 
     lane_number: int = Field(..., alias="LaneNumber", gt=0)
     demux_results: List[DemuxResult] = Field(..., alias="DemuxResults")
-    undetermined: Optional[Undetermined] = Field(alias="Undetermined")
+    undetermined: Optional[Undetermined] = Field(None, alias="Undetermined")
 
 
-class Bcl2FastqSampleLaneTileMetrics(BaseModel):
+class SampleLaneTileMetrics(BaseModel):
     """
     Represents a set of sequencing metrics for a bcl2fastq run per sample, lane and tile on a flow cell.
     """
@@ -49,15 +49,15 @@ class Bcl2FastqSampleLaneTileMetrics(BaseModel):
     conversion_results: List[ConversionResult] = Field(..., alias="ConversionResults")
 
 
-class Bcl2FastqSampleLaneMetrics(BaseModel):
+class SampleLaneMetrics(BaseModel):
     """
     Aggregated metrics per sample and lane from a bcl2fastq run.
     """
 
     flow_cell_name: str
-    flow_cell_lane_number: int
+    lane_number: int
     sample_id: str
-    sample_total_reads_in_lane: int
-    sample_total_yield_in_lane: int
-    sample_total_yield_q30_in_lane: int
-    sample_total_quality_score_in_lane: int
+    total_reads: int
+    total_yield: int
+    total_yield_q30: int
+    total_quality_score: int
