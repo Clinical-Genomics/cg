@@ -82,7 +82,7 @@ class FlowCellDirectoryData:
     def set_sample_sheet_path_hk(self, hk_path: Path):
         self._sample_sheet_path_hk = hk_path
 
-    def get_sample_sheet_path_hk(self) -> Optional[Path]:
+    def get_sample_sheet_path_hk(self) -> Path:
         if not self._sample_sheet_path_hk:
             raise FlowCellError("Attribute _sample_sheet_path_hk has not been assigned yet")
         return self._sample_sheet_path_hk

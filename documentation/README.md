@@ -64,12 +64,6 @@ Internal app for opening tickets in SupportSystems. We use this mainly to link a
 
 Interface to Scout. For uploading analysis results to Scout. It's also used to access the generation of gene panels files used in the analysis pipeline.
 
-#### stats
-
-Interface to CGStats. Used to handle things related to flowcells:
-
-- this is where we find out how many reads a sample have been sequened
-- getting paths to FASTQ files for samples/flowcells
 
 ### `cli`
 
@@ -152,10 +146,10 @@ And similarly for filling in the delivery date:
 cg transfer lims --status delivered
 ```
 
-Another common task is to transfer data and FASTQ files from the demux/cgstats interface when a demultiplexing task completes. This is as easy as determining the flowcell of interest and running:
+Another common task is to transfer data and FASTQ files from the demultiplexed-runs folder when a demultiplexing task completes. This is as easy as determining the flowcell of interest and running:
 
 ```bash
-cg transfer flowcell HGF2KBCXX
+cg demultiplex finish flow-cell <flow-cell-demultiplexed-runs-dir-name>
 ```
 
 The command will update the _total_ read counts of each sample and check against the application for the sample if it has been fully sequenced. It will also make sure to link the related FASTQ files to Housekeeper. You can run the command over and over - only additional information will be updated.
@@ -209,17 +203,6 @@ It opens a ticket using the `osticket` API for each order which it links with th
 #### transfer
 
 This interface has a few related roles:
-
-##### flowcell
-
-Includes: `stats`, `hk`, `status`
-
-The API accepts the name of a flowcell which will be looked up in `stats`. For all samples on the flowcell it will:
-
-1. check if the quality (Q30) is good enough to include the sequencing results.
-1. update the number of reads that the sample has been sequenced _overall_ and match this with the requirement given by the application.
-1. accordingly, the interface will look up FASTQ files and store them using `hk`.
-1. if a sample has sufficient number of reads, the `sequenced_at` date will be filled in (`status`) according to the sequencing date of the most recent flowcell.
 
 ##### lims
 

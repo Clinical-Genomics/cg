@@ -7,14 +7,14 @@ from typing import Optional
 import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
-from cg.cli.workflow.nextflow.options import (
+from cg.cli.workflow.nf_analysis import (
+    OPTION_COMPUTE_ENV,
     OPTION_CONFIG,
     OPTION_LOG,
     OPTION_PARAMS_FILE,
     OPTION_PROFILE,
     OPTION_REVISION,
-    OPTION_STUB,
-    OPTION_TOWER,
+    OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
 )
@@ -23,7 +23,6 @@ from cg.cli.workflow.rnafusion.options import (
     OPTION_REFERENCES,
     OPTION_STRANDEDNESS,
 )
-from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV, OPTION_TOWER_RUN_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.exc import AnalysisNotReadyError, CgError
@@ -78,8 +77,6 @@ def config_case(
 @OPTION_WORKDIR
 @OPTION_FROM_START
 @OPTION_PROFILE
-@OPTION_TOWER
-@OPTION_STUB
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
 @OPTION_REVISION
@@ -95,8 +92,6 @@ def run(
     work_dir: str,
     from_start: bool,
     profile: str,
-    with_tower: bool,
-    stub: bool,
     config: str,
     params_file: str,
     revision: str,
@@ -119,8 +114,6 @@ def run(
             "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
-            "with_tower": with_tower,
-            "stub": stub,
             "config": analysis_api.get_nextflow_config_path(nextflow_config=config),
             "params_file": analysis_api.get_params_file_path(
                 case_id=case_id, params_file=params_file
@@ -161,8 +154,6 @@ def run(
 @OPTION_LOG
 @OPTION_WORKDIR
 @OPTION_PROFILE
-@OPTION_TOWER
-@OPTION_STUB
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
 @OPTION_REVISION
@@ -177,8 +168,6 @@ def start(
     log: str,
     work_dir: str,
     profile: str,
-    with_tower: bool,
-    stub: bool,
     config: str,
     params_file: str,
     revision: str,
@@ -200,8 +189,6 @@ def start(
         work_dir=work_dir,
         from_start=True,
         profile=profile,
-        with_tower=with_tower,
-        stub=stub,
         config=config,
         params_file=params_file,
         revision=revision,
@@ -274,7 +261,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
             analysis_api.report_deliver(case_id=case_id)
         else:
             LOG.info("Dry-run")
-    except CgError as error:
+    except (CgError, ValidationError) as error:
         LOG.error(f"Could not create report file: {error}")
         raise click.Abort()
     except Exception as error:

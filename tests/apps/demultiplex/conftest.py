@@ -1,48 +1,50 @@
-from typing import List
+from typing import List, Tuple
 
 import pytest
-
 from cg.apps.demultiplex.sample_sheet.index import Index
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
-    SampleSheetCreatorBcl2Fastq,
-    SampleSheetCreatorBCLConvert,
-)
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
+)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
+    SampleSheetCreatorBcl2Fastq,
+    SampleSheetCreatorBCLConvert,
 )
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 @pytest.fixture
+def bcl_convert_samples_with_updated_indexes() -> List[FlowCellSampleBCLConvert]:
+    """Return a list of three FlowCellSampleBCLConvert with updated indexes."""
+    sample_1 = FlowCellSampleBCLConvert(
+        lane=1, sample_id="sample 1", index="CAGAAGAT", index2="CAATGTAC"
+    )
+    sample_2 = FlowCellSampleBCLConvert(
+        lane=1, sample_id="sample 2", index="CAGAAGAG", index2="CAATGTAT"
+    )
+    sample_3 = FlowCellSampleBCLConvert(
+        lane=2, sample_id="sample 3", index="AAGCGATAGA", index2="AACCGCAACA"
+    )
+    return [sample_1, sample_2, sample_3]
+
+
+@pytest.fixture
+def override_cycles_for_samples_with_updated_indexes() -> List[str]:
+    """Return the correspondent Override Cycles values for three samples."""
+    return ["Y151;I8N2;N2I8;Y151", "Y151;I8N2;N2I8;Y151", "Y151;I10;I10;Y151"]
+
+
+@pytest.fixture
+def barcode_mismatch_values_for_samples_with_updated_indexes() -> List[Tuple[int, int]]:
+    """Return the pairs of barcode mismatch values corresponding to three samples."""
+    return [(0, 0), (0, 0), (1, 1)]
+
+
+@pytest.fixture
 def valid_index() -> Index:
     """Return a valid index."""
     return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
-
-
-@pytest.fixture
-def lims_novaseq_bcl2fastq_samples(
-    lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleBcl2Fastq]:
-    """Return a list of parsed Bcl2fastq flow cell samples"""
-    return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
-
-
-@pytest.fixture
-def lims_novaseq_dragen_samples(
-    lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleBCLConvert]:
-    """Return a list of parsed Dragen flow cell samples"""
-    return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
-
-
-@pytest.fixture
-def lims_novaseq_x_samples(
-    lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleBCLConvert]:
-    """Return a list of parsed NovaSeqX flow cell samples"""
-    return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture
@@ -60,12 +62,12 @@ def bcl2fastq_sample_sheet_creator(
 @pytest.fixture
 def bcl_convert_sample_sheet_creator(
     bcl_convert_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_dragen_samples: List[FlowCellSampleBCLConvert],
+    lims_novaseq_bcl_convert_samples: List[FlowCellSampleBCLConvert],
 ) -> SampleSheetCreatorBCLConvert:
     """Returns a sample sheet creator for version 2 sample sheets with dragen format."""
     return SampleSheetCreatorBCLConvert(
         flow_cell=bcl_convert_flow_cell,
-        lims_samples=lims_novaseq_dragen_samples,
+        lims_samples=lims_novaseq_bcl_convert_samples,
     )
 
 

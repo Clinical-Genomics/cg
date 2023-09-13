@@ -4,8 +4,6 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from pydantic.v1 import ValidationError
-
 from cg import resources
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, Strandedness
@@ -21,7 +19,7 @@ from cg.models.deliverables.metric_deliverables import (
     MetricsDeliverablesCondition,
     MultiqcDataJson,
 )
-from cg.models.nf_analysis import NextflowDeliverables, PipelineParameters
+from cg.models.nf_analysis import PipelineDeliverables
 from cg.models.rnafusion.rnafusion import (
     RnafusionAnalysis,
     RnafusionParameters,
@@ -55,6 +53,14 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.compute_env: str = config.rnafusion.compute_env
         self.revision: str = config.rnafusion.revision
         self.nextflow_binary_path: str = config.rnafusion.binary_path
+
+    @staticmethod
+    def get_deliverables_template_content() -> List[dict]:
+        """Return deliverables file template content."""
+        return ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML,
+            file_path=resources.RNAFUSION_BUNDLE_FILENAMES_PATH,
+        )
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, case_id: str, strandedness: Strandedness
@@ -134,23 +140,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
     def report_deliver(self, case_id: str) -> None:
-        """Get a deliverables file template from resources, parse it and, then write the deliverables file."""
-        deliverables_content: dict = self.get_template_deliverables_file_content(
-            resources.RNAFUSION_BUNDLE_FILENAMES_PATH
-        )
-        try:
-            for index, deliver_file in enumerate(deliverables_content):
-                NextflowDeliverables(deliverables=deliver_file)
-                deliverables_content[index] = self.replace_dict_values(
-                    self.get_replace_map(case_id=case_id),
-                    deliver_file,
-                )
-        except ValidationError as error:
-            LOG.error(error)
-            raise ValueError
-        self.create_case_directory(case_id=case_id)
-        self.write_deliverables_bundle(
-            deliverables_content=self.add_bundle_header(deliverables_content=deliverables_content),
+        """Create deliverables file."""
+        deliverables_content: PipelineDeliverables = self.get_deliverables_for_case(case_id=case_id)
+        self.write_deliverables_file(
+            deliverables_content=deliverables_content.dict(),
             file_path=self.get_deliverables_file_path(case_id=case_id),
         )
         LOG.info(
