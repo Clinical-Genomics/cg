@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from pathlib import Path
@@ -11,6 +12,7 @@ from cg.constants.demultiplexing import (
     BCL2FASTQ_METRICS_DIRECTORY_NAME,
     BCL2FASTQ_METRICS_FILE_NAME,
 )
+from cg.io.json import read_json
 
 LOG = logging.getLogger(__name__)
 
@@ -36,7 +38,8 @@ def parse_bcl2fastq_raw_tile_metrics(
 
     for stats_json_path in stats_json_paths:
         LOG.debug(f"Parsing stats.json file {stats_json_path}")
-        sequencing_metrics = Bcl2FastqSampleLaneTileMetrics.parse_file(stats_json_path)
+        data = read_json(stats_json_path)
+        sequencing_metrics = Bcl2FastqSampleLaneTileMetrics.model_validate(data)
         tile_sequencing_metrics.append(sequencing_metrics)
 
     return tile_sequencing_metrics
