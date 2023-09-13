@@ -10,7 +10,6 @@ from cg.apps.demultiplex.sample_sheet.index import (
     get_hamming_distance_index_1,
     get_hamming_distance_index_2,
     get_index_pair,
-    get_indexes_by_lane,
     get_reagent_kit_version,
     get_reverse_complement_dna_seq,
     get_valid_indexes,
@@ -35,24 +34,6 @@ def test_get_valid_indexes():
     # THEN assert that the indexes are correct
     assert indexes
     assert isinstance(indexes[0], Index)
-
-
-def test_get_indexes_by_lane(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
-    novaseq6000_flow_cell_sample_2: FlowCellSampleBcl2Fastq,
-):
-    """Test that getting indexes by lane groups indexes correctly."""
-    # GIVEN two samples on different lanes
-    assert novaseq6000_flow_cell_sample_1.lane != novaseq6000_flow_cell_sample_2.lane
-
-    # WHEN getting indexes by lane
-    indexes_by_lane: Dict[int, Set[str]] = get_indexes_by_lane(
-        samples=[novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]
-    )
-
-    # THEN the result dictionary has two items
-    assert len(indexes_by_lane.keys()) == 2
-    assert len(indexes_by_lane.values()) == 2
 
 
 def test_get_reagent_kit_version_non_existent_reagent(caplog):

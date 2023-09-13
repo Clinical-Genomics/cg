@@ -33,17 +33,6 @@ def is_dual_index(index: str) -> bool:
     return "-" in index
 
 
-def get_indexes_by_lane(samples: List[FlowCellSample]) -> Dict[int, Set[str]]:
-    """Group the indexes from samples by lane."""
-    indexes_by_lane = {}
-    for sample in samples:
-        lane: int = sample.lane
-        if lane not in indexes_by_lane:
-            indexes_by_lane[lane] = set()
-        indexes_by_lane[lane].add(sample.index)
-    return indexes_by_lane
-
-
 class Index(BaseModel):
     """Class that represents an index."""
 
