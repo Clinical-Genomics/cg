@@ -203,7 +203,12 @@ class CompressAPI:
                 f"Adding decompressed FASTQ files to Housekeeper for sample {sample.internal_id}"
             )
 
-            self.add_fastq_hk(sample_obj=sample, fastq_first=fastq_first, fastq_second=fastq_second)
+            self.add_fastq_hk(
+                spring_path=compression.spring_path,
+                fastq_first=fastq_first,
+                fastq_second=fastq_second,
+                sample_internal_id=sample.internal_id,
+            )
         return True
 
     def delete_fastq_housekeeper(self, hk_fastq_first: File, hk_fastq_second: File) -> None:
@@ -259,18 +264,21 @@ class CompressAPI:
             hk_fastq_first=hk_fastq_first, hk_fastq_second=hk_fastq_second
         )
 
-    def add_fastq_hk(self, sample_obj: Sample, fastq_first: Path, fastq_second: Path) -> None:
-        """Add FASTQ files to Housekeeper."""
-
-        flow_cell_id: str = self.get_flow_cell_id_from_sample(
-            file_path=fastq_first, sample=sample_obj
-        )
-        if not sample_obj.application_version.application.is_external:
-            fastq_tags: List[str] = [flow_cell_id, SequencingFileTag.FASTQ]
-        else:
-            fastq_tags: List[str] = [flow_cell_id, sample_obj.internal_id, SequencingFileTag.FASTQ]
+    def add_fastq_hk(
+        self,
+        spring_path: Path,
+        sample_internal_id: str,
+        fastq_first: Path,
+        fastq_second: Path,
+    ) -> None:
+        """Add decompressed FASTQ files to Housekeeper."""
+        spring_file: File = self.hk_api.files(path=spring_path.as_posix()).first()
+        fastq_tags = [
+            SequencingFileTag.FASTQ if tag_name == SequencingFileTag.SPRING else tag_name
+            for tag_name in [tag.name for tag in spring_file.tags]
+        ]
         LOG.info(
-            f"Adds {fastq_first}, {fastq_second} to bundle {sample_obj.internal_id} with tags {fastq_tags}"
+            f"Adds {fastq_first}, {fastq_second} to bundle {sample_internal_id} with tags {fastq_tags}"
         )
         if self.dry_run:
             return
@@ -278,7 +286,7 @@ class CompressAPI:
         LOG.info("Updating files in Housekeeper...")
         for fastq in [fastq_first, fastq_second]:
             self.hk_api.add_and_include_file_to_latest_version(
-                bundle_name=sample_obj.internal_id, file=fastq, tags=fastq_tags
+                bundle_name=sample_internal_id, file=fastq, tags=fastq_tags
             )
         self.hk_api.commit()
 

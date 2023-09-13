@@ -2,13 +2,12 @@
 from pathlib import Path
 from typing import Generator
 
-from housekeeper.store.models import Version
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import HK_FASTQ_TAGS
 from cg.meta.compress import CompressAPI, files
 from cg.store import Store
 from cg.store.models import Sample
+from housekeeper.store.models import Version
 from tests.cli.conftest import MockCompressAPI
 from tests.meta.compress.conftest import MockCompressionData
 from tests.store_helpers import StoreHelpers
@@ -81,7 +80,8 @@ def test_add_fastq_housekeeper_when_no_fastq_in_hk(
 
     # WHEN adding the files to housekeeper
     compress_api.add_fastq_hk(
-        sample_obj=sample,
+        spring_path=compression_files.spring_path,
+        sample_internal_id=sample.internal_id,
         fastq_first=compression_files.fastq_first_file,
         fastq_second=compression_files.fastq_second_file,
     )
