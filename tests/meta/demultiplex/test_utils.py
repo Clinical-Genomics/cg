@@ -332,7 +332,7 @@ def test_is_syncing_complete_false(
     assert not is_directory_synced
 
 
-def test_add_flow_cell_name_to_fastq_file_path(bcl2fastq_flow_cell_id: str, fastq_file_path):
+def test_add_flow_cell_name_to_fastq_file_path(bcl2fastq_flow_cell_id: str, fastq_file_path: Path):
     # GIVEN a fastq file path and a flow cell name
 
     # WHEN adding the flow cell name to the fastq file path
@@ -347,7 +347,7 @@ def test_add_flow_cell_name_to_fastq_file_path(bcl2fastq_flow_cell_id: str, fast
 
 
 def test_add_flow_cell_name_to_fastq_file_path_when_flow_cell_name_already_in_name(
-    bcl2fastq_flow_cell_id: str, fastq_file_path
+    bcl2fastq_flow_cell_id: str, fastq_file_path: Path
 ):
     # GIVEN a fastq file path and a flow cell name
 
