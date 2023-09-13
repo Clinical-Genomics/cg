@@ -12,6 +12,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_sample_sheet_path_to_housekeeper,
     add_tags_if_non_existent,
     get_sample_sheets_from_latest_version,
+    store_fastq_path_in_housekeeper,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -214,10 +215,11 @@ def test_add_demux_logs_to_housekeeper(
         assert file.path.split("/")[-1] in expected_file_names
 
 
-def test_function(fastq_file_path):
+def test_function():
     """Test."""
     # GIVEN a fastq file that has not been added to Housekeeper
 
-    # WHEN
+    # WHEN adding the fastq file to housekeeper
+    store_fastq_path_in_housekeeper()
 
-    # THEN
+    # THEN the entry in Housekeeper has the correct tags
