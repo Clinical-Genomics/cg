@@ -3,12 +3,19 @@ from pathlib import Path
 from typing import Dict, List, Type
 from pydantic import TypeAdapter
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
+from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSample,
+    FlowCellSampleBCLConvert,
+    FlowCellSampleBcl2Fastq,
+    SampleSheet,
+)
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import (
+    BclConverter,
     SampleSheetBcl2FastqSections,
     SampleSheetBCLConvertSections,
 )
+from cg.constants.sequencing import Sequencers
 
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
@@ -48,6 +55,20 @@ def get_sample_sheet_from_file(
         sample_sheet_content=sample_sheet_content,
         sample_type=flow_cell_sample_type,
     )
+
+
+def get_sample_type_from_sequencer_type(sequencer_type: str) -> Type[FlowCellSample]:
+    bcl_converter: str = get_bcl_converter_by_sequencer(sequencer_type)
+    if bcl_converter == BclConverter.BCL2FASTQ:
+        return FlowCellSampleBcl2Fastq
+    return FlowCellSampleBCLConvert
+
+
+def get_bcl_converter_by_sequencer(sequencer_type: str) -> str:
+    """Return the BCL converter based on the sequencer."""
+    if sequencer_type in [Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
+        return BclConverter.DRAGEN
+    return BclConverter.BCL2FASTQ
 
 
 def get_validated_sample_sheet(
