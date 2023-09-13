@@ -99,7 +99,9 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
-        flow_cell_out_directory: Path = self.get_flow_cell_path(flow_cell_directory_name)
+        flow_cell_out_directory: Path = self.get_demultiplexed_runs_flow_cell_path(
+            flow_cell_directory_name
+        )
         sample_sheet_path: Path = self.get_sample_sheet_path(flow_cell_directory_name)
 
         parsed_flow_cell = FlowCellDirectoryData(
@@ -168,7 +170,7 @@ class DemuxPostProcessingAPI:
         flow_cell_id: str = get_flow_cell_id(flow_cell_dir_name)
         return get_sample_sheet_path_hk(flow_cell_id=flow_cell_id, hk_api=self.hk_api)
 
-    def get_flow_cell_path(self, flow_cell_dir_name: str) -> Path:
+    def get_demultiplexed_runs_flow_cell_path(self, flow_cell_dir_name: str) -> Path:
         return Path(self.demux_api.demultiplexed_runs_dir, flow_cell_dir_name)
 
 

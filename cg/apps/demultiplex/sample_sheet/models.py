@@ -63,7 +63,7 @@ class SampleSheet(BaseModel):
     samples: List[FlowCellSample]
 
     def get_sample_ids(self) -> List[str]:
-        """Return ids for samples in sheet."""
+        """Return all unique sample ids in sheet."""
         sample_internal_ids: List[str] = []
         for sample in self.samples:
             sample_internal_id: str = sample.sample_id.split("_")[0]

@@ -34,7 +34,7 @@ def store_flow_cell_data_in_status_db(
     else:
         LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}.")
 
-    sample_internal_ids = parsed_flow_cell.sample_sheet.get_sample_ids()
+    sample_internal_ids: List[str] = parsed_flow_cell.sample_sheet.get_sample_ids()
     add_samples_to_flow_cell_in_status_db(
         flow_cell=flow_cell,
         sample_internal_ids=sample_internal_ids,

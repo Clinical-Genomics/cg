@@ -19,7 +19,7 @@ def is_flow_cell_ready_for_delivery(flow_cell_directory: Path) -> bool:
 
 
 def validate_sample_sheet_exists(flow_cell: FlowCellDirectoryData) -> None:
-    sample_sheet_path: Path = flow_cell.sample_sheet_path_hk
+    sample_sheet_path: Path = flow_cell.sample_sheet_path
     if not sample_sheet_path or not sample_sheet_path.exists():
         raise FlowCellError(f"Sample sheet {sample_sheet_path} does not exist in housekeeper.")
     LOG.debug(f"Found sample sheet {sample_sheet_path} in housekeeper.")
