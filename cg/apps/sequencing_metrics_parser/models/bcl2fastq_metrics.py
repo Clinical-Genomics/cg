@@ -55,7 +55,7 @@ class SampleLaneMetrics(BaseModel):
     """
 
     flow_cell_name: str
-    lane_number: int
+    lane: int
     sample_id: str
     total_reads: int
     total_yield: int
