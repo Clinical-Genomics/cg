@@ -1,12 +1,17 @@
 """Tests for the report-deliver cli command"""
 
 import logging
+from pathlib import Path
+from typing import List
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
 from cg.cli.workflow.rnafusion.base import report_deliver
 from cg.constants import EXIT_SUCCESS
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 
@@ -70,23 +75,42 @@ def test_without_samples(
     assert "no samples" in caplog.text
 
 
-def test_dry_run(
+def test_report_deliver_successful(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
-    caplog: LogCaptureFixture,
     rnafusion_case_id: str,
+    rnafusion_deliverables_file_path: Path,
+    deliverables_template_content: List[dict],
+    mock_analysis_finish,
+    caplog: LogCaptureFixture,
+    mocker,
 ):
-    """Test command with case_id and analysis_finish which should execute successfully."""
+    """Test that deliverable files is properly created on a valid and successful run."""
     caplog.set_level(logging.INFO)
-    # GIVEN case-id
-    case_id: str = rnafusion_case_id
 
-    # WHEN dry running with dry specified
-    result = cli_runner.invoke(report_deliver, [case_id, "--dry-run"], obj=rnafusion_context)
+    # GIVEN a successful run
+
+    # GIVEN a mocked deliverables template
+    mocker.patch.object(
+        RnafusionAnalysisAPI,
+        "get_deliverables_template_content",
+        return_value=deliverables_template_content,
+    )
+
+    # WHEN running
+    result = cli_runner.invoke(report_deliver, [rnafusion_case_id], obj=rnafusion_context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN rnafusion and case_id should be found in command string
-    assert "rnafusion" in caplog.text
-    assert case_id in caplog.text
+    # THEN deliverables file should be written
+    assert rnafusion_deliverables_file_path.is_file()
+
+    # THEN deliverables content should match the expected values
+    deliverables_content: str = ReadFile.get_content_from_file(
+        file_format=FileFormat.TXT, file_path=rnafusion_deliverables_file_path, read_to_string=True
+    )
+    for field in deliverables_template_content[0].keys():
+        assert field in deliverables_content
+    # THEN assess that missing fields are written
+    assert "path_index: null" in deliverables_content
