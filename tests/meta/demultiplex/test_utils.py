@@ -12,6 +12,7 @@ from cg.meta.demultiplex.utils import (
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_sheet_path,
+    get_undetermined_fastqs,
     is_file_path_compressed_fastq,
     is_file_relevant_for_demultiplexing,
     is_lane_in_fastq_file_name,
@@ -360,3 +361,41 @@ def test_add_flow_cell_name_to_fastq_file_path_when_flow_cell_name_already_in_na
 
     # THEN the fastq file path should be returned equal to the original fastq file path
     assert renamed_fastq_file_path == fastq_file_path
+
+
+def test_get_undetermined_fastqs_no_matching_files(tmp_path):
+    # GIVEN a lane and a flow cell with no undetermined fastq files
+
+    # WHEN reetrieving undetermined fastqs for the lane
+    result = get_undetermined_fastqs(lane=1, flow_cell_path=tmp_path)
+
+    # THEN no undetermined fastq files should be returned
+    assert not result
+
+
+def test_get_undetermined_fastqs_single_matching_file(tmp_path):
+    # GIVEN a flow cell with one undetermined fastq file
+    expected_file: Path = Path(tmp_path, "Undetermined_L001_R1.fastq.gz")
+    expected_file.touch()
+
+    # WHEN retrieving undetermined fastqs for the lane
+    result = get_undetermined_fastqs(lane=1, flow_cell_path=tmp_path)
+
+    # THEN the undetermined fastq file for the lane should be returned
+    assert result == [expected_file]
+
+
+def test_get_undetermined_fastqs_multiple_matching_files(tmp_path):
+    # GIVEN a flow cell with multiple undetermined fastq files for a lane
+    expected_files = [
+        Path(tmp_path, "Undetermined_L001_R1.fastq.gz"),
+        Path(tmp_path, "Undetermined_L001_R2.fastq.gz"),
+    ]
+    for file in expected_files:
+        file.touch()
+
+    # WHEN retrieving the undetermined fastqs for the lane
+    result = get_undetermined_fastqs(lane=1, flow_cell_path=tmp_path)
+
+    # THEN the undetermined fastq files for the lane should be returned
+    assert set(result) == set(expected_files)
