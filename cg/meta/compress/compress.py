@@ -5,7 +5,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
@@ -15,7 +15,7 @@ from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
 from cg.store.models import Sample
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ class CompressAPI:
         return flow_cell_id
 
     def compress_fastq(self, sample_id: str) -> bool:
-        """Compress the FASTQ files for a individual."""
+        """Compress the FASTQ files for an individual."""
         LOG.info(f"Check if FASTQ compression is possible for {sample_id}")
         version: Version = self.hk_api.get_latest_bundle_version(bundle_name=sample_id)
         if not version:
@@ -223,8 +223,13 @@ class CompressAPI:
     ) -> None:
         """Update Housekeeper with compressed FASTQ files and SPRING metadata file."""
         version: Version = self.hk_api.last_version(sample_id)
-        spring_tags: List[str] = [sample_id, SequencingFileTag.SPRING]
-        spring_metadata_tags: List[str] = [sample_id, SequencingFileTag.SPRING_METADATA]
+        fastq_tags: List[str] = [
+            tag.name
+            for tag in self.hk_api.files(path=compression_obj.fastq_first.as_posix()).first().tags
+        ]
+        fastq_tags.remove(SequencingFileTag.FASTQ)
+        spring_tags: List[str] = fastq_tags + [SequencingFileTag.SPRING]
+        spring_metadata_tags: List[str] = fastq_tags + [SequencingFileTag.SPRING_METADATA]
         LOG.info(f"Updating FASTQ files in Housekeeper for {sample_id}")
         LOG.info(
             f"{compression_obj.fastq_first}, {compression_obj.fastq_second} -> {compression_obj.spring_path}, "
