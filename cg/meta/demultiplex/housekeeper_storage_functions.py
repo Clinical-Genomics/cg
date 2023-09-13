@@ -3,8 +3,6 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from housekeeper.store.models import File, Version
-
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_internal_ids_from_sample_sheet,
 )
@@ -22,6 +20,7 @@ from cg.meta.demultiplex.utils import (
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.utils.files import get_files_matching_pattern
+from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -118,10 +117,11 @@ def store_fastq_path_in_housekeeper(
 
     if sample_fastq_should_be_stored:
         add_bundle_and_version_if_non_existent(bundle_name=sample_internal_id, hk_api=hk_api)
+        add_tags_if_non_existent(tag_names=[sample_internal_id], hk_api=hk_api)
         add_file_to_bundle_if_non_existent(
             file_path=sample_fastq_path,
             bundle_name=sample_internal_id,
-            tag_names=[SequencingFileTag.FASTQ, flow_cell.id],
+            tag_names=[SequencingFileTag.FASTQ, flow_cell.id, sample_internal_id],
             hk_api=hk_api,
         )
 
