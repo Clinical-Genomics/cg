@@ -5,28 +5,14 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
-from cg.apps.cgstats.db.models import (
-    Datasource,
-    Flowcell,
-    Project,
-    Sample,
-    Supportparams,
-    Unaligned,
-)
-from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.constants.invoice import CustomerNames
 from cg.constants.sequencing import Sequencers
 from cg.meta.invoice import InvoiceAPI
-from cg.meta.transfer import TransferFlowCell
-from cg.store import Store
-from cg.store.models import ApplicationVersion, Customer, Invoice, Sample
-from tests.mocks.hk_mock import MockHousekeeperAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
-from cg.store.models import Customer, ApplicationVersion, Invoice, Sample
-from tests.store_helpers import StoreHelpers
+from cg.store.models import ApplicationVersion, Customer, Invoice, Sample
 from tests.mocks.limsmock import MockLimsAPI
 from tests.store_helpers import StoreHelpers
 
