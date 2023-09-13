@@ -331,27 +331,27 @@ def test_is_syncing_complete_false(
     assert not is_directory_synced
 
 
-def test_add_flow_cell_name_to_fastq_file_path(bcl2fastq_flow_cell_id: str, fluffy_fastq_file_path):
+def test_add_flow_cell_name_to_fastq_file_path(bcl2fastq_flow_cell_id: str, fastq_file_path):
     # GIVEN a fastq file path and a flow cell name
 
     # WHEN adding the flow cell name to the fastq file path
     rename_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
-        fastq_file_path=fluffy_fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
+        fastq_file_path=fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
     # THEN the fastq file path should be returned with the flow cell name added
     assert rename_fastq_file_path == Path(
-        fluffy_fastq_file_path.parent, f"{bcl2fastq_flow_cell_id}_{fluffy_fastq_file_path.name}"
+        fastq_file_path.parent, f"{bcl2fastq_flow_cell_id}_{fastq_file_path.name}"
     )
 
 
 def test_add_flow_cell_name_to_fastq_file_path_when_flow_cell_name_already_in_name(
-    bcl2fastq_flow_cell_id: str, fluffy_fastq_file_path
+    bcl2fastq_flow_cell_id: str, fastq_file_path
 ):
     # GIVEN a fastq file path and a flow cell name
 
     # GIVEN that the flow cell name is already in the fastq file path
-    fluffy_fastq_file_path = Path(f"{bcl2fastq_flow_cell_id}_{fluffy_fastq_file_path.name}")
+    fastq_file_path = Path(f"{bcl2fastq_flow_cell_id}_{fastq_file_path.name}")
 
     # WHEN adding the flow cell name to the fastq file path
     renamed_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
