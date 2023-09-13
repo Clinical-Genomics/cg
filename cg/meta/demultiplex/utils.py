@@ -8,13 +8,14 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
+from cg.io.csv import read_csv
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.utils.files import (
-    get_file_in_directory,
-    get_files_matching_pattern,
     is_pattern_in_file_path_name,
     rename_file,
 )
+
+from cg.utils.files import get_file_in_directory, get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
 
@@ -196,3 +197,38 @@ def get_undetermined_fastqs(lane: int, flow_cell_path: Path) -> List[Path]:
         directory=flow_cell_path,
         pattern=undetermined_pattern,
     )
+
+def parse_manifest_file(manifest_file: Path) -> List[Path]:
+    """Returns a list with the first entry of each row of the given TSV file."""
+    files: List[List[str]] = read_csv(file_path=manifest_file, delimiter="\t")
+    return [Path(file[0]) for file in files]
+
+
+def is_file_relevant_for_demultiplexing(file: Path) -> bool:
+    """Returns whether a file is relevant for demultiplexing."""
+    relevant_directories = [DemultiplexingDirsAndFiles.INTER_OP, DemultiplexingDirsAndFiles.DATA]
+    for relevant_directory in relevant_directories:
+        if relevant_directory in file.parts:
+            return True
+    return False
+
+
+def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
+    """Returns whether all relevant files for demultiplexing have been synced from the source to
+    the target."""
+    manifest_file = Path(source_directory, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST)
+    if not manifest_file.exists():
+        LOG.debug(
+            f"{source_directory} does not contain a "
+            f"{DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST} file. Skipping."
+        )
+        return False
+    files_at_source: List[Path] = parse_manifest_file(manifest_file)
+    for file in files_at_source:
+        if is_file_relevant_for_demultiplexing(file) and not Path(target_directory, file).exists():
+            LOG.info(
+                f"File: {file}, has not been transferred from {source_directory} "
+                f"to {target_directory}"
+            )
+            return False
+    return True

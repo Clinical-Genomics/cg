@@ -1,52 +1,55 @@
 """Tests for the SampleSheetCreator classes."""
-import pytest
-
 from pathlib import Path
-from typing import List
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
-    SampleSheetCreator,
-    SampleSheetCreatorV1,
-    SampleSheetCreatorV2,
-)
+from typing import List, Tuple
+
+import pytest
 from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
     SampleSheet,
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeq6000Dragen,
-    FlowCellSampleNovaSeqX,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_validated_sample_sheet
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
+    SampleSheetCreator,
+    SampleSheetCreatorBcl2Fastq,
+    SampleSheetCreatorBCLConvert,
+)
 from cg.constants.demultiplexing import BclConverter
 from cg.exc import SampleSheetError
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
-def test_v2_sample_sheet_fails_with_bcl2fastq(
-    novaseq_x_flow_cell: FlowCellDirectoryData, lims_novaseq_x_samples: List[FlowCellSampleNovaSeqX]
+def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
+    novaseq_x_flow_cell: FlowCellDirectoryData,
+    lims_novaseq_bcl_convert_samples: List[FlowCellSampleBCLConvert],
 ):
-    """Test that creating a v2 sample sheet fails if the bcl converter is Bcl2fastq."""
-    # GIVEN a NovaSeqX flow cell and samples
+    """Test that creating a BCL Convert sample sheet fails if the bcl converter is Bcl2fastq."""
+    # GIVEN a NovaSeqX flow cell and samples and the bcl converter is Bcl2fastq
+    novaseq_x_flow_cell.bcl_converter = BclConverter.BCL2FASTQ
 
-    # WHEN trying to instantiate a SampleSheetCreatorV2 with bcl2fastq as bcl_converter
+    # WHEN trying to instantiate a SampleSheetCreatorBCLConvert with Bcl2fastq as bcl_converter
     with pytest.raises(SampleSheetError) as exc_info:
-        SampleSheetCreatorV2(
+        SampleSheetCreatorBCLConvert(
             flow_cell=novaseq_x_flow_cell,
-            lims_samples=lims_novaseq_x_samples,
-            bcl_converter=BclConverter.BCL2FASTQ,
+            lims_samples=lims_novaseq_bcl_convert_samples,
         )
         # THEN an error is raised
-        assert str(exc_info.value) == f"Can't use {BclConverter.BCL2FASTQ} with sample sheet v2"
+        assert (
+            str(exc_info.value)
+            == f"Can't use {BclConverter.BCL2FASTQ} with BCL Convert sample sheet"
+        )
 
 
-def test_add_dummy_samples_for_sample_sheet_v1(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
+def test_add_dummy_samples_for_bcl2fastq_sample_sheet(
+    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
     bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     """Test that dummy samples are added when needed for a NovaSeq6000 sample sheet."""
     # GIVEN a list of one NovaSeq6000 sample and a sample sheet creator with the sample
-    samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq] = [novaseq6000_flow_cell_sample_1]
+    samples: List[FlowCellSampleBcl2Fastq] = [novaseq6000_flow_cell_sample_1]
     assert len(samples) == 1
-    sample_sheet_creator = SampleSheetCreatorV1(
-        flow_cell=bcl2fastq_flow_cell, lims_samples=samples, bcl_converter=BclConverter.BCL2FASTQ
+    sample_sheet_creator = SampleSheetCreatorBcl2Fastq(
+        flow_cell=bcl2fastq_flow_cell, lims_samples=samples
     )
 
     # WHEN adding dummy samples
@@ -57,73 +60,52 @@ def test_add_dummy_samples_for_sample_sheet_v1(
 
 
 def test_construct_bcl2fastq_sheet(
-    novaseq_bcl2fastq_sample_sheet_creator: SampleSheetCreator, project_dir: Path
+    bcl2fastq_sample_sheet_creator: SampleSheetCreator, project_dir: Path
 ):
     """Test that a created Bcl2fastq sample sheet has samples."""
-    # GIVEN a V1 sample sheet creator populated with Bcl2fastq samples
-    assert novaseq_bcl2fastq_sample_sheet_creator.lims_samples
+    # GIVEN a Bcl2fastq sample sheet creator populated with Bcl2fastq samples
+    assert bcl2fastq_sample_sheet_creator.lims_samples
 
     # WHEN building the sample sheet
-    sample_sheet_content: List[
-        List[str]
-    ] = novaseq_bcl2fastq_sample_sheet_creator.construct_sample_sheet()
+    sample_sheet_content: List[List[str]] = bcl2fastq_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
     sample_sheet: SampleSheet = get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_content,
-        sample_type=FlowCellSampleNovaSeq6000Bcl2Fastq,
+        sample_type=FlowCellSampleBcl2Fastq,
     )
     assert sample_sheet.samples
 
 
-def test_construct_dragen_sheet(
-    novaseq_dragen_sample_sheet_creator: SampleSheetCreator, project_dir: Path
+def test_construct_bcl_convert_sheet(
+    bcl_convert_sample_sheet_creator: SampleSheetCreator, project_dir: Path
 ):
-    """Test that a created Dragen sample sheet has samples."""
-    # GIVEN a V1 sample sheet creator populated with Dragen samples
-    assert novaseq_dragen_sample_sheet_creator.lims_samples
+    """Test that a created BCL Convert sample sheet has samples."""
+    # GIVEN a BCL convert sample sheet creator populated with BCL convert samples
+    assert bcl_convert_sample_sheet_creator.lims_samples
 
     # WHEN building the sample sheet
     sample_sheet_content: List[
         List[str]
-    ] = novaseq_dragen_sample_sheet_creator.construct_sample_sheet()
+    ] = bcl_convert_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
     sample_sheet: SampleSheet = get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_content,
-        sample_type=FlowCellSampleNovaSeq6000Dragen,
-    )
-    assert sample_sheet.samples
-
-
-def test_construct_novaseq_x_sheet(
-    novaseq_x_sample_sheet_creator: SampleSheetCreator, project_dir: Path
-):
-    """Test that a created NovaSeqX sample sheet has samples."""
-    # GIVEN a V2 sample sheet creator populated with Dragen samples
-    assert novaseq_x_sample_sheet_creator.lims_samples
-
-    # WHEN building the sample sheet
-    sample_sheet_content: List[List[str]] = novaseq_x_sample_sheet_creator.construct_sample_sheet()
-
-    # THEN a correctly formatted sample sheet was created
-    sample_sheet: SampleSheet = get_validated_sample_sheet(
-        sample_sheet_content=sample_sheet_content,
-        sample_type=FlowCellSampleNovaSeqX,
+        sample_type=FlowCellSampleBCLConvert,
     )
     assert sample_sheet.samples
 
 
 def test_remove_unwanted_samples_dual_index(
-    novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleBcl2Fastq,
     bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     """Test that a sample with dual index is not removed."""
     # GIVEN a sample sheet creator with a sample with dual index
-    sample_sheet_creator: SampleSheetCreatorV1 = SampleSheetCreatorV1(
+    sample_sheet_creator: SampleSheetCreatorBcl2Fastq = SampleSheetCreatorBcl2Fastq(
         flow_cell=bcl2fastq_flow_cell,
         lims_samples=[novaseq6000_flow_cell_sample_before_adapt_indexes],
-        bcl_converter=BclConverter.BCL2FASTQ,
     )
 
     # WHEN removing unwanted samples
@@ -134,16 +116,15 @@ def test_remove_unwanted_samples_dual_index(
 
 
 def test_remove_unwanted_samples_no_dual_index(
-    novaseq6000_flow_cell_sample_no_dual_index: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_no_dual_index: FlowCellSampleBcl2Fastq,
     bcl2fastq_flow_cell: FlowCellDirectoryData,
     caplog,
 ):
     """Test that samples with no dual index are removed."""
     # GIVEN a sample sheet creator with a sample without dual indexes
-    sample_sheet_creator: SampleSheetCreatorV1 = SampleSheetCreatorV1(
+    sample_sheet_creator: SampleSheetCreatorBcl2Fastq = SampleSheetCreatorBcl2Fastq(
         flow_cell=bcl2fastq_flow_cell,
         lims_samples=[novaseq6000_flow_cell_sample_no_dual_index],
-        bcl_converter=BclConverter.BCL2FASTQ,
     )
 
     # WHEN removing unwanted samples
@@ -155,3 +136,54 @@ def test_remove_unwanted_samples_no_dual_index(
         f"Removing sample {novaseq6000_flow_cell_sample_no_dual_index} since it does not have dual index"
         in caplog.text
     )
+
+
+def test_add_override_cycles_to_samples(
+    novaseq_x_flow_cell: FlowCellDirectoryData,
+    bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
+    override_cycles_for_samples_with_updated_indexes: List[str],
+):
+    """Test that the OverrideCycles values are generated correctly."""
+    # GIVEN a SampleSheetCreator with samples without Override Cycles added
+    sample_sheet_creator = SampleSheetCreatorBCLConvert(
+        flow_cell=novaseq_x_flow_cell, lims_samples=bcl_convert_samples_with_updated_indexes
+    )
+    assert all(sample.override_cycles == "" for sample in sample_sheet_creator.lims_samples)
+
+    # WHEN adding the correct values of override samples
+    sample_sheet_creator.add_override_cycles_to_samples()
+
+    # THEN the Override Cycles attribute is added to all samples
+    assert all(
+        sample.override_cycles == override_cycles_value
+        for sample, override_cycles_value in zip(
+            sample_sheet_creator.lims_samples, override_cycles_for_samples_with_updated_indexes
+        )
+    )
+
+
+def test_update_barcode_mismatch_values_for_samples(
+    novaseq_x_flow_cell: FlowCellDirectoryData,
+    bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
+    barcode_mismatch_values_for_samples_with_updated_indexes: List[Tuple[int, int]],
+):
+    """."""
+    # GIVEN a sample sheet creator with samples with barcode mismatch values equal to 1
+    sample_sheet_creator = SampleSheetCreatorBCLConvert(
+        flow_cell=novaseq_x_flow_cell, lims_samples=bcl_convert_samples_with_updated_indexes
+    )
+    assert all(
+        sample.barcode_mismatches_1 == 1 and sample.barcode_mismatches_2 == 1
+        for sample in sample_sheet_creator.lims_samples
+    )
+
+    # WHEN updating the barcode mismatch values
+    sample_sheet_creator.update_barcode_mismatch_values_for_samples(
+        sample_sheet_creator.lims_samples
+    )
+
+    # THEN exactly two samples have barcode mismatches equal to zero
+    for sample, barcode_mismatch_tuple in zip(
+        sample_sheet_creator.lims_samples, barcode_mismatch_values_for_samples_with_updated_indexes
+    ):
+        assert (sample.barcode_mismatches_1, sample.barcode_mismatches_2) == barcode_mismatch_tuple

@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from typing import List
 import pytest
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
@@ -17,6 +17,9 @@ from cg.meta.demultiplex.utils import (
     is_sample_id_in_directory_name,
     is_valid_sample_fastq_file,
     parse_flow_cell_directory_data,
+    is_file_relevant_for_demultiplexing,
+    parse_manifest_file,
+    is_syncing_complete,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
@@ -263,6 +266,69 @@ def test_parse_flow_cell_directory_data_valid():
     # THEN the flow cell path and bcl converter should be set
     assert result.path == Path(flow_cell_run_directory)
     assert result.bcl_converter == "dummy_bcl_converter"
+
+
+def test_parse_manifest_file(novaseq_x_manifest_file: Path):
+    # GIVEN a manifest file
+
+    # WHEN parsing the manifest file
+    files_at_source: List[Path] = parse_manifest_file(novaseq_x_manifest_file)
+
+    # THEN paths should be returned
+    # THEN the paths should be Path objects
+    assert files_at_source
+    assert isinstance(files_at_source, list)
+    assert all(isinstance(file, Path) for file in files_at_source)
+
+
+@pytest.mark.parametrize(
+    "file, expected_result",
+    [
+        (Path("flow_cell_dir", DemultiplexingDirsAndFiles.DATA, "some_file.txt"), True),
+        (Path("flow_cell_dir", DemultiplexingDirsAndFiles.INTER_OP, "some_file.txt"), True),
+        (Path("flow_cell_dir", "Thumbnail_Images", "some_file.txt"), False),
+    ],
+)
+def test_is_file_relevant_for_demultiplexing(file: Path, expected_result: bool):
+    # GIVEN a file path
+
+    # WHEN checking if the file is relevant
+    result = is_file_relevant_for_demultiplexing(file)
+
+    # THEN the correct result should be returned
+    assert result == expected_result
+
+
+def test_is_syncing_complete_true(lsyncd_source_directory: Path, lsyncd_target_directory: Path):
+    # GIVEN a source directory with a manifest file
+
+    # GIVEN a target directory with all relevant files
+
+    # WHEN checking if the syncing is complete
+    is_directory_synced: bool = is_syncing_complete(
+        source_directory=lsyncd_source_directory, target_directory=lsyncd_target_directory
+    )
+
+    # THEN the syncing should be deemed complete
+    assert is_directory_synced
+
+
+def test_is_syncing_complete_false(
+    lsyncd_source_directory: Path, lsyncd_target_directory: Path, base_call_file: Path
+):
+    """Tests if the syncing is not complete when a file is missing."""
+    # GIVEN a source directory with a manifest file
+
+    # GIVEN a target directory without all relevant files
+    Path(lsyncd_target_directory, base_call_file).unlink()
+
+    # WHEN checking if the syncing is complete
+    is_directory_synced: bool = is_syncing_complete(
+        source_directory=lsyncd_source_directory, target_directory=lsyncd_target_directory
+    )
+
+    # THEN the syncing should not be deemed complete
+    assert not is_directory_synced
 
 
 def test_add_flow_cell_name_to_fastq_file_path(bcl2fastq_flow_cell_id: str, fastq_file_path: Path):
