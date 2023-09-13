@@ -2,21 +2,20 @@
 
 from pathlib import Path
 from typing import List
-from mock import MagicMock, call
-
 
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_bundle_and_version_if_non_existent,
-    add_tags_if_non_existent,
+    add_demux_logs_to_housekeeper,
     add_sample_fastq_files_to_housekeeper,
     add_sample_sheet_path_to_housekeeper,
-    add_demux_logs_to_housekeeper,
+    add_tags_if_non_existent,
     get_sample_sheets_from_latest_version,
 )
+from cg.models.cg_config import CGConfig
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from mock import MagicMock, call
 
 
 def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
@@ -213,3 +212,12 @@ def test_add_demux_logs_to_housekeeper(
     assert len(files) == 2
     for file in files:
         assert file.path.split("/")[-1] in expected_file_names
+
+
+def test_function(fastq_file_path):
+    """Test."""
+    # GIVEN a fastq file that has not been added to Housekeeper
+
+    # WHEN
+
+    # THEN
