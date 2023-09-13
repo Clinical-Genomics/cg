@@ -1,7 +1,7 @@
 import logging
 import os
 from pathlib import Path
-from typing import List
+from typing import Iterable, List
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
     Bcl2FastqSampleLaneMetrics,
@@ -30,14 +30,12 @@ def parse_bcl2fastq_raw_tile_metrics(
     """Parse metrics for each tile on a flow cell demultiplexed with Bcl2fastq."""
     tile_sequencing_metrics: List[Bcl2FastqSampleLaneTileMetrics] = []
 
-    stats_json_paths: List[Path] = get_bcl2fastq_stats_paths(
-        demultiplex_result_directory=demultiplex_result_directory
-    )
+    stats_json_paths: List[Path] = get_bcl2fastq_stats_paths(demultiplex_result_directory)
 
     for stats_json_path in stats_json_paths:
         LOG.debug(f"Parsing stats.json file {stats_json_path}")
-        sequencing_metrics = Bcl2FastqSampleLaneTileMetrics.parse_file(stats_json_path)
-        tile_sequencing_metrics.append(sequencing_metrics)
+        metrics = Bcl2FastqSampleLaneTileMetrics.parse_file(stats_json_path)
+        tile_sequencing_metrics.append(metrics)
 
     return tile_sequencing_metrics
 
