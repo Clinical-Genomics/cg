@@ -10,6 +10,9 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
+from housekeeper.store.models import File, Version
+from requests import Response
+
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
@@ -51,8 +54,6 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
 )
 from cg.utils import Process
-from housekeeper.store.models import File, Version
-from requests import Response
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -113,6 +114,11 @@ def timestamp_in_2_weeks(timestamp_now: datetime) -> datetime:
 
 
 # Case fixtures
+
+
+@pytest.fixture(scope="session")
+def any_string() -> str:
+    return "any_string"
 
 
 @pytest.fixture(scope="session")
@@ -2687,6 +2693,14 @@ def rnafusion_sample_sheet_path(rnafusion_dir, rnafusion_case_id) -> Path:
 def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to parameters file."""
     return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_params_file").with_suffix(
+        FileExtensions.YAML
+    )
+
+
+@pytest.fixture(scope="function")
+def rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
+    """Path to deliverables file."""
+    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_deliverables").with_suffix(
         FileExtensions.YAML
     )
 

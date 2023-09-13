@@ -100,6 +100,7 @@ class FileFormat(StrEnum):
     CSV: str = "csv"
     XML: str = "xml"
     TXT: str = "txt"
+    TSV: str = "tsv"
 
 
 class GenomeVersion(StrEnum):
