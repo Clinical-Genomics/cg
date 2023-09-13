@@ -198,6 +198,7 @@ def get_undetermined_fastqs(lane: int, flow_cell_path: Path) -> List[Path]:
         pattern=undetermined_pattern,
     )
 
+
 def parse_manifest_file(manifest_file: Path) -> List[Path]:
     """Returns a list with the first entry of each row of the given TSV file."""
     files: List[List[str]] = read_csv(file_path=manifest_file, delimiter="\t")
