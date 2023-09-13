@@ -28,11 +28,6 @@ REAGENT_KIT_PARAMETER_TO_VERSION: Dict[str, str] = {"1": "1.0", "3": "1.5"}
 SHORT_SAMPLE_INDEX_LENGTH: int = 8
 
 
-def index_exists(index: str, indexes: Set[str]) -> bool:
-    """Determines if an index is already present in the existing indexes."""
-    return any(existing_index.startswith(index) for existing_index in indexes)
-
-
 def is_dual_index(index: str) -> bool:
     """Determines if an index in the raw sample sheet is dual index or not."""
     return "-" in index

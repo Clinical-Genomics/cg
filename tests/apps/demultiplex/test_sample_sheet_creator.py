@@ -39,26 +39,6 @@ def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
             == f"Can't use {BclConverter.BCL2FASTQ} with BCL Convert sample sheet"
         )
 
-
-def test_add_dummy_samples_for_bcl2fastq_sample_sheet(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
-    bcl2fastq_flow_cell: FlowCellDirectoryData,
-):
-    """Test that dummy samples are added when needed for a NovaSeq6000 sample sheet."""
-    # GIVEN a list of one NovaSeq6000 sample and a sample sheet creator with the sample
-    samples: List[FlowCellSampleBcl2Fastq] = [novaseq6000_flow_cell_sample_1]
-    assert len(samples) == 1
-    sample_sheet_creator = SampleSheetCreatorBcl2Fastq(
-        flow_cell=bcl2fastq_flow_cell, lims_samples=samples
-    )
-
-    # WHEN adding dummy samples
-    sample_sheet_creator.add_dummy_samples()
-
-    # THEN the list of sample has increased in size
-    assert len(sample_sheet_creator.lims_samples) > 1
-
-
 def test_construct_bcl2fastq_sheet(
     bcl2fastq_sample_sheet_creator: SampleSheetCreator, project_dir: Path
 ):
