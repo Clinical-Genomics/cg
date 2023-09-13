@@ -2,17 +2,18 @@ import logging
 import operator
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
-from cg.constants.nextflow import NFX_SAMPLE_HEADER, NFX_WORK_DIR
+from cg.constants.nextflow import NFX_WORK_DIR
 from cg.exc import CgError
-from cg.io.controller import ReadFile, WriteFile
+from cg.io.controller import WriteFile
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
+from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.utils import Process
 
@@ -148,26 +149,6 @@ class NfAnalysisAPI(AnalysisAPI):
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def get_replace_map(self, case_id: str) -> dict:
-        """Get a mapping to replace constants from template to create case deliverables."""
-        return {
-            "PATHTOCASE": str(self.get_case_path(case_id)),
-            "CASEID": case_id,
-        }
-
-    @staticmethod
-    def get_template_deliverables_file_content(file_bundle_template: Path) -> dict:
-        """Return deliverables file template content."""
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=file_bundle_template,
-        )
-
-    @staticmethod
-    def add_bundle_header(deliverables_content: dict) -> dict:
-        """Adds header to bundle content."""
-        return {"files": deliverables_content}
-
     def write_params_file(self, case_id: str, pipeline_parameters: dict) -> None:
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
@@ -193,7 +174,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
 
     @staticmethod
-    def write_deliverables_bundle(
+    def write_deliverables_file(
         deliverables_content: dict, file_path: Path, file_format=FileFormat.YAML
     ) -> None:
         """Write deliverables file."""
@@ -277,10 +258,21 @@ class NfAnalysisAPI(AnalysisAPI):
             LOG.info(self.process.stdout)
 
     @staticmethod
-    def replace_dict_values(replace_map: dict, my_dict: dict) -> dict:
-        for str_to_replace, with_value in replace_map.items():
-            for key, value in my_dict.items():
-                if not value:
-                    value = "~"
-                my_dict.update({key: value.replace(str_to_replace, with_value)})
-        return my_dict
+    def get_deliverables_template_content() -> List[dict]:
+        """Return deliverables file template content."""
+        raise NotImplementedError
+
+    def get_deliverables_for_case(self, case_id: str) -> PipelineDeliverables:
+        """Return PipelineDeliverables for a given case."""
+        deliverable_template: List[dict] = self.get_deliverables_template_content()
+        files: List[FileDeliverable] = []
+        for file in deliverable_template:
+            for deliverable_field, deliverable_value in file.items():
+                if deliverable_value is None:
+                    continue
+                file[deliverable_field] = file[deliverable_field].replace("CASEID", case_id)
+                file[deliverable_field] = file[deliverable_field].replace(
+                    "PATHTOCASE", str(self.get_case_path(case_id=case_id))
+                )
+            files.append(FileDeliverable(**file))
+        return PipelineDeliverables(files=files)
