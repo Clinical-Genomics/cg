@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq_to_sequencing_statistics import (
-    create_undetermined_sequencing_metrics_for_bcl2fastq_flow_cells,
+    create_undetermined_sequencing_metrics_for_bcl2fastq_flow_cell,
 )
 from cg.store.models import SampleLaneSequencingMetrics
 
@@ -15,7 +15,7 @@ def test_create_sequencing_statistics_from_bcl2fastq_flow_cell(bcl2fastq_flow_ce
     # WHEN creating undetermined metrics for an existing lane on the flow cell
     metrics: List[
         SampleLaneSequencingMetrics
-    ] = create_undetermined_sequencing_metrics_for_bcl2fastq_flow_cells(
+    ] = create_undetermined_sequencing_metrics_for_bcl2fastq_flow_cell(
         flow_cell_dir=bcl2fastq_flow_cell_path, non_pooled_samples_and_lanes=[(1, "sample_id")]
     )
 
@@ -34,7 +34,7 @@ def test_create_undetermined_metrics_for_invalid_lane(bcl2fastq_flow_cell_path: 
     # WHEN creating metrics for a non existing lane on the flow cell
     metrics: List[
         SampleLaneSequencingMetrics
-    ] = create_undetermined_sequencing_metrics_for_bcl2fastq_flow_cells(
+    ] = create_undetermined_sequencing_metrics_for_bcl2fastq_flow_cell(
         flow_cell_dir=bcl2fastq_flow_cell_path, non_pooled_samples_and_lanes=[(2, "sample_id")]
     )
 

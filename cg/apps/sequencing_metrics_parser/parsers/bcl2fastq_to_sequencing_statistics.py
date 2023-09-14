@@ -22,19 +22,19 @@ def create_sequencing_metrics_for_bcl2fastq_flow_cell(
     return convert_to_sequencing_metrics(raw_metrics)
 
 
-def convert_to_sequencing_metrics(
-    raw_metrics: List[SampleLaneMetrics],
-) -> List[SampleLaneSequencingMetrics]:
-    return [create_sample_lane_sequencing_metrics(raw_metric) for raw_metric in raw_metrics]
-
-
-def create_undetermined_sequencing_metrics_for_bcl2fastq_flow_cells(
+def create_undetermined_sequencing_metrics_for_bcl2fastq_flow_cell(
     flow_cell_dir: Path, non_pooled_samples_and_lanes: List[Tuple[str, int]]
 ):
     undetermined_metrics: List[SampleLaneMetrics] = parse_undetermined_metrics(
         flow_cell_dir=flow_cell_dir, non_pooled_lanes_and_samples=non_pooled_samples_and_lanes
     )
     return convert_to_sequencing_metrics(undetermined_metrics)
+
+
+def convert_to_sequencing_metrics(
+    raw_metrics: List[SampleLaneMetrics],
+) -> List[SampleLaneSequencingMetrics]:
+    return [create_sample_lane_sequencing_metrics(raw_metric) for raw_metric in raw_metrics]
 
 
 def create_sample_lane_sequencing_metrics(
