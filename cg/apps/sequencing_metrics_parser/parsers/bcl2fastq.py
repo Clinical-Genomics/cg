@@ -171,11 +171,11 @@ def combine_undetermined_tiles_per_lane(
 
 
 def get_metrics_for_non_pooled_samples(
-    lane_metrics: Dict[int, SampleLaneMetrics], non_pooled_lanes_and_samples: List[Tuple[int, str]]
+    lane_metrics: Dict[int, SampleLaneMetrics], non_pooled_lane_sample_pairs: List[Tuple[int, str]]
 ) -> List[SampleLaneMetrics]:
     """Get metrics for non pooled samples and set sample ids."""
     non_pooled_metrics: List[SampleLaneMetrics] = []
-    for lane, sample_id in non_pooled_lanes_and_samples:
+    for lane, sample_id in non_pooled_lane_sample_pairs:
         metric: Optional[SampleLaneMetrics] = lane_metrics.get(lane)
         if not metric:
             continue
@@ -184,13 +184,13 @@ def get_metrics_for_non_pooled_samples(
     return non_pooled_metrics
 
 
-def parse_undetermined_metrics(
-    flow_cell_dir: Path, non_pooled_lanes_and_samples: List[Tuple[int, str]]
+def parse_undetermined_non_pooled_metrics(
+    flow_cell_dir: Path, non_pooled_lane_sample_pairs: List[Tuple[int, str]]
 ) -> List[SampleLaneMetrics]:
     """Parse undetermined metrics for a flow cell demultiplexed with Bcl2fastq for non pooled samples."""
     tile_metrics: List[SampleLaneTileMetrics] = parse_tile_metrics(flow_cell_dir)
     lane_metrics: Dict[int, SampleLaneMetrics] = combine_undetermined_tiles_per_lane(tile_metrics)
 
     return get_metrics_for_non_pooled_samples(
-        lane_metrics=lane_metrics, non_pooled_lanes_and_samples=non_pooled_lanes_and_samples
+        lane_metrics=lane_metrics, non_pooled_lane_sample_pairs=non_pooled_lane_sample_pairs
     )

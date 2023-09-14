@@ -6,7 +6,7 @@ from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
 )
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import (
     parse_metrics,
-    parse_undetermined_metrics,
+    parse_undetermined_non_pooled_metrics,
 )
 
 
@@ -36,8 +36,8 @@ def test_parse_undetermined_metrics(bcl2fastq_flow_cell_path: Path):
     # GIVEN a flow cell demultiplexed with bcl2fastq containing undetermined reads
 
     # WHEN parsing the undetermined metrics for the flow cell
-    metrics: List[SampleLaneMetrics] = parse_undetermined_metrics(
-        flow_cell_dir=bcl2fastq_flow_cell_path, non_pooled_lanes_and_samples=[(1, "sample_id")]
+    metrics: List[SampleLaneMetrics] = parse_undetermined_non_pooled_metrics(
+        flow_cell_dir=bcl2fastq_flow_cell_path, non_pooled_lane_sample_pairs=[(1, "sample_id")]
     )
 
     # THEN a list of metrics is returned
