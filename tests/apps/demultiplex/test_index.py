@@ -2,6 +2,7 @@
 from typing import Dict, List, Set, Tuple
 
 import pytest
+
 from cg.apps.demultiplex.sample_sheet.index import (
     INDEX_ONE_PAD_SEQUENCE,
     INDEX_TWO_PAD_SEQUENCE,
@@ -101,7 +102,7 @@ def test_get_reverse_complement_not_dna(caplog):
         get_reverse_complement_dna_seq(dna=strain)
 
 
-def test_adapt_barcode_mismatch_values(
+def test_update_barcode_mismatch_values_for_sample(
     lims_novaseq_bcl_convert_samples: List[FlowCellSampleBCLConvert],
     novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
 ):
@@ -117,6 +118,7 @@ def test_adapt_barcode_mismatch_values(
     update_barcode_mismatch_values_for_sample(
         sample_to_update=novaseq_x_flow_cell_sample_before_adapt_indexes,
         samples_to_compare_to=lims_novaseq_bcl_convert_samples,
+        is_reverse_complement=False,
     )
 
     # THEN the barcode mismatch values have been updated
@@ -124,7 +126,7 @@ def test_adapt_barcode_mismatch_values(
     assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_2 == 0
 
 
-def test_adapt_barcode_mismatch_values_repeated_sample(
+def test_update_barcode_mismatch_values_for_sample(
     novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
 ):
     """Test that a sample does not compare to itself when adapting barcode mismatching values."""
@@ -139,6 +141,7 @@ def test_adapt_barcode_mismatch_values_repeated_sample(
     update_barcode_mismatch_values_for_sample(
         sample_to_update=novaseq_x_flow_cell_sample_before_adapt_indexes,
         samples_to_compare_to=samples,
+        is_reverse_complement=False,
     )
 
     # THEN the barcode mismatch values remains being 1 for all samples
@@ -147,7 +150,7 @@ def test_adapt_barcode_mismatch_values_repeated_sample(
         assert sample.barcode_mismatches_2 == 1
 
 
-def test_adapt_indexes_for_sample_reverse_complement_padding(
+def test_pad_and_reverse_complement_sample_indexes_reverse_complement_padding(
     novaseq_6000_run_parameters: RunParameters,
     novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleBcl2Fastq,
 ):
@@ -176,7 +179,7 @@ def test_adapt_indexes_for_sample_reverse_complement_padding(
     assert sample.index2[-2:] == get_reverse_complement_dna_seq(dna=INDEX_TWO_PAD_SEQUENCE)
 
 
-def test_adapt_indexes_for_sample_reverse_complement_no_padding(
+def test_pad_and_reverse_complement_sample_indexes_reverse_complement_no_padding(
     novaseq_6000_run_parameters: RunParameters,
     novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleBcl2Fastq,
 ):
@@ -208,7 +211,7 @@ def test_adapt_indexes_for_sample_reverse_complement_no_padding(
     assert sample.index2 == get_reverse_complement_dna_seq(dna=initial_index2)
 
 
-def test_adapt_indexes_for_sample_no_reverse_complement_no_padding(
+def test_pad_and_reverse_complement_sample_indexes_no_reverse_complement_no_padding(
     novaseq_x_run_parameters: RunParameters,
     novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
 ):
@@ -271,7 +274,7 @@ def test_get_hamming_distance_index_1_different_prefixes():
     assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_1) == 2
 
 
-def test_get_hamming_distance_index_2_different_lengths():
+def test_get_hamming_distance_index_2_different_lengths_no_reverse_complement():
     """Test that hamming distance between indexes with same suffix but different lengths is zero."""
     # GIVEN two index_2 sequences with the same suffixes but different lengths
     sequence_1: str = "GATTACA"
@@ -280,17 +283,76 @@ def test_get_hamming_distance_index_2_different_lengths():
     # WHEN getting the hamming distance between them in any order
 
     # THEN the distance is zero
-    assert get_hamming_distance_index_2(sequence_1=sequence_1, sequence_2=sequence_2) == 0
-    assert get_hamming_distance_index_2(sequence_1=sequence_2, sequence_2=sequence_1) == 0
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=False
+        )
+        == 0
+    )
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=False
+        )
+        == 0
+    )
 
     # WHEN getting the hamming distance between themselves
 
     # THEN the distance is zero
-    assert get_hamming_distance_index_2(sequence_1=sequence_1, sequence_2=sequence_1) == 0
-    assert get_hamming_distance_index_2(sequence_1=sequence_2, sequence_2=sequence_2) == 0
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_1, sequence_2=sequence_1, is_reverse_complement=False
+        )
+        == 0
+    )
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_2, sequence_2=sequence_2, is_reverse_complement=False
+        )
+        == 0
+    )
 
 
-def test_get_hamming_distance_index_2_different_prefixes():
+def test_get_hamming_distance_index_2_different_lengths_reverse_complement():
+    """Test that hamming distance between indexes with same prefix is zero if reverse complement."""
+    # GIVEN two index_2 sequences with the same prefixes but different lengths
+    sequence_1: str = "GATTACA"
+    sequence_2: str = "GATTACAXX"
+
+    # WHEN getting the hamming distance between them in any order with reverse complement
+
+    # THEN the distance is zero
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=True
+        )
+        == 0
+    )
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=True
+        )
+        == 0
+    )
+
+    # WHEN getting the hamming distance between themselves
+
+    # THEN the distance is zero
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_1, sequence_2=sequence_1, is_reverse_complement=False
+        )
+        == 0
+    )
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_2, sequence_2=sequence_2, is_reverse_complement=False
+        )
+        == 0
+    )
+
+
+def test_get_hamming_distance_index_2_different_prefixes_no_reverse_complement():
     """Test that hamming distance for index 2 counts different characters from the right."""
     # GIVEN two index_2 sequences different lengths differing by two characters
     # when aligned to the right
@@ -300,5 +362,15 @@ def test_get_hamming_distance_index_2_different_prefixes():
     # WHEN getting the hamming distance between them in any order
 
     # THEN the distance is equal to the number of different characters
-    assert get_hamming_distance_index_2(sequence_1=sequence_1, sequence_2=sequence_2) == 2
-    assert get_hamming_distance_index_2(sequence_1=sequence_2, sequence_2=sequence_1) == 2
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=False
+        )
+        == 2
+    )
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=False
+        )
+        == 2
+    )
