@@ -43,10 +43,10 @@ def parse_tile_metrics(
 
 
 def update_lane_metrics_with_demux_data(lane_metrics: SampleLaneMetrics, demux_result: DemuxResult):
-    tile_reads: int = demux_result.tile_sample_total_reads
-    lane_metrics.total_reads += scale_paired_read_count(tile_reads)
+    tile_sample_reads: int = demux_result.tile_sample_reads
+    lane_metrics.total_reads += scale_paired_read_count(tile_sample_reads)
 
-    tile_yield: int = demux_result.tile_sample_total_yield
+    tile_yield: int = demux_result.tile_sample_yield
     lane_metrics.total_yield += tile_yield
 
     read_metrics: List[ReadMetric] = demux_result.tile_sample_read_metrics
@@ -66,12 +66,10 @@ def combine_tiles_per_lane(tile_metrics: List[SampleLaneTileMetrics]) -> List[Sa
                     demux_result.sample_id,
                 )
 
-                sample_id: str = remove_index_from_sample_id(
-                    sample_id_with_index=demux_result.sample_id
-                )
+                sample_id: str = remove_index_from_sample_id(demux_result.sample_id)
 
                 if metric_key not in metrics:
-                    metrics[metric_key] = initialise_lane_metrics(
+                    metrics[metric_key] = create_empty_lane_metric(
                         flow_cell_name=tile_metric.flow_cell_name,
                         lane=conversion_result.lane_number,
                         sample_id=sample_id,
@@ -109,7 +107,7 @@ def get_metrics_file_paths(demultiplex_result_directory: Path) -> List[Path]:
     return stats_json_paths
 
 
-def initialise_lane_metrics(flow_cell_name: str, lane: int, sample_id: str) -> SampleLaneMetrics:
+def create_empty_lane_metric(flow_cell_name: str, lane: int, sample_id: str) -> SampleLaneMetrics:
     return SampleLaneMetrics(
         flow_cell_name=flow_cell_name,
         lane=lane,
@@ -134,18 +132,18 @@ def scale_paired_read_count(paired_reads: int):
     return paired_reads * 2
 
 
-def update_lane_with_undetermined_tile_metrics(
+def update_lane_metrics_with_undetermined_tile_data(
     lane_metrics: SampleLaneMetrics, undetermined_tile_metrics: Undetermined
 ):
-    reads: int = undetermined_tile_metrics.tile_total_reads
-    lane_metrics.total_reads += scale_paired_read_count(reads)
+    tile_total_reads: int = undetermined_tile_metrics.tile_total_reads
+    lane_metrics.total_reads += scale_paired_read_count(tile_total_reads)
 
-    yield_: int = undetermined_tile_metrics.tile_total_yield
-    lane_metrics.total_yield += yield_
+    tile_total_yield: int = undetermined_tile_metrics.tile_total_yield
+    lane_metrics.total_yield += tile_total_yield
 
-    read_metrics: List[ReadMetric] = undetermined_tile_metrics.tile_read_metrics
-    lane_metrics.total_yield_q30 += sum_q30_yields(read_metrics)
-    lane_metrics.total_quality_score += sum_quality_scores(read_metrics)
+    tile_read_metrics: List[ReadMetric] = undetermined_tile_metrics.tile_read_metrics
+    lane_metrics.total_yield_q30 += sum_q30_yields(tile_read_metrics)
+    lane_metrics.total_quality_score += sum_quality_scores(tile_read_metrics)
 
 
 def combine_undetermined_tiles_per_lane(
@@ -162,13 +160,13 @@ def combine_undetermined_tiles_per_lane(
             lane: int = conversion_result.lane_number
 
             if lane not in lane_metrics:
-                lane_metrics[lane] = initialise_lane_metrics(
+                lane_metrics[lane] = create_empty_lane_metric(
                     flow_cell_name=tile_metric.flow_cell_name,
                     lane=lane,
                     sample_id="undetermined",
                 )
 
-            update_lane_with_undetermined_tile_metrics(
+            update_lane_metrics_with_undetermined_tile_data(
                 lane_metrics=lane_metrics[lane],
                 undetermined_tile_metrics=conversion_result.tile_undetermined_results,
             )

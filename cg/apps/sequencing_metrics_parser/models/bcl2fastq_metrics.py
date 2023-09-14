@@ -14,8 +14,8 @@ class DemuxResult(BaseModel):
     """Metrics for a sample on a tile in a lane."""
 
     sample_id: str = Field(..., alias="SampleId", min_length=1)
-    tile_sample_total_reads: int = Field(..., alias="NumberReads", ge=0)
-    tile_sample_total_yield: int = Field(..., alias="Yield", ge=0)
+    tile_sample_reads: int = Field(..., alias="NumberReads", ge=0)
+    tile_sample_yield: int = Field(..., alias="Yield", ge=0)
     tile_sample_read_metrics: List[ReadMetric] = Field(..., alias="ReadMetrics")
 
 
