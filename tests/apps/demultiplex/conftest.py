@@ -15,7 +15,7 @@ from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def bcl_convert_samples_with_updated_indexes() -> List[FlowCellSampleBCLConvert]:
     """Return a list of three FlowCellSampleBCLConvert with updated indexes."""
     sample_1 = FlowCellSampleBCLConvert(
