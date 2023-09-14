@@ -14,6 +14,7 @@ from cg.constants.demultiplexing import (
     BCL2FASTQ_METRICS_DIRECTORY_NAME,
     BCL2FASTQ_METRICS_FILE_NAME,
 )
+from cg.io.json import read_json
 
 LOG = logging.getLogger(__name__)
 
@@ -34,7 +35,8 @@ def parse_tile_metrics(
 
     for json_path in stats_paths:
         LOG.debug(f"Parsing stats.json file {json_path}")
-        metrics = SampleLaneTileMetrics.parse_file(json_path)
+        data = read_json(stats_json_path)
+        metrics = Bcl2FastqSampleLaneTileMetrics.model_validate(data)
         tile_metrics.append(metrics)
 
     return tile_metrics
