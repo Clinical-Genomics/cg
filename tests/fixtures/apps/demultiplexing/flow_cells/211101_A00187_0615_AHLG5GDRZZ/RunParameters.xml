@@ -5,12 +5,12 @@
   <Side>A</Side>
   <Read1NumberOfCycles>51</Read1NumberOfCycles>
   <Read2NumberOfCycles>51</Read2NumberOfCycles>
-  <IndexRead1NumberOfCycles>10</IndexRead1NumberOfCycles>
-  <IndexRead2NumberOfCycles>10</IndexRead2NumberOfCycles>
+  <IndexRead1NumberOfCycles>8</IndexRead1NumberOfCycles>
+  <IndexRead2NumberOfCycles>8</IndexRead2NumberOfCycles>
   <PlannedRead1Cycles>51</PlannedRead1Cycles>
   <PlannedRead2Cycles>51</PlannedRead2Cycles>
-  <PlannedIndex1ReadCycles>10</PlannedIndex1ReadCycles>
-  <PlannedIndex2ReadCycles>10</PlannedIndex2ReadCycles>
+  <PlannedIndex1ReadCycles>8</PlannedIndex1ReadCycles>
+  <PlannedIndex2ReadCycles>8</PlannedIndex2ReadCycles>
   <RunNumber>615</RunNumber>
   <RtaVersion>v3.4.4</RtaVersion>
   <RecipeVersion>1.7.5</RecipeVersion>

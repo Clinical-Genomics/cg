@@ -146,14 +146,15 @@ def test_add_override_cycles_to_novaseqx_samples(
 
 
 def test_add_override_cycles_to_novaseqx_samples_reverse_complement(
-    bcl_convert_flow_cell: FlowCellDirectoryData,
+    novaseq6000_flow_cell,
     bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
     override_cycles_for_samples_with_updated_indexes_reverse_complement: List[str],
 ):
     """Test that OverrideCycles values are generated correctly for reverse complement samples."""
     # GIVEN a SampleSheetCreator with samples without Override Cycles added
     sample_sheet_creator = SampleSheetCreatorBCLConvert(
-        flow_cell=bcl_convert_flow_cell, lims_samples=bcl_convert_samples_with_updated_indexes
+        flow_cell=novaseq6000_flow_cell,
+        lims_samples=bcl_convert_samples_with_updated_indexes,
     )
     assert all(sample.override_cycles == "" for sample in sample_sheet_creator.lims_samples)
 

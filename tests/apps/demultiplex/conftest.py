@@ -39,7 +39,7 @@ def override_cycles_for_samples_with_updated_indexes() -> List[str]:
 @pytest.fixture
 def override_cycles_for_samples_with_updated_indexes_reverse_complement() -> List[str]:
     """Return the correspondent Override Cycles values for three samples."""
-    return ["Y51;I8N2;I8N2;Y51", "Y51;I8N2;I8N2;Y51", "Y51;I10;I10;Y51"]
+    return ["Y151;I8N2;I8N2;Y151", "Y151;I8N2;I8N2;Y151", "Y151;I10;I10;Y151"]
 
 
 @pytest.fixture
