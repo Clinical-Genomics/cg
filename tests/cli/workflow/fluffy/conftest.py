@@ -2,6 +2,7 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
 from cg.constants import Pipeline
@@ -53,7 +54,7 @@ def sample() -> Sample:
         name="sample_name",
         order="sample_project",
         control="positive",
-        sequenced_at=dt.datetime.now(),
+        reads_updated_at=dt.datetime.now(),
     )
 
 
