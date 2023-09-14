@@ -25,7 +25,7 @@ def create_sample_lane_sequencing_metrics_for_flow_cell(
 def create_undetermined_sequencing_metrics_for_flow_cell(
     flow_cell_directory: Path,
     bcl_converter: str,
-    non_pooled_lanes_and_samples: List[Tuple(int, str)],
+    non_pooled_lanes_and_samples: List[Tuple[int, str]],
 ) -> List[SampleLaneSequencingMetrics]:
     """Parse undetermined metrics for the specified non-pooled lanes and samples for flow cell."""
 
