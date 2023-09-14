@@ -37,7 +37,9 @@ def parse_bcl2fastq_raw_tile_metrics(
 
     for stats_json_path in stats_json_paths:
         LOG.debug(f"Parsing stats.json file {stats_json_path}")
-        sequencing_metrics = Bcl2FastqSampleLaneTileMetrics.model_validate_json(stats_json_path.open())
+        sequencing_metrics = Bcl2FastqSampleLaneTileMetrics.model_validate_json(
+            stats_json_path.open()
+        )
         tile_sequencing_metrics.append(sequencing_metrics)
 
     return tile_sequencing_metrics
