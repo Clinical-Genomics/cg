@@ -63,7 +63,7 @@ def samplesheet_path():
 
 
 @pytest.fixture(scope="function")
-def fastq_file_path(config_root_dir):
+def fluffy_fastq_file_path(config_root_dir):
     path = Path(config_root_dir)
     path.mkdir(parents=True, exist_ok=True)
     fastq_path = Path(path, "fastq.fastq.gz")
@@ -108,14 +108,14 @@ def fluffy_hermes_deliverables_response_data(
 
 
 @pytest.fixture(scope="function")
-def fluffy_fastq_hk_bundle_data(fastq_file_path, fluffy_sample_lims_id) -> dict:
+def fluffy_fastq_hk_bundle_data(fluffy_fastq_file_path, fluffy_sample_lims_id) -> dict:
     return {
         "name": fluffy_sample_lims_id,
         "created": dt.datetime.now(),
         "version": "1.0",
         "files": [
             {
-                "path": fastq_file_path.as_posix(),
+                "path": fluffy_fastq_file_path.as_posix(),
                 "tags": ["fastq", "flowcell"],
                 "archive": False,
             }
