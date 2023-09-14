@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 import pytest
+
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
@@ -138,12 +139,12 @@ def test_remove_unwanted_samples_no_dual_index(
     )
 
 
-def test_add_override_cycles_to_samples(
+def test_add_override_cycles_to_novaseqx_samples(
     novaseq_x_flow_cell: FlowCellDirectoryData,
     bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
     override_cycles_for_samples_with_updated_indexes: List[str],
 ):
-    """Test that the OverrideCycles values are generated correctly."""
+    """Test that the OverrideCycles values are generated correctly for NovaSeqX samples."""
     # GIVEN a SampleSheetCreator with samples without Override Cycles added
     sample_sheet_creator = SampleSheetCreatorBCLConvert(
         flow_cell=novaseq_x_flow_cell, lims_samples=bcl_convert_samples_with_updated_indexes

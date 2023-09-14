@@ -64,6 +64,10 @@ class SampleSheetCreator:
     def valid_indexes(self) -> List[Index]:
         return get_valid_indexes(dual_indexes_only=True)
 
+    @property
+    def is_reverse_complement(self) -> bool:
+        return is_reverse_complement_needed(run_parameters=self.run_parameters)
+
     def add_dummy_samples(self) -> None:
         """Add all dummy samples with non-existing indexes to samples if applicable."""
         raise NotImplementedError("Impossible to add dummy samples in parent class")
@@ -132,16 +136,13 @@ class SampleSheetCreator:
             LOG.info("Skipped adding dummy samples since they are not needed")
         self.remove_unwanted_samples()
         samples_in_lane: List[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]]
-        is_reverse_complement: bool = is_reverse_complement_needed(
-            run_parameters=self.run_parameters
-        )
         self.add_override_cycles_to_samples()
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
             LOG.info(f"Adapting index and barcode mismatch values for samples in lane {lane}")
             update_indexes_for_samples(
                 samples=samples_in_lane,
                 index_cycles=self.run_parameters.index_length,
-                is_reverse_complement=is_reverse_complement,
+                is_reverse_complement=self.is_reverse_complement,
             )
             self.update_barcode_mismatch_values_for_samples(samples_in_lane)
 
@@ -250,7 +251,11 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
             sample_index_len: int = len(get_index_pair(sample)[0])
             if sample_index_len < flow_cell_index_len:
                 index1_cycles = f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
-                index2_cycles = f"N{flow_cell_index_len - sample_index_len}I{sample_index_len};"
+                index2_cycles = (
+                    f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
+                    if self.is_reverse_complement
+                    else f"N{flow_cell_index_len - sample_index_len}I{sample_index_len};"
+                )
             sample.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
     def get_additional_sections_sample_sheet(self) -> List[List[str]]:
