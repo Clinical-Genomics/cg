@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 
 class ReadMetric(BaseModel):
-    """Metrics for a read for a sample in a tile on a lane."""
+    """Metrics for a read for a sample on a tile in a lane."""
 
     yield_: int = Field(..., alias="Yield", ge=0)
     yield_q30: int = Field(..., alias="YieldQ30", ge=0)
@@ -11,7 +11,7 @@ class ReadMetric(BaseModel):
 
 
 class DemuxResult(BaseModel):
-    """Metrics for a sample in a tile in a lane."""
+    """Metrics for a sample on a tile in a lane."""
 
     sample_id: str = Field(..., alias="SampleId", min_length=1)
     number_reads: int = Field(..., alias="NumberReads", ge=0)
@@ -20,7 +20,7 @@ class DemuxResult(BaseModel):
 
 
 class Undetermined(BaseModel):
-    """Metrics for undetermined reads for a tile in a lane."""
+    """Metrics for reads without a sample id within a tile of a lane."""
 
     number_reads: int = Field(..., alias="NumberReads", ge=0)
     yield_: int = Field(..., alias="Yield", ge=0)
@@ -28,7 +28,7 @@ class Undetermined(BaseModel):
 
 
 class ConversionResult(BaseModel):
-    """Result of the conversion process for a tile in a lane."""
+    """Demultiplexing results and undetermined reads for a tile within a lane."""
 
     lane_number: int = Field(..., alias="LaneNumber", gt=0)
     demux_results: List[DemuxResult] = Field(..., alias="DemuxResults")
@@ -36,7 +36,7 @@ class ConversionResult(BaseModel):
 
 
 class SampleLaneTileMetrics(BaseModel):
-    """Metrics for samples in a lane and tile on a flow cell from a bcl2fastq run."""
+    """Metrics for samples on a tile in a lane on a flow cell from a bcl2fastq run."""
 
     flow_cell_name: str = Field(..., alias="Flowcell", min_length=1)
     conversion_results: List[ConversionResult] = Field(..., alias="ConversionResults")
