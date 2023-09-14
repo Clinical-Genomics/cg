@@ -1,7 +1,7 @@
 import logging
 import os
 from pathlib import Path
-from typing import Iterable, List
+from typing import Dict, Iterable, List, Optional, Tuple
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
     DemuxResult,
@@ -147,11 +147,11 @@ def update_lane_metrics_with_undetermined_data(
     sample_lane_metric.total_quality_score += sum_quality_scores(read_metrics)
 
 
-def combine_undetermined_lane_metrics_from_tiles(
+def combine_undetermined_tile_metrics(
     tile_metrics: List[SampleLaneTileMetrics],
-) -> List[SampleLaneMetrics]:
+) -> Dict[int, SampleLaneMetrics]:
     """Aggregate the undetermined tile metrics per lane."""
-    sample_lane_metrics = {}
+    lane_metrics = {}
 
     for tile_metric in tile_metrics:
         for conversion_result in tile_metric.conversion_results:
@@ -159,23 +159,41 @@ def combine_undetermined_lane_metrics_from_tiles(
                 continue
 
             lane: int = conversion_result.lane_number
-            flow_cell_name: str = tile_metric.flow_cell_name
 
-            if lane not in sample_lane_metrics:
-                sample_lane_metrics[lane] = initialise_sample_lane_metrics(
-                    flow_cell_name=flow_cell_name,
+            if lane not in lane_metrics:
+                lane_metrics[lane] = initialise_sample_lane_metrics(
+                    flow_cell_name=tile_metric.flow_cell_name,
                     lane=lane,
                     sample_id="undetermined",
                 )
 
             update_lane_metrics_with_undetermined_data(
-                sample_lane_metric=sample_lane_metrics[lane],
+                sample_lane_metric=lane_metrics[lane],
                 undetermined_data=conversion_result.undetermined,
             )
-    return list(sample_lane_metrics.values())
+    return lane_metrics
 
 
-def parse_undetermined_metrics(flow_cell_dir: Path) -> List[SampleLaneMetrics]:
-    """Parse metrics for a flow cell demultiplexed with Bcl2fastq."""
+def get_non_pooled_undetermined_metrics_and_assign_sample_ids(
+    lane_metrics: Dict[int, SampleLaneMetrics], non_pooled_lanes_and_samples: List[Tuple[int, str]]
+) -> List[SampleLaneMetrics]:
+    non_pooled_metrics: List[SampleLaneMetrics] = []
+    for lane, sample_id in non_pooled_lanes_and_samples:
+        metric: Optional[SampleLaneMetrics] = lane_metrics.get(lane)
+        if not metric:
+            continue
+        metric.sample_id = sample_id
+        non_pooled_metrics.append(metric)
+    return non_pooled_metrics
+
+
+def parse_undetermined_metrics(
+    flow_cell_dir: Path, non_pooled_lanes_and_samples: List[Tuple[int, str]]
+) -> List[SampleLaneMetrics]:
+    """Parse undetermined metrics for a flow cell demultiplexed with Bcl2fastq for non pooled samples."""
     tile_metrics: List[SampleLaneTileMetrics] = parse_raw_tile_metrics(flow_cell_dir)
-    return combine_undetermined_lane_metrics_from_tiles(tile_metrics)
+    lane_metrics: Dict[int, SampleLaneMetrics] = combine_undetermined_tile_metrics(tile_metrics)
+
+    return get_non_pooled_undetermined_metrics_and_assign_sample_ids(
+        lane_metrics=lane_metrics, non_pooled_lanes_and_samples=non_pooled_lanes_and_samples
+    )

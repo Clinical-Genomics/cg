@@ -36,8 +36,13 @@ def test_parse_undetermined_metrics(bcl2fastq_flow_cell_path: Path):
     # GIVEN a flow cell demultiplexed with bcl2fastq containing undetermined reads
 
     # WHEN parsing the undetermined metrics for the flow cell
-    metrics: List[SampleLaneMetrics] = parse_undetermined_metrics(bcl2fastq_flow_cell_path)
+    metrics: List[SampleLaneMetrics] = parse_undetermined_metrics(
+        flow_cell_dir=bcl2fastq_flow_cell_path, non_pooled_lanes_and_samples=[(1, "sample_id")]
+    )
 
     # THEN a list of metrics is returned
     assert isinstance(metrics, list)
     assert all(isinstance(item, SampleLaneMetrics) for item in metrics)
+
+    # THEN the metrics has been assigned the correct sample id
+    assert metrics[0].sample_id == "sample_id"

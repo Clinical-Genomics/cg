@@ -56,8 +56,8 @@ def raw_bcl2fastq_metrics_data() -> Dict:
 def bcl2fastq_flow_cell_path(tmp_path: Path, raw_bcl2fastq_metrics_data: Dict) -> Path:
     """Directory for flow cell demultiplexed with bcl2fastq with valid stats.json file."""
 
-    valid_dir = tmp_path / "l1t1" / BCL2FASTQ_METRICS_DIRECTORY_NAME
+    valid_dir = Path(tmp_path, "l1t1", BCL2FASTQ_METRICS_DIRECTORY_NAME)
     valid_dir.mkdir(parents=True)
-    stats_json_path = valid_dir / BCL2FASTQ_METRICS_FILE_NAME
+    stats_json_path = Path(valid_dir, BCL2FASTQ_METRICS_FILE_NAME)
     stats_json_path.write_text(json.dumps(raw_bcl2fastq_metrics_data))
     return tmp_path
