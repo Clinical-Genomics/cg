@@ -237,7 +237,9 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         """Update barcode mismatch values for both indexes of given samples."""
         for sample in samples:
             update_barcode_mismatch_values_for_sample(
-                sample_to_update=sample, samples_to_compare_to=samples
+                sample_to_update=sample,
+                samples_to_compare_to=samples,
+                is_reverse_complement=self.is_reverse_complement,
             )
 
     def add_override_cycles_to_samples(self) -> None:
