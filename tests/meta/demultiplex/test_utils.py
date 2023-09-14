@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import List
+
 import pytest
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
@@ -13,13 +14,13 @@ from cg.meta.demultiplex.utils import (
     get_sample_sheet_path,
     get_undetermined_fastqs,
     is_file_path_compressed_fastq,
+    is_file_relevant_for_demultiplexing,
     is_lane_in_fastq_file_name,
     is_sample_id_in_directory_name,
+    is_syncing_complete,
     is_valid_sample_fastq_file,
     parse_flow_cell_directory_data,
-    is_file_relevant_for_demultiplexing,
     parse_manifest_file,
-    is_syncing_complete,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
