@@ -15,7 +15,6 @@ from cg.apps.demultiplex.sample_sheet.index import (
     update_indexes_for_samples,
 )
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSample,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
@@ -66,6 +65,7 @@ class SampleSheetCreator:
 
     @property
     def is_reverse_complement(self) -> bool:
+        """Return whether the samples require reverse complement."""
         return is_reverse_complement_needed(run_parameters=self.run_parameters)
 
     def add_dummy_samples(self) -> None:
