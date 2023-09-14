@@ -178,3 +178,4 @@ def combine_undetermined_lane_metrics_from_tiles(
 def parse_undetermined_metrics(flow_cell_dir: Path) -> List[SampleLaneMetrics]:
     """Parse metrics for a flow cell demultiplexed with Bcl2fastq."""
     tile_metrics: List[SampleLaneTileMetrics] = parse_raw_tile_metrics(flow_cell_dir)
+    return combine_undetermined_lane_metrics_from_tiles(tile_metrics)
