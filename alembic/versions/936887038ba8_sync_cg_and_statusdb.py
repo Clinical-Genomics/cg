@@ -2,12 +2,13 @@
 
 Revision ID: 936887038ba8
 Revises: 5cb3ce4c3e39
-Create Date: 2023-09-12 09:26:50.748369
+Create Date: 2023-09-14 09:26:50.748369
 
 """
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects import mysql
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "936887038ba8"
