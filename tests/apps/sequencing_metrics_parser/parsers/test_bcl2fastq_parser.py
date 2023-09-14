@@ -12,32 +12,32 @@ from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import (
 
 def test_parse_valid_bcl2fastq_sequencing_metrics(bcl2fastq_flow_cell_path: Path):
     """Test parsing metrics for a flow cell demultiplexed with bcl2fastq."""
-    # GIVEN a valid directory structure with a valid stats.json file
+    # GIVEN a flow cell demultiplexed with bcl2fastq
 
-    # WHEN parsing the directory containing the valid stats.json file
+    # WHEN parsing the flow cell
     metrics: List[SampleLaneMetrics] = parse_bcl2fastq_sequencing_metrics(bcl2fastq_flow_cell_path)
 
-    # THEN a list of Bcl2FastqTileSequencingMetrics models is returned
+    # THEN a list of metrics is returned
     assert isinstance(metrics, list)
     assert all(isinstance(item, SampleLaneMetrics) for item in metrics)
 
 
-def test_parse_not_found_bcl2fastq_sequencing_metrics():
-    """Test that an error is raised when the expected directory structure is not found."""
-    # GIVEN a directory structure that does not contain the expected directory structure
-    # WHEN parsing the directory containing the valid stats.json file
+def test_parse_invalid_bcl2fastq_sequencing_metrics(tmp_path: Path):
+    """Test that an error is raised for an invalid flow cell."""
+    # GIVEN an invalid bcl2fastq flow cell directory
+    # WHEN parsing flow cell
     # THEN a FileNotFoundError is raised
     with pytest.raises(FileNotFoundError):
-        parse_bcl2fastq_sequencing_metrics(flow_cell_dir=Path("/does/not/exist"))
+        parse_bcl2fastq_sequencing_metrics(tmp_path)
 
 
 def test_parse_undetermined_metrics(bcl2fastq_flow_cell_path: Path):
     """Test parsing undetermined reads for a flow cell demultiplexed with bcl2fastq."""
     # GIVEN a flow cell demultiplexed with bcl2fastq containing undetermined reads
 
-    # WHEN parsing the undetermined metrics
+    # WHEN parsing the undetermined metrics for the flow cell
     metrics: List[SampleLaneMetrics] = parse_undetermined_metrics(bcl2fastq_flow_cell_path)
 
-    # THEN a list of Bcl2FastqTileSequencingMetrics models is returned
+    # THEN a list of metrics is returned
     assert isinstance(metrics, list)
     assert all(isinstance(item, SampleLaneMetrics) for item in metrics)
