@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import List
+from cg.apps.sequencing_metrics_parser.models.bcl_convert import BclConvertQualityMetrics
 from cg.store.models import SampleLaneSequencingMetrics
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -41,3 +42,14 @@ def create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell
             )
 
     return sample_lane_sequencing_metrics
+
+
+def create_undetermined_sequencing_metrics(
+    flow_cell_dir: Path,
+) -> List[SampleLaneSequencingMetrics]:
+    metrics_parser = BclConvertMetricsParser(flow_cell_dir)
+    undetermined_metrics: List[
+        BclConvertQualityMetrics
+    ] = metrics_parser.get_undetermined_quality_metrics()
+
+    

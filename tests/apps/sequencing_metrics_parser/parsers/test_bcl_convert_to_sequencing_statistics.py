@@ -33,3 +33,17 @@ def test_create_sequencing_statistics_from_bcl_convert_metrics(
     )
 
     # THEN assert that the sequencing statistics are correct
+
+
+def test_create_undetermined_sequencing_metrics(
+    parsed_bcl_convert_metrics: BclConvertMetricsParser,
+):
+    # GIVEN a flow cell demultiplexed with bcl convert
+
+    # WHEN creating sequencing statistics for undetermined reads
+    metrics: List[
+        SampleLaneSequencingMetrics
+    ] = parsed_bcl_convert_metrics.get_undetermined_quality_metrics()
+
+    # THEN a list of undetermined metrics is returned
+    
