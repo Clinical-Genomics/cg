@@ -35,8 +35,8 @@ def parse_tile_metrics(
 
     for json_path in stats_paths:
         LOG.debug(f"Parsing stats.json file {json_path}")
-        data = read_json(stats_json_path)
-        metrics = Bcl2FastqSampleLaneTileMetrics.model_validate(data)
+        data = read_json(json_path)
+        metrics = SampleLaneTileMetrics.model_validate(data)
         tile_metrics.append(metrics)
 
     return tile_metrics
