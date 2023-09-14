@@ -3,7 +3,9 @@ from pathlib import Path
 from typing import List
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import SampleLaneMetrics
-from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import parse_bcl2fastq_sequencing_metrics
+from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import (
+    parse_metrics,
+)
 from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
     calculate_average_quality_score,
     calculate_q30_bases_percentage,
@@ -15,24 +17,21 @@ def create_sample_lane_sequencing_metrics_from_bcl2fastq_for_flow_cell(
     flow_cell_dir: Path,
 ) -> List[SampleLaneSequencingMetrics]:
     """
-    Parses the Bcl2fastq generated stats.json files and aggregates and calculates metrics for each sample in each lane.
+    Parses the metrics from a flow cell demultiplexed with bcl2fastq, including metrics for any
+    non pooled samples.
     """
-
-    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
-    sample_and_lane_metrics: List[SampleLaneMetrics] = parse_bcl2fastq_sequencing_metrics(
-        flow_cell_dir=flow_cell_dir
-    )
-
-    for raw_sample_metrics in sample_and_lane_metrics:
-        metrics: SampleLaneSequencingMetrics = create_sample_lane_sequencing_metrics_from_bcl2fastq(
-            raw_sample_metrics
-        )
-        sample_lane_sequencing_metrics.append(metrics)
-
-    return sample_lane_sequencing_metrics
+    raw_metrics: List[SampleLaneMetrics] = parse_metrics(flow_cell_dir)
+    metrics: List[SampleLaneSequencingMetrics] = convert_to_sequencing_metrics(raw_metrics)
+    return metrics
 
 
-def create_sample_lane_sequencing_metrics_from_bcl2fastq(
+def convert_to_sequencing_metrics(
+    raw_metrics: List[SampleLaneMetrics],
+) -> List[SampleLaneSequencingMetrics]:
+    return [create_sample_lane_sequencing_metrics(raw_metric) for raw_metric in raw_metrics]
+
+
+def create_sample_lane_sequencing_metrics(
     sample_lane_metrics: SampleLaneMetrics,
 ) -> SampleLaneSequencingMetrics:
     """Generates a SampleLaneSequencingMetrics based on the provided raw results."""

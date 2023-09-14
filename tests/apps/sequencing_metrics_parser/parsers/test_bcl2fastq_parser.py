@@ -5,7 +5,7 @@ from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
     SampleLaneMetrics,
 )
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import (
-    parse_bcl2fastq_sequencing_metrics,
+    parse_metrics,
     parse_undetermined_metrics,
 )
 
@@ -15,7 +15,7 @@ def test_parse_valid_bcl2fastq_sequencing_metrics(bcl2fastq_flow_cell_path: Path
     # GIVEN a flow cell demultiplexed with bcl2fastq
 
     # WHEN parsing the flow cell
-    metrics: List[SampleLaneMetrics] = parse_bcl2fastq_sequencing_metrics(bcl2fastq_flow_cell_path)
+    metrics: List[SampleLaneMetrics] = parse_metrics(bcl2fastq_flow_cell_path)
 
     # THEN a list of metrics is returned
     assert isinstance(metrics, list)
@@ -28,7 +28,7 @@ def test_parse_invalid_bcl2fastq_sequencing_metrics(tmp_path: Path):
     # WHEN parsing flow cell
     # THEN a FileNotFoundError is raised
     with pytest.raises(FileNotFoundError):
-        parse_bcl2fastq_sequencing_metrics(tmp_path)
+        parse_metrics(tmp_path)
 
 
 def test_parse_undetermined_metrics(bcl2fastq_flow_cell_path: Path):

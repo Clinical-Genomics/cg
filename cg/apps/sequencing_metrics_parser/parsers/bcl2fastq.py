@@ -18,7 +18,7 @@ from cg.constants.demultiplexing import (
 LOG = logging.getLogger(__name__)
 
 
-def parse_bcl2fastq_sequencing_metrics(flow_cell_dir: Path) -> List[SampleLaneMetrics]:
+def parse_metrics(flow_cell_dir: Path) -> List[SampleLaneMetrics]:
     """Parse metrics for a flow cell demultiplexed with Bcl2fastq."""
     tile_metrics: List[SampleLaneTileMetrics] = parse_raw_tile_metrics(flow_cell_dir)
     return combine_tile_metrics_per_sample_and_lane(tile_metrics)
@@ -73,7 +73,7 @@ def combine_tile_metrics_per_sample_and_lane(
                 )
 
                 if sample_lane_key not in metrics:
-                    metrics[sample_lane_key] = create_default_sample_lane_metrics(
+                    metrics[sample_lane_key] = initialise_sample_lane_metrics(
                         flow_cell_name=tile_metric.flow_cell_name,
                         lane=conversion_result.lane_number,
                         sample_id=sample_id,
@@ -111,7 +111,7 @@ def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
     return stats_json_paths
 
 
-def create_default_sample_lane_metrics(
+def initialise_sample_lane_metrics(
     flow_cell_name: str, lane: int, sample_id: str
 ) -> SampleLaneMetrics:
     return SampleLaneMetrics(
@@ -162,7 +162,7 @@ def combine_undetermined_lane_metrics_from_tiles(
             flow_cell_name: str = tile_metric.flow_cell_name
 
             if lane not in sample_lane_metrics:
-                sample_lane_metrics[lane] = create_default_sample_lane_metrics(
+                sample_lane_metrics[lane] = initialise_sample_lane_metrics(
                     flow_cell_name=flow_cell_name,
                     lane=lane,
                     sample_id="undetermined",

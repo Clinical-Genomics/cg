@@ -16,8 +16,6 @@ def create_sample_lane_sequencing_metrics_for_flow_cell(
     """Parse the sequencing metrics data for the correct demultiplexing software into the sequencing statistics model."""
     if bcl_converter == BclConverter.BCLCONVERT or bcl_converter == BclConverter.DRAGEN:
         return create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell(
-            flow_cell_dir=flow_cell_directory
+            flow_cell_directory
         )
-    return create_sample_lane_sequencing_metrics_from_bcl2fastq_for_flow_cell(
-        flow_cell_dir=flow_cell_directory
-    )
+    return create_sample_lane_sequencing_metrics_from_bcl2fastq_for_flow_cell(flow_cell_directory)
