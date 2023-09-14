@@ -20,50 +20,46 @@ LOG = logging.getLogger(__name__)
 
 def parse_metrics(flow_cell_dir: Path) -> List[SampleLaneMetrics]:
     """Parse metrics for a flow cell demultiplexed with Bcl2fastq."""
-    tile_metrics: List[SampleLaneTileMetrics] = parse_raw_tile_metrics(flow_cell_dir)
-    return combine_tile_metrics_per_sample_and_lane(tile_metrics)
+    tile_metrics: List[SampleLaneTileMetrics] = parse_tile_metrics(flow_cell_dir)
+    return combine_tiles_per_lane(tile_metrics)
 
 
-def parse_raw_tile_metrics(
+def parse_tile_metrics(
     demultiplex_result_directory: Path,
 ) -> List[SampleLaneTileMetrics]:
     """Parse metrics for each tile on a flow cell demultiplexed with Bcl2fastq."""
     tile_metrics: List[SampleLaneTileMetrics] = []
 
-    stats_json_paths: List[Path] = get_bcl2fastq_stats_paths(demultiplex_result_directory)
+    stats_paths: List[Path] = get_metrics_file_paths(demultiplex_result_directory)
 
-    for stats_json_path in stats_json_paths:
-        LOG.debug(f"Parsing stats.json file {stats_json_path}")
-        metrics = SampleLaneTileMetrics.parse_file(stats_json_path)
+    for json_path in stats_paths:
+        LOG.debug(f"Parsing stats.json file {json_path}")
+        metrics = SampleLaneTileMetrics.parse_file(json_path)
         tile_metrics.append(metrics)
 
     return tile_metrics
 
 
-def update_lane_metrics_with_demux_data(
-    sample_lane_metrics: SampleLaneMetrics, demux_result: DemuxResult
-):
+def update_lane_metrics_with_demux_data(lane_metrics: SampleLaneMetrics, demux_result: DemuxResult):
     reads: int = demux_result.number_reads
-    sample_lane_metrics.total_reads += reads * 2
+    lane_metrics.total_reads += reads * 2
 
     yield_: int = demux_result.yield_
-    sample_lane_metrics.total_yield += yield_
+    lane_metrics.total_yield += yield_
 
     read_metrics: List[ReadMetric] = demux_result.read_metrics
-    sample_lane_metrics.total_yield_q30 += sum_q30_yields(read_metrics)
-    sample_lane_metrics.total_quality_score += sum_quality_scores(read_metrics)
+    lane_metrics.total_yield_q30 += sum_q30_yields(read_metrics)
+    lane_metrics.total_quality_score += sum_quality_scores(read_metrics)
 
 
-def combine_tile_metrics_per_sample_and_lane(
-    tile_metrics: List[SampleLaneTileMetrics],
-) -> List[SampleLaneMetrics]:
-    """Aggregate the tile metrics per sample and lane."""
+def combine_tiles_per_lane(tile_metrics: List[SampleLaneTileMetrics]) -> List[SampleLaneMetrics]:
+    """Aggregate the tile metrics to per lane instead."""
     metrics = {}
 
     for tile_metric in tile_metrics:
         for conversion_result in tile_metric.conversion_results:
             for demux_result in conversion_result.demux_results:
-                sample_lane_key = (
+                metric_key = (
                     conversion_result.lane_number,
                     demux_result.sample_id,
                 )
@@ -72,15 +68,15 @@ def combine_tile_metrics_per_sample_and_lane(
                     sample_id_with_index=demux_result.sample_id
                 )
 
-                if sample_lane_key not in metrics:
-                    metrics[sample_lane_key] = initialise_sample_lane_metrics(
+                if metric_key not in metrics:
+                    metrics[metric_key] = initialise_lane_metrics(
                         flow_cell_name=tile_metric.flow_cell_name,
                         lane=conversion_result.lane_number,
                         sample_id=sample_id,
                     )
 
                 update_lane_metrics_with_demux_data(
-                    sample_lane_metrics=metrics[sample_lane_key], demux_result=demux_result
+                    lane_metrics=metrics[metric_key], demux_result=demux_result
                 )
 
     return list(metrics.values())
@@ -91,7 +87,7 @@ def remove_index_from_sample_id(sample_id_with_index: str) -> str:
     return sample_id_with_index.split("_")[0]
 
 
-def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
+def get_metrics_file_paths(demultiplex_result_directory: Path) -> List[Path]:
     """
     Finds metrics files in Bcl2fastq demultiplex result directory.
     Raises:
@@ -111,9 +107,7 @@ def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
     return stats_json_paths
 
 
-def initialise_sample_lane_metrics(
-    flow_cell_name: str, lane: int, sample_id: str
-) -> SampleLaneMetrics:
+def initialise_lane_metrics(flow_cell_name: str, lane: int, sample_id: str) -> SampleLaneMetrics:
     return SampleLaneMetrics(
         flow_cell_name=flow_cell_name,
         lane=lane,
@@ -134,20 +128,20 @@ def sum_q30_yields(read_metrics: Iterable[ReadMetric]) -> int:
 
 
 def update_lane_metrics_with_undetermined_data(
-    sample_lane_metric: SampleLaneMetrics, undetermined_data: Undetermined
+    lane_metrics: SampleLaneMetrics, undetermined_data: Undetermined
 ):
     reads: int = undetermined_data.number_reads
-    sample_lane_metric.total_reads += reads * 2
+    lane_metrics.total_reads += reads * 2
 
     yield_: int = undetermined_data.yield_
-    sample_lane_metric.total_yield += yield_
+    lane_metrics.total_yield += yield_
 
     read_metrics: List[ReadMetric] = undetermined_data.read_metrics
-    sample_lane_metric.total_yield_q30 += sum_q30_yields(read_metrics)
-    sample_lane_metric.total_quality_score += sum_quality_scores(read_metrics)
+    lane_metrics.total_yield_q30 += sum_q30_yields(read_metrics)
+    lane_metrics.total_quality_score += sum_quality_scores(read_metrics)
 
 
-def combine_undetermined_tile_metrics(
+def combine_undetermined_tiles_per_lane(
     tile_metrics: List[SampleLaneTileMetrics],
 ) -> Dict[int, SampleLaneMetrics]:
     """Aggregate the undetermined tile metrics per lane."""
@@ -161,14 +155,14 @@ def combine_undetermined_tile_metrics(
             lane: int = conversion_result.lane_number
 
             if lane not in lane_metrics:
-                lane_metrics[lane] = initialise_sample_lane_metrics(
+                lane_metrics[lane] = initialise_lane_metrics(
                     flow_cell_name=tile_metric.flow_cell_name,
                     lane=lane,
                     sample_id="undetermined",
                 )
 
             update_lane_metrics_with_undetermined_data(
-                sample_lane_metric=lane_metrics[lane],
+                lane_metrics=lane_metrics[lane],
                 undetermined_data=conversion_result.undetermined,
             )
     return lane_metrics
@@ -191,8 +185,8 @@ def parse_undetermined_metrics(
     flow_cell_dir: Path, non_pooled_lanes_and_samples: List[Tuple[int, str]]
 ) -> List[SampleLaneMetrics]:
     """Parse undetermined metrics for a flow cell demultiplexed with Bcl2fastq for non pooled samples."""
-    tile_metrics: List[SampleLaneTileMetrics] = parse_raw_tile_metrics(flow_cell_dir)
-    lane_metrics: Dict[int, SampleLaneMetrics] = combine_undetermined_tile_metrics(tile_metrics)
+    tile_metrics: List[SampleLaneTileMetrics] = parse_tile_metrics(flow_cell_dir)
+    lane_metrics: Dict[int, SampleLaneMetrics] = combine_undetermined_tiles_per_lane(tile_metrics)
 
     return get_non_pooled_undetermined_metrics_and_assign_sample_ids(
         lane_metrics=lane_metrics, non_pooled_lanes_and_samples=non_pooled_lanes_and_samples
