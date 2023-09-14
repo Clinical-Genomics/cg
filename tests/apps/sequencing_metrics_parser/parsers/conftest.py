@@ -27,6 +27,26 @@ def raw_bcl2fastq_metrics_data() -> Dict:
                         "ReadMetrics": [{"Yield": 100, "YieldQ30": 90, "QualityScoreSum": 100}],
                     }
                 ],
+                "Undetermined": {
+                    "NumberReads": 5293801,
+                    "Yield": 1598727902,
+                    "ReadMetrics": [
+                        {
+                            "ReadNumber": 1,
+                            "Yield": 799363951,
+                            "YieldQ30": 719898156,
+                            "QualityScoreSum": 30157716143,
+                            "TrimmedBases": 0,
+                        },
+                        {
+                            "ReadNumber": 2,
+                            "Yield": 799363951,
+                            "YieldQ30": 615436475,
+                            "QualityScoreSum": 27313363301,
+                            "TrimmedBases": 0,
+                        },
+                    ],
+                },
             }
         ],
     }

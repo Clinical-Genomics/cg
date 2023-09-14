@@ -36,5 +36,12 @@ def test_parse_not_found_bcl2fastq_sequencing_metrics():
         parse_bcl2fastq_sequencing_metrics(flow_cell_dir=Path("/does/not/exist"))
 
 
-def test_parse_undetermined_metrics():
-    pass
+def test_parse_undetermined_metrics(bcl2fastq_flow_cell_path: Path):
+    # GIVEN a flow cell demultiplexed with bcl2fastq containing undetermined reads
+
+    # WHEN parsing the undetermined metrics
+    metrics: List[SampleLaneMetrics] = parse_undetermined_metrics(bcl2fastq_flow_cell_path)
+
+    # THEN a list of Bcl2FastqTileSequencingMetrics models is returned
+    assert isinstance(metrics, list)
+    assert all(isinstance(item, SampleLaneMetrics) for item in metrics)
