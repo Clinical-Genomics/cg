@@ -127,16 +127,16 @@ def sum_q30_yields(read_metrics: Iterable[ReadMetric]) -> int:
     return sum([read_metric.yield_q30 for read_metric in read_metrics])
 
 
-def update_lane_metrics_with_undetermined_data(
-    lane_metrics: SampleLaneMetrics, undetermined_data: Undetermined
+def update_lane_with_undetermined_metrics(
+    lane_metrics: SampleLaneMetrics, undetermined_metrics: Undetermined
 ):
-    reads: int = undetermined_data.number_reads
+    reads: int = undetermined_metrics.number_reads
     lane_metrics.total_reads += reads * 2
 
-    yield_: int = undetermined_data.yield_
+    yield_: int = undetermined_metrics.yield_
     lane_metrics.total_yield += yield_
 
-    read_metrics: List[ReadMetric] = undetermined_data.read_metrics
+    read_metrics: List[ReadMetric] = undetermined_metrics.read_metrics
     lane_metrics.total_yield_q30 += sum_q30_yields(read_metrics)
     lane_metrics.total_quality_score += sum_quality_scores(read_metrics)
 
@@ -161,16 +161,17 @@ def combine_undetermined_tiles_per_lane(
                     sample_id="undetermined",
                 )
 
-            update_lane_metrics_with_undetermined_data(
+            update_lane_with_undetermined_metrics(
                 lane_metrics=lane_metrics[lane],
-                undetermined_data=conversion_result.undetermined,
+                undetermined_metrics=conversion_result.undetermined,
             )
     return lane_metrics
 
 
-def get_non_pooled_undetermined_metrics_and_assign_sample_ids(
+def get_metrics_for_non_pooled_samples(
     lane_metrics: Dict[int, SampleLaneMetrics], non_pooled_lanes_and_samples: List[Tuple[int, str]]
 ) -> List[SampleLaneMetrics]:
+    """Get metrics for non pooled samples and set sample ids."""
     non_pooled_metrics: List[SampleLaneMetrics] = []
     for lane, sample_id in non_pooled_lanes_and_samples:
         metric: Optional[SampleLaneMetrics] = lane_metrics.get(lane)
@@ -188,6 +189,6 @@ def parse_undetermined_metrics(
     tile_metrics: List[SampleLaneTileMetrics] = parse_tile_metrics(flow_cell_dir)
     lane_metrics: Dict[int, SampleLaneMetrics] = combine_undetermined_tiles_per_lane(tile_metrics)
 
-    return get_non_pooled_undetermined_metrics_and_assign_sample_ids(
+    return get_metrics_for_non_pooled_samples(
         lane_metrics=lane_metrics, non_pooled_lanes_and_samples=non_pooled_lanes_and_samples
     )
