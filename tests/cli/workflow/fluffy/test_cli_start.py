@@ -1,11 +1,11 @@
 import datetime as dt
 
+from click.testing import CliRunner
+
 from cg.cli.workflow.fluffy.base import start_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
-
 from cg.store.models import Sample
 
 
@@ -58,7 +58,6 @@ def test_start_available(
     # GIVEN every sample in SampleSheet has been given a name in StatusDB
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_name_from_lims_id")
     FluffyAnalysisAPI.get_sample_name_from_lims_id.return_value = "CustName"
-
 
     # GIVEN every sample in SampleSheet has valid order field in StatusDB
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_starlims_id")
