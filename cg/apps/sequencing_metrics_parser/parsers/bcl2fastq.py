@@ -170,7 +170,7 @@ def combine_undetermined_lane_metrics_from_tiles(
 
             update_lane_metrics_with_undetermined_data(
                 sample_lane_metric=sample_lane_metrics[lane],
-                undetermined_metrics=conversion_result.undetermined,
+                undetermined_data=conversion_result.undetermined,
             )
     return list(sample_lane_metrics.values())
 
