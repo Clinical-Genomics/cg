@@ -116,7 +116,7 @@ class SampleSheetCreator:
         return sample_sheet_content
 
     def process_samples_for_sample_sheet(self) -> None:
-        """Add dummy samples, remove unwanted samples and adapt remaining samples."""
+        """Remove unwanted samples and adapt remaining samples."""
         self.remove_unwanted_samples()
         samples_in_lane: List[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]]
         is_reverse_complement: bool = is_reverse_complement_needed(
