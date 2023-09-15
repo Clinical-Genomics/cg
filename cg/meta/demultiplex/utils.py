@@ -180,16 +180,6 @@ def rename_fastq_file_if_needed(fastq_file_path: Path, flow_cell_name: str) -> P
     return renamed_fastq_file_path
 
 
-def get_sample_sheet(flow_cell: FlowCellDirectoryData) -> SampleSheet:
-    """Return sample sheet associated with flowcell."""
-    sample_sheet_path: Path = flow_cell.get_sample_sheet_path_hk()
-    sample_type = flow_cell.sample_type
-    sample_sheet: SampleSheet = get_sample_sheet_from_file(
-        infile=sample_sheet_path, flow_cell_sample_type=sample_type
-    )
-    return sample_sheet
-
-
 def get_undetermined_fastqs(lane: int, flow_cell_path: Path) -> List[Path]:
     """Get the undetermined fastq files for a specific lane on a flow cell."""
     undetermined_pattern = f"Undetermined*_L00{lane}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"

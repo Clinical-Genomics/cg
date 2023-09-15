@@ -14,7 +14,6 @@ from cg.meta.demultiplex.utils import (
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_fastqs_from_flow_cell,
-    get_sample_sheet,
     get_sample_sheet_path,
     get_undetermined_fastqs,
     rename_fastq_file_if_needed,
@@ -49,8 +48,7 @@ def add_undetermined_fastq_files_to_housekeeper(
     flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI
 ) -> None:
     """Add undetermined fastq files for non-pooled samples in Housekeeper."""
-    sample_sheet: SampleSheet = get_sample_sheet(flow_cell)
-    non_pooled_samples: List[FlowCellSample] = sample_sheet.get_non_pooled_samples()
+    non_pooled_samples: List[FlowCellSample] = flow_cell.sample_sheet.get_non_pooled_samples()
 
     for sample in non_pooled_samples:
         undetermined_fastqs: List[Path] = get_undetermined_fastqs(

@@ -126,7 +126,7 @@ def combine_mean_quality_score(
     existing_metric: SampleLaneSequencingMetrics, new_metric: SampleLaneSequencingMetrics
 ) -> float:
     """Calculate the weighted average of two mean quality scores."""
-    return _weighted_average(
+    return weighted_average(
         total_1=existing_metric.sample_total_reads_in_lane,
         percentage_1=existing_metric.sample_base_mean_quality_score,
         total_2=new_metric.sample_total_reads_in_lane,
@@ -138,7 +138,7 @@ def combine_q30_percentage(
     existing_metric: SampleLaneSequencingMetrics, new_metric: SampleLaneSequencingMetrics
 ) -> float:
     """Calculate the weighted average of two q30 percentages."""
-    return _weighted_average(
+    return weighted_average(
         total_1=existing_metric.sample_total_reads_in_lane,
         percentage_1=existing_metric.sample_base_percentage_passing_q30,
         total_2=new_metric.sample_total_reads_in_lane,
@@ -146,9 +146,7 @@ def combine_q30_percentage(
     )
 
 
-def _weighted_average(
-    total_1: int, percentage_1: float, total_2: int, percentage_2: float
-) -> float:
+def weighted_average(total_1: int, percentage_1: float, total_2: int, percentage_2: float) -> float:
     """Calculate the weighted average of two percentages."""
     return (total_1 * percentage_1 + total_2 * percentage_2) / (total_1 + total_2)
 

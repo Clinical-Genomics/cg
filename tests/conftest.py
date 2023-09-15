@@ -1147,7 +1147,7 @@ def demultiplexing_api(
 
 @pytest.fixture
 def novaseq6000_flow_cell_dir() -> FlowCellDirectoryData:
-    """Return the path to a NovaSeq 6000 BCL convert sample sheet."""
+    """Return the path to a NovaSeq 6000 flow cell directory demultiplexed with BCL Convert."""
     flow_cell_path = Path(
         "tests", "fixtures", "apps", "sequencing_metrics_parser", "230622_A00621_0864_AHY7FFDRX2"
     )
