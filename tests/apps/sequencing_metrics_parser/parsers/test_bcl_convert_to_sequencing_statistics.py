@@ -50,3 +50,20 @@ def test_create_undetermined_sequencing_statistics_from_bcl_convert_metrics(
     # THEN metrics are created for the undetermined reads
     assert isinstance(metrics, list)
     assert isinstance(metrics[0], SampleLaneSequencingMetrics)
+
+
+def test_create_undetermined_sequencing_statistics_from_bcl_convert_metrics_for_existing_lane_without_undetermined_reads(
+    bcl_convert_metrics_dir_path: Path,
+):
+    """Test creating undetermined sequencing statistics from bcl convert metrics."""
+
+    # GIVEN a directory with a flow cell demultiplexed with bcl convert with undetermined reads
+
+    # WHEN creating undetermined sequencing statistics from bcl convert metrics specifying a non-existing lane
+    metrics: List[SampleLaneSequencingMetrics] = create_bcl_convert_undetermined_metrics(
+        flow_cell_dir=bcl_convert_metrics_dir_path,
+        non_pooled_lane_sample_pairs=[(2, "sample_id")],
+    )
+
+    # THEN an empty list is returned
+    assert not metrics
