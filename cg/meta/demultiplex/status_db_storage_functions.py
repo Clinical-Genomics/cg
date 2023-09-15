@@ -1,13 +1,14 @@
 """Functions interacting with statusdb in the DemuxPostProcessingAPI."""
 import datetime
 import logging
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Tuple
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_internal_ids_from_sample_sheet,
 )
 from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
+    create_undetermined_sequencing_metrics_for_flow_cell,
 )
 from cg.meta.demultiplex.utils import get_q30_threshold
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -79,8 +80,37 @@ def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, stor
     LOG.info(f"Added sequencing metrics to status db for: {flow_cell.id}")
 
 
-def store_undetermined_sequencing_metrics_in_status_db():
-    pass
+def store_sequencing_metrics_for_non_pooled_undetermined_reads(
+    flow_cell: FlowCellDirectoryData, store: Store
+) -> None:
+    non_pooled_lanes_and_samples: List[
+        Tuple[int, str]
+    ] = flow_cell.sample_sheet.get_non_pooled_lane_sample_id_pairs()
+
+    metrics: List[
+        SampleLaneSequencingMetrics
+    ] = create_undetermined_sequencing_metrics_for_flow_cell(
+        flow_cell_directory=flow_cell.path,
+        bcl_converter=flow_cell.bcl_converter,
+        non_pooled_lanes_and_samples=non_pooled_lanes_and_samples,
+    )
+
+    for undetermined_metric in metrics:
+        sample_id: str = undetermined_metric.sample_internal_id
+        lane: int = undetermined_metric.flow_cell_lane_number
+
+        existing_metric: SampleLaneSequencingMetrics = (
+            store.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+                flow_cell_name=flow_cell.id, sample_internal_id=sample_id, lane=lane
+            )
+        )
+
+        if existing_metric:
+            # TODO: update metric
+            pass
+        else:
+            # TODO: store metric
+            pass
 
 
 def add_sequencing_metrics_to_statusdb(

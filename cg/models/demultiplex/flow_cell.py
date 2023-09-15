@@ -79,6 +79,16 @@ class FlowCellDirectoryData:
         """
         return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME.value)
 
+    @property
+    def sample_sheet(self) -> SampleSheet:
+        """Return sample sheet object."""
+        if not self._sample_sheet_path_hk:
+            raise FlowCellError("Sample sheet path has not been assigned yet")
+        return get_sample_sheet_from_file(
+            infile=self._sample_sheet_path_hk,
+            flow_cell_sample_type=self.sample_type,
+        )
+
     def set_sample_sheet_path_hk(self, hk_path: Path):
         self._sample_sheet_path_hk = hk_path
 
