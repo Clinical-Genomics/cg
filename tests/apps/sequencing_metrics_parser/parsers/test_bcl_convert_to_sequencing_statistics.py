@@ -55,9 +55,9 @@ def test_create_undetermined_sequencing_statistics_from_bcl_convert_metrics(
 def test_create_undetermined_sequencing_statistics_from_bcl_convert_metrics_for_existing_lane_without_undetermined_reads(
     bcl_convert_metrics_dir_path: Path,
 ):
-    """Test creating undetermined sequencing statistics from bcl convert metrics."""
+    """Test creating undetermined sequencing statistics from bcl convert metrics without undetermined reads."""
 
-    # GIVEN a directory with a flow cell demultiplexed with bcl convert with undetermined reads
+    # GIVEN a directory with a flow cell demultiplexed with bcl convert without undetermined reads in a lane
 
     # WHEN creating undetermined sequencing statistics from bcl convert metrics specifying an existing lane without undetermined reads
     metrics: List[SampleLaneSequencingMetrics] = create_bcl_convert_undetermined_metrics(
