@@ -76,13 +76,14 @@ def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, stor
     add_sequencing_metrics_to_statusdb(
         sample_lane_sequencing_metrics=sample_lane_sequencing_metrics, store=store
     )
-
+    store_sequencing_metrics_for_non_pooled_undetermined_reads(flow_cell=flow_cell, store=store)
     LOG.info(f"Added sequencing metrics to status db for: {flow_cell.id}")
 
 
 def store_sequencing_metrics_for_non_pooled_undetermined_reads(
     flow_cell: FlowCellDirectoryData, store: Store
 ) -> None:
+    """Store sequencing metrics for non pooled undetermined reads in status db."""
     non_pooled_lanes_and_samples: List[
         Tuple[int, str]
     ] = flow_cell.sample_sheet.get_non_pooled_lane_sample_id_pairs()
@@ -131,7 +132,7 @@ def combine_mean_quality_score(
     existing_metric: SampleLaneSequencingMetrics, new_metric: SampleLaneSequencingMetrics
 ) -> float:
     """Calculate the weighted average of two mean quality scores."""
-    existing_metric.sample_base_mean_quality_score = _weighted_average(
+    return _weighted_average(
         total_1=existing_metric.sample_total_reads_in_lane,
         percentage_1=existing_metric.sample_base_mean_quality_score,
         total_2=new_metric.sample_total_reads_in_lane,
@@ -142,7 +143,8 @@ def combine_mean_quality_score(
 def combine_q30_percentage(
     existing_metric: SampleLaneSequencingMetrics, new_metric: SampleLaneSequencingMetrics
 ) -> float:
-    existing_metric.sample_base_percentage_passing_q30 = _weighted_average(
+    """Calculate the weighted average of two q30 percentages."""
+    return _weighted_average(
         total_1=existing_metric.sample_total_reads_in_lane,
         percentage_1=existing_metric.sample_base_percentage_passing_q30,
         total_2=new_metric.sample_total_reads_in_lane,
