@@ -104,13 +104,57 @@ def store_sequencing_metrics_for_non_pooled_undetermined_reads(
                 flow_cell_name=flow_cell.id, sample_internal_id=sample_id, lane=lane
             )
         )
-
         if existing_metric:
-            # TODO: update metric
-            pass
+            update_existing_metric(existing_metric=existing_metric, new_metric=undetermined_metric)
         else:
-            # TODO: store metric
-            pass
+            store.session.add(undetermined_metric)
+    store.session.commit()
+
+
+def update_existing_metric(
+    existing_metric: SampleLaneSequencingMetrics, new_metric: SampleLaneSequencingMetrics
+) -> None:
+    """Update an existing metric with a new metric."""
+
+    existing_metric.sample_base_percentage_passing_q30 = combine_q30_percentage(
+        existing_metric=existing_metric, new_metric=new_metric
+    )
+    existing_metric.sample_base_mean_quality_score = combine_mean_quality_score(
+        existing_metric=existing_metric, new_metric=new_metric
+    )
+    existing_metric.sample_total_reads_in_lane = (
+        existing_metric.sample_total_reads_in_lane + new_metric.sample_total_reads_in_lane
+    )
+
+
+def combine_mean_quality_score(
+    existing_metric: SampleLaneSequencingMetrics, new_metric: SampleLaneSequencingMetrics
+) -> float:
+    """Calculate the weighted average of two mean quality scores."""
+    existing_metric.sample_base_mean_quality_score = _weighted_average(
+        total_1=existing_metric.sample_total_reads_in_lane,
+        percentage_1=existing_metric.sample_base_mean_quality_score,
+        total_2=new_metric.sample_total_reads_in_lane,
+        percentage_2=new_metric.sample_base_mean_quality_score,
+    )
+
+
+def combine_q30_percentage(
+    existing_metric: SampleLaneSequencingMetrics, new_metric: SampleLaneSequencingMetrics
+) -> float:
+    existing_metric.sample_base_percentage_passing_q30 = _weighted_average(
+        total_1=existing_metric.sample_total_reads_in_lane,
+        percentage_1=existing_metric.sample_base_percentage_passing_q30,
+        total_2=new_metric.sample_total_reads_in_lane,
+        percentage_2=new_metric.sample_base_percentage_passing_q30,
+    )
+
+
+def _weighted_average(
+    total_1: int, percentage_1: float, total_2: int, percentage_2: float
+) -> float:
+    """Calculate the weighted average of two percentages."""
+    return (total_1 * percentage_1 + total_2 * percentage_2) / (total_1 + total_2)
 
 
 def add_sequencing_metrics_to_statusdb(
