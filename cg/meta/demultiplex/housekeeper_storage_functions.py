@@ -3,6 +3,8 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
+from housekeeper.store.models import File, Version
+
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_internal_ids_from_sample_sheet,
@@ -23,7 +25,6 @@ from cg.meta.demultiplex.utils import (
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.utils.files import get_files_matching_pattern
-from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 

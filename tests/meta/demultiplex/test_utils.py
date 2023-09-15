@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 import pytest
+
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
@@ -332,35 +333,40 @@ def test_is_syncing_complete_false(
     assert not is_directory_synced
 
 
-def test_add_flow_cell_name_to_fastq_file_path(bcl2fastq_flow_cell_id: str, fastq_file_path: Path):
+def test_add_flow_cell_name_to_fastq_file_path(
+    bcl2fastq_flow_cell_id: str, demultiplex_fastq_file_path
+):
     # GIVEN a fastq file path and a flow cell name
 
     # WHEN adding the flow cell name to the fastq file path
     rename_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
-        fastq_file_path=fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
+        fastq_file_path=demultiplex_fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
     # THEN the fastq file path should be returned with the flow cell name added
     assert rename_fastq_file_path == Path(
-        fastq_file_path.parent, f"{bcl2fastq_flow_cell_id}_{fastq_file_path.name}"
+        demultiplex_fastq_file_path.parent,
+        f"{bcl2fastq_flow_cell_id}_{demultiplex_fastq_file_path.name}",
     )
 
 
 def test_add_flow_cell_name_to_fastq_file_path_when_flow_cell_name_already_in_name(
-    bcl2fastq_flow_cell_id: str, fastq_file_path: Path
+    bcl2fastq_flow_cell_id: str, demultiplex_fastq_file_path
 ):
     # GIVEN a fastq file path and a flow cell name
 
     # GIVEN that the flow cell name is already in the fastq file path
-    fastq_file_path = Path(f"{bcl2fastq_flow_cell_id}_{fastq_file_path.name}")
+    demultiplex_fastq_file_path = Path(
+        f"{bcl2fastq_flow_cell_id}_{demultiplex_fastq_file_path.name}"
+    )
 
     # WHEN adding the flow cell name to the fastq file path
     renamed_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
-        fastq_file_path=fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
+        fastq_file_path=demultiplex_fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
     # THEN the fastq file path should be returned equal to the original fastq file path
-    assert renamed_fastq_file_path == fastq_file_path
+    assert renamed_fastq_file_path == demultiplex_fastq_file_path
 
 
 def test_get_undetermined_fastqs_no_matching_files(tmp_path):

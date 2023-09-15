@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict, List
 
 import pytest
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
@@ -39,8 +40,8 @@ def temp_fastq_paths(tmp_demulitplexing_dir: Path) -> List[Path]:
 
 
 @pytest.fixture
-def fastq_file_path() -> Path:
-    """Return a path to a fastq file."""
+def demultiplex_fastq_file_path() -> Path:
+    """Return a path to non-existent a fastq file."""
     return Path("path/to/sample_internal_id_S1_L001_R1_001.fastq.gz")
 
 
