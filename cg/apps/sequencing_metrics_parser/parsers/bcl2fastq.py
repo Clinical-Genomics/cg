@@ -1,5 +1,5 @@
+import logging
 import os
-import re
 from pathlib import Path
 from typing import List
 
@@ -11,6 +11,9 @@ from cg.constants.demultiplexing import (
     BCL2FASTQ_METRICS_DIRECTORY_NAME,
     BCL2FASTQ_METRICS_FILE_NAME,
 )
+from cg.io.json import read_json
+
+LOG = logging.getLogger(__name__)
 
 
 def parse_bcl2fastq_sequencing_metrics(flow_cell_dir: Path) -> List[Bcl2FastqSampleLaneMetrics]:
@@ -33,9 +36,9 @@ def parse_bcl2fastq_raw_tile_metrics(
     )
 
     for stats_json_path in stats_json_paths:
-        if not stats_json_path.exists():
-            raise FileNotFoundError(f"File {stats_json_path} does not exist.")
-        sequencing_metrics = Bcl2FastqSampleLaneTileMetrics.parse_file(stats_json_path)
+        LOG.debug(f"Parsing stats.json file {stats_json_path}")
+        data = read_json(stats_json_path)
+        sequencing_metrics = Bcl2FastqSampleLaneTileMetrics.model_validate(data)
         tile_sequencing_metrics.append(sequencing_metrics)
 
     return tile_sequencing_metrics
@@ -86,19 +89,20 @@ def discard_index_sequence(sample_id_with_index: str) -> str:
 
 
 def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
-    """Find metrics files in Bcl2fastq demultiplex result directory."""
+    """
+    Finds metrics files in Bcl2fastq demultiplex result directory.
+    Raises:
+        FileNotFoundError: If no stats.json files are found in the demultiplex result directory.
+    """
     stats_json_paths = []
-    pattern = re.compile(r"l\d+t\d+")
 
-    for subdir in os.listdir(demultiplex_result_directory):
-        if pattern.match(subdir):
-            stats_json_path = (
-                demultiplex_result_directory
-                / subdir
-                / BCL2FASTQ_METRICS_DIRECTORY_NAME
-                / BCL2FASTQ_METRICS_FILE_NAME
-            )
-            if stats_json_path.is_file():
-                stats_json_paths.append(stats_json_path)
+    for root, _, files in os.walk(demultiplex_result_directory):
+        if root.endswith(BCL2FASTQ_METRICS_DIRECTORY_NAME) and BCL2FASTQ_METRICS_FILE_NAME in files:
+            stats_json_paths.append(Path(root, BCL2FASTQ_METRICS_FILE_NAME))
+
+    if not stats_json_paths:
+        raise FileNotFoundError(
+            f"Could not find any stats.json files in {demultiplex_result_directory}"
+        )
 
     return stats_json_paths

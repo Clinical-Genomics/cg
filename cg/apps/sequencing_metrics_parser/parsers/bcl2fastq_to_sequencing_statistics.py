@@ -19,7 +19,6 @@ def create_sample_lane_sequencing_metrics_from_bcl2fastq_for_flow_cell(
     """
 
     sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
-
     sample_and_lane_metrics: List[Bcl2FastqSampleLaneMetrics] = parse_bcl2fastq_sequencing_metrics(
         flow_cell_dir=flow_cell_dir
     )

@@ -10,8 +10,9 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
-from cg.apps.cgstats.crud import create
-from cg.apps.cgstats.stats import StatsAPI
+from housekeeper.store.models import File, Version
+from requests import Response
+
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
@@ -37,7 +38,6 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.models.rnafusion.rnafusion import RnafusionParameters
@@ -54,8 +54,6 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
 )
 from cg.utils import Process
-from housekeeper.store.models import File, Version
-from requests import Response
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -116,6 +114,11 @@ def timestamp_in_2_weeks(timestamp_now: datetime) -> datetime:
 
 
 # Case fixtures
+
+
+@pytest.fixture(scope="session")
+def any_string() -> str:
+    return "any_string"
 
 
 @pytest.fixture(scope="session")
@@ -746,7 +749,7 @@ def compression_object(fastq_stub: Path, original_fastq_data: CompressionData) -
 # Demultiplex fixtures
 
 
-@pytest.fixture(name="lims_novaseq_bcl_convert_samples")
+@pytest.fixture
 def lims_novaseq_bcl_convert_samples(
     lims_novaseq_samples_raw: List[dict],
 ) -> List[FlowCellSampleBCLConvert]:
@@ -754,29 +757,12 @@ def lims_novaseq_bcl_convert_samples(
     return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
 
 
-@pytest.fixture(name="lims_novaseq_bcl2fastq_samples")
+@pytest.fixture
 def lims_novaseq_bcl2fastq_samples(
     lims_novaseq_samples_raw: List[dict],
 ) -> List[FlowCellSampleBcl2Fastq]:
     """Return a list of parsed Bcl2fastq flow cell samples"""
     return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
-
-
-@pytest.fixture(name="stats_api")
-def stats_api(project_dir: Path) -> StatsAPI:
-    """Setup base CGStats store."""
-    _store = StatsAPI(
-        {
-            "cgstats": {
-                "binary_path": "echo",
-                "database": "sqlite://",
-                "root": "tests/fixtures/DEMUX",
-            }
-        }
-    )
-    _store.create_all()
-    yield _store
-    _store.drop_all()
 
 
 @pytest.fixture(name="tmp_flow_cells_directory")
@@ -929,6 +915,17 @@ def tmp_bcl2fastq_flow_cell(
     )
 
 
+@pytest.fixture
+def novaseq6000_flow_cell(
+    tmp_flow_cells_directory_malformed_sample_sheet: Path,
+) -> FlowCellDirectoryData:
+    """Return a NovaSeq6000 flow cell."""
+    return FlowCellDirectoryData(
+        flow_cell_path=tmp_flow_cells_directory_malformed_sample_sheet,
+        bcl_converter=BclConverter.BCLCONVERT,
+    )
+
+
 @pytest.fixture(name="tmp_bcl_convert_flow_cell")
 def tmp_bcl_convert_flow_cell(
     tmp_flow_cell_directory_bclconvert: Path,
@@ -1071,13 +1068,11 @@ def store_with_demultiplexed_samples(
 @pytest.fixture(name="demultiplexing_context_for_demux")
 def demultiplexing_context_for_demux(
     demultiplexing_api_for_demux: DemultiplexingAPI,
-    stats_api: StatsAPI,
     cg_context: CGConfig,
     store_with_demultiplexed_samples: Store,
 ) -> CGConfig:
     """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api_for_demux
-    cg_context.cg_stats_api_ = stats_api
     cg_context.housekeeper_api_ = demultiplexing_api_for_demux.hk_api
     cg_context.status_db_ = store_with_demultiplexed_samples
     return cg_context
@@ -1086,14 +1081,12 @@ def demultiplexing_context_for_demux(
 @pytest.fixture(name="demultiplex_context")
 def demultiplex_context(
     demultiplexing_api: DemultiplexingAPI,
-    stats_api: StatsAPI,
     real_housekeeper_api: HousekeeperAPI,
     cg_context: CGConfig,
     store_with_demultiplexed_samples: Store,
 ) -> CGConfig:
     """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api
-    cg_context.cg_stats_api_ = stats_api
     cg_context.housekeeper_api_ = real_housekeeper_api
     cg_context.status_db_ = store_with_demultiplexed_samples
     return cg_context
@@ -1150,13 +1143,6 @@ def demultiplexing_api(
     )
     demux_api.slurm_api.process = sbatch_process
     return demux_api
-
-
-@pytest.fixture(name="populated_stats_api")
-def populated_stats_api(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults) -> StatsAPI:
-    create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
-    """Return a stats API with a populated database."""
-    return stats_api
 
 
 @pytest.fixture(name="novaseq6000_bcl_convert_sample_sheet_path")
@@ -1388,7 +1374,7 @@ def lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
     return Path(raw_lims_sample_dir, "raw_samplesheet_novaseq.json")
 
 
-@pytest.fixture(name="lims_novaseq_samples_raw")
+@pytest.fixture
 def lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[dict]:
     """Return a list of raw flow cell samples."""
     return ReadFile.get_content_from_file(
@@ -1416,16 +1402,18 @@ def novaseqx_demultiplexed_flow_cell(demultiplexed_runs: Path, novaseq_x_flow_ce
     return Path(demultiplexed_runs, novaseq_x_flow_cell_full_name)
 
 
-@pytest.fixture(name="bcl2fastq_demux_results")
-def bcl2fastq_demux_results(
-    demultiplexed_flow_cell: Path, bcl2fastq_flow_cell: FlowCellDirectoryData
-) -> DemuxResults:
-    """Return a demux results object for a bcl2fastq demultiplexed flow cell."""
-    return DemuxResults(
-        demux_dir=demultiplexed_flow_cell,
-        flow_cell=bcl2fastq_flow_cell,
-        bcl_converter=BclConverter.BCL2FASTQ,
+@pytest.fixture()
+def novaseqx_flow_cell_with_sample_sheet_no_fastq(
+    mocker, novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
+) -> FlowCellDirectoryData:
+    """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
+    novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)
+    flow_cell = FlowCellDirectoryData(flow_cell_path=novaseqx_flow_cell_directory)
+    sample_sheet_path = Path(
+        novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
+    mocker.patch.object(flow_cell, "get_sample_sheet_path_hk", return_value=sample_sheet_path)
+    return flow_cell
 
 
 # Genotype file fixture
@@ -2196,13 +2184,15 @@ def context_config(
     microsalt_dir: Path,
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
+    flow_cells_dir: Path,
+    demultiplexed_runs: Path,
 ) -> dict:
     """Return a context config."""
     return {
         "database": cg_uri,
         "delivery_path": str(cg_dir),
-        "flow_cells_dir": "path/to/flow_cells",
-        "demultiplexed_flow_cells_dir": "path/to/demultiplexed_flow_cells_dir",
+        "flow_cells_dir": str(flow_cells_dir),
+        "demultiplexed_flow_cells_dir": str(demultiplexed_runs),
         "email_base_settings": {
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",
@@ -2234,7 +2224,6 @@ def context_config(
             },
             "swegen_path": str(cg_dir),
         },
-        "cgstats": {"binary_path": "echo", "database": "sqlite:///./cgstats", "root": str(cg_dir)},
         "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
         "crunchy": {
             "conda_binary": "a_conda_binary",
@@ -2720,6 +2709,14 @@ def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     )
 
 
+@pytest.fixture(scope="function")
+def rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
+    """Path to deliverables file."""
+    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_deliverables").with_suffix(
+        FileExtensions.YAML
+    )
+
+
 @pytest.fixture(scope="session")
 def tower_id() -> int:
     """Returns a NF-Tower ID."""
@@ -3116,15 +3113,9 @@ def novaseqx_latest_analysis_version() -> str:
 
 
 @pytest.fixture(scope="function")
-def novaseqx_flow_cell_dir_name() -> str:
-    """Return the flow cell full name for a NovaseqX flow cell."""
-    return "20230427_LH00188_0001_B223YYCLT3"
-
-
-@pytest.fixture(scope="function")
-def novaseqx_flow_cell_directory(tmp_path: Path, novaseqx_flow_cell_dir_name: str) -> Path:
+def novaseqx_flow_cell_directory(tmp_path: Path, novaseq_x_flow_cell_full_name: str) -> Path:
     """Return the path to a NovaseqX flow cell directory."""
-    return Path(tmp_path, novaseqx_flow_cell_dir_name)
+    return Path(tmp_path, novaseq_x_flow_cell_full_name)
 
 
 @pytest.fixture(scope="function")

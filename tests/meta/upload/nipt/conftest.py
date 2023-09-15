@@ -1,8 +1,5 @@
 import pytest
 from sqlalchemy import update
-
-from cg.apps.cgstats.db import models as stats_models
-from cg.apps.cgstats.stats import StatsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
@@ -12,7 +9,6 @@ from tests.store.api.conftest import (
     store_failing_sequencing_qc,
 )
 
-from tests.apps.cgstats.conftest import nipt_stats_api
 from tests.store.api.conftest import re_sequenced_sample_store
 from cg.store.models import Application
 

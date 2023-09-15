@@ -43,13 +43,3 @@ def sample_sheet_path(tmpdir_factory) -> Generator[Path, None, None]:
     )
     sample_sheet_path.touch()
     yield sample_sheet_path
-
-
-@pytest.fixture(name="cgstats_log_path")
-def cgstats_log_path(tmpdir_factory) -> Generator[Path, None, None]:
-    """Create and return path to cgstats log file."""
-    cgstats_log_path_dir: Path = Path(tmpdir_factory.mktemp("DEMUX"), "HVKJCDRXX", "NAADM1")
-    cgstats_log_path_dir.mkdir(parents=True, exist_ok=True)
-    cgstats_log_path: Path = Path(cgstats_log_path_dir, "stats-121087-flow-cell-id.txt")
-    cgstats_log_path.touch()
-    yield cgstats_log_path
