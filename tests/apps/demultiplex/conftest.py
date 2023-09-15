@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
 import pytest
+
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
@@ -33,6 +34,12 @@ def bcl_convert_samples_with_updated_indexes() -> List[FlowCellSampleBCLConvert]
 def override_cycles_for_samples_with_updated_indexes() -> List[str]:
     """Return the correspondent Override Cycles values for three samples."""
     return ["Y151;I8N2;N2I8;Y151", "Y151;I8N2;N2I8;Y151", "Y151;I10;I10;Y151"]
+
+
+@pytest.fixture
+def override_cycles_for_samples_with_updated_indexes_reverse_complement() -> List[str]:
+    """Return the correspondent Override Cycles values for three samples."""
+    return ["Y151;I8N2;I8N2;Y151", "Y151;I8N2;I8N2;Y151", "Y151;I10;I10;Y151"]
 
 
 @pytest.fixture
