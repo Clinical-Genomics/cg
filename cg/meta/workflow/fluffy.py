@@ -38,7 +38,7 @@ class FluffySampleSheetHeaders(Enum):
     control: str = "Control"
     recipe: str = "Recipe"
     operator: str = "Operator"
-    sample_project: str = "SampleProject"
+    sample_project: str = "Sample_Project"
     exclude: str = "Exclude"
     library_nM: str = "Library_nM"
     sequencing_date: str = "SequencingDate"
