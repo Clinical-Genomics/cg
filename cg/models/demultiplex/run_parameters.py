@@ -44,11 +44,6 @@ class RunParameters:
         )
 
     @property
-    def requires_dummy_samples(self) -> Optional[bool]:
-        """Return true if the flow cell requires the addition of dummy samples."""
-        raise NotImplementedError("Impossible to know dummy sample requirements of parent class")
-
-    @property
     def control_software_version(self) -> Optional[str]:
         """Return the control software version if existent."""
         raise NotImplementedError(
@@ -106,11 +101,6 @@ class RunParametersNovaSeq6000(RunParameters):
             raise RunParametersError(
                 "The file parsed does not correspond to a NovaSeq6000 instrument"
             )
-
-    @property
-    def requires_dummy_samples(self) -> bool:
-        """Return true if the number of cycles of both indexes is 8."""
-        return self.index_length != 8
 
     @property
     def control_software_version(self) -> str:
@@ -173,11 +163,6 @@ class RunParametersNovaSeqX(RunParameters):
         self.node_not_found(node=xml_node, name="Instrument")
         if xml_node.text != RunParametersXMLNodes.NOVASEQ_X_INSTRUMENT:
             raise RunParametersError("The file parsed does not correspond to a NovaSeqX instrument")
-
-    @property
-    def requires_dummy_samples(self) -> bool:
-        """Return False for run parameters associated with NovaSeqX sequencing."""
-        return False
 
     @property
     def control_software_version(self) -> None:
