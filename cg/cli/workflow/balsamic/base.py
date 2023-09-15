@@ -186,6 +186,8 @@ def store_housekeeper(context: CGConfig, case_id: str):
 @DRY_RUN
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
+@OPTION_CACHE_VERSION
+@OPTION_OBSERVATIONS
 @OPTION_RUN_ANALYSIS
 @click.pass_context
 def start(
@@ -193,8 +195,10 @@ def start(
     case_id: str,
     gender: str,
     genome_version: str,
+    cache_version: str,
     panel_bed: str,
     pon_cnn: str,
+    observations: List[click.Path],
     slurm_quality_of_service: str,
     run_analysis: bool,
     dry_run: bool,
@@ -209,8 +213,10 @@ def start(
             case_id=case_id,
             gender=gender,
             genome_version=genome_version,
+            cache_version=cache_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
+            observations=observations,
             dry_run=dry_run,
         )
         context.invoke(
