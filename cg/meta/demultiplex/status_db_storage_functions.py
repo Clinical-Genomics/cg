@@ -79,6 +79,10 @@ def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, stor
     LOG.info(f"Added sequencing metrics to status db for: {flow_cell.id}")
 
 
+def store_undetermined_sequencing_metrics_in_status_db():
+    pass
+
+
 def add_sequencing_metrics_to_statusdb(
     sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics], store: Store
 ) -> None:
