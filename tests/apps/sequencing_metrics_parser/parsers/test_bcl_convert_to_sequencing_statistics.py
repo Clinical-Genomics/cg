@@ -31,5 +31,3 @@ def test_create_sequencing_statistics_from_bcl_convert_metrics(
         len(sequencing_statistics_list)
         == len(parsed_bcl_convert_metrics.get_sample_internal_ids()) * 2
     )
-
-    # THEN assert that the sequencing statistics are correct
