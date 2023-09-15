@@ -27,12 +27,6 @@ def test_sample_internal_id() -> str:
 
 
 @pytest.fixture(scope="session")
-def test_sample_project() -> str:
-    """Return a test sample project."""
-    return "405887"
-
-
-@pytest.fixture(scope="session")
 def test_lane() -> int:
     """Return a test lane."""
     return 1
@@ -60,7 +54,6 @@ def bcl_convert_test_mean_quality_score_per_lane() -> float:
 def bcl_convert_demux_metric_model_with_data(
     test_lane,
     test_sample_internal_id,
-    test_sample_project,
 ) -> BclConvertDemuxMetrics:
     """Return a BclConvertDemuxMetrics model with data."""
     return BclConvertDemuxMetrics(
@@ -74,7 +67,7 @@ def bcl_convert_demux_metric_model_with_data(
 
 @pytest.fixture(scope="session")
 def bcl_convert_quality_metric_model_with_data(
-    test_lane, test_sample_internal_id, test_sample_project
+    test_lane, test_sample_internal_id
 ) -> BclConvertQualityMetrics:
     """Return a BclConvertQualityMetrics model with data."""
     return BclConvertQualityMetrics(
