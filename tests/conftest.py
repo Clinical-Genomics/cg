@@ -1145,19 +1145,21 @@ def demultiplexing_api(
     return demux_api
 
 
-@pytest.fixture(name="novaseq6000_bcl_convert_sample_sheet_path")
-def novaseq6000_sample_sheet_path() -> Path:
+@pytest.fixture
+def novaseq6000_flow_cell_dir() -> FlowCellDirectoryData:
     """Return the path to a NovaSeq 6000 BCL convert sample sheet."""
-    return Path(
-        "tests",
-        "fixtures",
-        "apps",
-        "sequencing_metrics_parser",
-        "230622_A00621_0864_AHY7FFDRX2",
+    flow_cell_path = Path(
+        "tests", "fixtures", "apps", "sequencing_metrics_parser", "230622_A00621_0864_AHY7FFDRX2"
+    )
+    sample_sheet_path = Path(
+        flow_cell_path,
         "Unaligned",
         "Reports",
         "SampleSheet.csv",
     )
+    flow_cell = FlowCellDirectoryData(flow_cell_path)
+    flow_cell._sample_sheet_path_hk = sample_sheet_path
+    return flow_cell
 
 
 @pytest.fixture(scope="session")
@@ -1412,7 +1414,7 @@ def novaseqx_flow_cell_with_sample_sheet_no_fastq(
     sample_sheet_path = Path(
         novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
-    mocker.patch.object(flow_cell, "get_sample_sheet_path_hk", return_value=sample_sheet_path)
+    flow_cell._sample_sheet_path_hk = sample_sheet_path
     return flow_cell
 
 

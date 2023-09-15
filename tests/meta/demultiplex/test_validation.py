@@ -1,9 +1,6 @@
 from pathlib import Path
 
 import pytest
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_internal_ids_from_sample_sheet,
-)
 from cg.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError, MissingFilesError
@@ -135,7 +132,7 @@ def test_validate_flow_cell_delivery_status_forced(tmp_path: Path):
 
 
 def test_validate_samples_have_fastq_files_passes(
-    novaseqx_flow_cell_with_sample_sheet_no_fastq,
+    novaseqx_flow_cell_with_sample_sheet_no_fastq: FlowCellDirectoryData,
 ):
     """Test the check of a flow cells with one sample fastq file does not raise an error."""
     # GIVEN a demultiplexed flow cell with no fastq files
@@ -144,10 +141,7 @@ def test_validate_samples_have_fastq_files_passes(
     assert novaseqx_flow_cell_with_sample_sheet_no_fastq.get_sample_sheet_path_hk()
 
     # GIVEN that a valid sample fastq file is added to the directory
-    sample_id: str = get_sample_internal_ids_from_sample_sheet(
-        sample_sheet_path=novaseqx_flow_cell_with_sample_sheet_no_fastq.get_sample_sheet_path_hk(),
-        flow_cell_sample_type=novaseqx_flow_cell_with_sample_sheet_no_fastq.sample_type,
-    )[0]
+    sample_id: str = novaseqx_flow_cell_with_sample_sheet_no_fastq.sample_sheet.get_sample_ids()[0]
     fastq_file_path = Path(
         novaseqx_flow_cell_with_sample_sheet_no_fastq.path,
         f"{sample_id}_S11_L1_R1_{FileExtensions.FASTQ}{FileExtensions.GZIP}",

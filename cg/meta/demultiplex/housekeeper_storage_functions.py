@@ -6,9 +6,6 @@ from typing import List, Optional
 from housekeeper.store.models import File, Version
 
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_internal_ids_from_sample_sheet,
-)
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
@@ -108,11 +105,7 @@ def add_sample_fastq_files_to_housekeeper(
     flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, store: Store
 ) -> None:
     """Add sample fastq files from flow cell to Housekeeper."""
-    sample_internal_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
-        sample_sheet_path=flow_cell.get_sample_sheet_path_hk(),
-        flow_cell_sample_type=flow_cell.sample_type,
-    )
-
+    sample_internal_ids: List[str] = flow_cell.sample_sheet.get_sample_ids()
     for sample_internal_id in sample_internal_ids:
         sample_fastq_paths: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
             flow_cell_directory=flow_cell.path, sample_internal_id=sample_internal_id
