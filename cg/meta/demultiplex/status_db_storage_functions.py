@@ -111,15 +111,17 @@ def update_existing_metric(
 ) -> None:
     """Update an existing metric with a new metric."""
 
-    existing_metric.sample_base_percentage_passing_q30 = combine_q30_percentage(
+    combined_q30_percentage: float = combine_q30_percentage(
         existing_metric=existing_metric, new_metric=new_metric
     )
-    existing_metric.sample_base_mean_quality_score = combine_mean_quality_score(
+    combined_mean_quality_score: float = combine_mean_quality_score(
         existing_metric=existing_metric, new_metric=new_metric
     )
-    existing_metric.sample_total_reads_in_lane = (
-        existing_metric.sample_total_reads_in_lane + new_metric.sample_total_reads_in_lane
-    )
+    combined_reads: int = combine_reads(existing_metric=existing_metric, new_metric=new_metric)
+
+    existing_metric.sample_base_percentage_passing_q30 = combined_q30_percentage
+    existing_metric.sample_base_mean_quality_score = combined_mean_quality_score
+    existing_metric.sample_total_reads_in_lane = combined_reads
 
 
 def combine_mean_quality_score(
@@ -144,6 +146,13 @@ def combine_q30_percentage(
         total_2=new_metric.sample_total_reads_in_lane,
         percentage_2=new_metric.sample_base_percentage_passing_q30,
     )
+
+
+def combine_reads(
+    existing_metric: SampleLaneSequencingMetrics, new_metric: SampleLaneSequencingMetrics
+) -> int:
+    """Combine the total reads from two metrics."""
+    return existing_metric.sample_total_reads_in_lane + new_metric.sample_total_reads_in_lane
 
 
 def weighted_average(total_1: int, percentage_1: float, total_2: int, percentage_2: float) -> float:
