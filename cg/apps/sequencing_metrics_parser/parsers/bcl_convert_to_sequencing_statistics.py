@@ -22,7 +22,7 @@ def create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell
 
     for sample_internal_id in sample_internal_ids:
         for lane in metrics_parser.get_lanes_for_sample(sample_internal_id=sample_internal_id):
-            metrics: SampleLaneSequencingMetrics = create_sequencing_metrics(
+            metrics: SampleLaneSequencingMetrics = create_bcl_convert_sequencing_metrics(
                 sample_internal_id=sample_internal_id, lane=lane, metrics_parser=metrics_parser
             )
             sample_lane_sequencing_metrics.append(metrics)
@@ -33,13 +33,15 @@ def create_bcl_convert_undetermined_metrics(
     flow_cell_dir: Path, non_pooled_lane_sample_pairs: List[Tuple[int, str]]
 ) -> List[SampleLaneSequencingMetrics]:
     """Return sequencing metrics for any undetermined reads in the specified lanes."""
-    metrics_parser: BclConvertMetricsParser = BclConvertMetricsParser(flow_cell_dir)
+    metrics_parser = BclConvertMetricsParser(flow_cell_dir)
     undetermined_metrics: List[SampleLaneSequencingMetrics] = []
 
     for lane, sample_internal_id in non_pooled_lane_sample_pairs:
         if not metrics_parser.has_undetermined_reads_in_lane(lane):
             continue
-        metrics: SampleLaneSequencingMetrics = create_sequencing_metrics(
+
+        # BclConvert assigns Undetermined as the sample id for any undetermined reads
+        metrics: SampleLaneSequencingMetrics = create_bcl_convert_sequencing_metrics(
             sample_internal_id=UNDETERMINED, lane=lane, metrics_parser=metrics_parser
         )
         metrics.sample_internal_id = sample_internal_id
@@ -47,7 +49,7 @@ def create_bcl_convert_undetermined_metrics(
     return undetermined_metrics
 
 
-def create_sequencing_metrics(
+def create_bcl_convert_sequencing_metrics(
     sample_internal_id: str, lane: int, metrics_parser: BclConvertMetricsParser
 ) -> SampleLaneSequencingMetrics:
     """Create sequencing metrics for a sample in a lane."""
