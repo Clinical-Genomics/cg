@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 
 
 def scale_paired_reads_to_total_reads(paired_reads: int) -> int:
-    """Multiply the read count of R1 by two to represent the total amount of reads for both read pairs R1 and R2"""
+    """Multiply the read count of R1 by two to represent the total amount of reads for both read pairs R1 and R2."""
     return paired_reads * 2
 
 
