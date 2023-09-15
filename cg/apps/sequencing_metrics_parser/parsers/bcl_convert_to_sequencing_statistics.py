@@ -40,7 +40,8 @@ def create_bcl_convert_undetermined_metrics(
         if not metrics_parser.has_undetermined_reads_in_lane(lane):
             continue
 
-        # BclConvert assigns Undetermined as the sample id for any undetermined reads
+        # Passing Undetermined as the sample id is required to extract the undetermined reads data.
+        # BclConvert tags undetermined reads in a lane with the sample id "Undetermined".
         metrics: SampleLaneSequencingMetrics = create_bcl_convert_sequencing_metrics(
             sample_internal_id=UNDETERMINED, lane=lane, metrics_parser=metrics_parser
         )
