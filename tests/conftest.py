@@ -915,6 +915,17 @@ def tmp_bcl2fastq_flow_cell(
     )
 
 
+@pytest.fixture
+def novaseq6000_flow_cell(
+    tmp_flow_cells_directory_malformed_sample_sheet: Path,
+) -> FlowCellDirectoryData:
+    """Return a NovaSeq6000 flow cell."""
+    return FlowCellDirectoryData(
+        flow_cell_path=tmp_flow_cells_directory_malformed_sample_sheet,
+        bcl_converter=BclConverter.BCLCONVERT,
+    )
+
+
 @pytest.fixture(name="tmp_bcl_convert_flow_cell")
 def tmp_bcl_convert_flow_cell(
     tmp_flow_cell_directory_bclconvert: Path,

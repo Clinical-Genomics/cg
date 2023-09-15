@@ -2,7 +2,9 @@
 from pathlib import Path
 from typing import List, Tuple
 
+import mock
 import pytest
+
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
@@ -119,12 +121,12 @@ def test_remove_unwanted_samples_no_dual_index(
     )
 
 
-def test_add_override_cycles_to_samples(
+def test_add_override_cycles_to_novaseqx_samples(
     novaseq_x_flow_cell: FlowCellDirectoryData,
     bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
     override_cycles_for_samples_with_updated_indexes: List[str],
 ):
-    """Test that the OverrideCycles values are generated correctly."""
+    """Test that OverrideCycles values are generated correctly for NovaSeqX samples."""
     # GIVEN a SampleSheetCreator with samples without Override Cycles added
     sample_sheet_creator = SampleSheetCreatorBCLConvert(
         flow_cell=novaseq_x_flow_cell, lims_samples=bcl_convert_samples_with_updated_indexes
@@ -139,6 +141,34 @@ def test_add_override_cycles_to_samples(
         sample.override_cycles == override_cycles_value
         for sample, override_cycles_value in zip(
             sample_sheet_creator.lims_samples, override_cycles_for_samples_with_updated_indexes
+        )
+    )
+
+
+def test_add_override_cycles_to_novaseqx_samples_reverse_complement(
+    novaseq6000_flow_cell,
+    bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
+    override_cycles_for_samples_with_updated_indexes_reverse_complement: List[str],
+):
+    """Test that OverrideCycles values are generated correctly for reverse complement samples."""
+    # GIVEN a SampleSheetCreator with samples without Override Cycles added
+    sample_sheet_creator = SampleSheetCreatorBCLConvert(
+        flow_cell=novaseq6000_flow_cell,
+        lims_samples=bcl_convert_samples_with_updated_indexes,
+    )
+    assert all(sample.override_cycles == "" for sample in sample_sheet_creator.lims_samples)
+
+    # GIVEN that the samples need reverse complement
+    assert sample_sheet_creator.is_reverse_complement
+
+    # WHEN adding the correct values of override samples
+    sample_sheet_creator.add_override_cycles_to_samples()
+    # THEN the Override Cycles attribute is added to all samples
+    assert all(
+        sample.override_cycles == override_cycles_value
+        for sample, override_cycles_value in zip(
+            sample_sheet_creator.lims_samples,
+            override_cycles_for_samples_with_updated_indexes_reverse_complement,
         )
     )
 

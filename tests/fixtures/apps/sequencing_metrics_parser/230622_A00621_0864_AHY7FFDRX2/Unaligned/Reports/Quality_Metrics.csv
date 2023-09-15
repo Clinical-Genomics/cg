@@ -869,5 +869,3 @@ Lane,SampleID,Sample_Project,index,index2,ReadNumber,Yield,YieldQ30,QualityScore
 2,Duplex-primer--5-E1---CTTGTCGA-GAACATCG-,indexcheck,CTTGTCGAAT,CGATGTTCGT,2,0,0,0,0.00,0.00
 2,Duplex-primer--16-H2---ATCCAGAG-CGACGTTA-,indexcheck,ATCCAGAGAT,TAACGTCGGT,1,0,0,0,0.00,0.00
 2,Duplex-primer--16-H2---ATCCAGAG-CGACGTTA-,indexcheck,ATCCAGAGAT,TAACGTCGGT,2,0,0,0,0.00,0.00
-2,Undetermined,Undetermined,,,1,1003841748,835851010,34075144401,33.94,0.83
-2,Undetermined,Undetermined,,,2,3474836820,2731693237,113812476466,32.75,0.79
