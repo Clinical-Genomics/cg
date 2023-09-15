@@ -10,7 +10,7 @@ class ReadMetric(BaseModel):
     read_quality_score_sum: int = Field(..., alias="QualityScoreSum", ge=0)
 
 
-class DemuxResult(BaseModel):
+class TileReads(BaseModel):
     """Metrics for a sample on a tile in a lane."""
 
     sample_id: str = Field(..., alias="SampleId", min_length=1)
@@ -19,7 +19,7 @@ class DemuxResult(BaseModel):
     tile_sample_read_metrics: List[ReadMetric] = Field(..., alias="ReadMetrics")
 
 
-class Undetermined(BaseModel):
+class UndeterminedTileReads(BaseModel):
     """Metrics for reads without a sample id within a tile of a lane."""
 
     tile_total_reads: int = Field(..., alias="NumberReads", ge=0)
@@ -30,9 +30,9 @@ class Undetermined(BaseModel):
 class ConversionResult(BaseModel):
     """Demultiplexing results and undetermined reads for a tile within a lane."""
 
-    lane_number: int = Field(..., alias="LaneNumber", gt=0)
-    tile_demux_results: List[DemuxResult] = Field(..., alias="DemuxResults")
-    tile_undetermined_results: Optional[Undetermined] = Field(None, alias="Undetermined")
+    lane: int = Field(..., alias="LaneNumber", gt=0)
+    tile_reads: List[TileReads] = Field(..., alias="DemuxResults")
+    tile_undetermined_reads: Optional[UndeterminedTileReads] = Field(None, alias="Undetermined")
 
 
 class SampleLaneTileMetrics(BaseModel):

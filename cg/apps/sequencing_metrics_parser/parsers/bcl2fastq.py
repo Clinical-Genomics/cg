@@ -4,11 +4,11 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
-    DemuxResult,
+    TileReads,
     ReadMetric,
     SampleLaneMetrics,
     SampleLaneTileMetrics,
-    Undetermined,
+    UndeterminedTileReads,
 )
 from cg.constants.demultiplexing import (
     BCL2FASTQ_METRICS_DIRECTORY_NAME,
@@ -66,20 +66,20 @@ def create_empty_lane_metric(flow_cell_name: str, lane: int, sample_id: str) -> 
     )
 
 
-def update_lane_metrics_with_demux_data(lane_metrics: SampleLaneMetrics, demux_result: DemuxResult):
-    tile_sample_reads: int = demux_result.tile_sample_reads
+def update_lane_metrics_with_tile_reads(lane_metrics: SampleLaneMetrics, tile_reads: TileReads):
+    tile_sample_reads: int = tile_reads.tile_sample_reads
     lane_metrics.total_reads += scale_paired_reads_to_total_reads(tile_sample_reads)
 
-    tile_yield: int = demux_result.tile_sample_yield
+    tile_yield: int = tile_reads.tile_sample_yield
     lane_metrics.total_yield += tile_yield
 
-    read_metrics: List[ReadMetric] = demux_result.tile_sample_read_metrics
+    read_metrics: List[ReadMetric] = tile_reads.tile_sample_read_metrics
     lane_metrics.total_yield_q30 += sum_q30_yields(read_metrics)
     lane_metrics.total_quality_score += sum_quality_scores(read_metrics)
 
 
 def update_lane_metrics_with_undetermined_tile_data(
-    lane_metrics: SampleLaneMetrics, undetermined_tile_metrics: Undetermined
+    lane_metrics: SampleLaneMetrics, undetermined_tile_metrics: UndeterminedTileReads
 ):
     tile_total_reads: int = undetermined_tile_metrics.tile_total_reads
     lane_metrics.total_reads += scale_paired_reads_to_total_reads(tile_total_reads)
@@ -98,9 +98,9 @@ def combine_tiles_per_lane(tile_metrics: List[SampleLaneTileMetrics]) -> List[Sa
 
     for tile_metric in tile_metrics:
         for conversion_result in tile_metric.conversion_results:
-            for demux_result in conversion_result.tile_demux_results:
+            for demux_result in conversion_result.tile_reads:
                 metric_key = (
-                    conversion_result.lane_number,
+                    conversion_result.lane,
                     demux_result.sample_id,
                 )
                 sample_id: str = remove_index_from_sample_id(demux_result.sample_id)
@@ -108,11 +108,11 @@ def combine_tiles_per_lane(tile_metrics: List[SampleLaneTileMetrics]) -> List[Sa
                 if metric_key not in metrics:
                     metrics[metric_key] = create_empty_lane_metric(
                         flow_cell_name=tile_metric.flow_cell_name,
-                        lane=conversion_result.lane_number,
+                        lane=conversion_result.lane,
                         sample_id=sample_id,
                     )
-                update_lane_metrics_with_demux_data(
-                    lane_metrics=metrics[metric_key], demux_result=demux_result
+                update_lane_metrics_with_tile_reads(
+                    lane_metrics=metrics[metric_key], tile_reads=demux_result
                 )
     return list(metrics.values())
 
@@ -125,10 +125,10 @@ def combine_undetermined_tiles_per_lane(
 
     for tile_metric in tile_metrics:
         for conversion_result in tile_metric.conversion_results:
-            if conversion_result.tile_undetermined_results is None:
+            if conversion_result.tile_undetermined_reads is None:
                 continue
 
-            lane: int = conversion_result.lane_number
+            lane: int = conversion_result.lane
 
             if lane not in lane_metrics:
                 lane_metrics[lane] = create_empty_lane_metric(
@@ -139,7 +139,7 @@ def combine_undetermined_tiles_per_lane(
 
             update_lane_metrics_with_undetermined_tile_data(
                 lane_metrics=lane_metrics[lane],
-                undetermined_tile_metrics=conversion_result.tile_undetermined_results,
+                undetermined_tile_metrics=conversion_result.tile_undetermined_reads,
             )
     return lane_metrics
 
