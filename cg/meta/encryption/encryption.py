@@ -1,4 +1,4 @@
-"""API for encryption on Hasta"""
+"""API for encryption on Hasta."""
 import logging
 import subprocess
 from io import TextIOWrapper
@@ -92,6 +92,89 @@ class EncryptionAPI:
         decryption_parameters.extend(output_parameter)
         return decryption_parameters
 
+
+    def encrypted_key_path(self, encrypted_file_path: Path) -> Path:
+        """The name of the encrypted key file"""
+        return Path(encrypted_file_path).with_suffix(FileExtensions.KEY + FileExtensions.GPG)
+
+    def encryption_key(self, encrypted_file_path: Path) -> Path:
+        """The name of the encryption key"""
+        return Path(encrypted_file_path).with_suffix(FileExtensions.KEY)
+
+
+
+class FlowCellEncryptionAPI(EncryptionAPI):
+    """Encryption functionality for flow cells."""
+
+    def __init__(
+        self,
+        binary_path: str,
+        dry_run: bool = False,
+    ):
+        super().__init__(binary_path=binary_path, dry_run=dry_run)
+        self._temporary_passphrase = None
+
+    def flow_cell_symmetric_encryption(self, flow_cell_file_path: Path) -> None:
+        """Symmetrically encrypts a flow cell file."""
+        output_file: Path = self.encrypted_flow_cell_file_path(flow_cell_file_path)
+        LOG.debug("*** ENCRYPTING FLOW CELL ***")
+        LOG.info(f"Encrypt flow_cell: {flow_cell_file_path}")
+        LOG.info(f"to output file   : {output_file}")
+        encryption_command: list = self.get_symmetric_encryption_command(
+            input_file=flow_cell_file_path, output_file=output_file
+        )
+        self.run_gpg_command(encryption_command)
+
+    def key_asymmetric_encryption(self, flow_cell_file_path: Path) -> None:
+        """Asymmetrically encrypts the key used for flow cell encryption."""
+        output_file = self.encrypted_key_path(flow_cell_file_path)
+        LOG.debug("*** ENCRYPTING KEY FILE ***")
+        LOG.info(f"Encrypt key file: {self.temporary_passphrase}")
+        LOG.info(f"to target file  : {output_file}")
+        encryption_command: list = self.get_asymmetric_encryption_command(
+            input_file=self.temporary_passphrase, output_file=output_file
+        )
+        self.run_gpg_command(encryption_command)
+
+    def flow_cell_symmetric_decryption(self, flow_cell_file_path: Path, output_file: Path) -> None:
+        """Decrypt a flow cell."""
+        input_file = self.encrypted_flow_cell_file_path(flow_cell_file_path)
+        LOG.debug("*** DECRYPTING FLOW CELL ***")
+        LOG.info(f"Decrypt flow_cell: {input_file}")
+        LOG.info(f"to target file   : {output_file}")
+        decryption_command: list = self.get_symmetric_decryption_command(
+            input_file=input_file,
+            output_file=output_file,
+            encryption_key=self.encryption_key(flow_cell_file_path),
+        )
+        self.run_gpg_command(decryption_command)
+
+    def key_asymmetric_decryption(self, flow_cell_file_path: Path) -> None:
+        """Asymmetrically decrypts the key used for flow_cell decryption."""
+        input_file = self.encrypted_key_path(flow_cell_file_path)
+        output_file = self.encryption_key(flow_cell_file_path)
+        LOG.debug("*** DECRYPTING KEY FILE ***")
+        LOG.info(f"Decrypt key file: {input_file}")
+        LOG.info(f"to target file  : {output_file}")
+        decryption_command: list = self.get_asymmetric_decryption_command(
+            input_file=input_file, output_file=output_file
+        )
+        self.run_gpg_command(decryption_command)
+
+    def encrypted_flow_cell_file_path(self, flow_cell_file_path: Path) -> Path:
+        """The name of the encrypted flow cell file."""
+        return flow_cell_file_path.with_suffix(FileExtensions.SPRING + FileExtensions.GPG)
+
+    def decrypted_flow_cell_file_checksum(self, flow_cell_file_path: Path) -> Path:
+        """The name of the decrypted flow cell file used to perform the checksum check."""
+        return flow_cell_file_path.with_suffix(FileExtensions.SPRING + FileExtensions.TMP)
+
+    @property
+    def temporary_passphrase(self) -> Path:
+        """The name of the temporary passphrase"""
+        if self._temporary_passphrase is None:
+            self._temporary_passphrase: Path = self.generate_temporary_passphrase_file()
+        return self._temporary_passphrase
 
 class SpringEncryptionAPI(EncryptionAPI):
     """Encryption functionality for spring files"""
@@ -194,9 +277,9 @@ class SpringEncryptionAPI(EncryptionAPI):
             raise ChecksumFailedError(f"Checksum comparison failed!")
         LOG.info("Checksum comparison successful!")
 
-    def encrypted_key_path(self, spring_file_path: Path) -> Path:
+    def encrypted_key_path(self, encrypted_file_path: Path) -> Path:
         """The name of the encrypted key file"""
-        return Path(spring_file_path).with_suffix(FileExtensions.KEY + FileExtensions.GPG)
+        return Path(encrypted_file_path).with_suffix(FileExtensions.KEY + FileExtensions.GPG)
 
     def encryption_key(self, spring_file_path: Path) -> Path:
         """The name of the encryption key"""

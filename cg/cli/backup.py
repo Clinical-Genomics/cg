@@ -1,7 +1,7 @@
 """Backup related CLI commands."""
 import logging
 from pathlib import Path
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, List, Optional, Union, Dict
 
 import click
 import housekeeper.store.models as hk_models
@@ -9,11 +9,13 @@ import housekeeper.store.models as hk_models
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.exc import FlowCellError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, Sample
 
@@ -27,25 +29,31 @@ def backup(context: CGConfig):
     pass
 
 
-@backup.command("archive-flow-cell")
+@backup.command("encrypt-flow-cell")
 @click.option("-f", "--flow-cell-id", help="Retrieve a specific flow cell, ex. 'HCK2KDSXX'")
 @DRY_RUN
 @click.pass_obj
-def archive_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str] = None):
-    """Archive flow cell to PDC."""
-    pdc_api = PdcAPI(binary_path=context.pdc.binary_path, dry_run=dry_run)
+def encrypt_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str] = None):
+    """Encrypt flow cell."""
+    encrypt_dir: Dict[str, str] = context.backup.encrypt_dir.dict()
     encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
-    context.meta_apis["backup_api"] = BackupAPI(
-        encryption_api=encryption_api,
-        encrypt_dir=context.backup.encrypt_dir.dict(),
-        status=context.status_db,
-        tar_api=tar_api,
-        pdc_api=pdc_api,
-        flow_cells_dir=context.flow_cells_dir,
-        dry_run=dry_run,
-    )
-    backup_api: BackupAPI = context.meta_apis["backup_api"]
+    encrypt_dir: Dict[str, str] = context.backup.encrypt_dir.dict()
+    flow_cells_dir: Path = Path(context.flow_cells_dir)
+    LOG.debug(f"Search for flow cells ready to encrypt in {flow_cells_dir}")
+    for sub_dir in flow_cells_dir.iterdir():
+        if not sub_dir.is_dir():
+            continue
+        LOG.debug(f"Found directory {sub_dir}")
+        try:
+            flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir)
+        except FlowCellError:
+            continue
+        if not flow_cell.is_flow_cell_ready():
+            continue
+        if encryption_api.encrypted_key_path(Path(flow_cells_dir, flow_cell.id)).exists():
+            LOG.debug(f"Encryption already started for flow cell: {flow_cell.id}")
+            continue
 
 
 @backup.command("fetch-flow-cell")

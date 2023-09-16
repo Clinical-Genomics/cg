@@ -270,8 +270,7 @@ class FlowCellDirectoryData:
         return self.hiseq_x_flow_cell.exists()
 
     def is_flow_cell_ready(self) -> bool:
-        """Check if a flow cell is ready for demultiplexing.
-
+        """Check if a flow cell is ready for downstream processing.
         A flow cell is ready if the two files RTAComplete.txt and CopyComplete.txt exists in the
         flow cell directory.
         """
@@ -284,7 +283,7 @@ class FlowCellDirectoryData:
             LOG.info(f"Copy of sequence data is not ready for flow cell {self.id}")
             return False
         LOG.debug(f"All data has been transferred for flow cell {self.id}")
-        LOG.info(f"Flow cell {self.id} is ready for demultiplexing")
+        LOG.info(f"Flow cell {self.id} is ready for downstream processing")
         return True
 
     def __str__(self):
