@@ -1,4 +1,11 @@
-"""Hold sbatch templates in global variables"""
+"""Hold sbatch templates in global variables."""
+
+FLOW_CELL_ENCRYPT_ERROR = """
+if [[ -e {spring_path} ]]
+then
+    rm -rf {flow_cell_encrypt_dir}
+fi
+"""
 
 FASTQ_TO_SPRING_ERROR = """
 if [[ -e {spring_path} ]]
@@ -27,6 +34,13 @@ if [[ -e {pending_path} ]]
 then
     rm {pending_path}
 fi
+"""
+
+FLOW_CELL_ENCRYPT_COMMANDS = """
+{symmetric_passphrase_cmd}
+
+{asymmetrically_encrypt_passphrase_cmd}
+
 """
 
 FASTQ_TO_SPRING_COMMANDS = """

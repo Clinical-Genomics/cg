@@ -7,7 +7,7 @@ from tempfile import NamedTemporaryFile
 from typing import List
 
 from cg.constants import FileExtensions
-from cg.constants.encryption import GPGParameters
+from cg.constants.encryption import GPGParameters, EncryptionUserID
 from cg.exc import ChecksumFailedError
 from cg.utils import Process
 from cg.utils.checksum.checksum import sha512_checksum
@@ -56,6 +56,13 @@ class EncryptionAPI:
 
         return Path(passphrase_file.name)
 
+    def get_symmetric_passphrase_cmd(self, passphrase_file_path: Path, quality_level: int = 2, count: int = 256) -> List[str]:
+        """Return command to generate a symmetrical passphrase file."""
+        return [self.binary_path, "--gen-random", str(quality_level), str(count), ">", passphrase_file_path.as_posix()]
+
+    def get_asymmetrically_encrypt_passphrase_cmd(self, passphrase_file_path: Path) -> List[str]:
+        """Return command to asymmetrically encrypt a symmetrical passphrase file."""
+        return [self.binary_path, "-e", "-r", EncryptionUserID.HASTA_USER_ID, "-o", passphrase_file_path.with_suffix(FileExtensions.GPG).as_posix(), passphrase_file_path.as_posix()]
     def get_asymmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
         """Generates the gpg command for asymmetric encryption"""
         encryption_parameters: list = GPGParameters.ASYMMETRIC_ENCRYPTION.copy()
@@ -65,7 +72,7 @@ class EncryptionAPI:
         return encryption_parameters
 
     def get_symmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
-        """Generates the gpg command for symmetric encryption of spring files"""
+        """Generates the gpg command for symmetric encryption of file."""
         encryption_parameters: list = GPGParameters.SYMMETRIC_ENCRYPTION.copy()
         encryption_parameters.append(str(self.temporary_passphrase))
         output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
@@ -101,6 +108,13 @@ class EncryptionAPI:
         """The name of the encryption key"""
         return Path(encrypted_file_path).with_suffix(FileExtensions.KEY)
 
+    @staticmethod
+    def create_pending_file(pending_path: Path, dry_run: bool) -> None:
+        """Create a pending flag file."""
+        LOG.info(f"Creating pending flag {pending_path}")
+        if dry_run:
+            return
+        pending_path.touch(exist_ok=False)
 
 
 class FlowCellEncryptionAPI(EncryptionAPI):

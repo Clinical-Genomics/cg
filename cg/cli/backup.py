@@ -6,13 +6,14 @@ from typing import Iterable, List, Optional, Union, Dict
 import click
 import housekeeper.store.models as hk_models
 
+from cg.apps.crunchy.sbatch import FLOW_CELL_ENCRYPT_ERROR, FLOW_CELL_ENCRYPT_COMMANDS
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import FlowCellError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
-from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
+from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI, FlowCellEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -35,8 +36,7 @@ def backup(context: CGConfig):
 @click.pass_obj
 def encrypt_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str] = None):
     """Encrypt flow cell."""
-    encrypt_dir: Dict[str, str] = context.backup.encrypt_dir.dict()
-    encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
+    flow_cell_encryption_api = FlowCellEncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
     encrypt_dir: Dict[str, str] = context.backup.encrypt_dir.dict()
     flow_cells_dir: Path = Path(context.flow_cells_dir)
@@ -51,15 +51,25 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[s
             continue
         if not flow_cell.is_flow_cell_ready():
             continue
-        if encryption_api.encrypted_key_path(Path(flow_cells_dir, flow_cell.id)).exists():
+        flow_cell_encrypt_dir: Path = Path(encrypt_dir.get("current"), flow_cell.id)
+        if flow_cell_encrypt_dir.exists() and Path(flow_cell_encrypt_dir, "encryption_pending").exists():
             LOG.debug(f"Encryption already started for flow cell: {flow_cell.id}")
             continue
+        flow_cell_encrypt_dir.mkdir(exist_ok=True, parents=True)
+        flow_cell_encryption_api.create_pending_file(Path(flow_cell_encrypt_dir, f"{flow_cell_id})").with_suffix("pending"))
+        symetric_passphrase_file_path: Path = Path(flow_cell_encrypt_dir, f"{flow_cell_id})").with_suffix("passphrase")
+        error_function = FLOW_CELL_ENCRYPT_ERROR.format(flow_cell_encrypt_dir=flow_cell_encrypt_dir)
+        commands = FLOW_CELL_ENCRYPT_COMMANDS(symmetric_passphrase_cmd=flow_cell_encryption_api.get_symmetric_passphrase_cmd(passphrase_file_path=symetric_passphrase_file_path),
+                                              asymmetrically_encrypt_passphrase_cmd=flow_cell_encryption_api.get_asymmetrically_encrypt_passphrase_cmd(passphrase_file_path=symetric_passphrase_file_path),
+                                              )
+
+
 
 
 @backup.command("fetch-flow-cell")
 @click.option("-f", "--flow-cell-id", help="Retrieve a specific flow cell, ex. 'HCK2KDSXX'")
 @DRY_RUN
-@click.pass_obj
+@click.pass_obj)
 def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str] = None):
     """Fetch the first flow cell in the requested queue from backup"""
 
