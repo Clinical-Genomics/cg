@@ -1,22 +1,29 @@
 """Backup related CLI commands."""
 import logging
 from pathlib import Path
-from typing import Iterable, List, Optional, Union, Dict
+from typing import Dict, Iterable, List, Optional, Union
 
 import click
 import housekeeper.store.models as hk_models
 
-from cg.apps.crunchy.sbatch import FLOW_CELL_ENCRYPT_ERROR, FLOW_CELL_ENCRYPT_COMMANDS
+from cg.apps.crunchy.sbatch import FLOW_CELL_ENCRYPT_COMMANDS, FLOW_CELL_ENCRYPT_ERROR
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import FileExtensions
 from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.constants.priority import SlurmQos
 from cg.exc import FlowCellError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
-from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI, FlowCellEncryptionAPI
+from cg.meta.encryption.encryption import (
+    EncryptionAPI,
+    FlowCellEncryptionAPI,
+    SpringEncryptionAPI,
+)
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.slurm.sbatch import Sbatch
 from cg.store import Store
 from cg.store.models import Flowcell, Sample
 
@@ -52,18 +59,52 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[s
         if not flow_cell.is_flow_cell_ready():
             continue
         flow_cell_encrypt_dir: Path = Path(encrypt_dir.get("current"), flow_cell.id)
-        if flow_cell_encrypt_dir.exists() and Path(flow_cell_encrypt_dir, "encryption_pending").exists():
+        flow_cell_encrypt_file_path_prefix: Path = Path(flow_cell_encrypt_dir, flow_cell.id)
+        pending_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(".pending")
+        if flow_cell_encrypt_dir.exists() and pending_file_path.exists():
             LOG.debug(f"Encryption already started for flow cell: {flow_cell.id}")
             continue
         flow_cell_encrypt_dir.mkdir(exist_ok=True, parents=True)
-        flow_cell_encryption_api.create_pending_file(Path(flow_cell_encrypt_dir, f"{flow_cell_id})").with_suffix("pending"))
-        symetric_passphrase_file_path: Path = Path(flow_cell_encrypt_dir, f"{flow_cell_id})").with_suffix("passphrase")
+        sbatch_cores: int = 12
+        compressed_flow_cell_gpg_suffix: str = f"{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
+        compressed_flow_cell_md5sum_suffix: str = f"{FileExtensions.TAR}{FileExtensions.GZIP}.md5sum"
+        compressed_flow_cell_degpg_md5sum_suffix: str = f"{FileExtensions.TAR}{FileExtensions.GZIP}.degpg.md5sum"
+        flow_cell_encryption_api.create_pending_file(pending_path=pending_file_path)
+        symetric_passphrase_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(".passphrase")
+        final_passphrase_suffix: str = f".key{FileExtensions.GPG}"
         error_function = FLOW_CELL_ENCRYPT_ERROR.format(flow_cell_encrypt_dir=flow_cell_encrypt_dir)
         commands = FLOW_CELL_ENCRYPT_COMMANDS(symmetric_passphrase_cmd=flow_cell_encryption_api.get_symmetric_passphrase_cmd(passphrase_file_path=symetric_passphrase_file_path),
                                               asymmetrically_encrypt_passphrase_cmd=flow_cell_encryption_api.get_asymmetrically_encrypt_passphrase_cmd(passphrase_file_path=symetric_passphrase_file_path),
+                                              tar_encrypt_flow_cell_dir_cmd=tar_api.get_compress_cmd(input_path=flow_cell_encrypt_dir),
+                                              parallel_gzip_cmd=f"pigz p {sbatch_cores} --fast -c",
+                                              tee_cmd=f"tee (md5sum > {flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_md5sum_suffix)})",
+                                              flow_cell_symmetric_encryption_cmd=flow_cell_encryption_api.get_flow_cell_symmetric_encryption_command(output_file=flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_gpg_suffix), passphrase_file_path=symetric_passphrase_file_path),
+                                              flow_cell_symmetric_decryption_cmd=flow_cell_encryption_api.get_flow_cell_symmetric_decryption_command(input_file=flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_gpg_suffix), passphrase_file_path=symetric_passphrase_file_path),
+                                              md5sum_cmd=f"md5sum > {flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_degpg_md5sum_suffix)}",
+                                              diff_cmd=f"diff -q {flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_md5sum_suffix)} {flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_degpg_md5sum_suffix)}",
+                                              mv_passphrase_file_cmd=f"mv {symetric_passphrase_file_path.with_suffix(FileExtensions.GPG)} {flow_cell_encrypt_file_path_prefix.with_suffix(final_passphrase_suffix)}"
                                               )
 
-
+        sbatch_parameters: Sbatch = Sbatch(
+            account="production",
+            commands=commands,
+            email="a_mail",
+            error=error_function,
+            hours=24,
+            job_name="_".join([flow_cell.id, "flow_cell_encryption"]),
+            log_dir="a log dir",
+            memory=60,
+            number_tasks=sbatch_cores,
+            quality_of_service=SlurmQos.HIGH,
+        )
+        sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters)
+        sbatch_path = files.get_spring_to_fastq_sbatch_path(
+            log_dir=log_dir, run_name=compression_obj.run_name
+        )
+        sbatch_number: int = self.slurm_api.submit_sbatch(
+            sbatch_content=sbatch_content, sbatch_path=sbatch_path
+        )
+        LOG.info("Spring decompression running as job %s", sbatch_number)
 
 
 @backup.command("fetch-flow-cell")

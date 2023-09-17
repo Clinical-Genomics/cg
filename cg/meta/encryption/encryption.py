@@ -6,8 +6,9 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import List
 
+from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions
-from cg.constants.encryption import GPGParameters, EncryptionUserID
+from cg.constants.encryption import EncryptionUserID, GPGParameters
 from cg.exc import ChecksumFailedError
 from cg.utils import Process
 from cg.utils.checksum.checksum import sha512_checksum
@@ -56,13 +57,31 @@ class EncryptionAPI:
 
         return Path(passphrase_file.name)
 
-    def get_symmetric_passphrase_cmd(self, passphrase_file_path: Path, quality_level: int = 2, count: int = 256) -> List[str]:
+    def get_symmetric_passphrase_cmd(
+        self, passphrase_file_path: Path, quality_level: int = 2, count: int = 256
+    ) -> List[str]:
         """Return command to generate a symmetrical passphrase file."""
-        return [self.binary_path, "--gen-random", str(quality_level), str(count), ">", passphrase_file_path.as_posix()]
+        return [
+            self.binary_path,
+            "--gen-random",
+            str(quality_level),
+            str(count),
+            ">",
+            passphrase_file_path.as_posix(),
+        ]
 
     def get_asymmetrically_encrypt_passphrase_cmd(self, passphrase_file_path: Path) -> List[str]:
         """Return command to asymmetrically encrypt a symmetrical passphrase file."""
-        return [self.binary_path, "-e", "-r", EncryptionUserID.HASTA_USER_ID, "-o", passphrase_file_path.with_suffix(FileExtensions.GPG).as_posix(), passphrase_file_path.as_posix()]
+        return [
+            self.binary_path,
+            "-e",
+            "-r",
+            EncryptionUserID.HASTA_USER_ID,
+            "-o",
+            passphrase_file_path.with_suffix(FileExtensions.GPG).as_posix(),
+            passphrase_file_path.as_posix(),
+        ]
+
     def get_asymmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
         """Generates the gpg command for asymmetric encryption"""
         encryption_parameters: list = GPGParameters.ASYMMETRIC_ENCRYPTION.copy()
@@ -99,15 +118,6 @@ class EncryptionAPI:
         decryption_parameters.extend(output_parameter)
         return decryption_parameters
 
-
-    def encrypted_key_path(self, encrypted_file_path: Path) -> Path:
-        """The name of the encrypted key file"""
-        return Path(encrypted_file_path).with_suffix(FileExtensions.KEY + FileExtensions.GPG)
-
-    def encryption_key(self, encrypted_file_path: Path) -> Path:
-        """The name of the encryption key"""
-        return Path(encrypted_file_path).with_suffix(FileExtensions.KEY)
-
     @staticmethod
     def create_pending_file(pending_path: Path, dry_run: bool) -> None:
         """Create a pending flag file."""
@@ -122,58 +132,39 @@ class FlowCellEncryptionAPI(EncryptionAPI):
 
     def __init__(
         self,
+        config: dict,
         binary_path: str,
         dry_run: bool = False,
     ):
         super().__init__(binary_path=binary_path, dry_run=dry_run)
         self._temporary_passphrase = None
+        self.slurm_api: SlurmAPI = SlurmAPI()
+        self.slurm_account: str = config["backup"]["slurm"]["account"]
+        self.slurm_hours: int = config["backup"]["slurm"]["hours"]
+        self.slurm_mail_user: str = config["backup"]["slurm"]["mail_user"]
+        self.slurm_memory: int = config["backup"]["slurm"]["memory"]
+        self.slurm_number_tasks: int = config["backup"]["slurm"]["number_tasks"]
 
-    def flow_cell_symmetric_encryption(self, flow_cell_file_path: Path) -> None:
-        """Symmetrically encrypts a flow cell file."""
-        output_file: Path = self.encrypted_flow_cell_file_path(flow_cell_file_path)
-        LOG.debug("*** ENCRYPTING FLOW CELL ***")
-        LOG.info(f"Encrypt flow_cell: {flow_cell_file_path}")
-        LOG.info(f"to output file   : {output_file}")
-        encryption_command: list = self.get_symmetric_encryption_command(
-            input_file=flow_cell_file_path, output_file=output_file
-        )
-        self.run_gpg_command(encryption_command)
+    @classmethod
+    def get_flow_cell_symmetric_encryption_command(
+        cls, output_file: Path, passphrase_file_path: Path
+    ) -> List[str]:
+        """Generates the gpg command for symmetric encryption of file."""
+        encryption_parameters: list = GPGParameters.SYMMETRIC_ENCRYPTION.copy()
+        encryption_parameters.append(str(passphrase_file_path))
+        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
+        output_parameter.extend([str(output_file)])
+        encryption_parameters.extend(output_parameter)
+        return encryption_parameters
 
-    def key_asymmetric_encryption(self, flow_cell_file_path: Path) -> None:
-        """Asymmetrically encrypts the key used for flow cell encryption."""
-        output_file = self.encrypted_key_path(flow_cell_file_path)
-        LOG.debug("*** ENCRYPTING KEY FILE ***")
-        LOG.info(f"Encrypt key file: {self.temporary_passphrase}")
-        LOG.info(f"to target file  : {output_file}")
-        encryption_command: list = self.get_asymmetric_encryption_command(
-            input_file=self.temporary_passphrase, output_file=output_file
-        )
-        self.run_gpg_command(encryption_command)
-
-    def flow_cell_symmetric_decryption(self, flow_cell_file_path: Path, output_file: Path) -> None:
-        """Decrypt a flow cell."""
-        input_file = self.encrypted_flow_cell_file_path(flow_cell_file_path)
-        LOG.debug("*** DECRYPTING FLOW CELL ***")
-        LOG.info(f"Decrypt flow_cell: {input_file}")
-        LOG.info(f"to target file   : {output_file}")
-        decryption_command: list = self.get_symmetric_decryption_command(
-            input_file=input_file,
-            output_file=output_file,
-            encryption_key=self.encryption_key(flow_cell_file_path),
-        )
-        self.run_gpg_command(decryption_command)
-
-    def key_asymmetric_decryption(self, flow_cell_file_path: Path) -> None:
-        """Asymmetrically decrypts the key used for flow_cell decryption."""
-        input_file = self.encrypted_key_path(flow_cell_file_path)
-        output_file = self.encryption_key(flow_cell_file_path)
-        LOG.debug("*** DECRYPTING KEY FILE ***")
-        LOG.info(f"Decrypt key file: {input_file}")
-        LOG.info(f"to target file  : {output_file}")
-        decryption_command: list = self.get_asymmetric_decryption_command(
-            input_file=input_file, output_file=output_file
-        )
-        self.run_gpg_command(decryption_command)
+    @classmethod
+    def get_flow_cell_symmetric_decryption_command(
+        cls, input_file: Path, passphrase_file_path: Path
+    ) -> List[str]:
+        """Generates the gpg command for symmetric decryption."""
+        decryption_parameters: list = GPGParameters.SYMMETRIC_DECRYPTION.copy()
+        decryption_parameters.extend([passphrase_file_path.as_posix(), input_file.as_posix()])
+        return decryption_parameters
 
     def encrypted_flow_cell_file_path(self, flow_cell_file_path: Path) -> Path:
         """The name of the encrypted flow cell file."""
@@ -189,6 +180,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         if self._temporary_passphrase is None:
             self._temporary_passphrase: Path = self.generate_temporary_passphrase_file()
         return self._temporary_passphrase
+
 
 class SpringEncryptionAPI(EncryptionAPI):
     """Encryption functionality for spring files"""
