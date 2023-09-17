@@ -101,7 +101,7 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[s
         sbatch_number: int = flow_cell_encryption_api.slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
-        LOG.info(f"Flow cell encryption running as job {sbatch_number})
+        LOG.info(f"Flow cell encryption running as job {sbatch_number}")
 
 
 @backup.command("fetch-flow-cell")
