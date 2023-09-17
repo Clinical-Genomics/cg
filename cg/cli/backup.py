@@ -43,7 +43,7 @@ def backup(context: CGConfig):
 @click.pass_obj
 def encrypt_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str] = None):
     """Encrypt flow cell."""
-    flow_cell_encryption_api = FlowCellEncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
+    flow_cell_encryption_api = FlowCellEncryptionAPI(binary_path=context.encryption.binary_path, config=context.backup.dict(), dry_run=dry_run)
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
     encrypt_dir: Dict[str, str] = context.backup.encrypt_dir.dict()
     flow_cells_dir: Path = Path(context.flow_cells_dir)
@@ -65,7 +65,6 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[s
             LOG.debug(f"Encryption already started for flow cell: {flow_cell.id}")
             continue
         flow_cell_encrypt_dir.mkdir(exist_ok=True, parents=True)
-        sbatch_cores: int = 12
         compressed_flow_cell_gpg_suffix: str = f"{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
         compressed_flow_cell_md5sum_suffix: str = f"{FileExtensions.TAR}{FileExtensions.GZIP}.md5sum"
         compressed_flow_cell_degpg_md5sum_suffix: str = f"{FileExtensions.TAR}{FileExtensions.GZIP}.degpg.md5sum"
@@ -76,7 +75,7 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[s
         commands = FLOW_CELL_ENCRYPT_COMMANDS(symmetric_passphrase_cmd=flow_cell_encryption_api.get_symmetric_passphrase_cmd(passphrase_file_path=symetric_passphrase_file_path),
                                               asymmetrically_encrypt_passphrase_cmd=flow_cell_encryption_api.get_asymmetrically_encrypt_passphrase_cmd(passphrase_file_path=symetric_passphrase_file_path),
                                               tar_encrypt_flow_cell_dir_cmd=tar_api.get_compress_cmd(input_path=flow_cell_encrypt_dir),
-                                              parallel_gzip_cmd=f"pigz p {sbatch_cores} --fast -c",
+                                              parallel_gzip_cmd=f"pigz p {flow_cell_encryption_api.slurm_number_tasks,} --fast -c",
                                               tee_cmd=f"tee (md5sum > {flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_md5sum_suffix)})",
                                               flow_cell_symmetric_encryption_cmd=flow_cell_encryption_api.get_flow_cell_symmetric_encryption_command(output_file=flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_gpg_suffix), passphrase_file_path=symetric_passphrase_file_path),
                                               flow_cell_symmetric_decryption_cmd=flow_cell_encryption_api.get_flow_cell_symmetric_decryption_command(input_file=flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_gpg_suffix), passphrase_file_path=symetric_passphrase_file_path),
@@ -86,22 +85,20 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[s
                                               )
 
         sbatch_parameters: Sbatch = Sbatch(
-            account="production",
+            account=flow_cell_encryption_api.slurm_account,
             commands=commands,
-            email="a_mail",
+            email=flow_cell_encryption_api.slurm_mail_user,
             error=error_function,
-            hours=24,
+            hours=flow_cell_encryption_api.slurm_hours,
             job_name="_".join([flow_cell.id, "flow_cell_encryption"]),
             log_dir="a log dir",
-            memory=60,
-            number_tasks=sbatch_cores,
+            memory=flow_cell_encryption_api.slurm_memory,
+            number_tasks=flow_cell_encryption_api.slurm_number_tasks,
             quality_of_service=SlurmQos.HIGH,
         )
-        sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters)
-        sbatch_path = files.get_spring_to_fastq_sbatch_path(
-            log_dir=log_dir, run_name=compression_obj.run_name
-        )
-        sbatch_number: int = self.slurm_api.submit_sbatch(
+        sbatch_content: str = flow_cell_encryption_api.slurm_api.generate_sbatch_content(sbatch_parameters)
+        sbatch_path = Path(flow_cell_encrypt_file_path_prefix.with_suffix(FileExtensions.SBATCH))
+        sbatch_number: int = flow_cell_encryption_api.slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
         LOG.info("Spring decompression running as job %s", sbatch_number)
