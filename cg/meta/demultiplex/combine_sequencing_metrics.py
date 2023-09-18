@@ -1,7 +1,6 @@
-from cg.store.models import SampleLaneSequencingMetrics
-
-
 from typing import Dict, List, Tuple
+
+from cg.store.models import SampleLaneSequencingMetrics
 
 
 def combine_mapped_metrics_with_undetermined(

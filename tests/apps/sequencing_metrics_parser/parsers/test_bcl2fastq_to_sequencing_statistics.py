@@ -21,9 +21,14 @@ def test_create_sequencing_statistics_from_bcl2fastq_flow_cell(bcl2fastq_flow_ce
     # THEN a list of metrics is returned
     assert isinstance(metrics, list)
     assert all(isinstance(item, SampleLaneSequencingMetrics) for item in metrics)
+    assert len(metrics) == 1
 
-    # THEN the metrics has been assigned the correct sample id
+    # THEN the undetermined metrics have been assigned the correct sample id and lane number
     assert metrics[0].sample_internal_id == "sample_id"
+    assert metrics[0].flow_cell_lane_number == 1
+
+    # THEN the undetermined reads in each tile were combined
+    assert metrics[0].sample_total_reads_in_lane == 4
 
 
 def test_create_undetermined_metrics_for_invalid_lane(bcl2fastq_flow_cell_path: Path):
