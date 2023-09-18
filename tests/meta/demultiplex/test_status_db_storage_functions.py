@@ -28,7 +28,7 @@ def test_add_single_sequencing_metrics_entry_to_statusdb(
 
     # WHEN adding the sequencing metrics entry to the statusdb
     add_sequencing_metrics_to_statusdb(
-        sample_lane_sequencing_metrics=[sequencing_metrics_entry],
+        metrics=[sequencing_metrics_entry],
         store=demux_post_processing_api.status_db,
     )
 

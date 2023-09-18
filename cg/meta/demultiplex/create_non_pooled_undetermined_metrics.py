@@ -2,16 +2,15 @@ from typing import List, Optional, Tuple
 from cg.apps.sequencing_metrics_parser.api import (
     create_undetermined_sequencing_metrics_for_flow_cell,
 )
-from cg.meta.demultiplex.status_db_storage_functions import add_sequencing_metrics_to_statusdb
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store.api.core import Store
 from cg.store.models import SampleLaneSequencingMetrics
 
 
-def create_metrics_for_non_pooled_undetermined_reads(
+def create_sequencing_metrics_for_non_pooled_undetermined_reads(
     flow_cell: FlowCellDirectoryData, store: Store
 ) -> None:
-    """Store sequencing metrics for non pooled undetermined reads in status db."""
+    """Create and store sequencing metrics for non pooled undetermined reads."""
     non_pooled_lanes_and_samples: List[
         Tuple[int, str]
     ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
@@ -39,13 +38,13 @@ def create_metrics_for_non_pooled_undetermined_reads(
             combine_metrics(existing_metric=existing_metric, new_metric=metric)
         else:
             new_metrics.append(metric)
-    add_sequencing_metrics_to_statusdb(sample_lane_sequencing_metrics=new_metrics, store=store)
+    return new_metrics
 
 
 def combine_metrics(
     existing_metric: SampleLaneSequencingMetrics, new_metric: SampleLaneSequencingMetrics
 ) -> None:
-    """Update an existing metric with a new metric."""
+    """Update an existing metric with data from a new metric."""
 
     combined_q30_percentage: float = weighted_average(
         total_1=existing_metric.sample_total_reads_in_lane,

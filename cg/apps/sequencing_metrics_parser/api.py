@@ -12,7 +12,7 @@ from cg.apps.sequencing_metrics_parser.parsers.bcl_convert_to_sequencing_statist
 )
 
 
-def create_sample_lane_sequencing_metrics_for_flow_cell(
+def create_sequencing_metrics_for_flow_cell(
     flow_cell_directory: Path, bcl_converter: str
 ) -> List[SampleLaneSequencingMetrics]:
     """Parse the sequencing metrics data for the correct demultiplexing software into the sequencing statistics model."""
