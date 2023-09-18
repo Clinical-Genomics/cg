@@ -9,6 +9,7 @@ import cg
 import click
 import coloredlogs
 from cg.cli.delete.base import delete
+from cg.cli.downsample import down_sample_cmd
 from cg.cli.set.base import set_cmd
 from cg.constants.constants import FileFormat
 from cg.cli.store.store import store as store_cmd
@@ -99,3 +100,4 @@ base.add_command(store_cmd)
 base.add_command(deliver_cmd)
 base.add_command(demultiplex_cmd)
 base.add_command(generate_cmd)
+base.add_command(down_sample_cmd)
