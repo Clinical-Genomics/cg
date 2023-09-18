@@ -30,7 +30,7 @@ def down_sample_cmd():
     "-sr" "--sample-internal-id;reads",
     multiple=True,
     required=True,
-    short_help="Identifier used in statusdb, e.g. ACC1234567 separated by the number of reads to down sample to in millions."
+    short_help="Identifier used in statusdb, e.g. ACC1234567 and the number of reads to down sample to in millions separated by ;."
     "e.g. ACC1234567;30",
 )
 @DRY_RUN
