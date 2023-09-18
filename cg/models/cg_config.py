@@ -306,7 +306,6 @@ class CGConfig(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         fields = {
-            "cg_stats_api_": "cg_stats_api",
             "chanjo_api_": "chanjo_api",
             "crunchy_api_": "crunchy_api",
             "demultiplex_api_": "demultiplex_api",

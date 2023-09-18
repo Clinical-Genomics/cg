@@ -1,16 +1,21 @@
 """Functions that deal with modifications of the indexes."""
 import logging
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Set, Tuple, Union
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, FlowCellSampleBCLConvert
+from packaging import version
+from pydantic import BaseModel
+
+from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSample,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
+)
 from cg.constants.constants import FileFormat
 from cg.constants.sequencing import Sequencers
 from cg.io.controller import ReadFile
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.resources import VALID_INDEXES_PATH
 from cg.utils.utils import get_hamming_distance
-from packaging import version
-from pydantic import BaseModel
 
 LOG = logging.getLogger(__name__)
 DNA_COMPLEMENTS: Dict[str, str] = {"A": "T", "C": "G", "G": "C", "T": "A"}
@@ -24,25 +29,9 @@ REAGENT_KIT_PARAMETER_TO_VERSION: Dict[str, str] = {"1": "1.0", "3": "1.5"}
 SHORT_SAMPLE_INDEX_LENGTH: int = 8
 
 
-def index_exists(index: str, indexes: Set[str]) -> bool:
-    """Determines if an index is already present in the existing indexes."""
-    return any(existing_index.startswith(index) for existing_index in indexes)
-
-
 def is_dual_index(index: str) -> bool:
     """Determines if an index in the raw sample sheet is dual index or not."""
     return "-" in index
-
-
-def get_indexes_by_lane(samples: List[FlowCellSample]) -> Dict[int, Set[str]]:
-    """Group the indexes from samples by lane."""
-    indexes_by_lane = {}
-    for sample in samples:
-        lane: int = sample.lane
-        if lane not in indexes_by_lane:
-            indexes_by_lane[lane] = set()
-        indexes_by_lane[lane].add(sample.index)
-    return indexes_by_lane
 
 
 class Index(BaseModel):
@@ -85,7 +74,7 @@ def get_index_pair(sample: FlowCellSample) -> Tuple[str, str]:
     return sample.index, sample.index2
 
 
-def is_reverse_complement(run_parameters: RunParameters) -> bool:
+def is_reverse_complement_needed(run_parameters: RunParameters) -> bool:
     """Return True if the second index requires reverse complement.
 
     If the run used the new NovaSeq control software version (NEW_CONTROL_SOFTWARE_VERSION)
@@ -142,17 +131,39 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
     return index_string + INDEX_TWO_PAD_SEQUENCE
 
 
-def get_hamming_distance_for_indexes(sequence_1: str, sequence_2: str) -> int:
-    """Get the hamming distance between two index sequences.
+def get_hamming_distance_index_1(sequence_1: str, sequence_2: str) -> int:
+    """Get the hamming distance between two index 1 sequences.
     In the case that one sequence is longer than the other, the distance is calculated between
     the shortest sequence and the first segment of equal length of the longest sequence."""
-    limit: int = min(len(sequence_1), len(sequence_2))
-    return get_hamming_distance(str_1=sequence_1[:limit], str_2=sequence_2[:limit])
+    shortest_index_length: int = min(len(sequence_1), len(sequence_2))
+    return get_hamming_distance(
+        str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
+    )
+
+
+def get_hamming_distance_index_2(
+    sequence_1: str, sequence_2: str, is_reverse_complement: bool
+) -> int:
+    """Get the hamming distance between two index 2 sequences.
+    In the case that one sequence is longer than the other, the distance is calculated between
+    the shortest sequence and the last segment of equal length of the longest sequence.
+    If the sample requires reverse complement, the calculation is the same as for index 1."""
+    shortest_index_length: int = min(len(sequence_1), len(sequence_2))
+    return (
+        get_hamming_distance(
+            str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
+        )
+        if is_reverse_complement
+        else get_hamming_distance(
+            str_1=sequence_1[-shortest_index_length:], str_2=sequence_2[-shortest_index_length:]
+        )
+    )
 
 
 def update_barcode_mismatch_values_for_sample(
     sample_to_update: FlowCellSampleBCLConvert,
     samples_to_compare_to: List[FlowCellSampleBCLConvert],
+    is_reverse_complement: bool,
 ) -> None:
     """Updates the sample's barcode mismatch values.
     If a sample index has a hamming distance to any other sample lower than the threshold
@@ -163,9 +174,7 @@ def update_barcode_mismatch_values_for_sample(
             continue
         index_1, index_2 = get_index_pair(sample=sample_to_compare_to)
         if (
-            get_hamming_distance_for_indexes(
-                sequence_1=index_1_sample_to_update, sequence_2=index_1
-            )
+            get_hamming_distance_index_1(sequence_1=index_1_sample_to_update, sequence_2=index_1)
             < MINIMUM_HAMMING_DISTANCE
         ):
             LOG.debug(
@@ -173,8 +182,10 @@ def update_barcode_mismatch_values_for_sample(
             )
             sample_to_update.barcode_mismatches_1 = 0
         if (
-            get_hamming_distance_for_indexes(
-                sequence_1=index_2_sample_to_update, sequence_2=index_2
+            get_hamming_distance_index_2(
+                sequence_1=index_2_sample_to_update,
+                sequence_2=index_2,
+                is_reverse_complement=is_reverse_complement,
             )
             < MINIMUM_HAMMING_DISTANCE
         ):
@@ -184,40 +195,38 @@ def update_barcode_mismatch_values_for_sample(
             sample_to_update.barcode_mismatches_2 = 0
 
 
-def adapt_indexes_for_sample(
-    sample: FlowCellSample, index_cycles: int, reverse_complement: bool
+def pad_and_reverse_complement_sample_indexes(
+    sample: FlowCellSample, index_cycles: int, is_reverse_complement: bool
 ) -> None:
     """Adapts the indexes of sample.
     1. Pad indexes if needed so that all indexes have a length equal to the number of index reads
     2. Takes the reverse complement of index 2 in case of the new NovaSeq software control version
     (1.7) in combination with the new reagent kit (version 1.5).
-    3. Assigns the indexes to the sample attributes index1 and index2."""
+    3. Assigns the indexes to the sample attributes index and index2."""
     index1, index2 = get_index_pair(sample=sample)
     index_length = len(index1)
-    if is_padding_needed(index_cycles=index_cycles, sample_index_length=index_length):
+    if isinstance(sample, FlowCellSampleBcl2Fastq) and is_padding_needed(
+        index_cycles=index_cycles, sample_index_length=index_length
+    ):
         LOG.debug("Padding indexes")
         index1 = pad_index_one(index_string=index1)
-        index2 = pad_index_two(index_string=index2, reverse_complement=reverse_complement)
-    if reverse_complement:
+        index2 = pad_index_two(index_string=index2, reverse_complement=is_reverse_complement)
+    LOG.debug(f"Padding not necessary for sample {sample.sample_id}")
+    if is_reverse_complement:
         index2 = get_reverse_complement_dna_seq(index2)
     sample.index = index1
     sample.index2 = index2
 
 
-def adapt_samples(
-    samples: List[FlowCellSample],
-    run_parameters: RunParameters,
-    reverse_complement: bool,
+def update_indexes_for_samples(
+    samples: List[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]],
+    index_cycles: int,
+    is_reverse_complement: bool,
 ) -> None:
-    """Adapt the indexes and updates the barcode mismatch values of the samples."""
-    index_cycles: int = run_parameters.index_length
+    """Updates the values to the fields index1 and index 2 of samples."""
     for sample in samples:
-        if run_parameters.sequencer == Sequencers.NOVASEQX:
-            update_barcode_mismatch_values_for_sample(
-                sample_to_update=sample, samples_to_compare_to=samples
-            )
-        adapt_indexes_for_sample(
+        pad_and_reverse_complement_sample_indexes(
             sample=sample,
             index_cycles=index_cycles,
-            reverse_complement=reverse_complement,
+            is_reverse_complement=is_reverse_complement,
         )
