@@ -224,7 +224,6 @@ def test_store_fastq_path_in_housekeeper_correct_tags(
     populated_housekeeper_api: HousekeeperAPI,
     empty_fastq_file_path: Path,
     novaseq6000_flow_cell: FlowCellDirectoryData,
-    store: Store,
 ):
     """Test that a fastq file is stored in Housekeeper with the correct tags."""
     sample_id: str = "sample_internal_id"
@@ -232,17 +231,12 @@ def test_store_fastq_path_in_housekeeper_correct_tags(
     assert not populated_housekeeper_api.files(path=empty_fastq_file_path.as_posix()).first()
 
     # WHEN adding the fastq file to housekeeper
-    with mock.patch(
-        "cg.meta.demultiplex.housekeeper_storage_functions.check_if_fastq_path_should_be_stored_in_housekeeper",
-        return_value=True,
-    ):
-        store_fastq_path_in_housekeeper(
-            sample_internal_id=sample_id,
-            sample_fastq_path=empty_fastq_file_path,
-            flow_cell=novaseq6000_flow_cell,
-            hk_api=populated_housekeeper_api,
-            store=store,
-        )
+    store_fastq_path_in_housekeeper(
+        sample_internal_id=sample_id,
+        sample_fastq_path=empty_fastq_file_path,
+        flow_cell_id=novaseq6000_flow_cell.id,
+        hk_api=populated_housekeeper_api,
+    )
 
     # THEN the file was added to Housekeeper with the correct tags
     file: File = populated_housekeeper_api.get_files(bundle=sample_id).first()
