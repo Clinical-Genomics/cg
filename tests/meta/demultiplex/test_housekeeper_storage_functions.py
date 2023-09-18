@@ -7,6 +7,7 @@ import mock
 from housekeeper.store.models import File
 from mock import MagicMock, call
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.housekeeper_storage_functions import (
@@ -20,6 +21,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
 )
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.store import Store
 
 
 def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
@@ -219,7 +221,10 @@ def test_add_demux_logs_to_housekeeper(
 
 
 def test_store_fastq_path_in_housekeeper_correct_tags(
-    populated_housekeeper_api, empty_fastq_file_path, novaseq6000_flow_cell, store
+    populated_housekeeper_api: HousekeeperAPI,
+    empty_fastq_file_path: Path,
+    novaseq6000_flow_cell: FlowCellDirectoryData,
+    store: Store,
 ):
     """Test that a fastq file is stored in Housekeeper with the correct tags."""
     sample_id: str = "sample_internal_id"
