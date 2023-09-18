@@ -1,133 +1,21 @@
 from pathlib import Path
 
 import pytest
-
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_internal_ids_from_sample_sheet,
+)
+from cg.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.exc import FlowCellError
-
+from cg.exc import FlowCellError, MissingFilesError
 from cg.meta.demultiplex.validation import (
     is_demultiplexing_complete,
-    is_file_path_compressed_fastq,
     is_flow_cell_ready_for_delivery,
-    is_lane_in_fastq_file_name,
-    is_sample_id_in_directory_name,
-    is_valid_sample_fastq_file,
     validate_demultiplexing_complete,
     validate_flow_cell_delivery_status,
+    validate_flow_cell_has_fastq_files,
     validate_sample_sheet_exists,
 )
-
-
-def test_validate_sample_fastq_with_valid_file():
-    # GIVEN a sample fastq file with a lane number and sample id in the parent directory name
-    sample_fastq = Path("Sample_123/sample_L0002.fastq.gz")
-
-    # WHEN validating the sample fastq file
-    is_valid = is_valid_sample_fastq_file(sample_fastq=sample_fastq, sample_internal_id="sample")
-
-    # THEN it should be valid
-    assert is_valid
-
-
-def test_validate_sample_fastq_without_sample_id_in_parent_directory_name():
-    # GIVEN a sample fastq file without a sample id in the parent directory name or file name
-    sample_fastq = Path("L0002.fastq.gz")
-
-    # WHEN validating the sample fastq file
-    is_valid_fastq = is_valid_sample_fastq_file(
-        sample_fastq=sample_fastq, sample_internal_id="sample_id"
-    )
-
-    # THEN it should not be valid
-    assert not is_valid_fastq
-
-
-def test_validate_sample_fastq_without_lane_number_in_path():
-    # GIVEN a sample fastq file without a lane number
-    sample_fastq = Path("Sample_123/sample_id.fastq.gz")
-
-    # WHEN validating the sample fastq file
-    is_valid_fastq = is_valid_sample_fastq_file(sample_fastq, sample_internal_id="sample_id")
-
-    # THEN it should not be valid
-    assert not is_valid_fastq
-
-
-def test_validate_sample_fastq_with_invalid_file_extension():
-    # GIVEN a sample fastq file without a valid file extension
-    sample_fastq = Path("Sample_123/123_L0002.fastq")
-
-    # WHEN validating the sample fastq file
-    is_valid_fastq = is_valid_sample_fastq_file(sample_fastq, sample_internal_id="123")
-
-    # THEN it should not be valid
-    assert not is_valid_fastq
-
-
-def test_is_file_path_compressed_fastq_with_valid_file():
-    # GIVEN a valid .fastq.gz file
-    file_path = Path("sample_L0002.fastq.gz")
-
-    # WHEN checking if the file path is a compressed fastq file
-    result = is_file_path_compressed_fastq(file_path)
-
-    # THEN the result should be True
-    assert result is True
-
-
-def test_is_file_path_compressed_fastq_with_invalid_file():
-    # GIVEN a file with invalid extension
-    file_path = Path("sample_L0002.fastq")
-
-    # WHEN checking if the file path is a compressed fastq file
-    result = is_file_path_compressed_fastq(file_path)
-
-    # THEN the result should be False
-    assert result is False
-
-
-def test_is_lane_in_fastq_file_name_with_valid_file():
-    # GIVEN a valid file containing lane number
-    file_path = Path("sample_L0002.fastq.gz")
-
-    # WHEN checking if the lane number is in the fastq file name
-    result = is_lane_in_fastq_file_name(file_path)
-
-    # THEN the result should be True
-    assert result is True
-
-
-def test_is_lane_in_fastq_file_name_with_invalid_file():
-    # GIVEN a file without lane number
-    file_path = Path("sample.fastq.gz")
-
-    # WHEN checking if the lane number is in the fastq file name
-    result = is_lane_in_fastq_file_name(file_path)
-
-    # THEN the result should be False
-    assert result is False
-
-
-def test_is_sample_id_in_directory_name_with_valid_directory():
-    # GIVEN a directory containing sample id
-    directory = Path("Sample_123")
-
-    # WHEN checking if the sample id is in the directory name
-    result = is_sample_id_in_directory_name(directory=directory, sample_internal_id="123")
-
-    # THEN the result should be True
-    assert result is True
-
-
-def test_is_sample_id_in_directory_name_with_invalid_directory():
-    # GIVEN a directory without sample id
-    directory = Path("sample/123_L0002.fastq.gz")
-
-    # WHEN checking if the sample id is in the directory name
-    result = is_sample_id_in_directory_name(directory=directory, sample_internal_id="sample_id")
-
-    # THEN the result should be False
-    assert result is False
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 def test_is_demultiplexing_complete_true(tmp_path: Path):
@@ -172,22 +60,29 @@ def test_is_flow_cell_ready_for_delivery_false(tmp_path: Path):
     assert result == False
 
 
-def test_validate_sample_sheet_exists_raises_error(tmp_path: Path):
-    # GIVEN a path with no sample sheet
-
+def test_validate_sample_sheet_exists_raises_error(bcl2fastq_flow_cell_dir: Path):
+    # GIVEN a flow cell without a sample sheet in housekeeper
+    flow_cell = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    flow_cell._sample_sheet_path_hk = None
     # WHEN validating the existence of the sample sheet
     # THEN it should raise a FlowCellError
     with pytest.raises(FlowCellError):
-        validate_sample_sheet_exists(tmp_path)
+        validate_sample_sheet_exists(flow_cell=flow_cell)
 
 
-def test_validate_sample_sheet_exists_no_error(tmp_path: Path):
+def test_validate_sample_sheet_exists(bcl2fastq_flow_cell_dir: Path):
     # GIVEN a path with a sample sheet
-    (tmp_path / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME).touch()
+    # GIVEN a flow cell without a sample sheet in housekeeper
+    flow_cell = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    sample_sheet_path = Path(
+        bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+    sample_sheet_path.touch()
+    flow_cell._sample_sheet_path_hk = sample_sheet_path
 
     # WHEN validating the existence of the sample sheet
     # THEN it should not raise an error
-    assert validate_sample_sheet_exists(tmp_path) is None
+    assert validate_sample_sheet_exists(flow_cell=flow_cell) is None
 
 
 def test_validate_demultiplexing_complete_raises_error(tmp_path: Path):
@@ -237,3 +132,44 @@ def test_validate_flow_cell_delivery_status_forced(tmp_path: Path):
     assert (
         validate_flow_cell_delivery_status(flow_cell_output_directory=tmp_path, force=True) is None
     )
+
+
+def test_validate_samples_have_fastq_files_passes(
+    novaseqx_flow_cell_with_sample_sheet_no_fastq,
+):
+    """Test the check of a flow cells with one sample fastq file does not raise an error."""
+    # GIVEN a demultiplexed flow cell with no fastq files
+
+    # GIVEN a that the flow cell has a sample sheet in Housekeeper
+    assert novaseqx_flow_cell_with_sample_sheet_no_fastq.get_sample_sheet_path_hk()
+
+    # GIVEN that a valid sample fastq file is added to the directory
+    sample_id: str = get_sample_internal_ids_from_sample_sheet(
+        sample_sheet_path=novaseqx_flow_cell_with_sample_sheet_no_fastq.get_sample_sheet_path_hk(),
+        flow_cell_sample_type=novaseqx_flow_cell_with_sample_sheet_no_fastq.sample_type,
+    )[0]
+    fastq_file_path = Path(
+        novaseqx_flow_cell_with_sample_sheet_no_fastq.path,
+        f"{sample_id}_S11_L1_R1_{FileExtensions.FASTQ}{FileExtensions.GZIP}",
+    )
+    fastq_file_path.touch(exist_ok=True)
+
+    # WHEN checking if the flow cell has fastq files for the samples
+    validate_flow_cell_has_fastq_files(flow_cell=novaseqx_flow_cell_with_sample_sheet_no_fastq)
+
+    # THEN no error is raised
+
+
+def test_validate_samples_have_fastq_files_fails(
+    novaseqx_flow_cell_with_sample_sheet_no_fastq,
+):
+    """Test the check of a flow cells with one sample fastq file does not raise an error."""
+    # GIVEN a demultiplexed flow cell with no fastq files
+
+    # GIVEN a that the flow cell has a sample sheet in Housekeeper
+    assert novaseqx_flow_cell_with_sample_sheet_no_fastq.get_sample_sheet_path_hk()
+
+    # WHEN checking if the flow cell has fastq files for the samples
+    with pytest.raises(MissingFilesError):
+        # THEN an error is raised
+        validate_flow_cell_has_fastq_files(flow_cell=novaseqx_flow_cell_with_sample_sheet_no_fastq)

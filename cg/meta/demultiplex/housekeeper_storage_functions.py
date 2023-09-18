@@ -5,6 +5,7 @@ from typing import List, Optional
 
 from housekeeper.store.models import File, Version
 
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_internal_ids_from_sample_sheet,
 )
@@ -16,7 +17,10 @@ from cg.meta.demultiplex.utils import (
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_fastqs_from_flow_cell,
+    get_sample_sheet,
     get_sample_sheet_path,
+    get_undetermined_fastqs,
+    rename_fastq_file_if_needed,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
@@ -41,6 +45,39 @@ def store_flow_cell_data_in_housekeeper(
     add_sample_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api, store=store)
     add_demux_logs_to_housekeeper(
         flow_cell=flow_cell, hk_api=hk_api, flow_cell_run_dir=flow_cell_run_dir
+    )
+
+
+def add_undetermined_fastq_files_to_housekeeper(
+    flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI
+) -> None:
+    """Add undetermined fastq files for non-pooled samples in Housekeeper."""
+    sample_sheet: SampleSheet = get_sample_sheet(flow_cell)
+    non_pooled_samples: List[FlowCellSample] = sample_sheet.get_non_pooled_samples()
+
+    for sample in non_pooled_samples:
+        undetermined_fastqs: List[Path] = get_undetermined_fastqs(
+            lane=sample.lane, flow_cell_path=flow_cell.path
+        )
+
+        for fastq_path in undetermined_fastqs:
+            add_fastq_file_to_housekeeper(
+                sample_id=sample.sample_id,
+                flow_cell_id=flow_cell.id,
+                fastq_path=fastq_path,
+                hk_api=hk_api,
+            )
+
+
+def add_fastq_file_to_housekeeper(
+    sample_id: str, flow_cell_id: str, fastq_path: Path, hk_api: HousekeeperAPI
+) -> None:
+    add_bundle_and_version_if_non_existent(bundle_name=sample_id, hk_api=hk_api)
+    add_file_to_bundle_if_non_existent(
+        file_path=fastq_path,
+        bundle_name=sample_id,
+        tag_names=[SequencingFileTag.FASTQ, flow_cell_id],
+        hk_api=hk_api,
     )
 
 
@@ -88,6 +125,9 @@ def add_sample_fastq_files_to_housekeeper(
             continue
 
         for sample_fastq_path in sample_fastq_paths:
+            sample_fastq_path: Path = rename_fastq_file_if_needed(
+                fastq_file_path=sample_fastq_path, flow_cell_name=flow_cell.id
+            )
             store_fastq_path_in_housekeeper(
                 sample_internal_id=sample_internal_id,
                 sample_fastq_path=sample_fastq_path,

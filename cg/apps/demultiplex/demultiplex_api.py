@@ -60,7 +60,7 @@ class DemultiplexingAPI:
         demux_dir: Path,
     ) -> str:
         """Create the sbatch error string."""
-        LOG.info("Creating the sbatch error string")
+        LOG.debug("Creating the sbatch error string")
         error_parameters: SbatchError = SbatchError(
             flow_cell_id=flow_cell.id,
             email=email,
@@ -73,17 +73,21 @@ class DemultiplexingAPI:
     @staticmethod
     def get_sbatch_command(
         run_dir: Path,
-        unaligned_dir: Path,
+        demux_dir: Path,
         sample_sheet: Path,
         demux_completed: Path,
         flow_cell: FlowCellDirectoryData,
         environment: Literal["production", "stage"] = "stage",
     ) -> str:
-        """Return sbatch command."""
-        LOG.info("Creating the sbatch command string")
+        """
+        Return sbatch command.
+        The unaligned_dir is only used for Bcl2Fastq.
+        """
+        LOG.debug("Creating the sbatch command string")
+        unaligned_dir: Path = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
         command_parameters: SbatchCommand = SbatchCommand(
             run_dir=run_dir.as_posix(),
-            demux_dir=unaligned_dir.parent.as_posix(),
+            demux_dir=demux_dir.as_posix(),
             unaligned_dir=unaligned_dir.as_posix(),
             sample_sheet=sample_sheet.as_posix(),
             demux_completed_file=demux_completed.as_posix(),
@@ -166,7 +170,10 @@ class DemultiplexingAPI:
             LOG.warning(f"Could not find sample sheet in Housekeeper for {flow_cell.id}")
             demultiplexing_possible = False
 
-        if flow_cell.is_demultiplexing_started():
+        if (
+            flow_cell.has_demultiplexing_started_locally()
+            or flow_cell.has_demultiplexing_started_on_sequencer()
+        ):
             LOG.warning("Demultiplexing has already been started")
             demultiplexing_possible = False
 
@@ -224,8 +231,9 @@ class DemultiplexingAPI:
         unaligned_dir: Path = self.get_flow_cell_unaligned_dir(flow_cell=flow_cell)
         LOG.info(f"Demultiplexing to {unaligned_dir}")
         if not self.dry_run:
-            LOG.info(f"Creating demux dir {unaligned_dir}")
-            unaligned_dir.mkdir(exist_ok=False, parents=True)
+            self.create_demultiplexing_output_dir(
+                flow_cell=flow_cell, demux_dir=demux_dir, unaligned_dir=unaligned_dir
+            )
 
         log_path: Path = self.get_stderr_logfile(flow_cell=flow_cell)
         error_function: str = self.get_sbatch_error(
@@ -233,7 +241,7 @@ class DemultiplexingAPI:
         )
         commands: str = self.get_sbatch_command(
             run_dir=flow_cell.path,
-            unaligned_dir=unaligned_dir,
+            demux_dir=demux_dir,
             sample_sheet=flow_cell.sample_sheet_path,
             demux_completed=self.demultiplexing_completed_path(flow_cell=flow_cell),
             flow_cell=flow_cell,
@@ -274,3 +282,12 @@ class DemultiplexingAPI:
         )
         LOG.info(f"Demultiplexing running as job {sbatch_number}")
         return sbatch_number
+
+    @staticmethod
+    def create_demultiplexing_output_dir(
+        flow_cell: FlowCellDirectoryData, demux_dir: Path, unaligned_dir: Path
+    ) -> None:
+        LOG.debug(f"Creating demux dir {unaligned_dir}")
+        demux_dir.mkdir(exist_ok=False, parents=True)
+        if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
+            unaligned_dir.mkdir(exist_ok=False, parents=False)

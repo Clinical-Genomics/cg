@@ -5,14 +5,15 @@ from pathlib import Path
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell, delete_flow_cell
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from tests.meta.demultiplex.conftest import (
-    fixture_tmp_flow_cell_demux_base_path,
-    fixture_tmp_flow_cell_run_base_path,
+    tmp_flow_cell_demux_base_path,
+    tmp_flow_cell_run_base_path,
 )
 
 
@@ -128,10 +129,8 @@ def test_demultiplex_dragen_flowcell(
     # GIVEN an out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
-    unaligned_dir: Path = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     assert demux_dir.exists() is False
-    assert unaligned_dir.exists() is False
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
 
     # WHEN starting demultiplexing from the CLI with dry run flag
@@ -146,7 +145,6 @@ def test_demultiplex_dragen_flowcell(
 
     # THEN assert the results folder was created
     assert demux_dir.exists()
-    assert unaligned_dir.exists()
 
     # THEN assert that the sbatch script was created
     assert demux_api.demultiplex_sbatch_path(flow_cell).exists()
@@ -264,3 +262,69 @@ def test_delete_flow_cell_dry_run_status_db(
         f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_context.demultiplex_api.flow_cells_dir / Path(f'some_prefix_1100_{bcl2fastq_flow_cell_id}')}"
     ) in caplog.text
     assert "DeleteDemuxAPI-Init-files: Would have removed" not in caplog.text
+
+
+def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bclconvert: Path):
+    # GIVEN a flow cell without a demuxstarted.txt file
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
+    assert not Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).exists()
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_locally()
+
+    # THEN the response should be False
+    assert not has_demux_started
+
+
+def test_has_demultiplexing_started_locally_true(
+    tmp_flow_cell_directory_bclconvert: Path,
+):
+    # GIVEN a flow cell with a demuxstarted.txt file
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
+    Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).touch()
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_locally()
+
+    # THEN the response should be True
+    assert has_demux_started
+
+
+def test_has_demultiplexing_started_on_sequencer_true(
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+):
+    # GIVEN a flow cell with a BCLConvert folder
+    flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_dir_with_analysis_data)
+    Path.mkdir(
+        Path(
+            flow_cell.path,
+            get_latest_analysis_path(flow_cell.path),
+            DemultiplexingDirsAndFiles.DATA,
+            DemultiplexingDirsAndFiles.BCL_CONVERT,
+        )
+    )
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_on_sequencer()
+
+    # THEN the response should be True
+    assert has_demux_started
+
+
+def test_has_demultiplexing_started_on_sequencer_false(
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+):
+    # GIVEN a flow cell without a BCLConvert folder
+    flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_dir_with_analysis_data)
+    assert not Path(
+        flow_cell.path,
+        get_latest_analysis_path(flow_cell.path),
+        DemultiplexingDirsAndFiles.DATA,
+        DemultiplexingDirsAndFiles.BCL_CONVERT,
+    ).exists()
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_on_sequencer()
+
+    # THEN the response should be False
+    assert not has_demux_started
