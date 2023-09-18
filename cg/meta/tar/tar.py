@@ -33,3 +33,7 @@ class TarAPI:
         extraction_parameters.extend(target_directory_parameters)
         extraction_parameters.append(str(output_dir))
         return extraction_parameters
+
+    def get_compress_cmd(self, input_path: Path) -> List[str]:
+        """Return compression command of input path."""
+        return [self.binary_path, "-cf", "-", input_path.as_posix()]
