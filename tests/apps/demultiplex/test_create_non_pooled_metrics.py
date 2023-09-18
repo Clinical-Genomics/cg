@@ -1,6 +1,8 @@
+from typing import List
+from cg.apps.sequencing_metrics_parser.api import create_sequencing_metrics_for_flow_cell
 from cg.meta.demultiplex.create_non_pooled_metrics import (
+    combine_mapped_metrics_with_undetermined,
     combine_metrics,
-    create_sequencing_metrics_for_non_pooled_reads,
     weighted_average,
 )
 from cg.store.api.core import Store
@@ -57,6 +59,96 @@ def test_combine_metrics():
     assert existing_metric.sample_base_mean_quality_score == 27.5
 
 
-def test_create_undetermined_metrics_with_no_existing_metrics(store: Store, bcl2fastq_flow_cell):
-    # GIVEN: A flow cell demultiplexed with bcl2fastq
-    pass
+def test_combine_empty_metrics():
+    # GIVEN empty lists for mapped and undetermined metrics
+    mapped_metrics = []
+    undetermined_metrics = []
+
+    # WHEN combining them
+    combined_metrics = combine_mapped_metrics_with_undetermined(
+        mapped_metrics=mapped_metrics, undetermined_metrics=undetermined_metrics
+    )
+
+    # THEN the result should be an empty list
+    assert combined_metrics == []
+
+
+def test_combine_metrics_with_only_mapped_metrics():
+    # GIVEN a list of mapped metrics and an empty list of undetermined metrics
+    mapped_metrics = [SampleLaneSequencingMetrics()]
+    undetermined_metrics = []
+
+    # WHEN combining them
+    combined_metrics = combine_mapped_metrics_with_undetermined(
+        mapped_metrics=mapped_metrics, undetermined_metrics=undetermined_metrics
+    )
+
+    # THEN the result should be the mapped metrics
+    assert combined_metrics == mapped_metrics
+
+
+def test_combine_metrics_with_only_undetermined_metrics():
+    # GIVEN an empty list of mapped metrics and list of undetermined metrics
+    mapped_metrics = []
+    undetermined_metrics = [SampleLaneSequencingMetrics()]
+
+    # WHEN combining them
+    combined_metrics = combine_mapped_metrics_with_undetermined(
+        mapped_metrics=mapped_metrics, undetermined_metrics=undetermined_metrics
+    )
+
+    # THEN the result should be the undetermined metrics
+    assert combined_metrics == undetermined_metrics
+
+
+def test_combine_metrics_with_both_mapped_and_undetermined_metrics_different_lanes():
+    # GIVEN a list of mapped metrics and list of undetermined metrics in different lanes for the same sample
+    mapped_metrics = [
+        SampleLaneSequencingMetrics(flow_cell_lane_number=1, sample_internal_id="sample")
+    ]
+    undetermined_metrics = [
+        SampleLaneSequencingMetrics(flow_cell_lane_number=2, sample_internal_id="sample")
+    ]
+
+    # WHEN combining them
+    combined_metrics = combine_mapped_metrics_with_undetermined(
+        mapped_metrics=mapped_metrics, undetermined_metrics=undetermined_metrics
+    )
+
+    # THEN the combined metrics should be the mapped and undetermined metrics
+    assert len(combined_metrics) == len(mapped_metrics + undetermined_metrics)
+
+    # THEN the combined metrics should be the mapped and undetermined metrics
+    assert set(combined_metrics) == set(mapped_metrics + undetermined_metrics)
+
+
+def test_combine_metrics_with_both_mapped_and_undetermined_metrics_same_lane():
+    # GIVEN a list of mapped metrics and list of undetermined metrics in the same lane for the same sample
+    mapped_metric = SampleLaneSequencingMetrics(
+        sample_internal_id="sample",
+        flow_cell_lane_number=1,
+        sample_total_reads_in_lane=100,
+        sample_base_percentage_passing_q30=0.9,
+        sample_base_mean_quality_score=30,
+    )
+
+    undetermined_metric = SampleLaneSequencingMetrics(
+        sample_internal_id="sample",
+        flow_cell_lane_number=1,
+        sample_total_reads_in_lane=100,
+        sample_base_percentage_passing_q30=0.8,
+        sample_base_mean_quality_score=20,
+    )
+
+    # WHEN combining them
+    combined_metrics = combine_mapped_metrics_with_undetermined(
+        mapped_metrics=[mapped_metric], undetermined_metrics=[undetermined_metric]
+    )
+
+    # THEN the combined metrics should be a single metric
+    assert len(combined_metrics) == 1
+
+    # THEN the metrics should be combined
+    assert combined_metrics[0].sample_total_reads_in_lane == 200
+    assert combined_metrics[0].sample_base_percentage_passing_q30 == 0.85
+    assert combined_metrics[0].sample_base_mean_quality_score == 25

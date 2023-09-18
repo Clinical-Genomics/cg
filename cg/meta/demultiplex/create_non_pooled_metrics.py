@@ -37,7 +37,7 @@ def combine_mapped_metrics_with_undetermined(
 
 def combine_metrics(
     existing_metric: SampleLaneSequencingMetrics, new_metric: SampleLaneSequencingMetrics
-) -> None:
+) -> SampleLaneSequencingMetrics:
     """Update an existing metric with data from a new metric."""
 
     combined_q30_percentage: float = weighted_average(
@@ -59,6 +59,8 @@ def combine_metrics(
     existing_metric.sample_base_percentage_passing_q30 = combined_q30_percentage
     existing_metric.sample_base_mean_quality_score = combined_mean_quality_score
     existing_metric.sample_total_reads_in_lane = combined_reads
+
+    return existing_metric
 
 
 def weighted_average(total_1: int, percentage_1: float, total_2: int, percentage_2: float) -> float:
