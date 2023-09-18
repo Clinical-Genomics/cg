@@ -26,6 +26,7 @@ def create_sequencing_metrics_for_non_pooled_reads(
         )
         if existing_metric:
             combine_metrics(existing_metric=existing_metric, new_metric=metric)
+            new_metrics.append(existing_metric)
         else:
             new_metrics.append(metric)
     return new_metrics

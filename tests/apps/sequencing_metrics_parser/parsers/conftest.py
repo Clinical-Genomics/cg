@@ -7,6 +7,7 @@ from cg.constants.demultiplexing import (
     BCL2FASTQ_METRICS_DIRECTORY_NAME,
     BCL2FASTQ_METRICS_FILE_NAME,
 )
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 @pytest.fixture

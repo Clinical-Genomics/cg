@@ -1,6 +1,10 @@
-from pytest import approx
-
-from cg.meta.demultiplex.create_non_pooled_metrics import weighted_average
+from cg.meta.demultiplex.create_non_pooled_metrics import (
+    combine_metrics,
+    create_sequencing_metrics_for_non_pooled_reads,
+    weighted_average,
+)
+from cg.store.api.core import Store
+from cg.store.models import SampleLaneSequencingMetrics
 
 
 def test_calculates_simple_weighted_average():
@@ -29,3 +33,30 @@ def test_handles_zero_counts():
 
     # THEN: The weighted average should be zero
     assert result == 0.0
+
+
+def test_combine_metrics():
+    # GIVEN: Two sequencing metrics
+    existing_metric = SampleLaneSequencingMetrics(
+        sample_total_reads_in_lane=100,
+        sample_base_percentage_passing_q30=0.9,
+        sample_base_mean_quality_score=30,
+    )
+    new_metric = SampleLaneSequencingMetrics(
+        sample_total_reads_in_lane=100,
+        sample_base_percentage_passing_q30=0.8,
+        sample_base_mean_quality_score=25,
+    )
+
+    # WHEN: Combining the metrics
+    combine_metrics(existing_metric=existing_metric, new_metric=new_metric)
+
+    # THEN: The existing metric should be updated
+    assert existing_metric.sample_total_reads_in_lane == 200
+    assert existing_metric.sample_base_percentage_passing_q30 == 0.85
+    assert existing_metric.sample_base_mean_quality_score == 27.5
+
+
+def test_create_undetermined_metrics_with_no_existing_metrics(store: Store, bcl2fastq_flow_cell):
+    # GIVEN: A flow cell demultiplexed with bcl2fastq
+    pass
