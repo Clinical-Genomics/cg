@@ -1,6 +1,9 @@
 import logging
 from typing import Optional
 
+from pydantic.v1 import BaseModel, EmailStr, Field
+from typing_extensions import Literal
+
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -17,8 +20,6 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.store import Store
-from pydantic.v1 import BaseModel, EmailStr, Field
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -38,10 +39,6 @@ class FlowCellRunDirs(Sequencers):
     pass
 
 
-class BackupConfig(BaseModel):
-    encrypt_dir: EncryptionDirs
-
-
 class CleanDirs(BaseModel):
     sample_sheets_dir_name: str
     flow_cell_run_dirs: FlowCellRunDirs
@@ -59,6 +56,11 @@ class SlurmConfig(BaseModel):
     number_tasks: Optional[int]
     conda_env: Optional[str]
     qos: SlurmQos = SlurmQos.LOW
+
+
+class BackupConfig(BaseModel):
+    encrypt_dir: EncryptionDirs
+    slurm: SlurmConfig
 
 
 class HousekeeperConfig(BaseModel):
