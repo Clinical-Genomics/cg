@@ -6,6 +6,7 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import List
 
+from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions
 from cg.constants.encryption import GPGParameters
 from cg.exc import ChecksumFailedError
@@ -99,6 +100,45 @@ class EncryptionAPI:
         if dry_run:
             return
         pending_path.touch(exist_ok=False)
+
+
+class FlowCellEncryptionAPI(EncryptionAPI):
+    """Encryption functionality for flow cells."""
+
+    def __init__(
+        self,
+        config: dict,
+        binary_path: str,
+        dry_run: bool = False,
+    ):
+        super().__init__(binary_path=binary_path, dry_run=dry_run)
+        self.slurm_api: SlurmAPI = SlurmAPI()
+        self.slurm_account: str = config["backup"]["slurm"]["account"]
+        self.slurm_hours: int = config["backup"]["slurm"]["hours"]
+        self.slurm_mail_user: str = config["backup"]["slurm"]["mail_user"]
+        self.slurm_memory: int = config["backup"]["slurm"]["memory"]
+        self.slurm_number_tasks: int = config["backup"]["slurm"]["number_tasks"]
+
+    @classmethod
+    def get_flow_cell_symmetric_encryption_command(
+        cls, output_file: Path, passphrase_file_path: Path
+    ) -> List[str]:
+        """Generates the gpg command for symmetric encryption of file."""
+        encryption_parameters: list = GPGParameters.SYMMETRIC_ENCRYPTION.copy()
+        encryption_parameters.append(str(passphrase_file_path))
+        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
+        output_parameter.extend([str(output_file)])
+        encryption_parameters.extend(output_parameter)
+        return encryption_parameters
+
+    @classmethod
+    def get_flow_cell_symmetric_decryption_command(
+        cls, input_file: Path, passphrase_file_path: Path
+    ) -> List[str]:
+        """Generates the gpg command for symmetric decryption."""
+        decryption_parameters: list = GPGParameters.SYMMETRIC_DECRYPTION.copy()
+        decryption_parameters.extend([passphrase_file_path.as_posix(), input_file.as_posix()])
+        return decryption_parameters
 
 
 class SpringEncryptionAPI(EncryptionAPI):
