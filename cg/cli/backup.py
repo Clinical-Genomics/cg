@@ -68,6 +68,7 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool):
             flow_cell_id=flow_cell.id,
             flow_cell_encrypt_dir=flow_cell_encrypt_dir,
             flow_cell_encrypt_file_path_prefix=flow_cell_encrypt_file_path_prefix,
+            pending_file_path=pending_file_path,
         )
 
 
