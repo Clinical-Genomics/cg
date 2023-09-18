@@ -4,8 +4,8 @@ import logging
 from typing import List, Optional, Set
 
 from cg.apps.sequencing_metrics_parser.api import create_sequencing_metrics_for_flow_cell
-from cg.meta.demultiplex.create_non_pooled_undetermined_metrics import (
-    create_sequencing_metrics_for_non_pooled_undetermined_reads,
+from cg.meta.demultiplex.create_non_pooled_metrics import (
+    create_sequencing_metrics_for_non_pooled_reads,
 )
 from cg.meta.demultiplex.utils import get_q30_threshold
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -69,7 +69,7 @@ def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, stor
 
     undetermined_sequencing_metrics: List[
         SampleLaneSequencingMetrics
-    ] = create_sequencing_metrics_for_non_pooled_undetermined_reads(
+    ] = create_sequencing_metrics_for_non_pooled_reads(
         flow_cell=flow_cell, store=store
     )
     add_sequencing_metrics_to_statusdb(metrics=undetermined_sequencing_metrics, store=store)
