@@ -66,8 +66,8 @@ class FlowCellSampleBCLConvert(FlowCellSample):
 class SampleSheet(BaseModel):
     samples: List[FlowCellSample]
 
-    def get_non_pooled_lane_sample_id_pairs(self) -> Iterable[Tuple[int, str]]:
-        """Return tuples of non pooled lane and sample id pairs."""
+    def get_non_pooled_lanes_and_samples(self) -> Iterable[Tuple[int, str]]:
+        """Return tuples of non pooled lane and sample ids."""
         non_pooled_lane_sample_id_pairs: List[Tuple[int, str]] = []
         non_pooled_samples: List[FlowCellSample] = self.get_non_pooled_samples()
         for sample in non_pooled_samples:

@@ -8,13 +8,13 @@ from cg.store.api.core import Store
 from cg.store.models import SampleLaneSequencingMetrics
 
 
-def store_metrics_for_non_pooled_undetermined_reads(
+def create_metrics_for_non_pooled_undetermined_reads(
     flow_cell: FlowCellDirectoryData, store: Store
 ) -> None:
     """Store sequencing metrics for non pooled undetermined reads in status db."""
     non_pooled_lanes_and_samples: List[
         Tuple[int, str]
-    ] = flow_cell.sample_sheet.get_non_pooled_lane_sample_id_pairs()
+    ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 
     undetermined_non_pooled_metrics: List[
         SampleLaneSequencingMetrics
@@ -26,46 +26,46 @@ def store_metrics_for_non_pooled_undetermined_reads(
 
     new_metrics: List[SampleLaneSequencingMetrics] = []
 
-    for metrics in undetermined_non_pooled_metrics:
-        sample_id: str = metrics.sample_internal_id
-        lane: int = metrics.flow_cell_lane_number
+    for metric in undetermined_non_pooled_metrics:
+        sample_id: str = metric.sample_internal_id
+        lane: int = metric.flow_cell_lane_number
 
-        existing_metrics: Optional[
+        existing_metric: Optional[
             SampleLaneSequencingMetrics
         ] = store.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
             flow_cell_name=flow_cell.id, sample_internal_id=sample_id, lane=lane
         )
-        if existing_metrics:
-            combine_metrics(existing_metrics=existing_metrics, new_metrics=metrics)
+        if existing_metric:
+            combine_metrics(existing_metric=existing_metric, new_metric=metric)
         else:
-            new_metrics.append(metrics)
+            new_metrics.append(metric)
     add_sequencing_metrics_to_statusdb(sample_lane_sequencing_metrics=new_metrics, store=store)
 
 
 def combine_metrics(
-    existing_metrics: SampleLaneSequencingMetrics, new_metrics: SampleLaneSequencingMetrics
+    existing_metric: SampleLaneSequencingMetrics, new_metric: SampleLaneSequencingMetrics
 ) -> None:
     """Update an existing metric with a new metric."""
 
     combined_q30_percentage: float = weighted_average(
-        total_1=existing_metrics.sample_total_reads_in_lane,
-        percentage_1=existing_metrics.sample_base_percentage_passing_q30,
-        total_2=new_metrics.sample_total_reads_in_lane,
-        percentage_2=new_metrics.sample_base_percentage_passing_q30,
+        total_1=existing_metric.sample_total_reads_in_lane,
+        percentage_1=existing_metric.sample_base_percentage_passing_q30,
+        total_2=new_metric.sample_total_reads_in_lane,
+        percentage_2=new_metric.sample_base_percentage_passing_q30,
     )
     combined_mean_quality_score: float = weighted_average(
-        total_1=existing_metrics.sample_total_reads_in_lane,
-        percentage_1=existing_metrics.sample_base_mean_quality_score,
-        total_2=new_metrics.sample_total_reads_in_lane,
-        percentage_2=new_metrics.sample_base_mean_quality_score,
+        total_1=existing_metric.sample_total_reads_in_lane,
+        percentage_1=existing_metric.sample_base_mean_quality_score,
+        total_2=new_metric.sample_total_reads_in_lane,
+        percentage_2=new_metric.sample_base_mean_quality_score,
     )
     combined_reads: int = (
-        existing_metrics.sample_total_reads_in_lane + new_metrics.sample_total_reads_in_lane
+        existing_metric.sample_total_reads_in_lane + new_metric.sample_total_reads_in_lane
     )
 
-    existing_metrics.sample_base_percentage_passing_q30 = combined_q30_percentage
-    existing_metrics.sample_base_mean_quality_score = combined_mean_quality_score
-    existing_metrics.sample_total_reads_in_lane = combined_reads
+    existing_metric.sample_base_percentage_passing_q30 = combined_q30_percentage
+    existing_metric.sample_base_mean_quality_score = combined_mean_quality_score
+    existing_metric.sample_total_reads_in_lane = combined_reads
 
 
 def weighted_average(total_1: int, percentage_1: float, total_2: int, percentage_2: float) -> float:
