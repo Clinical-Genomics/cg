@@ -14,11 +14,14 @@ from cg.constants.priority import SlurmQos
 from cg.exc import FlowCellError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
-from cg.meta.backup.sbatch import FLOW_CELL_ENCRYPT_COMMANDS, FLOW_CELL_ENCRYPT_ERROR
 from cg.meta.encryption.encryption import (
     EncryptionAPI,
     FlowCellEncryptionAPI,
     SpringEncryptionAPI,
+)
+from cg.meta.encryption.sbatch import (
+    FLOW_CELL_ENCRYPT_COMMANDS,
+    FLOW_CELL_ENCRYPT_ERROR,
 )
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
