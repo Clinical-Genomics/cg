@@ -6,9 +6,15 @@ from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
-from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell, delete_flow_cell
+from cg.cli.demultiplex.demux import (
+    delete_flow_cell,
+    demultiplex_all,
+    demultiplex_flow_cell,
+)
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_sample_sheet_path_to_housekeeper,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from tests.meta.demultiplex.conftest import (
@@ -164,8 +170,10 @@ def test_demultiplex_all_novaseq(
     assert demux_api.flow_cells_dir == tmp_flow_cells_demux_all_directory
 
     # GIVEN sequenced flow cells with their sample sheet in Housekeeper
+    flow_cell_id: str = ""
     for flow_cell_dir in tmp_flow_cells_demux_all_directory.iterdir():
         flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=flow_cell_dir)
+        flow_cell_id = flow_cell.id
         add_sample_sheet_path_to_housekeeper(
             flow_cell_directory=flow_cell_dir,
             flow_cell_name=flow_cell.id,
@@ -187,7 +195,7 @@ def test_demultiplex_all_novaseq(
     assert "Found directory" in caplog.text
 
     # THEN assert it found a flow cell that is ready for demultiplexing
-    assert f"Flow cell {flow_cell.id} is ready for demultiplexing" in caplog.text
+    assert f"Flow cell {flow_cell_id} is ready for demultiplexing" in caplog.text
 
 
 def test_is_demultiplexing_complete(tmp_flow_cell_directory_bcl2fastq: Path):

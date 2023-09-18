@@ -6,7 +6,10 @@ from typing import Dict, Iterable, List, Optional, Union
 import click
 import housekeeper.store.models as hk_models
 
-from cg.apps.crunchy.sbatch import FLOW_CELL_ENCRYPT_COMMANDS, FLOW_CELL_ENCRYPT_ERROR
+from cg.apps.encryption.sbatch import (
+    FLOW_CELL_ENCRYPT_COMMANDS,
+    FLOW_CELL_ENCRYPT_ERROR,
+)
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions
 from cg.constants.constants import DRY_RUN, FlowCellStatus
@@ -38,12 +41,13 @@ def backup(context: CGConfig):
 
 
 @backup.command("encrypt-flow-cell")
-@click.option("-f", "--flow-cell-id", help="Retrieve a specific flow cell, ex. 'HCK2KDSXX'")
 @DRY_RUN
 @click.pass_obj
-def encrypt_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str] = None):
+def encrypt_flow_cell(context: CGConfig, dry_run: bool):
     """Encrypt flow cell."""
-    flow_cell_encryption_api = FlowCellEncryptionAPI(binary_path=context.encryption.binary_path, config=context.backup.dict(), dry_run=dry_run)
+    flow_cell_encryption_api = FlowCellEncryptionAPI(
+        binary_path=context.encryption.binary_path, config=context.backup.dict(), dry_run=dry_run
+    )
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
     encrypt_dir: Dict[str, str] = context.backup.encrypt_dir.dict()
     flow_cells_dir: Path = Path(context.flow_cells_dir)
@@ -65,24 +69,50 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[s
             LOG.debug(f"Encryption already started for flow cell: {flow_cell.id}")
             continue
         flow_cell_encrypt_dir.mkdir(exist_ok=True, parents=True)
-        compressed_flow_cell_gpg_suffix: str = f"{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
-        compressed_flow_cell_md5sum_suffix: str = f"{FileExtensions.TAR}{FileExtensions.GZIP}.md5sum"
-        compressed_flow_cell_degpg_md5sum_suffix: str = f"{FileExtensions.TAR}{FileExtensions.GZIP}.degpg.md5sum"
+        compressed_flow_cell_gpg_suffix: str = (
+            f"{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
+        )
+        compressed_flow_cell_md5sum_suffix: str = (
+            f"{FileExtensions.TAR}{FileExtensions.GZIP}.md5sum"
+        )
+        compressed_flow_cell_degpg_md5sum_suffix: str = (
+            f"{FileExtensions.TAR}{FileExtensions.GZIP}.degpg.md5sum"
+        )
         flow_cell_encryption_api.create_pending_file(pending_path=pending_file_path)
-        symetric_passphrase_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(".passphrase")
+        symetric_passphrase_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
+            ".passphrase"
+        )
         final_passphrase_suffix: str = f".key{FileExtensions.GPG}"
         error_function = FLOW_CELL_ENCRYPT_ERROR.format(flow_cell_encrypt_dir=flow_cell_encrypt_dir)
-        commands = FLOW_CELL_ENCRYPT_COMMANDS(symmetric_passphrase_cmd=flow_cell_encryption_api.get_symmetric_passphrase_cmd(passphrase_file_path=symetric_passphrase_file_path),
-                                              asymmetrically_encrypt_passphrase_cmd=flow_cell_encryption_api.get_asymmetrically_encrypt_passphrase_cmd(passphrase_file_path=symetric_passphrase_file_path),
-                                              tar_encrypt_flow_cell_dir_cmd=tar_api.get_compress_cmd(input_path=flow_cell_encrypt_dir),
-                                              parallel_gzip_cmd=f"pigz p {flow_cell_encryption_api.slurm_number_tasks,} --fast -c",
-                                              tee_cmd=f"tee (md5sum > {flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_md5sum_suffix)})",
-                                              flow_cell_symmetric_encryption_cmd=flow_cell_encryption_api.get_flow_cell_symmetric_encryption_command(output_file=flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_gpg_suffix), passphrase_file_path=symetric_passphrase_file_path),
-                                              flow_cell_symmetric_decryption_cmd=flow_cell_encryption_api.get_flow_cell_symmetric_decryption_command(input_file=flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_gpg_suffix), passphrase_file_path=symetric_passphrase_file_path),
-                                              md5sum_cmd=f"md5sum > {flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_degpg_md5sum_suffix)}",
-                                              diff_cmd=f"diff -q {flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_md5sum_suffix)} {flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_degpg_md5sum_suffix)}",
-                                              mv_passphrase_file_cmd=f"mv {symetric_passphrase_file_path.with_suffix(FileExtensions.GPG)} {flow_cell_encrypt_file_path_prefix.with_suffix(final_passphrase_suffix)}"
-                                              )
+        commands = FLOW_CELL_ENCRYPT_COMMANDS(
+            symmetric_passphrase_cmd=flow_cell_encryption_api.get_symmetric_passphrase_cmd(
+                passphrase_file_path=symetric_passphrase_file_path
+            ),
+            asymmetrically_encrypt_passphrase_cmd=flow_cell_encryption_api.get_asymmetrically_encrypt_passphrase_cmd(
+                passphrase_file_path=symetric_passphrase_file_path
+            ),
+            tar_encrypt_flow_cell_dir_cmd=tar_api.get_compress_cmd(
+                input_path=flow_cell_encrypt_dir
+            ),
+            parallel_gzip_cmd=f"pigz p {flow_cell_encryption_api.slurm_number_tasks - 3} --fast -c",
+            tee_cmd=f"tee (md5sum > {flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_md5sum_suffix)})",
+            flow_cell_symmetric_encryption_cmd=flow_cell_encryption_api.get_flow_cell_symmetric_encryption_command(
+                output_file=flow_cell_encrypt_file_path_prefix.with_suffix(
+                    compressed_flow_cell_gpg_suffix
+                ),
+                passphrase_file_path=symetric_passphrase_file_path,
+            ),
+            flow_cell_symmetric_decryption_cmd=flow_cell_encryption_api.get_flow_cell_symmetric_decryption_command(
+                input_file=flow_cell_encrypt_file_path_prefix.with_suffix(
+                    compressed_flow_cell_gpg_suffix
+                ),
+                passphrase_file_path=symetric_passphrase_file_path,
+            ),
+            md5sum_cmd=f"md5sum > {flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_degpg_md5sum_suffix)}",
+            diff_cmd=f"diff -q {flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_md5sum_suffix)} {flow_cell_encrypt_file_path_prefix.with_suffix(compressed_flow_cell_degpg_md5sum_suffix)}",
+            mv_passphrase_file_cmd=f"mv {symetric_passphrase_file_path.with_suffix(FileExtensions.GPG)} {flow_cell_encrypt_file_path_prefix.with_suffix(final_passphrase_suffix)}",
+            remove_pending_file=f"rm -f {pending_file_path}",
+        )
 
         sbatch_parameters: Sbatch = Sbatch(
             account=flow_cell_encryption_api.slurm_account,
@@ -91,12 +121,14 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[s
             error=error_function,
             hours=flow_cell_encryption_api.slurm_hours,
             job_name="_".join([flow_cell.id, "flow_cell_encryption"]),
-            log_dir="a log dir",
+            log_dir=flow_cell_encrypt_dir.as_posix(),
             memory=flow_cell_encryption_api.slurm_memory,
             number_tasks=flow_cell_encryption_api.slurm_number_tasks,
             quality_of_service=SlurmQos.HIGH,
         )
-        sbatch_content: str = flow_cell_encryption_api.slurm_api.generate_sbatch_content(sbatch_parameters)
+        sbatch_content: str = flow_cell_encryption_api.slurm_api.generate_sbatch_content(
+            sbatch_parameters
+        )
         sbatch_path = Path(flow_cell_encrypt_file_path_prefix.with_suffix(FileExtensions.SBATCH))
         sbatch_number: int = flow_cell_encryption_api.slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
@@ -107,7 +139,7 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[s
 @backup.command("fetch-flow-cell")
 @click.option("-f", "--flow-cell-id", help="Retrieve a specific flow cell, ex. 'HCK2KDSXX'")
 @DRY_RUN
-@click.pass_obj)
+@click.pass_obj
 def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str] = None):
     """Fetch the first flow cell in the requested queue from backup"""
 
