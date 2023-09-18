@@ -61,7 +61,7 @@ class DownSampleWorkflow:
         if email:
             self._email = email
         else:
-            self._email = "karl.nyren@scilifelab.se"
+            self._email = ""
 
     @property
     def bin_downsample(self) -> str:
