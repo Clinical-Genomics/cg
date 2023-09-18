@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List, Tuple
 from cg.constants.demultiplexing import BclConverter
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store.models import SampleLaneSequencingMetrics
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq_to_sequencing_statistics import (
     create_bcl2fastq_metrics,
@@ -23,19 +24,21 @@ def create_sequencing_metrics_for_flow_cell(
     return create_bcl2fastq_metrics(flow_cell_directory)
 
 
-def create_undetermined_sequencing_metrics_for_flow_cell(
-    flow_cell_directory: Path,
-    bcl_converter: str,
-    non_pooled_lanes_and_samples: List[Tuple[int, str]],
+def create_undetermined_sequencing_metrics_for_non_pooled_samples_on_flow_cell(
+    flow_cell: FlowCellDirectoryData,
 ) -> List[SampleLaneSequencingMetrics]:
     """Return sequencing metrics for undetermined reads in the specified non-pooled lanes."""
 
-    if bcl_converter == BclConverter.BCL2FASTQ:
+    non_pooled_lanes_and_samples: List[
+        Tuple[int, str]
+    ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
+
+    if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
         return create_bcl2fastq_undetermined_metrics(
-            bcl2fastq_flow_cell_path=flow_cell_directory,
+            bcl2fastq_flow_cell_path=flow_cell.path,
             non_pooled_lane_sample_pairs=non_pooled_lanes_and_samples,
         )
     return create_bcl_convert_undetermined_metrics(
-        flow_cell_dir=flow_cell_directory,
+        flow_cell_dir=flow_cell.path,
         non_pooled_lane_sample_pairs=non_pooled_lanes_and_samples,
     )

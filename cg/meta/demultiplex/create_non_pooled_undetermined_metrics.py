@@ -1,6 +1,6 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from cg.apps.sequencing_metrics_parser.api import (
-    create_undetermined_sequencing_metrics_for_flow_cell,
+    create_undetermined_sequencing_metrics_for_non_pooled_samples_on_flow_cell,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store.api.core import Store
@@ -11,17 +11,9 @@ def create_sequencing_metrics_for_non_pooled_undetermined_reads(
     flow_cell: FlowCellDirectoryData, store: Store
 ) -> None:
     """Create and store sequencing metrics for non pooled undetermined reads."""
-    non_pooled_lanes_and_samples: List[
-        Tuple[int, str]
-    ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
-
     undetermined_non_pooled_metrics: List[
         SampleLaneSequencingMetrics
-    ] = create_undetermined_sequencing_metrics_for_flow_cell(
-        flow_cell_directory=flow_cell.path,
-        bcl_converter=flow_cell.bcl_converter,
-        non_pooled_lanes_and_samples=non_pooled_lanes_and_samples,
-    )
+    ] = create_undetermined_sequencing_metrics_for_non_pooled_samples_on_flow_cell(flow_cell)
 
     new_metrics: List[SampleLaneSequencingMetrics] = []
 
