@@ -1,35 +1,38 @@
-from typing import List
-from cg.apps.sequencing_metrics_parser.api import (
-    create_undetermined_non_pooled_metrics,
-)
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.store.api.core import Store
 from cg.store.models import SampleLaneSequencingMetrics
 
 
-def create_sequencing_metrics_for_non_pooled_reads(
-    flow_cell: FlowCellDirectoryData, store: Store
+from typing import Dict, List, Tuple
+
+
+def combine_mapped_metrics_with_undetermined(
+    mapped_metrics: List[SampleLaneSequencingMetrics],
+    undetermined_metrics: List[SampleLaneSequencingMetrics],
 ) -> List[SampleLaneSequencingMetrics]:
-    """Create sequencing metrics for any non pooled undetermined reads on the flow cell."""
-    undetermined_non_pooled_metrics: List[
-        SampleLaneSequencingMetrics
-    ] = create_undetermined_non_pooled_metrics(flow_cell)
+    """Combine metrics for mapped and undetermined reads."""
 
-    new_metrics: List[SampleLaneSequencingMetrics] = []
+    metrics_dict: Dict[Tuple[str, int], SampleLaneSequencingMetrics] = {
+        (metric.sample_internal_id, metric.flow_cell_lane_number): metric
+        for metric in mapped_metrics
+    }
 
-    for metric in undetermined_non_pooled_metrics:
-        sample_id: str = metric.sample_internal_id
-        lane: int = metric.flow_cell_lane_number
+    combined_metrics: List[SampleLaneSequencingMetrics] = []
 
-        existing_metric = store.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-            flow_cell_name=flow_cell.id, sample_internal_id=sample_id, lane=lane
-        )
+    for undetermined_metric in undetermined_metrics:
+        key = (undetermined_metric.sample_internal_id, undetermined_metric.flow_cell_lane_number)
+        existing_metric = metrics_dict.get(key)
+
         if existing_metric:
-            combine_metrics(existing_metric=existing_metric, new_metric=metric)
-            new_metrics.append(existing_metric)
+            combined_metric = combine_metrics(
+                existing_metric=existing_metric, new_metric=undetermined_metric
+            )
+            combined_metrics.append(combined_metric)
         else:
-            new_metrics.append(metric)
-    return new_metrics
+            combined_metrics.append(undetermined_metric)
+
+    for metric in metrics_dict.values():
+        if metric not in combined_metrics:
+            combined_metrics.append(metric)
+    return combined_metrics
 
 
 def combine_metrics(
