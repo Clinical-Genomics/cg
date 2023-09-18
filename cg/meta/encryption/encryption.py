@@ -92,6 +92,14 @@ class EncryptionAPI:
         decryption_parameters.extend(output_parameter)
         return decryption_parameters
 
+    @staticmethod
+    def create_pending_file(pending_path: Path, dry_run: bool) -> None:
+        """Create a pending flag file."""
+        LOG.info(f"Creating pending flag {pending_path}")
+        if dry_run:
+            return
+        pending_path.touch(exist_ok=False)
+
 
 class SpringEncryptionAPI(EncryptionAPI):
     """Encryption functionality for spring files"""
@@ -191,7 +199,7 @@ class SpringEncryptionAPI(EncryptionAPI):
             self.decrypted_spring_file_checksum(spring_file_path)
         )
         if not is_checksum_equal:
-            raise ChecksumFailedError(f"Checksum comparison failed!")
+            raise ChecksumFailedError("Checksum comparison failed!")
         LOG.info("Checksum comparison successful!")
 
     def encrypted_key_path(self, spring_file_path: Path) -> Path:
