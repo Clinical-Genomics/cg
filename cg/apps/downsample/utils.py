@@ -1,10 +1,10 @@
 """Utility functions for the downsample app."""
-from typing import List, Iterator
+from typing import Iterator, List
 
 from cg.store import Store
 
 
-def format_down_sample_case(
+def format_downsample_case(
     case_internal_id: str, status_db: Store, number_of_reads: int
 ) -> List[str]:
     """Format a case identifier to the correct format."""

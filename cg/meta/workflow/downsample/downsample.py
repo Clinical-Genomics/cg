@@ -2,32 +2,31 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from cg.meta.workflow.down_sample.sbatch import WORKFLOW_TEMPLATE
-from cg.models.cg_config import CGConfig
-
-from cg.store.models import Sample
 from cg.apps.slurm.slurm_api import SlurmAPI
+from cg.meta.workflow.downsample.sbatch import WORKFLOW_TEMPLATE
+from cg.models.cg_config import CGConfig
+from cg.store.models import Sample
 
 LOG = logging.getLogger("logger")
 
 
-class DownSampleWorkflow:
+class DownsampleWorkflow:
     def __init__(
         self,
         config: CGConfig,
         number_of_reads: int,
-        down_sampled_sample: Sample,
+        downsampled_sample: Sample,
         dry_run: bool,
         output_fastq_dir: str,
         input_fastq_dir: str,
         original_sample: Sample,
     ):
         if dry_run:
-            down_sampled_sample = Sample()
+            downsampled_sample = Sample()
             original_sample = Sample()
 
         self.config: CGConfig = config
-        self.down_sampled_sample: Sample = down_sampled_sample
+        self.downsampled_sample: Sample = downsampled_sample
         self.number_of_reads: int = number_of_reads
         self.dry_run: bool = dry_run
         self.input_fastq_dir: str = input_fastq_dir
@@ -70,9 +69,9 @@ class DownSampleWorkflow:
     @property
     def job_name(self) -> str:
         LOG.info(
-            f"Jobname: downsample_{self.original_sample.internal_id}_to_{self.down_sampled_sample.internal_id}"
+            f"Jobname: downsample_{self.original_sample.internal_id}_to_{self.downsampled_sample.internal_id}"
         )
-        return f"downsample_{self.original_sample.internal_id}_to_{self.down_sampled_sample.internal_id}"
+        return f"downsample_{self.original_sample.internal_id}_to_{self.downsampled_sample.internal_id}"
 
     @property
     def memory(self) -> str:
@@ -122,7 +121,7 @@ class DownSampleWorkflow:
             bin_downsample=self.bin_downsample,
             config_path=self.config,
             downsample_to=str(self.number_of_reads),
-            bundle=self.down_sampled_sample.internal_id if not self.dry_run else "dry_run",
+            bundle=self.downsampled_sample.internal_id if not self.dry_run else "dry_run",
             email=self.email,
             input_fastq_dir=self.input_fastq_dir,
             job_name=self.job_name,
@@ -137,7 +136,7 @@ class DownSampleWorkflow:
     @property
     def sbatch_name(self) -> str:
         return (
-            f"{self.down_sampled_sample.internal_id}_down_sample.sh"
+            f"{self.downsampled_sample.internal_id}_downsample.sh"
             if not self.dry_run
             else "dry_run_downsample.sh"
         )

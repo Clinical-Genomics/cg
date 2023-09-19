@@ -1,19 +1,19 @@
 """API that handles downsampling of samples."""
+import logging
 from pathlib import Path
 from typing import List
+
 from cg.constants import Priority, SequencingFileTag
 from cg.meta.meta import MetaAPI
-from cg.meta.workflow.down_sample.downsample import DownSampleWorkflow
+from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
 from cg.models.cg_config import CGConfig
-from cg.store.models import Sample, Family, ApplicationVersion
-import logging
-
+from cg.store.models import ApplicationVersion, Family, Sample
 from cg.utils.files import get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
 
 
-class DownSampleMetaData:
+class DownsampleMetaData:
     def __init__(
         self, config: CGConfig, sample_internal_id: str, number_of_reads: int, case_internal_id: str
     ):
@@ -22,11 +22,11 @@ class DownSampleMetaData:
         self.sample_internal_id: str = sample_internal_id
         self.number_of_reads: int = number_of_reads
         self.case_internal_id: str = case_internal_id
-        self.original_sample: Sample = self.get_sample_to_down_sample()
-        self.original_case: Family = self.get_case_to_down_sample()
-        self.has_enough_reads: bool = self.has_enough_reads_to_down_sample()
-        self.down_sampled_sample: Sample = self._generate_statusdb_down_sampled_sample_record()
-        self.down_sampled_case: Family = self._generate_statusdb_down_sampled_case()
+        self.original_sample: Sample = self.get_sample_to_downsample()
+        self.original_case: Family = self.get_case_to_downsample()
+        self.has_enough_reads: bool = self.has_enough_reads_to_downsample()
+        self.downsampled_sample: Sample = self._generate_statusdb_downsampled_sample_record()
+        self.downsampled_case: Family = self._generate_statusdb_downsampled_case()
         self.create_down_sampling_working_directory()
         LOG.info(f"Pre-flight checks completed for {self.sample_internal_id}")
 
@@ -37,7 +37,7 @@ class DownSampleMetaData:
         return self.number_of_reads * 1_000_000
 
     @property
-    def down_sampled_sample_name(
+    def downsampled_sample_name(
         self,
     ) -> str:
         """Return a new sample name with the number of reads to which it is down sampled in millions appended."""
@@ -46,7 +46,7 @@ class DownSampleMetaData:
         return new_name
 
     @property
-    def down_sampled_case_name(
+    def downsampled_case_name(
         self,
     ) -> str:
         """Return a case name with _DS appended."""
@@ -54,21 +54,21 @@ class DownSampleMetaData:
         LOG.info(f"Changed {self.case_internal_id} to {new_name}")
         return new_name
 
-    def get_sample_to_down_sample(self) -> Sample:
+    def get_sample_to_downsample(self) -> Sample:
         """Check if a sample exists in StatusDB."""
         sample: Sample = self.config.status_db.get_sample_by_internal_id(self.sample_internal_id)
         if not sample:
             raise ValueError(f"Sample {self.sample_internal_id} not found in StatusDB.")
         return sample
 
-    def get_case_to_down_sample(self) -> Family:
+    def get_case_to_downsample(self) -> Family:
         """Check if a case exists in StatusDB."""
         case: Family = self.config.status_db.get_case_by_internal_id(self.case_internal_id)
         if not case:
             raise ValueError(f"Case {self.case_internal_id} not found in StatusDB.")
         return case
 
-    def _generate_statusdb_down_sampled_sample_record(
+    def _generate_statusdb_downsampled_sample_record(
         self,
     ) -> Sample:
         """
@@ -76,9 +76,9 @@ class DownSampleMetaData:
         The new sample contains the original sample internal id and meta data.
         """
         application_version: ApplicationVersion = self.get_application_version(self.original_sample)
-        down_sampled_sample: Sample = self.config.status_db.add_sample(
-            name=self.down_sampled_sample_name,
-            internal_id=self.down_sampled_sample_name,
+        downsampled_sample: Sample = self.config.status_db.add_sample(
+            name=self.downsampled_sample_name,
+            internal_id=self.downsampled_sample_name,
             sex=self.original_sample.sex,
             order=self.original_sample.order,
             downsampled_to=self.multiply_reads_by_million(),
@@ -88,28 +88,26 @@ class DownSampleMetaData:
             customer=self.original_sample.customer,
             application_version=application_version,
         )
-        if self.sample_exists_in_statusdb(down_sampled_sample.internal_id):
-            raise ValueError(
-                f"Sample {down_sampled_sample.internal_id} already exists in StatusDB."
-            )
-        return down_sampled_sample
+        if self.sample_exists_in_statusdb(downsampled_sample.internal_id):
+            raise ValueError(f"Sample {downsampled_sample.internal_id} already exists in StatusDB.")
+        return downsampled_sample
 
-    def _generate_statusdb_down_sampled_case(
+    def _generate_statusdb_downsampled_case(
         self,
     ) -> Family:
         """Generate a case for the down sampled samples. The new case uses existing case data."""
-        down_sampled_case: Family = self.config.status_db.add_case(
+        downsampled_case: Family = self.config.status_db.add_case(
             data_analysis=self.original_case.data_analysis,
             data_delivery=self.original_case.data_delivery,
-            name=self.down_sampled_case_name,
+            name=self.downsampled_case_name,
             panels=["OMIM-AUTO"],
             priority=self.original_case.priority,
             ticket=self.original_case.latest_ticket,
         )
-        down_sampled_case.customer = self.original_case.customer
-        if self.case_exists_in_statusdb(down_sampled_case.internal_id):
-            raise ValueError(f"Case {down_sampled_case.internal_id} already exists in StatusDB.")
-        return down_sampled_case
+        downsampled_case.customer = self.original_case.customer
+        if self.case_exists_in_statusdb(downsampled_case.internal_id):
+            raise ValueError(f"Case {downsampled_case.internal_id} already exists in StatusDB.")
+        return downsampled_case
 
     def case_exists_in_statusdb(self, case_internal_id: str) -> bool:
         """Check if a case exists in StatusDB."""
@@ -125,7 +123,7 @@ class DownSampleMetaData:
             return True
         return False
 
-    def has_enough_reads_to_down_sample(self) -> bool:
+    def has_enough_reads_to_downsample(self) -> bool:
         """Check if the sample has enough reads to down sample."""
         if not self.original_sample.reads > self.number_of_reads * 1_000_000:
             raise ValueError(
@@ -146,9 +144,7 @@ class DownSampleMetaData:
     @property
     def fastq_file_output_directory(self):
         """Get the output directory for the down sampled sample."""
-        return Path(
-            "home", "proj", "production", "down_sample", self.down_sampled_sample.internal_id
-        )
+        return Path("home", "proj", "production", "downsample", self.downsampled_sample.internal_id)
 
     @staticmethod
     def sample_status(sample: Sample) -> str:
@@ -185,58 +181,58 @@ class DownSampleAPI(MetaAPI):
         self.sample_reads: str = sample_reads
         self.case_internal_id: str = case_internal_id
         self.dry_run: bool = dry_run
-        self.down_sample_meta_data: DownSampleMetaData = self.get_meta_data()
+        self.downsample_meta_data: DownsampleMetaData = self.get_meta_data()
 
     @staticmethod
     def parse_sample_reads_input(
         sample_reads: str, case_internal_id: str, config: CGConfig
-    ) -> DownSampleMetaData:
+    ) -> DownsampleMetaData:
         """Parse the sample reads input into the SampleToDownSample model."""
         sample_internal_id: str
         number_of_reads: int
         sample_internal_id, number_of_reads = sample_reads.split(";")
-        return DownSampleMetaData(
+        return DownsampleMetaData(
             config=config,
             sample_internal_id=sample_internal_id,
             number_of_reads=number_of_reads,
             case_internal_id=case_internal_id,
         )
 
-    def get_meta_data(self) -> DownSampleMetaData:
+    def get_meta_data(self) -> DownsampleMetaData:
         return self.parse_sample_reads_input(
             sample_reads=self.sample_reads,
             case_internal_id=self.case_internal_id,
             config=self.config,
         )
 
-    def add_down_sampled_sample_entry_to_statusdb(self) -> Sample:
+    def add_downsampled_sample_entry_to_statusdb(self) -> Sample:
         """Add a down sampled sample entry to StatusDB."""
-        down_sampled_sample: Sample = self.down_sample_meta_data.down_sampled_sample
+        downsampled_sample: Sample = self.downsample_meta_data.downsampled_sample
         LOG.info(
-            f"New downsampled sample created: {down_sampled_sample.internal_id} from {down_sampled_sample.from_sample}"
-            f"Application tag set to: {down_sampled_sample.application_version.application.tag}"
-            f"Customer set to: {down_sampled_sample.customer}"
+            f"New downsampled sample created: {downsampled_sample.internal_id} from {downsampled_sample.from_sample}"
+            f"Application tag set to: {downsampled_sample.application_version.application.tag}"
+            f"Customer set to: {downsampled_sample.customer}"
         )
         if not self.dry_run:
-            self.status_db.session.add_commit(down_sampled_sample)
-            LOG.info(f"Added {down_sampled_sample.name} to StatusDB.")
-            return down_sampled_sample
-        return down_sampled_sample
+            self.status_db.session.add_commit(downsampled_sample)
+            LOG.info(f"Added {downsampled_sample.name} to StatusDB.")
+            return downsampled_sample
+        return downsampled_sample
 
-    def add_down_sampled_case_to_statusdb(self) -> Family:
+    def add_downsampled_case_to_statusdb(self) -> Family:
         """
         Add a down sampled case entry to StatusDB.
         Checks if the down sampled case already exists in StatusDB.
         """
-        down_sampled_case: Family = self.down_sample_meta_data.down_sampled_case
+        downsampled_case: Family = self.downsample_meta_data.downsampled_case
         if not self.dry_run:
-            self.status_db.session.add_commit(down_sampled_case)
-            LOG.info(f"New down sampled case created: {down_sampled_case.name}")
-            return down_sampled_case
-        LOG.info(f"Case {down_sampled_case.internal_id} already exists in StatusDB.")
-        return down_sampled_case
+            self.status_db.session.add_commit(downsampled_case)
+            LOG.info(f"New down sampled case created: {downsampled_case.name}")
+            return downsampled_case
+        LOG.info(f"Case {downsampled_case.internal_id} already exists in StatusDB.")
+        return downsampled_case
 
-    def _link_down_sampled_sample_to_case(self, sample: Sample, case: Family) -> None:
+    def _link_downsampled_sample_to_case(self, sample: Sample, case: Family) -> None:
         """Create a link between sample and case in statusDB."""
         if self.dry_run:
             LOG.info(f"Would relate sample {sample} to {case.internal_id}")
@@ -244,23 +240,23 @@ class DownSampleAPI(MetaAPI):
         sample_case_link = self.status_db.relate_sample(
             family=case,
             sample=sample,
-            status=self.down_sample_meta_data.sample_status(sample=sample),
+            status=self.downsample_meta_data.sample_status(sample=sample),
         )
         self.status_db.session.add_commit(sample_case_link)
         LOG.info(f"Related sample {sample.internal_id} to {case.internal_id}")
 
-    def add_down_sampled_sample_case_to_statusdb(self) -> None:
+    def add_downsampled_sample_case_to_statusdb(self) -> None:
         """
         Add the down sampled sample and case to statusDB and generate the sample case link.
             -Asserts that both the original sample and case exists in statusDB.
             -Asserts that the down sampled sample and case does not already exist in statusDB.
             -Asserts that the original sample has more reads than the number to which it is down sampled.
         """
-        self.add_down_sampled_sample_entry_to_statusdb()
-        self.add_down_sampled_case_to_statusdb()
-        self._link_down_sampled_sample_to_case(
-            sample=self.down_sample_meta_data.down_sampled_sample,
-            case=self.down_sample_meta_data.down_sampled_case,
+        self.add_downsampled_sample_entry_to_statusdb()
+        self.add_downsampled_case_to_statusdb()
+        self._link_downsampled_sample_to_case(
+            sample=self.downsample_meta_data.downsampled_sample,
+            case=self.downsample_meta_data.downsampled_case,
         )
 
     def is_decompression_needed(self, case) -> bool:
@@ -273,55 +269,55 @@ class DownSampleAPI(MetaAPI):
         self.prepare_fastq_api.compress_api.decompress_spring(sample.internal_id)
         LOG.info("Re-run down sample command when decompression is done.")
 
-    def start_down_sample_job(self, original_sample: Sample, sample_to_down_sample: Sample) -> None:
+    def start_downsample_job(self, original_sample: Sample, sample_to_downsample: Sample) -> None:
         """
         Start a down sample job for a sample.
         -Retrieves input directory from the latest version of a sample bundle in housekeeper
         -Starts a down sample job
         """
-        down_sample_work_flow = DownSampleWorkflow(
-            number_of_reads=self.down_sample_meta_data.multiply_reads_by_million(),
+        downsample_work_flow = DownsampleWorkflow(
+            number_of_reads=self.downsample_meta_data.multiply_reads_by_million(),
             config=self.config,
-            output_fastq_dir=str(self.down_sample_meta_data.fastq_file_output_directory),
-            input_fastq_dir=str(self.down_sample_meta_data.fastq_file_input_directory),
+            output_fastq_dir=str(self.downsample_meta_data.fastq_file_output_directory),
+            input_fastq_dir=str(self.downsample_meta_data.fastq_file_input_directory),
             original_sample=original_sample,
-            down_sampled_sample=sample_to_down_sample,
+            downsampled_sample=sample_to_downsample,
             dry_run=self.dry_run,
         )
-        down_sample_work_flow.write_and_submit_sbatch_script()
+        downsample_work_flow.write_and_submit_sbatch_script()
 
-    def add_down_sampled_sample_to_housekeeper(self) -> None:
+    def add_downsampled_sample_to_housekeeper(self) -> None:
         """Add a down sampled sample to housekeeper and include the fastq files."""
-        self.create_down_sampled_sample_bundle()
-        self.add_down_sampled_fastq_files_to_housekeeper()
+        self.create_downsampled_sample_bundle()
+        self.add_downsampled_fastq_files_to_housekeeper()
 
-    def create_down_sampled_sample_bundle(self) -> None:
+    def create_downsampled_sample_bundle(self) -> None:
         """Create a new bundle for the down sampled sample in housekeeper."""
         self.config.housekeeper_api.create_new_bundle_and_version(
-            name=self.down_sample_meta_data.down_sampled_sample.internal_id
+            name=self.downsample_meta_data.downsampled_sample.internal_id
         )
 
-    def add_down_sampled_fastq_files_to_housekeeper(self) -> None:
+    def add_downsampled_fastq_files_to_housekeeper(self) -> None:
         """Add down sampled fastq files to housekeeper."""
         fastq_file_paths: List[Path] = get_files_matching_pattern(
-            directory=self.down_sample_meta_data.fastq_file_output_directory,
+            directory=self.downsample_meta_data.fastq_file_output_directory,
             pattern=f"*.{SequencingFileTag.FASTQ}",
         )
         for fastq_file_path in fastq_file_paths:
             self.housekeeper_api.add_and_include_file_to_latest_version(
-                bundle_name=self.down_sample_meta_data.down_sampled_sample.internal_id,
+                bundle_name=self.downsample_meta_data.downsampled_sample.internal_id,
                 file=fastq_file_path,
                 tags=[SequencingFileTag.FASTQ],
             )
 
-    def down_sample_sample(self) -> None:
+    def downsample_sample(self) -> None:
         """Down sample a sample."""
-        if self.is_decompression_needed(self.down_sample_meta_data.down_sampled_case):
-            self.start_decompression(self.down_sample_meta_data.down_sampled_sample)
+        if self.is_decompression_needed(self.downsample_meta_data.downsampled_case):
+            self.start_decompression(self.downsample_meta_data.downsampled_sample)
             return
-        self.add_down_sampled_sample_case_to_statusdb()
-        self.add_down_sampled_sample_to_housekeeper()
-        self.start_down_sample_job(
-            original_sample=self.down_sample_meta_data.original_sample,
-            sample_to_down_sample=self.down_sample_meta_data.down_sampled_sample,
+        self.add_downsampled_sample_case_to_statusdb()
+        self.add_downsampled_sample_to_housekeeper()
+        self.start_downsample_job(
+            original_sample=self.downsample_meta_data.original_sample,
+            sample_to_downsample=self.downsample_meta_data.downsampled_sample,
         )
