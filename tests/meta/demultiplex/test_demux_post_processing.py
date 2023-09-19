@@ -139,7 +139,7 @@ def test_get_all_demultiplexed_flow_cell_out_dirs(
 def test_post_processing_tracks_undetermined_fastqs_for_bcl2fastq(
     demux_post_processing_api: DemuxPostProcessingAPI,
     bcl2fastq_flow_cell_dir_name: str,
-    non_pooled_with_undetermined_sample_id: str,
+    sample_id_with_non_pooled_undetermined_reads: str,
 ):
     # GIVEN a flow cell with undetermined fastqs in a non pooled lane
 
@@ -149,7 +149,7 @@ def test_post_processing_tracks_undetermined_fastqs_for_bcl2fastq(
     # THEN the undetermined fastqs were tracked
     fastq_files: List[File] = demux_post_processing_api.hk_api.get_files(
         tags=[SequencingFileTag.FASTQ],
-        bundle=non_pooled_with_undetermined_sample_id,
+        bundle=sample_id_with_non_pooled_undetermined_reads,
     ).all()
 
     undetermined_fastq_files = [file for file in fastq_files if "Undetermined" in file.path]

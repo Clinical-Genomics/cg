@@ -5,7 +5,6 @@ from typing import List, Optional, Tuple
 
 from housekeeper.store.models import File, Version
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
@@ -77,7 +76,6 @@ def store_undetermined_fastq_files(
     ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 
     for lane, sample_id in non_pooled_lanes_and_samples:
-
         undetermined_fastqs: List[Path] = get_undetermined_fastqs(
             lane=lane, flow_cell_path=flow_cell.path
         )

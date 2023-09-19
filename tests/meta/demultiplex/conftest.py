@@ -504,5 +504,5 @@ def bcl2fastq_flow_cell_dir_name(demux_post_processing_api) -> str:
 
 
 @pytest.fixture
-def non_pooled_with_undetermined_sample_id() -> str:
+def sample_id_with_non_pooled_undetermined_reads() -> str:
     return "SVE2528A1"
