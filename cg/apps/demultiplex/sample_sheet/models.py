@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from typing import Iterable, List, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 from pydantic import BaseModel, ConfigDict, Extra, Field
 
@@ -20,6 +20,11 @@ class FlowCellSample(BaseModel):
     index: str
     index2: str = ""
     model_config = ConfigDict(populate_by_name=True, extra=Extra.ignore)
+
+    def get_valid_sample_id(self) -> Optional[str]:
+        sample_id: str = self.sample_id.split("_")[0]  # Remove any trailing index
+        if is_valid_sample_internal_id(sample_id):
+            return sample_id
 
 
 class FlowCellSampleBcl2Fastq(FlowCellSample):
@@ -71,7 +76,9 @@ class SampleSheet(BaseModel):
         non_pooled_lane_sample_id_pairs: List[Tuple[int, str]] = []
         non_pooled_samples: List[FlowCellSample] = self.get_non_pooled_samples()
         for sample in non_pooled_samples:
-            non_pooled_lane_sample_id_pairs.append((sample.lane, sample.sample_id))
+            sample_id: Optional[str] = sample.get_valid_sample_id()
+            if sample_id:
+                non_pooled_lane_sample_id_pairs.append((sample.lane, sample_id))
         return non_pooled_lane_sample_id_pairs
 
     def get_non_pooled_samples(self) -> List[FlowCellSample]:

@@ -8,6 +8,7 @@ from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
 from cg.models.cg_config import CGConfig
 from tests.meta.demultiplex.conftest import FlowCellInfo
+from housekeeper.store.models import File
 
 
 def test_set_dry_run(
@@ -133,3 +134,23 @@ def test_get_all_demultiplexed_flow_cell_out_dirs(
 
     # THEN the demultiplexed flow cells run directories should be returned
     assert tmp_demultiplexed_runs_bcl2fastq_directory in demultiplexed_flow_cell_dirs
+
+
+def test_post_processing_tracks_undetermined_fastqs_for_bcl2fastq(
+    demux_post_processing_api: DemuxPostProcessingAPI,
+    bcl2fastq_flow_cell_dir_name: str,
+    non_pooled_with_undetermined_sample_id: str,
+):
+    # GIVEN a flow cell with undetermined fastqs in a non pooled lane
+
+    # WHEN post processing the flow cell
+    demux_post_processing_api.finish_flow_cell(bcl2fastq_flow_cell_dir_name)
+
+    # THEN the undetermined fastqs were tracked
+    fastq_files: List[File] = demux_post_processing_api.hk_api.get_files(
+        tags=[SequencingFileTag.FASTQ],
+        bundle=non_pooled_with_undetermined_sample_id,
+    ).all()
+
+    undetermined_fastq_files = [file for file in fastq_files if "Undetermined" in file.path]
+    assert undetermined_fastq_files
