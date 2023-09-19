@@ -71,7 +71,8 @@ class SampleSheet(BaseModel):
         non_pooled_lane_sample_id_pairs: List[Tuple[int, str]] = []
         non_pooled_samples: List[FlowCellSample] = self.get_non_pooled_samples()
         for sample in non_pooled_samples:
-            non_pooled_lane_sample_id_pairs.append((sample.lane, sample.sample_id))
+            sample_id: str = sample.sample_id.split("_")[0]
+            non_pooled_lane_sample_id_pairs.append((sample.lane, sample_id))
         return non_pooled_lane_sample_id_pairs
 
     def get_non_pooled_samples(self) -> List[FlowCellSample]:

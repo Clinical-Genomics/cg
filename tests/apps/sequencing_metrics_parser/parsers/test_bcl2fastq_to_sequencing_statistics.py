@@ -23,7 +23,7 @@ def test_create_sequencing_statistics_from_bcl2fastq_flow_cell(bcl2fastq_flow_ce
     assert all(isinstance(item, SampleLaneSequencingMetrics) for item in metrics)
     assert len(metrics) == 1
 
-    # THEN the undetermined metrics have been assigned the correct sample id and lane number
+    # THEN the undetermined metrics have been assigned the correct sample id and lane
     assert metrics[0].sample_internal_id == "sample_id"
     assert metrics[0].flow_cell_lane_number == 1
 
