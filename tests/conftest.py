@@ -10,6 +10,9 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
+from housekeeper.store.models import File, Version
+from requests import Response
+
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
@@ -51,8 +54,6 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
 )
 from cg.utils import Process
-from housekeeper.store.models import File, Version
-from requests import Response
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -113,6 +114,11 @@ def timestamp_in_2_weeks(timestamp_now: datetime) -> datetime:
 
 
 # Case fixtures
+
+
+@pytest.fixture(scope="session")
+def any_string() -> str:
+    return "any_string"
 
 
 @pytest.fixture(scope="session")
@@ -743,7 +749,7 @@ def compression_object(fastq_stub: Path, original_fastq_data: CompressionData) -
 # Demultiplex fixtures
 
 
-@pytest.fixture(name="lims_novaseq_bcl_convert_samples")
+@pytest.fixture
 def lims_novaseq_bcl_convert_samples(
     lims_novaseq_samples_raw: List[dict],
 ) -> List[FlowCellSampleBCLConvert]:
@@ -751,7 +757,7 @@ def lims_novaseq_bcl_convert_samples(
     return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
 
 
-@pytest.fixture(name="lims_novaseq_bcl2fastq_samples")
+@pytest.fixture
 def lims_novaseq_bcl2fastq_samples(
     lims_novaseq_samples_raw: List[dict],
 ) -> List[FlowCellSampleBcl2Fastq]:
@@ -906,6 +912,17 @@ def tmp_bcl2fastq_flow_cell(
     return FlowCellDirectoryData(
         flow_cell_path=tmp_demultiplexed_runs_bcl2fastq_directory,
         bcl_converter=BclConverter.BCL2FASTQ,
+    )
+
+
+@pytest.fixture
+def novaseq6000_flow_cell(
+    tmp_flow_cells_directory_malformed_sample_sheet: Path,
+) -> FlowCellDirectoryData:
+    """Return a NovaSeq6000 flow cell."""
+    return FlowCellDirectoryData(
+        flow_cell_path=tmp_flow_cells_directory_malformed_sample_sheet,
+        bcl_converter=BclConverter.BCLCONVERT,
     )
 
 
@@ -1357,7 +1374,7 @@ def lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
     return Path(raw_lims_sample_dir, "raw_samplesheet_novaseq.json")
 
 
-@pytest.fixture(name="lims_novaseq_samples_raw")
+@pytest.fixture
 def lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[dict]:
     """Return a list of raw flow cell samples."""
     return ReadFile.get_content_from_file(
@@ -1383,6 +1400,20 @@ def bcl_convert_demultiplexed_flow_cell(
 def novaseqx_demultiplexed_flow_cell(demultiplexed_runs: Path, novaseq_x_flow_cell_full_name: str):
     """Return the path to a demultiplexed NovaSeqX flow cell."""
     return Path(demultiplexed_runs, novaseq_x_flow_cell_full_name)
+
+
+@pytest.fixture()
+def novaseqx_flow_cell_with_sample_sheet_no_fastq(
+    mocker, novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
+) -> FlowCellDirectoryData:
+    """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
+    novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)
+    flow_cell = FlowCellDirectoryData(flow_cell_path=novaseqx_flow_cell_directory)
+    sample_sheet_path = Path(
+        novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+    mocker.patch.object(flow_cell, "get_sample_sheet_path_hk", return_value=sample_sheet_path)
+    return flow_cell
 
 
 # Genotype file fixture
@@ -2677,6 +2708,14 @@ def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     )
 
 
+@pytest.fixture(scope="function")
+def rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
+    """Path to deliverables file."""
+    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_deliverables").with_suffix(
+        FileExtensions.YAML
+    )
+
+
 @pytest.fixture(scope="session")
 def tower_id() -> int:
     """Returns a NF-Tower ID."""
@@ -3073,15 +3112,9 @@ def novaseqx_latest_analysis_version() -> str:
 
 
 @pytest.fixture(scope="function")
-def novaseqx_flow_cell_dir_name() -> str:
-    """Return the flow cell full name for a NovaseqX flow cell."""
-    return "20230427_LH00188_0001_B223YYCLT3"
-
-
-@pytest.fixture(scope="function")
-def novaseqx_flow_cell_directory(tmp_path: Path, novaseqx_flow_cell_dir_name: str) -> Path:
+def novaseqx_flow_cell_directory(tmp_path: Path, novaseq_x_flow_cell_full_name: str) -> Path:
     """Return the path to a NovaseqX flow cell directory."""
-    return Path(tmp_path, novaseqx_flow_cell_dir_name)
+    return Path(tmp_path, novaseq_x_flow_cell_full_name)
 
 
 @pytest.fixture(scope="function")
