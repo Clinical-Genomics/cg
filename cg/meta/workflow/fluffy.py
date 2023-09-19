@@ -191,7 +191,11 @@ class FluffyAnalysisAPI(AnalysisAPI):
         fluffy_sample_sheet_rows = []
 
         for sample in sample_sheet.samples:
-            sample_id: str = sample.sample_id
+            sample_id: Optional[str] = sample.get_valid_sample_id()
+
+            if not sample_id:
+                continue
+
             db_sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
 
             sample_sheet_row = FluffySample(

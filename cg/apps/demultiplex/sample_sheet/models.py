@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Extra, Field
 
@@ -20,6 +20,11 @@ class FlowCellSample(BaseModel):
     index: str
     index2: str = ""
     model_config = ConfigDict(populate_by_name=True, extra=Extra.ignore)
+
+    def get_valid_sample_id(self) -> Optional[str]:
+        sample_id: str = self.sample_id.split("_")[0]  # Remove any trailing index
+        if is_valid_sample_internal_id(sample_id):
+            return sample_id
 
 
 class FlowCellSampleBcl2Fastq(FlowCellSample):
