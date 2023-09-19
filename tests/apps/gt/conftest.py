@@ -9,8 +9,8 @@ from cg.constants.subject import Gender
 from cg.io.controller import WriteStream
 
 
-@pytest.fixture(name="genotype_export_sample_output")
-def fixture_genotype_export_sample_output(genotype_config: dict) -> str:
+@pytest.fixture
+def genotype_export_sample_output(genotype_config: dict) -> str:
     """
     genotype API fixture
     """
@@ -31,8 +31,8 @@ def fixture_genotype_export_sample_output(genotype_config: dict) -> str:
     return WriteStream.write_stream_from_content(content=sample_output, file_format=FileFormat.JSON)
 
 
-@pytest.fixture(name="genotype_export_sample_analysis_output")
-def fixture_genotype_export_sample_analysis_output() -> str:
+@pytest.fixture
+def genotype_export_sample_analysis_output() -> str:
     """Return some output from a sample analysis export"""
     sample_analysis_output = {
         "ACC6987A15": {

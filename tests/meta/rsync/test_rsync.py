@@ -10,8 +10,8 @@ from cg.meta.rsync import RsyncAPI
 from cg.store import Store
 from cg.store.models import Family
 from cg.constants.priority import SlurmQos, SlurmAccount
-from tests.meta.deliver.conftest import fixture_all_samples_in_inbox, fixture_dummy_file_name
-from tests.store.conftest import fixture_case_obj
+from tests.meta.deliver.conftest import all_samples_in_inbox, dummy_file_name
+from tests.store.conftest import case_obj
 
 
 def test_get_source_and_destination_paths(
