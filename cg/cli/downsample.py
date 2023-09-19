@@ -66,16 +66,16 @@ def downsample_sample(
 @DRY_RUN
 def downsample_case(context: CGConfig, case_internal_id: str, number_of_reads: int, dry_run: bool):
     """Downsample reads in all samples in a case."""
-    sample_reads: List[str] = format_downsample_case(
+    samples_reads: List[str] = format_downsample_case(
         case_internal_id=case_internal_id,
         number_of_reads=number_of_reads,
         status_db=context.status_db,
     )
-    for sample_read in sample_reads:
+    for sample_reads in samples_reads:
         downsample_api = DownSampleAPI(
             config=context,
             dry_run=dry_run,
             case_internal_id=case_internal_id,
-            sample_reads=sample_read,
+            sample_reads=sample_reads,
         )
         downsample_api.downsample_sample()

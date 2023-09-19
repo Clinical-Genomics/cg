@@ -4,6 +4,7 @@ from pathlib import Path
 
 from cg.constants import Priority, SequencingFileTag
 from cg.models.cg_config import CGConfig
+from cg.store import Store
 from cg.store.models import ApplicationVersion, Family, Sample
 
 LOG = logging.getLogger(__name__)
@@ -11,10 +12,10 @@ LOG = logging.getLogger(__name__)
 
 class DownsampleMetaData:
     def __init__(
-        self, config: CGConfig, sample_internal_id: str, number_of_reads: int, case_internal_id: str
+        self, status_db: Store, sample_internal_id: str, number_of_reads: int, case_internal_id: str
     ):
         """Initialize the model."""
-        self.config = config
+        self.status_db = status_db
         self.sample_internal_id: str = sample_internal_id
         self.number_of_reads: int = number_of_reads
         self.case_internal_id: str = case_internal_id
@@ -52,14 +53,14 @@ class DownsampleMetaData:
 
     def get_sample_to_downsample(self) -> Sample:
         """Check if a sample exists in StatusDB."""
-        sample: Sample = self.config.status_db.get_sample_by_internal_id(self.sample_internal_id)
+        sample: Sample = self.status_db.get_sample_by_internal_id(self.sample_internal_id)
         if not sample:
             raise ValueError(f"Sample {self.sample_internal_id} not found in StatusDB.")
         return sample
 
     def get_case_to_downsample(self) -> Family:
         """Check if a case exists in StatusDB."""
-        case: Family = self.config.status_db.get_case_by_internal_id(self.case_internal_id)
+        case: Family = self.status_db.get_case_by_internal_id(self.case_internal_id)
         if not case:
             raise ValueError(f"Case {self.case_internal_id} not found in StatusDB.")
         return case
@@ -72,7 +73,7 @@ class DownsampleMetaData:
         The new sample contains the original sample internal id and meta data.
         """
         application_version: ApplicationVersion = self.get_application_version(self.original_sample)
-        downsampled_sample: Sample = self.config.status_db.add_sample(
+        downsampled_sample: Sample = self.status_db.add_sample(
             name=self.downsampled_sample_name,
             internal_id=self.downsampled_sample_name,
             sex=self.original_sample.sex,
@@ -92,7 +93,7 @@ class DownsampleMetaData:
         self,
     ) -> Family:
         """Generate a case for the down sampled samples. The new case uses existing case data."""
-        downsampled_case: Family = self.config.status_db.add_case(
+        downsampled_case: Family = self.status_db.add_case(
             data_analysis=self.original_case.data_analysis,
             data_delivery=self.original_case.data_delivery,
             name=self.downsampled_case_name,
@@ -107,14 +108,14 @@ class DownsampleMetaData:
 
     def case_exists_in_statusdb(self, case_internal_id: str) -> bool:
         """Check if a case exists in StatusDB."""
-        case: Family = self.config.status_db.get_case_by_internal_id(case_internal_id)
+        case: Family = self.status_db.get_case_by_internal_id(case_internal_id)
         if case:
             return True
         return False
 
     def sample_exists_in_statusdb(self, sample_internal_id: str) -> bool:
         """Check if a sample exists in StatusDB."""
-        sample: Sample = self.config.status_db.get_sample_by_internal_id(sample_internal_id)
+        sample: Sample = self.status_db.get_sample_by_internal_id(sample_internal_id)
         if sample:
             return True
         return False
@@ -155,7 +156,7 @@ class DownsampleMetaData:
     def get_application_version(self, sample: Sample) -> ApplicationVersion:
         """Return the application version for a sample."""
         application_tag: str = self.get_application_tag(sample)
-        return self.config.status_db.get_current_application_version_by_tag(application_tag)
+        return self.status_db.get_current_application_version_by_tag(application_tag)
 
     def create_down_sampling_working_directory(self) -> Path:
         """Create a working directory for the down sample job."""

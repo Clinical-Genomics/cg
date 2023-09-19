@@ -35,7 +35,7 @@ class DownSampleAPI(MetaAPI):
         number_of_reads: int
         sample_internal_id, number_of_reads = sample_reads.split(";")
         return DownsampleMetaData(
-            config=config,
+            status_db=config.status_db,
             sample_internal_id=sample_internal_id,
             number_of_reads=number_of_reads,
             case_internal_id=case_internal_id,
@@ -144,7 +144,7 @@ class DownSampleAPI(MetaAPI):
         """Add down sampled fastq files to housekeeper."""
         fastq_file_paths: List[Path] = get_files_matching_pattern(
             directory=self.downsample_meta_data.fastq_file_output_directory,
-            pattern=f"*.{SequencingFileTag.FASTQ}",
+            pattern=f"*.{SequencingFileTag.FASTQ}.gz",
         )
         for fastq_file_path in fastq_file_paths:
             self.housekeeper_api.add_and_include_file_to_latest_version(
