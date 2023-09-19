@@ -4,12 +4,10 @@ from typing import List
 
 from pydantic import BaseModel, ConfigDict, Extra, Field
 
-from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 from cg.constants.constants import GenomeVersion
-from cg.constants.demultiplexing import (
-    SampleSheetBcl2FastqSections,
-    SampleSheetBCLConvertSections,
-)
+from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
+from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
+from pydantic import BaseModel, ConfigDict, Extra, Field
 
 LOG = logging.getLogger(__name__)
 
@@ -34,9 +32,7 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
     )
     index: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.INDEX_1.value)
     index2: str = Field("", alias=SampleSheetBcl2FastqSections.Data.INDEX_2.value)
-    sample_name: str = Field(
-        ..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value
-    )
+    sample_name: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_NAME.value)
     control: str = Field("N", alias=SampleSheetBcl2FastqSections.Data.CONTROL.value)
     recipe: str = Field("R1", alias=SampleSheetBcl2FastqSections.Data.RECIPE.value)
     operator: str = Field("script", alias=SampleSheetBcl2FastqSections.Data.OPERATOR.value)

@@ -94,6 +94,8 @@ class SampleSheetCreator:
     ) -> List[str]:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
         LOG.debug(f"Use sample sheet header {data_column_names}")
+        if isinstance(sample, FlowCellSampleBcl2Fastq):
+            sample.sample_name = sample.sample_id
         sample_dict = sample.model_dump(by_alias=True)
         return [str(sample_dict[column]) for column in data_column_names]
 
