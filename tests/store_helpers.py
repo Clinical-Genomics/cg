@@ -1,7 +1,7 @@
 """Utility functions to simply add test data in a cg store."""
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import List, Optional, Dict
 
 from housekeeper.store.models import Bundle, Version
 
@@ -28,8 +28,8 @@ from cg.store.models import (
     Panel,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     User,
+    SampleLaneSequencingMetrics,
 )
 
 LOG = logging.getLogger(__name__)
@@ -265,9 +265,7 @@ class StoreHelpers:
         if not case:
             case = StoreHelpers.add_case(store, data_analysis=pipeline, data_delivery=data_delivery)
 
-        analysis = store.add_analysis(
-            pipeline=pipeline, version=pipeline_version, family_id=case.id
-        )
+        analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
 
         analysis.started_at = started_at or datetime.now()
         if completed_at:
