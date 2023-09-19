@@ -1,4 +1,4 @@
-"""Sync cg and statusdb
+"""Sync parts of cg and statusdb
 
 Revision ID: 936887038ba8
 Revises: 5cb3ce4c3e39
