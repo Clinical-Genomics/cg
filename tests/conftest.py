@@ -1406,7 +1406,7 @@ def novaseqx_demultiplexed_flow_cell(demultiplexed_runs: Path, novaseq_x_flow_ce
 
 @pytest.fixture()
 def novaseqx_flow_cell_with_sample_sheet_no_fastq(
-  novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
+    novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
 ) -> FlowCellDirectoryData:
     """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
     novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)

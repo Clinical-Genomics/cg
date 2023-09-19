@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from housekeeper.store.models import File, Version
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
@@ -39,41 +39,9 @@ def store_flow_cell_data_in_housekeeper(
     add_tags_if_non_existent(tag_names=tags, hk_api=hk_api)
 
     add_sample_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api, store=store)
-    add_undetermined_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api, store=store)
+    store_undetermined_fastq_files(flow_cell=flow_cell, hk_api=hk_api, store=store)
     add_demux_logs_to_housekeeper(
         flow_cell=flow_cell, hk_api=hk_api, flow_cell_run_dir=flow_cell_run_dir
-    )
-
-
-def add_undetermined_fastq_files_to_housekeeper(
-    flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI
-) -> None:
-    """Add undetermined fastq files for non-pooled samples in Housekeeper."""
-    non_pooled_samples: List[FlowCellSample] = flow_cell.sample_sheet.get_non_pooled_samples()
-
-    for sample in non_pooled_samples:
-        undetermined_fastqs: List[Path] = get_undetermined_fastqs(
-            lane=sample.lane, flow_cell_path=flow_cell.path
-        )
-
-        for fastq_path in undetermined_fastqs:
-            add_fastq_file_to_housekeeper(
-                sample_id=sample.sample_id,
-                flow_cell_id=flow_cell.id,
-                fastq_path=fastq_path,
-                hk_api=hk_api,
-            )
-
-
-def add_fastq_file_to_housekeeper(
-    sample_id: str, flow_cell_id: str, fastq_path: Path, hk_api: HousekeeperAPI
-) -> None:
-    add_bundle_and_version_if_non_existent(bundle_name=sample_id, hk_api=hk_api)
-    add_file_to_bundle_if_non_existent(
-        file_path=fastq_path,
-        bundle_name=sample_id,
-        tag_names=[SequencingFileTag.FASTQ, flow_cell_id],
-        hk_api=hk_api,
     )
 
 
@@ -98,6 +66,27 @@ def add_demux_logs_to_housekeeper(
             LOG.info(f"Added demux log file {log_file_path} to Housekeeper.")
         except FileNotFoundError as e:
             LOG.error(f"Cannot find demux log file {log_file_path}. Error: {e}.")
+
+
+def store_undetermined_fastq_files(
+    flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, store: Store
+) -> None:
+    """Store undetermined fastq files for non-pooled samples in Housekeeper."""
+    non_pooled_samples: List[FlowCellSample] = flow_cell.sample_sheet.get_non_pooled_samples()
+
+    for sample in non_pooled_samples:
+        undetermined_fastqs: List[Path] = get_undetermined_fastqs(
+            lane=sample.lane, flow_cell_path=flow_cell.path
+        )
+
+        for fastq_path in undetermined_fastqs:
+            store_fastq_path_in_housekeeper(
+                sample_internal_id=sample.sample_id,
+                sample_fastq_path=fastq_path,
+                flow_cell=flow_cell,
+                hk_api=hk_api,
+                store=store,
+            )
 
 
 def add_sample_fastq_files_to_housekeeper(
