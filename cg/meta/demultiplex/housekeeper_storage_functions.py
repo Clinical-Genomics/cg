@@ -128,38 +128,36 @@ def add_sample_fastq_files_to_housekeeper(
             sample_fastq_path: Path = rename_fastq_file_if_needed(
                 fastq_file_path=sample_fastq_path, flow_cell_name=flow_cell.id
             )
-            store_fastq_path_in_housekeeper(
-                sample_internal_id=sample_internal_id,
+            if check_if_fastq_path_should_be_stored_in_housekeeper(
+                sample_id=sample_internal_id,
                 sample_fastq_path=sample_fastq_path,
-                flow_cell=flow_cell,
-                hk_api=hk_api,
+                sequencer_type=flow_cell.sequencer_type,
+                flow_cell_name=flow_cell.id,
                 store=store,
-            )
+            ):
+                store_fastq_path_in_housekeeper(
+                    sample_internal_id=sample_internal_id,
+                    sample_fastq_path=sample_fastq_path,
+                    flow_cell_id=flow_cell.id,
+                    hk_api=hk_api,
+                )
 
 
 def store_fastq_path_in_housekeeper(
     sample_internal_id: str,
     sample_fastq_path: Path,
-    flow_cell: FlowCellDirectoryData,
+    flow_cell_id: str,
     hk_api: HousekeeperAPI,
-    store: Store,
 ) -> None:
-    sample_fastq_should_be_stored: bool = check_if_fastq_path_should_be_stored_in_housekeeper(
-        sample_id=sample_internal_id,
-        sample_fastq_path=sample_fastq_path,
-        sequencer_type=flow_cell.sequencer_type,
-        flow_cell_name=flow_cell.id,
-        store=store,
+    """Add the fastq file path with tags to a bundle and version in Housekeeper."""
+    add_bundle_and_version_if_non_existent(bundle_name=sample_internal_id, hk_api=hk_api)
+    add_tags_if_non_existent(tag_names=[sample_internal_id], hk_api=hk_api)
+    add_file_to_bundle_if_non_existent(
+        file_path=sample_fastq_path,
+        bundle_name=sample_internal_id,
+        tag_names=[SequencingFileTag.FASTQ, flow_cell_id, sample_internal_id],
+        hk_api=hk_api,
     )
-
-    if sample_fastq_should_be_stored:
-        add_bundle_and_version_if_non_existent(bundle_name=sample_internal_id, hk_api=hk_api)
-        add_file_to_bundle_if_non_existent(
-            file_path=sample_fastq_path,
-            bundle_name=sample_internal_id,
-            tag_names=[SequencingFileTag.FASTQ, flow_cell.id],
-            hk_api=hk_api,
-        )
 
 
 def check_if_fastq_path_should_be_stored_in_housekeeper(

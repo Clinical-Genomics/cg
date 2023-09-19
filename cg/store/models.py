@@ -2,6 +2,11 @@ import datetime as dt
 import re
 from typing import Dict, List, Optional, Set
 
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.util import deprecated
+
 from cg.constants import (
     CASE_ACTIONS,
     FLOWCELL_STATUS,
@@ -13,10 +18,6 @@ from cg.constants import (
     Priority,
 )
 from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm.attributes import InstrumentedAttribute
-from sqlalchemy.util import deprecated
 
 Model = declarative_base()
 
@@ -189,7 +190,7 @@ class Analysis(Model):
     is_primary = Column(types.Boolean, default=False)
 
     created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
-    family_id = Column(ForeignKey("family.id", ondelete="CASCADE"))
+    family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
     uploaded_to_vogue_at = Column(types.DateTime, nullable=True)
 
     def __str__(self):
