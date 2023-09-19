@@ -1,12 +1,9 @@
 from pathlib import Path
-from cg.utils.files import get_all_files_in_dir
-from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 
-from cg.cli.demultiplex.demux import (
-    hardlink_flow_cell_analysis_data,
-    is_ready_for_post_processing,
-)
+from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
+from cg.cli.demultiplex.demux import hardlink_flow_cell_analysis_data, is_ready_for_post_processing
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.utils.files import get_all_files_in_dir
 
 
 def test_flow_cell_is_ready_for_post_processing(
@@ -103,11 +100,11 @@ def test_get_latest_analysis_version_path(
 def test_copy_novaseqx_flow_cell(
     demultiplexed_runs_flow_cell_directory: Path,
     novaseqx_flow_cell_dir_with_analysis_data: Path,
-    novaseqx_flow_cell_dir_name: str,
+    novaseq_x_flow_cell_full_name: str,
 ):
     # GIVEN a demultiplexed runs directory for a NovaseqX flow cell
     demultiplexed_runs_novaseqx_dir: Path = Path(
-        demultiplexed_runs_flow_cell_directory, novaseqx_flow_cell_dir_name
+        demultiplexed_runs_flow_cell_directory, novaseq_x_flow_cell_full_name
     )
     # WHEN copying the flow cell analysis data to demultiplexed runs NovaseqX directory
     hardlink_flow_cell_analysis_data(

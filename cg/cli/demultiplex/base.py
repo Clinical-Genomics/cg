@@ -2,7 +2,6 @@
 import logging
 
 import click
-from cg.cli.demultiplex.add import add_flow_cell_cmd, select_project_cmd
 from cg.cli.demultiplex.demux import (
     demultiplex_all,
     demultiplex_flow_cell,
@@ -11,7 +10,6 @@ from cg.cli.demultiplex.demux import (
     confirm_flow_cell_sync,
 )
 from cg.cli.demultiplex.finish import finish_group
-from cg.cli.demultiplex.report import create_report_cmd
 from cg.cli.demultiplex.sample_sheet import sample_sheet_commands
 
 LOG = logging.getLogger(__name__)
@@ -25,8 +23,6 @@ def demultiplex_cmd_group():
 
 demultiplex_cmd_group: click.Group
 for sub_cmd in [
-    add_flow_cell_cmd,
-    create_report_cmd,
     confirm_flow_cell_sync,
     delete_flow_cell,
     demultiplex_flow_cell,
@@ -34,6 +30,5 @@ for sub_cmd in [
     finish_group,
     copy_novaseqx_flow_cells,
     sample_sheet_commands,
-    select_project_cmd,
 ]:
     demultiplex_cmd_group.add_command(sub_cmd)

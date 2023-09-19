@@ -9,8 +9,8 @@ from cg.models.cg_config import CGConfig
 from tests.mocks.report import MockMipDNAReportAPI, MockMipDNAAnalysisAPI
 
 
-@pytest.fixture(name="mip_dna_context")
-def fixture_mip_dna_context(cg_context, helpers, case_id, real_housekeeper_api) -> CGConfig:
+@pytest.fixture
+def mip_dna_context(cg_context, helpers, case_id, real_housekeeper_api) -> CGConfig:
     """MIP DNA context fixture"""
 
     store = cg_context.status_db
@@ -53,8 +53,8 @@ def fixture_mip_dna_context(cg_context, helpers, case_id, real_housekeeper_api) 
     return cg_context
 
 
-@pytest.fixture(name="delivery_report_click_context")
-def fixture_delivery_report_click_context(mip_dna_context) -> click.Context:
+@pytest.fixture
+def delivery_report_click_context(mip_dna_context) -> click.Context:
     """Click delivery report context fixture"""
 
     return click.Context(generate_delivery_report, obj=mip_dna_context)
