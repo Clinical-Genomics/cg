@@ -1,18 +1,18 @@
 import shutil
-
-import pytest
-
 from collections import namedtuple
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
+
+import pytest
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store.api import Store
-from cg.store.models import Sample, Family
+from cg.store.models import Family, Sample
 from tests.store_helpers import StoreHelpers
 
 FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_internal_ids")
@@ -39,9 +39,9 @@ def temp_fastq_paths(tmp_demulitplexing_dir: Path) -> List[Path]:
     return fastqs
 
 
-@pytest.fixture(name="fastq_file_path")
-def fastq_file_path() -> Path:
-    """Return a path to a fastq file."""
+@pytest.fixture
+def demultiplex_fastq_file_path() -> Path:
+    """Return a path to non-existent a fastq file."""
     return Path("path/to/sample_internal_id_S1_L001_R1_001.fastq.gz")
 
 
