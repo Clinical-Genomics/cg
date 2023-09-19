@@ -39,6 +39,7 @@ def store_flow_cell_data_in_housekeeper(
     add_tags_if_non_existent(tag_names=tags, hk_api=hk_api)
 
     add_sample_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api, store=store)
+    add_undetermined_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api, store=store)
     add_demux_logs_to_housekeeper(
         flow_cell=flow_cell, hk_api=hk_api, flow_cell_run_dir=flow_cell_run_dir
     )
