@@ -4,7 +4,7 @@ from pathlib import Path
 
 from cg.constants import Priority, SequencingFileTag
 from cg.models.cg_config import CGConfig
-from cg.store.models import Sample, Family, ApplicationVersion
+from cg.store.models import ApplicationVersion, Family, Sample
 
 LOG = logging.getLogger(__name__)
 

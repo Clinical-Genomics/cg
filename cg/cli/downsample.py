@@ -13,25 +13,24 @@ from cg.models.cg_config import CGConfig
 LOG = logging.getLogger(__name__)
 
 
-@click.group
+@click.group()
 def downsample_cmd():
     """Downsample reads in a sample."""
-    return
 
 
-@downsample_cmd.command(
-    "samples", short_help="Downsample reads in one or multiple samples in a case."
-)
-@click.argument(
-    "-c" "--case-internal-id",
+@downsample_cmd.command("samples", help="Downsample reads in one or multiple samples in a case.")
+@click.option(
+    "-c",
+    "--case-internal-id",
     required=True,
-    short_help="Case identifier used in statusdb, e.g. supersonicturtle",
+    help="Case identifier used in statusdb, e.g. supersonicturtle",
 )
-@click.argument(
-    "-sr" "--sample-internal-id;reads",
+@click.option(
+    "-sr",
+    "--sample_internal_id_reads",
+    required=True,
     multiple=True,
-    required=True,
-    short_help="Identifier used in statusdb, e.g. ACC1234567 and the number of reads to down sample to in millions separated by ;."
+    help="Identifier used in statusdb, e.g. ACC1234567 and the number of reads to down sample to in millions separated by ;."
     "e.g. ACC1234567;30",
 )
 @DRY_RUN
@@ -50,19 +49,19 @@ def downsample_sample(
 
 
 @downsample_cmd.command(
-    "case", short_help="Down sample reads in all samples in a case to the same number of reads."
+    "case", help="Down sample reads in all samples in a case to the same number of reads."
 )
-@click.argument(
+@click.option(
     "-c",
     "--case_internal_id",
     required=True,
-    short_help="Case identifier used in statusdb, e.g. subsonicrabbit",
+    help="Case identifier used in statusdb, e.g. subsonicrabbit",
 )
-@click.argument(
+@click.option(
     "-r",
     "--number_of_reads",
     required=True,
-    short_help="Number of reads to down sample to in millions, e.g. 30",
+    help="Number of reads to down sample to in millions, e.g. 30",
 )
 @DRY_RUN
 def downsample_case(context: CGConfig, case_internal_id: str, number_of_reads: int, dry_run: bool):
