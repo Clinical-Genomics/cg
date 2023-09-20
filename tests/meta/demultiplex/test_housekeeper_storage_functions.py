@@ -1,22 +1,27 @@
 """Tests for the housekeeper storage functions of the demultiplexing post post-processing module."""
 
 from pathlib import Path
-from typing import List
+from typing import List, Set
+
+import mock
+from housekeeper.store.models import File
 from mock import MagicMock, call
 
-
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_bundle_and_version_if_non_existent,
-    add_tags_if_non_existent,
+    add_demux_logs_to_housekeeper,
     add_sample_fastq_files_to_housekeeper,
     add_sample_sheet_path_to_housekeeper,
-    add_demux_logs_to_housekeeper,
+    add_tags_if_non_existent,
     get_sample_sheets_from_latest_version,
+    store_fastq_path_in_housekeeper,
 )
+from cg.models.cg_config import CGConfig
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.store import Store
 
 
 def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
@@ -213,3 +218,27 @@ def test_add_demux_logs_to_housekeeper(
     assert len(files) == 2
     for file in files:
         assert file.path.split("/")[-1] in expected_file_names
+
+
+def test_store_fastq_path_in_housekeeper_correct_tags(
+    populated_housekeeper_api: HousekeeperAPI,
+    empty_fastq_file_path: Path,
+    novaseq6000_flow_cell: FlowCellDirectoryData,
+):
+    """Test that a fastq file is stored in Housekeeper with the correct tags."""
+    sample_id: str = "sample_internal_id"
+    # GIVEN a fastq file that has not been added to Housekeeper
+    assert not populated_housekeeper_api.files(path=empty_fastq_file_path.as_posix()).first()
+
+    # WHEN adding the fastq file to housekeeper
+    store_fastq_path_in_housekeeper(
+        sample_internal_id=sample_id,
+        sample_fastq_path=empty_fastq_file_path,
+        flow_cell_id=novaseq6000_flow_cell.id,
+        hk_api=populated_housekeeper_api,
+    )
+
+    # THEN the file was added to Housekeeper with the correct tags
+    file: File = populated_housekeeper_api.get_files(bundle=sample_id).first()
+    expected_tags: Set[str] = {SequencingFileTag.FASTQ.value, novaseq6000_flow_cell.id, sample_id}
+    assert set([tag.name for tag in file.tags]) == expected_tags
