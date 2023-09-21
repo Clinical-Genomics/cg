@@ -1,9 +1,6 @@
 import logging
 from typing import Optional
 
-from pydantic.v1 import BaseModel, EmailStr, Field
-from typing_extensions import Literal
-
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -20,6 +17,8 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.store import Store
+from pydantic.v1 import BaseModel, EmailStr, Field
+from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -35,8 +34,21 @@ class EncryptionDirs(BaseModel):
     legacy: str
 
 
+class FlowCellRunDirs(Sequencers):
+    pass
+
+
 class BackupConfig(BaseModel):
     encrypt_dir: EncryptionDirs
+
+
+class CleanDirs(BaseModel):
+    sample_sheets_dir_name: str
+    flow_cell_run_dirs: FlowCellRunDirs
+
+
+class CleanConfig(BaseModel):
+    flow_cells: CleanDirs
 
 
 class SlurmConfig(BaseModel):
@@ -241,6 +253,7 @@ class CGConfig(BaseModel):
     backup: BackupConfig = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
+    clean: Optional[CleanConfig] = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
@@ -291,6 +304,7 @@ class CGConfig(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         fields = {
+            "cg_stats_api_": "cg_stats_api",
             "chanjo_api_": "chanjo_api",
             "crunchy_api_": "crunchy_api",
             "demultiplex_api_": "demultiplex_api",
