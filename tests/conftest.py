@@ -2161,7 +2161,7 @@ def microsalt_dir(tmpdir_factory) -> Path:
 @pytest.fixture
 def current_encryption_dir() -> Path:
     """Return a temporary directory for current encryption testing."""
-    return Path("home", "ENCRYPT")
+    return Path("home", "encrypt")
 
 
 @pytest.fixture
