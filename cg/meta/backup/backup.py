@@ -3,13 +3,13 @@ import logging
 import re
 import subprocess
 from pathlib import Path
-from typing import Optional, Dict, List, Tuple
+from typing import List, Optional, Tuple
 
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import FileExtensions, FlowCellStatus
 from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
+from cg.constants.constants import FileExtensions, FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.indexes import ListIndexes
 from cg.constants.pdc import PDCExitCodes
@@ -33,7 +33,7 @@ class BackupAPI:
     def __init__(
         self,
         encryption_api: EncryptionAPI,
-        encrypt_dir: Dict[str, str],
+        encrypt_dir: str,
         status: Store,
         tar_api: TarAPI,
         pdc_api: PdcAPI,
@@ -41,7 +41,7 @@ class BackupAPI:
         dry_run: bool = False,
     ):
         self.encryption_api = encryption_api
-        self.encrypt_dir = encrypt_dir
+        self.encrypt_dir: str = encrypt_dir
         self.status: Store = status
         self.tar_api: TarAPI = tar_api
         self.pdc: PdcAPI = pdc_api
@@ -253,9 +253,7 @@ class BackupAPI:
 
     def query_pdc_for_flow_cell(self, flow_cell_id) -> List[str]:
         """Query PDC for a given flow cell id."""
-        search_patterns: List[str] = [
-            dir + ASTERISK + flow_cell_id + ASTERISK for dir in self.encrypt_dir.values()
-        ]
+        search_patterns: List[str] = [self.encrypt_dir + ASTERISK + flow_cell_id + ASTERISK]
 
         for search_pattern in search_patterns:
             try:
@@ -294,15 +292,14 @@ class BackupAPI:
             and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
 
-        for dir in self.encrypt_dir.values():
-            re_archived_flow_cell_path: re.Pattern = re.compile(dir + ".+?(?=\s)")
-            arhived_flow_cell: Optional[re.Match] = re.search(
-                re_archived_flow_cell_path, flow_cell_query
-            )
-            if arhived_flow_cell:
-                archived_flow_cell_path: Path = Path(arhived_flow_cell.group())
-                LOG.info(f"Flow cell found: {archived_flow_cell_path}")
-                return archived_flow_cell_path
+        re_archived_flow_cell_path: re.Pattern = re.compile(self.encrypt_dir + ".+?(?=\s)")
+        arhived_flow_cell: Optional[re.Match] = re.search(
+            re_archived_flow_cell_path, flow_cell_query
+        )
+        if arhived_flow_cell:
+            archived_flow_cell_path: Path = Path(arhived_flow_cell.group())
+            LOG.info(f"Flow cell found: {archived_flow_cell_path}")
+            return archived_flow_cell_path
 
     def get_archived_encryption_key_path(self, query: list) -> Path:
         """Get the encryption key for the archived flow cell from a PDC query."""
@@ -310,15 +307,14 @@ class BackupAPI:
             row for row in query if FileExtensions.KEY in row and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
 
-        for dir in self.encrypt_dir.values():
-            re_archived_encryption_key_path: re.Pattern = re.compile(dir + ".+?(?=\s)")
-            archived_encryption_key: Optional[re.Match] = re.search(
-                re_archived_encryption_key_path, encryption_key_query
-            )
-            if archived_encryption_key:
-                archived_encryption_key_path: Path = Path(archived_encryption_key.group())
-                LOG.info(f"Encryption key found: {archived_encryption_key_path}")
-                return archived_encryption_key_path
+        re_archived_encryption_key_path: re.Pattern = re.compile(self.encrypt_dir + ".+?(?=\s)")
+        archived_encryption_key: Optional[re.Match] = re.search(
+            re_archived_encryption_key_path, encryption_key_query
+        )
+        if archived_encryption_key:
+            archived_encryption_key_path: Path = Path(archived_encryption_key.group())
+            LOG.info(f"Encryption key found: {archived_encryption_key_path}")
+            return archived_encryption_key_path
 
 
 class SpringBackupAPI:

@@ -7,15 +7,14 @@ import mock
 import pytest
 from mock import call
 
-from cg.constants.sequencing import Sequencers
-from tests.mocks.hk_mock import MockFile
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, FlowCellStatus
+from cg.constants.sequencing import Sequencers
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
+from tests.mocks.hk_mock import MockFile
 
 
 @mock.patch("cg.store.Store")
@@ -196,7 +195,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     # GIVEN we check if a flow cell needs to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        encrypt_dir=cg_context.backup.encrypt_dir.dict(),
+        encrypt_dir=cg_context.backup.encrypt_dir,
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
@@ -259,7 +258,7 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     # GIVEN we want to retrieve a specific flow cell from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        encrypt_dir=cg_context.backup.encrypt_dir.dict(),
+        encrypt_dir=cg_context.backup.encrypt_dir,
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
@@ -324,7 +323,7 @@ def test_fetch_flow_cell_pdc_retrieval_failed(
     # GIVEN we are going to retrieve a flow cell from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        encrypt_dir=cg_context.backup.encrypt_dir.dict(),
+        encrypt_dir=cg_context.backup.encrypt_dir,
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock_pdc,
@@ -372,7 +371,7 @@ def test_fetch_flow_cell_integration(
     # GIVEN we want to retrieve a specific flow cell from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        encrypt_dir=cg_context.backup.encrypt_dir.dict(),
+        encrypt_dir=cg_context.backup.encrypt_dir,
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
