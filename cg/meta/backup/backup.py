@@ -255,7 +255,9 @@ class BackupAPI:
         Raise:
             CalledProcessError if no files archived files were found.
         """
-        search_pattern: str = f"{ASTERISK}{FWD_SLASH}{ASTERISK}{flow_cell_id}{ASTERISK}"
+        search_pattern: str = (
+            f"{ASTERISK}{FWD_SLASH}{ASTERISK}{flow_cell_id}{ASTERISK}{FileExtensions.GPG}"
+        )
         dsmc_output: List[str] = []
         try:
             self.pdc.query_pdc(search_pattern=search_pattern)
@@ -263,8 +265,8 @@ class BackupAPI:
         except subprocess.CalledProcessError as error:
             if error.returncode != PDCExitCodes.NO_FILES_FOUND:
                 raise error
-            LOG.error(f"No archived files found for pdc query: {search_pattern}")
-        LOG.info(f"Found archived files for pdc query: {search_pattern}")
+            LOG.error(f"No archived files found for PDC query: {search_pattern}")
+        LOG.info(f"Found archived files for PDC query: {search_pattern}")
         return dsmc_output
 
     def retrieve_archived_file(self, archived_file: Path, run_dir: Path) -> None:

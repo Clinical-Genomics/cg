@@ -19,9 +19,36 @@ from cg.meta.encryption.encryption import SpringEncryptionAPI
 from tests.mocks.hk_mock import MockFile
 
 
+def test_query_pdc_for_flow_cell(caplog, flow_cell_name: str, mocker):
+    """Tests query PDC for a flow cell."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an DSMC output
+    mocker.patch.object(PdcAPI, "query_pdc")
+    PdcAPI.query_pdc.return_value = "a str"
+
+    # GIVEN a Backup API
+    backup_api = BackupAPI(
+        encryption_api=mock.Mock(),
+        encrypt_dir=mock.Mock(),
+        status=mock.Mock(),
+        tar_api=mock.Mock(),
+        pdc_api=mock.Mock(),
+        flow_cells_dir=mock.Mock(),
+    )
+
+    # WHEN getting the dcms output of flow cell query
+    backup_api.query_pdc_for_flow_cell(flow_cell_id=flow_cell_name)
+
+    # THEN log that files were found
+    assert "Found archived files for PDC query: " in caplog.text
+
+
 def test_get_archived_encryption_key_path(dsmc_q_archive_output: List[str], flow_cell_name: str):
     """Tests returning an encryption key path from DSMC output."""
     # GIVEN an DSMC output
+
+    # GIVEN a Backup API
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
         encrypt_dir=mock.Mock(),
@@ -37,7 +64,7 @@ def test_get_archived_encryption_key_path(dsmc_q_archive_output: List[str], flow
     # THEN this method should return a path object
     assert isinstance(key_path, Path)
 
-    # THEN path should return the key file name
+    # THEN return the key file name
     assert (
         key_path.name
         == f"190329_A00689_0018_A{flow_cell_name}{FileExtensions.KEY}{FileExtensions.GPG}"
@@ -47,6 +74,7 @@ def test_get_archived_encryption_key_path(dsmc_q_archive_output: List[str], flow
 def test_get_archived_flow_cell_path(dsmc_q_archive_output: List[str], flow_cell_name: str):
     """Tests returning a flow cell path from DSMC output."""
     # GIVEN an DSMC output
+    # GIVEN a Backup API
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
         encrypt_dir=mock.Mock(),
@@ -62,7 +90,7 @@ def test_get_archived_flow_cell_path(dsmc_q_archive_output: List[str], flow_cell
     # THEN this method should return a path object
     assert isinstance(flow_cell_path, Path)
 
-    # THEN path should return the key file name
+    # THEN return the flow cell file name
     assert (
         flow_cell_path.name
         == f"190329_A00689_0018_A{flow_cell_name}{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
