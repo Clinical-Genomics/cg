@@ -54,6 +54,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
                 "--genome-version": genome_version,
                 "--balsamic-cache": self.balsamic_cache,
                 "--cache-version": cache_version,
+                "--conda-env": self.conda_env,
                 "--version": self.get_next_pon_version(verified_panel_bed),
             }
         )

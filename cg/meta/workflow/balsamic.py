@@ -46,6 +46,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         super().__init__(config=config, pipeline=pipeline)
         self.account = config.balsamic.slurm.account
         self.balsamic_cache = config.balsamic.balsamic_cache
+        self.conda_env = config.balsamic.conda_env
         self.bed_path = config.balsamic.bed_path
         self.cadd_path = config.balsamic.cadd_path
         self.email = config.balsamic.slurm.mail_user
@@ -544,6 +545,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--analysis-dir": self.root_dir,
                 "--balsamic-cache": self.balsamic_cache,
                 "--cache-version": cache_version,
+                "--conda-env": self.conda_env,
                 "--fastq-path": self.get_sample_fastq_destination_dir(
                     self.status_db.get_case_by_internal_id(case_id)
                 ),
