@@ -67,6 +67,7 @@ class GisaidSample(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def set_generated_fields(cls, data: Any):
+        """Constructs the fields that are generated from other fields."""
         if isinstance(data, dict):
             data.setdefault("covv_location", _generate_covv_location(data.get("region")))
             data["covv_subm_sample_id"] = _generate_covv_subm_sample_id(
