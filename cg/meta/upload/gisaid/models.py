@@ -23,15 +23,22 @@ class GisaidAccession(BaseModel):
     accession_nr: Optional[str] = None
     sample_id: Optional[str] = None
 
-    @field_validator("accession_nr")
+    @model_validator(mode="before")
     @classmethod
-    def parse_accession(cls, _, info: FieldValidationInfo):
-        return info.data.get("log_message").split(";")[-1]
+    def set_generated_fields(cls, data: Any) -> Any:
+        """Constructs the fields that are generated from other fields."""
+        if isinstance(data, dict):
+            data.setdefault("accession_nr", _parse_accession_nr(data["log_message"]))
+            data.setdefault("sample_id", _parse_sample_id_from_log(data["log_message"]))
+        return data
 
-    @field_validator("sample_id")
-    @classmethod
-    def parse_sample_id(cls, _, info: FieldValidationInfo):
-        return info.data.get("log_message").split("/")[2].split("_")[2]
+
+def _parse_accession_nr(log_message: str) -> str:
+    return log_message.split(";")[-1]
+
+
+def _parse_sample_id_from_log(log_message: str) -> str:
+    return log_message.split("/")[2].split("_")[2]
 
 
 class UploadFiles(BaseModel):
