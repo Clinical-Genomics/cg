@@ -2159,8 +2159,8 @@ def microsalt_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def current_encryption_dir() -> Path:
-    """Return a temporary directory for current encryption testing."""
+def encryption_dir() -> Path:
+    """Return a temporary directory for encryption testing."""
     return Path("home", "encrypt")
 
 
@@ -2218,7 +2218,7 @@ def context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encrypt_dir": str(current_encryption_dir),
+            "encrypt_dir": str(encryption_dir),
             "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
         },
         "balsamic": {
