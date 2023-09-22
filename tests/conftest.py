@@ -2164,12 +2164,6 @@ def encryption_dir() -> Path:
     return Path("home", "encrypt")
 
 
-@pytest.fixture
-def legacy_encryption_dir() -> Path:
-    """Return a temporary directory for current encryption testing."""
-    return Path("home", "TO_PDC")
-
-
 @pytest.fixture(name="cg_uri")
 def cg_uri() -> str:
     """Return a cg URI."""
