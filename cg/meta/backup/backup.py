@@ -92,9 +92,7 @@ class BackupAPI:
             raise error
 
         archived_key: Path = self.get_archived_encryption_key_path(query=pdc_flow_cell_query)
-        archived_flow_cell: Path = self.get_archived_flow_cell_path(
-            query=pdc_flow_cell_query, flow_cell_id=flow_cell.name
-        )
+        archived_flow_cell: Path = self.get_archived_flow_cell_path(query=pdc_flow_cell_query)
 
         if not self.dry_run:
             return self._process_flow_cell(
