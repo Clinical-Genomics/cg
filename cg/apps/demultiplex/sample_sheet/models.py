@@ -4,10 +4,12 @@ from typing import List
 
 from pydantic import BaseModel, ConfigDict, Extra, Field
 
-from cg.constants.constants import GenomeVersion
 from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
-from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
-from pydantic import BaseModel, ConfigDict, Extra, Field
+from cg.constants.constants import GenomeVersion
+from cg.constants.demultiplexing import (
+    SampleSheetBcl2FastqSections,
+    SampleSheetBCLConvertSections,
+)
 
 LOG = logging.getLogger(__name__)
 
