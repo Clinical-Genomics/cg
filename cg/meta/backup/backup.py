@@ -251,28 +251,22 @@ class BackupAPI:
         self.status.session.commit()
         LOG.info(f"Status for flow cell {flow_cell.name} set to {flow_cell.status}")
 
-    def query_pdc_for_flow_cell(self, flow_cell_id) -> List[str]:
-        """Query PDC for a given flow cell id."""
-        search_patterns: List[str] = [f"{ASTERISK}{FWD_SLASH}{ASTERISK}{flow_cell_id}{ASTERISK}"]
-        query: List[str] = []
-        for search_pattern in search_patterns:
-            try:
-                self.pdc.query_pdc(search_pattern=search_pattern)
-                query: List[str] = self.pdc.process.stdout.split(NEW_LINE)
-                continue
-            except subprocess.CalledProcessError as error:
-                if error.returncode != PDCExitCodes.NO_FILES_FOUND:
-                    raise error
-                LOG.info(
-                    f"No archived files found for pdc query {search_patterns}, testing legacy directory"
-                )
-
-        if not query:
-            raise PdcNoFilesMatchingSearchError(
-                message=f"No archived files found for pdc queries {search_patterns}"
-            )
-        LOG.info(f"Found archived files for pdc queries {search_patterns}")
-        return query
+    def query_pdc_for_flow_cell(self, flow_cell_id: str) -> List[str]:
+        """Query PDC for a given flow cell id.
+        Raise:
+            CalledProcessError if no files archived files were found.
+        """
+        search_pattern: str = f"{ASTERISK}{FWD_SLASH}{ASTERISK}{flow_cell_id}{ASTERISK}"
+        dsmc_output: List[str] = []
+        try:
+            self.pdc.query_pdc(search_pattern=search_pattern)
+            dsmc_output: List[str] = self.pdc.process.stdout.split(NEW_LINE)
+        except subprocess.CalledProcessError as error:
+            if error.returncode != PDCExitCodes.NO_FILES_FOUND:
+                raise error
+            LOG.error(f"No archived files found for pdc query: {search_pattern}")
+        LOG.info(f"Found archived files for pdc query: {search_pattern}")
+        return dsmc_output
 
     def retrieve_archived_file(self, archived_file: Path, run_dir: Path) -> None:
         """Retrieve the archived file from PDC to a flow cell runs directory."""
