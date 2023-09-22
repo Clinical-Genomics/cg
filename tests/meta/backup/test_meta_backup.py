@@ -2,6 +2,8 @@
 
 import logging
 import subprocess
+from pathlib import Path
+from typing import List
 
 import mock
 import pytest
@@ -15,6 +17,27 @@ from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from tests.mocks.hk_mock import MockFile
+
+
+def test_get_archived_encryption_key_path(dsmc_q_archive_output: List[str], flow_cell_name: str):
+    """Tests returning an encryption key path."""
+    # GIVEN an DSMC output
+    backup_api = BackupAPI(
+        encryption_api=mock.Mock(),
+        encrypt_dir=mock.Mock(),
+        status=mock.Mock(),
+        tar_api=mock.Mock(),
+        pdc_api=mock.Mock(),
+        flow_cells_dir=mock.Mock(),
+    )
+
+    # WHEN getting the encryption key path
+    key_path: Path = backup_api.get_archived_encryption_key_path(
+        flow_cell_id=flow_cell_name, query=dsmc_q_archive_output
+    )
+
+    # THEN this method should return a path object
+    assert isinstance(key_path, Path)
 
 
 @mock.patch("cg.store.Store")
