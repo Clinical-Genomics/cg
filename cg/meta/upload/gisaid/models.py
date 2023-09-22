@@ -66,7 +66,7 @@ class GisaidSample(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def set_generated_fields(cls, data: Any):
+    def set_generated_fields(cls, data: Any) -> Any:
         """Constructs the fields that are generated from other fields."""
         if isinstance(data, dict):
             data.setdefault("covv_location", _generate_covv_location(data.get("region")))
@@ -86,14 +86,14 @@ class GisaidSample(BaseModel):
         return data
 
 
-def _generate_covv_location(region):
+def _generate_covv_location(region: str) -> str:
     return f"Europe/Sweden/{region}"
 
 
-def _generate_covv_subm_sample_id(subm_sample_id, region_code):
+def _generate_covv_subm_sample_id(subm_sample_id: str, region_code: str) -> str:
     return f"{region_code}_SE100_{subm_sample_id}"
 
 
-def _generate_covv_virus_name(covv_subm_sample_id, covv_collection_date):
-    datetime_date = datetime.strptime(covv_collection_date, "%Y-%m-%d")
+def _generate_covv_virus_name(covv_subm_sample_id: str, covv_collection_date: str) -> str:
+    datetime_date: datetime = datetime.strptime(covv_collection_date, "%Y-%m-%d")
     return f"hCoV-19/Sweden/{covv_subm_sample_id}/{datetime_date.year}"
