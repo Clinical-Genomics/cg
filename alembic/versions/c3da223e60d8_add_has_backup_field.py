@@ -9,6 +9,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 
 from alembic import op
+from cg.constants.sequencing import Sequencers
 from cg.store.models import Flowcell
 
 # revision identifiers, used by Alembic.
@@ -31,7 +32,7 @@ def upgrade():
 
     # Update has_backup based on sequencer_type
     for flowcell in session.query(Flowcell).all():
-        if flowcell.sequencer_type == "novaseqx":
+        if flowcell.sequencer_type == Sequencers.NOVASEQX:
             flowcell.has_backup = False
         else:
             flowcell.has_backup = True
