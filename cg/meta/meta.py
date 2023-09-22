@@ -9,12 +9,12 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.meta.backup.backup import SpringBackupAPI
+from cg.meta.backup.pdc import PdcAPI
 from cg.meta.compress import CompressAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.meta.backup.pdc import PdcAPI
 
 
 class MetaAPI:
@@ -36,7 +36,7 @@ class MetaAPI:
             compress_api=CompressAPI(
                 hk_api=config.housekeeper_api,
                 crunchy_api=config.crunchy_api,
-                demux_root=config.demultiplex.out_dir,
+                demux_root=config.demultiplexed_flow_cells_dir,
                 backup_api=SpringBackupAPI(
                     encryption_api=SpringEncryptionAPI(
                         binary_path=config.dict()["encryption"]["binary_path"]

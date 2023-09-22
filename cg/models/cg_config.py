@@ -63,8 +63,6 @@ class HousekeeperConfig(BaseModel):
 
 
 class DemultiplexConfig(BaseModel):
-    run_dir: str
-    out_dir: str
     slurm: SlurmConfig
 
 
