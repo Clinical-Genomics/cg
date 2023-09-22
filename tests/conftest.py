@@ -2213,7 +2213,6 @@ def context_config(
         "pon_path": str(cg_dir),
         "backup": {
             "encrypt_dir": str(encryption_dir),
-            "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
         },
         "balsamic": {
             "balsamic_cache": "hello",
