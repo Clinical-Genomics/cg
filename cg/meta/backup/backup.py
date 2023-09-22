@@ -253,7 +253,7 @@ class BackupAPI:
 
     def query_pdc_for_flow_cell(self, flow_cell_id) -> List[str]:
         """Query PDC for a given flow cell id."""
-        search_patterns: List[str] = [self.encrypt_dir + ASTERISK + flow_cell_id + ASTERISK]
+        search_patterns: List[str] = [ASTERISK, ASTERISK + flow_cell_id + ASTERISK]
         query: List[str] = []
         for search_pattern in search_patterns:
             try:
