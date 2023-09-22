@@ -14,7 +14,7 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.indexes import ListIndexes
 from cg.constants.pdc import PDCExitCodes
 from cg.constants.process import RETURN_WARNING
-from cg.constants.symbols import ASTERISK, NEW_LINE
+from cg.constants.symbols import ASTERISK, FWD_SLASH, NEW_LINE
 from cg.exc import ChecksumFailedError, PdcNoFilesMatchingSearchError
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
@@ -253,7 +253,7 @@ class BackupAPI:
 
     def query_pdc_for_flow_cell(self, flow_cell_id) -> List[str]:
         """Query PDC for a given flow cell id."""
-        search_patterns: List[str] = [ASTERISK, ASTERISK + flow_cell_id + ASTERISK]
+        search_patterns: List[str] = [f"{ASTERISK}{FWD_SLASH}{ASTERISK}{flow_cell_id}{ASTERISK}"]
         query: List[str] = []
         for search_pattern in search_patterns:
             try:
