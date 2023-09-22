@@ -20,7 +20,7 @@ from tests.mocks.hk_mock import MockFile
 
 
 def test_get_archived_encryption_key_path(dsmc_q_archive_output: List[str], flow_cell_name: str):
-    """Tests returning an encryption key path."""
+    """Tests returning an encryption key path from DSMC output."""
     # GIVEN an DSMC output
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
@@ -32,12 +32,41 @@ def test_get_archived_encryption_key_path(dsmc_q_archive_output: List[str], flow
     )
 
     # WHEN getting the encryption key path
-    key_path: Path = backup_api.get_archived_encryption_key_path(
-        flow_cell_id=flow_cell_name, query=dsmc_q_archive_output
-    )
+    key_path: Path = backup_api.get_archived_encryption_key_path(query=dsmc_q_archive_output)
 
     # THEN this method should return a path object
     assert isinstance(key_path, Path)
+
+    # THEN path should return the key file name
+    assert (
+        key_path.name
+        == f"190329_A00689_0018_A{flow_cell_name}{FileExtensions.KEY}{FileExtensions.GPG}"
+    )
+
+
+def test_get_archived_flow_cell_path(dsmc_q_archive_output: List[str], flow_cell_name: str):
+    """Tests returning a flow cell path from DSMC output."""
+    # GIVEN an DSMC output
+    backup_api = BackupAPI(
+        encryption_api=mock.Mock(),
+        encrypt_dir=mock.Mock(),
+        status=mock.Mock(),
+        tar_api=mock.Mock(),
+        pdc_api=mock.Mock(),
+        flow_cells_dir=mock.Mock(),
+    )
+
+    # WHEN getting the flow cell path
+    flow_cell_path: Path = backup_api.get_archived_flow_cell_path(query=dsmc_q_archive_output)
+
+    # THEN this method should return a path object
+    assert isinstance(flow_cell_path, Path)
+
+    # THEN path should return the key file name
+    assert (
+        flow_cell_path.name
+        == f"190329_A00689_0018_A{flow_cell_name}{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
+    )
 
 
 @mock.patch("cg.store.Store")

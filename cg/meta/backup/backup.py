@@ -1,6 +1,5 @@
 """ Module for retrieving flow cells from backup."""
 import logging
-import re
 import subprocess
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -92,9 +91,7 @@ class BackupAPI:
             LOG.error(f"PDC query failed: {error}")
             raise error
 
-        archived_key: Path = self.get_archived_encryption_key_path(
-            query=pdc_flow_cell_query, flow_cell_id=flow_cell.name
-        )
+        archived_key: Path = self.get_archived_encryption_key_path(query=pdc_flow_cell_query)
         archived_flow_cell: Path = self.get_archived_flow_cell_path(
             query=pdc_flow_cell_query, flow_cell_id=flow_cell.name
         )
@@ -280,7 +277,8 @@ class BackupAPI:
             file_path=str(archived_file), target_path=str(retrieved_file)
         )
 
-    def get_archived_flow_cell_path(self, query: list, flow_cell_id: str) -> Path:
+    @classmethod
+    def get_archived_flow_cell_path(cls, query: list) -> Path:
         """Get the path of the archived flow cell from a PDC query."""
         flow_cell_query: str = [
             row
@@ -290,30 +288,24 @@ class BackupAPI:
             and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
 
-        re_archived_flow_cell_path: re.Pattern = re.compile(flow_cell_id + ".+?(?=\s)")
-        arhived_flow_cell: Optional[re.Match] = re.search(
-            re_archived_flow_cell_path, flow_cell_query
-        )
-        if arhived_flow_cell:
-            archived_flow_cell_path: Path = Path(arhived_flow_cell.group())
-            LOG.info(f"Flow cell found: {archived_flow_cell_path}")
-            return archived_flow_cell_path
+        file_colum: str = flow_cell_query.split()[4]
+        archived_flow_cell = Path(file_colum.split(sep="/")[-1])
+        if archived_flow_cell:
+            LOG.info(f"Flow cell found: {archived_flow_cell}")
+            return archived_flow_cell
 
     @classmethod
-    def get_archived_encryption_key_path(cls, flow_cell_id: str, query: list) -> Path:
+    def get_archived_encryption_key_path(cls, query: list) -> Path:
         """Get the encryption key for the archived flow cell from a PDC query."""
         encryption_key_query: str = [
             row for row in query if FileExtensions.KEY in row and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
 
-        re_archived_encryption_key_path: re.Pattern = re.compile(flow_cell_id + ".+?(?=\s)")
-        archived_encryption_key: Optional[re.Match] = re.search(
-            re_archived_encryption_key_path, encryption_key_query
-        )
+        file_colum: str = encryption_key_query.split()[4]
+        archived_encryption_key = Path(file_colum.split(sep="/")[-1])
         if archived_encryption_key:
-            archived_encryption_key_path: Path = Path(archived_encryption_key.group())
-            LOG.info(f"Encryption key found: {archived_encryption_key_path}")
-            return archived_encryption_key_path
+            LOG.info(f"Encryption key found: {archived_encryption_key}")
+            return archived_encryption_key
 
 
 class SpringBackupAPI:
