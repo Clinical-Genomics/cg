@@ -35,6 +35,8 @@ def upgrade():
             flowcell.has_backup = False
         else:
             flowcell.has_backup = True
+        session.add(flowcell)
+    session.commit()
     # ### end Alembic commands ###
 
 
