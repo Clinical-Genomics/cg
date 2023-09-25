@@ -155,7 +155,7 @@ def update_sample_read_count(sample_id: str, q30_threshold: int, store: Store) -
             f"Updating sample {sample_id} with read count {sample_read_count} and setting sequenced at."
         )
         sample.reads = sample_read_count
-        if not sample.sequenced_at:
-            sample.sequenced_at = datetime.datetime.now()
+        if not sample.reads_updated_at:
+            sample.reads_updated_at = datetime.datetime.now()
     else:
         LOG.warning(f"Cannot find {sample_id} in status_db when adding read counts. Skipping.")
