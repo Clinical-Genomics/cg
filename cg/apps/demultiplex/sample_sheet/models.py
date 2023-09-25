@@ -1,10 +1,15 @@
 import logging
+from collections import defaultdict
 from typing import List
+
+from pydantic import BaseModel, ConfigDict, Extra, Field
 
 from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 from cg.constants.constants import GenomeVersion
-from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
-from pydantic import BaseModel, ConfigDict, Extra, Field
+from cg.constants.demultiplexing import (
+    SampleSheetBcl2FastqSections,
+    SampleSheetBCLConvertSections,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -62,6 +67,14 @@ class FlowCellSampleBCLConvert(FlowCellSample):
 
 class SampleSheet(BaseModel):
     samples: List[FlowCellSample]
+
+    def get_non_pooled_samples(self) -> List[FlowCellSample]:
+        """Return samples that are sequenced solo in their lane."""
+        lane_samples = defaultdict(list)
+        for sample in self.samples:
+            lane_samples[sample.lane].append(sample)
+
+        return [samples[0] for samples in lane_samples.values() if len(samples) == 1]
 
     def get_sample_ids(self) -> List[str]:
         """Return ids for samples in sheet."""
