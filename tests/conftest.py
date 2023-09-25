@@ -438,10 +438,10 @@ def gens_api(gens_config: dict) -> GensAPI:
 
 
 @pytest.fixture
-def madeline_api(madeline_output) -> MockMadelineAPI:
+def madeline_api(madeline_output: Path) -> MockMadelineAPI:
     """madeline_api fixture."""
     _api = MockMadelineAPI()
-    _api.set_outpath(madeline_output)
+    _api.set_outpath(out_path=madeline_output.as_posix())
     return _api
 
 
@@ -460,6 +460,13 @@ def osticket(ticket_id: str) -> MockOsTicket:
 
 
 # Files fixtures
+
+
+@pytest.fixture
+def empty_fastq_file_path(data_dir: Path):
+    """Return the path to an empty fastq file."""
+    return Path(data_dir, "fastq.fastq.gz")
+
 
 # Common file name fixtures
 
@@ -519,6 +526,12 @@ def cgweb_orders_dir(fixtures_dir: Path) -> Path:
     return Path(fixtures_dir, "cgweb_orders")
 
 
+@pytest.fixture(scope="session")
+def data_dir(fixtures_dir: Path) -> Path:
+    """Return the path to the data dir."""
+    return Path(fixtures_dir, "data")
+
+
 @pytest.fixture
 def fastq_dir(demultiplexed_runs: Path) -> Path:
     """Return the path to the fastq files dir."""
@@ -576,9 +589,9 @@ def orderforms(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture
-def hk_file(filled_file, case_id) -> File:
+def hk_file(filled_file: Path, case_id: str) -> File:
     """Return a housekeeper File object."""
-    return File(id=case_id, path=filled_file)
+    return File(id=case_id, path=filled_file.as_posix())
 
 
 @pytest.fixture
@@ -912,6 +925,17 @@ def tmp_bcl2fastq_flow_cell(
     return FlowCellDirectoryData(
         flow_cell_path=tmp_demultiplexed_runs_bcl2fastq_directory,
         bcl_converter=BclConverter.BCL2FASTQ,
+    )
+
+
+@pytest.fixture
+def novaseq6000_flow_cell(
+    tmp_flow_cells_directory_malformed_sample_sheet: Path,
+) -> FlowCellDirectoryData:
+    """Return a NovaSeq6000 flow cell."""
+    return FlowCellDirectoryData(
+        flow_cell_path=tmp_flow_cells_directory_malformed_sample_sheet,
+        bcl_converter=BclConverter.BCLCONVERT,
     )
 
 

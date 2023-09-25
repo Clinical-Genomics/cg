@@ -2,6 +2,9 @@
 import logging
 from typing import Dict, List, Set, Tuple, Union
 
+from packaging import version
+from pydantic import BaseModel
+
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSample,
     FlowCellSampleBcl2Fastq,
@@ -13,8 +16,6 @@ from cg.io.controller import ReadFile
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.resources import VALID_INDEXES_PATH
 from cg.utils.utils import get_hamming_distance
-from packaging import version
-from pydantic import BaseModel
 
 LOG = logging.getLogger(__name__)
 DNA_COMPLEMENTS: Dict[str, str] = {"A": "T", "C": "G", "G": "C", "T": "A"}
@@ -28,25 +29,9 @@ REAGENT_KIT_PARAMETER_TO_VERSION: Dict[str, str] = {"1": "1.0", "3": "1.5"}
 SHORT_SAMPLE_INDEX_LENGTH: int = 8
 
 
-def index_exists(index: str, indexes: Set[str]) -> bool:
-    """Determines if an index is already present in the existing indexes."""
-    return any(existing_index.startswith(index) for existing_index in indexes)
-
-
 def is_dual_index(index: str) -> bool:
     """Determines if an index in the raw sample sheet is dual index or not."""
     return "-" in index
-
-
-def get_indexes_by_lane(samples: List[FlowCellSample]) -> Dict[int, Set[str]]:
-    """Group the indexes from samples by lane."""
-    indexes_by_lane = {}
-    for sample in samples:
-        lane: int = sample.lane
-        if lane not in indexes_by_lane:
-            indexes_by_lane[lane] = set()
-        indexes_by_lane[lane].add(sample.index)
-    return indexes_by_lane
 
 
 class Index(BaseModel):
@@ -156,19 +141,29 @@ def get_hamming_distance_index_1(sequence_1: str, sequence_2: str) -> int:
     )
 
 
-def get_hamming_distance_index_2(sequence_1: str, sequence_2: str) -> int:
+def get_hamming_distance_index_2(
+    sequence_1: str, sequence_2: str, is_reverse_complement: bool
+) -> int:
     """Get the hamming distance between two index 2 sequences.
     In the case that one sequence is longer than the other, the distance is calculated between
-    the shortest sequence and the last segment of equal length of the longest sequence."""
+    the shortest sequence and the last segment of equal length of the longest sequence.
+    If the sample requires reverse complement, the calculation is the same as for index 1."""
     shortest_index_length: int = min(len(sequence_1), len(sequence_2))
-    return get_hamming_distance(
-        str_1=sequence_1[-shortest_index_length:], str_2=sequence_2[-shortest_index_length:]
+    return (
+        get_hamming_distance(
+            str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
+        )
+        if is_reverse_complement
+        else get_hamming_distance(
+            str_1=sequence_1[-shortest_index_length:], str_2=sequence_2[-shortest_index_length:]
+        )
     )
 
 
 def update_barcode_mismatch_values_for_sample(
     sample_to_update: FlowCellSampleBCLConvert,
     samples_to_compare_to: List[FlowCellSampleBCLConvert],
+    is_reverse_complement: bool,
 ) -> None:
     """Updates the sample's barcode mismatch values.
     If a sample index has a hamming distance to any other sample lower than the threshold
@@ -187,7 +182,11 @@ def update_barcode_mismatch_values_for_sample(
             )
             sample_to_update.barcode_mismatches_1 = 0
         if (
-            get_hamming_distance_index_2(sequence_1=index_2_sample_to_update, sequence_2=index_2)
+            get_hamming_distance_index_2(
+                sequence_1=index_2_sample_to_update,
+                sequence_2=index_2,
+                is_reverse_complement=is_reverse_complement,
+            )
             < MINIMUM_HAMMING_DISTANCE
         ):
             LOG.debug(
