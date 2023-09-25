@@ -65,12 +65,12 @@ def filter_samples_is_not_down_sampled(samples: Query, **kwargs) -> Query:
 
 def filter_samples_is_sequenced(samples: Query, **kwargs) -> Query:
     """Return samples that are sequenced."""
-    return samples.filter(Sample.sequenced_at.isnot(None))
+    return samples.filter(Sample.reads_updated_at.isnot(None))
 
 
 def filter_samples_is_not_sequenced(samples: Query, **kwargs) -> Query:
     """Return samples that are not sequenced."""
-    return samples.filter(Sample.sequenced_at.is_(None))
+    return samples.filter(Sample.reads_updated_at.is_(None))
 
 
 def filter_samples_do_invoice(samples: Query, **kwargs) -> Query:
