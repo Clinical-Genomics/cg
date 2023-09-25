@@ -1,10 +1,11 @@
+import datetime as dt
 from pathlib import Path
+
 from cg.cli.workflow.fluffy.base import create_samplesheet
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
-import datetime as dt
 
 from cg.store.models import Flowcell, Sample
 
@@ -133,7 +134,7 @@ def test_create_fluffy_samplesheet_from_bcl_convert_sample_sheet(
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_name_from_lims_id")
     FluffyAnalysisAPI.get_sample_name_from_lims_id.return_value = "CustName"
 
-    # GIVEN every sample in SampleSheet sequenced_at set in StatusDB
+    # GIVEN every sample in SampleSheet reads_updated_at set in StatusDB
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_sequenced_date")
     FluffyAnalysisAPI.get_sample_sequenced_date.return_value = dt.datetime.now().date()
 

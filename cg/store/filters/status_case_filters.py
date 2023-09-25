@@ -1,18 +1,18 @@
 from datetime import datetime
-from typing import Optional, List, Callable
 from enum import Enum
-from cgmodels.cg.constants import Pipeline
-from sqlalchemy import and_, not_, or_
-from sqlalchemy.orm import Query
+from typing import Callable, List, Optional
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
 from cg.constants.constants import CaseActions, DataDelivery
 from cg.constants.observations import (
-    LOQUSDB_SUPPORTED_PIPELINES,
-    LOQUSDB_MIP_SEQUENCING_METHODS,
     LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
+    LOQUSDB_MIP_SEQUENCING_METHODS,
+    LOQUSDB_SUPPORTED_PIPELINES,
 )
 from cg.store.models import Analysis, Application, Customer, Family, Sample
+from cgmodels.cg.constants import Pipeline
+from sqlalchemy import and_, not_, or_
+from sqlalchemy.orm import Query
 
 
 def filter_cases_by_action(cases: Query, action: str, **kwargs) -> Query:
@@ -102,7 +102,7 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
             ),
             and_(
                 Family.action.is_(None),
-                Analysis.created_at < Sample.sequenced_at,
+                Analysis.created_at < Sample.reads_updated_at,
             ),
         )
     )
@@ -110,7 +110,7 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
 
 def filter_cases_has_sequence(cases: Query, **kwargs) -> Query:
     """Filter cases that is not sequenced according to record in StatusDB."""
-    return cases.filter(or_(Application.is_external, Sample.sequenced_at.isnot(None)))
+    return cases.filter(or_(Application.is_external, Sample.reads_updated_at.isnot(None)))
 
 
 def filter_cases_not_analysed(cases: Query, **kwargs) -> Query:
