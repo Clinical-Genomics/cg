@@ -594,6 +594,7 @@ class StoreHelpers:
         samples: List[Sample] = None,
         status: str = None,
         date: datetime = datetime.now(),
+        has_backup: Optional[bool] = False,
     ) -> Flowcell:
         """Utility function to add a flow cell to the store and return an object."""
         flow_cell = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
@@ -604,6 +605,7 @@ class StoreHelpers:
             sequencer_name="dummy_sequencer",
             sequencer_type=sequencer_type,
             date=date,
+            has_backup=has_backup,
         )
         flow_cell.archived_at = archived_at
         if samples:
