@@ -1,9 +1,8 @@
 import logging
 from collections import defaultdict
-from typing import Iterable, List, Tuple
-from typing_extensions import Annotated
+from typing import List, Tuple
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Extra, Field
+from pydantic import BaseModel, ConfigDict, Extra, Field
 
 from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import remove_index_from_sample_id
@@ -20,7 +19,7 @@ class FlowCellSample(BaseModel):
     """Base class for flow cell samples."""
 
     lane: int
-    sample_id: Annotated[str, AfterValidator(remove_index_from_sample_id)]
+    sample_id: str
     index: str
     index2: str = ""
     model_config = ConfigDict(populate_by_name=True, extra=Extra.ignore)
