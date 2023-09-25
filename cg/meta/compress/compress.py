@@ -5,7 +5,9 @@
 import logging
 import re
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
+
+from housekeeper.store.models import File, Version
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
@@ -15,7 +17,6 @@ from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
 from cg.store.models import Sample
-from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -289,12 +290,6 @@ class CompressAPI:
                 bundle_name=sample_internal_id, file=fastq, tags=fastq_tags
             )
         self.hk_api.commit()
-
-    @staticmethod
-    def get_flow_cell_id_from_sample(file_path: Path, sample: Sample) -> Optional[str]:
-        for flow_cell_name in [flow_cell.name for flow_cell in sample.flowcells]:
-            if flow_cell_name in str(file_path):
-                return flow_cell_name
 
     # Methods to remove files from disc
     def remove_fastq(self, fastq_first: Path, fastq_second: Path):
