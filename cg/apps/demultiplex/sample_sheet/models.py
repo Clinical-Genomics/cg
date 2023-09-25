@@ -1,10 +1,12 @@
 import logging
 from collections import defaultdict
 from typing import Iterable, List, Tuple
+from typing_extensions import Annotated
 
-from pydantic import BaseModel, ConfigDict, Extra, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, Extra, Field
 
 from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
+from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import remove_index_from_sample_id
 from cg.constants.constants import GenomeVersion
 from cg.constants.demultiplexing import (
     SampleSheetBcl2FastqSections,
@@ -18,7 +20,7 @@ class FlowCellSample(BaseModel):
     """Base class for flow cell samples."""
 
     lane: int
-    sample_id: str
+    sample_id: Annotated[str, AfterValidator(remove_index_from_sample_id)]
     index: str
     index2: str = ""
     model_config = ConfigDict(populate_by_name=True, extra=Extra.ignore)
@@ -68,12 +70,12 @@ class FlowCellSampleBCLConvert(FlowCellSample):
 class SampleSheet(BaseModel):
     samples: List[FlowCellSample]
 
-    def get_non_pooled_lanes_and_samples(self) -> Iterable[Tuple[int, str]]:
-        """Return tuples of non pooled lane and sample ids."""
+    def get_non_pooled_lanes_and_samples(self) -> List[Tuple[int, str]]:
+        """Return tuples of non-pooled lane and sample ids."""
         non_pooled_lane_sample_id_pairs: List[Tuple[int, str]] = []
         non_pooled_samples: List[FlowCellSample] = self.get_non_pooled_samples()
         for sample in non_pooled_samples:
-            sample_id: str = sample.sample_id.split("_")[0]
+            sample_id: str = remove_index_from_sample_id(sample.sample_id)
             non_pooled_lane_sample_id_pairs.append((sample.lane, sample_id))
         return non_pooled_lane_sample_id_pairs
 
@@ -89,7 +91,7 @@ class SampleSheet(BaseModel):
         """Return ids for samples in sheet."""
         sample_internal_ids: List[str] = []
         for sample in self.samples:
-            sample_internal_id: str = sample.sample_id.split("_")[0]
+            sample_internal_id: str = remove_index_from_sample_id(sample.sample_id)
             if is_valid_sample_internal_id(sample_internal_id):
                 sample_internal_ids.append(sample_internal_id)
         return list(set(sample_internal_ids))

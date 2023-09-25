@@ -25,20 +25,20 @@ def create_sample_lane_sequencing_metrics_for_flow_cell(
 
 
 def create_undetermined_non_pooled_metrics(
-    flow_cell_data: FlowCellDirectoryData,
+    flow_cell: FlowCellDirectoryData,
 ) -> List[SampleLaneSequencingMetrics]:
-    """Return sequencing metrics for any undetermined reads in non pooled lanes."""
+    """Return sequencing metrics for any undetermined reads in non-pooled lanes."""
 
     non_pooled_lanes_and_samples: List[
         Tuple[int, str]
-    ] = flow_cell_data.sample_sheet.get_non_pooled_lanes_and_samples()
+    ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 
-    if flow_cell_data.bcl_converter == BclConverter.BCL2FASTQ:
+    if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
         return create_bcl2fastq_undetermined_metrics(
-            bcl2fastq_flow_cell_path=flow_cell_data.path,
+            bcl2fastq_flow_cell_path=flow_cell.path,
             non_pooled_lane_sample_pairs=non_pooled_lanes_and_samples,
         )
     return create_bcl_convert_undetermined_metrics(
-        flow_cell_dir=flow_cell_data.path,
+        flow_cell_dir=flow_cell.path,
         non_pooled_lane_sample_pairs=non_pooled_lanes_and_samples,
     )

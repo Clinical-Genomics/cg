@@ -70,7 +70,7 @@ def add_samples_to_flow_cell_in_status_db(
 
 
 def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
-    metrics: List[
+    mapped_metrics: List[
         SampleLaneSequencingMetrics
     ] = create_sample_lane_sequencing_metrics_for_flow_cell(
         flow_cell_directory=flow_cell.path,
@@ -81,7 +81,7 @@ def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, stor
     ] = create_undetermined_non_pooled_metrics(flow_cell)
 
     combined_metrics = combine_mapped_metrics_with_undetermined(
-        mapped_metrics=metrics,
+        mapped_metrics=mapped_metrics,
         undetermined_metrics=undetermined_metrics,
     )
 

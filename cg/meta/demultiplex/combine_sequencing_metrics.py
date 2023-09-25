@@ -18,10 +18,10 @@ def combine_mapped_metrics_with_undetermined(
 
     for undetermined_metric in undetermined_metrics:
         key = (undetermined_metric.sample_internal_id, undetermined_metric.flow_cell_lane_number)
-        existing_metric = metrics_dict.get(key)
+        existing_metric: SampleLaneSequencingMetrics = metrics_dict.get(key)
 
         if existing_metric:
-            combined_metric = combine_metrics(
+            combined_metric: SampleLaneSequencingMetrics = combine_metrics(
                 existing_metric=existing_metric, new_metric=undetermined_metric
             )
             combined_metrics.append(combined_metric)
