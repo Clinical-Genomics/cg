@@ -271,7 +271,7 @@ class BackupAPI:
 
     def retrieve_archived_file(self, archived_file: Path, run_dir: Path) -> None:
         """Retrieve the archived file from PDC to a flow cell runs directory."""
-        retrieved_file: Path = run_dir / archived_file.name
+        retrieved_file = Path(run_dir, archived_file.name)
         LOG.debug(f"Retrieving file {archived_file} to {retrieved_file}")
         self.pdc.retrieve_file_from_pdc(
             file_path=str(archived_file), target_path=str(retrieved_file)
@@ -288,8 +288,7 @@ class BackupAPI:
             and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
 
-        file_colum: str = flow_cell_query.split()[4]
-        archived_flow_cell = Path(file_colum.split(sep="/")[-1])
+        archived_flow_cell = Path(flow_cell_query.split()[4])
         if archived_flow_cell:
             LOG.info(f"Flow cell found: {archived_flow_cell}")
             return archived_flow_cell
@@ -305,8 +304,7 @@ class BackupAPI:
             and FileExtensions.GZIP not in row
         ][ListIndexes.FIRST.value]
 
-        file_colum: str = encryption_key_query.split()[4]
-        archived_encryption_key = Path(file_colum.split(sep="/")[-1])
+        archived_encryption_key = Path(encryption_key_query.split()[4])
         if archived_encryption_key:
             LOG.info(f"Encryption key found: {archived_encryption_key}")
             return archived_encryption_key
