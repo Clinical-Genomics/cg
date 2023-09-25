@@ -529,5 +529,11 @@ def bclconvert_flow_cell_name(demux_post_processing_api) -> str:
 
 
 @pytest.fixture
-def bclconvert_sample_id_with_non_pooled_undetermined_reads() -> str:
+def bcl_convert_sample_id_with_non_pooled_undetermined_reads() -> str:
     return "ACC11927A2"
+
+
+@pytest.fixture
+def bcl_convert_non_pooled_sample_read_count() -> int:
+    """Based on the data in 230504_A00689_0804_BHY7FFDRX2, the sum of all reads - mapped and undetermined."""
+    return 4000000
