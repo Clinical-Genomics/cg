@@ -79,20 +79,20 @@ class BackupAPI:
             LOG.info("No flow cells requested")
             return None
 
-        flow_cell.status: FlowCellStatus = FlowCellStatus.PROCESSING
+        flow_cell.status = FlowCellStatus.PROCESSING
         if not self.dry_run:
             self.status.session.commit()
             LOG.info(f"{flow_cell.name}: retrieving from PDC")
 
         try:
-            pdc_flow_cell_query: List[str] = self.query_pdc_for_flow_cell(flow_cell.name)
+            dcms_output: List[str] = self.query_pdc_for_flow_cell(flow_cell.name)
 
         except PdcNoFilesMatchingSearchError as error:
             LOG.error(f"PDC query failed: {error}")
             raise error
 
-        archived_key: Path = self.get_archived_encryption_key_path(query=pdc_flow_cell_query)
-        archived_flow_cell: Path = self.get_archived_flow_cell_path(query=pdc_flow_cell_query)
+        archived_key: Path = self.get_archived_encryption_key_path(dcms_output=dcms_output)
+        archived_flow_cell: Path = self.get_archived_flow_cell_path(dcms_output=dcms_output)
 
         if not self.dry_run:
             return self._process_flow_cell(
@@ -278,33 +278,33 @@ class BackupAPI:
         )
 
     @classmethod
-    def get_archived_flow_cell_path(cls, query: list) -> Path:
+    def get_archived_flow_cell_path(cls, dcms_output: List[str]) -> Optional[Path]:
         """Get the path of the archived flow cell from a PDC query."""
-        flow_cell_query: str = [
+        flow_cell_line: str = [
             row
-            for row in query
+            for row in dcms_output
             if FileExtensions.TAR in row
             and FileExtensions.GZIP in row
             and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
 
-        archived_flow_cell = Path(flow_cell_query.split()[4])
+        archived_flow_cell = Path(flow_cell_line.split()[4])
         if archived_flow_cell:
             LOG.info(f"Flow cell found: {archived_flow_cell}")
             return archived_flow_cell
 
     @classmethod
-    def get_archived_encryption_key_path(cls, query: list) -> Path:
+    def get_archived_encryption_key_path(cls, dcms_output: List[str]) -> Optional[Path]:
         """Get the encryption key for the archived flow cell from a PDC query."""
-        encryption_key_query: str = [
+        encryption_key_line: str = [
             row
-            for row in query
+            for row in dcms_output
             if FileExtensions.KEY in row
             and FileExtensions.GPG in row
             and FileExtensions.GZIP not in row
         ][ListIndexes.FIRST.value]
 
-        archived_encryption_key = Path(encryption_key_query.split()[4])
+        archived_encryption_key = Path(encryption_key_line.split()[4])
         if archived_encryption_key:
             LOG.info(f"Encryption key found: {archived_encryption_key}")
             return archived_encryption_key
