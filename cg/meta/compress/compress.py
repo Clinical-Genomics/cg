@@ -273,11 +273,7 @@ class CompressAPI:
         fastq_second: Path,
     ) -> None:
         """Add decompressed FASTQ files to Housekeeper."""
-        spring_file: File = self.hk_api.files(path=spring_path.as_posix()).first()
-        fastq_tags = [
-            SequencingFileTag.FASTQ if tag_name == SequencingFileTag.SPRING else tag_name
-            for tag_name in [tag.name for tag in spring_file.tags]
-        ]
+        fastq_tags = self.get_fastq_tags_from_spring_path(spring_path)
         LOG.info(
             f"Adds {fastq_first}, {fastq_second} to bundle {sample_internal_id} with tags {fastq_tags}"
         )
@@ -290,6 +286,13 @@ class CompressAPI:
                 bundle_name=sample_internal_id, file=fastq, tags=fastq_tags
             )
         self.hk_api.commit()
+
+    def get_fastq_tags_from_spring_path(self, spring_path: Path):
+        """Returns a list containing all non-spring tags of the specified file, together with the fastq tag."""
+        spring_file: File = self.hk_api.files(path=spring_path.as_posix()).first()
+        spring_tags: List[str] = [tag.name for tag in spring_file.tags]
+        spring_tags.remove(SequencingFileTag.SPRING)
+        return spring_tags + [SequencingFileTag.FASTQ]
 
     # Methods to remove files from disc
     def remove_fastq(self, fastq_first: Path, fastq_second: Path):
