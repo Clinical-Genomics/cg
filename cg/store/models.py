@@ -395,8 +395,8 @@ class Family(Model, PriorityMixin):
         for link in self.links:
             if link.sample.application_version.application.is_external:
                 sequenced_dates.append(link.sample.ordered_at)
-            elif link.sample.sequenced_at:
-                sequenced_dates.append(link.sample.sequenced_at)
+            elif link.sample.reads_updated_at:
+                sequenced_dates.append(link.sample.reads_updated_at)
         return max(sequenced_dates, default=None)
 
     @property
@@ -644,10 +644,10 @@ class Sample(Model, PriorityMixin):
 
     priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     reads = Column(types.BigInteger, default=0)
+    reads_updated_at = Column(types.DateTime)
     received_at = Column(types.DateTime)
     reference_genome = Column(types.String(255))
     sequence_start = Column(types.DateTime)
-    sequenced_at = Column(types.DateTime)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
 
@@ -705,8 +705,8 @@ class Sample(Model, PriorityMixin):
         """Get the current sample state."""
         if self.delivered_at:
             return f"Delivered {self.delivered_at.date()}"
-        if self.sequenced_at:
-            return f"Sequenced {self.sequenced_at.date()}"
+        if self.reads_updated_at:
+            return f"Sequenced {self.reads_updated_at.date()}"
         if self.sequence_start:
             return f"Sequencing {self.sequence_start.date()}"
         if self.received_at:
