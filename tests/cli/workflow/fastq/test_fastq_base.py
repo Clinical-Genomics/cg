@@ -1,8 +1,6 @@
 import logging
 from datetime import datetime
 
-from cg.cli.workflow.fastq.base import store_available_fastq_analysis, store_fastq_analysis
-from cg.store.models import Analysis, Family, Sample
 from cgmodels.cg.constants import Pipeline
 
 from cg.cli.workflow.fastq.base import (
@@ -10,7 +8,7 @@ from cg.cli.workflow.fastq.base import (
     store_fastq_analysis,
 )
 from cg.constants.constants import CaseActions
-from cg.store.models import Analysis, Family
+from cg.store.models import Analysis, Family, Sample
 
 
 def test_store_fastq_analysis(caplog, another_case_id: str, cli_runner, fastq_context, helpers):
@@ -39,10 +37,8 @@ def test_store_available_fastq_analysis(
 ):
     """Test for CLI command creating an analysis object for all fastq cases to be delivered"""
     caplog.set_level(logging.INFO)
-    
+
     # GIVEN a case with no analysis, a sample that has been sequenced and a fastq context
-    case_obj: Family = fastq_context.status_db.get_case_by_internal_id(internal_id=case_id)
-    case_obj.analyses = []
     sample_obj: Sample = fastq_context.status_db.get_sample_by_internal_id(internal_id=sample_id)
     sample_obj.reads_updated_at = datetime.now()
 
@@ -53,7 +49,8 @@ def test_store_available_fastq_analysis(
     assert not case_obj.analyses
     case_obj.data_analysis = Pipeline.FASTQ
     case_obj.action = CaseActions.ANALYZE
-    case_obj.samples[0].sequenced_at = datetime.now()
+    case_obj.samples[0].reads_updated_at = datetime.now()
+
     # WHEN the store_available_fastq_analysis command is invoked
     cli_runner.invoke(store_available_fastq_analysis, ["--dry-run"], obj=fastq_context)
 
