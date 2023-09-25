@@ -224,7 +224,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             "Customer_ID": sample_obj.customer.internal_id,
             "application_tag": sample_obj.application_version.application.tag,
             "date_arrival": str(sample_obj.received_at or datetime.min),
-            "date_sequencing": str(sample_obj.sequenced_at or datetime.min),
+            "date_sequencing": str(sample_obj.reads_updated_at or datetime.min),
             "date_libprep": str(sample_obj.prepared_at or datetime.min),
             "method_libprep": method_library_prep or "Not in LIMS",
             "method_sequencing": method_sequencing or "Not in LIMS",
