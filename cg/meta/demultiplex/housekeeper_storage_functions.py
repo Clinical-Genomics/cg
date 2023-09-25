@@ -9,6 +9,7 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_internal_ids_from_sample_sheet,
 )
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
 from cg.exc import HousekeeperBundleVersionMissingError
@@ -55,9 +56,13 @@ def store_undetermined_fastq_files(
         Tuple[int, str]
     ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 
+    undetermined_dir_path: Path = flow_cell.path
+    if not flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
+        undetermined_dir_path = Path(flow_cell.path, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
+
     for lane, sample_id in non_pooled_lanes_and_samples:
         undetermined_fastqs: List[Path] = get_undetermined_fastqs(
-            lane=lane, flow_cell_path=flow_cell.path
+            lane=lane, undetermined_dir_path=undetermined_dir_path
         )
 
         for fastq_path in undetermined_fastqs:

@@ -83,7 +83,6 @@ class SampleSheet(BaseModel):
         lane_samples = defaultdict(list)
         for sample in self.samples:
             lane_samples[sample.lane].append(sample)
-
         return [samples[0] for samples in lane_samples.values() if len(samples) == 1]
 
     def get_sample_ids(self) -> List[str]:
