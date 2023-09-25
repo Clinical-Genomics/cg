@@ -509,6 +509,12 @@ def bcl2fastq_sample_id_with_non_pooled_undetermined_reads() -> str:
 
 
 @pytest.fixture
+def bcl2fastq_non_pooled_sample_read_count() -> int:
+    """Based on the data in 170407_ST-E00198_0209_BHHKVCALXX, the sum of all reads - mapped and undetermined."""
+    return 8000000
+
+
+@pytest.fixture
 def bclconvert_flow_cell_name(demux_post_processing_api) -> str:
     """Return a flow cell name that has been demultiplexed with bclconvert."""
     flow_cell_dir_name = "230504_A00689_0804_BHY7FFDRX2"

@@ -141,6 +141,7 @@ def test_post_processing_tracks_undetermined_fastqs_for_bcl2fastq(
     demux_post_processing_api: DemuxPostProcessingAPI,
     bcl2fastq_flow_cell_dir_name: str,
     bcl2fastq_sample_id_with_non_pooled_undetermined_reads: str,
+    bcl2fastq_non_pooled_sample_read_count: int
 ):
     # GIVEN a flow cell with undetermined fastqs in a non-pooled lane
 
@@ -156,6 +157,12 @@ def test_post_processing_tracks_undetermined_fastqs_for_bcl2fastq(
     undetermined_fastq_files = [file for file in fastq_files if "Undetermined" in file.path]
     assert undetermined_fastq_files
 
+    # THEN the sample read count was updated with the undetermined reads
+    sample: Sample = demux_post_processing_api.status_db.get_sample_by_internal_id(
+        bcl2fastq_sample_id_with_non_pooled_undetermined_reads
+    )
+
+    assert sample.reads == bcl2fastq_non_pooled_sample_read_count
 
 def test_post_processing_tracks_undetermined_fastqs_for_bclconvert(
     demux_post_processing_api: DemuxPostProcessingAPI,
@@ -177,12 +184,12 @@ def test_post_processing_tracks_undetermined_fastqs_for_bclconvert(
     assert undetermined_fastq_files
 
 
-def test_post_processing_sample_read_count_update_is_idempotent(
+def test_sample_read_count_update_is_idempotent(
     demux_post_processing_api: DemuxPostProcessingAPI,
     bcl2fastq_flow_cell_dir_name: str,
     bcl2fastq_sample_id_with_non_pooled_undetermined_reads: str,
 ):
-    """Test that sample read counts do not change if the flow cell is processed twice."""
+    """Test that sample read counts are the same if the flow cell is processed twice."""
 
     # GIVEN a demultiplexed flow cell
 
@@ -196,6 +203,9 @@ def test_post_processing_sample_read_count_update_is_idempotent(
     second_sample_read_count: int = demux_post_processing_api.status_db.get_sample_by_internal_id(
         bcl2fastq_sample_id_with_non_pooled_undetermined_reads
     ).reads
+
+    # THEN the sample read counts are not zero
+    assert first_sample_read_count
 
     # THEN the sample read count is the same after the second post processing
     assert first_sample_read_count == second_sample_read_count
