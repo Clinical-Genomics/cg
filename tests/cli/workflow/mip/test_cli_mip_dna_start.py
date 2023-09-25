@@ -35,7 +35,7 @@ def test_dna_case_included(cli_runner, caplog, dna_case, mip_dna_context, mocker
     #   -> has a sample that is sequenced and has an dna-application (non-wts)
     for link in dna_case.links:
         sample = link.sample
-        assert sample.sequenced_at
+        assert sample.reads_updated_at
         assert sample.application_version.application.analysis_type not in "wts"
     assert not dna_case.analyses
 
@@ -65,7 +65,7 @@ def test_rna_case_excluded(cli_runner, caplog, mip_dna_context, rna_case, mocker
     assert rna_case.data_analysis == str(Pipeline.MIP_RNA)
     for link in rna_case.links:
         sample = link.sample
-        assert sample.sequenced_at
+        assert sample.reads_updated_at
 
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_dna_context)

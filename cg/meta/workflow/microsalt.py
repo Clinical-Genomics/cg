@@ -5,6 +5,7 @@
     Method: Outputted as “1273:23”. Defaults to “Not in LIMS”
     Date: Returns latest == most recent date. Outputted as DT object “YYYY MM DD”. Defaults to
     datetime.min"""
+import glob
 import logging
 import os
 import re
@@ -12,23 +13,19 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
-import glob
 
 import click
-from cg.constants import Pipeline
-from cg.constants.constants import MicrosaltQC, MicrosaltAppTags
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgDataError
+from cg.io.json import read_json, write_json
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Family, Sample
 from cg.utils import Process
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.io.json import read_json, write_json
-
-from cg.constants import Priority
 
 LOG = logging.getLogger(__name__)
 
@@ -226,7 +223,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             "Customer_ID": sample_obj.customer.internal_id,
             "application_tag": sample_obj.application_version.application.tag,
             "date_arrival": str(sample_obj.received_at or datetime.min),
-            "date_sequencing": str(sample_obj.sequenced_at or datetime.min),
+            "date_sequencing": str(sample_obj.reads_updated_at or datetime.min),
             "date_libprep": str(sample_obj.prepared_at or datetime.min),
             "method_libprep": method_library_prep or "Not in LIMS",
             "method_sequencing": method_sequencing or "Not in LIMS",
