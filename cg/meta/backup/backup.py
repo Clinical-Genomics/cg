@@ -253,7 +253,7 @@ class BackupAPI:
     def query_pdc_for_flow_cell(self, flow_cell_id: str) -> List[str]:
         """Query PDC for a given flow cell id.
         Raise:
-            CalledProcessError if no files archived files were found.
+            CalledProcessError if no archived files were found.
         """
         search_pattern: str = (
             f"{ASTERISK}{FWD_SLASH}{ASTERISK}{flow_cell_id}{ASTERISK}{FileExtensions.GPG}"
@@ -298,7 +298,11 @@ class BackupAPI:
     def get_archived_encryption_key_path(cls, query: list) -> Path:
         """Get the encryption key for the archived flow cell from a PDC query."""
         encryption_key_query: str = [
-            row for row in query if FileExtensions.KEY in row and FileExtensions.GPG in row
+            row
+            for row in query
+            if FileExtensions.KEY in row
+            and FileExtensions.GPG in row
+            and FileExtensions.GZIP not in row
         ][ListIndexes.FIRST.value]
 
         file_colum: str = encryption_key_query.split()[4]
