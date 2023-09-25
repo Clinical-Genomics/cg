@@ -2,6 +2,7 @@
 import logging
 from pathlib import Path
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Priority, SequencingFileTag
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -12,10 +13,16 @@ LOG = logging.getLogger(__name__)
 
 class DownsampleMetaData:
     def __init__(
-        self, status_db: Store, sample_internal_id: str, number_of_reads: int, case_internal_id: str
+        self,
+        status_db: Store,
+        hk_api: HousekeeperAPI,
+        sample_internal_id: str,
+        number_of_reads: int,
+        case_internal_id: str,
     ):
         """Initialize the model."""
-        self.status_db = status_db
+        self.status_db: Store = status_db
+        self.housekeeper_api: HousekeeperAPI = hk_api
         self.sample_internal_id: str = sample_internal_id
         self.number_of_reads: int = number_of_reads
         self.case_internal_id: str = case_internal_id
