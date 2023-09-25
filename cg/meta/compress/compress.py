@@ -7,6 +7,8 @@ import re
 from pathlib import Path
 from typing import Dict, List
 
+from housekeeper.store.models import File, Version
+
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -15,7 +17,6 @@ from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
 from cg.store.models import Sample
-from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -223,13 +224,10 @@ class CompressAPI:
     ) -> None:
         """Update Housekeeper with compressed FASTQ files and SPRING metadata file."""
         version: Version = self.hk_api.last_version(sample_id)
-        fastq_tags: List[str] = [
-            tag.name
-            for tag in self.hk_api.files(path=compression_obj.fastq_first.as_posix()).first().tags
-        ]
-        fastq_tags.remove(SequencingFileTag.FASTQ)
-        spring_tags: List[str] = fastq_tags + [SequencingFileTag.SPRING]
-        spring_metadata_tags: List[str] = fastq_tags + [SequencingFileTag.SPRING_METADATA]
+        spring_tags: List[str] = self.get_spring_tags_from_compression(compression_obj)
+        spring_metadata_tags: List[str] = self.get_spring_metadata_tags_from_compression(
+            compression_obj
+        )
         LOG.info(f"Updating FASTQ files in Housekeeper for {sample_id}")
         LOG.info(
             f"{compression_obj.fastq_first}, {compression_obj.fastq_second} -> {compression_obj.spring_path}, "
@@ -263,6 +261,23 @@ class CompressAPI:
         self.delete_fastq_housekeeper(
             hk_fastq_first=hk_fastq_first, hk_fastq_second=hk_fastq_second
         )
+
+    def get_spring_metadata_tags_from_compression(self, compression: CompressionData) -> List[str]:
+        spring_metadata_tags: List[str] = self.get_all_non_fastq_tags(compression)
+        return spring_metadata_tags + [SequencingFileTag.SPRING_METADATA]
+
+    def get_spring_tags_from_compression(self, compression: CompressionData) -> List[str]:
+        spring_tags: List[str] = self.get_all_non_fastq_tags(compression)
+        return spring_tags + [SequencingFileTag.SPRING]
+
+    def get_all_non_fastq_tags(self, compression: CompressionData) -> List[str]:
+        """Returns a list with all tags except 'fastq' for the fastq_first file of the given CompressionData object."""
+        fastq_tags: List[str] = [
+            tag.name
+            for tag in self.hk_api.files(path=compression.fastq_first.as_posix()).first().tags
+        ]
+        fastq_tags.remove(SequencingFileTag.FASTQ)
+        return fastq_tags
 
     def add_fastq_hk(self, sample_obj: Sample, fastq_first: Path, fastq_second: Path) -> None:
         """Add FASTQ files to Housekeeper."""
