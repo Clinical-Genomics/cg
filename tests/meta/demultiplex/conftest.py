@@ -504,7 +504,7 @@ def bcl2fastq_flow_cell_dir_name(demux_post_processing_api) -> str:
 
 
 @pytest.fixture
-def sample_id_with_non_pooled_undetermined_reads() -> str:
+def bcl2fastq_sample_id_with_non_pooled_undetermined_reads() -> str:
     return "SVE2528A1"
 
 
@@ -520,3 +520,8 @@ def bclconvert_flow_cell_name(demux_post_processing_api) -> str:
         hk_api=demux_post_processing_api.hk_api,
     )
     return flow_cell_dir_name
+
+
+@pytest.fixture
+def bclconvert_sample_id_with_non_pooled_undetermined_reads() -> str:
+    return "ACC11927A2"
