@@ -515,7 +515,7 @@ def bcl2fastq_non_pooled_sample_read_count() -> int:
 
 
 @pytest.fixture
-def bclconvert_flow_cell_name(demux_post_processing_api) -> str:
+def bclconvert_flow_cell_dir_name(demux_post_processing_api) -> str:
     """Return a flow cell name that has been demultiplexed with bclconvert."""
     flow_cell_dir_name = "230504_A00689_0804_BHY7FFDRX2"
     flow_cell_path = Path(demux_post_processing_api.demultiplexed_runs_dir, flow_cell_dir_name)
