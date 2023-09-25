@@ -35,21 +35,8 @@ class EncryptionDirs(BaseModel):
     legacy: str
 
 
-class FlowCellRunDirs(Sequencers):
-    pass
-
-
 class BackupConfig(BaseModel):
     encrypt_dir: EncryptionDirs
-
-
-class CleanDirs(BaseModel):
-    sample_sheets_dir_name: str
-    flow_cell_run_dirs: FlowCellRunDirs
-
-
-class CleanConfig(BaseModel):
-    flow_cells: CleanDirs
 
 
 class SlurmConfig(BaseModel):
@@ -254,7 +241,6 @@ class CGConfig(BaseModel):
     backup: BackupConfig = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
-    clean: Optional[CleanConfig] = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
