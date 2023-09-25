@@ -18,7 +18,6 @@ import click
 
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
-from cg.constants.tb import AnalysisStatus
 from cg.exc import CgDataError
 from cg.io.json import read_json, write_json
 from cg.meta.workflow.analysis import AnalysisAPI
