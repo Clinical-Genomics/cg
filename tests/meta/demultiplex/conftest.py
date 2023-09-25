@@ -506,3 +506,17 @@ def bcl2fastq_flow_cell_dir_name(demux_post_processing_api) -> str:
 @pytest.fixture
 def sample_id_with_non_pooled_undetermined_reads() -> str:
     return "SVE2528A1"
+
+
+@pytest.fixture
+def bclconvert_flow_cell_name(demux_post_processing_api) -> str:
+    """Return a flow cell name that has been demultiplexed with bclconvert."""
+    flow_cell_dir_name = "230504_A00689_0804_BHY7FFDRX2"
+    flow_cell_path = Path(demux_post_processing_api.demultiplexed_runs_dir, flow_cell_dir_name)
+
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=flow_cell_path,
+        flow_cell_name="HY7FFDRX2",
+        hk_api=demux_post_processing_api.hk_api,
+    )
+    return flow_cell_dir_name

@@ -155,3 +155,22 @@ def test_post_processing_tracks_undetermined_fastqs_for_bcl2fastq(
 
     undetermined_fastq_files = [file for file in fastq_files if "Undetermined" in file.path]
     assert undetermined_fastq_files
+
+
+def test_post_processing_tracks_undetermined_fastqs_for_bclconvert(
+    demux_post_processing_api: DemuxPostProcessingAPI,
+    bclconvert_flow_cell_name: str,
+):
+    # GIVEN a flow cell with undetermined fastqs in a non-pooled lane
+
+    # WHEN post processing the flow cell
+    demux_post_processing_api.finish_flow_cell(bclconvert_flow_cell_name)
+
+    # THEN the undetermined fastqs were stored in housekeeper
+    fastq_files: List[File] = demux_post_processing_api.hk_api.get_files(
+        tags=[SequencingFileTag.FASTQ],
+        bundle="ACC11927A2",
+    ).all()
+
+    undetermined_fastq_files = [file for file in fastq_files if "Undetermined" in file.path]
+    assert undetermined_fastq_files
