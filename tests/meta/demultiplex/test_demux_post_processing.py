@@ -175,3 +175,27 @@ def test_post_processing_tracks_undetermined_fastqs_for_bclconvert(
 
     undetermined_fastq_files = [file for file in fastq_files if "Undetermined" in file.path]
     assert undetermined_fastq_files
+
+
+def test_post_processing_sample_read_count_update_is_idempotent(
+    demux_post_processing_api: DemuxPostProcessingAPI,
+    bcl2fastq_flow_cell_dir_name: str,
+    bcl2fastq_sample_id_with_non_pooled_undetermined_reads: str,
+):
+    """Test that sample read counts do not change if the flow cell is processed twice."""
+
+    # GIVEN a demultiplexed flow cell
+
+    # WHEN post processing the flow cell twice
+    demux_post_processing_api.finish_flow_cell(bcl2fastq_flow_cell_dir_name)
+    first_sample_read_count: int = demux_post_processing_api.status_db.get_sample_by_internal_id(
+        bcl2fastq_sample_id_with_non_pooled_undetermined_reads
+    ).reads
+
+    demux_post_processing_api.finish_flow_cell(bcl2fastq_flow_cell_dir_name)
+    second_sample_read_count: int = demux_post_processing_api.status_db.get_sample_by_internal_id(
+        bcl2fastq_sample_id_with_non_pooled_undetermined_reads
+    ).reads
+
+    # THEN the sample read count is the same after the second post processing
+    assert first_sample_read_count == second_sample_read_count
