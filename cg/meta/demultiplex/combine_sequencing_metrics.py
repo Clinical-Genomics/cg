@@ -9,29 +9,22 @@ def combine_mapped_metrics_with_undetermined(
 ) -> List[SampleLaneSequencingMetrics]:
     """Combine metrics for mapped and undetermined reads."""
 
-    metrics_dict: Dict[Tuple[str, int], SampleLaneSequencingMetrics] = {
+    metrics: Dict[Tuple[str, int], SampleLaneSequencingMetrics] = {
         (metric.sample_internal_id, metric.flow_cell_lane_number): metric
         for metric in mapped_metrics
     }
-
-    combined_metrics: List[SampleLaneSequencingMetrics] = []
-
     for undetermined_metric in undetermined_metrics:
         key = (undetermined_metric.sample_internal_id, undetermined_metric.flow_cell_lane_number)
-        existing_metric: SampleLaneSequencingMetrics = metrics_dict.get(key)
+        existing_metric: SampleLaneSequencingMetrics = metrics.get(key)
 
         if existing_metric:
             combined_metric: SampleLaneSequencingMetrics = combine_metrics(
                 existing_metric=existing_metric, new_metric=undetermined_metric
             )
-            combined_metrics.append(combined_metric)
+            metrics[key] = combined_metric
         else:
-            combined_metrics.append(undetermined_metric)
-
-    for metric in metrics_dict.values():
-        if metric not in combined_metrics:
-            combined_metrics.append(metric)
-    return combined_metrics
+            metrics[key] = undetermined_metric
+    return list(metrics.values())
 
 
 def combine_metrics(
