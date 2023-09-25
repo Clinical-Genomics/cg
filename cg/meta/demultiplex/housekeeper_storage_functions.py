@@ -1,15 +1,15 @@
 """Functions interacting with housekeeper in the DemuxPostProcessingAPI."""
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from housekeeper.store.models import File, Version
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_internal_ids_from_sample_sheet,
 )
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
 from cg.exc import HousekeeperBundleVersionMissingError
@@ -17,7 +17,6 @@ from cg.meta.demultiplex.utils import (
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_fastqs_from_flow_cell,
-    get_sample_sheet,
     get_sample_sheet_path,
     get_undetermined_fastqs,
     rename_fastq_file_if_needed,
@@ -43,42 +42,43 @@ def store_flow_cell_data_in_housekeeper(
     add_tags_if_non_existent(tag_names=tags, hk_api=hk_api)
 
     add_sample_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api, store=store)
+    store_undetermined_fastq_files(flow_cell=flow_cell, hk_api=hk_api, store=store)
     add_demux_logs_to_housekeeper(
         flow_cell=flow_cell, hk_api=hk_api, flow_cell_run_dir=flow_cell_run_dir
     )
 
 
-def add_undetermined_fastq_files_to_housekeeper(
-    flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI
+def store_undetermined_fastq_files(
+    flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, store: Store
 ) -> None:
-    """Add undetermined fastq files for non-pooled samples in Housekeeper."""
-    sample_sheet: SampleSheet = get_sample_sheet(flow_cell)
-    non_pooled_samples: List[FlowCellSample] = sample_sheet.get_non_pooled_samples()
+    """Store undetermined fastq files for non-pooled samples in Housekeeper."""
+    non_pooled_lanes_and_samples: List[
+        Tuple[int, str]
+    ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 
-    for sample in non_pooled_samples:
+    undetermined_dir_path: Path = flow_cell.path
+    if not flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
+        undetermined_dir_path = Path(flow_cell.path, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
+
+    for lane, sample_id in non_pooled_lanes_and_samples:
         undetermined_fastqs: List[Path] = get_undetermined_fastqs(
-            lane=sample.lane, flow_cell_path=flow_cell.path
+            lane=lane, undetermined_dir_path=undetermined_dir_path
         )
 
         for fastq_path in undetermined_fastqs:
-            add_fastq_file_to_housekeeper(
-                sample_id=sample.sample_id,
-                flow_cell_id=flow_cell.id,
-                fastq_path=fastq_path,
-                hk_api=hk_api,
-            )
-
-
-def add_fastq_file_to_housekeeper(
-    sample_id: str, flow_cell_id: str, fastq_path: Path, hk_api: HousekeeperAPI
-) -> None:
-    add_bundle_and_version_if_non_existent(bundle_name=sample_id, hk_api=hk_api)
-    add_file_to_bundle_if_non_existent(
-        file_path=fastq_path,
-        bundle_name=sample_id,
-        tag_names=[SequencingFileTag.FASTQ, flow_cell_id],
-        hk_api=hk_api,
-    )
+            if check_if_fastq_path_should_be_stored_in_housekeeper(
+                sample_id=sample_id,
+                sample_fastq_path=fastq_path,
+                sequencer_type=flow_cell.sequencer_type,
+                flow_cell_name=flow_cell.id,
+                store=store,
+            ):
+                store_fastq_path_in_housekeeper(
+                    sample_internal_id=sample_id,
+                    sample_fastq_path=fastq_path,
+                    flow_cell_id=flow_cell.id,
+                    hk_api=hk_api,
+                )
 
 
 def add_demux_logs_to_housekeeper(
