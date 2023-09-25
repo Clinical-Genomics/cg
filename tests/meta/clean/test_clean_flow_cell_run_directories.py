@@ -34,14 +34,14 @@ def test_sequenced_date_from_statusdb(
     bcl2fastq_flow_cell_dir,
     timestamp_yesterday,
 ):
-    # GIVEN a flow cell with a sequenced_at date in statusdb
+    # GIVEN a flow cell with a reads_updated_at date in statusdb
     flow_cell: RunDirFlowCell = RunDirFlowCell(bcl2fastq_flow_cell_dir, mock_statusdb, mock_hk)
     mock_statusdb.get_flow_cell_by_name.return_value.sequenced_at = timestamp_yesterday
 
     # WHEN determining the age of a flow cell
     result = flow_cell.sequenced_date
 
-    # THEN the sequenced_date property of the flow cell should be set to the sequenced_at date in
+    # THEN the sequenced_date property of the flow cell should be set to the reads_updated_at date in
     # statusdb
     assert result == timestamp_yesterday
 
