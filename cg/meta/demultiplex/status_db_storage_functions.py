@@ -11,6 +11,7 @@ from cg.apps.sequencing_metrics_parser.api import (
     create_undetermined_non_pooled_metrics,
 )
 from cg.meta.demultiplex.combine_sequencing_metrics import combine_mapped_metrics_with_undetermined
+from cg.constants import FlowCellStatus
 from cg.meta.demultiplex.utils import get_q30_threshold
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
@@ -38,6 +39,7 @@ def store_flow_cell_data_in_status_db(
         LOG.info(f"Flow cell added to status db: {parsed_flow_cell.id}.")
     else:
         LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}.")
+        flow_cell.status = FlowCellStatus.ON_DISK
 
     sample_internal_ids = get_sample_internal_ids_from_sample_sheet(
         sample_sheet_path=parsed_flow_cell.get_sample_sheet_path_hk(),
