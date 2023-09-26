@@ -61,7 +61,6 @@ def test_taxprofiler_start_available(
     caplog.set_level(logging.INFO)
 
     # GIVEN case id with enough reads
-    case_id_enough_reads: str = taxprofiler_case_id
 
     # GIVEN a mocked config
 
