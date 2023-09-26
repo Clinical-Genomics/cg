@@ -1421,11 +1421,11 @@ def novaseqx_flow_cell_with_sample_sheet_no_fastq(
 ) -> FlowCellDirectoryData:
     """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
     novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)
-    flow_cell = FlowCellDirectoryData(flow_cell_path=novaseqx_flow_cell_directory)
+    flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_directory)
     sample_sheet_path = Path(
         novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
-    mocker.patch.object(flow_cell, "get_sample_sheet_path_hk", return_value=sample_sheet_path)
+    flow_cell._sample_sheet_path_hk = sample_sheet_path
     return flow_cell
 
 
