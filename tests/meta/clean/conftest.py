@@ -11,7 +11,6 @@ from cg.constants.time import TWENTY_ONE_DAYS_IN_SECONDS
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
 from tests.store_helpers import StoreHelpers
 
 
@@ -63,39 +62,18 @@ def store_with_flow_cell_to_clean(
         (sample_id, tmp_flow_cell_to_clean.id, 1, 50_000_0000, 90.5, 32),
         (sample_id, tmp_flow_cell_to_clean.id, 2, 50_000_0000, 90.4, 31),
     ]
-
-    flow_cell: Flowcell = helpers.add_flowcell(
+    helpers.add_flowcell(
         flow_cell_name=tmp_flow_cell_to_clean.id,
         store=store,
         has_backup=True,
     )
-    sample: Sample = helpers.add_sample(
+    helpers.add_sample(
         name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
     )
-    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
+    helpers.add_mutliple_sample_lane_sequencing_metrics_entries(
+        metrics_data=sample_sequencing_metrics_details, store=store
+    )
 
-    for (
-        sample_internal_id,
-        flow_cell_name_,
-        flow_cell_lane_number,
-        sample_total_reads_in_lane,
-        sample_base_percentage_passing_q30,
-        sample_base_mean_quality_score,
-    ) in sample_sequencing_metrics_details:
-        helpers.add_sample_lane_sequencing_metrics(
-            store=store,
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=flow_cell_name_,
-            flow_cell_lane_number=flow_cell_lane_number,
-            sample_total_reads_in_lane=sample_total_reads_in_lane,
-            sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
-            sample_base_mean_quality_score=sample_base_mean_quality_score,
-        )
-
-    store.session.add(flow_cell)
-    store.session.add(sample)
-    store.session.add_all(sample_lane_sequencing_metrics)
-    store.session.commit()
     return store
 
 
