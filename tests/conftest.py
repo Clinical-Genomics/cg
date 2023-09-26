@@ -3075,39 +3075,16 @@ def store_with_sequencing_metrics(
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 3, 1_500_000, 80.5, 33),
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 2, 1_500_000, 80.5, 33),
     ]
-
-    flow_cell: Flowcell = helpers.add_flowcell(
+    helpers.add_flowcell(
         flow_cell_name=flow_cell_name,
         store=store,
     )
-    sample: Sample = helpers.add_sample(
+    helpers.add_sample(
         name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
     )
-    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
-
-    for (
-        sample_internal_id,
-        flow_cell_name_,
-        flow_cell_lane_number,
-        sample_total_reads_in_lane,
-        sample_base_percentage_passing_q30,
-        sample_base_mean_quality_score,
-    ) in sample_sequencing_metrics_details:
-        helpers.add_sample_lane_sequencing_metrics(
-            store=store,
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=flow_cell_name_,
-            flow_cell_lane_number=flow_cell_lane_number,
-            sample_total_reads_in_lane=sample_total_reads_in_lane,
-            sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
-            sample_base_mean_quality_score=sample_base_mean_quality_score,
-        )
-
-    store.session.add(flow_cell)
-    store.session.add(sample)
-    store.session.add_all(sample_lane_sequencing_metrics)
-    store.session.commit()
-
+    helpers.add_mutliple_sample_lane_sequencing_metrics_entries(
+        metrics_data=sample_sequencing_metrics_details, store=store
+    )
     return store
 
 
