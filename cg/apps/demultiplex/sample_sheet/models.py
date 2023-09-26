@@ -1,11 +1,14 @@
 import logging
 from collections import defaultdict
 from typing import List, Tuple
+from typing_extensions import Annotated
 
-from pydantic import BaseModel, ConfigDict, Extra, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, Extra, Field
 
-from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
-from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import remove_index_from_sample_id
+from cg.apps.demultiplex.sample_sheet.validators import (
+    remove_index_from_sample_id,
+    validate_sample_id,
+)
 from cg.constants.constants import GenomeVersion
 from cg.constants.demultiplexing import (
     SampleSheetBcl2FastqSections,
@@ -14,12 +17,18 @@ from cg.constants.demultiplexing import (
 
 LOG = logging.getLogger(__name__)
 
+ValidSampleId = Annotated[
+    str,
+    AfterValidator(remove_index_from_sample_id),
+    AfterValidator(validate_sample_id),
+]
+
 
 class FlowCellSample(BaseModel):
     """Base class for flow cell samples."""
 
     lane: int
-    sample_id: str
+    sample_id: ValidSampleId
     index: str
     index2: str = ""
     model_config = ConfigDict(populate_by_name=True, extra=Extra.ignore)
@@ -40,7 +49,7 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
     recipe: str = Field("R1", alias=SampleSheetBcl2FastqSections.Data.RECIPE.value)
     operator: str = Field("script", alias=SampleSheetBcl2FastqSections.Data.OPERATOR.value)
 
-    sample_id: str = Field(
+    sample_id: ValidSampleId = Field(
         ..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value
     )
     project: str = Field(
@@ -52,7 +61,9 @@ class FlowCellSampleBCLConvert(FlowCellSample):
     """Class that represents a NovaSeqX flow cell sample."""
 
     lane: int = Field(..., alias=SampleSheetBCLConvertSections.Data.LANE.value)
-    sample_id: str = Field(..., alias=SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID.value)
+    sample_id: ValidSampleId = Field(
+        ..., alias=SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID.value
+    )
     index: str = Field(..., alias=SampleSheetBCLConvertSections.Data.INDEX_1.value)
     index2: str = Field("", alias=SampleSheetBCLConvertSections.Data.INDEX_2.value)
     override_cycles: str = Field("", alias=SampleSheetBCLConvertSections.Data.OVERRIDE_CYCLES.value)
@@ -74,8 +85,7 @@ class SampleSheet(BaseModel):
         non_pooled_lane_sample_id_pairs: List[Tuple[int, str]] = []
         non_pooled_samples: List[FlowCellSample] = self.get_non_pooled_samples()
         for sample in non_pooled_samples:
-            sample_id: str = remove_index_from_sample_id(sample.sample_id)
-            non_pooled_lane_sample_id_pairs.append((sample.lane, sample_id))
+            non_pooled_lane_sample_id_pairs.append((sample.lane, sample.sample_id))
         return non_pooled_lane_sample_id_pairs
 
     def get_non_pooled_samples(self) -> List[FlowCellSample]:
@@ -89,9 +99,7 @@ class SampleSheet(BaseModel):
         """Return ids for samples in sheet."""
         sample_internal_ids: List[str] = []
         for sample in self.samples:
-            sample_internal_id: str = remove_index_from_sample_id(sample.sample_id)
-            if is_valid_sample_internal_id(sample_internal_id):
-                sample_internal_ids.append(sample_internal_id)
+            sample_internal_ids.append(sample.sample_id)
         return list(set(sample_internal_ids))
 
 

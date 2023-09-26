@@ -19,13 +19,13 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 def bcl_convert_samples_with_updated_indexes() -> List[FlowCellSampleBCLConvert]:
     """Return a list of three FlowCellSampleBCLConvert with updated indexes."""
     sample_1 = FlowCellSampleBCLConvert(
-        lane=1, sample_id="sample 1", index="CAGAAGAT", index2="CAATGTAC"
+        lane=1, sample_id="ACC123", index="CAGAAGAT", index2="CAATGTAC"
     )
     sample_2 = FlowCellSampleBCLConvert(
-        lane=1, sample_id="sample 2", index="CAGAAGAG", index2="CAATGTAT"
+        lane=1, sample_id="ACC456", index="CAGAAGAG", index2="CAATGTAT"
     )
     sample_3 = FlowCellSampleBCLConvert(
-        lane=2, sample_id="sample 3", index="AAGCGATAGA", index2="AACCGCAACA"
+        lane=2, sample_id="ACC789", index="AAGCGATAGA", index2="AACCGCAACA"
     )
     return [sample_1, sample_2, sample_3]
 
