@@ -39,7 +39,10 @@ from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
+from cg.models.demultiplex.run_parameters import (
+    RunParametersNovaSeq6000,
+    RunParametersNovaSeqX,
+)
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
@@ -2156,15 +2159,9 @@ def microsalt_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def current_encryption_dir() -> Path:
-    """Return a temporary directory for current encryption testing."""
-    return Path("home", "ENCRYPT")
-
-
-@pytest.fixture
-def legacy_encryption_dir() -> Path:
-    """Return a temporary directory for current encryption testing."""
-    return Path("home", "TO_PDC")
+def encryption_dir() -> Path:
+    """Return a temporary directory for encryption testing."""
+    return Path("home", "encrypt")
 
 
 @pytest.fixture(name="cg_uri")
@@ -2215,11 +2212,7 @@ def context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encrypt_dir": {
-                "current": str(current_encryption_dir),
-                "legacy": str(legacy_encryption_dir),
-            },
-            "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
+            "encrypt_dir": str(encryption_dir),
         },
         "balsamic": {
             "balsamic_cache": "hello",
