@@ -44,17 +44,27 @@ def validate_samples_unique_per_lane(samples: List[FlowCellSample]) -> None:
 
 
 def get_sample_sheet_from_file(
-    infile: Path,
-    flow_cell_sample_type: Type[FlowCellSample],
+    infile: Path, flow_cell_sample_type: Type[FlowCellSample]
 ) -> SampleSheet:
     """Parse and validate a sample sheet from file."""
     sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.CSV, file_path=infile
     )
+    sample_type: Type[FlowCellSample] = get_sample_type(sample_sheet_content)
+
     return get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_content,
-        sample_type=flow_cell_sample_type,
+        sample_type=sample_type,
     )
+
+
+def get_sample_type(sample_sheet_content: List[List[str]]) -> Type[FlowCellSample]:
+    for row in sample_sheet_content:
+        if SampleSheetBCLConvertSections.Settings.HEADER.value in row:
+            return FlowCellSampleBCLConvert
+        if SampleSheetBcl2FastqSections.Settings.HEADER.value in row:
+            return FlowCellSampleBcl2Fastq
+    raise SampleSheetError("Could not determine sample sheet type")
 
 
 def get_sample_type_from_sequencer_type(sequencer_type: str) -> Type[FlowCellSample]:
