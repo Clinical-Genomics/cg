@@ -5,16 +5,17 @@ from pathlib import Path
 from typing import Set
 
 import click
+
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
 from cg.constants.constants import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
+from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
 from cg.store import Store
 from cg.store.models import Family
-from cgmodels.trailblazer.constants import AnalysisTypes
 
 LOG = logging.getLogger(__name__)
 
