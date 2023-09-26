@@ -1,11 +1,9 @@
-import collections
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Union
 
 from pydantic.v1 import BaseModel, Field, conlist, validator
 
-from cg.constants.nextflow import DELIVER_FILE_HEADERS
-from cg.exc import SampleSheetError
+from cg.exc import SampleSheetError, ValidationError
 
 
 class PipelineParameters(BaseModel):
@@ -44,22 +42,27 @@ class NextflowSampleSheetEntry(BaseModel):
         return fastq_paths
 
 
-class NextflowDeliverables(BaseModel):
-    """Nextflow deliverables model
+class FileDeliverable(BaseModel):
+    """Specification for a general deliverables file."""
 
-    Attributes:
-        deliverables: dictionary containing format, path, path_index, step, tag and id keys.
-    """
+    id: str
+    format: str
+    path: str
+    path_index: Optional[str]
+    step: str
+    tag: str
 
-    deliverables: dict
+    @validator("path", "path_index", pre=True)
+    def path_exist(cls, file_path: Union[str, Path]) -> Optional[str]:
+        if file_path is not None:
+            path = Path(file_path)
+            if not path.exists():
+                raise ValidationError(f"Path {file_path} does not exist")
+            return str(path)
+        return None
 
-    @validator("deliverables")
-    def headers(cls, v: dict) -> None:
-        """Validate header format."""
-        if collections.Counter(list(v.keys())) != collections.Counter(DELIVER_FILE_HEADERS):
-            raise ValueError(
-                f"Headers are not matching the standard header format: {DELIVER_FILE_HEADERS}"
-            )
-        for key, value in v.items():
-            if not value and key != "path_index":
-                raise ValueError("An entry other than path_index is empty!")
+
+class PipelineDeliverables(BaseModel):
+    """Specification for pipeline deliverables."""
+
+    files: List[FileDeliverable]

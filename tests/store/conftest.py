@@ -64,7 +64,7 @@ class StoreConstants(enum.Enum):
 
 
 @pytest.fixture(name="microbial_submitted_order")
-def fixture_microbial_submitted_order() -> dict:
+def microbial_submitted_order() -> dict:
     """Build an example order as it looks after submission to."""
 
     def _get_item(name: str, internal_id: str, well_position: str, organism: str) -> dict:
@@ -124,7 +124,7 @@ def fixture_microbial_submitted_order() -> dict:
 
 
 @pytest.fixture(name="microbial_store")
-def fixture_microbial_store(
+def microbial_store(
     base_store: Store, microbial_submitted_order: dict
 ) -> Generator[Store, None, None]:
     """Set up a microbial store instance."""
@@ -158,37 +158,37 @@ def fixture_microbial_store(
 
 
 @pytest.fixture(name="case")
-def fixture_case_obj(analysis_store: Store) -> Family:
+def case_obj(analysis_store: Store) -> Family:
     """Return a case models object."""
     return analysis_store.get_cases()[0]
 
 
 @pytest.fixture(name="sample")
-def fixture_sample_obj(analysis_store) -> Sample:
+def sample_obj(analysis_store) -> Sample:
     """Return a sample models object."""
     return analysis_store._get_query(table=Sample).first()
 
 
 @pytest.fixture(name="sequencer_name")
-def fixture_sequencer_name() -> str:
+def sequencer_name() -> str:
     """Return sequencer name."""
     return "A00689"
 
 
 @pytest.fixture(name="invalid_application_id")
-def fixture_invalid_application_id() -> int:
+def invalid_application_id() -> int:
     """Return an invalid application id."""
     return -1
 
 
 @pytest.fixture(name="invalid_application_tag")
-def fixture_invalid_application_tag() -> str:
+def invalid_application_tag() -> str:
     """Return an invalid application tag."""
     return "invalid-tag"
 
 
 @pytest.fixture(name="store_with_a_sample_that_has_many_attributes_and_one_without")
-def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
+def store_with_a_sample_that_has_many_attributes_and_one_without(
     store: Store,
     helpers: StoreHelpers,
     timestamp_now=dt.datetime.now(),
@@ -205,7 +205,7 @@ def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
         sequence_start=timestamp_now,
         delivered_at=timestamp_now,
         received_at=timestamp_now,
-        sequenced_at=timestamp_now,
+        reads_updated_at=timestamp_now,
         prepared_at=timestamp_now,
         invoiced_at=timestamp_now,
         application_version_id=StoreConstants.APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES.value,
@@ -237,7 +237,7 @@ def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
         is_tumour=False,
         delivered_at=None,
         received_at=None,
-        sequenced_at=None,
+        reads_updated_at=None,
         prepared_at=None,
         subject_id=None,
         invoice_id=None,
@@ -249,7 +249,7 @@ def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
 
 
 @pytest.fixture(name="store_with_a_pool_with_and_without_attributes")
-def fixture_store_with_a_pool_with_and_without_attributes(
+def store_with_a_pool_with_and_without_attributes(
     store: Store,
     helpers: StoreHelpers,
     timestamp_now=dt.datetime.now(),
@@ -278,7 +278,7 @@ def fixture_store_with_a_pool_with_and_without_attributes(
 
 
 @pytest.fixture(name="store_with_an_application_with_and_without_attributes")
-def fixture_store_with_an_application_with_and_without_attributes(
+def store_with_an_application_with_and_without_attributes(
     store: Store,
     helpers: StoreHelpers,
     timestamp_now=dt.datetime.now(),
@@ -304,7 +304,7 @@ def fixture_store_with_an_application_with_and_without_attributes(
 
 
 @pytest.fixture(name="applications_store")
-def fixture_applications_store(store: Store, helpers: StoreHelpers) -> Store:
+def applications_store(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store populated with applications from excel file"""
     app_tags: List[str] = ["PGOTTTR020", "PGOTTTR030", "PGOTTTR040"]
     for app_tag in app_tags:
@@ -313,7 +313,7 @@ def fixture_applications_store(store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture(name="store_with_different_application_versions")
-def fixture_store_with_different_application_versions(
+def store_with_different_application_versions(
     applications_store: Store,
     helpers: StoreHelpers,
     old_timestamp: dt.datetime,
@@ -337,7 +337,7 @@ def fixture_store_with_different_application_versions(
 
 
 @pytest.fixture(name="store_with_an_invoice_with_and_without_attributes")
-def fixture_store_with_an_invoice_with_and_without_attributes(
+def store_with_an_invoice_with_and_without_attributes(
     store: Store,
     helpers: StoreHelpers,
     timestamp_now=dt.datetime.now(),
@@ -358,7 +358,7 @@ def fixture_store_with_an_invoice_with_and_without_attributes(
 
 
 @pytest.fixture(name="store_with_older_and_newer_analyses")
-def fixture_store_with_older_and_newer_analyses(
+def store_with_older_and_newer_analyses(
     base_store: Store,
     helpers: StoreHelpers,
     case: Family,
@@ -392,7 +392,7 @@ def fixture_store_with_older_and_newer_analyses(
 
 
 @pytest.fixture(name="store_with_analyses_for_cases")
-def fixture_store_with_analyses_for_cases(
+def store_with_analyses_for_cases(
     analysis_store: Store,
     helpers: StoreHelpers,
     timestamp_now: dt.datetime,

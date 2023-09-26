@@ -1,7 +1,9 @@
 import logging
 from typing import Optional
 
-from cg.apps.cgstats.stats import StatsAPI
+from pydantic.v1 import BaseModel, EmailStr, Field
+from typing_extensions import Literal
+
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -18,8 +20,6 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.store import Store
-from pydantic.v1 import BaseModel, EmailStr, Field
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -30,26 +30,8 @@ class Sequencers(BaseModel):
     novaseq: str
 
 
-class EncryptionDirs(BaseModel):
-    current: str
-    legacy: str
-
-
-class FlowCellRunDirs(Sequencers):
-    pass
-
-
 class BackupConfig(BaseModel):
-    encrypt_dir: EncryptionDirs
-
-
-class CleanDirs(BaseModel):
-    sample_sheets_dir_name: str
-    flow_cell_run_dirs: FlowCellRunDirs
-
-
-class CleanConfig(BaseModel):
-    flow_cells: CleanDirs
+    encrypt_dir: str
 
 
 class SlurmConfig(BaseModel):
@@ -68,8 +50,6 @@ class HousekeeperConfig(BaseModel):
 
 
 class DemultiplexConfig(BaseModel):
-    run_dir: str
-    out_dir: str
     slurm: SlurmConfig
 
 
@@ -181,12 +161,6 @@ class TaxprofilerConfig(CommonAppConfig):
     tower_pipeline: str
 
 
-class CGStatsConfig(BaseModel):
-    binary_path: str
-    database: str
-    root: str
-
-
 class MicrosaltConfig(BaseModel):
     binary_path: str
     conda_binary: Optional[str] = None
@@ -260,11 +234,8 @@ class CGConfig(BaseModel):
 
     # App APIs that can be instantiated in CGConfig
     backup: BackupConfig = None
-    cgstats: CGStatsConfig = None
-    cg_stats_api_: StatsAPI = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
-    clean: Optional[CleanConfig] = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
@@ -315,7 +286,6 @@ class CGConfig(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         fields = {
-            "cg_stats_api_": "cg_stats_api",
             "chanjo_api_": "chanjo_api",
             "crunchy_api_": "crunchy_api",
             "demultiplex_api_": "demultiplex_api",
@@ -339,15 +309,6 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating chanjo api")
             api = ChanjoAPI(config=self.dict())
             self.chanjo_api_ = api
-        return api
-
-    @property
-    def cg_stats_api(self) -> StatsAPI:
-        api = self.__dict__.get("cg_stats_api_")
-        if api is None:
-            LOG.debug("Instantiating cg_stats api")
-            api = StatsAPI(config=self.dict())
-            self.cg_stats_api_ = api
         return api
 
     @property

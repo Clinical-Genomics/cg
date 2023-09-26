@@ -2,11 +2,13 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
 from cg.constants import Pipeline
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store.models import Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -41,26 +43,41 @@ def fluffy_success_output_aberrations(tmpdir_factory):
     return file_path
 
 
+@pytest.fixture
+def bcl_convert_samplesheet_path() -> Path:
+    return Path("tests", "fixtures", "data", "bcl_convert_sample_sheet.csv")
+
+
+@pytest.fixture
+def sample() -> Sample:
+    return Sample(
+        name="sample_name",
+        order="sample_project",
+        control="positive",
+        reads_updated_at=dt.datetime.now(),
+    )
+
+
 @pytest.fixture(scope="function")
-def samplesheet_fixture_path():
+def samplesheet_path():
     return Path("tests/fixtures/data/SampleSheet.csv").absolute()
 
 
 @pytest.fixture(scope="function")
-def fastq_file_fixture_path(config_root_dir):
-    fixture_path = Path(config_root_dir)
-    fixture_path.mkdir(parents=True, exist_ok=True)
-    fixture_fastq_path = Path(fixture_path, "fastq.fastq.gz")
-    fixture_fastq_path.touch(exist_ok=True)
-    return fixture_fastq_path
+def fluffy_fastq_file_path(config_root_dir):
+    path = Path(config_root_dir)
+    path.mkdir(parents=True, exist_ok=True)
+    fastq_path = Path(path, "fastq.fastq.gz")
+    fastq_path.touch(exist_ok=True)
+    return fastq_path
 
 
 @pytest.fixture(scope="function")
-def deliverables_yaml_fixture_path():
+def deliverables_yaml_path():
     return Path("tests/fixtures/apps/fluffy/deliverables.yaml")
 
 
-@pytest.fixture()
+@pytest.fixture
 def fluffy_hermes_deliverables_response_data(
     create_multiqc_html_file,
     fluffy_case_id_existing,
@@ -92,14 +109,14 @@ def fluffy_hermes_deliverables_response_data(
 
 
 @pytest.fixture(scope="function")
-def fluffy_fastq_hk_bundle_data(fastq_file_fixture_path, fluffy_sample_lims_id) -> dict:
+def fluffy_fastq_hk_bundle_data(fluffy_fastq_file_path, fluffy_sample_lims_id) -> dict:
     return {
         "name": fluffy_sample_lims_id,
         "created": dt.datetime.now(),
         "version": "1.0",
         "files": [
             {
-                "path": fastq_file_fixture_path.as_posix(),
+                "path": fluffy_fastq_file_path.as_posix(),
                 "tags": ["fastq", "flowcell"],
                 "archive": False,
             }
@@ -108,14 +125,14 @@ def fluffy_fastq_hk_bundle_data(fastq_file_fixture_path, fluffy_sample_lims_id) 
 
 
 @pytest.fixture(scope="function")
-def fluffy_samplesheet_bundle_data(samplesheet_fixture_path) -> dict:
+def fluffy_samplesheet_bundle_data(samplesheet_path) -> dict:
     return {
         "name": "flowcell",
         "created": dt.datetime.now(),
         "version": "1.0",
         "files": [
             {
-                "path": str(samplesheet_fixture_path),
+                "path": str(samplesheet_path),
                 "tags": ["flowcell", "samplesheet"],
                 "archive": False,
             }
@@ -151,7 +168,7 @@ def fluffy_context(
         is_tumour=False,
         application_type="tgs",
         reads=100,
-        sequenced_at=dt.datetime.now(),
+        reads_updated_at=dt.datetime.now(),
     )
     helpers.add_flowcell(
         fluffy_analysis_api.status_db, flow_cell_name="flowcell", samples=[example_fluffy_sample]

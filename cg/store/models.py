@@ -2,6 +2,11 @@ import datetime as dt
 import re
 from typing import Dict, List, Optional, Set
 
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.util import deprecated
+
 from cg.constants import (
     CASE_ACTIONS,
     FLOWCELL_STATUS,
@@ -13,10 +18,6 @@ from cg.constants import (
     Priority,
 )
 from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm.attributes import InstrumentedAttribute
-from sqlalchemy.util import deprecated
 
 Model = declarative_base()
 
@@ -189,7 +190,7 @@ class Analysis(Model):
     is_primary = Column(types.Boolean, default=False)
 
     created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
-    family_id = Column(ForeignKey("family.id", ondelete="CASCADE"))
+    family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
     uploaded_to_vogue_at = Column(types.DateTime, nullable=True)
 
     def __str__(self):
@@ -394,8 +395,8 @@ class Family(Model, PriorityMixin):
         for link in self.links:
             if link.sample.application_version.application.is_external:
                 sequenced_dates.append(link.sample.ordered_at)
-            elif link.sample.sequenced_at:
-                sequenced_dates.append(link.sample.sequenced_at)
+            elif link.sample.reads_updated_at:
+                sequenced_dates.append(link.sample.reads_updated_at)
         return max(sequenced_dates, default=None)
 
     @property
@@ -521,6 +522,7 @@ class Flowcell(Model):
     sequenced_at = Column(types.DateTime)
     status = Column(types.Enum(*FLOWCELL_STATUS), default="ondisk")
     archived_at = Column(types.DateTime)
+    has_backup = Column(types.Boolean, nullable=False, default=False)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
     samples = orm.relationship("Sample", secondary=flowcell_sample, backref="flowcells")
@@ -642,10 +644,10 @@ class Sample(Model, PriorityMixin):
 
     priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     reads = Column(types.BigInteger, default=0)
+    reads_updated_at = Column(types.DateTime)
     received_at = Column(types.DateTime)
     reference_genome = Column(types.String(255))
     sequence_start = Column(types.DateTime)
-    sequenced_at = Column(types.DateTime)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
 
@@ -703,8 +705,8 @@ class Sample(Model, PriorityMixin):
         """Get the current sample state."""
         if self.delivered_at:
             return f"Delivered {self.delivered_at.date()}"
-        if self.sequenced_at:
-            return f"Sequenced {self.sequenced_at.date()}"
+        if self.reads_updated_at:
+            return f"Sequenced {self.reads_updated_at.date()}"
         if self.sequence_start:
             return f"Sequencing {self.sequence_start.date()}"
         if self.received_at:

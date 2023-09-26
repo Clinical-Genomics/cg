@@ -2,6 +2,8 @@ import logging
 import re
 from pathlib import Path
 from typing import List, Optional
+from cg.apps.demultiplex.sample_sheet.models import SampleSheet
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
@@ -178,6 +180,25 @@ def rename_fastq_file_if_needed(fastq_file_path: Path, flow_cell_name: str) -> P
     return renamed_fastq_file_path
 
 
+def get_sample_sheet(flow_cell: FlowCellDirectoryData) -> SampleSheet:
+    """Return sample sheet associated with flowcell."""
+    sample_sheet_path: Path = flow_cell.get_sample_sheet_path_hk()
+    sample_type = flow_cell.sample_type
+    sample_sheet: SampleSheet = get_sample_sheet_from_file(
+        infile=sample_sheet_path, flow_cell_sample_type=sample_type
+    )
+    return sample_sheet
+
+
+def get_undetermined_fastqs(lane: int, undetermined_dir_path: Path) -> List[Path]:
+    """Get the undetermined fastq files for a specific lane on a flow cell."""
+    undetermined_pattern = f"Undetermined*_L00{lane}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    return get_files_matching_pattern(
+        directory=undetermined_dir_path,
+        pattern=undetermined_pattern,
+    )
+
+
 def parse_manifest_file(manifest_file: Path) -> List[Path]:
     """Returns a list with the first entry of each row of the given TSV file."""
     files: List[List[str]] = read_csv(file_path=manifest_file, delimiter="\t")
@@ -212,3 +233,10 @@ def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
             )
             return False
     return True
+
+
+def get_flow_cell_id(flow_cell_dir_name: str) -> str:
+    """Return the flow cell id from the flow cell directory name.
+    Example: 230802_A00689_0857_BHGTMFDSX7 -> HGTMFDSX7
+    """
+    return flow_cell_dir_name.split("_")[-1][1:]

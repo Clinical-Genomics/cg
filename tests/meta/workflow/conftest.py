@@ -1,32 +1,29 @@
 """Fixtures for the workflow tests."""
 import datetime
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 import pytest
-from cgmodels.cg.constants import Pipeline
-
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
-from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
-
 from cg.meta.compress.compress import CompressAPI
-from cg.models.compression_data import CompressionData
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.compression_data import CompressionData
 from cg.store.models import Family, Sample
-from tests.store_helpers import StoreHelpers
-from tests.conftest import fixture_base_store
-from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
-from tests.meta.upload.scout.conftest import fixture_another_sample_id
+from cgmodels.cg.constants import Pipeline
 from tests.cli.workflow.balsamic.conftest import (
+    balsamic_housekeeper_dir,
     fastq_file_l_1_r_1,
     fastq_file_l_2_r_1,
     fastq_file_l_2_r_2,
-    balsamic_housekeeper_dir,
 )
+from tests.meta.compress.conftest import compress_api, real_crunchy_api
+from tests.meta.upload.scout.conftest import another_sample_id
+from tests.store_helpers import StoreHelpers
 
 
-@pytest.fixture(scope="function", name="populated_compress_spring_api")
-def fixture_populated_compress_spring_api(
+@pytest.fixture(scope="function")
+def populated_compress_spring_api(
     compress_api: CompressAPI, only_spring_bundle: dict, helpers
 ) -> CompressAPI:
     """Populated compress api fixture with only spring compressed fastq."""
@@ -35,8 +32,8 @@ def fixture_populated_compress_spring_api(
     return compress_api
 
 
-@pytest.fixture(scope="function", name="populated_compress_api_fastq_spring")
-def fixture_populated_compress_api_fastq_spring(
+@pytest.fixture(scope="function")
+def populated_compress_api_fastq_spring(
     compress_api: CompressAPI, spring_fastq_mix: dict, helpers
 ) -> CompressAPI:
     """Populated compress api fixture with both spring and fastq."""
@@ -46,7 +43,7 @@ def fixture_populated_compress_api_fastq_spring(
 
 
 @pytest.fixture(name="only_spring_bundle")
-def fixture_only_spring_bundle() -> dict:
+def only_spring_bundle() -> dict:
     """Return a dictionary with bundle info in the correct format."""
     return {
         "name": "ADM1",
@@ -62,7 +59,7 @@ def fixture_only_spring_bundle() -> dict:
 
 
 @pytest.fixture(name="spring_fastq_mix")
-def fixture_spring_fastq_mix(compression_object: CompressionData) -> dict:
+def spring_fastq_mix(compression_object: CompressionData) -> dict:
     """Return a dictionary with bundle info including both fastq and spring files."""
 
     return {
@@ -170,7 +167,7 @@ def qc_microsalt_context(
             application_tag=MicrosaltAppTags.MWRNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
             reads=MicrosaltQC.TARGET_READS,
-            sequenced_at=datetime.datetime.now(),
+            reads_updated_at=datetime.datetime.now(),
         )
 
         helpers.add_relationship(store=store, case=microsalt_case_qc_pass, sample=sample_to_add)
@@ -190,7 +187,7 @@ def qc_microsalt_context(
             application_tag=MicrosaltAppTags.MWXNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
             reads=MicrosaltQC.TARGET_READS,
-            sequenced_at=datetime.datetime.now(),
+            reads_updated_at=datetime.datetime.now(),
         )
 
         helpers.add_relationship(store=store, case=microsalt_case_qc_fail, sample=sample_to_add)
@@ -209,7 +206,7 @@ def qc_microsalt_context(
 
 
 @pytest.fixture(name="rnafusion_metrics")
-def fixture_rnafusion_metrics() -> Dict[str, float]:
+def rnafusion_metrics() -> Dict[str, float]:
     """Return Rnafusion raw analysis metrics dictionary."""
     return {
         "after_filtering_gc_content": 0.516984,

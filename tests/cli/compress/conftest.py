@@ -3,12 +3,11 @@
 import datetime as dt
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Generator
+from typing import Any, Dict, Generator
 
 import pytest
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-
 from cg.constants import FileExtensions, SequencingFileTag
 from cg.constants.pedigree import Pedigree
 from cg.meta.compress import CompressAPI
@@ -42,14 +41,14 @@ class MockCompressAPI(CompressAPI):
         return self.spring_decompression_success
 
 
-@pytest.fixture(name="compress_api")
-def fixture_compress_api() -> MockCompressAPI:
+@pytest.fixture
+def compress_api() -> MockCompressAPI:
     """Return a Compress context."""
     return MockCompressAPI()
 
 
-@pytest.fixture(name="real_crunchy_api")
-def fixture_real_crunchy_api(
+@pytest.fixture
+def real_crunchy_api(
     crunchy_config: Dict[str, Dict[str, Any]]
 ) -> Generator[CrunchyAPI, None, None]:
     """Return Crunchy API."""
@@ -58,8 +57,8 @@ def fixture_real_crunchy_api(
     yield _api
 
 
-@pytest.fixture(name="real_compress_api")
-def fixture_real_compress_api(
+@pytest.fixture
+def real_compress_api(
     demultiplex_runs: Path, housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
 ) -> CompressAPI:
     """Return a Compress context."""
@@ -68,8 +67,8 @@ def fixture_real_compress_api(
     )
 
 
-@pytest.fixture(name="real_populated_compress_fastq_api")
-def fixture_real_populated_compress_fastq_api(
+@pytest.fixture
+def real_populated_compress_fastq_api(
     real_compress_api: CompressAPI, compress_hk_fastq_bundle: dict, helpers: StoreHelpers
 ) -> CompressAPI:
     """Return populated Compress API."""
@@ -91,8 +90,8 @@ class CaseInfo:
         self.application_tag: str = kwargs["application_tag"]
 
 
-@pytest.fixture(name="compress_case_info")
-def fixture_compress_case_info(
+@pytest.fixture
+def compress_case_info(
     case_id: str,
     family_name: str,
     timestamp: datetime,
@@ -109,8 +108,8 @@ def fixture_compress_case_info(
     )
 
 
-@pytest.fixture(name="populated_compress_store")
-def fixture_populated_compress_store(
+@pytest.fixture
+def populated_compress_store(
     store: Store, helpers: StoreHelpers, compress_case_info, analysis_family
 ):
     """Return a store populated with a completed analysis."""
@@ -124,8 +123,8 @@ def fixture_populated_compress_store(
     return store
 
 
-@pytest.fixture(name="populated_compress_multiple_store")
-def fixture_populated_compress_multiple_store(
+@pytest.fixture
+def populated_compress_multiple_store(
     store: Store,
     helpers: StoreHelpers,
     compress_case_info: CaseInfo,
@@ -162,8 +161,8 @@ def fixture_populated_compress_multiple_store(
 
 
 # Context fixtures
-@pytest.fixture(name="compress_context")
-def fixture_base_compress_context(
+@pytest.fixture
+def base_compress_context(
     compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
 ) -> CGConfig:
     """Return a Compress context."""
@@ -172,8 +171,8 @@ def fixture_base_compress_context(
     return cg_config_object
 
 
-@pytest.fixture(name="populated_multiple_compress_context")
-def fixture_populated_multiple_compress_context(
+@pytest.fixture
+def populated_multiple_compress_context(
     compress_api: CompressAPI, populated_compress_multiple_store: Store, cg_config_object: CGConfig
 ) -> CGConfig:
     """Return a Compress context populated with a completed analysis."""
@@ -182,8 +181,8 @@ def fixture_populated_multiple_compress_context(
     return cg_config_object
 
 
-@pytest.fixture(name="populated_compress_context")
-def fixture_populated_compress_context(
+@pytest.fixture
+def populated_compress_context(
     compress_api: CompressAPI, populated_compress_store: Store, cg_config_object: CGConfig
 ) -> CGConfig:
     """Return a Compress context populated with a completed analysis."""
@@ -192,8 +191,8 @@ def fixture_populated_compress_context(
     return cg_config_object
 
 
-@pytest.fixture(name="real_populated_compress_context")
-def fixture_real_populated_compress_context(
+@pytest.fixture
+def real_populated_compress_context(
     real_populated_compress_fastq_api: CompressAPI,
     populated_compress_store: Store,
     cg_config_object: CGConfig,
@@ -207,22 +206,22 @@ def fixture_real_populated_compress_context(
 # Bundle fixtures
 
 
-@pytest.fixture(name="sample")
-def fixture_sample() -> str:
+@pytest.fixture
+def sample() -> str:
     """Return the sample id for first sample."""
     return "sample_1"
 
 
-@pytest.fixture(name="new_dir")
-def fixture_new_dir(project_dir: Path) -> Path:
+@pytest.fixture
+def new_dir(project_dir: Path) -> Path:
     """Return the path to a subdirectory."""
     new_dir = Path(project_dir, "new_dir")
     new_dir.mkdir()
     return new_dir
 
 
-@pytest.fixture(name="spring_bundle")
-def fixture_spring_bundle(project_dir: Path, timestamp: datetime, sample: str) -> dict:
+@pytest.fixture
+def spring_bundle(project_dir: Path, timestamp: datetime, sample: str) -> dict:
     """Return a bundle with spring files."""
     spring_file: Path = Path(project_dir, f"file{FileExtensions.SPRING}")
     spring_file.touch()
@@ -247,8 +246,8 @@ def fixture_spring_bundle(project_dir: Path, timestamp: datetime, sample: str) -
     }
 
 
-@pytest.fixture(name="spring_bundle_symlink_problem")
-def fixture_spring_bundle_symlink_problem(
+@pytest.fixture
+def spring_bundle_symlink_problem(
     project_dir: Path, new_dir: Path, timestamp: datetime, sample: str
 ):
     """Return Housekeeper bundle with SPRING files having symlinks."""
@@ -277,8 +276,8 @@ def fixture_spring_bundle_symlink_problem(
     }
 
 
-@pytest.fixture(name="symlinked_fastqs")
-def fixture_symlinked_fastqs(project_dir: Path, new_dir: Path) -> dict:
+@pytest.fixture
+def symlinked_fastqs(project_dir: Path, new_dir: Path) -> dict:
     """Setup an environment that is similar to the case we want to solve."""
     fastq_first: Path = Path(project_dir, "first.fastq.gz")
     fastq_second: Path = Path(project_dir, "second.fastq.gz")

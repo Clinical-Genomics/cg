@@ -1,9 +1,16 @@
 import logging
-from pydantic import ConfigDict, BaseModel, Extra, Field
-from typing import List
+from collections import defaultdict
+from typing import List, Tuple
 
+from pydantic import BaseModel, ConfigDict, Extra, Field
+
+from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
+from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import remove_index_from_sample_id
 from cg.constants.constants import GenomeVersion
-from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
+from cg.constants.demultiplexing import (
+    SampleSheetBcl2FastqSections,
+    SampleSheetBCLConvertSections,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -48,6 +55,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
     sample_id: str = Field(..., alias=SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID.value)
     index: str = Field(..., alias=SampleSheetBCLConvertSections.Data.INDEX_1.value)
     index2: str = Field("", alias=SampleSheetBCLConvertSections.Data.INDEX_2.value)
+    override_cycles: str = Field("", alias=SampleSheetBCLConvertSections.Data.OVERRIDE_CYCLES.value)
     adapter_read_1: str = Field("", alias=SampleSheetBCLConvertSections.Data.ADAPTER_READ_1.value)
     adapter_read_2: str = Field("", alias=SampleSheetBCLConvertSections.Data.ADAPTER_READ_2.value)
     barcode_mismatches_1: int = Field(
@@ -60,6 +68,31 @@ class FlowCellSampleBCLConvert(FlowCellSample):
 
 class SampleSheet(BaseModel):
     samples: List[FlowCellSample]
+
+    def get_non_pooled_lanes_and_samples(self) -> List[Tuple[int, str]]:
+        """Return tuples of non-pooled lane and sample ids."""
+        non_pooled_lane_sample_id_pairs: List[Tuple[int, str]] = []
+        non_pooled_samples: List[FlowCellSample] = self.get_non_pooled_samples()
+        for sample in non_pooled_samples:
+            sample_id: str = remove_index_from_sample_id(sample.sample_id)
+            non_pooled_lane_sample_id_pairs.append((sample.lane, sample_id))
+        return non_pooled_lane_sample_id_pairs
+
+    def get_non_pooled_samples(self) -> List[FlowCellSample]:
+        """Return samples that are sequenced solo in their lane."""
+        lane_samples = defaultdict(list)
+        for sample in self.samples:
+            lane_samples[sample.lane].append(sample)
+        return [samples[0] for samples in lane_samples.values() if len(samples) == 1]
+
+    def get_sample_ids(self) -> List[str]:
+        """Return ids for samples in sheet."""
+        sample_internal_ids: List[str] = []
+        for sample in self.samples:
+            sample_internal_id: str = remove_index_from_sample_id(sample.sample_id)
+            if is_valid_sample_internal_id(sample_internal_id):
+                sample_internal_ids.append(sample_internal_id)
+        return list(set(sample_internal_ids))
 
 
 class SampleSheetBcl2Fastq(SampleSheet):

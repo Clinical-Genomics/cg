@@ -42,7 +42,7 @@ def test_cli_link(
     fluffy_case_id_existing,
     fluffy_sample_lims_id,
     fluffy_context: CGConfig,
-    fastq_file_fixture_path,
+    fluffy_fastq_file_path,
     caplog,
 ):
     caplog.set_level("INFO")
@@ -78,7 +78,7 @@ def test_cli_link_dir_exists(
     fluffy_case_id_existing,
     fluffy_sample_lims_id,
     fluffy_context: CGConfig,
-    fastq_file_fixture_path,
+    fluffy_fastq_file_path,
     caplog,
 ):
     caplog.set_level("INFO")

@@ -39,7 +39,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
     context.meta_apis["backup_api"] = BackupAPI(
         encryption_api=encryption_api,
-        encrypt_dir=context.backup.encrypt_dir.dict(),
+        encrypt_dir=context.backup.encrypt_dir,
         status=context.status_db,
         tar_api=tar_api,
         pdc_api=pdc_api,
@@ -83,7 +83,9 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
     LOG.info("Getting all spring files from Housekeeper.")
     spring_files: Iterable[hk_models.File] = housekeeper_api.files(
         tags=[SequencingFileTag.SPRING]
-    ).filter(hk_models.File.path.like(f"%{config.environment}/{config.demultiplex.out_dir}%"))
+    ).filter(
+        hk_models.File.path.like(f"%{config.environment}/{config.demultiplexed_flow_cells_dir}%")
+    )
     for spring_file in spring_files:
         LOG.info("Attempting encryption and PDC archiving for file %s", spring_file.path)
         if Path(spring_file.path).exists():
