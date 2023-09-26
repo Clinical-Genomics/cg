@@ -270,7 +270,7 @@ class CompressAPI:
 
     @staticmethod
     def get_all_non_fastq_tags(fastq_file: File) -> List[str]:
-        """Returns a list with all tags except 'fastq' for the fastq_first file of the given CompressionData object."""
+        """Returns a list with all tags except 'fastq' for the fastq_first file of the given fastq file."""
         fastq_tags: List[str] = [tag.name for tag in fastq_file.tags]
         fastq_tags.remove(SequencingFileTag.FASTQ)
         return fastq_tags
