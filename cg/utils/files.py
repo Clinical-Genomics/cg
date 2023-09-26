@@ -1,10 +1,9 @@
 """Some helper functions for working with files"""
-import shutil
-from datetime import datetime
-from pathlib import Path
-import os
-from typing import List, Set
 import logging
+import os
+import shutil
+from pathlib import Path
+from typing import List, Set
 
 LOG = logging.getLogger(__name__)
 
@@ -45,9 +44,9 @@ def is_pattern_in_file_path_name(file_path: Path, pattern: str) -> bool:
     return pattern in file_path.name
 
 
-def get_creation_date(directory_path: Path) -> datetime:
+def get_creation_time_stamp(directory_path: Path) -> float:
     """
-    Return the date that a directory is created.
+    Return time stamp that a directory is created.
     Raises:
         FileNotFoundError if the directory does not exist.
         ValueError if the specified path is not a directory.
@@ -60,10 +59,7 @@ def get_creation_date(directory_path: Path) -> datetime:
 
     stat_info = os.stat(directory_path)
     creation_timestamp = stat_info.st_ctime
-
-    # Convert the timestamp to a human-readable format
-    creation_date = datetime.fromtimestamp(creation_timestamp)
-    return creation_date
+    return creation_timestamp
 
 
 def remove_directory_and_contents(directory_path):

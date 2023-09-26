@@ -1,59 +1,161 @@
+"""Tests for the CleanFlowCellsAPI."""
+from datetime import datetime
 from pathlib import Path
+from typing import Dict, List, Union
 
 import pytest
 
-
-@pytest.fixture(scope="function")
-def correct_flow_cell_name(bcl2fastq_flow_cell_full_name: str) -> str:
-    """Correct flow cell name."""
-    return bcl2fastq_flow_cell_full_name
-
-
-@pytest.fixture(scope="function")
-def incorrect_flow_cell_too_long(correct_flow_cell_name: str) -> str:
-    """Incorrect flow cell name."""
-    return correct_flow_cell_name + "_r"
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import SequencingFileTag
+from cg.constants.time import TWENTY_ONE_DAYS_IN_SECONDS
+from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.store import Store
+from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(scope="function")
-def incorrect_flow_cell_extension(correct_flow_cell_name: str) -> str:
-    """Incorrect flow cell name."""
-    return correct_flow_cell_name + ".someextension"
+def flow_cell_clean_api_can_be_removed(
+    tmp_flow_cell_to_clean_path: Path,
+    store_with_flow_cell_to_clean: Store,
+    housekeeper_api_with_flow_cell_to_clean: HousekeeperAPI,
+    tmp_sample_sheet_clean_flow_cell_path: Path,
+) -> CleanFlowCellAPI:
+    clean_flow_cell_api = CleanFlowCellAPI(
+        flow_cell_path=tmp_flow_cell_to_clean_path,
+        status_db=store_with_flow_cell_to_clean,
+        housekeeper_api=housekeeper_api_with_flow_cell_to_clean,
+        dry_run=False,
+    )
+    clean_flow_cell_api.current_time = clean_flow_cell_api.current_time + TWENTY_ONE_DAYS_IN_SECONDS
+    clean_flow_cell_api.flow_cell._sample_sheet_path_hk = tmp_sample_sheet_clean_flow_cell_path
+    return clean_flow_cell_api
 
 
 @pytest.fixture(scope="function")
-def incorrect_flow_cell_name() -> str:
-    """Incorrect flow cell name."""
-    return "201203_A00689_0200_AZZZZZZZZZ"
+def tmp_flow_cell_to_clean_path(tmp_flow_cell_directory_bclconvert: Path):
+    """Returns the path to a flow cell fulfilling all cleaning criteria."""
+    return tmp_flow_cell_directory_bclconvert
 
 
 @pytest.fixture(scope="function")
-def correct_flow_cell_path(
-    tmp_demultiplexed_runs_directory: Path, correct_flow_cell_name: str
-) -> Path:
-    """Full path to a correctly named flow cell directory in demultiplexed-runs."""
-    return Path(tmp_demultiplexed_runs_directory, correct_flow_cell_name)
+def tmp_flow_cell_to_clean(tmp_flow_cell_to_clean_path: Path) -> FlowCellDirectoryData:
+    """Returns a flow cell directory object for a flow cell that fulfills all cleaning criteria."""
+    return FlowCellDirectoryData(tmp_flow_cell_to_clean_path)
+
+
+@pytest.fixture(scope="session")
+def tmp_sample_sheet_clean_flow_cell_path(tmp_path_factory) -> Path:
+    sample_sheet_path = tmp_path_factory.mktemp("SampleSheet.csv")
+    return sample_sheet_path
+
+
+@pytest.fixture
+def store_with_flow_cell_to_clean(
+    store: Store,
+    sample_id: str,
+    tmp_flow_cell_to_clean: FlowCellDirectoryData,
+    helpers: StoreHelpers,
+) -> Store:
+    """Return a store with multiple samples with sample lane sequencing metrics."""
+    sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
+        (sample_id, tmp_flow_cell_to_clean.id, 1, 50_000_0000, 90.5, 32),
+        (sample_id, tmp_flow_cell_to_clean.id, 2, 50_000_0000, 90.4, 31),
+    ]
+
+    flow_cell: Flowcell = helpers.add_flowcell(
+        flow_cell_name=tmp_flow_cell_to_clean.id,
+        store=store,
+        has_backup=True,
+    )
+    sample: Sample = helpers.add_sample(
+        name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
+    )
+    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
+
+    for (
+        sample_internal_id,
+        flow_cell_name_,
+        flow_cell_lane_number,
+        sample_total_reads_in_lane,
+        sample_base_percentage_passing_q30,
+        sample_base_mean_quality_score,
+    ) in sample_sequencing_metrics_details:
+        helpers.add_sample_lane_sequencing_metrics(
+            store=store,
+            sample_internal_id=sample_internal_id,
+            flow_cell_name=flow_cell_name_,
+            flow_cell_lane_number=flow_cell_lane_number,
+            sample_total_reads_in_lane=sample_total_reads_in_lane,
+            sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
+            sample_base_mean_quality_score=sample_base_mean_quality_score,
+        )
+
+    store.session.add(flow_cell)
+    store.session.add(sample)
+    store.session.add_all(sample_lane_sequencing_metrics)
+    store.session.commit()
+    return store
 
 
 @pytest.fixture(scope="function")
-def incorrect_flow_cell_path_too_long(
-    tmp_demultiplexed_runs_directory: Path, incorrect_flow_cell_too_long: str
-) -> Path:
-    """Full path to an incorrectly named flow cell directory in demultiplexed-runs."""
-    return Path(tmp_demultiplexed_runs_directory, incorrect_flow_cell_too_long)
+def housekeeper_api_with_flow_cell_to_clean(
+    real_housekeeper_api: HousekeeperAPI,
+    helpers: StoreHelpers,
+    hk_flow_cell_to_clean_bundle: Dict,
+    hk_sample_bundle_for_flow_cell_to_clean: Dict,
+):
+    """
+    Return a housekeeper api that contains a flow cell bundle with sample sheet,
+    a sample bundle with a fastq and a SPRING file that are tagged with the flow cell.
+    """
+    helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=hk_flow_cell_to_clean_bundle)
+    helpers.ensure_hk_bundle(
+        store=real_housekeeper_api, bundle_data=hk_sample_bundle_for_flow_cell_to_clean
+    )
+    return real_housekeeper_api
 
 
 @pytest.fixture(scope="function")
-def incorrect_flow_cell_path_extension(
-    tmp_demultiplexed_runs_directory: Path, incorrect_flow_cell_extension: str
-) -> Path:
-    """Full path to an incorrectly named flow cell directory in demultiplexed-runs."""
-    return Path(tmp_demultiplexed_runs_directory, incorrect_flow_cell_extension)
+def hk_flow_cell_to_clean_bundle(
+    tmp_flow_cell_to_clean: FlowCellDirectoryData,
+    timestamp_yesterday: datetime,
+    tmp_sample_sheet_clean_flow_cell_path,
+) -> Dict:
+    """Housekeeper bundle information for a flow cell that can be cleaned."""
+    return {
+        "name": tmp_flow_cell_to_clean.id,
+        "created": timestamp_yesterday,
+        "expires": timestamp_yesterday,
+        "files": [
+            {
+                "path": str(tmp_sample_sheet_clean_flow_cell_path),
+                "archive": False,
+                "tags": ["samplesheet", tmp_flow_cell_to_clean.id],
+            }
+        ],
+    }
 
 
-@pytest.fixture(name="non-existent_flow_cell_path", scope="function")
-def non_existent_flow_cell_path(
-    tmp_demultiplexed_runs_directory: Path, incorrect_flow_cell_name: str
-) -> Path:
-    """Full path to an incorrectly named flow cell directory in demultiplexed-runs."""
-    return Path(tmp_demultiplexed_runs_directory, incorrect_flow_cell_name)
+@pytest.fixture(scope="function")
+def hk_sample_bundle_for_flow_cell_to_clean(
+    sample_id: str, timestamp_yesterday: datetime, spring_file, fastq_file, tmp_flow_cell_to_clean
+) -> Dict:
+    return {
+        "name": sample_id,
+        "created": timestamp_yesterday,
+        "expires": timestamp_yesterday,
+        "files": [
+            {
+                "path": spring_file.as_posix(),
+                "archive": False,
+                "tags": [SequencingFileTag.SPRING, sample_id, tmp_flow_cell_to_clean.id],
+            },
+            {
+                "path": fastq_file.as_posix(),
+                "archive": False,
+                "tags": [SequencingFileTag.FASTQ, sample_id, tmp_flow_cell_to_clean.id],
+            },
+        ],
+    }

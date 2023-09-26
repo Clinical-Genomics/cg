@@ -1,15 +1,16 @@
 from datetime import datetime
+from pathlib import Path
 from typing import List
 
-from cg.utils.files import (
-    get_file_in_directory,
-    rename_file,
-    get_all_directories_in_path,
-    remove_directory_and_contents,
-    get_creation_date,
-)
-from pathlib import Path
 import pytest
+
+from cg.utils.files import (
+    get_all_directories_in_path,
+    get_creation_time_stamp,
+    get_file_in_directory,
+    remove_directory_and_contents,
+    rename_file,
+)
 
 
 def test_get_file_in_directory(nested_directory_with_file: Path, some_file: str):
@@ -81,10 +82,10 @@ def test_get_creation_date(tmp_path_factory, timestamp_now: datetime):
     # GIVEN a directory that is created now
     directory_path: Path = tmp_path_factory.mktemp("some_dir")
 
-    # WHEN retrieving the creation date
-    creation_date: datetime = get_creation_date(directory_path)
-    # THEN the creation date is now
-    assert isinstance(creation_date, datetime)
+    # WHEN retrieving the creation time stamp
+    creation_time_stamp: float = get_creation_time_stamp(directory_path)
+    # THEN the creation time stamp is returned
+    assert isinstance(creation_time_stamp, float)
 
 
 def test_get_all_directories_in_path(

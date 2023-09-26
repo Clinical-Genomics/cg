@@ -1,5 +1,6 @@
 """An API that handles the cleaning of flow cells on Hasta."""
-from datetime import datetime, timedelta
+import logging
+import time
 from pathlib import Path
 from typing import List
 
@@ -7,20 +8,21 @@ from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.models.cg_config import CGConfig
+from cg.constants.time import TWENTY_ONE_DAYS_IN_SECONDS
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
-from cg.utils.date import get_timedelta_from_date
-from cg.utils.files import get_creation_date, remove_directory_and_contents
+from cg.utils.files import get_creation_time_stamp, remove_directory_and_contents
+
+LOG = logging.getLogger(__name__)
 
 
-class CleanFlowCellsAPI:
+class CleanFlowCellAPI:
     """
             Handles the cleaning of flow cells in the flow_cells and demultiplexed_runs directories.
     Requirements for cleaning:
             Flow cell is older than 21 days
-            Flow cells are backed up on PDC get from statusDB
+            Flow cell is backed up
             Flow cell is in statusDB
             Flow cell has sequencing metrics in statusDB
             Flow cell has fastq files in housekeeper
@@ -28,16 +30,23 @@ class CleanFlowCellsAPI:
             Flow cell has a sample sheet in housekeeper
     """
 
-    def __init__(self, config: CGConfig, flow_cell_path: Path):
-        self.config: CGConfig = config
-        self.status_db: Store = config.status_db
-        self.hk_api: HousekeeperAPI = config.housekeeper_api
+    def __init__(
+        self, status_db: Store, housekeeper_api: HousekeeperAPI, flow_cell_path: Path, dry_run: bool
+    ):
+        self.status_db: Store = status_db
+        self.hk_api: HousekeeperAPI = housekeeper_api
         self.flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_path)
+        self.current_time = time.time()
+        self.dry_run: bool = dry_run
 
     def delete_flow_cell_directory(self):
         """Delete the flow cell directory if it fulfills all requirements."""
         if self.can_flow_cell_directory_be_deleted():
+            if self.dry_run:
+                LOG.debug(f"Dry run: Would have removed: {self.flow_cell.path}")
+                return
             remove_directory_and_contents(self.flow_cell.path)
+        LOG.debug(f"Flow cell with path {self.flow_cell.path} not removed.")
 
     def can_flow_cell_directory_be_deleted(self) -> bool:
         """Determine whether a flow cell directory can be deleted."""
@@ -53,11 +62,14 @@ class CleanFlowCellsAPI:
             ]
         )
 
-    def is_directory_older_than_days_old(self, days_old: int = 21) -> bool:
-        """Check if a given directory is older than specified number of days."""
-        dir_creation_date: datetime = get_creation_date(self.flow_cell.path)
-        time_delta: timedelta = get_timedelta_from_date(dir_creation_date)
-        return bool(time_delta.days > days_old)
+    def is_directory_older_than_days_old(self) -> bool:
+        """Check if a given directory is older than specified number of days.
+        The check is performed by comparing whether the directory creation time stamp in seconds
+        is greater than the current time minus 21 days in seconds.
+        """
+        dir_creation_time_stamp: float = get_creation_time_stamp(self.flow_cell.path)
+
+        return bool(dir_creation_time_stamp < self.current_time - TWENTY_ONE_DAYS_IN_SECONDS)
 
     def get_flow_cell_from_status_db(self) -> Flowcell:
         """Get the flow cell entry from statusDB.
