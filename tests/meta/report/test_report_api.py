@@ -5,18 +5,15 @@ from pathlib import Path
 from typing import List
 
 from _pytest.logging import LogCaptureFixture
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-
-from cg.store import Store
-
-from cg.meta.report.mip_dna import MipDNAReportAPI
-
 from cg.constants import REPORT_GENDER
 from cg.exc import DeliveryReportError
+from cg.meta.report.mip_dna import MipDNAReportAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.report.report import DataAnalysisModel, ReportModel, CustomerModel, CaseModel
-from cg.models.report.sample import SampleModel, ApplicationModel, MethodsModel, TimestampModel
-from cg.store.models import Analysis, FamilySample, Family
+from cg.models.report.report import CaseModel, CustomerModel, DataAnalysisModel, ReportModel
+from cg.models.report.sample import ApplicationModel, MethodsModel, SampleModel, TimestampModel
+from cg.store import Store
+from cg.store.models import Analysis, Family, FamilySample
 from tests.meta.report.helper import recursive_assert
 from tests.store_helpers import StoreHelpers
 
@@ -388,7 +385,7 @@ def test_get_sample_timestamp_data(
         "ordered_at": str((datetime.now() - timedelta(days=3)).date()),
         "received_at": str((datetime.now() - timedelta(days=2)).date()),
         "prepared_at": str(timestamp_yesterday.date()),
-        "sequenced_at": str(timestamp_yesterday.date()),
+        "reads_updated_at": str(timestamp_yesterday.date()),
     }
 
     # WHEN extracting the timestamp data associated to a specific sample

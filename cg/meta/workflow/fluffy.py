@@ -5,7 +5,6 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Optional
 
-
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
@@ -23,6 +22,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Family, Flowcell, Sample
 from cg.utils import Process
+from sqlalchemy.orm import Query
 
 LOG = logging.getLogger(__name__)
 
@@ -175,9 +175,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
     def get_sample_sequenced_date(self, sample_id: str) -> Optional[dt.date]:
         sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
-        sequenced_at: dt.datetime = sample_obj.sequenced_at
-        if sequenced_at:
-            return sequenced_at.date()
+        reads_updated_at: dt.datetime = sample_obj.reads_updated_at
+        if reads_updated_at:
+            return reads_updated_at.date()
 
     def get_sample_control_status(self, sample_id: str) -> bool:
         sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)

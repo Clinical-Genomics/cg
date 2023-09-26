@@ -3,8 +3,6 @@ import logging
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from housekeeper.store.models import Bundle, Version
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.pedigree import Pedigree
@@ -31,6 +29,7 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     User,
 )
+from housekeeper.store.models import Bundle, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -595,6 +594,7 @@ class StoreHelpers:
         samples: List[Sample] = None,
         status: str = None,
         date: datetime = datetime.now(),
+        has_backup: Optional[bool] = False,
     ) -> Flowcell:
         """Utility function to add a flow cell to the store and return an object."""
         flow_cell = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
@@ -605,6 +605,7 @@ class StoreHelpers:
             sequencer_name="dummy_sequencer",
             sequencer_type=sequencer_type,
             date=date,
+            has_backup=has_backup,
         )
         flow_cell.archived_at = archived_at
         if samples:
@@ -712,7 +713,7 @@ class StoreHelpers:
 
         samples: List[Sample] = cls.add_samples(store=base_store, nr_samples=nr_samples)
         for sample in samples:
-            sample.sequenced_at: datetime = sequenced_at
+            sample.reads_updated_at: datetime = sequenced_at
         case: Family = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
         cls.relate_samples(base_store=base_store, case=case, samples=samples)
         return case

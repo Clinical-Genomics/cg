@@ -8,7 +8,9 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
 )
 from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
+    create_undetermined_non_pooled_metrics,
 )
+from cg.meta.demultiplex.combine_sequencing_metrics import combine_mapped_metrics_with_undetermined
 from cg.constants import FlowCellStatus
 from cg.meta.demultiplex.utils import get_q30_threshold
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -68,16 +70,22 @@ def add_samples_to_flow_cell_in_status_db(
 
 
 def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
-    sample_lane_sequencing_metrics: List[
+    mapped_metrics: List[
         SampleLaneSequencingMetrics
     ] = create_sample_lane_sequencing_metrics_for_flow_cell(
         flow_cell_directory=flow_cell.path,
         bcl_converter=flow_cell.bcl_converter,
     )
-    add_sequencing_metrics_to_statusdb(
-        sample_lane_sequencing_metrics=sample_lane_sequencing_metrics, store=store
+    undetermined_metrics: List[
+        SampleLaneSequencingMetrics
+    ] = create_undetermined_non_pooled_metrics(flow_cell)
+
+    combined_metrics = combine_mapped_metrics_with_undetermined(
+        mapped_metrics=mapped_metrics,
+        undetermined_metrics=undetermined_metrics,
     )
 
+    add_sequencing_metrics_to_statusdb(sample_lane_sequencing_metrics=combined_metrics, store=store)
     LOG.info(f"Added sequencing metrics to status db for: {flow_cell.id}")
 
 
@@ -147,7 +155,7 @@ def update_sample_read_count(sample_id: str, q30_threshold: int, store: Store) -
             f"Updating sample {sample_id} with read count {sample_read_count} and setting sequenced at."
         )
         sample.reads = sample_read_count
-        if not sample.sequenced_at:
-            sample.sequenced_at = datetime.datetime.now()
+        if not sample.reads_updated_at:
+            sample.reads_updated_at = datetime.datetime.now()
     else:
         LOG.warning(f"Cannot find {sample_id} in status_db when adding read counts. Skipping.")
