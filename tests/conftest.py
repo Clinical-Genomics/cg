@@ -2213,6 +2213,13 @@ def context_config(
         "pon_path": str(cg_dir),
         "backup": {
             "encrypt_dir": str(encryption_dir),
+            "slurm": {
+                "account": "development",
+                "hours": 1,
+                "mail_user": "an@scilifelab.se",
+                "memory": 1,
+                "number_tasks": 1,
+            },
         },
         "balsamic": {
             "balsamic_cache": "hello",

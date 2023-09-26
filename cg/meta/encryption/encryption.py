@@ -6,13 +6,22 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import List
 
+from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions
-from cg.constants.encryption import GPGParameters
+from cg.constants.encryption import EncryptionUserID, GPGParameters
+from cg.constants.priority import SlurmQos
 from cg.exc import ChecksumFailedError
+from cg.meta.encryption.sbatch import (
+    FLOW_CELL_ENCRYPT_COMMANDS,
+    FLOW_CELL_ENCRYPT_ERROR,
+)
+from cg.meta.tar.tar import TarAPI
+from cg.models.slurm.sbatch import Sbatch
 from cg.utils import Process
 from cg.utils.checksum.checksum import sha512_checksum
 
 LOG = logging.getLogger(__name__)
+LIMIT_GZIP_TASK: int = 3
 
 
 class EncryptionAPI:
@@ -56,6 +65,35 @@ class EncryptionAPI:
 
         return Path(passphrase_file.name)
 
+    def get_symmetric_passphrase_cmd(
+        self, passphrase_file_path: Path, quality_level: int = 2, count: int = 256
+    ) -> str:
+        """Return command to generate a symmetrical passphrase file."""
+        return " ".join(
+            [
+                self.binary_path,
+                "--gen-random",
+                str(quality_level),
+                str(count),
+                ">",
+                passphrase_file_path.as_posix(),
+            ]
+        )
+
+    def get_asymmetrically_encrypt_passphrase_cmd(self, passphrase_file_path: Path) -> str:
+        """Return command to asymmetrically encrypt a symmetrical passphrase file."""
+        return " ".join(
+            [
+                self.binary_path,
+                "-e",
+                "-r",
+                EncryptionUserID.HASTA_USER_ID,
+                "-o",
+                passphrase_file_path.with_suffix(FileExtensions.GPG).as_posix(),
+                passphrase_file_path.as_posix(),
+            ]
+        )
+
     def get_asymmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
         """Generates the gpg command for asymmetric encryption"""
         encryption_parameters: list = GPGParameters.ASYMMETRIC_ENCRYPTION.copy()
@@ -91,6 +129,124 @@ class EncryptionAPI:
         output_parameter.extend([str(output_file), str(input_file)])
         decryption_parameters.extend(output_parameter)
         return decryption_parameters
+
+    def create_pending_file(self, pending_path: Path) -> None:
+        """Create a pending flag file."""
+        LOG.info(f"Creating pending flag {pending_path}")
+        if self.dry_run:
+            return
+        pending_path.touch(exist_ok=False)
+
+
+class FlowCellEncryptionAPI(EncryptionAPI):
+    """Encryption functionality for flow cells."""
+
+    def __init__(
+        self,
+        config: dict,
+        binary_path: str,
+        dry_run: bool = False,
+    ):
+        super().__init__(binary_path=binary_path, dry_run=dry_run)
+        self.tar_api = TarAPI(binary_path=config["tar"]["binary_path"], dry_run=dry_run)
+        self.slurm_api: SlurmAPI = SlurmAPI()
+        self.slurm_account: str = config["backup"]["slurm"]["account"]
+        self.slurm_hours: int = config["backup"]["slurm"]["hours"]
+        self.slurm_mail_user: str = config["backup"]["slurm"]["mail_user"]
+        self.slurm_memory: int = config["backup"]["slurm"]["memory"]
+        self.slurm_number_tasks: int = config["backup"]["slurm"]["number_tasks"]
+
+    @classmethod
+    def get_flow_cell_symmetric_encryption_command(
+        cls, output_file: Path, passphrase_file_path: Path
+    ) -> str:
+        """Generates the Gpg command for symmetric encryption of file."""
+        encryption_parameters: list = GPGParameters.SYMMETRIC_ENCRYPTION.copy()
+        encryption_parameters.append(passphrase_file_path.as_posix())
+        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
+        output_parameter.extend([output_file.as_posix()])
+        encryption_parameters.extend(output_parameter)
+        return " ".join(encryption_parameters)
+
+    @classmethod
+    def get_flow_cell_symmetric_decryption_command(
+        cls, input_file: Path, passphrase_file_path: Path
+    ) -> str:
+        """Generates the gpg command for symmetric decryption."""
+        decryption_parameters: list = GPGParameters.SYMMETRIC_DECRYPTION.copy()
+        decryption_parameters.extend([passphrase_file_path.as_posix(), input_file.as_posix()])
+        return " ".join(decryption_parameters)
+
+    def encrypt_flow_cell(
+        self,
+        flow_cell_id: str,
+        flow_cell_encrypt_dir: Path,
+        flow_cell_encrypt_file_path_prefix: Path,
+        pending_file_path: Path,
+    ) -> None:
+        """Encrypt flow cell via GPG and SLURM."""
+        encrypted_gpg_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
+            f"{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
+        )
+        encrypted_md5sum_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
+            f"{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.MD5SUM}"
+        )
+        decrypted_md5sum_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
+            f"{FileExtensions.TAR}{FileExtensions.GZIP}.degpg{FileExtensions.MD5SUM}"
+        )
+        symmetric_passphrase_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
+            ".passphrase"
+        )
+        final_passphrase_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
+            f".key{FileExtensions.GPG}"
+        )
+
+        error_function: str = FLOW_CELL_ENCRYPT_ERROR.format(
+            flow_cell_encrypt_dir=flow_cell_encrypt_dir
+        )
+        commands: str = FLOW_CELL_ENCRYPT_COMMANDS(
+            symmetric_passphrasese=self.get_symmetric_passphrase_cmd(
+                passphrase_file_path=symmetric_passphrase_file_path
+            ),
+            asymmetrically_encrypt_passphrase=self.get_asymmetrically_encrypt_passphrase_cmd(
+                passphrase_file_path=symmetric_passphrase_file_path
+            ),
+            tar_encrypt_flow_cell_dir=self.tar_api.get_compress_cmd(
+                input_path=flow_cell_encrypt_dir
+            ),
+            parallel_gzip=f"pigz p {self.slurm_number_tasks - LIMIT_GZIP_TASK} --fast -c",
+            tee=f"tee (md5sum > {encrypted_md5sum_file_path})",
+            flow_cell_symmetric_encryption=self.get_flow_cell_symmetric_encryption_command(
+                output_file=encrypted_gpg_file_path,
+                passphrase_file_path=symmetric_passphrase_file_path,
+            ),
+            flow_cell_symmetric_decryption=self.get_flow_cell_symmetric_decryption_command(
+                input_file=encrypted_gpg_file_path,
+                passphrase_file_path=symmetric_passphrase_file_path,
+            ),
+            md5sum=f"md5sum > {decrypted_md5sum_file_path}",
+            diff=f"diff -q {encrypted_md5sum_file_path} {decrypted_md5sum_file_path}",
+            mv_passphrase_file=f"mv {symmetric_passphrase_file_path.with_suffix(FileExtensions.GPG)} {final_passphrase_file_path}",
+            remove_pending_file=f"rm -f {pending_file_path}",
+        )
+        sbatch_parameters = Sbatch(
+            account=self.slurm_account,
+            commands=commands,
+            email=self.slurm_mail_user,
+            error=error_function,
+            hours=self.slurm_hours,
+            job_name="_".join([flow_cell_id, "flow_cell_encryption"]),
+            log_dir=flow_cell_encrypt_dir.as_posix(),
+            memory=self.slurm_memory,
+            number_tasks=self.slurm_number_tasks,
+            quality_of_service=SlurmQos.HIGH,
+        )
+        sbatch_content: str = self.slurm_api.generate_sbatch_content(sbatch_parameters)
+        sbatch_path = Path(flow_cell_encrypt_file_path_prefix.with_suffix(FileExtensions.SBATCH))
+        sbatch_number: int = self.slurm_api.submit_sbatch(
+            sbatch_content=sbatch_content, sbatch_path=sbatch_path
+        )
+        LOG.info(f"Flow cell encryption running as job {sbatch_number}")
 
 
 class SpringEncryptionAPI(EncryptionAPI):
@@ -191,7 +347,7 @@ class SpringEncryptionAPI(EncryptionAPI):
             self.decrypted_spring_file_checksum(spring_file_path)
         )
         if not is_checksum_equal:
-            raise ChecksumFailedError(f"Checksum comparison failed!")
+            raise ChecksumFailedError("Checksum comparison failed!")
         LOG.info("Checksum comparison successful!")
 
     def encrypted_key_path(self, spring_file_path: Path) -> Path:

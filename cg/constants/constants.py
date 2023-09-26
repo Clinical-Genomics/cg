@@ -143,6 +143,7 @@ class FileExtensions(StrEnum):
     JSON: str = ".json"
     KEY: str = ".key"
     LOG: str = ".log"
+    MD5SUM: str = ".md5sum"
     NO_EXTENSION: str = ""
     SBATCH: str = ".sbatch"
     SPRING: str = ".spring"

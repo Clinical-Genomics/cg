@@ -9,11 +9,17 @@ import housekeeper.store.models as hk_models
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.exc import FlowCellError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
-from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
+from cg.meta.encryption.encryption import (
+    EncryptionAPI,
+    FlowCellEncryptionAPI,
+    SpringEncryptionAPI,
+)
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, Sample
 
@@ -25,6 +31,45 @@ LOG = logging.getLogger(__name__)
 def backup(context: CGConfig):
     """Backup utilities"""
     pass
+
+
+@backup.command("encrypt-flow-cell")
+@DRY_RUN
+@click.pass_obj
+def encrypt_flow_cell(context: CGConfig, dry_run: bool):
+    """Encrypt flow cell."""
+    flow_cell_encryption_api = FlowCellEncryptionAPI(
+        binary_path=context.encryption.binary_path, config=context.backup.dict(), dry_run=dry_run
+    )
+    encrypt_dir: str = context.backup.encrypt_dir
+    flow_cells_dir = Path(context.flow_cells_dir)
+    LOG.debug(f"Search for flow cells ready to encrypt in {flow_cells_dir}")
+    for sub_dir in flow_cells_dir.iterdir():
+        if not sub_dir.is_dir():
+            continue
+        LOG.debug(f"Found directory: {sub_dir}")
+        try:
+            flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir)
+        except FlowCellError:
+            continue
+        if not flow_cell.is_flow_cell_ready():
+            continue
+
+        flow_cell_encrypt_dir = Path(encrypt_dir, flow_cell.id)
+        flow_cell_encrypt_file_path_prefix = Path(flow_cell_encrypt_dir, flow_cell.id)
+        pending_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(".pending")
+        if flow_cell_encrypt_dir.exists() and pending_file_path.exists():
+            LOG.debug(f"Encryption already started for flow cell: {flow_cell.id}")
+            continue
+
+        flow_cell_encrypt_dir.mkdir(exist_ok=True, parents=True)
+        flow_cell_encryption_api.create_pending_file(pending_path=pending_file_path)
+        flow_cell_encryption_api.encrypt_flow_cell(
+            flow_cell_id=flow_cell.id,
+            flow_cell_encrypt_dir=flow_cell_encrypt_dir,
+            flow_cell_encrypt_file_path_prefix=flow_cell_encrypt_file_path_prefix,
+            pending_file_path=pending_file_path,
+        )
 
 
 @backup.command("fetch-flow-cell")
@@ -83,9 +128,7 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
     LOG.info("Getting all spring files from Housekeeper.")
     spring_files: Iterable[hk_models.File] = housekeeper_api.files(
         tags=[SequencingFileTag.SPRING]
-    ).filter(
-        hk_models.File.path.like(f"%{config.environment}/{config.demultiplexed_flow_cells_dir}%")
-    )
+    ).filter(hk_models.File.path.like(f"%{config.environment}/{config.demultiplex.out_dir}%"))
     for spring_file in spring_files:
         LOG.info("Attempting encryption and PDC archiving for file %s", spring_file.path)
         if Path(spring_file.path).exists():
