@@ -42,20 +42,10 @@ def validate_sample_sheet(
     bcl_converter: str,
     sheet: click.Path,
 ):
-    """Validate a sample sheet.
-    flow-cell-name is the flow cell run directory name, e.g. '201203_D00483_0200_AHVKJCDRXX'
-    """
-
-    flow_cell_path: Path = Path(context.demultiplex_api.flow_cells_dir, flow_cell_name)
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
-    )
-    LOG.info(
-        f"Validating {sheet} as a {flow_cell.sequencer_type} {bcl_converter} sample sheet",
-    )
-    sheet: Path = Path(str(sheet))
+    """Validate a sample sheet."""
+    sample_sheet_path = Path(str(sheet))
     try:
-        get_sample_sheet_from_file(infile=sheet, flow_cell_sample_type=flow_cell.sample_type)
+        get_sample_sheet_from_file(sample_sheet_path)
     except ValidationError as error:
         LOG.warning(error)
         raise click.Abort from error

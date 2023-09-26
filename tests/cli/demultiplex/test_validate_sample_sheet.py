@@ -76,10 +76,7 @@ def test_validate_correct_bcl2fastq_sample_sheet(
     assert sample_sheet.exists()
 
     # GIVEN that the sample sheet is correct
-    get_sample_sheet_from_file(
-        infile=sample_sheet,
-        flow_cell_sample_type=FlowCellSampleBcl2Fastq,
-    )
+    get_sample_sheet_from_file(sample_sheet)
 
     # WHEN validating the sample sheet
     result: Result = cli_runner.invoke(
@@ -105,7 +102,7 @@ def test_validate_correct_dragen_sample_sheet(
     assert sample_sheet.exists()
 
     # GIVEN that the sample sheet is correct
-    get_sample_sheet_from_file(infile=sample_sheet, flow_cell_sample_type=FlowCellSampleBCLConvert)
+    get_sample_sheet_from_file(sample_sheet)
 
     # WHEN validating the sample sheet
     result: Result = cli_runner.invoke(
