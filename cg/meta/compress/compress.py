@@ -224,10 +224,8 @@ class CompressAPI:
     ) -> None:
         """Update Housekeeper with compressed FASTQ files and SPRING metadata file."""
         version: Version = self.hk_api.last_version(sample_id)
-        spring_tags: List[str] = self.get_spring_tags_from_compression(compression_obj)
-        spring_metadata_tags: List[str] = self.get_spring_metadata_tags_from_compression(
-            compression_obj
-        )
+        spring_tags: List[str] = self.get_spring_tags_from_fastq(hk_fastq_first)
+        spring_metadata_tags: List[str] = self.get_spring_metadata_tags_from_fastq(hk_fastq_first)
         LOG.info(f"Updating FASTQ files in Housekeeper for {sample_id}")
         LOG.info(
             f"{compression_obj.fastq_first}, {compression_obj.fastq_second} -> {compression_obj.spring_path}, "
@@ -262,20 +260,18 @@ class CompressAPI:
             hk_fastq_first=hk_fastq_first, hk_fastq_second=hk_fastq_second
         )
 
-    def get_spring_metadata_tags_from_compression(self, compression: CompressionData) -> List[str]:
-        spring_metadata_tags: List[str] = self.get_all_non_fastq_tags(compression)
+    def get_spring_metadata_tags_from_fastq(self, fastq_file: File) -> List[str]:
+        spring_metadata_tags: List[str] = self.get_all_non_fastq_tags(fastq_file)
         return spring_metadata_tags + [SequencingFileTag.SPRING_METADATA]
 
-    def get_spring_tags_from_compression(self, compression: CompressionData) -> List[str]:
-        spring_tags: List[str] = self.get_all_non_fastq_tags(compression)
+    def get_spring_tags_from_fastq(self, fastq_file: File) -> List[str]:
+        spring_tags: List[str] = self.get_all_non_fastq_tags(fastq_file)
         return spring_tags + [SequencingFileTag.SPRING]
 
-    def get_all_non_fastq_tags(self, compression: CompressionData) -> List[str]:
+    @staticmethod
+    def get_all_non_fastq_tags(fastq_file: File) -> List[str]:
         """Returns a list with all tags except 'fastq' for the fastq_first file of the given CompressionData object."""
-        fastq_tags: List[str] = [
-            tag.name
-            for tag in self.hk_api.files(path=compression.fastq_first.as_posix()).first().tags
-        ]
+        fastq_tags: List[str] = [tag.name for tag in fastq_file.tags]
         fastq_tags.remove(SequencingFileTag.FASTQ)
         return fastq_tags
 
