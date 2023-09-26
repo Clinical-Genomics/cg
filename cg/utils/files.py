@@ -74,7 +74,7 @@ def remove_directory_and_contents(directory_path):
         LOG.error(f"Failed to remove the directory {directory_path} and its contents: {e}")
 
 
-def get_all_directories_in_path(path: Path) -> List[Path]:
+def get_directories_in_path(path: Path) -> List[Path]:
     """Get all directories for a specified path.
     Raises file not found error if the path does not exist.
     """

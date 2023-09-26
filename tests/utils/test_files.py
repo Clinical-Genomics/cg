@@ -5,8 +5,8 @@ from typing import List
 import pytest
 
 from cg.utils.files import (
-    get_all_directories_in_path,
     get_creation_time_stamp,
+    get_directories_in_path,
     get_file_in_directory,
     remove_directory_and_contents,
     rename_file,
@@ -95,7 +95,7 @@ def test_get_all_directories_in_path(
     # GIVEN a path that contains directories and a file
 
     # WHEN retrieving all directories in the path
-    directories: List[Path] = get_all_directories_in_path(path=path_with_directories_and_a_file)
+    directories: List[Path] = get_directories_in_path(path=path_with_directories_and_a_file)
 
     # THEN all directories are returned
     for sub_dir_name in sub_dir_names:

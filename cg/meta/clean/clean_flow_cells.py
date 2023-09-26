@@ -41,12 +41,18 @@ class CleanFlowCellAPI:
 
     def delete_flow_cell_directory(self):
         """Delete the flow cell directory if it fulfills all requirements."""
-        if self.can_flow_cell_directory_be_deleted():
-            if self.dry_run:
-                LOG.debug(f"Dry run: Would have removed: {self.flow_cell.path}")
-                return
-            remove_directory_and_contents(self.flow_cell.path)
-        LOG.debug(f"Flow cell with path {self.flow_cell.path} not removed.")
+        is_error_raised: bool = False
+        try:
+            if self.can_flow_cell_directory_be_deleted():
+                if self.dry_run:
+                    LOG.debug(f"Dry run: Would have removed: {self.flow_cell.path}")
+                    return
+                remove_directory_and_contents(self.flow_cell.path)
+                return is_error_raised
+        except Exception as error:
+            is_error_raised = True
+            LOG.error(f"Flow cell with path {self.flow_cell.path} not removed: {str(error)}")
+            return is_error_raised
 
     def can_flow_cell_directory_be_deleted(self) -> bool:
         """Determine whether a flow cell directory can be deleted."""

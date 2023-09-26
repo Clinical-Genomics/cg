@@ -27,12 +27,13 @@ from cg.cli.workflow.commands import (
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.constants.housekeeper_tags import ALIGNMENT_FILE_TAGS, ScoutTag
 from cg.meta.clean.api import CleanAPI
+from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Analysis
 from cg.utils.date import get_date_days_ago, get_timedelta_from_date
 from cg.utils.dispatcher import Dispatcher
-
+from cg.utils.files import get_directories_in_path
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -253,6 +254,26 @@ def hk_bundle_files(
 @DRY_RUN
 def clean_flow_cells(context: CGConfig, dry_run: bool):
     """Remove flow cells from the flow_cells and demultiplexed_runs folder."""
+
+    directories_to_check: List[Path] = []
+    for path in [Path(context.flow_cells_dir), Path(context.demultiplexed_flow_cells_dir)]:
+        directories_to_check.extend(get_directories_in_path(path))
+
+    raised_errors: List[bool] = []
+    for flow_cell_directory in directories_to_check:
+        clean_flow_cell_api = CleanFlowCellAPI(
+            flow_cell_path=flow_cell_directory,
+            status_db=context.status_db,
+            housekeeper_api=context.housekeeper_api,
+            dry_run=dry_run,
+        )
+        try:
+            raised_errors.extend(clean_flow_cell_api.delete_flow_cell_directory())
+        except Exception as error:
+            LOG.error(str(error))
+            continue
+    if any(raised_errors):
+        click.Abort
 
 
 def _get_confirm_question(bundle, file_obj) -> str:
