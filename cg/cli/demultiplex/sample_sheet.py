@@ -7,13 +7,13 @@ from typing import List
 import click
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_validated_sample_sheet
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import DRY_RUN, FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
-from cg.io.controller import WriteFile, WriteStream
+from cg.io.controller import ReadFile, WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_sample_sheet_path_to_housekeeper,
     get_sample_sheets_from_latest_version,
@@ -42,10 +42,26 @@ def validate_sample_sheet(
     bcl_converter: str,
     sheet: click.Path,
 ):
-    """Validate a sample sheet."""
+    """Validate a sample sheet.
+    flow-cell-name is the flow cell run directory name, e.g. '201203_D00483_0200_AHVKJCDRXX'
+    """
+
+    flow_cell_path: Path = Path(context.demultiplex_api.flow_cells_dir, flow_cell_name)
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
+    )
+    LOG.info(
+        f"Validating {sheet} as a {flow_cell.sequencer_type} {bcl_converter} sample sheet",
+    )
     sample_sheet_path = Path(str(sheet))
+    sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.CSV, file_path=sample_sheet_path
+    )
     try:
-        get_sample_sheet_from_file(sample_sheet_path)
+        get_validated_sample_sheet(
+            sample_sheet_content=sample_sheet_content,
+            sample_type=flow_cell.sample_type
+        )
     except ValidationError as error:
         LOG.warning(error)
         raise click.Abort from error
