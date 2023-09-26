@@ -1,14 +1,14 @@
 from typing import List
+
 from cg.store import Store
-from cg.store.models import Flowcell, Family, FamilySample, Sample
-from tests.meta.demultiplex.conftest import flow_cell_name_demultiplexed_with_bcl_convert
+from cg.store.models import Family, FamilySample, Flowcell, Sample
 
 
 def test_delete_flow_cell(bcl2fastq_flow_cell_id: str, populated_flow_cell_store: Store):
     """Test deleting a flow cell in Store."""
 
     # GIVEN a database containing a flow cell
-    flow_cell: Flowcell = populated_flow_cell_store.get_flow_cell_by_name(
+    flow_cell: Flowcell = populated_flow_cell_store.filter_flow_cell_by_name(
         flow_cell_name=bcl2fastq_flow_cell_id
     )
 
@@ -18,7 +18,7 @@ def test_delete_flow_cell(bcl2fastq_flow_cell_id: str, populated_flow_cell_store
     populated_flow_cell_store.delete_flow_cell(flow_cell_id=bcl2fastq_flow_cell_id)
 
     # THEN no entry should be found for the flow cell
-    results: Flowcell = populated_flow_cell_store.get_flow_cell_by_name(
+    results: Flowcell = populated_flow_cell_store.filter_flow_cell_by_name(
         flow_cell_name=bcl2fastq_flow_cell_id
     )
 

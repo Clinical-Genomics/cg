@@ -1,19 +1,22 @@
 import itertools
 import logging
 import shutil
-
 from glob import glob
 from pathlib import Path
 from typing import Iterable, List, Optional
+
+from housekeeper.store.models import File
+
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import DeleteDemuxError
-from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    get_sample_sheets_from_latest_version,
+)
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Sample, Flowcell
-from housekeeper.store.models import File
+from cg.store.models import Flowcell, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -53,7 +56,7 @@ class DeleteDemuxAPI:
     @property
     def status_db_presence(self) -> bool:
         """Update about the presence of given flow cell in status_db"""
-        return bool(self.status_db.get_flow_cell_by_name(flow_cell_name=self.flow_cell_name))
+        return bool(self.status_db.filter_flow_cell_by_name(flow_cell_name=self.flow_cell_name))
 
     @staticmethod
     def set_dry_run(dry_run: bool) -> bool:
@@ -63,7 +66,7 @@ class DeleteDemuxAPI:
 
     def _set_samples_on_flow_cell(self) -> None:
         """Set a list of samples related to a flow cell in status-db."""
-        flow_cell = self.status_db.get_flow_cell_by_name(flow_cell_name=self.flow_cell_name)
+        flow_cell = self.status_db.filter_flow_cell_by_name(flow_cell_name=self.flow_cell_name)
         self.samples_on_flow_cell: List[Sample] = flow_cell.samples
 
     def active_samples_on_flow_cell(self) -> Optional[List[str]]:
@@ -199,7 +202,7 @@ class DeleteDemuxAPI:
         self, demultiplexing_dir: bool, run_dir: bool, status_db: bool
     ) -> None:
         if demultiplexing_dir and run_dir and status_db:
-            flow_cell_obj: Flowcell = self.status_db.get_flow_cell_by_name(
+            flow_cell_obj: Flowcell = self.status_db.filter_flow_cell_by_name(
                 flow_cell_name=self.flow_cell_name
             )
             flow_cell_obj.status = "removed"

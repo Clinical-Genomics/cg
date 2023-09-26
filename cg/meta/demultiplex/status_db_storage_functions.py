@@ -7,8 +7,10 @@ from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
     create_undetermined_non_pooled_metrics,
 )
-from cg.meta.demultiplex.combine_sequencing_metrics import combine_mapped_metrics_with_undetermined
 from cg.constants import FlowCellStatus
+from cg.meta.demultiplex.combine_sequencing_metrics import (
+    combine_mapped_metrics_with_undetermined,
+)
 from cg.meta.demultiplex.utils import get_q30_threshold
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
@@ -25,7 +27,9 @@ def store_flow_cell_data_in_status_db(
     Create flow cell from the parsed and validated flow cell data.
     And add the samples on the flow cell to the model.
     """
-    flow_cell: Optional[Flowcell] = store.get_flow_cell_by_name(flow_cell_name=parsed_flow_cell.id)
+    flow_cell: Optional[Flowcell] = store.filter_flow_cell_by_name(
+        flow_cell_name=parsed_flow_cell.id
+    )
     if not flow_cell:
         flow_cell: Flowcell = Flowcell(
             name=parsed_flow_cell.id,

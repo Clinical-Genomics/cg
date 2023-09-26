@@ -5,13 +5,14 @@ import logging
 from typing import Iterable, List, Optional
 
 import click
-from cg.cli.set.cases import set_cases
+
 from cg.cli.set.case import set_case
+from cg.cli.set.cases import set_cases
 from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Sample, Customer, ApplicationVersion, Flowcell
+from cg.store.models import ApplicationVersion, Customer, Flowcell, Sample
 
 CONFIRM = "Continue?"
 HELP_KEY_VALUE = "Give a property on sample and the value to set it to, e.g. -kv name Prov52"
@@ -141,7 +142,7 @@ def list_changeable_sample_attributes(
     sample: Optional[Sample] = None, skip_attributes: List[str] = []
 ) -> None:
     """List changeable attributes on sample and its current value."""
-    LOG.info(f"Below is a set of changeable sample attributes, to combine with -kv flag:\n")
+    LOG.info("Below is a set of changeable sample attributes, to combine with -kv flag:\n")
 
     sample_attributes: Iterable[str] = Sample.__dict__.keys()
     for attribute in sample_attributes:
@@ -288,7 +289,7 @@ def _update_comment(comment, obj):
 def flowcell(context: CGConfig, flow_cell_name: str, status: Optional[str]):
     """Update information about a flow cell."""
     status_db: Store = context.status_db
-    flowcell_obj: Flowcell = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
+    flowcell_obj: Flowcell = status_db.filter_flow_cell_by_name(flow_cell_name=flow_cell_name)
 
     if flowcell_obj is None:
         LOG.warning(f"flow cell not found: {flow_cell_name}")

@@ -1,13 +1,13 @@
-import cachecontrol
 import http
 import json
 import logging
 import tempfile
 from functools import wraps
 from pathlib import Path
-import requests
 from typing import Any, Dict, List, Optional
 
+import cachecontrol
+import requests
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
@@ -321,7 +321,7 @@ def parse_pool(pool_id):
 @BLUEPRINT.route("/flowcells")
 def parse_flow_cells() -> Any:
     """Return flow cells."""
-    flow_cells: List[Flowcell] = db.get_flow_cell_by_name_pattern_and_status(
+    flow_cells: List[Flowcell] = db.filter_flow_cell_by_name_pattern_and_status(
         flow_cell_statuses=[request.args.get("status")],
         name_pattern=request.args.get("enquiry"),
     )
@@ -332,7 +332,7 @@ def parse_flow_cells() -> Any:
 @BLUEPRINT.route("/flowcells/<flowcell_id>")
 def parse_flow_cell(flowcell_id):
     """Return a single flowcell."""
-    flow_cell: Flowcell = db.get_flow_cell_by_name(flow_cell_name=flowcell_id)
+    flow_cell: Flowcell = db.filter_flow_cell_by_name(flow_cell_name=flowcell_id)
     if flow_cell is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     return jsonify(**flow_cell.to_dict(samples=True))

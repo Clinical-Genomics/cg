@@ -1,13 +1,13 @@
 """This script tests the cli methods to get samples in status-db"""
 from typing import List
 
+from click.testing import CliRunner
+
 from cg.cli.get import get
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from click.testing import CliRunner
-
-from cg.store.models import Flowcell, Sample, Family
+from cg.store.models import Family, Flowcell, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -216,7 +216,9 @@ def test_get_sample_flowcells_with_flowcell(
     # GIVEN a database with a sample and a related flow cell
     flow_cell = helpers.add_flowcell(disk_store)
     sample = helpers.add_sample(disk_store, flowcell=flow_cell)
-    returned_flow_cell: Flowcell = disk_store.get_flow_cell_by_name(flow_cell_name=flow_cell.name)
+    returned_flow_cell: Flowcell = disk_store.filter_flow_cell_by_name(
+        flow_cell_name=flow_cell.name
+    )
     assert sample in returned_flow_cell.samples
 
     # WHEN getting a sample with the --hide-flow-cell flag

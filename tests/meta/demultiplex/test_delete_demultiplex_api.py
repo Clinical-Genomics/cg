@@ -1,16 +1,15 @@
 import logging
-import pytest
-
 from pathlib import Path
 from typing import List, Optional
 
+import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import DeleteDemuxError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.store.api import Store
-from cg.store.models import Sample, Flowcell
+from cg.store.models import Flowcell, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -105,7 +104,7 @@ def test_no_active_samples_on_flow_cell(
 
     # GIVEN a flow cell with no active samples related to it
     store: Store = populated_delete_demultiplex_api.status_db
-    flow_cell = store.get_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
+    flow_cell = store.filter_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
     samples_on_flow_cell: List[Sample] = flow_cell.samples
 
     assert samples_on_flow_cell
@@ -131,7 +130,7 @@ def test_active_samples_on_flow_cell(
     """Test if the function to find active samples works correctly."""
     # GIVEN a flow cell with active samples related to it
     store: Store = active_flow_cell_store
-    flow_cell = store.get_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
+    flow_cell = store.filter_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
     samples_on_flow_cell: List[Sample] = flow_cell.samples
 
     assert samples_on_flow_cell
@@ -273,7 +272,7 @@ def test_delete_flow_cell_statusdb(
     delete_demux_api: DeleteDemuxAPI = populated_delete_demultiplex_api
     delete_demux_api.set_dry_run(dry_run=False)
     store = populated_delete_demux_context.status_db
-    flow_cell: Flowcell = store.get_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
+    flow_cell: Flowcell = store.filter_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
     assert flow_cell
 
     # WHEN removing the flow cell from the database
@@ -283,7 +282,7 @@ def test_delete_flow_cell_statusdb(
     assert f"StatusDB: Deleted flowcell {delete_demux_api.flow_cell_name}" in caplog.text
 
     # AND the flow cell should no longer exist in status db
-    flow_cell: Flowcell = store.get_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
+    flow_cell: Flowcell = store.filter_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
     assert not flow_cell
 
 
@@ -296,7 +295,7 @@ def test_delete_flow_cell_hasta(
     caplog.set_level(logging.INFO)
     delete_demux_api: DeleteDemuxAPI = populated_delete_demultiplex_api
 
-    flow_cell_obj: Flowcell = delete_demux_api.status_db.get_flow_cell_by_name(
+    flow_cell_obj: Flowcell = delete_demux_api.status_db.filter_flow_cell_by_name(
         delete_demux_api.flow_cell_name
     )
     delete_demux_api.set_dry_run(dry_run=False)

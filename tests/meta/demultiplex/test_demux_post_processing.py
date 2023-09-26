@@ -1,13 +1,17 @@
 from pathlib import Path
 from typing import Dict, List
+
 import pytest
-from cg.store.models import Sample
+from housekeeper.store.models import File
+
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_sample_sheet_path_to_housekeeper,
+)
 from cg.models.cg_config import CGConfig
-from housekeeper.store.models import File
+from cg.store.models import Sample
 from tests.meta.demultiplex.conftest import FlowCellInfo
 
 
@@ -75,7 +79,7 @@ def test_post_processing_of_flow_cell(
     demux_post_processing_api.finish_flow_cell(flow_cell_demultiplexing_directory)
 
     # THEN a flow cell was created in statusdb
-    assert demux_post_processing_api.status_db.get_flow_cell_by_name(flow_cell_name)
+    assert demux_post_processing_api.status_db.filter_flow_cell_by_name(flow_cell_name)
 
     # THEN sequencing metrics were created for the flow cell
     assert demux_post_processing_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(

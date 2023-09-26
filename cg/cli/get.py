@@ -3,11 +3,11 @@ import re
 from typing import Iterable, List, Optional
 
 import click
-from cg.models.cg_config import CGConfig
-from cg.store import Store
 from tabulate import tabulate
 
-from cg.store.models import Family, Flowcell, Customer, Sample
+from cg.models.cg_config import CGConfig
+from cg.store import Store
+from cg.store.models import Customer, Family, Flowcell, Sample
 
 LOG = logging.getLogger(__name__)
 ANALYSIS_HEADERS = ["Analysis Date", "Pipeline", "Version"]
@@ -179,7 +179,7 @@ def get_case(
 def get_flow_cell(context: click.Context, samples: bool, flow_cell_id: str):
     """Get information about a flow cell and the samples on it."""
     status_db: Store = context.obj.status_db
-    existing_flow_cell: Flowcell = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
+    existing_flow_cell: Flowcell = status_db.filter_flow_cell_by_name(flow_cell_name=flow_cell_id)
     if not existing_flow_cell:
         LOG.error(f"{flow_cell_id}: flow cell not found")
         raise click.Abort

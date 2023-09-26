@@ -1,4 +1,6 @@
 """Tests for the status_db_storage_functions module of the demultiplexing post post-processing module."""
+from mock import MagicMock
+
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.status_db_storage_functions import (
     add_samples_to_flow_cell_in_status_db,
@@ -8,7 +10,6 @@ from cg.meta.demultiplex.status_db_storage_functions import (
 )
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from mock import MagicMock
 
 
 def test_add_single_sequencing_metrics_entry_to_statusdb(
@@ -96,7 +97,9 @@ def test_add_samples_to_flow_cell_in_status_db(
     store = store_with_sequencing_metrics
 
     # GIVEN a flow cell
-    flow_cell = store_with_sequencing_metrics.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
+    flow_cell = store_with_sequencing_metrics.filter_flow_cell_by_name(
+        flow_cell_name=flow_cell_name
+    )
 
     # WHEN adding samples to flow cell
     add_samples_to_flow_cell_in_status_db(
@@ -104,6 +107,8 @@ def test_add_samples_to_flow_cell_in_status_db(
     )
 
     # THEN the samples are added to the flow cell in statusdb and FlowcellSamples are updated
-    flow_cell = store_with_sequencing_metrics.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
+    flow_cell = store_with_sequencing_metrics.filter_flow_cell_by_name(
+        flow_cell_name=flow_cell_name
+    )
     assert flow_cell.samples
     assert flow_cell.samples[0].internal_id == sample_id
