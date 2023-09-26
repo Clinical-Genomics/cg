@@ -2012,7 +2012,7 @@ def sample_store(base_store: Store) -> Store:
             sex=Gender.MALE,
             received=datetime.now(),
             prepared_at=datetime.now(),
-            sequenced_at=datetime.now(),
+            reads_updated_at=datetime.now(),
             reads=(310 * 1000000),
         ),
         base_store.add_sample(
@@ -2025,12 +2025,12 @@ def sample_store(base_store: Store) -> Store:
         base_store.add_sample(
             name="to-deliver",
             sex=Gender.MALE,
-            sequenced_at=datetime.now(),
+            reads_updated_at=datetime.now(),
         ),
         base_store.add_sample(
             name="delivered",
             sex=Gender.MALE,
-            sequenced_at=datetime.now(),
+            reads_updated_at=datetime.now(),
             delivered_at=datetime.now(),
             no_invoice=False,
         ),
@@ -2159,15 +2159,9 @@ def microsalt_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def current_encryption_dir() -> Path:
-    """Return a temporary directory for current encryption testing."""
-    return Path("home", "ENCRYPT")
-
-
-@pytest.fixture
-def legacy_encryption_dir() -> Path:
-    """Return a temporary directory for current encryption testing."""
-    return Path("home", "TO_PDC")
+def encryption_dir() -> Path:
+    """Return a temporary directory for encryption testing."""
+    return Path("home", "encrypt")
 
 
 @pytest.fixture(name="cg_uri")
@@ -2218,11 +2212,7 @@ def context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encrypt_dir": {
-                "current": str(current_encryption_dir),
-                "legacy": str(legacy_encryption_dir),
-            },
-            "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
+            "encrypt_dir": str(encryption_dir),
             "slurm": {
                 "account": "development",
                 "hours": 1,
@@ -2800,7 +2790,7 @@ def rnafusion_context(
     sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        sequenced_at=datetime.now(),
+        reads_updated_at=datetime.now(),
     )
 
     helpers.add_relationship(
@@ -3028,7 +3018,7 @@ def taxprofiler_context(
     taxprofiler_sample: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        sequenced_at=datetime.now(),
+        reads_updated_at=datetime.now(),
         name=sample_name,
     )
 

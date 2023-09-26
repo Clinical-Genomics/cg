@@ -30,24 +30,6 @@ class Sequencers(BaseModel):
     novaseq: str
 
 
-class EncryptionDirs(BaseModel):
-    current: str
-    legacy: str
-
-
-class FlowCellRunDirs(Sequencers):
-    pass
-
-
-class CleanDirs(BaseModel):
-    sample_sheets_dir_name: str
-    flow_cell_run_dirs: FlowCellRunDirs
-
-
-class CleanConfig(BaseModel):
-    flow_cells: CleanDirs
-
-
 class SlurmConfig(BaseModel):
     account: str
     hours: Optional[int]
@@ -59,7 +41,7 @@ class SlurmConfig(BaseModel):
 
 
 class BackupConfig(BaseModel):
-    encrypt_dir: EncryptionDirs
+    encrypt_dir: str
     slurm: SlurmConfig
 
 
@@ -69,8 +51,6 @@ class HousekeeperConfig(BaseModel):
 
 
 class DemultiplexConfig(BaseModel):
-    run_dir: str
-    out_dir: str
     slurm: SlurmConfig
 
 
@@ -257,7 +237,6 @@ class CGConfig(BaseModel):
     backup: BackupConfig = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
-    clean: Optional[CleanConfig] = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
