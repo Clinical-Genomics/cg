@@ -60,9 +60,11 @@ def get_sample_sheet_from_file(
 
 def get_sample_type(sample_sheet_content: List[List[str]]) -> Type[FlowCellSample]:
     for row in sample_sheet_content:
-        if SampleSheetBCLConvertSections.Settings.HEADER.value in row:
+        if not row:
+            continue
+        if SampleSheetBCLConvertSections.Data.HEADER.value in row[0]:
             return FlowCellSampleBCLConvert
-        if SampleSheetBcl2FastqSections.Settings.HEADER.value in row:
+        if SampleSheetBcl2FastqSections.Data.HEADER.value in row[0]:
             return FlowCellSampleBcl2Fastq
     raise SampleSheetError("Could not determine sample sheet type")
 
