@@ -69,7 +69,7 @@ def test_get_flow_cell_by_id(base_store: Store, helpers: StoreHelpers, bcl2fastq
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: Flowcell = filter_flow_cell_by_name(
+    returned_flow_cell: Query = filter_flow_cell_by_name(
         flow_cells=base_store._get_query(table=Flowcell), flow_cell_name=bcl2fastq_flow_cell_id
     )
 

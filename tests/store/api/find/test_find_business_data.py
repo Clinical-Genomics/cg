@@ -76,7 +76,7 @@ def test_get_flow_cell(bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: S
     # GIVEN a store with two flow cells
 
     # WHEN fetching the latest flow cell
-    flow_cell: Flowcell = re_sequenced_sample_store.filter_flow_cell_by_name(
+    flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
         flow_cell_name=bcl2fastq_flow_cell_id
     )
 
@@ -212,7 +212,7 @@ def test_get_latest_flow_cell_on_case(
     """Test returning the latest sequenced flow cell on a case."""
 
     # GIVEN a store with two flow cells in it, one being the latest sequenced of the two
-    latest_flow_cell: Flowcell = re_sequenced_sample_store.filter_flow_cell_by_name(
+    latest_flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
         flow_cell_name=bcl2fastq_flow_cell_id
     )
 

@@ -27,9 +27,7 @@ def store_flow_cell_data_in_status_db(
     Create flow cell from the parsed and validated flow cell data.
     And add the samples on the flow cell to the model.
     """
-    flow_cell: Optional[Flowcell] = store.filter_flow_cell_by_name(
-        flow_cell_name=parsed_flow_cell.id
-    )
+    flow_cell: Optional[Flowcell] = store.get_flow_cell_by_name(flow_cell_name=parsed_flow_cell.id)
     if not flow_cell:
         flow_cell: Flowcell = Flowcell(
             name=parsed_flow_cell.id,

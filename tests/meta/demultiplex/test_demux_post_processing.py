@@ -79,7 +79,7 @@ def test_post_processing_of_flow_cell(
     demux_post_processing_api.finish_flow_cell(flow_cell_demultiplexing_directory)
 
     # THEN a flow cell was created in statusdb
-    assert demux_post_processing_api.status_db.filter_flow_cell_by_name(flow_cell_name)
+    assert demux_post_processing_api.status_db.get_flow_cell_by_name(flow_cell_name)
 
     # THEN sequencing metrics were created for the flow cell
     assert demux_post_processing_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(

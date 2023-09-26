@@ -412,7 +412,7 @@ class FindBusinessDataHandler(BaseHandler):
             lane=lane,
         ).first()
 
-    def filter_flow_cell_by_name(self, flow_cell_name: str) -> Flowcell:
+    def get_flow_cell_by_name(self, flow_cell_name: str) -> Flowcell:
         """Return flow cell by flow cell name."""
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
@@ -453,7 +453,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_samples_from_flow_cell(self, flow_cell_id: str) -> Optional[List[Sample]]:
         """Return samples present on flow cell."""
-        flow_cell: Flowcell = self.filter_flow_cell_by_name(flow_cell_name=flow_cell_id)
+        flow_cell: Flowcell = self.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
         if flow_cell:
             return flow_cell.samples
 
