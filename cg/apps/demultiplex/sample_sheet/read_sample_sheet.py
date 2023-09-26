@@ -48,7 +48,7 @@ def get_sample_sheet_from_file(infile: Path) -> SampleSheet:
     sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.CSV, file_path=infile
     )
-    sample_type: Type[FlowCellSample] = get_sample_type(sample_sheet_content)
+    sample_type: Type[FlowCellSample] = get_sample_type(infile)
 
     return get_validated_sample_sheet(
         sample_sheet_content=sample_sheet_content,
@@ -56,7 +56,10 @@ def get_sample_sheet_from_file(infile: Path) -> SampleSheet:
     )
 
 
-def get_sample_type(sample_sheet_content: List[List[str]]) -> Type[FlowCellSample]:
+def get_sample_type(sample_sheet_path: Path) -> Type[FlowCellSample]:
+    sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.CSV, file_path=sample_sheet_path
+    )
     for row in sample_sheet_content:
         if not row:
             continue

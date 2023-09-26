@@ -12,11 +12,13 @@ from cg.apps.demultiplex.sample_sheet.models import (
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_sheet_from_file,
+    get_sample_type,
     validate_samples_are_unique,
     get_samples_by_lane,
     get_validated_sample_sheet,
     get_raw_samples,
 )
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 def test_validate_samples_are_unique(
@@ -197,3 +199,23 @@ def test_get_sample_internal_ids_from_sample_sheet(novaseq6000_bcl_convert_sampl
     # THEN the sample internal ids are the expected ones
     for sample_internal_id in sample_internal_ids:
         assert is_valid_sample_internal_id(sample_internal_id=sample_internal_id) is True
+
+
+def test_get_sample_type_for_bcl_convert(bcl_convert_sample_sheet_path: Path):
+    # GIVEN a bcl convert sample sheet path
+
+    # WHEN getting the sample type
+    sample_type: FlowCellSample = get_sample_type(bcl_convert_sample_sheet_path)
+
+    # THEN the sample type is FlowCellSampleBCLConvert
+    assert sample_type is FlowCellSampleBCLConvert
+
+
+def test_get_sample_type_for_bcl2fastq(bcl2fastq_sample_sheet_path: Path):
+    # GIVEN a bcl convert sample sheet path
+
+    # WHEN getting the sample type
+    sample_type: FlowCellSample = get_sample_type(bcl2fastq_sample_sheet_path)
+
+    # THEN the sample type is FlowCellSampleBCLConvert
+    assert sample_type is FlowCellSampleBcl2Fastq
