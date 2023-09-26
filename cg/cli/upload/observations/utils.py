@@ -4,17 +4,16 @@ import logging
 from typing import Union
 
 from sqlalchemy.orm import Query
-from cgmodels.cg.constants import Pipeline
 
+from cg.constants.constants import Pipeline
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Family
-
-from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 

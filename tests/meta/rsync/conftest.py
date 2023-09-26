@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pytest
 
-from cg.store.models import Family
+from cg.constants.constants import Pipeline
 from cg.models.cg_config import CGConfig
-from cgmodels.cg.constants import Pipeline
+from cg.store.models import Family
 
 
 @pytest.fixture

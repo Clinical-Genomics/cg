@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import List, Optional
 
 import click
-from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -24,7 +23,7 @@ from cg.cli.workflow.commands import (
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
 )
-from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
+from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Pipeline
 from cg.constants.housekeeper_tags import ALIGNMENT_FILE_TAGS, ScoutTag
 from cg.meta.clean.api import CleanAPI
 from cg.models.cg_config import CGConfig

@@ -4,17 +4,17 @@ import logging
 
 import pytest
 from _pytest.logging import LogCaptureFixture
-from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
 
 from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.observations.utils import (
+    get_observations_api,
     get_observations_case,
     get_observations_case_to_upload,
-    get_observations_api,
     get_sequencing_method,
 )
 from cg.constants import EXIT_SUCCESS
+from cg.constants.constants import Pipeline
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError

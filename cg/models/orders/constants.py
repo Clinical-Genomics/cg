@@ -1,4 +1,5 @@
-from cgmodels.cg.constants import Pipeline, StrEnum
+from cg.constants.constants import Pipeline
+from cg.utils.enums import StrEnum
 
 
 class OrderType(StrEnum):
