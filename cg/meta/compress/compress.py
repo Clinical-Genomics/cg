@@ -261,12 +261,12 @@ class CompressAPI:
         )
 
     def get_spring_metadata_tags_from_fastq(self, fastq_file: File) -> List[str]:
-        spring_metadata_tags: List[str] = self.get_all_non_fastq_tags(fastq_file)
-        return spring_metadata_tags + [SequencingFileTag.SPRING_METADATA]
+        non_fastq_tags: List[str] = self.get_all_non_fastq_tags(fastq_file)
+        return non_fastq_tags + [SequencingFileTag.SPRING_METADATA]
 
     def get_spring_tags_from_fastq(self, fastq_file: File) -> List[str]:
-        spring_tags: List[str] = self.get_all_non_fastq_tags(fastq_file)
-        return spring_tags + [SequencingFileTag.SPRING]
+        non_fastq_tags: List[str] = self.get_all_non_fastq_tags(fastq_file)
+        return non_fastq_tags + [SequencingFileTag.SPRING]
 
     @staticmethod
     def get_all_non_fastq_tags(fastq_file: File) -> List[str]:
