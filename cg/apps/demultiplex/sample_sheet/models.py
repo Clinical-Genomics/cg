@@ -17,7 +17,7 @@ from cg.constants.demultiplexing import (
 
 LOG = logging.getLogger(__name__)
 
-ValidSampleId = Annotated[
+SampleId = Annotated[
     str,
     AfterValidator(remove_index_from_sample_id),
     AfterValidator(validate_sample_id),
@@ -28,7 +28,7 @@ class FlowCellSample(BaseModel):
     """Base class for flow cell samples."""
 
     lane: int
-    sample_id: ValidSampleId
+    sample_id: SampleId
     index: str
     index2: str = ""
     model_config = ConfigDict(populate_by_name=True, extra=Extra.ignore)
@@ -49,7 +49,7 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
     recipe: str = Field("R1", alias=SampleSheetBcl2FastqSections.Data.RECIPE.value)
     operator: str = Field("script", alias=SampleSheetBcl2FastqSections.Data.OPERATOR.value)
 
-    sample_id: ValidSampleId = Field(
+    sample_id: SampleId = Field(
         ..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value
     )
     project: str = Field(
@@ -61,7 +61,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
     """Class that represents a NovaSeqX flow cell sample."""
 
     lane: int = Field(..., alias=SampleSheetBCLConvertSections.Data.LANE.value)
-    sample_id: ValidSampleId = Field(
+    sample_id: SampleId = Field(
         ..., alias=SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID.value
     )
     index: str = Field(..., alias=SampleSheetBCLConvertSections.Data.INDEX_1.value)
