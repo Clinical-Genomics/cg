@@ -417,7 +417,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
             flow_cell_name=flow_cell_name,
-            filter_functions=[FlowCellFilter.GET_BY_NAME],
+            filter_functions=[FlowCellFilter.FILTER_BY_NAME],
         ).first()
 
     def get_flow_cells_by_statuses(self, flow_cell_statuses: List[str]) -> Optional[List[Flowcell]]:
@@ -425,7 +425,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
             flow_cell_statuses=flow_cell_statuses,
-            filter_functions=[FlowCellFilter.GET_WITH_STATUSES],
+            filter_functions=[FlowCellFilter.FILTER_WITH_STATUSES],
         ).all()
 
     def get_flow_cell_by_name_pattern_and_status(
@@ -433,8 +433,8 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[Flowcell]:
         """Return flow cell by name pattern and status."""
         filter_functions: List[FlowCellFilter] = [
-            FlowCellFilter.GET_WITH_STATUSES,
-            FlowCellFilter.GET_BY_NAME_SEARCH,
+            FlowCellFilter.FILTER_WITH_STATUSES,
+            FlowCellFilter.FILTER_BY_NAME_SEARCH,
         ]
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
@@ -447,7 +447,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Return flow cells for case."""
         return apply_flow_cell_filter(
             flow_cells=self._get_join_flow_cell_sample_links_query(),
-            filter_functions=[FlowCellFilter.GET_BY_CASE],
+            filter_functions=[FlowCellFilter.FILTER_BY_CASE],
             case=case,
         ).all()
 

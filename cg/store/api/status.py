@@ -2,29 +2,29 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import List, Optional
 
-
 from sqlalchemy.orm import Query, Session
 from typing_extensions import Literal
 
-from cg.constants import CASE_ACTIONS, Pipeline, FlowCellStatus
+from cg.constants import CASE_ACTIONS, FlowCellStatus, Pipeline
 from cg.constants.constants import CaseActions
 from cg.constants.invoice import CustomerNames
-from cg.store.models import (
-    Analysis,
-    Customer,
-    Family,
-    Pool,
-    Sample,
-    Flowcell,
-)
-
-from cg.store.filters.status_analysis_filters import apply_analysis_filter, AnalysisFilter
-from cg.store.filters.status_case_filters import apply_case_filter, CaseFilter
 from cg.store.api.base import BaseHandler
-from cg.store.filters.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilter
-from cg.store.filters.status_sample_filters import apply_sample_filter, SampleFilter
-from cg.store.filters.status_pool_filters import apply_pool_filter, PoolFilter
-from cg.store.filters.status_application_filters import apply_application_filter, ApplicationFilter
+from cg.store.filters.status_analysis_filters import (
+    AnalysisFilter,
+    apply_analysis_filter,
+)
+from cg.store.filters.status_application_filters import (
+    ApplicationFilter,
+    apply_application_filter,
+)
+from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
+from cg.store.filters.status_flow_cell_filters import (
+    FlowCellFilter,
+    apply_flow_cell_filter,
+)
+from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
+from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
+from cg.store.models import Analysis, Customer, Family, Flowcell, Pool, Sample
 
 
 class StatusHandler(BaseHandler):
@@ -220,7 +220,7 @@ class StatusHandler(BaseHandler):
         """Return flow cells for case."""
         return apply_flow_cell_filter(
             flow_cells=self._get_join_flow_cell_sample_links_query(),
-            filter_functions=[FlowCellFilter.GET_BY_CASE],
+            filter_functions=[FlowCellFilter.FILTER_BY_CASE],
             case=case,
         ).all()
 
