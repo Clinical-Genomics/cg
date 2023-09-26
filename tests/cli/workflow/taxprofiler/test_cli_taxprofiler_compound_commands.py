@@ -75,3 +75,20 @@ def test_taxprofiler_start_available(
 
     # THEN it should successfully identify the one case eligible for auto-start
     assert taxprofiler_case_id in caplog.text
+
+
+def test_taxprofiler_start_available_case_without_samples(
+    cli_runner: CliRunner,
+    taxprofiler_context: CGConfig,
+    caplog: LogCaptureFixture,
+    no_sample_case_id: str,
+):
+    """Test config_case with a case without samples."""
+    caplog.set_level(logging.ERROR)
+    # GIVEN a case
+
+    # WHEN running config case
+    result = cli_runner.invoke(start_available, [no_sample_case_id], obj=taxprofiler_context)
+
+    # THEN command should not exit successfully
+    assert result.exit_code != EXIT_SUCCESS
