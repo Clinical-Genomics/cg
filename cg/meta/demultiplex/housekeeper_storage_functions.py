@@ -57,7 +57,7 @@ def store_undetermined_fastq_files(
     ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 
     undetermined_dir_path: Path = flow_cell.path
-    if not flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
+    if flow_cell.bcl_converter != BclConverter.BCL2FASTQ:
         undetermined_dir_path = Path(flow_cell.path, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
 
     for lane, sample_id in non_pooled_lanes_and_samples:
