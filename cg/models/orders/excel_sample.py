@@ -1,5 +1,8 @@
 from typing import List, Optional
 
+from pydantic import AfterValidator, BeforeValidator, Field
+from typing_extensions import Annotated
+
 from cg.models.orders.sample_base import OrderSample
 from cg.models.orders.validators.excel_sample_validators import (
     convert_sex,
@@ -8,13 +11,11 @@ from cg.models.orders.validators.excel_sample_validators import (
     convert_to_priority,
     numeric_value,
     parse_panels,
+    replace_spaces_with_underscores,
     validate_data_analysis,
     validate_parent,
     validate_source,
-    replace_spaces_with_underscores,
 )
-from pydantic import AfterValidator, BeforeValidator, Field
-from typing_extensions import Annotated
 
 
 class ExcelSample(OrderSample):
@@ -65,7 +66,7 @@ class ExcelSample(OrderSample):
     pool: str = Field(None, alias="UDF/pool name")
     post_formalin_fixation_time: str = Field(None, alias="UDF/Post Formalin Fixation Time")
     pre_processing_method: str = Field(None, alias="UDF/Pre Processing Method")
-    primer: str = Field(None, alias="UDF/Primer")
+    primer: str = Field(None, alias="UDF/primer")
     priority: Annotated[
         str,
         AfterValidator(convert_to_lower),
