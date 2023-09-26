@@ -25,7 +25,7 @@ class PdcAPI:
             self.run_dsmc_command(command=command)
 
     def query_pdc(self, search_pattern: str) -> None:
-        """Query PDC based on a given search pattern"""
+        """Query PDC based on a given search pattern."""
         command: list = DSMCParameters.QUERY_COMMAND.copy()
         command.append(search_pattern)
         LOG.debug("Starting DSMC command:")
