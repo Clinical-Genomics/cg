@@ -22,19 +22,6 @@ def test_flowcell_id(bcl2fastq_flow_cell_dir: Path):
     assert flowcell_obj.id == flowcell_id
 
 
-def test_flowcell_position(bcl2fastq_flow_cell_dir: Path):
-    """Test getting flow cell position."""
-    # GIVEN the path to a finished flow cell
-    # GIVEN a flow cell object
-    flowcell_obj = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
-
-    # WHEN fetching the flow cell position
-    position = flowcell_obj.position
-
-    # THEN assert it is A or B
-    assert position in ["A", "B"]
-
-
 def test_rta_exists(bcl2fastq_flow_cell: FlowCellDirectoryData):
     """Test return of RTS file."""
     # GIVEN the path to a finished flow cell

@@ -39,7 +39,6 @@ class FlowCellDirectoryData:
         self.machine_number: int = 0
         self.base_name: str = ""  # Base name is flow cell-id + flow cell position
         self.id: str = ""
-        self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_dir_name()
         self.bcl_converter: Optional[str] = self.get_bcl_converter(bcl_converter)
         self._sample_sheet_path_hk: Optional[Path] = None
@@ -60,7 +59,6 @@ class FlowCellDirectoryData:
         self.base_name = base_name
         LOG.debug(f"Set flow cell id to {base_name}")
         self.id = base_name[1:]
-        self.position = base_name[0]
 
     @property
     def split_flow_cell_name(self) -> List[str]:
