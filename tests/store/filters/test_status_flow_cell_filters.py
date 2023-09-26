@@ -136,6 +136,10 @@ def test_filter_flow_cells_by_has_backup(
     returned_flow_cell_query: Query = filter_flow_cells_by_has_backup(
         flow_cells=base_store._get_query(table=Flowcell),
     )
+    flow_cell: Flowcell = returned_flow_cell_query.first()
 
     # THEN a query should be returned
     assert isinstance(returned_flow_cell_query, Query)
+
+    # THEN the flow cell should have a backup
+    assert flow_cell.has_backup
