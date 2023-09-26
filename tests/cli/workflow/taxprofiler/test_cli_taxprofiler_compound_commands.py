@@ -74,4 +74,4 @@ def test_taxprofiler_start_available(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN it should successfully identify the one case eligible for auto-start
-    assert case_id_enough_reads in caplog.text
+    assert taxprofiler_case_id in caplog.text
