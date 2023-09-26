@@ -59,8 +59,7 @@ def validate_sample_sheet(
     )
     try:
         get_validated_sample_sheet(
-            sample_sheet_content=sample_sheet_content,
-            sample_type=flow_cell.sample_type
+            sample_sheet_content=sample_sheet_content, sample_type=flow_cell.sample_type
         )
     except ValidationError as error:
         LOG.warning(error)
