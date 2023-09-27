@@ -3,18 +3,35 @@ import datetime as dt
 import logging
 from typing import Callable, Dict, Iterator, List, Optional, Set, Union
 
+from sqlalchemy.orm import Query, Session
+
 from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError, CgError
 from cg.store.api.base import BaseHandler
-from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
+from cg.store.filters.status_analysis_filters import (
+    AnalysisFilter,
+    apply_analysis_filter,
+)
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_case_sample_filters import CaseSampleFilter, apply_case_sample_filter
-from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
-from cg.store.filters.status_flow_cell_filters import FlowCellFilter, apply_flow_cell_filter
+from cg.store.filters.status_case_sample_filters import (
+    CaseSampleFilter,
+    apply_case_sample_filter,
+)
+from cg.store.filters.status_customer_filters import (
+    CustomerFilter,
+    apply_customer_filter,
+)
+from cg.store.filters.status_flow_cell_filters import (
+    FlowCellFilter,
+    apply_flow_cell_filter,
+)
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
-from cg.store.filters.status_metrics_filters import SequencingMetricsFilter, apply_metrics_filter
+from cg.store.filters.status_metrics_filters import (
+    SequencingMetricsFilter,
+    apply_metrics_filter,
+)
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
 from cg.store.models import (
@@ -29,7 +46,6 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
 )
-from sqlalchemy.orm import Query, Session
 
 LOG = logging.getLogger(__name__)
 
@@ -396,7 +412,7 @@ class FindBusinessDataHandler(BaseHandler):
             lane=lane,
         ).first()
 
-    def get_flow_cell_by_name(self, flow_cell_name: str) -> Flowcell:
+    def get_flow_cell_by_name(self, flow_cell_name: str) -> Optional[Flowcell]:
         """Return flow cell by flow cell name."""
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),

@@ -38,6 +38,7 @@ def backup(context: CGConfig):
 @click.pass_obj
 def encrypt_flow_cell(context: CGConfig, dry_run: bool):
     """Encrypt flow cell."""
+    status_db: Store = context.status_db
     flow_cell_encryption_api = FlowCellEncryptionAPI(
         binary_path=context.encryption.binary_path, config=context.backup.dict(), dry_run=dry_run
     )
@@ -51,6 +52,11 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool):
         try:
             flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir)
         except FlowCellError:
+            continue
+        db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
+            flow_cell_name=flow_cell.id
+        )
+        if db_flow_cell and db_flow_cell.has_backup:
             continue
         if not flow_cell.is_flow_cell_ready():
             continue
