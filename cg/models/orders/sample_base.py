@@ -1,11 +1,12 @@
 from enum import Enum
 from typing import List, Optional
 
+from pydantic import BaseModel, BeforeValidator, ConfigDict, constr
+from typing_extensions import Annotated
+
 from cg.constants import DataDelivery, Pipeline
 from cg.models.orders.validators.sample_base_validators import snake_case
 from cg.store.models import Application, Customer, Family, Pool, Sample
-from pydantic import BaseModel, BeforeValidator, ConfigDict, constr
-from typing_extensions import Annotated
 
 
 class ControlEnum(str, Enum):
@@ -101,6 +102,7 @@ class OrderSample(BaseModel):
     post_formalin_fixation_time: Optional[int] = None
     pre_processing_method: Optional[str] = None
     priority: Annotated[PriorityEnum, BeforeValidator(snake_case)] = PriorityEnum.standard
+    primer: Optional[str] = None
     quantity: Optional[int] = None
     reagent_label: Optional[str] = None
     reference_genome: Optional[
