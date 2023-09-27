@@ -545,7 +545,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--analysis-dir": self.root_dir,
                 "--balsamic-cache": self.balsamic_cache,
                 "--cache-version": cache_version,
-                "--conda-env": self.conda_env,
                 "--fastq-path": self.get_sample_fastq_destination_dir(
                     self.status_db.get_case_by_internal_id(case_id)
                 ),
