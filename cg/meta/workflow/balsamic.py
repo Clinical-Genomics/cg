@@ -71,7 +71,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     @property
     def process(self):
         if not self._process:
-            self._process = Process(self.config.balsamic.binary_path)
+            self._process = Process(
+                binary=self.config.balsamic.binary_path, environment=self.config.balsamic.conda_env
+            )
         return self._process
 
     @property
