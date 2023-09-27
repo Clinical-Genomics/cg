@@ -65,7 +65,7 @@ def get_creation_time_stamp(directory_path: Path) -> float:
 def remove_directory_and_contents(directory_path):
     """
     Delete a directory and its contents.
-    Raises OSError if not successful.
+    Excepts OSError.
     """
     try:
         shutil.rmtree(directory_path)
@@ -80,5 +80,4 @@ def get_directories_in_path(path: Path) -> List[Path]:
     """
     if not path.exists():
         raise FileNotFoundError(f"Path {path} does not exist.")
-    directories = [entry for entry in path.iterdir() if entry.is_dir()]
-    return directories
+    return [entry for entry in path.iterdir() if entry.is_dir()]

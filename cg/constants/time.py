@@ -1,5 +1,5 @@
 """Constants relating to time."""
 
-SECONDS_IN_A_DAY: int = 86400
+SECONDS_IN_A_DAY: int = 86_400
 TWENTY_ONE_DAYS: int = 21
 TWENTY_ONE_DAYS_IN_SECONDS: int = SECONDS_IN_A_DAY * TWENTY_ONE_DAYS

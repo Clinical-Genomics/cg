@@ -11,6 +11,7 @@ from cg.constants.time import TWENTY_ONE_DAYS_IN_SECONDS
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
+from cg.store.models import Flowcell, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -30,6 +31,21 @@ def flow_cell_clean_api_can_be_removed(
     clean_flow_cell_api.current_time = clean_flow_cell_api.current_time + TWENTY_ONE_DAYS_IN_SECONDS
     clean_flow_cell_api.flow_cell._sample_sheet_path_hk = tmp_sample_sheet_clean_flow_cell_path
     return clean_flow_cell_api
+
+
+@pytest.fixture(scope="function")
+def flow_cell_clean_api_can_not_be_removed(
+    tmp_flow_cell_to_clean_path: Path,
+    store: Store,
+    real_housekeeper_api: HousekeeperAPI,
+    tmp_sample_sheet_clean_flow_cell_path: Path,
+) -> CleanFlowCellAPI:
+    return CleanFlowCellAPI(
+        flow_cell_path=tmp_flow_cell_to_clean_path,
+        status_db=store,
+        housekeeper_api=real_housekeeper_api,
+        dry_run=False,
+    )
 
 
 @pytest.fixture(scope="function")
@@ -62,18 +78,20 @@ def store_with_flow_cell_to_clean(
         (sample_id, tmp_flow_cell_to_clean.id, 1, 50_000_0000, 90.5, 32),
         (sample_id, tmp_flow_cell_to_clean.id, 2, 50_000_0000, 90.4, 31),
     ]
-    helpers.add_flowcell(
+    flow_cell: Flowcell = helpers.add_flowcell(
         flow_cell_name=tmp_flow_cell_to_clean.id,
         store=store,
         has_backup=True,
     )
-    helpers.add_sample(
+    sample: Sample = helpers.add_sample(
         name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
     )
     helpers.add_mutliple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
     )
-
+    flow_cell.samples = [sample]
+    store.session.add(flow_cell)
+    store.session.commit()
     return store
 
 
@@ -134,6 +152,11 @@ def hk_sample_bundle_for_flow_cell_to_clean(
                 "path": fastq_file.as_posix(),
                 "archive": False,
                 "tags": [SequencingFileTag.FASTQ, sample_id, tmp_flow_cell_to_clean.id],
+            },
+            {
+                "path": fastq_file.as_posix(),
+                "archive": False,
+                "tags": [SequencingFileTag.SPRING_METADATA, sample_id, tmp_flow_cell_to_clean.id],
             },
         ],
     }

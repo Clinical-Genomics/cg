@@ -2,8 +2,6 @@
 import time
 from typing import List
 
-from housekeeper.store.models import File
-
 from cg.constants import SequencingFileTag
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
@@ -70,7 +68,7 @@ def test_is_directory_older_than_days_old_pass(
     # GIVEN a clean flow cell api with a current time that is set 21 days from now
 
     # THEN checking whether a given flow cell directory is older than 21 days is TRUE
-    assert flow_cell_clean_api_can_be_removed.is_directory_older_than_days_old()
+    assert flow_cell_clean_api_can_be_removed.is_directory_older_than_21_days()
 
 
 def test_is_directory_not_than_days_old_fail(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
@@ -80,7 +78,7 @@ def test_is_directory_not_than_days_old_fail(flow_cell_clean_api_can_be_removed:
     flow_cell_clean_api_can_be_removed.current_time = time.time()
 
     # THEN checking whether a given flow cell directory is older than 21 days is FALSE
-    assert not flow_cell_clean_api_can_be_removed.is_directory_older_than_days_old()
+    assert not flow_cell_clean_api_can_be_removed.is_directory_older_than_21_days()
 
 
 def test_has_sample_sheet_in_housekeeper(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
@@ -98,11 +96,15 @@ def test_get_files_for_flow_cell_bundle(flow_cell_clean_api_can_be_removed: Clea
     # GIVEN a clean flow cell api with a flow cell that has files in housekeeper
 
     # WHEN getting fastq and spring files that are tagged with the flow cell
-    fastq_files: List[File] = flow_cell_clean_api_can_be_removed.get_files_for_flow_cell_bundle(
-        tag=SequencingFileTag.FASTQ
+    fastq_files: bool = (
+        flow_cell_clean_api_can_be_removed.has_files_for_samples_on_flow_cell_with_tag(
+            tag=SequencingFileTag.FASTQ
+        )
     )
-    spring_files: List[File] = flow_cell_clean_api_can_be_removed.get_files_for_flow_cell_bundle(
-        tag=SequencingFileTag.SPRING
+    spring_files: bool = (
+        flow_cell_clean_api_can_be_removed.has_files_for_samples_on_flow_cell_with_tag(
+            tag=SequencingFileTag.SPRING
+        )
     )
 
     # THEN fastq and SPRING files are returned
@@ -132,3 +134,35 @@ def test_delete_flow_cell_directory(flow_cell_clean_api_can_be_removed: CleanFlo
 
     # THEN the flow cell directory is removed
     assert not flow_cell_clean_api_can_be_removed.flow_cell.path.exists()
+
+
+def test_delete_flow_cell_directory_can_not_be_deleted(
+    flow_cell_clean_api_can_not_be_removed: CleanFlowCellAPI,
+):
+    """Test delete a flow cell that does not pass all checks."""
+    # GIVEN a flow cell that should not be removed.
+
+    # GIVEN that the flow cell directory exists
+    assert flow_cell_clean_api_can_not_be_removed.flow_cell.path.exists()
+
+    # WHEN trying to remove the flow cell
+    flow_cell_clean_api_can_not_be_removed.delete_flow_cell_directory()
+
+    # THEN the flow cell directory still exists
+    flow_cell_clean_api_can_not_be_removed.flow_cell.path.exists()
+
+
+def test_get_flow_cell_from_statusdb_does_not_exist(
+    flow_cell_clean_api_can_not_be_removed: CleanFlowCellAPI,
+):
+    """Test retrieving a flow cell from statusDB that does not exist."""
+    # GIVEN a CleanFlowCellAPI with a flow cell that is not in statusDB
+    assert not flow_cell_clean_api_can_not_be_removed.status_db.get_flow_cell_by_name(
+        flow_cell_clean_api_can_not_be_removed.flow_cell.id
+    )
+
+    # WHEN retrieving the flow cell from statusDB an error is raised
+    flow_cell: Flowcell = flow_cell_clean_api_can_not_be_removed.get_flow_cell_from_status_db()
+
+    # THEN no flow cell is returned
+    assert not flow_cell
