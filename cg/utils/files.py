@@ -44,7 +44,7 @@ def is_pattern_in_file_path_name(file_path: Path, pattern: str) -> bool:
     return pattern in file_path.name
 
 
-def get_creation_time_stamp(directory_path: Path) -> float:
+def get_directory_creation_time_stamp(directory_path: Path) -> float:
     """
     Return time stamp that a directory is created.
     Raises:
@@ -57,9 +57,7 @@ def get_creation_time_stamp(directory_path: Path) -> float:
     if not directory_path.is_dir():
         raise ValueError(f"Specified path {directory_path} is not a directory.")
 
-    stat_info = os.stat(directory_path)
-    creation_timestamp = stat_info.st_ctime
-    return creation_timestamp
+    return os.stat(directory_path).st_ctime
 
 
 def remove_directory_and_contents(directory_path):
@@ -70,8 +68,8 @@ def remove_directory_and_contents(directory_path):
     try:
         shutil.rmtree(directory_path)
         LOG.info(f"Successfully removed the directory and its contents: {directory_path}")
-    except OSError as e:
-        LOG.error(f"Failed to remove the directory {directory_path} and its contents: {e}")
+    except OSError as error:
+        LOG.error(f"Failed to remove the directory {directory_path} and its contents: {error}")
 
 
 def get_directories_in_path(path: Path) -> List[Path]:

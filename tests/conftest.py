@@ -701,6 +701,12 @@ def spring_file(spring_dir: Path) -> Path:
     return Path(spring_dir, "dummy_run_001.spring")
 
 
+@pytest.fixture(name="spring_meta_data_file")
+def spring_meta_data_file(spring_dir: Path) -> Path:
+    """Return the path to an existing spring file."""
+    return Path(spring_dir, "dummy_spring_meta_data")
+
+
 @pytest.fixture(name="spring_file_father")
 def spring_file_father(spring_dir: Path) -> Path:
     """Return the path to a second existing spring file."""

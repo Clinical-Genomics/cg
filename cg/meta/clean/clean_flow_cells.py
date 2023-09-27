@@ -1,8 +1,8 @@
-"""An API that handles the cleaning of flow cells on Hasta."""
+"""An API that handles the cleaning of flow cells."""
 import logging
 import time
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from housekeeper.store.models import File
 
@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 
 class CleanFlowCellAPI:
     """
-            Handles the cleaning of flow cells in the flow_cells and demultiplexed_runs directories.
+            Handles the cleaning of flow cells in the flow cells and demultiplexed runs directories.
     Requirements for cleaning:
             Flow cell is older than 21 days
             Flow cell is backed up
@@ -38,7 +38,7 @@ class CleanFlowCellAPI:
         self.status_db: Store = status_db
         self.hk_api: HousekeeperAPI = housekeeper_api
         self.flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_path)
-        self.current_time = time.time()
+        self.current_time: float = time.time()
         self.dry_run: bool = dry_run
 
     def delete_flow_cell_directory(self):
@@ -79,11 +79,11 @@ class CleanFlowCellAPI:
             current_time=self.current_time,
         )
 
-    def get_flow_cell_from_status_db(self) -> Flowcell:
-        """Get the flow cell entry from statusDB."""
+    def get_flow_cell_from_status_db(self) -> Optional[Flowcell]:
+        """Get the flow cell entry from StatusDB."""
         flow_cell: Flowcell = self.status_db.get_flow_cell_by_name(self.flow_cell.id)
         if not flow_cell:
-            LOG.warning(f"Flow cell {self.flow_cell.id} not found in statusDB.")
+            LOG.warning(f"Flow cell {self.flow_cell.id} not found in StatusDB.")
         return flow_cell
 
     def is_flow_cell_in_statusdb(self) -> bool:
@@ -94,18 +94,18 @@ class CleanFlowCellAPI:
         """Check if flow cell is backed up on PDC."""
         return bool(self.get_flow_cell_from_status_db().has_backup)
 
-    def get_sequencing_metrics_for_flow_cell(self) -> List[SampleLaneSequencingMetrics]:
+    def get_sequencing_metrics_for_flow_cell(self) -> Optional[List[SampleLaneSequencingMetrics]]:
         """Get the SampleLaneSequencingMetrics entries for a flow cell."""
         metrics: List[
             SampleLaneSequencingMetrics
         ] = self.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(self.flow_cell.id)
         if not metrics:
             LOG.warning(
-                f"No SampleLaneSequencingMetrics found for flow cell {self.flow_cell.id} in statusDB"
+                f"No SampleLaneSequencingMetrics found for flow cell {self.flow_cell.id} in StatusDB"
             )
         return metrics
 
-    def has_sequencing_metrics(self):
+    def has_sequencing_metrics(self) -> bool:
         """Check if a flow cell has entries in the SampleLaneSequencingMetrics table."""
         return bool(self.get_sequencing_metrics_for_flow_cell())
 

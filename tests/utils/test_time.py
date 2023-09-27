@@ -2,7 +2,7 @@
 import time
 from pathlib import Path
 
-from cg.constants.time import TWENTY_ONE_DAYS_IN_SECONDS, TWENTY_ONE_DAYS
+from cg.constants.time import TWENTY_ONE_DAYS, TWENTY_ONE_DAYS_IN_SECONDS
 from cg.utils.time import is_directory_older_than_days_old
 
 

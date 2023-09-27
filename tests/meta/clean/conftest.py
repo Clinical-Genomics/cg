@@ -117,7 +117,7 @@ def housekeeper_api_with_flow_cell_to_clean(
 def hk_flow_cell_to_clean_bundle(
     tmp_flow_cell_to_clean: FlowCellDirectoryData,
     timestamp_yesterday: datetime,
-    tmp_sample_sheet_clean_flow_cell_path,
+    tmp_sample_sheet_clean_flow_cell_path: Path,
 ) -> Dict:
     """Housekeeper bundle information for a flow cell that can be cleaned."""
     return {
@@ -136,7 +136,12 @@ def hk_flow_cell_to_clean_bundle(
 
 @pytest.fixture(scope="function")
 def hk_sample_bundle_for_flow_cell_to_clean(
-    sample_id: str, timestamp_yesterday: datetime, spring_file, fastq_file, tmp_flow_cell_to_clean
+    sample_id: str,
+    timestamp_yesterday: datetime,
+    spring_file: Path,
+    fastq_file: Path,
+    spring_meta_data_file: Path,
+    tmp_flow_cell_to_clean: FlowCellDirectoryData,
 ) -> Dict:
     return {
         "name": sample_id,
@@ -154,7 +159,7 @@ def hk_sample_bundle_for_flow_cell_to_clean(
                 "tags": [SequencingFileTag.FASTQ, sample_id, tmp_flow_cell_to_clean.id],
             },
             {
-                "path": fastq_file.as_posix(),
+                "path": spring_meta_data_file.as_posix(),
                 "archive": False,
                 "tags": [SequencingFileTag.SPRING_METADATA, sample_id, tmp_flow_cell_to_clean.id],
             },
