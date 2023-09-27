@@ -108,3 +108,27 @@ def test_get_files_for_flow_cell_bundle(flow_cell_clean_api_can_be_removed: Clea
     # THEN fastq and SPRING files are returned
     assert fastq_files
     assert spring_files
+
+
+def test_can_flow_cell_be_deleted(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
+    """Test the flow cell can be deleted check."""
+    # GIVEN a flow cell that can be deleted
+
+    # WHEN checking that the flow cell can be deleted
+
+    # THEN the check whether the flow cell can be deleted returns True
+    assert flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
+
+
+def test_delete_flow_cell_directory(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
+    """Test that a flow cell directory is removed."""
+    # GIVEN a flow cell that cen be removed
+
+    # GIVEN that the flow cell directory exists
+    assert flow_cell_clean_api_can_be_removed.flow_cell.path.exists()
+
+    # WHEN removing the flow cell directory
+    flow_cell_clean_api_can_be_removed.delete_flow_cell_directory()
+
+    # THEN the flow cell directory is removed
+    assert not flow_cell_clean_api_can_be_removed.flow_cell.path.exists()
