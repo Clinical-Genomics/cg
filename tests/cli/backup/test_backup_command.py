@@ -2,9 +2,28 @@ import logging
 
 from click.testing import CliRunner
 
-from cg.cli.backup import fetch_flow_cell
-from cg.constants import FlowCellStatus, EXIT_SUCCESS
+from cg.apps.slurm.slurm_api import SlurmAPI
+from cg.cli.backup import encrypt_flow_cell, fetch_flow_cell
+from cg.constants import EXIT_SUCCESS, FlowCellStatus
 from cg.models.cg_config import CGConfig
+
+
+def test_encrypt_flow_cell(cli_runner: CliRunner, encrypt_context: CGConfig, caplog, mocker):
+    """Test encrypt flow cell."""
+    # Given a mock SLURM API
+    sbatch_number: str = "1234"
+    caplog.set_level(logging.DEBUG)
+    mocker.patch.object(SlurmAPI, "submit_sbatch_job")
+    SlurmAPI.submit_sbatch_job.return_value = sbatch_number
+
+    # WHEN running the fetch flow cell command without specifying any flow cell in dry run mode
+    result = cli_runner.invoke(encrypt_flow_cell, ["--dry-run"], obj=encrypt_context)
+
+    # THEN assert that it exits without any problems
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN assert that it is communicated that no flow cells are requested
+    assert f"Flow cell encryption running as job {sbatch_number}" in caplog.text
 
 
 def test_run_fetch_flow_cell_dry_run_no_flow_cell_specified(

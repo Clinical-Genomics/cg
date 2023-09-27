@@ -40,9 +40,9 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool):
     """Encrypt flow cell."""
     status_db: Store = context.status_db
     flow_cell_encryption_api = FlowCellEncryptionAPI(
-        binary_path=context.encryption.binary_path, config=context.backup.dict(), dry_run=dry_run
+        binary_path=context.encryption.binary_path, config=context.dict(), dry_run=dry_run
     )
-    encrypt_dir: str = context.backup.encrypt_dir
+    encrypt_dir: Path = Path(context.backup.encrypt_dir)
     flow_cells_dir = Path(context.flow_cells_dir)
     LOG.debug(f"Search for flow cells ready to encrypt in {flow_cells_dir}")
     for sub_dir in flow_cells_dir.iterdir():

@@ -18,3 +18,8 @@ def backup_context(cg_context: CGConfig) -> CGConfig:
         flow_cells_dir=cg_context.flow_cells_dir,
     )
     return cg_context
+
+
+@pytest.fixture
+def encrypt_context(cg_context: CGConfig) -> CGConfig:
+    return cg_context

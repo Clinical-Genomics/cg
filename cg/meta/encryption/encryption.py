@@ -200,12 +200,18 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         final_passphrase_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
             f".key{FileExtensions.GPG}"
         )
-
         error_function: str = FLOW_CELL_ENCRYPT_ERROR.format(
             flow_cell_encrypt_dir=flow_cell_encrypt_dir
         )
-        commands: str = FLOW_CELL_ENCRYPT_COMMANDS(
-            symmetric_passphrasese=self.get_symmetric_passphrase_cmd(
+
+        LOG.debug(
+            self.get_flow_cell_symmetric_encryption_command(
+                output_file=encrypted_gpg_file_path,
+                passphrase_file_path=symmetric_passphrase_file_path,
+            )
+        )
+        commands: str = FLOW_CELL_ENCRYPT_COMMANDS.format(
+            symmetric_passphrase=self.get_symmetric_passphrase_cmd(
                 passphrase_file_path=symmetric_passphrase_file_path
             ),
             asymmetrically_encrypt_passphrase=self.get_asymmetrically_encrypt_passphrase_cmd(

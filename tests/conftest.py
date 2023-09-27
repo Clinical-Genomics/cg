@@ -2196,6 +2196,7 @@ def context_config(
     taxprofiler_dir: Path,
     flow_cells_dir: Path,
     demultiplexed_runs: Path,
+    encryption_dir: Path,
 ) -> dict:
     """Return a context config."""
     return {
@@ -2212,7 +2213,7 @@ def context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encrypt_dir": str(encryption_dir),
+            "encrypt_dir": encryption_dir.as_posix(),
             "slurm": {
                 "account": "development",
                 "hours": 1,
