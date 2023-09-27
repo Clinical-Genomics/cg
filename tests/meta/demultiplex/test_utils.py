@@ -373,7 +373,7 @@ def test_get_undetermined_fastqs_no_matching_files(tmp_path):
     # GIVEN a lane and a flow cell with no undetermined fastq files
 
     # WHEN reetrieving undetermined fastqs for the lane
-    result = get_undetermined_fastqs(lane=1, flow_cell_path=tmp_path)
+    result = get_undetermined_fastqs(lane=1, undetermined_dir_path=tmp_path)
 
     # THEN no undetermined fastq files should be returned
     assert not result
@@ -385,7 +385,7 @@ def test_get_undetermined_fastqs_single_matching_file(tmp_path):
     expected_file.touch()
 
     # WHEN retrieving undetermined fastqs for the lane
-    result = get_undetermined_fastqs(lane=1, flow_cell_path=tmp_path)
+    result = get_undetermined_fastqs(lane=1, undetermined_dir_path=tmp_path)
 
     # THEN the undetermined fastq file for the lane should be returned
     assert result == [expected_file]
@@ -401,7 +401,7 @@ def test_get_undetermined_fastqs_multiple_matching_files(tmp_path):
         file.touch()
 
     # WHEN retrieving the undetermined fastqs for the lane
-    result = get_undetermined_fastqs(lane=1, flow_cell_path=tmp_path)
+    result = get_undetermined_fastqs(lane=1, undetermined_dir_path=tmp_path)
 
     # THEN the undetermined fastq files for the lane should be returned
     assert set(result) == set(expected_files)
