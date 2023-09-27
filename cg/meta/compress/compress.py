@@ -264,7 +264,7 @@ class CompressAPI:
         self.delete_fastq_housekeeper(
             hk_fastq_first=hk_fastq_first, hk_fastq_second=hk_fastq_second
         )
-        
+
     def get_spring_metadata_tags_from_fastq(self, fastq_file: File) -> List[str]:
         non_fastq_tags: List[str] = self.get_all_non_fastq_tags(fastq_file)
         return non_fastq_tags + [SequencingFileTag.SPRING_METADATA]
