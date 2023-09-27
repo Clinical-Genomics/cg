@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 
 from cg.constants import HK_FASTQ_TAGS, SequencingFileTag
 from cg.constants.compression import (
