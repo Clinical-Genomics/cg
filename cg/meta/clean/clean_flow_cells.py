@@ -23,11 +23,11 @@ class CleanFlowCellAPI:
     Requirements for cleaning:
             Flow cell is older than 21 days
             Flow cell is backed up
-            Flow cell is in statusDB
-            Flow cell has sequencing metrics in statusDB
-            Flow cell has fastq files in housekeeper
-            Flow cell has SPRING files in housekeeper
-            Flow cell has a sample sheet in housekeeper
+            Flow cell is in StatusDB
+            Flow cell has sequencing metrics in StatusDB
+            Flow cell has fastq files in Housekeeper
+            Flow cell has SPRING files in Housekeeper
+            Flow cell has a sample sheet in Housekeeper
     """
 
     def __init__(
@@ -96,7 +96,9 @@ class CleanFlowCellAPI:
         return bool(self.get_flow_cell_from_status_db().has_backup)
 
     def get_sequencing_metrics_for_flow_cell(self):
-        """Get the SampleLaneSequencingMetrics entries for a flow cell."""
+        """Get the SampleLaneSequencingMetrics entries for a flow cell.
+        Raises:
+            ValueError if no SampleLaneSequencingMetrics entry is found."""
         metrics: List[
             SampleLaneSequencingMetrics
         ] = self.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(self.flow_cell.id)
@@ -115,7 +117,7 @@ class CleanFlowCellAPI:
         return bool(self.flow_cell.get_sample_sheet_path_hk())
 
     def get_files_for_flow_cell_bundle(self, tag: str):
-        """Get the files with a specific tag from housekeeper for the flow cell bundle."""
+        """Get the files with a specific tag from Housekeeper for the flow cell bundle."""
         files: List[File] = self.hk_api.get_files_from_latest_version(
             bundle_name=self.flow_cell.id, tags=[tag]
         )

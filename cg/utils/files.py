@@ -76,7 +76,7 @@ def remove_directory_and_contents(directory_path):
 
 def get_directories_in_path(path: Path) -> List[Path]:
     """Get all directories for a specified path.
-    Raises file not found error if the path does not exist.
+    Raises FileNotFoundError if the path does not exist.
     """
     if not path.exists():
         raise FileNotFoundError(f"Path {path} does not exist.")
