@@ -45,7 +45,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.account = config.balsamic.slurm.account
+        self.binary_path = config.balsamic.binary_path
         self.balsamic_cache = config.balsamic.balsamic_cache
+        self.conda_binary = config.balsamic.conda_binary
         self.conda_env = config.balsamic.conda_env
         self.bed_path = config.balsamic.bed_path
         self.cadd_path = config.balsamic.cadd_path
@@ -72,7 +74,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def process(self):
         if not self._process:
             self._process = Process(
-                binary=self.config.balsamic.binary_path, environment=self.config.balsamic.conda_env
+                binary=self.binary_path, conda_binary=self.conda_binary, environment=self.conda_env
             )
         return self._process
 
