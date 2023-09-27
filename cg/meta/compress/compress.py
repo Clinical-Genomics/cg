@@ -287,7 +287,7 @@ class CompressAPI:
             )
         self.hk_api.commit()
 
-    def get_fastq_tags_from_spring_path(self, spring_path: Path):
+    def get_fastq_tags_from_spring_path(self, spring_path: Path) -> List[str]:
         """Returns a list containing all non-spring tags of the specified file, together with the fastq tag."""
         spring_file: File = self.hk_api.files(path=spring_path.as_posix()).first()
         spring_tags: List[str] = [tag.name for tag in spring_file.tags]
