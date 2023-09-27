@@ -30,13 +30,8 @@ class Sequencers(BaseModel):
     novaseq: str
 
 
-class EncryptionDirs(BaseModel):
-    current: str
-    legacy: str
-
-
 class BackupConfig(BaseModel):
-    encrypt_dir: EncryptionDirs
+    encrypt_dir: str
 
 
 class SlurmConfig(BaseModel):
