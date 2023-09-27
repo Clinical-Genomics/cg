@@ -46,16 +46,7 @@ from cg.models.demultiplex.run_parameters import (
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
-from cg.store.models import (
-    Bed,
-    BedVersion,
-    Customer,
-    Family,
-    Flowcell,
-    Organism,
-    Sample,
-    SampleLaneSequencingMetrics,
-)
+from cg.store.models import Bed, BedVersion, Customer, Family, Organism, Sample
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
