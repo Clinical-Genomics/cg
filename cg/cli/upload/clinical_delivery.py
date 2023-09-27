@@ -48,7 +48,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
         DeliverAPI(
             store=context.obj.status_db,
             hk_api=context.obj.housekeeper_api,
-            case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
+            case_tagUns=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
             sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
             delivery_type=delivery_type,
             project_base_path=Path(context.obj.delivery_path),
@@ -90,8 +90,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
     for analysis_obj in status_db.get_analyses_to_upload(pipeline=Pipeline.FASTQ):
         if analysis_obj.family.analyses[0].uploaded_at:
             LOG.debug(
-                "Newer analysis already uploaded for %s, skipping",
-                analysis_obj.family.internal_id,
+                f"Newer analysis already uploaded for {analysis_obj.family.internal_id}, skipping"
             )
             continue
         if analysis_obj.upload_started_at:
@@ -99,19 +98,16 @@ def auto_fastq(context: click.Context, dry_run: bool):
                 case_id=analysis_obj.family.internal_id
             ):
                 LOG.info(
-                    "The upload for %s is completed, setting uploaded at to %s",
-                    analysis_obj.family.internal_id,
-                    dt.datetime.now(),
+                    f"The upload for {analysis_obj.family.internal_id} is completed, setting uploaded at to {dt.datetime.now()}"
                 )
                 analysis_obj.uploaded_at = dt.datetime.now()
             else:
                 LOG.debug(
-                    "Upload to clinical-delivery for %s has already started, skipping",
-                    analysis_obj.family.internal_id,
+                    f"Upload to clinical-delivery for {analysis_obj.family.internal_id} has already started, skipping"
                 )
             continue
         case: Family = analysis_obj.family
-        LOG.info("Uploading family: %s", case.internal_id)
+        LOG.info(f"Uploading family: {case.internal_id}")
         analysis_obj.upload_started_at = dt.datetime.now()
         try:
             context.invoke(upload_clinical_delivery, case_id=case.internal_id, dry_run=dry_run)
@@ -121,8 +117,8 @@ def auto_fastq(context: click.Context, dry_run: bool):
             exit_code: int = EXIT_FAIL
             continue
 
-        if not dry_run:
-            status_db.session.commit()
+    if not dry_run:
+        status_db.session.commit()
 
-        if exit_code:
-            raise click.Abort
+    if exit_code == EXIT_FAIL:
+        raise click.Abort
