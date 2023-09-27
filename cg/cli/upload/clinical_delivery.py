@@ -48,7 +48,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
         DeliverAPI(
             store=context.obj.status_db,
             hk_api=context.obj.housekeeper_api,
-            case_tagUns=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
+            case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
             sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
             delivery_type=delivery_type,
             project_base_path=Path(context.obj.delivery_path),
