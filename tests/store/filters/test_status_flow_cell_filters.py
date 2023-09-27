@@ -8,7 +8,6 @@ from cg.store.filters.status_flow_cell_filters import (
     filter_flow_cell_by_name,
     filter_flow_cell_by_name_search,
     filter_flow_cells_by_case,
-    filter_flow_cells_by_has_backup,
     filter_flow_cells_with_statuses,
 )
 from cg.store.models import Family, Flowcell, Sample
@@ -145,26 +144,3 @@ def test_filter_flow_cells_by_name(
 
     # THEN the flow cell should have the origin flow cell name
     assert returned_flow_cell.name == flow_cell.name
-
-
-def test_filter_flow_cells_by_has_backup(
-    base_store: Store, helpers: StoreHelpers, bcl2fastq_flow_cell_id: str
-):
-    """Test that flow cells are returned when they have a backup."""
-
-    # GIVEN a flow cell that exist in status db
-    helpers.add_flowcell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, has_backup=True)
-
-    # GIVEN a flow cell Query
-
-    # WHEN getting flow cell
-    returned_flow_cell_query: Query = filter_flow_cells_by_has_backup(
-        flow_cells=base_store._get_query(table=Flowcell),
-    )
-    flow_cell: Flowcell = returned_flow_cell_query.first()
-
-    # THEN a query should be returned
-    assert isinstance(returned_flow_cell_query, Query)
-
-    # THEN the flow cell should have a backup
-    assert flow_cell.has_backup

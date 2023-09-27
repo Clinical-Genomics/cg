@@ -11,11 +11,6 @@ def filter_flow_cells_by_case(case: Family, flow_cells: Query, **kwargs) -> Quer
     return flow_cells.filter(FamilySample.family == case)
 
 
-def filter_flow_cells_by_has_backup(flow_cells: Query, **kwargs) -> Query:
-    """Return flow cells which has a backup."""
-    return flow_cells.filter(Flowcell.has_backup.isnot(None))
-
-
 def filter_flow_cell_by_name(flow_cells: Query, flow_cell_name: str, **kwargs) -> Query:
     """Return flow cell by flow cell id."""
     return flow_cells.filter(Flowcell.name == flow_cell_name)
@@ -57,7 +52,6 @@ class FlowCellFilter(Enum):
     """Define FlowCell filter functions."""
 
     FILTER_BY_CASE: Callable = filter_flow_cells_by_case
-    FILTER_BY_HAS_BACKUP: Callable = filter_flow_cells_by_has_backup
     FILTER_BY_NAME: Callable = filter_flow_cell_by_name
     FILTER_BY_NAME_SEARCH: Callable = filter_flow_cell_by_name_search
     FILTER_WITH_STATUSES: Callable = filter_flow_cells_with_statuses
