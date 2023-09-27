@@ -39,7 +39,10 @@ from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
+from cg.models.demultiplex.run_parameters import (
+    RunParametersNovaSeq6000,
+    RunParametersNovaSeqX,
+)
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
@@ -1421,11 +1424,11 @@ def novaseqx_flow_cell_with_sample_sheet_no_fastq(
 ) -> FlowCellDirectoryData:
     """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
     novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)
-    flow_cell = FlowCellDirectoryData(flow_cell_path=novaseqx_flow_cell_directory)
+    flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_directory)
     sample_sheet_path = Path(
         novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
-    mocker.patch.object(flow_cell, "get_sample_sheet_path_hk", return_value=sample_sheet_path)
+    flow_cell._sample_sheet_path_hk = sample_sheet_path
     return flow_cell
 
 
@@ -2009,7 +2012,7 @@ def sample_store(base_store: Store) -> Store:
             sex=Gender.MALE,
             received=datetime.now(),
             prepared_at=datetime.now(),
-            sequenced_at=datetime.now(),
+            reads_updated_at=datetime.now(),
             reads=(310 * 1000000),
         ),
         base_store.add_sample(
@@ -2022,12 +2025,12 @@ def sample_store(base_store: Store) -> Store:
         base_store.add_sample(
             name="to-deliver",
             sex=Gender.MALE,
-            sequenced_at=datetime.now(),
+            reads_updated_at=datetime.now(),
         ),
         base_store.add_sample(
             name="delivered",
             sex=Gender.MALE,
-            sequenced_at=datetime.now(),
+            reads_updated_at=datetime.now(),
             delivered_at=datetime.now(),
             no_invoice=False,
         ),
@@ -2156,15 +2159,9 @@ def microsalt_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def current_encryption_dir() -> Path:
-    """Return a temporary directory for current encryption testing."""
-    return Path("home", "ENCRYPT")
-
-
-@pytest.fixture
-def legacy_encryption_dir() -> Path:
-    """Return a temporary directory for current encryption testing."""
-    return Path("home", "TO_PDC")
+def encryption_dir() -> Path:
+    """Return a temporary directory for encryption testing."""
+    return Path("home", "encrypt")
 
 
 @pytest.fixture(name="cg_uri")
@@ -2215,11 +2212,7 @@ def context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encrypt_dir": {
-                "current": str(current_encryption_dir),
-                "legacy": str(legacy_encryption_dir),
-            },
-            "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
+            "encrypt_dir": str(encryption_dir),
         },
         "balsamic": {
             "balsamic_cache": "hello",
@@ -2790,7 +2783,7 @@ def rnafusion_context(
     sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        sequenced_at=datetime.now(),
+        reads_updated_at=datetime.now(),
     )
 
     helpers.add_relationship(
@@ -3018,7 +3011,7 @@ def taxprofiler_context(
     taxprofiler_sample: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        sequenced_at=datetime.now(),
+        reads_updated_at=datetime.now(),
         name=sample_name,
     )
 

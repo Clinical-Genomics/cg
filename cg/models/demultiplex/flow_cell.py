@@ -233,6 +233,16 @@ class FlowCellDirectoryData:
             return False
         return True
 
+    @property
+    def sample_sheet(self) -> SampleSheet:
+        """Return sample sheet object."""
+        if not self._sample_sheet_path_hk:
+            raise FlowCellError("Sample sheet path has not been assigned yet")
+        return get_sample_sheet_from_file(
+            infile=self._sample_sheet_path_hk,
+            flow_cell_sample_type=self.sample_type,
+        )
+
     def get_sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
         return get_sample_sheet_from_file(

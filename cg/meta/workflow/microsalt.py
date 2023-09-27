@@ -5,6 +5,7 @@
     Method: Outputted as “1273:23”. Defaults to “Not in LIMS”
     Date: Returns latest == most recent date. Outputted as DT object “YYYY MM DD”. Defaults to
     datetime.min"""
+import glob
 import logging
 import os
 import re
@@ -12,23 +13,19 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
-import glob
 
 import click
-from cg.constants import Pipeline
-from cg.constants.constants import MicrosaltQC, MicrosaltAppTags
-from cg.constants.tb import AnalysisStatus
+
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.exc import CgDataError
+from cg.io.json import read_json, write_json
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Family, Sample
 from cg.utils import Process
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.io.json import read_json, write_json
-
-from cg.constants import Priority
 
 LOG = logging.getLogger(__name__)
 
@@ -226,7 +223,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             "Customer_ID": sample_obj.customer.internal_id,
             "application_tag": sample_obj.application_version.application.tag,
             "date_arrival": str(sample_obj.received_at or datetime.min),
-            "date_sequencing": str(sample_obj.sequenced_at or datetime.min),
+            "date_sequencing": str(sample_obj.reads_updated_at or datetime.min),
             "date_libprep": str(sample_obj.prepared_at or datetime.min),
             "method_libprep": method_library_prep or "Not in LIMS",
             "method_sequencing": method_sequencing or "Not in LIMS",
@@ -236,54 +233,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_project(self, sample_id: str) -> str:
         """Get LIMS project for a sample"""
         return self.lims_api.get_sample_project(sample_id)
-
-    def get_cases_to_store(self) -> List[Family]:
-        """Return a list of cases where analysis finished successfully,
-        and is ready to be stored in Housekeeper."""
-        cases_qc_ready: List[Family] = self.get_completed_cases()
-        cases_to_store: List[Family] = []
-        LOG.info(f"Found {len(cases_qc_ready)} cases to perform QC on!")
-
-        for case in cases_qc_ready:
-            case_run_dir: Union[Path, None] = self.get_latest_case_path(case_id=case.internal_id)
-            if self.is_qc_required(case_run_dir=case_run_dir, case_id=case.internal_id):
-                if self.microsalt_qc(
-                    case_id=case.internal_id,
-                    run_dir_path=case_run_dir,
-                    lims_project=self.get_project(case.samples[0].internal_id),
-                ):
-                    self.trailblazer_api.add_comment(case_id=case.internal_id, comment="QC passed")
-                    cases_to_store.append(case)
-                else:
-                    self.trailblazer_api.set_analysis_status(
-                        case_id=case.internal_id, status=AnalysisStatus.FAILED
-                    )
-                    self.trailblazer_api.add_comment(case_id=case.internal_id, comment="QC failed")
-            else:
-                cases_to_store.append(case)
-
-        return cases_to_store
-
-    def is_qc_required(self, case_run_dir: Union[Path, None], case_id: str) -> bool:
-        """Checks if a qc is required for a microbial case."""
-        if case_run_dir is None:
-            LOG.info(f"There are no running directories for case {case_id}.")
-            return False
-
-        if case_run_dir.joinpath("QC_done.json").exists():
-            LOG.info(f"QC already performed for case {case_id}, storing case.")
-            return False
-
-        LOG.info(f"Performing QC on case {case_id}")
-        return True
-
-    def get_completed_cases(self) -> List[Family]:
-        """Return cases that are completed in trailblazer."""
-        return [
-            case
-            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
-            if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
-        ]
 
     def resolve_case_sample_id(
         self, sample: bool, ticket: bool, unique_id: Any

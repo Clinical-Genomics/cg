@@ -2,15 +2,15 @@ from datetime import datetime
 from typing import Optional, Union
 
 from cg.constants.subject import Gender
-from pydantic.v1 import BaseModel, validator
 from cg.models.report.metadata import SampleMetadataModel
 from cg.models.report.validators import (
-    validate_empty_field,
     validate_boolean,
-    validate_rml_sample,
     validate_date,
+    validate_empty_field,
     validate_gender,
+    validate_rml_sample,
 )
+from pydantic.v1 import BaseModel, validator
 
 
 class ApplicationModel(BaseModel):
@@ -72,19 +72,19 @@ class TimestampModel(BaseModel):
         ordered_at: order date; source: StatusDB/sample/ordered_at
         received_at: arrival date; source: StatusDB/sample/received_at
         prepared_at: library preparation date; source: StatusDB/sample/prepared_at
-        sequenced_at: sequencing date; source: StatusDB/sample/sequenced_at
+        reads_updated_at: sequencing date; source: StatusDB/sample/reads_updated_at
     """
 
     ordered_at: Union[None, datetime, str]
     received_at: Union[None, datetime, str]
     prepared_at: Union[None, datetime, str]
-    sequenced_at: Union[None, datetime, str]
+    reads_updated_at: Union[None, datetime, str]
 
     _values = validator(
         "ordered_at",
         "received_at",
         "prepared_at",
-        "sequenced_at",
+        "reads_updated_at",
         always=True,
         allow_reuse=True,
     )(validate_date)
