@@ -28,6 +28,7 @@ def flow_cell_clean_api_can_be_removed(
         housekeeper_api=housekeeper_api_with_flow_cell_to_clean,
         dry_run=False,
     )
+    clean_flow_cell_api.flow_cell._sample_sheet_path_hk = tmp_sample_sheet_clean_flow_cell_path
     return clean_flow_cell_api
 
 
@@ -125,7 +126,7 @@ def store_with_flow_cell_not_to_clean(
     sample: Sample = helpers.add_sample(
         name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
     )
-    helpers.add_mutliple_sample_lane_sequencing_metrics_entries(
+    helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
     )
     flow_cell.samples = [sample]

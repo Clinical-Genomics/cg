@@ -2,10 +2,12 @@
 import time
 from typing import List
 
+import mock
 import pytest
 from housekeeper.store.models import File
 
 from cg.constants import SequencingFileTag
+from cg.constants.time import TWENTY_ONE_DAYS_IN_SECONDS
 from cg.exc import HousekeeperBundleVersionMissingError
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.store import Store
@@ -79,17 +81,20 @@ def test_is_directory_older_than_21_days_pass(
 ):
     """Test to check whether a directory is older than 21 days."""
 
-    # GIVEN a clean flow cell api with a current time that is set 21 days from now
+    # GIVEN a clean flow cell api with a flow cell that can be deleted
 
     # THEN checking whether a given flow cell directory is older than 21 days is TRUE
-    assert flow_cell_clean_api_can_be_removed.is_directory_older_than_21_days()
+    with mock.patch(
+        "time.time",
+        return_value=time.time() + TWENTY_ONE_DAYS_IN_SECONDS,
+    ):
+        assert flow_cell_clean_api_can_be_removed.is_directory_older_than_21_days()
 
 
 def test_is_directory_older_than_21_days_fail(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
     """Test to check whether a directory is older than 21 days."""
 
     # GIVEN a clean flow cell api with a current time that is set to now.
-    flow_cell_clean_api_can_be_removed.current_time = time.time()
 
     # THEN checking whether a given flow cell directory is older than 21 days is FALSE
     assert not flow_cell_clean_api_can_be_removed.is_directory_older_than_21_days()
@@ -139,7 +144,11 @@ def test_can_flow_cell_be_deleted(flow_cell_clean_api_can_be_removed: CleanFlowC
     # WHEN checking that the flow cell can be deleted
 
     # THEN the check whether the flow cell can be deleted returns True
-    assert flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
+    with mock.patch(
+        "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
+        return_value=True,
+    ):
+        assert flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
 
 
 def test_delete_flow_cell_directory(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
@@ -150,13 +159,14 @@ def test_delete_flow_cell_directory(flow_cell_clean_api_can_be_removed: CleanFlo
     assert flow_cell_clean_api_can_be_removed.flow_cell.path.exists()
 
     # WHEN removing the flow cell directory
-    error_is_raised: bool = flow_cell_clean_api_can_be_removed.delete_flow_cell_directory()
+    with mock.patch(
+        "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
+        return_value=True,
+    ):
+        flow_cell_clean_api_can_be_removed.delete_flow_cell_directory()
 
     # THEN the flow cell directory is removed
     assert not flow_cell_clean_api_can_be_removed.flow_cell.path.exists()
-
-    # THEN a bool is returned that no error is raised
-    assert not error_is_raised
 
 
 def test_delete_flow_cell_directory_can_not_be_deleted(
@@ -169,13 +179,10 @@ def test_delete_flow_cell_directory_can_not_be_deleted(
     assert flow_cell_clean_api_can_not_be_removed.flow_cell.path.exists()
 
     # WHEN trying to remove the flow cell
-    error_raised: bool = flow_cell_clean_api_can_not_be_removed.delete_flow_cell_directory()
+    flow_cell_clean_api_can_not_be_removed.delete_flow_cell_directory()
 
     # THEN the flow cell directory still exists
     flow_cell_clean_api_can_not_be_removed.flow_cell.path.exists()
-
-    # THEN a bool is returned whether an error has been raised
-    assert error_raised
 
 
 def test_get_flow_cell_from_statusdb_does_not_exist(

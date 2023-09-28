@@ -17,9 +17,7 @@ def get_elapsed_time(start_time: float) -> float:
     return time.time() - start_time
 
 
-def is_directory_older_than_days_old(
-    directory_path: Path, days_old: int, current_time: time.time
-) -> bool:
+def is_directory_older_than_days_old(directory_path: Path, days_old: int) -> bool:
     """
     Check if the directory is older than the specified number of days.
     """
@@ -27,4 +25,4 @@ def is_directory_older_than_days_old(
     dir_creation_time_stamp: float = get_directory_creation_time_stamp(
         directory_path=directory_path
     )
-    return bool(dir_creation_time_stamp < current_time - days_in_seconds)
+    return bool(dir_creation_time_stamp < time.time() - days_in_seconds)

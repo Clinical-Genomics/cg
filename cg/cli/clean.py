@@ -24,8 +24,10 @@ from cg.cli.workflow.commands import (
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
 )
+from cg.constants import EXIT_FAIL
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.constants.housekeeper_tags import ALIGNMENT_FILE_TAGS, ScoutTag
+from cg.exc import CleanFlowCellFailedError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.models.cg_config import CGConfig
@@ -253,25 +255,26 @@ def hk_bundle_files(
 @clean.command("flow-cells")
 @DRY_RUN
 @click.pass_obj
-def clean_flow_cells(context: CGConfig, dry_run: bool):
+def clean_flow_cells(context: CGConfig, dry_run: bool, EXIT_SUCCES=None):
     """Remove flow cells from the flow cells and demultiplexed runs folder."""
 
     directories_to_check: List[Path] = []
     for path in [Path(context.flow_cells_dir), Path(context.demultiplexed_flow_cells_dir)]:
         directories_to_check.extend(get_directories_in_path(path))
-
-    exit_fail: bool = False
+    exit_code = EXIT_SUCCES
     for flow_cell_directory in directories_to_check:
-        clean_flow_cell_api = CleanFlowCellAPI(
-            flow_cell_path=flow_cell_directory,
-            status_db=context.status_db,
-            housekeeper_api=context.housekeeper_api,
-            dry_run=dry_run,
-        )
-        raised_error: bool = clean_flow_cell_api.delete_flow_cell_directory()
-        if raised_error:
-            exit_fail = True
-    if exit_fail:
+        try:
+            clean_flow_cell_api = CleanFlowCellAPI(
+                flow_cell_path=flow_cell_directory,
+                status_db=context.status_db,
+                housekeeper_api=context.housekeeper_api,
+                dry_run=dry_run,
+            )
+            clean_flow_cell_api.delete_flow_cell_directory()
+        except CleanFlowCellFailedError as error:
+            LOG.error(repr(error))
+            exit_code = EXIT_FAIL
+    if exit_code:
         click.Abort
 
 

@@ -1,6 +1,5 @@
 """An API that handles the cleaning of flow cells."""
 import logging
-import time
 from pathlib import Path
 from typing import List, Optional
 
@@ -9,7 +8,7 @@ from housekeeper.store.models import File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS
-from cg.exc import HousekeeperFileMissingError
+from cg.exc import CleanFlowCellFailedError, HousekeeperFileMissingError
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     get_sample_sheets_from_latest_version,
 )
@@ -42,26 +41,23 @@ class CleanFlowCellAPI:
         self.status_db: Store = status_db
         self.hk_api: HousekeeperAPI = housekeeper_api
         self.flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_path)
-        self.current_time: float = time.time()
         self.dry_run: bool = dry_run
 
-    def delete_flow_cell_directory(self) -> bool:
+    def delete_flow_cell_directory(self) -> None:
         """
         Delete the flow cell directory if it fulfills all requirements.
         """
-        is_error_raised: bool = False
         try:
             self.set_sample_sheet_path_from_housekeeper()
             if self.can_flow_cell_directory_be_deleted():
                 if self.dry_run:
                     LOG.debug(f"Dry run: Would have removed: {self.flow_cell.path}")
-                    return is_error_raised
+                    return
                 remove_directory_and_contents(self.flow_cell.path)
-                return is_error_raised
         except Exception as error:
-            is_error_raised = True
-            LOG.error(f"Flow cell with path {self.flow_cell.path} not removed: {str(error)}")
-        return is_error_raised
+            raise CleanFlowCellFailedError(
+                f"Flow cell with path {self.flow_cell.path} not removed: {repr(error)}"
+            )
 
     def set_sample_sheet_path_from_housekeeper(self):
         """Set the sample sheet for a flow cell."""
@@ -99,7 +95,6 @@ class CleanFlowCellAPI:
         return is_directory_older_than_days_old(
             directory_path=self.flow_cell.path,
             days_old=TWENTY_ONE_DAYS,
-            current_time=self.current_time,
         )
 
     def is_flow_cell_in_statusdb(self) -> bool:
