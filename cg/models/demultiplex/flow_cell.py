@@ -4,12 +4,17 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Type, Union
 
+from pydantic import ValidationError
+from typing_extensions import Literal
+
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
     SampleSheet,
 )
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
@@ -21,8 +26,6 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
-from pydantic import ValidationError
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -280,12 +283,12 @@ class FlowCellDirectoryData:
         return self.hiseq_x_flow_cell.exists()
 
     def is_flow_cell_ready(self) -> bool:
-        """Check if a flow cell is ready for demultiplexing.
+        """Check if a flow cell is ready for downstream processing.
 
-        A flow cell is ready if the two files RTAComplete.txt and CopyComplete.txt exists in the
+        A flow cell is ready if the two files RTAComplete.txt and CopyComplete.txt exist in the
         flow cell directory.
         """
-        LOG.info("Check if flow cell is ready for demultiplexing")
+        LOG.info("Check if flow cell is ready for downstream processing")
         if not self.is_sequencing_done():
             LOG.info(f"Sequencing is not completed for flow cell {self.id}")
             return False
@@ -294,7 +297,7 @@ class FlowCellDirectoryData:
             LOG.info(f"Copy of sequence data is not ready for flow cell {self.id}")
             return False
         LOG.debug(f"All data has been transferred for flow cell {self.id}")
-        LOG.info(f"Flow cell {self.id} is ready for demultiplexing")
+        LOG.info(f"Flow cell {self.id} is ready for downstream processing")
         return True
 
     def __str__(self):

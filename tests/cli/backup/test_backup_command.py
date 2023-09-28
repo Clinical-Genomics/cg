@@ -11,7 +11,7 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from tests.store_helpers import StoreHelpers
 
 
-def test_encrypt_flow_cell(
+def test_encrypt_flow_cells(
     cli_runner: CliRunner, cg_context: CGConfig, caplog, mocker, sbatch_job_number: str
 ):
     """Test encrypt flow cell in dry run mode."""
@@ -33,7 +33,7 @@ def test_encrypt_flow_cell(
     assert f"Flow cell encryption running as job {sbatch_job_number}" in caplog.text
 
 
-def test_encrypt_flow_cell_when_already_backed_up(
+def test_encrypt_flow_cells_when_already_backed_up(
     cli_runner: CliRunner,
     cg_context: CGConfig,
     caplog,
@@ -66,7 +66,7 @@ def test_encrypt_flow_cell_when_already_backed_up(
     assert f"Flow cell: {flow_cell_name} is already backed-up" in caplog.text
 
 
-def test_encrypt_flow_cell_when_sequencing_not_done(
+def test_encrypt_flow_cells_when_sequencing_not_done(
     cli_runner: CliRunner,
     cg_context: CGConfig,
     caplog,
