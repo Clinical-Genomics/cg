@@ -145,6 +145,8 @@ class FileExtensions(StrEnum):
     LOG: str = ".log"
     MD5SUM: str = ".md5sum"
     NO_EXTENSION: str = ""
+    PASS_PHRASE: str = ".passphrase"
+    PENDING: str = ".pending"
     SBATCH: str = ".sbatch"
     SPRING: str = ".spring"
     TAR: str = ".tar"

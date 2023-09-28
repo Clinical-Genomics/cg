@@ -172,7 +172,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
     def get_flow_cell_symmetric_decryption_command(
         cls, input_file: Path, passphrase_file_path: Path
     ) -> str:
-        """Generates the gpg command for symmetric decryption."""
+        """Generates the Gpg command for symmetric decryption."""
         decryption_parameters: list = GPGParameters.SYMMETRIC_DECRYPTION.copy()
         decryption_parameters.extend([passphrase_file_path.as_posix(), input_file.as_posix()])
         return " ".join(decryption_parameters)
@@ -195,7 +195,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             f"{FileExtensions.TAR}{FileExtensions.GZIP}.degpg{FileExtensions.MD5SUM}"
         )
         symmetric_passphrase_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
-            ".passphrase"
+            FileExtensions.PASS_PHRASE
         )
         final_passphrase_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
             f".key{FileExtensions.GPG}"

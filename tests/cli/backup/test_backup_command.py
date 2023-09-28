@@ -5,7 +5,7 @@ from click.testing import CliRunner
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.cli.backup import encrypt_flow_cell, fetch_flow_cell
-from cg.constants import EXIT_SUCCESS, FlowCellStatus
+from cg.constants import EXIT_SUCCESS, FileExtensions, FlowCellStatus
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from tests.store_helpers import StoreHelpers
@@ -120,7 +120,7 @@ def test_encrypt_flow_cell_when_encryption_already_started(
     # Given a pending flag file
     flow_cells_dir = Path(cg_context.backup.encrypt_dir, flow_cell_name)
     flow_cells_dir.mkdir(parents=True, exist_ok=True)
-    Path(flow_cells_dir, flow_cell_name).with_suffix(".pending").touch()
+    Path(flow_cells_dir, flow_cell_name).with_suffix(FileExtensions.PENDING).touch()
 
     # GIVEN a flow cells directory
 
