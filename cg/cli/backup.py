@@ -57,6 +57,7 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool):
             flow_cell_name=flow_cell.id
         )
         if db_flow_cell and db_flow_cell.has_backup:
+            LOG.debug(f"Flow cell: {flow_cell.id} is already backed-up")
             continue
         if not flow_cell.is_flow_cell_ready():
             continue

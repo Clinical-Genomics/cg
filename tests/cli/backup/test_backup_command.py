@@ -6,15 +6,19 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.cli.backup import encrypt_flow_cell, fetch_flow_cell
 from cg.constants import EXIT_SUCCESS, FlowCellStatus
 from cg.models.cg_config import CGConfig
+from tests.store_helpers import StoreHelpers
 
 
 def test_encrypt_flow_cell(cli_runner: CliRunner, cg_context: CGConfig, caplog, mocker):
     """Test encrypt flow cell in dry run mode."""
-    # Given a mock SLURM API
     caplog.set_level(logging.INFO)
+
+    # Given a mock SLURM API
     sbatch_number: str = "1234"
     mocker.patch.object(SlurmAPI, "submit_sbatch_job")
     SlurmAPI.submit_sbatch_job.return_value = sbatch_number
+
+    # GIVEN a flow cells directory
 
     # WHEN encrypting flow cells in dry run mode
     result = cli_runner.invoke(encrypt_flow_cell, ["--dry-run"], obj=cg_context)
@@ -24,6 +28,37 @@ def test_encrypt_flow_cell(cli_runner: CliRunner, cg_context: CGConfig, caplog, 
 
     # THEN communicate flow cell encryption is submitted
     assert f"Flow cell encryption running as job {sbatch_number}" in caplog.text
+
+
+def test_encrypt_flow_cell_when_already_backed_up(
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    caplog,
+    flow_cell_name: str,
+    helpers: StoreHelpers,
+    mocker,
+):
+    """Test encrypt flow cell in dry run mode when there is already a back-up."""
+    caplog.set_level(logging.DEBUG)
+
+    # Given a mock SLURM API
+    sbatch_number: str = "1234"
+    mocker.patch.object(SlurmAPI, "submit_sbatch_job")
+    SlurmAPI.submit_sbatch_job.return_value = sbatch_number
+
+    # Given a flow cell with a back-up
+    helpers.add_flowcell(store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=True)
+
+    # GIVEN a flow cells directory
+
+    # WHEN encrypting flow cells in dry run mode
+    result = cli_runner.invoke(encrypt_flow_cell, ["--dry-run"], obj=cg_context)
+    print(caplog.text)
+    # THEN exits without any errors
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN communicate flow cell encryption is submitted
+    assert f"Flow cell: {flow_cell_name} is already backed-up" in caplog.text
 
 
 def test_run_fetch_flow_cell_dry_run_no_flow_cell_specified(
