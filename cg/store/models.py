@@ -117,31 +117,7 @@ class Application(Model):
     versions = orm.relationship(
         "ApplicationVersion", order_by="ApplicationVersion.version", backref="application"
     )
-
-    def __str__(self) -> str:
-        return self.tag
-
-    @property
-    def reduced_price(self):
-        return self.tag.startswith("WGT") or self.tag.startswith("EXT")
-
-    @property
-    def expected_reads(self):
-        return self.target_reads * self.percent_reads_guaranteed / 100
-
-    @property
-    def analysis_type(self) -> str:
-        if self.prep_category == PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
-            return PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
-
-        return (
-            PrepCategory.WHOLE_GENOME_SEQUENCING.value
-            if self.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING.value
-            else PrepCategory.WHOLE_EXOME_SEQUENCING.value
-        )
-
-    def to_dict(self):
-        return to_dict(model_instance=self)
+    pipeline_limitations = orm.relationship("ApplicationLimitations", backref="application")
 
 
 class ApplicationVersion(Model):
@@ -172,6 +148,24 @@ class ApplicationVersion(Model):
         if application:
             data["application"] = self.application.to_dict()
         return data
+
+
+class ApplicationLimitations(Model):
+    __tablename__ = "application_limitations"
+
+    id = Column(types.Integer, primary_key=True)
+    application_id = Column(ForeignKey(Application.id), nullable=False)
+    pipeline = Column(types.Enum(*list(Pipeline)), nullable=False)
+    limitations = Column(types.Text)
+    comment = Column(types.Text)
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+
+    def __str__(self):
+        return f"{self.application.tag} – {self.pipeline}"
+
+    def to_dict(self):
+        return to_dict(model_instance=self)
 
 
 class Analysis(Model):
