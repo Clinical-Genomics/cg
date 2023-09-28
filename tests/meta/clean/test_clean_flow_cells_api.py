@@ -45,7 +45,7 @@ def test_is_not_flow_cell_backed_up(flow_cell_clean_api_can_be_removed: CleanFlo
     # GIVEN a clean flow cell api with a flow cell that has not been backed up
     flow_cell_clean_api_can_be_removed.get_flow_cell_from_status_db().has_backup = False
 
-    # THEN checking whether the flow cell has been backed up is TRUE
+    # THEN checking whether the flow cell has been backed up is FALSE
     assert not flow_cell_clean_api_can_be_removed.is_flow_cell_backed_up()
 
 
@@ -61,7 +61,7 @@ def test_get_sequencing_metrics_for_flow_cell_from_statusdb(
         SampleLaneSequencingMetrics
     ] = flow_cell_clean_api_can_be_removed.get_sequencing_metrics_for_flow_cell()
 
-    # THEN a flow cell is retrieved
+    # THEN a SampleLaneSequencingMetrics entry is retrieved
     assert isinstance(metrics[0], SampleLaneSequencingMetrics)
 
 
@@ -74,7 +74,7 @@ def test_has_sequencing_metrics_in_statusdb(flow_cell_clean_api_can_be_removed: 
     assert flow_cell_clean_api_can_be_removed.has_sequencing_metrics_in_statusdb()
 
 
-def test_is_directory_older_than_days_old_pass(
+def test_is_directory_older_than_21_days_pass(
     flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
 ):
     """Test to check whether a directory is older than 21 days."""
@@ -85,7 +85,7 @@ def test_is_directory_older_than_days_old_pass(
     assert flow_cell_clean_api_can_be_removed.is_directory_older_than_21_days()
 
 
-def test_is_directory_not_than_days_old_fail(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
+def test_is_directory_older_than_21_days_fail(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
     """Test to check whether a directory is older than 21 days."""
 
     # GIVEN a clean flow cell api with a current time that is set to now.
@@ -144,7 +144,7 @@ def test_can_flow_cell_be_deleted(flow_cell_clean_api_can_be_removed: CleanFlowC
 
 def test_delete_flow_cell_directory(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
     """Test that a flow cell directory is removed."""
-    # GIVEN a flow cell that cen be removed
+    # GIVEN a flow cell that can be removed
 
     # GIVEN that the flow cell directory exists
     assert flow_cell_clean_api_can_be_removed.flow_cell.path.exists()
