@@ -254,7 +254,7 @@ def hk_bundle_files(
 @DRY_RUN
 @click.pass_obj
 def clean_flow_cells(context: CGConfig, dry_run: bool):
-    """Remove flow cells from the flow_cells and demultiplexed_runs folder."""
+    """Remove flow cells from the flow cells and demultiplexed runs folder."""
 
     directories_to_check: List[Path] = []
     for path in [Path(context.flow_cells_dir), Path(context.demultiplexed_flow_cells_dir)]:
