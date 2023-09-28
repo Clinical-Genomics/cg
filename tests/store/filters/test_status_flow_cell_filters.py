@@ -1,5 +1,7 @@
 from typing import List, Optional
 
+from sqlalchemy.orm import Query
+
 from cg.constants import FlowCellStatus
 from cg.store import Store
 from cg.store.filters.status_flow_cell_filters import (
@@ -9,7 +11,6 @@ from cg.store.filters.status_flow_cell_filters import (
     get_flow_cell_by_name,
 )
 from cg.store.models import Family, Flowcell, Sample
-from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
 
 
@@ -24,7 +25,7 @@ def test_get_flow_cells_by_case(
     """Test that a flow cell is returned when there is a flow cell with matching flow cell case."""
 
     # GIVEN a flow cell that exist in status db
-    helpers.add_flowcell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
+    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
 
     # GIVEN a flow cell Query
 
@@ -63,7 +64,7 @@ def test_get_flow_cell_by_id(base_store: Store, helpers: StoreHelpers, bcl2fastq
     """Test that a flow cell is returned when there is a flow cell with matching flow cell id."""
 
     # GIVEN a flow cell that exist in status db
-    flow_cell: Flowcell = helpers.add_flowcell(
+    flow_cell: Flowcell = helpers.add_flow_cell(
         store=base_store, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
@@ -86,7 +87,7 @@ def test_get_flow_cell_by_id_and_by_enquiry(
     """Test that a flow cell is returned when there is a flow cell with enquiry flow cell id."""
 
     # GIVEN a flow cell that exist in status db
-    flow_cell: Flowcell = helpers.add_flowcell(
+    flow_cell: Flowcell = helpers.add_flow_cell(
         store=base_store, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
@@ -109,7 +110,7 @@ def test_get_flow_cells_with_statuses(
     """Test that a flow cell is returned when there is a flow cell with matching flow cell id."""
 
     # GIVEN a flow cell that exist in status db
-    helpers.add_flowcell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id)
+    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id)
 
     # GIVEN a flow cell Query
 

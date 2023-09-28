@@ -47,7 +47,9 @@ def test_encrypt_flow_cell_when_already_backed_up(
     SlurmAPI.submit_sbatch_job.return_value = sbatch_number
 
     # Given a flow cell with a back-up
-    helpers.add_flowcell(store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=True)
+    helpers.add_flow_cell(
+        store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=True
+    )
 
     # GIVEN a flow cells directory
 

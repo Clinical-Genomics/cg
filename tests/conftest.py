@@ -1057,10 +1057,10 @@ def store_with_demultiplexed_samples(
     flow_cell_name_demultiplexed_with_bcl_convert: str,
 ) -> Store:
     """Return a store with samples that have been demultiplexed with BCL Convert and BCL2Fastq."""
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store, flow_cell_name_demultiplexed_with_bcl_convert, sequencer_type="novaseq"
     )
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store, flow_cell_name_demultiplexed_with_bcl2fastq, sequencer_type="hiseqx"
     )
     for i, sample_internal_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_internal_ids):
@@ -3084,10 +3084,7 @@ def store_with_sequencing_metrics(
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 2, 1_500_000, 80.5, 33),
     ]
 
-    flow_cell: Flowcell = helpers.add_flowcell(
-        flow_cell_name=flow_cell_name,
-        store=store,
-    )
+    flow_cell: Flowcell = helpers.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
     sample: Sample = helpers.add_sample(
         name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
     )
