@@ -222,14 +222,8 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             ),
             parallel_gzip=f"pigz p {self.slurm_number_tasks - LIMIT_GZIP_TASK} --fast -c",
             tee=f"tee (md5sum > {encrypted_md5sum_file_path})",
-            flow_cell_symmetric_encryption=self.get_flow_cell_symmetric_encryption_command(
-                output_file=encrypted_gpg_file_path,
-                passphrase_file_path=symmetric_passphrase_file_path,
-            ),
-            flow_cell_symmetric_decryption=self.get_flow_cell_symmetric_decryption_command(
-                input_file=encrypted_gpg_file_path,
-                passphrase_file_path=symmetric_passphrase_file_path,
-            ),
+            flow_cell_symmetric_encryption=f"{self.binary_path} {self.get_flow_cell_symmetric_encryption_command(output_file = encrypted_gpg_file_path, passphrase_file_path = symmetric_passphrase_file_path,)}",
+            flow_cell_symmetric_decryption=f"{self.binary_path} {self.get_flow_cell_symmetric_decryption_command(input_file=encrypted_gpg_file_path, passphrase_file_path=symmetric_passphrase_file_path,)}",
             md5sum=f"md5sum > {decrypted_md5sum_file_path}",
             diff=f"diff -q {encrypted_md5sum_file_path} {decrypted_md5sum_file_path}",
             mv_passphrase_file=f"mv {symmetric_passphrase_file_path.with_suffix(FileExtensions.GPG)} {final_passphrase_file_path}",
