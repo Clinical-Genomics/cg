@@ -8,7 +8,7 @@ from housekeeper.store.models import File
 
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS_IN_SECONDS
-from cg.exc import HousekeeperBundleVersionMissingError
+from cg.exc import CleanFlowCellFailedError, HousekeeperBundleVersionMissingError
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
@@ -179,7 +179,8 @@ def test_delete_flow_cell_directory_can_not_be_deleted(
     assert flow_cell_clean_api_can_not_be_removed.flow_cell.path.exists()
 
     # WHEN trying to remove the flow cell
-    flow_cell_clean_api_can_not_be_removed.delete_flow_cell_directory()
+    with pytest.raises(CleanFlowCellFailedError):
+        flow_cell_clean_api_can_not_be_removed.delete_flow_cell_directory()
 
     # THEN the flow cell directory still exists
     flow_cell_clean_api_can_not_be_removed.flow_cell.path.exists()
