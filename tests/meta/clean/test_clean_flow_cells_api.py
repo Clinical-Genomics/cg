@@ -2,8 +2,13 @@
 import time
 from typing import List
 
+import pytest
+from housekeeper.store.models import File
+
 from cg.constants import SequencingFileTag
+from cg.exc import HousekeeperBundleVersionMissingError
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
+from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 
 
@@ -35,6 +40,15 @@ def test_is_flow_cell_backed_up(flow_cell_clean_api_can_be_removed: CleanFlowCel
     assert flow_cell_clean_api_can_be_removed.is_flow_cell_backed_up()
 
 
+def test_is_not_flow_cell_backed_up(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
+    """Test to check that a flow cell has been backed up."""
+    # GIVEN a clean flow cell api with a flow cell that has not been backed up
+    flow_cell_clean_api_can_be_removed.get_flow_cell_from_status_db().has_backup = False
+
+    # THEN checking whether the flow cell has been backed up is TRUE
+    assert not flow_cell_clean_api_can_be_removed.is_flow_cell_backed_up()
+
+
 def test_get_sequencing_metrics_for_flow_cell_from_statusdb(
     flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
 ):
@@ -57,7 +71,7 @@ def test_has_sequencing_metrics_in_statusdb(flow_cell_clean_api_can_be_removed: 
     # GIVEN a clean flow cell api with a store that contains a flow cell with SampleLaneSequencingMetrics entries
 
     # THEN checking whether a flow cell has SampleLaneSequencingMetrics entries returns True
-    assert flow_cell_clean_api_can_be_removed.has_sequencing_metrics()
+    assert flow_cell_clean_api_can_be_removed.has_sequencing_metrics_in_statusdb()
 
 
 def test_is_directory_older_than_days_old_pass(
@@ -96,20 +110,26 @@ def test_get_files_for_flow_cell_bundle(flow_cell_clean_api_can_be_removed: Clea
     # GIVEN a clean flow cell api with a flow cell that has files in housekeeper
 
     # WHEN getting fastq and spring files that are tagged with the flow cell
-    fastq_files: bool = (
-        flow_cell_clean_api_can_be_removed.has_files_for_samples_on_flow_cell_with_tag(
-            tag=SequencingFileTag.FASTQ
-        )
+    fastq_files: List[
+        File
+    ] = flow_cell_clean_api_can_be_removed.has_files_for_samples_on_flow_cell_with_tag(
+        tag=SequencingFileTag.FASTQ
     )
-    spring_files: bool = (
-        flow_cell_clean_api_can_be_removed.has_files_for_samples_on_flow_cell_with_tag(
-            tag=SequencingFileTag.SPRING
-        )
+    spring_files: List[
+        File
+    ] = flow_cell_clean_api_can_be_removed.has_files_for_samples_on_flow_cell_with_tag(
+        tag=SequencingFileTag.SPRING
+    )
+    spring_metadata_files: List[
+        File
+    ] = flow_cell_clean_api_can_be_removed.has_files_for_samples_on_flow_cell_with_tag(
+        tag=SequencingFileTag.SPRING_METADATA
     )
 
     # THEN fastq and SPRING files are returned
     assert fastq_files
     assert spring_files
+    assert spring_metadata_files
 
 
 def test_can_flow_cell_be_deleted(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
@@ -130,10 +150,13 @@ def test_delete_flow_cell_directory(flow_cell_clean_api_can_be_removed: CleanFlo
     assert flow_cell_clean_api_can_be_removed.flow_cell.path.exists()
 
     # WHEN removing the flow cell directory
-    flow_cell_clean_api_can_be_removed.delete_flow_cell_directory()
+    error_is_raised: bool = flow_cell_clean_api_can_be_removed.delete_flow_cell_directory()
 
     # THEN the flow cell directory is removed
     assert not flow_cell_clean_api_can_be_removed.flow_cell.path.exists()
+
+    # THEN a bool is returned that no error is raised
+    assert not error_is_raised
 
 
 def test_delete_flow_cell_directory_can_not_be_deleted(
@@ -146,10 +169,13 @@ def test_delete_flow_cell_directory_can_not_be_deleted(
     assert flow_cell_clean_api_can_not_be_removed.flow_cell.path.exists()
 
     # WHEN trying to remove the flow cell
-    flow_cell_clean_api_can_not_be_removed.delete_flow_cell_directory()
+    error_raised: bool = flow_cell_clean_api_can_not_be_removed.delete_flow_cell_directory()
 
     # THEN the flow cell directory still exists
     flow_cell_clean_api_can_not_be_removed.flow_cell.path.exists()
+
+    # THEN a bool is returned whether an error has been raised
+    assert error_raised
 
 
 def test_get_flow_cell_from_statusdb_does_not_exist(
@@ -161,8 +187,50 @@ def test_get_flow_cell_from_statusdb_does_not_exist(
         flow_cell_clean_api_can_not_be_removed.flow_cell.id
     )
 
-    # WHEN retrieving the flow cell from statusDB an error is raised
-    flow_cell: Flowcell = flow_cell_clean_api_can_not_be_removed.get_flow_cell_from_status_db()
+    # WHEN retrieving the flow cell from statusDB
 
-    # THEN no flow cell is returned
-    assert not flow_cell
+    # THEN a ValueError is raised
+    with pytest.raises(ValueError):
+        flow_cell_clean_api_can_not_be_removed.get_flow_cell_from_status_db()
+
+
+def test_flow_cell_has_not_fastq_files_in_housekeeper(
+    flow_cell_clean_api_can_not_be_removed: CleanFlowCellAPI, store_with_flow_cell_to_clean: Store
+):
+    """Test to check wether a flow cell has files in Housekeeper."""
+    # GIVEN a flow cell that has entries in StatusDB but does not have any files in Housekeeper for its samples
+    flow_cell_clean_api_can_not_be_removed.status_db = store_with_flow_cell_to_clean
+
+    # WHEN checking whether a sample on a flow cell has fastq files
+
+    # THEN a HousekeeperBundleVersionMissingError is raised
+    with pytest.raises(HousekeeperBundleVersionMissingError):
+        flow_cell_clean_api_can_not_be_removed.has_fastq_files_for_samples_in_housekeeper()
+
+
+def test_flow_cell_has_not_spring_files_in_housekeeper(
+    flow_cell_clean_api_can_not_be_removed: CleanFlowCellAPI, store_with_flow_cell_to_clean: Store
+):
+    """Test to check whether a flow cell has files in Housekeeper."""
+    # GIVEN a flow cell that has entries in StatusDB but does not have any files in Housekeeper for its samples
+    flow_cell_clean_api_can_not_be_removed.status_db = store_with_flow_cell_to_clean
+
+    # WHEN checking whether a sample on a flow cell has spring files
+
+    # THEN a HousekeeperBundleVersionMissingError is raised
+    with pytest.raises(HousekeeperBundleVersionMissingError):
+        flow_cell_clean_api_can_not_be_removed.has_spring_files_for_samples_in_housekeeper()
+
+
+def test_flow_cell_has_not_spring_meta_data_files_in_housekeeper(
+    flow_cell_clean_api_can_not_be_removed: CleanFlowCellAPI, store_with_flow_cell_to_clean: Store
+):
+    """Test to check whether a flow cell has files in Housekeeper."""
+    # GIVEN a flow cell that has entries in StatusDB but does not have any files in Housekeeper for its samples
+    flow_cell_clean_api_can_not_be_removed.status_db = store_with_flow_cell_to_clean
+
+    # WHEN checking whether a sample on a flow cell has spring files
+
+    # THEN a HousekeeperBundleVersionMissingError is raised
+    with pytest.raises(HousekeeperBundleVersionMissingError):
+        flow_cell_clean_api_can_not_be_removed.has_spring_meta_data_files_for_samples_in_housekeeper()

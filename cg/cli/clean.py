@@ -259,7 +259,7 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
     for path in [Path(context.flow_cells_dir), Path(context.demultiplexed_flow_cells_dir)]:
         directories_to_check.extend(get_directories_in_path(path))
 
-    raised_errors: List[bool] = []
+    exit_fail: bool = False
     for flow_cell_directory in directories_to_check:
         clean_flow_cell_api = CleanFlowCellAPI(
             flow_cell_path=flow_cell_directory,
@@ -267,12 +267,10 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
             housekeeper_api=context.housekeeper_api,
             dry_run=dry_run,
         )
-        try:
-            raised_errors.extend(clean_flow_cell_api.delete_flow_cell_directory())
-        except Exception as error:
-            LOG.error(str(error))
-            continue
-    if any(raised_errors):
+        raised_error: bool = clean_flow_cell_api.delete_flow_cell_directory()
+        if raised_error:
+            exit_fail = True
+    if exit_fail:
         click.Abort
 
 

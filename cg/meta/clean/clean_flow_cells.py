@@ -9,6 +9,7 @@ from housekeeper.store.models import File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS
+from cg.exc import HousekeeperBundleVersionMissingError, HousekeeperFileMissingError
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
@@ -41,20 +42,31 @@ class CleanFlowCellAPI:
         self.current_time: float = time.time()
         self.dry_run: bool = dry_run
 
-    def delete_flow_cell_directory(self):
-        """Delete the flow cell directory if it fulfills all requirements."""
+    def delete_flow_cell_directory(self) -> bool:
+        """
+        Delete the flow cell directory if it fulfills all requirements.
+        Excepts:
+            ValueError
+            HousekeeperFileMissingError
+            HousekeeperBundleVersionMissingError
+        """
         is_error_raised: bool = False
         try:
             if self.can_flow_cell_directory_be_deleted():
                 if self.dry_run:
                     LOG.debug(f"Dry run: Would have removed: {self.flow_cell.path}")
-                    return
+                    return is_error_raised
                 remove_directory_and_contents(self.flow_cell.path)
                 return is_error_raised
-        except Exception as error:
+        except (
+            ValueError,
+            HousekeeperFileMissingError,
+            HousekeeperBundleVersionMissingError,
+        ) as error:
             is_error_raised = True
             LOG.error(f"Flow cell with path {self.flow_cell.path} not removed: {str(error)}")
             return is_error_raised
+        return is_error_raised
 
     def can_flow_cell_directory_be_deleted(self) -> bool:
         """Determine whether a flow cell directory can be deleted."""
@@ -63,10 +75,10 @@ class CleanFlowCellAPI:
                 self.is_directory_older_than_21_days(),
                 self.is_flow_cell_in_statusdb(),
                 self.is_flow_cell_backed_up(),
-                self.has_sequencing_metrics(),
-                self.has_fastq_files_in_housekeeper(),
-                self.has_spring_meta_data_files_in_housekeeper(),
-                self.has_spring_files_in_housekeeper(),
+                self.has_sequencing_metrics_in_statusdb(),
+                self.has_fastq_files_for_samples_in_housekeeper(),
+                self.has_spring_meta_data_files_for_samples_in_housekeeper(),
+                self.has_spring_files_for_samples_in_housekeeper(),
                 self.has_sample_sheet_in_housekeeper(),
             ]
         )
@@ -80,10 +92,14 @@ class CleanFlowCellAPI:
         )
 
     def get_flow_cell_from_status_db(self) -> Optional[Flowcell]:
-        """Get the flow cell entry from StatusDB."""
+        """
+        Get the flow cell entry from StatusDB.
+        Raises:
+            ValueError if the flow cell is not found in StatusDB.
+        """
         flow_cell: Flowcell = self.status_db.get_flow_cell_by_name(self.flow_cell.id)
         if not flow_cell:
-            LOG.warning(f"Flow cell {self.flow_cell.id} not found in StatusDB.")
+            raise ValueError(f"Flow cell {self.flow_cell.id} not found in StatusDB.")
         return flow_cell
 
     def is_flow_cell_in_statusdb(self) -> bool:
@@ -95,17 +111,21 @@ class CleanFlowCellAPI:
         return bool(self.get_flow_cell_from_status_db().has_backup)
 
     def get_sequencing_metrics_for_flow_cell(self) -> Optional[List[SampleLaneSequencingMetrics]]:
-        """Get the SampleLaneSequencingMetrics entries for a flow cell."""
+        """
+        Get the SampleLaneSequencingMetrics entries for a flow cell.
+        Raises:
+              Value error if no SampleLaneSequencingMetrics are found in StatusDB.
+        """
         metrics: List[
             SampleLaneSequencingMetrics
         ] = self.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(self.flow_cell.id)
         if not metrics:
-            LOG.warning(
-                f"No SampleLaneSequencingMetrics found for flow cell {self.flow_cell.id} in StatusDB"
+            raise ValueError(
+                f"No SampleLaneSequencingMetrics found for {self.flow_cell.id} in StatusDB."
             )
         return metrics
 
-    def has_sequencing_metrics(self) -> bool:
+    def has_sequencing_metrics_in_statusdb(self) -> bool:
         """Check if a flow cell has entries in the SampleLaneSequencingMetrics table."""
         return bool(self.get_sequencing_metrics_for_flow_cell())
 
@@ -113,32 +133,35 @@ class CleanFlowCellAPI:
         """Check if the flow cell has a sample sheet in housekeeper."""
         return bool(self.flow_cell.get_sample_sheet_path_hk())
 
-    def has_files_for_samples_on_flow_cell_with_tag(self, tag: str) -> bool:
+    def has_files_for_samples_on_flow_cell_with_tag(self, tag: str) -> Optional[List[File]]:
         """
-        Get the files with a specified tag from Housekeeper for the samples on a flow cell.
+        Return the files with the specified tag for all samples on a Flow cell.
         """
         flow_cell: Flowcell = self.get_flow_cell_from_status_db()
         bundle_names: List[str] = [sample.internal_id for sample in flow_cell.samples]
-        all_samples_have_files: bool = True
+        files: List[File] = []
         for bundle_name in bundle_names:
-            files: List[File] = self.hk_api.get_files_from_latest_version(
-                bundle_name=bundle_name, tags=[tag, self.flow_cell.id]
-            ).all()
+            files.extend(
+                self.hk_api.get_files_from_latest_version(
+                    bundle_name=bundle_name, tags=[tag, self.flow_cell.id]
+                ).all()
+            )
             if not files:
-                LOG.warning(f"No files with tag {tag}  found in bundle {bundle_name}.")
-                all_samples_have_files = False
-        return all_samples_have_files
+                raise HousekeeperFileMissingError(
+                    f"No files with tag {tag} found for sample {bundle_name} on flow cell {self.flow_cell.id}"
+                )
+        return files
 
-    def has_fastq_files_in_housekeeper(self) -> bool:
+    def has_fastq_files_for_samples_in_housekeeper(self) -> bool:
         """Check if all samples on the flow cell have fastq files in housekeeper."""
-        return self.has_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.FASTQ)
+        return bool(self.has_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.FASTQ))
 
-    def has_spring_files_in_housekeeper(self) -> bool:
+    def has_spring_files_for_samples_in_housekeeper(self) -> bool:
         """Check if all samples on the flow cell have SPRING files in housekeeper."""
-        return self.has_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.SPRING)
+        return bool(self.has_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.SPRING))
 
-    def has_spring_meta_data_files_in_housekeeper(self) -> bool:
+    def has_spring_meta_data_files_for_samples_in_housekeeper(self) -> bool:
         """Check if all samples on the flow cell have SPRING metadata files in housekeeper."""
-        return self.has_files_for_samples_on_flow_cell_with_tag(
-            tag=SequencingFileTag.SPRING_METADATA
+        return bool(
+            self.has_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.SPRING_METADATA)
         )

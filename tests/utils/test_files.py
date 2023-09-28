@@ -5,8 +5,8 @@ from typing import List
 import pytest
 
 from cg.utils.files import (
-    get_directory_creation_time_stamp,
     get_directories_in_path,
+    get_directory_creation_time_stamp,
     get_file_in_directory,
     remove_directory_and_contents,
     rename_file,
