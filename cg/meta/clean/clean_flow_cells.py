@@ -9,7 +9,7 @@ from housekeeper.store.models import File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS
-from cg.exc import HousekeeperBundleVersionMissingError, HousekeeperFileMissingError
+from cg.exc import HousekeeperFileMissingError
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     get_sample_sheets_from_latest_version,
 )
@@ -52,7 +52,6 @@ class CleanFlowCellAPI:
         is_error_raised: bool = False
         try:
             self.set_sample_sheet_path_from_housekeeper()
-            test = self.can_flow_cell_directory_be_deleted()
             if self.can_flow_cell_directory_be_deleted():
                 if self.dry_run:
                     LOG.debug(f"Dry run: Would have removed: {self.flow_cell.path}")
