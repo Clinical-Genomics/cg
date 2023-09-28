@@ -97,7 +97,7 @@ def store_with_flow_cell_to_clean(
     sample: Sample = helpers.add_sample(
         name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
     )
-    helpers.add_mutliple_sample_lane_sequencing_metrics_entries(
+    helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
     )
     flow_cell.samples = [sample]

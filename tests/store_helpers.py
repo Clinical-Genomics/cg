@@ -870,7 +870,8 @@ class StoreHelpers:
         return metrics
 
     @classmethod
-    def add_mutliple_sample_lane_sequencing_metrics_entries(cls, metrics_data: List, store):
+    def add_multiple_sample_lane_sequencing_metrics_entries(cls, metrics_data: List, store):
+
         for (
             sample_internal_id,
             flow_cell_name_,

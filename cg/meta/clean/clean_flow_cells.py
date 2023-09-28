@@ -133,11 +133,7 @@ class CleanFlowCellAPI:
             raise HousekeeperFileMissingError(
                 f"No sample sheet found for flow cell {self.flow_cell.id} in Housekeeper."
             )
-        sample_sheet_path: Path = Path(
-            get_sample_sheets_from_latest_version(
-                flow_cell_id=self.flow_cell.id, hk_api=self.hk_api
-            )[0].full_path
-        )
+        sample_sheet_path: Path = Path(sample_sheets[0].full_path)
         self.flow_cell.set_sample_sheet_path_hk(sample_sheet_path)
 
     def has_sample_sheet_in_housekeeper(self) -> bool:
