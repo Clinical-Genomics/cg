@@ -66,6 +66,7 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool):
         flow_cell_encrypt_dir = Path(encrypt_dir, flow_cell.id)
         flow_cell_encrypt_file_path_prefix = Path(flow_cell_encrypt_dir, flow_cell.id)
         pending_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(".pending")
+        LOG.debug(pending_file_path)
         if pending_file_path.exists():
             LOG.debug(f"Encryption already started for flow cell: {flow_cell.id}")
             continue

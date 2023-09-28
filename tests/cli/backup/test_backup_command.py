@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from click.testing import CliRunner
 
@@ -10,14 +11,15 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from tests.store_helpers import StoreHelpers
 
 
-def test_encrypt_flow_cell(cli_runner: CliRunner, cg_context: CGConfig, caplog, mocker):
+def test_encrypt_flow_cell(
+    cli_runner: CliRunner, cg_context: CGConfig, caplog, mocker, sbatch_job_number: str
+):
     """Test encrypt flow cell in dry run mode."""
     caplog.set_level(logging.INFO)
 
     # Given a mock SLURM API
-    sbatch_number: str = "1234"
     mocker.patch.object(SlurmAPI, "submit_sbatch_job")
-    SlurmAPI.submit_sbatch_job.return_value = sbatch_number
+    SlurmAPI.submit_sbatch_job.return_value = sbatch_job_number
 
     # GIVEN a flow cells directory
 
@@ -28,7 +30,7 @@ def test_encrypt_flow_cell(cli_runner: CliRunner, cg_context: CGConfig, caplog, 
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN communicate flow cell encryption is submitted
-    assert f"Flow cell encryption running as job {sbatch_number}" in caplog.text
+    assert f"Flow cell encryption running as job {sbatch_job_number}" in caplog.text
 
 
 def test_encrypt_flow_cell_when_already_backed_up(
@@ -38,14 +40,14 @@ def test_encrypt_flow_cell_when_already_backed_up(
     flow_cell_name: str,
     helpers: StoreHelpers,
     mocker,
+    sbatch_job_number: str,
 ):
     """Test encrypt flow cell in dry run mode when there is already a back-up."""
     caplog.set_level(logging.DEBUG)
 
     # Given a mock SLURM API
-    sbatch_number: str = "1234"
     mocker.patch.object(SlurmAPI, "submit_sbatch_job")
-    SlurmAPI.submit_sbatch_job.return_value = sbatch_number
+    SlurmAPI.submit_sbatch_job.return_value = sbatch_job_number
 
     # Given a flow cell with a back-up
     helpers.add_flow_cell(
@@ -65,15 +67,19 @@ def test_encrypt_flow_cell_when_already_backed_up(
 
 
 def test_encrypt_flow_cell_when_sequencing_not_done(
-    cli_runner: CliRunner, cg_context: CGConfig, caplog, flow_cell_name: str, mocker
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    caplog,
+    flow_cell_name: str,
+    mocker,
+    sbatch_job_number: str,
 ):
     """Test encrypt flow cell in dry run mode when sequencing is not done."""
     caplog.set_level(logging.DEBUG)
 
     # Given a mock SLURM API
-    sbatch_number: str = "1234"
     mocker.patch.object(SlurmAPI, "submit_sbatch_job")
-    SlurmAPI.submit_sbatch_job.return_value = sbatch_number
+    SlurmAPI.submit_sbatch_job.return_value = sbatch_job_number
 
     # GIVEN flow cells that are being sequenced
     mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
@@ -89,6 +95,43 @@ def test_encrypt_flow_cell_when_sequencing_not_done(
 
     # THEN communicate flow cell is not ready
     assert f"Flow cell: {flow_cell_name} is not ready" in caplog.text
+
+
+def test_encrypt_flow_cell_when_encryption_already_started(
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    caplog,
+    encryption_dir: Path,
+    flow_cell_name: str,
+    mocker,
+    sbatch_job_number: str,
+):
+    """Test encrypt flow cell in dry run mode when pending file exists"""
+    caplog.set_level(logging.DEBUG)
+
+    # Given a mock SLURM API
+    mocker.patch.object(SlurmAPI, "submit_sbatch_job")
+    SlurmAPI.submit_sbatch_job.return_value = sbatch_job_number
+
+    # GIVEN flow cells that are being sequenced
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
+
+    # Given a pending flag file
+    flow_cells_dir = Path(cg_context.backup.encrypt_dir, flow_cell_name)
+    flow_cells_dir.mkdir(parents=True, exist_ok=True)
+    Path(flow_cells_dir, flow_cell_name).with_suffix(".pending").touch()
+
+    # GIVEN a flow cells directory
+
+    # WHEN encrypting flow cells in dry run mode
+    result = cli_runner.invoke(encrypt_flow_cell, ["--dry-run"], obj=cg_context)
+
+    # THEN exits without any errors
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN communicate flow cell encryption already started
+    assert f"Encryption already started for flow cell: {flow_cell_name}" in caplog.text
 
 
 def test_run_fetch_flow_cell_dry_run_no_flow_cell_specified(

@@ -132,7 +132,7 @@ def slurm_account() -> str:
 
 @pytest.fixture(scope="session")
 def user_name() -> str:
-    """Return a user name."""
+    """Return a username."""
     return "Paul Anderson"
 
 
@@ -992,8 +992,8 @@ def sample_sheet_context(
     cg_context: CGConfig, lims_api: LimsAPI, populated_housekeeper_api: HousekeeperAPI
 ) -> CGConfig:
     """Return cg context with added Lims and Housekeeper API."""
-    cg_context.lims_api_: LimsAPI = lims_api
-    cg_context.housekeeper_api_: HousekeeperAPI = populated_housekeeper_api
+    cg_context.lims_api_ = lims_api
+    cg_context.housekeeper_api_ = populated_housekeeper_api
     return cg_context
 
 
@@ -1420,7 +1420,7 @@ def novaseqx_demultiplexed_flow_cell(demultiplexed_runs: Path, novaseq_x_flow_ce
 
 @pytest.fixture()
 def novaseqx_flow_cell_with_sample_sheet_no_fastq(
-    mocker, novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
+    novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
 ) -> FlowCellDirectoryData:
     """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
     novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)
@@ -1486,14 +1486,14 @@ def small_helpers() -> SmallHelpers:
 @pytest.fixture(name="root_path")
 def root_path(project_dir: Path) -> Path:
     """Return the path to a hk bundles dir."""
-    _root_path = project_dir / "bundles"
+    _root_path = Path(project_dir, "bundles")
     _root_path.mkdir(parents=True, exist_ok=True)
     return _root_path
 
 
 @pytest.fixture(name="hk_bundle_sample_path")
 def hk_bundle_sample_path(sample_id: str, timestamp: datetime) -> Path:
-    """Return the relative path to a HK bundle mock sample."""
+    """Return the relative path to a Housekeeper bundle mock sample."""
     return Path(sample_id, timestamp.strftime("%Y-%m-%d"))
 
 
@@ -1524,7 +1524,6 @@ def hk_bundle_data(
 @pytest.fixture(name="hk_sample_bundle")
 def hk_sample_bundle(
     fastq_file: Path,
-    helpers,
     sample_hk_bundle_no_files: dict,
     sample_id: str,
     spring_file: Path,
@@ -1598,7 +1597,6 @@ def compress_hk_fastq_bundle(
     compression_object: CompressionData, sample_hk_bundle_no_files: dict
 ) -> dict:
     """Create a complete bundle mock for testing compression
-
     This bundle contains a pair of fastq files.
     ."""
     hk_bundle_data = deepcopy(sample_hk_bundle_no_files)
@@ -1608,7 +1606,7 @@ def compress_hk_fastq_bundle(
     for fastq_file in [first_fastq, second_fastq]:
         fastq_file.touch()
         # We need to set the time to an old date
-        # Create a older date
+        # Create an older date
         # Convert the date to a float
         before_timestamp = datetime.timestamp(datetime(2020, 1, 1))
         # Update the utime so file looks old
@@ -1627,7 +1625,7 @@ def housekeeper_api(hk_config_dict: dict) -> MockHousekeeperAPI:
 
 @pytest.fixture(name="real_housekeeper_api")
 def real_housekeeper_api(hk_config_dict: dict) -> Generator[HousekeeperAPI, None, None]:
-    """Setup a real Housekeeper store."""
+    """Set up a real Housekeeper store."""
     _api = HousekeeperAPI(hk_config_dict)
     _api.initialise_db()
     yield _api
@@ -1731,7 +1729,7 @@ def analysis_store_trio(analysis_store: Store) -> Generator[Store, None, None]:
 def analysis_store_single(
     base_store: Store, analysis_family_single_case: Store, helpers: StoreHelpers
 ):
-    """Setup a store instance with a single ind case for testing analysis API."""
+    """Set up a store instance with a single ind case for testing analysis API."""
     helpers.ensure_case_from_dict(base_store, case_info=analysis_family_single_case)
     yield base_store
 
@@ -2159,9 +2157,9 @@ def microsalt_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def encryption_dir() -> Path:
+def encryption_dir(tmp_flow_cells_directory: Path) -> Path:
     """Return a temporary directory for encryption testing."""
-    return Path("home", "encrypt")
+    return Path(tmp_flow_cells_directory, "encrypt")
 
 
 @pytest.fixture(name="cg_uri")
