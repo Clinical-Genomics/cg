@@ -1,13 +1,11 @@
 """Fixtures for Compress API tests."""
 import copy
-from typing import List, Dict, Any, Generator
-
 import os
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, Generator, List
 
 import pytest
-
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
@@ -139,7 +137,7 @@ def real_crunchy_api(
     yield CrunchyAPI(crunchy_config)
 
 
-@pytest.fixture(name="compress_api")
+@pytest.fixture()
 def compress_api(
     demultiplexed_runs: Path,
     real_crunchy_api: CrunchyAPI,

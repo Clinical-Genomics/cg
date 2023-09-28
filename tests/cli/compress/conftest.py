@@ -3,12 +3,11 @@
 import datetime as dt
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Generator
+from typing import Any, Dict, Generator
 
 import pytest
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-
 from cg.constants import FileExtensions, SequencingFileTag
 from cg.constants.pedigree import Pedigree
 from cg.meta.compress import CompressAPI
