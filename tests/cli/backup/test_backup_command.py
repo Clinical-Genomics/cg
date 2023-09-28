@@ -4,7 +4,7 @@ from pathlib import Path
 from click.testing import CliRunner
 
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.cli.backup import encrypt_flow_cell, fetch_flow_cell
+from cg.cli.backup import encrypt_flow_cells, fetch_flow_cell
 from cg.constants import EXIT_SUCCESS, FileExtensions, FlowCellStatus
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -24,7 +24,7 @@ def test_encrypt_flow_cell(
     # GIVEN a flow cells directory
 
     # WHEN encrypting flow cells in dry run mode
-    result = cli_runner.invoke(encrypt_flow_cell, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(encrypt_flow_cells, ["--dry-run"], obj=cg_context)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -57,7 +57,7 @@ def test_encrypt_flow_cell_when_already_backed_up(
     # GIVEN a flow cells directory
 
     # WHEN encrypting flow cells in dry run mode
-    result = cli_runner.invoke(encrypt_flow_cell, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(encrypt_flow_cells, ["--dry-run"], obj=cg_context)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -88,7 +88,7 @@ def test_encrypt_flow_cell_when_sequencing_not_done(
     # GIVEN a flow cells directory
 
     # WHEN encrypting flow cells in dry run mode
-    result = cli_runner.invoke(encrypt_flow_cell, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(encrypt_flow_cells, ["--dry-run"], obj=cg_context)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -125,7 +125,7 @@ def test_encrypt_flow_cell_when_encryption_already_started(
     # GIVEN a flow cells directory
 
     # WHEN encrypting flow cells in dry run mode
-    result = cli_runner.invoke(encrypt_flow_cell, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(encrypt_flow_cells, ["--dry-run"], obj=cg_context)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS

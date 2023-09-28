@@ -34,11 +34,11 @@ def backup(context: CGConfig):
     pass
 
 
-@backup.command("encrypt-flow-cell")
+@backup.command("encrypt-flow-cells")
 @DRY_RUN
 @click.pass_obj
-def encrypt_flow_cell(context: CGConfig, dry_run: bool):
-    """Encrypt flow cell."""
+def encrypt_flow_cells(context: CGConfig, dry_run: bool):
+    """Encrypt flow cells."""
     status_db: Store = context.status_db
     flow_cell_encryption_api = FlowCellEncryptionAPI(
         binary_path=context.encryption.binary_path, config=context.dict(), dry_run=dry_run
