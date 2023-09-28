@@ -239,7 +239,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             account=self.slurm_account,
             commands=commands,
             email=self.slurm_mail_user,
-            error=error_function,
+            # error=error_function,
             hours=self.slurm_hours,
             job_name="_".join([flow_cell_id, "flow_cell_encryption"]),
             log_dir=flow_cell_encrypt_dir.as_posix(),
