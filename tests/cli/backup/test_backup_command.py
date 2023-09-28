@@ -53,11 +53,11 @@ def test_encrypt_flow_cell_when_already_backed_up(
 
     # WHEN encrypting flow cells in dry run mode
     result = cli_runner.invoke(encrypt_flow_cell, ["--dry-run"], obj=cg_context)
-    print(caplog.text)
+
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN communicate flow cell encryption is submitted
+    # THEN communicate flow cell is already backed-up
     assert f"Flow cell: {flow_cell_name} is already backed-up" in caplog.text
 
 
