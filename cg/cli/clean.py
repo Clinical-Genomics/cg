@@ -252,6 +252,7 @@ def hk_bundle_files(
 
 @clean.command("flow-cells")
 @DRY_RUN
+@click.pass_obj
 def clean_flow_cells(context: CGConfig, dry_run: bool):
     """Remove flow cells from the flow_cells and demultiplexed_runs folder."""
 

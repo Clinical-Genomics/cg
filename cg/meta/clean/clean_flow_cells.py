@@ -10,6 +10,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS
 from cg.exc import HousekeeperBundleVersionMissingError, HousekeeperFileMissingError
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    get_sample_sheets_from_latest_version,
+)
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
@@ -45,27 +48,20 @@ class CleanFlowCellAPI:
     def delete_flow_cell_directory(self) -> bool:
         """
         Delete the flow cell directory if it fulfills all requirements.
-        Excepts:
-            ValueError
-            HousekeeperFileMissingError
-            HousekeeperBundleVersionMissingError
         """
         is_error_raised: bool = False
         try:
+            self.set_sample_sheet_path_from_housekeeper()
+            test = self.can_flow_cell_directory_be_deleted()
             if self.can_flow_cell_directory_be_deleted():
                 if self.dry_run:
                     LOG.debug(f"Dry run: Would have removed: {self.flow_cell.path}")
                     return is_error_raised
                 remove_directory_and_contents(self.flow_cell.path)
                 return is_error_raised
-        except (
-            ValueError,
-            HousekeeperFileMissingError,
-            HousekeeperBundleVersionMissingError,
-        ) as error:
+        except Exception as error:
             is_error_raised = True
             LOG.error(f"Flow cell with path {self.flow_cell.path} not removed: {str(error)}")
-            return is_error_raised
         return is_error_raised
 
     def can_flow_cell_directory_be_deleted(self) -> bool:
@@ -128,6 +124,22 @@ class CleanFlowCellAPI:
     def has_sequencing_metrics_in_statusdb(self) -> bool:
         """Check if a flow cell has entries in the SampleLaneSequencingMetrics table."""
         return bool(self.get_sequencing_metrics_for_flow_cell())
+
+    def set_sample_sheet_path_from_housekeeper(self):
+        """Set the sample sheet for a flow cell."""
+        sample_sheets: Optional[List[File]] = get_sample_sheets_from_latest_version(
+            flow_cell_id=self.flow_cell.id, hk_api=self.hk_api
+        )
+        if not sample_sheets:
+            raise HousekeeperFileMissingError(
+                f"No sample sheet found for flow cell {self.flow_cell.id} in Housekeeper."
+            )
+        sample_sheet_path: Path = Path(
+            get_sample_sheets_from_latest_version(
+                flow_cell_id=self.flow_cell.id, hk_api=self.hk_api
+            )[0].full_path
+        )
+        self.flow_cell.set_sample_sheet_path_hk(sample_sheet_path)
 
     def has_sample_sheet_in_housekeeper(self) -> bool:
         """Check if the flow cell has a sample sheet in housekeeper."""

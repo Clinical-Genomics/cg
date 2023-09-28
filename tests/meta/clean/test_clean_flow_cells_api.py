@@ -183,6 +183,8 @@ def test_get_flow_cell_from_statusdb_does_not_exist(
 ):
     """Test retrieving a flow cell from statusDB that does not exist."""
     # GIVEN a CleanFlowCellAPI with a flow cell that is not in statusDB
+    flow_cell_clean_api_can_not_be_removed.flow_cell.id = "flow_cell_does_not_exist"
+
     assert not flow_cell_clean_api_can_not_be_removed.status_db.get_flow_cell_by_name(
         flow_cell_clean_api_can_not_be_removed.flow_cell.id
     )

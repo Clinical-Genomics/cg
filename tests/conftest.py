@@ -527,15 +527,15 @@ def data_dir(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture
-def fastq_dir(demultiplexed_runs: Path) -> Path:
+def fastq_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the fastq files dir."""
-    return Path(demultiplexed_runs, "fastq")
+    return Path(demultiplex_fixtures, "fastq")
 
 
 @pytest.fixture
-def spring_dir(demultiplexed_runs: Path) -> Path:
+def spring_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the fastq files dir."""
-    return Path(demultiplexed_runs, "spring")
+    return Path(demultiplex_fixtures, "spring")
 
 
 @pytest.fixture

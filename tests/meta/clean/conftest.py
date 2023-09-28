@@ -35,14 +35,13 @@ def flow_cell_clean_api_can_be_removed(
 
 @pytest.fixture(scope="function")
 def flow_cell_clean_api_can_not_be_removed(
-    tmp_flow_cell_to_clean_path: Path,
-    store: Store,
+    tmp_flow_cell_not_to_clean_path: Path,
+    store_with_flow_cell_not_to_clean: Store,
     real_housekeeper_api: HousekeeperAPI,
-    tmp_sample_sheet_clean_flow_cell_path: Path,
 ) -> CleanFlowCellAPI:
     return CleanFlowCellAPI(
-        flow_cell_path=tmp_flow_cell_to_clean_path,
-        status_db=store,
+        flow_cell_path=tmp_flow_cell_not_to_clean_path,
+        status_db=store_with_flow_cell_not_to_clean,
         housekeeper_api=real_housekeeper_api,
         dry_run=False,
     )
@@ -58,6 +57,18 @@ def tmp_flow_cell_to_clean_path(tmp_flow_cell_directory_bclconvert: Path):
 def tmp_flow_cell_to_clean(tmp_flow_cell_to_clean_path: Path) -> FlowCellDirectoryData:
     """Returns a flow cell directory object for a flow cell that fulfills all cleaning criteria."""
     return FlowCellDirectoryData(tmp_flow_cell_to_clean_path)
+
+
+@pytest.fixture(scope="function")
+def tmp_flow_cell_not_to_clean_path(tmp_flow_cell_directory_bcl2fastq: Path):
+    """Return the path to a flow cell not fulfilling all cleaning criteria."""
+    return tmp_flow_cell_directory_bcl2fastq
+
+
+@pytest.fixture(scope="function")
+def tmp_flow_cell_not_to_clean(tmp_flow_cell_not_to_clean_path: Path) -> FlowCellDirectoryData:
+    """Returns a flow cell directory object for a flow cell that does not fulfill all cleaning criteria."""
+    return FlowCellDirectoryData(tmp_flow_cell_not_to_clean_path)
 
 
 @pytest.fixture(scope="session")
@@ -80,6 +91,35 @@ def store_with_flow_cell_to_clean(
     ]
     flow_cell: Flowcell = helpers.add_flowcell(
         flow_cell_name=tmp_flow_cell_to_clean.id,
+        store=store,
+        has_backup=True,
+    )
+    sample: Sample = helpers.add_sample(
+        name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
+    )
+    helpers.add_mutliple_sample_lane_sequencing_metrics_entries(
+        metrics_data=sample_sequencing_metrics_details, store=store
+    )
+    flow_cell.samples = [sample]
+    store.session.add(flow_cell)
+    store.session.commit()
+    return store
+
+
+@pytest.fixture
+def store_with_flow_cell_not_to_clean(
+    store: Store,
+    sample_id: str,
+    tmp_flow_cell_not_to_clean: FlowCellDirectoryData,
+    helpers: StoreHelpers,
+) -> Store:
+    """Return a store with multiple samples with sample lane sequencing metrics."""
+    sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
+        (sample_id, tmp_flow_cell_not_to_clean.id, 1, 50_000_0000, 90.5, 32),
+        (sample_id, tmp_flow_cell_not_to_clean.id, 2, 50_000_0000, 90.4, 31),
+    ]
+    flow_cell: Flowcell = helpers.add_flowcell(
+        flow_cell_name=tmp_flow_cell_not_to_clean.id,
         store=store,
         has_backup=True,
     )
