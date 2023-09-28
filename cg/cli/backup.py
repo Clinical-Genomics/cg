@@ -60,6 +60,7 @@ def encrypt_flow_cell(context: CGConfig, dry_run: bool):
             LOG.debug(f"Flow cell: {flow_cell.id} is already backed-up")
             continue
         if not flow_cell.is_flow_cell_ready():
+            LOG.debug(f"Flow cell: {flow_cell.id} is not ready")
             continue
 
         flow_cell_encrypt_dir = Path(encrypt_dir, flow_cell.id)
