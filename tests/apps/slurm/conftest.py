@@ -1,13 +1,14 @@
 from pathlib import Path
 
 import pytest
+
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.models.slurm.sbatch import Sbatch
 from tests.mocks.process_mock import ProcessMock
 
 
 @pytest.fixture
-def sbatch_parameters(email_adress: str, slurm_account: str) -> Sbatch:
+def sbatch_parameters(email_address: str, slurm_account: str) -> Sbatch:
     """Return sbatch parameters."""
     config = {
         "job_name": "test",
@@ -15,7 +16,7 @@ def sbatch_parameters(email_adress: str, slurm_account: str) -> Sbatch:
         "number_tasks": 3,
         "memory": 10,
         "log_dir": "path/to/dir",
-        "email": email_adress,
+        "email": email_address,
         "hours": 2,
         "commands": "genmod",
     }

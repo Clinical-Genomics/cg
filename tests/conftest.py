@@ -143,9 +143,9 @@ def user_mail() -> str:
 
 
 @pytest.fixture(scope="session")
-def email_adress() -> str:
-    """Return an email adress."""
-    return "james.holden@scilifelab.se"
+def email_address() -> str:
+    """Return an email address."""
+    return "user.name@scilifelab.se"
 
 
 @pytest.fixture(scope="session")
@@ -2184,6 +2184,7 @@ def loqusdb_id() -> str:
 def context_config(
     cg_uri: str,
     hk_uri: str,
+    email_address: str,
     fluffy_dir: Path,
     housekeeper_dir: Path,
     mip_dir: Path,
@@ -2215,7 +2216,7 @@ def context_config(
             "slurm": {
                 "account": "development",
                 "hours": 1,
-                "mail_user": "an@scilifelab.se",
+                "mail_user": email_address,
                 "memory": 1,
                 "number_tasks": 1,
             },
@@ -2243,7 +2244,7 @@ def context_config(
                 "account": "development",
                 "conda_env": "S_crunchy",
                 "hours": 1,
-                "mail_user": "an@scilifelab.se",
+                "mail_user": email_address,
                 "memory": 1,
                 "number_tasks": 1,
             },
@@ -2254,14 +2255,14 @@ def context_config(
             "covid_destination_path": "server.name.se:/another/%s/foldername/",
             "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
             "destination_path": "server.name.se:/some",
-            "mail_user": "an@email.com",
+            "mail_user": email_address,
         },
         "demultiplex": {
             "run_dir": "tests/fixtures/apps/demultiplexing/flow_cells/nova_seq_6000",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
             "slurm": {
                 "account": "development",
-                "mail_user": "an@scilifelab.se",
+                "mail_user": email_address,
             },
         },
         "encryption": {"binary_path": "bin/gpg"},
