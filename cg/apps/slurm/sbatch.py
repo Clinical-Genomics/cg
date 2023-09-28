@@ -33,7 +33,6 @@ DRAGEN_SBATCH_HEADER_TEMPLATE = """#! /bin/bash
 #SBATCH --mail-user={email}
 #SBATCH --time={hours}:{minutes}:00
 #SBATCH --qos={quality_of_service}
-#SBATCH --exclude=cg-dragen2
 
 set -eu -o pipefail
 
