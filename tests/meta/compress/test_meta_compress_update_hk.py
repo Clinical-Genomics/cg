@@ -81,7 +81,6 @@ def test_add_fastq_housekeeper_when_no_fastq_in_hk(
 
     # WHEN adding the files to housekeeper
     compress_api.add_fastq_hk(
-        spring_path=compression_files.spring_path,
         sample_internal_id=sample.internal_id,
         fastq_first=compression_files.fastq_first_file,
         fastq_second=compression_files.fastq_second_file,
@@ -140,9 +139,7 @@ def test_add_decompressed_fastq(
     )
 
 
-def test_get_fastq_tag_names_from_spring_path(
-    compress_api: MockCompressAPI, helpers, hk_sample_bundle
-):
+def test_get_fastq_tag_names(compress_api: MockCompressAPI, helpers, hk_sample_bundle, sample_id):
     """Tests that we get the correct fastq tags when providing the path to an existing spring file."""
 
     # GIVEN a spring file
@@ -154,9 +151,7 @@ def test_get_fastq_tag_names_from_spring_path(
     assert len(spring_file.tags) > 1
 
     # WHEN getting fastq tags from its path
-    fastq_tags: List[str] = compress_api.get_fastq_tag_names_from_spring_path(
-        Path(spring_file.path)
-    )
+    fastq_tags: List[str] = compress_api.get_fastq_tag_names(sample_id)
 
     # THEN the fastq tags should contain all non-spring tags of the spring file
     for tag_name in [tag.name for tag in spring_file.tags]:

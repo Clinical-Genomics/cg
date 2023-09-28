@@ -205,7 +205,6 @@ class CompressAPI:
             )
 
             self.add_fastq_hk(
-                spring_path=compression.spring_path,
                 fastq_first=fastq_first,
                 fastq_second=fastq_second,
                 sample_internal_id=sample.internal_id,
@@ -282,13 +281,12 @@ class CompressAPI:
 
     def add_fastq_hk(
         self,
-        spring_path: Path,
         sample_internal_id: str,
         fastq_first: Path,
         fastq_second: Path,
     ) -> None:
         """Add decompressed FASTQ files to Housekeeper."""
-        fastq_tags: List[str] = self.get_fastq_tag_names_from_spring_path(spring_path)
+        fastq_tags: List[str] = self.get_fastq_tag_names(sample_internal_id)
 
         LOG.info(
             f"Adds {fastq_first}, {fastq_second} to bundle {sample_internal_id} with tags {fastq_tags}"
@@ -303,11 +301,14 @@ class CompressAPI:
             )
         self.hk_api.commit()
 
-    def get_fastq_tag_names_from_spring_path(self, spring_path: Path) -> List[str]:
+    def get_fastq_tag_names(self, sample_internal_id: str) -> List[str]:
         """Returns a list containing all non-spring tag names of the specified file,
         together with the fastq tag name."""
-        spring_file: File = self.hk_api.files(path=spring_path.as_posix()).first()
-        spring_tags: List[str] = [tag.name for tag in spring_file.tags]
+
+        spring_file: File = self.hk_api.get_files(
+            bundle=sample_internal_id, tags=[SequencingFileTag.SPRING]
+        ).first()
+        spring_tags: List[str] = self.hk_api.get_tag_names_from_file(spring_file)
         spring_tags.remove(SequencingFileTag.SPRING)
         return spring_tags + [SequencingFileTag.FASTQ]
 
