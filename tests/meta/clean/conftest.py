@@ -7,7 +7,6 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.constants.time import TWENTY_ONE_DAYS_IN_SECONDS
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
@@ -22,14 +21,13 @@ def flow_cell_clean_api_can_be_removed(
     housekeeper_api_with_flow_cell_to_clean: HousekeeperAPI,
     tmp_sample_sheet_clean_flow_cell_path: Path,
 ) -> CleanFlowCellAPI:
+    """Return a CleanFlowCellAPI with a flow cell that can be removed."""
     clean_flow_cell_api = CleanFlowCellAPI(
         flow_cell_path=tmp_flow_cell_to_clean_path,
         status_db=store_with_flow_cell_to_clean,
         housekeeper_api=housekeeper_api_with_flow_cell_to_clean,
         dry_run=False,
     )
-    clean_flow_cell_api.current_time = clean_flow_cell_api.current_time + TWENTY_ONE_DAYS_IN_SECONDS
-    clean_flow_cell_api.flow_cell._sample_sheet_path_hk = tmp_sample_sheet_clean_flow_cell_path
     return clean_flow_cell_api
 
 
@@ -39,6 +37,7 @@ def flow_cell_clean_api_can_not_be_removed(
     store_with_flow_cell_not_to_clean: Store,
     real_housekeeper_api: HousekeeperAPI,
 ) -> CleanFlowCellAPI:
+    """Return a CleanFlowCellAPI with a flow cell that can not be removed."""
     return CleanFlowCellAPI(
         flow_cell_path=tmp_flow_cell_not_to_clean_path,
         status_db=store_with_flow_cell_not_to_clean,
