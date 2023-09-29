@@ -63,13 +63,13 @@ def get_directory_creation_time_stamp(directory_path: Path) -> float:
 def remove_directory_and_contents(directory_path):
     """
     Delete a directory and its contents.
-    Excepts OSError.
+    Raises OSError when failed to remove directory.
     """
     try:
         shutil.rmtree(directory_path)
         LOG.info(f"Successfully removed the directory and its contents: {directory_path}")
     except OSError as error:
-        LOG.error(f"Failed to remove the directory {directory_path} and its contents: {error}")
+        raise OSError(f"Failed to remove the directory {directory_path} and its contents: {error}")
 
 
 def get_directories_in_path(path: Path) -> List[Path]:

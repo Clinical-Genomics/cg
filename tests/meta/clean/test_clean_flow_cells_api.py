@@ -117,17 +117,17 @@ def test_get_files_for_flow_cell_bundle(flow_cell_clean_api_can_be_removed: Clea
     # WHEN getting fastq and spring files that are tagged with the flow cell
     fastq_files: List[
         File
-    ] = flow_cell_clean_api_can_be_removed.has_files_for_samples_on_flow_cell_with_tag(
+    ] = flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(
         tag=SequencingFileTag.FASTQ
     )
     spring_files: List[
         File
-    ] = flow_cell_clean_api_can_be_removed.has_files_for_samples_on_flow_cell_with_tag(
+    ] = flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(
         tag=SequencingFileTag.SPRING
     )
     spring_metadata_files: List[
         File
-    ] = flow_cell_clean_api_can_be_removed.has_files_for_samples_on_flow_cell_with_tag(
+    ] = flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(
         tag=SequencingFileTag.SPRING_METADATA
     )
 

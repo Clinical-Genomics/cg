@@ -27,10 +27,7 @@ def test_is_directory_not_older_than_days_old(tmp_path_factory):
     # GIVEN a directory that is created now
     created_now_path: Path = tmp_path_factory.mktemp("created_now")
 
-    # GIVEN a current time that is now
-    current_time: float = time.time()
-
     # THEN checking whether a directory is older than 21 days returns false
     assert not is_directory_older_than_days_old(
-        directory_path=created_now_path, days_old=TWENTY_ONE_DAYS, current_time=current_time
+        directory_path=created_now_path, days_old=TWENTY_ONE_DAYS
     )

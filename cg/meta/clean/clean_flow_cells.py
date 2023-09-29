@@ -46,6 +46,8 @@ class CleanFlowCellAPI:
     def delete_flow_cell_directory(self) -> None:
         """
         Delete the flow cell directory if it fulfills all requirements.
+        Raises:
+            CleanFlowCellFailedError when any exception is caught
         """
         try:
             self.set_sample_sheet_path_from_housekeeper()
@@ -60,7 +62,11 @@ class CleanFlowCellAPI:
             )
 
     def set_sample_sheet_path_from_housekeeper(self):
-        """Set the sample sheet for a flow cell."""
+        """
+        Set the sample sheet for a flow cell.
+        Raises:
+            HousekeeperFileMissingError when the sample sheet is missing in Housekeeper
+        """
         sample_sheets: Optional[List[File]] = get_sample_sheets_from_latest_version(
             flow_cell_id=self.flow_cell.id, hk_api=self.hk_api
         )
@@ -68,11 +74,7 @@ class CleanFlowCellAPI:
             raise HousekeeperFileMissingError(
                 f"No sample sheet found for flow cell {self.flow_cell.id} in Housekeeper."
             )
-        sample_sheet_path: Path = Path(
-            get_sample_sheets_from_latest_version(
-                flow_cell_id=self.flow_cell.id, hk_api=self.hk_api
-            )[0].full_path
-        )
+        sample_sheet_path: Path = Path(sample_sheets[0].full_path)
         self.flow_cell.set_sample_sheet_path_hk(sample_sheet_path)
 
     def can_flow_cell_directory_be_deleted(self) -> bool:
@@ -103,7 +105,7 @@ class CleanFlowCellAPI:
 
     def is_flow_cell_backed_up(self) -> bool:
         """Check if flow cell is backed up on PDC."""
-        return bool(self.get_flow_cell_from_status_db().has_backup)
+        return self.get_flow_cell_from_status_db().has_backup
 
     def has_sequencing_metrics_in_statusdb(self) -> bool:
         """Check if a flow cell has entries in the SampleLaneSequencingMetrics table."""
@@ -115,16 +117,16 @@ class CleanFlowCellAPI:
 
     def has_fastq_files_for_samples_in_housekeeper(self) -> bool:
         """Check if all samples on the flow cell have fastq files in housekeeper."""
-        return bool(self.has_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.FASTQ))
+        return bool(self.get_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.FASTQ))
 
     def has_spring_files_for_samples_in_housekeeper(self) -> bool:
         """Check if all samples on the flow cell have SPRING files in housekeeper."""
-        return bool(self.has_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.SPRING))
+        return bool(self.get_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.SPRING))
 
     def has_spring_meta_data_files_for_samples_in_housekeeper(self) -> bool:
         """Check if all samples on the flow cell have SPRING metadata files in housekeeper."""
         return bool(
-            self.has_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.SPRING_METADATA)
+            self.get_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.SPRING_METADATA)
         )
 
     def get_flow_cell_from_status_db(self) -> Optional[Flowcell]:
@@ -153,7 +155,7 @@ class CleanFlowCellAPI:
             )
         return metrics
 
-    def has_files_for_samples_on_flow_cell_with_tag(self, tag: str) -> Optional[List[File]]:
+    def get_files_for_samples_on_flow_cell_with_tag(self, tag: str) -> Optional[List[File]]:
         """
         Return the files with the specified tag for all samples on a Flow cell.
         """
