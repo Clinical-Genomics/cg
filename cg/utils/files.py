@@ -68,7 +68,7 @@ def remove_directory_and_contents(directory_path):
     try:
         shutil.rmtree(directory_path)
         LOG.info(f"Successfully removed the directory and its contents: {directory_path}")
-    except OSError as error:
+    except Exception as error:
         raise OSError(f"Failed to remove the directory {directory_path} and its contents: {error}")
 
 
