@@ -21,4 +21,6 @@ FLOW_CELL_ENCRYPT_COMMANDS = """
 {mv_passphrase_file}
 
 {remove_pending_file}
+
+{flag_as_complete}
 """

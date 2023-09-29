@@ -92,7 +92,7 @@ def test_encrypt_flow_cell_when_encryption_already_started(
     """Test encrypt flow cell in dry run mode when pending file exists"""
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN flow cells that are being sequenced
+    # GIVEN flow cells that are ready
     mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
     FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
@@ -111,6 +111,38 @@ def test_encrypt_flow_cell_when_encryption_already_started(
 
     # THEN communicate flow cell encryption already started
     assert f"Encryption already started for flow cell: {flow_cell_name}" in caplog.text
+
+
+def test_encrypt_flow_cell_when_encryption_already_completed(
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    caplog,
+    encryption_dir: Path,
+    flow_cell_name: str,
+    mocker,
+):
+    """Test encrypt flow cell in dry run mode when completed file exists"""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN flow cells that are ready
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
+
+    # Given a pending flag file
+    flow_cells_dir = Path(cg_context.backup.encrypt_dir, flow_cell_name)
+    flow_cells_dir.mkdir(parents=True, exist_ok=True)
+    Path(flow_cells_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()
+
+    # GIVEN a flow cells directory
+
+    # WHEN encrypting flow cells in dry run mode
+    result = cli_runner.invoke(encrypt_flow_cells, ["--dry-run"], obj=cg_context)
+
+    # THEN exits without any errors
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN communicate flow cell encryption already completed
+    assert f"Encryption already completed for flow cell: {flow_cell_name}" in caplog.text
 
 
 def test_run_fetch_flow_cell_dry_run_no_flow_cell_specified(

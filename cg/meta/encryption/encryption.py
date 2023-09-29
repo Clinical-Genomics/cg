@@ -181,6 +181,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
 
     def encrypt_flow_cell(
         self,
+        complete_file_path: Path,
         flow_cell_id: str,
         flow_cell_encrypt_dir: Path,
         flow_cell_encrypt_file_path_prefix: Path,
@@ -227,6 +228,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             diff=f"diff -q {encrypted_md5sum_file_path} {decrypted_md5sum_file_path}",
             mv_passphrase_file=f"mv {symmetric_passphrase_file_path.with_suffix(FileExtensions.GPG)} {final_passphrase_file_path}",
             remove_pending_file=f"rm -f {pending_file_path}",
+            flag_as_complete=f"touch {complete_file_path}",
         )
         sbatch_parameters = Sbatch(
             account=self.slurm_account,
