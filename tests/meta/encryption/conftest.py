@@ -3,23 +3,25 @@ from typing import List
 
 import pytest
 
+from cg.constants.encryption import EncryptionUserID
+
 
 @pytest.fixture(name="input_file")
 def input_file_path() -> Path:
     """input file"""
-    return Path("/path/to/input.file")
+    return Path("path", "to", "input.file")
 
 
 @pytest.fixture(name="output_file")
 def output_file_path() -> Path:
     """output file"""
-    return Path("/path/to/output.file")
+    return Path("path", "to", "output.file")
 
 
 @pytest.fixture(name="temporary_passphrase")
 def temporary_passphrase() -> str:
     """temporary passphrase file"""
-    return "tmp/tmp_test_passphrase"
+    return Path("tmp", "tmp_test_passphrase").as_posix()
 
 
 @pytest.fixture(name="test_command")
@@ -31,46 +33,40 @@ def test_command() -> List:
 @pytest.fixture(name="encryption_key_file")
 def encryption_key_file() -> Path:
     """Return an encryption key file Path object"""
-    return Path("/path/to/file.key")
+    return Path("path", "to", "file.key")
 
 
 @pytest.fixture(name="encrypted_key_file")
 def encrypted_key_file() -> Path:
     """Return an encrypted encryption key file Path object"""
-    return Path("/path/to/encryption.key.gpg")
+    return Path("path", "to", "encryption.key.gpg")
 
 
 @pytest.fixture(name="spring_file_path")
 def spring_file_path() -> Path:
-    """Return an spring file Path object"""
-    return Path("/path/to/file.spring")
+    """Return a spring file Path object"""
+    return Path("path", "to", "file.spring")
 
 
-@pytest.fixture(name="encrypted_spring_file_path")
+@pytest.fixture
 def encrypted_spring_file_path() -> Path:
     """Return an encrypted spring file Path object"""
-    return Path("/path/to/file.spring.gpg")
+    return Path("path", "to", "file.spring.gpg")
 
 
-@pytest.fixture(name="encryption_user_id")
-def encryption_user_id() -> str:
-    """Encryption user ID fixture"""
-    return "Clinical Genomics"
-
-
-@pytest.fixture(name="cipher_algorithm")
+@pytest.fixture
 def cipher_algorithm() -> str:
     """Cipher algorithm fixture"""
     return "AES256"
 
 
-@pytest.fixture(name="asymmetric_encryption_command")
-def asymmetric_encryption_command(encryption_user_id, output_file, input_file) -> List:
+@pytest.fixture
+def asymmetric_encryption_command(output_file, input_file) -> List:
     """Asymmetric encryption_command fixture"""
     return [
         "--encrypt",
         "--recipient",
-        encryption_user_id,
+        EncryptionUserID.HASTA_USER_ID,
         "-o",
         str(output_file),
         str(input_file),
@@ -78,9 +74,7 @@ def asymmetric_encryption_command(encryption_user_id, output_file, input_file) -
 
 
 @pytest.fixture(name="asymmetric_decryption_command")
-def asymmetric_decryption_command(
-    cipher_algorithm, encryption_user_id, output_file, input_file
-) -> List:
+def asymmetric_decryption_command(cipher_algorithm, output_file, input_file) -> List:
     """Asymmetric decryption_command fixture"""
     return [
         "--decrypt",
@@ -88,7 +82,7 @@ def asymmetric_decryption_command(
         "--cipher-algo",
         cipher_algorithm,
         "--passphrase",
-        encryption_user_id,
+        EncryptionUserID.HASTA_USER_ID,
         "-o",
         str(output_file),
         str(input_file),
@@ -157,14 +151,12 @@ def spring_symmetric_encryption_command(
 
 
 @pytest.fixture(name="key_asymmetric_encryption_command")
-def key_asymmetric_encryption_command(
-    encryption_user_id, encrypted_key_file, temporary_passphrase
-) -> List:
+def key_asymmetric_encryption_command(encrypted_key_file, temporary_passphrase) -> List:
     """Asymmetric encryption_command fixture"""
     return [
         "--encrypt",
         "--recipient",
-        encryption_user_id,
+        EncryptionUserID.HASTA_USER_ID,
         "-o",
         str(encrypted_key_file),
         str(temporary_passphrase),
@@ -194,7 +186,7 @@ def spring_symmetric_decryption_command(
 
 @pytest.fixture(name="key_asymmetric_decryption_command")
 def key_asymmetric_decryption_command(
-    cipher_algorithm, encryption_user_id, encrypted_key_file, encryption_key_file
+    cipher_algorithm, encrypted_key_file, encryption_key_file
 ) -> List:
     """Asymmetric encryption_command fixture"""
     return [
@@ -203,7 +195,7 @@ def key_asymmetric_decryption_command(
         "--cipher-algo",
         cipher_algorithm,
         "--passphrase",
-        encryption_user_id,
+        EncryptionUserID.HASTA_USER_ID,
         "-o",
         str(encryption_key_file),
         str(encrypted_key_file),

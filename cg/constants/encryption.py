@@ -1,5 +1,5 @@
 """Constants specific for encryption"""
-
+from enum import Enum
 from typing import List
 
 from cg.utils.enums import ListEnum, StrEnum
@@ -19,7 +19,7 @@ class CipherAlgorithm(StrEnum):
     TWOFISH: str = "TWOFISH"
 
 
-class EncryptionUserID(StrEnum):
+class EncryptionUserID(str, Enum):
     HASTA_USER_ID: str = '"Clinical Genomics"'
 
 

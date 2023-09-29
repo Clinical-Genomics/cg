@@ -150,11 +150,13 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         super().__init__(binary_path=binary_path, dry_run=dry_run)
         self.tar_api = TarAPI(binary_path=config["tar"]["binary_path"], dry_run=dry_run)
         self.slurm_api: SlurmAPI = SlurmAPI()
-        self.slurm_account: str = config["backup"]["slurm"]["account"]
-        self.slurm_hours: int = config["backup"]["slurm"]["hours"]
-        self.slurm_mail_user: str = config["backup"]["slurm"]["mail_user"]
-        self.slurm_memory: int = config["backup"]["slurm"]["memory"]
-        self.slurm_number_tasks: int = config["backup"]["slurm"]["number_tasks"]
+        self.slurm_account: str = config["backup"]["slurm_flow_cell_encryption"]["account"]
+        self.slurm_hours: int = config["backup"]["slurm_flow_cell_encryption"]["hours"]
+        self.slurm_mail_user: str = config["backup"]["slurm_flow_cell_encryption"]["mail_user"]
+        self.slurm_memory: int = config["backup"]["slurm_flow_cell_encryption"]["memory"]
+        self.slurm_number_tasks: int = config["backup"]["slurm_flow_cell_encryption"][
+            "number_tasks"
+        ]
 
     def get_flow_cell_symmetric_encryption_command(
         self, output_file: Path, passphrase_file_path: Path

@@ -42,7 +42,7 @@ class SlurmConfig(BaseModel):
 
 class BackupConfig(BaseModel):
     encrypt_dir: str
-    slurm: SlurmConfig
+    slurm_flow_cell_encryption: SlurmConfig
 
 
 class HousekeeperConfig(BaseModel):

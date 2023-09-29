@@ -2213,7 +2213,7 @@ def context_config(
         "pon_path": str(cg_dir),
         "backup": {
             "encrypt_dir": encryption_dir.as_posix(),
-            "slurm": {
+            "slurm_flow_cell_encryption": {
                 "account": "development",
                 "hours": 1,
                 "mail_user": email_address,
