@@ -156,24 +156,26 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         self.slurm_memory: int = config["backup"]["slurm"]["memory"]
         self.slurm_number_tasks: int = config["backup"]["slurm"]["number_tasks"]
 
-    @classmethod
     def get_flow_cell_symmetric_encryption_command(
-        cls, output_file: Path, passphrase_file_path: Path
+        self, output_file: Path, passphrase_file_path: Path
     ) -> str:
         """Generates the Gpg command for symmetric encryption of file."""
-        encryption_parameters: list = GPGParameters.SYMMETRIC_ENCRYPTION.copy()
+        encryption_parameters: List[str] = [
+            self.binary_path
+        ] + GPGParameters.SYMMETRIC_ENCRYPTION.copy()
         encryption_parameters.append(passphrase_file_path.as_posix())
         output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
         output_parameter.extend([output_file.as_posix()])
         encryption_parameters.extend(output_parameter)
         return " ".join(encryption_parameters)
 
-    @classmethod
     def get_flow_cell_symmetric_decryption_command(
-        cls, input_file: Path, passphrase_file_path: Path
+        self, input_file: Path, passphrase_file_path: Path
     ) -> str:
         """Generates the Gpg command for symmetric decryption."""
-        decryption_parameters: list = GPGParameters.SYMMETRIC_DECRYPTION.copy()
+        decryption_parameters: List[str] = [
+            self.binary_path
+        ] + GPGParameters.SYMMETRIC_DECRYPTION.copy()
         decryption_parameters.extend([passphrase_file_path.as_posix(), input_file.as_posix()])
         return " ".join(decryption_parameters)
 
@@ -200,16 +202,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         final_passphrase_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
             f".key{FileExtensions.GPG}"
         )
-        error_function: str = FLOW_CELL_ENCRYPT_ERROR.format(
-            flow_cell_encrypt_dir=flow_cell_encrypt_dir
-        )
-
-        LOG.debug(
-            self.get_flow_cell_symmetric_encryption_command(
-                output_file=encrypted_gpg_file_path,
-                passphrase_file_path=symmetric_passphrase_file_path,
-            )
-        )
+        error_function: str = FLOW_CELL_ENCRYPT_ERROR.format(pending_file_path=pending_file_path)
         commands: str = FLOW_CELL_ENCRYPT_COMMANDS.format(
             symmetric_passphrase=self.get_symmetric_passphrase_cmd(
                 passphrase_file_path=symmetric_passphrase_file_path
@@ -222,8 +215,14 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             ),
             parallel_gzip=f"pigz p {self.slurm_number_tasks - LIMIT_GZIP_TASK} --fast -c",
             tee=f"tee (md5sum > {encrypted_md5sum_file_path})",
-            flow_cell_symmetric_encryption=f"{self.binary_path} {self.get_flow_cell_symmetric_encryption_command(output_file = encrypted_gpg_file_path, passphrase_file_path = symmetric_passphrase_file_path,)}",
-            flow_cell_symmetric_decryption=f"{self.binary_path} {self.get_flow_cell_symmetric_decryption_command(input_file=encrypted_gpg_file_path, passphrase_file_path=symmetric_passphrase_file_path,)}",
+            flow_cell_symmetric_encryption=self.get_flow_cell_symmetric_encryption_command(
+                output_file=encrypted_gpg_file_path,
+                passphrase_file_path=symmetric_passphrase_file_path,
+            ),
+            flow_cell_symmetric_decryption=self.get_flow_cell_symmetric_decryption_command(
+                input_file=encrypted_gpg_file_path,
+                passphrase_file_path=symmetric_passphrase_file_path,
+            ),
             md5sum=f"md5sum > {decrypted_md5sum_file_path}",
             diff=f"diff -q {encrypted_md5sum_file_path} {decrypted_md5sum_file_path}",
             mv_passphrase_file=f"mv {symmetric_passphrase_file_path.with_suffix(FileExtensions.GPG)} {final_passphrase_file_path}",
@@ -233,7 +232,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             account=self.slurm_account,
             commands=commands,
             email=self.slurm_mail_user,
-            # error=error_function,
+            error=error_function,
             hours=self.slurm_hours,
             job_name="_".join([flow_cell_id, "flow_cell_encryption"]),
             log_dir=flow_cell_encrypt_dir.as_posix(),
