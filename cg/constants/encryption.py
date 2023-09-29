@@ -2,10 +2,10 @@
 from enum import Enum
 from typing import List
 
-from cg.utils.enums import ListEnum, StrEnum
+from cg.utils.enums import ListEnum
 
 
-class CipherAlgorithm(StrEnum):
+class CipherAlgorithm(str, Enum):
     TRIPLE_DES: str = "3DES"
     AES: str = "AES"
     AES192: str = "AES192"

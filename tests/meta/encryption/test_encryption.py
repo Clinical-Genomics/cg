@@ -3,9 +3,7 @@ import logging
 import pathlib
 
 import mock
-import pytest
 
-from cg.exc import ChecksumFailedError
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 
 
@@ -55,7 +53,7 @@ def test_generate_temporary_passphrase(mocker, binary_path):
 
 
 def test_get_asymmetric_encryption_command(
-    binary_path, input_file, output_file, asymmetric_encryption_command
+    binary_path, input_file_path, output_file_path, asymmetric_encryption_command
 ):
     """Tests creating the asymmetric encryption command"""
     # GIVEN an input file and an output file for a gpg command
@@ -63,7 +61,7 @@ def test_get_asymmetric_encryption_command(
 
     # WHEN generating the GPG command for asymmetric_encryption
     result = encryption_api.get_asymmetric_encryption_command(
-        input_file=input_file, output_file=output_file
+        input_file=input_file_path, output_file=output_file_path
     )
 
     # THEN the correct parameters should be returned
@@ -71,7 +69,7 @@ def test_get_asymmetric_encryption_command(
 
 
 def test_get_asymmetric_decryption_command(
-    binary_path, input_file, output_file, asymmetric_decryption_command
+    binary_path, input_file_path, output_file_path, asymmetric_decryption_command
 ):
     """Tests creating the asymmetric decryption command"""
     # GIVEN an input file and an output file for a gpg command
@@ -79,7 +77,7 @@ def test_get_asymmetric_decryption_command(
 
     # WHEN generating the GPG command for asymmetric_decryption
     result = encryption_api.get_asymmetric_decryption_command(
-        input_file=input_file, output_file=output_file
+        input_file=input_file_path, output_file=output_file_path
     )
 
     # THEN the correct parameters should be returned
@@ -90,8 +88,8 @@ def test_get_asymmetric_decryption_command(
 def test_get_symmetric_encryption_command(
     mock_passphrase,
     binary_path,
-    input_file,
-    output_file,
+    input_file_path,
+    output_file_path,
     temporary_passphrase,
     symmetric_encryption_command,
 ):
@@ -102,7 +100,7 @@ def test_get_symmetric_encryption_command(
 
     # WHEN generating the GPG command for symmetric_encryption
     result = encryption_api.get_symmetric_encryption_command(
-        input_file=input_file, output_file=output_file
+        input_file=input_file_path, output_file=output_file_path
     )
 
     # THEN the correct parameters should be returned
@@ -110,7 +108,11 @@ def test_get_symmetric_encryption_command(
 
 
 def test_get_symmetric_decryption_command(
-    binary_path, input_file, output_file, encryption_key_file, symmetric_decryption_command
+    binary_path,
+    input_file_path,
+    output_file_path,
+    encryption_key_file,
+    symmetric_decryption_command,
 ):
     """Tests creating the symmetric decryption command"""
     # GIVEN an input file and an output file for a gpg command
@@ -118,7 +120,7 @@ def test_get_symmetric_decryption_command(
 
     # WHEN generating the GPG command for symmetric_decryption
     result = encryption_api.get_symmetric_decryption_command(
-        input_file=input_file, output_file=output_file, encryption_key=encryption_key_file
+        input_file=input_file_path, output_file=output_file_path, encryption_key=encryption_key_file
     )
 
     # THEN the correct parameters should be returned
