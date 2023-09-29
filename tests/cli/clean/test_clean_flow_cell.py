@@ -14,7 +14,7 @@ def test_clean_flow_cells_cmd(
     tmp_flow_cell_to_clean_path: Path,
     tmp_flow_cell_not_to_clean_path: Path,
 ):
-    """Test the clean flow cells cmd"""
+    """Test the clean flow cells command."""
     # GIVEN a config with StatusDB and Housekeeper that contain a flow cell that can be cleaned
 
     # GIVEN that the flow cells exist
@@ -44,7 +44,7 @@ def test_clean_flow_cells_cmd_dry_run(
     tmp_flow_cell_to_clean_path: Path,
     tmp_flow_cell_not_to_clean_path: Path,
 ):
-    """Test the clean flow cells cmd"""
+    """Test the clean flow cells command using dry-run."""
     # GIVEN a config with StatusDB and Housekeeper that contain a flow cell that can be cleaned
 
     # GIVEN that the flow cells exist
