@@ -85,10 +85,10 @@ class EncryptionAPI:
         return " ".join(
             [
                 self.binary_path,
-                "-e",
-                "-r",
+                "--encrypt",
+                "-recipient",
                 EncryptionUserID.HASTA_USER_ID,
-                "-o",
+                "-output",
                 passphrase_file_path.with_suffix(FileExtensions.GPG).as_posix(),
                 passphrase_file_path.as_posix(),
             ]

@@ -1,4 +1,5 @@
 """Constants specific for encryption"""
+
 from typing import List
 
 from cg.utils.enums import ListEnum, StrEnum
@@ -19,7 +20,7 @@ class CipherAlgorithm(StrEnum):
 
 
 class EncryptionUserID(StrEnum):
-    HASTA_USER_ID: str = "Clinical Genomics"
+    HASTA_USER_ID: str = '"Clinical Genomics"'
 
 
 class GPGParameters(ListEnum):
