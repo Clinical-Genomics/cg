@@ -65,7 +65,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
             LOG.debug(f"Flow cell: {flow_cell.id} is not ready")
             continue
 
-        flow_cell_encrypt_dir = Path(encrypt_dir, flow_cell.id)
+        flow_cell_encrypt_dir = Path(encrypt_dir, flow_cell.full_name)
         flow_cell_encrypt_file_path_prefix = Path(flow_cell_encrypt_dir, flow_cell.id)
         complete_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
             FileExtensions.COMPLETE
