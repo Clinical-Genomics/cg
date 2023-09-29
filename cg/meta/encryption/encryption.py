@@ -184,6 +184,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
     def encrypt_flow_cell(
         self,
         complete_file_path: Path,
+        flow_cell_dir: Path,
         flow_cell_id: str,
         flow_cell_encrypt_dir: Path,
         flow_cell_encrypt_file_path_prefix: Path,
@@ -213,11 +214,9 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             asymmetrically_encrypt_passphrase=self.get_asymmetrically_encrypt_passphrase_cmd(
                 passphrase_file_path=symmetric_passphrase_file_path
             ),
-            tar_encrypt_flow_cell_dir=self.tar_api.get_compress_cmd(
-                input_path=flow_cell_encrypt_dir
-            ),
-            parallel_gzip=f"pigz p {self.slurm_number_tasks - LIMIT_GZIP_TASK} --fast -c",
-            tee=f"tee (md5sum > {encrypted_md5sum_file_path})",
+            tar_encrypt_flow_cell_dir=self.tar_api.get_compress_cmd(input_path=flow_cell_dir),
+            parallel_gzip="gzip--fast -c",
+            tee=f"tee >(md5sum > {encrypted_md5sum_file_path})",
             flow_cell_symmetric_encryption=self.get_flow_cell_symmetric_encryption_command(
                 output_file=encrypted_gpg_file_path,
                 passphrase_file_path=symmetric_passphrase_file_path,

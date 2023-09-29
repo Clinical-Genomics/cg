@@ -65,12 +65,12 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
     encrypt_dir: Path = Path(context.backup.encrypt_dir)
     flow_cells_dir = Path(context.flow_cells_dir)
     LOG.debug(f"Search for flow cells ready to encrypt in {flow_cells_dir}")
-    for sub_dir in flow_cells_dir.iterdir():
-        if not sub_dir.is_dir():
+    for flow_cell_dir in flow_cells_dir.iterdir():
+        if not flow_cell_dir.is_dir():
             continue
-        LOG.debug(f"Found directory: {sub_dir}")
+        LOG.debug(f"Found directory: {flow_cell_dir}")
         try:
-            flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir)
+            flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_dir)
         except FlowCellError:
             continue
         db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
@@ -96,6 +96,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         flow_cell_encrypt_dir.mkdir(exist_ok=True, parents=True)
         flow_cell_encryption_api.create_pending_file(pending_path=pending_file_path)
         flow_cell_encryption_api.encrypt_flow_cell(
+            flow_cell_dir=flow_cell_dir,
             flow_cell_id=flow_cell.id,
             flow_cell_encrypt_dir=flow_cell_encrypt_dir,
             flow_cell_encrypt_file_path_prefix=flow_cell_encrypt_file_path_prefix,
