@@ -131,14 +131,12 @@ class ApplicationLimitationsView(BaseView):
         "created_at",
         "updated_at",
     )
-    column_formatters = {
-        "application": ApplicationView.view_application_link,
-        "pipeline": SelectEnumField(enum_class=Pipeline),
-    }
+    column_formatters = {"application": ApplicationView.view_application_link}
     column_filters = ["application.tag", "pipeline"]
     column_searchable_list = ["application.tag"]
     column_editable_list = ["comment"]
     form_excluded_columns = ["created_at", "updated_at"]
+    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
     create_modal = True
     edit_modal = True
 
