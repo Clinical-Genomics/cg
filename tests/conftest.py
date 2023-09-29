@@ -704,7 +704,7 @@ def spring_file(spring_dir: Path) -> Path:
 @pytest.fixture(name="spring_meta_data_file")
 def spring_meta_data_file(spring_dir: Path) -> Path:
     """Return the path to an existing spring file."""
-    return Path(spring_dir, "dummy_spring_meta_data")
+    return Path(spring_dir, "dummy_spring_meta_data.json")
 
 
 @pytest.fixture(name="spring_file_father")

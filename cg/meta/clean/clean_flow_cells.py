@@ -42,6 +42,7 @@ class CleanFlowCellAPI:
         self.hk_api: HousekeeperAPI = housekeeper_api
         self.flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_path)
         self.dry_run: bool = dry_run
+        LOG.info(f"Trying to delete {flow_cell_path}")
 
     def delete_flow_cell_directory(self) -> None:
         """

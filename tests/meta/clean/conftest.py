@@ -141,7 +141,7 @@ def housekeeper_api_with_flow_cell_to_clean(
     helpers: StoreHelpers,
     hk_flow_cell_to_clean_bundle: Dict,
     hk_sample_bundle_for_flow_cell_to_clean: Dict,
-):
+) -> HousekeeperAPI:
     """
     Return a housekeeper api that contains a flow cell bundle with sample sheet,
     a sample bundle with a fastq and a SPRING file that are tagged with the flow cell.

@@ -84,6 +84,7 @@ def test_get_creation_date(tmp_path_factory, timestamp_now: datetime):
 
     # WHEN retrieving the creation time stamp
     creation_time_stamp: float = get_directory_creation_time_stamp(directory_path)
+
     # THEN the creation time stamp is returned
     assert isinstance(creation_time_stamp, float)
 
@@ -91,8 +92,10 @@ def test_get_creation_date(tmp_path_factory, timestamp_now: datetime):
 def test_get_all_directories_in_path(
     path_with_directories_and_a_file: Path, sub_dir_names: List[str], some_file: str
 ):
-    """Test get all directories in path."""
+    """Test that get all directories in path only returns directories."""
+
     # GIVEN a path that contains directories and a file
+    assert Path(path_with_directories_and_a_file, some_file).exists()
 
     # WHEN retrieving all directories in the path
     directories: List[Path] = get_directories_in_path(path=path_with_directories_and_a_file)
@@ -105,7 +108,7 @@ def test_get_all_directories_in_path(
     assert some_file not in [directory.name for directory in directories]
 
 
-def test_remove_directory_and_contents(path_with_directories_and_a_file: Path, some_file):
+def test_remove_directory_and_contents(path_with_directories_and_a_file: Path, some_file: str):
     """Test to remove a directory and all its contents."""
 
     # GIVEN a path to a directory

@@ -30,16 +30,22 @@ def test_is_flow_cell_in_statusdb(flow_cell_clean_api_can_be_removed: CleanFlowC
     """Test to check that a flow cell is in statusdb."""
     # GIVEN a clean flow cell api with a store that contains a flow cell
 
+    # WHEN checking whether a flow cell is in status DB
+    is_in_statusdb: bool = flow_cell_clean_api_can_be_removed.is_flow_cell_in_statusdb()
+
     # THEN checking whether a flow cell is in statusdb is TRUE
-    assert flow_cell_clean_api_can_be_removed.is_flow_cell_in_statusdb()
+    assert is_in_statusdb
 
 
 def test_is_flow_cell_backed_up(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
     """Test to check that a flow cell has been backed up."""
     # GIVEN a clean flow cell api with a flow cell that has been backed up
 
+    # WHEN checking whether the flow cell has been backed
+    is_backed_up: bool = flow_cell_clean_api_can_be_removed.is_flow_cell_backed_up()
+
     # THEN checking whether the flow cell has been backed up is TRUE
-    assert flow_cell_clean_api_can_be_removed.is_flow_cell_backed_up()
+    assert is_backed_up
 
 
 def test_is_not_flow_cell_backed_up(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
@@ -47,8 +53,11 @@ def test_is_not_flow_cell_backed_up(flow_cell_clean_api_can_be_removed: CleanFlo
     # GIVEN a clean flow cell api with a flow cell that has not been backed up
     flow_cell_clean_api_can_be_removed.get_flow_cell_from_status_db().has_backup = False
 
+    # WHEN checking whether the flow cell has been backed
+    is_backed_up: bool = flow_cell_clean_api_can_be_removed.is_flow_cell_backed_up()
+
     # THEN checking whether the flow cell has been backed up is FALSE
-    assert not flow_cell_clean_api_can_be_removed.is_flow_cell_backed_up()
+    assert not is_backed_up
 
 
 def test_get_sequencing_metrics_for_flow_cell_from_statusdb(
@@ -72,8 +81,11 @@ def test_has_sequencing_metrics_in_statusdb(flow_cell_clean_api_can_be_removed: 
 
     # GIVEN a clean flow cell api with a store that contains a flow cell with SampleLaneSequencingMetrics entries
 
+    # WHEN THEN checking whether a flow cell has SampleLaneSequencingMetrics entries'
+    has_metrics: bool = flow_cell_clean_api_can_be_removed.has_sequencing_metrics_in_statusdb()
+
     # THEN checking whether a flow cell has SampleLaneSequencingMetrics entries returns True
-    assert flow_cell_clean_api_can_be_removed.has_sequencing_metrics_in_statusdb()
+    assert has_metrics
 
 
 def test_is_directory_older_than_21_days_pass(
@@ -83,12 +95,18 @@ def test_is_directory_older_than_21_days_pass(
 
     # GIVEN a clean flow cell api with a flow cell that can be deleted
 
-    # THEN checking whether a given flow cell directory is older than 21 days is TRUE
+    # WHEN checking whether a given flow cell directory is older than 21 days
+
     with mock.patch(
         "time.time",
         return_value=time.time() + TWENTY_ONE_DAYS_IN_SECONDS,
     ):
-        assert flow_cell_clean_api_can_be_removed.is_directory_older_than_21_days()
+        is_older_that_21_days: bool = (
+            flow_cell_clean_api_can_be_removed.is_directory_older_than_21_days()
+        )
+
+    # THEN checking whether a given flow cell directory is older than 21 days is TRUE
+    assert is_older_that_21_days
 
 
 def test_is_directory_older_than_21_days_fail(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
@@ -96,8 +114,13 @@ def test_is_directory_older_than_21_days_fail(flow_cell_clean_api_can_be_removed
 
     # GIVEN a clean flow cell api with a current time that is set to now.
 
+    # WHEN checking whether a given flow cell directory is older than 21 days
+    is_older_than_21_days: bool = (
+        flow_cell_clean_api_can_be_removed.is_directory_older_than_21_days()
+    )
+
     # THEN checking whether a given flow cell directory is older than 21 days is FALSE
-    assert not flow_cell_clean_api_can_be_removed.is_directory_older_than_21_days()
+    assert not is_older_than_21_days
 
 
 def test_has_sample_sheet_in_housekeeper(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
@@ -105,8 +128,11 @@ def test_has_sample_sheet_in_housekeeper(flow_cell_clean_api_can_be_removed: Cle
 
     # GIVEN a clean flow cell api with a flow cell that has a sample sheet in housekeeper
 
+    # WHEN checking whether the flow cell has a sample sheet in housekeeper
+    has_sample_sheet: bool = flow_cell_clean_api_can_be_removed.has_sample_sheet_in_housekeeper()
+
     # THEN checking whether the flow cell has a sample sheet in housekeeper returns TRUE
-    assert flow_cell_clean_api_can_be_removed.has_sample_sheet_in_housekeeper()
+    assert has_sample_sheet
 
 
 def test_get_files_for_flow_cell_bundle(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
@@ -114,41 +140,35 @@ def test_get_files_for_flow_cell_bundle(flow_cell_clean_api_can_be_removed: Clea
 
     # GIVEN a clean flow cell api with a flow cell that has files in housekeeper
 
-    # WHEN getting fastq and spring files that are tagged with the flow cell
-    fastq_files: List[
-        File
-    ] = flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(
-        tag=SequencingFileTag.FASTQ
-    )
-    spring_files: List[
-        File
-    ] = flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(
-        tag=SequencingFileTag.SPRING
-    )
-    spring_metadata_files: List[
-        File
-    ] = flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(
-        tag=SequencingFileTag.SPRING_METADATA
-    )
+    # WHEN getting fastq, spring and metadata files that are tagged with the flow cell
+    for tag in [
+        SequencingFileTag.FASTQ,
+        SequencingFileTag.SPRING,
+        SequencingFileTag.SPRING_METADATA,
+    ]:
+        files: List[
+            File
+        ] = flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(tag=tag)
 
-    # THEN fastq and SPRING files are returned
-    assert fastq_files
-    assert spring_files
-    assert spring_metadata_files
+        # THEN fastq, spring and spring metadata files are returned
+        assert files
 
 
 def test_can_flow_cell_be_deleted(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
     """Test the flow cell can be deleted check."""
     # GIVEN a flow cell that can be deleted
 
-    # WHEN checking that the flow cell can be deleted
-
-    # THEN the check whether the flow cell can be deleted returns True
     with mock.patch(
         "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
         return_value=True,
     ):
-        assert flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
+        # WHEN checking that the flow cell can be deleted
+        can_be_deleted: bool = (
+            flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
+        )
+
+    # THEN the check whether the flow cell can be deleted returns True
+    assert can_be_deleted
 
 
 def test_delete_flow_cell_directory(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
