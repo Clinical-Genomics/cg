@@ -3,7 +3,6 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.cli.backup import encrypt_flow_cells, fetch_flow_cell
 from cg.constants import EXIT_SUCCESS, FileExtensions, FlowCellStatus
 from cg.models.cg_config import CGConfig
@@ -12,14 +11,10 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_encrypt_flow_cells(
-    cli_runner: CliRunner, cg_context: CGConfig, caplog, mocker, sbatch_job_number: str
+    cli_runner: CliRunner, cg_context: CGConfig, caplog, sbatch_job_number: str
 ):
     """Test encrypt flow cell in dry run mode."""
     caplog.set_level(logging.INFO)
-
-    # Given a mock SLURM API
-    mocker.patch.object(SlurmAPI, "submit_sbatch_job")
-    SlurmAPI.submit_sbatch_job.return_value = sbatch_job_number
 
     # GIVEN a flow cells directory
 
@@ -39,15 +34,9 @@ def test_encrypt_flow_cells_when_already_backed_up(
     caplog,
     flow_cell_name: str,
     helpers: StoreHelpers,
-    mocker,
-    sbatch_job_number: str,
 ):
     """Test encrypt flow cell in dry run mode when there is already a back-up."""
     caplog.set_level(logging.DEBUG)
-
-    # Given a mock SLURM API
-    mocker.patch.object(SlurmAPI, "submit_sbatch_job")
-    SlurmAPI.submit_sbatch_job.return_value = sbatch_job_number
 
     # Given a flow cell with a back-up
     helpers.add_flow_cell(
@@ -70,16 +59,11 @@ def test_encrypt_flow_cells_when_sequencing_not_done(
     cli_runner: CliRunner,
     cg_context: CGConfig,
     caplog,
-    flow_cell_name: str,
     mocker,
-    sbatch_job_number: str,
+    flow_cell_name: str,
 ):
     """Test encrypt flow cell in dry run mode when sequencing is not done."""
     caplog.set_level(logging.DEBUG)
-
-    # Given a mock SLURM API
-    mocker.patch.object(SlurmAPI, "submit_sbatch_job")
-    SlurmAPI.submit_sbatch_job.return_value = sbatch_job_number
 
     # GIVEN flow cells that are being sequenced
     mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
@@ -104,14 +88,9 @@ def test_encrypt_flow_cell_when_encryption_already_started(
     encryption_dir: Path,
     flow_cell_name: str,
     mocker,
-    sbatch_job_number: str,
 ):
     """Test encrypt flow cell in dry run mode when pending file exists"""
     caplog.set_level(logging.DEBUG)
-
-    # Given a mock SLURM API
-    mocker.patch.object(SlurmAPI, "submit_sbatch_job")
-    SlurmAPI.submit_sbatch_job.return_value = sbatch_job_number
 
     # GIVEN flow cells that are being sequenced
     mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")

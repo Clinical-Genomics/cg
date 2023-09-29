@@ -43,6 +43,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
     flow_cell_encryption_api = FlowCellEncryptionAPI(
         binary_path=context.encryption.binary_path, config=context.dict(), dry_run=dry_run
     )
+    flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=dry_run)
     encrypt_dir: Path = Path(context.backup.encrypt_dir)
     flow_cells_dir = Path(context.flow_cells_dir)
     LOG.debug(f"Search for flow cells ready to encrypt in {flow_cells_dir}")
