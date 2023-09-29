@@ -308,9 +308,9 @@ class CompressAPI:
         spring_file: File = self.hk_api.get_files(
             bundle=sample_internal_id, tags=[SequencingFileTag.SPRING]
         ).first()
-        spring_tags: List[str] = self.hk_api.get_tag_names_from_file(spring_file)
-        spring_tags.remove(SequencingFileTag.SPRING)
-        return spring_tags + [SequencingFileTag.FASTQ]
+        spring_file_tags: List[str] = self.hk_api.get_tag_names_from_file(spring_file)
+        spring_file_tags.remove(SequencingFileTag.SPRING)
+        return spring_file_tags + [SequencingFileTag.FASTQ]
 
     # Methods to remove files from disc
     def remove_fastq(self, fastq_first: Path, fastq_second: Path):

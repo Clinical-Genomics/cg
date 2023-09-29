@@ -148,7 +148,9 @@ def test_get_fastq_tag_names(compress_api: MockCompressAPI, helpers, hk_sample_b
     assert spring_file
 
     # GIVEN that the spring_file is tagged with more than 'spring'
-    assert len(spring_file.tags) > 1
+    assert len(spring_file.tags) > 1 and SequencingFileTag.SPRING in [
+        tag.name for tag in spring_file.tags
+    ]
 
     # WHEN getting fastq tags from its path
     fastq_tags: List[str] = compress_api.get_fastq_tag_names(sample_id)
