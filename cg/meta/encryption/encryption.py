@@ -86,9 +86,9 @@ class EncryptionAPI:
             [
                 self.binary_path,
                 "--encrypt",
-                "-recipient",
+                "--recipient",
                 EncryptionUserID.HASTA_USER_ID,
-                "-output",
+                "--output",
                 passphrase_file_path.with_suffix(FileExtensions.GPG).as_posix(),
                 passphrase_file_path.as_posix(),
             ]
