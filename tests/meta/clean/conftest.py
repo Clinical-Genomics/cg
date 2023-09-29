@@ -154,6 +154,22 @@ def housekeeper_api_with_flow_cell_to_clean(
 
 
 @pytest.fixture(scope="function")
+def housekeeper_api_with_flow_cell_not_to_clean(
+    real_housekeeper_api: HousekeeperAPI,
+    helpers: StoreHelpers,
+    hk_sample_bundle_for_flow_cell_not_to_clean: Dict,
+) -> HousekeeperAPI:
+    """
+    Return a housekeeper api that contains a flow cell bundle with sample sheet,
+    a sample bundle with a fastq and a SPRING file that are tagged with the flow cell.
+    """
+    helpers.ensure_hk_bundle(
+        store=real_housekeeper_api, bundle_data=hk_sample_bundle_for_flow_cell_not_to_clean
+    )
+    return real_housekeeper_api
+
+
+@pytest.fixture(scope="function")
 def hk_flow_cell_to_clean_bundle(
     tmp_flow_cell_to_clean: FlowCellDirectoryData,
     timestamp_yesterday: datetime,
@@ -204,4 +220,17 @@ def hk_sample_bundle_for_flow_cell_to_clean(
                 "tags": [SequencingFileTag.SPRING_METADATA, sample_id, tmp_flow_cell_to_clean.id],
             },
         ],
+    }
+
+
+@pytest.fixture(scope="function")
+def hk_sample_bundle_for_flow_cell_not_to_clean(
+    sample_id: str,
+    timestamp_yesterday: datetime,
+) -> Dict:
+    return {
+        "name": sample_id,
+        "created": timestamp_yesterday,
+        "expires": timestamp_yesterday,
+        "files": [],
     }

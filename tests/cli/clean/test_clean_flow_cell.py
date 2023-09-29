@@ -3,7 +3,7 @@ from pathlib import Path
 from unittest import mock
 
 from click.testing import CliRunner
-
+import logging
 from cg.cli.clean import clean_flow_cells
 from cg.models.cg_config import CGConfig
 
@@ -13,10 +13,11 @@ def test_clean_flow_cells_cmd(
     clean_flow_cells_context: CGConfig,
     tmp_flow_cell_to_clean_path: Path,
     tmp_flow_cell_not_to_clean_path: Path,
+    caplog,
 ):
     """Test the clean flow cells command."""
     # GIVEN a config with StatusDB and Housekeeper
-
+    caplog.set_level(logging.DEBUG)
     # GIVEN one flow cell that should be cleaned and one that should not
     assert tmp_flow_cell_not_to_clean_path.exists()
     assert tmp_flow_cell_to_clean_path.exists()
@@ -33,9 +34,11 @@ def test_clean_flow_cells_cmd(
 
     # THEN the flow cell fulfilling all cleaning criteria is deleted
     assert not tmp_flow_cell_to_clean_path.exists()
+    assert "Successfully removed the directory and its contents" in caplog.text
 
     # THEN the flow cell not fulfilling all cleaning criteria is not deleted
     assert tmp_flow_cell_not_to_clean_path.exists()
+    assert "CleanFlowCellFailedError" in caplog.text
 
 
 def test_clean_flow_cells_cmd_dry_run(
@@ -43,10 +46,11 @@ def test_clean_flow_cells_cmd_dry_run(
     clean_flow_cells_context: CGConfig,
     tmp_flow_cell_to_clean_path: Path,
     tmp_flow_cell_not_to_clean_path: Path,
+    caplog,
 ):
     """Test the clean flow cells command using dry-run."""
     # GIVEN a config with StatusDB and Housekeeper
-
+    caplog.set_level(logging.DEBUG)
     # GIVEN one flow cell that should be cleaned and one that should not
     assert tmp_flow_cell_not_to_clean_path.exists()
     assert tmp_flow_cell_to_clean_path.exists()
@@ -64,3 +68,4 @@ def test_clean_flow_cells_cmd_dry_run(
     # THEN the directory to clean is not deleted
     assert tmp_flow_cell_to_clean_path.exists()
     assert tmp_flow_cell_not_to_clean_path.exists()
+    assert "Would have removed" in caplog.text
