@@ -229,8 +229,8 @@ def add_file_to_bundle_if_non_existent(
         LOG.warning(f"File does not exist: {file_path}")
         return
 
-    if not file_exists_in_latest_version_for_bundle(
-        file_path=file_path, bundle_name=bundle_name, hk_api=hk_api
+    if not hk_api.file_exists_in_latest_version_for_bundle(
+        file_path=file_path, bundle_name=bundle_name
     ):
         hk_api.add_and_include_file_to_latest_version(
             bundle_name=bundle_name,
@@ -240,14 +240,3 @@ def add_file_to_bundle_if_non_existent(
         LOG.info(f"File added to Housekeeper bundle {bundle_name}")
     else:
         LOG.info(f"Bundle {bundle_name} already has a file with the same name as {file_path}")
-
-
-def file_exists_in_latest_version_for_bundle(
-    file_path: Path, bundle_name: str, hk_api: HousekeeperAPI
-) -> bool:
-    """Check if a file exists in the latest version for bundle."""
-    latest_version: Version = hk_api.get_latest_bundle_version(bundle_name=bundle_name)
-
-    return any(
-        file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
-    )

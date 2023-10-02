@@ -516,3 +516,10 @@ class HousekeeperAPI:
             LOG.error(f"Sample sheet file for flowcell {flow_cell_id} not found in Housekeeper!")
             raise HousekeeperFileMissingError
         return Path(sample_sheet_files[0].full_path)
+
+    def file_exists_in_latest_version_for_bundle(self, file_path: Path, bundle_name: str) -> bool:
+        """Check if a file exists in the latest version for bundle."""
+        latest_version: Version = self.get_latest_bundle_version(bundle_name)
+        return any(
+            file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
+        )
