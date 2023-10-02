@@ -1,7 +1,7 @@
 [Header]
 FileFormatVersion,2
-RunName,HY7FFDRX2
-InstrumentPlatform,NovaSeq6000
+RunName,22522YLT3
+InstrumentPlatform,NovaSeqX
 IndexOrientation,Forward
 [Reads]
 Read1Cycles,51

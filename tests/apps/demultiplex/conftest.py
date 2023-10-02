@@ -326,26 +326,18 @@ def novaseq6000_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBcl2Fas
 
 
 @pytest.fixture
-def bcl_convert_sample_sheet_path():
+def bcl_convert_sample_sheet_path(demultiplexed_runs: Path):
     return Path(
-        "tests",
-        "fixtures",
-        "apps",
-        "demultiplexing",
-        "demultiplexed-runs",
+        demultiplexed_runs,
         "230504_A00689_0804_BHY7FFDRX2",
         "SampleSheet.csv",
     )
 
 
 @pytest.fixture
-def bcl2fastq_sample_sheet_path():
+def bcl2fastq_sample_sheet_path(demultiplexed_runs: Path):
     return Path(
-        "tests",
-        "fixtures",
-        "apps",
-        "demultiplexing",
-        "demultiplexed-runs",
+        demultiplexed_runs,
         "170407_ST-E00198_0209_BHHKVCALXX",
         "SampleSheet.csv",
     )
