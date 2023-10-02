@@ -1,16 +1,14 @@
 """Tests for cleaning FASTQ files."""
 import logging
 from pathlib import Path
-from typing import Generator, Dict, List
+from typing import Dict, Generator, List
 
 from _pytest.logging import LogCaptureFixture
-
-from housekeeper.store.models import Version, File
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.meta.compress import files
 from cg.models import CompressionData
+from housekeeper.store.models import File, Version
 from tests.cli.compress.conftest import MockCompressAPI
 from tests.meta.compress.conftest import MockCompressionData
 from tests.store_helpers import StoreHelpers
@@ -95,6 +93,9 @@ def test_update_hk_fastq(
     )
     for spring_file in [hk_spring_files, hk_spring_metadata_files]:
         assert spring_file
+        for tag_name in [tag.name for tag in fastq[run]["hk_first"].tags]:
+            if tag_name != SequencingFileTag.FASTQ:
+                assert tag_name in spring_file.tags
 
     # THEN assert that the SPRING files have been added to bundles directory
     for spring_file in [hk_spring_files[0].path, hk_spring_metadata_files[0].path]:

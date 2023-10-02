@@ -9,10 +9,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
 from cg.apps.demultiplex.sample_sheet.models import SampleSheet
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-    get_sample_type_from_sequencer_type,
-)
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.exc import HousekeeperFileMissingError
@@ -227,13 +224,8 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Create SampleSheet.csv file in working directory and add desired values to the file
         """
         flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(case_id)
-        sample_sheet_housekeeper_path: Path = self.get_sample_sheet_housekeeper_path(flow_cell.name)
-        flow_cell_sample_type = get_sample_type_from_sequencer_type(flow_cell.sequencer_type)
-
-        sample_sheet: SampleSheet = get_sample_sheet_from_file(
-            infile=sample_sheet_housekeeper_path,
-            flow_cell_sample_type=flow_cell_sample_type,
-        )
+        sample_sheet_path: Path = self.get_sample_sheet_housekeeper_path(flow_cell.name)
+        sample_sheet: SampleSheet = get_sample_sheet_from_file(sample_sheet_path)
 
         if not dry_run:
             Path(self.root_dir, case_id).mkdir(parents=True, exist_ok=True)

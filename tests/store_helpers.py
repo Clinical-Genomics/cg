@@ -3,6 +3,8 @@ import logging
 from datetime import datetime
 from typing import Dict, List, Optional
 
+from housekeeper.store.models import Bundle, Version
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.pedigree import Pedigree
@@ -29,7 +31,6 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     User,
 )
-from housekeeper.store.models import Bundle, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -867,3 +868,25 @@ class StoreHelpers:
         store.session.add(metrics)
         store.session.commit()
         return metrics
+
+    @classmethod
+    def add_multiple_sample_lane_sequencing_metrics_entries(cls, metrics_data: List, store) -> None:
+        """Add multiple sample lane sequencing metrics to a store."""
+
+        for (
+            sample_internal_id,
+            flow_cell_name_,
+            flow_cell_lane_number,
+            sample_total_reads_in_lane,
+            sample_base_percentage_passing_q30,
+            sample_base_mean_quality_score,
+        ) in metrics_data:
+            cls.add_sample_lane_sequencing_metrics(
+                store=store,
+                sample_internal_id=sample_internal_id,
+                flow_cell_name=flow_cell_name_,
+                flow_cell_lane_number=flow_cell_lane_number,
+                sample_total_reads_in_lane=sample_total_reads_in_lane,
+                sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
+                sample_base_mean_quality_score=sample_base_mean_quality_score,
+            )

@@ -38,7 +38,6 @@ def test_post_processing_of_flow_cell(
     demultiplex_context: CGConfig,
     flow_cell_info_map: Dict[str, FlowCellInfo],
     tmp_demultiplexed_runs_directory: Path,
-    novaseq6000_bcl_convert_sample_sheet_path,
 ):
     """Test adding a demultiplexed flow cell to the databases with. Runs on each type of
     demultiplexing software and setting used."""
