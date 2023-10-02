@@ -2354,6 +2354,7 @@ def context_config(
             "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
             "tower_pipeline": "rnafusion",
         },
+        "pigz": {"binary_path": "/bin/pigz"},
         "pdc": {"binary_path": "/bin/dsmc"},
         "taxprofiler": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),

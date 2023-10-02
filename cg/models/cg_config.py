@@ -261,6 +261,7 @@ class CGConfig(BaseModel):
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
+    pigz: Optional[CommonAppConfig] = None
     pdc: Optional[CommonAppConfig] = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
