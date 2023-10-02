@@ -57,6 +57,7 @@ def get_sample_sheet_from_file(infile: Path) -> SampleSheet:
 
 
 def get_sample_type(sample_sheet_path: Path) -> Type[FlowCellSample]:
+    """Returns the sample type based on the header of the given sample sheet."""
     sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.CSV, file_path=sample_sheet_path
     )
