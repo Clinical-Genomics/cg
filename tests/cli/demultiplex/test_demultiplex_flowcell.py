@@ -38,7 +38,7 @@ def test_demultiplex_flow_cell_dry_run(
     # GIVEN an out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
-    demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
+    demux_dir: Path = demux_api.flow_cell_demultiplexed_runs_dir(flow_cell)
     unaligned_dir: Path = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
@@ -79,7 +79,7 @@ def test_demultiplex_bcl2fastq_flow_cell(
 
     # GIVEN an out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
-    demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
+    demux_dir: Path = demux_api.flow_cell_demultiplexed_runs_dir(flow_cell)
     unaligned_dir: Path = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     assert demux_dir.exists() is False
@@ -128,7 +128,7 @@ def test_demultiplex_dragen_flowcell(
 
     # GIVEN an out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
-    demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
+    demux_dir: Path = demux_api.flow_cell_demultiplexed_runs_dir(flow_cell)
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     assert demux_dir.exists() is False
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
