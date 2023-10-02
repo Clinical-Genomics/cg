@@ -1,3 +1,5 @@
+import math
+
 from cg.meta.demultiplex.combine_sequencing_metrics import (
     combine_mapped_metrics_with_undetermined,
     combine_metrics,
@@ -17,7 +19,7 @@ def test_calculates_simple_weighted_average():
     )
 
     # THEN The weighted average should be 0.8
-    assert result == 0.8
+    assert math.isclose(result, 0.8, rel_tol=1e-9)
 
 
 def test_handles_zero_counts():
@@ -31,7 +33,7 @@ def test_handles_zero_counts():
     )
 
     # THEN The weighted average should be zero
-    assert result == 0.0
+    assert result == 0
 
 
 def test_combine_metrics():
@@ -52,8 +54,8 @@ def test_combine_metrics():
 
     # THEN The existing metric should be updated
     assert existing_metric.sample_total_reads_in_lane == 200
-    assert existing_metric.sample_base_percentage_passing_q30 == 0.85
-    assert existing_metric.sample_base_mean_quality_score == 27.5
+    assert math.isclose(existing_metric.sample_base_percentage_passing_q30, 0.85, rel_tol=1e-9)
+    assert math.isclose(existing_metric.sample_base_mean_quality_score, 27.5, rel_tol=1e-9)
 
 
 def test_combine_empty_metrics():
@@ -144,6 +146,7 @@ def test_combine_metrics_with_both_mapped_and_undetermined_metrics_same_lane():
     assert len(combined_metrics) == 1
 
     # THEN the metrics should be a weighted average of the mapped and undetermined metrics
-    assert combined_metrics[0].sample_total_reads_in_lane == 200
-    assert combined_metrics[0].sample_base_percentage_passing_q30 == 0.85
-    assert combined_metrics[0].sample_base_mean_quality_score == 25
+    metric: SampleLaneSequencingMetrics = combined_metrics[0]
+    assert metric.sample_total_reads_in_lane == 200
+    assert math.isclose(metric.sample_base_percentage_passing_q30, 0.85, rel_tol=1e-9)
+    assert metric.sample_base_mean_quality_score == 25
