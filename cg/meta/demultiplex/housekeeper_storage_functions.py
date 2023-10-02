@@ -3,13 +3,10 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-from housekeeper.store.models import File, Version
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
-from cg.exc import HousekeeperFileMissingError
 from cg.meta.demultiplex.utils import (
     get_lane_from_sample_fastq,
     get_q30_threshold,
@@ -90,11 +87,8 @@ def add_demux_logs_to_housekeeper(
     tag_names: List[str] = [SequencingFileTag.DEMUX_LOG, flow_cell.id]
     for log_file_path in demux_log_file_paths:
         try:
-            add_file_to_bundle_if_non_existent(
-                file_path=log_file_path,
-                bundle_name=flow_cell.id,
-                tag_names=tag_names,
-                hk_api=hk_api,
+            hk_api.add_file_to_bundle_if_non_existent(
+                file_path=log_file_path, bundle_name=flow_cell.id, tag_names=tag_names
             )
             LOG.info(f"Added demux log file {log_file_path} to Housekeeper.")
         except FileNotFoundError as e:
@@ -146,11 +140,10 @@ def store_fastq_path_in_housekeeper(
     """Add the fastq file path with tags to a bundle and version in Housekeeper."""
     add_bundle_and_version_if_non_existent(bundle_name=sample_internal_id, hk_api=hk_api)
     add_tags_if_non_existent(tag_names=[sample_internal_id], hk_api=hk_api)
-    add_file_to_bundle_if_non_existent(
+    hk_api.add_file_to_bundle_if_non_existent(
         file_path=sample_fastq_path,
         bundle_name=sample_internal_id,
         tag_names=[SequencingFileTag.FASTQ, flow_cell_id, sample_internal_id],
-        hk_api=hk_api,
     )
 
 
@@ -194,11 +187,10 @@ def add_sample_sheet_path_to_housekeeper(
             flow_cell_directory=flow_cell_directory
         )
         add_bundle_and_version_if_non_existent(bundle_name=flow_cell_name, hk_api=hk_api)
-        add_file_to_bundle_if_non_existent(
+        hk_api.add_file_to_bundle_if_non_existent(
             file_path=sample_sheet_file_path,
             bundle_name=flow_cell_name,
             tag_names=[SequencingFileTag.SAMPLE_SHEET, flow_cell_name],
-            hk_api=hk_api,
         )
     except FileNotFoundError as e:
         LOG.error(
@@ -219,24 +211,3 @@ def add_tags_if_non_existent(tag_names: List[str], hk_api: HousekeeperAPI) -> No
     for tag_name in tag_names:
         if hk_api.get_tag(name=tag_name) is None:
             hk_api.add_tag(name=tag_name)
-
-
-def add_file_to_bundle_if_non_existent(
-    file_path: Path, bundle_name: str, tag_names: List[str], hk_api: HousekeeperAPI
-) -> None:
-    """Add file to Housekeeper if it has not already been added."""
-    if not file_path.exists():
-        LOG.warning(f"File does not exist: {file_path}")
-        return
-
-    if not hk_api.file_exists_in_latest_version_for_bundle(
-        file_path=file_path, bundle_name=bundle_name
-    ):
-        hk_api.add_and_include_file_to_latest_version(
-            bundle_name=bundle_name,
-            file=file_path,
-            tags=tag_names,
-        )
-        LOG.info(f"File added to Housekeeper bundle {bundle_name}")
-    else:
-        LOG.info(f"Bundle {bundle_name} already has a file with the same name as {file_path}")

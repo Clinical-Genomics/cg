@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import List, Set
 
-import mock
 from housekeeper.store.models import File
 from mock import MagicMock, call
 
@@ -109,32 +108,28 @@ def test_add_fastq_files_without_sample_id(
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
-    demux_post_processing_api.add_file_to_bundle_if_non_existent = MagicMock()
-
     # GIVEN that the sample sheet exists in housekeeper and the path is in the flow cell
     add_sample_sheet_path_to_housekeeper(
         flow_cell_directory=bcl_convert_flow_cell.path,
         flow_cell_name=bcl_convert_flow_cell.id,
         hk_api=demultiplex_context.housekeeper_api,
     )
-    sample_sheet_path: Path = Path(
-        demultiplex_context.housekeeper_api.get_sample_sheets_from_latest_version(
-            bcl_convert_flow_cell.id
-        )[0].full_path
+    sample_sheet_path: Path = demultiplex_context.housekeeper_api.get_sample_sheet_path(
+        bcl_convert_flow_cell.id
     )
-    bcl_convert_flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
 
-    # WHEN add_fastq_files is called
+    bcl_convert_flow_cell.set_sample_sheet_path_hk(sample_sheet_path)
+    demux_post_processing_api.hk_api.add_file_to_bundle_if_non_existent = MagicMock()
 
+    # WHEN adding the fastq files to housekeeper
     add_sample_fastq_files_to_housekeeper(
         flow_cell=bcl_convert_flow_cell,
         hk_api=demux_post_processing_api.hk_api,
         store=demux_post_processing_api.status_db,
     )
 
-    # THEN add_file_if_non_existent was not called
-    demux_post_processing_api.add_file_to_bundle_if_non_existent.assert_not_called()
-
+    # THEN no files were added to housekeeper
+    demux_post_processing_api.hk_api.add_file_to_bundle_if_non_existent.assert_not_called()
 
 def test_add_existing_sample_sheet(
     demultiplex_context: CGConfig,

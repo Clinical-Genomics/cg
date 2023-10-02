@@ -523,3 +523,23 @@ class HousekeeperAPI:
         return any(
             file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
         )
+
+    def add_file_to_bundle_if_non_existent(
+        self, file_path: Path, bundle_name: str, tag_names: List[str]
+    ) -> None:
+        """Add file to Housekeeper if it has not already been added."""
+        if not file_path.exists():
+            LOG.warning(f"File does not exist: {file_path}")
+            return
+
+        if not self.file_exists_in_latest_version_for_bundle(
+            file_path=file_path, bundle_name=bundle_name
+        ):
+            self.add_and_include_file_to_latest_version(
+                bundle_name=bundle_name,
+                file=file_path,
+                tags=tag_names,
+            )
+            LOG.info(f"File added to Housekeeper bundle {bundle_name}")
+        else:
+            LOG.info(f"Bundle {bundle_name} already has a file with the same name as {file_path}")
