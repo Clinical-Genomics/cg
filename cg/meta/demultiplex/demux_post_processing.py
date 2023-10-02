@@ -2,10 +2,9 @@
 import logging
 from pathlib import Path
 from typing import List, Optional
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
-
 from cg.exc import FlowCellError, MissingFilesError
-
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     get_sample_sheets_from_latest_version,
     store_flow_cell_data_in_housekeeper,
@@ -15,15 +14,11 @@ from cg.meta.demultiplex.status_db_storage_functions import (
     store_sequencing_metrics_in_status_db,
     update_sample_read_counts_in_status_db,
 )
-from cg.meta.demultiplex.utils import (
-    create_delivery_file_in_flow_cell_directory,
-    parse_flow_cell_directory_data,
-)
+from cg.meta.demultiplex.utils import create_delivery_file_in_flow_cell_directory
 from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-
 
 LOG = logging.getLogger(__name__)
 
@@ -71,9 +66,8 @@ class DemuxPostProcessingAPI:
 
         flow_cell_out_directory: Path = Path(self.demultiplexed_runs_dir, flow_cell_directory_name)
 
-        parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
-            flow_cell_directory=flow_cell_out_directory,
-            bcl_converter=bcl_converter,
+        parsed_flow_cell = FlowCellDirectoryData(
+            flow_cell_path=flow_cell_out_directory, bcl_converter=bcl_converter
         )
 
         sample_sheet_path: Path = Path(
