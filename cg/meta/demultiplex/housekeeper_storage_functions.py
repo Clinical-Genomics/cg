@@ -9,7 +9,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
-from cg.exc import HousekeeperBundleVersionMissingError, HousekeeperFileMissingError
+from cg.exc import HousekeeperFileMissingError
 from cg.meta.demultiplex.utils import (
     get_lane_from_sample_fastq,
     get_q30_threshold,
@@ -253,26 +253,9 @@ def file_exists_in_latest_version_for_bundle(
     )
 
 
-def get_sample_sheets_from_latest_version(flow_cell_id: str, hk_api: HousekeeperAPI) -> List[File]:
-    """Returns the files tagged with 'samplesheet' or 'archived_sample_sheet' for the given bundle."""
-    try:
-        sheets_with_normal_tag: List[File] = hk_api.get_files_from_latest_version(
-            bundle_name=flow_cell_id, tags=[flow_cell_id, SequencingFileTag.SAMPLE_SHEET]
-        ).all()
-        sheets_with_archive_tag: List[File] = hk_api.get_files_from_latest_version(
-            bundle_name=flow_cell_id, tags=[flow_cell_id, SequencingFileTag.ARCHIVED_SAMPLE_SHEET]
-        ).all()
-        sample_sheet_files: List[File] = sheets_with_normal_tag + sheets_with_archive_tag
-    except HousekeeperBundleVersionMissingError:
-        sample_sheet_files: List = []
-    return sample_sheet_files
-
-
 def get_sample_sheet_path(flow_cell_id: str, hk_api: HousekeeperAPI) -> Path:
     """Returns the sample sheet path for the flow cell."""
-    sample_sheet_files: List[File] = get_sample_sheets_from_latest_version(
-        flow_cell_id=flow_cell_id, hk_api=hk_api
-    )
+    sample_sheet_files: List[File] = hk_api.get_sample_sheets_from_latest_version(flow_cell_id)
     if not sample_sheet_files:
         LOG.error(f"Sample sheet file for flowcell {flow_cell_id} not found in Housekeeper!")
         raise HousekeeperFileMissingError

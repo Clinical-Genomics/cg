@@ -16,7 +16,6 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_sample_fastq_files_to_housekeeper,
     add_sample_sheet_path_to_housekeeper,
     add_tags_if_non_existent,
-    get_sample_sheets_from_latest_version,
     store_fastq_path_in_housekeeper,
 )
 from cg.models.cg_config import CGConfig
@@ -119,8 +118,8 @@ def test_add_fastq_files_without_sample_id(
         hk_api=demultiplex_context.housekeeper_api,
     )
     sample_sheet_path: Path = Path(
-        get_sample_sheets_from_latest_version(
-            flow_cell_id=bcl_convert_flow_cell.id, hk_api=demultiplex_context.housekeeper_api
+        demultiplex_context.housekeeper_api.get_sample_sheets_from_latest_version(
+            bcl_convert_flow_cell.id
         )[0].full_path
     )
     bcl_convert_flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
