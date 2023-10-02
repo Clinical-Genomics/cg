@@ -20,7 +20,6 @@ from cg.meta.demultiplex.utils import (
     is_sample_id_in_directory_name,
     is_syncing_complete,
     is_valid_sample_fastq_file,
-    parse_flow_cell_directory_data,
     parse_manifest_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -253,14 +252,14 @@ def test_get_sample_sheet_path_not_found(tmp_path: Path):
 
 def test_parse_flow_cell_directory_data_invalid():
     with pytest.raises(FlowCellError):
-        parse_flow_cell_directory_data(Path("dummy_path"), "dummy_bcl_converter")
+        FlowCellDirectoryData(Path("dummy_path"), "dummy_bcl_converter")
 
 
 def test_parse_flow_cell_directory_data_valid():
     # GIVEN a flow cell directory which is valid
     # WHEN parsing the flow cell directory data
     flow_cell_run_directory = "20230508_LH00188_0003_A22522YLT3"
-    result = parse_flow_cell_directory_data(Path(flow_cell_run_directory), "dummy_bcl_converter")
+    result = FlowCellDirectoryData(Path(flow_cell_run_directory), "dummy_bcl_converter")
 
     # THEN a FlowCellDirectoryData object should be returned
     assert isinstance(result, FlowCellDirectoryData)
