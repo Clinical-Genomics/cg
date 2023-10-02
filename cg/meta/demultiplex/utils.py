@@ -183,10 +183,7 @@ def rename_fastq_file_if_needed(fastq_file_path: Path, flow_cell_name: str) -> P
 def get_sample_sheet(flow_cell: FlowCellDirectoryData) -> SampleSheet:
     """Return sample sheet associated with flowcell."""
     sample_sheet_path: Path = flow_cell.get_sample_sheet_path_hk()
-    sample_type = flow_cell.sample_type
-    sample_sheet: SampleSheet = get_sample_sheet_from_file(
-        infile=sample_sheet_path, flow_cell_sample_type=sample_type
-    )
+    sample_sheet: SampleSheet = get_sample_sheet_from_file(sample_sheet_path)
     return sample_sheet
 
 
