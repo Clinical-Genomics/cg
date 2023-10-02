@@ -33,7 +33,7 @@ def store_flow_cell_data_in_housekeeper(
     add_bundle_and_version_if_non_existent(bundle_name=flow_cell.id, hk_api=hk_api)
 
     tags: List[str] = [SequencingFileTag.FASTQ, flow_cell.id]
-    add_tags_if_non_existent(tag_names=tags, hk_api=hk_api)
+    hk_api.add_tags_if_non_existent(tags)
 
     add_sample_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api, store=store)
     store_undetermined_fastq_files(flow_cell=flow_cell, hk_api=hk_api, store=store)
@@ -139,7 +139,7 @@ def store_fastq_path_in_housekeeper(
 ) -> None:
     """Add the fastq file path with tags to a bundle and version in Housekeeper."""
     add_bundle_and_version_if_non_existent(bundle_name=sample_internal_id, hk_api=hk_api)
-    add_tags_if_non_existent(tag_names=[sample_internal_id], hk_api=hk_api)
+    hk_api.add_tags_if_non_existent([sample_internal_id])
     hk_api.add_file_to_bundle_if_non_existent(
         file_path=sample_fastq_path,
         bundle_name=sample_internal_id,
@@ -204,10 +204,3 @@ def add_bundle_and_version_if_non_existent(bundle_name: str, hk_api: Housekeeper
         hk_api.create_new_bundle_and_version(name=bundle_name)
     else:
         LOG.debug(f"Bundle with name {bundle_name} already exists")
-
-
-def add_tags_if_non_existent(tag_names: List[str], hk_api: HousekeeperAPI) -> None:
-    """Ensure that tags exist in Housekeeper."""
-    for tag_name in tag_names:
-        if hk_api.get_tag(name=tag_name) is None:
-            hk_api.add_tag(name=tag_name)

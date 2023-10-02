@@ -14,12 +14,10 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_demux_logs_to_housekeeper,
     add_sample_fastq_files_to_housekeeper,
     add_sample_sheet_path_to_housekeeper,
-    add_tags_if_non_existent,
     store_fastq_path_in_housekeeper,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.store import Store
 
 
 def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
@@ -72,7 +70,7 @@ def test_add_tags_if_non_existent(demultiplex_context: CGConfig):
 
     # WHEN adding new tags
     tag_names = ["tag1", "tag2"]
-    add_tags_if_non_existent(tag_names=tag_names, hk_api=demux_post_processing_api.hk_api)
+    demux_post_processing_api.hk_api.add_tags_if_non_existent(tag_names)
 
     # THEN the expected housekeeper API methods were called to create the tags
     demux_post_processing_api.hk_api.get_tag.assert_has_calls(
@@ -93,7 +91,7 @@ def test_add_tags_if_all_exist(demultiplex_context: CGConfig):
 
     # Call the add_tags_if_non_existent method with two tag names
     tag_names = ["tag1", "tag2"]
-    add_tags_if_non_existent(tag_names=tag_names, hk_api=demux_post_processing_api.hk_api)
+    demux_post_processing_api.hk_api.add_tags_if_non_existent(tag_names)
 
     # Assert that the expected methods were called with the expected arguments
     demux_post_processing_api.hk_api.get_tag.assert_has_calls(
@@ -130,6 +128,7 @@ def test_add_fastq_files_without_sample_id(
 
     # THEN no files were added to housekeeper
     demux_post_processing_api.hk_api.add_file_to_bundle_if_non_existent.assert_not_called()
+
 
 def test_add_existing_sample_sheet(
     demultiplex_context: CGConfig,

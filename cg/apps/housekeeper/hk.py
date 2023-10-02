@@ -543,3 +543,9 @@ class HousekeeperAPI:
             LOG.info(f"File added to Housekeeper bundle {bundle_name}")
         else:
             LOG.info(f"Bundle {bundle_name} already has a file with the same name as {file_path}")
+
+    def add_tags_if_non_existent(self, tag_names: List[str]) -> None:
+        """Ensure that tags exist in Housekeeper."""
+        for tag_name in tag_names:
+            if self.get_tag(name=tag_name) is None:
+                self.add_tag(name=tag_name)
