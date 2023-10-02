@@ -833,14 +833,6 @@ def tmp_flow_cell_name_no_run_parameters() -> str:
     return "180522_A00689_0200_BHLCKNCCXY"
 
 
-@pytest.fixture(name="tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert")
-def fixture_tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert() -> str:
-    """ "Returns the name of a flow cell directory ready for demultiplexing with BCL convert.
-    Contains a sample sheet that is BCL convert compliant
-    """
-    return "211101_A00187_0615_AHLG5GDRZZ"
-
-
 @pytest.fixture(name="tmp_flow_cell_name_malformed_sample_sheet")
 def fixture_tmp_flow_cell_name_malformed_sample_sheet() -> str:
     """ "Returns the name of a flow cell directory ready for demultiplexing with BCL convert.
@@ -887,10 +879,10 @@ def fixture_tmp_flow_cells_directory_malformed_sample_sheet(
 
 @pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert")
 def fixture_tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert(
-    tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert: str, tmp_flow_cells_directory: Path
+    bcl_convert_flow_cell_full_name: str, tmp_flow_cells_directory: Path
 ) -> Path:
     """This is a path to a flow cell directory with the run parameters missing."""
-    return Path(tmp_flow_cells_directory, tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert)
+    return Path(tmp_flow_cells_directory, bcl_convert_flow_cell_full_name)
 
 
 @pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq")
