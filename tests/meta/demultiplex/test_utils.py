@@ -12,7 +12,7 @@ from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
     get_lane_from_sample_fastq,
     get_q30_threshold,
-    get_sample_sheet_path,
+    get_sample_sheet_path_from_flow_cell_dir,
     get_undetermined_fastqs,
     is_file_path_compressed_fastq,
     is_file_relevant_for_demultiplexing,
@@ -216,7 +216,7 @@ def test_get_sample_sheet_path_found(tmp_path: Path):
     sample_sheet_path.touch()
 
     # WHEN the sample sheet is retrieved
-    found_sample_sheet_path: Path = get_sample_sheet_path(flow_cell_directory)
+    found_sample_sheet_path: Path = get_sample_sheet_path_from_flow_cell_dir(flow_cell_directory)
 
     # THEN the path to the sample sheet file should be returned
     assert found_sample_sheet_path == sample_sheet_path
@@ -235,7 +235,7 @@ def test_get_sample_sheet_path_found_in_nested_directory(tmp_path: Path):
     sample_sheet_path.touch()
 
     # WHEN the sample sheet is retrieved
-    found_sample_sheet_path: Path = get_sample_sheet_path(flow_cell_directory)
+    found_sample_sheet_path: Path = get_sample_sheet_path_from_flow_cell_dir(flow_cell_directory)
 
     # THEN the path to the sample sheet file should be returned
     assert found_sample_sheet_path == sample_sheet_path
@@ -248,7 +248,7 @@ def test_get_sample_sheet_path_not_found(tmp_path: Path):
     # WHEN the sample sheet is retrieved
     # THEN a FileNotFoundError should be raised
     with pytest.raises(FileNotFoundError):
-        get_sample_sheet_path(flow_cell_directory)
+        get_sample_sheet_path_from_flow_cell_dir(flow_cell_directory)
 
 
 def test_parse_flow_cell_directory_data_invalid():

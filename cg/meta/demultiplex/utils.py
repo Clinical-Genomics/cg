@@ -144,7 +144,7 @@ def get_q30_threshold(sequencer_type: Sequencers) -> int:
     return FLOWCELL_Q30_THRESHOLD[sequencer_type]
 
 
-def get_sample_sheet_path(
+def get_sample_sheet_path_from_flow_cell_dir(
     flow_cell_directory: Path,
     sample_sheet_file_name: str = DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
 ) -> Path:
