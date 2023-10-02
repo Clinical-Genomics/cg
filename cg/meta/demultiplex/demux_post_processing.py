@@ -7,7 +7,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import FlowCellError, MissingFilesError
 
 from cg.meta.demultiplex.housekeeper_storage_functions import (
-    get_sample_sheets_from_latest_version,
+    get_sample_sheet_path,
     store_flow_cell_data_in_housekeeper,
 )
 from cg.meta.demultiplex.status_db_storage_functions import (
@@ -69,17 +69,14 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
-        flow_cell_out_directory: Path = Path(self.demultiplexed_runs_dir, flow_cell_directory_name)
+        flow_cell_out_directory = Path(self.demultiplexed_runs_dir, flow_cell_directory_name)
 
         parsed_flow_cell: FlowCellDirectoryData = parse_flow_cell_directory_data(
             flow_cell_directory=flow_cell_out_directory,
             bcl_converter=bcl_converter,
         )
-
-        sample_sheet_path: Path = Path(
-            get_sample_sheets_from_latest_version(
-                flow_cell_id=parsed_flow_cell.id, hk_api=self.hk_api
-            )[0].full_path
+        sample_sheet_path: Path = get_sample_sheet_path(
+            flow_cell_id=parsed_flow_cell.id, hk_api=self.hk_api
         )
         parsed_flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
         LOG.debug("Set path for Housekeeper sample sheet in flow cell")

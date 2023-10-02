@@ -266,3 +266,13 @@ def get_sample_sheets_from_latest_version(flow_cell_id: str, hk_api: Housekeeper
     except HousekeeperBundleVersionMissingError:
         sample_sheet_files: List = []
     return sample_sheet_files
+
+
+def get_sample_sheet_path(flow_cell_id: str, hk_api: HousekeeperAPI) -> Path:
+    """Returns the sample sheet path for the flow cell."""
+    sample_sheet_files: List[File] = get_sample_sheets_from_latest_version(
+        flow_cell_id=flow_cell_id, hk_api=hk_api
+    )
+    if not sample_sheet_files:
+        raise FileNotFoundError(f"Sample sheet for flow cell {flow_cell_id} not found")
+    return sample_sheet_files[0].path
