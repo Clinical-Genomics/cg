@@ -2,6 +2,7 @@ from typing import Dict
 
 import pytest
 
+from cg.constants import METAGENOME_SOURCES
 from cg.constants.orderforms import REV_SEX_MAP
 from cg.models.orders.excel_sample import ExcelSample
 from cg.models.orders.sample_base import PriorityEnum
@@ -300,3 +301,19 @@ def test_invalid_source(mip_rna_orderform_sample: Dict):
     # THEN a ValueError should be raised
     with pytest.raises(ValueError):
         ExcelSample.model_validate(mip_rna_orderform_sample)
+
+
+def test_valid_source(mip_rna_orderform_sample: Dict):
+    """Tests that no ValueError is raised when a valid source is specified."""
+
+    # GIVEN a parsed order form in Excel format with a valid source specified
+    mip_rna_orderform_sample["UDF/Source"] = METAGENOME_SOURCES[0]
+
+    # WHEN converting to an ExcelSample object
+
+    # THEN no ValueError should be raised
+    ExcelSample.model_validate(mip_rna_orderform_sample)
+
+
+def test_status_convert_to_lower(mip_rna_orderform_sample: Dict):
+    """"""

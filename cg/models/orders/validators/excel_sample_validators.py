@@ -1,4 +1,3 @@
-import re
 from typing import Optional
 
 from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
@@ -34,14 +33,19 @@ def validate_data_analysis(data_analysis):
 
 
 def numeric_value(value: Optional[str]):
-    """Validates that the given string can be given as either an integer or a float"""
+    """Validates that the given string can be given as either an integer or a float. Also converts floats of the
+    type x.00 to x."""
     if not value:
         return None
     if value.replace(".", "").isnumeric():
-        if re.match(r"^\d+\.?0+$", value):
-            return value.split(".")[0]
-        if value.isnumeric() or re.match(r"\d+\.\d+", value):
+        try:
+            float_value = float(value)
+            if float_value.is_integer():
+                return value.split(".")[0]
             return value
+        except ValueError:
+            if value.isnumeric():
+                return value
     raise AttributeError(f"Order contains non-numeric value '{value}'")
 
 
