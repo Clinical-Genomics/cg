@@ -1,14 +1,10 @@
 import logging
 from collections import defaultdict
 from typing import List, Tuple
-from typing_extensions import Annotated
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Extra, Field
+from pydantic import BaseModel, ConfigDict, Extra, Field
 
-from cg.apps.demultiplex.sample_sheet.validators import (
-    remove_index_from_sample_id,
-    validate_sample_id,
-)
+from cg.apps.demultiplex.sample_sheet.validators import SampleId
 from cg.constants.constants import GenomeVersion
 from cg.constants.demultiplexing import (
     SampleSheetBcl2FastqSections,
@@ -16,12 +12,6 @@ from cg.constants.demultiplexing import (
 )
 
 LOG = logging.getLogger(__name__)
-
-SampleId = Annotated[
-    str,
-    AfterValidator(remove_index_from_sample_id),
-    AfterValidator(validate_sample_id),
-]
 
 
 class FlowCellSample(BaseModel):

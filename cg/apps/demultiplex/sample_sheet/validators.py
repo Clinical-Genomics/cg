@@ -1,5 +1,8 @@
 import re
 
+from pydantic import AfterValidator
+from typing_extensions import Annotated
+
 
 def is_valid_sample_internal_id(sample_internal_id: str) -> bool:
     """
@@ -18,3 +21,10 @@ def validate_sample_id(sample_id: str) -> str:
 
 def remove_index_from_sample_id(sample_id_with_index: str) -> str:
     return sample_id_with_index.split("_")[0]
+
+
+SampleId = Annotated[
+    str,
+    AfterValidator(remove_index_from_sample_id),
+    AfterValidator(validate_sample_id),
+]
