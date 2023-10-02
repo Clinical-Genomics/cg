@@ -251,13 +251,3 @@ def file_exists_in_latest_version_for_bundle(
     return any(
         file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
     )
-
-
-def get_sample_sheet_path(flow_cell_id: str, hk_api: HousekeeperAPI) -> Path:
-    """Returns the sample sheet path for the flow cell."""
-    sample_sheet_files: List[File] = hk_api.get_sample_sheets_from_latest_version(flow_cell_id)
-    if not sample_sheet_files:
-        LOG.error(f"Sample sheet file for flowcell {flow_cell_id} not found in Housekeeper!")
-        raise HousekeeperFileMissingError
-
-    return Path(sample_sheet_files[0].full_path)

@@ -508,3 +508,11 @@ class HousekeeperAPI:
         except HousekeeperBundleVersionMissingError:
             sample_sheet_files: List = []
         return sample_sheet_files
+
+    def get_sample_sheet_path(self, flow_cell_id: str) -> Path:
+        """Returns the sample sheet path for the flow cell."""
+        sample_sheet_files: List[File] = self.get_sample_sheets_from_latest_version(flow_cell_id)
+        if not sample_sheet_files:
+            LOG.error(f"Sample sheet file for flowcell {flow_cell_id} not found in Housekeeper!")
+            raise HousekeeperFileMissingError
+        return Path(sample_sheet_files[0].full_path)
