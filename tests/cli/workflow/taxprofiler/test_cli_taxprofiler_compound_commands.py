@@ -76,5 +76,3 @@ def test_taxprofiler_start_available(
 
     # THEN it should successfully identify the one case eligible for auto-start
     assert taxprofiler_case_id in caplog.text
-
-
