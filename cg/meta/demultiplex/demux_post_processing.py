@@ -71,7 +71,7 @@ class DemuxPostProcessingAPI:
         )
 
         sample_sheet_path: Path = get_sample_sheet_path(
-            flow_cell_id=parsed_flow_cell.id, hk_api=self.hk_api
+            flow_cell_id=flow_cell.id, hk_api=self.hk_api
         )
         flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
         LOG.debug("Set path for Housekeeper sample sheet in flow cell")
