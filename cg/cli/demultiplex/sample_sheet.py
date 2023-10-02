@@ -32,30 +32,12 @@ def sample_sheet_commands():
 
 
 @sample_sheet_commands.command(name="validate")
-@click.argument("flow-cell-name")
 @click.argument("sheet", type=click.Path(exists=True, dir_okay=False))
-@OPTION_BCL_CONVERTER
-@click.pass_obj
-def validate_sample_sheet(
-    context: CGConfig,
-    flow_cell_name: str,
-    bcl_converter: str,
-    sheet: click.Path,
-):
-    """Validate a sample sheet.
-    flow-cell-name is the flow cell run directory name, e.g. '201203_D00483_0200_AHVKJCDRXX'
-    """
-
-    flow_cell_path: Path = Path(context.demultiplex_api.flow_cells_dir, flow_cell_name)
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
-    )
-    LOG.info(
-        f"Validating {sheet} as a {flow_cell.sequencer_type} {bcl_converter} sample sheet",
-    )
-    sheet: Path = Path(str(sheet))
+def validate_sample_sheet(sheet: click.Path):
+    """Validate a sample sheet."""
+    LOG.info(f"Validating {sheet} sample sheet")
     try:
-        get_sample_sheet_from_file(infile=sheet, flow_cell_sample_type=flow_cell.sample_type)
+        get_sample_sheet_from_file(Path(sheet))
     except ValidationError as error:
         LOG.warning(error)
         raise click.Abort from error
