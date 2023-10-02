@@ -149,6 +149,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
     ):
         super().__init__(binary_path=binary_path, dry_run=dry_run)
         self.tar_api = TarAPI(binary_path=config["tar"]["binary_path"], dry_run=dry_run)
+        self.pigz_binary_path: str = config["pigz"]["binary_path"]
         self.slurm_api: SlurmAPI = SlurmAPI()
         self.slurm_account: str = config["backup"]["slurm_flow_cell_encryption"]["account"]
         self.slurm_hours: int = config["backup"]["slurm_flow_cell_encryption"]["hours"]
@@ -215,7 +216,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
                 passphrase_file_path=symmetric_passphrase_file_path
             ),
             tar_encrypt_flow_cell_dir=self.tar_api.get_compress_cmd(input_path=flow_cell_dir),
-            parallel_gzip=f"pigz -p {self.slurm_number_tasks - LIMIT_PIGZ_TASK} --fast -c",
+            parallel_gzip=f"{self.pigz_binary_path} -p {self.slurm_number_tasks - LIMIT_PIGZ_TASK} --fast -c",
             tee=f"tee >(md5sum > {encrypted_md5sum_file_path})",
             flow_cell_symmetric_encryption=self.get_flow_cell_symmetric_encryption_command(
                 output_file=encrypted_gpg_file_path,
