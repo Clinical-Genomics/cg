@@ -21,7 +21,7 @@ from cg.utils import Process
 from cg.utils.checksum.checksum import sha512_checksum
 
 LOG = logging.getLogger(__name__)
-LIMIT_GZIP_TASK: int = 3
+LIMIT_PIGZ_TASK: int = 3
 
 
 class EncryptionAPI:
@@ -215,7 +215,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
                 passphrase_file_path=symmetric_passphrase_file_path
             ),
             tar_encrypt_flow_cell_dir=self.tar_api.get_compress_cmd(input_path=flow_cell_dir),
-            parallel_gzip="gzip --fast -c",
+            parallel_gzip=f"pigz -p {self.slurm_number_tasks - LIMIT_PIGZ_TASK} --fast -c",
             tee=f"tee >(md5sum > {encrypted_md5sum_file_path})",
             flow_cell_symmetric_encryption=self.get_flow_cell_symmetric_encryption_command(
                 output_file=encrypted_gpg_file_path,
