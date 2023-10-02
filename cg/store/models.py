@@ -321,9 +321,6 @@ class Collaboration(Model):
             "internal_id": self.internal_id,
         }
 
-    def to_dict(self):
-        return to_dict(model_instance=self)
-
 
 class Delivery(Model):
     __tablename__ = "delivery"
