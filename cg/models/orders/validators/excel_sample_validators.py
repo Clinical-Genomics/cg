@@ -37,16 +37,13 @@ def numeric_value(value: Optional[str]):
     type x.00 to x."""
     if not value:
         return None
-    if value.replace(".", "").isnumeric():
-        try:
-            float_value = float(value)
-            if float_value.is_integer():
-                return value.split(".")[0]
-            return value
-        except ValueError:
-            if value.isnumeric():
-                return value
-    raise AttributeError(f"Order contains non-numeric value '{value}'")
+    try:
+        float_value: float = float(value)
+        if float_value.is_integer():
+            return str(int(float_value))
+        return float_value
+    except ValueError:
+        raise AttributeError(f"Order contains non-numeric value '{value}'")
 
 
 def validate_parent(parent: str):
