@@ -66,22 +66,22 @@ class DemuxPostProcessingAPI:
 
         flow_cell_out_directory: Path = Path(self.demultiplexed_runs_dir, flow_cell_directory_name)
 
-        parsed_flow_cell = FlowCellDirectoryData(
+        flow_cell = FlowCellDirectoryData(
             flow_cell_path=flow_cell_out_directory, bcl_converter=bcl_converter
         )
 
         sample_sheet_path: Path = Path(
-            get_sample_sheets_from_latest_version(
-                flow_cell_id=parsed_flow_cell.id, hk_api=self.hk_api
-            )[0].full_path
+            get_sample_sheets_from_latest_version(flow_cell_id=flow_cell.id, hk_api=self.hk_api)[
+                0
+            ].full_path
         )
-        parsed_flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
+        flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
         LOG.debug("Set path for Housekeeper sample sheet in flow cell")
 
         try:
             is_flow_cell_ready_for_postprocessing(
                 flow_cell_output_directory=flow_cell_out_directory,
-                flow_cell=parsed_flow_cell,
+                flow_cell=flow_cell,
                 force=force,
             )
         except (FlowCellError, MissingFilesError) as e:
@@ -89,7 +89,7 @@ class DemuxPostProcessingAPI:
             return
 
         try:
-            self.store_flow_cell_data(parsed_flow_cell)
+            self.store_flow_cell_data(flow_cell)
         except Exception as e:
             LOG.error(f"Failed to store flow cell data: {str(e)}")
             raise
