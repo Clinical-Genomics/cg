@@ -153,16 +153,6 @@ class FlowCellDirectoryData:
         return Path(self.path, DemultiplexingDirsAndFiles.COPY_COMPLETE)
 
     @property
-    def hiseq_x_copy_complete_path(self) -> Path:
-        """Return copy complete path for Hiseq X."""
-        return Path(self.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE)
-
-    @property
-    def hiseq_x_delivery_started_path(self) -> Path:
-        """Return delivery started path for Hiseq X."""
-        return Path(self.path, DemultiplexingDirsAndFiles.DELIVERY)
-
-    @property
     def demultiplexing_started_path(self) -> Path:
         """Return demux started path."""
         return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_STARTED)
@@ -171,11 +161,6 @@ class FlowCellDirectoryData:
     def trailblazer_config_path(self) -> Path:
         """Return file to SLURM job ids path."""
         return Path(self.path, "slurm_job_ids.yaml")
-
-    @property
-    def hiseq_x_flow_cell(self) -> Path:
-        """Return path to Hiseq X flow cell directory."""
-        return Path(self.path, DemultiplexingDirsAndFiles.Hiseq_X_TILE_DIR)
 
     @property
     def is_demultiplexing_complete(self) -> bool:
@@ -263,21 +248,6 @@ class FlowCellDirectoryData:
         """
         LOG.info("Check if copy of data from sequence instrument is ready")
         return self.copy_complete_path.exists()
-
-    def is_hiseq_x_copy_completed(self) -> bool:
-        """Check if copy of Hiseq X flow cell is done."""
-        LOG.info("Check if copy of data from Hiseq X sequence instrument is ready")
-        return self.hiseq_x_copy_complete_path.exists()
-
-    def is_hiseq_x_delivery_started(self) -> bool:
-        """Check if delivery of Hiseq X flow cell is started."""
-        LOG.info("Check if delivery of data from Hiseq X sequence instrument is ready")
-        return self.hiseq_x_delivery_started_path.exists()
-
-    def is_hiseq_x(self) -> bool:
-        """Check if flow cell is Hiseq X."""
-        LOG.debug("Check if flow cell is Hiseq X")
-        return self.hiseq_x_flow_cell.exists()
 
     def is_flow_cell_ready(self) -> bool:
         """Check if a flow cell is ready for demultiplexing.

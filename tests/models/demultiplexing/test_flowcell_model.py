@@ -47,62 +47,6 @@ def test_rta_exists(bcl2fastq_flow_cell: FlowCellDirectoryData):
     assert rta_file.exists()
 
 
-def test_is_hiseq_x_copy_completed_ready(bcl2fastq_flow_cell: FlowCellDirectoryData):
-    # GIVEN the path to a demultiplexed finished flow cell
-    # GIVEN a flow cell object
-    # GIVEN a copy complete file
-
-    # WHEN fetching the path to the copy complete file
-    is_completed = bcl2fastq_flow_cell.is_hiseq_x_copy_completed()
-
-    # THEN assert that the file exists
-    assert is_completed is True
-
-
-def test_is_hiseq_x_delivery_started_ready(
-    bcl2fastq_flow_cell: FlowCellDirectoryData, demultiplexing_delivery_file: Path
-):
-    # GIVEN the path to a demultiplexed finished flow cell
-    # GIVEN a flow cell object
-    # GIVEN a delivery file
-    demultiplexing_delivery_file.touch()
-
-    # WHEN checking the path to the delivery file
-    is_delivered = bcl2fastq_flow_cell.is_hiseq_x_delivery_started()
-
-    demultiplexing_delivery_file.unlink()
-
-    # THEN assert that the file exists
-    assert is_delivered is True
-
-
-def test_is_hiseq_x_delivery_started_not_ready(bcl2fastq_flow_cell: FlowCellDirectoryData):
-    # GIVEN the path to a demultiplexed finished flow cell
-    # GIVEN a flow cell object
-
-    # WHEN checking the path to the copy complete file
-    is_delivered = bcl2fastq_flow_cell.is_hiseq_x_delivery_started()
-
-    # THEN assert that the file do not exist
-    assert is_delivered is False
-
-
-def test_is_hiseq_x(bcl2fastq_flow_cell: FlowCellDirectoryData, hiseq_x_tile_dir: Path):
-    # GIVEN the path to a demultiplexed finished flow cell
-    # GIVEN a flow cell object
-    # GIVEN a Hiseq X directory
-    hiseq_x_tile_dir.mkdir(exist_ok=True)
-
-    # WHEN checking the path to the Hiseq X flow cell directory
-    is_hiseq_x = bcl2fastq_flow_cell.is_hiseq_x()
-
-    # Clean up
-    hiseq_x_tile_dir.rmdir()
-
-    # THEN assert that the file exists
-    assert is_hiseq_x is True
-
-
 def test_get_sample_model_bcl2fastq(bcl2fastq_flow_cell: FlowCellDirectoryData):
     """Test that the sample model of a bcl2fastq flow cell is FlowCellSampleNovaSeq6000Bcl2Fastq."""
     # GIVEN a Bcl2Fastq flow cell
