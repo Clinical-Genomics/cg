@@ -41,7 +41,7 @@ def numeric_value(value: Optional[str]):
         float_value: float = float(value)
         if float_value.is_integer():
             return str(int(float_value))
-        return float_value
+        return value
     except ValueError:
         raise AttributeError(f"Order contains non-numeric value '{value}'")
 
