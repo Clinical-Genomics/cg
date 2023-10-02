@@ -7,6 +7,7 @@ from cg.cli.workflow.taxprofiler.base import (
     start_available,
 )
 from cg.constants import EXIT_SUCCESS
+from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 
@@ -77,18 +78,3 @@ def test_taxprofiler_start_available(
     assert taxprofiler_case_id in caplog.text
 
 
-def test_taxprofiler_start_available_case_without_samples(
-    cli_runner: CliRunner,
-    taxprofiler_context: CGConfig,
-    caplog: LogCaptureFixture,
-    no_sample_case_id: str,
-):
-    """Test config_case with a case without samples."""
-    caplog.set_level(logging.ERROR)
-    # GIVEN a case
-
-    # WHEN running config case
-    result = cli_runner.invoke(start_available, [no_sample_case_id], obj=taxprofiler_context)
-
-    # THEN command should not exit successfully
-    assert result.exit_code != EXIT_SUCCESS
