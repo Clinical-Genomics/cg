@@ -89,7 +89,7 @@ def get_spring_archive_files(crunchy_metadata: CrunchyMetadata) -> Dict[str, Cru
 def write_metadata_content(spring_metadata: CrunchyMetadata, spring_metadata_path: Path) -> None:
     """Update the file on disk."""
     content: dict = ReadStream.get_content_from_stream(
-        file_format=FileFormat.JSON, stream=spring_metadata.model_dump_json(exclude_none=True)
+        file_format=FileFormat.JSON, stream=spring_metadata.json(exclude_none=True)
     )
     WriteFile.write_file_from_content(
         content=content["files"], file_format=FileFormat.JSON, file_path=spring_metadata_path
