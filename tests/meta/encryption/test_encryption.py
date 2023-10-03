@@ -1,6 +1,8 @@
-"""Tests for the meta EncryptionAPI and SpringEncryptionAPI"""
+"""Tests for the meta EncryptionAPIs."""
 import logging
 import pathlib
+from pathlib import Path
+from typing import List
 
 import mock
 
@@ -8,7 +10,7 @@ from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 
 
 @mock.patch("cg.utils.Process")
-def test_run_gpg_command(mock_process, binary_path, test_command):
+def test_run_gpg_command(mock_process, binary_path: str, test_command: List[str]):
     """Tests the run_gpg_command method"""
     # GIVEN a CLI command input for the Process API
     command = test_command
@@ -24,7 +26,7 @@ def test_run_gpg_command(mock_process, binary_path, test_command):
 
 
 @mock.patch("cg.utils.Process")
-def test_run_gpg_command_dry_run(mock_process, binary_path, test_command):
+def test_run_gpg_command_dry_run(mock_process, binary_path: str, test_command: List[str]):
     """Tests the run_gpg_command method"""
     # GIVEN a CLI command input for the Process API
     command = test_command
@@ -38,7 +40,7 @@ def test_run_gpg_command_dry_run(mock_process, binary_path, test_command):
     encryption_api.process.run_command.assert_called_once_with(command, dry_run=True)
 
 
-def test_generate_temporary_passphrase(mocker, binary_path):
+def test_generate_temporary_passphrase(mocker, binary_path: str):
     """Tests generating a temporary passphrase"""
     # GIVEN an instance of the encryption API
     encryption_api = EncryptionAPI(binary_path=binary_path, dry_run=True)
@@ -53,7 +55,10 @@ def test_generate_temporary_passphrase(mocker, binary_path):
 
 
 def test_get_asymmetric_encryption_command(
-    binary_path, input_file_path, output_file_path, asymmetric_encryption_command
+    binary_path: str,
+    input_file_path: Path,
+    output_file_path: Path,
+    asymmetric_encryption_command: List[str],
 ):
     """Tests creating the asymmetric encryption command"""
     # GIVEN an input file and an output file for a gpg command
@@ -69,7 +74,10 @@ def test_get_asymmetric_encryption_command(
 
 
 def test_get_asymmetric_decryption_command(
-    binary_path, input_file_path, output_file_path, asymmetric_decryption_command
+    binary_path: str,
+    input_file_path: Path,
+    output_file_path: Path,
+    asymmetric_decryption_command: List[str],
 ):
     """Tests creating the asymmetric decryption command"""
     # GIVEN an input file and an output file for a gpg command
@@ -87,11 +95,11 @@ def test_get_asymmetric_decryption_command(
 @mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.generate_temporary_passphrase_file")
 def test_get_symmetric_encryption_command(
     mock_passphrase,
-    binary_path,
-    input_file_path,
-    output_file_path,
-    temporary_passphrase,
-    symmetric_encryption_command,
+    binary_path: str,
+    input_file_path: Path,
+    output_file_path: Path,
+    temporary_passphrase: str,
+    symmetric_encryption_command: List[str],
 ):
     """Tests creating the symmetric encryption command"""
     # GIVEN an input file and an output file for a gpg command
@@ -108,11 +116,11 @@ def test_get_symmetric_encryption_command(
 
 
 def test_get_symmetric_decryption_command(
-    binary_path,
-    input_file_path,
-    output_file_path,
-    encryption_key_file,
-    symmetric_decryption_command,
+    binary_path: str,
+    input_file_path: Path,
+    output_file_path: Path,
+    encryption_key_file: str,
+    symmetric_decryption_command: List[str],
 ):
     """Tests creating the symmetric decryption command"""
     # GIVEN an input file and an output file for a gpg command
@@ -135,11 +143,11 @@ def test_spring_symmetric_encryption(
     mock_process,
     mock_passphrase,
     mock_encrypted_spring_file,
-    binary_path,
-    encrypted_spring_file_path,
-    spring_file_path,
-    spring_symmetric_encryption_command,
-    temporary_passphrase,
+    binary_path: str,
+    encrypted_spring_file_path: Path,
+    spring_file_path: Path,
+    spring_symmetric_encryption_command: List[str],
+    temporary_passphrase: str,
 ):
     """Tests encrypting a spring file"""
     # GIVEN a spring file
@@ -163,11 +171,11 @@ def test_key_asymmetric_encryption(
     mock_process,
     mock_passphrase,
     mock_encrypted_key_file,
-    binary_path,
-    encrypted_key_file,
-    key_asymmetric_encryption_command,
-    spring_file_path,
-    temporary_passphrase,
+    binary_path: str,
+    encrypted_key_file: Path,
+    key_asymmetric_encryption_command: List[str],
+    spring_file_path: Path,
+    temporary_passphrase: str,
 ):
     """Tests encrypting an encryption key"""
     # GIVEN a temporary passphrase
@@ -189,10 +197,10 @@ def test_key_asymmetric_encryption(
 def test_spring_symmetric_decryption(
     mock_process,
     mock_encrypted_spring_file_path,
-    binary_path,
-    encrypted_spring_file_path,
-    spring_symmetric_decryption_command,
-    spring_file_path,
+    binary_path: str,
+    encrypted_spring_file_path: Path,
+    spring_symmetric_decryption_command: List[str],
+    spring_file_path: Path,
 ):
     """Tests decrypting a spring file"""
     # GIVEN an encrypted spring file
@@ -215,10 +223,10 @@ def test_spring_symmetric_decryption(
 def test_key_asymmetric_decryption(
     mock_process,
     mock_encrypted_key_file,
-    binary_path,
-    encrypted_key_file,
-    key_asymmetric_decryption_command,
-    spring_file_path,
+    binary_path: str,
+    encrypted_key_file: Path,
+    key_asymmetric_decryption_command: List[str],
+    spring_file_path: Path,
 ):
     """Tests decrypting a encryption key file"""
     # GIVEN an encryption encryption key
@@ -235,7 +243,9 @@ def test_key_asymmetric_decryption(
 
 @mock.patch("pathlib.Path.unlink")
 @mock.patch("cg.utils.Process")
-def test_cleanup_all_files(mock_process, mock_unlink, binary_path, spring_file_path, caplog):
+def test_cleanup_all_files(
+    mock_process, mock_unlink, binary_path: str, spring_file_path: Path, caplog
+):
     """ """
     # GIVEN there are files to clean up: decrypted spring file, encrypted spring file, encrypted
     # encryption key and encryption key
@@ -259,8 +269,8 @@ def test_cleanup_all_files(mock_process, mock_unlink, binary_path, spring_file_p
 def test_cleanup_no_files(
     mock_process,
     mock_unlink,
-    binary_path,
-    spring_file_path,
+    binary_path: str,
+    spring_file_path: Path,
     caplog,
 ):
     """ """
