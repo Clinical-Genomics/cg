@@ -146,10 +146,11 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         config: dict,
         binary_path: str,
         pigz_binary_path: str,
+        tar_api: TarAPI,
         dry_run: bool = False,
     ):
         super().__init__(binary_path=binary_path, dry_run=dry_run)
-        self.tar_api = TarAPI(binary_path=config["tar"]["binary_path"], dry_run=dry_run)
+        self.tar_api: TarAPI = tar_api
         self.pigz_binary_path: str = pigz_binary_path
         self.slurm_api: SlurmAPI = SlurmAPI()
         self.slurm_account: str = config["backup"]["slurm_flow_cell_encryption"]["account"]

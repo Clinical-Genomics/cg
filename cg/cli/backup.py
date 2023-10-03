@@ -63,6 +63,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         config=context.dict(),
         dry_run=dry_run,
         pigz_binary_path=context.pigz.binary_path,
+        tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
     )
     flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=dry_run)
     encrypt_dir: Path = Path(context.backup.encrypt_dir)
