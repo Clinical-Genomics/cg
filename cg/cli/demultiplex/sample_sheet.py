@@ -150,9 +150,14 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
         except FlowCellError:
             continue
         flow_cell_id: str = flow_cell.id
-        sample_sheet_path: Optional[Path] = get_sample_sheet_path(
-            flow_cell_id=flow_cell_id, hk_api=hk_api
-        )
+
+        try:
+            sample_sheet_path: Optional[Path] = get_sample_sheet_path(
+                flow_cell_id=flow_cell_id, hk_api=hk_api
+            )
+        except HousekeeperFileMissingError:
+            sample_sheet_path = None
+
         if flow_cell.sample_sheet_exists():
             LOG.debug("Sample sheet already exists in flow cell directory")
             if not dry_run:
