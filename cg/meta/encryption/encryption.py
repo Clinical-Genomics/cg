@@ -186,23 +186,24 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         self, output_file: Path, passphrase_file_path: Path
     ) -> str:
         """Generates the Gpg command for symmetric encryption of file."""
-        encryption_parameters: List[str] = [
-            self.binary_path
-        ] + GPGParameters.SYMMETRIC_ENCRYPTION.copy()
-        encryption_parameters.append(passphrase_file_path.as_posix())
-        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
-        output_parameter.extend([output_file.as_posix()])
-        encryption_parameters.extend(output_parameter)
+        encryption_parameters: List[str] = (
+            [self.binary_path]
+            + GPGParameters.SYMMETRIC_ENCRYPTION
+            + [passphrase_file_path.as_posix()]
+            + GPGParameters.OUTPUT_PARAMETER
+            + [output_file.as_posix()]
+        )
         return " ".join(encryption_parameters)
 
     def get_flow_cell_symmetric_decryption_command(
         self, input_file: Path, passphrase_file_path: Path
     ) -> str:
         """Generates the Gpg command for symmetric decryption."""
-        decryption_parameters: List[str] = [
-            self.binary_path
-        ] + GPGParameters.SYMMETRIC_DECRYPTION.copy()
-        decryption_parameters.extend([passphrase_file_path.as_posix(), input_file.as_posix()])
+        decryption_parameters: List[str] = (
+            [self.binary_path]
+            + GPGParameters.SYMMETRIC_DECRYPTION
+            + [passphrase_file_path.as_posix(), input_file.as_posix()]
+        )
         return " ".join(decryption_parameters)
 
     def is_encryption_possible(self) -> Tuple[bool, Union[str, None]]:
