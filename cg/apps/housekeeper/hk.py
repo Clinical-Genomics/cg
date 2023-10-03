@@ -5,14 +5,14 @@ import os
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
-from cg.constants import SequencingFileTag
-from cg.exc import HousekeeperBundleVersionMissingError, HousekeeperFileMissingError
-from sqlalchemy.orm import Query
-
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
 from housekeeper.store.models import Archive, Bundle, File, Version
+from sqlalchemy.orm import Query
+
+from cg.constants import SequencingFileTag
+from cg.exc import HousekeeperBundleVersionMissingError, HousekeeperFileMissingError
 
 LOG = logging.getLogger(__name__)
 
@@ -124,6 +124,17 @@ class HousekeeperAPI:
         return self._store.get_files(
             bundle_name=bundle, tag_names=tags, version_id=version, file_path=path
         )
+
+    def get_file_insensitive_path(self, path: Path) -> Optional[File]:
+        """Returns a file in Housekeeper with a path that matches the given path, insensitive to whether the paths
+        are included or not."""
+        file: File = self.files(path=path.as_posix())
+        if not file:
+            if path.is_absolute():
+                file = self.files(path=str(path).replace(self.root_dir, ""))
+            else:
+                file = self.files(path=self.root_dir + str(path))
+        return file
 
     @staticmethod
     def get_files_from_version(version: Version, tags: Set[str]) -> Optional[List[File]]:

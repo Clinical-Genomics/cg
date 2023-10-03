@@ -1,3 +1,5 @@
+import math
+
 import pytest
 from pydantic import ValidationError
 
@@ -30,7 +32,7 @@ def test_statina_upload_files_optional_fields():
 def test_flow_cell_q30_and_reads_init():
     flow_cell = FlowCellQ30AndReads(total_reads_on_flow_cell=5000, average_q30_across_samples=90.5)
     assert flow_cell.total_reads_on_flow_cell == 5000
-    assert flow_cell.average_q30_across_samples == 90.5
+    assert math.isclose(flow_cell.average_q30_across_samples, 90.5, rel_tol=1e-9)
 
 
 def test_passes_read_threshold():

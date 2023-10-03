@@ -204,7 +204,11 @@ class CompressAPI:
                 f"Adding decompressed FASTQ files to Housekeeper for sample {sample.internal_id}"
             )
 
-            self.add_fastq_hk(sample_obj=sample, fastq_first=fastq_first, fastq_second=fastq_second)
+            self.add_fastq_hk(
+                fastq_first=fastq_first,
+                fastq_second=fastq_second,
+                sample_internal_id=sample.internal_id,
+            )
         return True
 
     def delete_fastq_housekeeper(self, hk_fastq_first: File, hk_fastq_second: File) -> None:
@@ -275,16 +279,17 @@ class CompressAPI:
         fastq_tags.remove(SequencingFileTag.FASTQ)
         return fastq_tags
 
-    def add_fastq_hk(self, sample_obj: Sample, fastq_first: Path, fastq_second: Path) -> None:
-        """Add FASTQ files to Housekeeper."""
+    def add_fastq_hk(
+        self,
+        sample_internal_id: str,
+        fastq_first: Path,
+        fastq_second: Path,
+    ) -> None:
+        """Add decompressed FASTQ files to Housekeeper."""
+        fastq_tags: List[str] = self.get_fastq_tag_names(sample_internal_id)
 
-        if not sample_obj.application_version.application.is_external:
-            flow_cell_id: str = self.get_flow_cell_id(fastq_path=fastq_first)
-            fastq_tags: List[str] = [flow_cell_id, SequencingFileTag.FASTQ]
-        else:
-            fastq_tags: List[str] = [sample_obj.internal_id, SequencingFileTag.FASTQ]
         LOG.info(
-            f"Adds {fastq_first}, {fastq_second} to bundle {sample_obj.internal_id} with tags {fastq_tags}"
+            f"Adds {fastq_first}, {fastq_second} to bundle {sample_internal_id} with tags {fastq_tags}"
         )
         if self.dry_run:
             return
@@ -292,9 +297,20 @@ class CompressAPI:
         LOG.info("Updating files in Housekeeper...")
         for fastq in [fastq_first, fastq_second]:
             self.hk_api.add_and_include_file_to_latest_version(
-                bundle_name=sample_obj.internal_id, file=fastq, tags=fastq_tags
+                bundle_name=sample_internal_id, file=fastq, tags=fastq_tags
             )
         self.hk_api.commit()
+
+    def get_fastq_tag_names(self, sample_internal_id: str) -> List[str]:
+        """Returns a list containing all non-spring tag names of the specified file,
+        together with the fastq tag name."""
+
+        spring_file: File = self.hk_api.get_files(
+            bundle=sample_internal_id, tags=[SequencingFileTag.SPRING]
+        ).first()
+        spring_file_tags: List[str] = self.hk_api.get_tag_names_from_file(spring_file)
+        spring_file_tags.remove(SequencingFileTag.SPRING)
+        return spring_file_tags + [SequencingFileTag.FASTQ]
 
     # Methods to remove files from disc
     def remove_fastq(self, fastq_first: Path, fastq_second: Path):
