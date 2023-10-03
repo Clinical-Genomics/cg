@@ -4,7 +4,8 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
-from cg.constants import DataDelivery, Pipeline
+
+from cg.constants import DataDelivery, FlowCellStatus, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.api.find_business_data import FindBusinessDataHandler
