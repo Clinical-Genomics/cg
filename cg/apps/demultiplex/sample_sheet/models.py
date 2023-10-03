@@ -21,7 +21,7 @@ class FlowCellSample(BaseModel):
     sample_id: SampleId
     index: str
     index2: str = ""
-    model_config = ConfigDict(populate_by_name=True, extra='ignore')
+    model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
 
 class FlowCellSampleBcl2Fastq(FlowCellSample):
