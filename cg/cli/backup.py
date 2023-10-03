@@ -1,14 +1,13 @@
 """Backup related CLI commands."""
 import logging
 from pathlib import Path
-from typing import Iterable, List, Optional, Tuple, Union
+from typing import Iterable, List, Optional, Union
 
 import click
 import housekeeper.store.models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.constants import FileExtensions
 from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import FlowCellError
@@ -26,24 +25,6 @@ from cg.store import Store
 from cg.store.models import Flowcell, Sample
 
 LOG = logging.getLogger(__name__)
-
-
-def _is_encryption_possible(
-    db_flow_cell: Flowcell,
-    flow_cell: FlowCellDirectoryData,
-    complete_file_path: Path,
-    pending_file_path: Path,
-) -> Tuple[bool, Union[str, None]]:
-    """Check if requirements for encryption are meet."""
-    if db_flow_cell and db_flow_cell.has_backup:
-        return False, f"Flow cell: {flow_cell.id} is already backed-up"
-    if not flow_cell.is_flow_cell_ready():
-        return False, f"Flow cell: {flow_cell.id} is not ready"
-    if complete_file_path.exists():
-        return False, f"Encryption already completed for flow cell: {flow_cell.id}"
-    if pending_file_path.exists():
-        return False, f"Encryption already started for flow cell: {flow_cell.id}"
-    return True, None
 
 
 @click.group()
@@ -72,6 +53,9 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
             flow_cell_name=flow_cell.id
         )
+        if db_flow_cell and db_flow_cell.has_backup:
+            LOG.debug(f"Flow cell: {flow_cell.id} is already backed-up")
+            continue
         flow_cell_encryption_api = FlowCellEncryptionAPI(
             binary_path=context.encryption.binary_path,
             dry_run=dry_run,
@@ -82,22 +66,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
             sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
             tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
         )
-        complete_file_path: Path = (
-            flow_cell_encryption_api.flow_cell_encrypt_file_path_prefix.with_suffix(
-                FileExtensions.COMPLETE
-            )
-        )
-        pending_file_path: Path = (
-            flow_cell_encryption_api.flow_cell_encrypt_file_path_prefix.with_suffix(
-                FileExtensions.PENDING
-            )
-        )
-        is_requirement_meet, error_msg = _is_encryption_possible(
-            db_flow_cell=db_flow_cell,
-            flow_cell=flow_cell,
-            complete_file_path=complete_file_path,
-            pending_file_path=pending_file_path,
-        )
+        is_requirement_meet, error_msg = flow_cell_encryption_api.is_encryption_possible()
         if not is_requirement_meet:
             LOG.debug(error_msg)
             continue

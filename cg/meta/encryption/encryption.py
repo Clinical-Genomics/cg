@@ -4,7 +4,7 @@ import subprocess
 from io import TextIOWrapper
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions
@@ -204,6 +204,16 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         ] + GPGParameters.SYMMETRIC_DECRYPTION.copy()
         decryption_parameters.extend([passphrase_file_path.as_posix(), input_file.as_posix()])
         return " ".join(decryption_parameters)
+
+    def is_encryption_possible(self) -> Tuple[bool, Union[str, None]]:
+        """Check if requirements for encryption are meet."""
+        if not self.flow_cell.is_flow_cell_ready():
+            return False, f"Flow cell: {self.flow_cell.id} is not ready"
+        if self.complete_file_path.exists():
+            return False, f"Encryption already completed for flow cell: {self.flow_cell.id}"
+        if self.pending_file_path.exists():
+            return False, f"Encryption already started for flow cell: {self.flow_cell.id}"
+        return True, None
 
     def encrypt_flow_cell(
         self,
