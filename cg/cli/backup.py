@@ -7,6 +7,7 @@ import click
 import housekeeper.store.models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions
 from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
@@ -60,9 +61,10 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
     status_db: Store = context.status_db
     flow_cell_encryption_api = FlowCellEncryptionAPI(
         binary_path=context.encryption.binary_path,
-        config=context.dict(),
         dry_run=dry_run,
         pigz_binary_path=context.pigz.binary_path,
+        slurm_api=SlurmAPI(),
+        sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
         tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
     )
     flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=dry_run)

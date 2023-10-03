@@ -4,7 +4,7 @@ import subprocess
 from io import TextIOWrapper
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import List
+from typing import Dict, List, Union
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions
@@ -143,23 +143,22 @@ class FlowCellEncryptionAPI(EncryptionAPI):
 
     def __init__(
         self,
-        config: dict,
         binary_path: str,
         pigz_binary_path: str,
+        sbatch_parameter: Dict[str, Union[str, int]],
+        slurm_api: SlurmAPI,
         tar_api: TarAPI,
         dry_run: bool = False,
     ):
         super().__init__(binary_path=binary_path, dry_run=dry_run)
         self.tar_api: TarAPI = tar_api
         self.pigz_binary_path: str = pigz_binary_path
-        self.slurm_api: SlurmAPI = SlurmAPI()
-        self.slurm_account: str = config["backup"]["slurm_flow_cell_encryption"]["account"]
-        self.slurm_hours: int = config["backup"]["slurm_flow_cell_encryption"]["hours"]
-        self.slurm_mail_user: str = config["backup"]["slurm_flow_cell_encryption"]["mail_user"]
-        self.slurm_memory: int = config["backup"]["slurm_flow_cell_encryption"]["memory"]
-        self.slurm_number_tasks: int = config["backup"]["slurm_flow_cell_encryption"][
-            "number_tasks"
-        ]
+        self.slurm_api: SlurmAPI = slurm_api
+        self.slurm_account: str = sbatch_parameter.get("account")
+        self.slurm_hours: int = sbatch_parameter.get("hours")
+        self.slurm_mail_user: str = sbatch_parameter.get("mail_user")
+        self.slurm_memory: int = sbatch_parameter.get("memory")
+        self.slurm_number_tasks: int = sbatch_parameter.get("number_tasks")
 
     def get_flow_cell_symmetric_encryption_command(
         self, output_file: Path, passphrase_file_path: Path
