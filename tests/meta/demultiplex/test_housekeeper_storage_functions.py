@@ -13,7 +13,6 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_demux_logs_to_housekeeper,
     add_sample_fastq_files_to_housekeeper,
     add_sample_sheet_path_to_housekeeper,
-    store_fastq_path_in_housekeeper,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -219,11 +218,10 @@ def test_store_fastq_path_in_housekeeper_correct_tags(
     assert not populated_housekeeper_api.files(path=empty_fastq_file_path.as_posix()).first()
 
     # WHEN adding the fastq file to housekeeper
-    store_fastq_path_in_housekeeper(
+    populated_housekeeper_api.store_fastq_path_in_housekeeper(
         sample_internal_id=sample_id,
         sample_fastq_path=empty_fastq_file_path,
         flow_cell_id=novaseq6000_flow_cell.id,
-        hk_api=populated_housekeeper_api,
     )
 
     # THEN the file was added to Housekeeper with the correct tags

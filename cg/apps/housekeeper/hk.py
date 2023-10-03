@@ -556,3 +556,18 @@ class HousekeeperAPI:
             self.create_new_bundle_and_version(name=bundle_name)
         else:
             LOG.debug(f"Bundle with name {bundle_name} already exists")
+
+    def store_fastq_path_in_housekeeper(
+        self,
+        sample_internal_id: str,
+        sample_fastq_path: Path,
+        flow_cell_id: str,
+    ) -> None:
+        """Add the fastq file path with tags to a bundle and version in Housekeeper."""
+        self.add_bundle_and_version_if_non_existent(sample_internal_id)
+        self.add_tags_if_non_existent([sample_internal_id])
+        self.add_file_to_bundle_if_non_existent(
+            file_path=sample_fastq_path,
+            bundle_name=sample_internal_id,
+            tag_names=[SequencingFileTag.FASTQ, flow_cell_id, sample_internal_id],
+        )

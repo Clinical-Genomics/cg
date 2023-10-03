@@ -67,11 +67,10 @@ def store_undetermined_fastq_files(
                 flow_cell_name=flow_cell.id,
                 store=store,
             ):
-                store_fastq_path_in_housekeeper(
+                hk_api.store_fastq_path_in_housekeeper(
                     sample_internal_id=sample_id,
                     sample_fastq_path=fastq_path,
                     flow_cell_id=flow_cell.id,
-                    hk_api=hk_api,
                 )
 
 
@@ -123,28 +122,11 @@ def add_sample_fastq_files_to_housekeeper(
                 flow_cell_name=flow_cell.id,
                 store=store,
             ):
-                store_fastq_path_in_housekeeper(
+                hk_api.store_fastq_path_in_housekeeper(
                     sample_internal_id=sample_internal_id,
                     sample_fastq_path=sample_fastq_path,
                     flow_cell_id=flow_cell.id,
-                    hk_api=hk_api,
                 )
-
-
-def store_fastq_path_in_housekeeper(
-    sample_internal_id: str,
-    sample_fastq_path: Path,
-    flow_cell_id: str,
-    hk_api: HousekeeperAPI,
-) -> None:
-    """Add the fastq file path with tags to a bundle and version in Housekeeper."""
-    hk_api.add_bundle_and_version_if_non_existent(sample_internal_id)
-    hk_api.add_tags_if_non_existent([sample_internal_id])
-    hk_api.add_file_to_bundle_if_non_existent(
-        file_path=sample_fastq_path,
-        bundle_name=sample_internal_id,
-        tag_names=[SequencingFileTag.FASTQ, flow_cell_id, sample_internal_id],
-    )
 
 
 def check_if_fastq_path_should_be_stored_in_housekeeper(
@@ -183,9 +165,7 @@ def add_sample_sheet_path_to_housekeeper(
     """Add sample sheet path to Housekeeper."""
 
     try:
-        sample_sheet_file_path: Path = get_sample_sheet_path_from_flow_cell_dir(
-            flow_cell_directory=flow_cell_directory
-        )
+        sample_sheet_file_path: Path = get_sample_sheet_path_from_flow_cell_dir(flow_cell_directory)
         hk_api.add_bundle_and_version_if_non_existent(flow_cell_name)
         hk_api.add_file_to_bundle_if_non_existent(
             file_path=sample_sheet_file_path,
