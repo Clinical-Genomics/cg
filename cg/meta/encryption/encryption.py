@@ -16,6 +16,7 @@ from cg.meta.encryption.sbatch import (
     FLOW_CELL_ENCRYPT_ERROR,
 )
 from cg.meta.tar.tar import TarAPI
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.slurm.sbatch import Sbatch
 from cg.utils import Process
 from cg.utils.checksum.checksum import sha512_checksum
@@ -144,6 +145,8 @@ class FlowCellEncryptionAPI(EncryptionAPI):
     def __init__(
         self,
         binary_path: str,
+        encryption_dir: Path,
+        flow_cell: FlowCellDirectoryData,
         pigz_binary_path: str,
         sbatch_parameter: Dict[str, Union[str, int]],
         slurm_api: SlurmAPI,
@@ -151,6 +154,8 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         dry_run: bool = False,
     ):
         super().__init__(binary_path=binary_path, dry_run=dry_run)
+        self.flow_cell: FlowCellDirectoryData = flow_cell
+        self.encryption_dir: Path = encryption_dir
         self.tar_api: TarAPI = tar_api
         self.pigz_binary_path: str = pigz_binary_path
         self.slurm_api: SlurmAPI = slurm_api
@@ -159,6 +164,10 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         self.slurm_mail_user: str = sbatch_parameter.get("mail_user")
         self.slurm_memory: int = sbatch_parameter.get("memory")
         self.slurm_number_tasks: int = sbatch_parameter.get("number_tasks")
+
+    @property
+    def flow_cell_encryption_dir(self) -> Path:
+        return Path(self.encryption_dir, self.flow_cell.full_name)
 
     def get_flow_cell_symmetric_encryption_command(
         self, output_file: Path, passphrase_file_path: Path

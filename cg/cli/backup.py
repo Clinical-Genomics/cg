@@ -59,15 +59,6 @@ def backup(context: CGConfig):
 def encrypt_flow_cells(context: CGConfig, dry_run: bool):
     """Encrypt flow cells."""
     status_db: Store = context.status_db
-    flow_cell_encryption_api = FlowCellEncryptionAPI(
-        binary_path=context.encryption.binary_path,
-        dry_run=dry_run,
-        pigz_binary_path=context.pigz.binary_path,
-        slurm_api=SlurmAPI(),
-        sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
-        tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
-    )
-    flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=dry_run)
     encrypt_dir: Path = Path(context.backup.encrypt_dir)
     flow_cells_dir = Path(context.flow_cells_dir)
     LOG.debug(f"Search for flow cells ready to encrypt in {flow_cells_dir}")
@@ -82,6 +73,17 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
             flow_cell_name=flow_cell.id
         )
+        flow_cell_encryption_api = FlowCellEncryptionAPI(
+            binary_path=context.encryption.binary_path,
+            dry_run=dry_run,
+            encryption_dir=Path(context.backup.encrypt_dir),
+            flow_cell=flow_cell,
+            pigz_binary_path=context.pigz.binary_path,
+            slurm_api=SlurmAPI(),
+            sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
+            tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
+        )
+        flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=dry_run)
         flow_cell_encrypt_dir = Path(encrypt_dir, flow_cell.full_name)
         flow_cell_encrypt_file_path_prefix = Path(flow_cell_encrypt_dir, flow_cell.id)
         complete_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
