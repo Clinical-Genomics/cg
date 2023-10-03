@@ -7,6 +7,8 @@ from subprocess import CalledProcessError
 from typing import List, Optional, Tuple, Union
 
 import click
+from housekeeper.store.models import Bundle, Version
+
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import AnalysisType, WorkflowManager
@@ -17,7 +19,6 @@ from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, BedVersion, Family, FamilySample, Sample
-from housekeeper.store.models import Bundle, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -409,6 +410,7 @@ class AnalysisAPI(MetaAPI):
             return
 
         if self.prepare_fastq_api.is_spring_decompression_running(case_id):
+            self.set_statusdb_action(case_id=case_id, action="analyze")
             return
 
         self.prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
