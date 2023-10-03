@@ -10,7 +10,7 @@
             "data_analysis": "fastq",
             "data_delivery": "fastq",
             "require_qc_ok": false,
-            "elution_buffer": "EB-buffer",
+            "elution_buffer": "Tris-HCl",
             "source": "faeces",
             "priority": "standard",
             "container_name": "Platen",
