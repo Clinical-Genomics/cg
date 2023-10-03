@@ -59,7 +59,6 @@ def backup(context: CGConfig):
 def encrypt_flow_cells(context: CGConfig, dry_run: bool):
     """Encrypt flow cells."""
     status_db: Store = context.status_db
-    encrypt_dir: Path = Path(context.backup.encrypt_dir)
     flow_cells_dir = Path(context.flow_cells_dir)
     LOG.debug(f"Search for flow cells ready to encrypt in {flow_cells_dir}")
     for flow_cell_dir in flow_cells_dir.iterdir():
@@ -83,13 +82,15 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
             sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
             tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
         )
-        flow_cell_encrypt_dir = Path(encrypt_dir, flow_cell.full_name)
-        flow_cell_encrypt_file_path_prefix = Path(flow_cell_encrypt_dir, flow_cell.id)
-        complete_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
-            FileExtensions.COMPLETE
+        complete_file_path: Path = (
+            flow_cell_encryption_api.flow_cell_encrypt_file_path_prefix.with_suffix(
+                FileExtensions.COMPLETE
+            )
         )
-        pending_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
-            FileExtensions.PENDING
+        pending_file_path: Path = (
+            flow_cell_encryption_api.flow_cell_encrypt_file_path_prefix.with_suffix(
+                FileExtensions.PENDING
+            )
         )
         is_requirement_meet, error_msg = _is_encryption_possible(
             db_flow_cell=db_flow_cell,
@@ -100,16 +101,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         if not is_requirement_meet:
             LOG.debug(error_msg)
             continue
-        flow_cell_encrypt_dir.mkdir(exist_ok=True, parents=True)
-        flow_cell_encryption_api.create_pending_file(pending_path=pending_file_path)
-        flow_cell_encryption_api.encrypt_flow_cell(
-            flow_cell_dir=flow_cell_dir,
-            flow_cell_id=flow_cell.id,
-            flow_cell_encrypt_dir=flow_cell_encrypt_dir,
-            flow_cell_encrypt_file_path_prefix=flow_cell_encrypt_file_path_prefix,
-            pending_file_path=pending_file_path,
-            complete_file_path=complete_file_path,
-        )
+        flow_cell_encryption_api.encrypt_flow_cell()
 
 
 @backup.command("fetch-flow-cell")

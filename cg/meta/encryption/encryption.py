@@ -174,6 +174,14 @@ class FlowCellEncryptionAPI(EncryptionAPI):
     def flow_cell_encrypt_file_path_prefix(self) -> Path:
         return Path(self.flow_cell_encryption_dir, self.flow_cell.id)
 
+    @property
+    def pending_file_path(self) -> Path:
+        return Path(self.flow_cell_encrypt_file_path_prefix.with_suffix(FileExtensions.PENDING))
+
+    @property
+    def complete_file_path(self) -> Path:
+        return Path(self.flow_cell_encrypt_file_path_prefix.with_suffix(FileExtensions.COMPLETE))
+
     def get_flow_cell_symmetric_encryption_command(
         self, output_file: Path, passphrase_file_path: Path
     ) -> str:
@@ -199,30 +207,28 @@ class FlowCellEncryptionAPI(EncryptionAPI):
 
     def encrypt_flow_cell(
         self,
-        complete_file_path: Path,
-        flow_cell_dir: Path,
-        flow_cell_id: str,
-        flow_cell_encrypt_dir: Path,
-        flow_cell_encrypt_file_path_prefix: Path,
-        pending_file_path: Path,
     ) -> None:
         """Encrypt flow cell via GPG and SLURM."""
-        encrypted_gpg_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
+        self.flow_cell_encryption_dir.mkdir(exist_ok=True, parents=True)
+        self.create_pending_file(pending_path=self.pending_file_path)
+        encrypted_gpg_file_path: Path = self.flow_cell_encrypt_file_path_prefix.with_suffix(
             f"{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
         )
-        encrypted_md5sum_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
+        encrypted_md5sum_file_path: Path = self.flow_cell_encrypt_file_path_prefix.with_suffix(
             f"{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.MD5SUM}"
         )
-        decrypted_md5sum_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
+        decrypted_md5sum_file_path: Path = self.flow_cell_encrypt_file_path_prefix.with_suffix(
             f"{FileExtensions.TAR}{FileExtensions.GZIP}.degpg{FileExtensions.MD5SUM}"
         )
-        symmetric_passphrase_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
+        symmetric_passphrase_file_path: Path = self.flow_cell_encrypt_file_path_prefix.with_suffix(
             FileExtensions.PASS_PHRASE
         )
-        final_passphrase_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(
+        final_passphrase_file_path: Path = self.flow_cell_encrypt_file_path_prefix.with_suffix(
             f".key{FileExtensions.GPG}"
         )
-        error_function: str = FLOW_CELL_ENCRYPT_ERROR.format(pending_file_path=pending_file_path)
+        error_function: str = FLOW_CELL_ENCRYPT_ERROR.format(
+            pending_file_path=self.pending_file_path
+        )
         commands: str = FLOW_CELL_ENCRYPT_COMMANDS.format(
             symmetric_passphrase=self.get_symmetric_passphrase_cmd(
                 passphrase_file_path=symmetric_passphrase_file_path
@@ -230,7 +236,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             asymmetrically_encrypt_passphrase=self.get_asymmetrically_encrypt_passphrase_cmd(
                 passphrase_file_path=symmetric_passphrase_file_path
             ),
-            tar_encrypt_flow_cell_dir=self.tar_api.get_compress_cmd(input_path=flow_cell_dir),
+            tar_encrypt_flow_cell_dir=self.tar_api.get_compress_cmd(input_path=self.flow_cell.path),
             parallel_gzip=f"{self.pigz_binary_path} -p {self.slurm_number_tasks - LIMIT_PIGZ_TASK} --fast -c",
             tee=f"tee >(md5sum > {encrypted_md5sum_file_path})",
             flow_cell_symmetric_encryption=self.get_flow_cell_symmetric_encryption_command(
@@ -244,8 +250,8 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             md5sum=f"md5sum > {decrypted_md5sum_file_path}",
             diff=f"diff -q {encrypted_md5sum_file_path} {decrypted_md5sum_file_path}",
             mv_passphrase_file=f"mv {symmetric_passphrase_file_path.with_suffix(FileExtensions.GPG)} {final_passphrase_file_path}",
-            remove_pending_file=f"rm -f {pending_file_path}",
-            flag_as_complete=f"touch {complete_file_path}",
+            remove_pending_file=f"rm -f {self.pending_file_path}",
+            flag_as_complete=f"touch {self.complete_file_path}",
         )
         sbatch_parameters = Sbatch(
             account=self.slurm_account,
@@ -253,14 +259,16 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             email=self.slurm_mail_user,
             error=error_function,
             hours=self.slurm_hours,
-            job_name="_".join([flow_cell_id, "flow_cell_encryption"]),
-            log_dir=flow_cell_encrypt_dir.as_posix(),
+            job_name="_".join([self.flow_cell.id, "flow_cell_encryption"]),
+            log_dir=self.flow_cell_encryption_dir.as_posix(),
             memory=self.slurm_memory,
             number_tasks=self.slurm_number_tasks,
             quality_of_service=SlurmQos.HIGH,
         )
         sbatch_content: str = self.slurm_api.generate_sbatch_content(sbatch_parameters)
-        sbatch_path = Path(flow_cell_encrypt_file_path_prefix.with_suffix(FileExtensions.SBATCH))
+        sbatch_path = Path(
+            self.flow_cell_encrypt_file_path_prefix.with_suffix(FileExtensions.SBATCH)
+        )
         sbatch_number: int = self.slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
