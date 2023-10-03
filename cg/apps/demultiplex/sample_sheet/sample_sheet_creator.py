@@ -57,26 +57,6 @@ class SampleSheetCreator:
         return self.flow_cell.bcl_converter
 
     @property
-    def run_parameters_path(self) -> Path:
-        """Return path to run parameters file."""
-        return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS)
-
-    @property
-    def run_parameters(self) -> RunParameters:
-        """Return run parameters object."""
-        if not self.run_parameters_path.exists():
-            message = f"Could not find run parameters file {self.run_parameters_path}"
-            LOG.warning(message)
-            raise FileNotFoundError(message)
-        if not self._run_parameters:
-            self._run_parameters = (
-                RunParametersNovaSeqX(run_parameters_path=self.run_parameters_path)
-                if self.sequencer_type == Sequencers.NOVASEQX
-                else RunParametersNovaSeq6000(run_parameters_path=self.run_parameters_path)
-            )
-        return self._run_parameters
-
-    @property
     def valid_indexes(self) -> List[Index]:
         return get_valid_indexes(dual_indexes_only=True)
 

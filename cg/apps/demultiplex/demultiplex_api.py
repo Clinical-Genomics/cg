@@ -115,7 +115,7 @@ class DemultiplexingAPI:
         """Create the path to the stdout logfile."""
         return Path(flow_cell.path, f"{DemultiplexingAPI.get_run_name(flow_cell)}.stdout")
 
-    def flow_cell_demultiplexed_runs_dir(self, flow_cell: FlowCellDirectoryData) -> Path:
+    def flow_cell_out_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Create the path to where the demultiplexed result should be produced."""
         return Path(self.demultiplexed_runs_dir, flow_cell.path.name)
 
@@ -128,21 +128,16 @@ class DemultiplexingAPI:
     def get_flow_cell_unaligned_dir(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Returns the path to where the demultiplexed result are located."""
         return Path(
-            self.flow_cell_demultiplexed_runs_dir(flow_cell),
-            DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
+            self.flow_cell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME
         )
 
     def demultiplexing_completed_path(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Return the path to demultiplexing complete file."""
         LOG.info(
-            Path(
-                self.flow_cell_demultiplexed_runs_dir(flow_cell),
-                DemultiplexingDirsAndFiles.DEMUX_COMPLETE,
-            )
+            Path(self.flow_cell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.DEMUX_COMPLETE)
         )
         return Path(
-            self.flow_cell_demultiplexed_runs_dir(flow_cell),
-            DemultiplexingDirsAndFiles.DEMUX_COMPLETE,
+            self.flow_cell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.DEMUX_COMPLETE
         )
 
     def is_demultiplexing_completed(self, flow_cell: FlowCellDirectoryData) -> bool:
@@ -182,7 +177,7 @@ class DemultiplexingAPI:
             LOG.warning("Demultiplexing has already been started")
             demultiplexing_possible = False
 
-        if self.flow_cell_demultiplexed_runs_dir(flow_cell=flow_cell).exists():
+        if self.flow_cell_out_dir_path(flow_cell=flow_cell).exists():
             LOG.warning("Flow cell out dir exists")
             demultiplexing_possible = False
 
@@ -190,76 +185,6 @@ class DemultiplexingAPI:
             LOG.warning(f"Demultiplexing is already completed for flow cell {flow_cell.id}")
             demultiplexing_possible = False
         return demultiplexing_possible
-
-    @property
-    def rta_complete_path(self) -> Path:
-        """Return RTAComplete path."""
-        return Path(self.path, DemultiplexingDirsAndFiles.RTACOMPLETE)
-
-    @property
-    def copy_complete_path(self) -> Path:
-        """Return copy complete path."""
-        return Path(self.path, DemultiplexingDirsAndFiles.COPY_COMPLETE)
-
-    @property
-    def demultiplexing_started_path(self) -> Path:
-        """Return demux started path."""
-        return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_STARTED)
-
-    @property
-    def trailblazer_config_path(self) -> Path:
-        """Return file to SLURM job ids path."""
-        return Path(self.path, "slurm_job_ids.yaml")
-
-    @property
-    def is_demultiplexing_complete(self) -> bool:
-        return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
-
-    def has_demultiplexing_started_locally(self) -> bool:
-        """Check if demultiplexing has started path exists on the cluster."""
-        return self.demultiplexing_started_path.exists()
-
-    def has_demultiplexing_started_on_sequencer(self) -> bool:
-        """Check if demultiplexing has started on the NovaSeqX machine."""
-        latest_analysis: Path = get_latest_analysis_path(self.path)
-        if not latest_analysis:
-            return False
-        return Path(
-            latest_analysis, DemultiplexingDirsAndFiles.DATA, DemultiplexingDirsAndFiles.BCL_CONVERT
-        ).exists()
-
-    def is_sequencing_done(self) -> bool:
-        """Check if sequencing is done.
-        This is indicated by that the file RTAComplete.txt exists.
-        """
-        LOG.info("Check if sequencing is done")
-        return self.rta_complete_path.exists()
-
-    def is_copy_completed(self) -> bool:
-        """Check if copy of flow cell is done.
-        This is indicated by that the file CopyComplete.txt exists.
-        """
-        LOG.info("Check if copy of data from sequence instrument is ready")
-        return self.copy_complete_path.exists()
-
-
-def is_flow_cell_ready(self) -> bool:
-        """Check if a flow cell is ready for demultiplexing.
-
-        A flow cell is ready if the two files RTAComplete.txt and CopyComplete.txt exists in the
-        flow cell directory.
-        """
-        LOG.info("Check if flow cell is ready for demultiplexing")
-        if not self.is_sequencing_done():
-            LOG.info(f"Sequencing is not completed for flow cell {self.id}")
-            return False
-        LOG.debug(f"Sequence is done for flow cell {self.id}")
-        if not self.is_copy_completed():
-            LOG.info(f"Copy of sequence data is not ready for flow cell {self.id}")
-            return False
-        LOG.debug(f"All data has been transferred for flow cell {self.id}")
-        LOG.info(f"Flow cell {self.id} is ready for demultiplexing")
-        return True
 
     def create_demultiplexing_started_file(self, demultiplexing_started_path: Path) -> None:
         LOG.info("Creating demultiplexing started file")
@@ -302,7 +227,7 @@ def is_flow_cell_ready(self) -> bool:
     def start_demultiplexing(self, flow_cell: FlowCellDirectoryData):
         """Start demultiplexing for a flow cell."""
         self.create_demultiplexing_started_file(flow_cell.demultiplexing_started_path)
-        demux_dir: Path = self.flow_cell_demultiplexed_runs_dir(flow_cell=flow_cell)
+        demux_dir: Path = self.flow_cell_out_dir_path(flow_cell=flow_cell)
         unaligned_dir: Path = self.get_flow_cell_unaligned_dir(flow_cell=flow_cell)
         LOG.info(f"Demultiplexing to {unaligned_dir}")
         if not self.dry_run:
