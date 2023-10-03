@@ -66,11 +66,10 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
             sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
             tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
         )
-        is_requirement_meet, error_msg = flow_cell_encryption_api.is_encryption_possible()
-        if not is_requirement_meet:
-            LOG.debug(error_msg)
-            continue
-        flow_cell_encryption_api.start_encryption()
+        try:
+            flow_cell_encryption_api.start_encryption()
+        except FlowCellError as error:
+            logging.debug(f"{error}")
 
 
 @backup.command("fetch-flow-cell")

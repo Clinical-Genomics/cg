@@ -4,13 +4,13 @@ import subprocess
 from io import TextIOWrapper
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Union
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions
 from cg.constants.encryption import EncryptionUserID, GPGParameters
 from cg.constants.priority import SlurmQos
-from cg.exc import ChecksumFailedError
+from cg.exc import ChecksumFailedError, FlowCellError
 from cg.meta.encryption.sbatch import (
     FLOW_CELL_ENCRYPT_COMMANDS,
     FLOW_CELL_ENCRYPT_ERROR,
@@ -240,15 +240,18 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         )
         return " ".join(decryption_parameters)
 
-    def is_encryption_possible(self) -> Tuple[bool, Union[str, None]]:
-        """Check if requirements for encryption are meet."""
+    def is_encryption_possible(self) -> Optional[bool]:
+        """Check if requirements for encryption are meet.
+        Raises:
+            FlowCellError if sequencing is not ready, encryption is pending or complete.
+        """
         if not self.flow_cell.is_flow_cell_ready():
-            return False, f"Flow cell: {self.flow_cell.id} is not ready"
+            raise FlowCellError(f"Flow cell: {self.flow_cell.id} is not ready")
         if self.complete_file_path.exists():
-            return False, f"Encryption already completed for flow cell: {self.flow_cell.id}"
+            raise FlowCellError(f"Encryption already completed for flow cell: {self.flow_cell.id}")
         if self.pending_file_path.exists():
-            return False, f"Encryption already started for flow cell: {self.flow_cell.id}"
-        return True, None
+            raise FlowCellError(f"Encryption already started for flow cell: {self.flow_cell.id}")
+        return True
 
     def encrypt_flow_cell(
         self,
@@ -304,6 +307,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
 
     def start_encryption(self) -> None:
         """Check if requirements for starting encryption are meet if so starts encryption."""
+        self.is_encryption_possible()
         self.flow_cell_encryption_dir.mkdir(exist_ok=True, parents=True)
         self.create_pending_file(pending_path=self.pending_file_path)
         self.encrypt_flow_cell()
