@@ -220,8 +220,6 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         self,
     ) -> None:
         """Encrypt flow cell via GPG and SLURM."""
-        self.flow_cell_encryption_dir.mkdir(exist_ok=True, parents=True)
-        self.create_pending_file(pending_path=self.pending_file_path)
         encrypted_gpg_file_path: Path = self.flow_cell_encrypt_file_path_prefix.with_suffix(
             f"{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
         )
@@ -284,6 +282,12 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
         LOG.info(f"Flow cell encryption running as job {sbatch_number}")
+
+    def start_encryption(self) -> None:
+        """Check if requirements for starting encryption are meet if so starts encryption."""
+        self.flow_cell_encryption_dir.mkdir(exist_ok=True, parents=True)
+        self.create_pending_file(pending_path=self.pending_file_path)
+        self.encrypt_flow_cell()
 
 
 class SpringEncryptionAPI(EncryptionAPI):

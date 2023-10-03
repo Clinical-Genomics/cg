@@ -70,7 +70,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         if not is_requirement_meet:
             LOG.debug(error_msg)
             continue
-        flow_cell_encryption_api.encrypt_flow_cell()
+        flow_cell_encryption_api.start_encryption()
 
 
 @backup.command("fetch-flow-cell")
