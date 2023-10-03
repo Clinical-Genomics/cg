@@ -46,11 +46,11 @@ class SlurmAPI:
 
     @staticmethod
     def generate_sbatch_header(sbatch_parameters: Sbatch) -> str:
-        return SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.dict())
+        return SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.model_dump())
 
     @staticmethod
     def generate_dragen_sbatch_header(sbatch_parameters: Sbatch) -> str:
-        return DRAGEN_SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.dict())
+        return DRAGEN_SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.model_dump())
 
     @staticmethod
     def generate_sbatch_body(commands: str, error_function: Optional[str] = None) -> str:

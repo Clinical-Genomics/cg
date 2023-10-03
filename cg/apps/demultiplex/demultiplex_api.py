@@ -69,7 +69,7 @@ class DemultiplexingAPI:
             demux_dir=demux_dir.as_posix(),
             demux_started=flow_cell.demultiplexing_started_path.as_posix(),
         )
-        return DEMULTIPLEX_ERROR.format(**error_parameters.dict())
+        return DEMULTIPLEX_ERROR.format(**error_parameters.model_dump())
 
     @staticmethod
     def get_sbatch_command(
@@ -94,7 +94,7 @@ class DemultiplexingAPI:
             demux_completed_file=demux_completed.as_posix(),
             environment=environment,
         )
-        return DEMULTIPLEX_COMMAND[flow_cell.bcl_converter].format(**command_parameters.dict())
+        return DEMULTIPLEX_COMMAND[flow_cell.bcl_converter].format(**command_parameters.model_dump())
 
     @staticmethod
     def demultiplex_sbatch_path(flow_cell: FlowCellDirectoryData) -> Path:
