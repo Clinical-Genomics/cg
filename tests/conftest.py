@@ -46,16 +46,7 @@ from cg.models.demultiplex.run_parameters import (
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
-from cg.store.models import (
-    Bed,
-    BedVersion,
-    Customer,
-    Family,
-    Flowcell,
-    Organism,
-    Sample,
-    SampleLaneSequencingMetrics,
-)
+from cg.store.models import Bed, BedVersion, Customer, Family, Organism, Sample
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -536,15 +527,15 @@ def data_dir(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture
-def fastq_dir(demultiplexed_runs: Path) -> Path:
+def fastq_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the fastq files dir."""
-    return Path(demultiplexed_runs, "fastq")
+    return Path(demultiplex_fixtures, "fastq")
 
 
 @pytest.fixture
-def spring_dir(demultiplexed_runs: Path) -> Path:
+def spring_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the fastq files dir."""
-    return Path(demultiplexed_runs, "spring")
+    return Path(demultiplex_fixtures, "spring")
 
 
 @pytest.fixture
@@ -710,6 +701,12 @@ def spring_file(spring_dir: Path) -> Path:
     return Path(spring_dir, "dummy_run_001.spring")
 
 
+@pytest.fixture(name="spring_meta_data_file")
+def spring_meta_data_file(spring_dir: Path) -> Path:
+    """Return the path to an existing spring file."""
+    return Path(spring_dir, "dummy_spring_meta_data.json")
+
+
 @pytest.fixture(name="spring_file_father")
 def spring_file_father(spring_dir: Path) -> Path:
     """Return the path to a second existing spring file."""
@@ -833,14 +830,6 @@ def tmp_flow_cell_name_no_run_parameters() -> str:
     return "180522_A00689_0200_BHLCKNCCXY"
 
 
-@pytest.fixture(name="tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert")
-def fixture_tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert() -> str:
-    """ "Returns the name of a flow cell directory ready for demultiplexing with BCL convert.
-    Contains a sample sheet that is BCL convert compliant
-    """
-    return "211101_A00187_0615_AHLG5GDRZZ"
-
-
 @pytest.fixture(name="tmp_flow_cell_name_malformed_sample_sheet")
 def fixture_tmp_flow_cell_name_malformed_sample_sheet() -> str:
     """ "Returns the name of a flow cell directory ready for demultiplexing with BCL convert.
@@ -887,10 +876,10 @@ def fixture_tmp_flow_cells_directory_malformed_sample_sheet(
 
 @pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert")
 def fixture_tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert(
-    tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert: str, tmp_flow_cells_directory: Path
+    bcl_convert_flow_cell_full_name: str, tmp_flow_cells_directory: Path
 ) -> Path:
     """This is a path to a flow cell directory with the run parameters missing."""
-    return Path(tmp_flow_cells_directory, tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert)
+    return Path(tmp_flow_cells_directory, bcl_convert_flow_cell_full_name)
 
 
 @pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq")
@@ -3075,39 +3064,16 @@ def store_with_sequencing_metrics(
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 3, 1_500_000, 80.5, 33),
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 2, 1_500_000, 80.5, 33),
     ]
-
-    flow_cell: Flowcell = helpers.add_flowcell(
+    helpers.add_flowcell(
         flow_cell_name=flow_cell_name,
         store=store,
     )
-    sample: Sample = helpers.add_sample(
+    helpers.add_sample(
         name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
     )
-    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
-
-    for (
-        sample_internal_id,
-        flow_cell_name_,
-        flow_cell_lane_number,
-        sample_total_reads_in_lane,
-        sample_base_percentage_passing_q30,
-        sample_base_mean_quality_score,
-    ) in sample_sequencing_metrics_details:
-        helpers.add_sample_lane_sequencing_metrics(
-            store=store,
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=flow_cell_name_,
-            flow_cell_lane_number=flow_cell_lane_number,
-            sample_total_reads_in_lane=sample_total_reads_in_lane,
-            sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
-            sample_base_mean_quality_score=sample_base_mean_quality_score,
-        )
-
-    store.session.add(flow_cell)
-    store.session.add(sample)
-    store.session.add_all(sample_lane_sequencing_metrics)
-    store.session.commit()
-
+    helpers.add_multiple_sample_lane_sequencing_metrics_entries(
+        metrics_data=sample_sequencing_metrics_details, store=store
+    )
     return store
 
 
