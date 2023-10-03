@@ -182,6 +182,40 @@ class FlowCellEncryptionAPI(EncryptionAPI):
     def complete_file_path(self) -> Path:
         return Path(self.flow_cell_encrypt_file_path_prefix.with_suffix(FileExtensions.COMPLETE))
 
+    @property
+    def encrypted_gpg_file_path(self) -> Path:
+        return Path(
+            self.flow_cell_encrypt_file_path_prefix.with_suffix(
+                f"{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
+            )
+        )
+
+    @property
+    def encrypted_md5sum_file_path(self) -> Path:
+        return Path(
+            self.flow_cell_encrypt_file_path_prefix.with_suffix(
+                f"{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.MD5SUM}"
+            )
+        )
+
+    @property
+    def decrypted_md5sum_file_path(self) -> Path:
+        return Path(
+            self.flow_cell_encrypt_file_path_prefix.with_suffix(
+                f"{FileExtensions.TAR}{FileExtensions.GZIP}.degpg{FileExtensions.MD5SUM}"
+            )
+        )
+
+    @property
+    def symmetric_passphrase_file_path(self) -> Path:
+        return Path(self.flow_cell_encrypt_file_path_prefix.with_suffix(FileExtensions.PASS_PHRASE))
+
+    @property
+    def final_passphrase_file_path(self) -> Path:
+        return Path(
+            self.flow_cell_encrypt_file_path_prefix.with_suffix(f".key{FileExtensions.GPG}")
+        )
+
     def get_flow_cell_symmetric_encryption_command(
         self, output_file: Path, passphrase_file_path: Path
     ) -> str:
@@ -220,45 +254,30 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         self,
     ) -> None:
         """Encrypt flow cell via GPG and SLURM."""
-        encrypted_gpg_file_path: Path = self.flow_cell_encrypt_file_path_prefix.with_suffix(
-            f"{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}"
-        )
-        encrypted_md5sum_file_path: Path = self.flow_cell_encrypt_file_path_prefix.with_suffix(
-            f"{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.MD5SUM}"
-        )
-        decrypted_md5sum_file_path: Path = self.flow_cell_encrypt_file_path_prefix.with_suffix(
-            f"{FileExtensions.TAR}{FileExtensions.GZIP}.degpg{FileExtensions.MD5SUM}"
-        )
-        symmetric_passphrase_file_path: Path = self.flow_cell_encrypt_file_path_prefix.with_suffix(
-            FileExtensions.PASS_PHRASE
-        )
-        final_passphrase_file_path: Path = self.flow_cell_encrypt_file_path_prefix.with_suffix(
-            f".key{FileExtensions.GPG}"
-        )
         error_function: str = FLOW_CELL_ENCRYPT_ERROR.format(
             pending_file_path=self.pending_file_path
         )
         commands: str = FLOW_CELL_ENCRYPT_COMMANDS.format(
             symmetric_passphrase=self.get_symmetric_passphrase_cmd(
-                passphrase_file_path=symmetric_passphrase_file_path
+                passphrase_file_path=self.symmetric_passphrase_file_path
             ),
             asymmetrically_encrypt_passphrase=self.get_asymmetrically_encrypt_passphrase_cmd(
-                passphrase_file_path=symmetric_passphrase_file_path
+                passphrase_file_path=self.symmetric_passphrase_file_path
             ),
             tar_encrypt_flow_cell_dir=self.tar_api.get_compress_cmd(input_path=self.flow_cell.path),
             parallel_gzip=f"{self.pigz_binary_path} -p {self.slurm_number_tasks - LIMIT_PIGZ_TASK} --fast -c",
-            tee=f"tee >(md5sum > {encrypted_md5sum_file_path})",
+            tee=f"tee >(md5sum > {self.encrypted_md5sum_file_path})",
             flow_cell_symmetric_encryption=self.get_flow_cell_symmetric_encryption_command(
-                output_file=encrypted_gpg_file_path,
-                passphrase_file_path=symmetric_passphrase_file_path,
+                output_file=self.encrypted_gpg_file_path,
+                passphrase_file_path=self.symmetric_passphrase_file_path,
             ),
             flow_cell_symmetric_decryption=self.get_flow_cell_symmetric_decryption_command(
-                input_file=encrypted_gpg_file_path,
-                passphrase_file_path=symmetric_passphrase_file_path,
+                input_file=self.encrypted_gpg_file_path,
+                passphrase_file_path=self.symmetric_passphrase_file_path,
             ),
-            md5sum=f"md5sum > {decrypted_md5sum_file_path}",
-            diff=f"diff -q {encrypted_md5sum_file_path} {decrypted_md5sum_file_path}",
-            mv_passphrase_file=f"mv {symmetric_passphrase_file_path.with_suffix(FileExtensions.GPG)} {final_passphrase_file_path}",
+            md5sum=f"md5sum > {self.decrypted_md5sum_file_path}",
+            diff=f"diff -q {self.encrypted_md5sum_file_path} {self.decrypted_md5sum_file_path}",
+            mv_passphrase_file=f"mv {self.symmetric_passphrase_file_path.with_suffix(FileExtensions.GPG)} {self.final_passphrase_file_path}",
             remove_pending_file=f"rm -f {self.pending_file_path}",
             flag_as_complete=f"touch {self.complete_file_path}",
         )
