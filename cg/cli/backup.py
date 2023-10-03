@@ -10,7 +10,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.exc import FlowCellError
+from cg.exc import FlowCellEncryptionError, FlowCellError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import (
@@ -68,7 +68,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         )
         try:
             flow_cell_encryption_api.start_encryption()
-        except FlowCellError as error:
+        except (FlowCellError, FlowCellEncryptionError) as error:
             logging.debug(f"{error}")
 
 
