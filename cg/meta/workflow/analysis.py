@@ -11,7 +11,7 @@ from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
-from cg.constants.constants import AnalysisType, WorkflowManager
+from cg.constants.constants import AnalysisType, CaseActions, WorkflowManager
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
@@ -410,7 +410,7 @@ class AnalysisAPI(MetaAPI):
             return
 
         if self.prepare_fastq_api.is_spring_decompression_running(case_id):
-            self.set_statusdb_action(case_id=case_id, action="analyze")
+            self.set_statusdb_action(case_id=case_id, action=CaseActions.ANALYZE)
             return
 
         self.prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
