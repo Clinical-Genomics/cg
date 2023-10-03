@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from typing import List, Tuple
 
-from pydantic import BaseModel, ConfigDict, Extra, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from cg.apps.demultiplex.sample_sheet.validators import SampleId
 from cg.constants.constants import GenomeVersion
@@ -21,7 +21,7 @@ class FlowCellSample(BaseModel):
     sample_id: SampleId
     index: str
     index2: str = ""
-    model_config = ConfigDict(populate_by_name=True, extra=Extra.ignore)
+    model_config = ConfigDict(populate_by_name=True, extra='ignore')
 
 
 class FlowCellSampleBcl2Fastq(FlowCellSample):
