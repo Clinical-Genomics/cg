@@ -83,7 +83,6 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
             sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
             tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
         )
-        flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=dry_run)
         flow_cell_encrypt_dir = Path(encrypt_dir, flow_cell.full_name)
         flow_cell_encrypt_file_path_prefix = Path(flow_cell_encrypt_dir, flow_cell.id)
         complete_file_path: Path = flow_cell_encrypt_file_path_prefix.with_suffix(

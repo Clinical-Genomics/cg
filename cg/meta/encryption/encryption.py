@@ -164,6 +164,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         self.slurm_mail_user: str = sbatch_parameter.get("mail_user")
         self.slurm_memory: int = sbatch_parameter.get("memory")
         self.slurm_number_tasks: int = sbatch_parameter.get("number_tasks")
+        self.slurm_api.set_dry_run(dry_run=self.dry_run)
 
     @property
     def flow_cell_encryption_dir(self) -> Path:
