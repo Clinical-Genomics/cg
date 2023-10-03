@@ -169,6 +169,10 @@ class FlowCellEncryptionAPI(EncryptionAPI):
     def flow_cell_encryption_dir(self) -> Path:
         return Path(self.encryption_dir, self.flow_cell.full_name)
 
+    @property
+    def flow_cell_encrypt_file_path_prefix(self) -> Path:
+        return Path(self.flow_cell_encryption_dir, self.flow_cell.id)
+
     def get_flow_cell_symmetric_encryption_command(
         self, output_file: Path, passphrase_file_path: Path
     ) -> str:
