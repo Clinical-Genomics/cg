@@ -25,7 +25,7 @@ from cg.constants.demultiplexing import (
     SampleSheetBCLConvertSections,
 )
 from cg.exc import SampleSheetError
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import SequencedFlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
 
 LOG = logging.getLogger(__name__)
@@ -36,11 +36,11 @@ class SampleSheetCreator:
 
     def __init__(
         self,
-        flow_cell: FlowCellDirectoryData,
+        flow_cell: SequencedFlowCell,
         lims_samples: List[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]],
         force: bool = False,
     ):
-        self.flow_cell: FlowCellDirectoryData = flow_cell
+        self.flow_cell: SequencedFlowCell = flow_cell
         self.flow_cell_id: str = flow_cell.id
         self.lims_samples: List[
             Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]
@@ -182,7 +182,7 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
 
     def __init__(
         self,
-        flow_cell: FlowCellDirectoryData,
+        flow_cell: SequencedFlowCell,
         lims_samples: List[FlowCellSampleBCLConvert],
         force: bool = False,
     ):

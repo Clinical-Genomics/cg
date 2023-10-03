@@ -10,7 +10,7 @@ from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
 from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import SequencedFlowCell
 from click import testing
 
 FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.get_flow_cell_samples"
@@ -26,7 +26,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
 ):
     """Test that creating a flow cell sample sheet fails if there is no run parameters file."""
     # GIVEN a folder with a non-existing sample sheet nor RunParameters file
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+    flow_cell: SequencedFlowCell = SequencedFlowCell(
         flow_cell_path=tmp_flow_cells_directory_no_run_parameters
     )
     assert not flow_cell.run_parameters_path.exists()
@@ -63,7 +63,7 @@ def test_create_bcl2fastq_sample_sheet(
 ):
     """Test that creating a Bcl2fastq sample sheet works."""
     # GIVEN a flowcell directory with some run parameters
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+    flow_cell: SequencedFlowCell = SequencedFlowCell(
         flow_cell_path=tmp_flow_cells_directory_no_sample_sheet,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
@@ -115,7 +115,7 @@ def test_create_dragen_sample_sheet(
 ):
     """Test that creating a Dragen sample sheet works."""
     # GIVEN a flow cell directory with some run parameters
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+    flow_cell: SequencedFlowCell = SequencedFlowCell(
         tmp_flow_cells_directory_no_sample_sheet, bcl_converter=BclConverter.DRAGEN
     )
     assert flow_cell.run_parameters_path.exists()
@@ -167,7 +167,7 @@ def test_incorrect_bcl2fastq_headers_samplesheet(
 ):
     """Test that correct logging is done when a Bcl2fastq generated sample sheet is malformed."""
     # GIVEN a flowcell directory with some run parameters
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+    flow_cell: SequencedFlowCell = SequencedFlowCell(
         flow_cell_path=tmp_flow_cells_directory_malformed_sample_sheet,
         bcl_converter=BclConverter.BCL2FASTQ,
     )

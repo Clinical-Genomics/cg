@@ -38,7 +38,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import SequencedFlowCell
 from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
@@ -920,9 +920,9 @@ def tmp_demultiplexed_runs_bcl2fastq_directory(
 @pytest.fixture(name="tmp_bcl2fastq_flow_cell")
 def tmp_bcl2fastq_flow_cell(
     tmp_demultiplexed_runs_bcl2fastq_directory: Path,
-) -> FlowCellDirectoryData:
+) -> SequencedFlowCell:
     """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
+    return SequencedFlowCell(
         flow_cell_path=tmp_demultiplexed_runs_bcl2fastq_directory,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
@@ -931,9 +931,9 @@ def tmp_bcl2fastq_flow_cell(
 @pytest.fixture
 def novaseq6000_flow_cell(
     tmp_flow_cells_directory_malformed_sample_sheet: Path,
-) -> FlowCellDirectoryData:
+) -> SequencedFlowCell:
     """Return a NovaSeq6000 flow cell."""
-    return FlowCellDirectoryData(
+    return SequencedFlowCell(
         flow_cell_path=tmp_flow_cells_directory_malformed_sample_sheet,
         bcl_converter=BclConverter.BCLCONVERT,
     )
@@ -942,9 +942,9 @@ def novaseq6000_flow_cell(
 @pytest.fixture(name="tmp_bcl_convert_flow_cell")
 def tmp_bcl_convert_flow_cell(
     tmp_flow_cell_directory_bclconvert: Path,
-) -> FlowCellDirectoryData:
+) -> SequencedFlowCell:
     """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
+    return SequencedFlowCell(
         flow_cell_path=tmp_flow_cell_directory_bclconvert,
         bcl_converter=BclConverter.DRAGEN,
     )
@@ -976,9 +976,9 @@ def demultiplexed_runs_bcl2fastq_flow_cell_directory(
 def unfinished_bcl2fastq_flow_cell(
     demultiplexed_runs_unfinished_bcl2fastq_flow_cell_directory: Path,
     bcl2fastq_flow_cell_full_name: str,
-) -> FlowCellDirectoryData:
+) -> SequencedFlowCell:
     """Copy the content of a demultiplexed but not finished directory to a temporary location."""
-    return FlowCellDirectoryData(
+    return SequencedFlowCell(
         flow_cell_path=demultiplexed_runs_unfinished_bcl2fastq_flow_cell_directory,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
@@ -1324,9 +1324,9 @@ def novaseq_x_run_parameters(
 
 
 @pytest.fixture(scope="session")
-def bcl2fastq_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
+def bcl2fastq_flow_cell(bcl2fastq_flow_cell_dir: Path) -> SequencedFlowCell:
     """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
+    return SequencedFlowCell(
         flow_cell_path=bcl2fastq_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
     )
 
@@ -1334,49 +1334,49 @@ def bcl2fastq_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
 @pytest.fixture(scope="session")
 def novaseq_flow_cell_demultiplexed_with_bcl2fastq(
     bcl_convert_flow_cell_dir: Path,
-) -> FlowCellDirectoryData:
+) -> SequencedFlowCell:
     """Create a Novaseq6000 flow cell object with flow cell that is demultiplexed using Bcl2fastq."""
-    return FlowCellDirectoryData(
+    return SequencedFlowCell(
         flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
     )
 
 
 @pytest.fixture(scope="session")
-def bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> FlowCellDirectoryData:
+def bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> SequencedFlowCell:
     """Create a bcl_convert flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
+    return SequencedFlowCell(
         flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
     )
 
 
 @pytest.fixture(scope="function")
-def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
+def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> SequencedFlowCell:
     """Create a NovaSeqX flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
+    return SequencedFlowCell(
         flow_cell_path=novaseq_x_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
     )
 
 
 @pytest.fixture(scope="session")
-def bcl2fastq_flow_cell_id(bcl2fastq_flow_cell: FlowCellDirectoryData) -> str:
+def bcl2fastq_flow_cell_id(bcl2fastq_flow_cell: SequencedFlowCell) -> str:
     """Return flow cell id from bcl2fastq flow cell object."""
     return bcl2fastq_flow_cell.id
 
 
 @pytest.fixture(scope="session")
-def bcl_convert_flow_cell_id(bcl_convert_flow_cell: FlowCellDirectoryData) -> str:
+def bcl_convert_flow_cell_id(bcl_convert_flow_cell: SequencedFlowCell) -> str:
     """Return flow cell id from bcl_convert flow cell object."""
     return bcl_convert_flow_cell.id
 
 
 @pytest.fixture(name="demultiplexing_delivery_file")
-def demultiplexing_delivery_file(bcl2fastq_flow_cell: FlowCellDirectoryData) -> Path:
+def demultiplexing_delivery_file(bcl2fastq_flow_cell: SequencedFlowCell) -> Path:
     """Return demultiplexing delivery started file."""
     return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.DELIVERY)
 
 
 @pytest.fixture(name="hiseq_x_tile_dir")
-def hiseq_x_tile_dir(bcl2fastq_flow_cell: FlowCellDirectoryData) -> Path:
+def hiseq_x_tile_dir(bcl2fastq_flow_cell: SequencedFlowCell) -> Path:
     """Return Hiseq X tile dir."""
     return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.Hiseq_X_TILE_DIR)
 
@@ -1418,10 +1418,10 @@ def novaseqx_demultiplexed_flow_cell(demultiplexed_runs: Path, novaseq_x_flow_ce
 @pytest.fixture()
 def novaseqx_flow_cell_with_sample_sheet_no_fastq(
     mocker, novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
-) -> FlowCellDirectoryData:
+) -> SequencedFlowCell:
     """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
     novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)
-    flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_directory)
+    flow_cell = SequencedFlowCell(novaseqx_flow_cell_directory)
     sample_sheet_path = Path(
         novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )

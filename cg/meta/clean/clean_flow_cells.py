@@ -12,7 +12,7 @@ from cg.exc import CleanFlowCellFailedError, HousekeeperFileMissingError
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     get_sample_sheets_from_latest_version,
 )
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils.files import remove_directory_and_contents

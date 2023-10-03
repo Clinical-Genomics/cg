@@ -9,7 +9,7 @@ from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.io.csv import read_csv
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.utils.files import (
     is_pattern_in_file_path_name,
     rename_file,

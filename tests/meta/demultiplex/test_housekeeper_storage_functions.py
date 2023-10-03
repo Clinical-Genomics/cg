@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import List, Set
 
-import mock
 from housekeeper.store.models import File
 from mock import MagicMock, call
 
@@ -20,8 +19,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     store_fastq_path_in_housekeeper,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.store import Store
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):

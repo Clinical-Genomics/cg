@@ -19,7 +19,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     get_sample_sheets_from_latest_version,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import SequencedFlowCell
 
 from housekeeper.store.models import File
 
@@ -47,7 +47,7 @@ def validate_sample_sheet(
     """
 
     flow_cell_path: Path = Path(context.demultiplex_api.flow_cells_dir, flow_cell_name)
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+    flow_cell: SequencedFlowCell = SequencedFlowCell(
         flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
     )
     LOG.info(
@@ -84,9 +84,7 @@ def create_sheet(
         LOG.warning(f"Could not find flow cell {flow_cell_path}")
         raise click.Abort
     try:
-        flow_cell = FlowCellDirectoryData(
-            flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
-        )
+        flow_cell = SequencedFlowCell(flow_cell_path=flow_cell_path, bcl_converter=bcl_converter)
     except FlowCellError as error:
         raise click.Abort from error
     flow_cell_id: str = flow_cell.id
@@ -161,7 +159,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
             continue
         LOG.debug(f"Found directory {sub_dir}")
         try:
-            flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir)
+            flow_cell = SequencedFlowCell(flow_cell_path=sub_dir)
         except FlowCellError:
             continue
         flow_cell_id: str = flow_cell.id

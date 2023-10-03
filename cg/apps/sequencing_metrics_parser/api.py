@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Tuple
 from cg.constants.demultiplexing import BclConverter
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.models import SampleLaneSequencingMetrics
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq_to_sequencing_statistics import (
     create_bcl2fastq_metrics,

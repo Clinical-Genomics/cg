@@ -1,12 +1,19 @@
 from pathlib import Path
 from typing import Type
 
+import pytest
+
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.constants.demultiplexing import BclConverter
+from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
+from cg.models.flow_cell.flow_cell import (
+    FlowCellDirectoryData,
+    SequencedFlowCell,
+    DemultiplexedFlowCell,
+)
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 
 
 def test_flowcell_id(bcl2fastq_flow_cell_dir: Path):
@@ -120,9 +127,109 @@ def test_flow_cell_directory_data_with_novaseq_flow_cell_directory(
     # GIVEN a Bcl2Fastq flow cell directory
 
     # WHEN instantiating a flow cell object
-    flow_cell = FlowCellDirectoryData(
+    flow_cell = SequencedFlowCell(
         flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl_convert),
     )
 
     # THEN the bcl converter is dragen
     assert flow_cell.bcl_converter == BclConverter.DRAGEN
+
+
+def test_get_run_parameters_when_non_existing(fixtures_dir: Path):
+    # GIVEN a flowcell object with a directory without run parameters
+    flowcell_path: Path = Path(
+        fixtures_dir,
+        "apps",
+        "demultiplexing",
+        "demultiplexed-runs",
+        "201203_D00483_0200_AHVKJCDRXX",
+    )
+    flow_cell = SequencedFlowCell(flow_cell_path=flowcell_path)
+    assert flow_cell.run_parameters_path.exists() is False
+
+    # WHEN fetching the run parameters object
+    with pytest.raises(FileNotFoundError):
+        # THEN assert that a FileNotFound error is raised
+        flow_cell.run_parameters
+
+
+def test_is_demultiplexing_complete(tmp_flow_cell_directory_bcl2fastq: Path):
+    """Tests the is_demultiplexing_complete property of SequencedFlowCell."""
+
+    # GIVEN a demultiplexing directory with no demuxcomplete.txt file
+    flow_cell: DemultiplexedFlowCell = DemultiplexedFlowCell(
+        flow_cell_path=tmp_flow_cell_directory_bcl2fastq
+    )
+    assert not flow_cell.is_demultiplexing_complete
+
+    # WHEN creating the demuxcomplete.txt file
+    Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
+
+    # THEN the property should return true
+    assert flow_cell.is_demultiplexing_complete
+
+
+def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bclconvert: Path):
+    # GIVEN a flow cell without a demuxstarted.txt file
+    flow_cell = SequencedFlowCell(tmp_flow_cell_directory_bclconvert)
+    assert not Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).exists()
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_locally()
+
+    # THEN the response should be False
+    assert not has_demux_started
+
+
+def test_has_demultiplexing_started_locally_true(
+    tmp_flow_cell_directory_bclconvert: Path,
+):
+    # GIVEN a flow cell with a demuxstarted.txt file
+    flow_cell = SequencedFlowCell(tmp_flow_cell_directory_bclconvert)
+    Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).touch()
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_locally()
+
+    # THEN the response should be True
+    assert has_demux_started
+
+
+def test_has_demultiplexing_started_on_sequencer_true(
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+):
+    # GIVEN a flow cell with a BCLConvert folder
+    flow_cell = SequencedFlowCell(novaseqx_flow_cell_dir_with_analysis_data)
+    Path.mkdir(
+        Path(
+            flow_cell.path,
+            get_latest_analysis_path(flow_cell.path),
+            DemultiplexingDirsAndFiles.DATA,
+            DemultiplexingDirsAndFiles.BCL_CONVERT,
+        )
+    )
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_on_sequencer()
+
+    # THEN the response should be True
+    assert has_demux_started
+
+
+def test_has_demultiplexing_started_on_sequencer_false(
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+):
+    # GIVEN a flow cell without a BCLConvert folder
+    flow_cell = SequencedFlowCell(novaseqx_flow_cell_dir_with_analysis_data)
+    assert not Path(
+        flow_cell.path,
+        get_latest_analysis_path(flow_cell.path),
+        DemultiplexingDirsAndFiles.DATA,
+        DemultiplexingDirsAndFiles.BCL_CONVERT,
+    ).exists()
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_on_sequencer()
+
+    # THEN the response should be False
+    assert not has_demux_started

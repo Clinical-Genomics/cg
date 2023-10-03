@@ -28,7 +28,7 @@ LOG = logging.getLogger(__name__)
 
 
 class FlowCellDirectoryData:
-    """Class to collect information about flow cell directories and their particular files."""
+    """Class parse a flow cell directory name."""
 
     def __init__(self, flow_cell_path: Path, bcl_converter: Optional[str] = None):
         LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
@@ -93,21 +93,6 @@ class FlowCellDirectoryData:
         return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS)
 
     @property
-    def run_parameters(self) -> RunParameters:
-        """Return run parameters object."""
-        if not self.run_parameters_path.exists():
-            message = f"Could not find run parameters file {self.run_parameters_path}"
-            LOG.warning(message)
-            raise FileNotFoundError(message)
-        if not self._run_parameters:
-            self._run_parameters = (
-                RunParametersNovaSeqX(run_parameters_path=self.run_parameters_path)
-                if self.sequencer_type == Sequencers.NOVASEQX
-                else RunParametersNovaSeq6000(run_parameters_path=self.run_parameters_path)
-            )
-        return self._run_parameters
-
-    @property
     def sample_type(
         self,
     ) -> Union[Type[FlowCellSampleBcl2Fastq], Type[FlowCellSampleBCLConvert]]:
@@ -143,28 +128,9 @@ class FlowCellDirectoryData:
         return BclConverter.BCL2FASTQ
 
     @property
-    def rta_complete_path(self) -> Path:
-        """Return RTAComplete path."""
-        return Path(self.path, DemultiplexingDirsAndFiles.RTACOMPLETE)
-
-    @property
-    def copy_complete_path(self) -> Path:
-        """Return copy complete path."""
-        return Path(self.path, DemultiplexingDirsAndFiles.COPY_COMPLETE)
-
-    @property
-    def demultiplexing_started_path(self) -> Path:
-        """Return demux started path."""
-        return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_STARTED)
-
-    @property
     def trailblazer_config_path(self) -> Path:
         """Return file to SLURM job ids path."""
         return Path(self.path, "slurm_job_ids.yaml")
-
-    @property
-    def is_demultiplexing_complete(self) -> bool:
-        return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
 
     def _parse_date(self):
         """Return the parsed date in the correct format."""
@@ -182,19 +148,6 @@ class FlowCellDirectoryData:
             message = f"Flowcell {self.full_name} does not follow the flow cell naming convention"
             LOG.warning(message)
             raise FlowCellError(message)
-
-    def has_demultiplexing_started_locally(self) -> bool:
-        """Check if demultiplexing has started path exists on the cluster."""
-        return self.demultiplexing_started_path.exists()
-
-    def has_demultiplexing_started_on_sequencer(self) -> bool:
-        """Check if demultiplexing has started on the NovaSeqX machine."""
-        latest_analysis: Path = get_latest_analysis_path(self.path)
-        if not latest_analysis:
-            return False
-        return Path(
-            latest_analysis, DemultiplexingDirsAndFiles.DATA, DemultiplexingDirsAndFiles.BCL_CONVERT
-        ).exists()
 
     def sample_sheet_exists(self) -> bool:
         """Check if sample sheet exists."""
@@ -235,19 +188,55 @@ class FlowCellDirectoryData:
             flow_cell_sample_type=self.sample_type,
         )
 
-    def is_sequencing_done(self) -> bool:
-        """Check if sequencing is done.
-        This is indicated by that the file RTAComplete.txt exists.
-        """
-        LOG.info("Check if sequencing is done")
-        return self.rta_complete_path.exists()
+    def __str__(self):
+        return f"FlowCell(path={self.path},run_parameters_path={self.run_parameters_path})"
 
-    def is_copy_completed(self) -> bool:
-        """Check if copy of flow cell is done.
-        This is indicated by that the file CopyComplete.txt exists.
-        """
-        LOG.info("Check if copy of data from sequence instrument is ready")
-        return self.copy_complete_path.exists()
+
+class SequencedFlowCell(FlowCellDirectoryData):
+    """This class represents a sequenced flow cell in the flow cells folder."""
+
+    @property
+    def rta_complete_path(self) -> Path:
+        """Return RTAComplete path."""
+        return Path(self.path, DemultiplexingDirsAndFiles.RTACOMPLETE)
+
+    @property
+    def copy_complete_path(self) -> Path:
+        """Return copy complete path."""
+        return Path(self.path, DemultiplexingDirsAndFiles.COPY_COMPLETE)
+
+    @property
+    def demultiplexing_started_path(self) -> Path:
+        """Return demux started path."""
+        return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_STARTED)
+
+    @property
+    def run_parameters(self) -> RunParameters:
+        """Return run parameters object."""
+        if not self.run_parameters_path.exists():
+            message = f"Could not find run parameters file {self.run_parameters_path}"
+            LOG.warning(message)
+            raise FileNotFoundError(message)
+        if not self._run_parameters:
+            self._run_parameters = (
+                RunParametersNovaSeqX(run_parameters_path=self.run_parameters_path)
+                if self.sequencer_type == Sequencers.NOVASEQX
+                else RunParametersNovaSeq6000(run_parameters_path=self.run_parameters_path)
+            )
+        return self._run_parameters
+
+    def has_demultiplexing_started_locally(self) -> bool:
+        """Check if demultiplexing has started path exists on the cluster."""
+        return self.demultiplexing_started_path.exists()
+
+    def has_demultiplexing_started_on_sequencer(self) -> bool:
+        """Check if demultiplexing has started on the NovaSeqX machine."""
+        latest_analysis: Path = get_latest_analysis_path(self.path)
+        if not latest_analysis:
+            return False
+        return Path(
+            latest_analysis, DemultiplexingDirsAndFiles.DATA, DemultiplexingDirsAndFiles.BCL_CONVERT
+        ).exists()
 
     def is_flow_cell_ready(self) -> bool:
         """Check if a flow cell is ready for demultiplexing.
@@ -255,17 +244,46 @@ class FlowCellDirectoryData:
         A flow cell is ready if the two files RTAComplete.txt and CopyComplete.txt exists in the
         flow cell directory.
         """
-        LOG.info("Check if flow cell is ready for demultiplexing")
+        LOG.debug("Check if flow cell is ready for demultiplexing")
         if not self.is_sequencing_done():
             LOG.info(f"Sequencing is not completed for flow cell {self.id}")
             return False
         LOG.debug(f"Sequence is done for flow cell {self.id}")
         if not self.is_copy_completed():
-            LOG.info(f"Copy of sequence data is not ready for flow cell {self.id}")
+            LOG.debug(f"Copy of sequence data is not ready for flow cell {self.id}")
             return False
         LOG.debug(f"All data has been transferred for flow cell {self.id}")
         LOG.info(f"Flow cell {self.id} is ready for demultiplexing")
         return True
 
-    def __str__(self):
-        return f"FlowCell(path={self.path},run_parameters_path={self.run_parameters_path})"
+    def is_sequencing_done(self) -> bool:
+        """Check if sequencing is done.
+        This is indicated by that the file RTAComplete.txt exists.
+        """
+        return self.rta_complete_path.exists()
+
+    def is_copy_completed(self) -> bool:
+        """Check if copy of flow cell is done.
+        This is indicated by that the file CopyComplete.txt exists.
+        """
+        return self.copy_complete_path.exists()
+
+
+class DemultiplexedFlowCell(FlowCellDirectoryData):
+    """This class represents a demultiplexed flow cell in the demultiplexed runs folder."""
+
+    @property
+    def is_demultiplexing_complete(self) -> bool:
+        return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
+
+
+class CleanFLowCell(FlowCellDirectoryData):
+    """holds information to check whether the flow cell can be cleaned"""
+
+    pass
+
+
+class EncryptFlowCell(FlowCellDirectoryData):
+    """Holds information to check whether encryption can be done"""
+
+    pass

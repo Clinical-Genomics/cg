@@ -23,7 +23,7 @@ from cg.meta.demultiplex.utils import (
     parse_flow_cell_directory_data,
     parse_manifest_file,
 )
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 def test_validate_sample_fastq_with_valid_file():
