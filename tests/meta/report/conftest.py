@@ -107,7 +107,7 @@ def report_store(analysis_store, helpers, timestamp_yesterday):
         family_sample.sample.ordered_at = timestamp_yesterday - timedelta(days=2)
         family_sample.sample.received_at = timestamp_yesterday - timedelta(days=1)
         family_sample.sample.prepared_at = timestamp_yesterday
-        family_sample.sample.sequenced_at = timestamp_yesterday
+        family_sample.sample.reads_updated_at = timestamp_yesterday
         family_sample.sample.delivered_at = datetime.now()
     return analysis_store
 

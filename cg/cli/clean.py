@@ -5,11 +5,12 @@ from pathlib import Path
 from typing import List, Optional
 
 import click
-from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cgmodels.cg.constants import Pipeline
+from housekeeper.store.models import File, Version
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
     balsamic_pon_past_run_dirs,
@@ -23,25 +24,18 @@ from cg.cli.workflow.commands import (
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
 )
-from cg.constants import FlowCellStatus
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
-from cg.constants.housekeeper_tags import ALIGNMENT_FILE_TAGS, ScoutTag, SequencingFileTag
-from cg.constants.sequencing import Sequencers
-from cg.exc import FlowCellError, HousekeeperBundleVersionMissingError
+from cg.constants.housekeeper_tags import ALIGNMENT_FILE_TAGS, ScoutTag
+from cg.exc import CleanFlowCellFailedError
 from cg.meta.clean.api import CleanAPI
-from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
-from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
-from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
+from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData as DemultiplexFlowCell
 from cg.store import Store
-from cg.store.models import Analysis, Flowcell, Sample
+from cg.store.models import Analysis
 from cg.utils.date import get_date_days_ago, get_timedelta_from_date
 from cg.utils.dispatcher import Dispatcher
-from cgmodels.cg.constants import Pipeline
-from housekeeper.store.models import File, Version
-from sqlalchemy.orm import Query
-from tabulate import tabulate
+from cg.utils.files import get_directories_in_path
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -258,277 +252,30 @@ def hk_bundle_files(
     LOG.info(f"Process freed {round(size_cleaned * 0.0000000001, 2)}GB. Dry run: {dry_run}")
 
 
-@clean.command("invalid-flow-cell-dirs")
-@click.option("-f", "--failed-only", is_flag=True, help="Shows failed flow cells only")
+@clean.command("flow-cells")
 @DRY_RUN
 @click.pass_obj
-def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, dry_run: bool):
-    """Removes invalid flow cell directories from demultiplexed-runs"""
-    status_db: Store = context.status_db
-    demux_api: DemultiplexingAPI = context.demultiplex_api
-    housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    trailblazer_api: TrailblazerAPI = context.trailblazer_api
-    sample_sheets_dir: str = context.clean.flow_cells.sample_sheets_dir_name
-    checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
-    search: str = f"%{demux_api.demultiplexed_runs_dir}%"
-    fastq_files_in_housekeeper: Query = housekeeper_api.files(
-        tags=[SequencingFileTag.FASTQ]
-    ).filter(File.path.like(search))
-    spring_files_in_housekeeper: Query = housekeeper_api.files(
-        tags=[SequencingFileTag.SPRING]
-    ).filter(File.path.like(search))
-    for flow_cell_dir in demux_api.demultiplexed_runs_dir.iterdir():
-        flow_cell: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
-            flow_cell_path=flow_cell_dir,
-            status_db=status_db,
-            housekeeper_api=housekeeper_api,
-            trailblazer_api=trailblazer_api,
-            sample_sheets_dir=sample_sheets_dir,
-            fastq_files=fastq_files_in_housekeeper,
-            spring_files=spring_files_in_housekeeper,
-        )
-        if not flow_cell.is_demultiplexing_ongoing_or_started_and_not_completed:
-            LOG.info(f"Found flow cell ready to be checked: {flow_cell.path}!")
-            checked_flow_cells.append(flow_cell)
-            if not flow_cell.passed_check:
-                LOG.warning(f"Invalid flow cell directory found: {flow_cell.path}")
-                if dry_run:
-                    continue
-                LOG.warning(f"Removing {flow_cell.path}!")
-                flow_cell.remove_failed_flow_cell()
-        else:
-            LOG.warning("Skipping check!")
+def clean_flow_cells(context: CGConfig, dry_run: bool):
+    """Remove flow cells from the flow cells and demultiplexed runs folder."""
 
-    failed_flow_cells: List[DemultiplexedRunsFlowCell] = [
-        flow_cell for flow_cell in checked_flow_cells if not flow_cell.passed_check
-    ]
-    flow_cells_to_present: List[DemultiplexedRunsFlowCell] = (
-        failed_flow_cells if failed_only else checked_flow_cells
-    )
-    tabulate_row = [
-        [
-            flow_cell.run_name,
-            flow_cell.id,
-            flow_cell.is_correctly_named,
-            flow_cell.exists_in_statusdb,
-            flow_cell.fastq_files_exist_in_housekeeper,
-            flow_cell.spring_files_exist_in_housekeeper,
-            flow_cell.files_exist_on_disk,
-            click.style(str(flow_cell.passed_check), fg=CHECK_COLOR[flow_cell.passed_check]),
-        ]
-        for flow_cell in flow_cells_to_present
-    ]
-
-    click.echo(
-        tabulate(
-            tabulate_row,
-            headers=FLOW_CELL_OUTPUT_HEADERS,
-            tablefmt="fancy_grid",
-            missingval="N/A",
-        ),
-    )
-
-
-@clean.command("fix-flow-cell-status")
-@DRY_RUN
-@click.pass_obj
-def fix_flow_cell_status(context: CGConfig, dry_run: bool):
-    """Set correct flow cell statuses in Statusdb."""
-    status_db: Store = context.status_db
-    housekeeper_api: HousekeeperAPI = context.housekeeper_api
-
-    flow_cells_in_statusdb: List[Flowcell] = status_db.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REMOVED]
-    )
-
-    LOG.info(
-        f"Number of flow cells with status {FlowCellStatus.ON_DISK.value} or {FlowCellStatus.REMOVED} in Statusdb: {len(flow_cells_in_statusdb)}"
-    )
-
-    for flow_cell in flow_cells_in_statusdb:
-        sample_bundle_names: List[str] = [sample.internal_id for sample in flow_cell.samples]
-        are_sequencing_files_in_hk: bool = False
-        are_sequencing_files_on_disk: bool = False
+    directories_to_check: List[Path] = []
+    for path in [Path(context.flow_cells_dir), Path(context.demultiplexed_flow_cells_dir)]:
+        directories_to_check.extend(get_directories_in_path(path))
+    exit_code = EXIT_SUCCESS
+    for flow_cell_directory in directories_to_check:
         try:
-            are_sequencing_files_in_hk: bool = housekeeper_api.is_fastq_or_spring_in_all_bundles(
-                bundle_names=sample_bundle_names
-            )
-            are_sequencing_files_on_disk: bool = (
-                housekeeper_api.is_fastq_or_spring_on_disk_in_all_bundles(
-                    bundle_names=sample_bundle_names
-                )
-            )
-        except HousekeeperBundleVersionMissingError:
-            LOG.warning(
-                f"Cannot find sample bundle in Housekeeper for sample on flow cell: {flow_cell.name}"
-            )
-        new_status: str = (
-            FlowCellStatus.ON_DISK
-            if are_sequencing_files_in_hk and are_sequencing_files_on_disk
-            else FlowCellStatus.REMOVED
-        )
-
-        if flow_cell.status != new_status:
-            LOG.info(
-                f"Setting status of flow cell {flow_cell.name} from: {flow_cell.status} to {new_status}"
-            )
-            if dry_run:
-                continue
-            flow_cell.status: str = new_status
-            status_db.session.commit()
-
-
-@clean.command("remove-old-flow-cell-run-dirs")
-@click.option(
-    "-s",
-    "--sequencer",
-    type=click.Choice([Sequencers.HISEQX, Sequencers.HISEQGA, Sequencers.NOVASEQ, Sequencers.ALL]),
-    default="all",
-    help="Specify the sequencer. Default is to remove flow cells for all sequencers",
-)
-@click.option(
-    "-o",
-    "--days-old",
-    type=int,
-    default=21,
-    help="Specify the age in days of the flow cells to be removed.",
-)
-@DRY_RUN
-@click.pass_obj
-def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: int, dry_run: bool):
-    """Removes flow cells from flow cell run dir based on the sequencing date and
-    the sequencer type, if specified."""
-    status_db: Store = context.status_db
-    housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    if sequencer == Sequencers.ALL:
-        LOG.info("Checking flow cells for all sequencers!")
-        for sequencer, run_directory in context.clean.flow_cells.flow_cell_run_dirs:
-            LOG.info(f"Checking directory {run_directory} of sequencer {sequencer}:")
-            flow_cell_dirs: List[Path] = [
-                flow_cell_dir
-                for flow_cell_dir in Path(run_directory).iterdir()
-                if flow_cell_dir.is_dir()
-            ]
-            for flow_cell_dir in flow_cell_dirs:
-                clean_run_directories(
-                    days_old=days_old,
-                    dry_run=dry_run,
-                    housekeeper_api=housekeeper_api,
-                    run_directory=flow_cell_dir,
-                    status_db=status_db,
-                )
-
-    else:
-        run_directory: str = dict(context.clean.flow_cells.flow_cell_run_dirs).get(sequencer)
-        LOG.info(f"Checking directory {run_directory} of sequencer {sequencer}:")
-        flow_cell_dirs: List[Path] = [
-            flow_cell_dir
-            for flow_cell_dir in Path(run_directory).iterdir()
-            if flow_cell_dir.is_dir()
-        ]
-        for flow_cell_dir in flow_cell_dirs:
-            clean_run_directories(
-                days_old=days_old,
+            clean_flow_cell_api = CleanFlowCellAPI(
+                flow_cell_path=flow_cell_directory,
+                status_db=context.status_db,
+                housekeeper_api=context.housekeeper_api,
                 dry_run=dry_run,
-                housekeeper_api=housekeeper_api,
-                run_directory=flow_cell_dir,
-                status_db=status_db,
             )
-
-
-@clean.command("remove-old-demultiplexed-run-dirs")
-@click.option(
-    "-o",
-    "--days-old",
-    type=int,
-    default=21,
-    help="Specify the age in days of the flow cells to be removed.",
-)
-@DRY_RUN
-@click.pass_obj
-def remove_old_demultiplexed_run_dirs(context: CGConfig, days_old: int, dry_run: bool):
-    """Removes flow cells from demultiplexed run directory."""
-    status_db: Store = context.status_db
-    demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
-    housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    trailblazer_api: TrailblazerAPI = context.trailblazer_api
-    for flow_cell_dir in demux_post_processing_api.get_all_demultiplexed_flow_cell_dirs():
-        try:
-            flow_cell: DemultiplexFlowCell = DemultiplexFlowCell(flow_cell_path=flow_cell_dir)
-        except FlowCellError as error:
-            LOG.info(f"Skipping flow cell in {flow_cell_dir} due to {error}")
-            continue
-
-        if not flow_cell.is_demultiplexing_complete:
-            LOG.info(
-                f"Demultiplexing not finished for {flow_cell.id}. Skipping removal of the directory."
-            )
-            continue
-
-        samples: List[Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flow_cell.id)
-        try:
-            are_sequencing_files_in_hk: bool = housekeeper_api.is_fastq_or_spring_in_all_bundles(
-                bundle_names=[sample.internal_id for sample in samples]
-            )
-        except HousekeeperBundleVersionMissingError:
-            LOG.info(
-                f"No bundle found for one or more of the samples on flow cell {flow_cell.id}."
-                f" Skipping removal of the directory."
-            )
-            continue
-
-        demux_runs_flow_cell: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
-            flow_cell_path=flow_cell_dir,
-            status_db=status_db,
-            housekeeper_api=housekeeper_api,
-            trailblazer_api=trailblazer_api,
-            sample_sheets_dir=context.clean.flow_cells.sample_sheets_dir_name,
-        )
-        if (
-            not demux_runs_flow_cell.is_demultiplexing_ongoing_or_started_and_not_completed
-            and are_sequencing_files_in_hk
-        ):
-            LOG.info(f"Found flow cell ready to be removed: {demux_runs_flow_cell.path}!")
-            if dry_run:
-                continue
-            LOG.warning(f"Removing {demux_runs_flow_cell.path}!")
-            clean_run_directories(
-                days_old=days_old,
-                dry_run=dry_run,
-                housekeeper_api=housekeeper_api,
-                run_directory=demux_runs_flow_cell.path,
-                status_db=status_db,
-            )
-
-
-def clean_run_directories(
-    days_old: int,
-    dry_run: bool,
-    housekeeper_api: HousekeeperAPI,
-    run_directory: Path,
-    status_db: Store,
-):
-    """Cleans up all flow cell directories in the specified run directory."""
-    LOG.info(f"Checking flow cell {run_directory.name}")
-    run_dir_flow_cell: RunDirFlowCell = RunDirFlowCell(
-        flow_cell_dir=run_directory, status_db=status_db, housekeeper_api=housekeeper_api
-    )
-    if run_dir_flow_cell.exists_in_statusdb and run_dir_flow_cell.is_retrieved_from_pdc:
-        LOG.info(
-            f"Skipping removal of flow cell {run_directory}, PDC retrieval status is '{run_dir_flow_cell.flow_cell_status}'!"
-        )
-        return
-    if run_dir_flow_cell.age < days_old:
-        LOG.info(
-            f"Flow cell {run_directory} is {run_dir_flow_cell.age} days old and will NOT be removed."
-        )
-        return
-    LOG.info(f"Flow cell {run_directory} is {run_dir_flow_cell.age} days old and will be removed.")
-    if dry_run:
-        return
-    LOG.info(f"Removing flow cell run directory {run_dir_flow_cell.flow_cell_dir}.")
-    run_dir_flow_cell.archive_sample_sheet()
-    run_dir_flow_cell.remove_run_directory()
+            clean_flow_cell_api.delete_flow_cell_directory()
+        except CleanFlowCellFailedError as error:
+            LOG.error(repr(error))
+            exit_code = EXIT_FAIL
+    if exit_code:
+        click.Abort
 
 
 def _get_confirm_question(bundle, file_obj) -> str:

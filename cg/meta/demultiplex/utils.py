@@ -144,19 +144,12 @@ def get_q30_threshold(sequencer_type: Sequencers) -> int:
     return FLOWCELL_Q30_THRESHOLD[sequencer_type]
 
 
-def get_sample_sheet_path(
+def get_sample_sheet_path_from_flow_cell_dir(
     flow_cell_directory: Path,
     sample_sheet_file_name: str = DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
 ) -> Path:
     """Return the path to the sample sheet in the flow cell directory."""
     return get_file_in_directory(directory=flow_cell_directory, file_name=sample_sheet_file_name)
-
-
-def parse_flow_cell_directory_data(
-    flow_cell_directory: Path, bcl_converter: Optional[str] = None
-) -> FlowCellDirectoryData:
-    """Return flow cell data from the flow cell directory."""
-    return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
 
 
 def add_flow_cell_name_to_fastq_file_path(fastq_file_path: Path, flow_cell_name: str) -> Path:
@@ -183,18 +176,15 @@ def rename_fastq_file_if_needed(fastq_file_path: Path, flow_cell_name: str) -> P
 def get_sample_sheet(flow_cell: FlowCellDirectoryData) -> SampleSheet:
     """Return sample sheet associated with flowcell."""
     sample_sheet_path: Path = flow_cell.get_sample_sheet_path_hk()
-    sample_type = flow_cell.sample_type
-    sample_sheet: SampleSheet = get_sample_sheet_from_file(
-        infile=sample_sheet_path, flow_cell_sample_type=sample_type
-    )
+    sample_sheet: SampleSheet = get_sample_sheet_from_file(sample_sheet_path)
     return sample_sheet
 
 
-def get_undetermined_fastqs(lane: int, flow_cell_path: Path) -> List[Path]:
+def get_undetermined_fastqs(lane: int, undetermined_dir_path: Path) -> List[Path]:
     """Get the undetermined fastq files for a specific lane on a flow cell."""
     undetermined_pattern = f"Undetermined*_L00{lane}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     return get_files_matching_pattern(
-        directory=flow_cell_path,
+        directory=undetermined_dir_path,
         pattern=undetermined_pattern,
     )
 

@@ -219,10 +219,7 @@ class FlowCellDirectoryData:
     def validate_sample_sheet(self) -> bool:
         """Validate if sample sheet is on correct format."""
         try:
-            get_sample_sheet_from_file(
-                infile=self.sample_sheet_path,
-                flow_cell_sample_type=self.sample_type,
-            )
+            get_sample_sheet_from_file(self.sample_sheet_path)
         except (SampleSheetError, ValidationError) as error:
             LOG.warning("Invalid sample sheet")
             LOG.warning(error)
@@ -233,12 +230,16 @@ class FlowCellDirectoryData:
             return False
         return True
 
+    @property
+    def sample_sheet(self) -> SampleSheet:
+        """Return sample sheet object."""
+        if not self._sample_sheet_path_hk:
+            raise FlowCellError("Sample sheet path has not been assigned yet")
+        return get_sample_sheet_from_file(self._sample_sheet_path_hk)
+
     def get_sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
-        return get_sample_sheet_from_file(
-            infile=self.sample_sheet_path,
-            flow_cell_sample_type=self.sample_type,
-        )
+        return get_sample_sheet_from_file(self.sample_sheet_path)
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done.

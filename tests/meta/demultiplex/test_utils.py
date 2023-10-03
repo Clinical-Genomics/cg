@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 import pytest
+
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
@@ -11,7 +12,7 @@ from cg.meta.demultiplex.utils import (
     create_delivery_file_in_flow_cell_directory,
     get_lane_from_sample_fastq,
     get_q30_threshold,
-    get_sample_sheet_path,
+    get_sample_sheet_path_from_flow_cell_dir,
     get_undetermined_fastqs,
     is_file_path_compressed_fastq,
     is_file_relevant_for_demultiplexing,
@@ -19,7 +20,6 @@ from cg.meta.demultiplex.utils import (
     is_sample_id_in_directory_name,
     is_syncing_complete,
     is_valid_sample_fastq_file,
-    parse_flow_cell_directory_data,
     parse_manifest_file,
 )
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
@@ -215,7 +215,7 @@ def test_get_sample_sheet_path_found(tmp_path: Path):
     sample_sheet_path.touch()
 
     # WHEN the sample sheet is retrieved
-    found_sample_sheet_path: Path = get_sample_sheet_path(flow_cell_directory)
+    found_sample_sheet_path: Path = get_sample_sheet_path_from_flow_cell_dir(flow_cell_directory)
 
     # THEN the path to the sample sheet file should be returned
     assert found_sample_sheet_path == sample_sheet_path
@@ -234,7 +234,7 @@ def test_get_sample_sheet_path_found_in_nested_directory(tmp_path: Path):
     sample_sheet_path.touch()
 
     # WHEN the sample sheet is retrieved
-    found_sample_sheet_path: Path = get_sample_sheet_path(flow_cell_directory)
+    found_sample_sheet_path: Path = get_sample_sheet_path_from_flow_cell_dir(flow_cell_directory)
 
     # THEN the path to the sample sheet file should be returned
     assert found_sample_sheet_path == sample_sheet_path
@@ -247,19 +247,19 @@ def test_get_sample_sheet_path_not_found(tmp_path: Path):
     # WHEN the sample sheet is retrieved
     # THEN a FileNotFoundError should be raised
     with pytest.raises(FileNotFoundError):
-        get_sample_sheet_path(flow_cell_directory)
+        get_sample_sheet_path_from_flow_cell_dir(flow_cell_directory)
 
 
 def test_parse_flow_cell_directory_data_invalid():
     with pytest.raises(FlowCellError):
-        parse_flow_cell_directory_data(Path("dummy_path"), "dummy_bcl_converter")
+        FlowCellDirectoryData(Path("dummy_path"), "dummy_bcl_converter")
 
 
 def test_parse_flow_cell_directory_data_valid():
     # GIVEN a flow cell directory which is valid
     # WHEN parsing the flow cell directory data
     flow_cell_run_directory = "20230508_LH00188_0003_A22522YLT3"
-    result = parse_flow_cell_directory_data(Path(flow_cell_run_directory), "dummy_bcl_converter")
+    result = FlowCellDirectoryData(Path(flow_cell_run_directory), "dummy_bcl_converter")
 
     # THEN a FlowCellDirectoryData object should be returned
     assert isinstance(result, FlowCellDirectoryData)
@@ -332,42 +332,47 @@ def test_is_syncing_complete_false(
     assert not is_directory_synced
 
 
-def test_add_flow_cell_name_to_fastq_file_path(bcl2fastq_flow_cell_id: str, fastq_file_path: Path):
+def test_add_flow_cell_name_to_fastq_file_path(
+    bcl2fastq_flow_cell_id: str, demultiplex_fastq_file_path
+):
     # GIVEN a fastq file path and a flow cell name
 
     # WHEN adding the flow cell name to the fastq file path
     rename_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
-        fastq_file_path=fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
+        fastq_file_path=demultiplex_fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
     # THEN the fastq file path should be returned with the flow cell name added
     assert rename_fastq_file_path == Path(
-        fastq_file_path.parent, f"{bcl2fastq_flow_cell_id}_{fastq_file_path.name}"
+        demultiplex_fastq_file_path.parent,
+        f"{bcl2fastq_flow_cell_id}_{demultiplex_fastq_file_path.name}",
     )
 
 
 def test_add_flow_cell_name_to_fastq_file_path_when_flow_cell_name_already_in_name(
-    bcl2fastq_flow_cell_id: str, fastq_file_path: Path
+    bcl2fastq_flow_cell_id: str, demultiplex_fastq_file_path
 ):
     # GIVEN a fastq file path and a flow cell name
 
     # GIVEN that the flow cell name is already in the fastq file path
-    fastq_file_path = Path(f"{bcl2fastq_flow_cell_id}_{fastq_file_path.name}")
+    demultiplex_fastq_file_path = Path(
+        f"{bcl2fastq_flow_cell_id}_{demultiplex_fastq_file_path.name}"
+    )
 
     # WHEN adding the flow cell name to the fastq file path
     renamed_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
-        fastq_file_path=fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
+        fastq_file_path=demultiplex_fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
     # THEN the fastq file path should be returned equal to the original fastq file path
-    assert renamed_fastq_file_path == fastq_file_path
+    assert renamed_fastq_file_path == demultiplex_fastq_file_path
 
 
 def test_get_undetermined_fastqs_no_matching_files(tmp_path):
     # GIVEN a lane and a flow cell with no undetermined fastq files
 
     # WHEN reetrieving undetermined fastqs for the lane
-    result = get_undetermined_fastqs(lane=1, flow_cell_path=tmp_path)
+    result = get_undetermined_fastqs(lane=1, undetermined_dir_path=tmp_path)
 
     # THEN no undetermined fastq files should be returned
     assert not result
@@ -379,7 +384,7 @@ def test_get_undetermined_fastqs_single_matching_file(tmp_path):
     expected_file.touch()
 
     # WHEN retrieving undetermined fastqs for the lane
-    result = get_undetermined_fastqs(lane=1, flow_cell_path=tmp_path)
+    result = get_undetermined_fastqs(lane=1, undetermined_dir_path=tmp_path)
 
     # THEN the undetermined fastq file for the lane should be returned
     assert result == [expected_file]
@@ -395,7 +400,7 @@ def test_get_undetermined_fastqs_multiple_matching_files(tmp_path):
         file.touch()
 
     # WHEN retrieving the undetermined fastqs for the lane
-    result = get_undetermined_fastqs(lane=1, flow_cell_path=tmp_path)
+    result = get_undetermined_fastqs(lane=1, undetermined_dir_path=tmp_path)
 
     # THEN the undetermined fastq files for the lane should be returned
     assert set(result) == set(expected_files)

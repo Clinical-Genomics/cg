@@ -10,7 +10,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
-from cg.store.models import Sample, Family, Application
+from cg.store.models import Application, Family, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -109,7 +109,7 @@ class MutantAnalysisAPI(AnalysisAPI):
             ),
             date_arrival=str(sample_obj.received_at),
             date_libprep=str(sample_obj.prepared_at),
-            date_sequencing=str(sample_obj.sequenced_at),
+            date_sequencing=str(sample_obj.reads_updated_at),
             selection_criteria=self.lims_api.get_sample_attribute(
                 lims_id=sample_obj.internal_id, key="selection_criteria"
             ),

@@ -4,13 +4,13 @@ from gettext import gettext
 from typing import List, Union
 
 from cgmodels.cg.constants import Pipeline
-from flask import redirect, request, session, url_for, flash
+from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 
-from cg.constants.constants import DataDelivery, CaseActions
+from cg.constants.constants import CaseActions, DataDelivery
 from cg.server.ext import db
 from cg.store.models import Sample
 from cg.utils.flask.enum import SelectEnumField
@@ -396,7 +396,7 @@ class SampleView(BaseView):
         "comment",
         "downsampled_to",
         "is_tumour",
-        "sequenced_at",
+        "reads_updated_at",
         "sex",
     ]
     column_filters = ["customer.internal_id", "priority", "sex", "application_version.application"]

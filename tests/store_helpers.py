@@ -1,7 +1,7 @@
 """Utility functions to simply add test data in a cg store."""
 import logging
 from datetime import datetime
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 from housekeeper.store.models import Bundle, Version
 
@@ -28,8 +28,8 @@ from cg.store.models import (
     Panel,
     Pool,
     Sample,
-    User,
     SampleLaneSequencingMetrics,
+    User,
 )
 
 LOG = logging.getLogger(__name__)
@@ -265,7 +265,9 @@ class StoreHelpers:
         if not case:
             case = StoreHelpers.add_case(store, data_analysis=pipeline, data_delivery=data_delivery)
 
-        analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
+        analysis = store.add_analysis(
+            pipeline=pipeline, version=pipeline_version, family_id=case.id
+        )
 
         analysis.started_at = started_at or datetime.now()
         if completed_at:
@@ -593,6 +595,7 @@ class StoreHelpers:
         samples: List[Sample] = None,
         status: str = None,
         date: datetime = datetime.now(),
+        has_backup: Optional[bool] = False,
     ) -> Flowcell:
         """Utility function to add a flow cell to the store and return an object."""
         flow_cell = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
@@ -603,6 +606,7 @@ class StoreHelpers:
             sequencer_name="dummy_sequencer",
             sequencer_type=sequencer_type,
             date=date,
+            has_backup=has_backup,
         )
         flow_cell.archived_at = archived_at
         if samples:
@@ -710,7 +714,7 @@ class StoreHelpers:
 
         samples: List[Sample] = cls.add_samples(store=base_store, nr_samples=nr_samples)
         for sample in samples:
-            sample.sequenced_at: datetime = sequenced_at
+            sample.reads_updated_at: datetime = sequenced_at
         case: Family = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
         cls.relate_samples(base_store=base_store, case=case, samples=samples)
         return case
@@ -864,3 +868,25 @@ class StoreHelpers:
         store.session.add(metrics)
         store.session.commit()
         return metrics
+
+    @classmethod
+    def add_multiple_sample_lane_sequencing_metrics_entries(cls, metrics_data: List, store) -> None:
+        """Add multiple sample lane sequencing metrics to a store."""
+
+        for (
+            sample_internal_id,
+            flow_cell_name_,
+            flow_cell_lane_number,
+            sample_total_reads_in_lane,
+            sample_base_percentage_passing_q30,
+            sample_base_mean_quality_score,
+        ) in metrics_data:
+            cls.add_sample_lane_sequencing_metrics(
+                store=store,
+                sample_internal_id=sample_internal_id,
+                flow_cell_name=flow_cell_name_,
+                flow_cell_lane_number=flow_cell_lane_number,
+                sample_total_reads_in_lane=sample_total_reads_in_lane,
+                sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
+                sample_base_mean_quality_score=sample_base_mean_quality_score,
+            )

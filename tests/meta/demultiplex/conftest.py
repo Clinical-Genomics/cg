@@ -1,18 +1,20 @@
 import shutil
-
-import pytest
-
 from collections import namedtuple
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
+
+import pytest
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
+from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store.api import Store
-from cg.store.models import Sample, Family
+from cg.store.models import Family, Sample
 from tests.store_helpers import StoreHelpers
 
 FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_internal_ids")
@@ -39,9 +41,9 @@ def temp_fastq_paths(tmp_demulitplexing_dir: Path) -> List[Path]:
     return fastqs
 
 
-@pytest.fixture(name="fastq_file_path")
-def fastq_file_path() -> Path:
-    """Return a path to a fastq file."""
+@pytest.fixture
+def demultiplex_fastq_file_path() -> Path:
+    """Return a path to non-existent a fastq file."""
     return Path("path/to/sample_internal_id_S1_L001_R1_001.fastq.gz")
 
 
@@ -476,3 +478,62 @@ def lsyncd_target_directory(lsyncd_source_directory: Path, tmp_path_factory) -> 
     target_directory = Path(lsyncd_source_directory.parent, Path(temp_target_directory, "target"))
     shutil.copytree(lsyncd_source_directory, target_directory)
     return target_directory
+
+
+@pytest.fixture
+def demux_post_processing_api(
+    demultiplex_context: CGConfig, tmp_demultiplexed_runs_directory: Path
+) -> DemuxPostProcessingAPI:
+    api = DemuxPostProcessingAPI(demultiplex_context)
+    api.demultiplexed_runs_dir = tmp_demultiplexed_runs_directory
+    return api
+
+
+@pytest.fixture
+def bcl2fastq_flow_cell_dir_name(demux_post_processing_api) -> str:
+    """Return a flow cell name that has been demultiplexed with bcl2fastq."""
+    flow_cell_dir_name = "170407_ST-E00198_0209_BHHKVCALXX"
+    flow_cell_path = Path(demux_post_processing_api.demultiplexed_runs_dir, flow_cell_dir_name)
+
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=flow_cell_path,
+        flow_cell_name="HHKVCALXX",
+        hk_api=demux_post_processing_api.hk_api,
+    )
+    return flow_cell_dir_name
+
+
+@pytest.fixture
+def bcl2fastq_sample_id_with_non_pooled_undetermined_reads() -> str:
+    return "SVE2528A1"
+
+
+@pytest.fixture
+def bcl2fastq_non_pooled_sample_read_count() -> int:
+    """Based on the data in 170407_ST-E00198_0209_BHHKVCALXX, the sum of all reads - mapped and undetermined."""
+    return 8000000
+
+
+@pytest.fixture
+def bclconvert_flow_cell_dir_name(demux_post_processing_api) -> str:
+    """Return a flow cell name that has been demultiplexed with bclconvert."""
+    flow_cell_dir_name = "230504_A00689_0804_BHY7FFDRX2"
+    flow_cell_path = Path(demux_post_processing_api.demultiplexed_runs_dir, flow_cell_dir_name)
+
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=flow_cell_path,
+        flow_cell_name="HY7FFDRX2",
+        hk_api=demux_post_processing_api.hk_api,
+    )
+    return flow_cell_dir_name
+
+
+@pytest.fixture
+def bcl_convert_sample_id_with_non_pooled_undetermined_reads() -> str:
+    return "ACC11927A2"
+
+
+@pytest.fixture
+def bcl_convert_non_pooled_sample_read_count() -> int:
+    """Based on the data in 230504_A00689_0804_BHY7FFDRX2, the sum of all reads - mapped and undetermined."""
+    return 4000000

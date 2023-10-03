@@ -39,20 +39,14 @@ from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
+from cg.models.demultiplex.run_parameters import (
+    RunParametersNovaSeq6000,
+    RunParametersNovaSeqX,
+)
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
-from cg.store.models import (
-    Bed,
-    BedVersion,
-    Customer,
-    Family,
-    Flowcell,
-    Organism,
-    Sample,
-    SampleLaneSequencingMetrics,
-)
+from cg.store.models import Bed, BedVersion, Customer, Family, Organism, Sample
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -438,10 +432,10 @@ def gens_api(gens_config: dict) -> GensAPI:
 
 
 @pytest.fixture
-def madeline_api(madeline_output) -> MockMadelineAPI:
+def madeline_api(madeline_output: Path) -> MockMadelineAPI:
     """madeline_api fixture."""
     _api = MockMadelineAPI()
-    _api.set_outpath(madeline_output)
+    _api.set_outpath(out_path=madeline_output.as_posix())
     return _api
 
 
@@ -460,6 +454,13 @@ def osticket(ticket_id: str) -> MockOsTicket:
 
 
 # Files fixtures
+
+
+@pytest.fixture
+def empty_fastq_file_path(data_dir: Path):
+    """Return the path to an empty fastq file."""
+    return Path(data_dir, "fastq.fastq.gz")
+
 
 # Common file name fixtures
 
@@ -519,16 +520,22 @@ def cgweb_orders_dir(fixtures_dir: Path) -> Path:
     return Path(fixtures_dir, "cgweb_orders")
 
 
-@pytest.fixture
-def fastq_dir(demultiplexed_runs: Path) -> Path:
-    """Return the path to the fastq files dir."""
-    return Path(demultiplexed_runs, "fastq")
+@pytest.fixture(scope="session")
+def data_dir(fixtures_dir: Path) -> Path:
+    """Return the path to the data dir."""
+    return Path(fixtures_dir, "data")
 
 
 @pytest.fixture
-def spring_dir(demultiplexed_runs: Path) -> Path:
+def fastq_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the fastq files dir."""
-    return Path(demultiplexed_runs, "spring")
+    return Path(demultiplex_fixtures, "fastq")
+
+
+@pytest.fixture
+def spring_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to the fastq files dir."""
+    return Path(demultiplex_fixtures, "spring")
 
 
 @pytest.fixture
@@ -576,9 +583,9 @@ def orderforms(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture
-def hk_file(filled_file, case_id) -> File:
+def hk_file(filled_file: Path, case_id: str) -> File:
     """Return a housekeeper File object."""
-    return File(id=case_id, path=filled_file)
+    return File(id=case_id, path=filled_file.as_posix())
 
 
 @pytest.fixture
@@ -692,6 +699,12 @@ def fastq_file_father(fastq_dir: Path) -> Path:
 def spring_file(spring_dir: Path) -> Path:
     """Return the path to an existing spring file."""
     return Path(spring_dir, "dummy_run_001.spring")
+
+
+@pytest.fixture(name="spring_meta_data_file")
+def spring_meta_data_file(spring_dir: Path) -> Path:
+    """Return the path to an existing spring file."""
+    return Path(spring_dir, "dummy_spring_meta_data.json")
 
 
 @pytest.fixture(name="spring_file_father")
@@ -817,14 +830,6 @@ def tmp_flow_cell_name_no_run_parameters() -> str:
     return "180522_A00689_0200_BHLCKNCCXY"
 
 
-@pytest.fixture(name="tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert")
-def fixture_tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert() -> str:
-    """ "Returns the name of a flow cell directory ready for demultiplexing with BCL convert.
-    Contains a sample sheet that is BCL convert compliant
-    """
-    return "211101_A00187_0615_AHLG5GDRZZ"
-
-
 @pytest.fixture(name="tmp_flow_cell_name_malformed_sample_sheet")
 def fixture_tmp_flow_cell_name_malformed_sample_sheet() -> str:
     """ "Returns the name of a flow cell directory ready for demultiplexing with BCL convert.
@@ -871,10 +876,10 @@ def fixture_tmp_flow_cells_directory_malformed_sample_sheet(
 
 @pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert")
 def fixture_tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert(
-    tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert: str, tmp_flow_cells_directory: Path
+    bcl_convert_flow_cell_full_name: str, tmp_flow_cells_directory: Path
 ) -> Path:
     """This is a path to a flow cell directory with the run parameters missing."""
-    return Path(tmp_flow_cells_directory, tmp_flow_cell_name_ready_for_demultiplexing_bcl_convert)
+    return Path(tmp_flow_cells_directory, bcl_convert_flow_cell_full_name)
 
 
 @pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq")
@@ -1408,11 +1413,11 @@ def novaseqx_flow_cell_with_sample_sheet_no_fastq(
 ) -> FlowCellDirectoryData:
     """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
     novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)
-    flow_cell = FlowCellDirectoryData(flow_cell_path=novaseqx_flow_cell_directory)
+    flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_directory)
     sample_sheet_path = Path(
         novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
-    mocker.patch.object(flow_cell, "get_sample_sheet_path_hk", return_value=sample_sheet_path)
+    flow_cell._sample_sheet_path_hk = sample_sheet_path
     return flow_cell
 
 
@@ -1996,7 +2001,7 @@ def sample_store(base_store: Store) -> Store:
             sex=Gender.MALE,
             received=datetime.now(),
             prepared_at=datetime.now(),
-            sequenced_at=datetime.now(),
+            reads_updated_at=datetime.now(),
             reads=(310 * 1000000),
         ),
         base_store.add_sample(
@@ -2009,12 +2014,12 @@ def sample_store(base_store: Store) -> Store:
         base_store.add_sample(
             name="to-deliver",
             sex=Gender.MALE,
-            sequenced_at=datetime.now(),
+            reads_updated_at=datetime.now(),
         ),
         base_store.add_sample(
             name="delivered",
             sex=Gender.MALE,
-            sequenced_at=datetime.now(),
+            reads_updated_at=datetime.now(),
             delivered_at=datetime.now(),
             no_invoice=False,
         ),
@@ -2143,15 +2148,9 @@ def microsalt_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def current_encryption_dir() -> Path:
-    """Return a temporary directory for current encryption testing."""
-    return Path("home", "ENCRYPT")
-
-
-@pytest.fixture
-def legacy_encryption_dir() -> Path:
-    """Return a temporary directory for current encryption testing."""
-    return Path("home", "TO_PDC")
+def encryption_dir() -> Path:
+    """Return a temporary directory for encryption testing."""
+    return Path("home", "encrypt")
 
 
 @pytest.fixture(name="cg_uri")
@@ -2202,11 +2201,7 @@ def context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encrypt_dir": {
-                "current": str(current_encryption_dir),
-                "legacy": str(legacy_encryption_dir),
-            },
-            "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
+            "encrypt_dir": str(encryption_dir),
         },
         "balsamic": {
             "balsamic_cache": "hello",
@@ -2777,7 +2772,7 @@ def rnafusion_context(
     sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        sequenced_at=datetime.now(),
+        reads_updated_at=datetime.now(),
     )
 
     helpers.add_relationship(
@@ -3005,7 +3000,7 @@ def taxprofiler_context(
     taxprofiler_sample: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        sequenced_at=datetime.now(),
+        reads_updated_at=datetime.now(),
         name=sample_name,
     )
 
@@ -3069,39 +3064,16 @@ def store_with_sequencing_metrics(
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 3, 1_500_000, 80.5, 33),
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 2, 1_500_000, 80.5, 33),
     ]
-
-    flow_cell: Flowcell = helpers.add_flowcell(
+    helpers.add_flowcell(
         flow_cell_name=flow_cell_name,
         store=store,
     )
-    sample: Sample = helpers.add_sample(
+    helpers.add_sample(
         name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
     )
-    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
-
-    for (
-        sample_internal_id,
-        flow_cell_name_,
-        flow_cell_lane_number,
-        sample_total_reads_in_lane,
-        sample_base_percentage_passing_q30,
-        sample_base_mean_quality_score,
-    ) in sample_sequencing_metrics_details:
-        helpers.add_sample_lane_sequencing_metrics(
-            store=store,
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=flow_cell_name_,
-            flow_cell_lane_number=flow_cell_lane_number,
-            sample_total_reads_in_lane=sample_total_reads_in_lane,
-            sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
-            sample_base_mean_quality_score=sample_base_mean_quality_score,
-        )
-
-    store.session.add(flow_cell)
-    store.session.add(sample)
-    store.session.add_all(sample_lane_sequencing_metrics)
-    store.session.commit()
-
+    helpers.add_multiple_sample_lane_sequencing_metrics_entries(
+        metrics_data=sample_sequencing_metrics_details, store=store
+    )
     return store
 
 
