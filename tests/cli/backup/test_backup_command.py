@@ -97,7 +97,7 @@ def test_encrypt_flow_cell_when_encryption_already_started(
     mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
     FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
-    # Given a pending flag file
+    # GIVEN a pending flag file
     flow_cells_dir = Path(cg_context.backup.encrypt_dir, flow_cell_full_name)
     flow_cells_dir.mkdir(parents=True, exist_ok=True)
     Path(flow_cells_dir, flow_cell_name).with_suffix(FileExtensions.PENDING).touch()
@@ -130,7 +130,7 @@ def test_encrypt_flow_cell_when_encryption_already_completed(
     mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
     FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
-    # Given a pending flag file
+    # GIVEN a pending flag file
     flow_cells_dir = Path(cg_context.backup.encrypt_dir, flow_cell_full_name)
     flow_cells_dir.mkdir(parents=True, exist_ok=True)
     Path(flow_cells_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()

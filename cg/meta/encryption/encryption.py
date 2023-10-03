@@ -7,10 +7,10 @@ from tempfile import NamedTemporaryFile
 from typing import Dict, List, Optional, Union
 
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.constants import FileExtensions
+from cg.constants import SPACE, FileExtensions
 from cg.constants.encryption import EncryptionUserID, GPGParameters
 from cg.constants.priority import SlurmQos
-from cg.exc import ChecksumFailedError, FlowCellError
+from cg.exc import ChecksumFailedError, FlowCellEncryptionError, FlowCellError
 from cg.meta.encryption.sbatch import (
     FLOW_CELL_ENCRYPT_COMMANDS,
     FLOW_CELL_ENCRYPT_ERROR,
@@ -227,7 +227,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             + GPGParameters.OUTPUT_PARAMETER
             + [output_file.as_posix()]
         )
-        return " ".join(encryption_parameters)
+        return SPACE.join(encryption_parameters)
 
     def get_flow_cell_symmetric_decryption_command(
         self, input_file: Path, passphrase_file_path: Path
@@ -238,7 +238,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             + GPGParameters.SYMMETRIC_DECRYPTION
             + [passphrase_file_path.as_posix(), input_file.as_posix()]
         )
-        return " ".join(decryption_parameters)
+        return SPACE.join(decryption_parameters)
 
     def is_encryption_possible(self) -> Optional[bool]:
         """Check if requirements for encryption are meet.
@@ -248,9 +248,13 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         if not self.flow_cell.is_flow_cell_ready():
             raise FlowCellError(f"Flow cell: {self.flow_cell.id} is not ready")
         if self.complete_file_path.exists():
-            raise FlowCellError(f"Encryption already completed for flow cell: {self.flow_cell.id}")
+            raise FlowCellEncryptionError(
+                f"Encryption already completed for flow cell: {self.flow_cell.id}"
+            )
         if self.pending_file_path.exists():
-            raise FlowCellError(f"Encryption already started for flow cell: {self.flow_cell.id}")
+            raise FlowCellEncryptionError(
+                f"Encryption already started for flow cell: {self.flow_cell.id}"
+            )
         return True
 
     def encrypt_flow_cell(
