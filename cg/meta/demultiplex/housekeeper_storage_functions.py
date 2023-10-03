@@ -30,7 +30,7 @@ def store_flow_cell_data_in_housekeeper(
 ) -> None:
     LOG.info(f"Add flow cell data to Housekeeper for {flow_cell.id}")
 
-    add_bundle_and_version_if_non_existent(bundle_name=flow_cell.id, hk_api=hk_api)
+    hk_api.add_bundle_and_version_if_non_existent(flow_cell.id)
 
     tags: List[str] = [SequencingFileTag.FASTQ, flow_cell.id]
     hk_api.add_tags_if_non_existent(tags)
@@ -138,7 +138,7 @@ def store_fastq_path_in_housekeeper(
     hk_api: HousekeeperAPI,
 ) -> None:
     """Add the fastq file path with tags to a bundle and version in Housekeeper."""
-    add_bundle_and_version_if_non_existent(bundle_name=sample_internal_id, hk_api=hk_api)
+    hk_api.add_bundle_and_version_if_non_existent(sample_internal_id)
     hk_api.add_tags_if_non_existent([sample_internal_id])
     hk_api.add_file_to_bundle_if_non_existent(
         file_path=sample_fastq_path,
@@ -186,7 +186,7 @@ def add_sample_sheet_path_to_housekeeper(
         sample_sheet_file_path: Path = get_sample_sheet_path_from_flow_cell_dir(
             flow_cell_directory=flow_cell_directory
         )
-        add_bundle_and_version_if_non_existent(bundle_name=flow_cell_name, hk_api=hk_api)
+        hk_api.add_bundle_and_version_if_non_existent(flow_cell_name)
         hk_api.add_file_to_bundle_if_non_existent(
             file_path=sample_sheet_file_path,
             bundle_name=flow_cell_name,
@@ -196,11 +196,3 @@ def add_sample_sheet_path_to_housekeeper(
         LOG.error(
             f"Sample sheet for flow cell {flow_cell_name} in {flow_cell_directory} was not found, error: {e}"
         )
-
-
-def add_bundle_and_version_if_non_existent(bundle_name: str, hk_api: HousekeeperAPI) -> None:
-    """Add bundle if it does not exist."""
-    if not hk_api.bundle(name=bundle_name):
-        hk_api.create_new_bundle_and_version(name=bundle_name)
-    else:
-        LOG.debug(f"Bundle with name {bundle_name} already exists")

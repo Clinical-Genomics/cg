@@ -10,7 +10,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_bundle_and_version_if_non_existent,
     add_demux_logs_to_housekeeper,
     add_sample_fastq_files_to_housekeeper,
     add_sample_sheet_path_to_housekeeper,
@@ -29,9 +28,7 @@ def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
 
     # WHEN adding a bundle and version which does not exist
     flow_cell_name: str = "flow_cell_name"
-    add_bundle_and_version_if_non_existent(
-        bundle_name=flow_cell_name, hk_api=demux_post_processing_api.hk_api
-    )
+    demux_post_processing_api.hk_api.add_bundle_and_version_if_non_existent(flow_cell_name)
 
     # THEN that the expected methods were called with the expected arguments
     demux_post_processing_api.hk_api.bundle.assert_called_once_with(name=flow_cell_name)
@@ -50,9 +47,7 @@ def test_add_bundle_and_version_if_already_exists(demultiplex_context: CGConfig)
 
     # WHEN adding a bundle and version which already exists
     flow_cell_name: str = "flow_cell_name"
-    add_bundle_and_version_if_non_existent(
-        bundle_name=flow_cell_name, hk_api=demux_post_processing_api.hk_api
-    )
+    demux_post_processing_api.hk_api.add_bundle_and_version_if_non_existent(flow_cell_name)
     # THEN the bundle was retrieved
     demux_post_processing_api.hk_api.bundle.assert_called_once_with(name=flow_cell_name)
 
@@ -142,8 +137,8 @@ def test_add_existing_sample_sheet(
     flow_cell_directory = Path(tmp_flow_cells_directory, bcl_convert_flow_cell.full_name)
 
     # GIVEN that a flow cell bundle exists in Housekeeper
-    add_bundle_and_version_if_non_existent(
-        bundle_name=bcl_convert_flow_cell.id, hk_api=demux_post_processing_api.hk_api
+    demux_post_processing_api.hk_api.add_bundle_and_version_if_non_existent(
+        bundle_name=bcl_convert_flow_cell.id
     )
 
     # WHEN a sample sheet is added
@@ -169,8 +164,8 @@ def test_add_demux_logs_to_housekeeper(
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a bundle and flow cell version exists in housekeeper
-    add_bundle_and_version_if_non_existent(
-        bundle_name=bcl_convert_flow_cell.id, hk_api=demux_post_processing_api.hk_api
+    demux_post_processing_api.hk_api.add_bundle_and_version_if_non_existent(
+        bundle_name=bcl_convert_flow_cell.id
     )
 
     # GIVEN a demux log in the run directory

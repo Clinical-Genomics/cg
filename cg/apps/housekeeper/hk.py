@@ -549,3 +549,10 @@ class HousekeeperAPI:
         for tag_name in tag_names:
             if self.get_tag(name=tag_name) is None:
                 self.add_tag(name=tag_name)
+
+    def add_bundle_and_version_if_non_existent(self, bundle_name: str) -> None:
+        """Add bundle if it does not exist."""
+        if not self.bundle(name=bundle_name):
+            self.create_new_bundle_and_version(name=bundle_name)
+        else:
+            LOG.debug(f"Bundle with name {bundle_name} already exists")
