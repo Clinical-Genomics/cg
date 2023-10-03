@@ -9,7 +9,9 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBCLConvert,
     SampleSheet,
 )
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_validated_sample_sheet
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_validated_sample_sheet,
+)
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreator,
     SampleSheetCreatorBcl2Fastq,
@@ -17,11 +19,11 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
 )
 from cg.constants.demultiplexing import BclConverter
 from cg.exc import SampleSheetError
-from cg.models.flow_cell.flow_cell import SequencedFlowCell
+from cg.models.flow_cell.flow_cell import SequencedFlowCellData
 
 
 def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
-    novaseq_x_flow_cell: SequencedFlowCell,
+    novaseq_x_flow_cell: SequencedFlowCellData,
     lims_novaseq_bcl_convert_samples: List[FlowCellSampleBCLConvert],
 ):
     """Test that creating a BCL Convert sample sheet fails if the bcl converter is Bcl2fastq."""
@@ -81,7 +83,7 @@ def test_construct_bcl_convert_sheet(
 
 def test_remove_unwanted_samples_dual_index(
     novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleBcl2Fastq,
-    bcl2fastq_flow_cell: SequencedFlowCell,
+    bcl2fastq_flow_cell: SequencedFlowCellData,
 ):
     """Test that a sample with dual index is not removed."""
     # GIVEN a sample sheet creator with a sample with dual index
@@ -99,7 +101,7 @@ def test_remove_unwanted_samples_dual_index(
 
 def test_remove_unwanted_samples_no_dual_index(
     novaseq6000_flow_cell_sample_no_dual_index: FlowCellSampleBcl2Fastq,
-    bcl2fastq_flow_cell: SequencedFlowCell,
+    bcl2fastq_flow_cell: SequencedFlowCellData,
     caplog,
 ):
     """Test that samples with no dual index are removed."""
@@ -121,7 +123,7 @@ def test_remove_unwanted_samples_no_dual_index(
 
 
 def test_add_override_cycles_to_novaseqx_samples(
-    novaseq_x_flow_cell: SequencedFlowCell,
+    novaseq_x_flow_cell: SequencedFlowCellData,
     bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
     override_cycles_for_samples_with_updated_indexes: List[str],
 ):
@@ -173,7 +175,7 @@ def test_add_override_cycles_to_novaseqx_samples_reverse_complement(
 
 
 def test_update_barcode_mismatch_values_for_samples(
-    novaseq_x_flow_cell: SequencedFlowCell,
+    novaseq_x_flow_cell: SequencedFlowCellData,
     bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
     barcode_mismatch_values_for_samples_with_updated_indexes: List[Tuple[int, int]],
 ):

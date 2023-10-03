@@ -2,10 +2,9 @@
 import logging
 from pathlib import Path
 from typing import List, Optional
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
-
 from cg.exc import FlowCellError, MissingFilesError
-
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     get_sample_sheets_from_latest_version,
     store_flow_cell_data_in_housekeeper,
@@ -23,7 +22,6 @@ from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-
 
 LOG = logging.getLogger(__name__)
 

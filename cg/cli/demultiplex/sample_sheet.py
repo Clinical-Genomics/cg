@@ -1,13 +1,17 @@
 import logging
 import os
 from pathlib import Path
-from pydantic import ValidationError
 from typing import List
 
 import click
+from housekeeper.store.models import File
+from pydantic import ValidationError
+
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import DRY_RUN, FileFormat
@@ -19,9 +23,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     get_sample_sheets_from_latest_version,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import SequencedFlowCell
-
-from housekeeper.store.models import File
+from cg.models.flow_cell.flow_cell import SequencedFlowCellData
 
 LOG = logging.getLogger(__name__)
 
@@ -47,7 +49,7 @@ def validate_sample_sheet(
     """
 
     flow_cell_path: Path = Path(context.demultiplex_api.flow_cells_dir, flow_cell_name)
-    flow_cell: SequencedFlowCell = SequencedFlowCell(
+    flow_cell: SequencedFlowCellData = SequencedFlowCellData(
         flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
     )
     LOG.info(
@@ -84,7 +86,9 @@ def create_sheet(
         LOG.warning(f"Could not find flow cell {flow_cell_path}")
         raise click.Abort
     try:
-        flow_cell = SequencedFlowCell(flow_cell_path=flow_cell_path, bcl_converter=bcl_converter)
+        flow_cell = SequencedFlowCellData(
+            flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
+        )
     except FlowCellError as error:
         raise click.Abort from error
     flow_cell_id: str = flow_cell.id
@@ -159,7 +163,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
             continue
         LOG.debug(f"Found directory {sub_dir}")
         try:
-            flow_cell = SequencedFlowCell(flow_cell_path=sub_dir)
+            flow_cell = SequencedFlowCellData(flow_cell_path=sub_dir)
         except FlowCellError:
             continue
         flow_cell_id: str = flow_cell.id

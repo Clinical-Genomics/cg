@@ -4,12 +4,17 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Type, Union
 
+from pydantic import ValidationError
+from typing_extensions import Literal
+
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
     SampleSheet,
 )
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
@@ -21,8 +26,6 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
-from pydantic import ValidationError
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -192,7 +195,7 @@ class FlowCellDirectoryData:
         return f"FlowCell(path={self.path},run_parameters_path={self.run_parameters_path})"
 
 
-class SequencedFlowCell(FlowCellDirectoryData):
+class SequencedFlowCellData(FlowCellDirectoryData):
     """This class represents a sequenced flow cell in the flow cells folder."""
 
     @property
@@ -269,7 +272,7 @@ class SequencedFlowCell(FlowCellDirectoryData):
         return self.copy_complete_path.exists()
 
 
-class DemultiplexedFlowCell(FlowCellDirectoryData):
+class DemultiplexedFlowCellData(FlowCellDirectoryData):
     """This class represents a demultiplexed flow cell in the demultiplexed runs folder."""
 
     @property
@@ -277,13 +280,13 @@ class DemultiplexedFlowCell(FlowCellDirectoryData):
         return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
 
 
-class CleanFLowCell(FlowCellDirectoryData):
+class CleanFlowCellData(FlowCellDirectoryData):
     """holds information to check whether the flow cell can be cleaned"""
 
     pass
 
 
-class EncryptFlowCell(FlowCellDirectoryData):
+class EncryptFlowCellData(FlowCellDirectoryData):
     """Holds information to check whether encryption can be done"""
 
     pass

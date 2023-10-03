@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 import click
+
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
@@ -15,7 +16,7 @@ from cg.exc import FlowCellError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.meta.demultiplex.utils import is_syncing_complete
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import SequencedFlowCell
+from cg.models.flow_cell.flow_cell import SequencedFlowCellData
 
 LOG = logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
             continue
         LOG.info(f"Found directory {sub_dir}")
         try:
-            flow_cell = SequencedFlowCell(flow_cell_path=sub_dir)
+            flow_cell = SequencedFlowCellData(flow_cell_path=sub_dir)
             LOG.info(f"Using {flow_cell.bcl_converter} for demultiplexing.")
         except FlowCellError:
             continue
@@ -89,7 +90,7 @@ def demultiplex_flow_cell(
     LOG.info(f"setting demultiplexed runs dir to {demultiplex_api.demultiplexed_runs_dir}")
 
     try:
-        flow_cell = SequencedFlowCell(
+        flow_cell = SequencedFlowCellData(
             flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
         )
     except FlowCellError as error:

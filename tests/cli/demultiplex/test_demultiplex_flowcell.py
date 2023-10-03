@@ -5,12 +5,17 @@ from pathlib import Path
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
-from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell, delete_flow_cell
+from cg.cli.demultiplex.demux import (
+    delete_flow_cell,
+    demultiplex_all,
+    demultiplex_flow_cell,
+)
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_sample_sheet_path_to_housekeeper,
+)
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import SequencedFlowCell
+from cg.models.flow_cell.flow_cell import SequencedFlowCellData
 from tests.meta.demultiplex.conftest import (
     tmp_flow_cell_demux_base_path,
     tmp_flow_cell_run_base_path,
@@ -26,7 +31,7 @@ def test_demultiplex_flow_cell_dry_run(
     caplog.set_level(logging.INFO)
 
     # GIVEN that all files are present for demultiplexing
-    flow_cell: SequencedFlowCell = SequencedFlowCell(
+    flow_cell: SequencedFlowCellData = SequencedFlowCellData(
         tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq
     )
     add_sample_sheet_path_to_housekeeper(
@@ -68,7 +73,7 @@ def test_demultiplex_bcl2fastq_flow_cell(
     caplog.set_level(logging.INFO)
 
     # GIVEN that all files are present for bcl2fastq demultiplexing
-    flow_cell: SequencedFlowCell = SequencedFlowCell(
+    flow_cell: SequencedFlowCellData = SequencedFlowCellData(
         tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq
     )
     add_sample_sheet_path_to_housekeeper(
@@ -117,7 +122,7 @@ def test_demultiplex_bcl_convert_flowcell(
 
     # GIVEN that all files are present for Dragen demultiplexing
 
-    flow_cell: SequencedFlowCell = SequencedFlowCell(
+    flow_cell: SequencedFlowCellData = SequencedFlowCellData(
         flow_cell_path=tmp_flow_cell_directory_bclconvert, bcl_converter="dragen"
     )
     add_sample_sheet_path_to_housekeeper(
@@ -165,7 +170,7 @@ def test_demultiplex_all_novaseq(
 
     # GIVEN sequenced flow cells with their sample sheet in Housekeeper
     for flow_cell_dir in tmp_flow_cells_demux_all_directory.iterdir():
-        flow_cell: SequencedFlowCell = SequencedFlowCell(flow_cell_path=flow_cell_dir)
+        flow_cell: SequencedFlowCellData = SequencedFlowCellData(flow_cell_path=flow_cell_dir)
         add_sample_sheet_path_to_housekeeper(
             flow_cell_directory=flow_cell_dir,
             flow_cell_name=flow_cell.id,
