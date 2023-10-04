@@ -3,8 +3,6 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from cgmodels.cg.constants import Pipeline
-from cgmodels.trailblazer.constants import AnalysisTypes
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
