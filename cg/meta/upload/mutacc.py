@@ -42,9 +42,9 @@ class UploadToMutaccAPI:
 
         if all([self._has_bam(case), self._has_causatives(case)]):
             causatives = self.scout.get_causative_variants(case_id=case.id)
-            mutacc_case = remap(case.dict(), SCOUT_TO_MUTACC_CASE)
+            mutacc_case = remap(case.model_dump(), SCOUT_TO_MUTACC_CASE)
             mutacc_variants = [
-                remap(variant.dict(), SCOUT_TO_MUTACC_VARIANTS) for variant in causatives
+                remap(variant.model_dump(), SCOUT_TO_MUTACC_VARIANTS) for variant in causatives
             ]
             return {"case": mutacc_case, "causatives": mutacc_variants}
         return {}
