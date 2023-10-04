@@ -489,7 +489,7 @@ def parse_orderform():
         error_message = error.message if hasattr(error, "message") else str(error)
         http_error_response = http.HTTPStatus.INTERNAL_SERVER_ERROR
     else:
-        return jsonify(**parsed_order.dict())
+        return jsonify(**parsed_order.model_dump())
 
     if error_message:
         return abort(make_response(jsonify(message=error_message), http_error_response))

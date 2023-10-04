@@ -211,7 +211,7 @@ class AnalysisAPI(MetaAPI):
             pipeline=str(self.pipeline),
             analysis_type=self.get_bundle_deliverables_type(case_id),
             created=self.get_bundle_created_date(case_id),
-        ).dict()
+        ).model_dump()
 
     def get_bundle_created_date(self, case_id: str) -> dt.datetime:
         return self.get_date_from_file_path(self.get_deliverables_file_path(case_id=case_id))
