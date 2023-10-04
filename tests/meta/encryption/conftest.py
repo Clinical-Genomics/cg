@@ -15,7 +15,7 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 def flow_cell_encryption_api(
     cg_context: CGConfig, flow_cell_full_name: str
 ) -> FlowCellEncryptionAPI:
-    return FlowCellEncryptionAPI(
+    flow_cell_encryption_api = FlowCellEncryptionAPI(
         binary_path=cg_context.encryption.binary_path,
         encryption_dir=Path(cg_context.backup.encrypt_dir),
         dry_run=True,
@@ -27,6 +27,8 @@ def flow_cell_encryption_api(
         sbatch_parameter=cg_context.backup.slurm_flow_cell_encryption.dict(),
         tar_api=TarAPI(binary_path=cg_context.tar.binary_path, dry_run=True),
     )
+    flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=True)
+    return flow_cell_encryption_api
 
 
 @pytest.fixture

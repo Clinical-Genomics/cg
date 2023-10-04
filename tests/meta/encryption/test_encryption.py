@@ -412,8 +412,6 @@ def test_is_encryption_possible_when_sequencing_not_ready(
 def test_is_encryption_possible_when_encryption_is_completed(
     caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str
 ):
-    caplog.set_level(logging.ERROR)
-
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that encryption is completed
@@ -434,8 +432,6 @@ def test_is_encryption_possible_when_encryption_is_completed(
 def test_is_encryption_possible_when_encryption_is_pending(
     caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str
 ):
-    caplog.set_level(logging.ERROR)
-
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that encryption is pending
@@ -451,3 +447,29 @@ def test_is_encryption_possible_when_encryption_is_pending(
 
     # Clean-up
     shutil.rmtree(flow_cell_encryption_api.flow_cell_encryption_dir)
+
+
+def test_encrypt_flow_cell(
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, sbatch_job_number
+):
+    caplog.set_level(logging.INFO)
+    # GIVEN a FlowCellEncryptionAPI
+
+    # WHEN encrypting flow cell
+    flow_cell_encryption_api.encrypt_flow_cell()
+
+    # THEN sbatch should be submitted
+    assert f"Flow cell encryption running as job {sbatch_job_number}" in caplog.text
+
+
+def test_start_encryption(
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, sbatch_job_number
+):
+    caplog.set_level(logging.INFO)
+    # GIVEN a FlowCellEncryptionAPI
+
+    # WHEN trying to start encrypting flow cell
+    flow_cell_encryption_api.start_encryption()
+
+    # THEN sbatch should be submitted
+    assert f"Flow cell encryption running as job {sbatch_job_number}" in caplog.text
