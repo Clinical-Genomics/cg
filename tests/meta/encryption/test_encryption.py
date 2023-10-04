@@ -7,7 +7,7 @@ from typing import List
 import mock
 import pytest
 
-from cg.exc import FlowCellError
+from cg.exc import FlowCellEncryptionError, FlowCellError
 from cg.meta.encryption.encryption import (
     EncryptionAPI,
     FlowCellEncryptionAPI,
@@ -373,3 +373,22 @@ def test_is_encryption_possible_when_sequencing_not_ready(
 
         # THEN error should be raised
         assert f"Flow cell: {flow_cell_name} is not ready" in caplog.text
+
+
+def test_is_encryption_possible_when_encryption_is_pending(
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str, mocker
+):
+    caplog.set_level(logging.ERROR)
+
+    # GIVEN a FlowCellEncryptionAPI
+
+    # GIVEN that sequencing is not ready
+    mocker.patch.object(Path, "exists")
+    pathlib.Path.exists.return_value = True
+
+    # WHEN checking if encryption is possible
+    with pytest.raises(FlowCellEncryptionError):
+        flow_cell_encryption_api.is_encryption_possible()
+
+        # THEN error should be raised
+        assert f"Encryption already completed for flow cell: {flow_cell_name}" in caplog.text
