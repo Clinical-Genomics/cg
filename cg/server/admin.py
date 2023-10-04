@@ -120,6 +120,27 @@ class ApplicationVersionView(BaseView):
     form_excluded_columns = ["samples", "pools", "microbial_samples"]
 
 
+class ApplicationLimitationsView(BaseView):
+    """Admin view for Model.ApplicationLimitations."""
+
+    column_list = (
+        "application",
+        "pipeline",
+        "limitations",
+        "comment",
+        "created_at",
+        "updated_at",
+    )
+    column_formatters = {"application": ApplicationView.view_application_link}
+    column_filters = ["application.tag", "pipeline"]
+    column_searchable_list = ["application.tag"]
+    column_editable_list = ["comment"]
+    form_excluded_columns = ["created_at", "updated_at"]
+    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
+    create_modal = True
+    edit_modal = True
+
+
 class BedView(BaseView):
     """Admin view for Model.Bed"""
 
