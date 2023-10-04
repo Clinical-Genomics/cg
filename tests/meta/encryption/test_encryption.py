@@ -1,6 +1,7 @@
 """Tests for the meta EncryptionAPIs."""
 import logging
 import pathlib
+import shutil
 from pathlib import Path
 from typing import List
 
@@ -375,16 +376,16 @@ def test_is_encryption_possible_when_sequencing_not_ready(
         assert f"Flow cell: {flow_cell_name} is not ready" in caplog.text
 
 
-def test_is_encryption_possible_when_encryption_is_pending(
-    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str, mocker
+def test_is_encryption_possible_when_encryption_is_completed(
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str
 ):
     caplog.set_level(logging.ERROR)
 
     # GIVEN a FlowCellEncryptionAPI
 
-    # GIVEN that sequencing is not ready
-    mocker.patch.object(Path, "exists")
-    pathlib.Path.exists.return_value = True
+    # GIVEN that encryption is completed
+    flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
+    flow_cell_encryption_api.complete_file_path.touch()
 
     # WHEN checking if encryption is possible
     with pytest.raises(FlowCellEncryptionError):
@@ -392,3 +393,28 @@ def test_is_encryption_possible_when_encryption_is_pending(
 
         # THEN error should be raised
         assert f"Encryption already completed for flow cell: {flow_cell_name}" in caplog.text
+
+    # Clean-up
+    shutil.rmtree(flow_cell_encryption_api.flow_cell_encryption_dir)
+
+
+def test_is_encryption_possible_when_encryption_is_pending(
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str
+):
+    caplog.set_level(logging.ERROR)
+
+    # GIVEN a FlowCellEncryptionAPI
+
+    # GIVEN that encryption is pending
+    flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
+    flow_cell_encryption_api.pending_file_path.touch()
+
+    # WHEN checking if encryption is possible
+    with pytest.raises(FlowCellEncryptionError):
+        flow_cell_encryption_api.is_encryption_possible()
+
+        # THEN error should be raised
+        assert f"Encryption already started for flow cell: {flow_cell_name}" in caplog.text
+
+    # Clean-up
+    shutil.rmtree(flow_cell_encryption_api.flow_cell_encryption_dir)
