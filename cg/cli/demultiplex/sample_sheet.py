@@ -21,7 +21,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ def create_sheet(
 
     try:
         sample_sheet_path: Path = hk_api.get_sample_sheet_path(flow_cell_id)
-    except HousekeeperFileMissingError as error:
+    except HousekeeperFileMissingError:
         sample_sheet_path = None
 
     if flow_cell.sample_sheet_exists():

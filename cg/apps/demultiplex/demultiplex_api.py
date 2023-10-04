@@ -3,22 +3,22 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from cgmodels.cg.constants import Pipeline
+from cgmodels.trailblazer.constants import AnalysisTypes
 from typing_extensions import Literal
 
-from cgmodels.trailblazer.constants import AnalysisTypes
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import WriteFile
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.slurm.sbatch import Sbatch, SbatchDragen
-from cgmodels.cg.constants import Pipeline
 
 LOG = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ class DemultiplexingAPI:
             demux_dir=demux_dir.as_posix(),
             demux_started=flow_cell.demultiplexing_started_path.as_posix(),
         )
-        return DEMULTIPLEX_ERROR.format(**error_parameters.dict())
+        return DEMULTIPLEX_ERROR.format(**error_parameters.model_dump())
 
     @staticmethod
     def get_sbatch_command(
@@ -93,7 +93,9 @@ class DemultiplexingAPI:
             demux_completed_file=demux_completed.as_posix(),
             environment=environment,
         )
-        return DEMULTIPLEX_COMMAND[flow_cell.bcl_converter].format(**command_parameters.dict())
+        return DEMULTIPLEX_COMMAND[flow_cell.bcl_converter].format(
+            **command_parameters.model_dump()
+        )
 
     @staticmethod
     def demultiplex_sbatch_path(flow_cell: FlowCellDirectoryData) -> Path:
