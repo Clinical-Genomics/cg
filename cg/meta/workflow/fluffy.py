@@ -19,7 +19,6 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Family, Flowcell, Sample
 from cg.utils import Process
-from sqlalchemy.orm import Query
 
 LOG = logging.getLogger(__name__)
 
@@ -84,7 +83,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         )
 
     @property
-    def threshold_reads(self):
+    def use_read_count_threshold(self):
         return False
 
     @property

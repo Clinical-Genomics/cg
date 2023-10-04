@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Union
+from typing import Dict, List, Optional, Union
 
 from cg.constants import Pipeline
 from cg.constants.gene_panel import GENOME_BUILD_38
@@ -34,7 +34,7 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
         return self.config.mip_rd_rna.script
 
     @property
-    def threshold_reads(self):
+    def use_read_count_threshold(self):
         return True
 
     @property

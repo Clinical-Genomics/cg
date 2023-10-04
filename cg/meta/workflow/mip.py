@@ -1,16 +1,15 @@
 import logging
-
 from pathlib import Path
-from typing import Any, List, Optional, Dict, Union
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic.v1 import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import COLLABORATORS, COMBOS, GenePanelMasterList, Pipeline, FileExtensions
+from cg.constants import COLLABORATORS, COMBOS, FileExtensions, GenePanelMasterList, Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
-from cg.io.controller import WriteFile, ReadFile
+from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
@@ -18,7 +17,7 @@ from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_config import MipBaseConfig
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
-from cg.store.models import BedVersion, FamilySample, Family, Sample
+from cg.store.models import BedVersion, Family, FamilySample, Sample
 
 CLI_OPTIONS = {
     "config": {"option": "--config_file"},
@@ -284,7 +283,7 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_cases_to_analyze(self) -> List[Family]:
         """Return cases to analyze."""
         cases_query: List[Family] = self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.threshold_reads
+            pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
         cases_to_analyze = []
         for case_obj in cases_query:

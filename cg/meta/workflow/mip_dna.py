@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Union
+from typing import Dict, List, Optional, Union
 
 from cg.constants import DEFAULT_CAPTURE_KIT, Pipeline
 from cg.constants.constants import AnalysisType
@@ -35,7 +35,7 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
         return self.config.mip_rd_dna.script
 
     @property
-    def threshold_reads(self):
+    def use_read_count_threshold(self):
         return True
 
     @property
