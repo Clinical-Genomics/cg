@@ -148,7 +148,7 @@ def miria_file_retrieve(local_directory: Path, remote_path: Path) -> MiriaObject
 def transfer_payload(miria_file_archive: MiriaObject) -> TransferPayload:
     """Return a TransferPayload object containing two identical MiriaObject object."""
     return TransferPayload(
-        files_to_transfer=[miria_file_archive, miria_file_archive.copy(deep=True)]
+        files_to_transfer=[miria_file_archive, miria_file_archive.model_copy(deep=True)]
     )
 
 

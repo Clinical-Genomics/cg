@@ -1,27 +1,27 @@
 import logging
 import os
 from pathlib import Path
-from pydantic import ValidationError
-from typing import List
+from typing import List, Optional
 
 import click
+from pydantic import ValidationError
+
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import DRY_RUN, FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
-from cg.exc import FlowCellError
+from cg.exc import FlowCellError, HousekeeperFileMissingError
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_sample_sheet_path_to_housekeeper,
-    get_sample_sheets_from_latest_version,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-
-from housekeeper.store.models import File
 
 LOG = logging.getLogger(__name__)
 
@@ -72,9 +72,12 @@ def create_sheet(
     except FlowCellError as error:
         raise click.Abort from error
     flow_cell_id: str = flow_cell.id
-    sample_sheets_hk: List[File] = get_sample_sheets_from_latest_version(
-        flow_cell_id=flow_cell_id, hk_api=hk_api
-    )
+
+    try:
+        sample_sheet_path: Path = hk_api.get_sample_sheet_path(flow_cell_id)
+    except HousekeeperFileMissingError as error:
+        sample_sheet_path = None
+
     if flow_cell.sample_sheet_exists():
         LOG.info("Sample sheet already exists in flow cell directory")
         if not dry_run:
@@ -82,12 +85,12 @@ def create_sheet(
                 flow_cell_directory=flow_cell_path, flow_cell_name=flow_cell_id, hk_api=hk_api
             )
         return
-    elif sample_sheets_hk:
+    elif sample_sheet_path:
         LOG.debug(
             "Sample sheet already exists in Housekeeper. Hard-linking it to flow cell directory"
         )
         if not dry_run:
-            os.link(src=sample_sheets_hk[0].full_path, dst=flow_cell.sample_sheet_path)
+            os.link(src=sample_sheet_path, dst=flow_cell.sample_sheet_path)
         return
     lims_samples: List[FlowCellSample] = list(
         get_flow_cell_samples(
@@ -147,9 +150,12 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
         except FlowCellError:
             continue
         flow_cell_id: str = flow_cell.id
-        sample_sheets_hk: List[File] = get_sample_sheets_from_latest_version(
-            flow_cell_id=flow_cell_id, hk_api=hk_api
-        )
+
+        try:
+            sample_sheet_path: Optional[Path] = hk_api.get_sample_sheet_path(flow_cell_id)
+        except HousekeeperFileMissingError:
+            sample_sheet_path = None
+
         if flow_cell.sample_sheet_exists():
             LOG.debug("Sample sheet already exists in flow cell directory")
             if not dry_run:
@@ -157,12 +163,12 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
                     flow_cell_directory=sub_dir, flow_cell_name=flow_cell_id, hk_api=hk_api
                 )
             continue
-        elif sample_sheets_hk:
+        elif sample_sheet_path:
             LOG.debug(
                 "Sample sheet already exists in Housekeeper. Copying it to flow cell directory"
             )
             if not dry_run:
-                os.link(src=sample_sheets_hk[0].full_path, dst=flow_cell.sample_sheet_path)
+                os.link(src=sample_sheet_path, dst=flow_cell.sample_sheet_path)
             continue
         LOG.info(f"Creating sample sheet for flow cell {flow_cell.id}")
         lims_samples: List[FlowCellSample] = list(
