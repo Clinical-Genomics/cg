@@ -3,7 +3,30 @@ from typing import List
 
 import pytest
 
+from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.encryption import CipherAlgorithm, EncryptionUserID
+from cg.meta.encryption.encryption import FlowCellEncryptionAPI
+from cg.meta.tar.tar import TarAPI
+from cg.models.cg_config import CGConfig
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+
+
+@pytest.fixture
+def flow_cell_encryption_api(
+    cg_context: CGConfig, flow_cell_full_name: str
+) -> FlowCellEncryptionAPI:
+    return FlowCellEncryptionAPI(
+        binary_path=cg_context.encryption.binary_path,
+        encryption_dir=Path(cg_context.backup.encrypt_dir),
+        dry_run=True,
+        flow_cell=FlowCellDirectoryData(
+            flow_cell_path=Path(cg_context.flow_cells_dir, flow_cell_full_name)
+        ),
+        pigz_binary_path=cg_context.pigz.binary_path,
+        slurm_api=SlurmAPI(),
+        sbatch_parameter=cg_context.backup.slurm_flow_cell_encryption.dict(),
+        tar_api=TarAPI(binary_path=cg_context.tar.binary_path, dry_run=True),
+    )
 
 
 @pytest.fixture
@@ -17,8 +40,8 @@ def output_file_path() -> Path:
 
 
 @pytest.fixture
-def temporary_passphrase() -> str:
-    return Path("tmp", "tmp_test_passphrase").as_posix()
+def temporary_passphrase() -> Path:
+    return Path("tmp", "tmp_test_passphrase")
 
 
 @pytest.fixture
@@ -82,7 +105,10 @@ def asymmetric_decryption_command(output_file_path: Path, input_file_path: Path)
 
 @pytest.fixture
 def symmetric_encryption_command(
-    temporary_passphrase: str, input_file_path: Path, output_file_path: Path, spring_file_path: Path
+    temporary_passphrase: Path,
+    input_file_path: Path,
+    output_file_path: Path,
+    spring_file_path: Path,
 ) -> List[str]:
     """Return symmetric encryption command."""
     return [
@@ -93,7 +119,7 @@ def symmetric_encryption_command(
         "--compress-algo",
         "None",
         "--passphrase-file",
-        temporary_passphrase,
+        temporary_passphrase.as_posix(),
         "-o",
         output_file_path.as_posix(),
         input_file_path.as_posix(),
@@ -122,7 +148,7 @@ def symmetric_decryption_command(
 
 @pytest.fixture
 def spring_symmetric_encryption_command(
-    temporary_passphrase: str, encrypted_spring_file_path: Path, spring_file_path: Path
+    temporary_passphrase: Path, encrypted_spring_file_path: Path, spring_file_path: Path
 ) -> List[str]:
     """Return symmetric encryption command."""
     return [
@@ -133,7 +159,7 @@ def spring_symmetric_encryption_command(
         "--compress-algo",
         "None",
         "--passphrase-file",
-        temporary_passphrase,
+        temporary_passphrase.as_posix(),
         "-o",
         encrypted_spring_file_path.as_posix(),
         spring_file_path.as_posix(),
@@ -142,7 +168,7 @@ def spring_symmetric_encryption_command(
 
 @pytest.fixture
 def key_asymmetric_encryption_command(
-    encrypted_key_file: Path, temporary_passphrase: str
+    encrypted_key_file: Path, temporary_passphrase: Path
 ) -> List[str]:
     """Return asymmetric encryption command."""
     return [
@@ -151,7 +177,7 @@ def key_asymmetric_encryption_command(
         EncryptionUserID.HASTA_USER_ID,
         "-o",
         encrypted_key_file.as_posix(),
-        temporary_passphrase,
+        temporary_passphrase.as_posix(),
     ]
 
 

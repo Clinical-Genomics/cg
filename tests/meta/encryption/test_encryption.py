@@ -6,15 +6,11 @@ from typing import List
 
 import mock
 
-from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.meta.encryption.encryption import (
     EncryptionAPI,
     FlowCellEncryptionAPI,
     SpringEncryptionAPI,
 )
-from cg.meta.tar.tar import TarAPI
-from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 @mock.patch("cg.utils.Process")
@@ -106,13 +102,13 @@ def test_get_symmetric_encryption_command(
     binary_path: str,
     input_file_path: Path,
     output_file_path: Path,
-    temporary_passphrase: str,
+    temporary_passphrase: Path,
     symmetric_encryption_command: List[str],
 ):
     """Tests creating the symmetric encryption command"""
     # GIVEN an input file and an output file for a gpg command
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
-    mock_passphrase.return_value = temporary_passphrase
+    mock_passphrase.return_value = temporary_passphrase.as_posix()
 
     # WHEN generating the GPG command for symmetric_encryption
     result = encryption_api.get_symmetric_encryption_command(
@@ -155,14 +151,14 @@ def test_spring_symmetric_encryption(
     encrypted_spring_file_path: Path,
     spring_file_path: Path,
     spring_symmetric_encryption_command: List[str],
-    temporary_passphrase: str,
+    temporary_passphrase: Path,
 ):
     """Tests encrypting a spring file"""
     # GIVEN a spring file
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
     encryption_api.process = mock_process()
     mock_encrypted_spring_file.return_value = encrypted_spring_file_path
-    mock_passphrase.return_value = temporary_passphrase
+    mock_passphrase.return_value = temporary_passphrase.as_posix()
 
     # WHEN symmetrically encrypting the spring file
     encryption_api.spring_symmetric_encryption(spring_file_path=spring_file_path)
@@ -183,14 +179,14 @@ def test_key_asymmetric_encryption(
     encrypted_key_file: Path,
     key_asymmetric_encryption_command: List[str],
     spring_file_path: Path,
-    temporary_passphrase: str,
+    temporary_passphrase: Path,
 ):
     """Tests encrypting an encryption key"""
     # GIVEN a temporary passphrase
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
     encryption_api.process = mock_process()
     mock_encrypted_key_file.return_value = encrypted_key_file
-    mock_passphrase.return_value = temporary_passphrase
+    mock_passphrase.return_value = temporary_passphrase.as_posix()
 
     # WHEN asymmetrically encrypting the temporary passphrase
     encryption_api.key_asymmetric_encryption(spring_file_path=spring_file_path)
@@ -303,23 +299,27 @@ def test_cleanup_no_files(
     assert "No existing key file to clean up, cleanup process completed" in caplog.text
 
 
-def test_flow_cell_encryption_api(cg_context: CGConfig, flow_cell_full_name: str):
+def test_flow_cell_encryption_api(flow_cell_encryption_api: FlowCellEncryptionAPI):
     """Tests instantiating flow cell encryption API."""
-    # GIVEN a cg context
+    # GIVEN a FlowCellEncryptionAPI
 
     # WHEN instantiating the API
-    flow_cell_encryption_api = FlowCellEncryptionAPI(
-        binary_path=cg_context.encryption.binary_path,
-        encryption_dir=Path(cg_context.backup.encrypt_dir),
-        dry_run=True,
-        flow_cell=FlowCellDirectoryData(
-            flow_cell_path=Path(cg_context.flow_cells_dir, flow_cell_full_name)
-        ),
-        pigz_binary_path=cg_context.pigz.binary_path,
-        slurm_api=SlurmAPI(),
-        sbatch_parameter=cg_context.backup.slurm_flow_cell_encryption.dict(),
-        tar_api=TarAPI(binary_path=cg_context.tar.binary_path, dry_run=True),
-    )
 
     # THEN return a FlowCellEncryptionAPI object
     assert isinstance(flow_cell_encryption_api, FlowCellEncryptionAPI)
+
+
+def test_get_flow_cell_symmetric_encryption_command(
+    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    output_file_path: Path,
+    temporary_passphrase: Path,
+):
+    # GIVEN a FlowCellEncryptionAPI
+
+    # WHEN getting the command
+    command: str = flow_cell_encryption_api.get_flow_cell_symmetric_encryption_command(
+        output_file=output_file_path, passphrase_file_path=temporary_passphrase
+    )
+
+    # THEN return a string
+    assert isinstance(command, str)
