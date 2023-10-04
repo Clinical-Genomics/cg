@@ -49,7 +49,6 @@ class FlowCellDirectoryData:
 
     def parse_flow_cell_dir_name(self):
         """Parse relevant information from flow cell name.
-
         This will assume that the flow cell naming convention is used. If not we skip the flow cell.
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>
         Example: '201203_D00483_0200_AHVKJCDRXX'.
@@ -176,11 +175,6 @@ class FlowCellDirectoryData:
         return Path(self.path, "slurm_job_ids.yaml")
 
     @property
-    def hiseq_x_flow_cell(self) -> Path:
-        """Return path to Hiseq X flow cell directory."""
-        return Path(self.path, DemultiplexingDirsAndFiles.Hiseq_X_TILE_DIR)
-
-    @property
     def is_demultiplexing_complete(self) -> bool:
         return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
 
@@ -257,21 +251,6 @@ class FlowCellDirectoryData:
         """
         LOG.info("Check if copy of data from sequence instrument is ready")
         return self.copy_complete_path.exists()
-
-    def is_hiseq_x_copy_completed(self) -> bool:
-        """Check if copy of Hiseq X flow cell is done."""
-        LOG.info("Check if copy of data from Hiseq X sequence instrument is ready")
-        return self.hiseq_x_copy_complete_path.exists()
-
-    def is_hiseq_x_delivery_started(self) -> bool:
-        """Check if delivery of Hiseq X flow cell is started."""
-        LOG.info("Check if delivery of data from Hiseq X sequence instrument is ready")
-        return self.hiseq_x_delivery_started_path.exists()
-
-    def is_hiseq_x(self) -> bool:
-        """Check if flow cell is Hiseq X."""
-        LOG.debug("Check if flow cell is Hiseq X")
-        return self.hiseq_x_flow_cell.exists()
 
     def is_flow_cell_ready(self) -> bool:
         """Check if a flow cell is ready for downstream processing.

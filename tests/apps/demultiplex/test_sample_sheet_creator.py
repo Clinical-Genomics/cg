@@ -2,7 +2,6 @@
 from pathlib import Path
 from typing import List, Tuple
 
-import mock
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.models import (
@@ -10,7 +9,9 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBCLConvert,
     SampleSheet,
 )
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_validated_sample_sheet
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_validated_sample_sheet,
+)
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreator,
     SampleSheetCreatorBcl2Fastq,
@@ -18,7 +19,7 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
 )
 from cg.constants.demultiplexing import BclConverter
 from cg.exc import SampleSheetError
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(

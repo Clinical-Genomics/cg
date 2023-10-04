@@ -8,7 +8,7 @@ import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, Sample
 from tests.store_helpers import StoreHelpers
