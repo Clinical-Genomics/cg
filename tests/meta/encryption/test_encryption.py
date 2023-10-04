@@ -6,7 +6,15 @@ from typing import List
 
 import mock
 
-from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
+from cg.apps.slurm.slurm_api import SlurmAPI
+from cg.meta.encryption.encryption import (
+    EncryptionAPI,
+    FlowCellEncryptionAPI,
+    SpringEncryptionAPI,
+)
+from cg.meta.tar.tar import TarAPI
+from cg.models.cg_config import CGConfig
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 @mock.patch("cg.utils.Process")
@@ -293,3 +301,25 @@ def test_cleanup_no_files(
     assert "No encrypted spring file to clean up, continuing cleanup" in caplog.text
     assert "No encrypted key file to clean up, continuing cleanup" in caplog.text
     assert "No existing key file to clean up, cleanup process completed" in caplog.text
+
+
+def test_flow_cell_encryption_api(cg_context: CGConfig, flow_cell_full_name: str):
+    """Tests instantiating flow cell encryption API."""
+    # GIVEN a cg context
+
+    # WHEN instantiating the API
+    flow_cell_encryption_api = FlowCellEncryptionAPI(
+        binary_path=cg_context.encryption.binary_path,
+        encryption_dir=Path(cg_context.backup.encrypt_dir),
+        dry_run=True,
+        flow_cell=FlowCellDirectoryData(
+            flow_cell_path=Path(cg_context.flow_cells_dir, flow_cell_full_name)
+        ),
+        pigz_binary_path=cg_context.pigz.binary_path,
+        slurm_api=SlurmAPI(),
+        sbatch_parameter=cg_context.backup.slurm_flow_cell_encryption.dict(),
+        tar_api=TarAPI(binary_path=cg_context.tar.binary_path, dry_run=True),
+    )
+
+    # THEN return a FlowCellEncryptionAPI object
+    assert isinstance(flow_cell_encryption_api, FlowCellEncryptionAPI)
