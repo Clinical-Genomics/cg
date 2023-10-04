@@ -5,12 +5,15 @@ from pathlib import Path
 from typing import List
 
 import mock
+import pytest
 
+from cg.exc import FlowCellError
 from cg.meta.encryption.encryption import (
     EncryptionAPI,
     FlowCellEncryptionAPI,
     SpringEncryptionAPI,
 )
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 @mock.patch("cg.utils.Process")
@@ -351,3 +354,22 @@ def test_is_encryption_possible(
 
     # THEN return True
     assert is_possible
+
+
+def test_is_encryption_possible_when_sequencing_not_ready(
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str, mocker
+):
+    caplog.set_level(logging.ERROR)
+
+    # GIVEN a FlowCellEncryptionAPI
+
+    # GIVEN that sequencing is not ready
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    FlowCellDirectoryData.is_flow_cell_ready.return_value = False
+
+    # WHEN checking if encryption is possible
+    with pytest.raises(FlowCellError):
+        flow_cell_encryption_api.is_encryption_possible()
+
+        # THEN error should be raised
+        assert f"Flow cell: {flow_cell_name} is not ready" in caplog.text
