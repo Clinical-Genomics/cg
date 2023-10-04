@@ -129,7 +129,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         samples: List[Sample] = [link.sample for link in case_obj.links]
         case_config_list = [
-            self.get_sample_parameters(sample_obj=sample_obj).dict() for sample_obj in samples
+            self.get_sample_parameters(sample_obj).model_dump() for sample_obj in samples
         ]
         config_path = self.get_case_config_path(case_id=case_id)
         if dry_run:

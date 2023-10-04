@@ -12,9 +12,7 @@ from cg.apps.demultiplex.sample_sheet.models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import WriteFile
-from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Family, Flowcell, Sample
@@ -206,24 +204,12 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
         return FluffySampleSheet(samples=fluffy_sample_sheet_rows)
 
-    def get_sample_sheet_housekeeper_path(self, flowcell_name: str) -> Path:
-        """Returns the path to original sample sheet file that is added to Housekeeper."""
-        sample_sheet_files: list = get_sample_sheets_from_latest_version(
-            flow_cell_id=flowcell_name, hk_api=self.housekeeper_api
-        )
-        if not sample_sheet_files:
-            LOG.error(
-                f"Sample sheet file for flowcell {flowcell_name} could not be found in Housekeeper!"
-            )
-            raise HousekeeperFileMissingError
-        return Path(sample_sheet_files[0].full_path)
-
     def make_sample_sheet(self, case_id: str, dry_run: bool) -> None:
         """
         Create SampleSheet.csv file in working directory and add desired values to the file
         """
         flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(case_id)
-        sample_sheet_path: Path = self.get_sample_sheet_housekeeper_path(flow_cell.name)
+        sample_sheet_path: Path = self.housekeeper_api.get_sample_sheet_path(flow_cell.name)
         sample_sheet: SampleSheet = get_sample_sheet_from_file(sample_sheet_path)
 
         if not dry_run:
