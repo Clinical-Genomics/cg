@@ -154,7 +154,7 @@ class GisaidAPI:
     def create_gisaid_csv(self, gisaid_samples: List[GisaidSample], case_id: str) -> None:
         """Create csv file for gisaid upload"""
         samples_df = pd.DataFrame(
-            data=[gisaid_sample.dict() for gisaid_sample in gisaid_samples],
+            data=[gisaid_sample.model_dump() for gisaid_sample in gisaid_samples],
             columns=HEADERS,
         )
 
