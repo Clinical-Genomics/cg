@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 from cg.apps.scout.validators import set_gender_if_other, set_parent_if_missing
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.subject import Gender, PlinkGender, PlinkPhenotypeStatus
-from pydantic import BaseModel, BeforeValidator, Field, Strict
+from pydantic import BaseModel, BeforeValidator, Field
 from typing_extensions import Annotated, Literal
 
 

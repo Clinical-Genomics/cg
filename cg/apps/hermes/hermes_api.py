@@ -58,7 +58,7 @@ class HermesApi:
         """Convert a deliverables object to a housekeeper object"""
         bundle_info = {
             "name": bundle_name,
-            "files": [file_info.dict() for file_info in deliverables.files],
+            "files": [file_info.model_dump() for file_info in deliverables.files],
         }
         if created:
             bundle_info["created"] = created
