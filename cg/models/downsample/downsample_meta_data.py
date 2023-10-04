@@ -4,14 +4,13 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Priority, SequencingFileTag
-from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import ApplicationVersion, Family, Sample
 
 LOG = logging.getLogger(__name__)
 
 
-class DownsampleMetaData:
+class DownsampleData:
     def __init__(
         self,
         status_db: Store,

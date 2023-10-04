@@ -1,13 +1,13 @@
 """API that handles downsampling of samples."""
 import logging
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 from cg.constants import SequencingFileTag
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
 from cg.models.cg_config import CGConfig
-from cg.models.downsample.downsample_meta_data import DownsampleMetaData
+from cg.models.downsample.downsample_meta_data import DownsampleData
 from cg.store.models import Family, Sample
 from cg.utils.files import get_files_matching_pattern
 
@@ -16,32 +16,28 @@ LOG = logging.getLogger(__name__)
 
 class DownSampleAPI(MetaAPI):
     def __init__(
-        self, config: CGConfig, sample_reads: str, case_internal_id: str, dry_run: bool = False
+        self,
+        config: CGConfig,
+        sample_internal_id: str,
+        number_of_reads: float,
+        case_internal_id: str,
+        dry_run: bool = False,
     ):
         """Initialize the API."""
         super().__init__(config)
         self.config = config
-        self.sample_reads: str = sample_reads
+        self.sample_internal_id: str = sample_internal_id
+        self.number_of_reads: float = number_of_reads
         self.case_internal_id: str = case_internal_id
         self.dry_run: bool = dry_run
-        self.downsample_meta_data: DownsampleMetaData = self.get_meta_data()
+        self.downsample_meta_data: DownsampleData = self.get_meta_data()
 
-    @staticmethod
-    def parse_sample_reads_input(
-        sample_reads: str, case_internal_id: str, config: CGConfig
-    ) -> Tuple[str, float]:
-        """Parse the sample reads input."""
-        sample_internal_id, number_of_reads = sample_reads.split(";")
-        return sample_internal_id, float(number_of_reads)
-
-    def get_meta_data(self) -> DownsampleMetaData:
-        sample_internal_id, number_of_reads = self.parse_sample_reads_input(
-            sample_reads=self.sample_reads, case_internal_id=self.case_internal_id
-        )
-        return DownsampleMetaData(
+    def get_meta_data(self) -> DownsampleData:
+        """Return the DownSampleData."""
+        return DownsampleData(
             status_db=self.status_db,
-            sample_internal_id=sample_internal_id,
-            number_of_reads=number_of_reads,
+            sample_internal_id=self.sample_internal_id,
+            number_of_reads=self.number_of_reads,
             case_internal_id=self.case_internal_id,
         )
 

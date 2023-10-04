@@ -1,12 +1,11 @@
 """cg module for downsampling reads in a sample."""
 
 import logging
-from typing import List
+from typing import Tuple
 
 import click
 
 from cg.apps.downsample.downsample import DownSampleAPI
-from cg.apps.downsample.utils import format_downsample_case
 from cg.constants.constants import DRY_RUN
 from cg.models.cg_config import CGConfig
 
@@ -26,25 +25,26 @@ def downsample_cmd():
     help="Case identifier used in statusdb, e.g. supersonicturtle. The case information wil be transferred.",
 )
 @click.option(
-    "-sr",
-    "--sample_id_reads",
+    "-i",
+    "--input",
     required=True,
     multiple=True,
-    help="Identifier used in statusdb, e.g. ACC1234567 and the number of reads to down sample to in millions separated by ;."
-    "e.g. ACC1234567;30",
+    help="Identifier used in statusdb, e.g. ACC1234567 and the number of reads to down sample to in millions separated by a space."
+    "e.g. ACC1234567 30",
 )
 @DRY_RUN
 def downsample_sample(
-    context: CGConfig, case_internal_id: str, sample_internal_id_reads: List[str], dry_run: bool
+    context: CGConfig, case_internal_id: str, input: Tuple[str, float], dry_run: bool
 ):
     """Downsample reads in one or multiple samples."""
-    for sample_internal_id_read in sample_internal_id_reads:
+    for sample_internal_id, reads in input:
         try:
             downsample_api = DownSampleAPI(
                 config=context,
                 dry_run=dry_run,
                 case_internal_id=case_internal_id,
-                sample_reads=sample_internal_id_read,
+                sample_internal_id=sample_internal_id,
+                number_of_reads=reads,
             )
             downsample_api.downsample_sample()
         except Exception as error:
@@ -56,30 +56,20 @@ def downsample_sample(
     "case", help="Down sample reads in all samples in a case to the same number of reads."
 )
 @click.option(
-    "-c",
-    "--case_internal_id",
+    "-input",
+    "--input",
     required=True,
-    help="Case identifier used in statusdb, e.g. subsonicrabbit",
-)
-@click.option(
-    "-r",
-    "--number_of_reads",
-    required=True,
-    help="Number of reads to down sample to in millions, e.g. 30",
+    help="Case identifier used in statusdb and the number of reads to downsample to in millions.  e.g. subsonicrabbit 30.",
 )
 @DRY_RUN
-def downsample_case(context: CGConfig, case_internal_id: str, number_of_reads: int, dry_run: bool):
+def downsample_case(context: CGConfig, input: Tuple[str, float], dry_run: bool):
     """Downsample reads in all samples in a case."""
-    samples_reads: List[str] = format_downsample_case(
-        case_internal_id=case_internal_id,
-        number_of_reads=number_of_reads,
-        status_db=context.status_db,
-    )
-    for sample_reads in samples_reads:
+    ## TO DO; this has to retrieve samples and then loop over samples like above...
+    for case_internal_id, number_of_reads in input:
         downsample_api = DownSampleAPI(
             config=context,
             dry_run=dry_run,
             case_internal_id=case_internal_id,
-            sample_reads=sample_reads,
+            number_of_reads=number_of_reads,
         )
         downsample_api.downsample_sample()

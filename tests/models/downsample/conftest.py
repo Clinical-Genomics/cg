@@ -6,7 +6,6 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.models.downsample.downsample_meta_data import DownsampleMetaData
 from cg.store import Store
 from cg.store.models import Family, Sample
 from tests.store_helpers import StoreHelpers
