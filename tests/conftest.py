@@ -39,10 +39,7 @@ from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.models.demultiplex.run_parameters import (
-    RunParametersNovaSeq6000,
-    RunParametersNovaSeqX,
-)
+from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
@@ -2773,6 +2770,7 @@ def rnafusion_context(
         status_db,
         internal_id=sample_id,
         reads_updated_at=datetime.now(),
+        reads=200000000,
     )
 
     helpers.add_relationship(
