@@ -15,7 +15,6 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
 from cg.constants.priority import SlurmQos
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import WriteFile
-from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheet_path
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch, SbatchDragen
@@ -123,7 +122,7 @@ class DemultiplexingAPI:
     def is_sample_sheet_in_housekeeper(self, flow_cell_id: str) -> bool:
         """Returns True if the sample sheet for the flow cell exists in Housekeeper."""
         try:
-            get_sample_sheet_path(flow_cell_id=flow_cell_id, hk_api=self.hk_api)
+            self.hk_api.get_sample_sheet_path(flow_cell_id)
             return True
         except HousekeeperFileMissingError:
             return False
