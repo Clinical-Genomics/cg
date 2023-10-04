@@ -10,7 +10,7 @@ from cg.models.report.validators import (
     validate_gender,
     validate_rml_sample,
 )
-from pydantic.v1 import BaseModel, validator
+from pydantic import BaseModel, validator
 
 
 class ApplicationModel(BaseModel):
