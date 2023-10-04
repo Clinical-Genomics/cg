@@ -1,13 +1,16 @@
 import logging
 import os
 from pathlib import Path
-from pydantic import ValidationError
 from typing import List, Optional
 
 import click
+from pydantic import ValidationError
+
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import DRY_RUN, FileFormat
@@ -16,12 +19,9 @@ from cg.exc import FlowCellError, HousekeeperFileMissingError
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_sample_sheet_path_to_housekeeper,
-    get_sample_sheet_path,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-
-from housekeeper.store.models import File
 
 LOG = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ def create_sheet(
     flow_cell_id: str = flow_cell.id
 
     try:
-        sample_sheet_path: Path = get_sample_sheet_path(flow_cell_id=flow_cell_id, hk_api=hk_api)
+        sample_sheet_path: Path = hk_api.get_sample_sheet_path(flow_cell_id)
     except HousekeeperFileMissingError as error:
         sample_sheet_path = None
 
@@ -150,9 +150,12 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
         except FlowCellError:
             continue
         flow_cell_id: str = flow_cell.id
-        sample_sheet_path: Optional[Path] = get_sample_sheet_path(
-            flow_cell_id=flow_cell_id, hk_api=hk_api
-        )
+
+        try:
+            sample_sheet_path: Optional[Path] = hk_api.get_sample_sheet_path(flow_cell_id)
+        except HousekeeperFileMissingError:
+            sample_sheet_path = None
+
         if flow_cell.sample_sheet_exists():
             LOG.debug("Sample sheet already exists in flow cell directory")
             if not dry_run:

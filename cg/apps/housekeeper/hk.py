@@ -493,3 +493,81 @@ class HousekeeperAPI:
             raise ValueError(f"No Archive entry found for file with id {file_id}.")
         self._store.update_retrieval_task_id(archive=archive, retrieval_task_id=retrieval_task_id)
         self.commit()
+
+    def get_sample_sheets_from_latest_version(self, flow_cell_id: str) -> List[File]:
+        """Returns the files tagged with 'samplesheet' or 'archived_sample_sheet' for the given bundle."""
+        try:
+            sheets_with_normal_tag: List[File] = self.get_files_from_latest_version(
+                bundle_name=flow_cell_id, tags=[flow_cell_id, SequencingFileTag.SAMPLE_SHEET]
+            ).all()
+            sheets_with_archive_tag: List[File] = self.get_files_from_latest_version(
+                bundle_name=flow_cell_id,
+                tags=[flow_cell_id, SequencingFileTag.ARCHIVED_SAMPLE_SHEET],
+            ).all()
+            sample_sheet_files: List[File] = sheets_with_normal_tag + sheets_with_archive_tag
+        except HousekeeperBundleVersionMissingError:
+            sample_sheet_files: List = []
+        return sample_sheet_files
+
+    def get_sample_sheet_path(self, flow_cell_id: str) -> Path:
+        """Returns the sample sheet path for the flow cell."""
+        sample_sheet_files: List[File] = self.get_sample_sheets_from_latest_version(flow_cell_id)
+        if not sample_sheet_files:
+            LOG.error(f"Sample sheet file for flowcell {flow_cell_id} not found in Housekeeper!")
+            raise HousekeeperFileMissingError
+        return Path(sample_sheet_files[0].full_path)
+
+    def file_exists_in_latest_version_for_bundle(self, file_path: Path, bundle_name: str) -> bool:
+        """Check if a file exists in the latest version for bundle."""
+        latest_version: Version = self.get_latest_bundle_version(bundle_name)
+        return any(
+            file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
+        )
+
+    def add_file_to_bundle_if_non_existent(
+        self, file_path: Path, bundle_name: str, tag_names: List[str]
+    ) -> None:
+        """Add file to Housekeeper if it has not already been added."""
+        if not file_path.exists():
+            LOG.warning(f"File does not exist: {file_path}")
+            return
+
+        if not self.file_exists_in_latest_version_for_bundle(
+            file_path=file_path, bundle_name=bundle_name
+        ):
+            self.add_and_include_file_to_latest_version(
+                bundle_name=bundle_name,
+                file=file_path,
+                tags=tag_names,
+            )
+            LOG.info(f"File added to Housekeeper bundle {bundle_name}")
+        else:
+            LOG.info(f"Bundle {bundle_name} already has a file with the same name as {file_path}")
+
+    def add_tags_if_non_existent(self, tag_names: List[str]) -> None:
+        """Ensure that tags exist in Housekeeper."""
+        for tag_name in tag_names:
+            if self.get_tag(name=tag_name) is None:
+                self.add_tag(name=tag_name)
+
+    def add_bundle_and_version_if_non_existent(self, bundle_name: str) -> None:
+        """Add bundle if it does not exist."""
+        if not self.bundle(name=bundle_name):
+            self.create_new_bundle_and_version(name=bundle_name)
+        else:
+            LOG.debug(f"Bundle with name {bundle_name} already exists")
+
+    def store_fastq_path_in_housekeeper(
+        self,
+        sample_internal_id: str,
+        sample_fastq_path: Path,
+        flow_cell_id: str,
+    ) -> None:
+        """Add the fastq file path with tags to a bundle and version in Housekeeper."""
+        self.add_bundle_and_version_if_non_existent(sample_internal_id)
+        self.add_tags_if_non_existent([sample_internal_id])
+        self.add_file_to_bundle_if_non_existent(
+            file_path=sample_fastq_path,
+            bundle_name=sample_internal_id,
+            tag_names=[SequencingFileTag.FASTQ, flow_cell_id, sample_internal_id],
+        )
