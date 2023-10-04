@@ -323,3 +323,19 @@ def test_get_flow_cell_symmetric_encryption_command(
 
     # THEN return a string
     assert isinstance(command, str)
+
+
+def test_get_flow_cell_symmetric_decryption_command(
+    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    input_file_path: Path,
+    temporary_passphrase: Path,
+):
+    # GIVEN a FlowCellEncryptionAPI
+
+    # WHEN getting the command
+    command: str = flow_cell_encryption_api.get_flow_cell_symmetric_decryption_command(
+        input_file=input_file_path, passphrase_file_path=temporary_passphrase
+    )
+
+    # THEN return a string
+    assert isinstance(command, str)
