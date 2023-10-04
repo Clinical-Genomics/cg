@@ -21,13 +21,13 @@ def downsample_cmd():
 @downsample_cmd.command("samples", help="Downsample reads in one or multiple samples in a case.")
 @click.option(
     "-c",
-    "--case-internal-id",
+    "--case--id",
     required=True,
-    help="Case identifier used in statusdb, e.g. supersonicturtle",
+    help="Case identifier used in statusdb, e.g. supersonicturtle. The case information wil be transferred.",
 )
 @click.option(
     "-sr",
-    "--sample_internal_id_reads",
+    "--sample_id_reads",
     required=True,
     multiple=True,
     help="Identifier used in statusdb, e.g. ACC1234567 and the number of reads to down sample to in millions separated by ;."
@@ -39,13 +39,17 @@ def downsample_sample(
 ):
     """Downsample reads in one or multiple samples."""
     for sample_internal_id_read in sample_internal_id_reads:
-        downsample_api = DownSampleAPI(
-            config=context,
-            dry_run=dry_run,
-            case_internal_id=case_internal_id,
-            sample_reads=sample_internal_id_read,
-        )
-        downsample_api.downsample_sample()
+        try:
+            downsample_api = DownSampleAPI(
+                config=context,
+                dry_run=dry_run,
+                case_internal_id=case_internal_id,
+                sample_reads=sample_internal_id_read,
+            )
+            downsample_api.downsample_sample()
+        except Exception as error:
+            LOG.info(repr(error))
+            continue
 
 
 @downsample_cmd.command(

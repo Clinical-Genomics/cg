@@ -17,14 +17,14 @@ class DownsampleMetaData:
         status_db: Store,
         hk_api: HousekeeperAPI,
         sample_internal_id: str,
-        number_of_reads: int,
+        number_of_reads: float,
         case_internal_id: str,
     ):
         """Initialize the model."""
         self.status_db: Store = status_db
         self.housekeeper_api: HousekeeperAPI = hk_api
         self.sample_internal_id: str = sample_internal_id
-        self.number_of_reads: int = number_of_reads
+        self.number_of_reads: float = number_of_reads
         self.case_internal_id: str = case_internal_id
         self.original_sample: Sample = self.get_sample_to_downsample()
         self.original_case: Family = self.get_case_to_downsample()
@@ -104,7 +104,7 @@ class DownsampleMetaData:
             data_analysis=self.original_case.data_analysis,
             data_delivery=self.original_case.data_delivery,
             name=self.downsampled_case_name,
-            panels=["OMIM-AUTO"],
+            panels=self.original_case.panels,
             priority=self.original_case.priority,
             ticket=self.original_case.latest_ticket,
         )
@@ -148,6 +148,7 @@ class DownsampleMetaData:
     @property
     def fastq_file_output_directory(self):
         """Get the output directory for the down sampled sample."""
+        ## TO DO add path to config in servers
         return Path("home", "proj", "production", "downsample", self.downsampled_sample.internal_id)
 
     @staticmethod

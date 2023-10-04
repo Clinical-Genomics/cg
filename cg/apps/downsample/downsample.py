@@ -1,7 +1,7 @@
 """API that handles downsampling of samples."""
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 from cg.constants import SequencingFileTag
 from cg.meta.meta import MetaAPI
@@ -29,23 +29,20 @@ class DownSampleAPI(MetaAPI):
     @staticmethod
     def parse_sample_reads_input(
         sample_reads: str, case_internal_id: str, config: CGConfig
-    ) -> DownsampleMetaData:
-        """Parse the sample reads input into the SampleToDownSample model."""
-        sample_internal_id: str
-        number_of_reads: int
+    ) -> Tuple[str, float]:
+        """Parse the sample reads input."""
         sample_internal_id, number_of_reads = sample_reads.split(";")
-        return DownsampleMetaData(
-            status_db=config.status_db,
-            sample_internal_id=sample_internal_id,
-            number_of_reads=number_of_reads,
-            case_internal_id=case_internal_id,
-        )
+        return sample_internal_id, float(number_of_reads)
 
     def get_meta_data(self) -> DownsampleMetaData:
-        return self.parse_sample_reads_input(
-            sample_reads=self.sample_reads,
+        sample_internal_id, number_of_reads = self.parse_sample_reads_input(
+            sample_reads=self.sample_reads, case_internal_id=self.case_internal_id
+        )
+        return DownsampleMetaData(
+            status_db=self.status_db,
+            sample_internal_id=sample_internal_id,
+            number_of_reads=number_of_reads,
             case_internal_id=self.case_internal_id,
-            config=self.config,
         )
 
     def add_downsampled_sample_entry_to_statusdb(self) -> Sample:
