@@ -345,6 +345,39 @@ def test_get_flow_cell_symmetric_decryption_command(
     assert isinstance(command, str)
 
 
+def test_create_pending_file(
+    flow_cell_encryption_api: FlowCellEncryptionAPI,
+):
+    # GIVEN a FlowCellEncryptionAPI
+
+    # WHEN checking if encryption is possible
+    flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
+    flow_cell_encryption_api.dry_run = False
+    flow_cell_encryption_api.create_pending_file(
+        pending_path=flow_cell_encryption_api.pending_file_path
+    )
+
+    # THEN pending file should exist
+    assert flow_cell_encryption_api.pending_file_path.exists()
+
+    # Clean-up
+    shutil.rmtree(flow_cell_encryption_api.flow_cell_encryption_dir)
+
+
+def test_create_pending_file_when_dry_run(
+    flow_cell_encryption_api: FlowCellEncryptionAPI,
+):
+    # GIVEN a FlowCellEncryptionAPI
+
+    # WHEN checking if encryption is possible
+    flow_cell_encryption_api.create_pending_file(
+        pending_path=flow_cell_encryption_api.pending_file_path
+    )
+
+    # THEN pending file should not exist
+    assert not flow_cell_encryption_api.pending_file_path.exists()
+
+
 def test_is_encryption_possible(
     flow_cell_encryption_api: FlowCellEncryptionAPI,
 ):
