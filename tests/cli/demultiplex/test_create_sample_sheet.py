@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import List
 
+from click import testing
+
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
@@ -9,8 +11,7 @@ from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from click import testing
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.get_flow_cell_samples"
 

@@ -16,7 +16,7 @@ from cg.meta.demultiplex.status_db_storage_functions import (
 from cg.meta.demultiplex.utils import create_delivery_file_in_flow_cell_directory
 from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)

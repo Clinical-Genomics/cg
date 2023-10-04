@@ -12,7 +12,7 @@ from cg.meta.demultiplex.combine_sequencing_metrics import (
     combine_mapped_metrics_with_undetermined,
 )
 from cg.meta.demultiplex.utils import get_q30_threshold
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
 

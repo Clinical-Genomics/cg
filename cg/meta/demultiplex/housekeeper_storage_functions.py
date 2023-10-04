@@ -15,7 +15,7 @@ from cg.meta.demultiplex.utils import (
     get_undetermined_fastqs,
     rename_fastq_file_if_needed,
 )
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.utils.files import get_files_matching_pattern
 
