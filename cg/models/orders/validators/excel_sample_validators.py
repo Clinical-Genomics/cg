@@ -1,10 +1,10 @@
-from typing import Optional
+from typing import List, Optional
 
 from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
 from cg.models.orders.sample_base import PriorityEnum
 
 
-def parse_panels(panels: str):
+def parse_panels(panels: str) -> Optional[List[str]]:
     if not panels:
         return None
     separator = ";" if ";" in panels else None
@@ -32,20 +32,25 @@ def validate_data_analysis(data_analysis):
     return data_analysis
 
 
-def numeric_value(value: Optional[str]):
+def numeric_value(value: Optional[str]) -> Optional[str]:
+    """Validates that the given string can be given as either an integer or a float. Also converts floats of the
+    type x.00 to x."""
     if not value:
         return None
-    str_value = value.rsplit(".0")[0]
-    if str_value.replace(".", "").isnumeric():
-        return str_value
-    raise AttributeError(f"Order contains non-numeric value '{value}'")
+    try:
+        float_value: float = float(value)
+        if float_value.is_integer():
+            return str(int(float_value))
+        return value
+    except ValueError:
+        raise AttributeError(f"Order contains non-numeric value '{value}'")
 
 
-def validate_parent(parent: str):
+def validate_parent(parent: str) -> str:
     return None if parent == "0.0" else parent
 
 
-def validate_source(source: Optional[str]):
+def validate_source(source: Optional[str]) -> str:
     if source not in SOURCE_TYPES:
         raise ValueError(f"'{source}' is not a valid source")
     return source
@@ -66,7 +71,7 @@ def replace_spaces_with_underscores(value: str) -> str:
     return value.replace(" ", "_")
 
 
-def convert_to_priority(priority: Optional[str]):
+def convert_to_priority(priority: Optional[str]) -> Optional[str]:
     """Translates the Swedish 'förtur' to 'priority' if specified in the order."""
     return PriorityEnum.priority if priority == "förtur" else priority
 

@@ -3,6 +3,8 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from cgmodels.cg.constants import Pipeline
+from cgmodels.trailblazer.constants import AnalysisTypes
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
@@ -15,8 +17,8 @@ from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisTypes
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import WriteFile
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.slurm.sbatch import Sbatch, SbatchDragen
 
 LOG = logging.getLogger(__name__)

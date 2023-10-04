@@ -12,7 +12,7 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreatorBCLConvert,
 )
 from cg.constants.demultiplexing import BclConverter
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 def test_sample_sheet_creator_factory_novaseq_6000(
