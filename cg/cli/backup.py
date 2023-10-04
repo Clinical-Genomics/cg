@@ -20,7 +20,7 @@ from cg.meta.encryption.encryption import (
 )
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.demultiplex.flow_cell import get_flow_cells_from_path
 from cg.store import Store
 from cg.store.models import Flowcell, Sample
 
@@ -40,16 +40,7 @@ def backup(context: CGConfig):
 def encrypt_flow_cells(context: CGConfig, dry_run: bool):
     """Encrypt flow cells."""
     status_db: Store = context.status_db
-    flow_cells_dir = Path(context.flow_cells_dir)
-    LOG.debug(f"Search for flow cells ready to encrypt in {flow_cells_dir}")
-    for flow_cell_dir in flow_cells_dir.iterdir():
-        if not flow_cell_dir.is_dir():
-            continue
-        LOG.debug(f"Found directory: {flow_cell_dir}")
-        try:
-            flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_dir)
-        except FlowCellError:
-            continue
+    for flow_cell in get_flow_cells_from_path(flow_cells_dir=Path(context.flow_cells_dir)):
         db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
             flow_cell_name=flow_cell.id
         )
