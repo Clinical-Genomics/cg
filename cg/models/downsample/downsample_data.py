@@ -19,7 +19,11 @@ class DownsampleData:
         number_of_reads: float,
         case_internal_id: str,
     ):
-        """Initialize the model."""
+        """Initialize the downsample data and perform integrity checks.
+        Raises:
+            ValueError
+            FileExistsError
+        """
         self.status_db: Store = status_db
         self.housekeeper_api: HousekeeperAPI = hk_api
         self.sample_internal_id: str = sample_internal_id
@@ -31,13 +35,13 @@ class DownsampleData:
         self.downsampled_sample: Sample = self._generate_statusdb_downsampled_sample_record()
         self.downsampled_case: Family = self._generate_statusdb_downsampled_case()
         self.create_down_sampling_working_directory()
-        LOG.info(f"Pre-flight checks completed for {self.sample_internal_id}")
+        LOG.info(f"Downsample Data checks completed for {self.sample_internal_id}")
 
     def multiply_reads_by_million(
         self,
     ) -> int:
         """Multiply the given number of reads by a million."""
-        return self.number_of_reads * 1_000_000
+        return int(self.number_of_reads * 1_000_000)
 
     @property
     def downsampled_sample_name(
@@ -75,7 +79,7 @@ class DownsampleData:
         self,
     ) -> Sample:
         """
-        Generate a down sampled sample record for StatusDB.
+        Generate a downsampled sample record for StatusDB.
         The new sample contains the original sample internal id and meta data.
         """
         application_version: ApplicationVersion = self.get_application_version(self.original_sample)
@@ -98,7 +102,7 @@ class DownsampleData:
     def _generate_statusdb_downsampled_case(
         self,
     ) -> Family:
-        """Generate a case for the down sampled samples. The new case uses existing case data."""
+        """Generate a case for the downsampled samples. The new case uses existing case data."""
         downsampled_case: Family = self.status_db.add_case(
             data_analysis=self.original_case.data_analysis,
             data_delivery=self.original_case.data_delivery,
@@ -127,7 +131,7 @@ class DownsampleData:
         return False
 
     def has_enough_reads_to_downsample(self) -> bool:
-        """Check if the sample has enough reads to down sample."""
+        """Check if the sample has enough reads to downsample."""
         if not self.original_sample.reads > self.number_of_reads * 1_000_000:
             raise ValueError(
                 f"Sample {self.original_sample.internal_id} does not have enough reads ({self.original_sample.reads}) to down sample to "
@@ -146,7 +150,7 @@ class DownsampleData:
 
     @property
     def fastq_file_output_directory(self):
-        """Get the output directory for the down sampled sample."""
+        """Get the output directory for the downsampled sample."""
         ## TO DO add path to config in servers
         return Path("home", "proj", "production", "downsample", self.downsampled_sample.internal_id)
 
@@ -166,7 +170,7 @@ class DownsampleData:
         return self.status_db.get_current_application_version_by_tag(application_tag)
 
     def create_down_sampling_working_directory(self) -> Path:
-        """Create a working directory for the down sample job."""
+        """Create a working directory for the downsample job."""
         working_directory: Path = self.fastq_file_output_directory
         if working_directory.exists():
             raise FileExistsError(f"Working directory {working_directory} already exists.")

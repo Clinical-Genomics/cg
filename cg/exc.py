@@ -65,6 +65,10 @@ class DeliveryReportError(CgError):
     """
 
 
+class DownsampleFailedError(CgError):
+    """Exception related to downsampling of samples."""
+
+
 class EmailNotSentError(CgError):
     """Raised when email not sent."""
 
