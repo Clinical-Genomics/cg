@@ -378,10 +378,12 @@ def test_create_pending_file_when_dry_run(
     assert not flow_cell_encryption_api.pending_file_path.exists()
 
 
-def test_is_encryption_possible(
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
-):
+def test_is_encryption_possible(flow_cell_encryption_api: FlowCellEncryptionAPI, mocker):
     # GIVEN a FlowCellEncryptionAPI
+
+    # GIVEN that sequencing is ready
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # WHEN checking if encryption is possible
     is_possible: bool = flow_cell_encryption_api.is_encryption_possible()
@@ -410,9 +412,13 @@ def test_is_encryption_possible_when_sequencing_not_ready(
 
 
 def test_is_encryption_possible_when_encryption_is_completed(
-    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str, mocker
 ):
     # GIVEN a FlowCellEncryptionAPI
+
+    # GIVEN that sequencing is ready
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # GIVEN that encryption is completed
     flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
@@ -430,9 +436,13 @@ def test_is_encryption_possible_when_encryption_is_completed(
 
 
 def test_is_encryption_possible_when_encryption_is_pending(
-    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str, mocker
 ):
     # GIVEN a FlowCellEncryptionAPI
+
+    # GIVEN that sequencing is ready
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # GIVEN that encryption is pending
     flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
@@ -450,10 +460,14 @@ def test_is_encryption_possible_when_encryption_is_pending(
 
 
 def test_encrypt_flow_cell(
-    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, sbatch_job_number
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, mocker, sbatch_job_number: int
 ):
     caplog.set_level(logging.INFO)
     # GIVEN a FlowCellEncryptionAPI
+
+    # GIVEN that sequencing is ready
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # WHEN encrypting flow cell
     flow_cell_encryption_api.encrypt_flow_cell()
@@ -463,10 +477,14 @@ def test_encrypt_flow_cell(
 
 
 def test_start_encryption(
-    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, sbatch_job_number
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, mocker, sbatch_job_number: int
 ):
     caplog.set_level(logging.INFO)
     # GIVEN a FlowCellEncryptionAPI
+
+    # GIVEN that sequencing is ready
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # WHEN trying to start encrypting flow cell
     flow_cell_encryption_api.start_encryption()
