@@ -24,14 +24,18 @@ from cg.cli.workflow.commands import (
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
 )
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.constants.housekeeper_tags import ALIGNMENT_FILE_TAGS, ScoutTag
+from cg.exc import CleanFlowCellFailedError
 from cg.meta.clean.api import CleanAPI
+from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Analysis
 from cg.utils.date import get_date_days_ago, get_timedelta_from_date
 from cg.utils.dispatcher import Dispatcher
+from cg.utils.files import get_directories_in_path
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -246,6 +250,32 @@ def hk_bundle_files(
             LOG.info(f"Removed file {file_path}. Dry run: {dry_run}")
 
     LOG.info(f"Process freed {round(size_cleaned * 0.0000000001, 2)}GB. Dry run: {dry_run}")
+
+
+@clean.command("flow-cells")
+@DRY_RUN
+@click.pass_obj
+def clean_flow_cells(context: CGConfig, dry_run: bool):
+    """Remove flow cells from the flow cells and demultiplexed runs folder."""
+
+    directories_to_check: List[Path] = []
+    for path in [Path(context.flow_cells_dir), Path(context.demultiplexed_flow_cells_dir)]:
+        directories_to_check.extend(get_directories_in_path(path))
+    exit_code = EXIT_SUCCESS
+    for flow_cell_directory in directories_to_check:
+        try:
+            clean_flow_cell_api = CleanFlowCellAPI(
+                flow_cell_path=flow_cell_directory,
+                status_db=context.status_db,
+                housekeeper_api=context.housekeeper_api,
+                dry_run=dry_run,
+            )
+            clean_flow_cell_api.delete_flow_cell_directory()
+        except CleanFlowCellFailedError as error:
+            LOG.error(repr(error))
+            exit_code = EXIT_FAIL
+    if exit_code:
+        click.Abort
 
 
 def _get_confirm_question(bundle, file_obj) -> str:

@@ -19,7 +19,7 @@ def sbatch_parameters(email_adress: str, slurm_account: str) -> Sbatch:
         "hours": 2,
         "commands": "genmod",
     }
-    return Sbatch.parse_obj(config)
+    return Sbatch.model_validate(config)
 
 
 @pytest.fixture

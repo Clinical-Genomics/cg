@@ -4,12 +4,17 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Type, Union
 
+from pydantic import ValidationError
+from typing_extensions import Literal
+
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
     SampleSheet,
 )
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
@@ -21,8 +26,6 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
-from pydantic import ValidationError
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -46,7 +49,6 @@ class FlowCellDirectoryData:
 
     def parse_flow_cell_dir_name(self):
         """Parse relevant information from flow cell name.
-
         This will assume that the flow cell naming convention is used. If not we skip the flow cell.
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>
         Example: '201203_D00483_0200_AHVKJCDRXX'.
@@ -173,11 +175,6 @@ class FlowCellDirectoryData:
         return Path(self.path, "slurm_job_ids.yaml")
 
     @property
-    def hiseq_x_flow_cell(self) -> Path:
-        """Return path to Hiseq X flow cell directory."""
-        return Path(self.path, DemultiplexingDirsAndFiles.Hiseq_X_TILE_DIR)
-
-    @property
     def is_demultiplexing_complete(self) -> bool:
         return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
 
@@ -219,10 +216,7 @@ class FlowCellDirectoryData:
     def validate_sample_sheet(self) -> bool:
         """Validate if sample sheet is on correct format."""
         try:
-            get_sample_sheet_from_file(
-                infile=self.sample_sheet_path,
-                flow_cell_sample_type=self.sample_type,
-            )
+            get_sample_sheet_from_file(self.sample_sheet_path)
         except (SampleSheetError, ValidationError) as error:
             LOG.warning("Invalid sample sheet")
             LOG.warning(error)
@@ -238,17 +232,11 @@ class FlowCellDirectoryData:
         """Return sample sheet object."""
         if not self._sample_sheet_path_hk:
             raise FlowCellError("Sample sheet path has not been assigned yet")
-        return get_sample_sheet_from_file(
-            infile=self._sample_sheet_path_hk,
-            flow_cell_sample_type=self.sample_type,
-        )
+        return get_sample_sheet_from_file(self._sample_sheet_path_hk)
 
     def get_sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
-        return get_sample_sheet_from_file(
-            infile=self.sample_sheet_path,
-            flow_cell_sample_type=self.sample_type,
-        )
+        return get_sample_sheet_from_file(self.sample_sheet_path)
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done.
@@ -263,21 +251,6 @@ class FlowCellDirectoryData:
         """
         LOG.info("Check if copy of data from sequence instrument is ready")
         return self.copy_complete_path.exists()
-
-    def is_hiseq_x_copy_completed(self) -> bool:
-        """Check if copy of Hiseq X flow cell is done."""
-        LOG.info("Check if copy of data from Hiseq X sequence instrument is ready")
-        return self.hiseq_x_copy_complete_path.exists()
-
-    def is_hiseq_x_delivery_started(self) -> bool:
-        """Check if delivery of Hiseq X flow cell is started."""
-        LOG.info("Check if delivery of data from Hiseq X sequence instrument is ready")
-        return self.hiseq_x_delivery_started_path.exists()
-
-    def is_hiseq_x(self) -> bool:
-        """Check if flow cell is Hiseq X."""
-        LOG.debug("Check if flow cell is Hiseq X")
-        return self.hiseq_x_flow_cell.exists()
 
     def is_flow_cell_ready(self) -> bool:
         """Check if a flow cell is ready for demultiplexing.

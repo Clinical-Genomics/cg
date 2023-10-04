@@ -25,8 +25,8 @@ from cg.constants.demultiplexing import (
     SampleSheetBCLConvertSections,
 )
 from cg.exc import SampleSheetError
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParameters
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
 

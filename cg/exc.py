@@ -55,6 +55,12 @@ class ChecksumFailedError(CgError):
     """
 
 
+class CleanFlowCellFailedError(CgError):
+    """
+    Exception raised when the cleaning of a flow cell failed.
+    """
+
+
 class DecompressionNeededError(CgError):
     """Raised when decompression still needed to start analysis."""
 

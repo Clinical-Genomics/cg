@@ -49,7 +49,7 @@ def test_parse_bcl_convert_quality_metrics(
     assert isinstance(quality_metrics_model, BclConvertQualityMetrics)
 
     # ASSERT that the parsed quality metrics has the correct values
-    for attr_name, attr_value in quality_metrics_model.dict().items():
+    for attr_name, attr_value in quality_metrics_model.model_dump().items():
         assert getattr(bcl_convert_quality_metric_model_with_data, attr_name) == attr_value
 
 
@@ -67,7 +67,7 @@ def test_parse_bcl_convert_demux_metrics(
     assert isinstance(demux_metrics_model, BclConvertDemuxMetrics)
 
     # ASSERT that the parsed demux metrics has the correct values
-    for attr_name, attr_value in demux_metrics_model.dict().items():
+    for attr_name, attr_value in demux_metrics_model.model_dump().items():
         assert getattr(bcl_convert_demux_metric_model_with_data, attr_name) == attr_value
 
 
