@@ -339,3 +339,15 @@ def test_get_flow_cell_symmetric_decryption_command(
 
     # THEN return a string
     assert isinstance(command, str)
+
+
+def test_is_encryption_possible(
+    flow_cell_encryption_api: FlowCellEncryptionAPI,
+):
+    # GIVEN a FlowCellEncryptionAPI
+
+    # WHEN checking if encryption is possible
+    is_possible: bool = flow_cell_encryption_api.is_encryption_possible()
+
+    # THEN return True
+    assert is_possible
