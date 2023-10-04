@@ -8,7 +8,7 @@ from cg.constants.encryption import CipherAlgorithm, EncryptionUserID
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 @pytest.fixture

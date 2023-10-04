@@ -16,7 +16,7 @@ from cg.meta.encryption.sbatch import (
     FLOW_CELL_ENCRYPT_ERROR,
 )
 from cg.meta.tar.tar import TarAPI
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.slurm.sbatch import Sbatch
 from cg.utils import Process
 from cg.utils.checksum.checksum import sha512_checksum

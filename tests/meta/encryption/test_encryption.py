@@ -14,7 +14,7 @@ from cg.meta.encryption.encryption import (
     FlowCellEncryptionAPI,
     SpringEncryptionAPI,
 )
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 @mock.patch("cg.utils.Process")
