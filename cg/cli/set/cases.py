@@ -2,8 +2,9 @@ import logging
 from typing import List, Optional, Set, Tuple
 
 import click
-from cg.constants import CASE_ACTIONS, Priority
+
 from cg.cli.set.case import set_case
+from cg.constants import CASE_ACTIONS, Priority
 from cg.store import Store
 from cg.store.models import Family, Sample
 from cg.utils.click.EnumChoice import EnumChoice

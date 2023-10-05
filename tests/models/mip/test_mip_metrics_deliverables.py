@@ -3,9 +3,9 @@
 from cg.models.mip.mip_metrics_deliverables import (
     DuplicateReads,
     GenderCheck,
-    MIPMappedReads,
     MeanInsertSize,
     MedianTargetCoverage,
+    MIPMappedReads,
     MIPMetricsDeliverables,
     MIPParsedMetrics,
     get_sample_id_metric,

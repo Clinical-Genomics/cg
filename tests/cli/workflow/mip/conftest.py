@@ -15,8 +15,8 @@ from cg.models.cg_config import CGConfig
 from cg.store.api.find_business_data import FindBusinessDataHandler
 from cg.store.api.status import StatusHandler
 from cg.store.models import Family
-from tests.store_helpers import StoreHelpers
 from tests.store.conftest import case_obj
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture

@@ -2,9 +2,10 @@
 
 import logging
 
+from click.testing import CliRunner
+
 from cg.cli.store.fastq import store_case
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
 
 
 def test_store_fastq_cli_no_family(compress_context: CGConfig, cli_runner: CliRunner, caplog):

@@ -1,7 +1,8 @@
 """Fixtures for testing mip app"""
 
-import pytest
 from typing import List
+
+import pytest
 
 
 def create_file(tmpdir, flowcell, lane, read, file_content):

@@ -2,7 +2,7 @@
 from click.testing import CliRunner
 
 from cg.cli.set.case import set_case
-from cg.constants import DataDelivery, Pipeline, EXIT_SUCCESS
+from cg.constants import EXIT_SUCCESS, DataDelivery, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Family

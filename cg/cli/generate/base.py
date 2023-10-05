@@ -3,8 +3,8 @@
 import click
 
 from cg.cli.generate.report.base import (
-    generate_delivery_report,
     generate_available_delivery_reports,
+    generate_delivery_report,
 )
 
 

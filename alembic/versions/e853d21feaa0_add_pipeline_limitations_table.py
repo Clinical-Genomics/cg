@@ -6,6 +6,7 @@ Create Date: 2023-09-28 10:13:37.226849
 
 """
 import sqlalchemy as sa
+
 from alembic import op
 from cg.constants.constants import Pipeline
 

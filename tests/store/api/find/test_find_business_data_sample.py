@@ -1,13 +1,16 @@
 """Tests the find business data part of the Cg store API related to sample model."""
 
-import pytest
-from typing import List, Dict, Any
-from sqlalchemy.orm import Query
-from cg.store import Store
+from typing import Any, Dict, List
 
-from cg.store.models import Sample, Invoice, Customer
+import pytest
+from sqlalchemy.orm import Query
+
+from cg.store import Store
+from cg.store.models import Customer, Invoice, Sample
+from tests.meta.demultiplex.conftest import (
+    flow_cell_name_demultiplexed_with_bcl_convert,
+)
 from tests.store_helpers import StoreHelpers
-from tests.meta.demultiplex.conftest import flow_cell_name_demultiplexed_with_bcl_convert
 
 
 def test_get_all_pools_and_samples_for_invoice_by_invoice_id(store: Store, helpers: StoreHelpers):

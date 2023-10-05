@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import List
+
 from cg.constants.constants import FileFormat
-from cg.io.controller import ReadFile, WriteFile, ReadStream, WriteStream
+from cg.io.controller import ReadFile, ReadStream, WriteFile, WriteStream
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 

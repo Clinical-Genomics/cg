@@ -4,10 +4,11 @@
 import logging
 from pathlib import Path
 
+from click.testing import CliRunner
+
 from cg.apps.lims import LimsAPI
 from cg.cli.workflow.microsalt.base import config_case
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
 
 EXIT_SUCCESS = 0
 

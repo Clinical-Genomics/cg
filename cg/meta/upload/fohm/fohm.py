@@ -1,12 +1,14 @@
-import logging
+import datetime as dt
 import getpass
-import paramiko
-import shutil
+import logging
 import os
+import shutil
 from pathlib import Path
 from typing import List, Optional
-import datetime as dt
+
 import pandas as pd
+import paramiko
+from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -17,7 +19,6 @@ from cg.models.email import EmailInfo
 from cg.store import Store
 from cg.store.models import Family, Sample
 from cg.utils.email import send_mail
-from housekeeper.store.models import Version
 
 LOG = logging.getLogger(__name__)
 

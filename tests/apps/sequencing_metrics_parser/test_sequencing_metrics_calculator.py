@@ -1,8 +1,8 @@
 import pytest
 
 from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
-    calculate_q30_bases_percentage,
     calculate_average_quality_score,
+    calculate_q30_bases_percentage,
 )
 
 

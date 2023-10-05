@@ -1,14 +1,12 @@
 """Fixtures for the housekeeper tests."""
+import datetime
 from pathlib import Path
 from typing import List
 
-import datetime
-
 import pytest
-
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from housekeeper.store.models import Bundle
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 
 

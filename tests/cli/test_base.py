@@ -1,11 +1,12 @@
 import logging
 from pathlib import Path
 
+from click.testing import CliRunner, Result
+
 import cg
 from cg.cli.base import base, init
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from click.testing import CliRunner, Result
 
 
 def test_cli_version(cli_runner: CliRunner):

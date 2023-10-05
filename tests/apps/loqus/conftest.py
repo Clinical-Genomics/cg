@@ -2,13 +2,14 @@
 from typing import Dict
 
 import pytest
+
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from tests.mocks.process_mock import ProcessMock
 from tests.models.observations.conftest import (
-    observations_input_files_raw,
     observations_input_files,
+    observations_input_files_raw,
 )
 
 LOQUSDB_OUTPUT = (

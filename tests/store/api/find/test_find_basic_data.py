@@ -1,13 +1,15 @@
-from typing import Optional, List
+from typing import List, Optional
+
 from sqlalchemy.orm import Query
+
 from cg.constants.constants import MicrosaltAppTags
 from cg.store import Store
 from cg.store.models import (
     Application,
     Bed,
     BedVersion,
-    Customer,
     Collaboration,
+    Customer,
     Organism,
     User,
 )

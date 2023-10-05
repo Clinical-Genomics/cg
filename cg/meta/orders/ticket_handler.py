@@ -1,7 +1,8 @@
 import logging
 import re
 from pathlib import Path
-from typing import Optional, Any
+from tempfile import TemporaryDirectory
+from typing import Any, Optional
 
 from sendmail_container import FormDataRequest
 
@@ -10,7 +11,6 @@ from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.store import Store
 from cg.store.models import Customer, Sample
-from tempfile import TemporaryDirectory
 
 LOG = logging.getLogger(__name__)
 

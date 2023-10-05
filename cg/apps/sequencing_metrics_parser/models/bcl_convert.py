@@ -1,7 +1,8 @@
 from pydantic import BaseModel, Field
+
 from cg.constants.bcl_convert_metrics import (
-    BclConvertQualityMetricsColumnNames,
     BclConvertDemuxMetricsColumnNames,
+    BclConvertQualityMetricsColumnNames,
 )
 
 

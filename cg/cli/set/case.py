@@ -1,15 +1,14 @@
 """Set case attributes in the status database."""
 import logging
 from typing import List, Optional, Tuple
+
 import click
 
-from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline
+from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline, Priority
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Customer, Family, Panel
 from cg.utils.click.EnumChoice import EnumChoice
-
-from cg.constants import Priority
 
 LOG = logging.getLogger(__name__)
 

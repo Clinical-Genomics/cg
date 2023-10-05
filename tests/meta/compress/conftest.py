@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List
 
 import pytest
+
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
