@@ -3,7 +3,7 @@ import logging
 from click.testing import CliRunner
 
 from cg.cli.backup import fetch_flow_cell
-from cg.constants import FlowCellStatus, EXIT_SUCCESS
+from cg.constants import EXIT_SUCCESS, FlowCellStatus
 from cg.models.cg_config import CGConfig
 
 
