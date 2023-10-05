@@ -1,7 +1,8 @@
-from datetime import datetime
-from typing import Optional, Union
+from typing import Optional
 
-from cg.constants.subject import Gender
+from pydantic import BaseModel, BeforeValidator
+from typing_extensions import Annotated
+
 from cg.models.report.metadata import SampleMetadataModel
 from cg.models.report.validators import (
     validate_boolean,
@@ -10,7 +11,6 @@ from cg.models.report.validators import (
     validate_gender,
     validate_rml_sample,
 )
-from pydantic import BaseModel, validator
 
 
 class ApplicationModel(BaseModel):
@@ -27,24 +27,13 @@ class ApplicationModel(BaseModel):
         external: whether the app tag is external or not; source: StatusDB/application/is_external
     """
 
-    tag: Optional[str]
-    version: Union[None, int, str]
-    prep_category: Optional[str]
-    description: Optional[str]
-    limitations: Optional[str]
-    accredited: Optional[bool]
-    external: Optional[bool]
-
-    _prep_category = validator("prep_category", always=True, allow_reuse=True)(validate_rml_sample)
-    _values = validator(
-        "tag",
-        "version",
-        "prep_category",
-        "description",
-        "limitations",
-        always=True,
-        allow_reuse=True,
-    )(validate_empty_field)
+    tag: Annotated[str, BeforeValidator(validate_empty_field)]
+    version: Annotated[str, BeforeValidator(validate_empty_field)]
+    prep_category: Annotated[str, BeforeValidator(validate_rml_sample)]
+    description: Annotated[str, BeforeValidator(validate_empty_field)]
+    limitations: Annotated[str, BeforeValidator(validate_empty_field)]
+    accredited: Optional[bool] = None
+    external: Optional[bool] = None
 
 
 class MethodsModel(BaseModel):
@@ -56,12 +45,8 @@ class MethodsModel(BaseModel):
         sequencing: sequencing procedure; source: LIMS/sample/sequencing_method
     """
 
-    library_prep: Optional[str]
-    sequencing: Optional[str]
-
-    _values = validator("library_prep", "sequencing", always=True, allow_reuse=True)(
-        validate_empty_field
-    )
+    library_prep: Annotated[str, BeforeValidator(validate_empty_field)]
+    sequencing: Annotated[str, BeforeValidator(validate_empty_field)]
 
 
 class TimestampModel(BaseModel):
@@ -75,19 +60,10 @@ class TimestampModel(BaseModel):
         reads_updated_at: sequencing date; source: StatusDB/sample/reads_updated_at
     """
 
-    ordered_at: Union[None, datetime, str]
-    received_at: Union[None, datetime, str]
-    prepared_at: Union[None, datetime, str]
-    reads_updated_at: Union[None, datetime, str]
-
-    _values = validator(
-        "ordered_at",
-        "received_at",
-        "prepared_at",
-        "reads_updated_at",
-        always=True,
-        allow_reuse=True,
-    )(validate_date)
+    ordered_at: Annotated[str, BeforeValidator(validate_date)]
+    received_at: Annotated[str, BeforeValidator(validate_date)]
+    prepared_at: Annotated[str, BeforeValidator(validate_date)]
+    reads_updated_at: Annotated[str, BeforeValidator(validate_date)]
 
 
 class SampleModel(BaseModel):
@@ -108,20 +84,14 @@ class SampleModel(BaseModel):
         timestamps: processing timestamp attributes
     """
 
-    name: Optional[str]
-    id: Optional[str]
-    ticket: Union[None, int, str]
-    status: Optional[str]
-    gender: Optional[str] = Gender.UNKNOWN
-    source: Optional[str]
-    tumour: Union[None, bool, str]
+    name: Annotated[str, BeforeValidator(validate_empty_field)]
+    id: Annotated[str, BeforeValidator(validate_empty_field)]
+    ticket: Annotated[str, BeforeValidator(validate_empty_field)]
+    status: Annotated[str, BeforeValidator(validate_empty_field)]
+    gender: Annotated[str, BeforeValidator(validate_gender)]
+    source: Annotated[str, BeforeValidator(validate_empty_field)]
+    tumour: Annotated[str, BeforeValidator(validate_boolean)]
     application: ApplicationModel
     methods: MethodsModel
     metadata: SampleMetadataModel
     timestamps: TimestampModel
-
-    _tumour = validator("tumour", always=True, allow_reuse=True)(validate_boolean)
-    _gender = validator("gender", always=True, allow_reuse=True)(validate_gender)
-    _values = validator("name", "id", "ticket", "status", "source", always=True, allow_reuse=True)(
-        validate_empty_field
-    )
