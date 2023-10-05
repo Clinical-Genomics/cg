@@ -127,7 +127,7 @@ def test_filter_flow_cells_by_name(
     """Test flow cell is returned by name."""
 
     # GIVEN a flow cell that exist in status db
-    flow_cell: Flowcell = helpers.add_flowcell(
+    flow_cell: Flowcell = helpers.add_flow_cell(
         store=base_store, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
