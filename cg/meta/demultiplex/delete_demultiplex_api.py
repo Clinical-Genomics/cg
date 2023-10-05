@@ -1,18 +1,19 @@
 import itertools
 import logging
 import shutil
-
 from glob import glob
 from pathlib import Path
 from typing import Iterable, List, Optional
+
+from housekeeper.store.models import File
+
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import DeleteDemuxError
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Sample, Flowcell
-from housekeeper.store.models import File
+from cg.store.models import Flowcell, Sample
 
 LOG = logging.getLogger(__name__)
 
