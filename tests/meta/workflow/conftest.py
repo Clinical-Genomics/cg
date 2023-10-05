@@ -4,13 +4,13 @@ from pathlib import Path
 from typing import Dict, List
 
 import pytest
-from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
+
+from cg.constants.constants import MicrosaltAppTags, MicrosaltQC, Pipeline
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.compression_data import CompressionData
 from cg.store.models import Family, Sample
-from cgmodels.cg.constants import Pipeline
 from tests.cli.workflow.balsamic.conftest import (
     balsamic_housekeeper_dir,
     fastq_file_l_1_r_1,

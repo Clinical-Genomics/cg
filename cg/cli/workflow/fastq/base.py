@@ -1,14 +1,13 @@
+import datetime as dt
 import logging
 
 import click
-import datetime as dt
-from cgmodels.cg.constants import Pipeline
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
-from cg.constants.constants import DRY_RUN
+from cg.constants.constants import DRY_RUN, Pipeline
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.store import Store
 from cg.store.models import Analysis, Family
-from cg.meta.workflow.analysis import AnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
