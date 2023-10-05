@@ -24,4 +24,4 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_column(table_name="customer", column_name="lab_contact")
+    op.drop_column(table_name="customer", column_name="lab_contact_id")
