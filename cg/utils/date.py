@@ -5,7 +5,7 @@ import re
 from datetime import datetime, timedelta
 from typing import Optional
 
-from cg.constants.symbols import SPACE, DASH, DOT, FWD_SLASH
+from cg.constants.symbols import DASH, DOT, FWD_SLASH, SPACE
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 DATETIME_FORMAT_DATE = "%Y-%m-%d %H:%M:%S"

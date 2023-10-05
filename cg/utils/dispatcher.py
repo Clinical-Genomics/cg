@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple, Callable, Dict
+from typing import Any, Callable, Dict, List, Tuple
 
 
 class Dispatcher:

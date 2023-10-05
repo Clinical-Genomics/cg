@@ -2,9 +2,9 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
+    balsamic_pon_past_run_dirs,
     balsamic_qc_past_run_dirs,
     balsamic_umi_past_run_dirs,
-    balsamic_pon_past_run_dirs,
     fluffy_past_run_dirs,
     microsalt_past_run_dirs,
     mip_dna_past_run_dirs,

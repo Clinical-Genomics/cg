@@ -1,10 +1,10 @@
+from click.testing import CliRunner
+
 from cg.cli.add import add
-from cg.constants import Priority, EXIT_SUCCESS
+from cg.constants import EXIT_SUCCESS, Priority
 from cg.constants.subject import Gender
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from click.testing import CliRunner
-
 from cg.store.models import Customer, Sample
 from tests.store_helpers import StoreHelpers
 

@@ -1,11 +1,15 @@
 """All models aggregated in a base class"""
-from typing import Callable, Optional, Type, List
-
-from sqlalchemy.orm import Query, Session
-from sqlalchemy import and_, func
 from dataclasses import dataclass
+from typing import Callable, List, Optional, Type
+
+from sqlalchemy import and_, func
+from sqlalchemy.orm import Query, Session
+
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
+from cg.store.filters.status_customer_filters import (
+    CustomerFilter,
+    apply_customer_filter,
+)
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
 from cg.store.models import (
     Analysis,
@@ -15,11 +19,10 @@ from cg.store.models import (
     Family,
     FamilySample,
     Flowcell,
-    Sample,
 )
-from cg.utils.date import get_date_days_ago
-
 from cg.store.models import Model as ModelBase
+from cg.store.models import Sample
+from cg.utils.date import get_date_days_ago
 
 
 @dataclass

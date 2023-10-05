@@ -1,11 +1,12 @@
 import logging
 from enum import Enum
-from typing import Dict, Union, List
+from typing import Dict, List, Union
 
-from cg.store.models import Pool, Sample
 import genologics.entities
+
 from cg.apps.lims import LimsAPI
 from cg.store import Store
+from cg.store.models import Pool, Sample
 
 LOG = logging.getLogger(__name__)
 

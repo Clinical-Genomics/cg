@@ -8,12 +8,12 @@ Create Date: 2021-03-24 07:50:31.774381
 from datetime import datetime
 from typing import List
 
-from alembic import op
 import sqlalchemy as sa
-from cg.constants import Pipeline, DataDelivery, PREP_CATEGORIES
-
 from sqlalchemy import orm
 from sqlalchemy.ext.declarative import declarative_base
+
+from alembic import op
+from cg.constants import PREP_CATEGORIES, DataDelivery, Pipeline
 
 # revision identifiers, used by Alembic.
 revision = "e9df15a35de4"

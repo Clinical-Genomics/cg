@@ -1,4 +1,5 @@
 import pytest
+
 from cg.store import Store
 from cg.store.models import Customer
 

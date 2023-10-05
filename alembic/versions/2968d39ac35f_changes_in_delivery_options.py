@@ -5,14 +5,14 @@ Revises: 9c9ca9407227
 Create Date: 2022-07-19 13:34:18.685207
 
 """
-from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import Column, orm, types
 from sqlalchemy.dialects import mysql
-
 
 # revision identifiers, used by Alembic.
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, types, orm
+
+from alembic import op
 
 revision = "2968d39ac35f"
 down_revision = "9c9ca9407227"

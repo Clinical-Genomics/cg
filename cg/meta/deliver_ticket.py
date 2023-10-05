@@ -1,11 +1,11 @@
 """Module for deliver and rsync customer inbox on the HPC to customer inbox on the delivery
 server """
+import datetime
 import logging
 import os
 import re
-import datetime
-from pathlib import Path
 import shutil
+from pathlib import Path
 from typing import List
 
 from cg.constants.delivery import INBOX_NAME
@@ -13,7 +13,6 @@ from cg.exc import CgError
 from cg.meta.meta import MetaAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Family, Sample
-
 
 LOG = logging.getLogger(__name__)
 PREFIX_TO_CONCATENATE = ["MWG", "MWL", "MWM", "MWR", "MWX"]

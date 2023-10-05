@@ -7,11 +7,11 @@ Create Date: 2021-02-17 17:43:47.102289
 """
 from typing import List
 
-from alembic import op
 import sqlalchemy as sa
-
 from sqlalchemy import orm
 from sqlalchemy.ext.declarative import declarative_base
+
+from alembic import op
 
 Base = declarative_base()
 

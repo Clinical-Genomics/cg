@@ -1,9 +1,10 @@
+from click.testing import CliRunner
+
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.cli.workflow.mip_dna.base import store, store_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
 
 
 def test_cli_store_dry_no_case(

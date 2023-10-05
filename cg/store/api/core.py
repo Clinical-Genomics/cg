@@ -1,10 +1,11 @@
 import logging
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from cg.store.models import Model
 from cg.store.api.delete import DeleteDataHandler
 from cg.store.api.find_business_data import FindBusinessDataHandler
+from cg.store.models import Model
 
 from .add import AddHandler
 from .find_basic_data import FindBasicDataHandler

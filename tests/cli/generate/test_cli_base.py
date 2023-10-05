@@ -1,8 +1,7 @@
 """Tests enabled commands for the generate command"""
 
-from cg.constants import EXIT_SUCCESS
-
 from cg.cli.generate.base import generate
+from cg.constants import EXIT_SUCCESS
 
 
 def test_generate_no_options(base_context, cli_runner):

@@ -1,10 +1,11 @@
 from typing import List, Optional
 
+from pydantic import BeforeValidator, constr
+from typing_extensions import Annotated
+
 from cg.constants import DataDelivery, Pipeline
 from cg.models.orders.sample_base import OrderSample
 from cg.models.orders.validators.json_sample_validators import convert_well, join_list
-from pydantic import BeforeValidator, constr
-from typing_extensions import Annotated
 
 
 class JsonSample(OrderSample):

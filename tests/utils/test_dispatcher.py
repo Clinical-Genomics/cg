@@ -1,12 +1,14 @@
+from datetime import datetime
 from typing import List
+
 import pytest
+
+from cg.constants import Pipeline
+from cg.constants.invoice import CustomerNames
+from cg.store import Store
+from cg.store.models import Analysis, Sample
 from cg.utils.dispatcher import Dispatcher
 from tests.store_helpers import StoreHelpers
-from cg.store import Store
-from cg.store.models import Sample, Analysis
-from cg.constants.invoice import CustomerNames
-from cg.constants import Pipeline
-from datetime import datetime
 
 
 def test_dispatch_table_generation(

@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from typing import Dict
+
 import pytest
 
 from cg.constants.demultiplexing import (

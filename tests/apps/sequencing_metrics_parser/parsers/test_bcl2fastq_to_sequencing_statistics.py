@@ -1,6 +1,5 @@
-from typing import List
 from pathlib import Path
-
+from typing import List
 
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq_to_sequencing_statistics import (
     create_bcl2fastq_undetermined_metrics,

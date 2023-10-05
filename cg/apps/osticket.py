@@ -1,7 +1,6 @@
-from pathlib import Path
-
 import logging
 import os.path
+from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import requests
@@ -9,7 +8,7 @@ from flask import Flask
 
 from cg.constants.constants import FileFormat
 from cg.exc import TicketCreationError
-from cg.io.controller import WriteStream, WriteFile
+from cg.io.controller import WriteFile, WriteStream
 
 LOG = logging.getLogger(__name__)
 TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
