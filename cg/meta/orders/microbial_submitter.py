@@ -1,14 +1,13 @@
 import datetime as dt
 from typing import List
 
-from cgmodels.cg.constants import Pipeline
-
 from cg.constants import DataDelivery
+from cg.constants.constants import Pipeline
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import MicrobialSample
-from cg.store.models import Customer, Family, Organism, Sample, ApplicationVersion
+from cg.store.models import ApplicationVersion, Customer, Family, Organism, Sample
 
 
 class MicrobialSubmitter(Submitter):

@@ -4,10 +4,9 @@ from pathlib import Path
 from typing import List
 
 import mock
-from cgmodels.cg.constants import Pipeline
 
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.constants import CaseActions
+from cg.constants.constants import CaseActions, Pipeline
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import ControlEnum

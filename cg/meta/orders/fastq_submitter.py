@@ -1,19 +1,16 @@
 import datetime as dt
 from typing import List
 
-from cgmodels.cg.constants import Pipeline
-
 from cg.constants import DataDelivery, GenePanelMasterList
-from cg.constants.constants import PrepCategory
+from cg.constants.constants import Pipeline, PrepCategory
 from cg.constants.invoice import CustomerNames
+from cg.constants.priority import Priority
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
-from cg.constants.priority import Priority
-from cg.store.models import Sample, Family, FamilySample, Customer, ApplicationVersion
-from cg.constants.constants import PrepCategory
+from cg.store.models import ApplicationVersion, Customer, Family, FamilySample, Sample
 
 
 class FastqSubmitter(Submitter):

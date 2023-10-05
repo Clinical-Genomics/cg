@@ -1,9 +1,8 @@
 import logging
 
-from cgmodels.cg.constants import Pipeline
-
 from cg.cli.upload.clinical_delivery import auto_fastq
 from cg.constants import DataDelivery
+from cg.constants.constants import Pipeline
 from cg.store.models import Analysis
 
 

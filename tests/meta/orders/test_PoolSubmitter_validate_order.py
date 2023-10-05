@@ -1,7 +1,7 @@
 import pytest
-from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery
+from cg.constants.constants import Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.models.orders.constants import OrderType
