@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 import click
+
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
@@ -15,7 +16,7 @@ from cg.exc import FlowCellError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.meta.demultiplex.utils import is_syncing_complete
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
 

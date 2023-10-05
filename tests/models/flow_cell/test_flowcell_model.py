@@ -1,12 +1,15 @@
 from pathlib import Path
 from typing import Type
 
+import pytest
+
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from cg.constants.demultiplexing import BclConverter
+from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 def test_flowcell_id(bcl2fastq_flow_cell_dir: Path):
@@ -45,62 +48,6 @@ def test_rta_exists(bcl2fastq_flow_cell: FlowCellDirectoryData):
 
     # THEN assert that the file exists
     assert rta_file.exists()
-
-
-def test_is_hiseq_x_copy_completed_ready(bcl2fastq_flow_cell: FlowCellDirectoryData):
-    # GIVEN the path to a demultiplexed finished flow cell
-    # GIVEN a flow cell object
-    # GIVEN a copy complete file
-
-    # WHEN fetching the path to the copy complete file
-    is_completed = bcl2fastq_flow_cell.is_hiseq_x_copy_completed()
-
-    # THEN assert that the file exists
-    assert is_completed is True
-
-
-def test_is_hiseq_x_delivery_started_ready(
-    bcl2fastq_flow_cell: FlowCellDirectoryData, demultiplexing_delivery_file: Path
-):
-    # GIVEN the path to a demultiplexed finished flow cell
-    # GIVEN a flow cell object
-    # GIVEN a delivery file
-    demultiplexing_delivery_file.touch()
-
-    # WHEN checking the path to the delivery file
-    is_delivered = bcl2fastq_flow_cell.is_hiseq_x_delivery_started()
-
-    demultiplexing_delivery_file.unlink()
-
-    # THEN assert that the file exists
-    assert is_delivered is True
-
-
-def test_is_hiseq_x_delivery_started_not_ready(bcl2fastq_flow_cell: FlowCellDirectoryData):
-    # GIVEN the path to a demultiplexed finished flow cell
-    # GIVEN a flow cell object
-
-    # WHEN checking the path to the copy complete file
-    is_delivered = bcl2fastq_flow_cell.is_hiseq_x_delivery_started()
-
-    # THEN assert that the file do not exist
-    assert is_delivered is False
-
-
-def test_is_hiseq_x(bcl2fastq_flow_cell: FlowCellDirectoryData, hiseq_x_tile_dir: Path):
-    # GIVEN the path to a demultiplexed finished flow cell
-    # GIVEN a flow cell object
-    # GIVEN a Hiseq X directory
-    hiseq_x_tile_dir.mkdir(exist_ok=True)
-
-    # WHEN checking the path to the Hiseq X flow cell directory
-    is_hiseq_x = bcl2fastq_flow_cell.is_hiseq_x()
-
-    # Clean up
-    hiseq_x_tile_dir.rmdir()
-
-    # THEN assert that the file exists
-    assert is_hiseq_x is True
 
 
 def test_get_sample_model_bcl2fastq(bcl2fastq_flow_cell: FlowCellDirectoryData):
@@ -182,3 +129,84 @@ def test_flow_cell_directory_data_with_novaseq_flow_cell_directory(
 
     # THEN the bcl converter is dragen
     assert flow_cell.bcl_converter == BclConverter.DRAGEN
+
+
+def test_get_run_parameters_when_non_existing(demultiplexed_runs: Path):
+    # GIVEN a flowcell object with a directory without run parameters
+    flowcell_path: Path = Path(
+        demultiplexed_runs,
+        "201203_D00483_0200_AHVKJCDRXX",
+    )
+    flow_cell = FlowCellDirectoryData(flow_cell_path=flowcell_path)
+    assert flow_cell.run_parameters_path.exists() is False
+
+    # WHEN fetching the run parameters object
+    with pytest.raises(FileNotFoundError):
+        # THEN assert that a FileNotFound error is raised
+        flow_cell.run_parameters
+
+
+def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bclconvert: Path):
+    # GIVEN a flow cell without a demuxstarted.txt file
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
+    assert not Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).exists()
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_locally()
+
+    # THEN the response should be False
+    assert not has_demux_started
+
+
+def test_has_demultiplexing_started_locally_true(
+    tmp_flow_cell_directory_bclconvert: Path,
+):
+    # GIVEN a flow cell with a demuxstarted.txt file
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
+    Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).touch()
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_locally()
+
+    # THEN the response should be True
+    assert has_demux_started
+
+
+def test_has_demultiplexing_started_on_sequencer_true(
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+):
+    # GIVEN a flow cell with a BCLConvert folder
+    flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_dir_with_analysis_data)
+    Path.mkdir(
+        Path(
+            flow_cell.path,
+            get_latest_analysis_path(flow_cell.path),
+            DemultiplexingDirsAndFiles.DATA,
+            DemultiplexingDirsAndFiles.BCL_CONVERT,
+        )
+    )
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_on_sequencer()
+
+    # THEN the response should be True
+    assert has_demux_started
+
+
+def test_has_demultiplexing_started_on_sequencer_false(
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+):
+    # GIVEN a flow cell without a BCLConvert folder
+    flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_dir_with_analysis_data)
+    assert not Path(
+        flow_cell.path,
+        get_latest_analysis_path(flow_cell.path),
+        DemultiplexingDirsAndFiles.DATA,
+        DemultiplexingDirsAndFiles.BCL_CONVERT,
+    ).exists()
+
+    # WHEN checking if the flow cell has started demultiplexing
+    has_demux_started: bool = flow_cell.has_demultiplexing_started_on_sequencer()
+
+    # THEN the response should be False
+    assert not has_demux_started

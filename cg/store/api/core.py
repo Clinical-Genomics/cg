@@ -34,7 +34,7 @@ class Store(CoreHandler):
 
     def __init__(self, uri):
         self.uri = uri
-        self.engine = create_engine(uri)
+        self.engine = create_engine(uri, pool_pre_ping=True)
         self.session = scoped_session(sessionmaker(bind=self.engine))
         super().__init__(session=self.session)
 
