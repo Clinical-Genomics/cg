@@ -1,6 +1,6 @@
 """Constants for delivery."""
 
-from cgmodels.cg.constants import Pipeline
+from cg.constants.constants import Pipeline
 
 ONLY_ONE_CASE_PER_TICKET = [
     Pipeline.FASTQ,

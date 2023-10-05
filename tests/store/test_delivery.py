@@ -4,8 +4,8 @@ import datetime as dt
 from typing import List, Set
 
 from cg.constants import DataDelivery
+from cg.constants.constants import Pipeline
 from cg.store.models import Family, Sample
-from cgmodels.cg.constants import Pipeline
 
 
 def test_get_delivery_arguments(case: Family):
