@@ -4,11 +4,12 @@ from pathlib import Path
 from typing import List
 
 import pytest
+from housekeeper.store.models import Version
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from housekeeper.store.models import Version
 from tests.store_helpers import StoreHelpers
 
 # Paths

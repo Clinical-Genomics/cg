@@ -5,13 +5,13 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Optional, Dict, Set
+from typing import Dict, List, Optional, Set
+
+from housekeeper.store.models import Bundle, File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError
-
-from housekeeper.store.models import File, Version, Bundle
 
 ROOT_PATH = tempfile.TemporaryDirectory().name
 

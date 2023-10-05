@@ -1,12 +1,11 @@
 """Test how the api handles bundles."""
-from typing import Dict, Any
-
 from datetime import datetime
+from typing import Any, Dict
+
+from housekeeper.store.models import Bundle
 
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.small_helpers import SmallHelpers
-
-from housekeeper.store.models import Bundle
 
 
 def test_new_bundle(

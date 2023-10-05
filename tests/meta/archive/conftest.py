@@ -4,6 +4,9 @@ from typing import Any, Dict, List
 from unittest import mock
 
 import pytest
+from housekeeper.store.models import File
+from requests import Response
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
@@ -21,8 +24,6 @@ from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
 from cg.store.models import Customer, Sample
-from housekeeper.store.models import File
-from requests import Response
 from tests.store_helpers import StoreHelpers
 
 

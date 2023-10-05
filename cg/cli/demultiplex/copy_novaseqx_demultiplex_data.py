@@ -1,7 +1,7 @@
 import logging
-from pathlib import Path
 import os
 import shutil
+from pathlib import Path
 from typing import List, Optional
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles

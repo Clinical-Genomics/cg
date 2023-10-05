@@ -1,7 +1,7 @@
 """Tests for CrunchyAPI"""
 import logging
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import get_tmp_dir, update_metadata_date

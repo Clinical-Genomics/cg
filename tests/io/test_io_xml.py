@@ -1,7 +1,9 @@
 """Tests for the io.xml module."""
-from cg.io.xml import read_xml, write_xml
 import xml.etree.ElementTree as ET
+
 import pytest
+
+from cg.io.xml import read_xml, write_xml
 
 
 def test_get_content_from_file(xml_file_path):

@@ -7,11 +7,11 @@ import click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress.helpers import (
-    correct_spring_paths,
-    update_compress_api,
-    is_case_ignored,
-    get_cases_to_process,
     compress_sample_fastqs_in_cases,
+    correct_spring_paths,
+    get_cases_to_process,
+    is_case_ignored,
+    update_compress_api,
 )
 from cg.constants.constants import DRY_RUN
 from cg.exc import CaseNotFoundError

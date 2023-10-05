@@ -4,19 +4,23 @@ import logging
 import os
 from math import ceil
 from pathlib import Path
-from typing import Iterator, Optional, List
+from typing import Iterator, List, Optional
 
-from housekeeper.store.models import Version, Bundle
+from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.compression import CASES_TO_IGNORE, MAX_READS_PER_GB, CRUNCHY_MIN_GB_PER_PROCESS
+from cg.constants.compression import (
+    CASES_TO_IGNORE,
+    CRUNCHY_MIN_GB_PER_PROCESS,
+    MAX_READS_PER_GB,
+)
 from cg.constants.slurm import Slurm
-from cg.utils.date import get_date_days_ago
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
 from cg.store import Store
 from cg.store.models import Family
+from cg.utils.date import get_date_days_ago
 
 LOG = logging.getLogger(__name__)
 

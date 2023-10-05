@@ -1,15 +1,16 @@
 from datetime import datetime
 from typing import List, Optional, Union
 
-from pydantic.v1 import BaseModel, validator, root_validator
-from cg.constants import Pipeline, DataDelivery
-from cg.models.report.sample import SampleModel, ApplicationModel
+from pydantic.v1 import BaseModel, root_validator, validator
+
+from cg.constants import DataDelivery, Pipeline
+from cg.models.report.sample import ApplicationModel, SampleModel
 from cg.models.report.validators import (
-    validate_empty_field,
-    validate_supported_pipeline,
-    validate_list,
     validate_date,
+    validate_empty_field,
+    validate_list,
     validate_path,
+    validate_supported_pipeline,
 )
 
 

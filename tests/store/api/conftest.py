@@ -2,6 +2,7 @@ import datetime as dt
 from typing import List
 
 import pytest
+
 from cg.constants import Pipeline
 from cg.constants.constants import PrepCategory
 from cg.constants.invoice import CustomerNames

@@ -2,9 +2,11 @@
 import logging
 from typing import Generator, List, Set
 
-import cg.store as Store
 import pytest
 from _pytest.logging import LogCaptureFixture
+from housekeeper.store.models import File
+
+import cg.store as Store
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.scout_upload import ScoutCustomCaseReportTags
@@ -12,7 +14,6 @@ from cg.constants.sequencing import SequencingMethod
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import RNADNACollection, UploadScoutAPI
 from cg.store.models import Family, Sample
-from housekeeper.store.models import File
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
 

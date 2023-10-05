@@ -1,10 +1,10 @@
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from smtplib import SMTP
 
 from cg.exc import EmailNotSentError
 from cg.models.email import EmailInfo
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.application import MIMEApplication
 
 
 def send_mail(email_info: EmailInfo) -> None:

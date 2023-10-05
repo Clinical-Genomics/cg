@@ -1,8 +1,8 @@
 import datetime as dt
 import logging
+from pathlib import Path
 
 from click.testing import CliRunner
-from pathlib import Path
 
 from cg.cli.workflow.commands import rsync_past_run_dirs
 from cg.constants.process import EXIT_SUCCESS

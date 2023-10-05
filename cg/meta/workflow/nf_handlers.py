@@ -6,7 +6,11 @@ from typing import Any, Dict, Iterable, List
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import FileExtensions, FileFormat
-from cg.constants.nextflow import JAVA_MEMORY_HEADJOB, NXF_JVM_ARGS_ENV, SlurmHeadJobDefaults
+from cg.constants.nextflow import (
+    JAVA_MEMORY_HEADJOB,
+    NXF_JVM_ARGS_ENV,
+    SlurmHeadJobDefaults,
+)
 from cg.io.controller import ReadFile
 from cg.models.slurm.sbatch import Sbatch
 from cg.utils.utils import build_command_from_dict

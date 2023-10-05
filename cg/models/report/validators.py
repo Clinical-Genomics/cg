@@ -3,17 +3,17 @@ from datetime import datetime
 from pathlib import Path
 from typing import Union
 
-from cg.models.orders.constants import OrderType
 from cg.constants import (
-    Pipeline,
+    BALSAMIC_ANALYSIS_TYPE,
     NA_FIELD,
-    YES_FIELD,
     NO_FIELD,
     PRECISION,
-    REPORT_SUPPORTED_PIPELINES,
-    BALSAMIC_ANALYSIS_TYPE,
     REPORT_GENDER,
+    REPORT_SUPPORTED_PIPELINES,
+    YES_FIELD,
+    Pipeline,
 )
+from cg.models.orders.constants import OrderType
 
 LOG = logging.getLogger(__name__)
 

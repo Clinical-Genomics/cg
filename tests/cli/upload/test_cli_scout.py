@@ -1,18 +1,18 @@
 import logging
+
 import mock
 from click.testing import CliRunner, Result
 
-from cg.constants import Pipeline, EXIT_SUCCESS
 from cg.cli.upload.scout import create_scout_load_config, get_upload_api
-from cg.models.cg_config import CGConfig
+from cg.constants import EXIT_SUCCESS, Pipeline
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Family
-
-from tests.store_helpers import StoreHelpers
 from tests.mocks.scout import MockScoutLoadConfig
+from tests.store_helpers import StoreHelpers
 
 
 def test_get_upload_api(cg_context: CGConfig, case_id: str, helpers: StoreHelpers):

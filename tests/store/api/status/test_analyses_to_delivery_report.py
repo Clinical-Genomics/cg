@@ -1,6 +1,6 @@
 """This file tests the analyses_to_delivery_report part of the status api"""
 
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import DataDelivery, Pipeline
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
 from cg.utils.date import get_date

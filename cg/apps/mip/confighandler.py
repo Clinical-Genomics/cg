@@ -1,10 +1,11 @@
 import logging
 from copy import deepcopy
 
+from marshmallow import Schema, fields, validate
+
 from cg.constants import DEFAULT_CAPTURE_KIT
 from cg.constants.subject import RelationshipStatus
 from cg.exc import PedigreeConfigError
-from marshmallow import Schema, fields, validate
 
 LOG = logging.getLogger(__name__)
 

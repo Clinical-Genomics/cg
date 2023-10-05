@@ -1,7 +1,9 @@
 from enum import Enum
-from typing import List, Optional, Callable
+from typing import Callable, List, Optional
+
 from sqlalchemy.orm import Query
-from cg.store.models import Pool, Customer
+
+from cg.store.models import Customer, Pool
 
 
 def filter_pools_by_customer_id(pools: Query, customer_ids: List[int], **kwargs) -> Query:

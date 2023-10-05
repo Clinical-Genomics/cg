@@ -4,8 +4,8 @@ from pathlib import Path
 import pytest
 
 from cg.models.observations.input_files import (
-    MipDNAObservationsInputFiles,
     BalsamicObservationsInputFiles,
+    MipDNAObservationsInputFiles,
 )
 
 

@@ -2,6 +2,9 @@ import logging
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Type
 
+from housekeeper.store.models import File
+from pydantic import BaseModel, ConfigDict
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
@@ -10,8 +13,6 @@ from cg.meta.archive.models import ArchiveHandler, FileAndSample, SampleAndDesti
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
 from cg.store.models import Sample
-from housekeeper.store.models import File
-from pydantic import BaseModel, ConfigDict
 
 LOG = logging.getLogger(__name__)
 DEFAULT_SPRING_ARCHIVE_COUNT = 200
