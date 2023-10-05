@@ -1,11 +1,12 @@
 import shutil
 from pathlib import Path
 
+from click.testing import CliRunner
+
 from cg.cli.workflow.commands import link
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
 
 
 def test_cli_link_no_case(

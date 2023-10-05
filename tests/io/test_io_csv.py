@@ -1,9 +1,9 @@
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 import pytest
 
-from cg.io.csv import read_csv, write_csv, read_csv_stream, write_csv_stream
+from cg.io.csv import read_csv, read_csv_stream, write_csv, write_csv_stream
 from tests.io.conftest import FileRepresentation
 
 

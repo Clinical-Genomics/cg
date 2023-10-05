@@ -1,13 +1,17 @@
 """This module contains tests for the BCLConvert metrics parser."""
 
-from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
-from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
-    BclConvertQualityMetrics,
-    BclConvertDemuxMetrics,
-)
 from pathlib import Path
 from typing import List
+
 import pytest
+
+from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
+    BclConvertDemuxMetrics,
+    BclConvertQualityMetrics,
+)
+from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import (
+    BclConvertMetricsParser,
+)
 
 
 def test_parse_bcl_convert_metrics(

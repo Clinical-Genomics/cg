@@ -1,8 +1,7 @@
 """Tests for the dict module."""
 from pathlib import Path
 
-
-from cg.utils.dict import get_list_from_dictionary, get_full_path_dictionary
+from cg.utils.dict import get_full_path_dictionary, get_list_from_dictionary
 
 
 def test_get_list_from_dictionary():

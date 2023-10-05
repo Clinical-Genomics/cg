@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.constants.invoice import CustomerNames

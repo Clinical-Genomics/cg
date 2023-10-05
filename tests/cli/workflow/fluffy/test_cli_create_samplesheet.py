@@ -1,12 +1,12 @@
 import datetime as dt
 from pathlib import Path
 
+from click.testing import CliRunner
+
 from cg.cli.workflow.fluffy.base import create_samplesheet
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
-
 from cg.store.models import Flowcell, Sample
 
 

@@ -1,13 +1,13 @@
+from sqlalchemy.orm import Query
+
+from cg.store import Store
 from cg.store.filters.status_application_filters import (
     filter_applications_by_tag,
     filter_applications_is_external,
-    filter_applications_is_not_external,
     filter_applications_is_not_archived,
+    filter_applications_is_not_external,
 )
-
-from cg.store import Store
 from cg.store.models import Application
-from sqlalchemy.orm import Query
 from tests.store.conftest import StoreConstants
 
 

@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import List
 
 import pytest
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, PrepCategory

@@ -5,6 +5,10 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from urllib.parse import urljoin
 
+from housekeeper.store.models import File
+from pydantic import BaseModel
+from requests.models import Response
+
 from cg.constants.constants import APIMethods
 from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import APIRequest
@@ -16,9 +20,6 @@ from cg.meta.archive.models import (
 )
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
-from housekeeper.store.models import File
-from pydantic import BaseModel
-from requests.models import Response
 
 OSTYPE: str = "Unix/MacOS"
 ROOT_TO_TRIM: str = "/home"

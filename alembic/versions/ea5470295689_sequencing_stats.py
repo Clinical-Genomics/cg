@@ -5,10 +5,11 @@ Revises: 9008aa5065b4
 Create Date: 2023-05-04 09:29:09.945895
 
 """
-from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import Column, ForeignKey, orm, types
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, types, orm, ForeignKey
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "ea5470295689"

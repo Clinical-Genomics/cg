@@ -1,11 +1,11 @@
 """Test CLI functions to get analysis in the Status database."""
 
+from click.testing import CliRunner
+
 from cg.cli.get import get
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from click.testing import CliRunner
-
 from cg.store.models import Family
 from tests.store_helpers import StoreHelpers
 

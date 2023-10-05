@@ -1,18 +1,19 @@
 from sqlalchemy.orm import Query
+
 from cg.store import Store
-from cg.store.models import Pool
 from cg.store.filters.status_pool_filters import (
-    filter_pools_is_received,
-    filter_pools_is_not_received,
+    filter_pools_by_customer_id,
+    filter_pools_by_invoice_id,
+    filter_pools_by_name_enquiry,
+    filter_pools_by_order_enquiry,
+    filter_pools_do_invoice,
     filter_pools_is_delivered,
     filter_pools_is_not_delivered,
+    filter_pools_is_not_received,
+    filter_pools_is_received,
     filter_pools_without_invoice_id,
-    filter_pools_do_invoice,
-    filter_pools_by_invoice_id,
-    filter_pools_by_order_enquiry,
-    filter_pools_by_name_enquiry,
-    filter_pools_by_customer_id,
 )
+from cg.store.models import Pool
 from tests.store.conftest import StoreConstants
 
 

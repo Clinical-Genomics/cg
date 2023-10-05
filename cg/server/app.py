@@ -8,6 +8,7 @@ from flask_dance.contrib.google import google, make_google_blueprint
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
     ApplicationVersion,
     Bed,
     BedVersion,
@@ -22,9 +23,8 @@ from cg.store.models import (
     Panel,
     Pool,
     Sample,
-    User,
     SampleLaneSequencingMetrics,
-    ApplicationLimitations,
+    User,
 )
 
 from . import admin, api, ext, invoices

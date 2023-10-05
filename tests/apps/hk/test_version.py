@@ -1,7 +1,6 @@
 """Test how the api handles versions."""
-from typing import Dict, Any
-
 import datetime
+from typing import Any, Dict
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from tests.small_helpers import SmallHelpers

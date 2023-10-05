@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import Dict, Generator, List
 
 import pytest
+from housekeeper.store.models import Version
+
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.sequencing import SequencingMethod
@@ -16,7 +18,6 @@ from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import MipLoadConfig
 from cg.store import Store
 from cg.store.models import Analysis, Family, Sample
-from housekeeper.store.models import Version
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI

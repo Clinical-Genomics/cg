@@ -4,11 +4,12 @@ from pathlib import Path
 from typing import Dict, Generator, List
 
 from _pytest.logging import LogCaptureFixture
+from housekeeper.store.models import File, Version
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.meta.compress import files
 from cg.models import CompressionData
-from housekeeper.store.models import File, Version
 from tests.cli.compress.conftest import MockCompressAPI
 from tests.meta.compress.conftest import MockCompressionData
 from tests.store_helpers import StoreHelpers

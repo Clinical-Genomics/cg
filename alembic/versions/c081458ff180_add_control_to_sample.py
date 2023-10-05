@@ -5,16 +5,10 @@ Revises: 1c27462b49f6
 Create Date: 2021-09-10 13:33:51.083517
 
 """
-from alembic import op
-from sqlalchemy import (
-    types,
-    Column,
-    ForeignKey,
-    orm,
-    String,
-)
+from sqlalchemy import Column, ForeignKey, String, orm, types
 from sqlalchemy.dialects import mysql
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "c081458ff180"

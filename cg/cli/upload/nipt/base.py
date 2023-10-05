@@ -2,14 +2,14 @@
 
 import logging
 import traceback
-from typing import Optional, List
-from cg.store.models import Analysis
+from typing import List, Optional
 
 import click
 
 from cg.constants.nipt import Q30_THRESHOLD
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.nipt import NiptUploadAPI
+from cg.store.models import Analysis
 
 from .ftp import ftp
 from .ftp import nipt_upload_case as nipt_upload_ftp_case

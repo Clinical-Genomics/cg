@@ -6,7 +6,6 @@ import click
 from cg.meta.upload.gisaid import GisaidAPI
 from cg.models.cg_config import CGConfig
 
-
 LOG = logging.getLogger(__name__)
 
 

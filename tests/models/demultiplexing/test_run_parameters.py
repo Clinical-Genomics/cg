@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List
 
 import pytest
+
 from cg.constants.demultiplexing import RunParametersXMLNodes
 from cg.constants.sequencing import Sequencers
 from cg.exc import RunParametersError
