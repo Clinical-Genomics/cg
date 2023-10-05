@@ -1,13 +1,17 @@
 from pathlib import Path
 from typing import Dict, List
+
 import pytest
-from cg.store.models import Sample
+from housekeeper.store.models import File
+
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_sample_sheet_path_to_housekeeper,
+)
 from cg.models.cg_config import CGConfig
-from housekeeper.store.models import File
+from cg.store.models import Sample
 from tests.meta.demultiplex.conftest import FlowCellInfo
 
 
