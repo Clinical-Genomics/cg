@@ -24,7 +24,7 @@ def test_validate_non_existing_sample_sheet(cli_runner: CliRunner):
     # THEN assert that it exits with a non-zero exit code
     assert result.exit_code != EXIT_SUCCESS
     # THEN assert the correct information was communicated
-    assert f'Path "{sample_sheet.name}" does not exist' in result.output
+    assert f"File '{sample_sheet.name}' does not exist" in result.output
 
 
 def test_validate_sample_sheet_wrong_file_type(
