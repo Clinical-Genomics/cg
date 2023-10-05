@@ -10,7 +10,8 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import INBOX_NAME
-from cg.constants.priority import SlurmQos, SlurmAccount
+from cg.constants.priority import SlurmAccount, SlurmQos
+from cg.constants.tb import AnalysisTypes
 from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.meta.meta import MetaAPI
@@ -18,7 +19,6 @@ from cg.meta.rsync.sbatch import COVID_RSYNC, ERROR_RSYNC_FUNCTION, RSYNC_COMMAN
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store.models import Family
-from cgmodels.trailblazer.constants import AnalysisTypes
 
 LOG = logging.getLogger(__name__)
 

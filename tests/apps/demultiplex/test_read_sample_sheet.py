@@ -1,24 +1,25 @@
 import logging
-from typing import List, Dict, Type
-import pytest
 from pathlib import Path
-from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
-from cg.exc import SampleSheetError
+from typing import Dict, List
+
+import pytest
+
 from cg.apps.demultiplex.sample_sheet.models import (
-    SampleSheet,
     FlowCellSample,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
+    SampleSheet,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_raw_samples,
     get_sample_sheet_from_file,
     get_sample_type,
-    validate_samples_are_unique,
     get_samples_by_lane,
     get_validated_sample_sheet,
-    get_raw_samples,
+    validate_samples_are_unique,
 )
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
+from cg.exc import SampleSheetError
 
 
 def test_validate_samples_are_unique(
