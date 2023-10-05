@@ -1,9 +1,10 @@
 import logging
 from datetime import datetime
 
+from click.testing import CliRunner
+
 from cg.cli.clean import hk_bundle_files
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
 from tests.store_helpers import StoreHelpers
 
 

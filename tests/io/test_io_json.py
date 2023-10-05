@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cg.io.json import read_json, write_json, read_json_stream, write_json_stream
+from cg.io.json import read_json, read_json_stream, write_json, write_json_stream
 
 
 def test_get_content_from_file(json_file_path: Path):

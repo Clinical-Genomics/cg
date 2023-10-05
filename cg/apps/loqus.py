@@ -2,10 +2,10 @@
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Optional, Dict, List
+from typing import Dict, List, Optional
 
 from cg.constants.constants import FileFormat
-from cg.exc import LoqusdbDeleteCaseError, CaseNotFoundError
+from cg.exc import CaseNotFoundError, LoqusdbDeleteCaseError
 from cg.io.controller import ReadStream
 from cg.utils import Process
 from cg.utils.dict import get_list_from_dictionary

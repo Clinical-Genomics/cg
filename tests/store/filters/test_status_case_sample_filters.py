@@ -2,8 +2,8 @@ from sqlalchemy.orm import Query
 
 from cg.store import Store
 from cg.store.filters.status_case_sample_filters import (
-    get_samples_in_case_by_internal_id,
     get_cases_with_sample_by_internal_id,
+    get_samples_in_case_by_internal_id,
 )
 
 

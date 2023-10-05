@@ -1,15 +1,14 @@
 """Test how the api handles files."""
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any, Tuple
+from typing import Any, Dict, List, Tuple
+
+from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from tests.meta.compress.conftest import MockCompressionData
 from tests.mocks.hk_mock import MockHousekeeperAPI
-
-from housekeeper.store.models import Version, File
-
 from tests.small_helpers import SmallHelpers
 from tests.store_helpers import StoreHelpers
 

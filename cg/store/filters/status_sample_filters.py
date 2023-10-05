@@ -1,10 +1,11 @@
 from enum import Enum
 from typing import Any, Callable, List, Optional
 
-from cg.constants.constants import SampleType
-from cg.store.models import Customer, Sample
 from sqlalchemy import or_
 from sqlalchemy.orm import Query
+
+from cg.constants.constants import SampleType
+from cg.store.models import Customer, Sample
 
 
 def filter_samples_by_internal_id(internal_id: str, samples: Query, **kwargs) -> Query:

@@ -2,6 +2,7 @@ import logging
 from typing import List, Optional, Tuple
 
 import click
+
 from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline, Priority
 from cg.constants.subject import Gender
 from cg.meta.transfer.external_data import ExternalDataAPI

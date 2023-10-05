@@ -7,7 +7,13 @@ from click.testing import CliRunner
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.workflow.rnafusion.base import rnafusion, start, start_available, store, store_available
+from cg.cli.workflow.rnafusion.base import (
+    rnafusion,
+    start,
+    start_available,
+    store,
+    store_available,
+)
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig

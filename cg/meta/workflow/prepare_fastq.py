@@ -4,6 +4,8 @@ import logging
 from pathlib import Path
 from typing import Dict, List
 
+from housekeeper.store.models import File, Version
+
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import files
@@ -11,7 +13,6 @@ from cg.meta.compress.compress import CompressAPI
 from cg.models import CompressionData
 from cg.store import Store
 from cg.store.models import Family
-from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 

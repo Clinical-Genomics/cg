@@ -4,7 +4,9 @@ from typing import List
 
 import mock
 import pytest
+
 from cg.constants import FlowCellStatus, GenePanelMasterList, Priority
+
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import Sequencers
 from cg.exc import AnalysisNotReadyError

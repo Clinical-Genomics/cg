@@ -4,13 +4,13 @@ import datetime as dt
 import logging
 from typing import List
 
+from click.testing import CliRunner
+
 from cg.cli.compress.fastq import fastq_cmd, get_cases_to_process
 from cg.constants import Pipeline
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
 from cg.store import Store
 from cg.store.models import Family
-
 from tests.store_helpers import StoreHelpers
 
 MOCK_SET_MEM_ACCORDING_TO_READS_PATH: str = "cg.cli.compress.helpers.set_memory_according_to_reads"

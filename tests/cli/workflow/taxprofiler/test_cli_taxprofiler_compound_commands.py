@@ -1,15 +1,13 @@
 import logging
+
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
-from cg.cli.workflow.taxprofiler.base import (
-    taxprofiler,
-    start,
-    start_available,
-)
+
+from cg.cli.workflow.taxprofiler.base import start, start_available, taxprofiler
 from cg.constants import EXIT_SUCCESS
 from cg.exc import CgError
-from cg.models.cg_config import CGConfig
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
+from cg.models.cg_config import CGConfig
 
 
 def test_taxprofiler_no_args(cli_runner: CliRunner, taxprofiler_context: CGConfig):

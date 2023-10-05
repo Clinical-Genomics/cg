@@ -4,7 +4,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Tuple
 
-from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
+from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import (
+    BclConvertMetricsParser,
+)
 from cg.apps.sequencing_metrics_parser.parsers.utils import get_flow_cell_id
 from cg.constants.demultiplexing import UNDETERMINED
 from cg.store.models import SampleLaneSequencingMetrics

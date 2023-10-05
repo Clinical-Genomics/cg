@@ -6,7 +6,7 @@ import click
 from housekeeper.store.models import Version
 
 from cg.cli.generate.report.options import ARGUMENT_CASE_ID
-from cg.cli.generate.report.utils import get_report_case, get_report_api
+from cg.cli.generate.report.utils import get_report_api, get_report_case
 from cg.meta.report.report_api import ReportAPI
 from cg.store.models import Family
 

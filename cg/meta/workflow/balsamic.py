@@ -4,11 +4,11 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 from pydantic.v1 import ValidationError
 
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat, SampleType, AnalysisType
+from cg.constants.constants import AnalysisType, FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.indexes import ListIndexes
 from cg.constants.observations import ObservationsFileWildcards

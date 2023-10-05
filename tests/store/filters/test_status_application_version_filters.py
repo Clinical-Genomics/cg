@@ -1,17 +1,16 @@
-from typing import List, Tuple, Iterable
 import datetime as dt
+from typing import Iterable, List, Tuple
 
 from sqlalchemy.orm import Query
 
 from cg.store import Store
 from cg.store.filters.status_application_version_filters import (
-    filter_application_versions_by_application_entry_id,
     filter_application_versions_before_valid_from,
+    filter_application_versions_by_application_entry_id,
     filter_application_versions_by_application_version_entry_id,
     order_application_versions_by_valid_from_desc,
 )
 from cg.store.models import Application, ApplicationVersion
-
 from tests.store_helpers import StoreHelpers
 
 

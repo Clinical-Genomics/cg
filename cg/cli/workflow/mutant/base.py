@@ -1,6 +1,7 @@
 import logging
 
 import click
+
 from cg.cli.workflow.commands import (
     ARGUMENT_CASE_ID,
     OPTION_ANALYSIS_PARAMETERS_CONFIG,

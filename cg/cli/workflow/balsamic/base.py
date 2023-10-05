@@ -4,6 +4,8 @@ import logging
 from typing import List
 
 import click
+from pydantic.v1 import ValidationError
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.options import (
     OPTION_GENDER,

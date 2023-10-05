@@ -1,6 +1,7 @@
 import logging
 
 import click
+
 from cg.cli.workflow.commands import link, resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import AnalysisNotReadyError, CgError

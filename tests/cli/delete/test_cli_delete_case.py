@@ -1,10 +1,11 @@
 """This script tests the cli methods to set families to status-db"""
 import logging
 
+from click.testing import CliRunner
+
 from cg.cli.delete.case import delete_case as delete_case_command
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from click.testing import CliRunner
 from cg.store.models import Family, FamilySample, Sample
 from tests.store_helpers import StoreHelpers
 

@@ -2,10 +2,11 @@
 import datetime
 import logging
 
+from click.testing import CliRunner
+
 from cg.cli.upload.base import upload_all_completed_analyses
 from cg.constants import Pipeline
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
 from tests.store_helpers import StoreHelpers
 
 

@@ -1,6 +1,7 @@
 from typing import List
+
 from cg.store import Store
-from cg.store.models import Pool, Customer
+from cg.store.models import Customer, Pool
 
 
 def test_get_pools_to_invoice_query(

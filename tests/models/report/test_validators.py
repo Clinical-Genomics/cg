@@ -1,16 +1,16 @@
 """Tests delivery report models validators."""
-from cg.constants import NA_FIELD, YES_FIELD, REPORT_GENDER, Pipeline
+from cg.constants import NA_FIELD, REPORT_GENDER, YES_FIELD, Pipeline
 from cg.constants.subject import Gender
 from cg.models.orders.constants import OrderType
 from cg.models.report.validators import (
-    validate_empty_field,
     validate_boolean,
+    validate_empty_field,
     validate_float,
+    validate_gender,
     validate_list,
+    validate_percentage,
     validate_rml_sample,
     validate_supported_pipeline,
-    validate_gender,
-    validate_percentage,
 )
 
 

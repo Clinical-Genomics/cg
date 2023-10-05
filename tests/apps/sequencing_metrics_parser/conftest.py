@@ -1,14 +1,18 @@
 """Fixtures for the sequencing metrics parser tests."""
 from pathlib import Path
+
+import pytest
+
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertDemuxMetrics,
     BclConvertQualityMetrics,
 )
-from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
-import pytest
+from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import (
+    BclConvertMetricsParser,
+)
 from cg.constants.bcl_convert_metrics import (
-    BclConvertQualityMetricsColumnNames,
     BclConvertDemuxMetricsColumnNames,
+    BclConvertQualityMetricsColumnNames,
 )
 
 

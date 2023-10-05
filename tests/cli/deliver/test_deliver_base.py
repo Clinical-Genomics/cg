@@ -1,11 +1,12 @@
 """Tests for the deliver base command"""
 import logging
 
-from cg.meta.deliver_ticket import DeliverTicketAPI
+from click.testing import CliRunner
+
 from cg.cli.deliver.base import deliver as deliver_cmd
 from cg.constants import EXIT_SUCCESS
+from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
 
 
 def test_run_base_help(cli_runner: CliRunner):
