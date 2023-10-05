@@ -1,6 +1,6 @@
-from typing import Optional, Union
+from pydantic import BaseModel, BeforeValidator
+from typing_extensions import Annotated
 
-from pydantic import BaseModel, validator
 from cg.models.report.validators import (
     validate_empty_field,
     validate_float,
@@ -16,15 +16,10 @@ class SampleMetadataModel(BaseModel):
     Attributes:
         million_read_pairs: number of million read pairs obtained; source: StatusDB/sample/reads (/2*10^6)
         duplicates: fraction of mapped sequence that is marked as duplicate; source: pipeline workflow
-
     """
 
-    million_read_pairs: Union[None, float, str]
-    duplicates: Union[None, float, str]
-
-    _float_values = validator("million_read_pairs", "duplicates", always=True, allow_reuse=True)(
-        validate_float
-    )
+    million_read_pairs: Annotated[str, BeforeValidator(validate_float)]
+    duplicates: Annotated[str, BeforeValidator(validate_float)]
 
 
 class MipDNASampleMetadataModel(SampleMetadataModel):
@@ -38,18 +33,11 @@ class MipDNASampleMetadataModel(SampleMetadataModel):
         pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: pipeline workflow
     """
 
-    bait_set: Optional[str]
-    gender: Optional[str]
-    mapped_reads: Union[None, float, str]
-    mean_target_coverage: Union[None, float, str]
-    pct_10x: Union[None, float, str]
-
-    _bait_set = validator("bait_set", always=True, allow_reuse=True)(validate_empty_field)
-    _gender = validator("gender", always=True, allow_reuse=True)(validate_gender)
-
-    _float_values_mip = validator(
-        "mapped_reads", "mean_target_coverage", "pct_10x", always=True, allow_reuse=True
-    )(validate_float)
+    bait_set: Annotated[str, BeforeValidator(validate_empty_field)]
+    gender: Annotated[str, BeforeValidator(validate_gender)]
+    mapped_reads: Annotated[str, BeforeValidator(validate_float)]
+    mean_target_coverage: Annotated[str, BeforeValidator(validate_float)]
+    pct_10x: Annotated[str, BeforeValidator(validate_float)]
 
 
 class BalsamicSampleMetadataModel(SampleMetadataModel):
@@ -60,12 +48,8 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
             fold_80: fold 80 base penalty; source: pipeline workflow
     """
 
-    mean_insert_size: Union[None, float, str]
-    fold_80: Union[None, float, str]
-
-    _float_values_balsamic = validator(
-        "mean_insert_size", "fold_80", always=True, allow_reuse=True
-    )(validate_float)
+    mean_insert_size: Annotated[str, BeforeValidator(validate_float)]
+    fold_80: Annotated[str, BeforeValidator(validate_float)]
 
 
 class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
@@ -79,19 +63,11 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
             pct_500x: percent of targeted bases that are covered to 500X coverage or more; source: pipeline workflow
     """
 
-    bait_set: Optional[str]
-    bait_set_version: Union[None, int, str]
-    median_target_coverage: Union[None, float, str]
-    pct_250x: Union[None, float, str]
-    pct_500x: Union[None, float, str]
-
-    _str_values = validator("bait_set", "bait_set_version", always=True, allow_reuse=True)(
-        validate_empty_field
-    )
-
-    _float_values_balsamic_targeted = validator(
-        "median_target_coverage", "pct_250x", "pct_500x", always=True, allow_reuse=True
-    )(validate_float)
+    bait_set: Annotated[str, BeforeValidator(validate_empty_field)]
+    bait_set_version: Annotated[str, BeforeValidator(validate_empty_field)]
+    median_target_coverage: Annotated[str, BeforeValidator(validate_float)]
+    pct_250x: Annotated[str, BeforeValidator(validate_float)]
+    pct_500x: Annotated[str, BeforeValidator(validate_float)]
 
 
 class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
@@ -103,13 +79,9 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
             pct_60x: fraction of bases that attained at least 15X sequence coverage; source: pipeline workflow
     """
 
-    median_coverage: Union[None, float, str]
-    pct_15x: Union[None, float, str]
-    pct_60x: Union[None, float, str]
-
-    _float_values_balsamic_wgs = validator(
-        "median_coverage", "pct_15x", "pct_60x", always=True, allow_reuse=True
-    )(validate_float)
+    median_coverage: Annotated[str, BeforeValidator(validate_float)]
+    pct_15x: Annotated[str, BeforeValidator(validate_float)]
+    pct_60x: Annotated[str, BeforeValidator(validate_float)]
 
 
 class RnafusionSampleMetadataModel(SampleMetadataModel):
@@ -133,42 +105,18 @@ class RnafusionSampleMetadataModel(SampleMetadataModel):
         uniquely_mapped_reads: percentage of mapped reads; source: pipeline workflow
     """
 
-    bias_5_3: Union[None, float, str]
-    gc_content: Union[None, float, str]
-    input_amount: Union[None, float, str]
-    insert_size: Union[None, float, str]
-    insert_size_peak: Union[None, float, str]
-    mapped_reads: Union[None, float, str]
-    mean_length_r1: Union[None, float, str]
-    mrna_bases: Union[None, float, str]
-    pct_adapter: Union[None, float, str]
-    pct_surviving: Union[None, float, str]
-    q20_rate: Union[None, float, str]
-    q30_rate: Union[None, float, str]
-    ribosomal_bases: Union[None, float, str]
-    rin: Union[None, float, str]
-    uniquely_mapped_reads: Union[None, float, str]
-
-    _float_values = validator(
-        "bias_5_3",
-        "input_amount",
-        "insert_size",
-        "insert_size_peak",
-        "mean_length_r1",
-        "mrna_bases",
-        "pct_adapter",
-        "pct_surviving",
-        "rin",
-        "uniquely_mapped_reads",
-        always=True,
-        allow_reuse=True,
-    )(validate_float)
-    _pct_values = validator(
-        "gc_content",
-        "mapped_reads",
-        "q20_rate",
-        "q30_rate",
-        "ribosomal_bases",
-        always=True,
-        allow_reuse=True,
-    )(validate_percentage)
+    bias_5_3: Annotated[str, BeforeValidator(validate_float)]
+    gc_content: Annotated[str, BeforeValidator(validate_percentage)]
+    input_amount: Annotated[str, BeforeValidator(validate_float)]
+    insert_size: Annotated[str, BeforeValidator(validate_float)]
+    insert_size_peak: Annotated[str, BeforeValidator(validate_float)]
+    mapped_reads: Annotated[str, BeforeValidator(validate_percentage)]
+    mean_length_r1: Annotated[str, BeforeValidator(validate_float)]
+    mrna_bases: Annotated[str, BeforeValidator(validate_float)]
+    pct_adapter: Annotated[str, BeforeValidator(validate_float)]
+    pct_surviving: Annotated[str, BeforeValidator(validate_float)]
+    q20_rate: Annotated[str, BeforeValidator(validate_percentage)]
+    q30_rate: Annotated[str, BeforeValidator(validate_percentage)]
+    ribosomal_bases: Annotated[str, BeforeValidator(validate_percentage)]
+    rin: Annotated[str, BeforeValidator(validate_float)]
+    uniquely_mapped_reads: Annotated[str, BeforeValidator(validate_float)]
