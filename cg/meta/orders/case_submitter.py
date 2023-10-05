@@ -1,20 +1,16 @@
 import datetime as dt
 import logging
-from typing import List, Set, Dict
+from typing import Dict, List, Set
 
-from cgmodels.cg.constants import Pipeline
-
-from cg.constants import DataDelivery
-from cg.constants.constants import CaseActions
+from cg.constants import DataDelivery, Priority
+from cg.constants.constants import CaseActions, Pipeline
 from cg.constants.pedigree import Pedigree
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
-
-from cg.constants import Priority
-from cg.store.models import Customer, Family, Sample, FamilySample, ApplicationVersion
+from cg.store.models import ApplicationVersion, Customer, Family, FamilySample, Sample
 
 LOG = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
 from pathlib import Path
-import pytest
 
+import pytest
 
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile

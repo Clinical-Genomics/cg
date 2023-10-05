@@ -3,6 +3,8 @@ from pathlib import Path
 from typing import List
 from unittest import mock
 
+from housekeeper.store.models import File
+
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import APIMethods
 from cg.constants.housekeeper_tags import SequencingFileTag
@@ -17,7 +19,6 @@ from cg.meta.archive.ddn_dataflow import AuthToken, DDNDataFlowClient, MiriaObje
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
-from housekeeper.store.models import File
 
 
 def test_get_files_by_archive_location(

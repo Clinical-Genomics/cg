@@ -1,5 +1,7 @@
 from typing import Any, Dict
 
+from sqlalchemy.orm import Query
+
 from cg.constants.constants import SampleType
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store
@@ -28,7 +30,6 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_without_loqusdb_id,
 )
 from cg.store.models import Sample
-from sqlalchemy.orm import Query
 from tests.store.conftest import StoreConstants
 
 

@@ -1,13 +1,13 @@
 import logging
 from datetime import datetime
-from typing import Iterator, List, Optional
 from pathlib import Path
+from typing import Iterator, List, Optional
 
-from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import File, Version
 
-from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.constants import Pipeline
+from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.store import Store
 from cg.store.models import Analysis
 

@@ -2,7 +2,13 @@ import datetime as dt
 from pathlib import Path
 from typing import Optional
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict, FieldValidationInfo, field_validator
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    FieldValidationInfo,
+    field_validator,
+)
 from typing_extensions import Annotated
 
 from cg.apps.tb.validators import parse_str_to_datetime, parse_str_to_path

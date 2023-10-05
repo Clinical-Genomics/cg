@@ -7,7 +7,6 @@ from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Gender
 from cg.exc import BalsamicStartError
-
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 

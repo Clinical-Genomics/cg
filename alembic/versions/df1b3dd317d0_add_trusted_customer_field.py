@@ -7,13 +7,13 @@ Create Date: 2023-04-12 11:13:37.585551
 
 """
 
-from alembic import op
 import sqlalchemy as sa
-
-from sqlalchemy import Column, types, orm
+from sqlalchemy import Column, orm, types
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "df1b3dd317d0"

@@ -1,13 +1,12 @@
 """Transfer CLI."""
 import logging
-import click
 
+import click
 
 from cg.apps.lims import LimsAPI
 from cg.meta.transfer import PoolState, SampleState, TransferLims
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-
 
 LOG = logging.getLogger(__name__)
 

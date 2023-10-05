@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Callable, List, Optional
-from sqlalchemy import func, and_
+
+from sqlalchemy import and_, func
 from sqlalchemy.orm import Query
 
 from cg.store.models import SampleLaneSequencingMetrics

@@ -5,15 +5,10 @@ Revises: 49ded71bd1a1
 Create Date: 2021-05-03 09:21:58.047779
 
 """
-from alembic import op
-from sqlalchemy import (
-    types,
-    Column,
-    orm,
-    String,
-)
+from sqlalchemy import Column, String, orm, types
 from sqlalchemy.ext.declarative import declarative_base
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "ef472ce31931"

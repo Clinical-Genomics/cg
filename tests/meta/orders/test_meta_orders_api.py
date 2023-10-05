@@ -2,19 +2,17 @@ import datetime as dt
 from unittest.mock import patch
 
 import pytest
-from cgmodels.cg.constants import Pipeline
-
-from cg.store.models import Customer, Family
-from tests.store_helpers import StoreHelpers
 
 from cg.constants import DataDelivery
+from cg.constants.constants import Pipeline
 from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.samples import MipDnaSample
 from cg.store import Store
-from cg.store.models import Pool, Sample
+from cg.store.models import Customer, Family, Pool, Sample
+from tests.store_helpers import StoreHelpers
 
 SUBMITTERS = [
     "fastq_submitter",

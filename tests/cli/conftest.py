@@ -3,12 +3,13 @@ from pathlib import Path
 from typing import Any, Dict
 
 import pytest
+from click.testing import CliRunner
+
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from click.testing import CliRunner
 from tests.cli.compress.conftest import CaseInfo
 from tests.store_helpers import StoreHelpers
 

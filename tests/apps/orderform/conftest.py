@@ -9,7 +9,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.constants.constants import FileFormat
-from cg.constants.orderforms import Orderform, ORDERFORM_VERSIONS
+from cg.constants.orderforms import ORDERFORM_VERSIONS, Orderform
 from cg.io.controller import ReadFile
 from cg.models.orders.constants import OrderType
 

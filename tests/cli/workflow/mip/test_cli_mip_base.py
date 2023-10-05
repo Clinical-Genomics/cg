@@ -3,12 +3,13 @@
 import logging
 
 from _pytest.logging import LogCaptureFixture
+from click.testing import CliRunner
+from pytest_mock import MockFixture
+
 from cg.cli.workflow.mip_dna.base import start, start_available
 from cg.constants.process import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store.models import Family
-from click.testing import CliRunner
-from pytest_mock import MockFixture
 from tests.cli.workflow.mip.conftest import setup_mocks
 
 

@@ -4,13 +4,14 @@ from pathlib import Path
 from typing import List, Optional
 
 from housekeeper.store.models import Version
+
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import HK_FASTQ_TAGS
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
-from cg.store.models import Sample, Customer
+from cg.store.models import Customer, Sample
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 
 LOG = logging.getLogger(__name__)

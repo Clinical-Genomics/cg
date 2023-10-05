@@ -1,21 +1,24 @@
 """Fixtures for cli balsamic tests."""
 
-from typing import Union
-
 import logging
 from datetime import datetime
 from pathlib import Path
 from tempfile import tempdir
+from typing import Union
 
 import pytest
-from cgmodels.cg.constants import Pipeline
+
 from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, Pipeline
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.constants.housekeeper_tags import HkMipAnalysisTag, GensAnalysisTag, HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import (
+    HK_DELIVERY_REPORT_TAG,
+    GensAnalysisTag,
+    HkMipAnalysisTag,
+)
 from cg.io.controller import ReadFile
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
@@ -26,18 +29,17 @@ from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
 from cg.store.models import Analysis
+from tests.cli.workflow.mip.conftest import (
+    mip_case_id,
+    mip_case_ids,
+    mip_dna_context,
+    mip_rna_context,
+)
+from tests.meta.upload.scout.conftest import mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.report import MockMipDNAReportAPI
 from tests.store_helpers import StoreHelpers
-
-from tests.meta.upload.scout.conftest import mip_load_config
-from tests.cli.workflow.mip.conftest import (
-    mip_rna_context,
-    mip_dna_context,
-    mip_case_ids,
-    mip_case_id,
-)
 
 LOG = logging.getLogger(__name__)
 
