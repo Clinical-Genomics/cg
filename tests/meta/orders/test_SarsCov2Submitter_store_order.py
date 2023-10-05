@@ -1,15 +1,14 @@
-from cgmodels.cg.constants import Pipeline
+import datetime as dt
 
 from cg.constants import DataDelivery
+from cg.constants.constants import Pipeline
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import ControlEnum
 from cg.models.orders.samples import SarsCov2Sample
 from cg.store import Store
-from cg.store.models import Sample
-from cg.store.models import Customer
-import datetime as dt
+from cg.store.models import Customer, Sample
 
 
 def test_store_items_in_status_control_has_stored_value(

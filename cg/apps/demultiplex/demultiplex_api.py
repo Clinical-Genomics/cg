@@ -3,17 +3,16 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from cgmodels.cg.constants import Pipeline
-from cgmodels.trailblazer.constants import AnalysisTypes
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, Pipeline
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
+from cg.constants.tb import AnalysisTypes
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import WriteFile
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
