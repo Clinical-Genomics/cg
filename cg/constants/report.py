@@ -1,7 +1,7 @@
 # Delivery report constants
 
 from cg.constants import DataDelivery
-from cgmodels.cg.constants import Pipeline
+from cg.constants.constants import Pipeline
 
 BALSAMIC_REPORT_ACCREDITED_PANELS = ["gmsmyeloid"]
 

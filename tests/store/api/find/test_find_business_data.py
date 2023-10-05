@@ -4,6 +4,8 @@ from datetime import datetime
 from typing import List, Optional
 
 import pytest
+from sqlalchemy.orm import Query
+
 from cg.constants import FlowCellStatus
 from cg.constants.constants import CaseActions
 from cg.constants.indexes import ListIndexes
@@ -21,9 +23,7 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
 )
-from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
-from tests.meta.demultiplex.conftest import flow_cell_name_demultiplexed_with_bcl_convert
 
 
 def test_get_analysis_by_case_entry_id_and_started_at(

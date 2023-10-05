@@ -1,7 +1,8 @@
-from enum import Enum
 from datetime import datetime
+from enum import Enum
+from typing import Callable, List
+
 from sqlalchemy.orm import Query
-from typing import List, Callable
 
 from cg.store.models import ApplicationVersion
 

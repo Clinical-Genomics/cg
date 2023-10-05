@@ -1,15 +1,11 @@
 import copy
 from typing import Dict
 
-from cg.models.report.metadata import BalsamicTargetedSampleMetadataModel
-
-from cg.store import Store
-
 from cg.meta.report.balsamic import BalsamicReportAPI
-
 from cg.models.balsamic.analysis import BalsamicAnalysis
-
-from cg.store.models import BedVersion, Sample, Family
+from cg.models.report.metadata import BalsamicTargetedSampleMetadataModel
+from cg.store import Store
+from cg.store.models import BedVersion, Family, Sample
 from tests.store_helpers import StoreHelpers
 
 

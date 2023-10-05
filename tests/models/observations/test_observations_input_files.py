@@ -5,8 +5,8 @@ import pytest
 from pydantic import ValidationError
 
 from cg.models.observations.input_files import (
-    MipDNAObservationsInputFiles,
     BalsamicObservationsInputFiles,
+    MipDNAObservationsInputFiles,
 )
 
 

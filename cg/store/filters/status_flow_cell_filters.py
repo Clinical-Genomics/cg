@@ -1,9 +1,9 @@
 from enum import Enum
-from typing import Optional, List, Callable
+from typing import Callable, List, Optional
 
 from sqlalchemy.orm import Query
 
-from cg.store.models import Flowcell, FamilySample, Family
+from cg.store.models import Family, FamilySample, Flowcell
 
 
 def filter_flow_cells_by_case(case: Family, flow_cells: Query, **kwargs) -> Query:
@@ -11,7 +11,7 @@ def filter_flow_cells_by_case(case: Family, flow_cells: Query, **kwargs) -> Quer
     return flow_cells.filter(FamilySample.family == case)
 
 
-def get_flow_cell_by_name(flow_cells: Query, flow_cell_name: str, **kwargs) -> Query:
+def filter_flow_cell_by_name(flow_cells: Query, flow_cell_name: str, **kwargs) -> Query:
     """Return flow cell by flow cell id."""
     return flow_cells.filter(Flowcell.name == flow_cell_name)
 
@@ -51,7 +51,7 @@ def apply_flow_cell_filter(
 class FlowCellFilter(Enum):
     """Define FlowCell filter functions."""
 
-    GET_BY_CASE: Callable = filter_flow_cells_by_case
-    GET_BY_NAME: Callable = get_flow_cell_by_name
-    GET_BY_NAME_SEARCH: Callable = filter_flow_cell_by_name_search
-    GET_WITH_STATUSES: Callable = filter_flow_cells_with_statuses
+    FILTER_BY_CASE: Callable = filter_flow_cells_by_case
+    FILTER_BY_NAME: Callable = filter_flow_cell_by_name
+    FILTER_BY_NAME_SEARCH: Callable = filter_flow_cell_by_name_search
+    FILTER_WITH_STATUSES: Callable = filter_flow_cells_with_statuses

@@ -1,4 +1,5 @@
 """Tests for the clean flow cells API."""
+import logging
 import time
 from typing import List
 
@@ -9,14 +10,10 @@ from housekeeper.store.models import File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS_IN_SECONDS
-from cg.exc import (
-    CleanFlowCellFailedError,
-    HousekeeperFileMissingError,
-)
+from cg.exc import CleanFlowCellFailedError, HousekeeperFileMissingError
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
-import logging
 
 
 def test_get_flow_cell_from_statusdb(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):

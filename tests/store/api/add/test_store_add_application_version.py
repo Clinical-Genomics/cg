@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Dict, List
+
 from cg.store import Store
 from cg.store.models import Application, ApplicationVersion
 

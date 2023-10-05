@@ -2,12 +2,13 @@
 from datetime import datetime
 from typing import List, Union
 
+from sqlalchemy.orm import Query
+
 from cg.constants import Pipeline
 from cg.constants.constants import CaseActions
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
 from cg.store.models import Analysis, Family, Sample
-from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
 
 

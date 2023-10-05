@@ -1,7 +1,8 @@
+from click.testing import CliRunner
+
 from cg.cli.workflow.fluffy.base import run
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
 
 
 def test_cli_run_dry(

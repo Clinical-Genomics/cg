@@ -4,7 +4,6 @@ from pathlib import Path
 
 from click import testing
 
-
 from cg.cli.demultiplex.finish import finish_all_cmd, finish_flow_cell
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig

@@ -1,19 +1,23 @@
 """Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
-from typing import Optional, Union, Dict, List, Tuple
-
+from typing import Dict, List, Optional, Tuple, Union
 
 from dateutil.parser import parse as parse_date
-from genologics.entities import Process, Sample, Artifact
+from genologics.entities import Artifact, Process, Sample
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
-from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod, LimsArtifactTypes
+from cg.constants.lims import (
+    MASTER_STEPS_UDFS,
+    PROP2UDF,
+    DocumentationMethod,
+    LimsArtifactTypes,
+)
 from cg.exc import LimsDataError
 
-from .order import OrderHandler
 from ...constants import Priority
+from .order import OrderHandler
 
 SEX_MAP = {"F": "female", "M": "male", "Unknown": "unknown", "unknown": "unknown"}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}

@@ -3,6 +3,7 @@ import logging
 from typing import Optional
 
 import click
+
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.gt import UploadGenotypesAPI

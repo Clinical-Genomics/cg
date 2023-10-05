@@ -1,7 +1,14 @@
 from datetime import datetime as dt
 
 from cg.store import Store
-from cg.store.models import ApplicationVersion, Collaboration, Customer, Organism, Sample, User
+from cg.store.models import (
+    ApplicationVersion,
+    Collaboration,
+    Customer,
+    Organism,
+    Sample,
+    User,
+)
 
 
 def test_add_collaboration(store: Store):

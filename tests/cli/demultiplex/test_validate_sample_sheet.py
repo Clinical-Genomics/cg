@@ -2,7 +2,9 @@ from pathlib import Path
 
 from click.testing import CliRunner, Result
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.cli.demultiplex.sample_sheet import validate_sample_sheet
 from cg.constants import EXIT_SUCCESS, FileExtensions
 

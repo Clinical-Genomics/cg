@@ -3,8 +3,13 @@ import logging
 from typing import List, Optional
 
 import click
+
 from cg.apps.environ import environ_email
-from cg.cli.workflow.commands import ensure_flow_cells_on_disk, link, resolve_compression
+from cg.cli.workflow.commands import (
+    ensure_flow_cells_on_disk,
+    link,
+    resolve_compression,
+)
 from cg.cli.workflow.mip.options import (
     ARGUMENT_CASE_ID,
     EMAIL_OPTION,
