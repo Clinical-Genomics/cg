@@ -2,20 +2,22 @@ import logging
 import re
 from pathlib import Path
 from typing import List, Optional
-from cg.apps.demultiplex.sample_sheet.models import SampleSheet
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 
+from cg.apps.demultiplex.sample_sheet.models import SampleSheet
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.io.csv import read_csv
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.utils.files import (
+    get_file_in_directory,
+    get_files_matching_pattern,
     is_pattern_in_file_path_name,
     rename_file,
 )
-
-from cg.utils.files import get_file_in_directory, get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
 
