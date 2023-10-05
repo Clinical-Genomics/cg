@@ -51,7 +51,7 @@ class ExcelSampleAliases(StrEnum):
     POOL = "UDF/pool name"
     POST_FORMALIN_FIXATION_TIME = "UDF/Post Formalin Fixation Time"
     PRE_PROCESSING_METHOD = "UDF/Pre Processing Method"
-    PRIMER = "UDF/primer"
+    PRIMER = "UDF/Primer"
     PRIORITY = "UDF/priority"
     QUANTITY = "UDF/Quantity"
     REAGENT_LABEL = "Sample/Reagent Label"
