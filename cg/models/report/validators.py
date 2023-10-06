@@ -1,9 +1,8 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Union
+from typing import Union, Dict, Any
 
-from cg.models.orders.constants import OrderType
 from cg.constants import (
     Pipeline,
     NA_FIELD,
@@ -14,6 +13,7 @@ from cg.constants import (
     BALSAMIC_ANALYSIS_TYPE,
     REPORT_GENDER,
 )
+from cg.models.orders.constants import OrderType
 
 LOG = logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ def validate_balsamic_analysis_type(value: str) -> str:
     return validate_empty_field(BALSAMIC_ANALYSIS_TYPE.get(value))
 
 
-def validate_supported_pipeline(cls, values: dict) -> dict:
+def validate_supported_pipeline(cls, values: Dict[str, Any]) -> Dict[str, Any]:
     """Validates if the report generation supports a specific pipeline and analysis type."""
     if values and values.get("pipeline") and values.get("customer_pipeline"):
         # Checks that the requested analysis and the executed one match

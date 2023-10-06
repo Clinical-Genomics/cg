@@ -1,8 +1,8 @@
-from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Optional
 
-from pydantic import BaseModel, validator, root_validator
-from cg.constants import Pipeline, DataDelivery
+from pydantic import BaseModel, BeforeValidator, model_validator
+from typing_extensions import Annotated
+
 from cg.models.report.sample import SampleModel, ApplicationModel
 from cg.models.report.validators import (
     validate_empty_field,
@@ -24,14 +24,10 @@ class CustomerModel(BaseModel):
         scout_access: whether the customer has access to scout or not; source: statusDB/family/customer/scout_access
     """
 
-    name: Optional[str]
-    id: Optional[str]
-    invoice_address: Optional[str]
-    scout_access: Optional[bool]
-
-    _values = validator("name", "id", "invoice_address", always=True, allow_reuse=True)(
-        validate_empty_field
-    )
+    name: Annotated[str, BeforeValidator(validate_empty_field)]
+    id: Annotated[str, BeforeValidator(validate_empty_field)]
+    invoice_address: Annotated[str, BeforeValidator(validate_empty_field)]
+    scout_access: Optional[bool] = None
 
 
 class ScoutReportFiles(BaseModel):
@@ -47,23 +43,12 @@ class ScoutReportFiles(BaseModel):
         smn_tsv: SMN gene variants file (MIP-DNA specific); source: HK
     """
 
-    snv_vcf: Optional[str]
-    snv_research_vcf: Optional[str]
-    sv_vcf: Optional[str]
-    sv_research_vcf: Optional[str]
-    vcf_str: Optional[str]
-    smn_tsv: Optional[str]
-
-    _str_values = validator(
-        "snv_vcf",
-        "snv_research_vcf",
-        "sv_vcf",
-        "sv_research_vcf",
-        "vcf_str",
-        "smn_tsv",
-        always=True,
-        allow_reuse=True,
-    )(validate_path)
+    snv_vcf: Annotated[str, BeforeValidator(validate_path)]
+    snv_research_vcf: Annotated[str, BeforeValidator(validate_path)]
+    sv_vcf: Annotated[str, BeforeValidator(validate_path)]
+    sv_research_vcf: Annotated[str, BeforeValidator(validate_path)]
+    vcf_str: Annotated[str, BeforeValidator(validate_path)]
+    smn_tsv: Annotated[str, BeforeValidator(validate_path)]
 
 
 class DataAnalysisModel(BaseModel):
@@ -82,30 +67,17 @@ class DataAnalysisModel(BaseModel):
         scout_files: list of file names uploaded to Scout
     """
 
-    customer_pipeline: Optional[Pipeline]
-    data_delivery: Optional[DataDelivery]
-    pipeline: Optional[Pipeline]
-    pipeline_version: Optional[str]
-    type: Optional[str]
-    genome_build: Optional[str]
-    variant_callers: Union[None, List[str], str]
-    panels: Union[None, List[str], str]
+    customer_pipeline: Annotated[str, BeforeValidator(validate_empty_field)]
+    data_delivery: Annotated[str, BeforeValidator(validate_empty_field)]
+    pipeline: Annotated[str, BeforeValidator(validate_empty_field)]
+    pipeline_version: Annotated[str, BeforeValidator(validate_empty_field)]
+    type: Annotated[str, BeforeValidator(validate_empty_field)]
+    genome_build: Annotated[str, BeforeValidator(validate_empty_field)]
+    variant_callers: Annotated[str, BeforeValidator(validate_list)]
+    panels: Annotated[str, BeforeValidator(validate_list)]
     scout_files: ScoutReportFiles
 
-    _values = root_validator(pre=True, allow_reuse=True)(validate_supported_pipeline)
-    _str_values = validator(
-        "customer_pipeline",
-        "data_delivery",
-        "pipeline",
-        "pipeline_version",
-        "type",
-        "genome_build",
-        always=True,
-        allow_reuse=True,
-    )(validate_empty_field)
-    _list_values = validator("variant_callers", "panels", always=True, allow_reuse=True)(
-        validate_list
-    )
+    _values = model_validator(mode="after")(validate_supported_pipeline)
 
 
 class CaseModel(BaseModel):
@@ -120,13 +92,11 @@ class CaseModel(BaseModel):
         applications: case associated unique applications
     """
 
-    name: Optional[str]
-    id: Optional[str]
+    name: Annotated[str, BeforeValidator(validate_empty_field)]
+    id: Annotated[str, BeforeValidator(validate_empty_field)]
     samples: List[SampleModel]
     data_analysis: DataAnalysisModel
     applications: List[ApplicationModel]
-
-    _name = validator("name", always=True, allow_reuse=True)(validate_empty_field)
 
 
 class ReportModel(BaseModel):
@@ -142,10 +112,7 @@ class ReportModel(BaseModel):
     """
 
     customer: CustomerModel
-    version: Union[None, int, str]
-    date: Union[None, datetime, str]
+    version: Annotated[str, BeforeValidator(validate_empty_field)]
+    date: Annotated[str, BeforeValidator(validate_date)]
     case: CaseModel
-    accredited: Optional[bool]
-
-    _version = validator("version", always=True, allow_reuse=True)(validate_empty_field)
-    _date = validator("date", always=True, allow_reuse=True)(validate_date)
+    accredited: Optional[bool] = None
