@@ -15,6 +15,7 @@ from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
+from cg.store.models import Family
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -61,6 +62,9 @@ class NfAnalysisAPI(AnalysisAPI):
         """Defines whether the threshold for adequate read count should be passed for all samples
         when determining if the analysis for a case should be automatically started."""
         return True
+
+    def get_cases_to_analyze(self) -> List[Family]:
+        return self.status_db.cases_to_analyze(pipeline=self.pipeline, threshold=True)
 
     def get_profile(self, profile: Optional[str] = None) -> str:
         """Get NF profiles."""
