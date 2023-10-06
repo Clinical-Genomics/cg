@@ -4,14 +4,14 @@ from pathlib import Path
 from typing import Union, Dict, Any
 
 from cg.constants import (
-    Pipeline,
-    NA_FIELD,
-    YES_FIELD,
-    NO_FIELD,
-    PRECISION,
-    REPORT_SUPPORTED_PIPELINES,
     BALSAMIC_ANALYSIS_TYPE,
+    NA_FIELD,
+    NO_FIELD,
+    Pipeline,
+    PRECISION,
     REPORT_GENDER,
+    REPORT_SUPPORTED_PIPELINES,
+    YES_FIELD,
 )
 from cg.models.orders.constants import OrderType
 

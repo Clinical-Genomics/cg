@@ -5,11 +5,11 @@ from typing_extensions import Annotated
 
 from cg.models.report.sample import SampleModel, ApplicationModel
 from cg.models.report.validators import (
-    validate_empty_field,
-    validate_supported_pipeline,
-    validate_list,
     validate_date,
+    validate_empty_field,
+    validate_list,
     validate_path,
+    validate_supported_pipeline,
 )
 
 

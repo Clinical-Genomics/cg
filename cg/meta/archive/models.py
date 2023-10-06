@@ -2,10 +2,11 @@
 from abc import abstractmethod
 from typing import List
 
-from cg.models.cg_config import DataFlowConfig
-from cg.store.models import Sample
 from housekeeper.store.models import File
 from pydantic import BaseModel, ConfigDict
+
+from cg.models.cg_config import DataFlowConfig
+from cg.store.models import Sample
 
 
 class FileAndSample(BaseModel):

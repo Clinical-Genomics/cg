@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import click
+from housekeeper.store.models import File, Version
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload.utils import suggest_cases_to_upload
@@ -22,7 +24,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
 from cg.store.models import Family
-from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 

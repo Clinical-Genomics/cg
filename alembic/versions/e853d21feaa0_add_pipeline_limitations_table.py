@@ -6,8 +6,9 @@ Create Date: 2023-09-28 10:13:37.226849
 
 """
 import sqlalchemy as sa
+
 from alembic import op
-from cgmodels.cg.constants import Pipeline
+from cg.constants.constants import Pipeline
 
 # revision identifiers, used by Alembic.
 revision = "e853d21feaa0"

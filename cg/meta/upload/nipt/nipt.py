@@ -4,19 +4,19 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
+import paramiko
 import requests
+from housekeeper.store.models import File
 from requests import Response
 
-import paramiko
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
 from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
-from cg.meta.upload.nipt.models import StatinaUploadFiles, FlowCellQ30AndReads
+from cg.meta.upload.nipt.models import FlowCellQ30AndReads, StatinaUploadFiles
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Analysis, Flowcell, Family
-from housekeeper.store.models import File
-from cg.apps.tb import TrailblazerAPI
+from cg.store.models import Analysis, Family, Flowcell
 
 LOG = logging.getLogger(__name__)
 

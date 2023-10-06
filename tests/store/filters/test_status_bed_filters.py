@@ -2,10 +2,10 @@ from sqlalchemy.orm import Query
 
 from cg.store import Store
 from cg.store.filters.status_bed_filters import (
-    get_not_archived_beds,
-    order_beds_by_name,
     get_bed_by_entry_id,
     get_bed_by_name,
+    get_not_archived_beds,
+    order_beds_by_name,
 )
 from cg.store.models import Bed
 

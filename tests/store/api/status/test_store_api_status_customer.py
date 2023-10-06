@@ -1,9 +1,10 @@
 """Tests for the functions in the store api status related to the customer module."""
+from typing import List
+
+from cg.constants.invoice import CustomerNames
 from cg.store import Store
 from cg.store.models import Customer
 from tests.store_helpers import StoreHelpers
-from typing import List
-from cg.constants.invoice import CustomerNames
 
 
 def test_get_customers_to_invoice(

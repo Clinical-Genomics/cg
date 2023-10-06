@@ -12,18 +12,17 @@ from typing import Dict, Optional
 
 from cg.apps.crunchy import files
 from cg.apps.crunchy.models import CrunchyFile, CrunchyMetadata
+from cg.apps.crunchy.sbatch import (
+    FASTQ_TO_SPRING_COMMANDS,
+    FASTQ_TO_SPRING_ERROR,
+    SPRING_TO_FASTQ_COMMANDS,
+    SPRING_TO_FASTQ_ERROR,
+)
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FASTQ_DELTA
+from cg.constants.priority import SlurmQos
 from cg.models import CompressionData
 from cg.models.slurm.sbatch import Sbatch
-
-from cg.apps.crunchy.sbatch import (
-    FASTQ_TO_SPRING_ERROR,
-    SPRING_TO_FASTQ_ERROR,
-    FASTQ_TO_SPRING_COMMANDS,
-    SPRING_TO_FASTQ_COMMANDS,
-)
-from cg.constants.priority import SlurmQos
 
 LOG = logging.getLogger(__name__)
 

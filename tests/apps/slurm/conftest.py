@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.models.slurm.sbatch import Sbatch
 from tests.mocks.process_mock import ProcessMock

@@ -2,10 +2,10 @@
 import logging
 from pathlib import Path
 
+from cg.constants.constants import Pipeline
 from cg.constants.delivery import INBOX_NAME
 from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.models.cg_config import CGConfig
-from cgmodels.cg.constants import Pipeline
 from cg.store import Store
 from tests.store_helpers import StoreHelpers
 

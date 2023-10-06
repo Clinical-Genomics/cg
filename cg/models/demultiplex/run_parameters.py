@@ -1,13 +1,13 @@
 """Module for modeling run parameters file parsing."""
 import logging
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Dict, Optional
 from xml.etree import ElementTree
 
 from cg.constants.demultiplexing import RunParametersXMLNodes
 from cg.constants.sequencing import Sequencers
-from cg.io.xml import read_xml
 from cg.exc import RunParametersError
+from cg.io.xml import read_xml
 
 LOG = logging.getLogger(__name__)
 

@@ -4,11 +4,11 @@ from pydantic.v1 import validator
 
 from cg.constants.subject import Gender
 from cg.models.deliverables.metric_deliverables import (
-    SampleMetric,
-    MedianTargetCoverage,
-    ParsedMetrics,
     MeanInsertSize,
+    MedianTargetCoverage,
     MetricsDeliverables,
+    ParsedMetrics,
+    SampleMetric,
     add_metric,
     add_sample_id_metrics,
 )

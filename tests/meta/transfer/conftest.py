@@ -1,12 +1,11 @@
-from typing import List, Generator
+from pathlib import Path
+from typing import Generator, List
 
 import pytest
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.transfer import TransferLims
 from cg.store import Store
-from pathlib import Path
-
 from tests.mocks.limsmock import MockLimsAPI
 
 

@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Callable, List, Optional
+
 from sqlalchemy.orm import Query
+
 from cg.store.models import User
 
 

@@ -11,21 +11,20 @@ from cg.meta.observations.balsamic_observations_api import BalsamicObservationsA
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-
-from tests.cli.conftest import base_context
 from tests.apps.loqus.conftest import (
-    loqusdb_config_dict,
-    nr_of_loaded_variants,
+    loqusdb_api,
     loqusdb_binary_path,
+    loqusdb_config_dict,
     loqusdb_config_path,
     loqusdb_process,
-    loqusdb_api,
+    nr_of_loaded_variants,
 )
+from tests.cli.conftest import base_context
 from tests.models.observations.conftest import (
-    observations_input_files_raw,
-    observations_input_files,
-    balsamic_observations_input_files_raw,
     balsamic_observations_input_files,
+    balsamic_observations_input_files_raw,
+    observations_input_files,
+    observations_input_files_raw,
 )
 
 

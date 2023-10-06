@@ -2,6 +2,7 @@
 
 
 import pytest
+
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers

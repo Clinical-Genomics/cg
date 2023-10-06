@@ -6,17 +6,24 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 
 from cg.apps.loqus import LoqusdbAPI
-from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters, LoqusdbMipCustomers
+from cg.constants.observations import (
+    LoqusdbInstance,
+    LoqusdbMipCustomers,
+    MipDNALoadParameters,
+)
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import LoqusdbDuplicateRecordError, LoqusdbUploadCaseError, CaseNotFoundError
+from cg.exc import (
+    CaseNotFoundError,
+    LoqusdbDuplicateRecordError,
+    LoqusdbUploadCaseError,
+)
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.observations.input_files import (
-    MipDNAObservationsInputFiles,
     BalsamicObservationsInputFiles,
+    MipDNAObservationsInputFiles,
 )
-from cg.store.models import Customer
-from cg.store.models import Family
+from cg.store.models import Customer, Family
 from tests.store_helpers import StoreHelpers
 
 

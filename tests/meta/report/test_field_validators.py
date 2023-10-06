@@ -1,9 +1,9 @@
 """Tests report data validation"""
 
 from cg.meta.report.field_validators import (
-    get_missing_report_data,
     get_empty_report_data,
     get_million_read_pairs,
+    get_missing_report_data,
 )
 
 

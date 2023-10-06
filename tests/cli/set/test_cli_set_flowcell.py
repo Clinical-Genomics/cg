@@ -1,10 +1,10 @@
 """This script tests the cli methods to set flow cells in status-db."""
+from click.testing import CliRunner
+
 from cg.cli.set.base import flowcell
 from cg.constants import FLOWCELL_STATUS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from click.testing import CliRunner
-
 from cg.store.models import Flowcell
 
 SUCCESS = 0

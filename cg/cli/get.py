@@ -3,11 +3,11 @@ import re
 from typing import Iterable, List, Optional
 
 import click
-from cg.models.cg_config import CGConfig
-from cg.store import Store
 from tabulate import tabulate
 
-from cg.store.models import Family, Flowcell, Customer, Sample
+from cg.models.cg_config import CGConfig
+from cg.store import Store
+from cg.store.models import Customer, Family, Flowcell, Sample
 
 LOG = logging.getLogger(__name__)
 ANALYSIS_HEADERS = ["Analysis Date", "Pipeline", "Version"]

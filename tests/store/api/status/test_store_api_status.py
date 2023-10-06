@@ -2,11 +2,12 @@
 
 from typing import List
 
+from sqlalchemy.orm import Query
+
 from cg.constants import Pipeline, Priority
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
 from cg.store.models import Analysis, Application, Sample
-from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
 
 

@@ -1,6 +1,8 @@
 """Module for defining invoice models."""
+from typing import Any, List, Optional
+
 from pydantic.v1 import BaseModel
-from typing import List, Optional, Any
+
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import RecordType
 

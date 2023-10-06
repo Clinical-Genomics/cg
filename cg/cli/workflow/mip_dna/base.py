@@ -3,6 +3,7 @@
 import logging
 
 import click
+
 from cg.cli.workflow.commands import (
     ensure_flow_cells_on_disk,
     link,
@@ -11,8 +12,8 @@ from cg.cli.workflow.commands import (
     store_available,
 )
 from cg.cli.workflow.mip.base import config_case, panel, run, start, start_available
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 

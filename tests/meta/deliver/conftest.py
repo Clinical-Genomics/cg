@@ -2,6 +2,7 @@
 from pathlib import Path
 
 import pytest
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
