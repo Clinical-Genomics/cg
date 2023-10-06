@@ -63,22 +63,6 @@ class NfAnalysisAPI(AnalysisAPI):
         when determining if the analysis for a case should be automatically started."""
         return True
 
-    def get_cases_to_analyze(self) -> List[Family]:
-        """Return cases to analyze."""
-        cases_query: List[Family] = self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.use_read_count_threshold
-        )
-        cases_to_analyze = []
-        for case_obj in cases_query:
-            if case_obj.action == "analyze" or not case_obj.latest_analyzed:
-                cases_to_analyze.append(case_obj)
-            elif (
-                self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
-                == "failed"
-            ):
-                cases_to_analyze.append(case_obj)
-        return cases_to_analyze
-
     def get_profile(self, profile: Optional[str] = None) -> str:
         """Get NF profiles."""
         return profile or self.profile
