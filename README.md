@@ -8,7 +8,7 @@
 [![Code style: black][black-image]][black-url]
 
 
-`cg` stands for _Clinical Genomics_; a clinical sequencing platform under [SciLifeLab][scilife]-
+`cg` stands for _Clinical Genomics_; a clinical sequencing platform under [SciLifeLab][scilife]
 
 In this context, `cg` provides the interface between these tools to facilitate automation and other necessary cross-talk. It also exposes some APIs:
 
