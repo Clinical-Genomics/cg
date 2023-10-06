@@ -2737,6 +2737,11 @@ def rnafusion_parameters_default(
     )
 
 
+@pytest.fixture(scope="session")
+def total_sequenced_reads() -> int:
+    return 200_000_000
+
+
 @pytest.fixture(scope="function")
 def rnafusion_context(
     cg_context: CGConfig,
@@ -2748,6 +2753,7 @@ def rnafusion_context(
     rnafusion_case_id: str,
     sample_id: str,
     no_sample_case_id: str,
+    total_sequenced_reads: int,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
@@ -2770,7 +2776,7 @@ def rnafusion_context(
         status_db,
         internal_id=sample_id,
         reads_updated_at=datetime.now(),
-        reads=200000000,
+        reads=total_sequenced_reads,
     )
 
     helpers.add_relationship(
@@ -2982,6 +2988,7 @@ def taxprofiler_context(
     trailblazer_api: MockTB,
     nf_analysis_housekeeper: HousekeeperAPI,
     no_sample_case_id: str,
+    total_sequenced_reads: int,
 ) -> CGConfig:
     """Context to use in cli."""
     cg_context.housekeeper_api_: HousekeeperAPI = nf_analysis_housekeeper
@@ -3001,7 +3008,7 @@ def taxprofiler_context(
         internal_id=sample_id,
         reads_updated_at=datetime.now(),
         name=sample_name,
-        reads=100000000,
+        reads=total_sequenced_reads,
     )
 
     helpers.add_relationship(
