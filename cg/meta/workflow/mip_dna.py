@@ -35,7 +35,7 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
         return self.config.mip_rd_dna.script
 
     @property
-    def use_read_count_threshold(self):
+    def use_read_count_threshold(self) -> bool:
         return True
 
     @property

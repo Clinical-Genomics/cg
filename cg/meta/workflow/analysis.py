@@ -38,7 +38,7 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     @property
-    def use_read_count_threshold(self):
+    def use_read_count_threshold(self) -> bool:
         """Defines whether the threshold for adequate read count should be passed for all samples
         when determining if the analysis for a case should be automatically started"""
         return False

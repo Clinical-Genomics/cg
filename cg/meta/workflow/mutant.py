@@ -44,7 +44,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         return MutantFastqHandler
 
     @property
-    def use_read_count_threshold(self):
+    def use_read_count_threshold(self) -> bool:
         return False
 
     def get_case_path(self, case_id: str) -> Path:

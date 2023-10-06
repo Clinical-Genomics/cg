@@ -60,7 +60,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return self.root_dir
 
     @property
-    def use_read_count_threshold(self):
+    def use_read_count_threshold(self) -> bool:
         return True
 
     @property
