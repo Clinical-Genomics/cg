@@ -74,7 +74,7 @@ def test_render_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dn
     )
 
     # WHEN rendering the report
-    rendered_report: str = report_api_mip_dna.render_delivery_report(report_data.dict())
+    rendered_report: str = report_api_mip_dna.render_delivery_report(report_data.model_dump())
 
     # THEN validate rendered report
     assert len(rendered_report) > 0
@@ -98,7 +98,7 @@ def test_get_validated_report_data(report_api_mip_dna: MipDNAReportAPI, case_mip
     report_data: ReportModel = report_api_mip_dna.validate_report_fields(
         case_mip_dna.internal_id, report_data, force_report=False
     )
-    recursive_assert(report_data.dict())
+    recursive_assert(report_data.model_dump())
 
 
 def test_validate_report_empty_fields(

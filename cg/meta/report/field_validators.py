@@ -37,34 +37,34 @@ def get_empty_fields(report_data: dict) -> list:
 def get_empty_report_data(report_data: ReportModel) -> dict:
     """Retrieve empty fields from a report data model."""
     empty_fields = {
-        "report": get_empty_fields(report_data=report_data.dict()),
-        "customer": get_empty_fields(report_data=report_data.customer.dict()),
-        "case": get_empty_fields(report_data=report_data.case.dict()),
+        "report": get_empty_fields(report_data=report_data.model_dump()),
+        "customer": get_empty_fields(report_data=report_data.customer.model_dump()),
+        "case": get_empty_fields(report_data=report_data.case.model_dump()),
         "applications": {
-            app.tag: get_empty_fields(report_data=app.dict())
+            app.tag: get_empty_fields(report_data=app.model_dump())
             for app in report_data.case.applications
-            if get_empty_fields(report_data=app.dict())
+            if get_empty_fields(report_data=app.model_dump())
         },
-        "data_analysis": get_empty_fields(report_data=report_data.case.data_analysis.dict()),
+        "data_analysis": get_empty_fields(report_data=report_data.case.data_analysis.model_dump()),
         "samples": {
-            sample.id: get_empty_fields(report_data=sample.dict())
+            sample.id: get_empty_fields(report_data=sample.model_dump())
             for sample in report_data.case.samples
-            if get_empty_fields(report_data=sample.dict())
+            if get_empty_fields(report_data=sample.model_dump())
         },
         "methods": {
-            sample.id: get_empty_fields(report_data=sample.methods.dict())
+            sample.id: get_empty_fields(report_data=sample.methods.model_dump())
             for sample in report_data.case.samples
-            if get_empty_fields(report_data=sample.methods.dict())
+            if get_empty_fields(report_data=sample.methods.model_dump())
         },
         "timestamps": {
-            sample.id: get_empty_fields(report_data=sample.timestamps.dict())
+            sample.id: get_empty_fields(report_data=sample.timestamps.model_dump())
             for sample in report_data.case.samples
-            if get_empty_fields(report_data=sample.timestamps.dict())
+            if get_empty_fields(report_data=sample.timestamps.model_dump())
         },
         "metadata": {
-            sample.id: get_empty_fields(report_data=sample.metadata.dict())
+            sample.id: get_empty_fields(report_data=sample.metadata.model_dump())
             for sample in report_data.case.samples
-            if get_empty_fields(report_data=sample.metadata.dict())
+            if get_empty_fields(report_data=sample.metadata.model_dump())
         },
     }
     # Clear empty values

@@ -58,7 +58,7 @@ class ReportAPI(MetaAPI):
         report_data: ReportModel = self.validate_report_fields(
             case_id=case_id, report_data=report_data, force_report=force_report
         )
-        rendered_report: str = self.render_delivery_report(report_data=report_data.dict())
+        rendered_report: str = self.render_delivery_report(report_data=report_data.model_dump())
         return rendered_report
 
     def create_delivery_report_file(
