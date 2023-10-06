@@ -28,5 +28,7 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_constraint(constraint_name="customer_lab_contact_fk_1", table_name="customer")
+    op.drop_constraint(
+        constraint_name="customer_lab_contact_fk_1", table_name="customer", type_="foreignkey"
+    )
     op.drop_column(table_name="customer", column_name="lab_contact_id")
