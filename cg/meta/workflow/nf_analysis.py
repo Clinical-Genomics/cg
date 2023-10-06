@@ -63,9 +63,6 @@ class NfAnalysisAPI(AnalysisAPI):
         when determining if the analysis for a case should be automatically started."""
         return True
 
-    def get_cases_to_analyze(self) -> List[Family]:
-        return self.status_db.cases_to_analyze(pipeline=self.pipeline, threshold=True)
-
     def get_profile(self, profile: Optional[str] = None) -> str:
         """Get NF profiles."""
         return profile or self.profile
