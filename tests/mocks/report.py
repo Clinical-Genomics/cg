@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Union, Optional, Dict
+from typing import Dict, Optional, Union
 
 from housekeeper.store.models import Version
 

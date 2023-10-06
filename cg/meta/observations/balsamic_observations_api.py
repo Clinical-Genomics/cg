@@ -3,19 +3,23 @@ import logging
 from pathlib import Path
 from typing import Dict, List
 
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import (
-    BalsamicObservationsAnalysisTag,
-    LoqusdbInstance,
     LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
-    BalsamicLoadParameters,
     LOQUSDB_ID,
+    BalsamicLoadParameters,
+    BalsamicObservationsAnalysisTag,
     LoqusdbBalsamicCustomers,
+    LoqusdbInstance,
 )
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import LoqusdbUploadCaseError, CaseNotFoundError, LoqusdbDuplicateRecordError
+from cg.exc import (
+    CaseNotFoundError,
+    LoqusdbDuplicateRecordError,
+    LoqusdbUploadCaseError,
+)
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles

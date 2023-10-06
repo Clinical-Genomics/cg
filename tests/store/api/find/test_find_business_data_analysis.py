@@ -1,11 +1,10 @@
 """Tests the findbusinessdata part of the Cg store API related to Analysis model."""
 from datetime import datetime
 from typing import List
-from cg.store import Store
-from cg.store.models import (
-    Analysis,
-)
+
 from cg.constants import Pipeline
+from cg.store import Store
+from cg.store.models import Analysis
 
 
 def test_get_latest_nipt_analysis_to_upload(

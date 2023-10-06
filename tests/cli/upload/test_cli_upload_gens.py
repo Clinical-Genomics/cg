@@ -1,10 +1,11 @@
 """Test the Gens upload command."""
 
 import logging
+
 from click.testing import CliRunner
 
-from cg.constants import EXIT_SUCCESS
 from cg.cli.upload.gens import upload_to_gens as upload_gens_cmd
+from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
 

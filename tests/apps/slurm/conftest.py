@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.models.slurm.sbatch import Sbatch
 from tests.mocks.process_mock import ProcessMock
@@ -19,7 +20,7 @@ def sbatch_parameters(email_adress: str, slurm_account: str) -> Sbatch:
         "hours": 2,
         "commands": "genmod",
     }
-    return Sbatch.parse_obj(config)
+    return Sbatch.model_validate(config)
 
 
 @pytest.fixture

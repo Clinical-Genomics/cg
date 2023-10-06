@@ -1,16 +1,15 @@
 import logging
-import pytest
-
 from pathlib import Path
 from typing import List, Optional
 
+import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import DeleteDemuxError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.store.api import Store
-from cg.store.models import Sample, Flowcell
+from cg.store.models import Flowcell, Sample
 from tests.store_helpers import StoreHelpers
 
 

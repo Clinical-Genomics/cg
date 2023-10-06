@@ -1,12 +1,13 @@
 import logging
 from pathlib import Path
 from typing import Dict, List, Type
+
 from pydantic import TypeAdapter
 
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSample,
-    FlowCellSampleBCLConvert,
     FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
     SampleSheet,
 )
 from cg.constants.constants import FileFormat
@@ -16,7 +17,6 @@ from cg.constants.demultiplexing import (
     SampleSheetBCLConvertSections,
 )
 from cg.constants.sequencing import Sequencers
-
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
 

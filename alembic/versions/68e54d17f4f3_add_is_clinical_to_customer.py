@@ -6,6 +6,7 @@ Create Date: 2023-07-07 09:57:29.371815
 
 """
 import sqlalchemy as sa
+
 from alembic import op
 from cg.store.models import Customer
 

@@ -1,11 +1,12 @@
 """This script tests the cli methods to add families to status-db"""
 
-from cg.cli.add import add
-from cg.store import Store
 from click.testing import CliRunner
+
+from cg.cli.add import add
+from cg.models.cg_config import CGConfig
+from cg.store import Store
 from cg.store.models import FamilySample
 from tests.store_helpers import StoreHelpers
-from cg.models.cg_config import CGConfig
 
 
 def test_add_relationship_required(cli_runner: CliRunner, base_context: CGConfig, helpers):

@@ -1,13 +1,13 @@
-import cachecontrol
 import http
 import json
 import logging
 import tempfile
 from functools import wraps
 from pathlib import Path
-import requests
 from typing import Any, Dict, List, Optional
 
+import cachecontrol
+import requests
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
@@ -489,7 +489,7 @@ def parse_orderform():
         error_message = error.message if hasattr(error, "message") else str(error)
         http_error_response = http.HTTPStatus.INTERNAL_SERVER_ERROR
     else:
-        return jsonify(**parsed_order.dict())
+        return jsonify(**parsed_order.model_dump())
 
     if error_message:
         return abort(make_response(jsonify(message=error_message), http_error_response))

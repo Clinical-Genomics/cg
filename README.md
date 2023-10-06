@@ -34,13 +34,13 @@ git clone https://github.com/Clinical-Genomics/cg
 cd cg
 ```
 To install CG either use pipenv (as described in contributing) and run
-```
+```bash
 pipenv install -e .
 ```
 
 or (without pipenv)
 
-```
+```bash
 pip install -r requirements-dev.txt --editable .
 ```
 

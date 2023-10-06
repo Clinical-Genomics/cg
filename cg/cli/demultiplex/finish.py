@@ -2,6 +2,7 @@
 import logging
 
 import click
+
 from cg.constants.constants import DRY_RUN
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI

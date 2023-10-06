@@ -1,16 +1,15 @@
 import datetime as dt
 from typing import List
 
-from cgmodels.cg.constants import Pipeline
-
 from cg.constants import DataDelivery
+from cg.constants.constants import Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.models.orders.samples import MetagenomeSample
-from cg.store.models import Customer, Family, FamilySample, Sample, ApplicationVersion
+from cg.store.models import ApplicationVersion, Customer, Family, FamilySample, Sample
 
 
 class MetagenomeSubmitter(Submitter):

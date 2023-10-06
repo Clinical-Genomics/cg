@@ -3,6 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
+
 from cg.constants import DataDelivery, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store

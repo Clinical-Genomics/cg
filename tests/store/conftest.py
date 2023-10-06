@@ -4,6 +4,7 @@ import enum
 from typing import Generator, List
 
 import pytest
+
 from cg.constants import Pipeline
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store

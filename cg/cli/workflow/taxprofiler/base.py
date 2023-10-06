@@ -18,7 +18,11 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
 )
-from cg.cli.workflow.taxprofiler.options import OPTION_FROM_START, OPTION_INSTRUMENT_PLATFORM
+from cg.cli.workflow.taxprofiler.options import (
+    OPTION_FROM_START,
+    OPTION_INSTRUMENT_PLATFORM,
+)
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.sequencing import SequencingPlatform
@@ -187,3 +191,22 @@ def start(
         use_nextflow=use_nextflow,
         dry_run=dry_run,
     )
+
+
+@taxprofiler.command("start-available")
+@DRY_RUN
+@click.pass_context
+def start_available(context: click.Context, dry_run: bool = False) -> None:
+    """Start full workflow for all cases available for analysis."""
+
+    analysis_api: AnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
+
+    exit_code: int = EXIT_SUCCESS
+    for case in analysis_api.get_cases_to_analyze():
+        try:
+            context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
+        except Exception as error:
+            LOG.error(error)
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort

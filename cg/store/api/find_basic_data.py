@@ -4,33 +4,45 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Query, Session
 
+from cg.store.api.base import BaseHandler
+from cg.store.filters.status_application_filters import (
+    ApplicationFilter,
+    apply_application_filter,
+)
+from cg.store.filters.status_application_version_filters import (
+    ApplicationVersionFilter,
+    apply_application_versions_filter,
+)
+from cg.store.filters.status_bed_filters import BedFilter, apply_bed_filter
+from cg.store.filters.status_bed_version_filters import (
+    BedVersionFilter,
+    apply_bed_version_filter,
+)
+from cg.store.filters.status_collaboration_filters import (
+    CollaborationFilter,
+    apply_collaboration_filter,
+)
+from cg.store.filters.status_customer_filters import (
+    CustomerFilter,
+    apply_customer_filter,
+)
+from cg.store.filters.status_organism_filters import (
+    OrganismFilter,
+    apply_organism_filter,
+)
+from cg.store.filters.status_panel_filters import PanelFilter, apply_panel_filter
+from cg.store.filters.status_user_filters import UserFilter, apply_user_filter
 from cg.store.models import (
     Application,
     ApplicationVersion,
     Bed,
     BedVersion,
-    Customer,
     Collaboration,
+    Customer,
     Organism,
     Panel,
     User,
 )
-from cg.store.api.base import BaseHandler
-from cg.store.filters.status_application_filters import apply_application_filter, ApplicationFilter
-from cg.store.filters.status_application_version_filters import (
-    apply_application_versions_filter,
-    ApplicationVersionFilter,
-)
-from cg.store.filters.status_bed_filters import apply_bed_filter, BedFilter
-from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
-from cg.store.filters.status_collaboration_filters import (
-    CollaborationFilter,
-    apply_collaboration_filter,
-)
-from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
-from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
-from cg.store.filters.status_panel_filters import PanelFilter, apply_panel_filter
-from cg.store.filters.status_user_filters import apply_user_filter, UserFilter
 
 
 class FindBasicDataHandler(BaseHandler):

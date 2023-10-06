@@ -9,8 +9,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS
 from cg.exc import CleanFlowCellFailedError, HousekeeperFileMissingError
-from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheet_path
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils.files import remove_directory_and_contents
@@ -66,9 +65,7 @@ class CleanFlowCellAPI:
         Raises:
             HousekeeperFileMissingError when the sample sheet is missing in Housekeeper
         """
-        sample_sheet_path: Path = get_sample_sheet_path(
-            flow_cell_id=self.flow_cell.id, hk_api=self.hk_api
-        )
+        sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(self.flow_cell.id)
         self.flow_cell.set_sample_sheet_path_hk(sample_sheet_path)
 
     def can_flow_cell_directory_be_deleted(self) -> bool:

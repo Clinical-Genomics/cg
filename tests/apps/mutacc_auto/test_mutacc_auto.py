@@ -3,6 +3,7 @@
 import subprocess
 
 import pytest
+
 from cg.apps.mutacc_auto import MutaccAutoAPI, run_command
 
 

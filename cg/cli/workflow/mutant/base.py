@@ -1,21 +1,21 @@
 import logging
 
 import click
+
 from cg.cli.workflow.commands import (
     ARGUMENT_CASE_ID,
+    OPTION_ANALYSIS_PARAMETERS_CONFIG,
     OPTION_DRY,
     link,
     resolve_compression,
     store,
     store_available,
-    OPTION_ANALYSIS_PARAMETERS_CONFIG,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import CgError, DecompressionNeededError
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.meta.workflow.analysis import AnalysisAPI
-
 
 LOG = logging.getLogger(__name__)
 

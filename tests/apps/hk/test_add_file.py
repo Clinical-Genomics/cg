@@ -1,6 +1,6 @@
 """ Test adding files with Housekeeper API."""
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers

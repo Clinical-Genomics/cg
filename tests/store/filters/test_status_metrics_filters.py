@@ -1,15 +1,19 @@
 from typing import Optional
+
+from sqlalchemy.orm import Query
+
 from cg.store import Store
 from cg.store.filters.status_metrics_filters import (
     filter_above_q30_threshold,
-    filter_total_read_count_for_sample,
-    filter_by_flow_cell_sample_internal_id_and_lane,
     filter_by_flow_cell_name,
+    filter_by_flow_cell_sample_internal_id_and_lane,
     filter_by_sample_internal_id,
+    filter_total_read_count_for_sample,
 )
 from cg.store.models import SampleLaneSequencingMetrics
-from sqlalchemy.orm import Query
-from tests.meta.demultiplex.conftest import flow_cell_name_demultiplexed_with_bcl_convert
+from tests.meta.demultiplex.conftest import (
+    flow_cell_name_demultiplexed_with_bcl_convert,
+)
 
 
 def test_filter_total_read_count_for_sample(

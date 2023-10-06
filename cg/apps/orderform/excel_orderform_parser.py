@@ -3,16 +3,17 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 import openpyxl
+from openpyxl.cell.cell import Cell
+from openpyxl.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
+from pydantic import ConfigDict, TypeAdapter
+
 from cg.apps.orderform.orderform_parser import OrderformParser
 from cg.constants import DataDelivery
 from cg.constants.orderforms import ORDERFORM_VERSIONS, Orderform
 from cg.exc import OrderFormError
 from cg.models.orders.excel_sample import ExcelSample
 from cg.models.orders.order import OrderType
-from openpyxl.cell.cell import Cell
-from openpyxl.workbook import Workbook
-from openpyxl.worksheet.worksheet import Worksheet
-from pydantic import ConfigDict, TypeAdapter
 
 LOG = logging.getLogger(__name__)
 
@@ -70,7 +71,7 @@ class ExcelOrderformParser(OrderformParser):
     def get_sample_row_info(
         row: Tuple[Cell], header_row: List[str], empty_row_found: bool
     ) -> Optional[dict]:
-        """Convert an excel row with sample data into a dict with sample info"""
+        """Convert an Excel row with sample data into a dict with sample info"""
         values = []
         cell: Cell
         for cell in row:

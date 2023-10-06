@@ -22,7 +22,6 @@ werkzeug
 
 # utils
 cachetools
-cgmodels>=0.11.0
 coloredlogs
 Jinja2
 lxml

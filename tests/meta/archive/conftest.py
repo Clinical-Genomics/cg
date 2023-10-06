@@ -4,6 +4,9 @@ from typing import Any, Dict, List
 from unittest import mock
 
 import pytest
+from housekeeper.store.models import File
+from requests import Response
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
@@ -21,8 +24,6 @@ from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
 from cg.store.models import Customer, Sample
-from housekeeper.store.models import File
-from requests import Response
 from tests.store_helpers import StoreHelpers
 
 
@@ -148,7 +149,7 @@ def miria_file_retrieve(local_directory: Path, remote_path: Path) -> MiriaObject
 def transfer_payload(miria_file_archive: MiriaObject) -> TransferPayload:
     """Return a TransferPayload object containing two identical MiriaObject object."""
     return TransferPayload(
-        files_to_transfer=[miria_file_archive, miria_file_archive.copy(deep=True)]
+        files_to_transfer=[miria_file_archive, miria_file_archive.model_copy(deep=True)]
     )
 
 

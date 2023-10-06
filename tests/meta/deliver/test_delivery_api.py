@@ -3,18 +3,18 @@
 from pathlib import Path
 from typing import List, Set
 
-from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.constants import Pipeline
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
-from cg.store.models import FamilySample, Sample, Family
-from tests.store_helpers import StoreHelpers
-from tests.store.conftest import case_obj
+from cg.store.models import Family, FamilySample, Sample
 from tests.cli.deliver.conftest import fastq_delivery_bundle, mip_delivery_bundle
+from tests.store.conftest import case_obj
+from tests.store_helpers import StoreHelpers
 
 
 def test_get_delivery_path(

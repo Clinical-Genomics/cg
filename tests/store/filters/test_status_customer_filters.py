@@ -1,11 +1,11 @@
+from sqlalchemy.orm import Query
+
 from cg.store import Store
-from cg.store.models import Customer
 from cg.store.filters.status_customer_filters import (
     filter_customer_by_customer_internal_id,
     filter_customer_by_exclude_customer_internal_id,
 )
-
-from sqlalchemy.orm import Query
+from cg.store.models import Customer
 
 
 def test_filter_customer_by_customer_id(base_store: Store, customer_id: str):

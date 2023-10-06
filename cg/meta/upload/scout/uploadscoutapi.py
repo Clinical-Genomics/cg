@@ -4,6 +4,9 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Set, Tuple
 
+from housekeeper.store.models import File, Version
+from pydantic.v1.dataclasses import dataclass
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
@@ -22,8 +25,6 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
 from cg.store.models import Analysis, Customer, Family, Sample
-from housekeeper.store.models import File, Version
-from pydantic.v1.dataclasses import dataclass
 
 LOG = logging.getLogger(__name__)
 
@@ -85,7 +86,7 @@ class UploadScoutAPI:
 
         LOG.info(f"Save Scout load config to {file_path.as_posix()}.")
         WriteFile.write_file_from_content(
-            content=upload_config.dict(exclude_none=True),
+            content=upload_config.model_dump(exclude_none=True),
             file_format=FileFormat.YAML,
             file_path=file_path,
         )
