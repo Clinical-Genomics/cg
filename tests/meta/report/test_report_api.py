@@ -191,7 +191,7 @@ def test_get_customer_data(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Fa
     customer_data: CustomerModel = report_api_mip_dna.get_customer_data(case_mip_dna)
 
     # THEN check if the retrieved customer data corresponds to the expected one
-    assert customer_data == expected_customer
+    assert customer_data.model_dump() == expected_customer
 
 
 def test_get_report_version_version(
@@ -358,7 +358,7 @@ def test_get_sample_methods_data(
     sample_methods: MethodsModel = report_api_mip_dna.get_sample_methods_data(sample_id)
 
     # THEN check the agreement between expected and extracted values
-    assert sample_methods == expected_sample_methods
+    assert sample_methods.model_dump() == expected_sample_methods
 
 
 def test_get_case_analysis_data(
@@ -405,4 +405,4 @@ def test_get_sample_timestamp_data(
     )
 
     # THEN check if the dates are correctly retrieved
-    assert sample_timestamp_data == expected_case_samples_data
+    assert sample_timestamp_data.model_dump() == expected_case_samples_data
