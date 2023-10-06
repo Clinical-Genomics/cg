@@ -2407,6 +2407,12 @@ def case_id_without_samples():
 
 
 @pytest.fixture(scope="session")
+def case_id_not_enough_reads():
+    """Return a case id associated to a sample without enough reads."""
+    return "tiredwalrus"
+
+
+@pytest.fixture(scope="session")
 def sample_id_in_single_case():
     """Return a sample id that should be associated with a single case."""
     return "ASM1"
@@ -2416,6 +2422,12 @@ def sample_id_in_single_case():
 def sample_id_in_multiple_cases():
     """Return a sample id that should be associated with multiple cases."""
     return "ASM2"
+
+
+@pytest.fixture(scope="session")
+def sample_id_not_enough_reads():
+    """Return a sample id without enough reads."""
+    return "ASM3"
 
 
 @pytest.fixture(name="store_with_multiple_cases_and_samples")
@@ -2738,8 +2750,13 @@ def rnafusion_parameters_default(
 
 
 @pytest.fixture(scope="session")
-def total_sequenced_reads() -> int:
+def total_sequenced_reads_pass() -> int:
     return 200_000_000
+
+
+@pytest.fixture(scope="session")
+def total_sequenced_reads_not_pass() -> int:
+    return 1
 
 
 @pytest.fixture(scope="function")
@@ -2753,7 +2770,11 @@ def rnafusion_context(
     rnafusion_case_id: str,
     sample_id: str,
     no_sample_case_id: str,
-    total_sequenced_reads: int,
+    total_sequenced_reads_pass: int,
+    apptag_rna: str,
+    case_id_not_enough_reads: str,
+    sample_id_not_enough_reads: str,
+    total_sequenced_reads_not_pass: int,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
@@ -2776,7 +2797,8 @@ def rnafusion_context(
         status_db,
         internal_id=sample_id,
         reads_updated_at=datetime.now(),
-        reads=total_sequenced_reads,
+        reads=total_sequenced_reads_pass,
+        application_tag=apptag_rna,
     )
 
     helpers.add_relationship(
@@ -2784,6 +2806,25 @@ def rnafusion_context(
         case=case_enough_reads,
         sample=sample_rnafusion_case_enough_reads,
     )
+
+    # Create case without enough reads
+    case_not_enough_reads: Family = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Pipeline.RNAFUSION,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=sample_id_not_enough_reads,
+        reads_updated_at=datetime.now(),
+        reads=total_sequenced_reads_not_pass,
+        application_tag=apptag_rna,
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
     return cg_context
 
 
@@ -2988,7 +3029,7 @@ def taxprofiler_context(
     trailblazer_api: MockTB,
     nf_analysis_housekeeper: HousekeeperAPI,
     no_sample_case_id: str,
-    total_sequenced_reads: int,
+    total_sequenced_reads_pass: int,
 ) -> CGConfig:
     """Context to use in cli."""
     cg_context.housekeeper_api_: HousekeeperAPI = nf_analysis_housekeeper
@@ -3008,7 +3049,7 @@ def taxprofiler_context(
         internal_id=sample_id,
         reads_updated_at=datetime.now(),
         name=sample_name,
-        reads=total_sequenced_reads,
+        reads=total_sequenced_reads_pass,
     )
 
     helpers.add_relationship(
