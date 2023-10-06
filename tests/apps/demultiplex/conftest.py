@@ -13,7 +13,7 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreatorBCLConvert,
 )
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 @pytest.fixture

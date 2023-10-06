@@ -11,12 +11,8 @@ from typing import Optional
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
-from cg.meta.orders.rnafusion_submitter import RnafusionSubmitter
-from cg.models.orders.order import OrderIn, OrderType
-from cg.store import Store
-
-from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
 from cg.meta.orders.balsamic_qc_submitter import BalsamicQCSubmitter
+from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
 from cg.meta.orders.balsamic_umi_submitter import BalsamicUmiSubmitter
 from cg.meta.orders.fastq_submitter import FastqSubmitter
 from cg.meta.orders.fluffy_submitter import FluffySubmitter
@@ -25,9 +21,12 @@ from cg.meta.orders.microsalt_submitter import MicrosaltSubmitter
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.meta.orders.mip_rna_submitter import MipRnaSubmitter
 from cg.meta.orders.rml_submitter import RmlSubmitter
+from cg.meta.orders.rnafusion_submitter import RnafusionSubmitter
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.submitter import Submitter
 from cg.meta.orders.ticket_handler import TicketHandler
+from cg.models.orders.order import OrderIn, OrderType
+from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 

@@ -1,4 +1,5 @@
-from typing import Optional, List
+from typing import List, Optional
+
 from cg.store import Store
 from cg.store.models import Application, ApplicationVersion
 

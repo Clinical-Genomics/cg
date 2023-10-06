@@ -1,4 +1,5 @@
 import pytest
+
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.constants.pedigree import Pedigree
 from cg.constants.subject import PlinkGender, PlinkPhenotypeStatus, RelationshipStatus

@@ -10,7 +10,7 @@ DESCRIPTION = "Clinical Genomics command center"
 URL = "https://github.com/Clinical-Genomics/cg"
 EMAIL = "support@clinicalgenomics.se"
 AUTHOR = "Clinical Genomics"
-REQUIRES_PYTHON = ">=3.6.0"
+REQUIRES_PYTHON = ">=3.8.0"
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -42,7 +42,7 @@ except FileNotFoundError:
 
 setup(
     name=NAME,
-    version="51.1.3",
+    version="51.2.8",
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
@@ -57,7 +57,7 @@ setup(
     tests_require=parse_requirements("requirements-dev.txt"),
     classifiers=[
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: Implementation :: CPython",
     ],
 )

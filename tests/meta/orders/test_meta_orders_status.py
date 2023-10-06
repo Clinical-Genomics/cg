@@ -4,12 +4,13 @@ from typing import List
 
 import pytest
 
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import DataDelivery, Pipeline, Priority
 from cg.constants.constants import CaseActions, PrepCategory
 from cg.exc import OrderError
+from cg.meta.orders import OrdersAPI
 from cg.meta.orders.api import FastqSubmitter
-from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
 from cg.meta.orders.balsamic_qc_submitter import BalsamicQCSubmitter
+from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
 from cg.meta.orders.balsamic_umi_submitter import BalsamicUmiSubmitter
 from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
 from cg.meta.orders.microbial_submitter import MicrobialSubmitter
@@ -19,10 +20,8 @@ from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn, OrderType
-from cg.meta.orders import OrdersAPI
 from cg.store import Store
 from cg.store.models import Application, Delivery, Family, Pool, Sample
-from cg.constants import Priority
 
 
 def test_pools_to_status(rml_order_to_submit):

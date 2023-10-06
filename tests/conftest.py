@@ -38,8 +38,8 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
@@ -2981,6 +2981,7 @@ def taxprofiler_context(
     sample_name: str,
     trailblazer_api: MockTB,
     nf_analysis_housekeeper: HousekeeperAPI,
+    no_sample_case_id: str,
 ) -> CGConfig:
     """Context to use in cli."""
     cg_context.housekeeper_api_: HousekeeperAPI = nf_analysis_housekeeper
@@ -3000,6 +3001,7 @@ def taxprofiler_context(
         internal_id=sample_id,
         reads_updated_at=datetime.now(),
         name=sample_name,
+        reads=100000000,
     )
 
     helpers.add_relationship(

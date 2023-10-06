@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Callable
+from typing import Callable, List, Optional
 
 from sqlalchemy.orm import Query
 

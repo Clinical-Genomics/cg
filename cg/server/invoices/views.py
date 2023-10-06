@@ -2,9 +2,11 @@ import http
 import os
 import tempfile
 from datetime import date
-from cg.constants.invoice import CostCenters
+from typing import List, Union
+
 from flask import (
     Blueprint,
+    abort,
     current_app,
     flash,
     redirect,
@@ -13,16 +15,14 @@ from flask import (
     send_from_directory,
     session,
     url_for,
-    abort,
 )
 from flask_dance.contrib.google import google
 
 from cg.apps.invoice.render import render_xlsx
+from cg.constants.invoice import CostCenters
 from cg.meta.invoice import InvoiceAPI
 from cg.server.ext import db, lims
-from typing import List, Union
 from cg.store.models import Customer, Invoice, Pool, Sample
-
 
 BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
 

@@ -1,13 +1,13 @@
 """This script tests the cli methods to get samples in status-db"""
 from typing import List
 
+from click.testing import CliRunner
+
 from cg.cli.get import get
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from click.testing import CliRunner
-
-from cg.store.models import Flowcell, Sample, Family
+from cg.store.models import Family, Flowcell, Sample
 from tests.store_helpers import StoreHelpers
 
 

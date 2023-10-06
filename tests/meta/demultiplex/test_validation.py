@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import pytest
 
 from cg.constants import FileExtensions
@@ -12,7 +13,7 @@ from cg.meta.demultiplex.validation import (
     validate_flow_cell_has_fastq_files,
     validate_sample_sheet_exists,
 )
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 def test_is_demultiplexing_complete_true(tmp_path: Path):

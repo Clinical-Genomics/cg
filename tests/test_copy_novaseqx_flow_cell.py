@@ -1,7 +1,10 @@
 from pathlib import Path
 
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
-from cg.cli.demultiplex.demux import hardlink_flow_cell_analysis_data, is_ready_for_post_processing
+from cg.cli.demultiplex.demux import (
+    hardlink_flow_cell_analysis_data,
+    is_ready_for_post_processing,
+)
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.utils.files import get_all_files_in_dir
 

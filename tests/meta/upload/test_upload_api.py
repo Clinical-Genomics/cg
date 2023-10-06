@@ -3,7 +3,7 @@ import datetime as dt
 
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family, Analysis
+from cg.store.models import Analysis, Family
 from tests.cli.workflow.conftest import tb_api
 
 

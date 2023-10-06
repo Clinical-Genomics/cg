@@ -4,6 +4,7 @@ import logging
 from typing import List, Optional
 
 import click
+
 from cg.constants import Pipeline
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE
 from cg.store import Store

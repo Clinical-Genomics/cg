@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cg.io.yaml import read_yaml, write_yaml, read_yaml_stream, write_yaml_stream
+from cg.io.yaml import read_yaml, read_yaml_stream, write_yaml, write_yaml_stream
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 

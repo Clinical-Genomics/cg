@@ -1,8 +1,9 @@
 """This script tests the cli methods to set values of several cases in status-db."""
 import logging
-from click.testing import CliRunner
+
 import pytest
 from _pytest.logging import LogCaptureFixture
+from click.testing import CliRunner
 
 from cg.cli.set.cases import set_cases
 from cg.models.cg_config import CGConfig

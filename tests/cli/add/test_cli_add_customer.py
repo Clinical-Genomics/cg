@@ -1,11 +1,11 @@
 """Test add customer CLI."""
 
+from click.testing import CliRunner
+
 from cg.cli.add import add
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from click.testing import CliRunner
-
 from cg.store.models import Customer
 
 NEW_TEST_CUST_NAME: str = "new_test_cust"

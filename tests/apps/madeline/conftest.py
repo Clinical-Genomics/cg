@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import pytest
-from tests.mocks.process_mock import ProcessMock
 
 from cg.apps.madeline.api import MadelineAPI
+from tests.mocks.process_mock import ProcessMock
 
 
 @pytest.fixture

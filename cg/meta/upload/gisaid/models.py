@@ -1,6 +1,7 @@
+from datetime import datetime
 from pathlib import Path
-from typing import Optional, Any
-from typing_extensions import Annotated
+from typing import Any, Optional
+
 from pydantic import (
     BaseModel,
     BeforeValidator,
@@ -8,7 +9,7 @@ from pydantic import (
     field_validator,
     model_validator,
 )
-from datetime import datetime
+from typing_extensions import Annotated
 
 from cg.meta.upload.gisaid.constants import AUTHORS
 

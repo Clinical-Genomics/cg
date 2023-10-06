@@ -3,19 +3,23 @@
 import logging
 from typing import Dict
 
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import (
-    MipDNAObservationsAnalysisTag,
-    MipDNALoadParameters,
-    LoqusdbInstance,
-    LOQUSDB_MIP_SEQUENCING_METHODS,
     LOQUSDB_ID,
+    LOQUSDB_MIP_SEQUENCING_METHODS,
+    LoqusdbInstance,
     LoqusdbMipCustomers,
+    MipDNALoadParameters,
+    MipDNAObservationsAnalysisTag,
 )
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import LoqusdbUploadCaseError, LoqusdbDuplicateRecordError, CaseNotFoundError
+from cg.exc import (
+    CaseNotFoundError,
+    LoqusdbDuplicateRecordError,
+    LoqusdbUploadCaseError,
+)
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles

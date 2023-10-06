@@ -1,9 +1,9 @@
-from typing import Dict, List
-import pytest
 from pathlib import Path
-from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
-    SampleLaneMetrics,
-)
+from typing import Dict, List
+
+import pytest
+
+from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import SampleLaneMetrics
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import (
     parse_metrics,
     parse_undetermined_non_pooled_metrics,

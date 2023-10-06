@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Optional, Union
 
+from pydantic.v1 import BaseModel, validator
+
 from cg.constants.subject import Gender
 from cg.models.report.metadata import SampleMetadataModel
 from cg.models.report.validators import (
@@ -10,7 +12,6 @@ from cg.models.report.validators import (
     validate_gender,
     validate_rml_sample,
 )
-from pydantic.v1 import BaseModel, validator
 
 
 class ApplicationModel(BaseModel):

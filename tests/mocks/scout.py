@@ -2,13 +2,13 @@
 
 import logging
 from pathlib import Path
-from pydantic.v1 import BaseModel, validator
 from typing import List
+
+from pydantic.v1 import BaseModel, validator
 from typing_extensions import Literal
 
 from cg.apps.scout.scoutapi import ScoutAPI
 from tests.mocks.process_mock import ProcessMock
-
 
 LOG = logging.getLogger(__name__)
 

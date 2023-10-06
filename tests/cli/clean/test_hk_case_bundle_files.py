@@ -1,15 +1,15 @@
 import datetime as dt
 import logging
 
+from click.testing import CliRunner
+
 from cg.cli.clean import hk_case_bundle_files
+from cg.constants.constants import Pipeline
 from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Analysis
-from cgmodels.cg.constants import Pipeline
-from click.testing import CliRunner
 from cg.utils.date import get_date_days_ago
-
 from tests.store_helpers import StoreHelpers
 
 
