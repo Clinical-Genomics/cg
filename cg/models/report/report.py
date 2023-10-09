@@ -1,16 +1,20 @@
+import logging
 from typing import List, Optional
 
 from pydantic import BaseModel, BeforeValidator, model_validator
 from typing_extensions import Annotated
 
-from cg.models.report.sample import SampleModel, ApplicationModel
+from cg.constants import NA_FIELD, REPORT_SUPPORTED_PIPELINES
+from cg.models.report.sample import ApplicationModel, SampleModel
 from cg.models.report.validators import (
-    validate_date,
-    validate_empty_field,
-    validate_list,
-    validate_path,
-    validate_supported_pipeline,
+    get_analysis_type_as_string,
+    get_date_as_string,
+    get_list_as_string,
+    get_path_as_string,
+    get_report_string,
 )
+
+LOG = logging.getLogger(__name__)
 
 
 class CustomerModel(BaseModel):
@@ -24,9 +28,9 @@ class CustomerModel(BaseModel):
         scout_access: whether the customer has access to scout or not; source: statusDB/family/customer/scout_access
     """
 
-    name: Annotated[str, BeforeValidator(validate_empty_field)]
-    id: Annotated[str, BeforeValidator(validate_empty_field)]
-    invoice_address: Annotated[str, BeforeValidator(validate_empty_field)]
+    name: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    id: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    invoice_address: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
     scout_access: Optional[bool] = None
 
 
@@ -43,12 +47,12 @@ class ScoutReportFiles(BaseModel):
         smn_tsv: SMN gene variants file (MIP-DNA specific); source: HK
     """
 
-    snv_vcf: Annotated[str, BeforeValidator(validate_path)]
-    snv_research_vcf: Annotated[str, BeforeValidator(validate_path)]
-    sv_vcf: Annotated[str, BeforeValidator(validate_path)]
-    sv_research_vcf: Annotated[str, BeforeValidator(validate_path)]
-    vcf_str: Annotated[str, BeforeValidator(validate_path)]
-    smn_tsv: Annotated[str, BeforeValidator(validate_path)]
+    snv_vcf: Annotated[Optional[str], BeforeValidator(get_path_as_string)] = NA_FIELD
+    snv_research_vcf: Annotated[Optional[str], BeforeValidator(get_path_as_string)] = NA_FIELD
+    sv_vcf: Annotated[Optional[str], BeforeValidator(get_path_as_string)] = NA_FIELD
+    sv_research_vcf: Annotated[Optional[str], BeforeValidator(get_path_as_string)] = NA_FIELD
+    vcf_str: Annotated[Optional[str], BeforeValidator(get_path_as_string)] = NA_FIELD
+    smn_tsv: Annotated[Optional[str], BeforeValidator(get_path_as_string)] = NA_FIELD
 
 
 class DataAnalysisModel(BaseModel):
@@ -67,17 +71,29 @@ class DataAnalysisModel(BaseModel):
         scout_files: list of file names uploaded to Scout
     """
 
-    customer_pipeline: Annotated[str, BeforeValidator(validate_empty_field)]
-    data_delivery: Annotated[str, BeforeValidator(validate_empty_field)]
-    pipeline: Annotated[str, BeforeValidator(validate_empty_field)]
-    pipeline_version: Annotated[str, BeforeValidator(validate_empty_field)]
-    type: Annotated[str, BeforeValidator(validate_empty_field)]
-    genome_build: Annotated[str, BeforeValidator(validate_empty_field)]
-    variant_callers: Annotated[str, BeforeValidator(validate_list)]
-    panels: Annotated[str, BeforeValidator(validate_list)]
+    customer_pipeline: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    data_delivery: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    pipeline: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    pipeline_version: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    type: Annotated[Optional[str], BeforeValidator(get_analysis_type_as_string)] = NA_FIELD
+    genome_build: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    variant_callers: Annotated[Optional[str], BeforeValidator(get_list_as_string)] = NA_FIELD
+    panels: Annotated[Optional[str], BeforeValidator(get_list_as_string)] = NA_FIELD
     scout_files: ScoutReportFiles
 
-    _values = model_validator(mode="after")(validate_supported_pipeline)
+    @model_validator(mode="after")
+    def check_supported_pipeline(self) -> "DataAnalysisModel":
+        """Check if the report generation supports a specific pipeline and analysis type."""
+        if self.pipeline != self.customer_pipeline:
+            LOG.error(
+                f"The analysis requested by the customer ({self.customer_pipeline}) does not match the one "
+                f"executed ({self.pipeline})"
+            )
+            raise ValueError
+        if self.pipeline not in REPORT_SUPPORTED_PIPELINES:
+            LOG.error(f"The pipeline {self.pipeline} does not support delivery report generation")
+            raise ValueError
+        return self
 
 
 class CaseModel(BaseModel):
@@ -92,8 +108,8 @@ class CaseModel(BaseModel):
         applications: case associated unique applications
     """
 
-    name: Annotated[str, BeforeValidator(validate_empty_field)]
-    id: Annotated[str, BeforeValidator(validate_empty_field)]
+    name: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    id: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
     samples: List[SampleModel]
     data_analysis: DataAnalysisModel
     applications: List[ApplicationModel]
@@ -112,7 +128,7 @@ class ReportModel(BaseModel):
     """
 
     customer: CustomerModel
-    version: Annotated[str, BeforeValidator(validate_empty_field)]
-    date: Annotated[str, BeforeValidator(validate_date)]
+    version: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    date: Annotated[Optional[str], BeforeValidator(get_date_as_string)] = NA_FIELD
     case: CaseModel
     accredited: Optional[bool] = None

@@ -3,13 +3,14 @@ from typing import Optional
 from pydantic import BaseModel, BeforeValidator
 from typing_extensions import Annotated
 
+from cg.constants import NA_FIELD
 from cg.models.report.metadata import SampleMetadataModel
 from cg.models.report.validators import (
-    validate_boolean,
-    validate_date,
-    validate_empty_field,
-    validate_gender,
-    validate_rml_sample,
+    get_boolean_as_string,
+    get_date_as_string,
+    get_gender_as_string,
+    get_prep_category_as_string,
+    get_report_string,
 )
 
 
@@ -27,11 +28,11 @@ class ApplicationModel(BaseModel):
         external: whether the app tag is external or not; source: StatusDB/application/is_external
     """
 
-    tag: Annotated[str, BeforeValidator(validate_empty_field)]
-    version: Annotated[str, BeforeValidator(validate_empty_field)]
-    prep_category: Annotated[str, BeforeValidator(validate_rml_sample)]
-    description: Annotated[str, BeforeValidator(validate_empty_field)]
-    limitations: Annotated[str, BeforeValidator(validate_empty_field)]
+    tag: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    version: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    prep_category: Annotated[Optional[str], BeforeValidator(get_prep_category_as_string)] = NA_FIELD
+    description: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    limitations: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
     accredited: Optional[bool] = None
     external: Optional[bool] = None
 
@@ -45,8 +46,8 @@ class MethodsModel(BaseModel):
         sequencing: sequencing procedure; source: LIMS/sample/sequencing_method
     """
 
-    library_prep: Annotated[str, BeforeValidator(validate_empty_field)]
-    sequencing: Annotated[str, BeforeValidator(validate_empty_field)]
+    library_prep: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    sequencing: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
 
 
 class TimestampModel(BaseModel):
@@ -60,10 +61,10 @@ class TimestampModel(BaseModel):
         reads_updated_at: sequencing date; source: StatusDB/sample/reads_updated_at
     """
 
-    ordered_at: Annotated[str, BeforeValidator(validate_date)]
-    received_at: Annotated[str, BeforeValidator(validate_date)]
-    prepared_at: Annotated[str, BeforeValidator(validate_date)]
-    reads_updated_at: Annotated[str, BeforeValidator(validate_date)]
+    ordered_at: Annotated[Optional[str], BeforeValidator(get_date_as_string)] = NA_FIELD
+    received_at: Annotated[Optional[str], BeforeValidator(get_date_as_string)] = NA_FIELD
+    prepared_at: Annotated[Optional[str], BeforeValidator(get_date_as_string)] = NA_FIELD
+    reads_updated_at: Annotated[Optional[str], BeforeValidator(get_date_as_string)] = NA_FIELD
 
 
 class SampleModel(BaseModel):
@@ -84,13 +85,13 @@ class SampleModel(BaseModel):
         timestamps: processing timestamp attributes
     """
 
-    name: Annotated[str, BeforeValidator(validate_empty_field)]
-    id: Annotated[str, BeforeValidator(validate_empty_field)]
-    ticket: Annotated[str, BeforeValidator(validate_empty_field)]
-    status: Annotated[str, BeforeValidator(validate_empty_field)]
-    gender: Annotated[str, BeforeValidator(validate_gender)]
-    source: Annotated[str, BeforeValidator(validate_empty_field)]
-    tumour: Annotated[str, BeforeValidator(validate_boolean)]
+    name: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    id: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    ticket: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    status: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    gender: Annotated[Optional[str], BeforeValidator(get_gender_as_string)] = NA_FIELD
+    source: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    tumour: Annotated[Optional[str], BeforeValidator(get_boolean_as_string)] = NA_FIELD
     application: ApplicationModel
     methods: MethodsModel
     metadata: SampleMetadataModel
