@@ -7,13 +7,20 @@ import click
 import housekeeper.store.models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.exc import FlowCellEncryptionError, FlowCellError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
-from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
+from cg.meta.encryption.encryption import (
+    EncryptionAPI,
+    FlowCellEncryptionAPI,
+    SpringEncryptionAPI,
+)
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
+from cg.models.flow_cell.flow_cell import get_flow_cells_from_path
 from cg.store import Store
 from cg.store.models import Flowcell, Sample
 
@@ -25,6 +32,35 @@ LOG = logging.getLogger(__name__)
 def backup(context: CGConfig):
     """Backup utilities"""
     pass
+
+
+@backup.command("encrypt-flow-cells")
+@DRY_RUN
+@click.pass_obj
+def encrypt_flow_cells(context: CGConfig, dry_run: bool):
+    """Encrypt flow cells."""
+    status_db: Store = context.status_db
+    for flow_cell in get_flow_cells_from_path(flow_cells_dir=Path(context.flow_cells_dir)):
+        db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
+            flow_cell_name=flow_cell.id
+        )
+        if db_flow_cell and db_flow_cell.has_backup:
+            LOG.debug(f"Flow cell: {flow_cell.id} is already backed-up")
+            continue
+        flow_cell_encryption_api = FlowCellEncryptionAPI(
+            binary_path=context.encryption.binary_path,
+            dry_run=dry_run,
+            encryption_dir=Path(context.backup.encrypt_dir),
+            flow_cell=flow_cell,
+            pigz_binary_path=context.pigz.binary_path,
+            slurm_api=SlurmAPI(),
+            sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
+            tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
+        )
+        try:
+            flow_cell_encryption_api.start_encryption()
+        except (FlowCellError, FlowCellEncryptionError) as error:
+            logging.debug(f"{error}")
 
 
 @backup.command("fetch-flow-cell")
@@ -83,9 +119,7 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
     LOG.info("Getting all spring files from Housekeeper.")
     spring_files: Iterable[hk_models.File] = housekeeper_api.files(
         tags=[SequencingFileTag.SPRING]
-    ).filter(
-        hk_models.File.path.like(f"%{config.environment}/{config.demultiplexed_flow_cells_dir}%")
-    )
+    ).filter(hk_models.File.path.like(f"%{config.environment}/{config.demultiplex.out_dir}%"))
     for spring_file in spring_files:
         LOG.info("Attempting encryption and PDC archiving for file %s", spring_file.path)
         if Path(spring_file.path).exists():
