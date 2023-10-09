@@ -30,7 +30,7 @@ def test_validate_case_father_none(none_case_raw: dict):
 
 
 def test_validate_case_father_int(none_case_raw: dict):
-    """Test to validate string coercion when the Father is set to 0"""
+    """Test to validate string coercion when the father is set to 0."""
 
     # GIVEN a case that has parent set to 0
     none_case_raw["individuals"][0][Pedigree.FATHER] = 0
