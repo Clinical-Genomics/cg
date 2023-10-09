@@ -2775,6 +2775,7 @@ def rnafusion_context(
     case_id_not_enough_reads: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
+    timestamp_yesterday: datetime,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
@@ -2824,6 +2825,17 @@ def rnafusion_context(
     )
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
+    helpers.add_analysis(
+        status_db,
+        case=case_not_enough_reads,
+        pipeline=Pipeline.RNAFUSION,
+        started_at=timestamp_yesterday,
+        uploaded_at=timestamp_yesterday,
+        created_at=timestamp_yesterday,
+        completed_at=timestamp_yesterday,
+        cleaned_at=None,
+    )
 
     return cg_context
 
