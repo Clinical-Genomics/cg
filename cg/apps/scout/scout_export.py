@@ -21,7 +21,9 @@ class Individual(BaseModel):
     father: Annotated[
         str, BeforeValidator(lambda x: str(x)), BeforeValidator(set_parent_if_missing)
     ]
-    mother: Annotated[str, BeforeValidator(set_parent_if_missing)]
+    mother: Annotated[
+        str, BeforeValidator(lambda x: str(x)), BeforeValidator(set_parent_if_missing)
+    ]
     phenotype: PlinkPhenotypeStatus
     analysis_type: str = "wgs"
 
