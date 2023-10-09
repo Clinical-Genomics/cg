@@ -7,7 +7,7 @@ Create Date: 2023-04-19 13:46:29.137152
 """
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 from alembic import op
 from cg.constants import Pipeline
