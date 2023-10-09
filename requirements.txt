@@ -1,10 +1,10 @@
 # database
 alembic
-SQLAlchemy<1.4
+SQLAlchemy~=1.4.0
 pymysql
 
 # cli
-Click<7.0
+Click
 
 # server
 blinker
@@ -12,7 +12,7 @@ cachecontrol
 Flask-Admin
 Flask-CORS
 Flask-Dance
-Flask>=1.1.1
+Flask
 flask_wtf
 google-auth
 gunicorn
@@ -26,7 +26,7 @@ coloredlogs
 Jinja2
 lxml
 marshmallow>3               # due to code expects behaviour from >3
-markupsafe<2.1            # due to soft_unicode import error from markupsafe
+markupsafe
 openpyxl==3.0.10
 packaging
 pandas

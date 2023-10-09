@@ -89,7 +89,7 @@ def store_with_flow_cell_to_clean(
         (sample_id, tmp_flow_cell_to_clean.id, 1, 50_000_0000, 90.5, 32),
         (sample_id, tmp_flow_cell_to_clean.id, 2, 50_000_0000, 90.4, 31),
     ]
-    flow_cell: Flowcell = helpers.add_flowcell(
+    flow_cell: Flowcell = helpers.add_flow_cell(
         flow_cell_name=tmp_flow_cell_to_clean.id,
         store=store,
         has_backup=True,
@@ -118,7 +118,7 @@ def store_with_flow_cell_not_to_clean(
         (sample_id, tmp_flow_cell_not_to_clean.id, 1, 50_000_0000, 90.5, 32),
         (sample_id, tmp_flow_cell_not_to_clean.id, 2, 50_000_0000, 90.4, 31),
     ]
-    flow_cell: Flowcell = helpers.add_flowcell(
+    flow_cell: Flowcell = helpers.add_flow_cell(
         flow_cell_name=tmp_flow_cell_not_to_clean.id,
         store=store,
         has_backup=True,

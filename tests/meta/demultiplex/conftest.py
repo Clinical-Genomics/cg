@@ -108,7 +108,7 @@ def populated_flow_cell_store(
         sample=sample,
         case=family,
     )
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=populated_flow_cell_store,
         flow_cell_name=bcl2fastq_flow_cell_id,
         sequencer_type="novaseq",
@@ -136,7 +136,7 @@ def active_flow_cell_store(
         sample=sample,
         case=family,
     )
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=active_flow_cell_store,
         flow_cell_name=bcl2fastq_flow_cell_id,
         sequencer_type="novaseq",

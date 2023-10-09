@@ -134,7 +134,7 @@ def test_priority_number(cli_runner: CliRunner, base_context: CGConfig, base_sto
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
         sample,
-        [sample_obj.internal_id, "-kv", key, new_value, "-y"],
+        [sample_obj.internal_id, "-kv", key, new_value.name, "-y"],
         obj=base_context,
     )
 

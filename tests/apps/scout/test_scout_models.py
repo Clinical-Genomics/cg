@@ -20,7 +20,7 @@ def test_validate_case_father_none(none_case_raw: dict):
     case_dict = case_obj.model_dump()
 
     # THEN assert father is set to string 0
-    assert case_dict["individuals"][0][Pedigree.FATHER] == RelationshipStatus.HAS_NO_PARENT
+    assert case_dict["individuals"][0][Pedigree.FATHER] == str(RelationshipStatus.HAS_NO_PARENT)
 
     # THEN assert that '_id' has been changed to 'id'
     assert "_id" not in case_dict
@@ -38,11 +38,11 @@ def test_validate_case_parents_none(none_case_raw: dict):
     case_obj = ScoutExportCase.model_validate(none_case_raw)
 
     # THEN assert father and mother is set to string 0
-    assert (
-        case_obj.model_dump()["individuals"][0][Pedigree.FATHER] == RelationshipStatus.HAS_NO_PARENT
+    assert case_obj.model_dump()["individuals"][0][Pedigree.FATHER] == str(
+        RelationshipStatus.HAS_NO_PARENT
     )
-    assert (
-        case_obj.model_dump()["individuals"][0][Pedigree.MOTHER] == RelationshipStatus.HAS_NO_PARENT
+    assert case_obj.model_dump()["individuals"][0][Pedigree.MOTHER] == str(
+        RelationshipStatus.HAS_NO_PARENT
     )
 
 
@@ -118,7 +118,7 @@ def test_set_parent_when_not_provided():
     validated_parent: str = set_parent_if_missing(parent=parent)
 
     # THEN the returned string should have been set to RelationshipStatus.HAS_NO_PARENT
-    assert validated_parent == RelationshipStatus.HAS_NO_PARENT
+    assert validated_parent == str(RelationshipStatus.HAS_NO_PARENT)
 
 
 def test_set_gender_if_provided():

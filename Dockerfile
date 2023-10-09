@@ -1,4 +1,4 @@
-FROM docker.io/library/python:3.8-slim-bullseye
+FROM docker.io/library/python:3.10-slim-bullseye
 
 ENV GUNICORN_WORKERS=1
 ENV GUNICORN_THREADS=1
