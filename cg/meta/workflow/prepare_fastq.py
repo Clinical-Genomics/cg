@@ -8,11 +8,12 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.constants import Pipeline
 from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.models import CompressionData
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -26,15 +27,29 @@ class PrepareFastqAPI:
 
     def get_compression_objects(self, case_id: str) -> List[CompressionData]:
         """Return a list of compression objects"""
-        case_obj: Family = self.store.get_case_by_internal_id(internal_id=case_id)
+        case: Family = self.store.get_case_by_internal_id(internal_id=case_id)
         compression_objects = []
-        for link in case_obj.links:
-            sample_id = link.sample.internal_id
+        for link in case.links:
+            sample: Sample = link.sample
+            sample_id = sample.internal_id
+            if self._should_skip_sample(case=case, sample=sample):
+                LOG.warning(f"Skipping sample {sample_id} - it has no reads.")
+                continue
             version_obj: Version = self.compress_api.hk_api.get_latest_bundle_version(
                 bundle_name=sample_id
             )
             compression_objects.extend(files.get_spring_paths(version_obj))
         return compression_objects
+
+    @staticmethod
+    def _should_skip_sample(case: Family, sample: Sample):
+        """
+        For some pipelines, we want to start a partial analysis disregarding the samples with no reads.
+        This method returns true if we should skip the sample.
+        """
+        if case.data_analysis in [Pipeline.MICROSALT, Pipeline.SARS_COV_2] and not sample.has_reads:
+            return True
+        return False
 
     def is_spring_decompression_needed(self, case_id: str) -> bool:
         """Check if spring decompression needs to be started"""
@@ -63,39 +78,39 @@ class PrepareFastqAPI:
 
     def add_decompressed_fastq_files_to_housekeeper(self, case_id: str) -> None:
         """Adds decompressed FASTQ files to housekeeper for a case, if there are any."""
-        case_obj: Family = self.store.get_case_by_internal_id(internal_id=case_id)
-        for link in case_obj.links:
-            sample_id = link.sample.internal_id
-            version_obj: Version = self.compress_api.hk_api.get_latest_bundle_version(
+        case: Family = self.store.get_case_by_internal_id(internal_id=case_id)
+        for link in case.links:
+            sample: Sample = link.sample
+            sample_id = sample.internal_id
+            if self._should_skip_sample(case=case, sample=sample):
+                LOG.warning(f"Skipping sample {sample_id} - it has no reads.")
+                continue
+            version: Version = self.compress_api.hk_api.get_latest_bundle_version(
                 bundle_name=sample_id
             )
             fastq_files: Dict[Path, File] = files.get_hk_files_dict(
-                tags=["fastq"], version_obj=version_obj
+                tags=["fastq"], version_obj=version
             )
-            compression_objs: List[CompressionData] = files.get_spring_paths(version_obj)
+            compression_objs: List[CompressionData] = files.get_spring_paths(version)
             for compression_obj in compression_objs:
                 result = True
                 if compression_obj.fastq_first not in fastq_files:
                     LOG.info(
-                        "Adding %s to sample %s in housekeeper"
-                        % (compression_obj.fastq_first, sample_id)
+                        f"Adding {compression_obj.fastq_first} to sample {sample_id} in Housekeeper"
                     )
-                    result: bool = self.compress_api.add_decompressed_fastq(sample=link.sample)
+                    result: bool = self.compress_api.add_decompressed_fastq(sample)
                 else:
                     LOG.info(
-                        "%s from sample %s is already in housekeeper"
-                        % (compression_obj.fastq_first, sample_id)
+                        f"{compression_obj.fastq_first} from sample {sample_id} is already in Housekeeper"
                     )
                 if compression_obj.fastq_second not in fastq_files:
                     LOG.info(
-                        "Adding %s to sample %s in housekeeper"
-                        % (compression_obj.fastq_first, sample_id)
+                        f"Adding {compression_obj.fastq_first} to sample {sample_id} in Housekeeper"
                     )
-                    result: bool = self.compress_api.add_decompressed_fastq(sample=link.sample)
+                    result: bool = self.compress_api.add_decompressed_fastq(sample)
                 else:
                     LOG.info(
-                        "%s from sample %s is already in housekeeper"
-                        % (compression_obj.fastq_first, sample_id)
+                        f"{compression_obj.fastq_first} from sample {sample_id} is already in Housekeeper"
                     )
                 if not result:
                     LOG.warning("Files where not added to fastq!")
