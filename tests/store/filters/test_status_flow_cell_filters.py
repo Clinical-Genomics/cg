@@ -24,7 +24,7 @@ def test_get_flow_cells_by_case(
     """Test that a flow cell is returned when there is a flow cell with matching flow cell case."""
 
     # GIVEN a flow cell that exist in status db
-    helpers.add_flowcell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
+    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
 
     # GIVEN a flow cell Query
 
@@ -61,7 +61,7 @@ def test_get_flow_cell_by_id(base_store: Store, helpers: StoreHelpers, bcl2fastq
     """Test that a flow cell is returned when there is a flow cell with matching flow cell id."""
 
     # GIVEN a flow cell that exist in status db
-    flow_cell: Flowcell = helpers.add_flowcell(
+    flow_cell: Flowcell = helpers.add_flow_cell(
         store=base_store, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
@@ -84,7 +84,7 @@ def test_get_flow_cell_by_id_and_by_enquiry(
     """Test that a flow cell is returned when there is a flow cell with enquiry flow cell id."""
 
     # GIVEN a flow cell that exist in status db
-    flow_cell: Flowcell = helpers.add_flowcell(
+    flow_cell: Flowcell = helpers.add_flow_cell(
         store=base_store, flow_cell_name=bcl2fastq_flow_cell_id
     )
 
@@ -107,7 +107,7 @@ def test_get_flow_cells_with_statuses(
     """Test that a flow cell is returned when there is a flow cell with matching flow cell id."""
 
     # GIVEN a flow cell that exist in status db
-    helpers.add_flowcell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id)
+    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id)
 
     # GIVEN a flow cell Query
 
@@ -127,7 +127,7 @@ def test_filter_flow_cells_by_name(
     """Test flow cell is returned by name."""
 
     # GIVEN a flow cell that exist in status db
-    flow_cell: Flowcell = helpers.add_flowcell(
+    flow_cell: Flowcell = helpers.add_flow_cell(
         store=base_store, flow_cell_name=bcl2fastq_flow_cell_id
     )
 

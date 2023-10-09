@@ -412,7 +412,7 @@ class FindBusinessDataHandler(BaseHandler):
             lane=lane,
         ).first()
 
-    def get_flow_cell_by_name(self, flow_cell_name: str) -> Flowcell:
+    def get_flow_cell_by_name(self, flow_cell_name: str) -> Optional[Flowcell]:
         """Return flow cell by flow cell name."""
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),

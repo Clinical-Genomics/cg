@@ -587,9 +587,9 @@ class StoreHelpers:
         ]
 
     @staticmethod
-    def add_flowcell(
+    def add_flow_cell(
         store: Store,
-        flow_cell_name: str = "flowcell_test",
+        flow_cell_name: str = "flow_cell_test",
         archived_at: datetime = None,
         sequencer_type: str = Sequencers.HISEQX,
         samples: List[Sample] = None,
@@ -601,7 +601,7 @@ class StoreHelpers:
         flow_cell: Optional[Flowcell] = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
         if flow_cell:
             return flow_cell
-        flow_cell = store.add_flow_cell(
+        flow_cell: Flowcell = store.add_flow_cell(
             flow_cell_name=flow_cell_name,
             sequencer_name="dummy_sequencer",
             sequencer_type=sequencer_type,
@@ -856,7 +856,7 @@ class StoreHelpers:
                 store=store, internal_id=sample_internal_id, customer_id=customer_id
             )
         if not flow_cell:
-            flow_cell = cls.add_flowcell(store=store, flow_cell_name=flow_cell_name)
+            flow_cell = cls.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
 
         metrics: SampleLaneSequencingMetrics = store.add_sample_lane_sequencing_metrics(
             sample_internal_id=sample.internal_id,
