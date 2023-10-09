@@ -18,7 +18,9 @@ class Individual(BaseModel):
         Literal[PlinkGender.UNKNOWN, PlinkGender.MALE, PlinkGender.FEMALE, Gender.OTHER],
         BeforeValidator(set_gender_if_other),
     ]
-    father: Annotated[str, BeforeValidator(set_parent_if_missing)]
+    father: Annotated[
+        str, BeforeValidator(lambda x: str(x)), BeforeValidator(set_parent_if_missing)
+    ]
     mother: Annotated[str, BeforeValidator(set_parent_if_missing)]
     phenotype: PlinkPhenotypeStatus
     analysis_type: str = "wgs"
