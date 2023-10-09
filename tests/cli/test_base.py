@@ -28,7 +28,7 @@ def test_list_commands(cli_runner: CliRunner):
 
 def test_missing_command(cli_runner: CliRunner):
     # WHEN invoking a missing command
-    result = cli_runner.invoke(cg, ["i_dont_exist"])
+    result = cli_runner.invoke(base, ["i_dont_exist"])
     # THEN context should abort
     assert result.exit_code != 0
 
