@@ -140,14 +140,14 @@ def re_sequenced_sample_store(
 
     one_day_ahead_of_now = timestamp_now + dt.timedelta(days=1)
 
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=re_sequenced_sample_store,
         flow_cell_name=bcl_convert_flow_cell_id,
         samples=[store_sample],
         date=timestamp_now,
     )
 
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=re_sequenced_sample_store,
         flow_cell_name=bcl2fastq_flow_cell_id,
         samples=[store_sample],
@@ -200,7 +200,7 @@ def store_failing_sequencing_qc(
         customer_id="fluffy_customer",
     )
 
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=store,
         flow_cell_name=bcl2fastq_flow_cell_id,
         samples=[store_sample],

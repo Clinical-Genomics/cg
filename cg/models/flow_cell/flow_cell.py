@@ -253,12 +253,12 @@ class FlowCellDirectoryData:
         return self.copy_complete_path.exists()
 
     def is_flow_cell_ready(self) -> bool:
-        """Check if a flow cell is ready for demultiplexing.
+        """Check if a flow cell is ready for downstream processing.
 
-        A flow cell is ready if the two files RTAComplete.txt and CopyComplete.txt exists in the
+        A flow cell is ready if the two files RTAComplete.txt and CopyComplete.txt exist in the
         flow cell directory.
         """
-        LOG.info("Check if flow cell is ready for demultiplexing")
+        LOG.info("Check if flow cell is ready for downstream processing")
         if not self.is_sequencing_done():
             LOG.info(f"Sequencing is not completed for flow cell {self.id}")
             return False
@@ -267,8 +267,24 @@ class FlowCellDirectoryData:
             LOG.info(f"Copy of sequence data is not ready for flow cell {self.id}")
             return False
         LOG.debug(f"All data has been transferred for flow cell {self.id}")
-        LOG.info(f"Flow cell {self.id} is ready for demultiplexing")
+        LOG.info(f"Flow cell {self.id} is ready for downstream processing")
         return True
 
     def __str__(self):
         return f"FlowCell(path={self.path},run_parameters_path={self.run_parameters_path})"
+
+
+def get_flow_cells_from_path(flow_cells_dir: Path) -> List[FlowCellDirectoryData]:
+    """Return flow cell objects from flow cell dir."""
+    flow_cells: List[FlowCellDirectoryData] = []
+    LOG.debug(f"Search for flow cells ready to encrypt in {flow_cells_dir}")
+    for flow_cell_dir in flow_cells_dir.iterdir():
+        if not flow_cell_dir.is_dir():
+            continue
+        LOG.debug(f"Found directory: {flow_cell_dir}")
+        try:
+            flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_dir)
+        except FlowCellError:
+            continue
+        flow_cells.append(flow_cell)
+    return flow_cells
