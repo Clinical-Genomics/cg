@@ -60,7 +60,7 @@ def test_get_presence_status_status_db(
     assert not empty_presence
 
     # WHEN adding a flowcell into the statusdb and checking its updated presence
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=delete_demux_api.status_db,
         flow_cell_name=bcl2fastq_flow_cell_id,
         sequencer_type="novaseq",

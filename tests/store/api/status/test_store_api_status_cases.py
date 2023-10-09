@@ -108,7 +108,7 @@ def test_samples_flowcell(base_store: Store, helpers):
     # and a sample not yet on a flowcell
     new_case = add_case(helpers, base_store)
     sample_on_flowcell = helpers.add_sample(base_store)
-    flowcell = helpers.add_flowcell(base_store, status="ondisk", samples=[sample_on_flowcell])
+    flowcell = helpers.add_flow_cell(base_store, samples=[sample_on_flowcell], status="ondisk")
     base_store.relate_sample(new_case, sample_on_flowcell, "unknown")
     sample_not_on_flowcell = helpers.add_sample(base_store)
     base_store.relate_sample(new_case, sample_not_on_flowcell, "unknown")
@@ -131,7 +131,7 @@ def test_sample_flowcell(base_store: Store, helpers):
     new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store)
     base_store.relate_sample(new_case, sample, "unknown")
-    flowcell = helpers.add_flowcell(base_store, status="ondisk", samples=[sample])
+    flowcell = helpers.add_flow_cell(base_store, samples=[sample], status="ondisk")
     assert flowcell.status
 
     # WHEN getting active cases

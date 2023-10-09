@@ -6,7 +6,7 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 
 def test_cg_dry_run(
-    cli_runner, mocker, caplog, case_id, email_adress, mip_dna_context, mip_dna_config_path
+    cli_runner, mocker, caplog, case_id, email_address, mip_dna_context, mip_dna_config_path
 ):
     """Test print the MIP run to console"""
 
@@ -18,7 +18,7 @@ def test_cg_dry_run(
     # GIVEN a cli function
     # WHEN we run a case in dry run mode
     result = cli_runner.invoke(
-        run, ["--dry-run", "--email", email_adress, case_id], obj=mip_dna_context
+        run, ["--dry-run", "--email", email_address, case_id], obj=mip_dna_context
     )
     # THEN command is run successfully
     assert result.exit_code == 0
@@ -28,7 +28,7 @@ def test_cg_dry_run(
 
 
 def test_mip_dry_run(
-    cli_runner, mocker, caplog, case_id, email_adress, mip_dna_context, mip_dna_config_path
+    cli_runner, mocker, caplog, case_id, email_address, mip_dna_context, mip_dna_config_path
 ):
     """Test print the MIP run to console"""
 
@@ -42,7 +42,7 @@ def test_mip_dry_run(
     # GIVEN a cli function
     # WHEN we run a case in dry run mode
     result = cli_runner.invoke(
-        run, ["--mip-dry-run", "--email", email_adress, case_id], obj=mip_dna_context
+        run, ["--mip-dry-run", "--email", email_address, case_id], obj=mip_dna_context
     )
 
     # THEN command is run successfully
@@ -57,7 +57,7 @@ def test_mip_run(
     mocker,
     caplog,
     case_id,
-    email_adress,
+    email_address,
     mip_dna_context,
     trailblazer_api,
     mip_dna_config_path,
@@ -76,7 +76,7 @@ def test_mip_run(
 
     # GIVEN a cli function
     # WHEN we run a case
-    result = cli_runner.invoke(run, ["--email", email_adress, case_id], obj=mip_dna_context)
+    result = cli_runner.invoke(run, ["--email", email_address, case_id], obj=mip_dna_context)
 
     # THEN command is run successfully
     assert result.exit_code == 0
@@ -90,7 +90,7 @@ def test_mip_run_fail(
     mocker,
     caplog,
     case_id,
-    email_adress,
+    email_address,
     mip_dna_context,
     tb_api,
     mip_dna_config_path,
@@ -109,7 +109,7 @@ def test_mip_run_fail(
 
     # GIVEN a cli function
     # WHEN we run a case
-    result = cli_runner.invoke(run, ["--email", email_adress, case_id], obj=mip_dna_context)
+    result = cli_runner.invoke(run, ["--email", email_address, case_id], obj=mip_dna_context)
 
     # THEN command should return an exit fail code
     assert result.exit_code == 1

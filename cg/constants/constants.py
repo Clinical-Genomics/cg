@@ -153,6 +153,7 @@ class HastaSlurmPartitions(StrEnum):
 
 class FileExtensions(StrEnum):
     BED: str = ".bed"
+    COMPLETE: str = ".complete"
     CRAM: str = ".cram"
     CSV: str = ".csv"
     FASTQ: str = ".fastq"
@@ -161,7 +162,10 @@ class FileExtensions(StrEnum):
     JSON: str = ".json"
     KEY: str = ".key"
     LOG: str = ".log"
+    MD5SUM: str = ".md5sum"
     NO_EXTENSION: str = ""
+    PASS_PHRASE: str = ".passphrase"
+    PENDING: str = ".pending"
     SBATCH: str = ".sbatch"
     SPRING: str = ".spring"
     TAR: str = ".tar"
