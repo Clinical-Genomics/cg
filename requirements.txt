@@ -41,5 +41,5 @@ typing_extensions
 urllib3
 
 # apps
-genologics==0.3.18
+genologics
 housekeeper>=4.6,<5.0
