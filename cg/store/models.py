@@ -283,8 +283,6 @@ class Customer(Model):
     invoice_address = Column(types.Text, nullable=False)
     invoice_reference = Column(types.String(32), nullable=False)
     is_trusted = Column(types.Boolean, nullable=False, default=False)
-    lab_contact_id = Column(ForeignKey("user.id"))
-    lab_contact = orm.relationship("User", foreign_keys=[lab_contact_id])
     loqus_upload = Column(types.Boolean, nullable=False, default=False)
     name = Column(types.String(128), nullable=False)
     organisation_number = Column(types.String(32))
