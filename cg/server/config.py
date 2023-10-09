@@ -3,7 +3,6 @@ import os
 
 # flask
 SECRET_KEY = os.environ.get("CG_SECRET_KEY") or "thisIsNotASafeKey"
-TEMPLATES_AUTO_RELOAD = True
 
 # sqlalchemy
 SQLALCHEMY_DATABASE_URI = os.environ["CG_SQL_DATABASE_URI"]

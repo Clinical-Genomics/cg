@@ -214,7 +214,7 @@ def test_get_sample_flowcells_with_flowcell(
 ):
     """Test query samples and hide flow cell, ensuring that no flow cell name is in the output."""
     # GIVEN a database with a sample and a related flow cell
-    flow_cell = helpers.add_flowcell(disk_store)
+    flow_cell = helpers.add_flow_cell(disk_store)
     sample = helpers.add_sample(disk_store, flowcell=flow_cell)
     returned_flow_cell: Flowcell = disk_store.get_flow_cell_by_name(flow_cell_name=flow_cell.name)
     assert sample in returned_flow_cell.samples
