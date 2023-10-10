@@ -3,18 +3,35 @@ import datetime as dt
 import logging
 from typing import Callable, Dict, Iterator, List, Optional, Set, Union
 
+from sqlalchemy.orm import Query, Session
+
 from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError, CgError
 from cg.store.api.base import BaseHandler
-from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
+from cg.store.filters.status_analysis_filters import (
+    AnalysisFilter,
+    apply_analysis_filter,
+)
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_case_sample_filters import CaseSampleFilter, apply_case_sample_filter
-from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
-from cg.store.filters.status_flow_cell_filters import FlowCellFilter, apply_flow_cell_filter
+from cg.store.filters.status_case_sample_filters import (
+    CaseSampleFilter,
+    apply_case_sample_filter,
+)
+from cg.store.filters.status_customer_filters import (
+    CustomerFilter,
+    apply_customer_filter,
+)
+from cg.store.filters.status_flow_cell_filters import (
+    FlowCellFilter,
+    apply_flow_cell_filter,
+)
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
-from cg.store.filters.status_metrics_filters import SequencingMetricsFilter, apply_metrics_filter
+from cg.store.filters.status_metrics_filters import (
+    SequencingMetricsFilter,
+    apply_metrics_filter,
+)
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
 from cg.store.models import (
@@ -29,7 +46,6 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
 )
-from sqlalchemy.orm import Query, Session
 
 LOG = logging.getLogger(__name__)
 
@@ -396,12 +412,12 @@ class FindBusinessDataHandler(BaseHandler):
             lane=lane,
         ).first()
 
-    def get_flow_cell_by_name(self, flow_cell_name: str) -> Flowcell:
+    def get_flow_cell_by_name(self, flow_cell_name: str) -> Optional[Flowcell]:
         """Return flow cell by flow cell name."""
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
             flow_cell_name=flow_cell_name,
-            filter_functions=[FlowCellFilter.GET_BY_NAME],
+            filter_functions=[FlowCellFilter.FILTER_BY_NAME],
         ).first()
 
     def get_flow_cells_by_statuses(self, flow_cell_statuses: List[str]) -> Optional[List[Flowcell]]:
@@ -409,7 +425,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
             flow_cell_statuses=flow_cell_statuses,
-            filter_functions=[FlowCellFilter.GET_WITH_STATUSES],
+            filter_functions=[FlowCellFilter.FILTER_WITH_STATUSES],
         ).all()
 
     def get_flow_cell_by_name_pattern_and_status(
@@ -417,8 +433,8 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[Flowcell]:
         """Return flow cell by name pattern and status."""
         filter_functions: List[FlowCellFilter] = [
-            FlowCellFilter.GET_WITH_STATUSES,
-            FlowCellFilter.GET_BY_NAME_SEARCH,
+            FlowCellFilter.FILTER_WITH_STATUSES,
+            FlowCellFilter.FILTER_BY_NAME_SEARCH,
         ]
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
@@ -431,7 +447,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Return flow cells for case."""
         return apply_flow_cell_filter(
             flow_cells=self._get_join_flow_cell_sample_links_query(),
-            filter_functions=[FlowCellFilter.GET_BY_CASE],
+            filter_functions=[FlowCellFilter.FILTER_BY_CASE],
             case=case,
         ).all()
 

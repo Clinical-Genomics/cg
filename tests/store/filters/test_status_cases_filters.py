@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import List, Union
 
-from cg.constants.constants import CaseActions, DataDelivery
+from sqlalchemy.orm import Query
+
+from cg.constants.constants import CaseActions, DataDelivery, Pipeline
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
@@ -28,8 +30,6 @@ from cg.store.filters.status_case_filters import (
     filter_running_cases,
 )
 from cg.store.models import Analysis, Family, Sample
-from cgmodels.cg.constants import Pipeline
-from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
 
 

@@ -1,19 +1,19 @@
 import itertools
 import logging
 import shutil
-
 from glob import glob
 from pathlib import Path
 from typing import Iterable, List, Optional
+
+from housekeeper.store.models import File
+
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import DeleteDemuxError
-from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Sample, Flowcell
-from housekeeper.store.models import File
+from cg.store.models import Flowcell, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -78,8 +78,8 @@ class DeleteDemuxAPI:
 
     def _delete_sample_sheet_housekeeper(self) -> None:
         """Delete the presence of all sample sheets related to a flow cell in Housekeeper."""
-        sample_sheet_files: List[File] = get_sample_sheets_from_latest_version(
-            flow_cell_id=self.flow_cell_name, hk_api=self.housekeeper_api
+        sample_sheet_files: List[File] = self.housekeeper_api.get_sample_sheets_from_latest_version(
+            self.flow_cell_name
         )
         if sample_sheet_files:
             for file in sample_sheet_files:

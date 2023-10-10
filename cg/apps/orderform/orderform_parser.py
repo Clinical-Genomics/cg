@@ -2,13 +2,14 @@ import logging
 from pathlib import Path
 from typing import Dict, Hashable, Iterable, List, Optional, Set
 
+from pydantic import BaseModel, ConfigDict, constr
+
 from cg.constants import DataDelivery
 from cg.exc import OrderFormError
 from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool
 from cg.models.orders.sample_base import OrderSample
 from cg.store.models import Customer
-from pydantic import BaseModel, ConfigDict, constr
 
 LOG = logging.getLogger(__name__)
 

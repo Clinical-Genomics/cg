@@ -38,7 +38,7 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     @property
-    def threshold_reads(self):
+    def use_read_count_threshold(self) -> bool:
         """Defines whether the threshold for adequate read count should be passed for all samples
         when determining if the analysis for a case should be automatically started"""
         return False
@@ -211,7 +211,7 @@ class AnalysisAPI(MetaAPI):
             pipeline=str(self.pipeline),
             analysis_type=self.get_bundle_deliverables_type(case_id),
             created=self.get_bundle_created_date(case_id),
-        ).dict()
+        ).model_dump()
 
     def get_bundle_created_date(self, case_id: str) -> dt.datetime:
         return self.get_date_from_file_path(self.get_deliverables_file_path(case_id=case_id))
@@ -254,7 +254,7 @@ class AnalysisAPI(MetaAPI):
 
     def get_cases_to_analyze(self) -> List[Family]:
         return self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.threshold_reads
+            pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
 
     def get_cases_to_store(self) -> List[Family]:

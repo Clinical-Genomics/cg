@@ -3,8 +3,7 @@ import logging
 from pathlib import Path
 from typing import List
 
-from cgmodels.cg.constants import Pipeline
-
+from cg.constants.constants import Pipeline
 from cg.constants.indexes import ListIndexes
 from cg.exc import BalsamicStartError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI

@@ -3,6 +3,7 @@ import logging
 from typing import List, Optional, Tuple
 
 import click
+
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI

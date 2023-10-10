@@ -1,22 +1,22 @@
 import logging
-from typing import List, Union, Optional, Dict
+from typing import Dict, List, Optional, Union
 
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 
 from cg.constants import (
+    BALSAMIC_ANALYSIS_TYPE,
     BALSAMIC_REPORT_ACCREDITED_PANELS,
-    REQUIRED_REPORT_FIELDS,
-    REQUIRED_CUSTOMER_FIELDS,
-    REQUIRED_CASE_FIELDS,
     REQUIRED_APPLICATION_FIELDS,
+    REQUIRED_CASE_FIELDS,
+    REQUIRED_CUSTOMER_FIELDS,
     REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS,
+    REQUIRED_REPORT_FIELDS,
     REQUIRED_SAMPLE_BALSAMIC_FIELDS,
-    REQUIRED_SAMPLE_METHODS_FIELDS,
-    REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS,
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS,
-    BALSAMIC_ANALYSIS_TYPE,
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS,
+    REQUIRED_SAMPLE_METHODS_FIELDS,
+    REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     Pipeline,
 )
 from cg.constants.scout_upload import BALSAMIC_CASE_TAGS
@@ -26,9 +26,9 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.config import BalsamicVarCaller
 from cg.models.balsamic.metrics import (
+    BalsamicQCMetrics,
     BalsamicTargetedQCMetrics,
     BalsamicWGSQCMetrics,
-    BalsamicQCMetrics,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import (
@@ -37,7 +37,7 @@ from cg.models.report.metadata import (
 )
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
-from cg.store.models import Family, Sample, BedVersion, Bed
+from cg.store.models import Bed, BedVersion, Family, Sample
 
 LOG = logging.getLogger(__name__)
 

@@ -3,14 +3,13 @@ from datetime import datetime
 from gettext import gettext
 from typing import List, Union
 
-from cgmodels.cg.constants import Pipeline
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 
-from cg.constants.constants import CaseActions, DataDelivery
+from cg.constants.constants import CaseActions, DataDelivery, Pipeline
 from cg.server.ext import db
 from cg.store.models import Sample
 from cg.utils.flask.enum import SelectEnumField
@@ -118,6 +117,27 @@ class ApplicationVersionView(BaseView):
     column_searchable_list = ["application.tag"]
     edit_modal = True
     form_excluded_columns = ["samples", "pools", "microbial_samples"]
+
+
+class ApplicationLimitationsView(BaseView):
+    """Admin view for Model.ApplicationLimitations."""
+
+    column_list = (
+        "application",
+        "pipeline",
+        "limitations",
+        "comment",
+        "created_at",
+        "updated_at",
+    )
+    column_formatters = {"application": ApplicationView.view_application_link}
+    column_filters = ["application.tag", "pipeline"]
+    column_searchable_list = ["application.tag"]
+    column_editable_list = ["comment"]
+    form_excluded_columns = ["created_at", "updated_at"]
+    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
+    create_modal = True
+    edit_modal = True
 
 
 class BedView(BaseView):

@@ -5,13 +5,12 @@ Revises: df1b3dd317d0
 Create Date: 2023-04-19 13:46:29.137152
 
 """
-from alembic import op
-from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
-
 import sqlalchemy as sa
-from cg.constants import Pipeline
+from sqlalchemy.dialects import mysql
+from sqlalchemy.orm import declarative_base
 
+from alembic import op
+from cg.constants import Pipeline
 
 # revision identifiers, used by Alembic.
 revision = "9008aa5065b4"

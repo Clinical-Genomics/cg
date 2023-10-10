@@ -1,8 +1,12 @@
 """Tests the config part of Crunchy."""
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
-from cg.apps.crunchy.files import get_crunchy_metadata, update_metadata_date, update_metadata_paths
+from cg.apps.crunchy.files import (
+    get_crunchy_metadata,
+    update_metadata_date,
+    update_metadata_paths,
+)
 from cg.apps.crunchy.models import CrunchyMetadata
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile

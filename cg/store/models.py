@@ -3,7 +3,7 @@ import re
 from typing import Dict, List, Optional, Set
 
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.util import deprecated
 
@@ -117,6 +117,7 @@ class Application(Model):
     versions = orm.relationship(
         "ApplicationVersion", order_by="ApplicationVersion.version", backref="application"
     )
+    pipeline_limitations = orm.relationship("ApplicationLimitations", backref="application")
 
     def __str__(self) -> str:
         return self.tag
@@ -172,6 +173,24 @@ class ApplicationVersion(Model):
         if application:
             data["application"] = self.application.to_dict()
         return data
+
+
+class ApplicationLimitations(Model):
+    __tablename__ = "application_limitations"
+
+    id = Column(types.Integer, primary_key=True)
+    application_id = Column(ForeignKey(Application.id), nullable=False)
+    pipeline = Column(types.Enum(*list(Pipeline)), nullable=False)
+    limitations = Column(types.Text)
+    comment = Column(types.Text)
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+
+    def __str__(self):
+        return f"{self.application.tag} – {self.pipeline}"
+
+    def to_dict(self):
+        return to_dict(model_instance=self)
 
 
 class Analysis(Model):
@@ -320,9 +339,6 @@ class Collaboration(Model):
             "name": self.name,
             "internal_id": self.internal_id,
         }
-
-    def to_dict(self):
-        return to_dict(model_instance=self)
 
 
 class Delivery(Model):

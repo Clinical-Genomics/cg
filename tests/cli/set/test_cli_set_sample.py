@@ -1,13 +1,13 @@
 """Test methods for cg cli set sample"""
 
 import pytest
+from click.testing import CliRunner
+
 from cg.cli.set.base import sample
 from cg.constants import EXIT_SUCCESS, Priority
 from cg.constants.subject import Gender
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from click.testing import CliRunner
-
 from cg.store.models import Sample
 
 
@@ -134,7 +134,7 @@ def test_priority_number(cli_runner: CliRunner, base_context: CGConfig, base_sto
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
         sample,
-        [sample_obj.internal_id, "-kv", key, new_value, "-y"],
+        [sample_obj.internal_id, "-kv", key, new_value.name, "-y"],
         obj=base_context,
     )
 

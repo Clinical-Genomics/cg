@@ -3,11 +3,12 @@
 from datetime import datetime
 from typing import Dict, List, Optional
 
+from pydantic import BaseModel, BeforeValidator, Field
+from typing_extensions import Annotated, Literal
+
 from cg.apps.scout.validators import set_gender_if_other, set_parent_if_missing
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.subject import Gender, PlinkGender, PlinkPhenotypeStatus
-from pydantic import BaseModel, BeforeValidator, Field, Strict
-from typing_extensions import Annotated, Literal
 
 
 class Individual(BaseModel):
@@ -17,8 +18,12 @@ class Individual(BaseModel):
         Literal[PlinkGender.UNKNOWN, PlinkGender.MALE, PlinkGender.FEMALE, Gender.OTHER],
         BeforeValidator(set_gender_if_other),
     ]
-    father: Annotated[str, BeforeValidator(set_parent_if_missing)]
-    mother: Annotated[str, BeforeValidator(set_parent_if_missing)]
+    father: Annotated[
+        str, BeforeValidator(lambda x: str(x)), BeforeValidator(set_parent_if_missing)
+    ]
+    mother: Annotated[
+        str, BeforeValidator(lambda x: str(x)), BeforeValidator(set_parent_if_missing)
+    ]
     phenotype: PlinkPhenotypeStatus
     analysis_type: str = "wgs"
 

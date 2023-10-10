@@ -1,7 +1,6 @@
 """Model MIP sample info"""
-from typing import Optional
-
 import datetime
+from typing import Optional
 
 from pydantic.v1 import BaseModel, Field, validator
 

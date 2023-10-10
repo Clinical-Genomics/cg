@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
-    TileReads,
     ReadMetric,
     SampleLaneMetrics,
     SampleLaneTileMetrics,
+    TileReads,
     UndeterminedTileReads,
 )
 from cg.constants.demultiplexing import (

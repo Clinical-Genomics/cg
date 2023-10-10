@@ -2,17 +2,17 @@ from datetime import datetime
 from enum import Enum
 from typing import Callable, List, Optional
 
+from sqlalchemy import and_, not_, or_
+from sqlalchemy.orm import Query
+
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
-from cg.constants.constants import CaseActions, DataDelivery
+from cg.constants.constants import CaseActions, DataDelivery, Pipeline
 from cg.constants.observations import (
     LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
     LOQUSDB_MIP_SEQUENCING_METHODS,
     LOQUSDB_SUPPORTED_PIPELINES,
 )
 from cg.store.models import Analysis, Application, Customer, Family, Sample
-from cgmodels.cg.constants import Pipeline
-from sqlalchemy import and_, not_, or_
-from sqlalchemy.orm import Query
 
 
 def filter_cases_by_action(cases: Query, action: str, **kwargs) -> Query:

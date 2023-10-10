@@ -3,11 +3,11 @@ import datetime as dt
 import logging
 from pathlib import Path
 
+from click.testing import CliRunner
+
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.commands import clean_run_dir, past_run_dirs
 from cg.constants import Pipeline
-from click.testing import CliRunner
-
 from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 

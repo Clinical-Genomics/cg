@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from flask.json import JSONEncoder
+from json import JSONEncoder
 from flask_admin import Admin
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect

@@ -1,16 +1,13 @@
 import pytest
 from sqlalchemy import update
+
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-
-
+from cg.store.models import Application
 from tests.store.api.conftest import (
     re_sequenced_sample_store,
     store_failing_sequencing_qc,
 )
-
-from tests.store.api.conftest import re_sequenced_sample_store
-from cg.store.models import Application
 
 
 @pytest.fixture

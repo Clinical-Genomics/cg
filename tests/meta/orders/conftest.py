@@ -1,8 +1,6 @@
 from pathlib import Path
 
 import pytest
-from tests.mocks.limsmock import MockLimsAPI
-from tests.mocks.osticket import MockOsTicket
 
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.api import FastqSubmitter
@@ -26,6 +24,8 @@ from tests.apps.orderform.conftest import (
     rnafusion_order_to_submit,
     sarscov2_order_to_submit,
 )
+from tests.mocks.limsmock import MockLimsAPI
+from tests.mocks.osticket import MockOsTicket
 
 
 @pytest.fixture(scope="session")

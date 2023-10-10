@@ -4,6 +4,7 @@ import logging
 from datetime import datetime, timedelta
 
 import click
+
 from cg.exc import AnalysisAlreadyUploadedError, AnalysisUploadError
 from cg.meta.meta import MetaAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI

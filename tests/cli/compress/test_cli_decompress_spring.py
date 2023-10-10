@@ -2,11 +2,10 @@
 
 import logging
 
-from cg.cli.compress.fastq import (
-    decompress_case,
-)
-from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
+
+from cg.cli.compress.fastq import decompress_case
+from cg.models.cg_config import CGConfig
 
 
 def test_decompress_spring_cli_no_family(

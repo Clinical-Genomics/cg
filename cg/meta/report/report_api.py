@@ -5,13 +5,20 @@ from pathlib import Path
 from typing import List, Optional
 
 import requests
+from housekeeper.store.models import File, Version
+from jinja2 import Environment, PackageLoader, Template, select_autoescape
+from sqlalchemy.orm import Query
+
 from cg.constants import Pipeline
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError
 from cg.io.controller import WriteStream
 from cg.meta.meta import MetaAPI
-from cg.meta.report.field_validators import get_empty_report_data, get_missing_report_data
+from cg.meta.report.field_validators import (
+    get_empty_report_data,
+    get_missing_report_data,
+)
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
@@ -23,11 +30,13 @@ from cg.models.report.report import (
     ReportModel,
     ScoutReportFiles,
 )
-from cg.models.report.sample import ApplicationModel, MethodsModel, SampleModel, TimestampModel
+from cg.models.report.sample import (
+    ApplicationModel,
+    MethodsModel,
+    SampleModel,
+    TimestampModel,
+)
 from cg.store.models import Analysis, Application, Family, FamilySample, Sample
-from housekeeper.store.models import File, Version
-from jinja2 import Environment, PackageLoader, Template, select_autoescape
-from sqlalchemy.orm import Query
 
 LOG = logging.getLogger(__name__)
 

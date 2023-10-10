@@ -1,16 +1,15 @@
 import logging
-import pytest
-
 from pathlib import Path
 from typing import List, Optional
 
+import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import DeleteDemuxError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.store.api import Store
-from cg.store.models import Sample, Flowcell
+from cg.store.models import Flowcell, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -61,7 +60,7 @@ def test_get_presence_status_status_db(
     assert not empty_presence
 
     # WHEN adding a flowcell into the statusdb and checking its updated presence
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=delete_demux_api.status_db,
         flow_cell_name=bcl2fastq_flow_cell_id,
         sequencer_type="novaseq",

@@ -3,6 +3,8 @@ import logging
 from datetime import datetime
 from typing import Dict, List, Optional
 
+from housekeeper.store.models import Bundle, Version
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.pedigree import Pedigree
@@ -29,7 +31,6 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     User,
 )
-from housekeeper.store.models import Bundle, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -586,9 +587,9 @@ class StoreHelpers:
         ]
 
     @staticmethod
-    def add_flowcell(
+    def add_flow_cell(
         store: Store,
-        flow_cell_name: str = "flowcell_test",
+        flow_cell_name: str = "flow_cell_test",
         archived_at: datetime = None,
         sequencer_type: str = Sequencers.HISEQX,
         samples: List[Sample] = None,
@@ -597,10 +598,10 @@ class StoreHelpers:
         has_backup: Optional[bool] = False,
     ) -> Flowcell:
         """Utility function to add a flow cell to the store and return an object."""
-        flow_cell = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
+        flow_cell: Optional[Flowcell] = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
         if flow_cell:
             return flow_cell
-        flow_cell = store.add_flow_cell(
+        flow_cell: Flowcell = store.add_flow_cell(
             flow_cell_name=flow_cell_name,
             sequencer_name="dummy_sequencer",
             sequencer_type=sequencer_type,
@@ -855,7 +856,7 @@ class StoreHelpers:
                 store=store, internal_id=sample_internal_id, customer_id=customer_id
             )
         if not flow_cell:
-            flow_cell = cls.add_flowcell(store=store, flow_cell_name=flow_cell_name)
+            flow_cell = cls.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
 
         metrics: SampleLaneSequencingMetrics = store.add_sample_lane_sequencing_metrics(
             sample_internal_id=sample.internal_id,
@@ -867,3 +868,25 @@ class StoreHelpers:
         store.session.add(metrics)
         store.session.commit()
         return metrics
+
+    @classmethod
+    def add_multiple_sample_lane_sequencing_metrics_entries(cls, metrics_data: List, store) -> None:
+        """Add multiple sample lane sequencing metrics to a store."""
+
+        for (
+            sample_internal_id,
+            flow_cell_name_,
+            flow_cell_lane_number,
+            sample_total_reads_in_lane,
+            sample_base_percentage_passing_q30,
+            sample_base_mean_quality_score,
+        ) in metrics_data:
+            cls.add_sample_lane_sequencing_metrics(
+                store=store,
+                sample_internal_id=sample_internal_id,
+                flow_cell_name=flow_cell_name_,
+                flow_cell_lane_number=flow_cell_lane_number,
+                sample_total_reads_in_lane=sample_total_reads_in_lane,
+                sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
+                sample_base_mean_quality_score=sample_base_mean_quality_score,
+            )

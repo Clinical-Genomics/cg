@@ -2,9 +2,11 @@ import http
 import os
 import tempfile
 from datetime import date
-from cg.constants.invoice import CostCenters
+from typing import List, Union
+
 from flask import (
     Blueprint,
+    abort,
     current_app,
     flash,
     redirect,
@@ -13,16 +15,14 @@ from flask import (
     send_from_directory,
     session,
     url_for,
-    abort,
 )
 from flask_dance.contrib.google import google
 
 from cg.apps.invoice.render import render_xlsx
+from cg.constants.invoice import CostCenters
 from cg.meta.invoice import InvoiceAPI
 from cg.server.ext import db, lims
-from typing import List, Union
 from cg.store.models import Customer, Invoice, Pool, Sample
-
 
 BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
 
@@ -204,7 +204,7 @@ def invoice_template(invoice_id):
     excel_path = os.path.join(temp_dir, filename)
     workbook.save(excel_path)
 
-    return send_from_directory(directory=temp_dir, filename=filename, as_attachment=True)
+    return send_from_directory(directory=temp_dir, path=filename, as_attachment=True)
 
 
 @BLUEPRINT.route("/<int:invoice_id>/invoice_file/<cost_center>")
@@ -222,4 +222,4 @@ def modified_invoice(invoice_id, cost_center):
             file_object.write(invoice_obj.excel_kth)
         elif cost_center == "KI":
             file_object.write(invoice_obj.excel_ki)
-    return send_from_directory(directory=temp_dir, filename=file_name, as_attachment=True)
+    return send_from_directory(directory=temp_dir, path=file_name, as_attachment=True)

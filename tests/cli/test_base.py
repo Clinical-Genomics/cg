@@ -1,11 +1,12 @@
 import logging
 from pathlib import Path
 
+from click.testing import CliRunner, Result
+
 import cg
 from cg.cli.base import base, init
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from click.testing import CliRunner, Result
 
 
 def test_cli_version(cli_runner: CliRunner):
@@ -27,7 +28,7 @@ def test_list_commands(cli_runner: CliRunner):
 
 def test_missing_command(cli_runner: CliRunner):
     # WHEN invoking a missing command
-    result = cli_runner.invoke(cg, ["i_dont_exist"])
+    result = cli_runner.invoke(base, ["i_dont_exist"])
     # THEN context should abort
     assert result.exit_code != 0
 

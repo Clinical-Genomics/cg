@@ -2,6 +2,7 @@
 from typing import List, Optional
 
 import click
+
 from cg.apps.coverage import ChanjoAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store

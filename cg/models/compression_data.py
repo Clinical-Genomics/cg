@@ -4,7 +4,11 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, FileExtensions
+from cg.constants import (
+    FASTQ_FIRST_READ_SUFFIX,
+    FASTQ_SECOND_READ_SUFFIX,
+    FileExtensions,
+)
 from cg.constants.compression import PENDING_PATH_SUFFIX
 
 LOG = logging.getLogger(__name__)

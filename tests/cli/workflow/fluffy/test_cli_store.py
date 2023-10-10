@@ -1,9 +1,10 @@
+from click.testing import CliRunner
+
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.cli.workflow.fluffy.base import store, store_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
 
 
 def test_cli_store_dry_no_case(

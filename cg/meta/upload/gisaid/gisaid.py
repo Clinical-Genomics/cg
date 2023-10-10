@@ -1,27 +1,25 @@
 """Interactions with the gisaid cli upload_results_to_gisaid"""
 import logging
 import re
-from pathlib import Path
-from typing import List, Dict, Optional
-import pandas as pd
-
-from cg.constants.constants import SARS_COV_REGEX, FileFormat
-from housekeeper.store.models import File
 import tempfile
+from pathlib import Path
+from typing import Dict, List, Optional
+
+import pandas as pd
+from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.constants.constants import SARS_COV_REGEX, FileFormat
+from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Sample
 from cg.utils import Process
-from .constants import HEADERS
-from .models import GisaidSample, GisaidAccession
 
-from cg.exc import (
-    HousekeeperFileMissingError,
-)
+from .constants import HEADERS
+from .models import GisaidAccession, GisaidSample
 
 LOG = logging.getLogger(__name__)
 
@@ -154,7 +152,7 @@ class GisaidAPI:
     def create_gisaid_csv(self, gisaid_samples: List[GisaidSample], case_id: str) -> None:
         """Create csv file for gisaid upload"""
         samples_df = pd.DataFrame(
-            data=[gisaid_sample.dict() for gisaid_sample in gisaid_samples],
+            data=[gisaid_sample.model_dump() for gisaid_sample in gisaid_samples],
             columns=HEADERS,
         )
 

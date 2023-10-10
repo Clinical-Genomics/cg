@@ -30,10 +30,6 @@ class Sequencers(BaseModel):
     novaseq: str
 
 
-class BackupConfig(BaseModel):
-    encrypt_dir: str
-
-
 class SlurmConfig(BaseModel):
     account: str
     hours: Optional[int]
@@ -42,6 +38,11 @@ class SlurmConfig(BaseModel):
     number_tasks: Optional[int]
     conda_env: Optional[str]
     qos: SlurmQos = SlurmQos.LOW
+
+
+class BackupConfig(BaseModel):
+    encrypt_dir: str
+    slurm_flow_cell_encryption: SlurmConfig
 
 
 class HousekeeperConfig(BaseModel):
@@ -262,6 +263,7 @@ class CGConfig(BaseModel):
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
+    pigz: Optional[CommonAppConfig] = None
     pdc: Optional[CommonAppConfig] = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
