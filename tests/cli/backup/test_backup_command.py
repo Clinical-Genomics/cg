@@ -17,12 +17,17 @@ def test_backup_flow_cells(
     caplog,
     flow_cell_name: str,
     flow_cell_full_name: str,
+    helpers: StoreHelpers,
 ):
     """Test backing up flow cell in dry run mode."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a flow cells directory
 
+    # Given a flow cell with no back-up
+    helpers.add_flow_cell(
+        store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=False
+    )
     # GIVEN an encrypted flow cell
     flow_cells_dir = Path(cg_context.backup.encrypt_dir, flow_cell_full_name)
     flow_cells_dir.mkdir(parents=True, exist_ok=True)
