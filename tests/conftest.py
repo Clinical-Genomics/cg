@@ -46,7 +46,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
-from cg.store.database import initialise_database
+from cg.store.database import create_all_tables, drop_all_tables, initialise_database
 from cg.store.models import Bed, BedVersion, Customer, Family, Organism, Sample
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
@@ -1767,9 +1767,9 @@ def store() -> Store:
     """Return a CG store."""
     initialise_database("sqlite:///:memory:")
     _store = Store()
-    _store.create_all()
+    create_all_tables()
     yield _store
-    _store.drop_all()
+    drop_all_tables()
 
 
 @pytest.fixture(name="apptag_rna")

@@ -25,8 +25,7 @@ from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.store import Store
-from cg.store.database import get_engine
+from cg.store.database import create_all_tables, drop_all_tables, get_engine, get_tables
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -66,22 +65,20 @@ def base(
 @base.command()
 @click.option("--reset", is_flag=True, help="reset database before setting up tables")
 @click.option("--force", is_flag=True, help="bypass manual confirmations")
-@click.pass_obj
-def init(context: CGConfig, reset: bool, force: bool):
+def init(reset: bool, force: bool):
     """Setup the database."""
-    status_db: Store = context.status_db
     engine = get_engine()
-    existing_tables = engine.table_names()
+    existing_tables = get_tables()
     if force or reset:
         if existing_tables and not force:
             message = f"Delete existing tables? [{', '.join(existing_tables)}]"
             click.confirm(click.style(message, fg="yellow"), abort=True)
-        status_db.drop_all()
+        drop_all_tables()
     elif existing_tables:
         LOG.error("Database already exists, use '--reset'")
         raise click.Abort
 
-    status_db.create_all()
+    create_all_tables()
     LOG.info("Success! New tables: %s", ", ".join(engine.table_names()))
 
 

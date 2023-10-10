@@ -3,7 +3,6 @@ import logging
 from cg.store.api.delete import DeleteDataHandler
 from cg.store.api.find_business_data import FindBusinessDataHandler
 from cg.store.database import get_session
-from cg.store.models import Model
 
 from .add import AddHandler
 from .find_basic_data import FindBasicDataHandler
@@ -31,12 +30,4 @@ class CoreHandler(
 class Store(CoreHandler):
     def __init__(self):
         self.session = get_session()
-        super().__init__(session=self.session)
-
-    def create_all(self):
-        """Create all tables in the database."""
-        Model.metadata.create_all(bind=self.session.get_bind())
-
-    def drop_all(self):
-        """Drop all tables in the database."""
-        Model.metadata.drop_all(bind=self.session.get_bind())
+        super().__init__(self.session)
