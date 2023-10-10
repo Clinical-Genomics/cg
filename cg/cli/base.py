@@ -78,7 +78,7 @@ def init(reset: bool, force: bool):
         raise click.Abort
 
     create_all_tables()
-    LOG.info("Success! New tables: %s", ", ".join(get_tables()))
+    LOG.info(f"Success! New tables: {', '.join(get_tables())}")
 
 
 base.add_command(add_cmd)
