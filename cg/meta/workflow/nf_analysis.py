@@ -57,12 +57,6 @@ class NfAnalysisAPI(AnalysisAPI):
     def process(self, process: Process):
         self._process = process
 
-    @property
-    def use_read_count_threshold(self) -> bool:
-        """Defines whether the threshold for adequate read count should be passed for all samples
-        when determining if the analysis for a case should be automatically started."""
-        return True
-
     def get_profile(self, profile: Optional[str] = None) -> str:
         """Get NF profiles."""
         return profile or self.profile
