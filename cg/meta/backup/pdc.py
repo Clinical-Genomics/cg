@@ -57,10 +57,13 @@ class PdcAPI:
         self.run_dsmc_command(command=command)
 
     def run_dsmc_command(self, command: list) -> None:
-        """Runs a DSMC command"""
+        """Runs a DSMC command.
+        Raises:
+            PdcError when unable to process command.
+        """
         LOG.debug("Starting DSMC command:")
         LOG.debug(f"{self.process.binary} {' '.join(command)}")
         try:
             self.process.run_command(parameters=command, dry_run=self.dry_run)
         except Exception as error:
-            raise PdcError(f"{error}")
+            raise PdcError(f"{error}") from error
