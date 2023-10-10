@@ -37,6 +37,56 @@ def test_backup_flow_cells(
     assert f"Flow cell: {flow_cell_full_name} has been backed up" in caplog.text
 
 
+def test_backup_flow_cells_when_flow_cell_already_has_backup(
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    caplog,
+    flow_cell_name: str,
+    flow_cell_full_name: str,
+    helpers: StoreHelpers,
+):
+    """Test backing up flow cell in dry run mode."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a flow cells directory
+
+    # Given a flow cell with a back-up
+    helpers.add_flow_cell(
+        store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=True
+    )
+
+    # WHEN backing up flow cells in dry run mode
+    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+
+    # THEN exits without any errors
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN communicate flow cell has already benn backed upped
+    assert f"Flow cell: {flow_cell_name} is already backed-up" in caplog.text
+
+
+def test_backup_flow_cells_when_encryption_is_not_completed(
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    caplog,
+    flow_cell_name: str,
+    flow_cell_full_name: str,
+):
+    """Test backing up flow cell in dry run mode."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a flow cells directory
+
+    # WHEN backing up flow cells in dry run mode
+    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+
+    # THEN exits without any errors
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN communicate flow cell encryption is not completed
+    assert f"Flow cell: {flow_cell_name} encryption process is not complete" in caplog.text
+
+
 def test_encrypt_flow_cells(
     cli_runner: CliRunner, cg_context: CGConfig, caplog, sbatch_job_number: str
 ):

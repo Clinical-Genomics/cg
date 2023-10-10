@@ -61,7 +61,7 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
             tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
         )
         if not flow_cell_encryption_api.complete_file_path.exists():
-            LOG.debug(f"Flow cell: {flow_cell.id}s' encryption process is not complete")
+            LOG.debug(f"Flow cell: {flow_cell.id} encryption process is not complete")
             continue
         archived_file_count: int = 0
         files_to_archive: list[Path] = [
