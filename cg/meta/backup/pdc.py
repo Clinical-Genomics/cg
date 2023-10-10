@@ -2,6 +2,8 @@
 
 import logging
 
+import psutil
+
 from cg.constants.pdc import DSMCParameters
 from cg.exc import PdcError
 from cg.utils import Process
@@ -17,6 +19,19 @@ class PdcAPI:
     def __init__(self, binary_path: str = None, dry_run: bool = False):
         self.process: Process = Process(binary=binary_path)
         self.dry_run: bool = dry_run
+
+    def is_dcms_running(self) -> bool:
+        """Check if a dmcs process is already running on the system."""
+        is_dcms_running: bool = False
+        try:
+            for process in psutil.process_iter():
+                if "dsmc" in process.name():
+                    is_dcms_running = True
+        except Exception as error:
+            LOG.debug(f"{error}")
+        if is_dcms_running:
+            LOG.info("A Dcms process is already running")
+        return is_dcms_running
 
     def archive_file_to_pdc(self, file_path: str, dry_run: bool = False) -> None:
         """Archive a file by storing it on PDC"""
