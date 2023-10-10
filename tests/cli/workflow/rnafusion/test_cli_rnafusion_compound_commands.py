@@ -7,13 +7,7 @@ from click.testing import CliRunner
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.workflow.rnafusion.base import (
-    rnafusion,
-    start,
-    start_available,
-    store,
-    store_available,
-)
+from cg.cli.workflow.rnafusion.base import rnafusion, start, start_available, store, store_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -223,13 +217,13 @@ def test_start_available(
     caplog: LogCaptureFixture,
     mocker,
     rnafusion_case_id: str,
+    case_id_not_enough_reads: str,
 ):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN CASE ID of sample where read counts pass threshold
-    case_id_success: str = rnafusion_case_id
+    # GIVEN a case passing read counts threshold and another one not passing
 
     # GIVEN a mocked config
 
@@ -244,4 +238,7 @@ def test_start_available(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN it should successfully identify the one case eligible for auto-start
-    assert case_id_success in caplog.text
+    assert rnafusion_case_id in caplog.text
+
+    # THEN the case without enough reads should not start
+    assert case_id_not_enough_reads not in caplog.text
