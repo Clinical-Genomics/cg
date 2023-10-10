@@ -38,11 +38,15 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
+from cg.models.demultiplex.run_parameters import (
+    RunParametersNovaSeq6000,
+    RunParametersNovaSeqX,
+)
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
+from cg.store.database import initialise_database
 from cg.store.models import Bed, BedVersion, Customer, Family, Organism, Sample
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
@@ -1761,7 +1765,8 @@ def wgs_application_tag() -> str:
 @pytest.fixture(name="store")
 def store() -> Store:
     """Return a CG store."""
-    _store = Store(uri="sqlite:///")
+    initialise_database("sqlite:///:memory:")
+    _store = Store()
     _store.create_all()
     yield _store
     _store.drop_all()

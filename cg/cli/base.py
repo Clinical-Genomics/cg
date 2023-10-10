@@ -26,6 +26,7 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
 from cg.store import Store
+from cg.store.database import get_engine
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -69,7 +70,8 @@ def base(
 def init(context: CGConfig, reset: bool, force: bool):
     """Setup the database."""
     status_db: Store = context.status_db
-    existing_tables = status_db.engine.table_names()
+    engine = get_engine()
+    existing_tables = engine.table_names()
     if force or reset:
         if existing_tables and not force:
             message = f"Delete existing tables? [{', '.join(existing_tables)}]"
@@ -80,7 +82,7 @@ def init(context: CGConfig, reset: bool, force: bool):
         raise click.Abort
 
     status_db.create_all()
-    LOG.info("Success! New tables: %s", ", ".join(status_db.engine.table_names()))
+    LOG.info("Success! New tables: %s", ", ".join(engine.table_names()))
 
 
 base.add_command(add_cmd)
