@@ -7,7 +7,7 @@ import cg
 from cg.cli.base import base, init
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.database import get_engine, initialise_database
+from cg.store.database import get_tables, initialise_database
 
 
 def test_cli_version(cli_runner: CliRunner):
@@ -51,7 +51,7 @@ def test_cli_init(cli_runner: CliRunner, base_context: CGConfig, caplog, tmp_pat
     # THEN it should setup the database with some tables
     assert result.exit_code == 0
     assert database_path.exists()
-    assert len(get_engine().table_names()) > 0
+    assert len(get_tables()) > 0
 
     # GIVEN the database already exists
     # WHEN calling the init function

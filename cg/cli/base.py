@@ -25,7 +25,7 @@ from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.store.database import create_all_tables, drop_all_tables, get_engine, get_tables
+from cg.store.database import create_all_tables, drop_all_tables, get_tables
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -67,7 +67,6 @@ def base(
 @click.option("--force", is_flag=True, help="bypass manual confirmations")
 def init(reset: bool, force: bool):
     """Setup the database."""
-    engine = get_engine()
     existing_tables = get_tables()
     if force or reset:
         if existing_tables and not force:
@@ -79,7 +78,7 @@ def init(reset: bool, force: bool):
         raise click.Abort
 
     create_all_tables()
-    LOG.info("Success! New tables: %s", ", ".join(engine.table_names()))
+    LOG.info("Success! New tables: %s", ", ".join(get_tables()))
 
 
 base.add_command(add_cmd)
