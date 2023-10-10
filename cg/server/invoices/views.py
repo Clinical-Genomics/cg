@@ -204,7 +204,7 @@ def invoice_template(invoice_id):
     excel_path = os.path.join(temp_dir, filename)
     workbook.save(excel_path)
 
-    return send_from_directory(directory=temp_dir, filename=filename, as_attachment=True)
+    return send_from_directory(directory=temp_dir, path=filename, as_attachment=True)
 
 
 @BLUEPRINT.route("/<int:invoice_id>/invoice_file/<cost_center>")
@@ -222,4 +222,4 @@ def modified_invoice(invoice_id, cost_center):
             file_object.write(invoice_obj.excel_kth)
         elif cost_center == "KI":
             file_object.write(invoice_obj.excel_ki)
-    return send_from_directory(directory=temp_dir, filename=file_name, as_attachment=True)
+    return send_from_directory(directory=temp_dir, path=file_name, as_attachment=True)

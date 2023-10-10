@@ -192,7 +192,7 @@ def test_demultiplex_all_novaseq(
     assert "Found directory" in caplog.text
 
     # THEN assert it found a flow cell that is ready for demultiplexing
-    assert f"Flow cell {flow_cell.id} is ready for demultiplexing" in caplog.text
+    assert f"Flow cell {flow_cell.id} is ready for downstream processing" in caplog.text
 
 
 def test_is_demultiplexing_complete(tmp_flow_cell_directory_bcl2fastq: Path):

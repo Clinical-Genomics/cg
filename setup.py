@@ -42,7 +42,7 @@ except FileNotFoundError:
 
 setup(
     name=NAME,
-    version="51.2.8",
+    version="51.5.6",
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
@@ -57,7 +57,7 @@ setup(
     tests_require=parse_requirements("requirements-dev.txt"),
     classifiers=[
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: CPython",
     ],
 )
