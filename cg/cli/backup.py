@@ -39,7 +39,7 @@ def backup(context: CGConfig):
 @click.pass_obj
 def backup_flow_cells(context: CGConfig, dry_run: bool):
     """Backup flow cells."""
-    pdc_api: PdcAPI = PdcAPI(binary_path=context.pdc.binary_path, dry_run=dry_run)
+    pdc_api = PdcAPI(binary_path=context.pdc.binary_path, dry_run=dry_run)
     if pdc_api.is_dcms_running():
         exit(0)
     status_db: Store = context.status_db

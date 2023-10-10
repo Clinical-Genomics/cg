@@ -28,6 +28,7 @@ def test_backup_flow_cells(
     helpers.add_flow_cell(
         store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=False
     )
+
     # GIVEN an encrypted flow cell
     flow_cells_dir = Path(cg_context.backup.encrypt_dir, flow_cell_full_name)
     flow_cells_dir.mkdir(parents=True, exist_ok=True)
@@ -39,7 +40,7 @@ def test_backup_flow_cells(
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN communicate flow cell has benn backed upped
+    # THEN communicate flow cell has been backed upped
     assert f"Flow cell: {flow_cell_full_name} has been backed up" in caplog.text
 
 
@@ -51,7 +52,7 @@ def test_backup_flow_cells_when_dcms_is_running(
     flow_cell_full_name: str,
     mocker,
 ):
-    """Test backing up flow cell in dry run mode."""
+    """Test backing up flow cell in dry run mode when Dcms processing has started."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a flow cells directory
@@ -78,7 +79,7 @@ def test_backup_flow_cells_when_flow_cell_already_has_backup(
     flow_cell_full_name: str,
     helpers: StoreHelpers,
 ):
-    """Test backing up flow cell in dry run mode."""
+    """Test backing up flow cell in dry run mode when already backed-up."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a flow cells directory
@@ -105,7 +106,7 @@ def test_backup_flow_cells_when_encryption_is_not_completed(
     flow_cell_name: str,
     flow_cell_full_name: str,
 ):
-    """Test backing up flow cell in dry run mode."""
+    """Test backing up flow cell in dry run mode when encryption is not complete."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a flow cells directory

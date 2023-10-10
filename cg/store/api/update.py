@@ -1,4 +1,4 @@
-"""Handler to delete data objects"""
+"""Handler to update data objects"""
 
 from sqlalchemy.orm import Session
 
