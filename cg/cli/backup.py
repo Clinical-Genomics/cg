@@ -76,6 +76,7 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
                 LOG.debug(f"{encrypted_file.as_posix()} cannot be archived")
             if archived_file_count == len(files_to_archive):
                 status_db.update_flow_cell_has_backup(flow_cell=flow_cell, has_backup=True)
+                LOG.debug(f"Flow cell: {flow_cell.full_name} has been backed up")
 
 
 @backup.command("encrypt-flow-cells")

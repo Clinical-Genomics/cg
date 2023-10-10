@@ -3,11 +3,38 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from cg.cli.backup import encrypt_flow_cells, fetch_flow_cell
+from cg.cli.backup import backup_flow_cells, encrypt_flow_cells, fetch_flow_cell
 from cg.constants import EXIT_SUCCESS, FileExtensions, FlowCellStatus
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from tests.store_helpers import StoreHelpers
+
+
+def test_backup_flow_cells(
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    caplog,
+    flow_cell_name: str,
+    flow_cell_full_name: str,
+):
+    """Test backing up flow cell in dry run mode."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a flow cells directory
+
+    # GIVEN an encrypted flow cell
+    flow_cells_dir = Path(cg_context.backup.encrypt_dir, flow_cell_full_name)
+    flow_cells_dir.mkdir(parents=True, exist_ok=True)
+    Path(flow_cells_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()
+
+    # WHEN backing up flow cells in dry run mode
+    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+
+    # THEN exits without any errors
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN communicate flow cell has benn backed upped
+    assert f"Flow cell: {flow_cell_full_name} has been backed up" in caplog.text
 
 
 def test_encrypt_flow_cells(
@@ -130,7 +157,7 @@ def test_encrypt_flow_cell_when_encryption_already_completed(
     mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
     FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
-    # GIVEN a pending flag file
+    # GIVEN a complete flag file
     flow_cells_dir = Path(cg_context.backup.encrypt_dir, flow_cell_full_name)
     flow_cells_dir.mkdir(parents=True, exist_ok=True)
     Path(flow_cells_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()
