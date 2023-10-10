@@ -2834,17 +2834,6 @@ def rnafusion_context(
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
-    helpers.add_analysis(
-        status_db,
-        case=case_not_enough_reads,
-        pipeline=Pipeline.RNAFUSION,
-        started_at=timestamp_yesterday,
-        uploaded_at=timestamp_yesterday,
-        created_at=timestamp_yesterday,
-        completed_at=timestamp_yesterday,
-        cleaned_at=None,
-    )
-
     return cg_context
 
 
