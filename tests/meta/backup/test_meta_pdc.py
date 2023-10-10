@@ -4,6 +4,18 @@ from unittest import mock
 from cg.meta.backup.pdc import PdcAPI
 
 
+def test_is_dcms_process_running(binary_path: str):
+    """Tests checking if Dcms process is running when no Dcms process is running."""
+    # GIVEN an instance of the PDC API
+    pdc_api = PdcAPI(binary_path=binary_path)
+
+    # WHEN checking if dcms is running
+    is_dmsc_running: bool = pdc_api.is_dcms_running()
+
+    # THEN return false
+    assert not is_dmsc_running
+
+
 @mock.patch("cg.meta.backup.pdc.Process")
 def test_archive_file_to_pdc(mock_process, binary_path, backup_file_path):
     """Tests execution command to archive file to PDC"""
