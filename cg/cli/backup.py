@@ -5,12 +5,13 @@ from typing import Iterable, List, Optional, Union
 
 import click
 import housekeeper.store.models as hk_models
+import psutil
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.exc import FlowCellEncryptionError, FlowCellError
+from cg.exc import FlowCellEncryptionError, FlowCellError, PdcError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import (
@@ -32,6 +33,52 @@ LOG = logging.getLogger(__name__)
 def backup(context: CGConfig):
     """Backup utilities"""
     pass
+
+
+@backup.command("flow-cells")
+@DRY_RUN
+@click.pass_obj
+def backup_flow_cells(context: CGConfig, dry_run: bool):
+    """Backup flow cells."""
+    is_dcms_running: bool = False
+    try:
+        for process in psutil.process_iter():
+            if "dsmc" in process.name():
+                is_dcms_running = True
+    except Exception as error:
+        LOG.debug(f"{error}")
+    if is_dcms_running:
+        LOG.info("A Dcms process is already running - Exiting")
+        exit(0)
+    status_db: Store = context.status_db
+    pdc_api: PdcAPI = PdcAPI(binary_path=context.pdc.binary_path, dry_run=dry_run)
+    for flow_cell in get_flow_cells_from_path(flow_cells_dir=Path(context.flow_cells_dir)):
+        db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
+            flow_cell_name=flow_cell.id
+        )
+        if db_flow_cell and db_flow_cell.has_backup:
+            LOG.debug(f"Flow cell: {flow_cell.id} is already backed-up")
+            continue
+        flow_cell_encryption_api = FlowCellEncryptionAPI(
+            binary_path=context.encryption.binary_path,
+            dry_run=dry_run,
+            encryption_dir=Path(context.backup.encrypt_dir),
+            flow_cell=flow_cell,
+            pigz_binary_path=context.pigz.binary_path,
+            slurm_api=SlurmAPI(),
+            sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
+            tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
+        )
+        if not flow_cell_encryption_api.complete_file_path.exists():
+            continue
+        for encrypted_file in [
+            flow_cell_encryption_api.final_passphrase_file_path,
+            flow_cell_encryption_api.encrypted_gpg_file_path,
+        ]:
+            try:
+                pdc_api.archive_file_to_pdc(file_path=encrypted_file.as_posix())
+            except PdcError:
+                LOG.debug(f"{encrypted_file.as_posix()} cannot be archived")
 
 
 @backup.command("encrypt-flow-cells")

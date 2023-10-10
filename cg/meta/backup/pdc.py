@@ -3,6 +3,7 @@
 import logging
 
 from cg.constants.pdc import DSMCParameters
+from cg.exc import PdcError
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -44,4 +45,7 @@ class PdcAPI:
         """Runs a DSMC command"""
         LOG.debug("Starting DSMC command:")
         LOG.debug(f"{self.process.binary} {' '.join(command)}")
-        self.process.run_command(parameters=command, dry_run=self.dry_run)
+        try:
+            self.process.run_command(parameters=command, dry_run=self.dry_run)
+        except Exception as error:
+            raise PdcError(f"{error}")

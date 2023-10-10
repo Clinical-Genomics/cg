@@ -32,6 +32,7 @@ packaging
 pandas
 paramiko
 petname
+psutil
 pydantic>2.0
 python-dateutil
 pyyaml

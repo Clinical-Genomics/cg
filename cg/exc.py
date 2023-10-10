@@ -183,7 +183,11 @@ class LoqusdbDuplicateRecordError(LoqusdbError):
     """Exception related to duplicate records in Loqusdb."""
 
 
-class PdcNoFilesMatchingSearchError(CgError):
+class PdcError(CgError):
+    """Exception raised when PDC API interaction errors."""
+
+
+class PdcNoFilesMatchingSearchError(PdcError):
     """Exception raised when PDC API returns no files matching the search criteria."""
 
 
