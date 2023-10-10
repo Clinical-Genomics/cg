@@ -5,6 +5,7 @@ from click.testing import CliRunner
 
 from cg.cli.backup import backup_flow_cells, encrypt_flow_cells, fetch_flow_cell
 from cg.constants import EXIT_SUCCESS, FileExtensions, FlowCellStatus
+from cg.meta.backup.pdc import PdcAPI
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from tests.store_helpers import StoreHelpers
@@ -35,6 +36,33 @@ def test_backup_flow_cells(
 
     # THEN communicate flow cell has benn backed upped
     assert f"Flow cell: {flow_cell_full_name} has been backed up" in caplog.text
+
+
+def test_backup_flow_cells_when_dcms_is_running(
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    caplog,
+    flow_cell_name: str,
+    flow_cell_full_name: str,
+    mocker,
+):
+    """Test backing up flow cell in dry run mode."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a flow cells directory
+
+    # GIVEN an ongoing Dcms process
+    mocker.patch.object(PdcAPI, "is_dcms_running")
+    PdcAPI.is_dcms_running.return_value = True
+
+    # WHEN backing up flow cells in dry run mode
+    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+
+    # THEN exits without any errors
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN communicate flow cell encryption is not completed
+    assert f"Flow cell: {flow_cell_name} encryption process is not complete" not in caplog.text
 
 
 def test_backup_flow_cells_when_flow_cell_already_has_backup(
