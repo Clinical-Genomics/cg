@@ -6,7 +6,7 @@ Create Date: 2022-02-25 16:13:16.666812
 
 """
 import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 from alembic import op
 
