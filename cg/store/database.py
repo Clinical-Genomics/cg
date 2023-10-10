@@ -25,6 +25,7 @@ def get_session() -> Session:
 
 
 def get_engine():
+    """Get the global engine for SQLAlchemy."""
     if not ENGINE:
         raise CgError("Database not initialised")
     return ENGINE
