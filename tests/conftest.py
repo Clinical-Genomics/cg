@@ -2213,7 +2213,7 @@ def context_config(
             "binary_path": "echo",
             "cadd_path": str(cg_dir),
             "conda_binary": "a_conda_binary",
-            "conda_env": "S_Balsamic",
+            "conda_env": "S_balsamic",
             "loqusdb_path": str(cg_dir),
             "pon_path": str(cg_dir),
             "root": str(balsamic_dir),
