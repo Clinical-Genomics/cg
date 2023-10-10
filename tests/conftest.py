@@ -1765,7 +1765,7 @@ def wgs_application_tag() -> str:
 @pytest.fixture(name="store")
 def store() -> Store:
     """Return a CG store."""
-    initialise_database("sqlite:///:memory:")
+    initialise_database("sqlite:///")
     _store = Store()
     create_all_tables()
     yield _store
