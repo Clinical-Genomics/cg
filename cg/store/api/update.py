@@ -13,6 +13,6 @@ class UpdateHandler(BaseHandler):
         super().__init__(session=session)
         self.session = session
 
-    def update_flow_cell_has_backup(self, flow_cell: Flowcell) -> None:
-        flow_cell.has_backup = True
+    def update_flow_cell_has_backup(self, flow_cell: Flowcell, has_backup: bool) -> None:
+        flow_cell.has_backup = has_backup
         self.session.commit()
