@@ -27,7 +27,7 @@ Jinja2
 lxml
 marshmallow>3               # due to code expects behaviour from >3
 markupsafe
-openpyxl==3.0.10
+openpyxl
 packaging
 pandas
 paramiko
