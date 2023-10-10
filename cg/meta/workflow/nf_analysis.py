@@ -15,7 +15,6 @@ from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
-from cg.store.models import Family
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
