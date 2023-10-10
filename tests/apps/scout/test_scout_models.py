@@ -124,6 +124,7 @@ def test_validate_rank_score_model_float(other_sex_case_output: str):
         file_format=FileFormat.JSON, stream=other_sex_case_output
     )
     case = cases[0]
+
     # GIVEN a case that has a float value as rank_model_version
     case["rank_model_version"] = 1.2
 
