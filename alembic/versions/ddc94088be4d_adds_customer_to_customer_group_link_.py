@@ -10,7 +10,7 @@ from sqlalchemy import Column, orm, types
 
 # revision identifiers, used by Alembic.
 from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 from alembic import op
 

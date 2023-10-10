@@ -39,7 +39,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         self.queries_path = config.microsalt.queries_path
 
     @property
-    def threshold_reads(self):
+    def use_read_count_threshold(self) -> bool:
         return False
 
     @property

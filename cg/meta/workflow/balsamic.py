@@ -60,7 +60,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return self.root_dir
 
     @property
-    def threshold_reads(self):
+    def use_read_count_threshold(self) -> bool:
         return True
 
     @property
@@ -85,7 +85,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_cases_to_analyze(self) -> List[Family]:
         cases_query: List[Family] = self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.threshold_reads
+            pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
         cases_to_analyze = []
         for case_obj in cases_query:

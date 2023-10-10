@@ -54,6 +54,12 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.revision: str = config.rnafusion.revision
         self.nextflow_binary_path: str = config.rnafusion.binary_path
 
+    @property
+    def use_read_count_threshold(self) -> bool:
+        """Defines whether the threshold for adequate read count should be passed for all samples
+        when determining if the analysis for a case should be automatically started."""
+        return True
+
     @staticmethod
     def get_deliverables_template_content() -> List[dict]:
         """Return deliverables file template content."""
