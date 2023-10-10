@@ -6,22 +6,22 @@ from sqlalchemy.orm import Session, scoped_session, sessionmaker
 from cg.exc import CgError
 from cg.store.models import Model
 
-SESSION: Optional[Session] = None
+SESSION_FACTORY: Optional[Session] = None
 ENGINE = None
 
 
 def initialise_database(db_uri: str) -> None:
     """Initialize the global engine and session factory for SQLAlchemy."""
-    global SESSION, ENGINE
+    global SESSION_FACTORY, ENGINE
     ENGINE = create_engine(db_uri, pool_pre_ping=True)
     session_factory = sessionmaker(ENGINE)
-    SESSION = scoped_session(session_factory)
+    SESSION_FACTORY = scoped_session(session_factory)
 
 
 def get_session() -> Session:
-    if not SESSION:
+    if not SESSION_FACTORY:
         raise CgError("Database not initialised")
-    return SESSION()
+    return SESSION_FACTORY()
 
 
 def get_engine():
