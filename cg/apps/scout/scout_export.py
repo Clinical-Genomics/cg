@@ -6,7 +6,11 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 from typing_extensions import Annotated, Literal
 
-from cg.apps.scout.validators import set_gender_if_other, set_parent_if_missing
+from cg.apps.scout.validators import (
+    convert_genome_build,
+    set_gender_if_other,
+    set_parent_if_missing,
+)
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.subject import Gender, PlinkGender, PlinkPhenotypeStatus
 
@@ -62,7 +66,7 @@ class ScoutExportCase(BaseModel):
     causatives: Optional[List[str]] = None
     collaborators: List[str] = []
     individuals: List[Individual]
-    genome_build: str = GENOME_BUILD_37
+    genome_build: Annotated[str, BeforeValidator(convert_genome_build)] = GENOME_BUILD_37
     panels: Optional[List[Panel]] = None
     rank_model_version: Optional[str] = None
     sv_rank_model_version: Optional[str] = None
