@@ -74,7 +74,7 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
                 archived_file_count += 1
             except PdcError:
                 LOG.debug(f"{encrypted_file.as_posix()} cannot be archived")
-            if archived_file_count == len(files_to_archive):
+            if archived_file_count == len(files_to_archive) and not dry_run:
                 status_db.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
                 LOG.debug(f"Flow cell: {flow_cell.full_name} has been backed up")
 
