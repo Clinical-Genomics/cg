@@ -5,6 +5,7 @@ from flask_admin.base import AdminIndexView
 from flask_dance.consumer import oauth_authorized
 from flask_dance.contrib.google import google, make_google_blueprint
 
+from cg.store.database import SESSION
 from cg.store.models import (
     Analysis,
     Application,
@@ -132,4 +133,5 @@ def _register_teardowns(app: Flask):
 
     @app.teardown_appcontext
     def remove_database_session(exception=None):
-        ext.db.session.remove()
+        """Remove the"""
+        SESSION.remove()
