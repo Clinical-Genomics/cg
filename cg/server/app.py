@@ -133,5 +133,8 @@ def _register_teardowns(app: Flask):
 
     @app.teardown_appcontext
     def remove_database_session(exception=None):
-        """Remove the database session to ensure database resources are released."""
+        """
+        Remove the database session to ensure database resources are
+        released when the request has been processed.
+        """
         SESSION.remove()
