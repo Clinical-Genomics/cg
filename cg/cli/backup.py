@@ -50,7 +50,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         flow_cell_encryption_api = FlowCellEncryptionAPI(
             binary_path=context.encryption.binary_path,
             dry_run=dry_run,
-            encryption_dir=Path(context.backup.encrypt_dir),
+            encryption_dir=Path(context.backup.encryption_directories.current),
             flow_cell=flow_cell,
             pigz_binary_path=context.pigz.binary_path,
             slurm_api=SlurmAPI(),
@@ -75,7 +75,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
     context.meta_apis["backup_api"] = BackupAPI(
         encryption_api=encryption_api,
-        encrypt_dir=context.backup.encrypt_dir,
+        encryption_directories=context.backup.encryption_directories,
         status=context.status_db,
         tar_api=tar_api,
         pdc_api=pdc_api,
