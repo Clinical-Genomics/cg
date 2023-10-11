@@ -13,7 +13,7 @@ ENGINE: Optional[Engine] = None
 
 
 def initialize_database(db_uri: str) -> None:
-    """Initialize the global engine and session for SQLAlchemy."""
+    """Initialize the SQLAlchemy engine and session for status db."""
     global SESSION, ENGINE
     ENGINE = create_engine(db_uri, pool_pre_ping=True)
     session_factory = sessionmaker(ENGINE)
@@ -31,7 +31,7 @@ def get_session() -> Session:
 
 
 def get_scoped_session_registry() -> Optional[scoped_session]:
-    """Get the scoped session registry."""
+    """Get the scoped session registry for status db."""
     return SESSION
 
 
