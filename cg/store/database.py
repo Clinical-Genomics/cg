@@ -1,7 +1,8 @@
 from typing import List, Optional
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.engine.base import Engine
+from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy.orm import Session, scoped_session, sessionmaker
 
 from cg.exc import CgError
@@ -56,4 +57,5 @@ def drop_all_tables() -> None:
 def get_tables() -> List[str]:
     """Get a list of all tables in status db."""
     engine: Engine = get_engine()
-    return engine.table_names()
+    inspector: Inspector = inspect(engine)
+    return inspector.get_table_names()
