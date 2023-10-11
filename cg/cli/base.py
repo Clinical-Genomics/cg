@@ -2,7 +2,7 @@
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 import click
 import coloredlogs
@@ -67,7 +67,7 @@ def base(
 @click.option("--force", is_flag=True, help="bypass manual confirmations")
 def init(reset: bool, force: bool):
     """Setup the database."""
-    existing_tables = get_tables()
+    existing_tables: List[str] = get_tables()
     if force or reset:
         if existing_tables and not force:
             message = f"Delete existing tables? [{', '.join(existing_tables)}]"
