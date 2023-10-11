@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Union
+from typing import Union
 
 from sqlalchemy.orm import Query
 
@@ -155,7 +155,7 @@ def test_filter_cases_with_pipeline_when_correct_pipline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
-    cases: List[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.BALSAMIC))
+    cases: list[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.BALSAMIC))
 
     # THEN cases should contain the test case
     assert cases
@@ -179,7 +179,7 @@ def test_filter_cases_with_pipeline_when_incorrect_pipline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
-    cases: List[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.MIP_DNA))
+    cases: list[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.MIP_DNA))
 
     # THEN cases should not contain the test case
     assert not cases
@@ -209,7 +209,7 @@ def test_filter_cases_with_loqusdb_supported_pipeline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases with pipeline
-    cases: List[Query] = list(filter_cases_with_loqusdb_supported_pipeline(cases=cases))
+    cases: list[Query] = list(filter_cases_with_loqusdb_supported_pipeline(cases=cases))
 
     # THEN only the Loqusdb supported case should be extracted
     assert test_mip_case in cases
@@ -660,7 +660,7 @@ def test_filter_running_cases_with_running_cases(store_with_multiple_cases_and_s
     """Test that at least one case is returned when at least one case has a running action."""
     # GIVEN a store containing cases with at least one "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
-    actions: List[str] = [case.action for case in cases_query.all()]
+    actions: list[str] = [case.action for case in cases_query.all()]
     assert CaseActions.RUNNING in actions
 
     # WHEN getting active cases

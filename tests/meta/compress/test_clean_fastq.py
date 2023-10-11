@@ -1,7 +1,7 @@
 """Tests for cleaning FASTQ files."""
 import logging
 from pathlib import Path
-from typing import Dict, Generator, List
+from typing import Dict, Generator
 
 from _pytest.logging import LogCaptureFixture
 from housekeeper.store.models import File, Version
@@ -88,8 +88,8 @@ def test_update_hk_fastq(
     )
 
     # THEN assert that the SPRING files have been added to Housekeeper
-    hk_spring_files: List[File] = list(real_housekeeper_api.files(tags=[SequencingFileTag.SPRING]))
-    hk_spring_metadata_files: List[File] = list(
+    hk_spring_files: list[File] = list(real_housekeeper_api.files(tags=[SequencingFileTag.SPRING]))
+    hk_spring_metadata_files: list[File] = list(
         real_housekeeper_api.files(tags=[SequencingFileTag.SPRING_METADATA])
     )
     for spring_file in [hk_spring_files, hk_spring_metadata_files]:
@@ -103,7 +103,7 @@ def test_update_hk_fastq(
         assert Path(root_path, spring_file).exists()
 
     # THEN assert that the FASTQ files are removed from Housekeeper
-    hk_fastq_files: List[File] = list(hk_api.files(tags=[SequencingFileTag.FASTQ]))
+    hk_fastq_files: list[File] = list(hk_api.files(tags=[SequencingFileTag.FASTQ]))
     assert not hk_fastq_files
 
 

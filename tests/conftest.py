@@ -7,7 +7,7 @@ import shutil
 from copy import deepcopy
 from datetime import MAXYEAR, datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Tuple, Union
+from typing import Any, Dict, Generator, Tuple, Union
 
 import pytest
 from housekeeper.store.models import File, Version
@@ -38,7 +38,10 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
+from cg.models.demultiplex.run_parameters import (
+    RunParametersNovaSeq6000,
+    RunParametersNovaSeqX,
+)
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
@@ -179,7 +182,7 @@ def invalid_sample_id() -> str:
 
 
 @pytest.fixture(scope="session")
-def sample_ids(sample_id: str, father_sample_id: str, mother_sample_id: str) -> List[str]:
+def sample_ids(sample_id: str, father_sample_id: str, mother_sample_id: str) -> list[str]:
     """Return a list with three samples of a family."""
     return [sample_id, father_sample_id, mother_sample_id]
 
@@ -669,7 +672,7 @@ def mother_sample_cram(mip_dna_analysis_dir: Path, mother_sample_id: str) -> Pat
 @pytest.fixture(name="sample_cram_files")
 def sample_crams(
     sample_cram: Path, father_sample_cram: Path, mother_sample_cram: Path
-) -> List[Path]:
+) -> list[Path]:
     """Return a list of cram paths for three samples."""
     return [sample_cram, father_sample_cram, mother_sample_cram]
 
@@ -761,16 +764,16 @@ def compression_object(fastq_stub: Path, original_fastq_data: CompressionData) -
 
 @pytest.fixture
 def lims_novaseq_bcl_convert_samples(
-    lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleBCLConvert]:
+    lims_novaseq_samples_raw: list[dict],
+) -> list[FlowCellSampleBCLConvert]:
     """Return a list of parsed flow cell samples demultiplexed with BCL convert."""
     return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture
 def lims_novaseq_bcl2fastq_samples(
-    lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleBcl2Fastq]:
+    lims_novaseq_samples_raw: list[dict],
+) -> list[FlowCellSampleBcl2Fastq]:
     """Return a list of parsed Bcl2fastq flow cell samples"""
     return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
 
@@ -984,7 +987,7 @@ def sample_sheet_context(
 
 
 @pytest.fixture(scope="session")
-def bcl_convert_demultiplexed_flow_cell_sample_internal_ids() -> List[str]:
+def bcl_convert_demultiplexed_flow_cell_sample_internal_ids() -> list[str]:
     """
     Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
     cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/230504_A00689_0804_BHY7FFDRX2.
@@ -993,7 +996,7 @@ def bcl_convert_demultiplexed_flow_cell_sample_internal_ids() -> List[str]:
 
 
 @pytest.fixture(scope="session")
-def bcl2fastq_demultiplexed_flow_cell_sample_internal_ids() -> List[str]:
+def bcl2fastq_demultiplexed_flow_cell_sample_internal_ids() -> list[str]:
     """
     Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
     cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/170407_A00689_0209_BHHKVCALXX.
@@ -1037,8 +1040,8 @@ def tmp_empty_demultiplexed_runs_directory(tmp_demultiplexed_runs_directory) -> 
 def store_with_demultiplexed_samples(
     store: Store,
     helpers: StoreHelpers,
-    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
-    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
+    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: list[str],
+    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: list[str],
     flow_cell_name_demultiplexed_with_bcl2fastq: str,
     flow_cell_name_demultiplexed_with_bcl_convert: str,
 ) -> Store:
@@ -1377,7 +1380,7 @@ def lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
 
 
 @pytest.fixture
-def lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[dict]:
+def lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> list[dict]:
     """Return a list of raw flow cell samples."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=lims_novaseq_samples_file
@@ -1825,7 +1828,7 @@ def base_store(
     collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
     store.session.add(collaboration)
-    customers: List[Customer] = []
+    customers: list[Customer] = []
     customer_map: Dict[str, str] = {
         customer_id: "Production",
         "cust001": "Customer",
@@ -1957,9 +1960,9 @@ def base_store(
     ]
     store.session.add_all(versions)
 
-    beds: List[Bed] = [store.add_bed(name=bed_name)]
+    beds: list[Bed] = [store.add_bed(name=bed_name)]
     store.session.add_all(beds)
-    bed_versions: List[BedVersion] = [
+    bed_versions: list[BedVersion] = [
         store.add_bed_version(
             bed=bed,
             version=1,
@@ -2459,7 +2462,7 @@ def store_with_multiple_cases_and_samples(
         base_store=store, case_id=case_id_with_multiple_samples, nr_samples=5
     )
 
-    case_samples: List[Tuple[str, str]] = [
+    case_samples: list[Tuple[str, str]] = [
         (case_id_with_multiple_samples, sample_id_in_multiple_cases),
         (case_id, sample_id_in_multiple_cases),
         (case_id_with_single_sample, sample_id_in_single_case),
@@ -2490,7 +2493,7 @@ def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
         ("organism_3", "Organism 3"),
     ]
 
-    organisms: List[Organism] = []
+    organisms: list[Organism] = []
     for internal_id, name in organism_details:
         organism: Organism = helpers.add_organism(store, internal_id=internal_id, name=name)
         organisms.append(organism)
@@ -2552,7 +2555,7 @@ def store_with_users(store: Store, helpers: StoreHelpers) -> Store:
 def store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with cases and customers."""
 
-    customer_details: List[Tuple[str, str, bool]] = [
+    customer_details: list[Tuple[str, str, bool]] = [
         ("cust000", "Customer 1", True),
         ("cust001", "Customer 2", False),
         ("cust002", "Customer 3", True),
@@ -2568,7 +2571,7 @@ def store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store
         )
         customers.append(customer)
 
-    case_details: List[Tuple[str, str, Pipeline, CaseActions, Customer]] = [
+    case_details: list[Tuple[str, str, Pipeline, CaseActions, Customer]] = [
         ("case 1", "flyingwhale", Pipeline.BALSAMIC, CaseActions.RUNNING, customers[0]),
         ("case 2", "swimmingtiger", Pipeline.FLUFFY, CaseActions.ANALYZE, customers[0]),
         ("case 3", "sadbaboon", Pipeline.SARS_COV_2, CaseActions.HOLD, customers[1]),
@@ -2634,7 +2637,7 @@ def fastq_reverse_read_path(housekeeper_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
-def mock_fastq_files(fastq_forward_read_path: Path, fastq_reverse_read_path: Path) -> List[Path]:
+def mock_fastq_files(fastq_forward_read_path: Path, fastq_reverse_read_path: Path) -> list[Path]:
     """Return list of all mock fastq files to commit to mock housekeeper."""
     return [fastq_forward_read_path, fastq_reverse_read_path]
 
@@ -2683,7 +2686,7 @@ def rnafusion_sample_sheet_content(
 def hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
     hermes_output: dict = {"pipeline": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
     for file_info in deliverable_data["files"]:
-        tags: List[str] = []
+        tags: list[str] = []
         if "html" in file_info["format"]:
             tags.append("multiqc-html")
         hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
@@ -3005,7 +3008,7 @@ def taxprofiler_parameters_default(
 def nf_analysis_housekeeper(
     housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
-    mock_fastq_files: List[Path],
+    mock_fastq_files: list[Path],
     sample_id: str,
 ):
     """Create populated Housekeeper sample bundle mock."""
@@ -3117,7 +3120,7 @@ def store_with_sequencing_metrics(
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
-    sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
+    sample_sequencing_metrics_details: list[Union[str, str, int, int, float, int]] = [
         (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
         (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 2, 2_000_000, 85.5, 30),

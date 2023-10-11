@@ -1,7 +1,7 @@
 """Test methods for compressing FASTQ"""
 import logging
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 import pytest
 from pydantic import ValidationError
@@ -54,7 +54,7 @@ def test_get_spring_archive_files(crunchy_metadata_object: CrunchyMetadata):
 
 
 def test_get_spring_metadata_malformed_info(
-    spring_metadata_file: Path, spring_metadata: List[dict]
+    spring_metadata_file: Path, spring_metadata: list[dict]
 ):
     """Test the method that fetches the SPRING metadata from a file when file is malformed"""
     # GIVEN a SPRING metadata file with missing information
@@ -70,7 +70,7 @@ def test_get_spring_metadata_malformed_info(
 
 
 def test_get_spring_metadata_wrong_number_files(
-    spring_metadata_file: Path, spring_metadata: List[dict]
+    spring_metadata_file: Path, spring_metadata: list[dict]
 ):
     """Test the method that fetches the SPRING metadata from a file when a file is missing"""
     # GIVEN a SPRING metadata file with missing file

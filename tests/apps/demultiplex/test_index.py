@@ -1,5 +1,5 @@
 """Tests for functions related to indexes."""
-from typing import Dict, List, Set, Tuple
+from typing import Tuple
 
 import pytest
 
@@ -30,7 +30,7 @@ def test_get_valid_indexes():
     # GIVEN a sample sheet API
 
     # WHEN fetching the indexes
-    indexes: List[Index] = get_valid_indexes()
+    indexes: list[Index] = get_valid_indexes()
 
     # THEN assert that the indexes are correct
     assert indexes
@@ -52,8 +52,8 @@ def test_get_reagent_kit_version_non_existent_reagent(caplog):
 def test_get_reagent_kit_version_all_possible_versions():
     """Test that get_reagent_kit_version works with the valid versions."""
     # GIVEN the valid reagent kit versions
-    valid_versions: List[str] = ["1", "3"]
-    valid_outputs: List = []
+    valid_versions: list[str] = ["1", "3"]
+    valid_outputs = []
 
     # WHEN getting the reagent kit versions of the inputs
     for version in valid_versions:
@@ -68,8 +68,8 @@ def test_get_index_pair_valid_cases(
 ):
     """Test that getting individual indexes from valid dual indexes works."""
     # GIVEN a list of dual indexes and their correct separation into individual indexes
-    dual_indexes: List[str] = ["ABC-DEF", "   GHI - JKL   ", "MNO-PQR\n"]
-    expected_results: List[Tuple[str, str]] = [("ABC", "DEF"), ("GHI", "JKL"), ("MNO", "PQR")]
+    dual_indexes: list[str] = ["ABC-DEF", "   GHI - JKL   ", "MNO-PQR\n"]
+    expected_results: list[Tuple[str, str]] = [("ABC", "DEF"), ("GHI", "JKL"), ("MNO", "PQR")]
 
     # WHEN getting the individual indexes of the valid indexes
     for index, expected in zip(dual_indexes, expected_results):
@@ -103,7 +103,7 @@ def test_get_reverse_complement_not_dna(caplog):
 
 
 def test_update_barcode_mismatch_values_for_sample(
-    lims_novaseq_bcl_convert_samples: List[FlowCellSampleBCLConvert],
+    lims_novaseq_bcl_convert_samples: list[FlowCellSampleBCLConvert],
     novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
 ):
     """Test that the barcode mismatch values are updated for a sample."""
@@ -133,7 +133,7 @@ def test_update_barcode_mismatch_values_for_sample(
     # GIVEN a list of repeated unadapted NovaSeqX samples
     assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_1 == 1
     assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_2 == 1
-    samples: List[FlowCellSampleBCLConvert] = [
+    samples: list[FlowCellSampleBCLConvert] = [
         novaseq_x_flow_cell_sample_before_adapt_indexes for _ in range(3)
     ]
 
@@ -190,7 +190,7 @@ def test_pad_and_reverse_complement_sample_indexes_reverse_complement_no_padding
     sample: FlowCellSampleBcl2Fastq = novaseq6000_flow_cell_sample_before_adapt_indexes
     assert novaseq_6000_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
     assert len(sample.index) >= 2 * LONG_INDEX_CYCLE_NR
-    initial_indexes: List[str] = sample.index.split("-")
+    initial_indexes: list[str] = sample.index.split("-")
     initial_index1: str = initial_indexes[0]
     initial_index2: str = initial_indexes[1]
 
@@ -222,7 +222,7 @@ def test_pad_and_reverse_complement_sample_indexes_no_reverse_complement_no_padd
     sample: FlowCellSampleBCLConvert = novaseq_x_flow_cell_sample_before_adapt_indexes
     assert novaseq_x_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
     assert len(sample.index) >= 2 * LONG_INDEX_CYCLE_NR
-    initial_indexes: List[str] = sample.index.split("-")
+    initial_indexes: list[str] = sample.index.split("-")
     initial_index1: str = initial_indexes[0]
     initial_index2: str = initial_indexes[1]
 

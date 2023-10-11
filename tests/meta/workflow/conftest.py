@@ -1,7 +1,7 @@
 """Fixtures for the workflow tests."""
 import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 import pytest
 
@@ -126,13 +126,13 @@ def microsalt_case_qc_fail() -> str:
 
 
 @pytest.fixture(name="qc_pass_microsalt_samples")
-def qc_pass_microsalt_samples() -> List[str]:
+def qc_pass_microsalt_samples() -> list[str]:
     """Return a list of 20 microsalt samples internal_ids."""
     return [f"ACC22222A{i}" for i in range(1, 21)]
 
 
 @pytest.fixture(name="qc_fail_microsalt_samples")
-def qc_fail_microsalt_samples() -> List[str]:
+def qc_fail_microsalt_samples() -> list[str]:
     """Return a list of 20 microsalt samples internal_ids."""
     return [f"ACC11111A{i}" for i in range(1, 21)]
 
@@ -143,8 +143,8 @@ def qc_microsalt_context(
     helpers: StoreHelpers,
     microsalt_case_qc_pass: str,
     microsalt_case_qc_fail: str,
-    qc_pass_microsalt_samples: List[str],
-    qc_fail_microsalt_samples: List[str],
+    qc_pass_microsalt_samples: list[str],
+    qc_fail_microsalt_samples: list[str],
     microsalt_qc_pass_lims_project: str,
     microsalt_qc_fail_lims_project: str,
 ) -> CGConfig:

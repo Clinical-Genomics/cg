@@ -1,7 +1,7 @@
 """Module for Flask-Admin views"""
 from datetime import datetime
 from gettext import gettext
-from typing import List, Union
+from typing import Union
 
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
@@ -270,7 +270,7 @@ class FamilyView(BaseView):
         "Set action to hold",
         "Are you sure you want to set the action for selected families to hold?",
     )
-    def action_set_hold(self, ids: List[str]):
+    def action_set_hold(self, ids: list[str]):
         self.set_action_for_cases(action=CaseActions.HOLD, case_entry_ids=ids)
 
     @action(
@@ -278,10 +278,10 @@ class FamilyView(BaseView):
         "Set action to Empty",
         "Are you sure you want to set the action for selected families to Empty?",
     )
-    def action_set_empty(self, ids: List[str]):
+    def action_set_empty(self, ids: list[str]):
         self.set_action_for_cases(action=None, case_entry_ids=ids)
 
-    def set_action_for_cases(self, action: Union[CaseActions, None], case_entry_ids: List[str]):
+    def set_action_for_cases(self, action: Union[CaseActions, None], case_entry_ids: list[str]):
         try:
             for entry_id in case_entry_ids:
                 family = db.get_case_by_entry_id(entry_id=entry_id)
@@ -465,7 +465,7 @@ class SampleView(BaseView):
         "Cancel samples",
         "Are you sure you want to cancel the selected samples?",
     )
-    def cancel_samples(self, entry_ids: List[str]) -> None:
+    def cancel_samples(self, entry_ids: list[str]) -> None:
         """
         Action for cancelling samples:
             - Comments each sample being cancelled with date and user.
@@ -477,7 +477,7 @@ class SampleView(BaseView):
         for entry_id in entry_ids:
             sample: Sample = db.get_sample_by_entry_id(entry_id=int(entry_id))
 
-            sample_case_ids: List[str] = [
+            sample_case_ids: list[str] = [
                 case_sample.family.internal_id for case_sample in sample.links
             ]
             all_associated_case_ids.update(sample_case_ids)
@@ -485,9 +485,9 @@ class SampleView(BaseView):
             db.delete_relationships_sample(sample=sample)
             self.write_cancel_comment(sample=sample)
 
-        case_ids: List[str] = list(all_associated_case_ids)
+        case_ids: list[str] = list(all_associated_case_ids)
         db.delete_cases_without_samples(case_internal_ids=case_ids)
-        cases_with_remaining_samples: List[str] = db.filter_cases_with_samples(case_ids=case_ids)
+        cases_with_remaining_samples: list[str] = db.filter_cases_with_samples(case_ids=case_ids)
 
         self.display_cancel_confirmation(
             sample_entry_ids=entry_ids, remaining_cases=cases_with_remaining_samples
@@ -502,7 +502,7 @@ class SampleView(BaseView):
         db.add_sample_comment(sample=sample, comment=comment)
 
     def display_cancel_confirmation(
-        self, sample_entry_ids: List[str], remaining_cases: List[str]
+        self, sample_entry_ids: list[str], remaining_cases: list[str]
     ) -> None:
         """Show a summary of the cancelled samples and any cases in which other samples were present."""
         samples: str = "sample" if len(sample_entry_ids) == 1 else "samples"

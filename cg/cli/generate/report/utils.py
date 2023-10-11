@@ -1,7 +1,7 @@
 """Delivery report helpers."""
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 import click
 
@@ -39,7 +39,7 @@ def get_report_case(context: click.Context, case_id: str) -> Family:
         pipeline: Pipeline = (
             report_api.analysis_api.pipeline if context.obj.meta_apis.get("report_api") else None
         )
-        cases_without_delivery_report: List[Family] = (
+        cases_without_delivery_report: list[Family] = (
             report_api.get_cases_without_delivery_report(pipeline=pipeline)
             if not context.obj.meta_apis.get("upload_api")
             else report_api.get_cases_without_uploaded_delivery_report(pipeline=pipeline)

@@ -3,7 +3,7 @@ import tempfile
 from datetime import datetime
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from cg.apps.crunchy.models import CrunchyFile, CrunchyMetadata
 from cg.constants.constants import FileFormat
@@ -45,7 +45,7 @@ def get_crunchy_metadata(metadata_path: Path) -> CrunchyMetadata:
     """Validate content of metadata file and return mapped content."""
     LOG.info(f"Fetch SPRING metadata from {metadata_path}")
     try:
-        content: List[Dict[str, str]] = ReadFile.get_content_from_file(
+        content: list[Dict[str, str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=metadata_path
         )
     except JSONDecodeError:

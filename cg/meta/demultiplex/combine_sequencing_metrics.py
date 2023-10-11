@@ -1,12 +1,12 @@
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 from cg.store.models import SampleLaneSequencingMetrics
 
 
 def combine_mapped_metrics_with_undetermined(
-    mapped_metrics: List[SampleLaneSequencingMetrics],
-    undetermined_metrics: List[SampleLaneSequencingMetrics],
-) -> List[SampleLaneSequencingMetrics]:
+    mapped_metrics: list[SampleLaneSequencingMetrics],
+    undetermined_metrics: list[SampleLaneSequencingMetrics],
+) -> list[SampleLaneSequencingMetrics]:
     """Combine metrics for mapped and undetermined reads."""
 
     metrics: Dict[Tuple[str, int], SampleLaneSequencingMetrics] = {

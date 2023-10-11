@@ -1,22 +1,20 @@
 """CLI support to start microsalt"""
 
-import datetime as dt
 import logging
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any
 
 import click
-from housekeeper.store.models import File
 
 from cg.cli.workflow.commands import resolve_compression, store, store_available
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.exc import CgError
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Analysis, Sample
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -91,13 +89,13 @@ def config_case(
     case_id, sample_id = analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
     )
-    sample_objs: List[Sample] = analysis_api.get_samples(case_id=case_id, sample_id=sample_id)
+    sample_objs: list[Sample] = analysis_api.get_samples(case_id=case_id, sample_id=sample_id)
 
     if not sample_objs:
         LOG.error("No sample found for that ticket/sample_id")
         raise click.Abort
 
-    parameters: List[dict] = [analysis_api.get_parameters(sample_obj) for sample_obj in sample_objs]
+    parameters: list[dict] = [analysis_api.get_parameters(sample_obj) for sample_obj in sample_objs]
     filename: str = sample_id or case_id
     config_case_path: Path = analysis_api.get_config_path(filename=filename)
     if dry_run:

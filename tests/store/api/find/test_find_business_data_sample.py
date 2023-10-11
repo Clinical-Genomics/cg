@@ -1,6 +1,6 @@
 """Tests the find business data part of the Cg store API related to sample model."""
 
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import pytest
 from sqlalchemy.orm import Query
@@ -118,7 +118,7 @@ def test_get_samples_by_subject_id(
 
 def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
     store_with_samples_customer_id_and_subject_id_and_tumour_status: Store,
-    customer_ids: List[int] = [1, 2],
+    customer_ids: list[int] = [1, 2],
     subject_id: str = "test_subject",
     is_tumour: bool = True,
 ):

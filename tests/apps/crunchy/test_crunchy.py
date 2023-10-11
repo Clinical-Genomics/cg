@@ -1,7 +1,7 @@
 """Tests for CrunchyAPI"""
 import logging
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import get_tmp_dir, update_metadata_date
@@ -230,7 +230,7 @@ def test_is_compression_done_spring_new_files(
 
     # GIVEN that the files where updated less than three weeks ago
     update_metadata_date(metadata_file)
-    content: List[Dict[str, str]] = ReadFile.get_content_from_file(
+    content: list[Dict[str, str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=metadata_file
     )
     for file_info in content:

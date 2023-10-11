@@ -3,7 +3,6 @@ import logging
 import pathlib
 import shutil
 from pathlib import Path
-from typing import List
 
 import mock
 import pytest
@@ -18,7 +17,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 @mock.patch("cg.utils.Process")
-def test_run_gpg_command(mock_process, binary_path: str, test_command: List[str]):
+def test_run_gpg_command(mock_process, binary_path: str, test_command: list[str]):
     """Tests the run_gpg_command method"""
     # GIVEN a CLI command input for the Process API
     command = test_command
@@ -34,7 +33,7 @@ def test_run_gpg_command(mock_process, binary_path: str, test_command: List[str]
 
 
 @mock.patch("cg.utils.Process")
-def test_run_gpg_command_dry_run(mock_process, binary_path: str, test_command: List[str]):
+def test_run_gpg_command_dry_run(mock_process, binary_path: str, test_command: list[str]):
     """Tests the run_gpg_command method"""
     # GIVEN a CLI command input for the Process API
     command = test_command
@@ -66,7 +65,7 @@ def test_get_asymmetric_encryption_command(
     binary_path: str,
     input_file_path: Path,
     output_file_path: Path,
-    asymmetric_encryption_command: List[str],
+    asymmetric_encryption_command: list[str],
 ):
     """Tests creating the asymmetric encryption command"""
     # GIVEN an input file and an output file for a gpg command
@@ -85,7 +84,7 @@ def test_get_asymmetric_decryption_command(
     binary_path: str,
     input_file_path: Path,
     output_file_path: Path,
-    asymmetric_decryption_command: List[str],
+    asymmetric_decryption_command: list[str],
 ):
     """Tests creating the asymmetric decryption command"""
     # GIVEN an input file and an output file for a gpg command
@@ -107,7 +106,7 @@ def test_get_symmetric_encryption_command(
     input_file_path: Path,
     output_file_path: Path,
     temporary_passphrase: Path,
-    symmetric_encryption_command: List[str],
+    symmetric_encryption_command: list[str],
 ):
     """Tests creating the symmetric encryption command"""
     # GIVEN an input file and an output file for a gpg command
@@ -128,7 +127,7 @@ def test_get_symmetric_decryption_command(
     input_file_path: Path,
     output_file_path: Path,
     encryption_key_file: str,
-    symmetric_decryption_command: List[str],
+    symmetric_decryption_command: list[str],
 ):
     """Tests creating the symmetric decryption command"""
     # GIVEN an input file and an output file for a gpg command
@@ -154,7 +153,7 @@ def test_spring_symmetric_encryption(
     binary_path: str,
     encrypted_spring_file_path: Path,
     spring_file_path: Path,
-    spring_symmetric_encryption_command: List[str],
+    spring_symmetric_encryption_command: list[str],
     temporary_passphrase: Path,
 ):
     """Tests encrypting a spring file"""
@@ -181,7 +180,7 @@ def test_key_asymmetric_encryption(
     mock_encrypted_key_file,
     binary_path: str,
     encrypted_key_file: Path,
-    key_asymmetric_encryption_command: List[str],
+    key_asymmetric_encryption_command: list[str],
     spring_file_path: Path,
     temporary_passphrase: Path,
 ):
@@ -207,7 +206,7 @@ def test_spring_symmetric_decryption(
     mock_encrypted_spring_file_path,
     binary_path: str,
     encrypted_spring_file_path: Path,
-    spring_symmetric_decryption_command: List[str],
+    spring_symmetric_decryption_command: list[str],
     spring_file_path: Path,
 ):
     """Tests decrypting a spring file"""
@@ -233,7 +232,7 @@ def test_key_asymmetric_decryption(
     mock_encrypted_key_file,
     binary_path: str,
     encrypted_key_file: Path,
-    key_asymmetric_decryption_command: List[str],
+    key_asymmetric_decryption_command: list[str],
     spring_file_path: Path,
 ):
     """Tests decrypting a encryption key file"""

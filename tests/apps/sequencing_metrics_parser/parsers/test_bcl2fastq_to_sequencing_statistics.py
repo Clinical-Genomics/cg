@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq_to_sequencing_statistics import (
     create_bcl2fastq_undetermined_metrics,
@@ -12,7 +11,7 @@ def test_create_sequencing_statistics_from_bcl2fastq_flow_cell(bcl2fastq_flow_ce
     # GIVEN a flow cell demultiplexed with bcl2fastq with one lane, one sample and two undetermined reads
 
     # WHEN creating undetermined metrics for the lane and sample
-    metrics: List[SampleLaneSequencingMetrics] = create_bcl2fastq_undetermined_metrics(
+    metrics: list[SampleLaneSequencingMetrics] = create_bcl2fastq_undetermined_metrics(
         bcl2fastq_flow_cell_path=bcl2fastq_flow_cell_path,
         non_pooled_lane_sample_pairs=[(1, "sample_id")],
     )
@@ -35,7 +34,7 @@ def test_create_undetermined_metrics_for_invalid_lane(bcl2fastq_flow_cell_path: 
     # GIVEN a flow cell demultiplexed with bcl2fastq
 
     # WHEN creating metrics for a non existing lane on the flow cell
-    metrics: List[SampleLaneSequencingMetrics] = create_bcl2fastq_undetermined_metrics(
+    metrics: list[SampleLaneSequencingMetrics] = create_bcl2fastq_undetermined_metrics(
         bcl2fastq_flow_cell_path=bcl2fastq_flow_cell_path,
         non_pooled_lane_sample_pairs=[(2, "sample_id")],
     )

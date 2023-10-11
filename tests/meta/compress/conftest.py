@@ -3,7 +3,7 @@ import copy
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Generator, List
+from typing import Any, Dict, Generator
 
 import pytest
 
@@ -46,7 +46,7 @@ class MockCompressionData:
         spring_path: Path,
         updated: bool = False,
         date: datetime = None,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Return SPRING metadata."""
         metadata = [
             {
@@ -72,7 +72,7 @@ class MockCompressionData:
     def spring_metadata_file(self) -> Path:
         """Return the path to an existing SPRING metadata file."""
 
-        spring_metadata: List[dict] = MockCompressionData._spring_metadata(
+        spring_metadata: list[dict] = MockCompressionData._spring_metadata(
             self.fastq_first, self.fastq_second, self.spring_path
         )
         WriteFile.write_file_from_content(
@@ -85,7 +85,7 @@ class MockCompressionData:
     @property
     def updated_spring_metadata_file(self) -> Path:
         """Return the path to an existing updated SPRING metadata file."""
-        spring_metadata: List[dict] = MockCompressionData._spring_metadata(
+        spring_metadata: list[dict] = MockCompressionData._spring_metadata(
             self.fastq_first, self.fastq_second, self.spring_path, True
         )
         WriteFile.write_file_from_content(

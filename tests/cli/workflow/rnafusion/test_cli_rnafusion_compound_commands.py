@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
@@ -7,7 +6,13 @@ from click.testing import CliRunner
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.workflow.rnafusion.base import rnafusion, start, start_available, store, store_available
+from cg.cli.workflow.rnafusion.base import (
+    rnafusion,
+    start,
+    start_available,
+    store,
+    store_available,
+)
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -67,7 +72,7 @@ def test_store_success(
     hermes_deliverables: dict,
     mocker,
     rnafusion_case_id: str,
-    deliverables_template_content: List[dict],
+    deliverables_template_content: list[dict],
 ):
     """Test to ensure all parts of store command are run successfully given ideal conditions."""
     caplog.set_level(logging.INFO)
@@ -115,7 +120,7 @@ def test_store_fail(
     rnafusion_case_id: str,
     rnafusion_context: CGConfig,
     real_housekeeper_api: HousekeeperAPI,
-    deliverables_template_content: List[dict],
+    deliverables_template_content: list[dict],
     caplog: LogCaptureFixture,
     mocker,
 ):
@@ -152,7 +157,7 @@ def test_store_available(
     real_housekeeper_api,
     hermes_deliverables,
     rnafusion_case_id: str,
-    deliverables_template_content: List[dict],
+    deliverables_template_content: list[dict],
     mock_deliverable,
     mock_analysis_finish,
     mock_config,

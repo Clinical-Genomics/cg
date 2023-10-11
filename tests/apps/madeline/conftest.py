@@ -1,7 +1,7 @@
 """Fixtures for testing the madeline cg app"""
 
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 import pytest
 
@@ -71,7 +71,7 @@ def proband() -> Dict[str, Optional[str]]:
 
 
 @pytest.fixture
-def trio(proband: dict, mother: dict, father: dict) -> List[Dict[str, Optional[str]]]:
+def trio(proband: dict, mother: dict, father: dict) -> list[Dict[str, Optional[str]]]:
     """return a list with a trio"""
     return [proband, mother, father]
 

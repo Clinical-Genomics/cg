@@ -1,6 +1,6 @@
 """Code that handles uploading to mutacc from the CLI"""
 import logging
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 import click
 
@@ -32,7 +32,7 @@ def process_solved(
     mutacc_upload_api = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
     # Get cases to upload into mutacc from scout
-    finished_cases: List[ScoutExportCase] = []
+    finished_cases: list[ScoutExportCase] = []
     if case_id is not None:
         finished_cases = scout_api.get_cases(finished=True, case_id=case_id)
     elif days_ago is not None:

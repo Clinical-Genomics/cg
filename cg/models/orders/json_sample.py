@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BeforeValidator, constr
 from typing_extensions import Annotated
@@ -9,14 +9,14 @@ from cg.models.orders.validators.json_sample_validators import convert_well, joi
 
 
 class JsonSample(OrderSample):
-    cohorts: Optional[List[str]] = None
+    cohorts: Optional[list[str]] = None
     concentration: Optional[str] = None
     concentration_sample: Optional[str] = None
     control: Optional[str] = None
     data_analysis: Pipeline = Pipeline.MIP_DNA
     data_delivery: DataDelivery = DataDelivery.SCOUT
     index: Optional[str] = None
-    panels: Optional[List[str]] = None
+    panels: Optional[list[str]] = None
     quantity: Optional[str] = None
     synopsis: Annotated[Optional[str], BeforeValidator(join_list)] = None
     well_position: Annotated[

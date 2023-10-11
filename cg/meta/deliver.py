@@ -4,7 +4,7 @@ import logging
 import os
 from copy import deepcopy
 from pathlib import Path
-from typing import Iterable, List, Set, Tuple
+from typing import Iterable, Set, Tuple
 
 from housekeeper.store.models import File, Version
 
@@ -25,8 +25,8 @@ class DeliverAPI:
         self,
         store: Store,
         hk_api: HousekeeperAPI,
-        case_tags: List[Set[str]],
-        sample_tags: List[Set[str]],
+        case_tags: list[Set[str]],
+        sample_tags: list[Set[str]],
         project_base_path: Path,
         delivery_type: str,
         force_all: bool = False,
@@ -44,9 +44,9 @@ class DeliverAPI:
         self.store = store
         self.hk_api = hk_api
         self.project_base_path: Path = project_base_path
-        self.case_tags: List[Set[str]] = case_tags
+        self.case_tags: list[Set[str]] = case_tags
         self.all_case_tags: Set[str] = {tag for tags in case_tags for tag in tags}
-        self.sample_tags: List[Set[str]] = sample_tags
+        self.sample_tags: list[Set[str]] = sample_tags
         self.customer_id: str = ""
         self.ticket: str = ""
         self.dry_run = False
@@ -77,11 +77,11 @@ class DeliverAPI:
                 LOG.info(f"Could not find any version for {case_id}")
             elif not self.skip_missing_bundle:
                 raise SyntaxError(f"Could not find any version for {case_id}")
-        links: List[FamilySample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
+        links: list[FamilySample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
         if not links:
             LOG.warning(f"Could not find any samples linked to case {case_id}")
             return
-        samples: List[Sample] = [link.sample for link in links]
+        samples: list[Sample] = [link.sample for link in links]
         self.set_ticket(case_obj.latest_ticket)
         self.set_customer_id(case_obj=case_obj)
 

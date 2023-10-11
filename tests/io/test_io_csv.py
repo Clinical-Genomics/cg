@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 import pytest
 
@@ -22,10 +22,10 @@ def test_get_content_from_file(delimiter: str, delimiter_map: Dict[str, FileRepr
     file_path = delimiter_map[delimiter].filepath
 
     # WHEN reading the file
-    raw_csv_content: List[List[str]] = read_csv(file_path=file_path, delimiter=delimiter)
+    raw_csv_content: list[list[str]] = read_csv(file_path=file_path, delimiter=delimiter)
 
     # THEN assert a list is returned
-    assert isinstance(raw_csv_content, List)
+    assert isinstance(raw_csv_content, list)
 
     # THEN all three values in each line should be parsed
     assert all(len(line) == 3 for line in raw_csv_content)
@@ -48,12 +48,12 @@ def test_get_content_from_file_to_dict(
     file_path = delimiter_map[delimiter].filepath
 
     # WHEN reading the file
-    raw_csv_content: List[List[str]] = read_csv(
+    raw_csv_content: list[list[str]] = read_csv(
         file_path=file_path, delimiter=delimiter, read_to_dict=True
     )
 
     # THEN assert a list is returned and that the first element is a dict
-    assert isinstance(raw_csv_content, List)
+    assert isinstance(raw_csv_content, list)
     assert isinstance(raw_csv_content[0], dict)
 
     # THEN all three values in each line should be parsed
@@ -75,10 +75,10 @@ def test_get_content_from_stream(delimiter: str, delimiter_map: Dict[str, FileRe
     stream = delimiter_map[delimiter].content
 
     # WHEN reading the content in string
-    raw_content: List[List[str]] = read_csv_stream(stream=stream, delimiter=delimiter)
+    raw_content: list[list[str]] = read_csv_stream(stream=stream, delimiter=delimiter)
 
     # THEN assert a list is returned
-    assert isinstance(raw_content, List)
+    assert isinstance(raw_content, list)
 
     # THEN the content should match the expected content
     expected_content = [["Lorem", "ipsum", "sit", "amet"]]
@@ -102,7 +102,7 @@ def test_write_csv(delimiter: str, delimiter_map: Dict[str, FileRepresentation])
     file_path = delimiter_map[delimiter].filepath
     output_file = delimiter_map[delimiter].output_file
     # WHEN reading the file
-    raw_csv_content: List[List[str]] = read_csv(file_path=file_path, delimiter=delimiter)
+    raw_csv_content: list[list[str]] = read_csv(file_path=file_path, delimiter=delimiter)
 
     # WHEN writing the content
     write_csv(content=raw_csv_content, file_path=output_file, delimiter=delimiter)
@@ -111,7 +111,7 @@ def test_write_csv(delimiter: str, delimiter_map: Dict[str, FileRepresentation])
     assert Path.exists(output_file)
 
     # WHEN reading it again
-    written_raw_csv_content: List[List[str]] = read_csv(file_path=output_file, delimiter=delimiter)
+    written_raw_csv_content: list[list[str]] = read_csv(file_path=output_file, delimiter=delimiter)
 
     # THEN assert that all data is the same
     assert raw_csv_content == written_raw_csv_content

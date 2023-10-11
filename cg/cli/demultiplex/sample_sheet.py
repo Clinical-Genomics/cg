@@ -1,7 +1,7 @@
 import logging
 import os
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import click
 from pydantic import ValidationError
@@ -92,7 +92,7 @@ def create_sheet(
         if not dry_run:
             os.link(src=sample_sheet_path, dst=flow_cell.sample_sheet_path)
         return
-    lims_samples: List[FlowCellSample] = list(
+    lims_samples: list[FlowCellSample] = list(
         get_flow_cell_samples(
             lims=context.lims_api,
             flow_cell_id=flow_cell_id,
@@ -103,7 +103,7 @@ def create_sheet(
         LOG.warning(f"Could not find any samples in LIMS for {flow_cell_id}")
         raise click.Abort
     try:
-        sample_sheet_content: List[List[str]] = create_sample_sheet(
+        sample_sheet_content: list[list[str]] = create_sample_sheet(
             flow_cell=flow_cell,
             lims_samples=lims_samples,
             force=force,
@@ -171,7 +171,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
                 os.link(src=sample_sheet_path, dst=flow_cell.sample_sheet_path)
             continue
         LOG.info(f"Creating sample sheet for flow cell {flow_cell.id}")
-        lims_samples: List[FlowCellSample] = list(
+        lims_samples: list[FlowCellSample] = list(
             get_flow_cell_samples(
                 lims=context.lims_api,
                 flow_cell_id=flow_cell_id,
@@ -183,7 +183,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
             continue
 
         try:
-            sample_sheet_content: List[List[str]] = create_sample_sheet(
+            sample_sheet_content: list[list[str]] = create_sample_sheet(
                 flow_cell=flow_cell,
                 lims_samples=lims_samples,
             )

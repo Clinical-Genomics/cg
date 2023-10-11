@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 import pytest
 
@@ -22,7 +22,7 @@ from tests.mocks.report import MockChanjo, MockHousekeeperMipDNAReportAPI
 
 @pytest.fixture(scope="function")
 def report_api_mip_dna(
-    cg_context: CGConfig, lims_samples: List[dict], report_store: Store
+    cg_context: CGConfig, lims_samples: list[dict], report_store: Store
 ) -> MipDNAReportAPI:
     """MIP DNA ReportAPI fixture."""
     cg_context.meta_apis["analysis_api"] = MockMipAnalysis()
@@ -35,7 +35,7 @@ def report_api_mip_dna(
 
 @pytest.fixture(scope="function")
 def report_api_balsamic(
-    cg_context: CGConfig, lims_samples: List[dict], report_store: Store
+    cg_context: CGConfig, lims_samples: list[dict], report_store: Store
 ) -> BalsamicReportAPI:
     """BALSAMIC ReportAPI fixture."""
     cg_context.meta_apis["analysis_api"] = MockBalsamicAnalysis(cg_context)
@@ -47,7 +47,7 @@ def report_api_balsamic(
 
 @pytest.fixture(scope="function")
 def report_api_rnafusion(
-    rnafusion_context: CGConfig, lims_samples: List[dict]
+    rnafusion_context: CGConfig, lims_samples: list[dict]
 ) -> RnafusionReportAPI:
     """Rnafusion report API fixture."""
     rnafusion_context.lims_api_ = MockLimsAPI(rnafusion_context, lims_samples)
@@ -88,7 +88,7 @@ def lims_family(fixtures_dir: Path) -> dict:
 
 
 @pytest.fixture(scope="session")
-def lims_samples(lims_family: dict) -> List[dict]:
+def lims_samples(lims_family: dict) -> list[dict]:
     """Returns the samples of a lims case."""
     return lims_family["samples"]
 

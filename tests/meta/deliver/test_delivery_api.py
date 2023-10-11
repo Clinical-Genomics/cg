@@ -1,7 +1,7 @@
 """Tests for delivery API"""
 
 from pathlib import Path
-from typing import List, Set
+from typing import Set
 
 from housekeeper.store.models import Version
 
@@ -50,10 +50,10 @@ def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str
     assert version
 
     # GIVEN that a case object exists in the database
-    link_objs: List[FamilySample] = deliver_api.store.get_case_samples_by_case_id(
+    link_objs: list[FamilySample] = deliver_api.store.get_case_samples_by_case_id(
         case_internal_id=case_id
     )
-    samples: List[Sample] = [link.sample for link in link_objs]
+    samples: list[Sample] = [link.sample for link in link_objs]
     sample_ids: Set[str] = set([sample.internal_id for sample in samples])
 
     # WHEN fetching all case files from the delivery api
@@ -100,8 +100,8 @@ def test_get_case_files_from_version(
     assert len(version.files) == 2
 
     # GIVEN the sample ids of the samples
-    link_objs: List[FamilySample] = analysis_store.get_case_samples_by_case_id(case_id)
-    samples: List[Sample] = [link.sample for link in link_objs]
+    link_objs: list[FamilySample] = analysis_store.get_case_samples_by_case_id(case_id)
+    samples: list[Sample] = [link.sample for link in link_objs]
     sample_ids: Set[str] = set([sample.internal_id for sample in samples])
 
     # WHEN fetching the case files

@@ -1,7 +1,7 @@
 """Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 from dateutil.parser import parse as parse_date
 from genologics.entities import Artifact, Process, Sample
@@ -154,7 +154,7 @@ class LimsAPI(Lims, OrderHandler):
 
         return None
 
-    def get_samples(self, *args, map_ids=False, **kwargs) -> Union[Dict[str, str], List[Sample]]:
+    def get_samples(self, *args, map_ids=False, **kwargs) -> Union[Dict[str, str], list[Sample]]:
         """Bypass to original method."""
         lims_samples = super(LimsAPI, self).get_samples(*args, **kwargs)
         if map_ids:
@@ -273,7 +273,7 @@ class LimsAPI(Lims, OrderHandler):
             if not artifacts:
                 continue
             # Get a list of parent processes for the artifacts
-            processes: List[Process] = self.get_processes_from_artifacts(artifacts=artifacts)
+            processes: list[Process] = self.get_processes_from_artifacts(artifacts=artifacts)
             for process in processes:
                 # Check which type of method document has been used
                 method_type: str = self.get_method_type(process, step_names_udfs[process_name])
@@ -312,11 +312,11 @@ class LimsAPI(Lims, OrderHandler):
         return None
 
     @staticmethod
-    def get_processes_from_artifacts(artifacts: List[Artifact]) -> List[Process]:
+    def get_processes_from_artifacts(artifacts: list[Artifact]) -> list[Process]:
         """
         Get a list of parent processes from a set of given artifacts.
         """
-        processes: List = []
+        processes = []
         for artifact in artifacts:
             parent_process: Process = artifact.parent_process
             if parent_process not in processes:
@@ -395,14 +395,14 @@ class LimsAPI(Lims, OrderHandler):
         sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
         return sample_artifact.udf.get(PROP2UDF["rin"])
 
-    def _get_rna_input_amounts(self, sample_id: str) -> List[Tuple[dt.datetime, float]]:
+    def _get_rna_input_amounts(self, sample_id: str) -> list[Tuple[dt.datetime, float]]:
         """Return all prep input amounts used for an RNA sample in lims."""
         step_names_udfs: Dict[str] = MASTER_STEPS_UDFS["rna_prep_step"]
 
-        input_amounts: List[Tuple[dt.datetime, float]] = []
+        input_amounts: list[Tuple[dt.datetime, float]] = []
 
         for process_type in step_names_udfs:
-            artifacts: List[Artifact] = self.get_artifacts(
+            artifacts: list[Artifact] = self.get_artifacts(
                 samplelimsid=sample_id, process_type=process_type, type=LimsArtifactTypes.ANALYTE
             )
 
@@ -417,10 +417,10 @@ class LimsAPI(Lims, OrderHandler):
         return input_amounts
 
     def _get_last_used_input_amount(
-        self, input_amounts: List[Tuple[dt.datetime, float]]
+        self, input_amounts: list[Tuple[dt.datetime, float]]
     ) -> Optional[float]:
         """Return the latest used input amount."""
-        sorted_input_amounts: List[Tuple[dt.datetime, float]] = self._sort_by_date_run(
+        sorted_input_amounts: list[Tuple[dt.datetime, float]] = self._sort_by_date_run(
             input_amounts
         )
         if not sorted_input_amounts:
@@ -429,7 +429,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_latest_rna_input_amount(self, sample_id: str) -> float:
         """Return the input amount used in the latest preparation of an RNA sample."""
-        input_amounts: List[Tuple[dt.datetime, float]] = self._get_rna_input_amounts(
+        input_amounts: list[Tuple[dt.datetime, float]] = self._get_rna_input_amounts(
             sample_id=sample_id
         )
         return self._get_last_used_input_amount(input_amounts=input_amounts)

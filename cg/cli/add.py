@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 import click
 
@@ -79,7 +79,7 @@ def add_customer(
     context: CGConfig,
     internal_id: str,
     name: str,
-    collaboration_internal_ids: Optional[List[str]],
+    collaboration_internal_ids: Optional[list[str]],
     invoice_address: str,
     invoice_reference: str,
     data_archive_location: str,
@@ -96,7 +96,7 @@ def add_customer(
         LOG.error(f"{existing_customer.name}: customer already added")
         raise click.Abort
 
-    collaborations: List[Collaboration] = [
+    collaborations: list[Collaboration] = [
         status_db.get_collaboration_by_internal_id(internal_id=collaboration_internal_id)
         for collaboration_internal_id in collaboration_internal_ids
     ]

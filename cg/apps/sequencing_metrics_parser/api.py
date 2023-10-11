@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Tuple
+from typing import Tuple
 
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq_to_sequencing_statistics import (
     create_bcl2fastq_metrics,
@@ -16,7 +16,7 @@ from cg.store.models import SampleLaneSequencingMetrics
 
 def create_sample_lane_sequencing_metrics_for_flow_cell(
     flow_cell_directory: Path, bcl_converter: str
-) -> List[SampleLaneSequencingMetrics]:
+) -> list[SampleLaneSequencingMetrics]:
     """Parse the sequencing metrics data for the correct demultiplexing software into the sequencing statistics model."""
     if bcl_converter == BclConverter.BCLCONVERT or bcl_converter == BclConverter.DRAGEN:
         return create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell(
@@ -27,10 +27,10 @@ def create_sample_lane_sequencing_metrics_for_flow_cell(
 
 def create_undetermined_non_pooled_metrics(
     flow_cell: FlowCellDirectoryData,
-) -> List[SampleLaneSequencingMetrics]:
+) -> list[SampleLaneSequencingMetrics]:
     """Return sequencing metrics for any undetermined reads in non-pooled lanes."""
 
-    non_pooled_lanes_and_samples: List[
+    non_pooled_lanes_and_samples: list[
         Tuple[int, str]
     ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 

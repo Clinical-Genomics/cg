@@ -1,11 +1,9 @@
 """Tests for MicroSALT analysis."""
 import logging
 from pathlib import Path
-from typing import List
 
 import mock
 
-from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import CaseActions, Pipeline
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -154,7 +152,7 @@ def test_get_cases_to_store(
     helpers.ensure_case(store=store, data_analysis=Pipeline.MICROSALT, action=CaseActions.RUNNING)
 
     # WHEN getting the cases to store in Housekeeper
-    cases_to_store: List[Family] = analysis_api.get_cases_to_store()
+    cases_to_store: list[Family] = analysis_api.get_cases_to_store()
     case: Family = cases_to_store[0]
 
     # THEN a list with one microsalt case is returned

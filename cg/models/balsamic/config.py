@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional, Union
 
 from pydantic.v1 import BaseModel, validator
 
@@ -71,7 +71,7 @@ class BalsamicConfigPanel(BaseModel):
 
     capture_kit: str
     capture_kit_version: Optional[str]
-    chrom: List[str]
+    chrom: list[str]
 
     @validator("capture_kit", pre=True)
     def extract_capture_kit_name_from_path(cls, capture_kit: str) -> str:
@@ -121,9 +121,9 @@ class BalsamicVarCaller(BaseModel):
 
     mutation: str
     type: str
-    analysis_type: List[str]
-    sequencing_type: List[str]
-    workflow_solution: List[str]
+    analysis_type: list[str]
+    sequencing_type: list[str]
+    workflow_solution: list[str]
 
 
 class BalsamicConfigJSON(BaseModel):
@@ -142,4 +142,4 @@ class BalsamicConfigJSON(BaseModel):
     panel: Optional[BalsamicConfigPanel]
     QC: BalsamicConfigQC
     vcf: Dict[str, BalsamicVarCaller]
-    bioinfo_tools_version: Dict[str, List[str]]
+    bioinfo_tools_version: Dict[str, list[str]]

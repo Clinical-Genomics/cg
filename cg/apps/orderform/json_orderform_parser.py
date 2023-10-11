@@ -1,4 +1,4 @@
-from typing import List, Set
+from typing import Set
 
 from cg.apps.orderform.orderform_parser import OrderformParser
 from cg.constants import DataDelivery, Pipeline
@@ -8,13 +8,13 @@ from cg.models.orders.order import OrderType
 
 
 class JsonOrderformParser(OrderformParser):
-    ACCEPTED_DATA_ANALYSES: List[str] = [
+    ACCEPTED_DATA_ANALYSES: list[str] = [
         str(Pipeline.MIP_DNA),
         str(Pipeline.FLUFFY),
         str(Pipeline.BALSAMIC),
     ]
     NO_VALUE: str = "no_value"
-    samples: List[JsonSample] = []
+    samples: list[JsonSample] = []
 
     def get_project_type(self) -> str:
         """Determine the project type."""
@@ -68,7 +68,7 @@ class JsonOrderformParser(OrderformParser):
     def parse_orderform(self, order_data: dict) -> None:
         """Parse order form in JSON format."""
 
-        self.samples: List[JsonSample] = [
+        self.samples: list[JsonSample] = [
             JsonSample.model_validate(sample_data) for sample_data in order_data.get("samples", [])
         ]
         if not self.samples:

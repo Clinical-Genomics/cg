@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, Hashable, Iterable, List, Optional, Set
+from typing import Dict, Hashable, Iterable, Optional, Set
 
 from pydantic import BaseModel, ConfigDict, constr
 
@@ -18,7 +18,7 @@ class OrderformParser(BaseModel):
     """Class to parse orderforms"""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    samples: List[OrderSample] = []
+    samples: list[OrderSample] = []
     project_type: Optional[OrderType] = None
     delivery_type: Optional[DataDelivery] = None
     customer_id: constr(
@@ -31,7 +31,7 @@ class OrderformParser(BaseModel):
         """Parse the orderform information"""
         raise NotImplementedError
 
-    def group_cases(self) -> Dict[str, List[OrderSample]]:
+    def group_cases(self) -> Dict[str, list[OrderSample]]:
         """Group samples in cases."""
         LOG.info("Group samples under respective case")
         cases = {}
@@ -48,7 +48,7 @@ class OrderformParser(BaseModel):
             LOG.info("Could not find any cases")
         return cases
 
-    def get_pools(self) -> List[OrderPool]:
+    def get_pools(self) -> list[OrderPool]:
         """create pools from samples
 
         Check that all samples from one pool has the same application
@@ -115,7 +115,7 @@ class OrderformParser(BaseModel):
         return values
 
     @staticmethod
-    def expand_case(case_id: str, case_samples: List[OrderSample]) -> OrderCase:
+    def expand_case(case_id: str, case_samples: list[OrderSample]) -> OrderCase:
         """Fill-in information about case."""
 
         priority: Hashable[str] = OrderformParser._get_single_value(
@@ -142,8 +142,8 @@ class OrderformParser(BaseModel):
 
     def generate_orderform(self) -> Orderform:
         """Generate an orderform"""
-        cases_map: Dict[str, List[OrderSample]] = self.group_cases()
-        case_objs: List[OrderCase] = []
+        cases_map: Dict[str, list[OrderSample]] = self.group_cases()
+        case_objs: list[OrderCase] = []
         for case_id in cases_map:
             case_objs.append(self.expand_case(case_id=case_id, case_samples=cases_map[case_id]))
         return Orderform(

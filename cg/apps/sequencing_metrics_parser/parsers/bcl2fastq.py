@@ -1,7 +1,7 @@
 import logging
 import os
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, Optional, Tuple
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
     ReadMetric,
@@ -36,7 +36,7 @@ def sum_q30_yields(read_metrics: Iterable[ReadMetric]) -> int:
     return sum([read_metric.read_yield_q30 for read_metric in read_metrics])
 
 
-def get_metrics_file_paths(demultiplex_result_directory: Path) -> List[Path]:
+def get_metrics_file_paths(demultiplex_result_directory: Path) -> list[Path]:
     """
     Finds metrics files in Bcl2fastq demultiplex result directory.
     Raises:
@@ -74,7 +74,7 @@ def update_lane_metrics_with_tile_reads(lane_metrics: SampleLaneMetrics, tile_re
     tile_yield: int = tile_reads.tile_sample_yield
     lane_metrics.total_yield += tile_yield
 
-    read_metrics: List[ReadMetric] = tile_reads.tile_sample_read_metrics
+    read_metrics: list[ReadMetric] = tile_reads.tile_sample_read_metrics
     lane_metrics.total_yield_q30 += sum_q30_yields(read_metrics)
     lane_metrics.total_quality_score += sum_quality_scores(read_metrics)
 
@@ -88,12 +88,12 @@ def update_lane_metrics_with_undetermined_tile_data(
     tile_total_yield: int = undetermined_tile_metrics.tile_total_yield
     lane_metrics.total_yield += tile_total_yield
 
-    tile_read_metrics: List[ReadMetric] = undetermined_tile_metrics.tile_read_metrics
+    tile_read_metrics: list[ReadMetric] = undetermined_tile_metrics.tile_read_metrics
     lane_metrics.total_yield_q30 += sum_q30_yields(tile_read_metrics)
     lane_metrics.total_quality_score += sum_quality_scores(tile_read_metrics)
 
 
-def combine_tiles_per_lane(tile_metrics: List[SampleLaneTileMetrics]) -> List[SampleLaneMetrics]:
+def combine_tiles_per_lane(tile_metrics: list[SampleLaneTileMetrics]) -> list[SampleLaneMetrics]:
     """Aggregate the tile metrics to per lane instead."""
     metrics = {}
 
@@ -119,7 +119,7 @@ def combine_tiles_per_lane(tile_metrics: List[SampleLaneTileMetrics]) -> List[Sa
 
 
 def combine_undetermined_tiles_per_lane(
-    tile_metrics: List[SampleLaneTileMetrics],
+    tile_metrics: list[SampleLaneTileMetrics],
 ) -> Dict[int, SampleLaneMetrics]:
     """Aggregate the undetermined tile metrics per lane."""
     lane_metrics = {}
@@ -146,10 +146,10 @@ def combine_undetermined_tiles_per_lane(
 
 
 def get_metrics_for_non_pooled_samples(
-    lane_metrics: Dict[int, SampleLaneMetrics], non_pooled_lane_sample_pairs: List[Tuple[int, str]]
-) -> List[SampleLaneMetrics]:
+    lane_metrics: Dict[int, SampleLaneMetrics], non_pooled_lane_sample_pairs: list[Tuple[int, str]]
+) -> list[SampleLaneMetrics]:
     """Get metrics for non pooled samples and set sample ids."""
-    non_pooled_metrics: List[SampleLaneMetrics] = []
+    non_pooled_metrics: list[SampleLaneMetrics] = []
     for lane, sample_id in non_pooled_lane_sample_pairs:
         metric: Optional[SampleLaneMetrics] = lane_metrics.get(lane)
         if not metric:
@@ -159,19 +159,19 @@ def get_metrics_for_non_pooled_samples(
     return non_pooled_metrics
 
 
-def parse_metrics(flow_cell_dir: Path) -> List[SampleLaneMetrics]:
+def parse_metrics(flow_cell_dir: Path) -> list[SampleLaneMetrics]:
     """Parse metrics for a flow cell demultiplexed with Bcl2fastq."""
-    tile_metrics: List[SampleLaneTileMetrics] = parse_tile_metrics(flow_cell_dir)
+    tile_metrics: list[SampleLaneTileMetrics] = parse_tile_metrics(flow_cell_dir)
     return combine_tiles_per_lane(tile_metrics)
 
 
 def parse_tile_metrics(
     demultiplex_result_directory: Path,
-) -> List[SampleLaneTileMetrics]:
+) -> list[SampleLaneTileMetrics]:
     """Parse metrics for each tile on a flow cell demultiplexed with Bcl2fastq."""
-    tile_metrics: List[SampleLaneTileMetrics] = []
+    tile_metrics: list[SampleLaneTileMetrics] = []
 
-    stats_paths: List[Path] = get_metrics_file_paths(demultiplex_result_directory)
+    stats_paths: list[Path] = get_metrics_file_paths(demultiplex_result_directory)
 
     for json_path in stats_paths:
         LOG.debug(f"Parsing stats.json file {json_path}")
@@ -183,10 +183,10 @@ def parse_tile_metrics(
 
 
 def parse_undetermined_non_pooled_metrics(
-    flow_cell_dir: Path, non_pooled_lane_sample_pairs: List[Tuple[int, str]]
-) -> List[SampleLaneMetrics]:
+    flow_cell_dir: Path, non_pooled_lane_sample_pairs: list[Tuple[int, str]]
+) -> list[SampleLaneMetrics]:
     """Parse undetermined metrics for a flow cell demultiplexed with Bcl2fastq for non pooled samples."""
-    tile_metrics: List[SampleLaneTileMetrics] = parse_tile_metrics(flow_cell_dir)
+    tile_metrics: list[SampleLaneTileMetrics] = parse_tile_metrics(flow_cell_dir)
     lane_metrics: Dict[int, SampleLaneMetrics] = combine_undetermined_tiles_per_lane(tile_metrics)
 
     return get_metrics_for_non_pooled_samples(

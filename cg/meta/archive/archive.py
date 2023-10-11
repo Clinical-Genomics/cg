@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Type
+from typing import Callable, Dict, Optional, Type
 
 from housekeeper.store.models import File
 from pydantic import BaseModel, ConfigDict
@@ -27,8 +27,8 @@ class ArchiveModels(BaseModel):
 
 
 def filter_files_on_archive_location(
-    files_and_samples: List[FileAndSample], archive_location: ArchiveLocations
-) -> List[FileAndSample]:
+    files_and_samples: list[FileAndSample], archive_location: ArchiveLocations
+) -> list[FileAndSample]:
     """
     Returns a list of FileAndSample where the associated sample has a specific archive location.
     """
@@ -40,9 +40,9 @@ def filter_files_on_archive_location(
 
 
 def filter_samples_on_archive_location(
-    samples_and_destinations: List[SampleAndDestination],
+    samples_and_destinations: list[SampleAndDestination],
     archive_location: ArchiveLocations,
-) -> List[SampleAndDestination]:
+) -> list[SampleAndDestination]:
     """
     Returns a list of SampleAndHousekeeperDestinations where the associated sample has a specific archive location.
     """
@@ -69,16 +69,16 @@ class SpringArchiveAPI:
         self.status_db: Store = status_db
         self.data_flow_config: DataFlowConfig = data_flow_config
 
-    def archive_files(self, files: List[FileAndSample], archive_location: ArchiveLocations) -> int:
+    def archive_files(self, files: list[FileAndSample], archive_location: ArchiveLocations) -> int:
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
         return archive_handler.archive_files(files_and_samples=files)
 
     def archive_to_location(
-        self, files_and_samples: List[FileAndSample], archive_location: ArchiveLocations
+        self, files_and_samples: list[FileAndSample], archive_location: ArchiveLocations
     ) -> None:
         """Filters out the files matching the archive_location,
         archives them and adds corresponding entries in Housekeeper."""
-        selected_files: [List[FileAndSample]] = filter_files_on_archive_location(
+        selected_files: [list[FileAndSample]] = filter_files_on_archive_location(
             files_and_samples=files_and_samples, archive_location=archive_location
         )
         archive_task_id: int = self.archive_files(
@@ -94,10 +94,10 @@ class SpringArchiveAPI:
     ) -> None:
         """Archives all non archived spring files."""
 
-        files_to_archive: List[File] = self.housekeeper_api.get_all_non_archived_spring_files()[
+        files_to_archive: list[File] = self.housekeeper_api.get_all_non_archived_spring_files()[
             :spring_file_count_limit
         ]
-        files_and_samples: List[FileAndSample] = self.add_samples_to_files(files_to_archive)
+        files_and_samples: list[FileAndSample] = self.add_samples_to_files(files_to_archive)
 
         for archive_location in ArchiveLocations:
             self.archive_to_location(
@@ -105,17 +105,17 @@ class SpringArchiveAPI:
                 archive_location=archive_location,
             )
 
-    def retrieve_samples(self, sample_internal_ids: List[str]) -> None:
+    def retrieve_samples(self, sample_internal_ids: list[str]) -> None:
         """Retrieves the archived spring files for a list of samples."""
-        samples: List[Sample] = [
+        samples: list[Sample] = [
             self.status_db.get_sample_by_internal_id(sample_internal_id)
             for sample_internal_id in sample_internal_ids
         ]
-        samples_and_destinations: List[SampleAndDestination] = self.join_destinations_and_samples(
+        samples_and_destinations: list[SampleAndDestination] = self.join_destinations_and_samples(
             samples
         )
         for archive_location in ArchiveLocations:
-            filtered_samples: List[SampleAndDestination] = filter_samples_on_archive_location(
+            filtered_samples: list[SampleAndDestination] = filter_samples_on_archive_location(
                 samples_and_destinations=samples_and_destinations,
                 archive_location=archive_location,
             )
@@ -131,9 +131,9 @@ class SpringArchiveAPI:
                     ),
                 )
 
-    def get_archived_files_from_samples(self, samples: List[Sample]) -> List[File]:
+    def get_archived_files_from_samples(self, samples: list[Sample]) -> list[File]:
         """Gets archived spring files from the bundles corresponding to the given list of samples."""
-        files: List[File] = []
+        files: list[File] = []
         for sample in samples:
             files.extend(
                 self.housekeeper_api.get_archived_files(
@@ -142,9 +142,9 @@ class SpringArchiveAPI:
             )
         return files
 
-    def join_destinations_and_samples(self, samples: List[Sample]) -> List[SampleAndDestination]:
+    def join_destinations_and_samples(self, samples: list[Sample]) -> list[SampleAndDestination]:
         """Gets all samples and combines them with their desired destination in Housekeeper."""
-        samples_to_retrieve: List[SampleAndDestination] = []
+        samples_to_retrieve: list[SampleAndDestination] = []
         for sample in samples:
             LOG.debug(f"Will try to retrieve sample: {sample.internal_id}.")
             destination: str = self.get_destination_from_sample_internal_id(sample.internal_id)
@@ -153,7 +153,7 @@ class SpringArchiveAPI:
 
     def retrieve_samples_from_archive_location(
         self,
-        samples_and_destinations: List[SampleAndDestination],
+        samples_and_destinations: list[SampleAndDestination],
         archive_location: ArchiveLocations,
     ):
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
@@ -165,7 +165,7 @@ class SpringArchiveAPI:
             sample_internal_id
         ).full_path.as_posix()
 
-    def set_archive_retrieval_task_ids(self, retrieval_task_id: int, files: List[File]) -> None:
+    def set_archive_retrieval_task_ids(self, retrieval_task_id: int, files: list[File]) -> None:
         for file in files:
             self.housekeeper_api.set_archive_retrieval_task_id(
                 file_id=file.id, retrieval_task_id=retrieval_task_id
@@ -183,10 +183,10 @@ class SpringArchiveAPI:
             )
         return sample
 
-    def add_samples_to_files(self, files_to_archive: List[File]) -> List[FileAndSample]:
+    def add_samples_to_files(self, files_to_archive: list[File]) -> list[FileAndSample]:
         """Fetches the Sample corresponding to each File, instantiates a FileAndSample object and
         adds it to the list which is returned."""
-        files_and_samples: List[FileAndSample] = []
+        files_and_samples: list[FileAndSample] = []
         for file in files_to_archive:
             sample: Optional[Sample] = self.get_sample(file)
             if sample:

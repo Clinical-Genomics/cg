@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple
+from typing import Tuple
 
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import (
     BclConvertMetricsParser,
@@ -14,13 +14,13 @@ from cg.store.models import SampleLaneSequencingMetrics
 
 def create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell(
     flow_cell_dir: Path,
-) -> List[SampleLaneSequencingMetrics]:
+) -> list[SampleLaneSequencingMetrics]:
     """Parse the BCL convert metrics data into the sequencing statistics model."""
     metrics_parser: BclConvertMetricsParser = BclConvertMetricsParser(
         bcl_convert_metrics_dir_path=flow_cell_dir,
     )
-    sample_internal_ids: List[str] = metrics_parser.get_sample_internal_ids()
-    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
+    sample_internal_ids: list[str] = metrics_parser.get_sample_internal_ids()
+    sample_lane_sequencing_metrics: list[SampleLaneSequencingMetrics] = []
 
     for sample_internal_id in sample_internal_ids:
         for lane in metrics_parser.get_lanes_for_sample(sample_internal_id=sample_internal_id):
@@ -32,11 +32,11 @@ def create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell
 
 
 def create_bcl_convert_undetermined_metrics(
-    flow_cell_dir: Path, non_pooled_lane_sample_pairs: List[Tuple[int, str]]
-) -> List[SampleLaneSequencingMetrics]:
+    flow_cell_dir: Path, non_pooled_lane_sample_pairs: list[Tuple[int, str]]
+) -> list[SampleLaneSequencingMetrics]:
     """Return sequencing metrics for any undetermined reads in the specified lanes."""
     metrics_parser = BclConvertMetricsParser(flow_cell_dir)
-    undetermined_metrics: List[SampleLaneSequencingMetrics] = []
+    undetermined_metrics: list[SampleLaneSequencingMetrics] = []
 
     for lane, sample_internal_id in non_pooled_lane_sample_pairs:
         if not metrics_parser.has_undetermined_reads_in_lane(lane):

@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Callable, List
+from typing import Callable
 
 from sqlalchemy.orm import Query
 
@@ -91,7 +91,7 @@ def filter_analysis_case_action_is_none(analyses: Query, **kwargs) -> Query:
 
 
 def apply_analysis_filter(
-    filter_functions: List[Callable],
+    filter_functions: list[Callable],
     analyses: Query,
     pipeline: Pipeline = None,
     case_entry_id: int = None,

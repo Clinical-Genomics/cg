@@ -1,7 +1,7 @@
 """Functions interacting with statusdb in the DemuxPostProcessingAPI."""
 import datetime
 import logging
-from typing import List, Optional, Set
+from typing import Optional, Set
 
 from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
@@ -40,7 +40,7 @@ def store_flow_cell_data_in_status_db(
         LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}.")
         flow_cell.status = FlowCellStatus.ON_DISK
 
-    sample_internal_ids: List[str] = parsed_flow_cell.sample_sheet.get_sample_ids()
+    sample_internal_ids: list[str] = parsed_flow_cell.sample_sheet.get_sample_ids()
     add_samples_to_flow_cell_in_status_db(
         flow_cell=flow_cell,
         sample_internal_ids=sample_internal_ids,
@@ -52,7 +52,7 @@ def store_flow_cell_data_in_status_db(
 
 
 def add_samples_to_flow_cell_in_status_db(
-    flow_cell: Flowcell, sample_internal_ids: List[str], store: Store
+    flow_cell: Flowcell, sample_internal_ids: list[str], store: Store
 ) -> Flowcell:
     """Adds samples to a flow cell in status db."""
     samples: Set[Sample] = {
@@ -66,13 +66,13 @@ def add_samples_to_flow_cell_in_status_db(
 
 
 def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
-    mapped_metrics: List[
+    mapped_metrics: list[
         SampleLaneSequencingMetrics
     ] = create_sample_lane_sequencing_metrics_for_flow_cell(
         flow_cell_directory=flow_cell.path,
         bcl_converter=flow_cell.bcl_converter,
     )
-    undetermined_metrics: List[
+    undetermined_metrics: list[
         SampleLaneSequencingMetrics
     ] = create_undetermined_non_pooled_metrics(flow_cell)
 
@@ -86,7 +86,7 @@ def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, stor
 
 
 def add_sequencing_metrics_to_statusdb(
-    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics], store: Store
+    sample_lane_sequencing_metrics: list[SampleLaneSequencingMetrics], store: Store
 ) -> None:
     for metric in sample_lane_sequencing_metrics:
         metric_exists: bool = metric_exists_in_status_db(metric=metric, store=store)
@@ -130,7 +130,7 @@ def update_sample_read_counts_in_status_db(
 ) -> None:
     """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
     q30_threshold: int = get_q30_threshold(flow_cell_data.sequencer_type)
-    sample_internal_ids: List[str] = flow_cell_data.sample_sheet.get_sample_ids()
+    sample_internal_ids: list[str] = flow_cell_data.sample_sheet.get_sample_ids()
     for sample_id in sample_internal_ids:
         update_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold, store=store)
     store.session.commit()

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from pydantic.v1 import validator
 
@@ -13,7 +13,7 @@ from cg.models.deliverables.metric_deliverables import (
     add_sample_id_metrics,
 )
 
-SAMPLE_METRICS_TO_PARSE: List[str] = [
+SAMPLE_METRICS_TO_PARSE: list[str] = [
     "duplicate_reads",
     "mapped_reads",
     "mean_insert_size",
@@ -70,21 +70,21 @@ class MIPMetricsDeliverables(MetricsDeliverables):
         "MEDIAN_TARGET_COVERAGE": MedianTargetCoverage,
         "gender": GenderCheck,
     }
-    duplicate_reads: Optional[List[DuplicateReads]]
-    mapped_reads: Optional[List[MIPMappedReads]]
-    mean_insert_size: Optional[List[MeanInsertSize]]
-    median_target_coverage: Optional[List[MedianTargetCoverage]]
-    predicted_sex: Optional[List[GenderCheck]]
-    sample_metric_to_parse: List[str] = SAMPLE_METRICS_TO_PARSE
-    sample_id_metrics: Optional[List[MIPParsedMetrics]]
+    duplicate_reads: Optional[list[DuplicateReads]]
+    mapped_reads: Optional[list[MIPMappedReads]]
+    mean_insert_size: Optional[list[MeanInsertSize]]
+    median_target_coverage: Optional[list[MedianTargetCoverage]]
+    predicted_sex: Optional[list[GenderCheck]]
+    sample_metric_to_parse: list[str] = SAMPLE_METRICS_TO_PARSE
+    sample_id_metrics: Optional[list[MIPParsedMetrics]]
 
     @validator("duplicate_reads", always=True)
-    def set_duplicate_reads(cls, _, values: dict) -> List[DuplicateReads]:
+    def set_duplicate_reads(cls, _, values: dict) -> list[DuplicateReads]:
         """Set duplicate_reads"""
         return add_metric(name="fraction_duplicates", values=values)
 
     @validator("mapped_reads", always=True)
-    def set_mapped_reads(cls, _, values: dict) -> List[MIPMappedReads]:
+    def set_mapped_reads(cls, _, values: dict) -> list[MIPMappedReads]:
         """Set mapped reads"""
         sample_ids: set = values.get("sample_ids")
         mapped_reads: list = []
@@ -108,28 +108,28 @@ class MIPMetricsDeliverables(MetricsDeliverables):
         return mapped_reads
 
     @validator("mean_insert_size", always=True)
-    def set_mean_insert_size(cls, _, values: dict) -> List[MeanInsertSize]:
+    def set_mean_insert_size(cls, _, values: dict) -> list[MeanInsertSize]:
         """Set mean insert size"""
         return add_metric(name="MEAN_INSERT_SIZE", values=values)
 
     @validator("median_target_coverage", always=True)
-    def set_median_target_coverage(cls, _, values: dict) -> List[MedianTargetCoverage]:
+    def set_median_target_coverage(cls, _, values: dict) -> list[MedianTargetCoverage]:
         """Set median target coverage"""
         return add_metric(name="MEDIAN_TARGET_COVERAGE", values=values)
 
     @validator("predicted_sex", always=True)
-    def set_predicted_sex(cls, _, values: dict) -> List[GenderCheck]:
+    def set_predicted_sex(cls, _, values: dict) -> list[GenderCheck]:
         """Set predicted sex"""
         return add_metric(name="gender", values=values)
 
     @validator("sample_id_metrics", always=True)
-    def set_sample_id_metrics(cls, _, values: dict) -> List[MIPParsedMetrics]:
+    def set_sample_id_metrics(cls, _, values: dict) -> list[MIPParsedMetrics]:
         """Set parsed sample_id metrics gathered from all metrics"""
         return add_sample_id_metrics(parsed_metric=MIPParsedMetrics, values=values)
 
 
 def get_sample_id_metric(
-    sample_id_metrics: List[MIPParsedMetrics], sample_id: str
+    sample_id_metrics: list[MIPParsedMetrics], sample_id: str
 ) -> MIPParsedMetrics:
     """Get parsed metrics for an sample_id"""
     for sample_id_metric in sample_id_metrics:

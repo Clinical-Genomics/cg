@@ -1,7 +1,7 @@
 """Test how the api handles files."""
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, Tuple
 
 from housekeeper.store.models import File, Version
 
@@ -123,7 +123,7 @@ def test_get_files_from_version(
     assert second_file in version.files
 
     # WHEN extracting the files from version
-    files: List[File] = real_housekeeper_api.get_files_from_version(version=version, tags={hk_tag})
+    files: list[File] = real_housekeeper_api.get_files_from_version(version=version, tags={hk_tag})
 
     # THEN the added files should be retrieved
     assert first_file in files
@@ -199,7 +199,7 @@ def test_get_files_from_latest_version(
     )
 
     # WHEN fetching the files
-    hk_files: List[File] = populated_housekeeper_api.get_files_from_latest_version(
+    hk_files: list[File] = populated_housekeeper_api.get_files_from_latest_version(
         bundle_name=case_id, tags=[hk_file.tags[0].name]
     )
 
@@ -349,7 +349,7 @@ def test_check_bundle_files(
     version: Version = populated_housekeeper_api.version(bundle=case_id, date=timestamp_yesterday)
 
     # WHEN attempting to add two files, one existing and one new
-    files_to_add: List[Path] = populated_housekeeper_api.check_bundle_files(
+    files_to_add: list[Path] = populated_housekeeper_api.check_bundle_files(
         file_paths=[bed_file, fastq_file],
         bundle_name=case_id,
         last_version=version,
@@ -379,7 +379,7 @@ def test_get_tag_names_from_file(populated_housekeeper_api: HousekeeperAPI):
 def test_is_fastq_or_spring_in_all_bundles_when_none(
     populated_housekeeper_api: HousekeeperAPI,
     case_id: str,
-    tags: List[str],
+    tags: list[str],
 ):
     """Test checking if all FASTQ or SPRING files are present in bundles when no files are present."""
     # GIVEN a populated housekeeper api with some files
@@ -395,7 +395,7 @@ def test_is_fastq_or_spring_in_all_bundles(
     populated_housekeeper_api: HousekeeperAPI,
     case_id: str,
     madeline_output: Path,
-    tags: List[str],
+    tags: list[str],
 ):
     """Test checking if all FASTQ or SPRING files are present in bundles when files are present."""
     # GIVEN a populated housekeeper api with some files
@@ -417,7 +417,7 @@ def test_is_fastq_or_spring_in_all_bundles_when_missing(
     case_id: str,
     madeline_output: Path,
     new_bundle_name: str,
-    tags: List[str],
+    tags: list[str],
 ):
     """Test checking if all FASTQ or SPRING files are present in bundles when not all bundles have files present."""
     # GIVEN a populated housekeeper api with some files
@@ -448,7 +448,7 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles(
     populated_housekeeper_api: HousekeeperAPI,
     madeline_output: Path,
     new_bundle_name: str,
-    tags: List[str],
+    tags: list[str],
 ):
     """Test checking if all FASTQ or SPRING files are present in bundles when all bundles have files present."""
     # GIVEN a populated housekeeper api with some files
@@ -486,7 +486,7 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles_and_files(
     populated_housekeeper_api: HousekeeperAPI,
     madeline_output: Path,
     new_bundle_name: str,
-    tags: List[str],
+    tags: list[str],
 ):
     """
     Test checking if all FASTQ or SPRING files are present in bundles when all bundles have files present and some
@@ -524,7 +524,7 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles_and_files(
 def test_is_fastq_or_spring_on_disk_in_all_bundles_when_none(
     populated_housekeeper_api: HousekeeperAPI,
     case_id: str,
-    tags: List[str],
+    tags: list[str],
 ):
     """Test checking if all FASTQ or SPRING files are on disk in bundles when no files are on disk."""
     # GIVEN a populated housekeeper api with some files
@@ -542,7 +542,7 @@ def test_is_fastq_or_spring_on_disk_in_all_bundles(
     populated_housekeeper_api: HousekeeperAPI,
     case_id: str,
     madeline_output: Path,
-    tags: List[str],
+    tags: list[str],
 ):
     """Test checking if all FASTQ or SPRING files are on disk in bundles when files are on disk."""
     # GIVEN a populated housekeeper api with some files
@@ -567,7 +567,7 @@ def test_is_fastq_or_spring_on_disk_in_all_bundles_when_missing_file(
     sample_id: str,
     madeline_output: Path,
     new_bundle_name: str,
-    tags: List[str],
+    tags: list[str],
 ):
     """Test checking if all FASTQ or SPRING files are on disk in bundles when not all bundles have files on disk."""
     # GIVEN a populated housekeeper api with some files
@@ -603,7 +603,7 @@ def testis_fastq_or_spring_on_disk_in_all_bundles_when_multiple_bundles(
     populated_housekeeper_api: HousekeeperAPI,
     madeline_output: Path,
     new_bundle_name: str,
-    tags: List[str],
+    tags: list[str],
 ):
     """Test checking if all FASTQ or SPRING files are on disk in bundles when all bundles have files on disk."""
     # GIVEN a populated housekeeper api with some files
@@ -640,7 +640,7 @@ def test_get_non_archived_spring_path_and_bundle_name(populated_housekeeper_api:
     # GIVEN a housekeeper_api containing spring_files which are not archived
 
     # WHEN fetching all non-archived spring baths and bundle names
-    files_and_bundle_names: List[
+    files_and_bundle_names: list[
         Tuple[str, str]
     ] = populated_housekeeper_api.get_non_archived_spring_path_and_bundle_name()
     assert len(files_and_bundle_names) > 0

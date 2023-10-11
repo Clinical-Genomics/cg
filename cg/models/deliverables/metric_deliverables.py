@@ -1,5 +1,5 @@
 import operator
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, Optional
 
 from pydantic.v1 import BaseModel, Field, validator
 
@@ -14,7 +14,7 @@ def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> Any:
             return metric
 
 
-def add_metric(name: str, values: dict) -> List[Any]:
+def add_metric(name: str, values: dict) -> list[Any]:
     """Add metric to list of objects"""
     found_metrics: list = []
     raw_metrics: list = values.get("metrics_")
@@ -29,7 +29,7 @@ def add_metric(name: str, values: dict) -> List[Any]:
     return found_metrics
 
 
-def add_sample_id_metrics(parsed_metric: Any, values: dict) -> List[Any]:
+def add_sample_id_metrics(parsed_metric: Any, values: dict) -> list[Any]:
     """Add parsed sample_id metrics gathered from all metrics to list"""
     sample_ids: set = values.get("sample_ids")
     sample_id_metrics: list = []
@@ -121,7 +121,7 @@ class ParsedMetrics(BaseModel):
 class MetricsDeliverables(BaseModel):
     """Specification for a metric general deliverables file"""
 
-    metrics_: List[MetricsBase] = Field(..., alias="metrics")
+    metrics_: list[MetricsBase] = Field(..., alias="metrics")
     sample_ids: Optional[set]
 
     @validator("sample_ids", always=True)
@@ -137,12 +137,12 @@ class MetricsDeliverables(BaseModel):
 class MetricsDeliverablesCondition(BaseModel):
     """Specification for a metric deliverables file with conditions sets."""
 
-    metrics: List[MetricsBase]
+    metrics: list[MetricsBase]
 
     @validator("metrics")
-    def validate_metrics(cls, metrics: List[MetricsBase]) -> List[MetricsBase]:
+    def validate_metrics(cls, metrics: list[MetricsBase]) -> list[MetricsBase]:
         """Verify that metrics met QC conditions."""
-        failed_metrics: List = []
+        failed_metrics = []
         for metric in metrics:
             if metric.condition is not None:
                 qc_function: Callable = getattr(operator, metric.condition.norm)
@@ -161,5 +161,5 @@ class MetricsDeliverablesCondition(BaseModel):
 class MultiqcDataJson(BaseModel):
     """Multiqc data json model."""
 
-    report_general_stats_data: Optional[List[Dict]]
+    report_general_stats_data: Optional[list[Dict]]
     report_data_sources: Optional[Dict]

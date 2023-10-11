@@ -1,6 +1,6 @@
 """Functions that deal with modifications of the indexes."""
 import logging
-from typing import Dict, List, Set, Tuple, Union
+from typing import Dict, Tuple, Union
 
 from packaging import version
 from pydantic import BaseModel
@@ -41,11 +41,11 @@ class Index(BaseModel):
     sequence: str
 
 
-def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
+def get_valid_indexes(dual_indexes_only: bool = True) -> list[Index]:
     """Return a list of valid indexes from the valid indexes file."""
     LOG.info(f"Fetch valid indexes from {VALID_INDEXES_PATH}")
-    indexes: List[Index] = []
-    indexes_csv: List[List[str]] = ReadFile.get_content_from_file(
+    indexes: list[Index] = []
+    indexes_csv: list[list[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.CSV, file_path=VALID_INDEXES_PATH
     )
     for row in indexes_csv:
@@ -162,7 +162,7 @@ def get_hamming_distance_index_2(
 
 def update_barcode_mismatch_values_for_sample(
     sample_to_update: FlowCellSampleBCLConvert,
-    samples_to_compare_to: List[FlowCellSampleBCLConvert],
+    samples_to_compare_to: list[FlowCellSampleBCLConvert],
     is_reverse_complement: bool,
 ) -> None:
     """Updates the sample's barcode mismatch values.
@@ -219,7 +219,7 @@ def pad_and_reverse_complement_sample_indexes(
 
 
 def update_indexes_for_samples(
-    samples: List[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]],
+    samples: list[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]],
     index_cycles: int,
     is_reverse_complement: bool,
 ) -> None:

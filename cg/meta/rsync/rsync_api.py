@@ -3,7 +3,7 @@ import datetime as dt
 import glob
 import logging
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, Iterable, Tuple
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
@@ -59,7 +59,7 @@ class RsyncAPI(MetaAPI):
         return covid_destination_path % customer_internal_id
 
     @staticmethod
-    def get_trailblazer_config(slurm_job_id: int) -> Dict[str, List[str]]:
+    def get_trailblazer_config(slurm_job_id: int) -> Dict[str, list[str]]:
         """Return dictionary of slurm job IDs."""
         return {"jobs": [str(slurm_job_id)]}
 
@@ -81,7 +81,7 @@ class RsyncAPI(MetaAPI):
 
     @staticmethod
     def concatenate_rsync_commands(
-        folder_list: List[str], source_and_destination_paths: Dict[str, Path], ticket: str
+        folder_list: list[str], source_and_destination_paths: Dict[str, Path], ticket: str
     ) -> str:
         """Concatenates the rsync commands for each folder to be transferred."""
         commands = ""
@@ -103,7 +103,7 @@ class RsyncAPI(MetaAPI):
             LOG.info(f"Setting log dir to: {self.base_path / folder_name}")
             self.log_dir: Path = self.base_path / folder_name
 
-    def get_all_cases_from_ticket(self, ticket: str) -> List[Family]:
+    def get_all_cases_from_ticket(self, ticket: str) -> list[Family]:
         return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
 
     def get_source_and_destination_paths(
@@ -141,7 +141,7 @@ class RsyncAPI(MetaAPI):
 
     def format_covid_report_path(self, case: Family, ticket: str) -> str:
         """Return a formatted of covid report path."""
-        covid_report_options: List[str] = glob.glob(
+        covid_report_options: list[str] = glob.glob(
             self.covid_report_path % (case.internal_id, ticket)
         )
         if not covid_report_options:
@@ -165,14 +165,14 @@ class RsyncAPI(MetaAPI):
 
     def get_folders_to_deliver(
         self, case_id: str, sample_files_present: bool, case_files_present: bool
-    ) -> List[str]:
+    ) -> list[str]:
         """Returns a list of all the folder names depending if sample and/or case data is to be
         transferred."""
         if not sample_files_present and not case_files_present:
             raise CgError(
                 "Since neither case or sample files are present, no files will be transferred"
             )
-        folder_list: List[str] = []
+        folder_list: list[str] = []
         if sample_files_present:
             folder_list.extend(
                 [sample.name for sample in self.status_db.get_samples_by_case_id(case_id=case_id)]
@@ -198,12 +198,12 @@ class RsyncAPI(MetaAPI):
         self.set_log_dir(folder_prefix=case_id)
         self.create_log_dir(dry_run=dry_run)
 
-        folders: List[str] = self.get_folders_to_deliver(
+        folders: list[str] = self.get_folders_to_deliver(
             case_id=case_id,
             sample_files_present=sample_files_present,
             case_files_present=case_files_present,
         )
-        existing_folders: List[str] = [
+        existing_folders: list[str] = [
             folder
             for folder in folders
             if Path(source_and_destination_paths["delivery_source_path"], folder).exists()
@@ -222,7 +222,7 @@ class RsyncAPI(MetaAPI):
         """Runs rsync of a whole ticket folder to the delivery server."""
         self.set_log_dir(folder_prefix=ticket)
         self.create_log_dir(dry_run=dry_run)
-        cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: list[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         if not cases:
             LOG.warning(f"Could not find any cases for ticket {ticket}")
             raise CgError()

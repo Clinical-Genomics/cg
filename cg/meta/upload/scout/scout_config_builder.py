@@ -1,6 +1,6 @@
 """Functions that handle files in the context of scout uploading"""
 import logging
-from typing import List, Optional, Set
+from typing import Optional, Set
 
 import requests
 from housekeeper.store.models import File, Version
@@ -122,7 +122,7 @@ class ScoutConfigBuilder:
 
     def include_cohorts(self) -> None:
         LOG.info("Including cohorts to scout load config")
-        cohorts: List[str] = self.analysis_obj.family.cohorts
+        cohorts: list[str] = self.analysis_obj.family.cohorts
         if cohorts:
             LOG.debug("Adding cohorts %s", ", ".join(cohorts))
             self.load_config.cohorts = cohorts

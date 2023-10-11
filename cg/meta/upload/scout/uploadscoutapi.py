@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
+from typing import Optional, Set, Tuple
 
 from housekeeper.store.models import File, Version
 from pydantic.v1.dataclasses import dataclass
@@ -36,7 +36,7 @@ class RNADNACollection:
 
     rna_sample_internal_id: str
     dna_sample_name: str
-    dna_case_ids: List[str]
+    dna_case_ids: list[str]
 
 
 class UploadScoutAPI:
@@ -165,7 +165,7 @@ class UploadScoutAPI:
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> Set[str]:
         """Return a set of unique DNA cases related to an RNA case."""
         case: Family = self.status_db.get_case_by_internal_id(case_id)
-        rna_dna_collections: List[RNADNACollection] = self.create_rna_dna_collections(case)
+        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(case)
         unique_dna_cases_related_to_rna_case: Set[str] = set()
         for rna_dna_collection in rna_dna_collections:
             unique_dna_cases_related_to_rna_case.update(rna_dna_collection.dna_case_ids)
@@ -253,7 +253,7 @@ class UploadScoutAPI:
 
         status_db: Store = self.status_db
         rna_case = status_db.get_case_by_internal_id(case_id)
-        rna_dna_collections: List[RNADNACollection] = self.create_rna_dna_collections(rna_case)
+        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
@@ -291,7 +291,7 @@ class UploadScoutAPI:
         status_db: Store = self.status_db
         rna_case: Family = status_db.get_case_by_internal_id(case_id)
 
-        rna_dna_collections: List[RNADNACollection] = self.create_rna_dna_collections(rna_case)
+        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
@@ -306,7 +306,7 @@ class UploadScoutAPI:
 
             LOG.debug(f"Splice junctions bed file {splice_junctions_bed.path} found")
             dna_sample_id: str
-            dna_cases: List[str]
+            dna_cases: list[str]
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading splice junctions bed file for sample {dna_sample_name} "
@@ -327,9 +327,9 @@ class UploadScoutAPI:
 
     @staticmethod
     def get_rna_splice_junctions_upload_summary(
-        rna_dna_collections: List[RNADNACollection],
-    ) -> List[str]:
-        upload_summary: List[str] = []
+        rna_dna_collections: list[RNADNACollection],
+    ) -> list[str]:
+        upload_summary: list[str] = []
         for rna_dna_collection in rna_dna_collections:
             upload_summary.extend(
                 f"Uploaded splice junctions bed file for sample {rna_dna_collection.dna_sample_name} in case {dna_case}."
@@ -339,9 +339,9 @@ class UploadScoutAPI:
 
     @staticmethod
     def get_rna_bigwig_coverage_upload_summary(
-        rna_dna_collections: List[RNADNACollection],
-    ) -> List[str]:
-        upload_summary: List[str] = []
+        rna_dna_collections: list[RNADNACollection],
+    ) -> list[str]:
+        upload_summary: list[str] = []
         for rna_dna_collection in rna_dna_collections:
             upload_summary.extend(
                 f"Uploaded bigwig coverage file for sample {rna_dna_collection.dna_sample_name} in case {dna_case}."
@@ -383,7 +383,7 @@ class UploadScoutAPI:
 
         return config_builders[analysis.pipeline]
 
-    def create_rna_dna_collections(self, rna_case: Family) -> List[RNADNACollection]:
+    def create_rna_dna_collections(self, rna_case: Family) -> list[RNADNACollection]:
         return [self.create_rna_dna_collection(link.sample) for link in rna_case.links]
 
     def create_rna_dna_collection(self, rna_sample: Sample) -> RNADNACollection:
@@ -395,7 +395,7 @@ class UploadScoutAPI:
             )
 
         collaborators: Set[Customer] = rna_sample.customer.collaborators
-        subject_id_samples: List[
+        subject_id_samples: list[
             Sample
         ] = self.status_db.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
             customer_ids=[customer.id for customer in collaborators],
@@ -403,7 +403,7 @@ class UploadScoutAPI:
             is_tumour=rna_sample.is_tumour,
         )
 
-        subject_id_dna_samples: List[Sample] = self._get_application_prep_category(
+        subject_id_dna_samples: list[Sample] = self._get_application_prep_category(
             subject_id_samples
         )
 
@@ -413,7 +413,7 @@ class UploadScoutAPI:
                 f"{rna_sample.subject_id}. Number of matches: {len(subject_id_dna_samples)} "
             )
         dna_sample: Sample = subject_id_dna_samples[0]
-        dna_cases: List[str] = self._dna_cases_related_to_dna_sample(
+        dna_cases: list[str] = self._dna_cases_related_to_dna_sample(
             dna_sample=dna_sample, collaborators=collaborators
         )
         return RNADNACollection(
@@ -424,9 +424,9 @@ class UploadScoutAPI:
 
     def _dna_cases_related_to_dna_sample(
         self, dna_sample: Sample, collaborators: Set[Customer]
-    ) -> List[str]:
+    ) -> list[str]:
         """Maps a list of uploaded DNA cases linked to DNA sample."""
-        potential_cases_related_to_dna_sample: List[Family] = [
+        potential_cases_related_to_dna_sample: list[Family] = [
             dna_sample_family_relation.family for dna_sample_family_relation in dna_sample.links
         ]
         return self.filter_cases_related_to_dna_sample(
@@ -435,11 +435,11 @@ class UploadScoutAPI:
 
     @staticmethod
     def filter_cases_related_to_dna_sample(
-        list_of_dna_cases: List[Family], collaborators: Set[Customer]
-    ) -> List[str]:
+        list_of_dna_cases: list[Family], collaborators: Set[Customer]
+    ) -> list[str]:
         """Filters the given list of DNA samples and returns a subset of uploaded cases ordered by customers in the
         specified list of collaborators and within the correct pipeline."""
-        filtered_dna_cases: List[str] = []
+        filtered_dna_cases: list[str] = []
         for case in list_of_dna_cases:
             if (
                 case.data_analysis
@@ -459,10 +459,10 @@ class UploadScoutAPI:
 
     @staticmethod
     def _get_application_prep_category(
-        subject_id_samples: List[Sample],
-    ) -> List[Optional[Sample]]:
+        subject_id_samples: list[Sample],
+    ) -> list[Optional[Sample]]:
         """Filter a models Sample list, returning DNA samples selected on their preparation category."""
-        subject_id_dna_samples: List[Optional[Sample]] = [
+        subject_id_dna_samples: list[Optional[Sample]] = [
             sample
             for sample in subject_id_samples
             if sample.prep_category

@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Generator, List
+from typing import Dict, Generator
 
 import pytest
 from housekeeper.store.models import Version
@@ -234,7 +234,7 @@ def lims_family(fixtures_dir) -> dict:
 
 
 @pytest.fixture(name="lims_samples")
-def lims_samples(lims_family: dict) -> List[dict]:
+def lims_samples(lims_family: dict) -> list[dict]:
     """Returns the samples of a LIMS case."""
     return lims_family["samples"]
 
@@ -327,7 +327,7 @@ def mip_rna_analysis_hk_bundle_data(
 ) -> dict:
     """Return MIP RNA bundle data for Housekeeper."""
 
-    files: List[dict] = [
+    files: list[dict] = [
         {
             "path": Path(mip_dna_analysis_dir, f"{rna_case_id}_report.selected.pdf").as_posix(),
             "archive": False,
@@ -608,7 +608,7 @@ def mip_load_config(
 
 
 @pytest.fixture(name="lims_api")
-def lims_api(lims_samples: List[dict]) -> MockLimsAPI:
+def lims_api(lims_samples: list[dict]) -> MockLimsAPI:
     """Return a LIMS API."""
     return MockLimsAPI(samples=lims_samples)
 
@@ -623,7 +623,7 @@ def mip_analysis_api() -> MockMipAnalysis:
 def upload_scout_api(
     scout_api: MockScoutAPI,
     madeline_api: MockMadelineAPI,
-    lims_samples: List[dict],
+    lims_samples: list[dict],
     housekeeper_api: MockHousekeeperAPI,
     store: Store,
 ) -> UploadScoutAPI:
@@ -645,7 +645,7 @@ def upload_scout_api(
 def upload_mip_analysis_scout_api(
     scout_api: MockScoutAPI,
     madeline_api: MockMadelineAPI,
-    lims_samples: List[dict],
+    lims_samples: list[dict],
     mip_dna_analysis_hk_api: MockHousekeeperAPI,
     store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
@@ -667,7 +667,7 @@ def upload_mip_analysis_scout_api(
 def upload_balsamic_analysis_scout_api(
     scout_api: MockScoutAPI,
     madeline_api: MockMadelineAPI,
-    lims_samples: List[dict],
+    lims_samples: list[dict],
     balsamic_analysis_hk_api: MockHousekeeperAPI,
     store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
@@ -690,12 +690,12 @@ def rna_dna_sample_case_map(
     rna_sample_son_id: str,
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
-) -> Dict[str, List[str]]:
+) -> Dict[str, list[str]]:
     """Return a valid RNA-DNA case map."""
     rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
 
     # WHEN adding the RNA sample rna_dna_case_map
-    rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]] = {}
+    rna_dna_sample_case_map: Dict[str, Dict[str, list[str]]] = {}
     upload_scout_api._map_dna_samples_related_to_rna_sample(
         rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_sample_case_map
     )
@@ -707,7 +707,7 @@ def rna_dna_sample_case_map(
 def upload_rnafusion_analysis_scout_api(
     scout_api: MockScoutAPI,
     madeline_api: MockMadelineAPI,
-    lims_samples: List[dict],
+    lims_samples: list[dict],
     rnafusion_analysis_hk_api: MockHousekeeperAPI,
     store: Store,
 ) -> UploadScoutAPI:

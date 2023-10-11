@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Dict, List, Union
+from typing import Dict, Union
 
 import genologics.entities
 
@@ -58,9 +58,9 @@ class TransferLims(object):
         """Transfer information about samples."""
 
         if sample_id:
-            samples: List[Sample] = self.status.get_samples_by_internal_id(internal_id=sample_id)
+            samples: list[Sample] = self.status.get_samples_by_internal_id(internal_id=sample_id)
         else:
-            samples: List[Sample] = self._get_samples_to_include(include, status_type)
+            samples: list[Sample] = self._get_samples_to_include(include, status_type)
 
         if samples is None:
             LOG.info(f"No samples to process found with {include} {status_type.value}")
@@ -105,7 +105,7 @@ class TransferLims(object):
             if not self._is_pool_valid(pool_obj, ticket, number_of_samples):
                 continue
 
-            samples_in_pool: Union[Dict[str:str], List[genologics.Sample]] = self.lims.get_samples(
+            samples_in_pool: Union[Dict[str:str], list[genologics.Sample]] = self.lims.get_samples(
                 projectname=ticket
             )
             for sample_obj in samples_in_pool:
@@ -125,7 +125,7 @@ class TransferLims(object):
                 self.status.session.commit()
                 break
 
-    def _get_samples_in_step(self, status_type) -> List[Sample]:
+    def _get_samples_in_step(self, status_type) -> list[Sample]:
         return self._sample_functions[status_type]()
 
     @staticmethod

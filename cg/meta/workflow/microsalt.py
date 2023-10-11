@@ -12,7 +12,7 @@ import re
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
 import click
 
@@ -60,13 +60,13 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
-    def get_case_path(self, case_id: str) -> List[Path]:
+    def get_case_path(self, case_id: str) -> list[Path]:
         """Returns all paths associated with the case or single sample analysis."""
         case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
         lims_project_dir_path: Path = Path(self.root_dir, "results", lims_project)
 
-        case_directories: List[Path] = [
+        case_directories: list[Path] = [
             Path(path) for path in glob.glob(f"{lims_project_dir_path}*", recursive=True)
         ]
 
@@ -87,7 +87,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             None,
         )
 
-    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[list[Path], Path]) -> int:
         """Remove workflow run directories for a MicroSALT case."""
 
         if not case_path:
@@ -152,11 +152,11 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         self, case_id: str, sample_id: Optional[str], dry_run: bool = False
     ) -> None:
         case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        samples: List[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
+        samples: list[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
         for sample_obj in samples:
             self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
 
-    def get_samples(self, case_id: str, sample_id: Optional[str] = None) -> List[Sample]:
+    def get_samples(self, case_id: str, sample_id: Optional[str] = None) -> list[Sample]:
         """Returns a list of samples to configure
         If sample_id is specified, will return a list with only this sample_id.
         Otherwise, returns all samples in given case"""
@@ -180,7 +180,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         Default to "Unset"."""
 
         if not sample_obj.organism:
-            raise CgDataError(f"Organism missing on Sample")
+            raise CgDataError("Organism missing on Sample")
 
         organism: str = sample_obj.organism.internal_id.strip()
         comment: str = self.get_lims_comment(sample_id=sample_obj.internal_id)

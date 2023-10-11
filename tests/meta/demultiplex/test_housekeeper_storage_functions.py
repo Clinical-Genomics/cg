@@ -1,7 +1,7 @@
 """Tests for the housekeeper storage functions of the demultiplexing post post-processing module."""
 
 from pathlib import Path
-from typing import List, Set
+from typing import Set
 
 from housekeeper.store.models import File
 from mock import MagicMock, call
@@ -168,7 +168,7 @@ def test_add_demux_logs_to_housekeeper(
     )
 
     # GIVEN a demux log in the run directory
-    demux_log_file_paths: List[Path] = [
+    demux_log_file_paths: list[Path] = [
         Path(
             demux_post_processing_api.flow_cells_dir,
             f"{bcl_convert_flow_cell.full_name}",
@@ -197,7 +197,7 @@ def test_add_demux_logs_to_housekeeper(
         bundle=bcl_convert_flow_cell.id,
     ).all()
 
-    expected_file_names: List[str] = []
+    expected_file_names: list[str] = []
     for file_path in demux_log_file_paths:
         expected_file_names.append(file_path.name.split("/")[-1])
 

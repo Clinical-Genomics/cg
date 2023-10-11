@@ -1,7 +1,7 @@
 """API for uploading cancer observations."""
 import logging
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 from housekeeper.store.models import File, Version
 
@@ -46,7 +46,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             )
             raise LoqusdbUploadCaseError
 
-        loqusdb_upload_apis: List[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
+        loqusdb_upload_apis: list[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
         for loqusdb_api in loqusdb_upload_apis:
             if self.is_duplicate(
                 case=case,
@@ -116,7 +116,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
 
     def delete_case(self, case: Family) -> None:
         """Delete cancer case observations from Loqusdb."""
-        loqusdb_apis: List[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
+        loqusdb_apis: list[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
         for loqusdb_api in loqusdb_apis:
             if not loqusdb_api.get_case(case.internal_id):
                 LOG.error(

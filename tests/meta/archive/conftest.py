@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 from unittest import mock
 
 import pytest
@@ -216,7 +216,7 @@ def archive_store(
         data_archive_location="PDC",
     )
 
-    new_samples: List[Sample] = [
+    new_samples: list[Sample] = [
         base_store.add_sample(
             name=sample_name,
             sex=Gender.MALE,

@@ -2,7 +2,7 @@ import datetime as dt
 import logging
 import shutil
 from pathlib import Path
-from typing import List, Union
+from typing import Union
 
 import click
 from dateutil.parser import parse as parse_date
@@ -174,7 +174,7 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.check_analysis_ongoing(case_id=case_id)
 
-    analysis_path: Union[List[Path], Path] = analysis_api.get_case_path(case_id)
+    analysis_path: Union[list[Path], Path] = analysis_api.get_case_path(case_id)
 
     if dry_run:
         LOG.info(f"Would have deleted: {analysis_path}")

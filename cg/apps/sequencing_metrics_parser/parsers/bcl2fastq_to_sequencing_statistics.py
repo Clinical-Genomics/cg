@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple
+from typing import Tuple
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import SampleLaneMetrics
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import (
@@ -14,17 +14,17 @@ from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
 from cg.store.models import SampleLaneSequencingMetrics
 
 
-def create_bcl2fastq_metrics(bcl2fastq_flow_cell_path: Path) -> List[SampleLaneSequencingMetrics]:
+def create_bcl2fastq_metrics(bcl2fastq_flow_cell_path: Path) -> list[SampleLaneSequencingMetrics]:
     """Return sequencing metrics for a bcl2fastq flow cell."""
-    bcl2fastq_metrics: List[SampleLaneMetrics] = parse_metrics(bcl2fastq_flow_cell_path)
+    bcl2fastq_metrics: list[SampleLaneMetrics] = parse_metrics(bcl2fastq_flow_cell_path)
     return convert_to_sequencing_metrics(bcl2fastq_metrics)
 
 
 def create_bcl2fastq_undetermined_metrics(
-    bcl2fastq_flow_cell_path: Path, non_pooled_lane_sample_pairs: List[Tuple[str, int]]
-) -> List[SampleLaneSequencingMetrics]:
+    bcl2fastq_flow_cell_path: Path, non_pooled_lane_sample_pairs: list[Tuple[str, int]]
+) -> list[SampleLaneSequencingMetrics]:
     """Return undetermined sequencing metrics for a bcl2fastq flow cell."""
-    undetermined_metrics: List[SampleLaneMetrics] = parse_undetermined_non_pooled_metrics(
+    undetermined_metrics: list[SampleLaneMetrics] = parse_undetermined_non_pooled_metrics(
         flow_cell_dir=bcl2fastq_flow_cell_path,
         non_pooled_lane_sample_pairs=non_pooled_lane_sample_pairs,
     )
@@ -32,8 +32,8 @@ def create_bcl2fastq_undetermined_metrics(
 
 
 def convert_to_sequencing_metrics(
-    bcl2fastq_metrics: List[SampleLaneMetrics],
-) -> List[SampleLaneSequencingMetrics]:
+    bcl2fastq_metrics: list[SampleLaneMetrics],
+) -> list[SampleLaneSequencingMetrics]:
     """Convert the raw bcl2fastq metrics to SampleLaneSequencingMetrics."""
     return [create_sequencing_metric(metric) for metric in bcl2fastq_metrics]
 

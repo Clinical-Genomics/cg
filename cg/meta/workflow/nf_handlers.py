@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Dict, Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import FileExtensions, FileFormat
@@ -30,10 +30,10 @@ class NfTowerHandler(NfBaseHandler):
     """
 
     @classmethod
-    def get_tower_launch_parameters(cls, tower_pipeline: str, command_args: dict) -> List[str]:
+    def get_tower_launch_parameters(cls, tower_pipeline: str, command_args: dict) -> list[str]:
         """Returns a tower launch command given a dictionary with arguments."""
 
-        tower_options: List[str] = build_command_from_dict(
+        tower_options: list[str] = build_command_from_dict(
             options={
                 f"--{arg.replace('_', '-')}": command_args.get(arg, None)
                 for arg in (
@@ -51,10 +51,10 @@ class NfTowerHandler(NfBaseHandler):
         return ["launch"] + tower_options + [tower_pipeline]
 
     @classmethod
-    def get_tower_relaunch_parameters(cls, from_tower_id: int, command_args: dict) -> List[str]:
+    def get_tower_relaunch_parameters(cls, from_tower_id: int, command_args: dict) -> list[str]:
         """Returns a tower relaunch command given a dictionary with arguments."""
 
-        tower_options: List[str] = build_command_from_dict(
+        tower_options: list[str] = build_command_from_dict(
             options={
                 f"--{arg.replace('_', '-')}": command_args.get(arg, None)
                 for arg in (
@@ -115,14 +115,14 @@ class NextflowHandler(NfBaseHandler):
     @classmethod
     def get_nextflow_run_parameters(
         cls, case_id: str, pipeline_path: str, root_dir: str, command_args: dict
-    ) -> List[str]:
+    ) -> list[str]:
         """Returns a Nextflow run command given a dictionary with arguments."""
 
-        nextflow_options: List[str] = build_command_from_dict(
+        nextflow_options: list[str] = build_command_from_dict(
             options=dict((f"-{arg}", command_args.get(arg, True)) for arg in ("log", "config")),
             exclude_true=True,
         )
-        run_options: List[str] = build_command_from_dict(
+        run_options: list[str] = build_command_from_dict(
             options=dict(
                 (f"-{arg.replace('_', '-')}", command_args.get(arg, None))
                 for arg in (
