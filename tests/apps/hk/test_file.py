@@ -1,7 +1,7 @@
 """Test how the api handles files."""
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Any
 
 from housekeeper.store.models import File, Version
 
@@ -641,7 +641,7 @@ def test_get_non_archived_spring_path_and_bundle_name(populated_housekeeper_api:
 
     # WHEN fetching all non-archived spring baths and bundle names
     files_and_bundle_names: list[
-        Tuple[str, str]
+        tuple[str, str]
     ] = populated_housekeeper_api.get_non_archived_spring_path_and_bundle_name()
     assert len(files_and_bundle_names) > 0
     # THEN each file should be a spring file

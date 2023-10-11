@@ -3,7 +3,7 @@ import datetime as dt
 import glob
 import logging
 from pathlib import Path
-from typing import Iterable, Tuple
+from typing import Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
@@ -187,7 +187,7 @@ class RsyncAPI(MetaAPI):
         dry_run: bool,
         sample_files_present: bool = False,
         case_files_present: bool = False,
-    ) -> Tuple[bool, int]:
+    ) -> tuple[bool, int]:
         """Runs rsync of a single case to the delivery server, parameters depend on delivery type."""
         case_id: str = case.internal_id
 

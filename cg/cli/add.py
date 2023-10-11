@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Tuple
+from typing import Optional
 
 import click
 
@@ -242,7 +242,7 @@ def add_sample(
 def add_case(
     context: CGConfig,
     priority: Priority,
-    panel_abbreviations: Tuple[str],
+    panel_abbreviations: tuple[str],
     data_analysis: Pipeline,
     data_delivery: DataDelivery,
     customer_id: str,

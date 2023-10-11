@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Set, Tuple
+from typing import Optional, Set
 
 import click
 
@@ -52,7 +52,7 @@ def set_cases(
     context: click.Context,
     action: Optional[str],
     priority: Optional[Priority],
-    panel_abbreviations: Optional[Tuple[str]],
+    panel_abbreviations: Optional[tuple[str]],
     customer_id: Optional[str],
     identifiers: click.Tuple([str, str]),
 ):

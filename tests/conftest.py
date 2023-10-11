@@ -7,7 +7,7 @@ import shutil
 from copy import deepcopy
 from datetime import MAXYEAR, datetime, timedelta
 from pathlib import Path
-from typing import Any, Generator, Tuple, Union
+from typing import Any, Generator, Union
 
 import pytest
 from housekeeper.store.models import File, Version
@@ -2462,7 +2462,7 @@ def store_with_multiple_cases_and_samples(
         base_store=store, case_id=case_id_with_multiple_samples, nr_samples=5
     )
 
-    case_samples: list[Tuple[str, str]] = [
+    case_samples: list[tuple[str, str]] = [
         (case_id_with_multiple_samples, sample_id_in_multiple_cases),
         (case_id, sample_id_in_multiple_cases),
         (case_id_with_single_sample, sample_id_in_single_case),
@@ -2555,7 +2555,7 @@ def store_with_users(store: Store, helpers: StoreHelpers) -> Store:
 def store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with cases and customers."""
 
-    customer_details: list[Tuple[str, str, bool]] = [
+    customer_details: list[tuple[str, str, bool]] = [
         ("cust000", "Customer 1", True),
         ("cust001", "Customer 2", False),
         ("cust002", "Customer 3", True),
@@ -2571,7 +2571,7 @@ def store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store
         )
         customers.append(customer)
 
-    case_details: list[Tuple[str, str, Pipeline, CaseActions, Customer]] = [
+    case_details: list[tuple[str, str, Pipeline, CaseActions, Customer]] = [
         ("case 1", "flyingwhale", Pipeline.BALSAMIC, CaseActions.RUNNING, customers[0]),
         ("case 2", "swimmingtiger", Pipeline.FLUFFY, CaseActions.ANALYZE, customers[0]),
         ("case 3", "sadbaboon", Pipeline.SARS_COV_2, CaseActions.HOLD, customers[1]),

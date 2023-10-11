@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Optional, Set, Tuple
+from typing import Optional, Set
 
 import openpyxl
 from openpyxl.cell.cell import Cell
@@ -69,7 +69,7 @@ class ExcelOrderformParser(OrderformParser):
 
     @staticmethod
     def get_sample_row_info(
-        row: Tuple[Cell], header_row: list[str], empty_row_found: bool
+        row: tuple[Cell], header_row: list[str], empty_row_found: bool
     ) -> Optional[dict]:
         """Convert an Excel row with sample data into a dict with sample info"""
         values = []
@@ -95,7 +95,7 @@ class ExcelOrderformParser(OrderformParser):
         return sample_dict
 
     @staticmethod
-    def get_header(rows: list[Tuple[Cell]]) -> list[str]:
+    def get_header(rows: list[tuple[Cell]]) -> list[str]:
         header_row: list[str] = []
         header = False
         for row in rows:
@@ -107,7 +107,7 @@ class ExcelOrderformParser(OrderformParser):
         return header_row
 
     @staticmethod
-    def get_raw_samples(rows: list[Tuple[Cell]], header_row: list[str]) -> list[dict]:
+    def get_raw_samples(rows: list[tuple[Cell]], header_row: list[str]) -> list[dict]:
         raw_samples: list[dict] = []
         sample_rows = False
         empty_row_found = False

@@ -1,5 +1,5 @@
 """Tests for functions related to indexes."""
-from typing import Tuple
+
 
 import pytest
 
@@ -69,7 +69,7 @@ def test_get_index_pair_valid_cases(
     """Test that getting individual indexes from valid dual indexes works."""
     # GIVEN a list of dual indexes and their correct separation into individual indexes
     dual_indexes: list[str] = ["ABC-DEF", "   GHI - JKL   ", "MNO-PQR\n"]
-    expected_results: list[Tuple[str, str]] = [("ABC", "DEF"), ("GHI", "JKL"), ("MNO", "PQR")]
+    expected_results: list[tuple[str, str]] = [("ABC", "DEF"), ("GHI", "JKL"), ("MNO", "PQR")]
 
     # WHEN getting the individual indexes of the valid indexes
     for index, expected in zip(dual_indexes, expected_results):

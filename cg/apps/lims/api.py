@@ -1,7 +1,7 @@
 """Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 
 from dateutil.parser import parse as parse_date
 from genologics.entities import Artifact, Process, Sample
@@ -333,7 +333,7 @@ class LimsAPI(Lims, OrderHandler):
         return DocumentationMethod.AM
 
     @staticmethod
-    def get_method_udf_values(method_udfs: dict, method_type: str) -> Tuple[str, str]:
+    def get_method_udf_values(method_udfs: dict, method_type: str) -> tuple[str, str]:
         """
         Return UDF values for Method and Method version depending on which method type.
         """
@@ -395,11 +395,11 @@ class LimsAPI(Lims, OrderHandler):
         sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
         return sample_artifact.udf.get(PROP2UDF["rin"])
 
-    def _get_rna_input_amounts(self, sample_id: str) -> list[Tuple[dt.datetime, float]]:
+    def _get_rna_input_amounts(self, sample_id: str) -> list[tuple[dt.datetime, float]]:
         """Return all prep input amounts used for an RNA sample in lims."""
         step_names_udfs: dict[str] = MASTER_STEPS_UDFS["rna_prep_step"]
 
-        input_amounts: list[Tuple[dt.datetime, float]] = []
+        input_amounts: list[tuple[dt.datetime, float]] = []
 
         for process_type in step_names_udfs:
             artifacts: list[Artifact] = self.get_artifacts(
@@ -417,10 +417,10 @@ class LimsAPI(Lims, OrderHandler):
         return input_amounts
 
     def _get_last_used_input_amount(
-        self, input_amounts: list[Tuple[dt.datetime, float]]
+        self, input_amounts: list[tuple[dt.datetime, float]]
     ) -> Optional[float]:
         """Return the latest used input amount."""
-        sorted_input_amounts: list[Tuple[dt.datetime, float]] = self._sort_by_date_run(
+        sorted_input_amounts: list[tuple[dt.datetime, float]] = self._sort_by_date_run(
             input_amounts
         )
         if not sorted_input_amounts:
@@ -429,7 +429,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_latest_rna_input_amount(self, sample_id: str) -> float:
         """Return the input amount used in the latest preparation of an RNA sample."""
-        input_amounts: list[Tuple[dt.datetime, float]] = self._get_rna_input_amounts(
+        input_amounts: list[tuple[dt.datetime, float]] = self._get_rna_input_amounts(
             sample_id=sample_id
         )
         return self._get_last_used_input_amount(input_amounts=input_amounts)

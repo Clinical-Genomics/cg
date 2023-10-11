@@ -1,7 +1,7 @@
 """Functions interacting with housekeeper in the DemuxPostProcessingAPI."""
 import logging
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
@@ -47,7 +47,7 @@ def store_undetermined_fastq_files(
 ) -> None:
     """Store undetermined fastq files for non-pooled samples in Housekeeper."""
     non_pooled_lanes_and_samples: list[
-        Tuple[int, str]
+        tuple[int, str]
     ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 
     undetermined_dir_path: Path = flow_cell.path

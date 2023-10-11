@@ -1,6 +1,6 @@
 """Set case attributes in the status database."""
 import logging
-from typing import Optional, Tuple
+from typing import Optional
 
 import click
 
@@ -42,7 +42,7 @@ def set_case(
     data_analysis: Optional[Pipeline],
     data_delivery: Optional[DataDelivery],
     priority: Optional[Priority],
-    panel_abbreviations: Optional[Tuple[str]],
+    panel_abbreviations: Optional[tuple[str]],
     case_id: str,
     customer_id: Optional[str],
 ):

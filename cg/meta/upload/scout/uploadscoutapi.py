@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Optional, Set, Tuple
+from typing import Optional, Set
 
 from housekeeper.store.models import File, Version
 from pydantic.v1.dataclasses import dataclass
@@ -118,7 +118,7 @@ class UploadScoutAPI:
 
     def get_multiqc_html_report(
         self, case_id: str, pipeline: Pipeline
-    ) -> Tuple[ScoutCustomCaseReportTags, Optional[File]]:
+    ) -> tuple[ScoutCustomCaseReportTags, Optional[File]]:
         """Return a multiqc report for a case in Housekeeper."""
         if pipeline == Pipeline.MIP_RNA:
             return (

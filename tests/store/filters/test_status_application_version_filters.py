@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import Iterable, Tuple
+from typing import Iterable
 
 from sqlalchemy.orm import Query
 
@@ -121,7 +121,7 @@ def test_filter_application_versions_before_valid_from_future_date(
     )
 
     # THEN the filtered query has the same elements as the unfiltered query
-    app_version_pair: Iterable[Tuple[ApplicationVersion, ApplicationVersion]] = zip(
+    app_version_pair: Iterable[tuple[ApplicationVersion, ApplicationVersion]] = zip(
         app_version_query.all(), filtered_app_version_query.all()
     )
     assert all(non_filtered == filtered for non_filtered, filtered in app_version_pair)

@@ -4,7 +4,7 @@ import os
 import shutil
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 
 import click
 from housekeeper.store.models import Bundle, Version
@@ -138,7 +138,7 @@ class AnalysisAPI(MetaAPI):
         """Storing bundle data in Housekeeper for CASE_ID"""
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         bundle_data: dict = self.get_hermes_transformed_deliverables(case_id)
-        bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
+        bundle_result: tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
             bundle_data=bundle_data
         )
         if not bundle_result:

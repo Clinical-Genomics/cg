@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Tuple
 
 import pytest
 
@@ -44,7 +43,7 @@ def override_cycles_for_samples_with_updated_indexes_reverse_complement() -> lis
 
 
 @pytest.fixture
-def barcode_mismatch_values_for_samples_with_updated_indexes() -> list[Tuple[int, int]]:
+def barcode_mismatch_values_for_samples_with_updated_indexes() -> list[tuple[int, int]]:
     """Return the pairs of barcode mismatch values corresponding to three samples."""
     return [(0, 0), (0, 0), (1, 1)]
 

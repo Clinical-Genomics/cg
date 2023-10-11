@@ -1,6 +1,6 @@
 """Functions that deal with modifications of the indexes."""
 import logging
-from typing import Tuple, Union
+from typing import Union
 
 from packaging import version
 from pydantic import BaseModel
@@ -66,7 +66,7 @@ def get_reagent_kit_version(reagent_kit_version: str) -> str:
     return REAGENT_KIT_PARAMETER_TO_VERSION[reagent_kit_version]
 
 
-def get_index_pair(sample: FlowCellSample) -> Tuple[str, str]:
+def get_index_pair(sample: FlowCellSample) -> tuple[str, str]:
     """Returns a sample index separated into index 1 and index 2."""
     if is_dual_index(sample.index):
         index_1, index_2 = sample.index.split("-")

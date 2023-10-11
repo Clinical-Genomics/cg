@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Tuple
 
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq_to_sequencing_statistics import (
     create_bcl2fastq_metrics,
@@ -31,7 +30,7 @@ def create_undetermined_non_pooled_metrics(
     """Return sequencing metrics for any undetermined reads in non-pooled lanes."""
 
     non_pooled_lanes_and_samples: list[
-        Tuple[int, str]
+        tuple[int, str]
     ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 
     if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:

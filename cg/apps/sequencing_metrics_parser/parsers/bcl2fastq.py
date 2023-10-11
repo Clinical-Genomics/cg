@@ -1,7 +1,7 @@
 import logging
 import os
 from pathlib import Path
-from typing import Iterable, Optional, Tuple
+from typing import Iterable, Optional
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
     ReadMetric,
@@ -146,7 +146,7 @@ def combine_undetermined_tiles_per_lane(
 
 
 def get_metrics_for_non_pooled_samples(
-    lane_metrics: dict[int, SampleLaneMetrics], non_pooled_lane_sample_pairs: list[Tuple[int, str]]
+    lane_metrics: dict[int, SampleLaneMetrics], non_pooled_lane_sample_pairs: list[tuple[int, str]]
 ) -> list[SampleLaneMetrics]:
     """Get metrics for non pooled samples and set sample ids."""
     non_pooled_metrics: list[SampleLaneMetrics] = []
@@ -183,7 +183,7 @@ def parse_tile_metrics(
 
 
 def parse_undetermined_non_pooled_metrics(
-    flow_cell_dir: Path, non_pooled_lane_sample_pairs: list[Tuple[int, str]]
+    flow_cell_dir: Path, non_pooled_lane_sample_pairs: list[tuple[int, str]]
 ) -> list[SampleLaneMetrics]:
     """Parse undetermined metrics for a flow cell demultiplexed with Bcl2fastq for non pooled samples."""
     tile_metrics: list[SampleLaneTileMetrics] = parse_tile_metrics(flow_cell_dir)

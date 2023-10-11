@@ -1,6 +1,6 @@
 """Code that handles uploading to mutacc from the CLI"""
 import logging
-from typing import Optional, Tuple
+from typing import Optional
 
 import click
 
@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 @click.option("--dry-run", is_flag=True, help="only print cases to be processed")
 @click.pass_obj
 def process_solved(
-    context: CGConfig, case_id: Optional[str], days_ago: int, customers: Tuple[str], dry_run: bool
+    context: CGConfig, case_id: Optional[str], days_ago: int, customers: tuple[str], dry_run: bool
 ):
     """Process cases with mutacc that has been marked as solved in scout.
     This prepares them to be uploaded to the mutacc database"""

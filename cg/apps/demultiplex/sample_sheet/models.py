@@ -1,6 +1,5 @@
 import logging
 from collections import defaultdict
-from typing import Tuple
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -70,9 +69,9 @@ class FlowCellSampleBCLConvert(FlowCellSample):
 class SampleSheet(BaseModel):
     samples: list[FlowCellSample]
 
-    def get_non_pooled_lanes_and_samples(self) -> list[Tuple[int, str]]:
+    def get_non_pooled_lanes_and_samples(self) -> list[tuple[int, str]]:
         """Return tuples of non-pooled lane and sample ids."""
-        non_pooled_lane_sample_id_pairs: list[Tuple[int, str]] = []
+        non_pooled_lane_sample_id_pairs: list[tuple[int, str]] = []
         non_pooled_samples: list[FlowCellSample] = self.get_non_pooled_samples()
         for sample in non_pooled_samples:
             non_pooled_lane_sample_id_pairs.append((sample.lane, sample.sample_id))

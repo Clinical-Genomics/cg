@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple
 
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import (
     BclConvertMetricsParser,
@@ -32,7 +31,7 @@ def create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell
 
 
 def create_bcl_convert_undetermined_metrics(
-    flow_cell_dir: Path, non_pooled_lane_sample_pairs: list[Tuple[int, str]]
+    flow_cell_dir: Path, non_pooled_lane_sample_pairs: list[tuple[int, str]]
 ) -> list[SampleLaneSequencingMetrics]:
     """Return sequencing metrics for any undetermined reads in the specified lanes."""
     metrics_parser = BclConvertMetricsParser(flow_cell_dir)

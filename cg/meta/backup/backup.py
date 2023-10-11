@@ -2,7 +2,7 @@
 import logging
 import subprocess
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 from housekeeper.store.models import File
 
@@ -180,7 +180,7 @@ class BackupAPI:
 
     def decrypt_flow_cell(
         self, archived_flow_cell: Path, archived_key: Path, run_dir: Path
-    ) -> Tuple[Path, Path, Path, Path]:
+    ) -> tuple[Path, Path, Path, Path]:
         """Decrypt the flow cell."""
         retrieved_key: Path = run_dir / archived_key.name
         encryption_key: Path = retrieved_key.with_suffix(FileExtensions.NO_EXTENSION)

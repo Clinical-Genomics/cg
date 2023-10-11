@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Optional, Set, Tuple
+from typing import Optional, Set
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
@@ -32,7 +32,7 @@ class HousekeeperAPI:
         """Create a new file bundle."""
         return self._store.new_bundle(name, created_at)
 
-    def add_bundle(self, bundle_data) -> Tuple[Bundle, Version]:
+    def add_bundle(self, bundle_data) -> tuple[Bundle, Version]:
         """Build a new bundle version of files."""
         return self._store.add_bundle(bundle_data)
 
@@ -275,7 +275,7 @@ class HousekeeperAPI:
         last_version: Version = self.last_version(bundle=bundle_name)
         if not last_version:
             LOG.info(f"Creating bundle for sample {bundle_name} in housekeeper")
-            bundle_result: Tuple[Bundle, Version] = self.add_bundle(
+            bundle_result: tuple[Bundle, Version] = self.add_bundle(
                 bundle_data={
                     "name": bundle_name,
                     "created_at": dt.datetime.now(),
@@ -453,7 +453,7 @@ class HousekeeperAPI:
             )
         return all(sequencing_files_on_disk.values())
 
-    def get_non_archived_spring_path_and_bundle_name(self) -> list[Tuple[str, str]]:
+    def get_non_archived_spring_path_and_bundle_name(self) -> list[tuple[str, str]]:
         """Return a list of bundles with corresponding file paths for all non-archived SPRING
         files."""
         return [

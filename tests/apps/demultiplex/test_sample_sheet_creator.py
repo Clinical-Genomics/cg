@@ -1,6 +1,5 @@
 """Tests for the SampleSheetCreator classes."""
 from pathlib import Path
-from typing import Tuple
 
 import pytest
 
@@ -177,7 +176,7 @@ def test_add_override_cycles_to_novaseqx_samples_reverse_complement(
 def test_update_barcode_mismatch_values_for_samples(
     novaseq_x_flow_cell: FlowCellDirectoryData,
     bcl_convert_samples_with_updated_indexes: list[FlowCellSampleBCLConvert],
-    barcode_mismatch_values_for_samples_with_updated_indexes: list[Tuple[int, int]],
+    barcode_mismatch_values_for_samples_with_updated_indexes: list[tuple[int, int]],
 ):
     """."""
     # GIVEN a sample sheet creator with samples with barcode mismatch values equal to 1

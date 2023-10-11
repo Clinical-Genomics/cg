@@ -4,7 +4,7 @@ import logging
 import os
 from copy import deepcopy
 from pathlib import Path
-from typing import Iterable, Set, Tuple
+from typing import Iterable, Set
 
 from housekeeper.store.models import File, Version
 
@@ -308,7 +308,7 @@ class DeliverAPI:
         return delivery_path
 
     @staticmethod
-    def get_delivery_scope(delivery_arguments: Set[str]) -> Tuple[bool, bool]:
+    def get_delivery_scope(delivery_arguments: Set[str]) -> tuple[bool, bool]:
         """Returns the scope of the delivery, ie whether sample and/or case files were delivered."""
         case_delivery: bool = False
         sample_delivery: bool = False

@@ -1,6 +1,5 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import SampleLaneMetrics
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import (
@@ -21,7 +20,7 @@ def create_bcl2fastq_metrics(bcl2fastq_flow_cell_path: Path) -> list[SampleLaneS
 
 
 def create_bcl2fastq_undetermined_metrics(
-    bcl2fastq_flow_cell_path: Path, non_pooled_lane_sample_pairs: list[Tuple[str, int]]
+    bcl2fastq_flow_cell_path: Path, non_pooled_lane_sample_pairs: list[tuple[str, int]]
 ) -> list[SampleLaneSequencingMetrics]:
     """Return undetermined sequencing metrics for a bcl2fastq flow cell."""
     undetermined_metrics: list[SampleLaneMetrics] = parse_undetermined_non_pooled_metrics(
