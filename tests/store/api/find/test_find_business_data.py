@@ -255,14 +255,14 @@ def test_are_all_flow_cells_on_disk_when_not_on_disk(
     """Test check if all flow cells for samples on a case is on disk when not on disk."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a store with two flow cell
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=base_store,
         flow_cell_name=bcl2fastq_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.PROCESSING,
     )
 
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=base_store,
         flow_cell_name=bcl_convert_flow_cell_id,
         samples=[sample],
@@ -287,15 +287,15 @@ def test_are_all_flow_cells_on_disk_when_requested(
 ):
     """Test check if all flow cells for samples on a case is on disk when requested."""
     caplog.set_level(logging.DEBUG)
-    
+
     # GIVEN a store with two flow cell
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=base_store,
         flow_cell_name=bcl2fastq_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.REMOVED,
     )
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=base_store,
         flow_cell_name=bcl_convert_flow_cell_id,
         samples=[sample],
@@ -320,9 +320,9 @@ def test_are_all_flow_cells_on_disk(
 ):
     """Test check if all flow cells for samples on a case is on disk."""
     caplog.set_level(logging.DEBUG)
-    
+
     # GIVEN a store with two flow cell
-    helpers.add_flowcell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
+    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
     helpers.add_flow_cell(store=base_store, flow_cell_name=bcl_convert_flow_cell_id)
 
     # WHEN fetching the latest flow cell

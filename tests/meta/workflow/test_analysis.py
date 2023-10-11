@@ -6,7 +6,6 @@ import mock
 import pytest
 
 from cg.constants import FlowCellStatus, GenePanelMasterList, Priority
-
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import Sequencers
 from cg.exc import AnalysisNotReadyError
@@ -160,7 +159,7 @@ def test_ensure_flow_cells_on_disk_does_not_request_flow_cells(
     # GIVEN a case
     case: Family = analysis_store.get_cases()[0]
 
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flow_cell_test",
         archived_at=datetime.now(),
@@ -192,7 +191,7 @@ def test_ensure_flow_cells_on_disk_does_request_flow_cells(
 
     # GIVEN a case with a REMOVED flow cell
     case: Family = analysis_store.get_cases()[0]
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flow_cell_test",
         archived_at=datetime.now(),
@@ -222,7 +221,7 @@ def test_is_case_ready_for_analysis_true(
 
     # GIVEN a case and a flow cell with status ON_DISK
     case: Family = analysis_store.get_cases()[0]
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flowcell_test",
         archived_at=datetime.now(),
@@ -249,7 +248,7 @@ def test_is_case_ready_for_analysis_decompression_needed(
 
     # GIVEN a case and a flow cell
     case: Family = analysis_store.get_cases()[0]
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flowcell_test",
         archived_at=datetime.now(),
@@ -279,7 +278,7 @@ def test_is_case_ready_for_analysis_decompression_running(
 
     # GIVEN a case and a flow cell
     case: Family = analysis_store.get_cases()[0]
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flowcell_test",
         archived_at=datetime.now(),
@@ -304,7 +303,7 @@ def test_prepare_fastq_files_success(mip_analysis_api: MipDNAAnalysisAPI, analys
 
     # GIVEN a case with a flow cell ON_DISK
     case: Family = analysis_store.get_cases()[0]
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flowcell_test",
         archived_at=datetime.now(),
@@ -335,7 +334,7 @@ def test_prepare_fastq_files_decompression_needed(
 
     # GIVEN a case with its flow cell with status ON_DISK
     case: Family = analysis_store.get_cases()[0]
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flowcell_test",
         archived_at=datetime.now(),
@@ -367,7 +366,7 @@ def test_prepare_fastq_files_decompression_running(
 
     # GIVEN a case with all its flow cells being ON_DISK
     case: Family = analysis_store.get_cases()[0]
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flowcell_test",
         archived_at=datetime.now(),
