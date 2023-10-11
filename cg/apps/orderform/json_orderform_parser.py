@@ -1,5 +1,3 @@
-from typing import Set
-
 from cg.apps.orderform.orderform_parser import OrderformParser
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderFormError
@@ -19,7 +17,7 @@ class JsonOrderformParser(OrderformParser):
     def get_project_type(self) -> str:
         """Determine the project type."""
 
-        data_analyses: Set[str] = {sample.data_analysis.lower() for sample in self.samples}
+        data_analyses: set[str] = {sample.data_analysis.lower() for sample in self.samples}
 
         if len(data_analyses) > 1:
             raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(data_analyses)}")

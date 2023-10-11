@@ -3,7 +3,7 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import Optional, Set
+from typing import Optional
 
 from housekeeper.store.models import File, Version
 
@@ -25,7 +25,7 @@ def get_hk_files_dict(tags: list[str], version_obj: Version) -> dict[Path, File]
     hk_file: dict[Path, File] = {}
     tags: set = set(tags)
     for version_file in version_obj.files:
-        file_tags: Set[str] = {tag.name for tag in version_file.tags}
+        file_tags: set[str] = {tag.name for tag in version_file.tags}
         if not file_tags.intersection(tags):
             continue
         LOG.info(f"Found file {version_file.path}")

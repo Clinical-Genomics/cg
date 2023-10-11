@@ -1,7 +1,6 @@
 """Tests for delivery API"""
 
 from pathlib import Path
-from typing import Set
 
 from housekeeper.store.models import Version
 
@@ -54,7 +53,7 @@ def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str
         case_internal_id=case_id
     )
     samples: list[Sample] = [link.sample for link in link_objs]
-    sample_ids: Set[str] = set([sample.internal_id for sample in samples])
+    sample_ids: set[str] = {sample.internal_id for sample in samples}
 
     # WHEN fetching all case files from the delivery api
     bundle_latest_files = deliver_api.get_case_files_from_version(
@@ -102,7 +101,7 @@ def test_get_case_files_from_version(
     # GIVEN the sample ids of the samples
     link_objs: list[FamilySample] = analysis_store.get_case_samples_by_case_id(case_id)
     samples: list[Sample] = [link.sample for link in link_objs]
-    sample_ids: Set[str] = set([sample.internal_id for sample in samples])
+    sample_ids: set[str] = {sample.internal_id for sample in samples}
 
     # WHEN fetching the case files
     case_files = deliver_api.get_case_files_from_version(version=version, sample_ids=sample_ids)
@@ -156,7 +155,7 @@ def test_get_sample_files_from_version(
 def test_get_delivery_scope_case_only():
     """Testing the delivery scope of a case only delivery."""
     # GIVEN a case only delivery type
-    delivery_type: Set[str] = {Pipeline.MIP_DNA}
+    delivery_type: set[str] = {Pipeline.MIP_DNA}
 
     # WHEN getting the delivery scope
     sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)

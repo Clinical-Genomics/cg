@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Optional, Set
+from typing import Optional
 
 import openpyxl
 from openpyxl.cell.cell import Cell
@@ -175,7 +175,7 @@ class ExcelOrderformParser(OrderformParser):
             raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}") from error
 
     def parse_data_delivery(self) -> str:
-        data_deliveries: Set[str] = {
+        data_deliveries: set[str] = {
             sample.data_delivery or self.NO_VALUE for sample in self.samples
         }
 

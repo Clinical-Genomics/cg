@@ -1,6 +1,6 @@
 import datetime as dt
 import re
-from typing import Optional, Set
+from typing import Optional
 
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 from sqlalchemy.orm import declarative_base
@@ -307,7 +307,7 @@ class Customer(Model):
         return f"{self.internal_id} ({self.name})"
 
     @property
-    def collaborators(self) -> Set["Customer"]:
+    def collaborators(self) -> set["Customer"]:
         """All customers that the current customer collaborates with (including itself)"""
         customers = {
             customer
@@ -463,9 +463,9 @@ class Family(Model, PriorityMixin):
         """Returns True if the latest connected analysis has been uploaded."""
         return self.analyses and self.analyses[0].uploaded_at
 
-    def get_delivery_arguments(self) -> Set[str]:
+    def get_delivery_arguments(self) -> set[str]:
         """Translates the case data_delivery field to pipeline specific arguments."""
-        delivery_arguments: Set[str] = set()
+        delivery_arguments: set[str] = set()
         requested_deliveries: list[str] = re.split("[-_]", self.data_delivery)
         delivery_per_pipeline_map: dict[str, str] = {
             DataDelivery.FASTQ: Pipeline.FASTQ,

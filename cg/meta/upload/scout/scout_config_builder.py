@@ -1,6 +1,6 @@
 """Functions that handle files in the context of scout uploading"""
 import logging
-from typing import Optional, Set
+from typing import Optional
 
 import requests
 from housekeeper.store.models import File, Version
@@ -90,7 +90,7 @@ class ScoutConfigBuilder:
 
     def include_phenotype_terms(self) -> None:
         LOG.info("Adding phenotype terms to scout load config")
-        phenotype_terms: Set[str] = set()
+        phenotype_terms: set[str] = set()
         link_obj: FamilySample
         for link_obj in self.analysis_obj.family.links:
             sample_obj: Sample = link_obj.sample
@@ -106,7 +106,7 @@ class ScoutConfigBuilder:
 
     def include_phenotype_groups(self) -> None:
         LOG.info("Adding phenotype groups to scout load config")
-        phenotype_groups: Set[str] = set()
+        phenotype_groups: set[str] = set()
         link_obj: FamilySample
         for link_obj in self.analysis_obj.family.links:
             sample_obj: Sample = link_obj.sample
@@ -160,13 +160,13 @@ class ScoutConfigBuilder:
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
         )
 
-    def get_sample_file(self, hk_tags: Set[str], sample_id: str) -> Optional[str]:
+    def get_sample_file(self, hk_tags: set[str], sample_id: str) -> Optional[str]:
         """Return a file that is specific for a individual from housekeeper"""
         tags: set = hk_tags.copy()
         tags.add(sample_id)
         return self.get_file_from_hk(hk_tags=tags)
 
-    def get_file_from_hk(self, hk_tags: Set[str], latest: Optional[bool] = False) -> Optional[str]:
+    def get_file_from_hk(self, hk_tags: set[str], latest: Optional[bool] = False) -> Optional[str]:
         """Get a file from housekeeper and return the path as a string."""
         LOG.info(f"Get file with tags {hk_tags}")
         if not hk_tags:

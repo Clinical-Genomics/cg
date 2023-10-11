@@ -3,7 +3,6 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Set
 
 LOG = logging.getLogger(__name__)
 
@@ -28,7 +27,7 @@ def get_files_matching_pattern(directory: Path, pattern: str) -> list[Path]:
     return list(directory.glob(pattern))
 
 
-def get_all_files_in_dir(base_path: Path) -> Set[Path]:
+def get_all_files_in_dir(base_path: Path) -> set[Path]:
     """Get a set of all files relative to the given base path."""
     return {file.relative_to(base_path) for file in base_path.rglob("*") if file.is_file()}
 

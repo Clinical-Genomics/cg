@@ -1,7 +1,7 @@
 """Handler to find business data objects."""
 import datetime as dt
 import logging
-from typing import Callable, Iterator, Optional, Set, Union
+from typing import Callable, Iterator, Optional, Union
 
 from sqlalchemy.orm import Query, Session
 
@@ -362,7 +362,7 @@ class FindBusinessDataHandler(BaseHandler):
         sequencing_metrics: list[
             SampleLaneSequencingMetrics
         ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
-        unique_sample_internal_ids: Set[str] = {
+        unique_sample_internal_ids: set[str] = {
             sequencing_metric.sample_internal_id for sequencing_metric in sequencing_metrics
         }
 

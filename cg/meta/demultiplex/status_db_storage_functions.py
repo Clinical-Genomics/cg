@@ -1,7 +1,7 @@
 """Functions interacting with statusdb in the DemuxPostProcessingAPI."""
 import datetime
 import logging
-from typing import Optional, Set
+from typing import Optional
 
 from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
@@ -55,7 +55,7 @@ def add_samples_to_flow_cell_in_status_db(
     flow_cell: Flowcell, sample_internal_ids: list[str], store: Store
 ) -> Flowcell:
     """Adds samples to a flow cell in status db."""
-    samples: Set[Sample] = {
+    samples: set[Sample] = {
         store.get_sample_by_internal_id(sample_internal_id)
         for sample_internal_id in sample_internal_ids
     }

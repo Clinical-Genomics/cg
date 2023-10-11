@@ -1,7 +1,6 @@
 """Tests for the samples to deliver api"""
 
 import datetime as dt
-from typing import Set
 
 from cg.constants import DataDelivery
 from cg.constants.constants import Pipeline
@@ -14,7 +13,7 @@ def test_get_delivery_arguments(case: Family):
     case.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
 
     # WHEN parsing the delivery types
-    delivery_types: Set[str] = case.get_delivery_arguments()
+    delivery_types: set[str] = case.get_delivery_arguments()
 
     # THEN the correct delivery types should be returned
     assert delivery_types == {Pipeline.MIP_DNA, Pipeline.FASTQ}

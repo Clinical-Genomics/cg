@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Hashable, Iterable, Optional, Set
+from typing import Hashable, Iterable, Optional
 
 from pydantic import BaseModel, ConfigDict, constr
 
@@ -91,14 +91,14 @@ class OrderformParser(BaseModel):
         @param default_value:   default value to use if item has an empty value of attr
         @return:                a value with the attribute of item in items
         """
-        values: Set[Hashable] = set(getattr(item, attr, default_value) for item in items)
+        values: set[Hashable] = set(getattr(item, attr, default_value) for item in items)
         if len(values) > 1:
             raise OrderFormError(f"multiple values [{values}] for '{attr}' for '{items_id}'")
 
         return values.pop()
 
     @staticmethod
-    def _get_single_set(items_id: str, items: Iterable, attr: str) -> Set[Hashable]:
+    def _get_single_set(items_id: str, items: Iterable, attr: str) -> set[Hashable]:
         """
         Get single value (set) from a bunch of items, will raise if value not same on all items
         @param items_id: id of items group (e.g. case-id)
@@ -106,7 +106,7 @@ class OrderformParser(BaseModel):
         @param attr:     one attribute of item containing a list (e.g. panels)
         @return:         a set with the attribute of item in items
         """
-        values: Set[Hashable] = set()
+        values: set[Hashable] = set()
         for item_idx, item in enumerate(items):
             if item_idx == 0:
                 values = set(getattr(item, attr)) if getattr(item, attr) else set()
@@ -124,10 +124,10 @@ class OrderformParser(BaseModel):
         synopsis: Hashable[str] = OrderformParser._get_single_value(
             items_id=case_id, items=case_samples, attr="synopsis"
         )
-        cohorts: Set[Hashable[str]] = OrderformParser._get_single_set(
+        cohorts: set[Hashable[str]] = OrderformParser._get_single_set(
             items_id=case_id, items=case_samples, attr="cohorts"
         )
-        panels: Set[Hashable[str]] = OrderformParser._get_single_set(
+        panels: set[Hashable[str]] = OrderformParser._get_single_set(
             items_id=case_id, items=case_samples, attr="panels"
         )
 

@@ -4,7 +4,7 @@ import logging
 import os
 from copy import deepcopy
 from pathlib import Path
-from typing import Iterable, Set
+from typing import Iterable
 
 from housekeeper.store.models import File, Version
 
@@ -25,8 +25,8 @@ class DeliverAPI:
         self,
         store: Store,
         hk_api: HousekeeperAPI,
-        case_tags: list[Set[str]],
-        sample_tags: list[Set[str]],
+        case_tags: list[set[str]],
+        sample_tags: list[set[str]],
         project_base_path: Path,
         delivery_type: str,
         force_all: bool = False,
@@ -44,9 +44,9 @@ class DeliverAPI:
         self.store = store
         self.hk_api = hk_api
         self.project_base_path: Path = project_base_path
-        self.case_tags: list[Set[str]] = case_tags
-        self.all_case_tags: Set[str] = {tag for tags in case_tags for tag in tags}
-        self.sample_tags: list[Set[str]] = sample_tags
+        self.case_tags: list[set[str]] = case_tags
+        self.all_case_tags: set[str] = {tag for tags in case_tags for tag in tags}
+        self.sample_tags: list[set[str]] = sample_tags
         self.customer_id: str = ""
         self.ticket: str = ""
         self.dry_run = False
@@ -85,7 +85,7 @@ class DeliverAPI:
         self.set_ticket(case_obj.latest_ticket)
         self.set_customer_id(case_obj=case_obj)
 
-        sample_ids: Set[str] = {sample.internal_id for sample in samples}
+        sample_ids: set[str] = {sample.internal_id for sample in samples}
 
         if self.case_tags:
             self.deliver_case_files(
@@ -124,7 +124,7 @@ class DeliverAPI:
             )
 
     def deliver_case_files(
-        self, case_id: str, case_name: str, version: Version, sample_ids: Set[str]
+        self, case_id: str, case_name: str, version: Version, sample_ids: set[str]
     ) -> None:
         """Deliver files on case level."""
         LOG.debug(f"Deliver case files for {case_id}")
@@ -204,7 +204,7 @@ class DeliverAPI:
             f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case_id}"
         )
 
-    def get_case_files_from_version(self, version: Version, sample_ids: Set[str]) -> Iterable[Path]:
+    def get_case_files_from_version(self, version: Version, sample_ids: set[str]) -> Iterable[Path]:
         """Fetch all case files from a version that are tagged with any of the case tags."""
 
         if not version:
@@ -231,7 +231,7 @@ class DeliverAPI:
                 continue
             yield Path(file_obj.full_path)
 
-    def include_file_case(self, file: File, sample_ids: Set[str]) -> bool:
+    def include_file_case(self, file: File, sample_ids: set[str]) -> bool:
         """Check if file should be included in case bundle.
 
         At least one tag should match between file and tags.
@@ -250,7 +250,7 @@ class DeliverAPI:
             return False
 
         # Check if any of the file tags matches the case tags
-        tags: Set[str]
+        tags: set[str]
         for tags in self.case_tags:
             LOG.debug(f"check if {tags} is a subset of {file_tags}")
             if tags.issubset(file_tags):
@@ -268,7 +268,7 @@ class DeliverAPI:
         For fastq delivery we know that we want to deliver all files of bundle.
         """
         file_tags = {tag.name for tag in file_obj.tags}
-        tags: Set[str]
+        tags: set[str]
         # Check if any of the file tags matches the sample tags
         for tags in self.sample_tags:
             working_copy = deepcopy(tags)
@@ -308,7 +308,7 @@ class DeliverAPI:
         return delivery_path
 
     @staticmethod
-    def get_delivery_scope(delivery_arguments: Set[str]) -> tuple[bool, bool]:
+    def get_delivery_scope(delivery_arguments: set[str]) -> tuple[bool, bool]:
         """Returns the scope of the delivery, ie whether sample and/or case files were delivered."""
         case_delivery: bool = False
         sample_delivery: bool = False

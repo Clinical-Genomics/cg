@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Set
+from typing import Optional
 
 import click
 
@@ -23,7 +23,7 @@ def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Sto
 def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> list[Family]:
     """Get cases that have samples that match identifiers if given"""
     samples_by_id: list[Sample] = _get_samples_by_identifiers(identifiers, store)
-    cases: Set[Family] = set()
+    cases: set[Family] = set()
     for sample in samples_by_id:
         for link in sample.links:
             cases.add(link.family)

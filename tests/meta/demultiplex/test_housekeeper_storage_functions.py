@@ -1,7 +1,6 @@
 """Tests for the housekeeper storage functions of the demultiplexing post post-processing module."""
 
 from pathlib import Path
-from typing import Set
 
 from housekeeper.store.models import File
 from mock import MagicMock, call
@@ -226,5 +225,5 @@ def test_store_fastq_path_in_housekeeper_correct_tags(
 
     # THEN the file was added to Housekeeper with the correct tags
     file: File = populated_housekeeper_api.get_files(bundle=sample_id).first()
-    expected_tags: Set[str] = {SequencingFileTag.FASTQ.value, novaseq6000_flow_cell.id, sample_id}
-    assert set([tag.name for tag in file.tags]) == expected_tags
+    expected_tags: set[str] = {SequencingFileTag.FASTQ.value, novaseq6000_flow_cell.id, sample_id}
+    assert {tag.name for tag in file.tags} == expected_tags

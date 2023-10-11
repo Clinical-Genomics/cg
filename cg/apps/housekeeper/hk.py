@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Optional, Set
+from typing import Optional
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
@@ -116,7 +116,7 @@ class HousekeeperAPI:
         self,
         *,
         bundle: str = None,
-        tags: Set[str] = None,
+        tags: set[str] = None,
         version: int = None,
         path: str = None,
     ) -> Query:
@@ -137,7 +137,7 @@ class HousekeeperAPI:
         return file
 
     @staticmethod
-    def get_files_from_version(version: Version, tags: Set[str]) -> Optional[list[File]]:
+    def get_files_from_version(version: Version, tags: set[str]) -> Optional[list[File]]:
         """Return a list of files associated with the given version and tags."""
         LOG.debug(f"Getting files from version with tags {tags}")
         files: list[File] = []
@@ -151,13 +151,13 @@ class HousekeeperAPI:
         return files
 
     @staticmethod
-    def get_file_from_version(version: Version, tags: Set[str]) -> Optional[File]:
+    def get_file_from_version(version: Version, tags: set[str]) -> Optional[File]:
         """Return the first file matching the given tags."""
         files: list[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
         return files[0] if files else None
 
     @staticmethod
-    def get_latest_file_from_version(version: Version, tags: Set[str]) -> Optional[File]:
+    def get_latest_file_from_version(version: Version, tags: set[str]) -> Optional[File]:
         """Return the latest file from Housekeeper given its version and tags."""
         files: list[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
         return sorted(files, key=lambda file_obj: file_obj.id)[-1] if files else None
@@ -371,7 +371,7 @@ class HousekeeperAPI:
         bundle_version.included_at = dt.datetime.now()
         self.commit()
 
-    def get_file_from_latest_version(self, bundle_name: str, tags: Set[str]) -> Optional[File]:
+    def get_file_from_latest_version(self, bundle_name: str, tags: set[str]) -> Optional[File]:
         """Return a file in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:

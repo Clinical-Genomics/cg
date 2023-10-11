@@ -1,6 +1,5 @@
 import datetime as dt
 import logging
-from typing import Set
 
 from cg.constants import DataDelivery, Priority
 from cg.constants.constants import CaseActions, Pipeline
@@ -161,7 +160,7 @@ class CaseSubmitter(Submitter):
             case_internal_id: str = CaseSubmitter._get_single_value(
                 case_name, case_samples, "case_internal_id"
             )
-            cohorts: Set[str] = {
+            cohorts: set[str] = {
                 cohort for sample in case_samples for cohort in sample.cohorts if cohort
             }
             data_analysis = CaseSubmitter._get_single_value(
@@ -171,9 +170,9 @@ class CaseSubmitter(Submitter):
                 case_name, case_samples, "data_delivery"
             )
 
-            panels: Set[str] = set()
+            panels: set[str] = set()
             if data_analysis == Pipeline.MIP_DNA:
-                panels: Set[str] = {
+                panels: set[str] = {
                     panel for sample in case_samples for panel in sample.panels if panel
                 }
 

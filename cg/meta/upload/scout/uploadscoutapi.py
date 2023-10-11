@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Optional, Set
+from typing import Optional
 
 from housekeeper.store.models import File, Version
 from pydantic.v1.dataclasses import dataclass
@@ -144,7 +144,7 @@ class UploadScoutAPI:
     def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> Optional[File]:
         """Return a splice junctions bed file for a case in Housekeeper."""
 
-        tags: Set[str] = {"junction", "bed", sample_id}
+        tags: set[str] = {"junction", "bed", sample_id}
         splice_junctions_bed: Optional[File] = None
         try:
             splice_junctions_bed = self.housekeeper.get_file_from_latest_version(
@@ -158,15 +158,15 @@ class UploadScoutAPI:
     def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> Optional[File]:
         """Return an RNA coverage bigwig file for a case in Housekeeper."""
 
-        tags: Set[str] = {"coverage", "bigwig", sample_id}
+        tags: set[str] = {"coverage", "bigwig", sample_id}
 
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
-    def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> Set[str]:
+    def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> set[str]:
         """Return a set of unique DNA cases related to an RNA case."""
         case: Family = self.status_db.get_case_by_internal_id(case_id)
         rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(case)
-        unique_dna_cases_related_to_rna_case: Set[str] = set()
+        unique_dna_cases_related_to_rna_case: set[str] = set()
         for rna_dna_collection in rna_dna_collections:
             unique_dna_cases_related_to_rna_case.update(rna_dna_collection.dna_case_ids)
         return unique_dna_cases_related_to_rna_case
@@ -186,7 +186,7 @@ class UploadScoutAPI:
 
         LOG.info(f"{report_type} fusion report {fusion_report.path} found")
 
-        related_dna_cases: Set[str] = self.get_related_uploaded_dna_cases(case_id)
+        related_dna_cases: set[str] = self.get_related_uploaded_dna_cases(case_id)
         if not related_dna_cases:
             raise CgDataError("No connected DNA case has been uploaded.")
 
@@ -214,7 +214,7 @@ class UploadScoutAPI:
         """Upload report file to DNA cases related to an RNA case in Scout."""
         LOG.info(f"Finding DNA cases related to RNA case {rna_case_id}")
 
-        related_dna_cases: Set[str] = self.get_related_uploaded_dna_cases(rna_case_id)
+        related_dna_cases: set[str] = self.get_related_uploaded_dna_cases(rna_case_id)
         if not related_dna_cases:
             raise CgDataError("No connected DNA case has been uploaded.")
         for dna_case_id in related_dna_cases:
@@ -394,7 +394,7 @@ class UploadScoutAPI:
                 f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
             )
 
-        collaborators: Set[Customer] = rna_sample.customer.collaborators
+        collaborators: set[Customer] = rna_sample.customer.collaborators
         subject_id_samples: list[
             Sample
         ] = self.status_db.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
@@ -423,7 +423,7 @@ class UploadScoutAPI:
         )
 
     def _dna_cases_related_to_dna_sample(
-        self, dna_sample: Sample, collaborators: Set[Customer]
+        self, dna_sample: Sample, collaborators: set[Customer]
     ) -> list[str]:
         """Maps a list of uploaded DNA cases linked to DNA sample."""
         potential_cases_related_to_dna_sample: list[Family] = [
@@ -435,7 +435,7 @@ class UploadScoutAPI:
 
     @staticmethod
     def filter_cases_related_to_dna_sample(
-        list_of_dna_cases: list[Family], collaborators: Set[Customer]
+        list_of_dna_cases: list[Family], collaborators: set[Customer]
     ) -> list[str]:
         """Filters the given list of DNA samples and returns a subset of uploaded cases ordered by customers in the
         specified list of collaborators and within the correct pipeline."""
@@ -475,11 +475,11 @@ class UploadScoutAPI:
 
         return subject_id_dna_samples
 
-    def get_related_uploaded_dna_cases(self, rna_case_id: str) -> Set[str]:
+    def get_related_uploaded_dna_cases(self, rna_case_id: str) -> set[str]:
         """Returns all uploaded DNA cases related to the specified RNA case."""
-        unique_dna_case_ids: Set[str] = self.get_unique_dna_cases_related_to_rna_case(rna_case_id)
+        unique_dna_case_ids: set[str] = self.get_unique_dna_cases_related_to_rna_case(rna_case_id)
 
-        uploaded_dna_cases: Set[str] = set()
+        uploaded_dna_cases: set[str] = set()
         for dna_case_id in unique_dna_case_ids:
             if self.status_db.get_case_by_internal_id(dna_case_id).is_uploaded:
                 uploaded_dna_cases.add(dna_case_id)
