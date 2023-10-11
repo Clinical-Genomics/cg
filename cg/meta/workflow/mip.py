@@ -5,13 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 from pydantic.v1 import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import (
-    COLLABORATORS,
-    COMBOS,
-    FileExtensions,
-    GenePanelMasterList,
-    Pipeline,
-)
+from cg.constants import COLLABORATORS, COMBOS, FileExtensions, GenePanelMasterList, Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
@@ -289,7 +283,7 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_cases_to_analyze(self) -> List[Family]:
         """Return cases to analyze."""
         cases_query: List[Family] = self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.threshold_reads
+            pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
         cases_to_analyze = []
         for case_obj in cases_query:
