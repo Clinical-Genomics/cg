@@ -29,6 +29,11 @@ def get_session() -> Session:
     return SESSION()
 
 
+def get_scoped_session() -> Optional[scoped_session]:
+    """Get the scoped session registry."""
+    return SESSION
+
+
 def get_engine() -> Engine:
     """Get the SQLAlchemy engine with a connection to status db."""
     if not ENGINE:
