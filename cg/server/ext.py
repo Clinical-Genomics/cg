@@ -8,7 +8,7 @@ from flask_wtf.csrf import CSRFProtect
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.store.api.core import Store
-from cg.store.database import initialise_database
+from cg.store.database import initialize_database
 
 
 class FlaskLims(LimsAPI):
@@ -34,7 +34,7 @@ class FlaskStore(Store):
 
     def init_app(self, app):
         uri = app.config["SQLALCHEMY_DATABASE_URI"]
-        initialise_database(uri)
+        initialize_database(uri)
         super(FlaskStore, self).__init__()
 
 

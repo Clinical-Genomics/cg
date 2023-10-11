@@ -7,7 +7,7 @@ import cg
 from cg.cli.base import base, init
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.database import get_tables, initialise_database
+from cg.store.database import get_tables, initialize_database
 
 
 def test_cli_version(cli_runner: CliRunner):
@@ -40,7 +40,7 @@ def test_cli_init(cli_runner: CliRunner, base_context: CGConfig, caplog, tmp_pat
     database = Path(tmp_path, "test_db.sqlite3")
     database_path = Path(database)
     database_uri = f"sqlite:///{database}"
-    initialise_database(database_uri)
+    initialize_database(database_uri)
     base_context.status_db_ = Store()
 
     assert database_path.exists() is False
