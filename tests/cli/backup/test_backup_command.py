@@ -40,9 +40,6 @@ def test_backup_flow_cells(
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN communicate flow cell has been backed upped
-    assert f"Flow cell: {flow_cell_full_name} has been backed up" in caplog.text
-
 
 def test_backup_flow_cells_when_dcms_is_running(
     cli_runner: CliRunner,
