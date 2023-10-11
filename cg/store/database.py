@@ -29,12 +29,6 @@ def get_session() -> Session:
     return SESSION()
 
 
-def get_session_factory() -> Session:
-    if not SESSION:
-        raise CgError("Database not initialised")
-    return SESSION
-
-
 def get_engine() -> Engine:
     """Get the SQLAlchemy engine with a connection to status db."""
     if not ENGINE:
