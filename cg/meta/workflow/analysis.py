@@ -38,7 +38,7 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     @property
-    def threshold_reads(self):
+    def use_read_count_threshold(self) -> bool:
         """Defines whether the threshold for adequate read count should be passed for all samples
         when determining if the analysis for a case should be automatically started"""
         return False
@@ -254,7 +254,7 @@ class AnalysisAPI(MetaAPI):
 
     def get_cases_to_analyze(self) -> List[Family]:
         return self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.threshold_reads
+            pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
 
     def get_cases_to_store(self) -> List[Family]:

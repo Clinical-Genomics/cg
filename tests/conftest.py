@@ -38,10 +38,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.run_parameters import (
-    RunParametersNovaSeq6000,
-    RunParametersNovaSeqX,
-)
+from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
@@ -123,7 +120,7 @@ def slurm_account() -> str:
 
 @pytest.fixture(scope="session")
 def user_name() -> str:
-    """Return a user name."""
+    """Return a username."""
     return "Paul Anderson"
 
 
@@ -134,9 +131,9 @@ def user_mail() -> str:
 
 
 @pytest.fixture(scope="session")
-def email_adress() -> str:
-    """Return an email adress."""
-    return "james.holden@scilifelab.se"
+def email_address() -> str:
+    """Return an email address."""
+    return "user.name@scilifelab.se"
 
 
 @pytest.fixture(scope="session")
@@ -981,8 +978,8 @@ def sample_sheet_context(
     cg_context: CGConfig, lims_api: LimsAPI, populated_housekeeper_api: HousekeeperAPI
 ) -> CGConfig:
     """Return cg context with added Lims and Housekeeper API."""
-    cg_context.lims_api_: LimsAPI = lims_api
-    cg_context.housekeeper_api_: HousekeeperAPI = populated_housekeeper_api
+    cg_context.lims_api_ = lims_api
+    cg_context.housekeeper_api_ = populated_housekeeper_api
     return cg_context
 
 
@@ -1046,10 +1043,10 @@ def store_with_demultiplexed_samples(
     flow_cell_name_demultiplexed_with_bcl_convert: str,
 ) -> Store:
     """Return a store with samples that have been demultiplexed with BCL Convert and BCL2Fastq."""
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store, flow_cell_name_demultiplexed_with_bcl_convert, sequencer_type="novaseq"
     )
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store, flow_cell_name_demultiplexed_with_bcl2fastq, sequencer_type="hiseqx"
     )
     for i, sample_internal_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_internal_ids):
@@ -1409,7 +1406,7 @@ def novaseqx_demultiplexed_flow_cell(demultiplexed_runs: Path, novaseq_x_flow_ce
 
 @pytest.fixture()
 def novaseqx_flow_cell_with_sample_sheet_no_fastq(
-    mocker, novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
+    novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
 ) -> FlowCellDirectoryData:
     """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
     novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)
@@ -1475,14 +1472,14 @@ def small_helpers() -> SmallHelpers:
 @pytest.fixture(name="root_path")
 def root_path(project_dir: Path) -> Path:
     """Return the path to a hk bundles dir."""
-    _root_path = project_dir / "bundles"
+    _root_path = Path(project_dir, "bundles")
     _root_path.mkdir(parents=True, exist_ok=True)
     return _root_path
 
 
 @pytest.fixture(name="hk_bundle_sample_path")
 def hk_bundle_sample_path(sample_id: str, timestamp: datetime) -> Path:
-    """Return the relative path to a HK bundle mock sample."""
+    """Return the relative path to a Housekeeper bundle mock sample."""
     return Path(sample_id, timestamp.strftime("%Y-%m-%d"))
 
 
@@ -1513,7 +1510,6 @@ def hk_bundle_data(
 @pytest.fixture(name="hk_sample_bundle")
 def hk_sample_bundle(
     fastq_file: Path,
-    helpers,
     sample_hk_bundle_no_files: dict,
     sample_id: str,
     spring_file: Path,
@@ -1587,7 +1583,6 @@ def compress_hk_fastq_bundle(
     compression_object: CompressionData, sample_hk_bundle_no_files: dict
 ) -> dict:
     """Create a complete bundle mock for testing compression
-
     This bundle contains a pair of fastq files.
     ."""
     hk_bundle_data = deepcopy(sample_hk_bundle_no_files)
@@ -1597,7 +1592,7 @@ def compress_hk_fastq_bundle(
     for fastq_file in [first_fastq, second_fastq]:
         fastq_file.touch()
         # We need to set the time to an old date
-        # Create a older date
+        # Create an older date
         # Convert the date to a float
         before_timestamp = datetime.timestamp(datetime(2020, 1, 1))
         # Update the utime so file looks old
@@ -1616,7 +1611,7 @@ def housekeeper_api(hk_config_dict: dict) -> MockHousekeeperAPI:
 
 @pytest.fixture(name="real_housekeeper_api")
 def real_housekeeper_api(hk_config_dict: dict) -> Generator[HousekeeperAPI, None, None]:
-    """Setup a real Housekeeper store."""
+    """Set up a real Housekeeper store."""
     _api = HousekeeperAPI(hk_config_dict)
     _api.initialise_db()
     yield _api
@@ -1720,7 +1715,7 @@ def analysis_store_trio(analysis_store: Store) -> Generator[Store, None, None]:
 def analysis_store_single(
     base_store: Store, analysis_family_single_case: Store, helpers: StoreHelpers
 ):
-    """Setup a store instance with a single ind case for testing analysis API."""
+    """Set up a store instance with a single ind case for testing analysis API."""
     helpers.ensure_case_from_dict(base_store, case_info=analysis_family_single_case)
     yield base_store
 
@@ -2148,9 +2143,9 @@ def microsalt_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def encryption_dir() -> Path:
+def encryption_dir(tmp_flow_cells_directory: Path) -> Path:
     """Return a temporary directory for encryption testing."""
-    return Path("home", "encrypt")
+    return Path(tmp_flow_cells_directory, "encrypt")
 
 
 @pytest.fixture(name="cg_uri")
@@ -2175,6 +2170,7 @@ def loqusdb_id() -> str:
 def context_config(
     cg_uri: str,
     hk_uri: str,
+    email_address: str,
     fluffy_dir: Path,
     housekeeper_dir: Path,
     mip_dir: Path,
@@ -2185,6 +2181,7 @@ def context_config(
     taxprofiler_dir: Path,
     flow_cells_dir: Path,
     demultiplexed_runs: Path,
+    encryption_dir: Path,
 ) -> dict:
     """Return a context config."""
     return {
@@ -2201,7 +2198,14 @@ def context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encrypt_dir": str(encryption_dir),
+            "encrypt_dir": encryption_dir.as_posix(),
+            "slurm_flow_cell_encryption": {
+                "account": "development",
+                "hours": 1,
+                "mail_user": email_address,
+                "memory": 1,
+                "number_tasks": 1,
+            },
         },
         "balsamic": {
             "balsamic_cache": "hello",
@@ -2226,7 +2230,7 @@ def context_config(
                 "account": "development",
                 "conda_env": "S_crunchy",
                 "hours": 1,
-                "mail_user": "an@scilifelab.se",
+                "mail_user": email_address,
                 "memory": 1,
                 "number_tasks": 1,
             },
@@ -2237,14 +2241,14 @@ def context_config(
             "covid_destination_path": "server.name.se:/another/%s/foldername/",
             "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
             "destination_path": "server.name.se:/some",
-            "mail_user": "an@email.com",
+            "mail_user": email_address,
         },
         "demultiplex": {
             "run_dir": "tests/fixtures/apps/demultiplexing/flow_cells/nova_seq_6000",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
             "slurm": {
                 "account": "development",
-                "mail_user": "an@scilifelab.se",
+                "mail_user": email_address,
             },
         },
         "encryption": {"binary_path": "bin/gpg"},
@@ -2339,6 +2343,7 @@ def context_config(
             "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
             "tower_pipeline": "rnafusion",
         },
+        "pigz": {"binary_path": "/bin/pigz"},
         "pdc": {"binary_path": "/bin/dsmc"},
         "taxprofiler": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
@@ -2410,6 +2415,12 @@ def case_id_without_samples():
 
 
 @pytest.fixture(scope="session")
+def case_id_not_enough_reads():
+    """Return a case id associated to a sample without enough reads."""
+    return "tiredwalrus"
+
+
+@pytest.fixture(scope="session")
 def sample_id_in_single_case():
     """Return a sample id that should be associated with a single case."""
     return "ASM1"
@@ -2419,6 +2430,12 @@ def sample_id_in_single_case():
 def sample_id_in_multiple_cases():
     """Return a sample id that should be associated with multiple cases."""
     return "ASM2"
+
+
+@pytest.fixture(scope="session")
+def sample_id_not_enough_reads():
+    """Return a sample id without enough reads."""
+    return "ASM3"
 
 
 @pytest.fixture(name="store_with_multiple_cases_and_samples")
@@ -2740,6 +2757,16 @@ def rnafusion_parameters_default(
     )
 
 
+@pytest.fixture(scope="session")
+def total_sequenced_reads_pass() -> int:
+    return 200_000_000
+
+
+@pytest.fixture(scope="session")
+def total_sequenced_reads_not_pass() -> int:
+    return 1
+
+
 @pytest.fixture(scope="function")
 def rnafusion_context(
     cg_context: CGConfig,
@@ -2751,6 +2778,12 @@ def rnafusion_context(
     rnafusion_case_id: str,
     sample_id: str,
     no_sample_case_id: str,
+    total_sequenced_reads_pass: int,
+    apptag_rna: str,
+    case_id_not_enough_reads: str,
+    sample_id_not_enough_reads: str,
+    total_sequenced_reads_not_pass: int,
+    timestamp_yesterday: datetime,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
@@ -2773,6 +2806,8 @@ def rnafusion_context(
         status_db,
         internal_id=sample_id,
         reads_updated_at=datetime.now(),
+        reads=total_sequenced_reads_pass,
+        application_tag=apptag_rna,
     )
 
     helpers.add_relationship(
@@ -2780,6 +2815,25 @@ def rnafusion_context(
         case=case_enough_reads,
         sample=sample_rnafusion_case_enough_reads,
     )
+
+    # Create case without enough reads
+    case_not_enough_reads: Family = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Pipeline.RNAFUSION,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=sample_id_not_enough_reads,
+        reads_updated_at=datetime.now(),
+        reads=total_sequenced_reads_not_pass,
+        application_tag=apptag_rna,
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
     return cg_context
 
 
@@ -2984,6 +3038,7 @@ def taxprofiler_context(
     trailblazer_api: MockTB,
     nf_analysis_housekeeper: HousekeeperAPI,
     no_sample_case_id: str,
+    total_sequenced_reads_pass: int,
 ) -> CGConfig:
     """Context to use in cli."""
     cg_context.housekeeper_api_: HousekeeperAPI = nf_analysis_housekeeper
@@ -3003,6 +3058,7 @@ def taxprofiler_context(
         internal_id=sample_id,
         reads_updated_at=datetime.now(),
         name=sample_name,
+        reads=total_sequenced_reads_pass,
     )
 
     helpers.add_relationship(
@@ -3019,10 +3075,16 @@ def expected_total_reads() -> int:
     return 1_000_000
 
 
-@pytest.fixture(name="flow_cell_name")
+@pytest.fixture
 def flow_cell_name() -> str:
     """Return flow cell name."""
     return "HVKJCDRXX"
+
+
+@pytest.fixture
+def flow_cell_full_name(flow_cell_name: str) -> str:
+    """Return flow cell full name."""
+    return f"201203_D00483_0200_A{flow_cell_name}"
 
 
 @pytest.fixture(name="expected_average_q30_for_sample")
@@ -3065,10 +3127,7 @@ def store_with_sequencing_metrics(
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 3, 1_500_000, 80.5, 33),
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 2, 1_500_000, 80.5, 33),
     ]
-    helpers.add_flowcell(
-        flow_cell_name=flow_cell_name,
-        store=store,
-    )
+    helpers.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
     helpers.add_sample(
         name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
     )

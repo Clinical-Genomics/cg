@@ -34,7 +34,7 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
         return self.config.mip_rd_rna.script
 
     @property
-    def threshold_reads(self):
+    def use_read_count_threshold(self) -> bool:
         return True
 
     @property

@@ -81,11 +81,15 @@ class EmailNotSentError(CgError):
 
 
 class FlowCellError(CgError):
-    """Raised when there is a problem with demultiplexing a flow cell."""
+    """Raised when there is a problem with a flow cell."""
 
 
 class FlowCellsNeededError(CgError):
     """Raised when fetching flow cells still needed to start analysis."""
+
+
+class FlowCellEncryptionError(CgError):
+    """Raised when there is a problem with encrypting a flow cell."""
 
 
 class HousekeeperFileMissingError(CgError):
