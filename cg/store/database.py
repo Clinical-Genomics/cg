@@ -29,7 +29,7 @@ def get_session() -> Session:
     return SESSION()
 
 
-def get_scoped_session() -> Optional[scoped_session]:
+def get_scoped_session_registry() -> Optional[scoped_session]:
     """Get the scoped session registry."""
     return SESSION
 
