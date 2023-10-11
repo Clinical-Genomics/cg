@@ -1,7 +1,7 @@
 """Delivery report helpers."""
 import logging
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Optional
 
 import click
 
@@ -78,7 +78,7 @@ def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> Repor
     """Resolves the report API given a specific pipeline."""
     # Default report API pipeline: MIP-DNA
     pipeline: Pipeline = pipeline if pipeline else Pipeline.MIP_DNA
-    dispatch_report_api: Dict[Pipeline, ReportAPI] = {
+    dispatch_report_api: dict[Pipeline, ReportAPI] = {
         Pipeline.BALSAMIC: BalsamicReportAPI(
             config=context.obj, analysis_api=BalsamicAnalysisAPI(config=context.obj)
         ),

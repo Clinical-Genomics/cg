@@ -1,7 +1,7 @@
 """Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
-from typing import Dict, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 
 from dateutil.parser import parse as parse_date
 from genologics.entities import Artifact, Process, Sample
@@ -154,7 +154,7 @@ class LimsAPI(Lims, OrderHandler):
 
         return None
 
-    def get_samples(self, *args, map_ids=False, **kwargs) -> Union[Dict[str, str], list[Sample]]:
+    def get_samples(self, *args, map_ids=False, **kwargs) -> Union[dict[str, str], list[Sample]]:
         """Bypass to original method."""
         lims_samples = super(LimsAPI, self).get_samples(*args, **kwargs)
         if map_ids:
@@ -324,7 +324,7 @@ class LimsAPI(Lims, OrderHandler):
         return processes
 
     @staticmethod
-    def get_method_type(process: Process, method_udfs: Dict) -> str:
+    def get_method_type(process: Process, method_udfs: dict) -> str:
         """
         Return which type of method documentation has been used, AM or Atlas.
         """
@@ -333,7 +333,7 @@ class LimsAPI(Lims, OrderHandler):
         return DocumentationMethod.AM
 
     @staticmethod
-    def get_method_udf_values(method_udfs: Dict, method_type: str) -> Tuple[str, str]:
+    def get_method_udf_values(method_udfs: dict, method_type: str) -> Tuple[str, str]:
         """
         Return UDF values for Method and Method version depending on which method type.
         """
@@ -397,7 +397,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def _get_rna_input_amounts(self, sample_id: str) -> list[Tuple[dt.datetime, float]]:
         """Return all prep input amounts used for an RNA sample in lims."""
-        step_names_udfs: Dict[str] = MASTER_STEPS_UDFS["rna_prep_step"]
+        step_names_udfs: dict[str] = MASTER_STEPS_UDFS["rna_prep_step"]
 
         input_amounts: list[Tuple[dt.datetime, float]] = []
 

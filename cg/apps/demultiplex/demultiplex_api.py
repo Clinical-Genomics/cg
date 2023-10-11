@@ -1,7 +1,7 @@
 """This api should handle everything around demultiplexing."""
 import logging
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 from typing_extensions import Literal
 
@@ -196,7 +196,7 @@ class DemultiplexingAPI:
         demultiplexing_started_path.touch(exist_ok=False)
 
     @staticmethod
-    def get_trailblazer_config(slurm_job_id: int) -> Dict[str, list[str]]:
+    def get_trailblazer_config(slurm_job_id: int) -> dict[str, list[str]]:
         return {"jobs": [str(slurm_job_id)]}
 
     @staticmethod

@@ -1,7 +1,7 @@
 """Tests for the CleanFlowCellsAPI."""
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Union
+from typing import Union
 
 import pytest
 
@@ -139,8 +139,8 @@ def store_with_flow_cell_not_to_clean(
 def housekeeper_api_with_flow_cell_to_clean(
     real_housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
-    hk_flow_cell_to_clean_bundle: Dict,
-    hk_sample_bundle_for_flow_cell_to_clean: Dict,
+    hk_flow_cell_to_clean_bundle: dict,
+    hk_sample_bundle_for_flow_cell_to_clean: dict,
 ) -> HousekeeperAPI:
     """
     Return a housekeeper api that contains a flow cell bundle with sample sheet,
@@ -157,7 +157,7 @@ def housekeeper_api_with_flow_cell_to_clean(
 def housekeeper_api_with_flow_cell_not_to_clean(
     real_housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
-    hk_sample_bundle_for_flow_cell_not_to_clean: Dict,
+    hk_sample_bundle_for_flow_cell_not_to_clean: dict,
 ) -> HousekeeperAPI:
     """
     Return a housekeeper api that contains a flow cell bundle with sample sheet,
@@ -174,7 +174,7 @@ def hk_flow_cell_to_clean_bundle(
     tmp_flow_cell_to_clean: FlowCellDirectoryData,
     timestamp_yesterday: datetime,
     tmp_sample_sheet_clean_flow_cell_path: Path,
-) -> Dict:
+) -> dict:
     """Housekeeper bundle information for a flow cell that can be cleaned."""
     return {
         "name": tmp_flow_cell_to_clean.id,
@@ -198,7 +198,7 @@ def hk_sample_bundle_for_flow_cell_to_clean(
     fastq_file: Path,
     spring_meta_data_file: Path,
     tmp_flow_cell_to_clean: FlowCellDirectoryData,
-) -> Dict:
+) -> dict:
     return {
         "name": sample_id,
         "created": timestamp_yesterday,
@@ -227,7 +227,7 @@ def hk_sample_bundle_for_flow_cell_to_clean(
 def hk_sample_bundle_for_flow_cell_not_to_clean(
     sample_id: str,
     timestamp_yesterday: datetime,
-) -> Dict:
+) -> dict:
     return {
         "name": sample_id,
         "created": timestamp_yesterday,

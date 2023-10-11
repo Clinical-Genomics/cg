@@ -1,6 +1,6 @@
 import datetime as dt
 import logging
-from typing import Dict, Set
+from typing import Set
 
 from cg.constants import DataDelivery, Priority
 from cg.constants.constants import CaseActions, Pipeline
@@ -244,7 +244,7 @@ class CaseSubmitter(Submitter):
                 self._update_action(action=CaseActions.ANALYZE, case=status_db_case)
                 self._update_case_panel(panels=case["panels"], case=status_db_case)
 
-            case_samples: Dict[str, Sample] = {}
+            case_samples: dict[str, Sample] = {}
             for sample in case["samples"]:
                 existing_sample: Sample = self.status.get_sample_by_internal_id(
                     internal_id=sample["internal_id"]

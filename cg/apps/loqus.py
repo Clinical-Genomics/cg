@@ -2,7 +2,7 @@
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Dict, Optional
+from typing import Optional
 
 from cg.constants.constants import FileFormat
 from cg.exc import CaseNotFoundError, LoqusdbDeleteCaseError
@@ -33,7 +33,7 @@ class LoqusdbAPI:
         qual_gq: Optional[bool] = False,
         hard_threshold: Optional[float] = None,
         soft_threshold: Optional[float] = None,
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         """Add observations to Loqusdb from VCF files."""
         load_params = {
             "--case-id": case_id,
@@ -99,7 +99,7 @@ class LoqusdbAPI:
         LOG.error(f"Could not delete case {case_id} from {repr(self)}")
         raise LoqusdbDeleteCaseError
 
-    def get_nr_of_variants_in_file(self) -> Dict[str, int]:
+    def get_nr_of_variants_in_file(self) -> dict[str, int]:
         """Return the number of variants in the uploaded to Loqusdb file."""
         nr_of_variants: int = 0
         for line in self.process.stderr_lines():

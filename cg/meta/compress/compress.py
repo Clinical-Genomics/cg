@@ -5,7 +5,6 @@
 import logging
 import re
 from pathlib import Path
-from typing import Dict
 
 from housekeeper.store.models import File, Version
 
@@ -64,7 +63,7 @@ class CompressAPI:
         if not version:
             return False
 
-        sample_fastq: Dict[str, dict] = files.get_fastq_files(
+        sample_fastq: dict[str, dict] = files.get_fastq_files(
             sample_id=sample_id, version_obj=version
         )
         if not sample_fastq:
@@ -142,7 +141,7 @@ class CompressAPI:
         if not version:
             return False
 
-        sample_fastq: Dict[str, dict] = files.get_fastq_files(
+        sample_fastq: dict[str, dict] = files.get_fastq_files(
             sample_id=sample_id, version_obj=version
         )
         if not sample_fastq:

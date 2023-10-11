@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Iterable
+from typing import Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import FileExtensions, FileFormat
@@ -108,7 +108,7 @@ class NextflowHandler(NfBaseHandler):
     """
 
     @staticmethod
-    def get_variables_to_export() -> Dict[str, str]:
+    def get_variables_to_export() -> dict[str, str]:
         """Dictionary with required environment variables to be exported."""
         return {NXF_JVM_ARGS_ENV: f"'{JAVA_MEMORY_HEADJOB}'"}
 

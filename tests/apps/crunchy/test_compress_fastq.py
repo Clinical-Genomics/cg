@@ -1,7 +1,6 @@
 """Test methods for compressing FASTQ"""
 import logging
 from pathlib import Path
-from typing import Dict
 
 import pytest
 from pydantic import ValidationError
@@ -42,7 +41,7 @@ def test_get_spring_archive_files(crunchy_metadata_object: CrunchyMetadata):
     assert isinstance(crunchy_metadata_object.files, list)
 
     # WHEN sorting the files
-    sorted_content: Dict[str, CrunchyFile] = get_spring_archive_files(crunchy_metadata_object)
+    sorted_content: dict[str, CrunchyFile] = get_spring_archive_files(crunchy_metadata_object)
 
     # THEN assert information about the three files is there
     assert len(sorted_content) == 3

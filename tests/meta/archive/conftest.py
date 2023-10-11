@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -51,7 +51,7 @@ def ok_ddn_response(ok_response: Response):
 @pytest.fixture(name="archive_request_json")
 def archive_request_json(
     remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
-) -> Dict:
+) -> dict:
     return {
         "osType": "Unix/MacOS",
         "createFolder": False,
@@ -68,7 +68,7 @@ def archive_request_json(
 @pytest.fixture(name="retrieve_request_json")
 def retrieve_request_json(
     remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Returns the body for a retrieval http post towards the DDN Miria API."""
     return {
         "osType": "Unix/MacOS",
@@ -85,7 +85,7 @@ def retrieve_request_json(
 
 
 @pytest.fixture(name="header_with_test_auth_token")
-def header_with_test_auth_token() -> Dict:
+def header_with_test_auth_token() -> dict:
     return {
         "Content-Type": "application/json",
         "accept": "application/json",

@@ -5,7 +5,7 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, Optional, Set
+from typing import Optional, Set
 
 from housekeeper.store.models import Bundle, File, Version
 
@@ -507,7 +507,7 @@ class MockHousekeeperAPI:
 
     def is_fastq_or_spring_in_all_bundles(self, bundle_names: list[str]) -> bool:
         """Return whether or not all FASTQ/SPRING files are included for the given bundles."""
-        sequencing_files_in_hk: Dict[str, bool] = {}
+        sequencing_files_in_hk: dict[str, bool] = {}
         for bundle_name in bundle_names:
             sequencing_files_in_hk[bundle_name] = False
             for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:

@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Tuple
 
 from cg.store.models import SampleLaneSequencingMetrics
 
@@ -9,7 +9,7 @@ def combine_mapped_metrics_with_undetermined(
 ) -> list[SampleLaneSequencingMetrics]:
     """Combine metrics for mapped and undetermined reads."""
 
-    metrics: Dict[Tuple[str, int], SampleLaneSequencingMetrics] = {
+    metrics: dict[Tuple[str, int], SampleLaneSequencingMetrics] = {
         (metric.sample_internal_id, metric.flow_cell_lane_number): metric
         for metric in mapped_metrics
     }

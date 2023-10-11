@@ -1,12 +1,12 @@
-from typing import Any, Callable, Dict, Tuple
+from typing import Any, Callable, Tuple
 
 
 class Dispatcher:
-    def __init__(self, functions: list[Callable], input_dict: Dict[str, Any]):
+    def __init__(self, functions: list[Callable], input_dict: dict[str, Any]):
         """Initialize the dispatcher with a list of functions and an input dict"""
         self.functions: list[Callable] = functions
-        self.input_dict: Dict[str, any] = input_dict
-        self.dispatch_table: Dict[Tuple[str], Callable] = self._generate_dispatch_table()
+        self.input_dict: dict[str, any] = input_dict
+        self.dispatch_table: dict[Tuple[str], Callable] = self._generate_dispatch_table()
 
     def __call__(self):
         """Call the dispatcher with the input dict"""
@@ -17,7 +17,7 @@ class Dispatcher:
             **dict(zip(parameters_not_none, parameter_values_not_none))
         )
 
-    def _parse_input_dict(self, input_dict: Dict[str, Any]) -> [Tuple[str], Tuple[Any]]:
+    def _parse_input_dict(self, input_dict: dict[str, Any]) -> [Tuple[str], Tuple[Any]]:
         """Parse the input dict and return a tuple of parameters and values that are not None"""
         parameters_not_none: list[str] = []
         values_not_none: list[Any] = []
@@ -28,7 +28,7 @@ class Dispatcher:
                 values_not_none.append(value)
         return tuple(parameters_not_none), tuple(values_not_none)
 
-    def _generate_dispatch_table(self) -> Dict[Tuple[str], Callable]:
+    def _generate_dispatch_table(self) -> dict[Tuple[str], Callable]:
         """Generate a dispatch table from the list of functions"""
         dispatch_table = {}
         for func in self.functions:

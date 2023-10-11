@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Generator
+from typing import Generator
 
 import pytest
 from housekeeper.store.models import Version
@@ -690,12 +690,12 @@ def rna_dna_sample_case_map(
     rna_sample_son_id: str,
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
-) -> Dict[str, list[str]]:
+) -> dict[str, list[str]]:
     """Return a valid RNA-DNA case map."""
     rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
 
     # WHEN adding the RNA sample rna_dna_case_map
-    rna_dna_sample_case_map: Dict[str, Dict[str, list[str]]] = {}
+    rna_dna_sample_case_map: dict[str, dict[str, list[str]]] = {}
     upload_scout_api._map_dna_samples_related_to_rna_sample(
         rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_sample_case_map
     )

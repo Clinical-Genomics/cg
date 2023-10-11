@@ -1,7 +1,7 @@
 """Test how the api handles files."""
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Tuple
 
 from housekeeper.store.models import File, Version
 
@@ -102,7 +102,7 @@ def test_get_file(populated_housekeeper_api: HousekeeperAPI):
 def test_get_files_from_version(
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
-    hk_bundle_data: Dict[str, Any],
+    hk_bundle_data: dict[str, Any],
     hk_tag: str,
     observations_clinical_snv_file_path: Path,
     observations_clinical_sv_file_path: Path,
@@ -133,7 +133,7 @@ def test_get_files_from_version(
 def test_get_latest_file_from_version(
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
-    hk_bundle_data: Dict[str, Any],
+    hk_bundle_data: dict[str, Any],
     hk_tag: str,
     observations_clinical_snv_file_path: Path,
     observations_clinical_sv_file_path: Path,

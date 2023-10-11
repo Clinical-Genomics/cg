@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 from pydantic.v1 import BaseModel, validator
 
@@ -137,9 +137,9 @@ class BalsamicConfigJSON(BaseModel):
     """
 
     analysis: BalsamicConfigAnalysis
-    samples: Dict[str, BalsamicConfigSample]
+    samples: dict[str, BalsamicConfigSample]
     reference: BalsamicConfigReference
     panel: Optional[BalsamicConfigPanel]
     QC: BalsamicConfigQC
-    vcf: Dict[str, BalsamicVarCaller]
-    bioinfo_tools_version: Dict[str, list[str]]
+    vcf: dict[str, BalsamicVarCaller]
+    bioinfo_tools_version: dict[str, list[str]]

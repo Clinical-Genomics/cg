@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Any, Dict
+from typing import Any
 
 from genologics.entities import Artifact, Container, Containertype, Project
 from lxml.objectify import ElementMaker, ObjectifiedElement
@@ -45,7 +45,7 @@ def build_container_batch(containers: list[ObjectifiedElement]) -> ObjectifiedEl
 
 
 def build_sample(
-    name: str, project: Project, container: Container, location: str, udfs: Dict[str, Any]
+    name: str, project: Project, container: Container, location: str, udfs: dict[str, Any]
 ) -> ObjectifiedElement:
     """Build sample in XML."""
     xml_sample = SMP_SAMPLECREATION(

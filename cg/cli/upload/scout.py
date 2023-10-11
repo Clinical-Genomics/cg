@@ -1,7 +1,7 @@
 """Code for uploading to scout via CLI"""
 import logging
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 import click
 from housekeeper.store.models import File, Version
@@ -237,7 +237,7 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
 def get_upload_api(case: Family, cg_config: CGConfig) -> UploadAPI:
     """Return the upload API based on the data analysis type"""
 
-    analysis_apis: Dict[Pipeline, UploadAPI] = {
+    analysis_apis: dict[Pipeline, UploadAPI] = {
         Pipeline.BALSAMIC: BalsamicAnalysisAPI,
         Pipeline.BALSAMIC_UMI: BalsamicUmiAnalysisAPI,
         Pipeline.MIP_RNA: MipRNAAnalysisAPI,

@@ -1,7 +1,7 @@
 """Schemas for scout serialisation"""
 
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Optional
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 from typing_extensions import Annotated, Literal
@@ -64,7 +64,7 @@ class DiagnosisPhenotypes(BaseModel):
     disease_nr: int
     disease_id: str
     description: str
-    individuals: Optional[list[Dict[str, str]]] = None
+    individuals: Optional[list[dict[str, str]]] = None
 
 
 class ScoutExportCase(BaseModel):

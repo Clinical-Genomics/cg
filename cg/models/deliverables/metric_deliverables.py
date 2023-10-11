@@ -1,5 +1,5 @@
 import operator
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Optional
 
 from pydantic.v1 import BaseModel, Field, validator
 
@@ -18,7 +18,7 @@ def add_metric(name: str, values: dict) -> list[Any]:
     """Add metric to list of objects"""
     found_metrics: list = []
     raw_metrics: list = values.get("metrics_")
-    metrics_validator: Dict[str, Any] = values.get("metric_to_get_")
+    metrics_validator: dict[str, Any] = values.get("metric_to_get_")
     for metric in raw_metrics:
         if name == metric.name and metric.name in metrics_validator:
             found_metrics.append(
@@ -161,5 +161,5 @@ class MetricsDeliverablesCondition(BaseModel):
 class MultiqcDataJson(BaseModel):
     """Multiqc data json model."""
 
-    report_general_stats_data: Optional[list[Dict]]
-    report_data_sources: Optional[Dict]
+    report_general_stats_data: Optional[list[dict]]
+    report_data_sources: Optional[dict]

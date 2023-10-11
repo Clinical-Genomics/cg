@@ -2,7 +2,7 @@
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 from urllib.parse import urljoin
 
 from housekeeper.store.models import File
@@ -171,7 +171,7 @@ class DDNDataFlowClient(ArchiveHandler):
         self.auth_token: str
         self.refresh_token: str
         self.token_expiration: datetime
-        self.headers: Dict[str, str] = {
+        self.headers: dict[str, str] = {
             "Content-Type": "application/json",
             "accept": "application/json",
         }
@@ -209,7 +209,7 @@ class DDNDataFlowClient(ArchiveHandler):
         self.token_expiration: datetime = datetime.fromtimestamp(response_content.expire)
 
     @property
-    def auth_header(self) -> Dict[str, str]:
+    def auth_header(self) -> dict[str, str]:
         """Returns an authorization header based on the current auth token, or updates it if
         needed."""
         if datetime.now() > self.token_expiration:

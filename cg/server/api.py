@@ -4,7 +4,7 @@ import logging
 import tempfile
 from functools import wraps
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import cachecontrol
 import requests
@@ -253,7 +253,7 @@ def parse_samples():
             pattern=request.args.get("enquiry"), customers=customers
         )
     limit = int(request.args.get("limit", 50))
-    parsed_samples: list[Dict] = [sample.to_dict() for sample in samples[:limit]]
+    parsed_samples: list[dict] = [sample.to_dict() for sample in samples[:limit]]
     return jsonify(samples=parsed_samples, total=len(samples))
 
 
@@ -267,7 +267,7 @@ def parse_samples_in_collaboration():
         pattern=request.args.get("enquiry"), customers=customer.collaborators
     )
     limit = int(request.args.get("limit", 50))
-    parsed_samples: list[Dict] = [sample.to_dict() for sample in samples[:limit]]
+    parsed_samples: list[dict] = [sample.to_dict() for sample in samples[:limit]]
     return jsonify(samples=parsed_samples, total=len(samples))
 
 
@@ -303,7 +303,7 @@ def parse_pools():
     pools: list[Pool] = db.get_pools_to_render(
         customers=customers, enquiry=request.args.get("enquiry")
     )
-    parsed_pools: list[Dict] = [pool_obj.to_dict() for pool_obj in pools[:30]]
+    parsed_pools: list[dict] = [pool_obj.to_dict() for pool_obj in pools[:30]]
     return jsonify(pools=parsed_pools, total=len(pools))
 
 
@@ -325,7 +325,7 @@ def parse_flow_cells() -> Any:
         flow_cell_statuses=[request.args.get("status")],
         name_pattern=request.args.get("enquiry"),
     )
-    parsed_flow_cells: list[Dict] = [flow_cell.to_dict() for flow_cell in flow_cells[:50]]
+    parsed_flow_cells: list[dict] = [flow_cell.to_dict() for flow_cell in flow_cells[:50]]
     return jsonify(flowcells=parsed_flow_cells, total=len(flow_cells))
 
 
@@ -367,7 +367,7 @@ def parse_analyses():
         analyses: list[Analysis] = db.get_analyses_to_upload()
     else:
         analyses: list[Analysis] = db.get_analyses()
-    parsed_analysis: list[Dict] = [analysis_obj.to_dict() for analysis_obj in analyses[:30]]
+    parsed_analysis: list[dict] = [analysis_obj.to_dict() for analysis_obj in analyses[:30]]
     return jsonify(analyses=parsed_analysis, total=len(analyses))
 
 
@@ -378,7 +378,7 @@ def parse_options():
         db.get_customers() if g.current_user.is_admin else g.current_user.customers
     )
 
-    app_tag_groups: Dict[str, list[str]] = {"ext": []}
+    app_tag_groups: dict[str, list[str]] = {"ext": []}
     applications: list[Application] = db.get_applications_is_not_archived()
     for application in applications:
         if not application.versions:
@@ -434,7 +434,7 @@ def parse_current_user_information():
 def parse_applications():
     """Return application tags."""
     applications: list[Application] = db.get_applications_is_not_archived()
-    parsed_applications: list[Dict] = [application.to_dict() for application in applications]
+    parsed_applications: list[dict] = [application.to_dict() for application in applications]
     return jsonify(applications=parsed_applications)
 
 

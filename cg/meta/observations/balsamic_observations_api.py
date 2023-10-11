@@ -1,7 +1,6 @@
 """API for uploading cancer observations."""
 import logging
 from pathlib import Path
-from typing import Dict
 
 from housekeeper.store.models import File, Version
 
@@ -98,7 +97,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self, hk_version: Version
     ) -> BalsamicObservationsInputFiles:
         """Extract observations files given a housekeeper version for cancer."""
-        input_files: Dict[str, File] = {
+        input_files: dict[str, File] = {
             "snv_germline_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_GERMLINE_VCF]
             ).first(),

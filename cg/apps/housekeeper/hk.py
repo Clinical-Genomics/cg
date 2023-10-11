@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Dict, Optional, Set, Tuple
+from typing import Optional, Set, Tuple
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
@@ -393,7 +393,7 @@ class HousekeeperAPI:
 
     def is_fastq_or_spring_in_all_bundles(self, bundle_names: list[str]) -> bool:
         """Return whether or not all FASTQ/SPRING files are included for the given bundles."""
-        sequencing_files_in_hk: Dict[str, bool] = {}
+        sequencing_files_in_hk: dict[str, bool] = {}
         if not bundle_names:
             return False
         for bundle_name in bundle_names:
@@ -433,7 +433,7 @@ class HousekeeperAPI:
 
     def is_fastq_or_spring_on_disk_in_all_bundles(self, bundle_names: list[str]) -> bool:
         """Return whether or not all FASTQ/SPRING files are on disk for the given bundles."""
-        sequencing_files_on_disk: Dict[str, bool] = {}
+        sequencing_files_on_disk: dict[str, bool] = {}
         if not bundle_names:
             return False
         for bundle_name in bundle_names:

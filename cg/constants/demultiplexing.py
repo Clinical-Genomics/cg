@@ -1,6 +1,5 @@
 """Constants related to demultiplexing."""
 from pathlib import Path
-from typing import Dict
 
 import click
 
@@ -113,7 +112,7 @@ class SampleSheetBCLConvertSections:
         FILE_FORMAT: list[str] = ["FileFormatVersion", "2"]
         RUN_NAME: str = "RunName"
         INSTRUMENT_PLATFORM_TITLE: str = "InstrumentPlatform"
-        INSTRUMENT_PLATFORM_VALUE: Dict[str, str] = {
+        INSTRUMENT_PLATFORM_VALUE: dict[str, str] = {
             Sequencers.NOVASEQ: "NovaSeq6000",
             Sequencers.NOVASEQX: "NovaSeqXSeries",
         }

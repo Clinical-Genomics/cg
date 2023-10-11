@@ -1,6 +1,6 @@
 """Functions that deal with modifications of the indexes."""
 import logging
-from typing import Dict, Tuple, Union
+from typing import Tuple, Union
 
 from packaging import version
 from pydantic import BaseModel
@@ -18,14 +18,14 @@ from cg.resources import VALID_INDEXES_PATH
 from cg.utils.utils import get_hamming_distance
 
 LOG = logging.getLogger(__name__)
-DNA_COMPLEMENTS: Dict[str, str] = {"A": "T", "C": "G", "G": "C", "T": "A"}
+DNA_COMPLEMENTS: dict[str, str] = {"A": "T", "C": "G", "G": "C", "T": "A"}
 INDEX_ONE_PAD_SEQUENCE: str = "AT"
 INDEX_TWO_PAD_SEQUENCE: str = "AC"
 LONG_INDEX_CYCLE_NR: int = 10
 MINIMUM_HAMMING_DISTANCE: int = 3
 NEW_CONTROL_SOFTWARE_VERSION: str = "1.7.0"
 NEW_REAGENT_KIT_VERSION: str = "1.5"
-REAGENT_KIT_PARAMETER_TO_VERSION: Dict[str, str] = {"1": "1.0", "3": "1.5"}
+REAGENT_KIT_PARAMETER_TO_VERSION: dict[str, str] = {"1": "1.0", "3": "1.5"}
 SHORT_SAMPLE_INDEX_LENGTH: int = 8
 
 

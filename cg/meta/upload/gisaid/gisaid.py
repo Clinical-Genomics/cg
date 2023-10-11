@@ -3,7 +3,7 @@ import logging
 import re
 import tempfile
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 import pandas as pd
 from housekeeper.store.models import File
@@ -266,7 +266,7 @@ class GisaidAPI:
         )
         temp_log.unlink()
 
-    def get_accession_numbers(self, case_id: str) -> Dict[str, str]:
+    def get_accession_numbers(self, case_id: str) -> dict[str, str]:
         """Parse accession numbers and sample ids from log file"""
 
         LOG.info("Parsing accession numbers from log file")

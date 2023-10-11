@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict
 
 import pytest
 
@@ -114,7 +113,7 @@ def report_store(analysis_store, helpers, timestamp_yesterday):
 
 
 @pytest.fixture(scope="session")
-def rnafusion_validated_metrics() -> Dict[str, str]:
+def rnafusion_validated_metrics() -> dict[str, str]:
     """Return Rnafusion raw analysis metrics dictionary."""
     return {
         "gc_content": "51.7",

@@ -6,7 +6,6 @@ import copy
 import logging
 import subprocess
 from subprocess import CalledProcessError
-from typing import Dict
 
 from cg.constants.process import RETURN_SUCCESS
 
@@ -59,7 +58,7 @@ class Process:
         self._stdout = ""
         self._stderr = ""
 
-    def export_variables(self, export: Dict[str, str]) -> None:
+    def export_variables(self, export: dict[str, str]) -> None:
         """Export variables prior to execution."""
         if export:
             self.base_call.insert(

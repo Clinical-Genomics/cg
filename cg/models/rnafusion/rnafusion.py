@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 from pydantic.v1 import BaseModel, Field
 
@@ -92,4 +92,4 @@ class RnafusionAnalysis(AnalysisModel):
         sample_metrics: retrieved QC metrics associated to a sample
     """
 
-    sample_metrics: Dict[str, RnafusionQCMetrics]
+    sample_metrics: dict[str, RnafusionQCMetrics]

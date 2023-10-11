@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 from housekeeper.store.models import File, Version
 from pydantic.v1 import ValidationError
@@ -299,7 +299,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve a valid gender from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
-    def get_verified_samples(self, case_id: str, sample_data: dict) -> Dict[str, str]:
+    def get_verified_samples(self, case_id: str, sample_data: dict) -> dict[str, str]:
         """Return a verified tumor and normal sample dictionary."""
 
         tumor_samples: list[Sample] = self.status_db.get_samples_by_type(
@@ -427,7 +427,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_parsed_observation_file_paths(self, observations: list[str]) -> dict:
         """Returns a verified {option: path} observations dictionary."""
-        verified_observations: Dict[str, str] = {}
+        verified_observations: dict[str, str] = {}
         for wildcard in list(ObservationsFileWildcards):
             file_path: str = get_string_from_list_by_pattern(observations, wildcard)
             verified_observations.update(
@@ -474,7 +474,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             else None
         )
 
-        config_case: Dict[str, str] = {
+        config_case: dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.pipeline,
             "genome_version": genome_version,

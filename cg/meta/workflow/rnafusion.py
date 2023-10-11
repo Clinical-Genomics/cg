@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from cg import resources
 from cg.constants import Pipeline
@@ -167,7 +167,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         multiqc_json: MultiqcDataJson = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
         )
-        metrics_values: Dict = {}
+        metrics_values: dict = {}
         for key in multiqc_json.report_general_stats_data:
             if case_id in key:
                 metrics_values.update(list(key.values())[0])
@@ -240,7 +240,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> RnafusionAnalysis:
         """Parse Rnafusion output analysis files and return analysis model."""
-        sample_metrics: Dict[str, dict] = {}
+        sample_metrics: dict[str, dict] = {}
         for metric in qc_metrics_raw:
             metric.name = metric.name.replace("5_3_bias", "bias_5_3")
             try:

@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, Hashable, Iterable, Optional, Set
+from typing import Hashable, Iterable, Optional, Set
 
 from pydantic import BaseModel, ConfigDict, constr
 
@@ -31,7 +31,7 @@ class OrderformParser(BaseModel):
         """Parse the orderform information"""
         raise NotImplementedError
 
-    def group_cases(self) -> Dict[str, list[OrderSample]]:
+    def group_cases(self) -> dict[str, list[OrderSample]]:
         """Group samples in cases."""
         LOG.info("Group samples under respective case")
         cases = {}
@@ -53,7 +53,7 @@ class OrderformParser(BaseModel):
 
         Check that all samples from one pool has the same application
         """
-        pools: Dict[str, OrderPool] = {}
+        pools: dict[str, OrderPool] = {}
         sample: OrderSample
         for sample in self.samples:
             pool_name = sample.pool
@@ -142,7 +142,7 @@ class OrderformParser(BaseModel):
 
     def generate_orderform(self) -> Orderform:
         """Generate an orderform"""
-        cases_map: Dict[str, list[OrderSample]] = self.group_cases()
+        cases_map: dict[str, list[OrderSample]] = self.group_cases()
         case_objs: list[OrderCase] = []
         for case_id in cases_map:
             case_objs.append(self.expand_case(case_id=case_id, case_samples=cases_map[case_id]))

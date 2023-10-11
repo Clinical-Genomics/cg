@@ -7,7 +7,7 @@ import shutil
 from copy import deepcopy
 from datetime import MAXYEAR, datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, Generator, Tuple, Union
+from typing import Any, Generator, Tuple, Union
 
 import pytest
 from housekeeper.store.models import File, Version
@@ -342,13 +342,13 @@ def cg_config_object(base_config_dict: dict) -> CGConfig:
 
 
 @pytest.fixture
-def chanjo_config() -> Dict[str, Dict[str, str]]:
+def chanjo_config() -> dict[str, dict[str, str]]:
     """Return Chanjo config."""
     return {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 
 
 @pytest.fixture
-def crunchy_config() -> Dict[str, Dict[str, Any]]:
+def crunchy_config() -> dict[str, dict[str, Any]]:
     """Return Crunchy config."""
     return {
         "crunchy": {
@@ -390,7 +390,7 @@ def genotype_config() -> dict:
 
 
 @pytest.fixture
-def gens_config() -> Dict[str, Dict[str, str]]:
+def gens_config() -> dict[str, dict[str, str]]:
     """Gens config fixture."""
     return {
         "gens": {
@@ -750,7 +750,7 @@ def fastq_stub(project_dir: Path, run_name: str) -> Path:
 def compression_object(fastq_stub: Path, original_fastq_data: CompressionData) -> CompressionData:
     """Creates compression data object with information about files used in fastq compression."""
     working_files: CompressionData = CompressionData(fastq_stub)
-    working_file_map: Dict[str, str] = {
+    working_file_map: dict[str, str] = {
         original_fastq_data.fastq_first.as_posix(): working_files.fastq_first.as_posix(),
         original_fastq_data.fastq_second.as_posix(): working_files.fastq_second.as_posix(),
     }
@@ -1494,7 +1494,7 @@ def hk_bundle_data(
     sample_id: str,
     father_sample_id: str,
     mother_sample_id: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Return some bundle data for Housekeeper."""
     return {
         "name": case_id,
@@ -1807,7 +1807,7 @@ def invoice_reference() -> str:
 
 
 @pytest.fixture(name="prices")
-def prices() -> Dict[str, int]:
+def prices() -> dict[str, int]:
     """Return dictionary with prices for each priority status."""
     return {"standard": 10, "priority": 20, "express": 30, "research": 5}
 
@@ -1822,14 +1822,14 @@ def base_store(
     invoice_address: str,
     invoice_reference: str,
     store: Store,
-    prices: Dict[str, int],
+    prices: dict[str, int],
 ) -> Store:
     """Setup and example store."""
     collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
     store.session.add(collaboration)
     customers: list[Customer] = []
-    customer_map: Dict[str, str] = {
+    customer_map: dict[str, str] = {
         customer_id: "Production",
         "cust001": "Customer",
         "cust002": "Karolinska",
@@ -3013,7 +3013,7 @@ def nf_analysis_housekeeper(
 ):
     """Create populated Housekeeper sample bundle mock."""
 
-    bundle_data: Dict[str, Any] = {
+    bundle_data: dict[str, Any] = {
         "name": sample_id,
         "created": timestamp_now,
         "version": "1.0",

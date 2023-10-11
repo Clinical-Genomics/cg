@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Dict
 
 import pytest
 from housekeeper.store.models import File
@@ -40,7 +39,7 @@ def test_set_dry_run(
 def test_post_processing_of_flow_cell(
     demux_type: str,
     demultiplex_context: CGConfig,
-    flow_cell_info_map: Dict[str, FlowCellInfo],
+    flow_cell_info_map: dict[str, FlowCellInfo],
     tmp_demultiplexed_runs_directory: Path,
 ):
     """Test adding a demultiplexed flow cell to the databases with. Runs on each type of

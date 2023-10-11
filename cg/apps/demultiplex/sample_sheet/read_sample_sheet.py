@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, Type
+from typing import Type
 
 from pydantic import TypeAdapter
 
@@ -35,7 +35,7 @@ def validate_samples_are_unique(samples: list[FlowCellSample]) -> None:
 
 def validate_samples_unique_per_lane(samples: list[FlowCellSample]) -> None:
     """Validate that each sample only exists once per lane in a sample sheet."""
-    sample_by_lane: Dict[int, list[FlowCellSample]] = get_samples_by_lane(samples)
+    sample_by_lane: dict[int, list[FlowCellSample]] = get_samples_by_lane(samples)
     for lane, lane_samples in sample_by_lane.items():
         LOG.debug(f"Validate that samples are unique in lane: {lane}")
         validate_samples_are_unique(samples=lane_samples)
@@ -76,17 +76,17 @@ def get_validated_sample_sheet(
     sample_type: Type[FlowCellSample],
 ) -> SampleSheet:
     """Return a validated sample sheet object."""
-    raw_samples: list[Dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
+    raw_samples: list[dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
     adapter = TypeAdapter(list[sample_type])
     samples = adapter.validate_python(raw_samples)
     validate_samples_unique_per_lane(samples=samples)
     return SampleSheet(samples=samples)
 
 
-def get_raw_samples(sample_sheet_content: list[list[str]]) -> list[Dict[str, str]]:
+def get_raw_samples(sample_sheet_content: list[list[str]]) -> list[dict[str, str]]:
     """Return the samples in a sample sheet as a list of dictionaries."""
     header: list[str] = []
-    raw_samples: list[Dict[str, str]] = []
+    raw_samples: list[dict[str, str]] = []
 
     for line in sample_sheet_content:
         # Skip lines that are too short to contain samples
@@ -114,10 +114,10 @@ def get_raw_samples(sample_sheet_content: list[list[str]]) -> list[Dict[str, str
 
 def get_samples_by_lane(
     samples: list[FlowCellSample],
-) -> Dict[int, list[FlowCellSample]]:
+) -> dict[int, list[FlowCellSample]]:
     """Group and return samples by lane."""
     LOG.debug("Order samples by lane")
-    sample_by_lane: Dict[int, list[FlowCellSample]] = {}
+    sample_by_lane: dict[int, list[FlowCellSample]] = {}
     for sample in samples:
         if sample.lane not in sample_by_lane:
             sample_by_lane[sample.lane] = []

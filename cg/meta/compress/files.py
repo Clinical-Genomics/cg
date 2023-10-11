@@ -3,7 +3,7 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Set
+from typing import Optional, Set
 
 from housekeeper.store.models import File, Version
 
@@ -20,9 +20,9 @@ LOG = logging.getLogger(__name__)
 # Functions to get common files
 
 
-def get_hk_files_dict(tags: list[str], version_obj: Version) -> Dict[Path, File]:
+def get_hk_files_dict(tags: list[str], version_obj: Version) -> dict[Path, File]:
     """Fetch files from a version in Housekeeper."""
-    hk_file: Dict[Path, File] = {}
+    hk_file: dict[Path, File] = {}
     tags: set = set(tags)
     for version_file in version_obj.files:
         file_tags: Set[str] = {tag.name for tag in version_file.tags}
@@ -44,7 +44,7 @@ def is_file_in_version(version_obj: Version, path: Path) -> bool:
 
 def get_spring_paths(version_obj: Version) -> list[CompressionData]:
     """Get all SPRING paths for a sample."""
-    hk_files_dict: Dict[Path, File] = get_hk_files_dict(
+    hk_files_dict: dict[Path, File] = get_hk_files_dict(
         tags=[SequencingFileTag.SPRING], version_obj=version_obj
     )
     spring_paths: list = []
@@ -91,7 +91,7 @@ def get_compression_data(fastq_files: list[Path]) -> list[CompressionData]:
     return compressions
 
 
-def get_fastq_files(sample_id: str, version_obj: Version) -> Dict[str, dict]:
+def get_fastq_files(sample_id: str, version_obj: Version) -> dict[str, dict]:
     """Get FASTQ files for sample."""
     hk_files_dict = get_hk_files_dict(tags=HK_FASTQ_TAGS, version_obj=version_obj)
     if hk_files_dict is None:

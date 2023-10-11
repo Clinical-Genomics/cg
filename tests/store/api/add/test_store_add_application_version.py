@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Dict
 
 from cg.store import Store
 from cg.store.models import Application, ApplicationVersion
@@ -8,7 +7,7 @@ from cg.store.models import Application, ApplicationVersion
 def test_add_application_version(
     store_with_an_application_with_and_without_attributes: Store,
     timestamp: datetime,
-    prices: Dict[str, int],
+    prices: dict[str, int],
     version: int = 1,
 ):
     """Test that the functions returns an application version."""

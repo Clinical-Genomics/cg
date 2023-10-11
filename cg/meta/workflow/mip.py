@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 from pydantic.v1 import ValidationError
 
@@ -127,7 +127,7 @@ class MipAnalysisAPI(AnalysisAPI):
         LOG.info("Config file saved to %s", pedigree_config_path)
 
     @staticmethod
-    def get_sample_data(link_obj: FamilySample) -> Dict[str, Union[str, int]]:
+    def get_sample_data(link_obj: FamilySample) -> dict[str, Union[str, int]]:
         """Return sample specific data."""
         return {
             "sample_id": link_obj.sample.internal_id,

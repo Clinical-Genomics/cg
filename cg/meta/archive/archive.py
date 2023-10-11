@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Callable, Dict, Optional, Type
+from typing import Callable, Optional, Type
 
 from housekeeper.store.models import File
 from pydantic import BaseModel, ConfigDict
@@ -53,7 +53,7 @@ def filter_samples_on_archive_location(
     ]
 
 
-ARCHIVE_HANDLERS: Dict[str, Type[ArchiveHandler]] = {
+ARCHIVE_HANDLERS: dict[str, Type[ArchiveHandler]] = {
     ArchiveLocations.KAROLINSKA_BUCKET: DDNDataFlowClient
 }
 

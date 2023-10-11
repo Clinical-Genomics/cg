@@ -3,7 +3,7 @@ import datetime as dt
 import glob
 import logging
 from pathlib import Path
-from typing import Dict, Iterable, Tuple
+from typing import Iterable, Tuple
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
@@ -59,7 +59,7 @@ class RsyncAPI(MetaAPI):
         return covid_destination_path % customer_internal_id
 
     @staticmethod
-    def get_trailblazer_config(slurm_job_id: int) -> Dict[str, list[str]]:
+    def get_trailblazer_config(slurm_job_id: int) -> dict[str, list[str]]:
         """Return dictionary of slurm job IDs."""
         return {"jobs": [str(slurm_job_id)]}
 
@@ -81,7 +81,7 @@ class RsyncAPI(MetaAPI):
 
     @staticmethod
     def concatenate_rsync_commands(
-        folder_list: list[str], source_and_destination_paths: Dict[str, Path], ticket: str
+        folder_list: list[str], source_and_destination_paths: dict[str, Path], ticket: str
     ) -> str:
         """Concatenates the rsync commands for each folder to be transferred."""
         commands = ""
@@ -108,9 +108,9 @@ class RsyncAPI(MetaAPI):
 
     def get_source_and_destination_paths(
         self, ticket: str, customer_internal_id: str
-    ) -> Dict[str, Path]:
+    ) -> dict[str, Path]:
         """Return the source and destination paths."""
-        source_and_destination_paths: Dict[str, Path] = {
+        source_and_destination_paths: dict[str, Path] = {
             "delivery_source_path": Path(
                 self.delivery_path, customer_internal_id, INBOX_NAME, ticket
             ),
@@ -192,7 +192,7 @@ class RsyncAPI(MetaAPI):
         case_id: str = case.internal_id
 
         ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case_id)
-        source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
+        source_and_destination_paths: dict[str, Path] = self.get_source_and_destination_paths(
             ticket=ticket, customer_internal_id=case.customer.internal_id
         )
         self.set_log_dir(folder_prefix=case_id)
@@ -227,7 +227,7 @@ class RsyncAPI(MetaAPI):
             LOG.warning(f"Could not find any cases for ticket {ticket}")
             raise CgError()
         customer_internal_id: str = cases[0].customer.internal_id
-        source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
+        source_and_destination_paths: dict[str, Path] = self.get_source_and_destination_paths(
             ticket=ticket, customer_internal_id=customer_internal_id
         )
         if cases[0].data_analysis == Pipeline.SARS_COV_2:

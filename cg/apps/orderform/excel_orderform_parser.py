@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Set, Tuple
+from typing import Optional, Set, Tuple
 
 import openpyxl
 from openpyxl.cell.cell import Cell
@@ -131,7 +131,7 @@ class ExcelOrderformParser(OrderformParser):
         return raw_samples
 
     @staticmethod
-    def relevant_rows(orderform_sheet: Worksheet) -> list[Dict[str, str]]:
+    def relevant_rows(orderform_sheet: Worksheet) -> list[dict[str, str]]:
         """Get the relevant rows from an order form sheet."""
         # orderform_sheet.rows is a generator. Convert to list to be able to iterate multiple times
         rows = list(orderform_sheet.rows)

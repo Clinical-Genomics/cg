@@ -1,6 +1,6 @@
 import datetime as dt
 import re
-from typing import Dict, Optional, Set
+from typing import Optional, Set
 
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 from sqlalchemy.orm import declarative_base
@@ -467,7 +467,7 @@ class Family(Model, PriorityMixin):
         """Translates the case data_delivery field to pipeline specific arguments."""
         delivery_arguments: Set[str] = set()
         requested_deliveries: list[str] = re.split("[-_]", self.data_delivery)
-        delivery_per_pipeline_map: Dict[str, str] = {
+        delivery_per_pipeline_map: dict[str, str] = {
             DataDelivery.FASTQ: Pipeline.FASTQ,
             DataDelivery.ANALYSIS_FILES: self.data_analysis,
         }

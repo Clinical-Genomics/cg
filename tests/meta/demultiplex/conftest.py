@@ -2,7 +2,6 @@ import shutil
 from collections import namedtuple
 from datetime import datetime
 from pathlib import Path
-from typing import Dict
 
 import pytest
 
@@ -330,7 +329,7 @@ def flow_cell_info_map(
     flow_cell_name_demultiplexed_with_bcl_convert: str,
     flow_cell_directory_name_demultiplexed_with_bcl2fastq: Path,
     flow_cell_name_demultiplexed_with_bcl2fastq: str,
-) -> Dict[str, FlowCellInfo]:
+) -> dict[str, FlowCellInfo]:
     """Returns a dict with the suitable fixtures for different demultiplexing softwares and
     settings. Keys are string, values are named tuples FlowCellInfo."""
     return {

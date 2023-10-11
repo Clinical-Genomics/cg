@@ -1,7 +1,6 @@
 """Fixtures for the workflow tests."""
 import datetime
 from pathlib import Path
-from typing import Dict
 
 import pytest
 
@@ -206,7 +205,7 @@ def qc_microsalt_context(
 
 
 @pytest.fixture(name="rnafusion_metrics")
-def rnafusion_metrics() -> Dict[str, float]:
+def rnafusion_metrics() -> dict[str, float]:
     """Return Rnafusion raw analysis metrics dictionary."""
     return {
         "after_filtering_gc_content": 0.516984,

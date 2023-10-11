@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from typing import Dict
 
 from housekeeper.store.models import File, Version
 
@@ -69,7 +68,7 @@ class PrepareFastqAPI:
             version_obj: Version = self.compress_api.hk_api.get_latest_bundle_version(
                 bundle_name=sample_id
             )
-            fastq_files: Dict[Path, File] = files.get_hk_files_dict(
+            fastq_files: dict[Path, File] = files.get_hk_files_dict(
                 tags=["fastq"], version_obj=version_obj
             )
             compression_objs: list[CompressionData] = files.get_spring_paths(version_obj)

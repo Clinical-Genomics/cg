@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import Dict
 
 import pytest
 
@@ -66,12 +65,12 @@ def test_get_samples_by_lane(
     # GIVEN two samples on two different lanes
 
     # WHEN getting the samples per lane
-    samples_per_lane: Dict[int, list[FlowCellSample]] = get_samples_by_lane(
+    samples_per_lane: dict[int, list[FlowCellSample]] = get_samples_by_lane(
         samples=[novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]
     )
 
     # THEN the returned value is a dictionary
-    assert isinstance(samples_per_lane, Dict)
+    assert isinstance(samples_per_lane, dict)
     # THEN the dictionary has two entries
     assert len(samples_per_lane) == 2
 
@@ -81,14 +80,14 @@ def test_get_raw_samples_valid_sample_sheet(valid_sample_sheet_bcl2fastq: list[l
     # GIVEN a valid sample sheet
 
     # WHEN getting the list of raw samples from it
-    raw_samples: list[Dict[str, str]] = get_raw_samples(
+    raw_samples: list[dict[str, str]] = get_raw_samples(
         sample_sheet_content=valid_sample_sheet_bcl2fastq
     )
 
     # THEN it returns a list with 2 dictionaries
     assert len(raw_samples) == 2
     # THEN the list contains dictionaries
-    assert isinstance(raw_samples[0], Dict)
+    assert isinstance(raw_samples[0], dict)
     # THEN the sample contains the key "Lane"
     assert "Lane" in raw_samples[0].keys()
 

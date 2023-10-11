@@ -12,7 +12,7 @@ import re
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 
 import click
 
@@ -202,7 +202,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         return organism
 
-    def get_parameters(self, sample_obj: Sample) -> Dict[str, str]:
+    def get_parameters(self, sample_obj: Sample) -> dict[str, str]:
         """Fill a dict with case config information for one sample"""
 
         sample_id = sample_obj.internal_id
@@ -286,12 +286,12 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def microsalt_qc(self, case_id: str, run_dir_path: Path, lims_project: str) -> bool:
         """Check if given microSALT case passes QC check."""
-        failed_samples: Dict = {}
-        case_qc: Dict = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
+        failed_samples: dict = {}
+        case_qc: dict = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
 
         for sample_id in case_qc:
             sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
-            sample_check: Union[Dict, None] = self.qc_sample_check(
+            sample_check: Union[dict, None] = self.qc_sample_check(
                 sample=sample,
                 sample_qc=case_qc[sample_id],
             )
@@ -306,7 +306,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         )
 
     def qc_case_check(
-        self, case_id: str, failed_samples: Dict, number_of_samples: int, run_dir_path: Path
+        self, case_id: str, failed_samples: dict, number_of_samples: int, run_dir_path: Path
     ) -> bool:
         """Perform the final QC check for a microbial case based on failed samples."""
         qc_pass: bool = True
@@ -335,11 +335,11 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         )
         return qc_pass
 
-    def create_qc_done_file(self, run_dir_path: Path, failed_samples: Dict) -> None:
+    def create_qc_done_file(self, run_dir_path: Path, failed_samples: dict) -> None:
         """Creates a QC_done when a QC check is performed."""
         write_json(file_path=run_dir_path.joinpath("QC_done.json"), content=failed_samples)
 
-    def qc_sample_check(self, sample: Sample, sample_qc: Dict) -> Union[Dict, None]:
+    def qc_sample_check(self, sample: Sample, sample_qc: dict) -> Union[dict, None]:
         """Perform a QC on a sample."""
         if sample.control == ControlEnum.negative:
             reads_pass: bool = self.check_external_negative_control_sample(sample)
@@ -355,7 +355,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 LOG.warning(f"Sample {sample.internal_id} failed QC.")
                 return {"Passed QC Reads": reads_pass, "Passed Coverage 10X": coverage_10x_pass}
 
-    def check_coverage_10x(self, sample_name: str, sample_qc: Dict) -> bool:
+    def check_coverage_10x(self, sample_name: str, sample_qc: dict) -> bool:
         """Check if a sample passed the coverage_10x criteria."""
         try:
             return (

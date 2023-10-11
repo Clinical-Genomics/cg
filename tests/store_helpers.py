@@ -1,7 +1,7 @@
 """Utility functions to simply add test data in a cg store."""
 import logging
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Optional
 
 from housekeeper.store.models import Bundle, Version
 
@@ -118,7 +118,7 @@ class StoreHelpers:
     def add_application_version(
         store: Store,
         application: Application,
-        prices: Dict,
+        prices: dict,
         version: int = 1,
         valid_from: datetime = datetime.now(),
     ) -> ApplicationVersion:

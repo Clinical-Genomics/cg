@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 from housekeeper.store.models import File, Version
 
@@ -53,7 +53,7 @@ class BalsamicReportAPI(ReportAPI):
         self, case: Family, sample: Sample, analysis_metadata: BalsamicAnalysis
     ) -> Union[BalsamicTargetedSampleMetadataModel, BalsamicWGSSampleMetadataModel]:
         """Return the sample metadata to include in the report."""
-        sample_metrics: Dict[str, BalsamicQCMetrics] = analysis_metadata.sample_metrics[
+        sample_metrics: dict[str, BalsamicQCMetrics] = analysis_metadata.sample_metrics[
             sample.internal_id
         ]
         million_read_pairs: float = get_million_read_pairs(reads=sample.reads)
@@ -130,8 +130,8 @@ class BalsamicReportAPI(ReportAPI):
         """
         sequencing_type: str = _analysis_metadata.config.analysis.sequencing_type
         analysis_type: str = _analysis_metadata.config.analysis.analysis_type
-        var_callers: Dict[str, BalsamicVarCaller] = _analysis_metadata.config.vcf
-        tool_versions: Dict[str, list] = _analysis_metadata.config.bioinfo_tools_version
+        var_callers: dict[str, BalsamicVarCaller] = _analysis_metadata.config.vcf
+        tool_versions: dict[str, list] = _analysis_metadata.config.bioinfo_tools_version
         analysis_var_callers = list()
         for var_caller_name, var_caller_attributes in var_callers.items():
             if (

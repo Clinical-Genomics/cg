@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Dict
 
 import pytest
 
@@ -14,7 +13,7 @@ from tests.io.conftest import FileRepresentation
         "\t",
     ],
 )
-def test_get_content_from_file(delimiter: str, delimiter_map: Dict[str, FileRepresentation]):
+def test_get_content_from_file(delimiter: str, delimiter_map: dict[str, FileRepresentation]):
     """
     Tests reading a file with the given separator.
     """
@@ -39,7 +38,7 @@ def test_get_content_from_file(delimiter: str, delimiter_map: Dict[str, FileRepr
     ],
 )
 def test_get_content_from_file_to_dict(
-    delimiter: str, delimiter_map: Dict[str, FileRepresentation]
+    delimiter: str, delimiter_map: dict[str, FileRepresentation]
 ):
     """
     Tests reading a delimited file into a list of dictionaries.
@@ -67,7 +66,7 @@ def test_get_content_from_file_to_dict(
         "\t",
     ],
 )
-def test_get_content_from_stream(delimiter: str, delimiter_map: Dict[str, FileRepresentation]):
+def test_get_content_from_stream(delimiter: str, delimiter_map: dict[str, FileRepresentation]):
     """
     Tests reading a delimited stream.
     """
@@ -92,7 +91,7 @@ def test_get_content_from_stream(delimiter: str, delimiter_map: Dict[str, FileRe
         "\t",
     ],
 )
-def test_write_csv(delimiter: str, delimiter_map: Dict[str, FileRepresentation]):
+def test_write_csv(delimiter: str, delimiter_map: dict[str, FileRepresentation]):
     """
     Tests writing content to a file with each delimiter.
     """
@@ -124,7 +123,7 @@ def test_write_csv(delimiter: str, delimiter_map: Dict[str, FileRepresentation])
         "\t",
     ],
 )
-def test_write_csv_stream(delimiter: str, delimiter_map: Dict[str, FileRepresentation]):
+def test_write_csv_stream(delimiter: str, delimiter_map: dict[str, FileRepresentation]):
     """
     Tests writing content to a stream with each delimiter.
     """

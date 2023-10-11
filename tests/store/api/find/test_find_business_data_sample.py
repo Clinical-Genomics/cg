@@ -1,6 +1,6 @@
 """Tests the find business data part of the Cg store API related to sample model."""
 
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 from sqlalchemy.orm import Query
@@ -270,7 +270,7 @@ def test_get_samples_by_customer_and_name_invalid_customer(
 
 def test_get_samples_by_any_id_not_an_attribute_fails(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    identifiers: Dict[str, Any] = {
+    identifiers: dict[str, Any] = {
         "non-existent-attribute": "not-an-attribute",
         "non-existent-value": "not-a-value",
     },
@@ -309,7 +309,7 @@ def test_get_samples_by_any_id_exclusive_filtering_gives_empty_query(
     assert sample_1.is_tumour != sample_2.is_tumour
 
     # WHEN filtering twice mutually exclusive conditions
-    identifiers: Dict[str, str] = {
+    identifiers: dict[str, str] = {
         "name": sample_1.name,
         "is_tumour": sample_2.is_tumour,
     }

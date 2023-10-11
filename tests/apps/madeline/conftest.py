@@ -1,7 +1,7 @@
 """Fixtures for testing the madeline cg app"""
 
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 import pytest
 
@@ -16,7 +16,7 @@ def madeline_output(apps_dir: Path) -> Path:
 
 
 @pytest.fixture
-def madeline_columns() -> Dict[str, str]:
+def madeline_columns() -> dict[str, str]:
     """return a dictionary with madeline columns"""
     columns = {
         "case": "FamilyId",
@@ -32,7 +32,7 @@ def madeline_columns() -> Dict[str, str]:
 
 
 @pytest.fixture
-def mother() -> Dict[str, Optional[str]]:
+def mother() -> dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "mother",
@@ -44,7 +44,7 @@ def mother() -> Dict[str, Optional[str]]:
 
 
 @pytest.fixture
-def father() -> Dict[str, Optional[str]]:
+def father() -> dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "father",
@@ -56,7 +56,7 @@ def father() -> Dict[str, Optional[str]]:
 
 
 @pytest.fixture
-def proband() -> Dict[str, Optional[str]]:
+def proband() -> dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "proband",
@@ -71,7 +71,7 @@ def proband() -> Dict[str, Optional[str]]:
 
 
 @pytest.fixture
-def trio(proband: dict, mother: dict, father: dict) -> list[Dict[str, Optional[str]]]:
+def trio(proband: dict, mother: dict, father: dict) -> list[dict[str, Optional[str]]]:
     """return a list with a trio"""
     return [proband, mother, father]
 

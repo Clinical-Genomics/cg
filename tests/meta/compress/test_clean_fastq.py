@@ -1,7 +1,7 @@
 """Tests for cleaning FASTQ files."""
 import logging
 from pathlib import Path
-from typing import Dict, Generator
+from typing import Generator
 
 from _pytest.logging import LogCaptureFixture
 from housekeeper.store.models import File, Version
@@ -75,7 +75,7 @@ def test_update_hk_fastq(
 
     # GIVEN a Housekeeper version and a compression object
     hk_version: Version = compress_api.hk_api.get_latest_bundle_version(bundle_name=sample_id)
-    fastq: Dict[str, dict] = files.get_fastq_files(sample_id=sample_id, version_obj=hk_version)
+    fastq: dict[str, dict] = files.get_fastq_files(sample_id=sample_id, version_obj=hk_version)
     run: str = list(fastq.keys())[0]
     compression: CompressionData = fastq[run]["compression_data"]
 
