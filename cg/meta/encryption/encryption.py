@@ -4,7 +4,7 @@ import subprocess
 from io import TextIOWrapper
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import SPACE, FileExtensions
@@ -95,7 +95,7 @@ class EncryptionAPI:
             ]
         )
 
-    def get_asymmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
+    def get_asymmetric_encryption_command(self, input_file: Path, output_file: Path) -> list[str]:
         """Generates the gpg command for asymmetric encryption"""
         encryption_parameters: list = GPGParameters.ASYMMETRIC_ENCRYPTION.copy()
         output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
@@ -103,7 +103,7 @@ class EncryptionAPI:
         encryption_parameters.extend(output_parameter)
         return encryption_parameters
 
-    def get_symmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
+    def get_symmetric_encryption_command(self, input_file: Path, output_file: Path) -> list[str]:
         """Generates the gpg command for symmetric encryption of spring files"""
         encryption_parameters: list = GPGParameters.SYMMETRIC_ENCRYPTION.copy()
         encryption_parameters.append(str(self.temporary_passphrase))
@@ -112,7 +112,7 @@ class EncryptionAPI:
         encryption_parameters.extend(output_parameter)
         return encryption_parameters
 
-    def get_asymmetric_decryption_command(self, input_file: Path, output_file: Path) -> List[str]:
+    def get_asymmetric_decryption_command(self, input_file: Path, output_file: Path) -> list[str]:
         """Generates the gpg command for asymmetric decryption"""
         decryption_parameters: list = GPGParameters.ASYMMETRIC_DECRYPTION.copy()
         output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
@@ -122,7 +122,7 @@ class EncryptionAPI:
 
     def get_symmetric_decryption_command(
         self, input_file: Path, output_file: Path, encryption_key: Path
-    ) -> List[str]:
+    ) -> list[str]:
         """Generates the gpg command for symmetric decryption"""
         decryption_parameters: list = GPGParameters.SYMMETRIC_DECRYPTION.copy()
         decryption_parameters.append(str(encryption_key))
@@ -148,7 +148,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         encryption_dir: Path,
         flow_cell: FlowCellDirectoryData,
         pigz_binary_path: str,
-        sbatch_parameter: Dict[str, Union[str, int]],
+        sbatch_parameter: dict[str, Union[str, int]],
         slurm_api: SlurmAPI,
         tar_api: TarAPI,
         dry_run: bool = False,
@@ -220,7 +220,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         self, output_file: Path, passphrase_file_path: Path
     ) -> str:
         """Generates the Gpg command for symmetric encryption of file."""
-        encryption_parameters: List[str] = (
+        encryption_parameters: list[str] = (
             [self.binary_path]
             + GPGParameters.SYMMETRIC_ENCRYPTION
             + [passphrase_file_path.as_posix()]
@@ -233,7 +233,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         self, input_file: Path, passphrase_file_path: Path
     ) -> str:
         """Generates the Gpg command for symmetric decryption."""
-        decryption_parameters: List[str] = (
+        decryption_parameters: list[str] = (
             [self.binary_path]
             + GPGParameters.SYMMETRIC_DECRYPTION
             + [passphrase_file_path.as_posix(), input_file.as_posix()]

@@ -1,6 +1,5 @@
 """Tests the findbusinessdata part of the Cg store API related to Analysis model."""
 from datetime import datetime
-from typing import List
 
 from cg.constants import Pipeline
 from cg.store import Store
@@ -16,7 +15,7 @@ def test_get_latest_nipt_analysis_to_upload(
     # GIVEN an analysis that is not delivery reported but there exists a newer analysis
 
     # WHEN fetching the latest analysis to upload to nipt
-    analyses: List[
+    analyses: list[
         Analysis
     ] = store_with_analyses_for_cases_not_uploaded_fluffy.get_latest_analysis_to_upload_for_pipeline(
         pipeline=pipeline
@@ -38,7 +37,7 @@ def test_get_latest_microsalt_analysis_to_upload(
     # GIVEN an analysis that is not delivery reported but there exists a newer analysis
 
     # WHEN fetching the latest analysis to upload to microsalt
-    analyses: List[
+    analyses: list[
         Analysis
     ] = store_with_analyses_for_cases_not_uploaded_microsalt.get_latest_analysis_to_upload_for_pipeline(
         pipeline=pipeline
@@ -74,7 +73,7 @@ def test_get_analyses(store_with_analyses_for_cases: Store):
     # GIVEN a database with an analysis and case
 
     # WHEN fetching all analyses
-    analysis: List[Analysis] = store_with_analyses_for_cases.get_analyses()
+    analysis: list[Analysis] = store_with_analyses_for_cases.get_analyses()
 
     # THEN one analysis should be returned
     assert len(analysis) == store_with_analyses_for_cases._get_query(table=Analysis).count()

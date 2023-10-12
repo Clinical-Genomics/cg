@@ -1,6 +1,6 @@
 """Tests for RNA part of the scout upload API"""
 import logging
-from typing import Generator, List, Set
+from typing import Generator, Set
 
 import pytest
 from _pytest.logging import LogCaptureFixture
@@ -501,7 +501,7 @@ def test_get_application_prep_category(
 
     dna_sample: Sample = rna_store.get_sample_by_internal_id(dna_sample_son_id)
     another_rna_sample_id: Sample = rna_store.get_sample_by_internal_id(another_rna_sample_id)
-    all_son_rna_dna_samples: List[Sample] = [dna_sample, another_rna_sample_id]
+    all_son_rna_dna_samples: list[Sample] = [dna_sample, another_rna_sample_id]
 
     # WHEN running the method to filter a list of Sample objects containing RNA and DNA samples connected by subject_id
     only_son_dna_samples = upload_scout_api._get_application_prep_category(all_son_rna_dna_samples)
@@ -525,7 +525,7 @@ def test_create_rna_dna_collections(
 
     # WHEN running the method to create a list of RNADNACollections
     # with the relationships between RNA/DNA samples and DNA cases
-    rna_dna_collections: List[RNADNACollection] = upload_scout_api.create_rna_dna_collections(
+    rna_dna_collections: list[RNADNACollection] = upload_scout_api.create_rna_dna_collections(
         rna_case
     )
 
@@ -545,13 +545,13 @@ def test_add_rna_sample(
 
     # GIVEN an RNA case and the associated RNA samples
     rna_case: Family = rna_store.get_case_by_internal_id(internal_id=rna_case_id)
-    rna_sample_list: List[Sample] = (
+    rna_sample_list: list[Sample] = (
         rna_store._get_query(table=Sample).filter(Sample.internal_id.like("rna")).all()
     )
 
     # WHEN running the method to create a list of RNADNACollections
     # with the relationships between RNA/DNA samples and DNA cases
-    rna_dna_collections: List[RNADNACollection] = upload_scout_api.create_rna_dna_collections(
+    rna_dna_collections: list[RNADNACollection] = upload_scout_api.create_rna_dna_collections(
         rna_case
     )
 
@@ -622,7 +622,7 @@ def test_map_dna_cases_to_dna_sample_incorrect_pipeline(
     dna_case.data_analysis = Pipeline.FASTQ
 
     # WHEN mapping the DNA case name to the DNA sample name in the related DNA cases
-    related_dna_cases: List[str] = upload_scout_api._dna_cases_related_to_dna_sample(
+    related_dna_cases: list[str] = upload_scout_api._dna_cases_related_to_dna_sample(
         dna_sample=dna_sample,
         collaborators=rna_sample.customer.collaborators,
     )
@@ -650,7 +650,7 @@ def test_map_dna_cases_to_dna_sample_incorrect_customer(
     dna_case.customer_id = 1000
 
     # WHEN mapping the DNA case name to the DNA sample name in the rna-dna-sample-case map
-    dna_cases: List[str] = upload_scout_api._dna_cases_related_to_dna_sample(
+    dna_cases: list[str] = upload_scout_api._dna_cases_related_to_dna_sample(
         dna_sample=dna_sample,
         collaborators=rna_sample.customer.collaborators,
     )

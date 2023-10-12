@@ -1,6 +1,5 @@
 import datetime as dt
 import logging
-from typing import Dict, List, Set
 
 from cg.constants import DataDelivery, Priority
 from cg.constants.constants import CaseActions, Pipeline
@@ -42,7 +41,7 @@ class CaseSubmitter(Submitter):
             if new_gender == "unknown":
                 continue
 
-            existing_samples: List[Sample] = self.status.get_samples_by_customer_and_subject_id(
+            existing_samples: list[Sample] = self.status.get_samples_by_customer_and_subject_id(
                 customer_internal_id=customer_id, subject_id=subject_id
             )
             existing_sample: Sample
@@ -57,7 +56,7 @@ class CaseSubmitter(Submitter):
                     )
 
     def _validate_samples_available_to_customer(
-        self, samples: List[OrderInSample], customer_id: str
+        self, samples: list[OrderInSample], customer_id: str
     ) -> None:
         """Validate that the customer have access to all samples"""
         sample: Of1508Sample
@@ -77,7 +76,7 @@ class CaseSubmitter(Submitter):
                 raise OrderError(f"Sample not available: {sample.name}")
 
     def _validate_case_names_are_unique(
-        self, samples: List[OrderInSample], customer_id: str
+        self, samples: list[OrderInSample], customer_id: str
     ) -> None:
         """Validate that the names of all cases are unused for all samples"""
 
@@ -123,7 +122,7 @@ class CaseSubmitter(Submitter):
         if lims_map:
             self._fill_in_sample_ids(samples=samples, lims_map=lims_map)
 
-        new_cases: List[Family] = self.store_items_in_status(
+        new_cases: list[Family] = self.store_items_in_status(
             customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"] if project_data else dt.datetime.now(),
@@ -133,7 +132,7 @@ class CaseSubmitter(Submitter):
         return {"project": project_data, "records": new_cases}
 
     @staticmethod
-    def _group_cases(samples: List[Of1508Sample]) -> dict:
+    def _group_cases(samples: list[Of1508Sample]) -> dict:
         """Group samples in cases."""
         cases = {}
         for sample in samples:
@@ -161,7 +160,7 @@ class CaseSubmitter(Submitter):
             case_internal_id: str = CaseSubmitter._get_single_value(
                 case_name, case_samples, "case_internal_id"
             )
-            cohorts: Set[str] = {
+            cohorts: set[str] = {
                 cohort for sample in case_samples for cohort in sample.cohorts if cohort
             }
             data_analysis = CaseSubmitter._get_single_value(
@@ -171,9 +170,9 @@ class CaseSubmitter(Submitter):
                 case_name, case_samples, "data_delivery"
             )
 
-            panels: Set[str] = set()
+            panels: set[str] = set()
             if data_analysis == Pipeline.MIP_DNA:
-                panels: Set[str] = {
+                panels: set[str] = {
                     panel for sample in case_samples for panel in sample.panels if panel
                 }
 
@@ -220,13 +219,13 @@ class CaseSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
-    ) -> List[Family]:
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: list[dict]
+    ) -> list[Family]:
         """Store cases, samples and their relationship in the Status database."""
         customer: Customer = self.status.get_customer_by_internal_id(
             customer_internal_id=customer_id
         )
-        new_cases: List[Family] = []
+        new_cases: list[Family] = []
 
         for case in items:
             status_db_case: Family = self.status.get_case_by_internal_id(
@@ -244,7 +243,7 @@ class CaseSubmitter(Submitter):
                 self._update_action(action=CaseActions.ANALYZE, case=status_db_case)
                 self._update_case_panel(panels=case["panels"], case=status_db_case)
 
-            case_samples: Dict[str, Sample] = {}
+            case_samples: dict[str, Sample] = {}
             for sample in case["samples"]:
                 existing_sample: Sample = self.status.get_sample_by_internal_id(
                     internal_id=sample["internal_id"]
@@ -290,7 +289,7 @@ class CaseSubmitter(Submitter):
         return new_cases
 
     @staticmethod
-    def _update_case_panel(panels: List[str], case: Family) -> None:
+    def _update_case_panel(panels: list[str], case: Family) -> None:
         """Update case panels."""
         case.panels = panels
 

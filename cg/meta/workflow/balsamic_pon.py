@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from typing import List
 
 from cg.constants.constants import Pipeline
 from cg.constants.indexes import ListIndexes
@@ -32,7 +31,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
-        observations: List[str],
+        observations: list[str],
         dry_run: bool = False,
     ) -> None:
         """Creates a config file for BALSAMIC PON analysis."""
@@ -44,7 +43,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
         verified_panel_bed: str = self.get_verified_bed(
             panel_bed=panel_bed, sample_data=sample_parameters
         )
-        options: List[str] = build_command_from_dict(
+        options: list[str] = build_command_from_dict(
             {
                 "--case-id": case.internal_id,
                 "--analysis-dir": self.root_dir,
@@ -55,7 +54,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
                 "--version": self.get_next_pon_version(verified_panel_bed),
             }
         )
-        parameters: List[str] = ["config", "pon"] + options
+        parameters: list[str] = ["config", "pon"] + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def get_case_config_path(self, case_id: str) -> Path:

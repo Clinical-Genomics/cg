@@ -1,5 +1,4 @@
 import datetime as dt
-from typing import List
 
 from cg.constants import DataDelivery
 from cg.constants.constants import Pipeline
@@ -105,14 +104,14 @@ class PoolSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
-    ) -> List[Pool]:
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: list[dict]
+    ) -> list[Pool]:
         """Store pools in the status database."""
         customer: Customer = self.status.get_customer_by_internal_id(
             customer_internal_id=customer_id
         )
-        new_pools: List[Pool] = []
-        new_samples: List[Sample] = []
+        new_pools: list[Pool] = []
+        new_samples: list[Sample] = []
         for pool in items:
             with self.status.session.no_autoflush:
                 application_version: ApplicationVersion = (
@@ -171,7 +170,7 @@ class PoolSubmitter(Submitter):
         return new_pools
 
     def _validate_case_names_are_available(
-        self, customer_id: str, samples: List[RmlSample], ticket: str
+        self, customer_id: str, samples: list[RmlSample], ticket: str
     ):
         """Validate names of all samples are not already in use."""
         customer: Customer = self.status.get_customer_by_internal_id(

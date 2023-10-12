@@ -1,7 +1,6 @@
 """Tests for the clean flow cells API."""
 import logging
 import time
-from typing import List
 
 import mock
 import pytest
@@ -70,7 +69,7 @@ def test_get_sequencing_metrics_for_flow_cell_from_statusdb(
     # GIVEN a clean flow cell api with a store that contains a flow cell with SampleLaneSequencingMetrics entries
 
     # WHEN retrieving the flow cell from the store
-    metrics: List[
+    metrics: list[
         SampleLaneSequencingMetrics
     ] = flow_cell_clean_api_can_be_removed.get_sequencing_metrics_for_flow_cell()
 
@@ -148,7 +147,7 @@ def test_get_files_for_flow_cell_bundle(flow_cell_clean_api_can_be_removed: Clea
         SequencingFileTag.SPRING,
         SequencingFileTag.SPRING_METADATA,
     ]:
-        files: List[
+        files: list[
             File
         ] = flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(tag=tag)
 

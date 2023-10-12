@@ -1,6 +1,4 @@
-from typing import List
-
-STATS_HEADER: List[str] = [
+STATS_HEADER: list[str] = [
     "sample",
     "Flowcell",
     "Lanes",

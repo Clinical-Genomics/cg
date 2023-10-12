@@ -2,7 +2,7 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import List, Optional, Type, Union
+from typing import Optional, Type, Union
 
 from pydantic import ValidationError
 from typing_extensions import Literal
@@ -65,7 +65,7 @@ class FlowCellDirectoryData:
         self.position = base_name[0]
 
     @property
-    def split_flow_cell_name(self) -> List[str]:
+    def split_flow_cell_name(self) -> list[str]:
         """Return split flow cell name."""
         return self.path.name.split("_")
 
@@ -274,9 +274,9 @@ class FlowCellDirectoryData:
         return f"FlowCell(path={self.path},run_parameters_path={self.run_parameters_path})"
 
 
-def get_flow_cells_from_path(flow_cells_dir: Path) -> List[FlowCellDirectoryData]:
+def get_flow_cells_from_path(flow_cells_dir: Path) -> list[FlowCellDirectoryData]:
     """Return flow cell objects from flow cell dir."""
-    flow_cells: List[FlowCellDirectoryData] = []
+    flow_cells: list[FlowCellDirectoryData] = []
     LOG.debug(f"Search for flow cells ready to encrypt in {flow_cells_dir}")
     for flow_cell_dir in flow_cells_dir.iterdir():
         if not flow_cell_dir.is_dir():

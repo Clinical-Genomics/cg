@@ -1,6 +1,5 @@
 """Handler to delete data objects"""
 
-from typing import List
 
 from sqlalchemy.orm import Session
 
@@ -38,7 +37,7 @@ class DeleteDataHandler(BaseHandler):
                 self.session.delete(case_sample)
             self.session.commit()
 
-    def delete_cases_without_samples(self, case_internal_ids: List[str]) -> None:
+    def delete_cases_without_samples(self, case_internal_ids: list[str]) -> None:
         """Delete any cases specified in case_ids without samples."""
         for case_internal_id in case_internal_ids:
             case: Family = self.get_case_by_internal_id(internal_id=case_internal_id)
@@ -50,7 +49,7 @@ class DeleteDataHandler(BaseHandler):
         self, flow_cell_name: str
     ) -> None:
         """Delete all entries in sample_lane_sequencing_metrics for a flow cell."""
-        metrics: List[
+        metrics: list[
             SampleLaneSequencingMetrics
         ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
         for metric in metrics:

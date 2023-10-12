@@ -1,5 +1,3 @@
-from typing import Dict, Set
-
 from cg.utils.enums import StrEnum
 
 
@@ -50,7 +48,7 @@ BALSAMIC_UMI_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
 )
 
-RNAFUSION_CASE_TAGS: Dict[str, Set[str]] = dict(
+RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
     multiqc_rna={"multiqc-html", "rna"},
     gene_fusion={"arriba-visualisation", "clinical"},
     gene_fusion_report_research={"arriba-visualisation", "research"},

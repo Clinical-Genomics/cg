@@ -1,5 +1,4 @@
 import datetime as dt
-from typing import List
 
 from cg.constants import DataDelivery
 from cg.constants.constants import Pipeline
@@ -17,7 +16,7 @@ class MetagenomeSubmitter(Submitter):
         self._validate_sample_names_are_unique(samples=order.samples, customer_id=order.customer)
 
     def _validate_sample_names_are_unique(
-        self, samples: List[MetagenomeSample], customer_id: str
+        self, samples: list[MetagenomeSample], customer_id: str
     ) -> None:
         """Validate that the names of all samples are unused."""
         customer: Customer = self.status.get_customer_by_internal_id(
@@ -80,8 +79,8 @@ class MetagenomeSubmitter(Submitter):
         order: str,
         ordered: dt.datetime,
         ticket_id: str,
-        items: List[dict],
-    ) -> List[Sample]:
+        items: list[dict],
+    ) -> list[Sample]:
         """Store samples in the status database."""
         customer: Customer = self.status.get_customer_by_internal_id(
             customer_internal_id=customer_id
@@ -125,7 +124,7 @@ class MetagenomeSubmitter(Submitter):
                         priority=case_dict["priority"],
                         ticket=ticket_id,
                     )
-                    case.customer: Customer = customer
+                    case.customer = customer
                     self.status.session.add(case)
                     self.status.session.commit()
 

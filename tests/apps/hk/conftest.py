@@ -1,7 +1,6 @@
 """Fixtures for the housekeeper tests."""
 import datetime
 from pathlib import Path
-from typing import List
 
 import pytest
 from housekeeper.store.models import Bundle
@@ -46,7 +45,7 @@ def hk_tag() -> str:
 
 
 @pytest.fixture
-def tags() -> List[str]:
+def tags() -> list[str]:
     """Return a list of Housekeeper tags."""
     return ["bed"]
 

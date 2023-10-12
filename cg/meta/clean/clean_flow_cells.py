@@ -1,7 +1,7 @@
 """An API that handles the cleaning of flow cells."""
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from housekeeper.store.models import File
 
@@ -131,13 +131,13 @@ class CleanFlowCellAPI:
             raise ValueError(f"Flow cell {self.flow_cell.id} not found in StatusDB.")
         return flow_cell
 
-    def get_sequencing_metrics_for_flow_cell(self) -> Optional[List[SampleLaneSequencingMetrics]]:
+    def get_sequencing_metrics_for_flow_cell(self) -> Optional[list[SampleLaneSequencingMetrics]]:
         """
         Get the SampleLaneSequencingMetrics entries for a flow cell.
         Raises:
               Value error if no SampleLaneSequencingMetrics are found in StatusDB.
         """
-        metrics: List[
+        metrics: list[
             SampleLaneSequencingMetrics
         ] = self.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(self.flow_cell.id)
         if not metrics:
@@ -146,13 +146,13 @@ class CleanFlowCellAPI:
             )
         return metrics
 
-    def get_files_for_samples_on_flow_cell_with_tag(self, tag: str) -> Optional[List[File]]:
+    def get_files_for_samples_on_flow_cell_with_tag(self, tag: str) -> Optional[list[File]]:
         """
         Return the files with the specified tag for all samples on a Flow cell.
         """
         flow_cell: Flowcell = self.get_flow_cell_from_status_db()
-        bundle_names: List[str] = [sample.internal_id for sample in flow_cell.samples]
-        files: List[File] = []
+        bundle_names: list[str] = [sample.internal_id for sample in flow_cell.samples]
+        files: list[File] = []
         for bundle_name in bundle_names:
             files.extend(
                 self.hk_api.get_files_from_latest_version(

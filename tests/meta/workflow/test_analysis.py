@@ -1,5 +1,5 @@
 """Test for analysis"""
-from typing import List
+
 
 import pytest
 
@@ -37,8 +37,8 @@ def test_gene_panels_correctly_added(customer_id):
     """Test get correct gene panel list."""
 
     # GIVEN a case that has a gene panel included in the gene panel master list
-    default_panels_included: List[str] = [GenePanelMasterList.get_panel_names()[0]]
-    master_list: List[str] = GenePanelMasterList.get_panel_names()
+    default_panels_included: list[str] = [GenePanelMasterList.get_panel_names()[0]]
+    master_list: list[str] = GenePanelMasterList.get_panel_names()
 
     # WHEN converting the gene panels between the default and the gene_panel_master_list
     list_of_gene_panels_used = MipAnalysisAPI.convert_panels(
@@ -52,7 +52,7 @@ def test_gene_panels_correctly_added(customer_id):
 def test_gene_panels_not_added(customer_id):
     """Test get only OMIM-AUTO and custom gene panel list."""
     # GIVEN a case that has a gene panel that is NOT included in the gene panel master list
-    default_panels_not_included: List[str] = ["PANEL_NOT_IN_GENE_PANEL_MASTER_LIST"]
+    default_panels_not_included: list[str] = ["PANEL_NOT_IN_GENE_PANEL_MASTER_LIST"]
 
     # WHEN converting the gene panels between the default and the gene_panel_master_list
     list_of_gene_panels_used = MipAnalysisAPI.convert_panels(

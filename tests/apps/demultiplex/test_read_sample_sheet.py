@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import Dict, List
 
 import pytest
 
@@ -66,34 +65,34 @@ def test_get_samples_by_lane(
     # GIVEN two samples on two different lanes
 
     # WHEN getting the samples per lane
-    samples_per_lane: Dict[int, List[FlowCellSample]] = get_samples_by_lane(
+    samples_per_lane: dict[int, list[FlowCellSample]] = get_samples_by_lane(
         samples=[novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]
     )
 
     # THEN the returned value is a dictionary
-    assert isinstance(samples_per_lane, Dict)
+    assert isinstance(samples_per_lane, dict)
     # THEN the dictionary has two entries
     assert len(samples_per_lane) == 2
 
 
-def test_get_raw_samples_valid_sample_sheet(valid_sample_sheet_bcl2fastq: List[List[str]]):
+def test_get_raw_samples_valid_sample_sheet(valid_sample_sheet_bcl2fastq: list[list[str]]):
     """Test that getting raw samples from a valid sample sheet gets a correct list of dictionaries."""
     # GIVEN a valid sample sheet
 
     # WHEN getting the list of raw samples from it
-    raw_samples: List[Dict[str, str]] = get_raw_samples(
+    raw_samples: list[dict[str, str]] = get_raw_samples(
         sample_sheet_content=valid_sample_sheet_bcl2fastq
     )
 
     # THEN it returns a list with 2 dictionaries
     assert len(raw_samples) == 2
     # THEN the list contains dictionaries
-    assert isinstance(raw_samples[0], Dict)
+    assert isinstance(raw_samples[0], dict)
     # THEN the sample contains the key "Lane"
     assert "Lane" in raw_samples[0].keys()
 
 
-def test_get_raw_samples_no_header(sample_sheet_samples_no_header: List[List[str]], caplog):
+def test_get_raw_samples_no_header(sample_sheet_samples_no_header: list[list[str]], caplog):
     """Test that getting samples from a sample sheet without header fails."""
     # GIVEN a sample sheet without header
     caplog.set_level(logging.INFO)
@@ -106,7 +105,7 @@ def test_get_raw_samples_no_header(sample_sheet_samples_no_header: List[List[str
     assert "Could not find header in sample sheet" in caplog.text
 
 
-def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: List[List[str]], caplog):
+def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: list[list[str]], caplog):
     """Test that getting samples from a sample sheet without samples fails."""
     # GIVEN a sample sheet without samples
     caplog.set_level(logging.INFO)
@@ -120,7 +119,7 @@ def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: List[Lis
 
 
 def test_get_sample_sheet_bcl2fastq_duplicate_same_lane(
-    sample_sheet_bcl2fastq_duplicate_same_lane: List[List[str]],
+    sample_sheet_bcl2fastq_duplicate_same_lane: list[list[str]],
 ):
     """Test that creating a Bcl2fastq sample sheet with duplicated samples in a lane fails."""
     # GIVEN a Bcl2fastq sample sheet with a sample duplicated in a lane
@@ -135,7 +134,7 @@ def test_get_sample_sheet_bcl2fastq_duplicate_same_lane(
 
 
 def test_get_sample_sheet_dragen_duplicate_same_lane(
-    sample_sheet_dragen_duplicate_same_lane: List[List[str]],
+    sample_sheet_dragen_duplicate_same_lane: list[list[str]],
 ):
     """Test that creating a Dragen sample sheet with duplicated samples in a lane fails."""
     # GIVEN a Dragen sample sheet with a sample duplicated in a lane
@@ -150,7 +149,7 @@ def test_get_sample_sheet_dragen_duplicate_same_lane(
 
 
 def test_get_sample_sheet_bcl2fastq_duplicate_different_lanes(
-    sample_sheet_bcl2fastq_duplicate_different_lane: List[List[str]],
+    sample_sheet_bcl2fastq_duplicate_different_lane: list[list[str]],
 ):
     """Test that Bcl2fastq a sample sheet created with duplicated samples in different lanes has samples."""
     # GIVEN a Bcl2fastq sample sheet with same sample duplicated in different lanes
@@ -166,7 +165,7 @@ def test_get_sample_sheet_bcl2fastq_duplicate_different_lanes(
 
 
 def test_get_sample_sheet_dragen_duplicate_different_lanes(
-    sample_sheet_dragen_duplicate_different_lane: List[List[str]],
+    sample_sheet_dragen_duplicate_different_lane: list[list[str]],
 ):
     """Test that Dragen a sample sheet created with duplicated samples in different lanes has samples."""
     # GIVEN a Dragen sample sheet with same sample duplicated in different lanes
@@ -189,10 +188,10 @@ def test_get_sample_internal_ids_from_sample_sheet(novaseq6000_bcl_convert_sampl
     )
 
     # WHEN getting the valid sample internal ids
-    sample_internal_ids: List[str] = sample_sheet.get_sample_ids()
+    sample_internal_ids: list[str] = sample_sheet.get_sample_ids()
 
     # THEN the returned value is a list
-    assert isinstance(sample_internal_ids, List)
+    assert isinstance(sample_internal_ids, list)
     # THEN the list contains strings
     assert isinstance(sample_internal_ids[0], str)
     # THEN the sample internal ids are unique
