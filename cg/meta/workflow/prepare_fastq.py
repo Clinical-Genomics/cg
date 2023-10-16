@@ -7,7 +7,7 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import Pipeline
+from cg.constants.constants import PIPELINES_USING_PARTIAL_ANALYSES
 from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.models import CompressionData
@@ -46,7 +46,7 @@ class PrepareFastqAPI:
         For some pipelines, we want to start a partial analysis disregarding the samples with no reads.
         This method returns true if we should skip the sample.
         """
-        if case.data_analysis in [Pipeline.MICROSALT, Pipeline.SARS_COV_2] and not sample.has_reads:
+        if case.data_analysis in PIPELINES_USING_PARTIAL_ANALYSES and not sample.has_reads:
             return True
         return False
 
