@@ -3,7 +3,6 @@ from json import JSONEncoder
 
 from flask_admin import Admin
 from flask_cors import CORS
-from flask_wtf.csrf import CSRFProtect
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
@@ -46,7 +45,6 @@ class CustomJSONEncoder(JSONEncoder):
 
 
 cors = CORS(resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
-csrf = CSRFProtect()
 db = FlaskStore()
 
 admin = Admin(name="Clinical Genomics")

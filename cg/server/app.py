@@ -55,7 +55,6 @@ def _configure_extensions(app: Flask):
     app.config["GOOGLE_OAUTH_CERTS"] = certs_resp.json()
 
     ext.cors.init_app(app)
-    ext.csrf.init_app(app)
     ext.db.init_app(app)
     ext.lims.init_app(app)
     if app.config["OSTICKET_API_KEY"]:
@@ -90,8 +89,6 @@ def _register_blueprints(app: Flask):
     app.register_blueprint(invoices.BLUEPRINT, url_prefix="/invoices")
     app.register_blueprint(oauth_bp, url_prefix="/login")
     _register_admin_views()
-
-    ext.csrf.exempt(api.BLUEPRINT)  # Protected with Auth header already
 
     @app.route("/")
     def index():

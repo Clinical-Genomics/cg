@@ -13,7 +13,6 @@ Flask-Admin
 Flask-CORS
 Flask-Dance
 Flask
-flask_wtf
 google-auth
 gunicorn
 requests[security]
