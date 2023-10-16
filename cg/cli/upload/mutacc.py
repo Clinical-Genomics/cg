@@ -1,6 +1,6 @@
 """Code that handles uploading to mutacc from the CLI"""
 import logging
-from typing import List, Optional, Tuple
+from typing import Optional
 
 import click
 
@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 @click.option("--dry-run", is_flag=True, help="only print cases to be processed")
 @click.pass_obj
 def process_solved(
-    context: CGConfig, case_id: Optional[str], days_ago: int, customers: Tuple[str], dry_run: bool
+    context: CGConfig, case_id: Optional[str], days_ago: int, customers: tuple[str], dry_run: bool
 ):
     """Process cases with mutacc that has been marked as solved in scout.
     This prepares them to be uploaded to the mutacc database"""
@@ -32,7 +32,7 @@ def process_solved(
     mutacc_upload_api = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
     # Get cases to upload into mutacc from scout
-    finished_cases: List[ScoutExportCase] = []
+    finished_cases: list[ScoutExportCase] = []
     if case_id is not None:
         finished_cases = scout_api.get_cases(finished=True, case_id=case_id)
     elif days_ago is not None:

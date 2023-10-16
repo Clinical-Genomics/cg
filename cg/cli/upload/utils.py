@@ -1,7 +1,7 @@
 """Utility functions for the upload cli commands."""
 
 import logging
-from typing import List, Optional
+from typing import Optional
 
 import click
 
@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 def suggest_cases_to_upload(status_db: Store, pipeline: Optional[Pipeline] = None) -> None:
     """Print a list of suggested cases to upload."""
     LOG.warning("Provide a case, suggestions:")
-    records: List[Analysis] = status_db.get_analyses_to_upload(pipeline=pipeline)[
+    records: list[Analysis] = status_db.get_analyses_to_upload(pipeline=pipeline)[
         :MAX_ITEMS_TO_RETRIEVE
     ]
     for case_obj in records:

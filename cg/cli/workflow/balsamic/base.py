@@ -1,7 +1,6 @@
 """CLI support to create config and/or start BALSAMIC."""
 
 import logging
-from typing import List
 
 import click
 from pydantic.v1 import ValidationError
@@ -60,7 +59,7 @@ def config_case(
     genome_version: str,
     panel_bed: str,
     pon_cnn: click.Path,
-    observations: List[click.Path],
+    observations: list[click.Path],
     dry_run: bool,
 ):
     """Create config file for BALSAMIC analysis for a given CASE_ID."""

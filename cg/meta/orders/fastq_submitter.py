@@ -1,5 +1,4 @@
 import datetime as dt
-from typing import List
 
 from cg.constants import DataDelivery, GenePanelMasterList
 from cg.constants.constants import Pipeline, PrepCategory
@@ -66,7 +65,7 @@ class FastqSubmitter(Submitter):
             priority=Priority.research,
             ticket=sample_obj.original_ticket,
         )
-        case.customer: Customer = self.status.get_customer_by_internal_id(
+        case.customer = self.status.get_customer_by_internal_id(
             customer_internal_id=CustomerNames.CG_INTERNAL_CUSTOMER
         )
         relationship: FamilySample = self.status.relate_sample(
@@ -75,8 +74,8 @@ class FastqSubmitter(Submitter):
         self.status.session.add_all([case, relationship])
 
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
-    ) -> List[Sample]:
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: list[dict]
+    ) -> list[Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
         customer: Customer = self.status.get_customer_by_internal_id(
             customer_internal_id=customer_id

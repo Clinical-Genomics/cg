@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -273,7 +272,7 @@ def test_parse_manifest_file(novaseq_x_manifest_file: Path):
     # GIVEN a manifest file
 
     # WHEN parsing the manifest file
-    files_at_source: List[Path] = parse_manifest_file(novaseq_x_manifest_file)
+    files_at_source: list[Path] = parse_manifest_file(novaseq_x_manifest_file)
 
     # THEN paths should be returned
     # THEN the paths should be Path objects

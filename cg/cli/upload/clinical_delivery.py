@@ -2,7 +2,6 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import Set
 
 import click
 
@@ -31,7 +30,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
     click.echo(click.style("----------------- Clinical-delivery -----------------"))
 
     case: Family = context.obj.status_db.get_case_by_internal_id(internal_id=case_id)
-    delivery_types: Set[str] = case.get_delivery_arguments()
+    delivery_types: set[str] = case.get_delivery_arguments()
     is_sample_delivery: bool
     is_case_delivery: bool
     is_complete_delivery: bool

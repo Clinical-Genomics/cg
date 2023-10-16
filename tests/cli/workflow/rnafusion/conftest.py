@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -7,7 +6,7 @@ from cg.constants import FileExtensions
 
 
 @pytest.fixture(scope="session")
-def deliverables_template_content() -> List[dict]:
+def deliverables_template_content() -> list[dict]:
     return [
         {
             "format": "yml",

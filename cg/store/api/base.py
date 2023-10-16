@@ -1,6 +1,6 @@
 """All models aggregated in a base class"""
 from dataclasses import dataclass
-from typing import Callable, List, Optional, Type
+from typing import Callable, Optional, Type
 
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Query, Session
@@ -136,7 +136,7 @@ class BaseHandler:
         sample_id: str,
     ) -> Query:
         cases_query: Query = self._get_query(table=Family)
-        filter_functions: List[Callable] = []
+        filter_functions: list[Callable] = []
 
         filter_case_order_date = None
         if days != 0:
@@ -165,7 +165,7 @@ class BaseHandler:
         )
 
         # customer filters
-        customer_filters: List[Callable] = []
+        customer_filters: list[Callable] = []
         if customer_id or exclude_customer_id:
             cases_query = cases_query.join(Family.customer)
 

@@ -3,13 +3,15 @@ import logging
 import shutil
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
 from cg.apps.demultiplex.sample_sheet.models import SampleSheet
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
@@ -56,7 +58,7 @@ class FluffySample(BaseModel):
 
 
 class FluffySampleSheet(BaseModel):
-    samples: List[FluffySample]
+    samples: list[FluffySample]
 
     def write_sample_sheet(self, out_path: Path) -> None:
         LOG.info(f"Writing fluffy sample sheet to {out_path}")
@@ -255,7 +257,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         ]
         self.process.run_command(command_args, dry_run=dry_run)
 
-    def get_cases_to_store(self) -> List[Family]:
+    def get_cases_to_store(self) -> list[Family]:
         """Return cases where analysis finished successfully,
         and is ready to be stored in Housekeeper."""
         return [

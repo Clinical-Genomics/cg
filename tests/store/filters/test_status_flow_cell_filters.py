@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from sqlalchemy.orm import Query
 
@@ -29,7 +29,7 @@ def test_get_flow_cells_by_case(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: Optional[List[Flowcell]] = filter_flow_cells_by_case(
+    returned_flow_cell: Optional[list[Flowcell]] = filter_flow_cells_by_case(
         flow_cells=base_store._get_join_flow_cell_sample_links_query(), case=case
     )
 
@@ -49,7 +49,7 @@ def test_get_flow_cells_by_case_when_no_flow_cell_for_case(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: Optional[List[Flowcell]] = filter_flow_cells_by_case(
+    returned_flow_cell: Optional[list[Flowcell]] = filter_flow_cells_by_case(
         flow_cells=base_store._get_join_flow_cell_sample_links_query(), case=case
     )
 
@@ -91,7 +91,7 @@ def test_get_flow_cell_by_id_and_by_enquiry(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: List[Flowcell] = filter_flow_cell_by_name_search(
+    returned_flow_cell: list[Flowcell] = filter_flow_cell_by_name_search(
         flow_cells=base_store._get_query(table=Flowcell), name_search=bcl2fastq_flow_cell_id[:4]
     )
 

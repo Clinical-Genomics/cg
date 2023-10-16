@@ -5,7 +5,6 @@
 import logging
 import os
 from collections import namedtuple
-from typing import Dict
 
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout import scout_export
@@ -29,7 +28,7 @@ class UploadToMutaccAPI:
             LOG.info("Extracting reads from case %s", case.id)
             self.mutacc_auto.extract_reads(case=data["case"], variants=data["causatives"])
 
-    def data(self, case: scout_export.ScoutExportCase) -> Dict[str, dict]:
+    def data(self, case: scout_export.ScoutExportCase) -> dict[str, dict]:
         """
         Find the necessary data for the case
 

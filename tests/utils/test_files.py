@@ -1,6 +1,5 @@
 from datetime import datetime
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -90,7 +89,7 @@ def test_get_creation_date(tmp_path_factory, timestamp_now: datetime):
 
 
 def test_get_all_directories_in_path(
-    path_with_directories_and_a_file: Path, sub_dir_names: List[str], some_file: str
+    path_with_directories_and_a_file: Path, sub_dir_names: list[str], some_file: str
 ):
     """Test that get all directories in path only returns directories."""
 
@@ -98,7 +97,7 @@ def test_get_all_directories_in_path(
     assert Path(path_with_directories_and_a_file, some_file).exists()
 
     # WHEN retrieving all directories in the path
-    directories: List[Path] = get_directories_in_path(path=path_with_directories_and_a_file)
+    directories: list[Path] = get_directories_in_path(path=path_with_directories_and_a_file)
 
     # THEN all directories are returned
     for sub_dir_name in sub_dir_names:

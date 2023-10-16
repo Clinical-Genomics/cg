@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import requests
 from housekeeper.store.models import File, Version
@@ -109,9 +109,9 @@ class ReportAPI(MetaAPI):
         template: Template = env.get_template(self.get_template_name())
         return template.render(**report_data)
 
-    def get_cases_without_delivery_report(self, pipeline: Pipeline) -> List[Family]:
+    def get_cases_without_delivery_report(self, pipeline: Pipeline) -> list[Family]:
         """Returns a list of cases that has been stored and need a delivery report."""
-        stored_cases: List[Family] = []
+        stored_cases: list[Family] = []
         analyses: Query = self.status_db.analyses_to_delivery_report(pipeline=pipeline)[
             :MAX_ITEMS_TO_RETRIEVE
         ]
@@ -130,7 +130,7 @@ class ReportAPI(MetaAPI):
                 )
         return stored_cases
 
-    def get_cases_without_uploaded_delivery_report(self, pipeline: Pipeline) -> List[Family]:
+    def get_cases_without_uploaded_delivery_report(self, pipeline: Pipeline) -> list[Family]:
         """Returns a list of cases that need a delivery report to be uploaded."""
         analyses: Query = self.status_db.analyses_to_upload_delivery_reports(pipeline=pipeline)[
             :MAX_ITEMS_TO_RETRIEVE
@@ -212,10 +212,10 @@ class ReportAPI(MetaAPI):
         analysis_metadata: AnalysisModel,
     ) -> CaseModel:
         """Returns case associated validated attributes."""
-        samples: List[SampleModel] = self.get_samples_data(
+        samples: list[SampleModel] = self.get_samples_data(
             case=case, analysis_metadata=analysis_metadata
         )
-        unique_applications: List[ApplicationModel] = self.get_unique_applications(samples=samples)
+        unique_applications: list[ApplicationModel] = self.get_unique_applications(samples=samples)
         return CaseModel(
             name=case.name,
             id=case.internal_id,
@@ -226,10 +226,10 @@ class ReportAPI(MetaAPI):
             applications=unique_applications,
         )
 
-    def get_samples_data(self, case: Family, analysis_metadata: AnalysisModel) -> List[SampleModel]:
+    def get_samples_data(self, case: Family, analysis_metadata: AnalysisModel) -> list[SampleModel]:
         """Extracts all the samples associated to a specific case and their attributes."""
         samples = list()
-        case_samples: List[FamilySample] = self.status_db.get_case_samples_by_case_id(
+        case_samples: list[FamilySample] = self.status_db.get_case_samples_by_case_id(
             case_internal_id=case.internal_id
         )
         for case_sample in case_samples:
@@ -283,7 +283,7 @@ class ReportAPI(MetaAPI):
         )
 
     @staticmethod
-    def get_unique_applications(samples: List[SampleModel]) -> List[ApplicationModel]:
+    def get_unique_applications(samples: list[SampleModel]) -> list[ApplicationModel]:
         """Returns the unique case associated applications."""
         applications = list()
         for sample in samples:
@@ -378,7 +378,7 @@ class ReportAPI(MetaAPI):
         return []
 
     def get_report_accreditation(
-        self, samples: List[SampleModel], analysis_metadata: AnalysisModel
+        self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
         """Checks if the report is accredited or not."""
         raise NotImplementedError

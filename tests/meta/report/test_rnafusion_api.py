@@ -1,5 +1,5 @@
 """Test module for the Rnafusion delivery report API."""
-from typing import Dict
+
 
 from cg.meta.report.rnafusion import RnafusionReportAPI
 from cg.models.report.metadata import RnafusionSampleMetadataModel
@@ -11,7 +11,7 @@ def test_get_sample_metadata(
     report_api_rnafusion: RnafusionReportAPI,
     sample_id: str,
     rnafusion_case_id: str,
-    rnafusion_validated_metrics: Dict[str, str],
+    rnafusion_validated_metrics: dict[str, str],
     mock_analysis_finish,
 ):
     """Test Rnafusion sample metadata extraction."""
