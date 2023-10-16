@@ -90,7 +90,7 @@ class PrepareFastqAPI:
             fastq_files: dict[Path, File] = files.get_hk_files_dict(
                 tags=["fastq"], version_obj=version
             )
-            compression_objs: list[CompressionData] = files.get_spring_paths(version_obj)
+            compression_objs: list[CompressionData] = files.get_spring_paths(version)
             for compression_obj in compression_objs:
                 result = True
                 if compression_obj.fastq_first not in fastq_files:
