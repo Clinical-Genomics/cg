@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 from sqlalchemy import and_, not_, or_
 from sqlalchemy.orm import Query
@@ -40,7 +40,7 @@ def filter_cases_by_customer_entry_id(cases: Query, customer_entry_id: int, **kw
 
 
 def filter_cases_by_customer_entry_ids(
-    cases: Query, customer_entry_ids: List[int], **kwargs
+    cases: Query, customer_entry_ids: list[int], **kwargs
 ) -> Query:
     """Filter cases with matching customer ids."""
     return cases.filter(Family.customer_id.in_(customer_entry_ids)) if customer_entry_ids else cases
@@ -197,12 +197,12 @@ def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
 
 def apply_case_filter(
     cases: Query,
-    filter_functions: List[Callable],
+    filter_functions: list[Callable],
     action: Optional[str] = None,
     case_search: Optional[str] = None,
     creation_date: Optional[datetime] = None,
     customer_entry_id: Optional[int] = None,
-    customer_entry_ids: Optional[List[int]] = None,
+    customer_entry_ids: Optional[list[int]] = None,
     entry_id: Optional[int] = None,
     internal_id: Optional[str] = None,
     internal_id_search: Optional[str] = None,

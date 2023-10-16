@@ -6,7 +6,6 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import List
 
 from cg.constants.delivery import INBOX_NAME
 from cg.exc import CgError
@@ -23,11 +22,11 @@ class DeliverTicketAPI(MetaAPI):
         super().__init__(config)
         self.delivery_path: Path = Path(config.delivery_path)
 
-    def get_all_cases_from_ticket(self, ticket: str) -> List[Family]:
+    def get_all_cases_from_ticket(self, ticket: str) -> list[Family]:
         return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
 
     def get_inbox_path(self, ticket: str) -> Path:
-        cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: list[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         if not cases:
             raise CgError(
                 f"The customer id was not identified since no cases for ticket {ticket} was found"
@@ -45,7 +44,7 @@ class DeliverTicketAPI(MetaAPI):
         return True
 
     def generate_date_tag(self, ticket: str) -> datetime.datetime:
-        cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: list[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         return cases[0].ordered_at
 
     def generate_output_filename(
@@ -58,12 +57,12 @@ class DeliverTicketAPI(MetaAPI):
         return Path(dir_path, fastq_file_name)
 
     @staticmethod
-    def sort_files(files: List[Path]) -> List[Path]:
+    def sort_files(files: list[Path]) -> list[Path]:
         files_map = {file_path.name: file_path for file_path in files}
         sorted_names = sorted(list(files_map.keys()))
         return [files_map[file_name] for file_name in sorted_names]
 
-    def get_current_read_direction(self, dir_path: Path, read_direction: int) -> List[Path]:
+    def get_current_read_direction(self, dir_path: Path, read_direction: int) -> list[Path]:
         same_direction = []
         direction_string = ".+_R" + str(read_direction) + "_[0-9]+.fastq.gz"
         direction_pattern = re.compile(direction_string)
@@ -73,26 +72,26 @@ class DeliverTicketAPI(MetaAPI):
                 same_direction.append(file_path)
         return self.sort_files(files=same_direction)
 
-    def get_total_size(self, files: List[Path]) -> int:
+    def get_total_size(self, files: list[Path]) -> int:
         total_size = 0
         for file in files:
             total_size += file.stat().st_size
         return total_size
 
-    def concatenate_same_read_direction(self, reads: List[Path], output: Path) -> None:
+    def concatenate_same_read_direction(self, reads: list[Path], output: Path) -> None:
         with open(output, "wb") as write_file_obj:
             for file in reads:
                 with open(file, "rb") as file_descriptor:
                     shutil.copyfileobj(file_descriptor, write_file_obj)
 
-    def remove_files(self, reads: List[Path]) -> None:
+    def remove_files(self, reads: list[Path]) -> None:
         for file in reads:
             LOG.info("Removing file: %s", file)
             file.unlink()
 
     def get_samples_from_ticket(self, ticket: str) -> list:
-        all_samples: List = []
-        cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        all_samples = []
+        cases: list[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         for case in cases:
             for link_obj in case.links:
                 all_samples.append(link_obj.sample.name)
@@ -136,7 +135,7 @@ class DeliverTicketAPI(MetaAPI):
             if not dir_path.is_dir():
                 continue
             for read_direction in [1, 2]:
-                same_direction: List[Path] = self.get_current_read_direction(
+                same_direction: list[Path] = self.get_current_read_direction(
                     dir_path=dir_path, read_direction=read_direction
                 )
                 total_size: int = self.get_total_size(files=same_direction)
@@ -167,10 +166,10 @@ class DeliverTicketAPI(MetaAPI):
         return app_tag
 
     def check_if_concatenation_is_needed(self, ticket: str) -> bool:
-        cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: list[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         case_id = cases[0].internal_id
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        samples: List[Sample] = [link.sample for link in case_obj.links]
+        samples: list[Sample] = [link.sample for link in case_obj.links]
         app_tag = self.get_app_tag(samples=samples)
         for prefix in PREFIX_TO_CONCATENATE:
             if app_tag.startswith(prefix):

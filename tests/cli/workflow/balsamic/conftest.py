@@ -3,7 +3,6 @@
 import datetime as dt
 import gzip
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -838,7 +837,7 @@ def mock_deliverable(balsamic_dir: Path, deliverable_data: dict, balsamic_case_i
 def hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -> dict:
     hermes_output: dict = {"pipeline": "balsamic", "bundle_id": balsamic_case_id, "files": []}
     for file_info in deliverable_data["files"]:
-        tags: List[str] = []
+        tags: list[str] = []
         if "html" in file_info["format"]:
             tags.append("multiqc-html")
         elif "fastq" in file_info["format"]:

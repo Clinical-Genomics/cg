@@ -4,7 +4,7 @@ import os
 import shutil
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import click
 from housekeeper.store.models import Bundle, Version
@@ -92,7 +92,7 @@ class AnalysisAPI(MetaAPI):
         """Get workflow manager for a given pipeline."""
         return WorkflowManager.Slurm.value
 
-    def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
+    def get_case_path(self, case_id: str) -> Union[list[Path], Path]:
         """Path to case working directory."""
         raise NotImplementedError
 
@@ -138,7 +138,7 @@ class AnalysisAPI(MetaAPI):
         """Storing bundle data in Housekeeper for CASE_ID"""
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         bundle_data: dict = self.get_hermes_transformed_deliverables(case_id)
-        bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
+        bundle_result: tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
             bundle_data=bundle_data
         )
         if not bundle_result:
@@ -246,18 +246,18 @@ class AnalysisAPI(MetaAPI):
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
         )
 
-    def get_analyses_to_clean(self, before: dt.datetime) -> List[Analysis]:
+    def get_analyses_to_clean(self, before: dt.datetime) -> list[Analysis]:
         analyses_to_clean = self.status_db.get_analyses_to_clean(
             pipeline=self.pipeline, before=before
         )
         return analyses_to_clean
 
-    def get_cases_to_analyze(self) -> List[Family]:
+    def get_cases_to_analyze(self) -> list[Family]:
         return self.status_db.cases_to_analyze(
             pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
 
-    def get_cases_to_store(self) -> List[Family]:
+    def get_cases_to_store(self) -> list[Family]:
         """Return cases where analysis finished successfully,
         and is ready to be stored in Housekeeper."""
         return [
@@ -266,7 +266,7 @@ class AnalysisAPI(MetaAPI):
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
         ]
 
-    def get_cases_to_qc(self) -> List[Family]:
+    def get_cases_to_qc(self) -> list[Family]:
         """Return cases where analysis finished successfully,
         and is ready for QC metrics checks."""
         return [
@@ -279,7 +279,7 @@ class AnalysisAPI(MetaAPI):
         """Return the path to the FASTQ destination directory."""
         raise NotImplementedError
 
-    def gather_file_metadata_for_sample(self, sample_obj: Sample) -> List[dict]:
+    def gather_file_metadata_for_sample(self, sample_obj: Sample) -> list[dict]:
         return [
             self.fastq_handler.parse_file_data(file_obj.full_path)
             for file_obj in self.housekeeper_api.files(
@@ -296,7 +296,7 @@ class AnalysisAPI(MetaAPI):
         """
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: "", 2: ""}
-        files: List[dict] = self.gather_file_metadata_for_sample(sample_obj=sample_obj)
+        files: list[dict] = self.gather_file_metadata_for_sample(sample_obj=sample_obj)
         sorted_files = sorted(files, key=lambda k: k["path"])
         fastq_dir = self.get_sample_fastq_destination_dir(case=case_obj, sample=sample_obj)
         fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -445,7 +445,7 @@ class AnalysisAPI(MetaAPI):
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
             self.status_db.session.commit()
 
-    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[list[Path], Path]) -> int:
         """Remove workflow run directory."""
 
         try:

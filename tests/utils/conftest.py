@@ -1,6 +1,5 @@
 """Fixtures for utils"""
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -52,7 +51,7 @@ def nested_directory_with_file(tmp_path_factory, some_file: str) -> Path:
 
 @pytest.fixture(scope="session")
 def path_with_directories_and_a_file(
-    tmp_path_factory, sub_dir_names: List[str], some_file: str
+    tmp_path_factory, sub_dir_names: list[str], some_file: str
 ) -> Path:
     """Return a path with directories and a file in it."""
     directory: Path = tmp_path_factory.mktemp("tmp_dir")
@@ -65,5 +64,5 @@ def path_with_directories_and_a_file(
 
 
 @pytest.fixture(scope="session")
-def sub_dir_names() -> List[str]:
+def sub_dir_names() -> list[str]:
     return ["sub_dir_1", "sub_dir_2", "sub_dir_3"]

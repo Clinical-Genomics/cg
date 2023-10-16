@@ -8,7 +8,7 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 from cg.apps.crunchy import files
 from cg.apps.crunchy.models import CrunchyFile, CrunchyMetadata
@@ -266,7 +266,7 @@ class CrunchyAPI:
         crunchy_metadata: CrunchyMetadata = files.get_crunchy_metadata(
             compression_obj.spring_metadata_path
         )
-        files_info: Dict[str, CrunchyFile] = files.get_spring_archive_files(crunchy_metadata)
+        files_info: dict[str, CrunchyFile] = files.get_spring_archive_files(crunchy_metadata)
         log_dir = files.get_log_dir(compression_obj.spring_path)
 
         error_function = SPRING_TO_FASTQ_ERROR.format(

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from pydantic.v1 import BaseModel
 from typing_extensions import Literal
@@ -29,7 +29,7 @@ class LimsSample(BaseModel):
     application: str = None
     application_version: str = None
     family: str = None
-    panels: List[str] = None
+    panels: list[str] = None
     comment: str = None
     project: LimsProject = LimsProject()
     received: str = None
@@ -40,7 +40,7 @@ class LimsSample(BaseModel):
 class MockLimsAPI(LimsAPI):
     """Mock LIMS API to get target bed from LIMS."""
 
-    def __init__(self, config: dict = None, samples: List[dict] = None):
+    def __init__(self, config: dict = None, samples: list[dict] = None):
         if samples is None:
             samples = []
         self.config = config

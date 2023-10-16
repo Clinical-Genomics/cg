@@ -1,7 +1,7 @@
 """Fixtures for store tests."""
 import datetime as dt
 import enum
-from typing import Generator, List
+from typing import Generator
 
 import pytest
 
@@ -52,7 +52,7 @@ class StoreConstants(enum.Enum):
     INVOICE_ID_INVOICE_WITHOUT_ATTRIBUTES: int = 2
 
     @staticmethod
-    def generate_year_interval(n_entries: int, old_timestamp: dt.datetime) -> List[int]:
+    def generate_year_interval(n_entries: int, old_timestamp: dt.datetime) -> list[int]:
         """Create a list of approximately uniformly distributed year numbers from 1 to present."""
         start: int = old_timestamp.year
         stop: int = dt.date.today().year
@@ -307,7 +307,7 @@ def store_with_an_application_with_and_without_attributes(
 @pytest.fixture(name="applications_store")
 def applications_store(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store populated with applications from excel file"""
-    app_tags: List[str] = ["PGOTTTR020", "PGOTTTR030", "PGOTTTR040"]
+    app_tags: list[str] = ["PGOTTTR020", "PGOTTTR030", "PGOTTTR040"]
     for app_tag in app_tags:
         helpers.ensure_application(store=store, tag=app_tag)
     return store
@@ -320,12 +320,12 @@ def store_with_different_application_versions(
     old_timestamp: dt.datetime,
 ) -> Store:
     """Returns a store with application versions with different applications, dates and versions."""
-    applications: List[Application] = applications_store.get_applications()
-    years: List[int] = StoreConstants.generate_year_interval(
+    applications: list[Application] = applications_store.get_applications()
+    years: list[int] = StoreConstants.generate_year_interval(
         n_entries=len(applications),
         old_timestamp=old_timestamp,
     )
-    versions: List[int] = list(range(1, len(applications) + 1))
+    versions: list[int] = list(range(1, len(applications) + 1))
 
     for application, year, version in zip(applications, years, versions):
         helpers.ensure_application_version(

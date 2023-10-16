@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import AfterValidator, BeforeValidator, Field
 from typing_extensions import Annotated
@@ -23,7 +23,7 @@ class ExcelSample(OrderSample):
     age_at_sampling: str = Field(None, alias=ExcelSampleAliases.AGE_AT_SAMPLING)
     application: str = Field(..., alias=ExcelSampleAliases.APPLICATION)
     capture_kit: str = Field(None, alias=ExcelSampleAliases.CAPTURE_KIT)
-    cohorts: List[str] = Field(None, alias=ExcelSampleAliases.COHORTS)
+    cohorts: list[str] = Field(None, alias=ExcelSampleAliases.COHORTS)
     collection_date: Annotated[str, AfterValidator(convert_to_date)] = Field(
         None, alias=ExcelSampleAliases.COLLECTION_DATE
     )
@@ -65,7 +65,7 @@ class ExcelSample(OrderSample):
     organism_other: str = Field(None, alias=ExcelSampleAliases.ORGANISM_OTHER)
     original_lab: str = Field(None, alias=ExcelSampleAliases.ORIGINAL_LAB)
     original_lab_address: str = Field(None, alias=ExcelSampleAliases.ORIGINAL_LAB_ADDRESS)
-    panels: Annotated[Optional[List[str]], BeforeValidator(parse_panels)] = Field(
+    panels: Annotated[Optional[list[str]], BeforeValidator(parse_panels)] = Field(
         None, alias=ExcelSampleAliases.PANELS
     )
     pool: str = Field(None, alias=ExcelSampleAliases.POOL)

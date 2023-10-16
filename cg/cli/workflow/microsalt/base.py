@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any, List
 
 import click
-from housekeeper.store.models import File
 
 from cg.cli.workflow.commands import resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -90,13 +89,13 @@ def config_case(
     case_id, sample_id = analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
     )
-    sample_objs: List[Sample] = analysis_api.get_samples(case_id=case_id, sample_id=sample_id)
+    sample_objs: list[Sample] = analysis_api.get_samples(case_id=case_id, sample_id=sample_id)
 
     if not sample_objs:
         LOG.error("No sample found for that ticket/sample_id")
         raise click.Abort
 
-    parameters: List[dict] = [analysis_api.get_parameters(sample_obj) for sample_obj in sample_objs]
+    parameters: list[dict] = [analysis_api.get_parameters(sample_obj) for sample_obj in sample_objs]
     filename: str = sample_id or case_id
     config_case_path: Path = analysis_api.get_config_path(filename=filename)
     if dry_run:

@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from sqlalchemy.orm import Query
 
@@ -612,7 +612,7 @@ def test_filter_samples_by_identifier_name_and_value_unique_sample(
     sample: Sample = sample_query.first()
 
     # WHEN filtering the sample query with every existing attribute of the sample
-    identifiers: Dict[str, Any] = {
+    identifiers: dict[str, Any] = {
         "age_at_sampling": sample.age_at_sampling,
         "application_version_id": sample.application_version_id,
         "capture_kit": sample.capture_kit,

@@ -2,7 +2,7 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import paramiko
 import requests
@@ -80,7 +80,7 @@ class NiptUploadAPI:
         """Get the result file for a NIPT analysis from Housekeeper"""
 
         if not tags:
-            tags: List[str] = self.RESULT_FILE_TAGS
+            tags: list[str] = self.RESULT_FILE_TAGS
 
         hk_all_results_file: File = self.housekeeper_api.get_file_from_latest_version(
             bundle_name=case_id, tags=tags
@@ -103,7 +103,7 @@ class NiptUploadAPI:
 
         return results_file
 
-    def get_all_upload_analyses(self) -> List[Analysis]:
+    def get_all_upload_analyses(self) -> list[Analysis]:
         """Gets all nipt analyses that are ready to be uploaded"""
         return self.status_db.get_latest_analysis_to_upload_for_pipeline(pipeline=Pipeline.FLUFFY)
 

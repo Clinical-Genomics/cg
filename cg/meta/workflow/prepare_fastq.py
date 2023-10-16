@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, List
 
 from housekeeper.store.models import File, Version
 
@@ -25,7 +24,7 @@ class PrepareFastqAPI:
         self.compress_api: CompressAPI = compress_api
         self.crunchy_api: CrunchyAPI = compress_api.crunchy_api
 
-    def get_compression_objects(self, case_id: str) -> List[CompressionData]:
+    def get_compression_objects(self, case_id: str) -> list[CompressionData]:
         """Return a list of compression objects"""
         case: Family = self.store.get_case_by_internal_id(internal_id=case_id)
         compression_objects = []
@@ -70,7 +69,7 @@ class PrepareFastqAPI:
 
     def can_at_least_one_sample_be_decompressed(self, case_id: str) -> bool:
         """Returns True if at least one sample can be decompressed, otherwise False"""
-        compression_objects: List[CompressionData] = self.get_compression_objects(case_id=case_id)
+        compression_objects: list[CompressionData] = self.get_compression_objects(case_id=case_id)
         return any(
             self.crunchy_api.is_spring_decompression_possible(compression_object)
             for compression_object in compression_objects
@@ -88,10 +87,10 @@ class PrepareFastqAPI:
             version: Version = self.compress_api.hk_api.get_latest_bundle_version(
                 bundle_name=sample_id
             )
-            fastq_files: Dict[Path, File] = files.get_hk_files_dict(
+            fastq_files: dict[Path, File] = files.get_hk_files_dict(
                 tags=["fastq"], version_obj=version
             )
-            compression_objs: List[CompressionData] = files.get_spring_paths(version)
+            compression_objs: list[CompressionData] = files.get_spring_paths(version_obj)
             for compression_obj in compression_objs:
                 result = True
                 if compression_obj.fastq_first not in fastq_files:
