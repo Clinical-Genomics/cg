@@ -65,7 +65,8 @@ def base(
 @base.command()
 @click.option("--reset", is_flag=True, help="reset database before setting up tables")
 @click.option("--force", is_flag=True, help="bypass manual confirmations")
-def init(reset: bool, force: bool):
+@click.pass_obj
+def init(context: CGConfig, reset: bool, force: bool):
     """Setup the database."""
     existing_tables: List[str] = get_tables()
     if force or reset:
