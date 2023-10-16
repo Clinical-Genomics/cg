@@ -115,7 +115,10 @@ class Application(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     versions = orm.relationship(
-        "ApplicationVersion", order_by="ApplicationVersion.version", backref="application"
+        "ApplicationVersion",
+        order_by="ApplicationVersion.version",
+        backref="application",
+        cascade_backrefs=False,
     )
     pipeline_limitations = orm.relationship("ApplicationLimitations", backref="application")
 

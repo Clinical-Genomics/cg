@@ -27,9 +27,10 @@ def test_add_application_version(
     )
 
     # WHEN adding a new application version
-    store_with_an_application_with_and_without_attributes.add_application_version(
+    version = store_with_an_application_with_and_without_attributes.add_application_version(
         application=applications[0], version=version, valid_from=timestamp, prices=prices
     )
+    store_with_an_application_with_and_without_attributes.session.add(version)
 
     # THEN the store has one application version
     assert (
