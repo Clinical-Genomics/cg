@@ -4,7 +4,6 @@
 
 
 class CgError(Exception):
-
     """
     Base exception for the package.
     """
@@ -22,6 +21,12 @@ class AnalysisUploadError(CgError):
 class AnalysisAlreadyUploadedError(CgError):
     """
     Error related to trying to upload an already (or in the process) uploaded analysis.
+    """
+
+
+class AnalysisNotReadyError(CgError):
+    """
+    Exception raised when some FASTQ file are missing when starting an analysis.
     """
 
 

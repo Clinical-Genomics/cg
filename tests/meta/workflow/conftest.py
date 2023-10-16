@@ -7,6 +7,7 @@ import pytest
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC, Pipeline
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.compression_data import CompressionData
 from cg.store.models import Family, Sample
@@ -222,3 +223,14 @@ def rnafusion_metrics() -> dict[str, float]:
         "reads_aligned": 72391566.0,
         "uniquely_mapped_percent": 91.02,
     }
+
+
+@pytest.fixture(name="mip_analysis_api")
+def fixture_mip_analysis_api(
+    cg_context: CGConfig, mip_hk_store, analysis_store
+) -> MipDNAAnalysisAPI:
+    """Return a MIP analysis API."""
+    analysis_api = MipDNAAnalysisAPI(cg_context)
+    analysis_api.housekeeper_api = mip_hk_store
+    analysis_api.status_db = analysis_store
+    return analysis_api

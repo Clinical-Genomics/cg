@@ -457,29 +457,26 @@ class FindBusinessDataHandler(BaseHandler):
         if flow_cell:
             return flow_cell.samples
 
-    def is_all_flow_cells_on_disk(self, case_id: str) -> bool:
-        """Check if flow cells are on disk for sample before starting the analysis.
-        Flow cells not on disk will be requested.
-        """
+    def are_all_flow_cells_on_disk(self, case_id: str) -> bool:
+        """Check if flow cells are on disk for sample before starting the analysis."""
         flow_cells: Optional[list[Flowcell]] = self.get_flow_cells_by_case(
             case=self.get_case_by_internal_id(internal_id=case_id)
         )
-
         if not flow_cells:
             LOG.info("No flow cells found")
             return False
-        statuses: list[str] = []
+        return all(flow_cell.status == FlowCellStatus.ON_DISK for flow_cell in flow_cells)
+
+    def request_flow_cells_for_case(self, case_id) -> None:
+        """Set the status of removed flow cells to REQUESTED for the given case."""
+        flow_cells: Optional[list[Flowcell]] = self.get_flow_cells_by_case(
+            case=self.get_case_by_internal_id(internal_id=case_id)
+        )
         for flow_cell in flow_cells:
-            LOG.info(f"{flow_cell.name}: checking if flow cell is on disk")
-            LOG.info(f"{flow_cell.name}: status is {flow_cell.status}")
-            statuses += [flow_cell.status] if flow_cell.status else []
-            if not flow_cell.status or flow_cell.status == FlowCellStatus.REMOVED:
-                LOG.info(f"{flow_cell.name}: flow cell not on disk, requesting")
+            if flow_cell.status == FlowCellStatus.REMOVED:
                 flow_cell.status = FlowCellStatus.REQUESTED
-            elif flow_cell.status != FlowCellStatus.ON_DISK:
-                LOG.warning(f"{flow_cell.name}: {flow_cell.status}")
+                LOG.info(f"Setting status for {flow_cell.name} to {FlowCellStatus.REQUESTED}")
         self.session.commit()
-        return all(status == FlowCellStatus.ON_DISK for status in statuses)
 
     def get_invoices_by_status(self, is_invoiced: bool = None) -> list[Invoice]:
         """Return invoices by invoiced status."""
