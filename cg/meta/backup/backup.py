@@ -13,13 +13,13 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.indexes import ListIndexes
 from cg.constants.pdc import PDCExitCodes
 from cg.constants.process import RETURN_WARNING
-from cg.constants.symbols import ASTERISK, FWD_SLASH, NEW_LINE
+from cg.constants.symbols import NEW_LINE
 from cg.exc import ChecksumFailedError, PdcNoFilesMatchingSearchError
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models import CompressionData
-from cg.models.cg_config import EncriptionDirectories
+from cg.models.cg_config import EncryptionDirectories
 from cg.store import Store
 from cg.store.models import Flowcell
 from cg.utils.time import get_elapsed_time, get_start_time
@@ -33,7 +33,7 @@ class BackupAPI:
     def __init__(
         self,
         encryption_api: EncryptionAPI,
-        encryption_directories: EncriptionDirectories,
+        encryption_directories: EncryptionDirectories,
         status: Store,
         tar_api: TarAPI,
         pdc_api: PdcAPI,
@@ -41,7 +41,7 @@ class BackupAPI:
         dry_run: bool = False,
     ):
         self.encryption_api = encryption_api
-        self.encryption_directories: EncriptionDirectories = encryption_directories
+        self.encryption_directories: EncryptionDirectories = encryption_directories
         self.status: Store = status
         self.tar_api: TarAPI = tar_api
         self.pdc: PdcAPI = pdc_api
@@ -262,8 +262,8 @@ class BackupAPI:
             self.encryption_directories.nas,
             self.encryption_directories.pre_nas,
         ]:
+            search_pattern = f"{encryption_directory}*{flow_cell_id}*{FileExtensions.GPG}"
             try:
-                search_pattern = f"{encryption_directory}*{flow_cell_id}*{FileExtensions.GPG}"
                 self.pdc.query_pdc(search_pattern)
                 dsmc_output: List[str] = self.pdc.process.stdout.split(NEW_LINE)
             except subprocess.CalledProcessError as error:

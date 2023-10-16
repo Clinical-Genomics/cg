@@ -40,14 +40,14 @@ class SlurmConfig(BaseModel):
     qos: SlurmQos = SlurmQos.LOW
 
 
-class EncriptionDirectories(BaseModel):
+class EncryptionDirectories(BaseModel):
     current: str
     nas: str
     pre_nas: str
 
 
 class BackupConfig(BaseModel):
-    encryption_directories: EncriptionDirectories
+    encryption_directories: EncryptionDirectories
     slurm_flow_cell_encryption: SlurmConfig
 
 
