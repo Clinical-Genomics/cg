@@ -1,6 +1,6 @@
 """Handler to find basic data objects"""
 import datetime as dt
-from typing import List, Optional
+from typing import Optional
 
 from sqlalchemy.orm import Query, Session
 
@@ -59,7 +59,7 @@ class FindBasicDataHandler(BaseHandler):
             tag=tag,
         ).first()
 
-    def get_applications_is_not_archived(self) -> List[Application]:
+    def get_applications_is_not_archived(self) -> list[Application]:
         """Return applications that are not archived."""
         return (
             apply_application_filter(
@@ -70,7 +70,7 @@ class FindBasicDataHandler(BaseHandler):
             .all()
         )
 
-    def get_applications(self) -> List[Application]:
+    def get_applications(self) -> list[Application]:
         """Return all applications."""
         return (
             self._get_query(table=Application)
@@ -128,7 +128,7 @@ class FindBasicDataHandler(BaseHandler):
 
     def get_active_beds(self) -> Query:
         """Get all beds which are not archived."""
-        bed_filter_functions: List[BedFilter] = [
+        bed_filter_functions: list[BedFilter] = [
             BedFilter.FILTER_NOT_ARCHIVED,
             BedFilter.ORDER_BY_NAME,
         ]
@@ -160,11 +160,11 @@ class FindBasicDataHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
-    def get_all_organisms(self) -> List[Organism]:
+    def get_all_organisms(self) -> list[Organism]:
         """Return all organisms ordered by organism internal id."""
         return self._get_query(table=Organism).order_by(Organism.internal_id)
 
-    def get_customers(self) -> List[Customer]:
+    def get_customers(self) -> list[Customer]:
         """Return costumers."""
         return self._get_query(table=Customer).all()
 
@@ -176,7 +176,7 @@ class FindBasicDataHandler(BaseHandler):
             abbreviation=abbreviation,
         ).first()
 
-    def get_panels(self) -> List[Panel]:
+    def get_panels(self) -> list[Panel]:
         """Returns all panels."""
         return self._get_query(table=Panel).order_by(Panel.abbrev).all()
 

@@ -1,7 +1,7 @@
 """Post-processing Demultiplex API."""
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import FlowCellError, MissingFilesError
@@ -120,9 +120,9 @@ class DemuxPostProcessingAPI:
             store=self.status_db,
         )
 
-    def get_all_demultiplexed_flow_cell_dirs(self) -> List[Path]:
+    def get_all_demultiplexed_flow_cell_dirs(self) -> list[Path]:
         """Return all demultiplex flow cell out directories."""
-        demultiplex_flow_cells: List[Path] = []
+        demultiplex_flow_cells: list[Path] = []
         for flow_cell_dir in self.demultiplexed_runs_dir.iterdir():
             if flow_cell_dir.is_dir():
                 LOG.debug(f"Found directory {flow_cell_dir}")

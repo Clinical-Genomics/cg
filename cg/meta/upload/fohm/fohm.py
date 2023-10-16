@@ -4,7 +4,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import pandas as pd
 import paramiko
@@ -34,9 +34,9 @@ class FOHMUploadAPI:
         self._daily_bundle_path = None
         self._daily_rawdata_path = None
         self._daily_report_path = None
-        self._cases_to_aggregate: List[str] = []
-        self._daily_reports_list: List[Path] = []
-        self._daily_pangolin_list: List[Path] = []
+        self._cases_to_aggregate: list[str] = []
+        self._daily_reports_list: list[Path] = []
+        self._daily_pangolin_list: list[Path] = []
         self._reports_dataframe = None
         self._pangolin_dataframe = None
         self._aggregation_dataframe = None
@@ -102,7 +102,7 @@ class FOHMUploadAPI:
         return self._aggregation_dataframe
 
     @property
-    def daily_reports_list(self) -> List[Path]:
+    def daily_reports_list(self) -> list[Path]:
         if not self._daily_reports_list:
             for case_id in self._cases_to_aggregate:
                 self._daily_reports_list.append(
@@ -113,7 +113,7 @@ class FOHMUploadAPI:
         return self._daily_reports_list
 
     @property
-    def daily_pangolin_list(self) -> List[Path]:
+    def daily_pangolin_list(self) -> list[Path]:
         if not self._daily_pangolin_list:
             for case_id in self._cases_to_aggregate:
                 self._daily_pangolin_list.append(
@@ -149,7 +149,7 @@ class FOHMUploadAPI:
         self.daily_report_path.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
-    def create_joined_dataframe(file_list: List[Path]) -> pd.DataFrame:
+    def create_joined_dataframe(file_list: list[Path]) -> pd.DataFrame:
         """Creates dataframe with all csv files used in daily delivery"""
         dataframe_list = [pd.read_csv(filename, index_col=None, header=0) for filename in file_list]
         return pd.concat(dataframe_list, axis=0, ignore_index=True)

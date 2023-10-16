@@ -1,7 +1,7 @@
 """Class to hold information about scout load config"""
 
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict
 from typing_extensions import Annotated, Literal
@@ -79,18 +79,18 @@ class ScoutLoadConfig(BaseModel):
     family: Annotated[str, BeforeValidator(field_not_none)] = None
     family_name: Optional[str] = None
     synopsis: Optional[str] = None
-    phenotype_terms: Optional[List[str]] = None
-    phenotype_groups: Optional[List[str]] = None
-    gene_panels: Optional[List[str]] = None
-    default_gene_panels: List[str] = []
-    cohorts: Optional[List[str]] = None
+    phenotype_terms: Optional[list[str]] = None
+    phenotype_groups: Optional[list[str]] = None
+    gene_panels: Optional[list[str]] = None
+    default_gene_panels: list[str] = []
+    cohorts: Optional[list[str]] = None
     human_genome_build: str = None
 
     rank_model_version: Optional[str] = None
     rank_score_threshold: int = None
     sv_rank_model_version: Optional[str] = None
     analysis_date: Optional[datetime] = None
-    samples: List[ScoutIndividual] = []
+    samples: list[ScoutIndividual] = []
 
     delivery_report: Optional[str] = None
     coverage_qc_report: Optional[str] = None
@@ -107,7 +107,7 @@ class BalsamicLoadConfig(ScoutLoadConfig):
     vcf_cancer_sv: Optional[str] = None
     vcf_cancer_research: Optional[str] = None
     vcf_cancer_sv_research: Optional[str] = None
-    samples: List[ScoutCancerIndividual] = []
+    samples: list[ScoutCancerIndividual] = []
 
 
 class BalsamicUmiLoadConfig(BalsamicLoadConfig):
@@ -115,13 +115,13 @@ class BalsamicUmiLoadConfig(BalsamicLoadConfig):
 
 
 class MipLoadConfig(ScoutLoadConfig):
-    chromograph_image_files: Optional[List[str]] = None
-    chromograph_prefixes: Optional[List[str]] = None
+    chromograph_image_files: Optional[list[str]] = None
+    chromograph_prefixes: Optional[list[str]] = None
     madeline: Optional[str] = None
     peddy_check: Optional[str] = None
     peddy_ped: Optional[str] = None
     peddy_sex: Optional[str] = None
-    samples: List[ScoutMipIndividual] = []
+    samples: list[ScoutMipIndividual] = []
     smn_tsv: Optional[str] = None
     variant_catalog: Optional[str] = None
     vcf_mei: Optional[str] = None
@@ -141,4 +141,4 @@ class RnafusionLoadConfig(ScoutLoadConfig):
     RNAfusion_inspector_research: Optional[str] = None
     RNAfusion_report: Optional[str] = None
     RNAfusion_report_research: Optional[str] = None
-    samples: List[ScoutCancerIndividual] = []
+    samples: list[ScoutCancerIndividual] = []

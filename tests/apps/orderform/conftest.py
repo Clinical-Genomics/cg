@@ -1,6 +1,5 @@
 """Fixtures for the orderform tests."""
 from pathlib import Path
-from typing import Dict
 
 import openpyxl
 import pytest
@@ -340,7 +339,7 @@ def json_order_list(
     mip_uploaded_json_order,
     fluffy_uploaded_json_order,
     balsamic_uploaded_json_order,
-) -> Dict[str, dict]:
+) -> dict[str, dict]:
     """Return a dict of orders that can be uploaded in the json format."""
     return {
         OrderType.MIP_DNA: mip_uploaded_json_order,

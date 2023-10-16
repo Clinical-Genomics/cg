@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 import pytest
 
@@ -159,7 +158,7 @@ def test_call_with_status_db_functions(
         },
     )
     # THEN the dispatcher should return the correct samples
-    samples: List[Sample] = dispatcher()
+    samples: list[Sample] = dispatcher()
     for sample in samples:
         assert sample.customer.internal_id == customer_internal_id
         assert sample.subject_id == test_subject
@@ -195,7 +194,7 @@ def test_dispatcher_on_other_functions(
             "started_at_before": timestamp_now,
         },
     )
-    analyses: List[Analysis] = function_dispatcher()
+    analyses: list[Analysis] = function_dispatcher()
 
     # THEN the dispatcher should return the correct analyses
     for analysis in analyses:

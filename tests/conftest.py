@@ -7,7 +7,7 @@ import shutil
 from copy import deepcopy
 from datetime import MAXYEAR, datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Tuple, Union
+from typing import Any, Generator, Union
 
 import pytest
 from housekeeper.store.models import File, Version
@@ -24,10 +24,10 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.api import LimsAPI
 from cg.constants import FileExtensions, Pipeline, SequencingFileTag
-from cg.constants.constants import CaseActions, FileFormat, Strandedness
+from cg.constants.constants import CaseActions, FileFormat, FlowCellStatus, Strandedness
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
-from cg.constants.sequencing import SequencingPlatform
+from cg.constants.sequencing import Sequencers, SequencingPlatform
 from cg.constants.subject import Gender
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
@@ -182,7 +182,7 @@ def invalid_sample_id() -> str:
 
 
 @pytest.fixture(scope="session")
-def sample_ids(sample_id: str, father_sample_id: str, mother_sample_id: str) -> List[str]:
+def sample_ids(sample_id: str, father_sample_id: str, mother_sample_id: str) -> list[str]:
     """Return a list with three samples of a family."""
     return [sample_id, father_sample_id, mother_sample_id]
 
@@ -342,13 +342,13 @@ def cg_config_object(base_config_dict: dict) -> CGConfig:
 
 
 @pytest.fixture
-def chanjo_config() -> Dict[str, Dict[str, str]]:
+def chanjo_config() -> dict[str, dict[str, str]]:
     """Return Chanjo config."""
     return {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 
 
 @pytest.fixture
-def crunchy_config() -> Dict[str, Dict[str, Any]]:
+def crunchy_config() -> dict[str, dict[str, Any]]:
     """Return Crunchy config."""
     return {
         "crunchy": {
@@ -390,7 +390,7 @@ def genotype_config() -> dict:
 
 
 @pytest.fixture
-def gens_config() -> Dict[str, Dict[str, str]]:
+def gens_config() -> dict[str, dict[str, str]]:
     """Gens config fixture."""
     return {
         "gens": {
@@ -672,7 +672,7 @@ def mother_sample_cram(mip_dna_analysis_dir: Path, mother_sample_id: str) -> Pat
 @pytest.fixture(name="sample_cram_files")
 def sample_crams(
     sample_cram: Path, father_sample_cram: Path, mother_sample_cram: Path
-) -> List[Path]:
+) -> list[Path]:
     """Return a list of cram paths for three samples."""
     return [sample_cram, father_sample_cram, mother_sample_cram]
 
@@ -750,7 +750,7 @@ def fastq_stub(project_dir: Path, run_name: str) -> Path:
 def compression_object(fastq_stub: Path, original_fastq_data: CompressionData) -> CompressionData:
     """Creates compression data object with information about files used in fastq compression."""
     working_files: CompressionData = CompressionData(fastq_stub)
-    working_file_map: Dict[str, str] = {
+    working_file_map: dict[str, str] = {
         original_fastq_data.fastq_first.as_posix(): working_files.fastq_first.as_posix(),
         original_fastq_data.fastq_second.as_posix(): working_files.fastq_second.as_posix(),
     }
@@ -764,16 +764,16 @@ def compression_object(fastq_stub: Path, original_fastq_data: CompressionData) -
 
 @pytest.fixture
 def lims_novaseq_bcl_convert_samples(
-    lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleBCLConvert]:
+    lims_novaseq_samples_raw: list[dict],
+) -> list[FlowCellSampleBCLConvert]:
     """Return a list of parsed flow cell samples demultiplexed with BCL convert."""
     return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture
 def lims_novaseq_bcl2fastq_samples(
-    lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleBcl2Fastq]:
+    lims_novaseq_samples_raw: list[dict],
+) -> list[FlowCellSampleBcl2Fastq]:
     """Return a list of parsed Bcl2fastq flow cell samples"""
     return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
 
@@ -987,7 +987,7 @@ def sample_sheet_context(
 
 
 @pytest.fixture(scope="session")
-def bcl_convert_demultiplexed_flow_cell_sample_internal_ids() -> List[str]:
+def bcl_convert_demultiplexed_flow_cell_sample_internal_ids() -> list[str]:
     """
     Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
     cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/230504_A00689_0804_BHY7FFDRX2.
@@ -996,7 +996,7 @@ def bcl_convert_demultiplexed_flow_cell_sample_internal_ids() -> List[str]:
 
 
 @pytest.fixture(scope="session")
-def bcl2fastq_demultiplexed_flow_cell_sample_internal_ids() -> List[str]:
+def bcl2fastq_demultiplexed_flow_cell_sample_internal_ids() -> list[str]:
     """
     Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
     cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/170407_A00689_0209_BHHKVCALXX.
@@ -1040,8 +1040,8 @@ def tmp_empty_demultiplexed_runs_directory(tmp_demultiplexed_runs_directory) -> 
 def store_with_demultiplexed_samples(
     store: Store,
     helpers: StoreHelpers,
-    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
-    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
+    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: list[str],
+    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: list[str],
     flow_cell_name_demultiplexed_with_bcl2fastq: str,
     flow_cell_name_demultiplexed_with_bcl_convert: str,
 ) -> Store:
@@ -1380,7 +1380,7 @@ def lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
 
 
 @pytest.fixture
-def lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[dict]:
+def lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> list[dict]:
     """Return a list of raw flow cell samples."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=lims_novaseq_samples_file
@@ -1494,7 +1494,7 @@ def hk_bundle_data(
     sample_id: str,
     father_sample_id: str,
     mother_sample_id: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Return some bundle data for Housekeeper."""
     return {
         "name": case_id,
@@ -1807,7 +1807,7 @@ def invoice_reference() -> str:
 
 
 @pytest.fixture(name="prices")
-def prices() -> Dict[str, int]:
+def prices() -> dict[str, int]:
     """Return dictionary with prices for each priority status."""
     return {"standard": 10, "priority": 20, "express": 30, "research": 5}
 
@@ -1822,14 +1822,14 @@ def base_store(
     invoice_address: str,
     invoice_reference: str,
     store: Store,
-    prices: Dict[str, int],
+    prices: dict[str, int],
 ) -> Store:
     """Setup and example store."""
     collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
     store.session.add(collaboration)
-    customers: List[Customer] = []
-    customer_map: Dict[str, str] = {
+    customers: list[Customer] = []
+    customer_map: dict[str, str] = {
         customer_id: "Production",
         "cust001": "Customer",
         "cust002": "Karolinska",
@@ -1960,9 +1960,9 @@ def base_store(
     ]
     store.session.add_all(versions)
 
-    beds: List[Bed] = [store.add_bed(name=bed_name)]
+    beds: list[Bed] = [store.add_bed(name=bed_name)]
     store.session.add_all(beds)
-    bed_versions: List[BedVersion] = [
+    bed_versions: list[BedVersion] = [
         store.add_bed_version(
             bed=bed,
             version=1,
@@ -2418,6 +2418,12 @@ def case_id_without_samples():
 
 
 @pytest.fixture(scope="session")
+def case_id_not_enough_reads():
+    """Return a case id associated to a sample without enough reads."""
+    return "tiredwalrus"
+
+
+@pytest.fixture(scope="session")
 def sample_id_in_single_case():
     """Return a sample id that should be associated with a single case."""
     return "ASM1"
@@ -2427,6 +2433,12 @@ def sample_id_in_single_case():
 def sample_id_in_multiple_cases():
     """Return a sample id that should be associated with multiple cases."""
     return "ASM2"
+
+
+@pytest.fixture(scope="session")
+def sample_id_not_enough_reads():
+    """Return a sample id without enough reads."""
+    return "ASM3"
 
 
 @pytest.fixture(name="store_with_multiple_cases_and_samples")
@@ -2450,7 +2462,7 @@ def store_with_multiple_cases_and_samples(
         base_store=store, case_id=case_id_with_multiple_samples, nr_samples=5
     )
 
-    case_samples: List[Tuple[str, str]] = [
+    case_samples: list[tuple[str, str]] = [
         (case_id_with_multiple_samples, sample_id_in_multiple_cases),
         (case_id, sample_id_in_multiple_cases),
         (case_id_with_single_sample, sample_id_in_single_case),
@@ -2481,7 +2493,7 @@ def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
         ("organism_3", "Organism 3"),
     ]
 
-    organisms: List[Organism] = []
+    organisms: list[Organism] = []
     for internal_id, name in organism_details:
         organism: Organism = helpers.add_organism(store, internal_id=internal_id, name=name)
         organisms.append(organism)
@@ -2543,7 +2555,7 @@ def store_with_users(store: Store, helpers: StoreHelpers) -> Store:
 def store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with cases and customers."""
 
-    customer_details: List[Tuple[str, str, bool]] = [
+    customer_details: list[tuple[str, str, bool]] = [
         ("cust000", "Customer 1", True),
         ("cust001", "Customer 2", False),
         ("cust002", "Customer 3", True),
@@ -2559,7 +2571,7 @@ def store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store
         )
         customers.append(customer)
 
-    case_details: List[Tuple[str, str, Pipeline, CaseActions, Customer]] = [
+    case_details: list[tuple[str, str, Pipeline, CaseActions, Customer]] = [
         ("case 1", "flyingwhale", Pipeline.BALSAMIC, CaseActions.RUNNING, customers[0]),
         ("case 2", "swimmingtiger", Pipeline.FLUFFY, CaseActions.ANALYZE, customers[0]),
         ("case 3", "sadbaboon", Pipeline.SARS_COV_2, CaseActions.HOLD, customers[1]),
@@ -2625,7 +2637,7 @@ def fastq_reverse_read_path(housekeeper_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
-def mock_fastq_files(fastq_forward_read_path: Path, fastq_reverse_read_path: Path) -> List[Path]:
+def mock_fastq_files(fastq_forward_read_path: Path, fastq_reverse_read_path: Path) -> list[Path]:
     """Return list of all mock fastq files to commit to mock housekeeper."""
     return [fastq_forward_read_path, fastq_reverse_read_path]
 
@@ -2674,7 +2686,7 @@ def rnafusion_sample_sheet_content(
 def hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
     hermes_output: dict = {"pipeline": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
     for file_info in deliverable_data["files"]:
-        tags: List[str] = []
+        tags: list[str] = []
         if "html" in file_info["format"]:
             tags.append("multiqc-html")
         hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
@@ -2748,6 +2760,16 @@ def rnafusion_parameters_default(
     )
 
 
+@pytest.fixture(scope="session")
+def total_sequenced_reads_pass() -> int:
+    return 200_000_000
+
+
+@pytest.fixture(scope="session")
+def total_sequenced_reads_not_pass() -> int:
+    return 1
+
+
 @pytest.fixture(scope="function")
 def rnafusion_context(
     cg_context: CGConfig,
@@ -2759,6 +2781,12 @@ def rnafusion_context(
     rnafusion_case_id: str,
     sample_id: str,
     no_sample_case_id: str,
+    total_sequenced_reads_pass: int,
+    apptag_rna: str,
+    case_id_not_enough_reads: str,
+    sample_id_not_enough_reads: str,
+    total_sequenced_reads_not_pass: int,
+    timestamp_yesterday: datetime,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
@@ -2781,6 +2809,8 @@ def rnafusion_context(
         status_db,
         internal_id=sample_id,
         reads_updated_at=datetime.now(),
+        reads=total_sequenced_reads_pass,
+        application_tag=apptag_rna,
     )
 
     helpers.add_relationship(
@@ -2788,6 +2818,25 @@ def rnafusion_context(
         case=case_enough_reads,
         sample=sample_rnafusion_case_enough_reads,
     )
+
+    # Create case without enough reads
+    case_not_enough_reads: Family = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Pipeline.RNAFUSION,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=sample_id_not_enough_reads,
+        reads_updated_at=datetime.now(),
+        reads=total_sequenced_reads_not_pass,
+        application_tag=apptag_rna,
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
     return cg_context
 
 
@@ -2959,12 +3008,12 @@ def taxprofiler_parameters_default(
 def nf_analysis_housekeeper(
     housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
-    mock_fastq_files: List[Path],
+    mock_fastq_files: list[Path],
     sample_id: str,
 ):
     """Create populated Housekeeper sample bundle mock."""
 
-    bundle_data: Dict[str, Any] = {
+    bundle_data: dict[str, Any] = {
         "name": sample_id,
         "created": timestamp_now,
         "version": "1.0",
@@ -2992,6 +3041,7 @@ def taxprofiler_context(
     trailblazer_api: MockTB,
     nf_analysis_housekeeper: HousekeeperAPI,
     no_sample_case_id: str,
+    total_sequenced_reads_pass: int,
 ) -> CGConfig:
     """Context to use in cli."""
     cg_context.housekeeper_api_: HousekeeperAPI = nf_analysis_housekeeper
@@ -3011,6 +3061,7 @@ def taxprofiler_context(
         internal_id=sample_id,
         reads_updated_at=datetime.now(),
         name=sample_name,
+        reads=total_sequenced_reads_pass,
     )
 
     helpers.add_relationship(
@@ -3069,7 +3120,7 @@ def store_with_sequencing_metrics(
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
-    sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
+    sample_sequencing_metrics_details: list[Union[str, str, int, int, float, int]] = [
         (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
         (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 2, 2_000_000, 85.5, 30),

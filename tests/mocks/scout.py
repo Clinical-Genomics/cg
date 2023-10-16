@@ -1,8 +1,6 @@
 """Mock the scout api"""
 
 import logging
-from pathlib import Path
-from typing import List
 
 from pydantic.v1 import BaseModel, validator
 from typing_extensions import Literal
@@ -81,7 +79,7 @@ class MockScoutAPI(ScoutAPI):
         """Load analysis of a new case into Scout."""
         LOG.debug("Case loaded successfully to Scout")
 
-    def export_panels(self, panels: List[str], versions=None):
+    def export_panels(self, panels: list[str], versions=None):
         """Pass through to export of a list of gene panels."""
         return self._panels
 

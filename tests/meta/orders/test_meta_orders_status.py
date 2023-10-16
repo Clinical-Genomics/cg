@@ -1,6 +1,5 @@
 import datetime as dt
 from copy import deepcopy
-from typing import List
 
 import pytest
 
@@ -739,7 +738,7 @@ def test_store_existing_case(
     )
 
     base_store.session.close()
-    new_cases: List[Family] = base_store.get_cases()
+    new_cases: list[Family] = base_store.get_cases()
 
     # Save internal id
     stored_cases_internal_ids = dict([(case.name, case.internal_id) for case in new_cases])
@@ -755,7 +754,7 @@ def test_store_existing_case(
     )
 
     base_store.session.close()
-    rerun_cases: List[Family] = base_store.get_cases()
+    rerun_cases: list[Family] = base_store.get_cases()
 
     # THEN the sample ticket should be appended to previos ticket and action set to analyze
     assert rerun_cases[0].tickets == f"{ticket_id},{ticket_id}"

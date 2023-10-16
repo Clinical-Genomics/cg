@@ -1,5 +1,5 @@
 import logging
-from typing import Iterable, List, Optional
+from typing import Iterable, Optional
 
 from housekeeper.store.models import File, Version
 
@@ -80,7 +80,7 @@ class MipDNAReportAPI(ReportAPI):
         return analysis_metadata.genome_build
 
     def get_report_accreditation(
-        self, samples: List[SampleModel], analysis_metadata: MipAnalysis = None
+        self, samples: list[SampleModel], analysis_metadata: MipAnalysis = None
     ) -> bool:
         """Checks if the report is accredited or not by evaluating each of the sample process accreditations."""
         for sample in samples:

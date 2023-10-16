@@ -1,7 +1,7 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from housekeeper.store.models import Version
 
@@ -88,21 +88,21 @@ class ExternalDataAPI(MetaAPI):
             )
         )
 
-    def get_all_fastq(self, sample_folder: Path) -> List[Path]:
+    def get_all_fastq(self, sample_folder: Path) -> list[Path]:
         """Returns a list of all fastq.gz files in given folder"""
-        all_fastqs: List[Path] = []
+        all_fastqs: list[Path] = []
         for leaf in sample_folder.glob("*fastq.gz"):
             abs_path: Path = sample_folder.joinpath(leaf)
             LOG.info("Found file %s inside folder %s" % (str(abs_path), sample_folder))
             all_fastqs.append(abs_path)
         return all_fastqs
 
-    def get_all_paths(self, customer: str, lims_sample_id: str) -> List[Path]:
+    def get_all_paths(self, customer: str, lims_sample_id: str) -> list[Path]:
         """Returns the paths of all fastq files associated to the sample"""
         fastq_folder: Path = self.get_destination_path(
             lims_sample_id=lims_sample_id, customer=customer
         )
-        all_fastq_in_folder: List[Path] = self.get_all_fastq(sample_folder=fastq_folder)
+        all_fastq_in_folder: list[Path] = self.get_all_fastq(sample_folder=fastq_folder)
         return all_fastq_in_folder
 
     def check_fastq_md5sum(self, fastq_path) -> Optional[Path]:
@@ -112,10 +112,10 @@ class ExternalDataAPI(MetaAPI):
             if not check_md5sum(file_path=fastq_path, md5sum=given_md5sum):
                 return fastq_path
 
-    def get_available_samples(self, folder: Path, ticket: str) -> List[Sample]:
+    def get_available_samples(self, folder: Path, ticket: str) -> list[Sample]:
         """Returns the samples from given ticket that are present in the provided folder"""
-        available_folders: List[str] = [sample_path.parts[-1] for sample_path in folder.iterdir()]
-        available_samples: List[Sample] = [
+        available_folders: list[str] = [sample_path.parts[-1] for sample_path in folder.iterdir()]
+        available_samples: list[Sample] = [
             sample
             for sample in self.status_db.get_samples_from_ticket(ticket=ticket)
             if sample.internal_id in available_folders or sample.name in available_folders
@@ -123,15 +123,15 @@ class ExternalDataAPI(MetaAPI):
         return available_samples
 
     def add_files_to_bundles(
-        self, fastq_paths: List[Path], last_version: Version, lims_sample_id: str
+        self, fastq_paths: list[Path], last_version: Version, lims_sample_id: str
     ):
         """Adds the given fastq files to the the hk-bundle"""
         for path in fastq_paths:
             LOG.info("Adding path %s to bundle %s in housekeeper" % (path, lims_sample_id))
             self.housekeeper_api.add_file(path=path, version_obj=last_version, tags=HK_FASTQ_TAGS)
 
-    def get_failed_fastq_paths(self, fastq_paths_to_add: List[Path]) -> List[Path]:
-        failed_sum_paths: List[Path] = []
+    def get_failed_fastq_paths(self, fastq_paths_to_add: list[Path]) -> list[Path]:
+        failed_sum_paths: list[Path] = []
         for path in fastq_paths_to_add:
             failed_path: Optional[Path] = self.check_fastq_md5sum(path)
             if failed_path:
@@ -140,9 +140,9 @@ class ExternalDataAPI(MetaAPI):
 
     def get_fastq_paths_to_add(
         self, customer: str, hk_version: Version, lims_sample_id: str
-    ) -> List[Path]:
-        paths: List[Path] = self.get_all_paths(lims_sample_id=lims_sample_id, customer=customer)
-        fastq_paths_to_add: List[Path] = self.housekeeper_api.check_bundle_files(
+    ) -> list[Path]:
+        paths: list[Path] = self.get_all_paths(lims_sample_id=lims_sample_id, customer=customer)
+        fastq_paths_to_add: list[Path] = self.housekeeper_api.check_bundle_files(
             file_paths=paths,
             bundle_name=lims_sample_id,
             last_version=hk_version,
@@ -173,15 +173,15 @@ class ExternalDataAPI(MetaAPI):
     ) -> None:
         """Creates sample bundles in housekeeper and adds the available files corresponding to the ticket to the
         bundle"""
-        failed_paths: List[Path] = []
+        failed_paths: list[Path] = []
         cust: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
         destination_folder_path: Path = self.get_destination_path(customer=cust)
         for sample_folder in destination_folder_path.iterdir():
             self.curate_sample_folder(cust_name=cust, sample_folder=sample_folder, force=force)
-        available_samples: List[Sample] = self.get_available_samples(
+        available_samples: list[Sample] = self.get_available_samples(
             folder=destination_folder_path, ticket=ticket
         )
-        cases_to_start: List[dict] = []
+        cases_to_start: list[dict] = []
         for sample in available_samples:
             cases_to_start.extend(
                 self.status_db.get_not_analysed_cases_by_sample_internal_id(
@@ -191,7 +191,7 @@ class ExternalDataAPI(MetaAPI):
             last_version: Version = self.housekeeper_api.get_create_version(
                 bundle_name=sample.internal_id
             )
-            fastq_paths_to_add: List[Path] = self.get_fastq_paths_to_add(
+            fastq_paths_to_add: list[Path] = self.get_fastq_paths_to_add(
                 customer=cust, hk_version=last_version, lims_sample_id=sample.internal_id
             )
             self.add_files_to_bundles(

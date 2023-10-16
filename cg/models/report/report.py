@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from pydantic.v1 import BaseModel, root_validator, validator
 
@@ -89,8 +89,8 @@ class DataAnalysisModel(BaseModel):
     pipeline_version: Optional[str]
     type: Optional[str]
     genome_build: Optional[str]
-    variant_callers: Union[None, List[str], str]
-    panels: Union[None, List[str], str]
+    variant_callers: Union[None, list[str], str]
+    panels: Union[None, list[str], str]
     scout_files: ScoutReportFiles
 
     _values = root_validator(pre=True, allow_reuse=True)(validate_supported_pipeline)
@@ -123,9 +123,9 @@ class CaseModel(BaseModel):
 
     name: Optional[str]
     id: Optional[str]
-    samples: List[SampleModel]
+    samples: list[SampleModel]
     data_analysis: DataAnalysisModel
-    applications: List[ApplicationModel]
+    applications: list[ApplicationModel]
 
     _name = validator("name", always=True, allow_reuse=True)(validate_empty_field)
 

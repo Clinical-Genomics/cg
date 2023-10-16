@@ -3,7 +3,6 @@
 import copy
 import logging
 from subprocess import CalledProcessError
-from typing import List
 
 from cg.constants import RETURN_SUCCESS
 from cg.utils.commands import Process
@@ -33,7 +32,7 @@ class ProcessMock(Process):
         )
         self.config_parameter = config_parameter
         LOG.debug("Initialising Process with binary: %s", self.binary)
-        self.base_call: List = []
+        self.base_call = []
         if self.binary:
             self.base_call.append(self.binary)
             if self.environment:

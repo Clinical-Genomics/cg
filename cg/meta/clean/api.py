@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Iterator, List, Optional
+from typing import Iterator, Optional
 
 from housekeeper.store.models import File, Version
 
@@ -19,7 +19,7 @@ class CleanAPI:
         self.status_db = status_db
         self.housekeeper_api = housekeeper_api
 
-    def get_bundle_files(self, before: datetime, pipeline: Pipeline) -> Iterator[List[File]]:
+    def get_bundle_files(self, before: datetime, pipeline: Pipeline) -> Iterator[list[File]]:
         """Get any bundle files for a specific version"""
 
         analysis: Analysis
@@ -55,11 +55,11 @@ class CleanAPI:
             ).all()
 
     @staticmethod
-    def has_protected_tags(file: File, protected_tags_lists: List[List[str]]) -> bool:
+    def has_protected_tags(file: File, protected_tags_lists: list[list[str]]) -> bool:
         """Check if a file has any protected tags"""
 
         LOG.info(f"File {file.full_path} has the tags {file.tags}")
-        file_tags: List[str] = HousekeeperAPI.get_tag_names_from_file(file)
+        file_tags: list[str] = HousekeeperAPI.get_tag_names_from_file(file)
 
         _has_protected_tags: bool = False
         for protected_tags in protected_tags_lists:
@@ -86,7 +86,7 @@ class CleanAPI:
                 LOG.debug("No protected tags defined for %s, skipping", pipeline)
                 continue
 
-            hk_files: List[File]
+            hk_files: list[File]
             for hk_files in self.get_bundle_files(
                 before=before,
                 pipeline=pipeline,

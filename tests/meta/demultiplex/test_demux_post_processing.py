@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Dict, List
 
 import pytest
 from housekeeper.store.models import File
@@ -40,7 +39,7 @@ def test_set_dry_run(
 def test_post_processing_of_flow_cell(
     demux_type: str,
     demultiplex_context: CGConfig,
-    flow_cell_info_map: Dict[str, FlowCellInfo],
+    flow_cell_info_map: dict[str, FlowCellInfo],
     tmp_demultiplexed_runs_directory: Path,
 ):
     """Test adding a demultiplexed flow cell to the databases with. Runs on each type of
@@ -49,7 +48,7 @@ def test_post_processing_of_flow_cell(
     # GIVEN a demultiplexed flow cell
     flow_cell_demultiplexing_directory: str = flow_cell_info_map.get(demux_type).directory
     flow_cell_name: str = flow_cell_info_map.get(demux_type).name
-    sample_internal_ids: List[str] = flow_cell_info_map.get(demux_type).sample_internal_ids
+    sample_internal_ids: list[str] = flow_cell_info_map.get(demux_type).sample_internal_ids
 
     # GIVEN the sample_internal_ids are present in statusdb
     for sample_internal_id in sample_internal_ids:
@@ -134,7 +133,7 @@ def test_get_all_demultiplexed_flow_cell_out_dirs(
     demux_api.demultiplexed_runs_dir = tmp_demultiplexed_runs_directory
 
     # WHEN calling get_all_demultiplexed_flow_cell_dirs
-    demultiplexed_flow_cell_dirs: List[Path] = demux_api.get_all_demultiplexed_flow_cell_dirs()
+    demultiplexed_flow_cell_dirs: list[Path] = demux_api.get_all_demultiplexed_flow_cell_dirs()
 
     # THEN the demultiplexed flow cells run directories should be returned
     assert tmp_demultiplexed_runs_bcl2fastq_directory in demultiplexed_flow_cell_dirs
@@ -152,7 +151,7 @@ def test_post_processing_tracks_undetermined_fastqs_for_bcl2fastq(
     demux_post_processing_api.finish_flow_cell(bcl2fastq_flow_cell_dir_name)
 
     # THEN the undetermined fastqs were stored in housekeeper
-    fastq_files: List[File] = demux_post_processing_api.hk_api.get_files(
+    fastq_files: list[File] = demux_post_processing_api.hk_api.get_files(
         tags=[SequencingFileTag.FASTQ],
         bundle=bcl2fastq_sample_id_with_non_pooled_undetermined_reads,
     ).all()
@@ -179,7 +178,7 @@ def test_post_processing_tracks_undetermined_fastqs_for_bclconvert(
     demux_post_processing_api.finish_flow_cell(bclconvert_flow_cell_dir_name)
 
     # THEN the undetermined fastqs were stored in housekeeper
-    fastq_files: List[File] = demux_post_processing_api.hk_api.get_files(
+    fastq_files: list[File] = demux_post_processing_api.hk_api.get_files(
         tags=[SequencingFileTag.FASTQ],
         bundle=bcl_convert_sample_id_with_non_pooled_undetermined_reads,
     ).all()

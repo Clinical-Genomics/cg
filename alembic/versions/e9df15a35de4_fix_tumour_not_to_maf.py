@@ -6,11 +6,10 @@ Create Date: 2021-03-24 07:50:31.774381
 
 """
 from datetime import datetime
-from typing import List
 
 import sqlalchemy as sa
 from sqlalchemy import orm
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 from alembic import op
 from cg.constants import PREP_CATEGORIES, DataDelivery, Pipeline
@@ -45,7 +44,7 @@ class Family(Base):
     ordered_at = sa.Column(sa.types.DateTime, default=datetime.now)
 
     @property
-    def panels(self) -> List[str]:
+    def panels(self) -> list[str]:
         """Return a list of panels."""
         return self._panels.split(",") if self._panels else []
 
