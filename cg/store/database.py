@@ -8,16 +8,16 @@ from sqlalchemy.orm import Session, scoped_session, sessionmaker
 from cg.exc import CgError
 from cg.store.models import Model
 
-SESSION: Optional[scoped_session] = None
+SESSION_REGISTRY: Optional[scoped_session] = None
 ENGINE: Optional[Engine] = None
 
 
 def initialize_database(db_uri: str) -> None:
     """Initialize the SQLAlchemy engine and session for status db."""
-    global SESSION, ENGINE
+    global SESSION_REGISTRY, ENGINE
     ENGINE = create_engine(db_uri, pool_pre_ping=True)
     session_factory = sessionmaker(ENGINE)
-    SESSION = scoped_session(session_factory)
+    SESSION_REGISTRY = scoped_session(session_factory)
 
 
 def get_session() -> Session:
@@ -25,14 +25,14 @@ def get_session() -> Session:
     Get a SQLAlchemy session with a connection to status db.
     The session is retrieved from the scoped session registry and is thread local.
     """
-    if not SESSION:
+    if not SESSION_REGISTRY:
         raise CgError("Database not initialised")
-    return SESSION()
+    return SESSION_REGISTRY()
 
 
 def get_scoped_session_registry() -> Optional[scoped_session]:
     """Get the scoped session registry for status db."""
-    return SESSION
+    return SESSION_REGISTRY
 
 
 def get_engine() -> Engine:
