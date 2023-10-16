@@ -457,10 +457,9 @@ class FindBusinessDataHandler(BaseHandler):
         if flow_cell:
             return flow_cell.samples
 
-
     def are_all_flow_cells_on_disk(self, case_id: str) -> bool:
         """Check if flow cells are on disk for sample before starting the analysis."""
-        flow_cells: Optional[List[Flowcell]] = self.get_flow_cells_by_case(
+        flow_cells: Optional[list[Flowcell]] = self.get_flow_cells_by_case(
             case=self.get_case_by_internal_id(internal_id=case_id)
         )
         if not flow_cells:
@@ -470,7 +469,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def request_flow_cells_for_case(self, case_id) -> None:
         """Set the status of removed flow cells to REQUESTED for the given case."""
-        flow_cells: Optional[List[Flowcell]] = self.get_flow_cells_by_case(
+        flow_cells: Optional[list[Flowcell]] = self.get_flow_cells_by_case(
             case=self.get_case_by_internal_id(internal_id=case_id)
         )
         for flow_cell in flow_cells:
