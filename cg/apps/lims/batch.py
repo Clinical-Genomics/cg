@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Any, Dict, List
+from typing import Any
 
 from genologics.entities import Artifact, Container, Containertype, Project
 from lxml.objectify import ElementMaker, ObjectifiedElement
@@ -36,7 +36,7 @@ def build_container(name: str, con_type: Containertype) -> ObjectifiedElement:
     return CON_CONTAINER(XML.name(name), XML.type(uri=con_type.uri))
 
 
-def build_container_batch(containers: List[ObjectifiedElement]) -> ObjectifiedElement:
+def build_container_batch(containers: list[ObjectifiedElement]) -> ObjectifiedElement:
     """Build batch with containers."""
     root = CON_DETAILS()
     for container in containers:
@@ -45,7 +45,7 @@ def build_container_batch(containers: List[ObjectifiedElement]) -> ObjectifiedEl
 
 
 def build_sample(
-    name: str, project: Project, container: Container, location: str, udfs: Dict[str, Any]
+    name: str, project: Project, container: Container, location: str, udfs: dict[str, Any]
 ) -> ObjectifiedElement:
     """Build sample in XML."""
     xml_sample = SMP_SAMPLECREATION(
@@ -58,7 +58,7 @@ def build_sample(
     return xml_sample
 
 
-def build_sample_batch(samples: List[ObjectifiedElement]) -> ObjectifiedElement:
+def build_sample_batch(samples: list[ObjectifiedElement]) -> ObjectifiedElement:
     """Build batch with samples."""
     root = SMP_DETAILS()
     for sample in samples:
@@ -73,7 +73,7 @@ def build_artifact(artifact: Artifact, reagent_label: str):
     )
 
 
-def build_artifact_batch(artifacts: List[ObjectifiedElement]) -> ObjectifiedElement:
+def build_artifact_batch(artifacts: list[ObjectifiedElement]) -> ObjectifiedElement:
     """Build bathch with artifacts."""
     root = ART_DETAILS()
     for artifact in artifacts:

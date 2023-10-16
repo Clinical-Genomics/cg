@@ -1,6 +1,6 @@
 """Tests for meta compress functionality that updates housekeeper."""
 from pathlib import Path
-from typing import Generator, List
+from typing import Generator
 
 from housekeeper.store.models import File, Version
 
@@ -153,7 +153,7 @@ def test_get_fastq_tag_names(compress_api: MockCompressAPI, helpers, hk_sample_b
     ]
 
     # WHEN getting fastq tags from its path
-    fastq_tags: List[str] = compress_api.get_fastq_tag_names(sample_id)
+    fastq_tags: list[str] = compress_api.get_fastq_tag_names(sample_id)
 
     # THEN the fastq tags should contain all non-spring tags of the spring file
     for tag_name in [tag.name for tag in spring_file.tags]:

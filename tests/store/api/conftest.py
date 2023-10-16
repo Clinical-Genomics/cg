@@ -1,5 +1,4 @@
 import datetime as dt
-from typing import List
 
 import pytest
 
@@ -404,13 +403,13 @@ def store_with_active_sample_running(store: Store, helpers: StoreHelpers) -> Sto
 
 
 @pytest.fixture(name="three_customer_ids")
-def three_customer_ids() -> List[str]:
+def three_customer_ids() -> list[str]:
     """Return three customer ids."""
     yield ["".join(["cust00", str(number)]) for number in range(3)]
 
 
 @pytest.fixture(name="three_pool_names")
-def three_pool_names() -> List[str]:
+def three_pool_names() -> list[str]:
     """Return three customer ids."""
     yield ["_".join(["test_pool", str(number)]) for number in range(3)]
 

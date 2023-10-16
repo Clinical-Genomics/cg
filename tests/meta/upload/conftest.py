@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Dict
 
 import pytest
 
@@ -75,7 +74,7 @@ def upload_genotypes_api(
 
 @pytest.fixture(scope="function")
 def coverage_upload_api(
-    chanjo_config: Dict[str, Dict[str, str]], populated_housekeeper_api: HousekeeperAPI
+    chanjo_config: dict[str, dict[str, str]], populated_housekeeper_api: HousekeeperAPI
 ):
     """Return a upload coverage API."""
     return UploadCoverageApi(

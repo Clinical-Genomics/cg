@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from pydantic.v1 import BaseModel, Field, conlist, validator
 
@@ -26,15 +26,15 @@ class NextflowSampleSheetEntry(BaseModel):
 
     @validator("fastq_reverse_read_paths")
     def validate_complete_fastq_file_pairs(
-        cls, fastq_reverse: List[str], values: dict
-    ) -> List[str]:
+        cls, fastq_reverse: list[str], values: dict
+    ) -> list[str]:
         """Verify that the number of fastq forward files is the same as for the reverse."""
         if len(fastq_reverse) != len(values.get("fastq_forward_read_paths")):
             raise SampleSheetError("Fastq file length for forward and reverse do not match")
         return fastq_reverse
 
     @validator("fastq_forward_read_paths", "fastq_reverse_read_paths")
-    def fastq_files_exist(cls, fastq_paths: List[str], values: dict) -> List[str]:
+    def fastq_files_exist(cls, fastq_paths: list[str], values: dict) -> list[str]:
         """Verify that fastq files exist."""
         for fastq_path in fastq_paths:
             if not fastq_path.is_file():
@@ -65,4 +65,4 @@ class FileDeliverable(BaseModel):
 class PipelineDeliverables(BaseModel):
     """Specification for pipeline deliverables."""
 
-    files: List[FileDeliverable]
+    files: list[FileDeliverable]

@@ -1,7 +1,7 @@
 """Functions interacting with housekeeper in the DemuxPostProcessingAPI."""
 import logging
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
@@ -32,7 +32,7 @@ def store_flow_cell_data_in_housekeeper(
 
     hk_api.add_bundle_and_version_if_non_existent(flow_cell.id)
 
-    tags: List[str] = [SequencingFileTag.FASTQ, flow_cell.id]
+    tags: list[str] = [SequencingFileTag.FASTQ, flow_cell.id]
     hk_api.add_tags_if_non_existent(tags)
 
     add_sample_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api, store=store)
@@ -46,8 +46,8 @@ def store_undetermined_fastq_files(
     flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, store: Store
 ) -> None:
     """Store undetermined fastq files for non-pooled samples in Housekeeper."""
-    non_pooled_lanes_and_samples: List[
-        Tuple[int, str]
+    non_pooled_lanes_and_samples: list[
+        tuple[int, str]
     ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 
     undetermined_dir_path: Path = flow_cell.path
@@ -55,7 +55,7 @@ def store_undetermined_fastq_files(
         undetermined_dir_path = Path(flow_cell.path, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
 
     for lane, sample_id in non_pooled_lanes_and_samples:
-        undetermined_fastqs: List[Path] = get_undetermined_fastqs(
+        undetermined_fastqs: list[Path] = get_undetermined_fastqs(
             lane=lane, undetermined_dir_path=undetermined_dir_path
         )
 
@@ -79,11 +79,11 @@ def add_demux_logs_to_housekeeper(
 ) -> None:
     """Add demux logs to Housekeeper."""
     log_file_name_pattern: str = r"*_demultiplex.std*"
-    demux_log_file_paths: List[Path] = get_files_matching_pattern(
+    demux_log_file_paths: list[Path] = get_files_matching_pattern(
         directory=Path(flow_cell_run_dir, flow_cell.full_name), pattern=log_file_name_pattern
     )
 
-    tag_names: List[str] = [SequencingFileTag.DEMUX_LOG, flow_cell.id]
+    tag_names: list[str] = [SequencingFileTag.DEMUX_LOG, flow_cell.id]
     for log_file_path in demux_log_file_paths:
         try:
             hk_api.add_file_to_bundle_if_non_existent(
@@ -98,10 +98,10 @@ def add_sample_fastq_files_to_housekeeper(
     flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, store: Store
 ) -> None:
     """Add sample fastq files from flow cell to Housekeeper."""
-    sample_internal_ids: List[str] = flow_cell.sample_sheet.get_sample_ids()
+    sample_internal_ids: list[str] = flow_cell.sample_sheet.get_sample_ids()
 
     for sample_internal_id in sample_internal_ids:
-        sample_fastq_paths: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
+        sample_fastq_paths: Optional[list[Path]] = get_sample_fastqs_from_flow_cell(
             flow_cell_directory=flow_cell.path, sample_internal_id=sample_internal_id
         )
 

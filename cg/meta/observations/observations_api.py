@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from housekeeper.store.models import Version
 
@@ -96,7 +96,7 @@ class ObservationsAPI:
         )
         return bool(loqusdb_case or duplicate or case.loqusdb_uploaded_samples)
 
-    def update_statusdb_loqusdb_id(self, samples: List[Family], loqusdb_id: Optional[str]) -> None:
+    def update_statusdb_loqusdb_id(self, samples: list[Family], loqusdb_id: Optional[str]) -> None:
         """Update Loqusdb ID field in StatusDB for each of the provided samples."""
         for sample in samples:
             sample.loqusdb_id = loqusdb_id

@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 from pydantic.v1 import Field
 
@@ -38,7 +37,7 @@ class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
     fasta: str
 
     @staticmethod
-    def headers() -> List[str]:
+    def headers() -> list[str]:
         """Return sample sheet headers."""
         return [
             "sample",
@@ -49,7 +48,7 @@ class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
             "fasta",
         ]
 
-    def reformat_sample_content(self) -> List[List[str]]:
+    def reformat_sample_content(self) -> list[list[str]]:
         """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
         return [
             [

@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -13,7 +12,7 @@ def test_read_txt_to_list(txt_file_path: Path):
     # GIVEN a txt file
 
     # WHEN reading the file
-    content: List[str] = read_txt(file_path=txt_file_path)
+    content: list[str] = read_txt(file_path=txt_file_path)
 
     # THEN assert a list is returned
     assert isinstance(content, list)

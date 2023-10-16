@@ -5,7 +5,7 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Optional, Set
 
 from housekeeper.store.models import Bundle, File, Version
 
@@ -183,7 +183,7 @@ class MockHousekeeperAPI:
             return None
         return self._files[-1]
 
-    def get_file_from_latest_version(self, bundle_name: str, tags: List[str]) -> Optional[File]:
+    def get_file_from_latest_version(self, bundle_name: str, tags: list[str]) -> Optional[File]:
         """Find a file in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
@@ -192,8 +192,8 @@ class MockHousekeeperAPI:
         return self.files(version=version.id, tags=tags).first()
 
     def get_files_from_latest_version(
-        self, bundle_name: str, tags: List[str]
-    ) -> Optional[List[File]]:
+        self, bundle_name: str, tags: list[str]
+    ) -> Optional[list[File]]:
         """Return files in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
@@ -265,7 +265,7 @@ class MockHousekeeperAPI:
         bundle_obj.versions.append(version_obj)
         return bundle_obj, version_obj
 
-    def _build_tags(self, tag_names: List[str]) -> dict:
+    def _build_tags(self, tag_names: list[str]) -> dict:
         """Build a list of tag objects."""
         tags = {}
         for tag_name in tag_names:
@@ -465,8 +465,8 @@ class MockHousekeeperAPI:
         return new_file
 
     def check_bundle_files(
-        self, bundle_name: str, file_paths: List[Path], last_version, tags: Optional[list] = None
-    ) -> List[Path]:
+        self, bundle_name: str, file_paths: list[Path], last_version, tags: Optional[list] = None
+    ) -> list[Path]:
         """Checks if any of the files in the provided list are already added to the provided bundle. Returns a list of files that have not been added"""
         for file in self.get_files(bundle=bundle_name, tags=tags, version=last_version.id):
             if Path(file.path) in file_paths:
@@ -505,14 +505,14 @@ class MockHousekeeperAPI:
         self.include(version_obj=bundle_version)
         self.commit()
 
-    def is_fastq_or_spring_in_all_bundles(self, bundle_names: List[str]) -> bool:
+    def is_fastq_or_spring_in_all_bundles(self, bundle_names: list[str]) -> bool:
         """Return whether or not all FASTQ/SPRING files are included for the given bundles."""
-        sequencing_files_in_hk: Dict[str, bool] = {}
+        sequencing_files_in_hk: dict[str, bool] = {}
         for bundle_name in bundle_names:
             sequencing_files_in_hk[bundle_name] = False
             for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
-                sample_file_in_hk: List[bool] = []
-                hk_files: Optional[List[File]] = self.get_files_from_latest_version(
+                sample_file_in_hk: list[bool] = []
+                hk_files: Optional[list[File]] = self.get_files_from_latest_version(
                     bundle_name=bundle_name, tags=[tag]
                 )
                 sample_file_in_hk += [True for hk_file in hk_files if hk_file.is_included]
