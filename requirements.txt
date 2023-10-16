@@ -18,6 +18,7 @@ gunicorn
 requests[security]
 sendmail-container
 werkzeug
+wtforms==3.0.0
 
 # utils
 cachetools
