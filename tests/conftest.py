@@ -24,10 +24,10 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.api import LimsAPI
 from cg.constants import FileExtensions, Pipeline, SequencingFileTag
-from cg.constants.constants import CaseActions, FileFormat, FlowCellStatus, Strandedness
+from cg.constants.constants import CaseActions, FileFormat, Strandedness
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
-from cg.constants.sequencing import Sequencers, SequencingPlatform
+from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Gender
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
@@ -46,6 +46,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
+from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Customer, Family, Organism, Sample
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
@@ -1764,10 +1765,11 @@ def wgs_application_tag() -> str:
 @pytest.fixture(name="store")
 def store() -> Store:
     """Return a CG store."""
-    _store = Store(uri="sqlite:///")
-    _store.create_all()
+    initialize_database("sqlite:///")
+    _store = Store()
+    create_all_tables()
     yield _store
-    _store.drop_all()
+    drop_all_tables()
 
 
 @pytest.fixture(name="apptag_rna")
