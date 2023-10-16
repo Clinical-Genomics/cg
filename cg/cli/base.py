@@ -2,7 +2,7 @@
 import logging
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import click
 import coloredlogs
@@ -25,7 +25,7 @@ from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.store.database import create_all_tables, drop_all_tables, get_tables
+from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -68,18 +68,19 @@ def base(
 @click.pass_obj
 def init(context: CGConfig, reset: bool, force: bool):
     """Setup the database."""
-    existing_tables: List[str] = get_tables()
+    status_db: Store = context.status_db
+    existing_tables = status_db.engine.table_names()
     if force or reset:
         if existing_tables and not force:
             message = f"Delete existing tables? [{', '.join(existing_tables)}]"
             click.confirm(click.style(message, fg="yellow"), abort=True)
-        drop_all_tables()
+        status_db.drop_all()
     elif existing_tables:
         LOG.error("Database already exists, use '--reset'")
         raise click.Abort
 
-    create_all_tables()
-    LOG.info(f"Success! New tables: {', '.join(get_tables())}")
+    status_db.create_all()
+    LOG.info("Success! New tables: %s", ", ".join(status_db.engine.table_names()))
 
 
 base.add_command(add_cmd)

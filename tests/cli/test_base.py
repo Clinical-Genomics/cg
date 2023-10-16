@@ -7,7 +7,6 @@ import cg
 from cg.cli.base import base, init
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.database import get_tables, initialize_database
 
 
 def test_cli_version(cli_runner: CliRunner):
@@ -40,8 +39,7 @@ def test_cli_init(cli_runner: CliRunner, base_context: CGConfig, caplog, tmp_pat
     database = Path(tmp_path, "test_db.sqlite3")
     database_path = Path(database)
     database_uri = f"sqlite:///{database}"
-    initialize_database(database_uri)
-    base_context.status_db_ = Store()
+    base_context.status_db_ = Store(uri=database_uri)
 
     assert database_path.exists() is False
 
@@ -51,7 +49,7 @@ def test_cli_init(cli_runner: CliRunner, base_context: CGConfig, caplog, tmp_pat
     # THEN it should setup the database with some tables
     assert result.exit_code == 0
     assert database_path.exists()
-    assert len(get_tables()) > 0
+    assert len(Store(uri=database_uri).engine.table_names()) > 0
 
     # GIVEN the database already exists
     # WHEN calling the init function
