@@ -1,5 +1,5 @@
 """Tests for the meta BackupAPI."""
-
+import fnmatch
 import logging
 import subprocess
 from pathlib import Path
@@ -15,12 +15,19 @@ from cg.exc import ChecksumFailedError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
-from tests.meta.backup.conftest import construct_dsmc_q_archive_output
+from cg.models.cg_config import EncryptionDirectories
 from tests.mocks.hk_mock import MockFile
 
 
+@pytest.mark.parametrize(
+    "flow_cell_name",
+    ["new_flow_cell", "old_flow_cell", "ancient_flow_cell"],
+)
 def test_query_pdc_for_flow_cell(
-    caplog, flow_cell_name: str, dummy_pdc_query_method, encryption_directories
+    caplog,
+    flow_cell_name: str,
+    dummy_pdc_query_method,
+    encryption_directories: EncryptionDirectories,
 ):
     """Tests query PDC for a flow cell with a mock PDC query."""
     caplog.set_level(logging.DEBUG)
@@ -39,14 +46,24 @@ def test_query_pdc_for_flow_cell(
 
     # WHEN getting the dsmc output of flow cell query
     backup_api.pdc.query_pdc = dummy_pdc_query_method
-    backup_api.pdc.process.stdout = construct_dsmc_q_archive_output(Path("new_flow_cell"))
-    backup_api.query_pdc_for_flow_cell(flow_cell_id="new_flow_cell")
+    backup_api.query_pdc_for_flow_cell(flow_cell_id=flow_cell_name)
 
     # THEN log that files were found
-    assert "Found archived files for PDC query: " in caplog.text
+    assert fnmatch.filter(
+        names=caplog.messages, pat=f"Found archived files for PDC query:*{flow_cell_name}*.gpg"
+    )
+    assert (
+        len(
+            fnmatch.filter(
+                names=caplog.messages,
+                pat=f"No archived files found for PDC query: *{flow_cell_name}*.gpg",
+            )
+        )
+        == 2
+    )
 
 
-def test_get_archived_encryption_key_path(flow_cell_name: str):
+def test_get_archived_encryption_key_path(dsmc_q_archive_output: list[str], flow_cell_name: str):
     """Tests returning an encryption key path from DSMC output."""
     # GIVEN an DSMC output and a flow cell id
 
@@ -61,11 +78,7 @@ def test_get_archived_encryption_key_path(flow_cell_name: str):
     )
 
     # WHEN getting the encryption key path
-    key_path: Path = backup_api.get_archived_encryption_key_path(
-        construct_dsmc_q_archive_output(
-            Path(f"/home/hiseq.clinical/ENCRYPT/190329_A00689_0018_A{flow_cell_name}")
-        ).splitlines()
-    )
+    key_path: Path = backup_api.get_archived_encryption_key_path(dcms_output=dsmc_q_archive_output)
 
     # THEN this method should return a path object
     assert isinstance(key_path, Path)
@@ -77,7 +90,7 @@ def test_get_archived_encryption_key_path(flow_cell_name: str):
     )
 
 
-def test_get_archived_flow_cell_path(flow_cell_name: str):
+def test_get_archived_flow_cell_path(dsmc_q_archive_output: list[str], flow_cell_name: str):
     """Tests returning a flow cell path from DSMC output."""
     # GIVEN an DSMC output and a flow cell id
 
@@ -92,11 +105,7 @@ def test_get_archived_flow_cell_path(flow_cell_name: str):
     )
 
     # WHEN getting the flow cell path
-    flow_cell_path: Path = backup_api.get_archived_flow_cell_path(
-        construct_dsmc_q_archive_output(
-            Path(f"/home/hiseq.clinical/ENCRYPT/190329_A00689_0018_A{flow_cell_name}")
-        ).splitlines()
-    )
+    flow_cell_path: Path = backup_api.get_archived_flow_cell_path(dcms_output=dsmc_q_archive_output)
 
     # THEN this method should return a path object
     assert isinstance(flow_cell_path, Path)
