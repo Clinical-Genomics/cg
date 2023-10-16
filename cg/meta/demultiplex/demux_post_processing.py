@@ -5,6 +5,7 @@ from typing import Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import FlowCellError, MissingFilesError
+from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     store_flow_cell_data_in_housekeeper,
 )
@@ -26,6 +27,7 @@ class DemuxPostProcessingAPI:
     """Post demultiplexing API class."""
 
     def __init__(self, config: CGConfig) -> None:
+        self.config: CGConfig = config
         self.flow_cells_dir: Path = Path(config.flow_cells_dir)
         self.demultiplexed_runs_dir: Path = Path(config.demultiplexed_flow_cells_dir)
         self.status_db: Store = config.status_db
@@ -82,6 +84,19 @@ class DemuxPostProcessingAPI:
         except (FlowCellError, MissingFilesError) as e:
             LOG.warning(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
             return
+
+        delete_demux_api = DeleteDemuxAPI(
+            config=self.config, dry_run=self.dry_run, flow_cell_name=flow_cell_directory_name
+        )
+        if delete_demux_api.status_db_presence:
+            delete_demux_api.delete_flow_cell(
+                demultiplexing_dir=False,
+                run_dir=False,
+                housekeeper=True,
+                init_files=False,
+                status_db=True,
+                sample_lane_sequencing_metrics=True,
+            )
 
         try:
             self.store_flow_cell_data(flow_cell)

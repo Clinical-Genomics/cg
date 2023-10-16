@@ -52,7 +52,7 @@ class DeleteDemuxAPI:
 
     @property
     def status_db_presence(self) -> bool:
-        """Update about the presence of given flow cell in status_db"""
+        """Update about the presence of given flow cell in status_db."""
         return bool(self.status_db.get_flow_cell_by_name(flow_cell_name=self.flow_cell_name))
 
     @staticmethod
