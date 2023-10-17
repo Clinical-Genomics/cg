@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import Optional
 
 import click
 
@@ -79,7 +79,7 @@ def preprocess_all(
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     gisaid_api = GisaidAPI(config=context)
     cases = list(cases)
-    upload_cases: List = []
+    upload_cases = []
     for case_id in cases:
         try:
             gisaid_api.upload(case_id=case_id)

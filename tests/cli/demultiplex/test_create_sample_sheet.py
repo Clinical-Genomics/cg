@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 from click import testing
 
@@ -20,7 +19,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_no_run_parameters: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
     caplog,
     mocker,
 ):
@@ -58,7 +57,7 @@ def test_create_bcl2fastq_sample_sheet(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_no_sample_sheet: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
     mocker,
 ):
     """Test that creating a Bcl2fastq sample sheet works."""
@@ -108,7 +107,7 @@ def test_create_dragen_sample_sheet(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_no_sample_sheet: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl_convert_samples: List[FlowCellSampleBCLConvert],
+    lims_novaseq_bcl_convert_samples: list[FlowCellSampleBCLConvert],
     mocker,
 ):
     """Test that creating a Dragen sample sheet works."""
@@ -157,7 +156,7 @@ def test_incorrect_bcl2fastq_headers_samplesheet(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_malformed_sample_sheet: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
     mocker,
     caplog,
 ):

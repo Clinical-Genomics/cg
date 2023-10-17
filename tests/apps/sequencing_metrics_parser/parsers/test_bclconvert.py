@@ -1,7 +1,6 @@
 """This module contains tests for the BCLConvert metrics parser."""
 
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -83,7 +82,7 @@ def test_get_sample_internal_ids(
     # GIVEN a parsed BCLConvert metrics
 
     # WHEN getting sample internal ids
-    sample_internal_ids: List[str] = parsed_bcl_convert_metrics.get_sample_internal_ids()
+    sample_internal_ids: list[str] = parsed_bcl_convert_metrics.get_sample_internal_ids()
 
     # THEN assert that the test sample internal id is present
     assert test_sample_internal_id in sample_internal_ids
@@ -102,7 +101,7 @@ def test_get_lanes_for_sample_internal_id(
     # GIVEN a parsed BCLConvert metrics
 
     # WHEN getting lanes for a sample internal id
-    lanes: List[int] = parsed_bcl_convert_metrics.get_lanes_for_sample(
+    lanes: list[int] = parsed_bcl_convert_metrics.get_lanes_for_sample(
         sample_internal_id=test_sample_internal_id
     )
 

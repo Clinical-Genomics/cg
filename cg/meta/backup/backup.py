@@ -2,7 +2,7 @@
 import logging
 import subprocess
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional
 
 from housekeeper.store.models import File
 
@@ -85,7 +85,7 @@ class BackupAPI:
             LOG.info(f"{flow_cell.name}: retrieving from PDC")
 
         try:
-            dcms_output: List[str] = self.query_pdc_for_flow_cell(flow_cell.name)
+            dcms_output: list[str] = self.query_pdc_for_flow_cell(flow_cell.name)
 
         except PdcNoFilesMatchingSearchError as error:
             LOG.error(f"PDC query failed: {error}")
@@ -180,18 +180,18 @@ class BackupAPI:
 
     def decrypt_flow_cell(
         self, archived_flow_cell: Path, archived_key: Path, run_dir: Path
-    ) -> Tuple[Path, Path, Path, Path]:
+    ) -> tuple[Path, Path, Path, Path]:
         """Decrypt the flow cell."""
         retrieved_key: Path = run_dir / archived_key.name
         encryption_key: Path = retrieved_key.with_suffix(FileExtensions.NO_EXTENSION)
-        decryption_command: List[str] = self.encryption_api.get_asymmetric_decryption_command(
+        decryption_command: list[str] = self.encryption_api.get_asymmetric_decryption_command(
             input_file=retrieved_key, output_file=encryption_key
         )
         LOG.debug(f"Decrypt key command: {decryption_command}")
         self.encryption_api.run_gpg_command(decryption_command)
         retrieved_flow_cell: Path = run_dir / archived_flow_cell.name
         decrypted_flow_cell: Path = retrieved_flow_cell.with_suffix(FileExtensions.NO_EXTENSION)
-        decryption_command: List[str] = self.encryption_api.get_symmetric_decryption_command(
+        decryption_command: list[str] = self.encryption_api.get_symmetric_decryption_command(
             input_file=retrieved_flow_cell,
             output_file=decrypted_flow_cell,
             encryption_key=encryption_key,
@@ -250,7 +250,7 @@ class BackupAPI:
         self.status.session.commit()
         LOG.info(f"Status for flow cell {flow_cell.name} set to {flow_cell.status}")
 
-    def query_pdc_for_flow_cell(self, flow_cell_id: str) -> List[str]:
+    def query_pdc_for_flow_cell(self, flow_cell_id: str) -> list[str]:
         """Query PDC for a given flow cell id.
         Raise:
             CalledProcessError if no archived files were found.
@@ -258,10 +258,10 @@ class BackupAPI:
         search_pattern: str = (
             f"{ASTERISK}{FWD_SLASH}{ASTERISK}{flow_cell_id}{ASTERISK}{FileExtensions.GPG}"
         )
-        dsmc_output: List[str] = []
+        dsmc_output: list[str] = []
         try:
             self.pdc.query_pdc(search_pattern=search_pattern)
-            dsmc_output: List[str] = self.pdc.process.stdout.split(NEW_LINE)
+            dsmc_output: list[str] = self.pdc.process.stdout.split(NEW_LINE)
         except subprocess.CalledProcessError as error:
             if error.returncode != PDCExitCodes.NO_FILES_FOUND:
                 raise error
@@ -278,7 +278,7 @@ class BackupAPI:
         )
 
     @classmethod
-    def get_archived_flow_cell_path(cls, dcms_output: List[str]) -> Optional[Path]:
+    def get_archived_flow_cell_path(cls, dcms_output: list[str]) -> Optional[Path]:
         """Get the path of the archived flow cell from a PDC query."""
         flow_cell_line: str = [
             row
@@ -294,7 +294,7 @@ class BackupAPI:
             return archived_flow_cell
 
     @classmethod
-    def get_archived_encryption_key_path(cls, dcms_output: List[str]) -> Optional[Path]:
+    def get_archived_encryption_key_path(cls, dcms_output: list[str]) -> Optional[Path]:
         """Get the encryption key for the archived flow cell from a PDC query."""
         encryption_key_line: str = [
             row

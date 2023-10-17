@@ -2,7 +2,7 @@
 import datetime
 import getpass
 import logging
-from typing import Iterable, List, Optional
+from typing import Iterable, Optional
 
 import click
 
@@ -80,7 +80,7 @@ def samples(
 ):
     """Set values on many samples at the same time."""
     store: Store = context.obj.status_db
-    sample_objs: List[Sample] = _get_samples(case_id=case_id, identifiers=identifiers, store=store)
+    sample_objs: list[Sample] = _get_samples(case_id=case_id, identifiers=identifiers, store=store)
 
     if not sample_objs:
         LOG.error("No samples to alter!")
@@ -100,16 +100,16 @@ def samples(
         )
 
 
-def _get_samples(case_id: str, identifiers: click.Tuple([str, str]), store: Store) -> List[Sample]:
+def _get_samples(case_id: str, identifiers: click.Tuple([str, str]), store: Store) -> list[Sample]:
     """Get samples that match both case_id and identifiers if given."""
     samples_by_case_id = None
     samples_by_id = None
 
     if case_id:
-        samples_by_case_id: List[Sample] = store.get_samples_by_case_id(case_id=case_id)
+        samples_by_case_id: list[Sample] = store.get_samples_by_case_id(case_id=case_id)
 
     if identifiers:
-        samples_by_id: List[Sample] = _get_samples_by_identifiers(identifiers, store)
+        samples_by_id: list[Sample] = _get_samples_by_identifiers(identifiers, store)
 
     if case_id and identifiers:
         sample_objs = set(set(samples_by_case_id) & set(samples_by_id))
@@ -119,7 +119,7 @@ def _get_samples(case_id: str, identifiers: click.Tuple([str, str]), store: Stor
     return sample_objs
 
 
-def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Store) -> List[Sample]:
+def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Store) -> list[Sample]:
     """Get samples matched by given set of identifiers."""
     identifier_args = {
         identifier_name: identifier_value for identifier_name, identifier_value in identifiers
@@ -128,7 +128,7 @@ def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Sto
     return list(store.get_samples_by_any_id(**identifier_args))
 
 
-def is_locked_attribute_on_sample(key: str, skip_attributes: List[str]) -> bool:
+def is_locked_attribute_on_sample(key: str, skip_attributes: list[str]) -> bool:
     """Returns true if the attribute is private or in the skip list."""
     return is_private_attribute(key) or key in skip_attributes
 
@@ -139,7 +139,7 @@ def is_private_attribute(key: str) -> bool:
 
 
 def list_changeable_sample_attributes(
-    sample: Optional[Sample] = None, skip_attributes: List[str] = []
+    sample: Optional[Sample] = None, skip_attributes: list[str] = []
 ) -> None:
     """List changeable attributes on sample and its current value."""
     LOG.info("Below is a set of changeable sample attributes, to combine with -kv flag:\n")

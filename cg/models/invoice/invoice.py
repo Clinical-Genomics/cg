@@ -1,5 +1,5 @@
 """Module for defining invoice models."""
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from pydantic.v1 import BaseModel
 
@@ -51,6 +51,6 @@ class InvoiceReport(BaseModel):
     agreement: Optional[str]
     invoice_id: int
     contact: dict
-    records: List
+    records: list
     pooled_samples: Optional[Any]
     record_type: RecordType

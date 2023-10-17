@@ -1,7 +1,7 @@
 """Module for Balsamic Analysis API"""
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from housekeeper.store.models import File, Version
 from pydantic.v1 import ValidationError
@@ -88,8 +88,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.root_dir, case_id)
 
-    def get_cases_to_analyze(self) -> List[Family]:
-        cases_query: List[Family] = self.status_db.cases_to_analyze(
+    def get_cases_to_analyze(self) -> list[Family]:
+        cases_query: list[Family] = self.status_db.cases_to_analyze(
             pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
         cases_to_analyze = []
@@ -153,7 +153,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return Path(self.get_case_path(case.internal_id), FileFormat.FASTQ)
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        """Link fastq files from Housekeeper to the working directory of a case."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case.links:
             self.link_fastq_files_for_sample(case_obj=case, sample_obj=link.sample)
@@ -284,12 +283,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve a valid gender from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
-    def get_verified_samples(self, case_id: str) -> Dict[str, str]:
+    def get_verified_samples(self, case_id: str) -> dict[str, str]:
         """Return a verified tumor and normal sample dictionary."""
-        tumor_samples: List[Sample] = self.status_db.get_samples_by_type(
+        tumor_samples: list[Sample] = self.status_db.get_samples_by_type(
             case_id=case_id, sample_type=SampleType.TUMOR
         )
-        normal_samples: List[Sample] = self.status_db.get_samples_by_type(
+        normal_samples: list[Sample] = self.status_db.get_samples_by_type(
             case_id=case_id, sample_type=SampleType.NORMAL
         )
         if (
@@ -396,9 +395,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         return str(available_files[0]) if available_files else None
 
-    def get_parsed_observation_file_paths(self, observations: List[str]) -> dict:
+    def get_parsed_observation_file_paths(self, observations: list[str]) -> dict:
         """Returns a verified {option: path} observations dictionary."""
-        verified_observations: Dict[str, str] = {}
+        verified_observations: dict[str, str] = {}
         for wildcard in list(ObservationsFileWildcards):
             file_path: str = get_string_from_list_by_pattern(observations, wildcard)
             verified_observations.update(
@@ -426,7 +425,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
-        observations: List[str] = None,
+        observations: list[str] = None,
         gender: Optional[str] = None,
     ) -> dict:
         """Takes a dictionary with per-sample parameters,
@@ -445,7 +444,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             else None
         )
 
-        config_case: Dict[str, str] = {
+        config_case: dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.pipeline,
             "genome_version": genome_version,
@@ -530,7 +529,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
-        observations: List[str],
+        observations: list[str],
         cache_version: str,
         dry_run: bool = False,
     ) -> None:

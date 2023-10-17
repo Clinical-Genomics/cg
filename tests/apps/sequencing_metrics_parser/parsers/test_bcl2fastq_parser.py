@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Dict, List
 
 import pytest
 
@@ -15,7 +14,7 @@ def test_parse_valid_bcl2fastq_sequencing_metrics(bcl2fastq_flow_cell_path: Path
     # GIVEN a flow cell demultiplexed with bcl2fastq
 
     # WHEN parsing the flow cell
-    metrics: List[SampleLaneMetrics] = parse_metrics(bcl2fastq_flow_cell_path)
+    metrics: list[SampleLaneMetrics] = parse_metrics(bcl2fastq_flow_cell_path)
 
     # THEN a list of metrics is returned
     assert isinstance(metrics, list)
@@ -36,7 +35,7 @@ def test_parse_undetermined_metrics(bcl2fastq_flow_cell_path: Path):
     # GIVEN a flow cell demultiplexed with bcl2fastq containing undetermined reads
 
     # WHEN parsing the undetermined metrics for the flow cell
-    metrics: List[SampleLaneMetrics] = parse_undetermined_non_pooled_metrics(
+    metrics: list[SampleLaneMetrics] = parse_undetermined_non_pooled_metrics(
         flow_cell_dir=bcl2fastq_flow_cell_path, non_pooled_lane_sample_pairs=[(1, "sample_id")]
     )
 

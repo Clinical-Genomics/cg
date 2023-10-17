@@ -1,6 +1,6 @@
 """ Test adding files with Housekeeper API."""
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
@@ -10,7 +10,7 @@ def test_add_file_with_flat_tag(
     hk_tag: str,
     housekeeper_api: MockHousekeeperAPI,
     helpers: StoreHelpers,
-    hk_bundle_data: Dict[str, Any],
+    hk_bundle_data: dict[str, Any],
     fastq_file: Path,
 ):
     """Test that we can call hk with one existing tag."""
@@ -31,7 +31,7 @@ def test_add_file_with_flat_tag(
 def test_add_file_with_list_of_tags(
     housekeeper_api: MockHousekeeperAPI,
     helpers: StoreHelpers,
-    hk_bundle_data: Dict[str, Any],
+    hk_bundle_data: dict[str, Any],
     fastq_file: Path,
     not_existing_hk_tag: str,
 ):

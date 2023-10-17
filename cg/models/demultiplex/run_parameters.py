@@ -1,7 +1,7 @@
 """Module for modeling run parameters file parsing."""
 import logging
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 from xml.etree import ElementTree
 
 from cg.constants.demultiplexing import RunParametersXMLNodes
@@ -180,9 +180,9 @@ class RunParametersNovaSeqX(RunParameters):
         return Sequencers.NOVASEQX.value
 
     @property
-    def read_parser(self) -> Dict[str, int]:
+    def read_parser(self) -> dict[str, int]:
         """Return read and index cycle values parsed as a dictionary."""
-        cycle_mapping: Dict[str, int] = {}
+        cycle_mapping: dict[str, int] = {}
         planned_reads: Optional[ElementTree.Element] = self.tree.find(
             RunParametersXMLNodes.PLANNED_READS
         )

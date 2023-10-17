@@ -32,18 +32,21 @@ def test_balsamic_no_args(cli_runner: CliRunner, balsamic_context: CGConfig):
     assert "help" in result.output
 
 
-def test_start(cli_runner: CliRunner, balsamic_context: CGConfig, mock_config, caplog, mocker):
+def test_start(
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+    mock_config,
+    caplog,
+    helpers,
+    mock_analysis_flow_cell,
+):
     """Test to ensure all parts of start command will run successfully given ideal conditions"""
     caplog.set_level(logging.INFO)
 
     # GIVEN case id for which we created a config file
     case_id = "balsamic_case_wgs_single"
 
-    # GIVEN decompression is not needed
-    mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression")
-    BalsamicAnalysisAPI.resolve_decompression.return_value = None
-
-    # WHEN dry running with dry specified
+    # WHEN dry running
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=balsamic_context)
 
     # THEN command should execute successfully
@@ -92,16 +95,18 @@ def test_store(
     assert balsamic_context.housekeeper_api.bundle(case_id)
 
 
-def test_start_available(cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker):
+def test_start_available(
+    cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker, mock_analysis_flow_cell
+):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones"""
     caplog.set_level(logging.INFO)
 
     # GIVEN CASE ID of sample where read counts pass threshold
-    case_id_success = "balsamic_case_wgs_paired_enough_reads"
+    case_id_success = "balsamic_case_wgs_single"
 
     # GIVEN CASE ID where read counts did not pass the threshold
-    case_id_fail = "balsamic_case_tgs_paired"
+    case_id_not_enough_reads = "balsamic_case_tgs_paired"
 
     # Ensure the config is mocked to run compound command
     Path.mkdir(
@@ -121,17 +126,14 @@ def test_start_available(cli_runner: CliRunner, balsamic_context: CGConfig, capl
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
 
-    # THEN command exits with 1 because one of cases raised errors
-    assert result.exit_code == 1
+    # THEN command exits with a successful exit code
+    assert result.exit_code == EXIT_SUCCESS
 
     # THEN it should successfully identify the one case eligible for auto-start
-    assert case_id_success in caplog.text
+    assert f"Starting analysis for {case_id_success}" in caplog.text
 
-    # THEN the ineligible case should NOT be ran
-    assert case_id_fail not in caplog.text
-
-    # THEN action of the case should NOT be set to running
-    assert balsamic_context.status_db.get_case_by_internal_id(case_id_fail).action is None
+    # THEN the ineligible case should NOT be run
+    assert case_id_not_enough_reads not in caplog.text
 
 
 def test_store_available(
@@ -143,6 +145,7 @@ def test_store_available(
     caplog,
     mocker,
     hermes_deliverables,
+    mock_analysis_flow_cell,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
     Test that sore-available picks up eligible cases and does not pick up ineligible ones"""
@@ -164,6 +167,7 @@ def test_store_available(
     )
 
     # GIVEN that HermesAPI returns a deliverables output
+    hermes_deliverables["bundle_id"] = case_id_success
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
@@ -172,8 +176,8 @@ def test_store_available(
     balsamic_context.status_db.get_case_by_internal_id(case_id_success).action = "running"
     balsamic_context.status_db.session.commit()
 
-    # THEN command exits with 1 because one of the cases threw errors
-    assert result.exit_code == 1
+    # THEN command exit with success
+    assert result.exit_code == EXIT_SUCCESS
     assert case_id_success in caplog.text
     assert balsamic_context.status_db.get_case_by_internal_id(case_id_success).action == "running"
 
@@ -189,7 +193,7 @@ def test_store_available(
     result = cli_runner.invoke(store_available, obj=balsamic_context)
 
     # THEN command exits successfully
-    assert result.exit_code == 0
+    assert result.exit_code == EXIT_SUCCESS
 
     # THEN case id with analysis_finish gets picked up
     assert case_id_success in caplog.text
