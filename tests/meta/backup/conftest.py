@@ -1,7 +1,7 @@
 import fnmatch
 import subprocess
 from pathlib import Path
-from typing import Callable, List
+from typing import Callable
 
 import pytest
 
@@ -24,7 +24,7 @@ def mock_pdc_query_method(archived_flow_cells) -> Callable:
 
 
 @pytest.fixture
-def dsmc_q_archive_output() -> List[str]:
+def dsmc_q_archive_output() -> list[str]:
     output: str = """IBM Tivoli Storage Manager
 Command Line Backup-Archive Client Interface
   Client Version 7, Release 1, Level 4.0
