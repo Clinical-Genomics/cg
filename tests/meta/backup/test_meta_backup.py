@@ -57,7 +57,7 @@ def test_query_pdc_for_flow_cell(
         len(
             fnmatch.filter(
                 names=caplog.messages,
-                pat=f"No archived files found for PDC query: *{flow_cell_name}*.gpg",
+                pat=f"No archived files found for PDC query: *{flow_cell_name}*{FileExtensions.GPG}",
             )
         )
         == 2

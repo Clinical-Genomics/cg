@@ -257,11 +257,7 @@ class BackupAPI:
             CalledProcessError if an error OTHER THAN no files found is raised.
         """
         dsmc_output: list[str] = []
-        for encryption_directory in [
-            self.encryption_directories.current,
-            self.encryption_directories.nas,
-            self.encryption_directories.pre_nas,
-        ]:
+        for _, encryption_directory in self.encryption_directories:
             search_pattern = f"{encryption_directory}*{flow_cell_id}*{FileExtensions.GPG}"
             try:
                 self.pdc.query_pdc(search_pattern)

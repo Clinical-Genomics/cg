@@ -5,12 +5,13 @@ from typing import Callable
 
 import pytest
 
+from cg.constants import FileExtensions
 from cg.constants.pdc import PDCExitCodes
 from cg.models.cg_config import EncryptionDirectories
 
 
 @pytest.fixture
-def mock_pdc_query_method(archived_flow_cells) -> Callable:
+def mock_pdc_query_method(archived_flow_cells: list[str]) -> Callable:
     """Returns a mock method mimicking the pattern search made by the dsmc q archive command."""
 
     def mock_method(search_pattern: str) -> list[str]:
@@ -49,9 +50,9 @@ Accessing as node: SLLCLINICAL
 def archived_flow_cells(encryption_directories: EncryptionDirectories) -> list[str]:
     """Returns a list of archived flow cells."""
     return [
-        f"{encryption_directories.current}/new_flow_cell.tar.gz.gpg",
-        f"{encryption_directories.nas}/old_flow_cell.tar.gz.gpg",
-        f"{encryption_directories.pre_nas}/ancient_flow_cell.tar.gz.gpg",
+        f"{encryption_directories.current}/new_flow_cell{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}",
+        f"{encryption_directories.nas}/old_flow_cell{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}",
+        f"{encryption_directories.pre_nas}/ancient_flow_cell{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}",
     ]
 
 
