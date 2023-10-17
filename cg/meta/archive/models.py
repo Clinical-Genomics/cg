@@ -6,9 +6,6 @@ from pydantic import BaseModel, ConfigDict
 
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
-from housekeeper.store.models import File
-from pydantic import BaseModel, ConfigDict
-
 
 
 class FileAndSample(BaseModel):
@@ -30,7 +27,6 @@ class FileTransferData(BaseModel):
 
     @classmethod
     @abstractmethod
-
     def create_from_file_and_sample(
         cls, file: File, sample: Sample, is_archiving: bool
     ) -> "FileTransferData":
