@@ -6,6 +6,7 @@ from typing import Callable
 import pytest
 
 from cg.constants.pdc import PDCExitCodes
+from cg.models.cg_config import EncryptionDirectories
 
 
 @pytest.fixture
@@ -42,6 +43,16 @@ Accessing as node: SLLCLINICAL
            607  B  04/07/2019 07:30:15    /home/hiseq.clinical/ENCRYPT/190329_A00689_0018_AHVKJCDRXX.key.gpg Never Archive Date: 04/07/2019
  1,244,997,334 KB  04/07/2019 04:00:05    /home/hiseq.clinical/ENCRYPT/190329_A00689_0018_AHVKJCDRXX.tar.gz.gpg Never Archive Date: 04/07/2019"""
     return output.splitlines()
+
+
+@pytest.fixture()
+def archived_flow_cells(encryption_directories: EncryptionDirectories) -> list[str]:
+    """Returns a list of archived flow cells."""
+    return [
+        f"{encryption_directories.current}/new_flow_cell.tar.gz.gpg",
+        f"{encryption_directories.nas}/old_flow_cell.tar.gz.gpg",
+        f"{encryption_directories.pre_nas}/ancient_flow_cell.tar.gz.gpg",
+    ]
 
 
 @pytest.fixture
