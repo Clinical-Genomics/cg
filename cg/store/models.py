@@ -168,7 +168,7 @@ class ApplicationVersion(Model):
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     application_id = Column(ForeignKey(Application.id), nullable=False)
 
-    application = orm.relationship("Application", back_populates="versions", cascade_backrefs=False)
+    application = orm.relationship(Application, back_populates="versions", cascade_backrefs=False)
 
     def __str__(self) -> str:
         return f"{self.application.tag} ({self.version})"
@@ -277,7 +277,7 @@ class BedVersion(Model):
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     bed_id = Column(ForeignKey(Bed.id), nullable=False)
 
-    bed = orm.relationship("Bed", back_populates="versions", cascade_backrefs=False)
+    bed = orm.relationship(Bed, back_populates="versions", cascade_backrefs=False)
 
     def __str__(self) -> str:
         return f"{self.bed.name} ({self.version})"
@@ -321,6 +321,9 @@ class Customer(Model):
     primary_contact = orm.relationship("User", foreign_keys=[primary_contact_id])
 
     panels = orm.relationship("Panel", back_populates="customer", cascade_backrefs=False)
+    users = orm.relationship(
+        "User", secondary=customer_user, back_populates="customers", cascade_backrefs=False
+    )
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -571,6 +574,7 @@ class Flowcell(Model):
         "SampleLaneSequencingMetrics",
         back_populates="flowcell",
         cascade="all, delete, delete-orphan",
+        cascade_backrefs=False,
     )
 
     def __str__(self):
@@ -706,7 +710,9 @@ class Sample(Model, PriorityMixin):
     flowcells = orm.relationship(
         Flowcell, secondary=flowcell_sample, back_populates="samples", cascade_backrefs=False
     )
-    sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
+    sequencing_metrics = orm.relationship(
+        "SampleLaneSequencingMetrics", back_populates="sample", cascade_backrefs=False
+    )
     invoice = orm.relationship("Invoice", back_populates="samples", cascade_backrefs=False)
 
     def __str__(self) -> str:
@@ -828,7 +834,7 @@ class User(Model):
     order_portal_login = Column(types.Boolean, default=False)
 
     customers = orm.relationship(
-        "Customer", secondary=customer_user, backref="users", cascade_backrefs=False
+        Customer, secondary=customer_user, back_populates="users", cascade_backrefs=False
     )
 
     def to_dict(self) -> dict:
