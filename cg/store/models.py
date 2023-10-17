@@ -387,6 +387,8 @@ class Family(Model, PriorityMixin):
     synopsis = Column(types.Text)
     tickets = Column(types.VARCHAR)
 
+    links = orm.relationship("FamilySample", back_populates="family", cascade_backrefs=False)
+
     @property
     def cohorts(self) -> list[str]:
         """Return a list of cohorts."""
@@ -515,10 +517,10 @@ class FamilySample(Model):
     mother_id = Column(ForeignKey("sample.id"))
     father_id = Column(ForeignKey("sample.id"))
 
-    family = orm.relationship("Family", backref="links", cascade_backrefs=False)
-    sample = orm.relationship("Sample", foreign_keys=[sample_id], backref="links")
-    mother = orm.relationship("Sample", foreign_keys=[mother_id], backref="mother_links")
-    father = orm.relationship("Sample", foreign_keys=[father_id], backref="father_links")
+    family = orm.relationship(Family, back_populates="links", cascade_backrefs=False)
+    sample = orm.relationship("Sample", foreign_keys=[sample_id], back_populates="links")
+    mother = orm.relationship("Sample", foreign_keys=[mother_id], back_populates="mother_links")
+    father = orm.relationship("Sample", foreign_keys=[father_id], back_populates="father_links")
 
     def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
         """Represent as dictionary"""
@@ -679,6 +681,15 @@ class Sample(Model, PriorityMixin):
     subject_id = Column(types.String(128))
 
     sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
+    links = orm.relationship(
+        FamilySample, foreign_keys=[FamilySample.sample_id], back_populates="sample"
+    )
+    mother_links = orm.relationship(
+        FamilySample, foreign_keys=[FamilySample.mother_id], back_populates="mother"
+    )
+    father_links = orm.relationship(
+        FamilySample, foreign_keys=[FamilySample.father_id], back_populates="father"
+    )
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
