@@ -243,7 +243,10 @@ class Bed(Model):
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
     versions = orm.relationship(
-        "BedVersion", order_by="BedVersion.version", backref="bed", cascade_backrefs=False
+        "BedVersion",
+        order_by="BedVersion.version",
+        back_populates="bed",
+        cascade_backrefs=False,
     )
 
     def __str__(self) -> str:
@@ -271,6 +274,8 @@ class BedVersion(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     bed_id = Column(ForeignKey(Bed.id), nullable=False)
+
+    bed = orm.relationship("Bed", back_populates="versions", cascade_backrefs=False)
 
     def __str__(self) -> str:
         return f"{self.bed.name} ({self.version})"
