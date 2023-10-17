@@ -308,6 +308,8 @@ class Customer(Model):
     primary_contact_id = Column(ForeignKey("user.id"))
     primary_contact = orm.relationship("User", foreign_keys=[primary_contact_id])
 
+    panels = orm.relationship("Panel", back_populates="customer", cascade_backrefs=False)
+
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
@@ -592,7 +594,7 @@ class Panel(Model):
     abbrev = Column(types.String(32), unique=True)
     current_version = Column(types.Float, nullable=False)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
-    customer = orm.relationship(Customer, backref="panels", cascade_backrefs=False)
+    customer = orm.relationship(Customer, back_populates="panels", cascade_backrefs=False)
     date = Column(types.DateTime, nullable=False)
     gene_count = Column(types.Integer)
     id = Column(types.Integer, primary_key=True)
