@@ -1,6 +1,5 @@
 """Test observations API methods."""
 import logging
-from typing import Dict
 
 import pytest
 from _pytest.logging import LogCaptureFixture
@@ -57,7 +56,7 @@ def test_observations_upload(
 
 def test_get_loqusdb_api(
     mip_dna_observations_api: MipDNAObservationsAPI,
-    loqusdb_config_dict: Dict[LoqusdbInstance, dict],
+    loqusdb_config_dict: dict[LoqusdbInstance, dict],
 ):
     """Test Loqusdb API retrieval given a Loqusdb instance."""
 

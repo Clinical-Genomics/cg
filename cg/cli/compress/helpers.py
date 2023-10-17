@@ -4,7 +4,7 @@ import logging
 import os
 from math import ceil
 from pathlib import Path
-from typing import Iterator, List, Optional
+from typing import Iterator, Optional
 
 from housekeeper.store.models import Bundle, Version
 
@@ -27,9 +27,9 @@ LOG = logging.getLogger(__name__)
 
 def get_cases_to_process(
     days_back: int, store: Store, case_id: Optional[str] = None
-) -> Optional[List[Family]]:
+) -> Optional[list[Family]]:
     """Return cases to process."""
-    cases: List[Family] = []
+    cases: list[Family] = []
     if case_id:
         case: Family = store.get_case_by_internal_id(internal_id=case_id)
         if not case:
@@ -38,7 +38,7 @@ def get_cases_to_process(
         cases.append(case)
     else:
         date_threshold: dt.datetime = get_date_days_ago(days_ago=days_back)
-        cases: List[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
+        cases: list[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
     return cases
 
 
@@ -108,9 +108,9 @@ def get_versions(hk_api: HousekeeperAPI, bundle_name: str = None) -> Iterator[Ve
         if not bundle:
             LOG.info(f"Could not find bundle {bundle_name}")
             return
-        bundles: List[Bundle] = [bundle]
+        bundles: list[Bundle] = [bundle]
     else:
-        bundles: List[Bundle] = hk_api.bundles()
+        bundles: list[Bundle] = hk_api.bundles()
 
     for bundle in bundles:
         LOG.debug(f"Check for versions in {bundle.name}")
@@ -136,7 +136,7 @@ def get_true_dir(dir_path: Path) -> Optional[Path]:
 
 def compress_sample_fastqs_in_cases(
     compress_api: CompressAPI,
-    cases: List[Family],
+    cases: list[Family],
     dry_run: bool,
     number_of_conversions: int,
     hours: int = None,

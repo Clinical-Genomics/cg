@@ -1,5 +1,3 @@
-from typing import List
-
 from cg.exc import OrderError
 from cg.meta.orders.microbial_submitter import MicrobialSubmitter
 from cg.models.orders.order import OrderIn
@@ -16,7 +14,7 @@ class SarsCov2Submitter(MicrobialSubmitter):
         self._validate_sample_names_are_available(samples=order.samples, customer_id=order.customer)
 
     def _validate_sample_names_are_available(
-        self, samples: List[SarsCov2Sample], customer_id: str
+        self, samples: list[SarsCov2Sample], customer_id: str
     ) -> None:
         """Validate names of all samples are not already in use."""
         customer: Customer = self.status.get_customer_by_internal_id(

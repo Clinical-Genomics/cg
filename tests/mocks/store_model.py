@@ -1,6 +1,5 @@
 """Mock models from the store. Used for processing them without using the store"""
 import datetime
-from typing import List
 
 from cg.store.models import Analysis, Customer, Family
 
@@ -17,7 +16,7 @@ class Family(Family):
 
     def __init__(self):
         self.id: int = 1
-        self.panels: List[str] = ["PEDHEP"]
+        self.panels: list[str] = ["PEDHEP"]
         self.internal_id: str = "yellowhog"
         self.name: str = "analysis_family"
         self.customer: Customer = Customer()

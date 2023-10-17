@@ -1,12 +1,11 @@
 """Tests for chanjo coverage API."""
 from pathlib import Path
-from typing import Dict
 
 from cg.apps.coverage.api import ChanjoAPI
 from cg.utils.commands import Process
 
 
-def test_chanjo_api_init(chanjo_config: Dict[str, Dict[str, str]]):
+def test_chanjo_api_init(chanjo_config: dict[str, dict[str, str]]):
     """Test __init__."""
     # GIVEN a config dict
 
@@ -21,7 +20,7 @@ def test_chanjo_api_init(chanjo_config: Dict[str, Dict[str, str]]):
 def test_chanjo_api_upload(
     bed_file: Path,
     case_id: str,
-    chanjo_config: Dict[str, Dict[str, str]],
+    chanjo_config: dict[str, dict[str, str]],
     family_name: str,
     mocker,
     sample_id: str,
@@ -61,7 +60,7 @@ def test_chanjo_api_upload(
 
 
 def test_chanjo_api_sample_existing(
-    chanjo_config: Dict[str, Dict[str, str]],
+    chanjo_config: dict[str, dict[str, str]],
     mocker,
     mock_process,
     sample_id: str,
@@ -87,7 +86,7 @@ def test_chanjo_api_sample_existing(
 
 
 def test_chanjo_api_sample_non_existing(
-    chanjo_config: Dict[str, Dict[str, str]], mocker, mock_process, sample_id: str
+    chanjo_config: dict[str, dict[str, str]], mocker, mock_process, sample_id: str
 ):
     """Test sample method."""
 
@@ -109,7 +108,7 @@ def test_chanjo_api_sample_non_existing(
     assert sample is None
 
 
-def test_chanjo_api_delete_sample(chanjo_config: Dict[str, Dict[str, str]], mocker, sample_id: str):
+def test_chanjo_api_delete_sample(chanjo_config: dict[str, dict[str, str]], mocker, sample_id: str):
     """Test delete method."""
     # GIVEN a sample_id
 
@@ -123,7 +122,7 @@ def test_chanjo_api_delete_sample(chanjo_config: Dict[str, Dict[str, str]], mock
 
 
 def test_chanjo_api_omim_coverage(
-    chanjo_config: Dict[str, Dict[str, str]],
+    chanjo_config: dict[str, dict[str, str]],
     chanjo_mean_completeness: int,
     chanjo_mean_coverage: int,
     mocker,
@@ -156,7 +155,7 @@ def test_chanjo_api_omim_coverage(
 
 
 def test_chanjo_api_coverage(
-    chanjo_config: Dict[str, Dict[str, str]],
+    chanjo_config: dict[str, dict[str, str]],
     chanjo_mean_completeness: int,
     chanjo_mean_coverage: int,
     mocker,

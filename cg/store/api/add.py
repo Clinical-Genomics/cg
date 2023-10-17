@@ -1,6 +1,6 @@
 import datetime as dt
 import logging
-from typing import List, Optional
+from typing import Optional
 
 import petname
 
@@ -175,8 +175,8 @@ class AddHandler(BaseHandler):
         data_delivery: DataDelivery,
         name: str,
         ticket: str,
-        panels: Optional[List[str]] = None,
-        cohorts: Optional[List[str]] = None,
+        panels: Optional[list[str]] = None,
+        cohorts: Optional[list[str]] = None,
         priority: Optional[Priority] = Priority.standard,
         synopsis: Optional[str] = None,
     ) -> Family:
@@ -326,9 +326,9 @@ class AddHandler(BaseHandler):
     def add_invoice(
         self,
         customer: Customer,
-        samples: List[Sample] = None,
-        microbial_samples: List[Sample] = None,
-        pools: List[Pool] = None,
+        samples: list[Sample] = None,
+        microbial_samples: list[Sample] = None,
+        pools: list[Pool] = None,
         comment: str = None,
         discount: int = 0,
         record_type: str = None,

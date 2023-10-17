@@ -2,7 +2,6 @@
 
 import datetime
 import logging
-from typing import List
 
 import click
 
@@ -61,7 +60,7 @@ def delete_case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
 
 def _delete_links_and_samples(case_obj: Family, dry_run: bool, status_db: Store, yes: bool):
     """Delete all links from a case to samples"""
-    samples_to_delete: List[Sample] = []
+    samples_to_delete: list[Sample] = []
     for case_link in case_obj.links:
         if not (yes or click.confirm(f"Do you want to DELETE link: {case_link}?")):
             raise click.Abort

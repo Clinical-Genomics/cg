@@ -1,13 +1,13 @@
 """Fixtures for the workflow tests."""
 import datetime
 from pathlib import Path
-from typing import Dict, List
 
 import pytest
 
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC, Pipeline
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.compression_data import CompressionData
 from cg.store.models import Family, Sample
@@ -126,13 +126,13 @@ def microsalt_case_qc_fail() -> str:
 
 
 @pytest.fixture(name="qc_pass_microsalt_samples")
-def qc_pass_microsalt_samples() -> List[str]:
+def qc_pass_microsalt_samples() -> list[str]:
     """Return a list of 20 microsalt samples internal_ids."""
     return [f"ACC22222A{i}" for i in range(1, 21)]
 
 
 @pytest.fixture(name="qc_fail_microsalt_samples")
-def qc_fail_microsalt_samples() -> List[str]:
+def qc_fail_microsalt_samples() -> list[str]:
     """Return a list of 20 microsalt samples internal_ids."""
     return [f"ACC11111A{i}" for i in range(1, 21)]
 
@@ -143,8 +143,8 @@ def qc_microsalt_context(
     helpers: StoreHelpers,
     microsalt_case_qc_pass: str,
     microsalt_case_qc_fail: str,
-    qc_pass_microsalt_samples: List[str],
-    qc_fail_microsalt_samples: List[str],
+    qc_pass_microsalt_samples: list[str],
+    qc_fail_microsalt_samples: list[str],
     microsalt_qc_pass_lims_project: str,
     microsalt_qc_fail_lims_project: str,
 ) -> CGConfig:
@@ -206,7 +206,7 @@ def qc_microsalt_context(
 
 
 @pytest.fixture(name="rnafusion_metrics")
-def rnafusion_metrics() -> Dict[str, float]:
+def rnafusion_metrics() -> dict[str, float]:
     """Return Rnafusion raw analysis metrics dictionary."""
     return {
         "after_filtering_gc_content": 0.516984,
@@ -223,3 +223,14 @@ def rnafusion_metrics() -> Dict[str, float]:
         "reads_aligned": 72391566.0,
         "uniquely_mapped_percent": 91.02,
     }
+
+
+@pytest.fixture(name="mip_analysis_api")
+def fixture_mip_analysis_api(
+    cg_context: CGConfig, mip_hk_store, analysis_store
+) -> MipDNAAnalysisAPI:
+    """Return a MIP analysis API."""
+    analysis_api = MipDNAAnalysisAPI(cg_context)
+    analysis_api.housekeeper_api = mip_hk_store
+    analysis_api.status_db = analysis_store
+    return analysis_api

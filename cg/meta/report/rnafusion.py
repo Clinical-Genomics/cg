@@ -1,5 +1,5 @@
 """RNAfusion delivery report API."""
-from typing import List, Optional
+from typing import Optional
 
 from cg.constants import (
     REQUIRED_APPLICATION_FIELDS,
@@ -67,7 +67,7 @@ class RnafusionReportAPI(ReportAPI):
         return GenomeVersion.hg38.value
 
     def get_report_accreditation(
-        self, samples: List[SampleModel], analysis_metadata: AnalysisModel
+        self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
         """Checks if the report is accredited or not. Rnafusion is not an accredited workflow."""
         return False

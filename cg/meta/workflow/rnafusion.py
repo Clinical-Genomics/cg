@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from cg import resources
 from cg.constants import Pipeline
@@ -61,7 +61,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         return True
 
     @staticmethod
-    def get_deliverables_template_content() -> List[dict]:
+    def get_deliverables_template_content() -> list[dict]:
         """Return deliverables file template content."""
         return ReadFile.get_content_from_file(
             file_format=FileFormat.YAML,
@@ -70,13 +70,13 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, case_id: str, strandedness: Strandedness
-    ) -> List[List[str]]:
+    ) -> list[list[str]]:
         """Get sample sheet content per sample."""
-        sample_metadata: List[dict] = self.gather_file_metadata_for_sample(sample_obj=sample)
-        fastq_forward_read_paths: List[str] = self.extract_read_files(
+        sample_metadata: list[dict] = self.gather_file_metadata_for_sample(sample_obj=sample)
+        fastq_forward_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
         )
-        fastq_reverse_read_paths: List[str] = self.extract_read_files(
+        fastq_reverse_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, reverse_read=True
         )
 
@@ -88,7 +88,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content()
 
-    def get_sample_sheet_content(self, case_id: str, strandedness: Strandedness) -> List[List[Any]]:
+    def get_sample_sheet_content(self, case_id: str, strandedness: Strandedness) -> list[list[Any]]:
         """Returns content for sample sheet."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         if len(case.links) != 1:
@@ -129,7 +129,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     ) -> None:
         """Create config files (parameters and sample sheet) for Rnafusion analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
-        sample_sheet_content: List[List[Any]] = self.get_sample_sheet_content(
+        sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(
             case_id=case_id, strandedness=strandedness
         )
         pipeline_parameters: RnafusionParameters = self.get_pipeline_parameters(
@@ -160,14 +160,14 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Return the path of the multiqc_data.json file."""
         return Path(self.root_dir, case_id, "multiqc", "multiqc_data", "multiqc_data.json")
 
-    def get_multiqc_json_metrics(self, case_id: str) -> List[MetricsBase]:
+    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Get a multiqc_data.json file and returns metrics and values formatted."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_id: str = case.links[0].sample.internal_id
         multiqc_json: MultiqcDataJson = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
         )
-        metrics_values: Dict = {}
+        metrics_values: dict = {}
         for key in multiqc_json.report_general_stats_data:
             if case_id in key:
                 metrics_values.update(list(key.values())[0])
@@ -185,7 +185,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         ]
 
     @staticmethod
-    def ensure_mandatory_metrics_present(metrics: List[MetricsBase]) -> None:
+    def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
         """Check that all mandatory metrics are present. Raise error if missing."""
         given_metrics: set = {metric.name for metric in metrics}
         mandatory_metrics: set = set(RNAFUSION_METRIC_CONDITIONS.keys())
@@ -238,9 +238,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             raise CgError from error
         self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
 
-    def parse_analysis(self, qc_metrics_raw: List[MetricsBase], **kwargs) -> RnafusionAnalysis:
+    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> RnafusionAnalysis:
         """Parse Rnafusion output analysis files and return analysis model."""
-        sample_metrics: Dict[str, dict] = {}
+        sample_metrics: dict[str, dict] = {}
         for metric in qc_metrics_raw:
             metric.name = metric.name.replace("5_3_bias", "bias_5_3")
             try:
@@ -251,5 +251,5 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_latest_metadata(self, case_id: str) -> RnafusionAnalysis:
         """Return the latest metadata of a specific Rnafusion case."""
-        qc_metrics: List[MetricsBase] = self.get_multiqc_json_metrics(case_id)
+        qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
         return self.parse_analysis(qc_metrics_raw=qc_metrics)

@@ -1,7 +1,7 @@
 import logging
 import shutil
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
@@ -77,7 +77,7 @@ class MutantAnalysisAPI(AnalysisAPI):
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        samples: List[Sample] = [link.sample for link in case_obj.links]
+        samples: list[Sample] = [link.sample for link in case_obj.links]
         for sample_obj in samples:
             application = sample_obj.application_version.application
             if self._is_nanopore(application):
@@ -127,7 +127,7 @@ class MutantAnalysisAPI(AnalysisAPI):
 
     def create_case_config(self, case_id: str, dry_run: bool) -> None:
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        samples: List[Sample] = [link.sample for link in case_obj.links]
+        samples: list[Sample] = [link.sample for link in case_obj.links]
         case_config_list = [
             self.get_sample_parameters(sample_obj).model_dump() for sample_obj in samples
         ]
@@ -186,7 +186,7 @@ class MutantAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
 
-    def get_cases_to_store(self) -> List[Family]:
+    def get_cases_to_store(self) -> list[Family]:
         """Return cases where analysis has a deliverables file,
         and is ready to be stored in Housekeeper."""
         return [
@@ -195,7 +195,7 @@ class MutantAnalysisAPI(AnalysisAPI):
             if Path(self.get_deliverables_file_path(case_id=case.internal_id)).exists()
         ]
 
-    def get_metadata_for_nanopore_sample(self, sample_obj: Sample) -> List[dict]:
+    def get_metadata_for_nanopore_sample(self, sample_obj: Sample) -> list[dict]:
         return [
             self.fastq_handler.parse_nanopore_file_data(file_obj.full_path)
             for file_obj in self.housekeeper_api.files(
@@ -211,7 +211,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         If pipeline input requires concatenated fastq, files can also be concatenated
         """
         read_paths = []
-        files: List[dict] = self.get_metadata_for_nanopore_sample(sample_obj=sample_obj)
+        files: list[dict] = self.get_metadata_for_nanopore_sample(sample_obj=sample_obj)
         sorted_files = sorted(files, key=lambda k: k["path"])
         fastq_dir = self.get_sample_fastq_destination_dir(case=case_obj, sample=sample_obj)
         fastq_dir.mkdir(parents=True, exist_ok=True)
