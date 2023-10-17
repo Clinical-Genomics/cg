@@ -63,33 +63,27 @@ def test_get_boolean_as_string():
 def test_get_float_as_string():
     """Test the validation of a float value."""
 
-    # GIVEN a valid float input (float and string format)
+    # GIVEN a valid float input
     float_value: float = 12.3456789
-    str_value: str = "12.3456789"
 
     # WHEN performing the validation
     validated_float_value: str = get_float_as_string(float_value)
-    validated_str_value: str = get_float_as_string(str_value)
 
-    # THEN check if the input values were formatted correctly
+    # THEN check if the input value was formatted correctly
     assert validated_float_value == "12.35"
-    assert validated_str_value == "12.35"
 
 
 def test_get_float_as_string_zero_input():
-    """Tests the validation of a float value."""
+    """Tests the validation of a float value when input is zero."""
 
-    # GIVEN a valid float input (float and string format)
+    # GIVEN a valid float input
     float_value: float = 0.0
-    str_value: str = "0.0"
 
     # WHEN performing the validation
     validated_float_value: str = get_float_as_string(float_value)
-    validated_str_value: str = get_float_as_string(str_value)
 
-    # THEN check if the input values were formatted correctly
+    # THEN check if the input value was formatted correctly
     assert validated_float_value == "0.0"
-    assert validated_str_value == "0.0"
 
 
 def test_get_float_as_percentage():
@@ -101,8 +95,21 @@ def test_get_float_as_percentage():
     # WHEN performing the validation
     validated_pct_value: str = get_float_as_percentage(pct_value)
 
-    # THEN check if the input values were formatted correctly
+    # THEN check if the input value was formatted correctly
     assert validated_pct_value == "98.76"
+
+
+def test_get_float_as_percentage_zero_input():
+    """Test the validation of a percentage value when input is zero."""
+
+    # GIVEN a zero input
+    pct_value: float = 0.0
+
+    # WHEN performing the validation
+    validated_pct_value: str = get_float_as_percentage(pct_value)
+
+    # THEN check if the input value was formatted correctly
+    assert validated_pct_value == "0.0"
 
 
 def test_get_date_as_string(timestamp_now: datetime):

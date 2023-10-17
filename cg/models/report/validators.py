@@ -34,12 +34,12 @@ def get_boolean_as_string(value: Optional[bool]) -> str:
 
 def get_float_as_string(value: Optional[float]) -> str:
     """Return string representation of a float value."""
-    return str(round(float(value), PRECISION)) if value or isinstance(value, float) else NA_FIELD
+    return str(round(value, PRECISION)) if value or isinstance(value, float) else NA_FIELD
 
 
 def get_float_as_percentage(value: Optional[float]) -> str:
     """Return string percentage representation of a float value."""
-    return get_float_as_string(float(value) * 100) if value else NA_FIELD
+    return get_float_as_string(value * 100) if value or isinstance(value, float) else NA_FIELD
 
 
 def get_date_as_string(date: Optional[datetime]) -> str:
