@@ -220,6 +220,8 @@ class Analysis(Model):
     family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
     uploaded_to_vogue_at = Column(types.DateTime, nullable=True)
 
+    family = orm.relationship("Family", back_populates="analyses", cascade_backrefs=False)
+
     def __str__(self):
         return f"{self.family.internal_id} | {self.completed_at.date()}"
 
@@ -377,9 +379,6 @@ class Family(Model, PriorityMixin):
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
     action = Column(types.Enum(*CASE_ACTIONS))
-    analyses = orm.relationship(
-        Analysis, backref="family", order_by="-Analysis.completed_at", cascade_backrefs=False
-    )
     _cohorts = Column(types.Text)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -397,6 +396,9 @@ class Family(Model, PriorityMixin):
     synopsis = Column(types.Text)
     tickets = Column(types.VARCHAR)
 
+    analyses = orm.relationship(
+        Analysis, back_populates="family", order_by="-Analysis.completed_at", cascade_backrefs=False
+    )
     links = orm.relationship("FamilySample", back_populates="family", cascade_backrefs=False)
 
     @property
@@ -563,7 +565,7 @@ class Flowcell(Model):
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
     samples = orm.relationship(
-        "Sample", secondary=flowcell_sample, backref="flowcells", cascade_backrefs=False
+        "Sample", secondary=flowcell_sample, back_populates="flowcells", cascade_backrefs=False
     )
     sequencing_metrics = orm.relationship(
         "SampleLaneSequencingMetrics",
@@ -690,7 +692,6 @@ class Sample(Model, PriorityMixin):
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
 
-    sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
     links = orm.relationship(
         FamilySample, foreign_keys=[FamilySample.sample_id], back_populates="sample"
     )
@@ -700,6 +701,10 @@ class Sample(Model, PriorityMixin):
     father_links = orm.relationship(
         FamilySample, foreign_keys=[FamilySample.father_id], back_populates="father"
     )
+    flowcells = orm.relationship(
+        Flowcell, secondary=flowcell_sample, back_populates="samples", cascade_backrefs=False
+    )
+    sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
