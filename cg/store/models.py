@@ -114,13 +114,14 @@ class Application(Model):
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+
     versions = orm.relationship(
         "ApplicationVersion",
         order_by="ApplicationVersion.version",
-        backref="application",
+        back_populates="application",
         cascade_backrefs=False,
     )
-    pipeline_limitations = orm.relationship("ApplicationLimitations", backref="application")
+    pipeline_limitations = orm.relationship("ApplicationLimitations", back_populates="application")
 
     def __str__(self) -> str:
         return self.tag
@@ -167,6 +168,8 @@ class ApplicationVersion(Model):
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     application_id = Column(ForeignKey(Application.id), nullable=False)
 
+    application = orm.relationship("Application", back_populates="versions", cascade_backrefs=False)
+
     def __str__(self) -> str:
         return f"{self.application.tag} ({self.version})"
 
@@ -188,6 +191,8 @@ class ApplicationLimitations(Model):
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+
+    application = orm.relationship(Application, back_populates="pipeline_limitations")
 
     def __str__(self):
         return f"{self.application.tag} – {self.pipeline}"
