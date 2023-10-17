@@ -646,7 +646,7 @@ class Sample(Model, PriorityMixin):
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship("Customer", foreign_keys=[customer_id])
     delivered_at = Column(types.DateTime)
-    deliveries = orm.relationship(Delivery, backref="sample")
+    deliveries = orm.relationship(Delivery, backref="sample", cascade_backrefs=False)
     downsampled_to = Column(types.BigInteger)
     from_sample = Column(types.String(128))
     id = Column(types.Integer, primary_key=True)
