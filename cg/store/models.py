@@ -548,7 +548,9 @@ class Flowcell(Model):
     has_backup = Column(types.Boolean, nullable=False, default=False)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
-    samples = orm.relationship("Sample", secondary=flowcell_sample, backref="flowcells")
+    samples = orm.relationship(
+        "Sample", secondary=flowcell_sample, backref="flowcells", cascade_backrefs=False
+    )
     sequencing_metrics = orm.relationship(
         "SampleLaneSequencingMetrics",
         back_populates="flowcell",
