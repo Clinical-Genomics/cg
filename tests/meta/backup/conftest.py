@@ -20,7 +20,7 @@ def mock_pdc_query_method(archived_flow_cells: list[str]) -> Callable:
             raise subprocess.CalledProcessError(
                 cmd="dummy_method", returncode=PDCExitCodes.NO_FILES_FOUND
             )
-        return match
+        return match[0]
 
     return mock_method
 
