@@ -778,7 +778,7 @@ class Invoice(Model):
     record_type = Column(types.Text)
 
     samples = orm.relationship(Sample, backref="invoice", cascade_backrefs=False)
-    pools = orm.relationship(Pool, backref="invoice")
+    pools = orm.relationship(Pool, backref="invoice", cascade_backrefs=False)
 
     def __str__(self):
         return f"{self.customer_id} ({self.invoiced_at})"
