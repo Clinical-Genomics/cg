@@ -27,7 +27,7 @@ def get_session() -> Session:
     """
     if not SESSION_REGISTRY:
         raise CgError("Database not initialised")
-    return SESSION_REGISTRY()
+    return SESSION_REGISTRY
 
 
 def get_scoped_session_registry() -> Optional[scoped_session]:
