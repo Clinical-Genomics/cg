@@ -511,7 +511,7 @@ class FamilySample(Model):
     mother_id = Column(ForeignKey("sample.id"))
     father_id = Column(ForeignKey("sample.id"))
 
-    family = orm.relationship("Family", backref="links")
+    family = orm.relationship("Family", backref="links", cascade_backrefs=False)
     sample = orm.relationship("Sample", foreign_keys=[sample_id], backref="links")
     mother = orm.relationship("Sample", foreign_keys=[mother_id], backref="mother_links")
     father = orm.relationship("Sample", foreign_keys=[father_id], backref="father_links")
