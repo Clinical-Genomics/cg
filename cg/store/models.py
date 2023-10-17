@@ -792,7 +792,9 @@ class User(Model):
     is_admin = Column(types.Boolean, default=False)
     order_portal_login = Column(types.Boolean, default=False)
 
-    customers = orm.relationship("Customer", secondary=customer_user, backref="users")
+    customers = orm.relationship(
+        "Customer", secondary=customer_user, backref="users", cascade_backrefs=False
+    )
 
     def to_dict(self) -> dict:
         """Represent as dictionary."""
