@@ -365,7 +365,9 @@ class Family(Model, PriorityMixin):
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
     action = Column(types.Enum(*CASE_ACTIONS))
-    analyses = orm.relationship(Analysis, backref="family", order_by="-Analysis.completed_at")
+    analyses = orm.relationship(
+        Analysis, backref="family", order_by="-Analysis.completed_at", cascade_backrefs=False
+    )
     _cohorts = Column(types.Text)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
