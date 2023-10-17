@@ -9,8 +9,10 @@ from cg.constants.pdc import PDCExitCodes
 
 
 @pytest.fixture
-def dummy_pdc_query_method(archived_flow_cells) -> Callable:
-    def dummy_method(search_pattern: str) -> list[str]:
+def mock_pdc_query_method(archived_flow_cells) -> Callable:
+    """Returns a mock method mimicking the pattern search made by the dsmc q archive command."""
+
+    def mock_method(search_pattern: str) -> list[str]:
         match = fnmatch.filter(archived_flow_cells, search_pattern)
         if not match:
             raise subprocess.CalledProcessError(
@@ -18,7 +20,7 @@ def dummy_pdc_query_method(archived_flow_cells) -> Callable:
             )
         return match
 
-    return dummy_method
+    return mock_method
 
 
 @pytest.fixture

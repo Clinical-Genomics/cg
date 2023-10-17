@@ -3,6 +3,7 @@ import fnmatch
 import logging
 import subprocess
 from pathlib import Path
+from typing import Callable
 
 import mock
 import pytest
@@ -26,13 +27,11 @@ from tests.mocks.hk_mock import MockFile
 def test_query_pdc_for_flow_cell(
     caplog,
     flow_cell_name: str,
-    dummy_pdc_query_method,
+    mock_pdc_query_method: Callable,
     encryption_directories: EncryptionDirectories,
 ):
     """Tests query PDC for a flow cell with a mock PDC query."""
     caplog.set_level(logging.DEBUG)
-
-    # GIVEN an DSMC output
 
     # GIVEN a Backup API
     backup_api = BackupAPI(
@@ -43,15 +42,17 @@ def test_query_pdc_for_flow_cell(
         pdc_api=mock.Mock(),
         flow_cells_dir=mock.Mock(),
     )
+    # GIVEN a mock pdc query method
+    backup_api.pdc.query_pdc = mock_pdc_query_method
 
-    # WHEN getting the dsmc output of flow cell query
-    backup_api.pdc.query_pdc = dummy_pdc_query_method
+    # WHEN querying pdc for a flow cell
     backup_api.query_pdc_for_flow_cell(flow_cell_id=flow_cell_name)
 
-    # THEN log that files were found
+    # THEN the flow cell is logged as found for one of the search patterns
     assert fnmatch.filter(
         names=caplog.messages, pat=f"Found archived files for PDC query:*{flow_cell_name}*.gpg"
     )
+    # THEN the flow cell is logged as not found for two of the search patterns
     assert (
         len(
             fnmatch.filter(

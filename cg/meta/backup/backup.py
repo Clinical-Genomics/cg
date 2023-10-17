@@ -254,7 +254,7 @@ class BackupAPI:
     def query_pdc_for_flow_cell(self, flow_cell_id: str) -> List[str]:
         """Query PDC for a given flow cell id.
         Raise:
-            CalledProcessError if no archived files were found.
+            CalledProcessError if an error OTHER THAN no files found is raised.
         """
         dsmc_output: List[str] = []
         for encryption_directory in [

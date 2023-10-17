@@ -2153,6 +2153,7 @@ def encryption_dir(tmp_flow_cells_directory: Path) -> Path:
 
 @pytest.fixture
 def encryption_directories(encryption_dir: Path) -> EncryptionDirectories:
+    """Returns different encryption directories."""
     return EncryptionDirectories(
         current=f"/{encryption_dir.as_posix()}/", nas="/ENCRYPT/", pre_nas="/OLD_ENCRYPT/"
     )
