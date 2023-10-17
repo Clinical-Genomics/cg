@@ -1,7 +1,7 @@
 """Model MIP config"""
 
+
 from pydantic.v1 import BaseModel, EmailStr, Field, validator
-from typing import List
 
 from cg.constants.priority import SlurmQos
 
@@ -17,7 +17,7 @@ class MipBaseConfig(BaseModel):
     family_id_: str = Field(None, alias="family_id")
     case_id: str = None
     analysis_type_: dict = Field(..., alias="analysis_type")
-    samples: List[AnalysisType] = None
+    samples: list[AnalysisType] = None
     config_path: str = Field(..., alias="config_file_analysis")
     deliverables_file_path: str = Field(..., alias="store_file")
     email: EmailStr
@@ -26,7 +26,7 @@ class MipBaseConfig(BaseModel):
     out_dir: str = Field(..., alias="outdata_dir")
     priority: SlurmQos = Field(..., alias="slurm_quality_of_service")
     sample_info_path: str = Field(..., alias="sample_info_file")
-    sample_ids: List[str]
+    sample_ids: list[str]
 
     @validator("case_id", always=True, pre=True)
     def set_case_id(cls, value, values: dict) -> str:
@@ -34,7 +34,7 @@ class MipBaseConfig(BaseModel):
         return value or values.get("family_id_")
 
     @validator("samples", always=True, pre=True)
-    def set_samples(cls, _, values: dict) -> List[AnalysisType]:
+    def set_samples(cls, _, values: dict) -> list[AnalysisType]:
         """Set samples analysis type"""
         raw_samples: dict = values.get("analysis_type_")
         return [

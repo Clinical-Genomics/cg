@@ -1,7 +1,7 @@
 """Utility functions to simply add test data in a cg store."""
 import logging
 from datetime import datetime
-from typing import List, Optional, Dict
+from typing import Optional
 
 from housekeeper.store.models import Bundle, Version
 
@@ -28,8 +28,8 @@ from cg.store.models import (
     Panel,
     Pool,
     Sample,
-    User,
     SampleLaneSequencingMetrics,
+    User,
 )
 
 LOG = logging.getLogger(__name__)
@@ -118,7 +118,7 @@ class StoreHelpers:
     def add_application_version(
         store: Store,
         application: Application,
-        prices: Dict,
+        prices: dict,
         version: int = 1,
         valid_from: datetime = datetime.now(),
     ) -> ApplicationVersion:
@@ -265,7 +265,9 @@ class StoreHelpers:
         if not case:
             case = StoreHelpers.add_case(store, data_analysis=pipeline, data_delivery=data_delivery)
 
-        analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
+        analysis = store.add_analysis(
+            pipeline=pipeline, version=pipeline_version, family_id=case.id
+        )
 
         analysis.started_at = started_at or datetime.now()
         if completed_at:
@@ -380,7 +382,7 @@ class StoreHelpers:
         action: str = None,
         internal_id: str = None,
         customer_id: str = "cust000",
-        panels: List[str] = [],
+        panels: list[str] = [],
         case_obj: Family = None,
         ticket: str = "123456",
     ) -> Family:
@@ -389,7 +391,7 @@ class StoreHelpers:
 
         """
         if not panels:
-            panels: List[str] = ["panel_test"]
+            panels: list[str] = ["panel_test"]
         customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
         if case_obj:
             panels = case_obj.panels
@@ -577,7 +579,7 @@ class StoreHelpers:
         return sample
 
     @staticmethod
-    def add_samples(store: Store, nr_samples: int = 5) -> List[Sample]:
+    def add_samples(store: Store, nr_samples: int = 5) -> list[Sample]:
         """Utility function to add a number of samples to use in tests."""
         nr_samples = max(nr_samples, 2)
         return [
@@ -585,24 +587,26 @@ class StoreHelpers:
         ]
 
     @staticmethod
-    def add_flowcell(
+    def add_flow_cell(
         store: Store,
-        flow_cell_name: str = "flowcell_test",
+        flow_cell_name: str = "flow_cell_test",
         archived_at: datetime = None,
         sequencer_type: str = Sequencers.HISEQX,
-        samples: List[Sample] = None,
+        samples: list[Sample] = None,
         status: str = None,
         date: datetime = datetime.now(),
+        has_backup: Optional[bool] = False,
     ) -> Flowcell:
         """Utility function to add a flow cell to the store and return an object."""
-        flow_cell = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
+        flow_cell: Optional[Flowcell] = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
         if flow_cell:
             return flow_cell
-        flow_cell = store.add_flow_cell(
+        flow_cell: Flowcell = store.add_flow_cell(
             flow_cell_name=flow_cell_name,
             sequencer_name="dummy_sequencer",
             sequencer_type=sequencer_type,
             date=date,
+            has_backup=has_backup,
         )
         flow_cell.archived_at = archived_at
         if samples:
@@ -661,11 +665,11 @@ class StoreHelpers:
 
     @staticmethod
     def add_phenotype_terms_to_sample(
-        store: Store, sample_id: str, phenotype_terms: List[str] = []
+        store: Store, sample_id: str, phenotype_terms: list[str] = []
     ) -> Optional[Sample]:
         """Function for adding a phenotype term to a sample in the database."""
         if not phenotype_terms:
-            phenotype_terms: List[str] = ["a phenotype term"]
+            phenotype_terms: list[str] = ["a phenotype term"]
         sample_obj: Sample = store.get_sample_by_internal_id(internal_id=sample_id)
         if not sample_obj:
             LOG.warning("Could not find sample")
@@ -688,7 +692,7 @@ class StoreHelpers:
         return sample_obj
 
     @classmethod
-    def relate_samples(cls, base_store: Store, case: Family, samples: List[Sample]):
+    def relate_samples(cls, base_store: Store, case: Family, samples: list[Sample]):
         """Utility function to relate many samples to one case."""
 
         for sample in samples:
@@ -708,9 +712,9 @@ class StoreHelpers:
     ) -> Family:
         """Utility function to add one case with many samples and return the case."""
 
-        samples: List[Sample] = cls.add_samples(store=base_store, nr_samples=nr_samples)
+        samples: list[Sample] = cls.add_samples(store=base_store, nr_samples=nr_samples)
         for sample in samples:
-            sample.sequenced_at: datetime = sequenced_at
+            sample.reads_updated_at: datetime = sequenced_at
         case: Family = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
         cls.relate_samples(base_store=base_store, case=case, samples=samples)
         return case
@@ -718,12 +722,12 @@ class StoreHelpers:
     @classmethod
     def add_cases_with_samples(
         cls, base_store: Store, nr_cases: int, sequenced_at: datetime
-    ) -> List[Family]:
+    ) -> list[Family]:
         """Utility function to add many cases with two samples to use in tests."""
 
-        cases: List[Family] = []
+        cases: list[Family] = []
         for i in range(nr_cases):
-            case: List[Family] = cls.add_case_with_samples(
+            case: list[Family] = cls.add_case_with_samples(
                 base_store, f"f{i}", 2, sequenced_at=sequenced_at
             )
             cases.append(case)
@@ -798,8 +802,8 @@ class StoreHelpers:
         invoice_id: int = 0,
         customer_id: str = "cust000",
         discount: int = 0,
-        pools: Optional[List[Pool]] = None,
-        samples: Optional[List[Sample]] = None,
+        pools: Optional[list[Pool]] = None,
+        samples: Optional[list[Sample]] = None,
         invoiced_at: Optional[datetime] = None,
     ) -> Invoice:
         """Utility function to create an invoice with a costumer and samples or pools."""
@@ -852,7 +856,7 @@ class StoreHelpers:
                 store=store, internal_id=sample_internal_id, customer_id=customer_id
             )
         if not flow_cell:
-            flow_cell = cls.add_flowcell(store=store, flow_cell_name=flow_cell_name)
+            flow_cell = cls.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
 
         metrics: SampleLaneSequencingMetrics = store.add_sample_lane_sequencing_metrics(
             sample_internal_id=sample.internal_id,
@@ -864,3 +868,25 @@ class StoreHelpers:
         store.session.add(metrics)
         store.session.commit()
         return metrics
+
+    @classmethod
+    def add_multiple_sample_lane_sequencing_metrics_entries(cls, metrics_data: list, store) -> None:
+        """Add multiple sample lane sequencing metrics to a store."""
+
+        for (
+            sample_internal_id,
+            flow_cell_name_,
+            flow_cell_lane_number,
+            sample_total_reads_in_lane,
+            sample_base_percentage_passing_q30,
+            sample_base_mean_quality_score,
+        ) in metrics_data:
+            cls.add_sample_lane_sequencing_metrics(
+                store=store,
+                sample_internal_id=sample_internal_id,
+                flow_cell_name=flow_cell_name_,
+                flow_cell_lane_number=flow_cell_lane_number,
+                sample_total_reads_in_lane=sample_total_reads_in_lane,
+                sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
+                sample_base_mean_quality_score=sample_base_mean_quality_score,
+            )

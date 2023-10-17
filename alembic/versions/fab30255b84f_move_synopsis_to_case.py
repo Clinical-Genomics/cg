@@ -5,13 +5,13 @@ Revises: 432379a1adfa
 Create Date: 2021-02-17 17:43:47.102289
 
 """
-from typing import List
+
+
+import sqlalchemy as sa
+from sqlalchemy import orm
+from sqlalchemy.orm import declarative_base
 
 from alembic import op
-import sqlalchemy as sa
-
-from sqlalchemy import orm
-from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
@@ -33,21 +33,21 @@ class Family(Base):
     _synopsis = sa.Column(sa.types.Text)
 
     @property
-    def cohorts(self) -> List[str]:
+    def cohorts(self) -> list[str]:
         """Return a list of cohorts."""
         return self._cohorts.split(",") if self._cohorts else []
 
     @cohorts.setter
-    def cohorts(self, cohort_list: List[str]):
+    def cohorts(self, cohort_list: list[str]):
         self._cohorts = ",".join(cohort_list) if cohort_list else None
 
     @property
-    def synopsis(self) -> List[str]:
+    def synopsis(self) -> list[str]:
         """Return a list of synopsis."""
         return self._synopsis.split(",") if self._synopsis else []
 
     @synopsis.setter
-    def synopsis(self, synopsis_list: List[str]):
+    def synopsis(self, synopsis_list: list[str]):
         self._synopsis = ",".join(synopsis_list) if synopsis_list else None
 
 
@@ -78,21 +78,21 @@ class Sample(Base):
     _synopsis = sa.Column(sa.types.Text)
 
     @property
-    def cohorts(self) -> List[str]:
+    def cohorts(self) -> list[str]:
         """Return a list of cohorts."""
         return self._cohorts.split(",") if self._cohorts else []
 
     @cohorts.setter
-    def cohorts(self, cohort_list: List[str]):
+    def cohorts(self, cohort_list: list[str]):
         self._cohorts = ",".join(cohort_list) if cohort_list else None
 
     @property
-    def synopsis(self) -> List[str]:
+    def synopsis(self) -> list[str]:
         """Return a list of synopsis."""
         return self._synopsis.split(",") if self._synopsis else []
 
     @synopsis.setter
-    def synopsis(self, synopsis_list: List[str]):
+    def synopsis(self, synopsis_list: list[str]):
         self._synopsis = ",".join(synopsis_list) if synopsis_list else None
 
 

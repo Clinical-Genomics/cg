@@ -1,21 +1,24 @@
 """API for uploading cancer observations."""
 import logging
 from pathlib import Path
-from typing import Dict, List
 
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import (
-    BalsamicObservationsAnalysisTag,
-    LoqusdbInstance,
     LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
-    BalsamicLoadParameters,
     LOQUSDB_ID,
+    BalsamicLoadParameters,
+    BalsamicObservationsAnalysisTag,
     LoqusdbBalsamicCustomers,
+    LoqusdbInstance,
 )
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import LoqusdbUploadCaseError, CaseNotFoundError, LoqusdbDuplicateRecordError
+from cg.exc import (
+    CaseNotFoundError,
+    LoqusdbDuplicateRecordError,
+    LoqusdbUploadCaseError,
+)
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
@@ -42,7 +45,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             )
             raise LoqusdbUploadCaseError
 
-        loqusdb_upload_apis: List[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
+        loqusdb_upload_apis: list[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
         for loqusdb_api in loqusdb_upload_apis:
             if self.is_duplicate(
                 case=case,
@@ -94,7 +97,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self, hk_version: Version
     ) -> BalsamicObservationsInputFiles:
         """Extract observations files given a housekeeper version for cancer."""
-        input_files: Dict[str, File] = {
+        input_files: dict[str, File] = {
             "snv_germline_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_GERMLINE_VCF]
             ).first(),
@@ -112,7 +115,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
 
     def delete_case(self, case: Family) -> None:
         """Delete cancer case observations from Loqusdb."""
-        loqusdb_apis: List[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
+        loqusdb_apis: list[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
         for loqusdb_api in loqusdb_apis:
             if not loqusdb_api.get_case(case.internal_id):
                 LOG.error(

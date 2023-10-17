@@ -1,10 +1,12 @@
 from enum import Enum
-from typing import List, Optional, Callable
+from typing import Callable, Optional
+
 from sqlalchemy.orm import Query
-from cg.store.models import Pool, Customer
+
+from cg.store.models import Customer, Pool
 
 
-def filter_pools_by_customer_id(pools: Query, customer_ids: List[int], **kwargs) -> Query:
+def filter_pools_by_customer_id(pools: Query, customer_ids: list[int], **kwargs) -> Query:
     """Return pools by customer id."""
     return pools.filter(Pool.customer_id.in_(customer_ids))
 
@@ -70,12 +72,12 @@ def filter_pools_by_customer(pools: Query, customer: Customer, **kwargs) -> Quer
 
 
 def apply_pool_filter(
-    filter_functions: List[Callable],
+    filter_functions: list[Callable],
     pools: Query,
     invoice_id: Optional[int] = None,
     entry_id: Optional[int] = None,
     name: Optional[str] = None,
-    customer_ids: Optional[List[int]] = None,
+    customer_ids: Optional[list[int]] = None,
     name_enquiry: Optional[str] = None,
     order_enquiry: Optional[str] = None,
     customer: Optional[Customer] = None,

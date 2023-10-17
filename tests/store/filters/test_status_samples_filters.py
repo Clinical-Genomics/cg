@@ -1,34 +1,35 @@
-from sqlalchemy.orm import Query
-from typing import Dict, Any
-from cg.constants.subject import PhenotypeStatus, Gender
-from cg.constants.constants import SampleType
-from cg.store import Store
-from cg.store.models import Sample
+from typing import Any
 
+from sqlalchemy.orm import Query
+
+from cg.constants.constants import SampleType
+from cg.constants.subject import Gender, PhenotypeStatus
+from cg.store import Store
 from cg.store.filters.status_sample_filters import (
-    filter_samples_with_loqusdb_id,
-    filter_samples_without_loqusdb_id,
-    filter_samples_is_delivered,
-    filter_samples_is_not_delivered,
-    filter_samples_without_invoice_id,
-    filter_samples_is_not_down_sampled,
-    filter_samples_is_sequenced,
-    filter_samples_is_not_sequenced,
-    filter_samples_do_invoice,
-    filter_samples_by_invoice_id,
-    filter_samples_by_internal_id,
+    filter_samples_by_entry_customer_ids,
     filter_samples_by_entry_id,
-    filter_samples_with_type,
-    filter_samples_is_prepared,
-    filter_samples_is_not_prepared,
-    filter_samples_is_received,
-    filter_samples_is_not_received,
+    filter_samples_by_identifier_name_and_value,
+    filter_samples_by_internal_id,
+    filter_samples_by_internal_id_pattern,
+    filter_samples_by_invoice_id,
     filter_samples_by_name,
     filter_samples_by_subject_id,
-    filter_samples_by_entry_customer_ids,
-    filter_samples_by_internal_id_pattern,
-    filter_samples_by_identifier_name_and_value,
+    filter_samples_do_invoice,
+    filter_samples_is_delivered,
+    filter_samples_is_not_delivered,
+    filter_samples_is_not_down_sampled,
+    filter_samples_is_not_prepared,
+    filter_samples_is_not_received,
+    filter_samples_is_not_sequenced,
+    filter_samples_is_prepared,
+    filter_samples_is_received,
+    filter_samples_is_sequenced,
+    filter_samples_with_loqusdb_id,
+    filter_samples_with_type,
+    filter_samples_without_invoice_id,
+    filter_samples_without_loqusdb_id,
 )
+from cg.store.models import Sample
 from tests.store.conftest import StoreConstants
 
 
@@ -237,7 +238,7 @@ def test_filter_samples_is_sequenced(
     assert len(samples.all()) == 1
 
     # THEN the sample should have a sequenced at date
-    assert samples.all()[0].sequenced_at is not None
+    assert samples.all()[0].reads_updated_at is not None
 
 
 def test_filter_samples_is_not_sequenced(
@@ -264,7 +265,7 @@ def test_filter_samples_is_not_sequenced(
     assert len(samples.all()) == 1
 
     # THEN the sample should not have a sequenced at date
-    assert samples.all()[0].sequenced_at is None
+    assert samples.all()[0].reads_updated_at is None
 
 
 def test_filter_samples_do_invoice(
@@ -611,7 +612,7 @@ def test_filter_samples_by_identifier_name_and_value_unique_sample(
     sample: Sample = sample_query.first()
 
     # WHEN filtering the sample query with every existing attribute of the sample
-    identifiers: Dict[str, Any] = {
+    identifiers: dict[str, Any] = {
         "age_at_sampling": sample.age_at_sampling,
         "application_version_id": sample.application_version_id,
         "capture_kit": sample.capture_kit,
@@ -641,7 +642,7 @@ def test_filter_samples_by_identifier_name_and_value_unique_sample(
         "reference_genome": sample.reference_genome,
         "sequence_start": sample.sequence_start,
         "sex": sample.sex,
-        "sequenced_at": sample.sequenced_at,
+        "reads_updated_at": sample.reads_updated_at,
         "subject_id": sample.subject_id,
     }
     for key, value in identifiers.items():

@@ -1,29 +1,29 @@
 """CLI support to create config and/or start BALSAMIC."""
 
 import logging
-from typing import List
 
 import click
+from pydantic.v1 import ValidationError
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.options import (
+    OPTION_GENDER,
+    OPTION_GENOME_VERSION,
+    OPTION_OBSERVATIONS,
     OPTION_PANEL_BED,
+    OPTION_PON_CNN,
     OPTION_QOS,
     OPTION_RUN_ANALYSIS,
-    OPTION_GENOME_VERSION,
-    OPTION_PON_CNN,
-    OPTION_GENDER,
-    OPTION_OBSERVATIONS,
 )
-from cg.cli.workflow.commands import link, resolve_compression, ARGUMENT_CASE_ID
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN
-from cg.exc import CgError, DecompressionNeededError
+from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from pydantic.v1 import ValidationError
-
 
 LOG = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ def config_case(
     genome_version: str,
     panel_bed: str,
     pon_cnn: click.Path,
-    observations: List[click.Path],
+    observations: list[click.Path],
     dry_run: bool,
 ):
     """Create config file for BALSAMIC analysis for a given CASE_ID."""
@@ -197,28 +197,26 @@ def start(
     dry_run: bool,
 ):
     """Start full workflow for case ID."""
+    analysis_api: BalsamicAnalysisAPI = context.obj.meta_apis["analysis_api"]
+    analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
     LOG.info(f"Starting analysis for {case_id}")
-    try:
-        context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
-        context.invoke(link, case_id=case_id, dry_run=dry_run)
-        context.invoke(
-            config_case,
-            case_id=case_id,
-            gender=gender,
-            genome_version=genome_version,
-            panel_bed=panel_bed,
-            pon_cnn=pon_cnn,
-            dry_run=dry_run,
-        )
-        context.invoke(
-            run,
-            case_id=case_id,
-            slurm_quality_of_service=slurm_quality_of_service,
-            run_analysis=run_analysis,
-            dry_run=dry_run,
-        )
-    except DecompressionNeededError as error:
-        LOG.error(error)
+    context.invoke(link, case_id=case_id, dry_run=dry_run)
+    context.invoke(
+        config_case,
+        case_id=case_id,
+        gender=gender,
+        genome_version=genome_version,
+        panel_bed=panel_bed,
+        pon_cnn=pon_cnn,
+        dry_run=dry_run,
+    )
+    context.invoke(
+        run,
+        case_id=case_id,
+        slurm_quality_of_service=slurm_quality_of_service,
+        run_analysis=run_analysis,
+        dry_run=dry_run,
+    )
 
 
 @balsamic.command("start-available")
@@ -233,6 +231,8 @@ def start_available(context: click.Context, dry_run: bool = False):
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run, run_analysis=True)
+        except AnalysisNotReadyError as error:
+            LOG.error(error)
         except CgError as error:
             LOG.error(error)
             exit_code = EXIT_FAIL

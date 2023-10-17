@@ -1,5 +1,4 @@
-from cgmodels.cg.constants import Pipeline
-
+from cg.constants.constants import Pipeline
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 

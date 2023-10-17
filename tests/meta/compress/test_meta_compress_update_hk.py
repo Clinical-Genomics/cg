@@ -2,10 +2,10 @@
 from pathlib import Path
 from typing import Generator
 
-from housekeeper.store.models import Version
+from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import HK_FASTQ_TAGS
+from cg.constants import HK_FASTQ_TAGS, SequencingFileTag
 from cg.meta.compress import CompressAPI, files
 from cg.store import Store
 from cg.store.models import Sample
@@ -81,7 +81,7 @@ def test_add_fastq_housekeeper_when_no_fastq_in_hk(
 
     # WHEN adding the files to housekeeper
     compress_api.add_fastq_hk(
-        sample_obj=sample,
+        sample_internal_id=sample.internal_id,
         fastq_first=compression_files.fastq_first_file,
         fastq_second=compression_files.fastq_second_file,
     )
@@ -137,3 +137,31 @@ def test_add_decompressed_fastq(
     assert files.is_file_in_version(
         version_obj=version, path=Path(hk_bundle_sample_path, fastq_second.name)
     )
+
+
+def test_get_fastq_tag_names(compress_api: MockCompressAPI, helpers, hk_sample_bundle, sample_id):
+    """Tests that we get the correct fastq tags when providing the path to an existing spring file."""
+
+    # GIVEN a spring file
+    helpers.ensure_hk_bundle(store=compress_api.hk_api, bundle_data=hk_sample_bundle)
+    spring_file: File = compress_api.hk_api.files(tags=[SequencingFileTag.SPRING]).first()
+    assert spring_file
+
+    # GIVEN that the spring_file is tagged with more than 'spring'
+    assert len(spring_file.tags) > 1 and SequencingFileTag.SPRING in [
+        tag.name for tag in spring_file.tags
+    ]
+
+    # WHEN getting fastq tags from its path
+    fastq_tags: list[str] = compress_api.get_fastq_tag_names(sample_id)
+
+    # THEN the fastq tags should contain all non-spring tags of the spring file
+    for tag_name in [tag.name for tag in spring_file.tags]:
+        if tag_name != SequencingFileTag.SPRING:
+            assert tag_name in fastq_tags
+
+    # THEN the fastq tags should contain the fastq tag
+    assert SequencingFileTag.FASTQ in fastq_tags
+
+    # THEN the fastq tags should not contain the spring tag
+    assert SequencingFileTag.SPRING not in fastq_tags

@@ -5,14 +5,15 @@ Revises: 2968d39ac35f
 Create Date: 2022-07-22 08:43:36.271777
 
 """
-from alembic import op
-import sqlalchemy as sa
-from sqlalchemy.dialects import mysql
 import datetime as dt
 
+import sqlalchemy as sa
+from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
+
+from alembic import op
 
 revision = "20750539a335"
 down_revision = "2968d39ac35f"

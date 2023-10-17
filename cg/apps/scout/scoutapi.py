@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import List, Optional
+from typing import Optional
 
 from cg.apps.scout.scout_export import ScoutExportCase, Variant
 from cg.constants.constants import FileFormat
@@ -49,7 +49,7 @@ class ScoutAPI:
         self.process.run_command(load_command)
         LOG.debug("Case loaded successfully to Scout")
 
-    def export_panels(self, panels: List[str], build: str = GENOME_BUILD_37) -> List[str]:
+    def export_panels(self, panels: list[str], build: str = GENOME_BUILD_37) -> list[str]:
         """Pass through to export of a list of gene panels.
 
         Return list of lines in bed format
@@ -70,7 +70,7 @@ class ScoutAPI:
 
         return list(self.process.stdout_lines())
 
-    def get_genes(self, panel_id: str, build: str = None) -> List[dict]:
+    def get_genes(self, panel_id: str, build: str = None) -> list[dict]:
         """Return panel genes."""
         export_panel_command = ["export", "panel", panel_id]
         if build:
@@ -95,7 +95,7 @@ class ScoutAPI:
 
         return panel_genes
 
-    def get_causative_variants(self, case_id: str) -> List[Variant]:
+    def get_causative_variants(self, case_id: str) -> list[Variant]:
         """
         Get causative variants for a case.
         """
@@ -107,7 +107,7 @@ class ScoutAPI:
         except CalledProcessError:
             LOG.warning(f"Could not find case {case_id} in scout")
             return []
-        variants: List[Variant] = [
+        variants: list[Variant] = [
             Variant(**variant_info)
             for variant_info in ReadStream.get_content_from_stream(
                 file_format=FileFormat.JSON, stream=self.process.stdout
@@ -118,7 +118,7 @@ class ScoutAPI:
 
     def get_case(self, case_id: str) -> Optional[ScoutExportCase]:
         """Fetch a case from Scout"""
-        cases: List[ScoutExportCase] = self.get_cases(case_id=case_id)
+        cases: list[ScoutExportCase] = self.get_cases(case_id=case_id)
         return cases[0] if cases else None
 
     def get_cases(
@@ -128,7 +128,7 @@ class ScoutAPI:
         finished: bool = False,
         status: Optional[str] = None,
         days_ago: int = None,
-    ) -> List[ScoutExportCase]:
+    ) -> list[ScoutExportCase]:
         """Interact with cases existing in the database."""
         get_cases_command = ["export", "cases", "--json"]
         if case_id:
@@ -155,15 +155,15 @@ class ScoutAPI:
             LOG.info("Could not find cases")
             return []
 
-        cases: List[ScoutExportCase] = []
+        cases: list[ScoutExportCase] = []
         for case_export in ReadStream.get_content_from_stream(
             file_format=FileFormat.JSON, stream=self.process.stdout
         ):
             LOG.info(f"Validating case {case_export.get('_id')}")
-            cases.append(ScoutExportCase(**case_export))
+            cases.append(ScoutExportCase.model_validate(case_export))
         return cases
 
-    def get_solved_cases(self, days_ago: int) -> List[ScoutExportCase]:
+    def get_solved_cases(self, days_ago: int) -> list[ScoutExportCase]:
         """
         Get cases solved within chosen time span.
         """
@@ -175,7 +175,7 @@ class ScoutAPI:
         If the user want to load a report that is already in the database
         'update' has to be 'True'."""
 
-        upload_command: List[str] = ["load", "delivery-report", case_id, report_path]
+        upload_command: list[str] = ["load", "delivery-report", case_id, report_path]
 
         if update:
             upload_command.append("--update")
@@ -189,7 +189,7 @@ class ScoutAPI:
     def upload_report(self, case_id: str, report_path: str, report_type: str) -> None:
         """Load report into a case in the database."""
 
-        upload_report_command: List[str] = [
+        upload_report_command: list[str] = [
             "load",
             "report",
             "-t",
@@ -217,7 +217,7 @@ class ScoutAPI:
     def upload_splice_junctions_bed(self, file_path: str, case_id: str, customer_sample_id: str):
         """Load a splice junctions bed file into a case in the database."""
 
-        upload_command: List[str] = [
+        upload_command: list[str] = [
             "update",
             "individual",
             "-c",
@@ -241,7 +241,7 @@ class ScoutAPI:
     ) -> None:
         """Load a rna coverage bigwig file into a case in the database."""
 
-        upload_command: List[str] = [
+        upload_command: list[str] = [
             "update",
             "individual",
             "-c",

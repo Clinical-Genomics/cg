@@ -5,26 +5,38 @@ from pathlib import Path
 
 import pytest
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store import Store
+from tests.meta.clean.conftest import (
+    hk_flow_cell_to_clean_bundle,
+    hk_sample_bundle_for_flow_cell_to_clean,
+    housekeeper_api_with_flow_cell_to_clean,
+    store_with_flow_cell_to_clean,
+    tmp_flow_cell_not_to_clean_path,
+    tmp_flow_cell_to_clean,
+    tmp_flow_cell_to_clean_path,
+    tmp_sample_sheet_clean_flow_cell_path,
+)
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.fixture(name="balsamic_case_clean")
-def fixture_balsamic_case_clean() -> str:
+@pytest.fixture
+def balsamic_case_clean() -> str:
     """Return a balsamic case to clean"""
     return "balsamic_case_clean"
 
 
-@pytest.fixture(name="balsamic_case_not_clean")
-def fixture_balsamic_case_not_clean() -> str:
+@pytest.fixture
+def balsamic_case_not_clean() -> str:
     """Return a balsamic case to clean"""
     return "balsamic_case_not_clean"
 
 
-@pytest.fixture()
+@pytest.fixture
 def clean_context(
     balsamic_case_clean: str,
     balsamic_case_not_clean: str,
@@ -95,8 +107,8 @@ def clean_context(
     return cg_context
 
 
-@pytest.fixture(name="rsync_process")
-def fixture_rsync_process(project_dir: Path) -> Path:
+@pytest.fixture
+def rsync_process(project_dir: Path) -> Path:
     """Return a rsync process after ensuing that is is created"""
 
     rsync_process = project_dir / "rsync" / "rsync_process"
@@ -105,14 +117,14 @@ def fixture_rsync_process(project_dir: Path) -> Path:
     return rsync_process
 
 
-@pytest.fixture(name="microsalt_case_clean_dry")
-def fixture_microsalt_case_clean_dry() -> str:
+@pytest.fixture
+def microsalt_case_clean_dry() -> str:
     """Return a microsalt case to clean in dry-run"""
     return "microsalt_case_clean_dry"
 
 
-@pytest.fixture(name="microsalt_case_clean")
-def fixture_microsalt_case_not_clean() -> str:
+@pytest.fixture
+def microsalt_case_clean() -> str:
     """Return a microsalt case to clean"""
     return "microsalt_case_clean"
 
@@ -199,5 +211,21 @@ def clean_context_microsalt(
     cg_context.meta_apis["analysis_api"] = analysis_api
 
     cg_context.data_delivery.base_path = f"{project_dir}/rsync"
+
+    return cg_context
+
+
+@pytest.fixture(scope="function")
+def clean_flow_cells_context(
+    cg_context: CGConfig,
+    tmp_flow_cells_directory: Path,
+    tmp_demultiplexed_runs_directory: Path,
+    store_with_flow_cell_to_clean: Store,
+    housekeeper_api_with_flow_cell_to_clean: HousekeeperAPI,
+) -> CGConfig:
+    cg_context.flow_cells_dir = tmp_flow_cells_directory
+    cg_context.demultiplexed_flow_cells_dir = tmp_demultiplexed_runs_directory
+    cg_context.housekeeper_api_ = housekeeper_api_with_flow_cell_to_clean
+    cg_context.status_db_ = store_with_flow_cell_to_clean
 
     return cg_context

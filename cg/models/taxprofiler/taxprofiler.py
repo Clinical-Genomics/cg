@@ -1,12 +1,15 @@
 from pathlib import Path
-from cg.models.nf_analysis import NextflowSample, PipelineParameters
+
+from pydantic.v1 import Field
+
 from cg.constants.sequencing import SequencingPlatform
+from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters
 
 
 class TaxprofilerParameters(PipelineParameters):
     """Model for Taxprofiler parameters."""
 
-    input: Path
+    input: Path = Field(..., alias="sample_sheet_path")
     outdir: Path
     databases: Path
     save_preprocessed_reads: bool = True
@@ -26,7 +29,37 @@ class TaxprofilerParameters(PipelineParameters):
     run_profile_standardisation: bool = True
 
 
-class TaxprofilerSample(NextflowSample):
+class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
     """Taxprofiler sample model is used when building the sample sheet."""
 
     instrument_platform: SequencingPlatform
+    run_accession: str
+    fasta: str
+
+    @staticmethod
+    def headers() -> list[str]:
+        """Return sample sheet headers."""
+        return [
+            "sample",
+            "run_accession",
+            "instrument_platform",
+            "fastq_1",
+            "fastq_2",
+            "fasta",
+        ]
+
+    def reformat_sample_content(self) -> list[list[str]]:
+        """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
+        return [
+            [
+                self.name,
+                self.run_accession,
+                self.instrument_platform,
+                fastq_forward_read_path,
+                fastq_reverse_read_path,
+                self.fasta,
+            ]
+            for fastq_forward_read_path, fastq_reverse_read_path in zip(
+                self.fastq_forward_read_paths, self.fastq_reverse_read_paths
+            )
+        ]

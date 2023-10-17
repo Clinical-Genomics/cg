@@ -1,21 +1,21 @@
 import logging
 
 import click
+
 from cg.cli.workflow.commands import (
     ARGUMENT_CASE_ID,
+    OPTION_ANALYSIS_PARAMETERS_CONFIG,
     OPTION_DRY,
     link,
     resolve_compression,
     store,
     store_available,
-    OPTION_ANALYSIS_PARAMETERS_CONFIG,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.exc import CgError, DecompressionNeededError
+from cg.exc import AnalysisNotReadyError, CgError
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.meta.workflow.analysis import AnalysisAPI
-
 
 LOG = logging.getLogger(__name__)
 
@@ -71,13 +71,12 @@ def run(context: CGConfig, dry_run: bool, case_id: str, config_artic: str = None
 @click.pass_context
 def start(context: click.Context, dry_run: bool, case_id: str, config_artic: str) -> None:
     """Start full analysis workflow for a case"""
-    try:
-        context.invoke(link, case_id=case_id, dry_run=dry_run)
-        context.invoke(config_case, case_id=case_id, dry_run=dry_run)
-        context.invoke(run, case_id=case_id, dry_run=dry_run, config_artic=config_artic)
-        context.invoke(store, case_id=case_id, dry_run=dry_run)
-    except DecompressionNeededError:
-        LOG.info("Workflow not ready to run, can continue after decompression")
+    analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
+    analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
+    context.invoke(link, case_id=case_id, dry_run=dry_run)
+    context.invoke(config_case, case_id=case_id, dry_run=dry_run)
+    context.invoke(run, case_id=case_id, dry_run=dry_run, config_artic=config_artic)
+    context.invoke(store, case_id=case_id, dry_run=dry_run)
 
 
 @mutant.command("start-available")
@@ -92,11 +91,13 @@ def start_available(context: click.Context, dry_run: bool = False):
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+        except AnalysisNotReadyError as error:
+            LOG.error(error)
         except CgError as error:
             LOG.error(error)
             exit_code = EXIT_FAIL
         except Exception as error:
-            LOG.error(f"Unspecified error occurred: %s", error)
+            LOG.error(f"Unspecified error occurred: {error}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

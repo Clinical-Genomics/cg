@@ -1,9 +1,12 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List
+from typing import Any
 from unittest import mock
 
 import pytest
+from housekeeper.store.models import File
+from requests import Response
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
@@ -11,18 +14,21 @@ from cg.constants.constants import FileFormat
 from cg.constants.subject import Gender
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
-from cg.meta.archive.ddn_dataflow import ROOT_TO_TRIM, DDNDataFlowClient, MiriaFile, TransferPayload
+from cg.meta.archive.ddn_dataflow import (
+    ROOT_TO_TRIM,
+    DDNDataFlowClient,
+    MiriaObject,
+    TransferPayload,
+)
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
 from cg.store.models import Customer, Sample
-from housekeeper.store.models import File
-from requests import Response
 from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(name="ddn_dataflow_config")
-def fixture_ddn_dataflow_config(
+def ddn_dataflow_config(
     local_storage_repository: str, remote_storage_repository: str
 ) -> DataFlowConfig:
     """Returns a mock DDN Dataflow config."""
@@ -37,15 +43,15 @@ def fixture_ddn_dataflow_config(
 
 
 @pytest.fixture(name="ok_ddn_response")
-def fixture_ok_ddn_response(ok_response: Response):
+def ok_ddn_response(ok_response: Response):
     ok_response._content = b'{"job_id": "123"}'
     return ok_response
 
 
 @pytest.fixture(name="archive_request_json")
-def fixture_archive_request_json(
+def archive_request_json(
     remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
-) -> Dict:
+) -> dict:
     return {
         "osType": "Unix/MacOS",
         "createFolder": False,
@@ -59,8 +65,27 @@ def fixture_archive_request_json(
     }
 
 
+@pytest.fixture(name="retrieve_request_json")
+def retrieve_request_json(
+    remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
+) -> dict[str, Any]:
+    """Returns the body for a retrieval http post towards the DDN Miria API."""
+    return {
+        "osType": "Unix/MacOS",
+        "createFolder": False,
+        "pathInfo": [
+            {
+                "destination": local_storage_repository
+                + Path(trimmed_local_path).parent.as_posix(),
+                "source": f"{remote_storage_repository}ADM1",
+            }
+        ],
+        "metadataList": [],
+    }
+
+
 @pytest.fixture(name="header_with_test_auth_token")
-def fixture_header_with_test_auth_token() -> Dict:
+def header_with_test_auth_token() -> dict:
     return {
         "Content-Type": "application/json",
         "accept": "application/json",
@@ -69,13 +94,13 @@ def fixture_header_with_test_auth_token() -> Dict:
 
 
 @pytest.fixture(name="ddn_auth_token_response")
-def fixture_ddn_auth_token_response(ok_response: Response):
+def ddn_auth_token_response(ok_response: Response):
     ok_response._content = b'{"access": "test_auth_token", "expire":15, "test_refresh_token"}'
     return ok_response
 
 
 @pytest.fixture(name="ddn_dataflow_client")
-def fixture_ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataFlowClient:
+def ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataFlowClient:
     """Returns a DDNApi without tokens being set."""
     mock_ddn_auth_success_response = Response()
     mock_ddn_auth_success_response.status_code = 200
@@ -95,13 +120,13 @@ def fixture_ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataF
 
 
 @pytest.fixture(name="miria_file_archive")
-def fixture_miria_file(local_directory: Path, remote_path: Path) -> MiriaFile:
-    """Return a MiriaFile for archiving."""
-    return MiriaFile(source=local_directory.as_posix(), destination=remote_path.as_posix())
+def miria_file(local_directory: Path, remote_path: Path) -> MiriaObject:
+    """Return a MiriaObject for archiving."""
+    return MiriaObject(source=local_directory.as_posix(), destination=remote_path.as_posix())
 
 
 @pytest.fixture(name="file_and_sample")
-def fixture_file_and_sample(spring_archive_api: SpringArchiveAPI, sample_id: str):
+def file_and_sample(spring_archive_api: SpringArchiveAPI, sample_id: str):
     return FileAndSample(
         file=spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first(),
         sample=spring_archive_api.status_db.get_sample_by_internal_id(sample_id),
@@ -109,69 +134,63 @@ def fixture_file_and_sample(spring_archive_api: SpringArchiveAPI, sample_id: str
 
 
 @pytest.fixture(name="trimmed_local_path")
-def fixture_trimmed_local_path(spring_archive_api: SpringArchiveAPI, sample_id: str):
+def trimmed_local_path(spring_archive_api: SpringArchiveAPI, sample_id: str):
     file: File = spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first()
     return file.path[5:]
 
 
 @pytest.fixture(name="miria_file_retrieve")
-def fixture_miria_file_retrieve(local_directory: Path, remote_path: Path) -> MiriaFile:
-    """Return a MiriaFile for retrieval."""
-    return MiriaFile(source=remote_path.as_posix(), destination=local_directory.as_posix())
+def miria_file_retrieve(local_directory: Path, remote_path: Path) -> MiriaObject:
+    """Return a MiriaObject for retrieval."""
+    return MiriaObject(source=remote_path.as_posix(), destination=local_directory.as_posix())
 
 
 @pytest.fixture(name="transfer_payload")
-def fixture_transfer_payload(miria_file_archive: MiriaFile) -> TransferPayload:
-    """Return a TransferPayload object containing two identical MiriaFile object."""
+def transfer_payload(miria_file_archive: MiriaObject) -> TransferPayload:
+    """Return a TransferPayload object containing two identical MiriaObject object."""
     return TransferPayload(
-        files_to_transfer=[miria_file_archive, miria_file_archive.copy(deep=True)]
+        files_to_transfer=[miria_file_archive, miria_file_archive.model_copy(deep=True)]
     )
 
 
 @pytest.fixture(name="remote_path")
-def fixture_remote_path() -> Path:
+def remote_path() -> Path:
     """Returns a mock path."""
     return Path("/some", "place")
 
 
 @pytest.fixture(name="local_directory")
-def fixture_local_directory() -> Path:
+def local_directory() -> Path:
     """Returns a mock path with /home as its root."""
     return Path(ROOT_TO_TRIM, "other", "place")
 
 
 @pytest.fixture(name="trimmed_local_directory")
-def fixture_trimmed_local_directory(local_directory: Path) -> Path:
+def trimmed_local_directory(local_directory: Path) -> Path:
     """Returns the trimmed local directory."""
     return Path(f"/{local_directory.relative_to(ROOT_TO_TRIM)}")
 
 
 @pytest.fixture(name="local_storage_repository")
-def fixture_local_storage_repository() -> str:
+def local_storage_repository() -> str:
     """Returns a local storage repository."""
     return "local@storage:"
 
 
 @pytest.fixture(name="remote_storage_repository")
-def fixture_remote_storage_repository() -> str:
+def remote_storage_repository() -> str:
     """Returns a remote storage repository."""
     return "archive@repository:"
 
 
 @pytest.fixture(name="full_remote_path")
-def fixture_full_remote_path(remote_storage_repository: str, remote_path: Path) -> str:
+def full_remote_path(remote_storage_repository: str, remote_path: Path) -> str:
     """Returns the merged remote repository and path."""
     return remote_storage_repository + remote_path.as_posix()
 
 
-@pytest.fixture(name="full_local_path")
-def fixture_full_local_path(local_storage_repository: str, trimmed_local_directory: Path) -> str:
-    """Returns the merged local repository and trimmed path."""
-    return local_storage_repository + trimmed_local_directory.as_posix()
-
-
 @pytest.fixture(name="archive_store")
-def fixture_archive_store(
+def archive_store(
     base_store: Store,
     helpers: StoreHelpers,
     sample_id,
@@ -197,7 +216,7 @@ def fixture_archive_store(
         data_archive_location="PDC",
     )
 
-    new_samples: List[Sample] = [
+    new_samples: list[Sample] = [
         base_store.add_sample(
             name=sample_name,
             sex=Gender.MALE,
@@ -228,8 +247,13 @@ def fixture_archive_store(
     return base_store
 
 
+@pytest.fixture(name="sample_with_spring_file")
+def sample_with_spring_file() -> str:
+    return "ADM1"
+
+
 @pytest.fixture(name="spring_archive_api")
-def fixture_spring_archive_api(
+def spring_archive_api(
     populated_housekeeper_api: HousekeeperAPI,
     archive_store: Store,
     ddn_dataflow_config: DataFlowConfig,

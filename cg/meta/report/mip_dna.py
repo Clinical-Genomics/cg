@@ -1,19 +1,19 @@
 import logging
-from typing import List, Optional, Iterable
+from typing import Iterable, Optional
 
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 
 from cg.constants import (
-    REQUIRED_REPORT_FIELDS,
-    REQUIRED_CUSTOMER_FIELDS,
-    REQUIRED_CASE_FIELDS,
     REQUIRED_APPLICATION_FIELDS,
+    REQUIRED_CASE_FIELDS,
+    REQUIRED_CUSTOMER_FIELDS,
     REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS,
-    REQUIRED_SAMPLE_MIP_DNA_FIELDS,
-    REQUIRED_SAMPLE_METHODS_FIELDS,
-    REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
+    REQUIRED_REPORT_FIELDS,
     REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS,
     REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS,
+    REQUIRED_SAMPLE_METHODS_FIELDS,
+    REQUIRED_SAMPLE_MIP_DNA_FIELDS,
+    REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     Pipeline,
 )
 from cg.constants.scout_upload import MIP_CASE_TAGS
@@ -80,7 +80,7 @@ class MipDNAReportAPI(ReportAPI):
         return analysis_metadata.genome_build
 
     def get_report_accreditation(
-        self, samples: List[SampleModel], analysis_metadata: MipAnalysis = None
+        self, samples: list[SampleModel], analysis_metadata: MipAnalysis = None
     ) -> bool:
         """Checks if the report is accredited or not by evaluating each of the sample process accreditations."""
         for sample in samples:

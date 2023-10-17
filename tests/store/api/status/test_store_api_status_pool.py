@@ -1,18 +1,17 @@
-from typing import List
 from cg.store import Store
-from cg.store.models import Pool, Customer
+from cg.store.models import Customer, Pool
 
 
 def test_get_pools_to_invoice_query(
     store_with_pools_for_multiple_customers: Store,
-    three_pool_names: List[str],
+    three_pool_names: list[str],
 ):
     """Test return pools to invoice."""
     # GIVEN a store with multiple pools for multiple customers
     assert len(store_with_pools_for_multiple_customers.get_pools()) > 1
 
     # WHEN finding samples to invoice
-    pools: List[Pool] = store_with_pools_for_multiple_customers.get_pools_to_invoice_query().all()
+    pools: list[Pool] = store_with_pools_for_multiple_customers.get_pools_to_invoice_query().all()
 
     # THEN it should return all pools that are not invoiced
     for pool in pools:
@@ -22,7 +21,7 @@ def test_get_pools_to_invoice_query(
 
 def test_get_pools_to_invoice_for_customer(
     store_with_pools_for_multiple_customers: Store,
-    three_customer_ids: List[str],
+    three_customer_ids: list[str],
 ):
     """Test return pools to invoice for a customer."""
     # GIVEN a store with multiple pools for multiple customers
@@ -35,7 +34,7 @@ def test_get_pools_to_invoice_for_customer(
     assert customer
 
     # WHEN finding samples to invoice for a customer
-    pools: List[Pool] = store_with_pools_for_multiple_customers.get_pools_to_invoice_for_customer(
+    pools: list[Pool] = store_with_pools_for_multiple_customers.get_pools_to_invoice_for_customer(
         customer=customer
     )
 

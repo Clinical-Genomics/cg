@@ -1,21 +1,16 @@
 """Tests for the status_db_storage_functions module of the demultiplexing post post-processing module."""
+
 from mock import MagicMock
 
-from cg.meta.demultiplex.demux_post_processing import (
-    DemuxPostProcessingAPI,
-)
-
-from cg.models.cg_config import CGConfig
-
-from cg.store import Store
-
-
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.status_db_storage_functions import (
-    add_sequencing_metrics_to_statusdb,
-    update_sample_read_count,
-    metric_has_sample_in_statusdb,
     add_samples_to_flow_cell_in_status_db,
+    add_sequencing_metrics_to_statusdb,
+    metric_has_sample_in_statusdb,
+    update_sample_read_count,
 )
+from cg.models.cg_config import CGConfig
+from cg.store import Store
 
 
 def test_add_single_sequencing_metrics_entry_to_statusdb(
@@ -45,17 +40,18 @@ def test_add_single_sequencing_metrics_entry_to_statusdb(
     )
 
 
-def test_update_sample_read_count(demultiplex_context: CGConfig):
+def test_update_sample_read_count(demultiplex_context: CGConfig, timestamp_yesterday):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a sample id and a q30 threshold
-    sample_internal_id = "sample_1"
-    q30_threshold = 0
+    sample_internal_id: str = "sample_1"
+    q30_threshold: int = 0
 
     # GIVEN a sample and a read count
     sample = MagicMock()
-    read_count = 100
+    read_count: int = 100
+    sample.reads_updated_at = timestamp_yesterday
 
     # GIVEN a mocked status_db
     status_db = MagicMock()
@@ -79,6 +75,9 @@ def test_update_sample_read_count(demultiplex_context: CGConfig):
 
     # THEN the calculated_read_count has been updated with the read count for the sample
     assert sample.reads == read_count
+
+    # THEN the reads_updated_at has been updated with a new timestamp
+    assert sample.reads_updated_at > timestamp_yesterday
 
 
 def test_metric_has_sample_in_statusdb(demultiplex_context: CGConfig):

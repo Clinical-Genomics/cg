@@ -1,7 +1,7 @@
 """Tests for the utils module"""
 import pytest
 
-from cg.utils.utils import get_string_from_list_by_pattern, get_hamming_distance
+from cg.utils.utils import get_hamming_distance, get_string_from_list_by_pattern
 
 
 def test_get_string_from_list_by_pattern():

@@ -1,15 +1,10 @@
 import copy
-from typing import Dict
-
-from cg.models.report.metadata import BalsamicTargetedSampleMetadataModel
-
-from cg.store import Store
 
 from cg.meta.report.balsamic import BalsamicReportAPI
-
 from cg.models.balsamic.analysis import BalsamicAnalysis
-
-from cg.store.models import BedVersion, Sample, Family
+from cg.models.report.metadata import BalsamicTargetedSampleMetadataModel
+from cg.store import Store
+from cg.store.models import BedVersion, Family, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -33,7 +28,7 @@ def test_get_sample_metadata(
     )
 
     # GIVEN the expected output
-    expected_metadata: Dict[str, str] = {
+    expected_metadata: dict[str, str] = {
         "million_read_pairs": "10.0",
         "duplicates": "93.1",
         "mean_insert_size": "178.19",

@@ -5,18 +5,16 @@ from pathlib import Path
 from typing import Optional
 
 import click
-from pydantic.v1 import ValidationError
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
-from cg.cli.workflow.nextflow.options import (
+from cg.cli.workflow.nf_analysis import (
+    OPTION_COMPUTE_ENV,
     OPTION_CONFIG,
     OPTION_LOG,
     OPTION_PARAMS_FILE,
     OPTION_PROFILE,
     OPTION_REVISION,
-    OPTION_STUB,
-    OPTION_TOWER,
+    OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
 )
@@ -25,15 +23,15 @@ from cg.cli.workflow.rnafusion.options import (
     OPTION_REFERENCES,
     OPTION_STRANDEDNESS,
 )
-from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV, OPTION_TOWER_RUN_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
-from cg.exc import CgError, DecompressionNeededError
+from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.store import Store
+from pydantic.v1 import ValidationError
 
 LOG = logging.getLogger(__name__)
 
@@ -62,13 +60,13 @@ def config_case(
 ) -> None:
     """Create sample sheet file and params file for a given case."""
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    LOG.info(f"Creating sample sheet file for {case_id}.")
+    LOG.info(f"Creating config files for {case_id}.")
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.config_case(
             case_id=case_id, strandedness=strandedness, genomes_base=genomes_base, dry_run=dry_run
         )
-    except CgError as error:
+    except (CgError, ValidationError) as error:
         LOG.error(f"Could not create config files for {case_id}: {error}")
         raise click.Abort() from error
 
@@ -79,8 +77,6 @@ def config_case(
 @OPTION_WORKDIR
 @OPTION_FROM_START
 @OPTION_PROFILE
-@OPTION_TOWER
-@OPTION_STUB
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
 @OPTION_REVISION
@@ -96,8 +92,6 @@ def run(
     work_dir: str,
     from_start: bool,
     profile: str,
-    with_tower: bool,
-    stub: bool,
     config: str,
     params_file: str,
     revision: str,
@@ -120,8 +114,6 @@ def run(
             "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
-            "with_tower": with_tower,
-            "stub": stub,
             "config": analysis_api.get_nextflow_config_path(nextflow_config=config),
             "params_file": analysis_api.get_params_file_path(
                 case_id=case_id, params_file=params_file
@@ -135,7 +127,7 @@ def run(
     )
 
     try:
-        analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
+        analysis_api.verify_sample_sheet_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.check_analysis_ongoing(case_id)
         LOG.info(f"Running RNAFUSION analysis for {case_id}")
         analysis_api.run_analysis(
@@ -162,8 +154,6 @@ def run(
 @OPTION_LOG
 @OPTION_WORKDIR
 @OPTION_PROFILE
-@OPTION_TOWER
-@OPTION_STUB
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
 @OPTION_REVISION
@@ -173,13 +163,11 @@ def run(
 @DRY_RUN
 @click.pass_context
 def start(
-    context: CGConfig,
+    context: click.Context,
     case_id: str,
     log: str,
     work_dir: str,
     profile: str,
-    with_tower: bool,
-    stub: bool,
     config: str,
     params_file: str,
     revision: str,
@@ -191,11 +179,8 @@ def start(
     """Start full workflow for CASE ID."""
     LOG.info(f"Starting analysis for {case_id}")
 
-    try:
-        context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
-    except DecompressionNeededError as error:
-        LOG.error(error)
-        raise click.Abort() from error
+    analysis_api: RnafusionAnalysisAPI = context.obj.meta_apis["analysis_api"]
+    analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
     context.invoke(config_case, case_id=case_id, genomes_base=genomes_base, dry_run=dry_run)
     context.invoke(
         run,
@@ -204,8 +189,6 @@ def start(
         work_dir=work_dir,
         from_start=True,
         profile=profile,
-        with_tower=with_tower,
-        stub=stub,
         config=config,
         params_file=params_file,
         revision=revision,
@@ -227,6 +210,8 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+        except AnalysisNotReadyError as error:
+            LOG.error(error)
         except CgError as error:
             LOG.error(error)
             exit_code = EXIT_FAIL
@@ -276,7 +261,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
             analysis_api.report_deliver(case_id=case_id)
         else:
             LOG.info("Dry-run")
-    except CgError as error:
+    except (CgError, ValidationError) as error:
         LOG.error(f"Could not create report file: {error}")
         raise click.Abort()
     except Exception as error:

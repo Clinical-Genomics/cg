@@ -1,6 +1,11 @@
 import datetime as dt
 import re
-from typing import Dict, List, Optional, Set
+from typing import Optional
+
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.util import deprecated
 
 from cg.constants import (
     CASE_ACTIONS,
@@ -13,10 +18,6 @@ from cg.constants import (
     Priority,
 )
 from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm.attributes import InstrumentedAttribute
-from sqlalchemy.util import deprecated
 
 Model = declarative_base()
 
@@ -116,6 +117,7 @@ class Application(Model):
     versions = orm.relationship(
         "ApplicationVersion", order_by="ApplicationVersion.version", backref="application"
     )
+    pipeline_limitations = orm.relationship("ApplicationLimitations", backref="application")
 
     def __str__(self) -> str:
         return self.tag
@@ -129,9 +131,9 @@ class Application(Model):
         return self.target_reads * self.percent_reads_guaranteed / 100
 
     @property
-    def analysis_type(self):
+    def analysis_type(self) -> str:
         if self.prep_category == PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
-            return self.prep_category
+            return PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
 
         return (
             PrepCategory.WHOLE_GENOME_SEQUENCING.value
@@ -173,6 +175,24 @@ class ApplicationVersion(Model):
         return data
 
 
+class ApplicationLimitations(Model):
+    __tablename__ = "application_limitations"
+
+    id = Column(types.Integer, primary_key=True)
+    application_id = Column(ForeignKey(Application.id), nullable=False)
+    pipeline = Column(types.Enum(*list(Pipeline)), nullable=False)
+    limitations = Column(types.Text)
+    comment = Column(types.Text)
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+
+    def __str__(self):
+        return f"{self.application.tag} – {self.pipeline}"
+
+    def to_dict(self):
+        return to_dict(model_instance=self)
+
+
 class Analysis(Model):
     __tablename__ = "analysis"
 
@@ -189,7 +209,7 @@ class Analysis(Model):
     is_primary = Column(types.Boolean, default=False)
 
     created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
-    family_id = Column(ForeignKey("family.id", ondelete="CASCADE"))
+    family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
     uploaded_to_vogue_at = Column(types.DateTime, nullable=True)
 
     def __str__(self):
@@ -287,7 +307,7 @@ class Customer(Model):
         return f"{self.internal_id} ({self.name})"
 
     @property
-    def collaborators(self) -> Set["Customer"]:
+    def collaborators(self) -> set["Customer"]:
         """All customers that the current customer collaborates with (including itself)"""
         customers = {
             customer
@@ -319,9 +339,6 @@ class Collaboration(Model):
             "name": self.name,
             "internal_id": self.internal_id,
         }
-
-    def to_dict(self):
-        return to_dict(model_instance=self)
 
 
 class Delivery(Model):
@@ -362,21 +379,21 @@ class Family(Model, PriorityMixin):
     tickets = Column(types.VARCHAR)
 
     @property
-    def cohorts(self) -> List[str]:
+    def cohorts(self) -> list[str]:
         """Return a list of cohorts."""
         return self._cohorts.split(",") if self._cohorts else []
 
     @cohorts.setter
-    def cohorts(self, cohort_list: List[str]):
+    def cohorts(self, cohort_list: list[str]):
         self._cohorts = ",".join(cohort_list) if cohort_list else None
 
     @property
-    def panels(self) -> List[str]:
+    def panels(self) -> list[str]:
         """Return a list of panels."""
         return self._panels.split(",") if self._panels else []
 
     @panels.setter
-    def panels(self, panel_list: List[str]):
+    def panels(self, panel_list: list[str]):
         self._panels = ",".join(panel_list) if panel_list else None
 
     @property
@@ -394,8 +411,8 @@ class Family(Model, PriorityMixin):
         for link in self.links:
             if link.sample.application_version.application.is_external:
                 sequenced_dates.append(link.sample.ordered_at)
-            elif link.sample.sequenced_at:
-                sequenced_dates.append(link.sample.sequenced_at)
+            elif link.sample.reads_updated_at:
+                sequenced_dates.append(link.sample.reads_updated_at)
         return max(sequenced_dates, default=None)
 
     @property
@@ -412,32 +429,32 @@ class Family(Model, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
-    def samples(self) -> List["Sample"]:
+    def samples(self) -> list["Sample"]:
         """Return case samples."""
         return self._get_samples
 
     @property
-    def _get_samples(self) -> List["Sample"]:
+    def _get_samples(self) -> list["Sample"]:
         """Extract samples from a case."""
         return [link.sample for link in self.links]
 
     @property
-    def tumour_samples(self) -> List["Sample"]:
+    def tumour_samples(self) -> list["Sample"]:
         """Return tumour samples."""
         return self._get_tumour_samples
 
     @property
-    def _get_tumour_samples(self) -> List["Sample"]:
+    def _get_tumour_samples(self) -> list["Sample"]:
         """Extract tumour samples."""
         return [link.sample for link in self.links if link.sample.is_tumour]
 
     @property
-    def loqusdb_uploaded_samples(self) -> List["Sample"]:
+    def loqusdb_uploaded_samples(self) -> list["Sample"]:
         """Return uploaded samples to Loqusdb."""
         return self._get_loqusdb_uploaded_samples
 
     @property
-    def _get_loqusdb_uploaded_samples(self) -> List["Sample"]:
+    def _get_loqusdb_uploaded_samples(self) -> list["Sample"]:
         """Extract samples uploaded to Loqusdb."""
         return [link.sample for link in self.links if link.sample.loqusdb_id]
 
@@ -446,11 +463,11 @@ class Family(Model, PriorityMixin):
         """Returns True if the latest connected analysis has been uploaded."""
         return self.analyses and self.analyses[0].uploaded_at
 
-    def get_delivery_arguments(self) -> Set[str]:
+    def get_delivery_arguments(self) -> set[str]:
         """Translates the case data_delivery field to pipeline specific arguments."""
-        delivery_arguments: Set[str] = set()
-        requested_deliveries: List[str] = re.split("[-_]", self.data_delivery)
-        delivery_per_pipeline_map: Dict[str, str] = {
+        delivery_arguments: set[str] = set()
+        requested_deliveries: list[str] = re.split("[-_]", self.data_delivery)
+        delivery_per_pipeline_map: dict[str, str] = {
             DataDelivery.FASTQ: Pipeline.FASTQ,
             DataDelivery.ANALYSIS_FILES: self.data_analysis,
         }
@@ -521,6 +538,7 @@ class Flowcell(Model):
     sequenced_at = Column(types.DateTime)
     status = Column(types.Enum(*FLOWCELL_STATUS), default="ondisk")
     archived_at = Column(types.DateTime)
+    has_backup = Column(types.Boolean, nullable=False, default=False)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
     samples = orm.relationship("Sample", secondary=flowcell_sample, backref="flowcells")
@@ -642,10 +660,10 @@ class Sample(Model, PriorityMixin):
 
     priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     reads = Column(types.BigInteger, default=0)
+    reads_updated_at = Column(types.DateTime)
     received_at = Column(types.DateTime)
     reference_genome = Column(types.String(255))
     sequence_start = Column(types.DateTime)
-    sequenced_at = Column(types.DateTime)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
 
@@ -676,21 +694,21 @@ class Sample(Model, PriorityMixin):
         return self.reads > application.expected_reads
 
     @property
-    def phenotype_groups(self) -> List[str]:
+    def phenotype_groups(self) -> list[str]:
         """Return a list of phenotype_groups."""
         return self._phenotype_groups.split(",") if self._phenotype_groups else []
 
     @phenotype_groups.setter
-    def phenotype_groups(self, phenotype_term_list: List[str]):
+    def phenotype_groups(self, phenotype_term_list: list[str]):
         self._phenotype_groups = ",".join(phenotype_term_list) if phenotype_term_list else None
 
     @property
-    def phenotype_terms(self) -> List[str]:
+    def phenotype_terms(self) -> list[str]:
         """Return a list of phenotype_terms."""
         return self._phenotype_terms.split(",") if self._phenotype_terms else []
 
     @phenotype_terms.setter
-    def phenotype_terms(self, phenotype_term_list: List[str]):
+    def phenotype_terms(self, phenotype_term_list: list[str]):
         self._phenotype_terms = ",".join(phenotype_term_list) if phenotype_term_list else None
 
     @property
@@ -703,8 +721,8 @@ class Sample(Model, PriorityMixin):
         """Get the current sample state."""
         if self.delivered_at:
             return f"Delivered {self.delivered_at.date()}"
-        if self.sequenced_at:
-            return f"Sequenced {self.sequenced_at.date()}"
+        if self.reads_updated_at:
+            return f"Sequenced {self.reads_updated_at.date()}"
         if self.sequence_start:
             return f"Sequencing {self.sequence_start.date()}"
         if self.received_at:
@@ -716,6 +734,10 @@ class Sample(Model, PriorityMixin):
     def archive_location(self) -> str:
         """Returns the data_archive_location if the customer linked to the sample."""
         return self.customer.data_archive_location
+
+    @property
+    def has_reads(self) -> bool:
+        return bool(self.reads)
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
@@ -788,7 +810,7 @@ class SampleLaneSequencingMetrics(Model):
 
     sample_internal_id = Column(types.String(32), ForeignKey("sample.internal_id"), nullable=False)
     sample_total_reads_in_lane = Column(types.BigInteger)
-    sample_base_fraction_passing_q30 = Column(types.Numeric(6, 2))
+    sample_base_percentage_passing_q30 = Column(types.Numeric(6, 2))
     sample_base_mean_quality_score = Column(types.Numeric(6, 2))
 
     created_at = Column(types.DateTime)

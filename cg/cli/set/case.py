@@ -1,15 +1,14 @@
 """Set case attributes in the status database."""
 import logging
-from typing import List, Optional, Tuple
+from typing import Optional
+
 import click
 
-from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline
+from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline, Priority
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Customer, Family, Panel
 from cg.utils.click.EnumChoice import EnumChoice
-
-from cg.constants import Priority
 
 LOG = logging.getLogger(__name__)
 
@@ -43,13 +42,13 @@ def set_case(
     data_analysis: Optional[Pipeline],
     data_delivery: Optional[DataDelivery],
     priority: Optional[Priority],
-    panel_abbreviations: Optional[Tuple[str]],
+    panel_abbreviations: Optional[tuple[str]],
     case_id: str,
     customer_id: Optional[str],
 ):
     """Update information about a case."""
 
-    options: List[str] = [
+    options: list[str] = [
         action,
         panel_abbreviations,
         priority,
@@ -83,7 +82,7 @@ def set_case(
     status_db.session.commit()
 
 
-def abort_on_empty_options(options: List[str]) -> None:
+def abort_on_empty_options(options: list[str]) -> None:
     if not any(options):
         LOG.error("Nothing to change")
         raise click.Abort
@@ -126,7 +125,7 @@ def update_data_delivery(case: Family, data_delivery: DataDelivery) -> None:
     case.data_delivery = data_delivery
 
 
-def update_panels(case: Family, panel_abbreviations: List[str], status_db: Store) -> None:
+def update_panels(case: Family, panel_abbreviations: list[str], status_db: Store) -> None:
     for panel_abbreviation in panel_abbreviations:
         panel: Panel = status_db.get_panel_by_abbreviation(abbreviation=panel_abbreviation)
         if panel is None:

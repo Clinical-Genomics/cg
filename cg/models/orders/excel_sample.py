@@ -1,139 +1,109 @@
-from typing import List, Optional
-from pydantic.v1 import Field, validator
+from typing import Optional
 
-from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
+from pydantic import AfterValidator, BeforeValidator, Field
+from typing_extensions import Annotated
+
+from cg.models.orders.constants import ExcelSampleAliases
 from cg.models.orders.sample_base import OrderSample
+from cg.models.orders.validators.excel_sample_validators import (
+    convert_sex,
+    convert_to_date,
+    convert_to_lower,
+    convert_to_priority,
+    numeric_value,
+    parse_panels,
+    replace_spaces_with_underscores,
+    validate_data_analysis,
+    validate_parent,
+    validate_source,
+)
 
 
 class ExcelSample(OrderSample):
-    age_at_sampling: str = Field(None, alias="UDF/age_at_sampling")
-    application: str = Field(..., alias="UDF/Sequencing Analysis")
-    capture_kit: str = Field(None, alias="UDF/Capture Library version")
-    cohorts: List[str] = Field(None, alias="UDF/cohorts")
-    collection_date: str = Field(None, alias="UDF/Collection Date")
-    comment: str = Field(None, alias="UDF/Comment")
-    concentration: str = Field(None, alias="UDF/Concentration (nM)")
-    concentration_sample: str = Field(None, alias="UDF/Sample Conc.")
-    container: str = Field(None, alias="Container/Type")
-    container_name: str = Field(None, alias="Container/Name")
-    control: str = Field(None, alias="UDF/Control")
-    custom_index: str = Field(None, alias="UDF/Custom index")
-    customer: str = Field(..., alias="UDF/customer")
-    data_analysis: str = Field("MIP DNA", alias="UDF/Data Analysis")
-    data_delivery: str = Field(None, alias="UDF/Data Delivery")
-    elution_buffer: str = Field(None, alias="UDF/Sample Buffer")
-    extraction_method: str = Field(None, alias="UDF/Extraction method")
-    family_name: str = Field(None, alias="UDF/familyID")
-    father: str = Field(None, alias="UDF/fatherID")
-    formalin_fixation_time: str = Field(None, alias="UDF/Formalin Fixation Time")
-    index: str = Field(None, alias="UDF/Index type")
-    index_number: str = Field(None, alias="UDF/Index number")
-    lab_code: str = Field(None, alias="UDF/Lab Code")
-    mother: str = Field(None, alias="UDF/motherID")
-    name: str = Field(..., alias="Sample/Name")
-    organism: str = Field(None, alias="UDF/Strain")
-    organism_other: str = Field(None, alias="UDF/Other species")
-    original_lab: str = Field(None, alias="UDF/Original Lab")
-    original_lab_address: str = Field(None, alias="UDF/Original Lab Address")
-    panels: List[str] = Field(None, alias="UDF/Gene List")
-    pool: str = Field(None, alias="UDF/pool name")
-    post_formalin_fixation_time: str = Field(None, alias="UDF/Post Formalin Fixation Time")
-    pre_processing_method: str = Field(None, alias="UDF/Pre Processing Method")
-    primer: str = Field(None, alias="UDF/Primer")
-    priority: str = Field(None, alias="UDF/priority")
-    quantity: str = Field(None, alias="UDF/Quantity")
-    reagent_label: str = Field(None, alias="Sample/Reagent Label")
-    reference_genome: str = Field(None, alias="UDF/Reference Genome Microbial")
-    region: str = Field(None, alias="UDF/Region")
-    region_code: str = Field(None, alias="UDF/Region Code")
-    require_qc_ok: bool = Field(None, alias="UDF/Process only if QC OK")
-    rml_plate_name: str = Field(None, alias="UDF/RML plate name")
-    selection_criteria: str = Field(None, alias="UDF/Selection Criteria")
-    sex: str = Field(None, alias="UDF/Gender")
-    source: str = Field(None, alias="UDF/Source")
-    status: str = Field(None, alias="UDF/Status")
-    subject_id: str = Field(None, alias="UDF/subjectID")
-    synopsis: str = Field(None, alias="UDF/synopsis")
-    tissue_block_size: str = Field(None, alias="UDF/Tissue Block Size")
-    tumour: bool = Field(None, alias="UDF/tumor")
-    tumour_purity: str = Field(None, alias="UDF/tumour purity")
-    volume: str = Field(None, alias="UDF/Volume (uL)")
-    well_position: str = Field(None, alias="Sample/Well Location")
-    well_position_rml: str = Field(None, alias="UDF/RML well position")
-
-    @validator("data_analysis")
-    def validate_data_analysis(cls, value):
-        data_analysis_alternatives = [
-            "Balsamic",  # OF 1508
-            "Balsamic QC",  # OF 1508
-            "Balsamic UMI",  # OF 1508
-            "fastq",  # OF 1605
-            "FLUFFY",  # OF 1604
-            "MicroSALT",  # OF 1603 (implicit)
-            "MIP DNA",  # OF 1508
-            "MIP RNA",  # OF 1508
-            "RNAfusion",  # OF 1508
-            "SARS-CoV-2",  # OF 2184
-            "No analysis",  # OF 1508, 1604, 2184
-        ]
-        if value not in data_analysis_alternatives:
-            raise AttributeError(f"'{value}' is not a valid data analysis")
-        return value
-
-    @validator("index_number", "volume", "quantity", "concentration", "concentration_sample")
-    def numeric_value(cls, value: Optional[str]):
-        if not value:
-            return None
-        str_value = value.rsplit(".0")[0]
-        if str_value.replace(".", "").isnumeric():
-            return str_value
-        raise AttributeError(f"Order contains non-numeric value '{value}'")
-
-    @validator("mother", "father")
-    def validate_parent(cls, value: str):
-        if value == "0.0":
-            return None
-        return value
-
-    @validator("source")
-    def validate_source(cls, value: Optional[str]):
-        if value not in SOURCE_TYPES:
-            raise ValueError(f"'{value}' is not a valid source")
-        return value
-
-    @validator("sex")
-    def convert_sex(cls, value: Optional[str]):
-        if not value:
-            return None
-        value = value.strip()
-        return REV_SEX_MAP.get(value, "unknown")
-
-    @validator("panels", pre=True)
-    def parse_panels(cls, value):
-        if not value:
-            return None
-        separator = ";"
-        if ":" in value:
-            separator = ":"
-        return value.split(separator)
-
-    @validator("data_delivery")
-    def convert_data_delivery(cls, value: Optional[str]):
-        return value.lower()
-
-    @validator("status", "priority")
-    def convert_to_lower(cls, value: Optional[str]):
-        value = value.lower()
-        return value
-
-    @validator("priority")
-    def convert_to_priority(cls, value: Optional[str]):
-        if value.lower() == "förtur":
-            return "priority"
-        return value
-
-    @validator("collection_date")
-    def convert_to_date(cls, value: Optional[str]) -> Optional[str]:
-        if not value:
-            return None
-        return value[0:10]
+    age_at_sampling: str = Field(None, alias=ExcelSampleAliases.AGE_AT_SAMPLING)
+    application: str = Field(..., alias=ExcelSampleAliases.APPLICATION)
+    capture_kit: str = Field(None, alias=ExcelSampleAliases.CAPTURE_KIT)
+    cohorts: list[str] = Field(None, alias=ExcelSampleAliases.COHORTS)
+    collection_date: Annotated[str, AfterValidator(convert_to_date)] = Field(
+        None, alias=ExcelSampleAliases.COLLECTION_DATE
+    )
+    comment: str = Field(None, alias=ExcelSampleAliases.COMMENT)
+    concentration: Annotated[str, AfterValidator(numeric_value)] = Field(
+        None, alias=ExcelSampleAliases.CONCENTRATION
+    )
+    concentration_sample: Annotated[str, AfterValidator(numeric_value)] = Field(
+        None, alias=ExcelSampleAliases.CONCENTRATION_SAMPLE
+    )
+    container: str = Field(None, alias=ExcelSampleAliases.CONTAINER)
+    container_name: str = Field(None, alias=ExcelSampleAliases.CONTAINER_NAME)
+    control: str = Field(None, alias=ExcelSampleAliases.CONTROL)
+    custom_index: str = Field(None, alias=ExcelSampleAliases.CUSTOM_INDEX)
+    customer: str = Field(..., alias=ExcelSampleAliases.CUSTOMER)
+    data_analysis: Annotated[str, AfterValidator(validate_data_analysis)] = Field(
+        "MIP DNA", alias=ExcelSampleAliases.DATA_ANALYSIS
+    )
+    data_delivery: Annotated[str, AfterValidator(convert_to_lower)] = Field(
+        None, alias=ExcelSampleAliases.DATA_DELIVERY
+    )
+    elution_buffer: str = Field(None, alias=ExcelSampleAliases.ELUTION_BUFFER)
+    extraction_method: str = Field(None, alias=ExcelSampleAliases.EXTRACTION_METHOD)
+    family_name: str = Field(None, alias=ExcelSampleAliases.FAMILY_NAME)
+    father: Annotated[str, AfterValidator(validate_parent)] = Field(
+        None, alias=ExcelSampleAliases.FATHER
+    )
+    formalin_fixation_time: str = Field(None, alias=ExcelSampleAliases.FORMALIN_FIXATION_TIME)
+    index: str = Field(None, alias=ExcelSampleAliases.INDEX)
+    index_number: Annotated[str, AfterValidator(numeric_value)] = Field(
+        None, alias=ExcelSampleAliases.INDEX_NUMBER
+    )
+    lab_code: str = Field(None, alias=ExcelSampleAliases.LAB_CODE)
+    mother: Annotated[str, AfterValidator(validate_parent)] = Field(
+        None, alias=ExcelSampleAliases.MOTHER
+    )
+    name: str = Field(..., alias=ExcelSampleAliases.NAME)
+    organism: str = Field(None, alias=ExcelSampleAliases.ORGANISM)
+    organism_other: str = Field(None, alias=ExcelSampleAliases.ORGANISM_OTHER)
+    original_lab: str = Field(None, alias=ExcelSampleAliases.ORIGINAL_LAB)
+    original_lab_address: str = Field(None, alias=ExcelSampleAliases.ORIGINAL_LAB_ADDRESS)
+    panels: Annotated[Optional[list[str]], BeforeValidator(parse_panels)] = Field(
+        None, alias=ExcelSampleAliases.PANELS
+    )
+    pool: str = Field(None, alias=ExcelSampleAliases.POOL)
+    post_formalin_fixation_time: str = Field(
+        None, alias=ExcelSampleAliases.POST_FORMALIN_FIXATION_TIME
+    )
+    pre_processing_method: str = Field(None, alias=ExcelSampleAliases.PRE_PROCESSING_METHOD)
+    primer: str = Field(None, alias=ExcelSampleAliases.PRIMER)
+    priority: Annotated[
+        str,
+        AfterValidator(convert_to_lower),
+        AfterValidator(convert_to_priority),
+        AfterValidator(replace_spaces_with_underscores),
+    ] = Field(None, alias=ExcelSampleAliases.PRIORITY)
+    quantity: Annotated[str, AfterValidator(numeric_value)] = Field(
+        None, alias=ExcelSampleAliases.QUANTITY
+    )
+    reagent_label: str = Field(None, alias=ExcelSampleAliases.REAGENT_LABEL)
+    reference_genome: str = Field(None, alias=ExcelSampleAliases.REFERENCE_GENOME)
+    region: str = Field(None, alias=ExcelSampleAliases.REGION)
+    region_code: str = Field(None, alias=ExcelSampleAliases.REGION_CODE)
+    require_qc_ok: bool = Field(None, alias=ExcelSampleAliases.REQUIRE_QC_OK)
+    rml_plate_name: str = Field(None, alias=ExcelSampleAliases.RML_PLATE_NAME)
+    selection_criteria: str = Field(None, alias=ExcelSampleAliases.SELECTION_CRITERIA)
+    sex: Annotated[str, AfterValidator(convert_sex)] = Field(None, alias=ExcelSampleAliases.SEX)
+    source: Annotated[str, AfterValidator(validate_source)] = Field(
+        None, alias=ExcelSampleAliases.SOURCE
+    )
+    status: Annotated[str, AfterValidator(convert_to_lower)] = Field(
+        None, alias=ExcelSampleAliases.STATUS
+    )
+    subject_id: str = Field(None, alias=ExcelSampleAliases.SUBJECT_ID)
+    synopsis: str = Field(None, alias=ExcelSampleAliases.SYNOPSIS)
+    tissue_block_size: str = Field(None, alias=ExcelSampleAliases.TISSUE_BLOCK_SIZE)
+    tumour: bool = Field(None, alias=ExcelSampleAliases.TUMOUR)
+    tumour_purity: str = Field(None, alias=ExcelSampleAliases.TUMOUR_PURITY)
+    volume: Annotated[str, AfterValidator(numeric_value)] = Field(
+        None, alias=ExcelSampleAliases.VOLUME
+    )
+    well_position: str = Field(None, alias=ExcelSampleAliases.WELL_POSITION)
+    well_position_rml: str = Field(None, alias=ExcelSampleAliases.WELL_POSITION_RML)

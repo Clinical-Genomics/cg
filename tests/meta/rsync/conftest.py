@@ -2,13 +2,13 @@ from pathlib import Path
 
 import pytest
 
-from cg.store.models import Family
+from cg.constants.constants import Pipeline
 from cg.models.cg_config import CGConfig
-from cgmodels.cg.constants import Pipeline
+from cg.store.models import Family
 
 
-@pytest.fixture(name="mutant_case")
-def fixture_mutant_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> Family:
+@pytest.fixture
+def mutant_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> Family:
     """Return mutant case"""
     case = helpers.add_case(
         store=cg_context.status_db,
@@ -19,8 +19,8 @@ def fixture_mutant_case(cg_context: CGConfig, case_id: str, ticket_id: str, help
     return case
 
 
-@pytest.fixture(name="microsalt_case")
-def fixture_microsalt_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> Family:
+@pytest.fixture
+def microsalt_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> Family:
     """Return mutant case"""
     case = helpers.add_case(
         store=cg_context.status_db,
@@ -31,7 +31,7 @@ def fixture_microsalt_case(cg_context: CGConfig, case_id: str, ticket_id: str, h
     return case
 
 
-@pytest.fixture(name="destination_path")
-def fixture_destination_path() -> Path:
+@pytest.fixture
+def destination_path() -> Path:
     """Retyrbs a dummy path."""
     return Path("path", "to", "destination")

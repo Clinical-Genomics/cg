@@ -1,19 +1,15 @@
 import datetime as dt
-from typing import List
-
-from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery, GenePanelMasterList
-from cg.constants.constants import PrepCategory
+from cg.constants.constants import Pipeline, PrepCategory
 from cg.constants.invoice import CustomerNames
+from cg.constants.priority import Priority
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
-from cg.constants.priority import Priority
-from cg.store.models import Sample, Family, FamilySample, Customer, ApplicationVersion
-from cg.constants.constants import PrepCategory
+from cg.store.models import ApplicationVersion, Customer, Family, FamilySample, Sample
 
 
 class FastqSubmitter(Submitter):
@@ -69,7 +65,7 @@ class FastqSubmitter(Submitter):
             priority=Priority.research,
             ticket=sample_obj.original_ticket,
         )
-        case.customer: Customer = self.status.get_customer_by_internal_id(
+        case.customer = self.status.get_customer_by_internal_id(
             customer_internal_id=CustomerNames.CG_INTERNAL_CUSTOMER
         )
         relationship: FamilySample = self.status.relate_sample(
@@ -78,8 +74,8 @@ class FastqSubmitter(Submitter):
         self.status.session.add_all([case, relationship])
 
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
-    ) -> List[Sample]:
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: list[dict]
+    ) -> list[Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
         customer: Customer = self.status.get_customer_by_internal_id(
             customer_internal_id=customer_id

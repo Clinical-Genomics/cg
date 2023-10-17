@@ -1,14 +1,13 @@
 """Tests for GensAPI."""
 
 from pathlib import Path
-from typing import Dict
 
 from cg.apps.gens import GensAPI
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.utils.commands import Process
 
 
-def test_instantiate(gens_config: Dict[str, Dict[str, str]]):
+def test_instantiate(gens_config: dict[str, dict[str, str]]):
     """Test to instantiate GensAPI."""
     # GIVEN a Gens API config dictionary
 
@@ -22,7 +21,7 @@ def test_instantiate(gens_config: Dict[str, Dict[str, str]]):
 
 def test_gens_api_load(
     case_id: str,
-    gens_config: Dict[str, Dict[str, str]],
+    gens_config: dict[str, dict[str, str]],
     gens_coverage_path: Path,
     gens_fracsnp_path: Path,
     mocker,

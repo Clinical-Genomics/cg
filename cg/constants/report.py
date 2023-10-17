@@ -1,8 +1,7 @@
 # Delivery report constants
 
-from cgmodels.cg.constants import Pipeline
-
 from cg.constants import DataDelivery
+from cg.constants.constants import Pipeline
 
 BALSAMIC_REPORT_ACCREDITED_PANELS = ["gmsmyeloid"]
 
@@ -116,7 +115,7 @@ REQUIRED_SAMPLE_RNAFUSION_FIELDS = REQUIRED_SAMPLE_BALSAMIC_FIELDS
 # Methods required fields (OPTIONAL: "library_prep", "sequencing")
 REQUIRED_SAMPLE_METHODS_FIELDS = []
 
-# Timestamp required fields (OPTIONAL: "prepared_at", "sequenced_at")
+# Timestamp required fields (OPTIONAL: "prepared_at", "reads_updated_at")
 REQUIRED_SAMPLE_TIMESTAMP_FIELDS = [
     "ordered_at",
     "received_at",  # Optional for external samples

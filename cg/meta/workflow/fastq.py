@@ -12,7 +12,7 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 LOG = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class FastqHandler:
     """Handles fastq file linking"""
 
     @staticmethod
-    def concatenate(files: List, concat_file: str):
+    def concatenate(files: list, concat_file: str):
         """Concatenates a list of fastq files"""
         LOG.info(FastqHandler.display_files(files, concat_file))
 
@@ -46,7 +46,7 @@ class FastqHandler:
             LOG.warning(error)
 
     @staticmethod
-    def size_before(files: List) -> int:
+    def size_before(files) -> int:
         """Returns the total size of the linked fastq files before concatenation"""
 
         return sum(os.stat(f).st_size for f in files)
@@ -70,7 +70,7 @@ class FastqHandler:
         LOG.info("Concatenation file size check successful!")
 
     @staticmethod
-    def display_files(files: List, concat_file: str) -> str:
+    def display_files(files: list, concat_file: str) -> str:
         """display file names for logging purposes"""
         return (
             f"Concatenating: {', '.join(Path(file_).name for file_ in files)} -> "

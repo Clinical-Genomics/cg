@@ -1,12 +1,11 @@
 """Test how the api handles bundles."""
-from typing import Dict, Any
-
 from datetime import datetime
+from typing import Any
+
+from housekeeper.store.models import Bundle
 
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.small_helpers import SmallHelpers
-
-from housekeeper.store.models import Bundle
 
 
 def test_new_bundle(
@@ -31,7 +30,7 @@ def test_new_bundle(
 
 
 def test_add_bundle(
-    hk_bundle_data: Dict[str, Any],
+    hk_bundle_data: dict[str, Any],
     case_id: str,
     housekeeper_api: MockHousekeeperAPI,
     small_helpers: SmallHelpers,

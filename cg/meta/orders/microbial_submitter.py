@@ -1,14 +1,12 @@
 import datetime as dt
-from typing import List
-
-from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery
+from cg.constants.constants import Pipeline
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import MicrobialSample
-from cg.store.models import Customer, Family, Organism, Sample, ApplicationVersion
+from cg.store.models import ApplicationVersion, Customer, Family, Organism, Sample
 
 
 class MicrobialSubmitter(Submitter):
@@ -72,7 +70,7 @@ class MicrobialSubmitter(Submitter):
         data_delivery: DataDelivery,
         order: str,
         ordered: dt.datetime,
-        items: List[dict],
+        items: list[dict],
         ticket_id: str,
     ) -> [Sample]:
         """Store microbial samples in the status database."""
@@ -98,7 +96,7 @@ class MicrobialSubmitter(Submitter):
                         panels=None,
                         ticket=ticket_id,
                     )
-                    case.customer: Customer = customer
+                    case.customer = customer
                     self.status.session.add(case)
                     self.status.session.commit()
 
@@ -120,7 +118,7 @@ class MicrobialSubmitter(Submitter):
                     self.status.session.commit()
 
                 if comment:
-                    case.comment: str = f"Order comment: {comment}"
+                    case.comment = f"Order comment: {comment}"
 
                 new_sample = self.status.add_sample(
                     name=sample_data["name"],
@@ -148,7 +146,7 @@ class MicrobialSubmitter(Submitter):
             self.status.session.commit()
         return sample_objs
 
-    def _fill_in_sample_verified_organism(self, samples: List[MicrobialSample]):
+    def _fill_in_sample_verified_organism(self, samples: list[MicrobialSample]):
         for sample in samples:
             organism_id = sample.organism
             reference_genome = sample.reference_genome

@@ -8,6 +8,7 @@ from flask_dance.contrib.google import google, make_google_blueprint
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
     ApplicationVersion,
     Bed,
     BedVersion,
@@ -22,8 +23,8 @@ from cg.store.models import (
     Panel,
     Pool,
     Sample,
-    User,
     SampleLaneSequencingMetrics,
+    User,
 )
 
 from . import admin, api, ext, invoices
@@ -40,7 +41,7 @@ def create_app():
     return app
 
 
-def _load_config(app):
+def _load_config(app: Flask):
     app.config.from_object(__name__.replace("app", "config"))
 
 
@@ -56,7 +57,7 @@ def _configure_extensions(app: Flask):
     if app.config["OSTICKET_API_KEY"]:
         ext.osticket.init_app(app)
     ext.admin.init_app(app, index_view=AdminIndexView(endpoint="admin"))
-    app.json_encoder = ext.CustomJSONEncoder
+    app.json_provider_class = ext.CustomJSONEncoder
 
 
 def _initialize_logging(app):
@@ -103,6 +104,7 @@ def _register_admin_views():
     # Base data views
     ext.admin.add_view(admin.ApplicationView(Application, ext.db.session))
     ext.admin.add_view(admin.ApplicationVersionView(ApplicationVersion, ext.db.session))
+    ext.admin.add_view(admin.ApplicationLimitationsView(ApplicationLimitations, ext.db.session))
     ext.admin.add_view(admin.BedView(Bed, ext.db.session))
     ext.admin.add_view(admin.BedVersionView(BedVersion, ext.db.session))
     ext.admin.add_view(admin.CustomerView(Customer, ext.db.session))

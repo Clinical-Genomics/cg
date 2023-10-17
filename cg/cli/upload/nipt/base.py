@@ -2,14 +2,14 @@
 
 import logging
 import traceback
-from typing import Optional, List
-from cg.store.models import Analysis
+from typing import Optional
 
 import click
 
 from cg.constants.nipt import Q30_THRESHOLD
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.nipt import NiptUploadAPI
+from cg.store.models import Analysis
 
 from .ftp import ftp
 from .ftp import nipt_upload_case as nipt_upload_ftp_case
@@ -68,7 +68,7 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
     nipt_upload_api.set_dry_run(dry_run=dry_run)
 
     all_good = True
-    analyses: List[Analysis] = nipt_upload_api.get_all_upload_analyses()
+    analyses: list[Analysis] = nipt_upload_api.get_all_upload_analyses()
     if not analyses:
         LOG.info("No analyses found to upload")
         return

@@ -8,22 +8,21 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 from cg.apps.crunchy import files
 from cg.apps.crunchy.models import CrunchyFile, CrunchyMetadata
+from cg.apps.crunchy.sbatch import (
+    FASTQ_TO_SPRING_COMMANDS,
+    FASTQ_TO_SPRING_ERROR,
+    SPRING_TO_FASTQ_COMMANDS,
+    SPRING_TO_FASTQ_ERROR,
+)
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FASTQ_DELTA
+from cg.constants.priority import SlurmQos
 from cg.models import CompressionData
 from cg.models.slurm.sbatch import Sbatch
-
-from cg.apps.crunchy.sbatch import (
-    FASTQ_TO_SPRING_ERROR,
-    SPRING_TO_FASTQ_ERROR,
-    FASTQ_TO_SPRING_COMMANDS,
-    SPRING_TO_FASTQ_COMMANDS,
-)
-from cg.constants.priority import SlurmQos
 
 LOG = logging.getLogger(__name__)
 
@@ -267,7 +266,7 @@ class CrunchyAPI:
         crunchy_metadata: CrunchyMetadata = files.get_crunchy_metadata(
             compression_obj.spring_metadata_path
         )
-        files_info: Dict[str, CrunchyFile] = files.get_spring_archive_files(crunchy_metadata)
+        files_info: dict[str, CrunchyFile] = files.get_spring_archive_files(crunchy_metadata)
         log_dir = files.get_log_dir(compression_obj.spring_path)
 
         error_function = SPRING_TO_FASTQ_ERROR.format(

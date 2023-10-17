@@ -1,13 +1,13 @@
-from typing import Optional, List
 from sqlalchemy.orm import Query
+
 from cg.constants.constants import MicrosaltAppTags
 from cg.store import Store
 from cg.store.models import (
     Application,
     Bed,
     BedVersion,
-    Customer,
     Collaboration,
+    Customer,
     Organism,
     User,
 )
@@ -90,7 +90,7 @@ def test_get_applications_is_not_archived(
     # GIVEN a store with application records
 
     # WHEN getting the query for the flow cells
-    applications: List[Application] = microbial_store.get_applications_is_not_archived()
+    applications: list[Application] = microbial_store.get_applications_is_not_archived()
 
     # THEN return a application with the supplied application tag
     assert len(applications) == EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS
@@ -103,7 +103,7 @@ def test_get_applications(microbial_store: Store, EXPECTED_NUMBER_OF_APPLICATION
     # GIVEN a store with application records
 
     # WHEN getting the query for the flow cells
-    applications: List[Application] = microbial_store.get_applications()
+    applications: list[Application] = microbial_store.get_applications()
 
     # THEN return a application with the supplied application tag
     assert len(applications) == EXPECTED_NUMBER_OF_APPLICATIONS
@@ -167,7 +167,7 @@ def test_get_customers(base_store: Store, customer_id: str):
     # GIVEN a store with customer records
 
     # WHEN getting the customers
-    customers: List[Customer] = base_store.get_customers()
+    customers: list[Customer] = base_store.get_customers()
 
     # THEN return customers
     assert customers

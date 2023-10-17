@@ -34,16 +34,7 @@
        {
         "SampleId" : "SVE2528A1_CTGAAGCT",
         "SampleName" : "123456",
-        "IndexMetrics" : [
-         {
-          "IndexSequence" : "CTGAAGCT",
-          "MismatchCounts" : {
-           "0" : 24470341,
-           "1" : 5093729
-          }
-         }
-        ],
-        "NumberReads" : 29564070,
+        "NumberReads" : 1000000,
         "Yield" : 8928349140,
         "ReadMetrics" : [
          {
@@ -64,7 +55,7 @@
        }
       ],
       "Undetermined" : {
-       "NumberReads" : 5885351,
+       "NumberReads" : 1000000,
        "Yield" : 1777376002,
        "ReadMetrics" : [
         {

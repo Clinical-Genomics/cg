@@ -1,7 +1,7 @@
 """Fixtures for testing mip app"""
 
+
 import pytest
-from typing import List
 
 
 def create_file(tmpdir, flowcell, lane, read, file_content):
@@ -30,7 +30,7 @@ class MockTB:
     def __init__(self):
         self._link_was_called = False
 
-    def link(self, family: str, sample: str, analysis_type: str, files: List[dict]):
+    def link(self, family: str, sample: str, analysis_type: str, files: list[dict]):
         """Link files mock"""
 
         del family, sample, analysis_type, files

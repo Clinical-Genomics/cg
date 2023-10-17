@@ -1,5 +1,4 @@
 """Constants for cg."""
-from enum import Enum
 
 import click
 
@@ -94,12 +93,33 @@ SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
+class Pipeline(StrEnum):
+    BALSAMIC: str = "balsamic"
+    BALSAMIC_QC: str = "balsamic-qc"
+    BALSAMIC_UMI: str = "balsamic-umi"
+    BALSAMIC_PON: str = "balsamic-pon"
+    DEMULTIPLEX: str = "demultiplex"
+    FASTQ: str = "fastq"
+    FLUFFY: str = "fluffy"
+    MICROSALT: str = "microsalt"
+    MIP_DNA: str = "mip-dna"
+    MIP_RNA: str = "mip-rna"
+    RAREDISEASE: str = "raredisease"
+    RNAFUSION: str = "rnafusion"
+    RSYNC: str = "rsync"
+    SARS_COV_2: str = "sars-cov-2"
+    SPRING: str = "spring"
+    TAXPROFILER: str = "taxprofiler"
+
+
 class FileFormat(StrEnum):
     FASTQ: str = "fastq"
     JSON: str = "json"
     YAML: str = "yaml"
     CSV: str = "csv"
     XML: str = "xml"
+    TXT: str = "txt"
+    TSV: str = "tsv"
 
 
 class GenomeVersion(StrEnum):
@@ -134,6 +154,7 @@ class HastaSlurmPartitions(StrEnum):
 
 class FileExtensions(StrEnum):
     BED: str = ".bed"
+    COMPLETE: str = ".complete"
     CRAM: str = ".cram"
     CSV: str = ".csv"
     FASTQ: str = ".fastq"
@@ -142,11 +163,15 @@ class FileExtensions(StrEnum):
     JSON: str = ".json"
     KEY: str = ".key"
     LOG: str = ".log"
+    MD5SUM: str = ".md5sum"
     NO_EXTENSION: str = ""
+    PASS_PHRASE: str = ".passphrase"
+    PENDING: str = ".pending"
     SBATCH: str = ".sbatch"
     SPRING: str = ".spring"
     TAR: str = ".tar"
     TMP: str = ".tmp"
+    TSV: str = ".tsv"
     VCF: str = ".vcf"
     XML: str = ".xml"
     YAML: str = ".yaml"
@@ -208,3 +233,6 @@ class Strandedness(StrEnum):
     FORWARD: str = "forward"
     REVERSE: str = "reverse"
     UNSTRANDED: str = "unstranded"
+
+
+PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.SARS_COV_2]

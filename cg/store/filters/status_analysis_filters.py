@@ -1,13 +1,12 @@
-from typing import List, Callable
+from datetime import datetime
 from enum import Enum
+from typing import Callable
+
 from sqlalchemy.orm import Query
 
-
 from cg.constants import REPORT_SUPPORTED_PIPELINES
-from cg.constants.constants import VALID_DATA_IN_PRODUCTION
+from cg.constants.constants import VALID_DATA_IN_PRODUCTION, Pipeline
 from cg.store.models import Analysis, Family
-from cgmodels.cg.constants import Pipeline
-from datetime import datetime
 
 
 def filter_valid_analyses_in_production(analyses: Query, **kwargs) -> Query:
@@ -92,7 +91,7 @@ def filter_analysis_case_action_is_none(analyses: Query, **kwargs) -> Query:
 
 
 def apply_analysis_filter(
-    filter_functions: List[Callable],
+    filter_functions: list[Callable],
     analyses: Query,
     pipeline: Pipeline = None,
     case_entry_id: int = None,

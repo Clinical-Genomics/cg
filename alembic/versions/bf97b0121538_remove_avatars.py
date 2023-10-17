@@ -5,10 +5,10 @@ Revises: 76e8252a6efb
 Create Date: 2022-02-25 16:13:16.666812
 
 """
-from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "bf97b0121538"

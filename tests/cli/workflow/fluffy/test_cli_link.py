@@ -1,11 +1,12 @@
 import shutil
 from pathlib import Path
 
+from click.testing import CliRunner
+
 from cg.cli.workflow.commands import link
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
 
 
 def test_cli_link_no_case(
@@ -42,7 +43,7 @@ def test_cli_link(
     fluffy_case_id_existing,
     fluffy_sample_lims_id,
     fluffy_context: CGConfig,
-    fastq_file_fixture_path,
+    fluffy_fastq_file_path,
     caplog,
 ):
     caplog.set_level("INFO")
@@ -78,7 +79,7 @@ def test_cli_link_dir_exists(
     fluffy_case_id_existing,
     fluffy_sample_lims_id,
     fluffy_context: CGConfig,
-    fastq_file_fixture_path,
+    fluffy_fastq_file_path,
     caplog,
 ):
     caplog.set_level("INFO")

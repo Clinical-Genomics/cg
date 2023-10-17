@@ -2,13 +2,13 @@
 
 import datetime
 import logging
-from typing import List
 
 import click
+
 from cg.cli.get import get_case as print_case
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.store import Store
-from cg.store.models import Sample, Family
+from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ def delete_case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
 
 def _delete_links_and_samples(case_obj: Family, dry_run: bool, status_db: Store, yes: bool):
     """Delete all links from a case to samples"""
-    samples_to_delete: List[Sample] = []
+    samples_to_delete: list[Sample] = []
     for case_link in case_obj.links:
         if not (yes or click.confirm(f"Do you want to DELETE link: {case_link}?")):
             raise click.Abort
@@ -68,9 +68,9 @@ def _delete_links_and_samples(case_obj: Family, dry_run: bool, status_db: Store,
         samples_to_delete.append(case_link.sample)
 
         if dry_run:
-            LOG.info("Link: %s was NOT deleted due to --dry-run", case_link)
+            LOG.info(f"Link: {case_link} was NOT deleted due to --dry-run")
         else:
-            LOG.info("Deleting link: %s", case_link)
+            LOG.info(f"Deleting link: {case_link}")
             status_db.session.delete(case_link)
             status_db.session.commit()
 
@@ -99,36 +99,36 @@ def _delete_sample(dry_run: bool, sample: Sample, status_db: Store, yes: bool):
         return
 
     if dry_run:
-        LOG.info("Sample: %s was NOT deleted due to --dry-run", sample)
+        LOG.info(f"Sample: {sample} was NOT deleted due to --dry-run")
         return
 
-    LOG.info("Deleting sample: %s", sample)
+    LOG.info(f"Deleting sample: {sample}")
     status_db.session.delete(sample)
 
 
 def _log_sample_process_information(sample: Sample):
-    LOG.info("Can NOT delete processed sample: %s", sample.internal_id)
-    LOG.info("Sample was received: %s", sample.received_at)
-    LOG.info("Sample was prepared: %s", sample.prepared_at)
-    LOG.info("Sample was sequenced: %s", sample.sequenced_at)
-    LOG.info("Sample was delivered: %s", sample.delivered_at)
-    LOG.info("Sample has invoice: %s", sample.invoice_id)
+    LOG.info(f"Can NOT delete processed sample: {sample.internal_id}")
+    LOG.info(f"Sample was received: {sample.received_at}")
+    LOG.info(f"Sample was prepared: {sample.prepared_at}")
+    LOG.info(f"Sample's reads were updated: {sample.reads_updated_at}")
+    LOG.info(f"Sample was delivered: {sample.delivered_at}")
+    LOG.info(f"Sample has invoice: {sample.invoice_id}")
 
 
 def _log_sample_links(sample: Sample):
     for sample_link in sample.links:
-        LOG.info("Sample is linked to: %s", sample_link.family.internal_id)
+        LOG.info(f"Sample is linked to: {sample_link.family.internal_id}")
     for sample_link in sample.mother_links:
-        LOG.info("Sample is linked as mother to: %s", sample_link.mother.internal_id)
+        LOG.info(f"Sample is linked as mother to: {sample_link.mother.internal_id}")
     for sample_link in sample.father_links:
-        LOG.info("Sample is linked as father to: %s", sample_link.father.internal_id)
+        LOG.info(f"Sample is linked as father to: {sample_link.father.internal_id}")
 
 
 def _has_sample_been_lab_processed(sample: Sample) -> datetime.datetime:
     return (
         sample.received_at
         or sample.prepared_at
-        or sample.sequenced_at
+        or sample.reads_updated_at
         or sample.delivered_at
         or sample.invoice_id
     )

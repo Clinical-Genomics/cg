@@ -1,10 +1,9 @@
-from typing import List, Union
+from datetime import datetime
+from typing import Union
 
 from sqlalchemy.orm import Query
-from cgmodels.cg.constants import Pipeline
-from datetime import datetime
 
-from cg.constants.constants import CaseActions, DataDelivery
+from cg.constants.constants import CaseActions, DataDelivery, Pipeline
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
@@ -40,7 +39,7 @@ def test_filter_cases_has_sequence(
     """Test that a case is returned when there is a cases with a sequenced sample."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
@@ -65,7 +64,7 @@ def test_filter_cases_has_sequence_when_external(base_store: Store, helpers: Sto
     """Test that a case is returned when there is a case with an externally sequenced sample."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=None, is_external=True)
+    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=None, is_external=True)
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
@@ -90,7 +89,7 @@ def test_filter_cases_has_sequence_when_not_sequenced(base_store: Store, helpers
     """Test that no case is returned when there is a cases with sample that has not been sequenced."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=None)
+    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=None)
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
@@ -117,7 +116,7 @@ def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
     """Test that no case is returned when there is a cases with sample that has not been sequenced nor is external."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=None, is_external=False)
+    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=None, is_external=False)
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
@@ -144,7 +143,7 @@ def test_filter_cases_with_pipeline_when_correct_pipline(
     """Test that no case is returned when there are no cases with the  specified pipeline."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
 
     # GIVEN a cancer case
     test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
@@ -156,7 +155,7 @@ def test_filter_cases_with_pipeline_when_correct_pipline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
-    cases: List[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.BALSAMIC))
+    cases: list[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.BALSAMIC))
 
     # THEN cases should contain the test case
     assert cases
@@ -168,7 +167,7 @@ def test_filter_cases_with_pipeline_when_incorrect_pipline(
     """Test that no case is returned when there are no cases with the  specified pipeline."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
 
     # GIVEN a cancer case
     test_case: Family = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
@@ -180,7 +179,7 @@ def test_filter_cases_with_pipeline_when_incorrect_pipline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
-    cases: List[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.MIP_DNA))
+    cases: list[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.MIP_DNA))
 
     # THEN cases should not contain the test case
     assert not cases
@@ -192,7 +191,7 @@ def test_filter_cases_with_loqusdb_supported_pipeline(
     """Test retrieval of cases that support Loqusdb upload."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
 
     # GIVEN a MIP-DNA and a FLUFFY case
     test_mip_case: Family = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
@@ -210,7 +209,7 @@ def test_filter_cases_with_loqusdb_supported_pipeline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases with pipeline
-    cases: List[Query] = list(filter_cases_with_loqusdb_supported_pipeline(cases=cases))
+    cases: list[Query] = list(filter_cases_with_loqusdb_supported_pipeline(cases=cases))
 
     # THEN only the Loqusdb supported case should be extracted
     assert test_mip_case in cases
@@ -224,7 +223,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method(
 
     # GIVEN a sample with a valid Loqusdb sequencing method
     test_sample_wes: Sample = helpers.add_sample(
-        base_store, sequenced_at=timestamp_now, application_type=SequencingMethod.WES
+        base_store, reads_updated_at=timestamp_now, application_type=SequencingMethod.WES
     )
 
     # GIVEN a MIP-DNA associated test case
@@ -253,7 +252,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
 
     # GIVEN a not supported loqusdb sample
     test_sample_wts: Sample = helpers.add_sample(
-        base_store, name="sample_wts", sequenced_at=timestamp_now, is_rna=True
+        base_store, name="sample_wts", reads_updated_at=timestamp_now, is_rna=True
     )
 
     # GIVEN a MIP-DNA associated test case
@@ -281,7 +280,7 @@ def test_filter_cases_for_analysis(
     """Test that a case is returned when there is a cases with an action set to analyse."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(
@@ -314,7 +313,7 @@ def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(
-        base_store, sequenced_at=timestamp_now, is_external=False
+        base_store, reads_updated_at=timestamp_now, is_external=False
     )
 
     # GIVEN a case
@@ -346,7 +345,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(
-        base_store, sequenced_at=timestamp_now, is_external=False
+        base_store, reads_updated_at=timestamp_now, is_external=False
     )
 
     # GIVEN a completed analysis
@@ -381,7 +380,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(
-        base_store, sequenced_at=timestamp_yesterday, is_external=True
+        base_store, reads_updated_at=timestamp_yesterday, is_external=True
     )
 
     # GIVEN a completed analysis
@@ -661,7 +660,7 @@ def test_filter_running_cases_with_running_cases(store_with_multiple_cases_and_s
     """Test that at least one case is returned when at least one case has a running action."""
     # GIVEN a store containing cases with at least one "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
-    actions: List[str] = [case.action for case in cases_query.all()]
+    actions: list[str] = [case.action for case in cases_query.all()]
     assert CaseActions.RUNNING in actions
 
     # WHEN getting active cases

@@ -3,9 +3,11 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Generator, List
+from typing import Generator
 
 import pytest
+from housekeeper.store.models import Version
+
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.sequencing import SequencingMethod
@@ -16,7 +18,6 @@ from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import MipLoadConfig
 from cg.store import Store
 from cg.store.models import Analysis, Family, Sample
-from housekeeper.store.models import Version
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -30,61 +31,61 @@ LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(name="rna_case_id")
-def fixture_rna_case_id() -> str:
+def rna_case_id() -> str:
     """Return a rna case id."""
     return "affirmativecat"
 
 
 @pytest.fixture(name="dna_case_id")
-def fixture_dna_case_id(case_id: str) -> str:
+def dna_case_id(case_id: str) -> str:
     """Return a DNA case id."""
     return case_id
 
 
 @pytest.fixture(name="rna_sample_son_id")
-def fixture_rna_sample_son_id() -> str:
+def rna_sample_son_id() -> str:
     """Return a son RNA sample id."""
     return "rna_son"
 
 
 @pytest.fixture(name="rna_sample_daughter_id")
-def fixture_rna_sample_daughter_id() -> str:
+def rna_sample_daughter_id() -> str:
     """Return a daughter RNA sample id."""
     return "rna_daughter"
 
 
 @pytest.fixture(name="rna_sample_mother_id")
-def fixture_rna_sample_mother_id() -> str:
+def rna_sample_mother_id() -> str:
     """Return a mother RNA sample id."""
     return "rna_mother"
 
 
 @pytest.fixture(name="rna_sample_father_id")
-def fixture_rna_sample_father_id() -> str:
+def rna_sample_father_id() -> str:
     """Return a father RNA sample id."""
     return "rna_father"
 
 
 @pytest.fixture(name="dna_sample_son_id")
-def fixture_dna_sample_son_id() -> str:
+def dna_sample_son_id() -> str:
     """Return a son DNA sample id."""
     return "dna_son"
 
 
 @pytest.fixture(name="another_sample_id")
-def fixture_another_sample_id() -> str:
+def another_sample_id() -> str:
     """Return another sample id."""
     return "another_sample_id"
 
 
 @pytest.fixture(name="another_rna_sample_id")
-def fixture_another_rna_sample_id() -> str:
+def another_rna_sample_id() -> str:
     """Return another RNA sample id."""
     return "another_rna_sample_id"
 
 
 @pytest.fixture(name="rna_store")
-def fixture_rna_store(
+def rna_store(
     base_store: Store,
     helpers: StoreHelpers,
     rna_case_id: str,
@@ -225,7 +226,7 @@ def fixture_rna_store(
 
 
 @pytest.fixture(name="lims_family")
-def fixture_lims_family(fixtures_dir) -> dict:
+def lims_family(fixtures_dir) -> dict:
     """Returns a LIMS-like case of samples."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(fixtures_dir, "report", "lims_family.json")
@@ -233,13 +234,13 @@ def fixture_lims_family(fixtures_dir) -> dict:
 
 
 @pytest.fixture(name="lims_samples")
-def fixture_lims_samples(lims_family: dict) -> List[dict]:
+def lims_samples(lims_family: dict) -> list[dict]:
     """Returns the samples of a LIMS case."""
     return lims_family["samples"]
 
 
-@pytest.fixture(scope="function", name="mip_dna_analysis_hk_bundle_data")
-def fixture_mip_dna_analysis_hk_bundle_data(
+@pytest.fixture(scope="function")
+def mip_dna_analysis_hk_bundle_data(
     case_id: str,
     timestamp: datetime,
     mip_dna_analysis_dir: Path,
@@ -314,8 +315,8 @@ def fixture_mip_dna_analysis_hk_bundle_data(
     }
 
 
-@pytest.fixture(scope="function", name="mip_rna_analysis_hk_bundle_data")
-def fixture_mip_rna_analysis_hk_bundle_data(
+@pytest.fixture(scope="function")
+def mip_rna_analysis_hk_bundle_data(
     rna_case_id: str,
     timestamp: datetime,
     mip_dna_analysis_dir: Path,
@@ -326,7 +327,7 @@ def fixture_mip_rna_analysis_hk_bundle_data(
 ) -> dict:
     """Return MIP RNA bundle data for Housekeeper."""
 
-    files: List[dict] = [
+    files: list[dict] = [
         {
             "path": Path(mip_dna_analysis_dir, f"{rna_case_id}_report.selected.pdf").as_posix(),
             "archive": False,
@@ -371,8 +372,8 @@ def fixture_mip_rna_analysis_hk_bundle_data(
     }
 
 
-@pytest.fixture(scope="function", name="balsamic_analysis_hk_bundle_data")
-def fixture_balsamic_analysis_hk_bundle_data(
+@pytest.fixture(scope="function")
+def balsamic_analysis_hk_bundle_data(
     case_id: str,
     timestamp: datetime,
     balsamic_wgs_analysis_dir: Path,
@@ -420,8 +421,8 @@ def fixture_balsamic_analysis_hk_bundle_data(
     }
 
 
-@pytest.fixture(scope="function", name="rnafusion_analysis_hk_bundle_data")
-def fixture_rnafusion_analysis_hk_bundle_data(
+@pytest.fixture(scope="function")
+def rnafusion_analysis_hk_bundle_data(
     case_id: str, timestamp: datetime, rnafusion_analysis_dir: Path
 ) -> dict:
     """Get some bundle data for housekeeper."""
@@ -445,7 +446,7 @@ def fixture_rnafusion_analysis_hk_bundle_data(
 
 
 @pytest.fixture(name="balsamic_analysis_hk_version")
-def fixture_balsamic_analysis_hk_version(
+def balsamic_analysis_hk_version(
     housekeeper_api: MockHousekeeperAPI, balsamic_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
     """Return Housekeeper version for a Balsamic bundle."""
@@ -453,7 +454,7 @@ def fixture_balsamic_analysis_hk_version(
 
 
 @pytest.fixture(name="mip_dna_analysis_hk_version")
-def fixture_mip_dna_analysis_hk_version(
+def mip_dna_analysis_hk_version(
     housekeeper_api: MockHousekeeperAPI, mip_dna_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
     """Return Housekeeper version for a MIP DNA bundle."""
@@ -461,7 +462,7 @@ def fixture_mip_dna_analysis_hk_version(
 
 
 @pytest.fixture(name="mip_dna_analysis_hk_api")
-def fixture_mip_dna_analysis_hk_api(
+def mip_dna_analysis_hk_api(
     housekeeper_api: MockHousekeeperAPI, mip_dna_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
     """Return a Housekeeper API populated with MIP DNA analysis files."""
@@ -470,7 +471,7 @@ def fixture_mip_dna_analysis_hk_api(
 
 
 @pytest.fixture(name="mip_rna_analysis_hk_api")
-def fixture_mip_rna_analysis_hk_api(
+def mip_rna_analysis_hk_api(
     housekeeper_api: MockHousekeeperAPI, mip_rna_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
     """Return a Housekeeper API populated with MIP RNA analysis files."""
@@ -479,7 +480,7 @@ def fixture_mip_rna_analysis_hk_api(
 
 
 @pytest.fixture(name="balsamic_analysis_hk_api")
-def fixture_balsamic_analysis_hk_api(
+def balsamic_analysis_hk_api(
     housekeeper_api: MockHousekeeperAPI, balsamic_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
     """Return a Housekeeper API populated with Balsamic analysis files."""
@@ -488,7 +489,7 @@ def fixture_balsamic_analysis_hk_api(
 
 
 @pytest.fixture(name="rnafusion_analysis_hk_api")
-def fixture_rnafusion_analysis_hk_api(
+def rnafusion_analysis_hk_api(
     housekeeper_api: MockHousekeeperAPI, rnafusion_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
     """Return a housekeeper api populated with some rnafusion analysis files"""
@@ -497,7 +498,7 @@ def fixture_rnafusion_analysis_hk_api(
 
 
 @pytest.fixture(name="mip_dna_analysis")
-def fixture_mip_dna_analysis(
+def mip_dna_analysis(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers: StoreHelpers
 ) -> Analysis:
     """Return a MIP DNA analysis object."""
@@ -524,7 +525,7 @@ def fixture_mip_dna_analysis(
 
 
 @pytest.fixture(name="balsamic_analysis_obj")
-def fixture_balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
+def balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a Balsamic analysis object."""
     analysis_obj.pipeline = Pipeline.BALSAMIC
     for link_object in analysis_obj.family.links:
@@ -536,7 +537,7 @@ def fixture_balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
 
 
 @pytest.fixture(name="balsamic_umi_analysis_obj")
-def fixture_balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
+def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a Balsamic UMI analysis object."""
     analysis_obj.pipeline = Pipeline.BALSAMIC_UMI
     for link_object in analysis_obj.family.links:
@@ -549,7 +550,7 @@ def fixture_balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
 
 
 @pytest.fixture(name="rnafusion_analysis_obj")
-def fixture_rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
+def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a RNAfusion analysis object."""
     analysis_obj.pipeline = Pipeline.RNAFUSION
     for link_object in analysis_obj.family.links:
@@ -562,7 +563,7 @@ def fixture_rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
 
 
 @pytest.fixture(name="mip_config_builder")
-def fixture_mip_config_builder(
+def mip_config_builder(
     mip_dna_analysis_hk_version: Version,
     mip_dna_analysis: Analysis,
     lims_api: MockLimsAPI,
@@ -580,7 +581,7 @@ def fixture_mip_config_builder(
 
 
 @pytest.fixture(name="balsamic_config_builder")
-def fixture_balsamic_config_builder(
+def balsamic_config_builder(
     balsamic_analysis_hk_version: Version,
     balsamic_analysis_obj: Analysis,
     lims_api: MockLimsAPI,
@@ -594,7 +595,7 @@ def fixture_balsamic_config_builder(
 
 
 @pytest.fixture(name="mip_load_config")
-def fixture_mip_load_config(
+def mip_load_config(
     mip_dna_analysis_dir: Path, case_id: str, customer_id: str, snv_vcf_file: str
 ) -> MipLoadConfig:
     """Return a valid MIP load_config."""
@@ -607,22 +608,22 @@ def fixture_mip_load_config(
 
 
 @pytest.fixture(name="lims_api")
-def fixture_lims_api(lims_samples: List[dict]) -> MockLimsAPI:
+def lims_api(lims_samples: list[dict]) -> MockLimsAPI:
     """Return a LIMS API."""
     return MockLimsAPI(samples=lims_samples)
 
 
 @pytest.fixture(name="mip_analysis_api")
-def fixture_mip_analysis_api() -> MockMipAnalysis:
+def mip_analysis_api() -> MockMipAnalysis:
     """Return a MIP analysis API."""
     return MockMipAnalysis()
 
 
 @pytest.fixture(name="upload_scout_api")
-def fixture_upload_scout_api(
+def upload_scout_api(
     scout_api: MockScoutAPI,
     madeline_api: MockMadelineAPI,
-    lims_samples: List[dict],
+    lims_samples: list[dict],
     housekeeper_api: MockHousekeeperAPI,
     store: Store,
 ) -> UploadScoutAPI:
@@ -641,10 +642,10 @@ def fixture_upload_scout_api(
 
 
 @pytest.fixture(name="upload_mip_analysis_scout_api")
-def fixture_upload_mip_analysis_scout_api(
+def upload_mip_analysis_scout_api(
     scout_api: MockScoutAPI,
     madeline_api: MockMadelineAPI,
-    lims_samples: List[dict],
+    lims_samples: list[dict],
     mip_dna_analysis_hk_api: MockHousekeeperAPI,
     store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
@@ -663,10 +664,10 @@ def fixture_upload_mip_analysis_scout_api(
 
 
 @pytest.fixture(name="upload_balsamic_analysis_scout_api")
-def fixture_upload_balsamic_analysis_scout_api(
+def upload_balsamic_analysis_scout_api(
     scout_api: MockScoutAPI,
     madeline_api: MockMadelineAPI,
-    lims_samples: List[dict],
+    lims_samples: list[dict],
     balsamic_analysis_hk_api: MockHousekeeperAPI,
     store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
@@ -685,16 +686,16 @@ def fixture_upload_balsamic_analysis_scout_api(
 
 
 @pytest.fixture(name="rna_dna_sample_case_map")
-def fixture_rna_dna_sample_case_map(
+def rna_dna_sample_case_map(
     rna_sample_son_id: str,
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
-) -> Dict[str, List[str]]:
+) -> dict[str, list[str]]:
     """Return a valid RNA-DNA case map."""
     rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
 
     # WHEN adding the RNA sample rna_dna_case_map
-    rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]] = {}
+    rna_dna_sample_case_map: dict[str, dict[str, list[str]]] = {}
     upload_scout_api._map_dna_samples_related_to_rna_sample(
         rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_sample_case_map
     )
@@ -703,10 +704,10 @@ def fixture_rna_dna_sample_case_map(
 
 
 @pytest.fixture(name="upload_rnafusion_analysis_scout_api")
-def fixture_upload_rnafusion_analysis_scout_api(
+def upload_rnafusion_analysis_scout_api(
     scout_api: MockScoutAPI,
     madeline_api: MockMadelineAPI,
-    lims_samples: List[dict],
+    lims_samples: list[dict],
     rnafusion_analysis_hk_api: MockHousekeeperAPI,
     store: Store,
 ) -> UploadScoutAPI:
