@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, List
+from typing import Callable
 
 from sqlalchemy.orm import Query
 
@@ -27,7 +27,7 @@ def filter_applications_is_not_external(applications: Query, **kwargs) -> Query:
 
 
 def apply_application_filter(
-    filter_functions: List[Callable],
+    filter_functions: list[Callable],
     applications: Query,
     tag: str = None,
     prep_category: str = None,

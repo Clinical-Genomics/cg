@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Optional
 
 import openpyxl
 from openpyxl.cell.cell import Cell
@@ -22,15 +22,15 @@ class ExcelOrderformParser(OrderformParser):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     NO_ANALYSIS: str = "no-analysis"
     NO_VALUE: str = "no_value"
-    SHEET_NAMES: List[str] = ["Orderform", "orderform", "order form"]
-    VALID_ORDERFORMS: List[str] = [
+    SHEET_NAMES: list[str] = ["Orderform", "orderform", "order form"]
+    VALID_ORDERFORMS: list[str] = [
         f"{Orderform.MIP_DNA}:{ORDERFORM_VERSIONS[Orderform.MIP_DNA]}",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
         f"{Orderform.MICROSALT}:{ORDERFORM_VERSIONS[Orderform.MICROSALT]}",  # Microbial WGS
         f"{Orderform.RML}:{ORDERFORM_VERSIONS[Orderform.RML]}",  # Orderform Ready made libraries (RML)
         f"{Orderform.METAGENOME}:{ORDERFORM_VERSIONS[Orderform.METAGENOME]}",  # Microbial meta genomes
         f"{Orderform.SARS_COV_2}:{ORDERFORM_VERSIONS[Orderform.SARS_COV_2]}",  # Orderform SARS-CoV-2
     ]
-    samples: List[ExcelSample] = []
+    samples: list[ExcelSample] = []
 
     def check_orderform_version(self, document_title: str) -> None:
         """Raise an error if the orderform is too new or too old for the order portal"""
@@ -40,7 +40,7 @@ class ExcelOrderformParser(OrderformParser):
                 return
         raise OrderFormError(f"Unsupported orderform: {document_title}")
 
-    def get_sheet_name(self, sheet_names: List[str]) -> str:
+    def get_sheet_name(self, sheet_names: list[str]) -> str:
         """Return the correct (existing) sheet names"""
 
         for name in sheet_names:
@@ -69,7 +69,7 @@ class ExcelOrderformParser(OrderformParser):
 
     @staticmethod
     def get_sample_row_info(
-        row: Tuple[Cell], header_row: List[str], empty_row_found: bool
+        row: tuple[Cell], header_row: list[str], empty_row_found: bool
     ) -> Optional[dict]:
         """Convert an Excel row with sample data into a dict with sample info"""
         values = []
@@ -95,8 +95,8 @@ class ExcelOrderformParser(OrderformParser):
         return sample_dict
 
     @staticmethod
-    def get_header(rows: List[Tuple[Cell]]) -> List[str]:
-        header_row: List[str] = []
+    def get_header(rows: list[tuple[Cell]]) -> list[str]:
+        header_row: list[str] = []
         header = False
         for row in rows:
             if header:
@@ -107,8 +107,8 @@ class ExcelOrderformParser(OrderformParser):
         return header_row
 
     @staticmethod
-    def get_raw_samples(rows: List[Tuple[Cell]], header_row: List[str]) -> List[dict]:
-        raw_samples: List[dict] = []
+    def get_raw_samples(rows: list[tuple[Cell]], header_row: list[str]) -> list[dict]:
+        raw_samples: list[dict] = []
         sample_rows = False
         empty_row_found = False
         for row in rows:
@@ -131,11 +131,11 @@ class ExcelOrderformParser(OrderformParser):
         return raw_samples
 
     @staticmethod
-    def relevant_rows(orderform_sheet: Worksheet) -> List[Dict[str, str]]:
+    def relevant_rows(orderform_sheet: Worksheet) -> list[dict[str, str]]:
         """Get the relevant rows from an order form sheet."""
         # orderform_sheet.rows is a generator. Convert to list to be able to iterate multiple times
         rows = list(orderform_sheet.rows)
-        header_row: List[str] = ExcelOrderformParser.get_header(rows)
+        header_row: list[str] = ExcelOrderformParser.get_header(rows)
         return ExcelOrderformParser.get_raw_samples(rows=rows, header_row=header_row)
 
     def get_project_type(self, document_title: str) -> str:
@@ -175,7 +175,7 @@ class ExcelOrderformParser(OrderformParser):
             raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}") from error
 
     def parse_data_delivery(self) -> str:
-        data_deliveries: Set[str] = {
+        data_deliveries: set[str] = {
             sample.data_delivery or self.NO_VALUE for sample in self.samples
         }
 
@@ -209,13 +209,13 @@ class ExcelOrderformParser(OrderformParser):
         self.check_orderform_version(document_title)
 
         LOG.info("Parsing all samples from orderform")
-        raw_samples: List[dict] = self.relevant_rows(orderform_sheet)
+        raw_samples: list[dict] = self.relevant_rows(orderform_sheet)
 
         if not raw_samples:
             raise OrderFormError("orderform doesn't contain any samples")
 
-        excel_sample_list_validator = TypeAdapter(List[ExcelSample])
-        self.samples: List[ExcelSample] = excel_sample_list_validator.validate_python(raw_samples)
+        excel_sample_list_validator = TypeAdapter(list[ExcelSample])
+        self.samples: list[ExcelSample] = excel_sample_list_validator.validate_python(raw_samples)
         self.project_type: str = self.get_project_type(document_title)
         self.delivery_type = self.get_data_delivery()
         self.customer_id = self.get_customer_id()

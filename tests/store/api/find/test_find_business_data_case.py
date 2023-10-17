@@ -1,5 +1,5 @@
 """Tests the findbusinessdata part of the Cg store API related to the Family model."""
-from typing import List
+
 
 from cg.constants.constants import CaseActions, Pipeline
 from cg.store import Store
@@ -77,7 +77,7 @@ def test_get_running_cases_in_pipeline(store_with_cases_and_customers: Store):
     # GIVEN a store with some cases
 
     # WHEN getting cases with a pipeline and are running
-    cases: List[Family] = store_with_cases_and_customers.get_running_cases_in_pipeline(
+    cases: list[Family] = store_with_cases_and_customers.get_running_cases_in_pipeline(
         pipeline=Pipeline.MIP_DNA
     )
 

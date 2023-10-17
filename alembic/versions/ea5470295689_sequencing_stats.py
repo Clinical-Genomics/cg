@@ -7,7 +7,7 @@ Create Date: 2023-05-04 09:29:09.945895
 """
 import sqlalchemy as sa
 from sqlalchemy import Column, ForeignKey, orm, types
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 from alembic import op
 

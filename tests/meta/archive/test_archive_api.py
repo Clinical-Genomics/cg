@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List
 from unittest import mock
 
 from housekeeper.store.models import File
@@ -25,7 +24,7 @@ def test_get_files_by_archive_location(
     spring_archive_api: SpringArchiveAPI, sample_id, father_sample_id
 ):
     """Tests filtering out files and samples with the correct Archive location from a list."""
-    files_and_samples: List[FileAndSample] = [
+    files_and_samples: list[FileAndSample] = [
         FileAndSample(
             file=spring_archive_api.housekeeper_api.get_files(bundle=sample).first(),
             sample=spring_archive_api.status_db.get_sample_by_internal_id(sample),
@@ -34,7 +33,7 @@ def test_get_files_by_archive_location(
     ]
 
     # WHEN fetching the files by archive location
-    selected_files: List[FileAndSample] = filter_files_on_archive_location(
+    selected_files: list[FileAndSample] = filter_files_on_archive_location(
         files_and_samples, ArchiveLocations.KAROLINSKA_BUCKET
     )
 
@@ -47,12 +46,12 @@ def test_get_files_by_archive_location(
 def test_add_samples_to_files(spring_archive_api: SpringArchiveAPI):
     """Tests matching Files to Samples when both files have a matching sample."""
     # GIVEN a list of SPRING Files to archive
-    files_to_archive: List[
+    files_to_archive: list[
         File
     ] = spring_archive_api.housekeeper_api.get_all_non_archived_spring_files()
 
     # WHEN adding the Sample objects
-    file_and_samples: List[FileAndSample] = spring_archive_api.add_samples_to_files(
+    file_and_samples: list[FileAndSample] = spring_archive_api.add_samples_to_files(
         files_to_archive
     )
 
@@ -66,13 +65,13 @@ def test_add_samples_to_files(spring_archive_api: SpringArchiveAPI):
 def test_add_samples_to_files_missing_sample(spring_archive_api: SpringArchiveAPI):
     """Tests matching Files to Samples when one of the files does not match a Sample."""
     # GIVEN a list of SPRING Files to archive
-    files_to_archive: List[
+    files_to_archive: list[
         File
     ] = spring_archive_api.housekeeper_api.get_all_non_archived_spring_files()
     # GIVEN one of the files does not match the
     files_to_archive[0].version.bundle.name = "does-not-exist"
     # WHEN adding the Sample objects
-    file_and_samples: List[FileAndSample] = spring_archive_api.add_samples_to_files(
+    file_and_samples: list[FileAndSample] = spring_archive_api.add_samples_to_files(
         files_to_archive
     )
 
@@ -135,7 +134,7 @@ def test_convert_into_transfer_data(
             config=ddn_dataflow_config
         )
     # WHEN using it to instantiate the correct class
-    transferdata: List[FileTransferData] = data_flow_client.convert_into_transfer_data(
+    transferdata: list[FileTransferData] = data_flow_client.convert_into_transfer_data(
         files_and_samples=[file_and_sample],
     )
 
@@ -207,7 +206,7 @@ def test_archive_all_non_archived_spring_files(
 
     # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper while no other
     # files should have an entry
-    files: List[File] = spring_archive_api.housekeeper_api.files()
+    files: list[File] = spring_archive_api.housekeeper_api.files()
     for file in files:
         if SequencingFileTag.SPRING in [tag.name for tag in file.tags]:
             sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(
@@ -235,7 +234,7 @@ def test_retrieve_samples(
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
     # with the DDN customer having two samples, and the non-DDN having one sample.
 
-    files: List[File] = spring_archive_api.housekeeper_api.get_files(
+    files: list[File] = spring_archive_api.housekeeper_api.get_files(
         bundle=sample_with_spring_file, tags=[SequencingFileTag.SPRING]
     )
     for file in files:

@@ -1,7 +1,7 @@
 """Module to create sbatch files and communicate with SLURM."""
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from cg.apps.slurm.sbatch import (
     DRAGEN_SBATCH_HEADER_TEMPLATE,
@@ -70,7 +70,7 @@ class SlurmAPI:
 
     def submit_sbatch_job(self, sbatch_path: Path) -> int:
         LOG.info("Submit sbatch %s", sbatch_path)
-        sbatch_parameters: List[str] = [str(sbatch_path)]
+        sbatch_parameters: list[str] = [str(sbatch_path)]
         self.process.run_command(parameters=sbatch_parameters, dry_run=self.dry_run)
         if self.process.stderr:
             LOG.info(self.process.stderr)

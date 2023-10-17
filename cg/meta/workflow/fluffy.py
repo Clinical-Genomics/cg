@@ -3,7 +3,7 @@ import logging
 import shutil
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
@@ -58,7 +58,7 @@ class FluffySample(BaseModel):
 
 
 class FluffySampleSheet(BaseModel):
-    samples: List[FluffySample]
+    samples: list[FluffySample]
 
     def write_sample_sheet(self, out_path: Path) -> None:
         LOG.info(f"Writing fluffy sample sheet to {out_path}")
@@ -83,7 +83,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         )
 
     @property
-    def threshold_reads(self):
+    def use_read_count_threshold(self) -> bool:
         return False
 
     @property
@@ -257,7 +257,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         ]
         self.process.run_command(command_args, dry_run=dry_run)
 
-    def get_cases_to_store(self) -> List[Family]:
+    def get_cases_to_store(self) -> list[Family]:
         """Return cases where analysis finished successfully,
         and is ready to be stored in Housekeeper."""
         return [

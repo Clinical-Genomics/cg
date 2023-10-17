@@ -2,7 +2,7 @@ import http
 import os
 import tempfile
 from datetime import date
-from typing import List, Union
+from typing import Union
 
 from flask import (
     Blueprint,
@@ -41,7 +41,7 @@ def logged_in():
 def undo_invoice(invoice_id):
     invoice_obj: Invoice = db.get_invoice_by_entry_id(entry_id=invoice_id)
     record_type: str = invoice_obj.record_type
-    records: List[Union[Pool, Sample]] = db.get_pools_and_samples_for_invoice_by_invoice_id(
+    records: list[Union[Pool, Sample]] = db.get_pools_and_samples_for_invoice_by_invoice_id(
         invoice_id=invoice_id
     )
     db.session.delete(invoice_obj)
@@ -60,7 +60,7 @@ def make_new_invoice():
     if len(record_ids) == 0:
         return redirect(url_for(".new", record_type=record_type))
     if record_type == "Pool":
-        pools: List[Pool] = [db.get_pool_by_entry_id(pool_id) for pool_id in record_ids]
+        pools: list[Pool] = [db.get_pool_by_entry_id(pool_id) for pool_id in record_ids]
         new_invoice: Invoice = db.add_invoice(
             customer=customer,
             pools=pools,
@@ -69,7 +69,7 @@ def make_new_invoice():
             record_type="Pool",
         )
     elif record_type == "Sample":
-        samples: List[Sample] = [
+        samples: list[Sample] = [
             db.get_sample_by_internal_id(sample_id) for sample_id in record_ids
         ]
         new_invoice: Invoice = db.add_invoice(
@@ -140,15 +140,15 @@ def new(record_type):
     customer_id = request.args.get("customer", "cust002")
     customer: Customer = db.get_customer_by_internal_id(customer_internal_id=customer_id)
     if record_type == "Sample":
-        records: List[Union[Pool, Sample]] = db.get_samples_to_invoice_for_customer(
+        records: list[Union[Pool, Sample]] = db.get_samples_to_invoice_for_customer(
             customer=customer
         )
-        customers_to_invoice: List[Customer] = db.get_customers_to_invoice(
+        customers_to_invoice: list[Customer] = db.get_customers_to_invoice(
             records=db.get_samples_to_invoice_query()
         )
     elif record_type == "Pool":
-        records: List[Union[Pool, Sample]] = db.get_pools_to_invoice_for_customer(customer=customer)
-        customers_to_invoice: List[Customer] = db.get_customers_to_invoice(
+        records: list[Union[Pool, Sample]] = db.get_pools_to_invoice_for_customer(customer=customer)
+        customers_to_invoice: list[Customer] = db.get_customers_to_invoice(
             records=db.get_pools_to_invoice_query()
         )
     return render_template(

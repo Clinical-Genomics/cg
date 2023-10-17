@@ -1,7 +1,6 @@
 """API for tar archiving and extraction on Hasta"""
 import logging
 from pathlib import Path
-from typing import List
 
 from cg.constants.extraction import FlowCellExtractionParameters
 from cg.utils import Process
@@ -24,7 +23,7 @@ class TarAPI:
         self.process.run_command(command, dry_run=self.dry_run)
 
     @staticmethod
-    def get_extract_file_command(input_file: Path, output_dir: Path) -> List[str]:
+    def get_extract_file_command(input_file: Path, output_dir: Path) -> list[str]:
         """Generates the Tar command for flow cel run directory extraction"""
         extraction_parameters: list = FlowCellExtractionParameters.EXTRACT_FILE.copy()
         extraction_parameters.append(str(input_file))

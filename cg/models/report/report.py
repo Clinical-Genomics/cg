@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, BeforeValidator, model_validator
 from typing_extensions import Annotated
@@ -110,9 +110,9 @@ class CaseModel(BaseModel):
 
     name: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
     id: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    samples: List[SampleModel]
+    samples: list[SampleModel]
     data_analysis: DataAnalysisModel
-    applications: List[ApplicationModel]
+    applications: list[ApplicationModel]
 
 
 class ReportModel(BaseModel):

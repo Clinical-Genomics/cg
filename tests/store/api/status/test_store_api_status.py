@@ -1,6 +1,5 @@
 """Tests for store API status module."""
 
-from typing import List
 
 from sqlalchemy.orm import Query
 
@@ -95,7 +94,7 @@ def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
     helpers.add_analysis(store=sample_store)
 
     # WHEN fetching all analyses that are ready for upload
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload()
     ]
 
@@ -109,7 +108,7 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
     helpers.add_analysis(store=sample_store, completed_at=timestamp)
 
     # WHEN fetching all analysis that are ready for upload without specifying pipeline
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=None)
     ]
 
@@ -123,7 +122,7 @@ def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, ti
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
 
     # WHEN fetching all analyses that are ready for upload and analysed with MIP
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=None)
     ]
 
@@ -138,7 +137,7 @@ def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, 
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=pipeline)
 
     # WHEN fetching all pipelines that are analysed with MIP
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=pipeline)
     ]
 
@@ -154,7 +153,7 @@ def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_sto
     helpers.add_analysis(store=sample_store, completed_at=None, pipeline=pipeline)
 
     # WHEN fetching all analyses that are ready for upload and analysed by MIP
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=pipeline)
     ]
 
@@ -168,7 +167,7 @@ def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
 
     # WHEN fetching all analyses that was analysed with MIP
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj
         for analysis_obj in sample_store.get_analyses_to_upload(pipeline=Pipeline.FASTQ)
     ]

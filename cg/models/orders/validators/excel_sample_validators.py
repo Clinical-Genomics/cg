@@ -1,10 +1,10 @@
-from typing import List, Optional
+from typing import Optional
 
 from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
 from cg.models.orders.sample_base import PriorityEnum
 
 
-def parse_panels(panels: str) -> Optional[List[str]]:
+def parse_panels(panels: str) -> Optional[list[str]]:
     if not panels:
         return None
     separator = ";" if ";" in panels else None

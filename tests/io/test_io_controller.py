@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, ReadStream, WriteFile, WriteStream
@@ -64,7 +63,7 @@ def test_get_content_from_file_to_dict_when_csv(csv_file_path: Path):
     # GIVEN a csv file
 
     # WHEN reading the csv file
-    raw_csv_content: List[dict] = ReadFile.get_content_from_file(
+    raw_csv_content: list[dict] = ReadFile.get_content_from_file(
         file_format=FileFormat.CSV, file_path=csv_file_path, read_to_dict=True
     )
 

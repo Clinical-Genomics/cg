@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
@@ -15,7 +14,7 @@ LOG = logging.getLogger(__name__)
 
 def get_sample_sheet_creator(
     flow_cell: FlowCellDirectoryData,
-    lims_samples: List[FlowCellSample],
+    lims_samples: list[FlowCellSample],
     force: bool,
 ) -> SampleSheetCreator:
     """Returns an initialised sample sheet creator according to the software used for demultiplexing."""
@@ -28,9 +27,9 @@ def get_sample_sheet_creator(
 
 def create_sample_sheet(
     flow_cell: FlowCellDirectoryData,
-    lims_samples: List[FlowCellSample],
+    lims_samples: list[FlowCellSample],
     force: bool = False,
-) -> List[List[str]]:
+) -> list[list[str]]:
     """Create a sample sheet for a flow cell."""
     sample_sheet_creator = get_sample_sheet_creator(
         flow_cell=flow_cell,

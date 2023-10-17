@@ -3,7 +3,6 @@
 import logging
 import subprocess
 from pathlib import Path
-from typing import List
 
 import mock
 import pytest
@@ -44,7 +43,7 @@ def test_query_pdc_for_flow_cell(caplog, flow_cell_name: str, mocker):
     assert "Found archived files for PDC query: " in caplog.text
 
 
-def test_get_archived_encryption_key_path(dsmc_q_archive_output: List[str], flow_cell_name: str):
+def test_get_archived_encryption_key_path(dsmc_q_archive_output: list[str], flow_cell_name: str):
     """Tests returning an encryption key path from DSMC output."""
     # GIVEN an DSMC output and a flow cell id
 
@@ -71,7 +70,7 @@ def test_get_archived_encryption_key_path(dsmc_q_archive_output: List[str], flow
     )
 
 
-def test_get_archived_flow_cell_path(dsmc_q_archive_output: List[str], flow_cell_name: str):
+def test_get_archived_flow_cell_path(dsmc_q_archive_output: list[str], flow_cell_name: str):
     """Tests returning a flow cell path from DSMC output."""
     # GIVEN an DSMC output and a flow cell id
 
