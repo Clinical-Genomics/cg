@@ -588,7 +588,7 @@ class Panel(Model):
     abbrev = Column(types.String(32), unique=True)
     current_version = Column(types.Float, nullable=False)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
-    customer = orm.relationship(Customer, backref="panels")
+    customer = orm.relationship(Customer, backref="panels", cascade_backrefs=False)
     date = Column(types.DateTime, nullable=False)
     gene_count = Column(types.Integer)
     id = Column(types.Integer, primary_key=True)
