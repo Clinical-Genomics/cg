@@ -1,7 +1,8 @@
 """File tags for files in Housekeeper."""
-from typing import List
 
-from cgmodels.cg.constants import Pipeline, StrEnum
+
+from cg.constants.constants import Pipeline
+from cg.utils.enums import StrEnum
 
 
 class AlignmentFileTag(StrEnum):
@@ -15,7 +16,7 @@ class AlignmentFileTag(StrEnum):
     CRAM_INDEX: str = "cram-index"
 
 
-ALIGNMENT_FILE_TAGS: List[str] = [tag.value for tag in AlignmentFileTag]
+ALIGNMENT_FILE_TAGS: list[str] = [tag.value for tag in AlignmentFileTag]
 
 
 class ArchiveTag(StrEnum):
@@ -51,9 +52,9 @@ HK_DELIVERY_REPORT_TAG = "delivery-report"
 
 
 class HkMipAnalysisTag:
-    CONFIG: List[str] = ["mip-config"]
-    QC_METRICS: List[str] = ["qc-metrics", "deliverable"]
-    SAMPLE_INFO: List[str] = ["sample-info"]
+    CONFIG: list[str] = ["mip-config"]
+    QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
+    SAMPLE_INFO: list[str] = ["sample-info"]
 
 
 class BalsamicAnalysisTag(StrEnum):
@@ -62,14 +63,14 @@ class BalsamicAnalysisTag(StrEnum):
 
 
 class GensAnalysisTag:
-    COVERAGE: List[str] = ["gens", "coverage", "bed"]
-    FRACSNP: List[str] = ["gens", "fracsnp", "bed"]
+    COVERAGE: list[str] = ["gens", "coverage", "bed"]
+    FRACSNP: list[str] = ["gens", "fracsnp", "bed"]
 
 
 class BalsamicProtectedTags:
     """Balsamic pipeline protected tags by type."""
 
-    QC: List[List[str]] = [
+    QC: list[list[str]] = [
         ["balsamic-config"],
         ["balsamic-dag"],
         ["balsamic-report"],
@@ -78,7 +79,7 @@ class BalsamicProtectedTags:
         ["multiqc-json"],
         ["qc-metrics"],
     ]
-    VARIANT_CALLERS: List[List[str]] = [
+    VARIANT_CALLERS: list[list[str]] = [
         ["ascatngs"],
         ["cnv-report"],
         ["cnvkit"],

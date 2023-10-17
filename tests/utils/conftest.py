@@ -1,7 +1,8 @@
 """Fixtures for utils"""
+from pathlib import Path
 
 import pytest
-from pathlib import Path
+
 from cg.utils import Process
 
 
@@ -31,14 +32,14 @@ def stderr_output():
     return lines
 
 
-@pytest.fixture(name="some_file", scope="session")
-def fixture_some_file() -> str:
+@pytest.fixture(scope="session")
+def some_file() -> str:
     """Return a file."""
     return "some_file.txt"
 
 
-@pytest.fixture(name="nested_directory_with_file", scope="session")
-def fixture_nested_directory_with_file(tmp_path_factory, some_file: str) -> Path:
+@pytest.fixture(scope="session")
+def nested_directory_with_file(tmp_path_factory, some_file: str) -> Path:
     """Return a nested directory with a file."""
     directory = tmp_path_factory.mktemp("nested_directory_with_file")
     sub_directory = directory / "sub_directory"
@@ -46,3 +47,22 @@ def fixture_nested_directory_with_file(tmp_path_factory, some_file: str) -> Path
     file = sub_directory / some_file
     file.touch()
     return directory
+
+
+@pytest.fixture(scope="session")
+def path_with_directories_and_a_file(
+    tmp_path_factory, sub_dir_names: list[str], some_file: str
+) -> Path:
+    """Return a path with directories and a file in it."""
+    directory: Path = tmp_path_factory.mktemp("tmp_dir")
+    for sub_dir_name in sub_dir_names:
+        sub_dir: Path = Path(directory, sub_dir_name)
+        sub_dir.mkdir()
+    file = Path(directory, some_file)
+    file.touch()
+    return directory
+
+
+@pytest.fixture(scope="session")
+def sub_dir_names() -> list[str]:
+    return ["sub_dir_1", "sub_dir_2", "sub_dir_3"]

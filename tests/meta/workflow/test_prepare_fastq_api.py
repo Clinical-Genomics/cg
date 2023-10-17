@@ -134,7 +134,7 @@ def test_no_fastq_in_housekeeper(
         assert file.path.endswith(".spring")
 
     # WHEN checking if fastq files need to be added to housekeeper
-    res = prepare_fastq_api.check_fastq_links(case_id)
+    res = prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
 
     # THEN assert that all fastq files are not there
     assert res is None

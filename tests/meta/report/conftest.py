@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List
 
 import pytest
 
@@ -20,9 +19,9 @@ from tests.mocks.mip_analysis_mock import MockMipAnalysis
 from tests.mocks.report import MockChanjo, MockHousekeeperMipDNAReportAPI
 
 
-@pytest.fixture(scope="function", name="report_api_mip_dna")
+@pytest.fixture(scope="function")
 def report_api_mip_dna(
-    cg_context: CGConfig, lims_samples: List[dict], report_store: Store
+    cg_context: CGConfig, lims_samples: list[dict], report_store: Store
 ) -> MipDNAReportAPI:
     """MIP DNA ReportAPI fixture."""
     cg_context.meta_apis["analysis_api"] = MockMipAnalysis()
@@ -33,9 +32,9 @@ def report_api_mip_dna(
     return MockHousekeeperMipDNAReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
 
 
-@pytest.fixture(scope="function", name="report_api_balsamic")
+@pytest.fixture(scope="function")
 def report_api_balsamic(
-    cg_context: CGConfig, lims_samples: List[dict], report_store: Store
+    cg_context: CGConfig, lims_samples: list[dict], report_store: Store
 ) -> BalsamicReportAPI:
     """BALSAMIC ReportAPI fixture."""
     cg_context.meta_apis["analysis_api"] = MockBalsamicAnalysis(cg_context)
@@ -45,9 +44,9 @@ def report_api_balsamic(
     return BalsamicReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
 
 
-@pytest.fixture(scope="function", name="report_api_rnafusion")
+@pytest.fixture(scope="function")
 def report_api_rnafusion(
-    rnafusion_context: CGConfig, lims_samples: List[dict]
+    rnafusion_context: CGConfig, lims_samples: list[dict]
 ) -> RnafusionReportAPI:
     """Rnafusion report API fixture."""
     rnafusion_context.lims_api_ = MockLimsAPI(rnafusion_context, lims_samples)
@@ -55,45 +54,45 @@ def report_api_rnafusion(
     return RnafusionReportAPI(rnafusion_context, rnafusion_context.meta_apis["analysis_api"])
 
 
-@pytest.fixture(scope="function", name="case_mip_dna")
+@pytest.fixture(scope="function")
 def case_mip_dna(case_id: str, report_api_mip_dna: MipDNAReportAPI) -> Family:
     """MIP DNA case instance."""
     return report_api_mip_dna.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
-@pytest.fixture(scope="function", name="case_balsamic")
+@pytest.fixture(scope="function")
 def case_balsamic(case_id: str, report_api_balsamic: BalsamicReportAPI) -> Family:
     """BALSAMIC case instance."""
     return report_api_balsamic.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
-@pytest.fixture(scope="function", name="case_samples_data")
+@pytest.fixture(scope="function")
 def case_samples_data(case_id: str, report_api_mip_dna: MipDNAReportAPI):
     """MIP DNA family sample object."""
     return report_api_mip_dna.status_db.get_case_samples_by_case_id(case_internal_id=case_id)
 
 
-@pytest.fixture(scope="function", name="mip_analysis_api")
+@pytest.fixture(scope="function")
 def mip_analysis_api() -> MockMipAnalysis:
     """MIP analysis mock data."""
     return MockMipAnalysis()
 
 
-@pytest.fixture(scope="session", name="lims_family")
-def fixture_lims_family(fixtures_dir: Path) -> dict:
+@pytest.fixture(scope="session")
+def lims_family(fixtures_dir: Path) -> dict:
     """Returns a lims-like case of samples."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(fixtures_dir, "report", "lims_family.json")
     )
 
 
-@pytest.fixture(scope="session", name="lims_samples")
-def fixture_lims_samples(lims_family: dict) -> List[dict]:
+@pytest.fixture(scope="session")
+def lims_samples(lims_family: dict) -> list[dict]:
     """Returns the samples of a lims case."""
     return lims_family["samples"]
 
 
-@pytest.fixture(scope="function", autouse=True, name="report_store")
+@pytest.fixture(scope="function", autouse=True)
 def report_store(analysis_store, helpers, timestamp_yesterday):
     """A mock store instance for report testing."""
     case = analysis_store.get_cases()[0]
@@ -108,13 +107,13 @@ def report_store(analysis_store, helpers, timestamp_yesterday):
         family_sample.sample.ordered_at = timestamp_yesterday - timedelta(days=2)
         family_sample.sample.received_at = timestamp_yesterday - timedelta(days=1)
         family_sample.sample.prepared_at = timestamp_yesterday
-        family_sample.sample.sequenced_at = timestamp_yesterday
+        family_sample.sample.reads_updated_at = timestamp_yesterday
         family_sample.sample.delivered_at = datetime.now()
     return analysis_store
 
 
-@pytest.fixture(scope="session", name="rnafusion_validated_metrics")
-def fixture_rnafusion_validated_metrics() -> Dict[str, str]:
+@pytest.fixture(scope="session")
+def rnafusion_validated_metrics() -> dict[str, str]:
     """Return Rnafusion raw analysis metrics dictionary."""
     return {
         "gc_content": "51.7",

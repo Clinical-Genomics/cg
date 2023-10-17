@@ -1,8 +1,9 @@
 import datetime as dt
 import logging
-from typing import List, Optional
+from typing import Optional
 
 import petname
+
 from cg.constants import DataDelivery, FlowCellStatus, Pipeline, Priority
 from cg.store.api.base import BaseHandler
 from cg.store.models import (
@@ -22,9 +23,8 @@ from cg.store.models import (
     Panel,
     Pool,
     Sample,
-    User,
-    Collaboration,
     SampleLaneSequencingMetrics,
+    User,
 )
 
 LOG = logging.getLogger(__name__)
@@ -175,8 +175,8 @@ class AddHandler(BaseHandler):
         data_delivery: DataDelivery,
         name: str,
         ticket: str,
-        panels: Optional[List[str]] = None,
-        cohorts: Optional[List[str]] = None,
+        panels: Optional[list[str]] = None,
+        cohorts: Optional[list[str]] = None,
         priority: Optional[Priority] = Priority.standard,
         synopsis: Optional[str] = None,
     ) -> Family:
@@ -226,6 +226,7 @@ class AddHandler(BaseHandler):
         sequencer_type: str,
         date: dt.datetime,
         flow_cell_status: Optional[str] = FlowCellStatus.ON_DISK,
+        has_backup: Optional[bool] = False,
     ) -> Flowcell:
         """Build a new Flowcell record."""
         return Flowcell(
@@ -234,6 +235,7 @@ class AddHandler(BaseHandler):
             sequencer_type=sequencer_type,
             sequenced_at=date,
             status=flow_cell_status,
+            has_backup=has_backup,
         )
 
     def add_analysis(
@@ -324,9 +326,9 @@ class AddHandler(BaseHandler):
     def add_invoice(
         self,
         customer: Customer,
-        samples: List[Sample] = None,
-        microbial_samples: List[Sample] = None,
-        pools: List[Pool] = None,
+        samples: list[Sample] = None,
+        microbial_samples: list[Sample] = None,
+        pools: list[Pool] = None,
         comment: str = None,
         discount: int = 0,
         record_type: str = None,

@@ -33,7 +33,7 @@ class HermesApi:
             convert_command.extend(["--analysis-type", analysis_type])
         self.process.run_command(convert_command)
 
-        return CGDeliverables.parse_raw(self.process.stdout)
+        return CGDeliverables.model_validate_json(self.process.stdout)
 
     def create_housekeeper_bundle(
         self,
@@ -58,7 +58,7 @@ class HermesApi:
         """Convert a deliverables object to a housekeeper object"""
         bundle_info = {
             "name": bundle_name,
-            "files": [file_info.dict() for file_info in deliverables.files],
+            "files": [file_info.model_dump() for file_info in deliverables.files],
         }
         if created:
             bundle_info["created"] = created

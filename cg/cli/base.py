@@ -1,32 +1,31 @@
 """ Start of CLI """
-from pathlib import Path
-
 import logging
 import sys
-from typing import Optional
+from pathlib import Path
+from typing import List, Optional
 
-import cg
 import click
 import coloredlogs
-from cg.cli.delete.base import delete
-from cg.cli.set.base import set_cmd
-from cg.constants.constants import FileFormat
-from cg.cli.store.store import store as store_cmd
-from cg.io.controller import ReadFile
-from cg.models.cg_config import CGConfig
-from cg.store import Store
 
+import cg
 from cg.cli.add import add as add_cmd
 from cg.cli.backup import backup
 from cg.cli.clean import clean
 from cg.cli.compress.base import compress, decompress
+from cg.cli.delete.base import delete
 from cg.cli.deliver.base import deliver as deliver_cmd
 from cg.cli.demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
+from cg.cli.generate.base import generate as generate_cmd
 from cg.cli.get import get
+from cg.cli.set.base import set_cmd
+from cg.cli.store.store import store as store_cmd
 from cg.cli.transfer import transfer_group
 from cg.cli.upload.base import upload
 from cg.cli.workflow.base import workflow as workflow_cmd
-from cg.cli.generate.base import generate as generate_cmd
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
+from cg.models.cg_config import CGConfig
+from cg.store.database import create_all_tables, drop_all_tables, get_tables
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -69,19 +68,18 @@ def base(
 @click.pass_obj
 def init(context: CGConfig, reset: bool, force: bool):
     """Setup the database."""
-    status_db: Store = context.status_db
-    existing_tables = status_db.engine.table_names()
+    existing_tables: List[str] = get_tables()
     if force or reset:
         if existing_tables and not force:
             message = f"Delete existing tables? [{', '.join(existing_tables)}]"
             click.confirm(click.style(message, fg="yellow"), abort=True)
-        status_db.drop_all()
+        drop_all_tables()
     elif existing_tables:
         LOG.error("Database already exists, use '--reset'")
         raise click.Abort
 
-    status_db.create_all()
-    LOG.info("Success! New tables: %s", ", ".join(status_db.engine.table_names()))
+    create_all_tables()
+    LOG.info(f"Success! New tables: {', '.join(get_tables())}")
 
 
 base.add_command(add_cmd)

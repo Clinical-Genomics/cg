@@ -1,12 +1,11 @@
 """Module for Loqusdb API."""
-
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Optional, Dict
+from typing import Optional
 
 from cg.constants.constants import FileFormat
-from cg.exc import LoqusdbDeleteCaseError, CaseNotFoundError
+from cg.exc import CaseNotFoundError, LoqusdbDeleteCaseError
 from cg.io.controller import ReadStream
 from cg.utils import Process
 from cg.utils.dict import get_list_from_dictionary
@@ -31,9 +30,10 @@ class LoqusdbAPI:
         family_ped_path: Optional[Path] = None,
         window_size: Optional[int] = None,
         gq_threshold: Optional[int] = None,
+        qual_gq: Optional[bool] = False,
         hard_threshold: Optional[float] = None,
         soft_threshold: Optional[float] = None,
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         """Add observations to Loqusdb from VCF files."""
         load_params = {
             "--case-id": case_id,
@@ -46,7 +46,8 @@ class LoqusdbAPI:
             "--hard-threshold": str(hard_threshold) if hard_threshold else None,
             "--soft-threshold": str(soft_threshold) if soft_threshold else None,
         }
-        load_call_params: list = ["load"] + get_list_from_dictionary(load_params)
+        load_call_params: list[str] = ["load"] + get_list_from_dictionary(load_params)
+        load_call_params.append("--qual-gq") if qual_gq else None
         self.process.run_command(parameters=load_call_params)
         return self.get_nr_of_variants_in_file()
 
@@ -98,7 +99,7 @@ class LoqusdbAPI:
         LOG.error(f"Could not delete case {case_id} from {repr(self)}")
         raise LoqusdbDeleteCaseError
 
-    def get_nr_of_variants_in_file(self) -> Dict[str, int]:
+    def get_nr_of_variants_in_file(self) -> dict[str, int]:
         """Return the number of variants in the uploaded to Loqusdb file."""
         nr_of_variants: int = 0
         for line in self.process.stderr_lines():

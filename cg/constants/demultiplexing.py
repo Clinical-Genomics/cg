@@ -1,7 +1,9 @@
 """Constants related to demultiplexing."""
 from pathlib import Path
-from typing import List, Dict
+
 import click
+
+from cg.constants.sequencing import Sequencers
 from cg.utils.enums import Enum, StrEnum
 
 
@@ -27,7 +29,15 @@ class DemultiplexingDirsAndFiles(StrEnum):
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
     BCL2FASTQ_TILE_DIR_PATTERN: str = r"l\dt\d{2}"
+    QUEUED_FOR_POST_PROCESSING: str = "post_processing_queued.txt"
+    ANALYSIS_COMPLETED: str = "Secondary_Analysis_Complete.txt"
+    ANALYSIS: str = "Analysis"
+    DATA: str = "Data"
+    BCL_CONVERT: str = "BCLConvert"
     FLOW_CELLS_DIRECTORY_NAME: str = "flow_cells"
+    DEMULTIPLEXED_RUNS_DIRECTORY_NAME: str = "demultiplexed_runs"
+    OUTPUT_FILE_MANIFEST: str = "Manifest.tsv"
+    INTER_OP: str = "InterOp"
 
 
 class RunParametersXMLNodes(StrEnum):
@@ -57,20 +67,19 @@ class RunParametersXMLNodes(StrEnum):
     UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
 
 
-class SampleSheetNovaSeq6000Sections:
+class SampleSheetBcl2FastqSections:
     """Class with all necessary constants for building a NovaSeqX sample sheet."""
 
     class Settings(Enum):
         HEADER: str = "[Settings]"
-        BARCODE_MISMATCH_INDEX1: List[str] = ["BarcodeMismatchesIndex1", "0"]
-        BARCODE_MISMATCH_INDEX2: List[str] = ["BarcodeMismatchesIndex2", "0"]
+        BARCODE_MISMATCH_INDEX1: list[str] = ["BarcodeMismatchesIndex1", "0"]
+        BARCODE_MISMATCH_INDEX2: list[str] = ["BarcodeMismatchesIndex2", "0"]
 
     class Data(Enum):
         HEADER: str = "[Data]"
         FLOW_CELL_ID: str = "FCID"
         LANE: str = "Lane"
         SAMPLE_INTERNAL_ID_BCL2FASTQ: str = "SampleID"
-        SAMPLE_INTERNAL_ID_BCLCONVERT: str = "Sample_ID"
         SAMPLE_REFERENCE: str = "SampleRef"
         INDEX_1: str = "index"
         INDEX_2: str = "index2"
@@ -79,47 +88,35 @@ class SampleSheetNovaSeq6000Sections:
         RECIPE: str = "Recipe"
         OPERATOR: str = "Operator"
         SAMPLE_PROJECT_BCL2FASTQ: str = "Project"
-        SAMPLE_PROJECT_BCLCONVERT: str = "Sample_Project"
 
-        COLUMN_NAMES: Dict[str, List[str]] = {
-            BclConverter.BCL2FASTQ.value: [
-                FLOW_CELL_ID,
-                LANE,
-                SAMPLE_INTERNAL_ID_BCL2FASTQ,
-                SAMPLE_REFERENCE,
-                INDEX_1,
-                INDEX_2,
-                SAMPLE_NAME,
-                CONTROL,
-                RECIPE,
-                OPERATOR,
-                SAMPLE_PROJECT_BCL2FASTQ,
-            ],
-            BclConverter.DRAGEN.value: [
-                FLOW_CELL_ID,
-                LANE,
-                SAMPLE_INTERNAL_ID_BCLCONVERT,
-                SAMPLE_REFERENCE,
-                INDEX_1,
-                INDEX_2,
-                SAMPLE_NAME,
-                CONTROL,
-                RECIPE,
-                OPERATOR,
-                SAMPLE_PROJECT_BCLCONVERT,
-            ],
-        }
+        COLUMN_NAMES: list[str] = [
+            FLOW_CELL_ID,
+            LANE,
+            SAMPLE_INTERNAL_ID_BCL2FASTQ,
+            SAMPLE_REFERENCE,
+            INDEX_1,
+            INDEX_2,
+            SAMPLE_NAME,
+            CONTROL,
+            RECIPE,
+            OPERATOR,
+            SAMPLE_PROJECT_BCL2FASTQ,
+        ]
 
 
-class SampleSheetNovaSeqXSections:
-    """Class with all necessary constants for building a NovaSeqX sample sheet."""
+class SampleSheetBCLConvertSections:
+    """Class with all necessary constants for building a version 2 sample sheet."""
 
     class Header(Enum):
         HEADER: str = "[Header]"
-        FILE_FORMAT: List[str] = ["FileFormatVersion", "2"]
+        FILE_FORMAT: list[str] = ["FileFormatVersion", "2"]
         RUN_NAME: str = "RunName"
-        INSTRUMENT_PLATFORM: List[str] = ["InstrumentPlatform", "NovaSeqXSeries"]
-        INDEX_ORIENTATION_FORWARD: List[str] = ["IndexOrientation", "Forward"]
+        INSTRUMENT_PLATFORM_TITLE: str = "InstrumentPlatform"
+        INSTRUMENT_PLATFORM_VALUE: dict[str, str] = {
+            Sequencers.NOVASEQ: "NovaSeq6000",
+            Sequencers.NOVASEQX: "NovaSeqXSeries",
+        }
+        INDEX_ORIENTATION_FORWARD: list[str] = ["IndexOrientation", "Forward"]
 
     class Reads(StrEnum):
         HEADER: str = "[Reads]"
@@ -130,8 +127,8 @@ class SampleSheetNovaSeqXSections:
 
     class Settings(Enum):
         HEADER: str = "[BCLConvert_Settings]"
-        SOFTWARE_VERSION: List[str] = ["SoftwareVersion", "4.1.5"]
-        FASTQ_COMPRESSION_FORMAT: List[str] = ["FastqCompressionFormat", "gzip"]
+        SOFTWARE_VERSION: list[str] = ["SoftwareVersion", "4.1.7"]
+        FASTQ_COMPRESSION_FORMAT: list[str] = ["FastqCompressionFormat", "gzip"]
 
     class Data(Enum):
         HEADER: str = "[BCLConvert_Data]"
@@ -139,16 +136,18 @@ class SampleSheetNovaSeqXSections:
         SAMPLE_INTERNAL_ID: str = "Sample_ID"
         INDEX_1: str = "Index"
         INDEX_2: str = "Index2"
+        OVERRIDE_CYCLES: str = "OverrideCycles"
         ADAPTER_READ_1: str = "AdapterRead1"
         ADAPTER_READ_2: str = "AdapterRead2"
         BARCODE_MISMATCHES_1: str = "BarcodeMismatchesIndex1"
         BARCODE_MISMATCHES_2: str = "BarcodeMismatchesIndex2"
 
-        COLUMN_NAMES: List[str] = [
+        COLUMN_NAMES: list[str] = [
             LANE,
             SAMPLE_INTERNAL_ID,
             INDEX_1,
             INDEX_2,
+            OVERRIDE_CYCLES,
             ADAPTER_READ_1,
             ADAPTER_READ_2,
             BARCODE_MISMATCHES_1,
@@ -160,9 +159,9 @@ OPTION_BCL_CONVERTER = click.option(
     "-b",
     "--bcl-converter",
     type=click.Choice(["bcl2fastq", "dragen"]),
-    default="bcl2fastq",
-    help="Specify bcl conversion software. Choose between bcl2fastq and dragen. Default is "
-    "bcl2fastq.",
+    default=None,
+    help="Specify bcl conversion software. Choose between bcl2fastq and dragen. "
+    "If not specified, the software will be determined automatically using the sequencer type.",
 )
 
 

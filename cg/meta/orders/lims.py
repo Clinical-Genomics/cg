@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from cg.apps.lims import LimsAPI
 from cg.models.lims.sample import LimsSample
@@ -9,7 +8,7 @@ from cg.models.orders.samples import OrderInSample
 LOG = logging.getLogger(__name__)
 
 
-def build_lims_sample(customer: str, samples: List[OrderInSample]) -> List[LimsSample]:
+def build_lims_sample(customer: str, samples: list[OrderInSample]) -> list[LimsSample]:
     """Convert order input to lims interface input."""
     samples_lims = []
     for sample in samples:
@@ -21,9 +20,9 @@ def build_lims_sample(customer: str, samples: List[OrderInSample]) -> List[LimsS
     return samples_lims
 
 
-def process_lims(lims_api: LimsAPI, lims_order: OrderIn, new_samples: List[OrderInSample]):
+def process_lims(lims_api: LimsAPI, lims_order: OrderIn, new_samples: list[OrderInSample]):
     """Process samples to add them to LIMS."""
-    samples_lims: List[LimsSample] = build_lims_sample(lims_order.customer, samples=new_samples)
+    samples_lims: list[LimsSample] = build_lims_sample(lims_order.customer, samples=new_samples)
     project_name = lims_order.ticket or lims_order.name
     # Create new lims project
     project_data = lims_api.submit_project(

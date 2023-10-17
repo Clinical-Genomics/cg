@@ -5,11 +5,12 @@ Revises: c494649637d5
 Create Date: 2021-12-16 12:39:57.439135
 
 """
-from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import Column, orm, types
 from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import orm, Column, types
+from sqlalchemy.orm import declarative_base
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "f2edbd530656"

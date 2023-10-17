@@ -2,6 +2,9 @@ import logging
 from pathlib import Path
 
 import pytest
+from click.testing import CliRunner
+from pydantic import ValidationError
+
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -12,8 +15,6 @@ from cg.io.controller import WriteStream
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
-from click.testing import CliRunner
-from pydantic.v1 import ValidationError
 
 
 def test_without_options(cli_runner: CliRunner, balsamic_context: CGConfig):

@@ -1,13 +1,13 @@
 """Module for modeling run parameters file parsing."""
 import logging
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Optional
 from xml.etree import ElementTree
 
 from cg.constants.demultiplexing import RunParametersXMLNodes
 from cg.constants.sequencing import Sequencers
-from cg.io.xml import read_xml
 from cg.exc import RunParametersError
+from cg.io.xml import read_xml
 
 LOG = logging.getLogger(__name__)
 
@@ -42,11 +42,6 @@ class RunParameters:
         raise NotImplementedError(
             "Parent class instantiated. Instantiate instead RunParametersNovaSeq6000 or RunParametersNovaSeqX"
         )
-
-    @property
-    def requires_dummy_samples(self) -> Optional[bool]:
-        """Return true if the flow cell requires the addition of dummy samples."""
-        raise NotImplementedError("Impossible to know dummy sample requirements of parent class")
 
     @property
     def control_software_version(self) -> Optional[str]:
@@ -106,11 +101,6 @@ class RunParametersNovaSeq6000(RunParameters):
             raise RunParametersError(
                 "The file parsed does not correspond to a NovaSeq6000 instrument"
             )
-
-    @property
-    def requires_dummy_samples(self) -> bool:
-        """Return true if the number of cycles of both indexes is 8."""
-        return self.index_length != 8
 
     @property
     def control_software_version(self) -> str:
@@ -175,11 +165,6 @@ class RunParametersNovaSeqX(RunParameters):
             raise RunParametersError("The file parsed does not correspond to a NovaSeqX instrument")
 
     @property
-    def requires_dummy_samples(self) -> bool:
-        """Return False for run parameters associated with NovaSeqX sequencing."""
-        return False
-
-    @property
     def control_software_version(self) -> None:
         """Return None for run parameters associated with NovaSeqX sequencing."""
         return
@@ -195,9 +180,9 @@ class RunParametersNovaSeqX(RunParameters):
         return Sequencers.NOVASEQX.value
 
     @property
-    def read_parser(self) -> Dict[str, int]:
+    def read_parser(self) -> dict[str, int]:
         """Return read and index cycle values parsed as a dictionary."""
-        cycle_mapping: Dict[str, int] = {}
+        cycle_mapping: dict[str, int] = {}
         planned_reads: Optional[ElementTree.Element] = self.tree.find(
             RunParametersXMLNodes.PLANNED_READS
         )

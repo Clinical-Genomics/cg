@@ -1,12 +1,13 @@
-from typing import List
+from datetime import datetime
+
 import pytest
+
+from cg.constants import Pipeline
+from cg.constants.invoice import CustomerNames
+from cg.store import Store
+from cg.store.models import Analysis, Sample
 from cg.utils.dispatcher import Dispatcher
 from tests.store_helpers import StoreHelpers
-from cg.store import Store
-from cg.store.models import Sample, Analysis
-from cg.constants.invoice import CustomerNames
-from cg.constants import Pipeline
-from datetime import datetime
 
 
 def test_dispatch_table_generation(
@@ -157,7 +158,7 @@ def test_call_with_status_db_functions(
         },
     )
     # THEN the dispatcher should return the correct samples
-    samples: List[Sample] = dispatcher()
+    samples: list[Sample] = dispatcher()
     for sample in samples:
         assert sample.customer.internal_id == customer_internal_id
         assert sample.subject_id == test_subject
@@ -193,7 +194,7 @@ def test_dispatcher_on_other_functions(
             "started_at_before": timestamp_now,
         },
     )
-    analyses: List[Analysis] = function_dispatcher()
+    analyses: list[Analysis] = function_dispatcher()
 
     # THEN the dispatcher should return the correct analyses
     for analysis in analyses:

@@ -5,6 +5,7 @@ import traceback
 from typing import Optional
 
 import click
+
 from cg.cli.upload.clinical_delivery import auto_fastq, upload_clinical_delivery
 from cg.cli.upload.coverage import upload_coverage
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout

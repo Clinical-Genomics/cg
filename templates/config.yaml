@@ -21,10 +21,6 @@ scout:
   database: "mongodb://USERNAME:PASSWORD@HOST:PORT/DATABASE"
   database_name: database
 
-cgstats:
-  database: "mysql+pymysql://USERNAME:PASSWORD@HOST:PORT/DATABASE"
-  root: /mnt/hds/proj/bioinfo/DEMUX
-
 loqusdb:
   database: "mongodb://USERNAME:PASSWORD@HOST:PORT/DATABASE"
   database_name: database

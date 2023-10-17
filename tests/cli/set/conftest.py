@@ -1,6 +1,7 @@
 """Fixtures for cli balsamic tests"""
 
 import pytest
+
 from cg.apps.lims import LimsAPI
 from cg.models.cg_config import CGConfig
 

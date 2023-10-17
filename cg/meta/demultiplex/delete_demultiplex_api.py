@@ -1,19 +1,19 @@
 import itertools
 import logging
 import shutil
-
 from glob import glob
 from pathlib import Path
-from typing import Iterable, List, Optional
+from typing import Iterable, Optional
+
+from housekeeper.store.models import File
+
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.cgstats.stats import StatsAPI
-from cg.constants import SequencingFileTag
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import DeleteDemuxError
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Sample, Flowcell
-from housekeeper.store.models import File
+from cg.store.models import Flowcell, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -27,8 +27,7 @@ class DeleteDemuxAPI:
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.status_db: Store = config.status_db
         self.demux_api: DemultiplexingAPI = config.demultiplex_api
-        self.stats_api: StatsAPI = config.cg_stats_api
-        self.samples_on_flow_cell: List[Sample] = []
+        self.samples_on_flow_cell: list[Sample] = []
         self.demultiplexing_out_path: Path = self.get_path_for_flow_cell(
             base_path=self.demux_api.demultiplexed_runs_dir
         )
@@ -65,11 +64,11 @@ class DeleteDemuxAPI:
     def _set_samples_on_flow_cell(self) -> None:
         """Set a list of samples related to a flow cell in status-db."""
         flow_cell = self.status_db.get_flow_cell_by_name(flow_cell_name=self.flow_cell_name)
-        self.samples_on_flow_cell: List[Sample] = flow_cell.samples
+        self.samples_on_flow_cell: list[Sample] = flow_cell.samples
 
-    def active_samples_on_flow_cell(self) -> Optional[List[str]]:
+    def active_samples_on_flow_cell(self) -> Optional[list[str]]:
         """Check if there are any active cases related to samples of a flow cell."""
-        active_samples_on_flow_cell: List[str] = [
+        active_samples_on_flow_cell: list[str] = [
             sample.internal_id
             for sample in self.samples_on_flow_cell
             if self.status_db.has_active_cases_for_sample(internal_id=sample.internal_id)
@@ -79,17 +78,19 @@ class DeleteDemuxAPI:
 
     def _delete_sample_sheet_housekeeper(self) -> None:
         """Delete the presence of all sample sheets related to a flow cell in Housekeeper."""
-        sample_sheet_files: Iterable[File] = self.housekeeper_api.files(
-            tags=[self.flow_cell_name, "samplesheet"]
+        sample_sheet_files: list[File] = self.housekeeper_api.get_sample_sheets_from_latest_version(
+            self.flow_cell_name
         )
-        if any(sample_sheet_files):
+        if sample_sheet_files:
             for file in sample_sheet_files:
                 self.housekeeper_api.delete_file(file_id=file.id)
                 LOG.info(f"DeleteDemuxAPI-Housekeeper: Deleted {file.path} from housekeeper")
         else:
-            LOG.info(f"DeleteDemuxAPI-Housekeeper: No files found with tag: {self.flow_cell_name}")
+            LOG.info(
+                f"DeleteDemuxAPI-Housekeeper: No sample sheets found with tag: {self.flow_cell_name}"
+            )
 
-    def _delete_files_if_related_in_housekeeper_by_tag(self, sample: Sample, tags: List[str]):
+    def _delete_files_if_related_in_housekeeper_by_tag(self, sample: Sample, tags: list[str]):
         """Delete any existing fastq related to sample"""
 
         housekeeper_files: Iterable[File] = self.housekeeper_api.files(
@@ -104,7 +105,7 @@ class DeleteDemuxAPI:
     def _delete_fastq_and_spring_housekeeper(self) -> None:
         """Delete the presence of any spring/fastq files in Housekeeper related to samples on the flow cell."""
 
-        tag_combinations: List[List[str]] = [
+        tag_combinations: list[list[str]] = [
             [SequencingFileTag.FASTQ.value, self.flow_cell_name],
             [SequencingFileTag.SPRING.value, self.flow_cell_name],
             [SequencingFileTag.SPRING_METADATA.value, self.flow_cell_name],
@@ -139,15 +140,6 @@ class DeleteDemuxAPI:
         else:
             self.status_db.delete_flow_cell(flow_cell_id=self.flow_cell_name)
             LOG.info(f"DeleteDemuxAPI-StatusDB: Deleted flowcell {self.flow_cell_name}")
-
-    def delete_flow_cell_cgstats(self) -> None:
-        """Delete any presence of a flow cell in cgstats"""
-        from cg.apps.cgstats.crud.delete import delete_flowcell
-
-        if self.dry_run:
-            LOG.info(f"DeleteDemuxAPI-CGStats: Would remove {self.flow_cell_name}")
-        else:
-            delete_flowcell(manager=self.stats_api, flowcell_name=self.flow_cell_name)
 
     def delete_flow_cell_sample_lane_sequencing_metrics(self) -> None:
         if self.dry_run:
@@ -221,7 +213,7 @@ class DeleteDemuxAPI:
             error_log_path, log_path = glob(
                 f"{self.run_path}/{self.flow_cell_name}_demultiplex.std*"
             )
-            demux_init_files: List[Path] = [
+            demux_init_files: list[Path] = [
                 slurm_job_id_file_path,
                 demux_script_file_path,
                 Path(error_log_path),
@@ -229,7 +221,7 @@ class DeleteDemuxAPI:
             ]
         except ValueError:
             LOG.info(f"DeleteDemuxAPI-Init-files: No demultiplexing logs found in: {self.run_path}")
-            demux_init_files: List[Path] = [
+            demux_init_files: list[Path] = [
                 slurm_job_id_file_path,
                 demux_script_file_path,
             ]
@@ -246,7 +238,7 @@ class DeleteDemuxAPI:
         """Check, and raise, if there are active samples on a flow cell."""
         if self.status_db_presence:
             self._set_samples_on_flow_cell()
-            active_samples_on_flow_cell: List[str] = self.active_samples_on_flow_cell()
+            active_samples_on_flow_cell: list[str] = self.active_samples_on_flow_cell()
             if active_samples_on_flow_cell:
                 LOG.warning(
                     f"There are active analyses using data from this flowcell.\n"
@@ -257,7 +249,6 @@ class DeleteDemuxAPI:
 
     def delete_flow_cell(
         self,
-        cg_stats: bool,
         demultiplexing_dir: bool,
         run_dir: bool,
         housekeeper: bool,
@@ -272,7 +263,6 @@ class DeleteDemuxAPI:
                 demultiplexing_dir=True,
                 run_dir=True,
             )
-            self.delete_flow_cell_cgstats()
             self.delete_flow_cell_housekeeper()
             self.delete_flow_cell_in_status_db()
 
@@ -281,8 +271,6 @@ class DeleteDemuxAPI:
                 demultiplexing_dir=demultiplexing_dir,
                 run_dir=run_dir,
             )
-        if cg_stats:
-            self.delete_flow_cell_cgstats()
         if init_files and not run_dir:
             self.delete_demux_init_files()
         if housekeeper:

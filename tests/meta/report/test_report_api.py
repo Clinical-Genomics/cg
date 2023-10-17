@@ -2,21 +2,28 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List
 
 from _pytest.logging import LogCaptureFixture
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-
-from cg.store import Store
-
-from cg.meta.report.mip_dna import MipDNAReportAPI
 
 from cg.constants import REPORT_GENDER
 from cg.exc import DeliveryReportError
+from cg.meta.report.mip_dna import MipDNAReportAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.report.report import DataAnalysisModel, ReportModel, CustomerModel, CaseModel
-from cg.models.report.sample import SampleModel, ApplicationModel, MethodsModel, TimestampModel
-from cg.store.models import Analysis, FamilySample, Family
+from cg.models.report.report import (
+    CaseModel,
+    CustomerModel,
+    DataAnalysisModel,
+    ReportModel,
+)
+from cg.models.report.sample import (
+    ApplicationModel,
+    MethodsModel,
+    SampleModel,
+    TimestampModel,
+)
+from cg.store import Store
+from cg.store.models import Analysis, Family, FamilySample
 from tests.meta.report.helper import recursive_assert
 from tests.store_helpers import StoreHelpers
 
@@ -238,8 +245,8 @@ def test_get_samples_data(
     report_api_mip_dna: MipDNAReportAPI,
     mip_analysis_api: MipDNAAnalysisAPI,
     case_mip_dna: Family,
-    case_samples_data: List[FamilySample],
-    lims_samples: List[dict],
+    case_samples_data: list[FamilySample],
+    lims_samples: list[dict],
 ):
     """Validates the retrieved sample data."""
 
@@ -271,8 +278,8 @@ def test_get_samples_data(
 
 def test_get_lims_sample(
     report_api_mip_dna: MipDNAReportAPI,
-    case_samples_data: List[FamilySample],
-    lims_samples: List[dict],
+    case_samples_data: list[FamilySample],
+    lims_samples: list[dict],
 ):
     """Tests lims data extraction."""
 
@@ -290,8 +297,8 @@ def test_get_lims_sample(
 
 def test_get_sample_application_data(
     report_api_mip_dna: MipDNAReportAPI,
-    case_samples_data: List[FamilySample],
-    lims_samples: List[dict],
+    case_samples_data: list[FamilySample],
+    lims_samples: list[dict],
 ):
     """Tests sample application data extraction."""
 
@@ -321,10 +328,10 @@ def test_get_unique_applications(
 
     # GIVEN a list of samples sharing the same application
     mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
-    samples: List[SampleModel] = report_api_mip_dna.get_samples_data(case_mip_dna, mip_metadata)
+    samples: list[SampleModel] = report_api_mip_dna.get_samples_data(case_mip_dna, mip_metadata)
 
     # WHEN calling the application filtering function
-    unique_applications: List[ApplicationModel] = report_api_mip_dna.get_unique_applications(
+    unique_applications: list[ApplicationModel] = report_api_mip_dna.get_unique_applications(
         samples
     )
 
@@ -333,7 +340,7 @@ def test_get_unique_applications(
 
 
 def test_get_sample_methods_data(
-    report_api_mip_dna: MipDNAReportAPI, case_samples_data: List[FamilySample]
+    report_api_mip_dna: MipDNAReportAPI, case_samples_data: list[FamilySample]
 ):
     """Tests sample methods retrieval from lims."""
 
@@ -376,7 +383,7 @@ def test_get_case_analysis_data(
 
 def test_get_sample_timestamp_data(
     report_api_mip_dna: MipDNAReportAPI,
-    case_samples_data: List[FamilySample],
+    case_samples_data: list[FamilySample],
     timestamp_yesterday: datetime,
 ):
     """Checks that the sample timestamp information is correctly retrieved from StatusDB."""
@@ -388,7 +395,7 @@ def test_get_sample_timestamp_data(
         "ordered_at": str((datetime.now() - timedelta(days=3)).date()),
         "received_at": str((datetime.now() - timedelta(days=2)).date()),
         "prepared_at": str(timestamp_yesterday.date()),
-        "sequenced_at": str(timestamp_yesterday.date()),
+        "reads_updated_at": str(timestamp_yesterday.date()),
     }
 
     # WHEN extracting the timestamp data associated to a specific sample

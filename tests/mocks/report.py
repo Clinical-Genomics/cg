@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Union, Optional, Dict
+from typing import Optional
 
 from housekeeper.store.models import Version
 
@@ -89,7 +89,7 @@ class MockChanjo(ChanjoAPI):
         mock_config = {"chanjo": {"config_path": "/mock/path", "binary_path": "/mock/path"}}
         super().__init__(mock_config)
 
-    def sample_coverage(self, sample_id: str, panel_genes: list) -> Optional[Dict[str, float]]:
+    def sample_coverage(self, sample_id: str, panel_genes: list) -> Optional[dict[str, float]]:
         """Return mocked sample dictionary."""
         sample_coverage = None
         if sample_id == "ADM1":

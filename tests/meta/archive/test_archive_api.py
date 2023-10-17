@@ -1,7 +1,10 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List
+
 from unittest import mock
+
+from housekeeper.store.models import File
 
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import APIMethods
@@ -19,17 +22,17 @@ from cg.meta.archive.ddn_dataflow import (
     GetJobStatusPayload,
     MiriaFile,
 )
+
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
-from housekeeper.store.models import File
 
 
 def test_get_files_by_archive_location(
     spring_archive_api: SpringArchiveAPI, sample_id, father_sample_id
 ):
     """Tests filtering out files and samples with the correct Archive location from a list."""
-    files_and_samples: List[FileAndSample] = [
+    files_and_samples: list[FileAndSample] = [
         FileAndSample(
             file=spring_archive_api.housekeeper_api.get_files(bundle=sample).first(),
             sample=spring_archive_api.status_db.get_sample_by_internal_id(sample),
@@ -38,7 +41,7 @@ def test_get_files_by_archive_location(
     ]
 
     # WHEN fetching the files by archive location
-    selected_files: List[FileAndSample] = filter_files_on_archive_location(
+    selected_files: list[FileAndSample] = filter_files_on_archive_location(
         files_and_samples, ArchiveLocations.KAROLINSKA_BUCKET
     )
 
@@ -51,12 +54,12 @@ def test_get_files_by_archive_location(
 def test_add_samples_to_files(spring_archive_api: SpringArchiveAPI):
     """Tests matching Files to Samples when both files have a matching sample."""
     # GIVEN a list of SPRING Files to archive
-    files_to_archive: List[
+    files_to_archive: list[
         File
     ] = spring_archive_api.housekeeper_api.get_all_non_archived_spring_files()
 
     # WHEN adding the Sample objects
-    file_and_samples: List[FileAndSample] = spring_archive_api.add_samples_to_files(
+    file_and_samples: list[FileAndSample] = spring_archive_api.add_samples_to_files(
         files_to_archive
     )
 
@@ -70,13 +73,13 @@ def test_add_samples_to_files(spring_archive_api: SpringArchiveAPI):
 def test_add_samples_to_files_missing_sample(spring_archive_api: SpringArchiveAPI):
     """Tests matching Files to Samples when one of the files does not match a Sample."""
     # GIVEN a list of SPRING Files to archive
-    files_to_archive: List[
+    files_to_archive: list[
         File
     ] = spring_archive_api.housekeeper_api.get_all_non_archived_spring_files()
     # GIVEN one of the files does not match the
     files_to_archive[0].version.bundle.name = "does-not-exist"
     # WHEN adding the Sample objects
-    file_and_samples: List[FileAndSample] = spring_archive_api.add_samples_to_files(
+    file_and_samples: list[FileAndSample] = spring_archive_api.add_samples_to_files(
         files_to_archive
     )
 
@@ -139,12 +142,12 @@ def test_convert_into_transfer_data(
             config=ddn_dataflow_config
         )
     # WHEN using it to instantiate the correct class
-    transferdata: List[FileTransferData] = data_flow_client.convert_into_transfer_data(
+    transferdata: list[FileTransferData] = data_flow_client.convert_into_transfer_data(
         files_and_samples=[file_and_sample],
     )
 
     # THEN the returned object should be of the correct type
-    assert isinstance(transferdata[0], MiriaFile)
+    assert isinstance(transferdata[0], MiriaObject)
 
 
 def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAPI, sample_id: str):
@@ -188,7 +191,7 @@ def test_archive_all_non_archived_spring_files(
     # WHEN archiving all available files
     with mock.patch.object(
         AuthToken,
-        "model_validate_json",
+        "model_validate",
         return_value=AuthToken(
             access="test_auth_token",
             expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
@@ -209,8 +212,9 @@ def test_archive_all_non_archived_spring_files(
         json=archive_request_json,
     )
 
-    # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper
-    files: List[File] = spring_archive_api.housekeeper_api.files()
+    # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper while no other
+    # files should have an entry
+    files: list[File] = spring_archive_api.housekeeper_api.files()
     for file in files:
         if SequencingFileTag.SPRING in [tag.name for tag in file.tags]:
             sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(
@@ -218,6 +222,7 @@ def test_archive_all_non_archived_spring_files(
             )
             if sample and sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET:
                 assert file.archive
+
 
 
 def test_get_job_status_done(
@@ -235,28 +240,67 @@ def test_get_job_status_done(
     with mock.patch.object(
         AuthToken,
         "model_validate_json",
+
+            else:
+                assert not file.archive
+        else:
+            assert not file.archive
+
+
+def test_retrieve_samples(
+    spring_archive_api: SpringArchiveAPI,
+    caplog,
+    ok_ddn_response,
+    trimmed_local_path,
+    local_storage_repository,
+    retrieve_request_json,
+    header_with_test_auth_token,
+    sample_with_spring_file: str,
+):
+    """Test retrieving all archived SPRING files tied to a sample for a Miria customer."""
+    # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
+    # with the DDN customer having two samples, and the non-DDN having one sample.
+
+    files: list[File] = spring_archive_api.housekeeper_api.get_files(
+        bundle=sample_with_spring_file, tags=[SequencingFileTag.SPRING]
+    )
+    for file in files:
+        spring_archive_api.housekeeper_api.add_archives(
+            files=[Path(file.full_path)], archive_task_id=123
+        )
+        assert not file.archive.retrieval_task_id
+        assert file.archive
+
+    # WHEN archiving all available files
+    with mock.patch.object(
+        AuthToken,
+        "model_validate",
+
         return_value=AuthToken(
             access="test_auth_token",
             expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
             refresh="test_refresh_token",
         ),
-    ), mock.patch.object(
+    ), mock.patch.object(MiriaObject, "trim_path", return_value=True), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_job_status_response,
+        return_value=ok_ddn_response,
     ) as mock_request_submitter:
-        spring_archive_api.update_ongoing_archival_task(
-            task_id=123, archive_location=ArchiveLocations.KAROLINSKA_BUCKET, is_archival=True
-        )
+        spring_archive_api.retrieve_samples([sample_with_spring_file])
 
-    # THEN we should have sent a POST with the correct request
-    mock_request_submitter.assert_called_with(
-        api_method=APIMethods.POST,
-        url="some/api/getJobStatus",
-        headers=header_with_test_auth_token,
-        json=GetJobStatusPayload(job_id=123).model_dump(),
+    retrieve_sample_request_json = retrieve_request_json.copy()
+    retrieve_sample_request_json["pathInfo"][0]["destination"] = (
+        local_storage_repository + files[0].version.full_path.as_posix()
     )
 
-    # THEN the file should have its archived_at timestamp set
-    files: List[File] = spring_archive_api.housekeeper_api.files()
-    assert [file for file in files if file.archive and file.archive.archived_at]
+    # THEN the DDN archiving function should have been called with the correct destination and source.
+    mock_request_submitter.assert_called_with(
+        api_method=APIMethods.POST,
+        url="some/api/files/retrieve",
+        headers=header_with_test_auth_token,
+        json=retrieve_sample_request_json,
+    )
+
+    # THEN the Archive entry should have a retrieval task id set
+    for file in files:
+        assert file.archive.retrieval_task_id

@@ -5,14 +5,13 @@ Revises: 6d74453565f2
 Create Date: 2021-03-16 12:05:13.275423
 
 """
-from cg.constants import Pipeline, DataDelivery
+import sqlalchemy as sa
+from sqlalchemy import Column, orm, types
 from sqlalchemy.dialects import mysql
+from sqlalchemy.orm import declarative_base
 
 from alembic import op
-import sqlalchemy as sa
-
-from sqlalchemy import orm, Column, types
-from sqlalchemy.ext.declarative import declarative_base
+from cg.constants import DataDelivery, Pipeline
 
 Base = declarative_base()
 

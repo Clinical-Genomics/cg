@@ -7,7 +7,6 @@ from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Gender
 from cg.exc import BalsamicStartError
-
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 
@@ -56,7 +55,10 @@ def test_get_verified_gender_unknown(caplog):
 
     # THEN gender must match the expected one
     assert retrieved_gender == Gender.FEMALE
-    assert f"The provided gender is unknown, setting {Gender.FEMALE} as the default" in caplog.text
+    assert (
+        f"The provided gender is unknown, setting {Gender.FEMALE.value} as the default"
+        in caplog.text
+    )
 
 
 def test_get_verified_pon():
@@ -114,7 +116,8 @@ def test_get_parsed_observation_file_paths_no_args(
     assert (
         args[ObservationsFileWildcards.CLINICAL_SV] == observations_clinical_sv_file_path.as_posix()
     )
-    assert args[ObservationsFileWildcards.CANCER_ALL_SNV] is None
+    assert args[ObservationsFileWildcards.CANCER_GERMLINE_SNV] is None
+    assert args[ObservationsFileWildcards.CANCER_GERMLINE_SV] is None
     assert (
         args[ObservationsFileWildcards.CANCER_SOMATIC_SNV]
         == observations_somatic_snv_file_path.as_posix()

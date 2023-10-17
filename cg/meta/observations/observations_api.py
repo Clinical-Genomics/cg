@@ -3,21 +3,25 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.loqus import LoqusdbAPI
-from cg.constants.observations import LoqusdbInstance, LoqusdbBalsamicCustomers, LoqusdbMipCustomers
+from cg.constants.observations import (
+    LoqusdbBalsamicCustomers,
+    LoqusdbInstance,
+    LoqusdbMipCustomers,
+)
 from cg.exc import LoqusdbUploadCaseError
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import (
-    MipDNAObservationsInputFiles,
     BalsamicObservationsInputFiles,
+    MipDNAObservationsInputFiles,
 )
 from cg.store import Store
-from cg.store.models import Customer, Family, Analysis
+from cg.store.models import Analysis, Customer, Family
 
 LOG = logging.getLogger(__name__)
 
@@ -92,7 +96,7 @@ class ObservationsAPI:
         )
         return bool(loqusdb_case or duplicate or case.loqusdb_uploaded_samples)
 
-    def update_statusdb_loqusdb_id(self, samples: List[Family], loqusdb_id: Optional[str]) -> None:
+    def update_statusdb_loqusdb_id(self, samples: list[Family], loqusdb_id: Optional[str]) -> None:
         """Update Loqusdb ID field in StatusDB for each of the provided samples."""
         for sample in samples:
             sample.loqusdb_id = loqusdb_id

@@ -1,7 +1,9 @@
 import logging
 from typing import Optional
 
-from cg.apps.cgstats.stats import StatsAPI
+from pydantic.v1 import BaseModel, EmailStr, Field
+from typing_extensions import Literal
+
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -18,8 +20,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.store import Store
-from pydantic.v1 import BaseModel, EmailStr, Field
-from typing_extensions import Literal
+from cg.store.database import initialize_database
 
 LOG = logging.getLogger(__name__)
 
@@ -28,29 +29,6 @@ class Sequencers(BaseModel):
     hiseqx: str
     hiseqga: str
     novaseq: str
-
-
-class EncryptionDirs(BaseModel):
-    current: str
-    legacy: str
-
-
-class FlowCellRunDirs(Sequencers):
-    pass
-
-
-class BackupConfig(BaseModel):
-    root: Sequencers
-    encrypt_dir: EncryptionDirs
-
-
-class CleanDirs(BaseModel):
-    sample_sheets_dir_name: str
-    flow_cell_run_dirs: FlowCellRunDirs
-
-
-class CleanConfig(BaseModel):
-    flow_cells: CleanDirs
 
 
 class SlurmConfig(BaseModel):
@@ -63,14 +41,17 @@ class SlurmConfig(BaseModel):
     qos: SlurmQos = SlurmQos.LOW
 
 
+class BackupConfig(BaseModel):
+    encrypt_dir: str
+    slurm_flow_cell_encryption: SlurmConfig
+
+
 class HousekeeperConfig(BaseModel):
     database: str
     root: str
 
 
 class DemultiplexConfig(BaseModel):
-    run_dir: str
-    out_dir: str
     slurm: SlurmConfig
 
 
@@ -178,12 +159,8 @@ class TaxprofilerConfig(CommonAppConfig):
     hostremoval_reference: str
     databases: str
     slurm: SlurmConfig
-
-
-class CGStatsConfig(BaseModel):
-    binary_path: str
-    database: str
-    root: str
+    tower_binary_path: str
+    tower_pipeline: str
 
 
 class MicrosaltConfig(BaseModel):
@@ -259,11 +236,8 @@ class CGConfig(BaseModel):
 
     # App APIs that can be instantiated in CGConfig
     backup: BackupConfig = None
-    cgstats: CGStatsConfig = None
-    cg_stats_api_: StatsAPI = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
-    clean: Optional[CleanConfig] = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
@@ -288,6 +262,7 @@ class CGConfig(BaseModel):
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
+    pigz: Optional[CommonAppConfig] = None
     pdc: Optional[CommonAppConfig] = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
@@ -314,7 +289,6 @@ class CGConfig(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         fields = {
-            "cg_stats_api_": "cg_stats_api",
             "chanjo_api_": "chanjo_api",
             "crunchy_api_": "crunchy_api",
             "demultiplex_api_": "demultiplex_api",
@@ -341,15 +315,6 @@ class CGConfig(BaseModel):
         return api
 
     @property
-    def cg_stats_api(self) -> StatsAPI:
-        api = self.__dict__.get("cg_stats_api_")
-        if api is None:
-            LOG.debug("Instantiating cg_stats api")
-            api = StatsAPI(config=self.dict())
-            self.cg_stats_api_ = api
-        return api
-
-    @property
     def crunchy_api(self) -> CrunchyAPI:
         api = self.__dict__.get("crunchy_api_")
         if api is None:
@@ -363,7 +328,9 @@ class CGConfig(BaseModel):
         demultiplex_api = self.__dict__.get("demultiplex_api_")
         if demultiplex_api is None:
             LOG.debug("Instantiating demultiplexing api")
-            demultiplex_api = DemultiplexingAPI(config=self.dict())
+            demultiplex_api = DemultiplexingAPI(
+                config=self.dict(), housekeeper_api=self.housekeeper_api
+            )
             self.demultiplex_api_ = demultiplex_api
         return demultiplex_api
 
@@ -456,7 +423,8 @@ class CGConfig(BaseModel):
         status_db = self.__dict__.get("status_db_")
         if status_db is None:
             LOG.debug("Instantiating status db")
-            status_db = Store(uri=self.database)
+            initialize_database(self.database)
+            status_db = Store()
             self.status_db_ = status_db
         return status_db
 

@@ -3,20 +3,17 @@ import logging
 from typing import Optional
 
 import click
+from housekeeper.store.models import File
+
 from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.cli.upload.utils import suggest_cases_to_upload
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.housekeeper_tags import GensAnalysisTag
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Family
-from housekeeper.store.models import File
-
-from cg.cli.upload.utils import suggest_cases_to_upload
-from cg.cli.workflow.commands import (
-    ARGUMENT_CASE_ID,
-    OPTION_DRY,
-)
 
 LOG = logging.getLogger(__name__)
 

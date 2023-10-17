@@ -10,7 +10,7 @@ DESCRIPTION = "Clinical Genomics command center"
 URL = "https://github.com/Clinical-Genomics/cg"
 EMAIL = "support@clinicalgenomics.se"
 AUTHOR = "Clinical Genomics"
-REQUIRES_PYTHON = ">=3.6.0"
+REQUIRES_PYTHON = ">=3.8.0"
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -42,7 +42,7 @@ except FileNotFoundError:
 
 setup(
     name=NAME,
-    version="40.12.1",
+    version="51.6.2",
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
@@ -52,12 +52,12 @@ setup(
     include_package_data=True,
     zip_safe=False,
     packages=find_packages(exclude=("tests*", "docs", "examples")),
-    entry_points={"console_scripts": ["cg=cg.cli:base"]},
+    entry_points={"console_scripts": ["cg=cg.cli.base:base"]},
     install_requires=parse_requirements(),
     tests_require=parse_requirements("requirements-dev.txt"),
     classifiers=[
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: CPython",
     ],
 )

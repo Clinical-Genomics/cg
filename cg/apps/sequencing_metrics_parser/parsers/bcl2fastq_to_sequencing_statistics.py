@@ -1,74 +1,62 @@
 from datetime import datetime
 from pathlib import Path
-from typing import List
 
-from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import Bcl2FastqSampleLaneMetrics
-from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import parse_bcl2fastq_sequencing_metrics
+from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import SampleLaneMetrics
+from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import (
+    parse_metrics,
+    parse_undetermined_non_pooled_metrics,
+)
 from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
-    average_quality_score,
-    q30_ratio,
+    calculate_average_quality_score,
+    calculate_q30_bases_percentage,
 )
 from cg.store.models import SampleLaneSequencingMetrics
 
 
-def create_sample_lane_sequencing_metrics_from_bcl2fastq_for_flow_cell(
-    flow_cell_dir: Path,
-) -> List[SampleLaneSequencingMetrics]:
-    """
-    Parses the Bcl2fastq generated stats.json files and aggregates and calculates metrics for each sample in each lane.
+def create_bcl2fastq_metrics(bcl2fastq_flow_cell_path: Path) -> list[SampleLaneSequencingMetrics]:
+    """Return sequencing metrics for a bcl2fastq flow cell."""
+    bcl2fastq_metrics: list[SampleLaneMetrics] = parse_metrics(bcl2fastq_flow_cell_path)
+    return convert_to_sequencing_metrics(bcl2fastq_metrics)
 
-    Args:
-        flow_cell_dir (Path): Demultiplexed flow cell directory containing output from bcl2fastq
 
-    Returns:
-        List[SampleLaneSequencingMetrics]: A list of SampleLaneSequencingMetrics representing the sequencing
-        metrics for each sample in each lane on the flow cell.
-    """
-
-    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
-
-    sample_and_lane_metrics: List[Bcl2FastqSampleLaneMetrics] = parse_bcl2fastq_sequencing_metrics(
-        flow_cell_dir=flow_cell_dir
+def create_bcl2fastq_undetermined_metrics(
+    bcl2fastq_flow_cell_path: Path, non_pooled_lane_sample_pairs: list[tuple[str, int]]
+) -> list[SampleLaneSequencingMetrics]:
+    """Return undetermined sequencing metrics for a bcl2fastq flow cell."""
+    undetermined_metrics: list[SampleLaneMetrics] = parse_undetermined_non_pooled_metrics(
+        flow_cell_dir=bcl2fastq_flow_cell_path,
+        non_pooled_lane_sample_pairs=non_pooled_lane_sample_pairs,
     )
-
-    for raw_sample_metrics in sample_and_lane_metrics:
-        metrics: SampleLaneSequencingMetrics = create_sample_lane_sequencing_metrics_from_bcl2fastq(
-            bcl2fastq_sample_metrics=raw_sample_metrics
-        )
-        sample_lane_sequencing_metrics.append(metrics)
-
-    return sample_lane_sequencing_metrics
+    return convert_to_sequencing_metrics(undetermined_metrics)
 
 
-def create_sample_lane_sequencing_metrics_from_bcl2fastq(
-    bcl2fastq_sample_metrics: Bcl2FastqSampleLaneMetrics,
+def convert_to_sequencing_metrics(
+    bcl2fastq_metrics: list[SampleLaneMetrics],
+) -> list[SampleLaneSequencingMetrics]:
+    """Convert the raw bcl2fastq metrics to SampleLaneSequencingMetrics."""
+    return [create_sequencing_metric(metric) for metric in bcl2fastq_metrics]
+
+
+def create_sequencing_metric(
+    bcl2fastq_metric: SampleLaneMetrics,
 ) -> SampleLaneSequencingMetrics:
-    """
-    Generates a SampleLaneSequencingMetrics based on the provided raw results.
+    """Generates a SampleLaneSequencingMetrics based on the provided raw results."""
 
-    Args:
-        raw_sample_metrics: Bcl2FastqSampleLaneMetrics: The raw sequencing metrics for a sample in a lane.
-
-    Returns:
-        SampleLaneSequencingMetrics: SampleLaneSequencingMetrics encapsulates the statistics for a sample
-        in a lane on the flow cell.
-    """
-
-    sample_base_fraction_passing_q30: float = q30_ratio(
-        q30_yield=bcl2fastq_sample_metrics.sample_total_yield_q30_in_lane,
-        total_yield=bcl2fastq_sample_metrics.sample_total_yield_in_lane,
+    sample_base_percentage_passing_q30: float = calculate_q30_bases_percentage(
+        q30_yield=bcl2fastq_metric.total_yield_q30,
+        total_yield=bcl2fastq_metric.total_yield,
     )
-    sample_base_mean_quality_score: float = average_quality_score(
-        total_quality_score=bcl2fastq_sample_metrics.sample_total_quality_score_in_lane,
-        total_yield=bcl2fastq_sample_metrics.sample_total_yield_in_lane,
+    sample_base_mean_quality_score: float = calculate_average_quality_score(
+        total_quality_score=bcl2fastq_metric.total_quality_score,
+        total_yield=bcl2fastq_metric.total_yield,
     )
 
     return SampleLaneSequencingMetrics(
-        flow_cell_name=bcl2fastq_sample_metrics.flow_cell_name,
-        flow_cell_lane_number=bcl2fastq_sample_metrics.flow_cell_lane_number,
-        sample_internal_id=bcl2fastq_sample_metrics.sample_id,
-        sample_total_reads_in_lane=bcl2fastq_sample_metrics.sample_total_reads_in_lane,
-        sample_base_fraction_passing_q30=sample_base_fraction_passing_q30,
+        flow_cell_name=bcl2fastq_metric.flow_cell_name,
+        flow_cell_lane_number=bcl2fastq_metric.lane,
+        sample_internal_id=bcl2fastq_metric.sample_id,
+        sample_total_reads_in_lane=bcl2fastq_metric.total_reads,
+        sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
         sample_base_mean_quality_score=sample_base_mean_quality_score,
         created_at=datetime.now(),
     )

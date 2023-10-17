@@ -1,6 +1,8 @@
 """Module for defining invoice models."""
+from typing import Any, Optional
+
 from pydantic.v1 import BaseModel
-from typing import List, Optional, Any
+
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import RecordType
 
@@ -49,6 +51,6 @@ class InvoiceReport(BaseModel):
     agreement: Optional[str]
     invoice_id: int
     contact: dict
-    records: List
+    records: list
     pooled_samples: Optional[Any]
     record_type: RecordType

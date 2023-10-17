@@ -7,14 +7,14 @@ from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
 
 
-@pytest.fixture(name="backup_context")
-def fixture_backup_context(cg_context: CGConfig) -> CGConfig:
+@pytest.fixture
+def backup_context(cg_context: CGConfig) -> CGConfig:
     cg_context.meta_apis["backup_api"] = BackupAPI(
         encryption_api=EncryptionAPI(binary_path=cg_context.encryption.binary_path),
-        encrypt_dir=cg_context.backup.encrypt_dir.dict(),
+        encrypt_dir=cg_context.backup.encrypt_dir,
         status=cg_context.status_db,
         tar_api=TarAPI(binary_path=cg_context.tar.binary_path),
         pdc_api=PdcAPI(binary_path=cg_context.pdc.binary_path),
-        root_dir=cg_context.backup.root.dict(),
+        flow_cells_dir=cg_context.flow_cells_dir,
     )
     return cg_context

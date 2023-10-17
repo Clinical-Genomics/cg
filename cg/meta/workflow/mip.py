@@ -1,16 +1,21 @@
 import logging
-
 from pathlib import Path
-from typing import Any, List, Optional, Dict, Union
+from typing import Any, Optional, Union
 
 from pydantic.v1 import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import COLLABORATORS, COMBOS, GenePanelMasterList, Pipeline, FileExtensions
+from cg.constants import (
+    COLLABORATORS,
+    COMBOS,
+    FileExtensions,
+    GenePanelMasterList,
+    Pipeline,
+)
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
-from cg.io.controller import WriteFile, ReadFile
+from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
@@ -18,7 +23,7 @@ from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_config import MipBaseConfig
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
-from cg.store.models import BedVersion, FamilySample, Family, Sample
+from cg.store.models import BedVersion, Family, FamilySample, Sample
 
 CLI_OPTIONS = {
     "config": {"option": "--config_file"},
@@ -122,7 +127,7 @@ class MipAnalysisAPI(AnalysisAPI):
         LOG.info("Config file saved to %s", pedigree_config_path)
 
     @staticmethod
-    def get_sample_data(link_obj: FamilySample) -> Dict[str, Union[str, int]]:
+    def get_sample_data(link_obj: FamilySample) -> dict[str, Union[str, int]]:
         """Return sample specific data."""
         return {
             "sample_id": link_obj.sample.internal_id,
@@ -151,7 +156,7 @@ class MipAnalysisAPI(AnalysisAPI):
                 sample_obj=link.sample,
             )
 
-    def write_panel(self, case_id: str, content: List[str]):
+    def write_panel(self, case_id: str, content: list[str]):
         """Write the gene panel to case dir"""
         out_dir = Path(self.root, case_id)
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -160,10 +165,10 @@ class MipAnalysisAPI(AnalysisAPI):
             out_handle.write("\n".join(content))
 
     @staticmethod
-    def convert_panels(customer: str, default_panels: List[str]) -> List[str]:
+    def convert_panels(customer: str, default_panels: list[str]) -> list[str]:
         """Convert between default panels and all panels included in gene list."""
         # check if all default panels are part of master list
-        master_list: List[str] = GenePanelMasterList.get_panel_names()
+        master_list: list[str] = GenePanelMasterList.get_panel_names()
         if customer in COLLABORATORS and set(default_panels).issubset(master_list):
             return master_list
 
@@ -181,7 +186,7 @@ class MipAnalysisAPI(AnalysisAPI):
 
         return list(all_panels)
 
-    def _get_latest_raw_file(self, family_id: str, tags: List[str]) -> Any:
+    def _get_latest_raw_file(self, family_id: str, tags: list[str]) -> Any:
         """Get a python object file for a tag and a family ."""
 
         last_version = self.housekeeper_api.last_version(bundle=family_id)
@@ -281,10 +286,10 @@ class MipAnalysisAPI(AnalysisAPI):
                 return True
         return False
 
-    def get_cases_to_analyze(self) -> List[Family]:
+    def get_cases_to_analyze(self) -> list[Family]:
         """Return cases to analyze."""
-        cases_query: List[Family] = self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.threshold_reads
+        cases_query: list[Family] = self.status_db.cases_to_analyze(
+            pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
         cases_to_analyze = []
         for case_obj in cases_query:

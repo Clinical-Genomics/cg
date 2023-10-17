@@ -1,7 +1,8 @@
 """Tests for store API status module."""
 
+
 from sqlalchemy.orm import Query
-from typing import List
+
 from cg.constants import Pipeline, Priority
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
@@ -93,7 +94,7 @@ def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
     helpers.add_analysis(store=sample_store)
 
     # WHEN fetching all analyses that are ready for upload
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload()
     ]
 
@@ -107,7 +108,7 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
     helpers.add_analysis(store=sample_store, completed_at=timestamp)
 
     # WHEN fetching all analysis that are ready for upload without specifying pipeline
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=None)
     ]
 
@@ -121,7 +122,7 @@ def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, ti
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
 
     # WHEN fetching all analyses that are ready for upload and analysed with MIP
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=None)
     ]
 
@@ -136,7 +137,7 @@ def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, 
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=pipeline)
 
     # WHEN fetching all pipelines that are analysed with MIP
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=pipeline)
     ]
 
@@ -152,7 +153,7 @@ def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_sto
     helpers.add_analysis(store=sample_store, completed_at=None, pipeline=pipeline)
 
     # WHEN fetching all analyses that are ready for upload and analysed by MIP
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=pipeline)
     ]
 
@@ -166,7 +167,7 @@ def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
 
     # WHEN fetching all analyses that was analysed with MIP
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj
         for analysis_obj in sample_store.get_analyses_to_upload(pipeline=Pipeline.FASTQ)
     ]
@@ -196,7 +197,7 @@ def test_sequencing_qc_priority_express_sample_with_one_half_of_the_reads(
     """Test if priority express sample(s), having more than 50% of the application target reads, pass sample QC."""
 
     # GIVEN a database with a case which has an express sample with half the amount of reads
-    sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
+    sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
     application: Application = sample.application_version.application
     application.target_reads = 40
     sample.reads = 20
@@ -215,7 +216,7 @@ def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
     """Test if priority standard sample(s), having more than 50% of the application target reads, pass sample QC."""
 
     # GIVEN a database with a case which has an normal sample with half the amount of reads
-    sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
+    sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
     application: Application = sample.application_version.application
     application.target_reads = 40
     sample.reads = 20

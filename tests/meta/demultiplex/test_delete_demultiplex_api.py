@@ -1,17 +1,15 @@
 import logging
+from pathlib import Path
+from typing import Optional
+
 import pytest
 
-from pathlib import Path
-from typing import List, Optional
-
-from cg.apps.cgstats.db import models
-from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import DeleteDemuxError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.store.api import Store
-from cg.store.models import Sample, Flowcell
+from cg.store.models import Flowcell, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -62,7 +60,7 @@ def test_get_presence_status_status_db(
     assert not empty_presence
 
     # WHEN adding a flowcell into the statusdb and checking its updated presence
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=delete_demux_api.status_db,
         flow_cell_name=bcl2fastq_flow_cell_id,
         sequencer_type="novaseq",
@@ -77,13 +75,11 @@ def test_set_dry_run_delete_demux_api(
     caplog,
     cg_context: CGConfig,
     bcl2fastq_flow_cell_id: str,
-    stats_api: StatsAPI,
     tmp_flow_cell_run_base_path: Path,
 ):
     """Test to test function to set the API to run in dry run mode"""
 
     caplog.set_level(logging.DEBUG)
-    cg_context.cg_stats_api_ = stats_api
     cg_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
     cg_context.demultiplex_api.demultiplexed_runs_dir = tmp_flow_cell_run_base_path
     Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
@@ -109,7 +105,7 @@ def test_no_active_samples_on_flow_cell(
     # GIVEN a flow cell with no active samples related to it
     store: Store = populated_delete_demultiplex_api.status_db
     flow_cell = store.get_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
-    samples_on_flow_cell: List[Sample] = flow_cell.samples
+    samples_on_flow_cell: list[Sample] = flow_cell.samples
 
     assert samples_on_flow_cell
     for sample in samples_on_flow_cell:
@@ -119,7 +115,7 @@ def test_no_active_samples_on_flow_cell(
     # WHEN checking for active samples on flowcell
     populated_delete_demultiplex_api._set_samples_on_flow_cell()
     active_samples_on_flow_cell: Optional[
-        List[str]
+        list[str]
     ] = populated_delete_demultiplex_api.active_samples_on_flow_cell()
 
     # THEN the no samples on the flowcell should be found active
@@ -135,7 +131,7 @@ def test_active_samples_on_flow_cell(
     # GIVEN a flow cell with active samples related to it
     store: Store = active_flow_cell_store
     flow_cell = store.get_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
-    samples_on_flow_cell: List[Sample] = flow_cell.samples
+    samples_on_flow_cell: list[Sample] = flow_cell.samples
 
     assert samples_on_flow_cell
     for sample in samples_on_flow_cell:
@@ -145,7 +141,7 @@ def test_active_samples_on_flow_cell(
     # WHEN checking for active samples on flowcell
     active_delete_demultiplex_api._set_samples_on_flow_cell()
     active_samples_on_flow_cell: Optional[
-        List[str]
+        list[str]
     ] = active_delete_demultiplex_api.active_samples_on_flow_cell()
 
     # THEN there should be active samples found
@@ -203,7 +199,7 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
     # THEN you should be notified that there are no files on flow cell names
 
     assert (
-        f"Housekeeper: No files found with tag: {delete_demultiplex_api.flow_cell_name}"
+        f"Housekeeper: No sample sheets found with tag: {delete_demultiplex_api.flow_cell_name}"
         in caplog.text
     )
 
@@ -335,49 +331,8 @@ def test_delete_flow_cell_hasta(
     assert flow_cell_obj.status == "removed"
 
 
-def test_delete_flow_cell_cgstats(
-    caplog,
-    populated_delete_demux_context: CGConfig,
-    populated_delete_demultiplex_api: DeleteDemuxAPI,
-    bcl2fastq_flow_cell_id: str,
-):
-    """Test if function to remove objects from cg-stats is working."""
-
-    caplog.set_level(logging.INFO)
-    delete_demux_api: DeleteDemuxAPI = populated_delete_demultiplex_api
-    delete_demux_api.set_dry_run(dry_run=False)
-
-    # GIVEN an existing object in cg-stags database
-
-    existing_object: models.Flowcell = (
-        populated_delete_demux_context.cg_stats_api.query(models.Flowcell)
-        .filter(models.Flowcell.flowcellname == bcl2fastq_flow_cell_id)
-        .first()
-    )
-
-    assert existing_object
-
-    # WHEN wiping the existence of said object
-
-    delete_demux_api.delete_flow_cell_cgstats()
-
-    # THEN the user should be notified that the object was removed
-
-    assert f"Removing entry {bcl2fastq_flow_cell_id} in from cgstats" in caplog.text
-
-    # AND the object should no longer exist
-
-    existing_object: models.Flowcell = (
-        populated_delete_demux_context.cg_stats_api.query(models.Flowcell)
-        .filter(models.Flowcell.flowcellname == bcl2fastq_flow_cell_id)
-        .first()
-    )
-
-    assert not existing_object
-
-
 def test_delete_demultiplexing_init_files(
-    caplog, demultiplexing_init_files: List[Path], populated_delete_demultiplex_api: DeleteDemuxAPI
+    caplog, demultiplexing_init_files: list[Path], populated_delete_demultiplex_api: DeleteDemuxAPI
 ):
     """Test function to remove demultiplexing init files from the filesystem"""
 

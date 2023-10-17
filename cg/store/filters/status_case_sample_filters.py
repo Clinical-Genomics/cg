@@ -1,5 +1,6 @@
-from typing import Optional, List, Callable
 from enum import Enum
+from typing import Callable, Optional
+
 from sqlalchemy.orm import Query
 
 from cg.store.models import Family, Sample
@@ -18,7 +19,7 @@ def get_cases_with_sample_by_internal_id(case_samples: Query, sample_internal_id
 
 
 def apply_case_sample_filter(
-    filter_functions: List[Callable],
+    filter_functions: list[Callable],
     case_samples: Query,
     case_internal_id: Optional[str] = None,
     sample_entry_id: Optional[int] = None,

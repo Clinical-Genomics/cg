@@ -3,9 +3,9 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Optional
 
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 
 from cg.constants import HK_FASTQ_TAGS, SequencingFileTag
 from cg.constants.compression import (
@@ -20,12 +20,12 @@ LOG = logging.getLogger(__name__)
 # Functions to get common files
 
 
-def get_hk_files_dict(tags: List[str], version_obj: Version) -> Dict[Path, File]:
+def get_hk_files_dict(tags: list[str], version_obj: Version) -> dict[Path, File]:
     """Fetch files from a version in Housekeeper."""
-    hk_file: Dict[Path, File] = {}
+    hk_file: dict[Path, File] = {}
     tags: set = set(tags)
     for version_file in version_obj.files:
-        file_tags: Set[str] = {tag.name for tag in version_file.tags}
+        file_tags: set[str] = {tag.name for tag in version_file.tags}
         if not file_tags.intersection(tags):
             continue
         LOG.info(f"Found file {version_file.path}")
@@ -42,9 +42,9 @@ def is_file_in_version(version_obj: Version, path: Path) -> bool:
 # Functions to get FASTQ like files
 
 
-def get_spring_paths(version_obj: Version) -> List[CompressionData]:
+def get_spring_paths(version_obj: Version) -> list[CompressionData]:
     """Get all SPRING paths for a sample."""
-    hk_files_dict: Dict[Path, File] = get_hk_files_dict(
+    hk_files_dict: dict[Path, File] = get_hk_files_dict(
         tags=[SequencingFileTag.SPRING], version_obj=version_obj
     )
     spring_paths: list = []
@@ -71,13 +71,13 @@ def get_fastq_stub(fastq_path: Path) -> Path:
     return None
 
 
-def get_compression_data(fastq_files: List[Path]) -> List[CompressionData]:
+def get_compression_data(fastq_files: list[Path]) -> list[CompressionData]:
     """Return a list of compression data objects.
 
     Each object has information about a pair of FASTQ files from the same run.
     """
     fastq_runs: set = set()
-    compressions: List[CompressionData] = []
+    compressions: list[CompressionData] = []
     for fastq_file in fastq_files:
         # file prefix is the run name identifier
         file_prefix: Optional[Path] = get_fastq_stub(fastq_file)
@@ -91,14 +91,14 @@ def get_compression_data(fastq_files: List[Path]) -> List[CompressionData]:
     return compressions
 
 
-def get_fastq_files(sample_id: str, version_obj: Version) -> Dict[str, dict]:
+def get_fastq_files(sample_id: str, version_obj: Version) -> dict[str, dict]:
     """Get FASTQ files for sample."""
     hk_files_dict = get_hk_files_dict(tags=HK_FASTQ_TAGS, version_obj=version_obj)
     if hk_files_dict is None:
         return None
 
     fastq_dict = {}
-    compression_objects: List[CompressionData] = get_compression_data(list(hk_files_dict.keys()))
+    compression_objects: list[CompressionData] = get_compression_data(list(hk_files_dict.keys()))
     if not compression_objects:
         LOG.info(f"Could not find FASTQ files for {sample_id}")
         return None

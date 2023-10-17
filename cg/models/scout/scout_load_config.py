@@ -1,10 +1,12 @@
 """Class to hold information about scout load config"""
 
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
-from pydantic.v1 import BaseModel, validator
-from typing_extensions import Literal
+from pydantic import BaseModel, BeforeValidator, ConfigDict
+from typing_extensions import Annotated, Literal
+
+from cg.models.scout.validators import field_not_none
 
 
 class ChromographImages(BaseModel):
@@ -23,15 +25,18 @@ class Reviewer(BaseModel):
 
 class ScoutIndividual(BaseModel):
     alignment_path: Optional[str] = None
-    analysis_type: Literal[
-        "external",
-        "mixed",
-        "panel",
-        "panel-umi",
-        "unknown",
-        "wes",
-        "wgs",
-        "wts",
+    analysis_type: Annotated[
+        Literal[
+            "external",
+            "mixed",
+            "panel",
+            "panel-umi",
+            "unknown",
+            "wes",
+            "wgs",
+            "wts",
+        ],
+        BeforeValidator(field_not_none),
     ] = None
     capture_kit: Optional[str] = None
     confirmed_parent: Optional[bool] = None
@@ -39,20 +44,13 @@ class ScoutIndividual(BaseModel):
     father: Optional[str] = None
     mother: Optional[str] = None
     phenotype: Optional[str] = None
-    sample_id: str = None
+    sample_id: Annotated[str, BeforeValidator(field_not_none)] = None
     sample_name: Optional[str] = None
-    sex: Optional[str] = None
+    sex: Annotated[Optional[str], BeforeValidator(field_not_none)] = None
     subject_id: Optional[str] = None
     tissue_type: Optional[str] = None
 
-    @validator("sample_id", "sex", "analysis_type")
-    def field_not_none(cls, value):
-        if value is None:
-            raise ValueError("sample_id, sex and analysis_type can not be None")
-        return value
-
-    class Config:
-        validate_assignment = True
+    model_config = ConfigDict(validate_assignment=True)
 
 
 class ScoutMipIndividual(ScoutIndividual):
@@ -77,22 +75,22 @@ class ScoutCancerIndividual(ScoutIndividual):
 
 
 class ScoutLoadConfig(BaseModel):
-    owner: str = None
-    family: str = None
+    owner: Annotated[str, BeforeValidator(field_not_none)] = None
+    family: Annotated[str, BeforeValidator(field_not_none)] = None
     family_name: Optional[str] = None
     synopsis: Optional[str] = None
-    phenotype_terms: Optional[List[str]] = None
-    phenotype_groups: Optional[List[str]] = None
-    gene_panels: Optional[List[str]] = None
-    default_gene_panels: List[str] = []
-    cohorts: Optional[List[str]] = None
+    phenotype_terms: Optional[list[str]] = None
+    phenotype_groups: Optional[list[str]] = None
+    gene_panels: Optional[list[str]] = None
+    default_gene_panels: list[str] = []
+    cohorts: Optional[list[str]] = None
     human_genome_build: str = None
 
     rank_model_version: Optional[str] = None
     rank_score_threshold: int = None
     sv_rank_model_version: Optional[str] = None
-    analysis_date: datetime = None
-    samples: List[ScoutIndividual] = []
+    analysis_date: Optional[datetime] = None
+    samples: list[ScoutIndividual] = []
 
     delivery_report: Optional[str] = None
     coverage_qc_report: Optional[str] = None
@@ -100,29 +98,16 @@ class ScoutLoadConfig(BaseModel):
     multiqc: Optional[str] = None
     track: Literal["rare", "cancer"] = "rare"
 
-    @validator("owner", "family")
-    def field_not_none(cls, value):
-        if value is None:
-            raise ValueError("Owner and family can not be None")
-        return value
-
-    class Config:
-        validate_assignment = True
+    model_config = ConfigDict(validate_assignment=True)
 
 
 class BalsamicLoadConfig(ScoutLoadConfig):
-    madeline: Optional[str]
-    vcf_cancer: str = None
+    madeline: Optional[str] = None
+    vcf_cancer: Annotated[str, BeforeValidator(field_not_none)] = None
     vcf_cancer_sv: Optional[str] = None
     vcf_cancer_research: Optional[str] = None
     vcf_cancer_sv_research: Optional[str] = None
-    samples: List[ScoutCancerIndividual] = []
-
-    @validator("vcf_cancer")
-    def check_mandatory_files(cls, vcf):
-        if vcf is None:
-            raise ValueError("Vcf can not be none")
-        return vcf
+    samples: list[ScoutCancerIndividual] = []
 
 
 class BalsamicUmiLoadConfig(BalsamicLoadConfig):
@@ -130,28 +115,22 @@ class BalsamicUmiLoadConfig(BalsamicLoadConfig):
 
 
 class MipLoadConfig(ScoutLoadConfig):
-    chromograph_image_files: Optional[List[str]]
-    chromograph_prefixes: Optional[List[str]]
+    chromograph_image_files: Optional[list[str]] = None
+    chromograph_prefixes: Optional[list[str]] = None
     madeline: Optional[str] = None
     peddy_check: Optional[str] = None
     peddy_ped: Optional[str] = None
     peddy_sex: Optional[str] = None
-    samples: List[ScoutMipIndividual] = []
+    samples: list[ScoutMipIndividual] = []
     smn_tsv: Optional[str] = None
     variant_catalog: Optional[str] = None
     vcf_mei: Optional[str] = None
     vcf_mei_research: Optional[str] = None
-    vcf_snv: str = None
-    vcf_snv_research: Optional[str] = None
+    vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
+    vcf_snv_research: Annotated[Optional[str], BeforeValidator(field_not_none)] = None
     vcf_str: Optional[str] = None
-    vcf_sv: Optional[str] = None
-    vcf_sv_research: Optional[str] = None
-
-    @validator("vcf_snv", "vcf_sv", "vcf_snv_research", "vcf_sv_research")
-    def check_mandatory_files(cls, vcf):
-        if vcf is None:
-            raise ValueError("Mandatory vcf can not be None")
-        return vcf
+    vcf_sv: Annotated[Optional[str], BeforeValidator(field_not_none)] = None
+    vcf_sv_research: Annotated[Optional[str], BeforeValidator(field_not_none)] = None
 
 
 class RnafusionLoadConfig(ScoutLoadConfig):
@@ -162,4 +141,4 @@ class RnafusionLoadConfig(ScoutLoadConfig):
     RNAfusion_inspector_research: Optional[str] = None
     RNAfusion_report: Optional[str] = None
     RNAfusion_report_research: Optional[str] = None
-    samples: List[ScoutCancerIndividual] = []
+    samples: list[ScoutCancerIndividual] = []
