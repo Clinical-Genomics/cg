@@ -20,14 +20,11 @@ def initialize_database(db_uri: str) -> None:
     SESSION = scoped_session(session_factory)
 
 
-def get_session() -> Session:
-    """
-    Get a SQLAlchemy session with a connection to status db.
-    The session is retrieved from the scoped session registry and is thread local.
-    """
+def get_session() -> scoped_session:
+    """Get a SQLAlchemy session with a connection to status db."""
     if not SESSION:
         raise CgError("Database not initialised")
-    return SESSION()
+    return SESSION
 
 
 def get_scoped_session_registry() -> Optional[scoped_session]:

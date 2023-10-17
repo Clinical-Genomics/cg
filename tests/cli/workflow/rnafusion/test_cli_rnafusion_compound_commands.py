@@ -16,6 +16,7 @@ from cg.cli.workflow.rnafusion.base import (
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
+from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
 
 def test_rnafusion_no_args(cli_runner: CliRunner, rnafusion_context: CGConfig):
@@ -39,6 +40,7 @@ def test_start(
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
+    mock_analysis_flow_cell,
 ):
     """Test to ensure all parts of start command will run successfully given ideal conditions."""
     caplog.set_level(logging.INFO)
@@ -151,6 +153,37 @@ def test_store_fail(
     assert result_fail.exit_code != EXIT_SUCCESS
 
 
+def test_start_available(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    mocker,
+    rnafusion_case_id: str,
+    mock_analysis_flow_cell,
+):
+    """Test to ensure all parts of compound start-available command are executed given ideal conditions
+    Test that start-available picks up eligible cases and does not pick up ineligible ones."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN CASE ID of sample where read counts pass threshold
+    case_id_success: str = rnafusion_case_id
+
+    # GIVEN a mocked config
+
+    # GIVEN decompression is not needed
+    mocker.patch.object(RnafusionAnalysisAPI, "resolve_decompression")
+    RnafusionAnalysisAPI.resolve_decompression.return_value = None
+
+    # WHEN running command
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
+
+    # THEN command exits with 0
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN it should successfully identify the one case eligible for auto-start
+    assert case_id_success in caplog.text
+
+
 def test_store_available(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
@@ -165,7 +198,7 @@ def test_store_available(
     caplog: LogCaptureFixture,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
-    Test that sore-available picks up eligible cases and does not pick up ineligible ones."""
+    Test that store-available picks up eligible cases and does not pick up ineligible ones."""
     caplog.set_level(logging.INFO)
 
     # GIVEN CASE ID of sample where read counts pass threshold

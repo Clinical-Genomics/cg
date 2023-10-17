@@ -30,4 +30,3 @@ class CoreHandler(
 class Store(CoreHandler):
     def __init__(self):
         self.session = get_session()
-        super().__init__(self.session)
