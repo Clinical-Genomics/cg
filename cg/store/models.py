@@ -644,6 +644,8 @@ class Pool(Model):
     received_at = Column(types.DateTime)
     ticket = Column(types.String(32))
 
+    invoice = orm.relationship("Invoice", back_populates="pools", cascade_backrefs=False)
+
     def to_dict(self):
         return to_dict(model_instance=self)
 
@@ -705,6 +707,7 @@ class Sample(Model, PriorityMixin):
         Flowcell, secondary=flowcell_sample, back_populates="samples", cascade_backrefs=False
     )
     sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
+    invoice = orm.relationship("Invoice", back_populates="samples", cascade_backrefs=False)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -805,8 +808,8 @@ class Invoice(Model):
     price = Column(types.Integer)
     record_type = Column(types.Text)
 
-    samples = orm.relationship(Sample, backref="invoice", cascade_backrefs=False)
-    pools = orm.relationship(Pool, backref="invoice", cascade_backrefs=False)
+    samples = orm.relationship(Sample, back_populates="invoice", cascade_backrefs=False)
+    pools = orm.relationship(Pool, back_populates="invoice", cascade_backrefs=False)
 
     def __str__(self):
         return f"{self.customer_id} ({self.invoiced_at})"
