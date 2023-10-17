@@ -773,7 +773,7 @@ class Invoice(Model):
     price = Column(types.Integer)
     record_type = Column(types.Text)
 
-    samples = orm.relationship(Sample, backref="invoice")
+    samples = orm.relationship(Sample, backref="invoice", cascade_backrefs=False)
     pools = orm.relationship(Pool, backref="invoice")
 
     def __str__(self):
