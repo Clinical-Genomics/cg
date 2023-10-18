@@ -1,7 +1,5 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List
-
 from unittest import mock
 
 from housekeeper.store.models import File
@@ -20,9 +18,10 @@ from cg.meta.archive.ddn_dataflow import (
     AuthToken,
     DDNDataFlowClient,
     GetJobStatusPayload,
-    MiriaFile,
+    GetJobStatusResponse,
+    JobDescription,
+    MiriaObject,
 )
-
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
@@ -224,8 +223,7 @@ def test_archive_all_non_archived_spring_files(
                 assert file.archive
 
 
-
-def test_get_job_status_done(
+def test_get_archival_status_done(
     spring_archive_api: SpringArchiveAPI,
     caplog,
     ok_ddn_job_status_response,
@@ -239,12 +237,67 @@ def test_get_job_status_done(
     # WHEN querying the task id and getting a "COMPLETED" response
     with mock.patch.object(
         AuthToken,
-        "model_validate_json",
+        "model_validate",
+        return_value=AuthToken(
+            access="test_auth_token",
+            expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
+            refresh="test_refresh_token",
+        ),
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_ddn_job_status_response,
+    ), mock.patch.object(
+        GetJobStatusPayload,
+        "post_request",
+        return_value=GetJobStatusResponse(job_id=123, description=JobDescription.COMPLETED),
+    ):
+        spring_archive_api.update_ongoing_task(
+            task_id=123, archive_location=ArchiveLocations.KAROLINSKA_BUCKET, is_archival=True
+        )
 
-            else:
-                assert not file.archive
-        else:
-            assert not file.archive
+    # THEN The Archive entry should have been updated
+    assert file.archive.archived_at
+
+
+def test_get_retrieval_status_done(
+    spring_archive_api: SpringArchiveAPI,
+    caplog,
+    ok_ddn_job_status_response,
+    archive_request_json,
+    header_with_test_auth_token,
+):
+    # GIVEN a file with an ongoing archival
+    file: File = spring_archive_api.housekeeper_api.files().first()
+    spring_archive_api.housekeeper_api.add_archives(files=[Path(file.path)], archive_task_id=123)
+    spring_archive_api.housekeeper_api.set_archive_retrieval_task_id(
+        file_id=file.id, retrieval_task_id=124
+    )
+
+    # WHEN querying the task id and getting a "COMPLETED" response
+    with mock.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=AuthToken(
+            access="test_auth_token",
+            expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
+            refresh="test_refresh_token",
+        ),
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_ddn_job_status_response,
+    ), mock.patch.object(
+        GetJobStatusPayload,
+        "post_request",
+        return_value=GetJobStatusResponse(job_id=124, description=JobDescription.COMPLETED),
+    ):
+        spring_archive_api.update_ongoing_task(
+            task_id=124, archive_location=ArchiveLocations.KAROLINSKA_BUCKET, is_archival=False
+        )
+
+    # THEN The Archive entry should have been updated
+    assert file.archive.retrieved_at
 
 
 def test_retrieve_samples(
@@ -275,7 +328,6 @@ def test_retrieve_samples(
     with mock.patch.object(
         AuthToken,
         "model_validate",
-
         return_value=AuthToken(
             access="test_auth_token",
             expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),

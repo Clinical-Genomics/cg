@@ -22,10 +22,6 @@ from cg.meta.archive.models import (
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
 from cg.utils.enums import StrEnum
-from housekeeper.store.models import File
-from pydantic import BaseModel
-from requests.models import Response
-
 
 LOG = logging.getLogger(__name__)
 
@@ -208,7 +204,7 @@ class GetJobStatusResponse(BaseModel):
     durationTime: Optional[int] = None
     priority: Optional[int] = None
     progress: Optional[float] = None
-    subjobs: Optional[List[SubJob]] = None
+    subjobs: Optional[list[SubJob]] = None
 
 
 class GetJobStatusPayload(BaseModel):

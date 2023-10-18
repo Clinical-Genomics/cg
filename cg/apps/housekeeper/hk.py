@@ -1,14 +1,9 @@
 """ Module to decouple cg code from Housekeeper code """
-import datetime
 import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
-
-from cg.constants import SequencingFileTag
-from cg.exc import HousekeeperBundleVersionMissingError, HousekeeperFileMissingError
-from sqlalchemy.orm import Query
+from typing import Optional
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
@@ -575,4 +570,9 @@ class HousekeeperAPI:
             file_path=sample_fastq_path,
             bundle_name=sample_internal_id,
             tag_names=[SequencingFileTag.FASTQ, flow_cell_id, sample_internal_id],
+        )
+
+    def get_archive_entries(self, archival_task_id: int = None, retrieval_task_id: int = None):
+        return self._store.get_archives(
+            archival_task_id=archival_task_id, retrieval_task_id=retrieval_task_id
         )

@@ -108,6 +108,12 @@ class HousekeeperBundleVersionMissingError(CgError):
     """
 
 
+class HousekeeperArchiveMissingError(CgError):
+    """
+    Exception raised when an archive is missing in Housekeeper.
+    """
+
+
 class LimsDataError(CgError):
     """
     Error related to missing/incomplete data in LIMS.
