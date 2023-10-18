@@ -12,7 +12,11 @@ from housekeeper.store.models import Archive, Bundle, File, Version
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingFileTag
-from cg.exc import HousekeeperBundleVersionMissingError, HousekeeperFileMissingError
+from cg.exc import (
+    HousekeeperArchiveMissingError,
+    HousekeeperBundleVersionMissingError,
+    HousekeeperFileMissingError,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -483,7 +487,6 @@ class HousekeeperAPI:
                 f"while archiving task id in Housekeeper is {archive.archiving_task_id}."
             )
         self._store.update_archiving_time_stamp(archive=archive)
-        self.commit()
 
     def set_archive_retrieval_task_id(self, file_id: int, retrieval_task_id: int) -> None:
         """Sets the retrieval_task_id for an Archive entry. Raises a ValueError if the given retrieval task id
@@ -492,7 +495,6 @@ class HousekeeperAPI:
         if not archive:
             raise ValueError(f"No Archive entry found for file with id {file_id}.")
         self._store.update_retrieval_task_id(archive=archive, retrieval_task_id=retrieval_task_id)
-        self.commit()
 
     def get_sample_sheets_from_latest_version(self, flow_cell_id: str) -> list[File]:
         """Returns the files tagged with 'samplesheet' or 'archived_sample_sheet' for the given bundle."""
@@ -576,3 +578,33 @@ class HousekeeperAPI:
         return self._store.get_archives(
             archival_task_id=archival_task_id, retrieval_task_id=retrieval_task_id
         )
+
+    def set_archived_at(self, archival_task_id: int):
+        """Sets archived_at to the current time for archive entries with matching archival task id."""
+        archive_entries: list[Archive] = self.housekeeper_api.get_archive_entries(
+            archival_task_id=archival_task_id
+        )
+        if not archive_entries:
+            raise HousekeeperArchiveMissingError(
+                f"Could not find any archives with archival_task_id {archival_task_id}"
+            )
+        for archive in archive_entries:
+            self.housekeeper_api.set_archive_archived_at(
+                archiving_task_id=archival_task_id, file_id=archive.file_id
+            )
+        self.commit()
+
+    def set_retrieved_at(self, retrieval_task_id: int):
+        """Sets retrieved_at to the current time for archive entries with matching archival task id."""
+        archive_entries: list[Archive] = self.housekeeper_api.get_archive_entries(
+            retrieval_task_id=retrieval_task_id
+        )
+        if not archive_entries:
+            raise HousekeeperArchiveMissingError(
+                f"Could not find any archives with retrieval_task_id {retrieval_task_id}"
+            )
+        for archive in archive_entries:
+            self.housekeeper_api.set_archive_retrieved_at(
+                retrieval_task_id=retrieval_task_id, file_id=archive.file_id
+            )
+        self.commit()

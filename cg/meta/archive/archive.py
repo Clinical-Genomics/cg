@@ -2,13 +2,12 @@ import logging
 from pathlib import Path
 from typing import Callable, Optional, Type
 
-from housekeeper.store.models import Archive, File
+from housekeeper.store.models import File
 from pydantic import BaseModel, ConfigDict
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
-from cg.exc import HousekeeperArchiveMissingError
 from cg.meta.archive.ddn_dataflow import DDNDataFlowClient
 from cg.meta.archive.models import ArchiveHandler, FileAndSample, SampleAndDestination
 from cg.models.cg_config import DataFlowConfig
@@ -203,34 +202,6 @@ class SpringArchiveAPI:
         if is_job_done:
             LOG.info(f"Job with id {task_id} has finished, updating Archive entries.")
             if is_archival:
-                self.set_archived_at(task_id)
+                self.housekeeper_api.set_archived_at(task_id)
             else:
-                self.set_retrieved_at(task_id)
-
-    def set_archived_at(self, archival_task_id: int):
-        """Sets archived_at to the current time for archive entries with matching archival task id."""
-        archive_entries: list[Archive] = self.housekeeper_api.get_archive_entries(
-            archival_task_id=archival_task_id
-        )
-        if not archive_entries:
-            raise HousekeeperArchiveMissingError(
-                f"Could not find any archives with archival_task_id {archival_task_id}"
-            )
-        for archive in archive_entries:
-            self.housekeeper_api.set_archive_archived_at(
-                archiving_task_id=archival_task_id, file_id=archive.file_id
-            )
-
-    def set_retrieved_at(self, retrieval_task_id: int):
-        """Sets retrieved_at to the current time for archive entries with matching archival task id."""
-        archive_entries: list[Archive] = self.housekeeper_api.get_archive_entries(
-            retrieval_task_id=retrieval_task_id
-        )
-        if not archive_entries:
-            raise HousekeeperArchiveMissingError(
-                f"Could not find any archives with retrieval_task_id {retrieval_task_id}"
-            )
-        for archive in archive_entries:
-            self.housekeeper_api.set_archive_retrieved_at(
-                retrieval_task_id=retrieval_task_id, file_id=archive.file_id
-            )
+                self.housekeeper_api.set_retrieved_at(task_id)
