@@ -13,12 +13,13 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.indexes import ListIndexes
 from cg.constants.pdc import PDCExitCodes
 from cg.constants.process import RETURN_WARNING
-from cg.constants.symbols import ASTERISK, FWD_SLASH, NEW_LINE
+from cg.constants.symbols import NEW_LINE
 from cg.exc import ChecksumFailedError, PdcNoFilesMatchingSearchError
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models import CompressionData
+from cg.models.cg_config import EncryptionDirectories
 from cg.store import Store
 from cg.store.models import Flowcell
 from cg.utils.time import get_elapsed_time, get_start_time
@@ -32,7 +33,7 @@ class BackupAPI:
     def __init__(
         self,
         encryption_api: EncryptionAPI,
-        encrypt_dir: str,
+        encryption_directories: EncryptionDirectories,
         status: Store,
         tar_api: TarAPI,
         pdc_api: PdcAPI,
@@ -40,7 +41,7 @@ class BackupAPI:
         dry_run: bool = False,
     ):
         self.encryption_api = encryption_api
-        self.encrypt_dir: str = encrypt_dir
+        self.encryption_directories: EncryptionDirectories = encryption_directories
         self.status: Store = status
         self.tar_api: TarAPI = tar_api
         self.pdc: PdcAPI = pdc_api
@@ -253,20 +254,20 @@ class BackupAPI:
     def query_pdc_for_flow_cell(self, flow_cell_id: str) -> list[str]:
         """Query PDC for a given flow cell id.
         Raise:
-            CalledProcessError if no archived files were found.
+            CalledProcessError if an error OTHER THAN no files found is raised.
         """
-        search_pattern: str = (
-            f"{ASTERISK}{FWD_SLASH}{ASTERISK}{flow_cell_id}{ASTERISK}{FileExtensions.GPG}"
-        )
         dsmc_output: list[str] = []
-        try:
-            self.pdc.query_pdc(search_pattern=search_pattern)
-            dsmc_output: list[str] = self.pdc.process.stdout.split(NEW_LINE)
-        except subprocess.CalledProcessError as error:
-            if error.returncode != PDCExitCodes.NO_FILES_FOUND:
-                raise error
-            LOG.error(f"No archived files found for PDC query: {search_pattern}")
-        LOG.info(f"Found archived files for PDC query: {search_pattern}")
+        for _, encryption_directory in self.encryption_directories:
+            search_pattern = f"{encryption_directory}*{flow_cell_id}*{FileExtensions.GPG}"
+            try:
+                self.pdc.query_pdc(search_pattern)
+                dsmc_output: list[str] = self.pdc.process.stdout.split(NEW_LINE)
+            except subprocess.CalledProcessError as error:
+                if error.returncode != PDCExitCodes.NO_FILES_FOUND:
+                    raise error
+                LOG.debug(f"No archived files found for PDC query: {search_pattern}")
+                continue
+            LOG.info(f"Found archived files for PDC query: {search_pattern}")
         return dsmc_output
 
     def retrieve_archived_file(self, archived_file: Path, run_dir: Path) -> None:
