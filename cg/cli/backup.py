@@ -10,7 +10,12 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.exc import FlowCellEncryptionError, FlowCellError, PdcError
+from cg.exc import (
+    DcmsAlreadyRunningError,
+    FlowCellEncryptionError,
+    FlowCellError,
+    PdcError,
+)
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import (
@@ -40,8 +45,6 @@ def backup(context: CGConfig):
 def backup_flow_cells(context: CGConfig, dry_run: bool):
     """Backup flow cells."""
     pdc_api = PdcAPI(binary_path=context.pdc.binary_path, dry_run=dry_run)
-    if pdc_api.is_dcms_running():
-        exit(0)
     status_db: Store = context.status_db
     for flow_cell in get_flow_cells_from_path(flow_cells_dir=Path(context.flow_cells_dir)):
         db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
@@ -60,9 +63,11 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
             sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
             tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
         )
-        if not flow_cell_encryption_api.complete_file_path.exists():
-            LOG.debug(f"Flow cell: {flow_cell.id} encryption process is not complete")
-            continue
+        try:
+            pdc_api.start_flow_cell_backup(flow_cell_encryption_api=flow_cell_encryption_api)
+        except (DcmsAlreadyRunningError, FlowCellEncryptionError) as error:
+            logging.debug(f"{error}")
+
         archived_file_count: int = 0
         files_to_archive: list[Path] = [
             flow_cell_encryption_api.final_passphrase_file_path,

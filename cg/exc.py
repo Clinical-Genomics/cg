@@ -66,6 +66,10 @@ class CleanFlowCellFailedError(CgError):
     """
 
 
+class DcmsAlreadyRunningError(CgError):
+    """Raised when there is already a DCms process running on the system."""
+
+
 class DecompressionNeededError(CgError):
     """Raised when decompression still needed to start analysis."""
 

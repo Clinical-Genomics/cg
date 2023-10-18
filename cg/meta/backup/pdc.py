@@ -5,7 +5,8 @@ import logging
 import psutil
 
 from cg.constants.pdc import DSMCParameters
-from cg.exc import PdcError
+from cg.exc import FlowCellEncryptionError, PdcError
+from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -67,3 +68,19 @@ class PdcAPI:
             self.process.run_command(parameters=command, dry_run=self.dry_run)
         except Exception as error:
             raise PdcError(f"{error}") from error
+
+    def validate_flow_cell_backup_possible(
+        self, flow_cell_encryption_api: FlowCellEncryptionAPI
+    ) -> None:
+        """Check if back-up of flow cell is possible.
+        Raises: DcmsAlreadyRunningError if there is already a Dcms process ongoing"""
+        if self.is_dcms_running():
+            exit(0)
+        if not flow_cell_encryption_api.complete_file_path.exists():
+            raise FlowCellEncryptionError(
+                f"Flow cell: {flow_cell_encryption_api.flow_cell.id} encryption process is not complete"
+            )
+
+    def start_flow_cell_backup(self, flow_cell_encryption_api: FlowCellEncryptionAPI) -> None:
+        """Check if back-up of flow cell is possible and if so starts it."""
+        self.validate_flow_cell_backup_possible(flow_cell_encryption_api=flow_cell_encryption_api)

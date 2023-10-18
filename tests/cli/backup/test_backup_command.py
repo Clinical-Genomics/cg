@@ -103,7 +103,7 @@ def test_backup_flow_cells_when_encryption_is_not_completed(
     flow_cell_name: str,
     flow_cell_full_name: str,
 ):
-    """Test backing up flow cell in dry run mode when encryption is not complete."""
+    """Test backing-up flow cell in dry run mode when encryption is not complete."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a flow cells directory
