@@ -217,7 +217,7 @@ class GetJobStatusPayload(BaseModel):
     debug: Optional[bool] = None
 
     def post_request(self, url: str, headers: dict) -> GetJobStatusResponse:
-        """Sends a request to the given url with, the given headers, and its own content as
+        """Sends a request to the given url with the given headers, and its own content as
         payload. Raises an error if the response code is not ok. Returns the job ID of the
         launched transfer task.
         """
