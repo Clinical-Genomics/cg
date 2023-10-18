@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from housekeeper.store.models import File, Version
 
@@ -53,7 +53,7 @@ class BalsamicReportAPI(ReportAPI):
         self, case: Family, sample: Sample, analysis_metadata: BalsamicAnalysis
     ) -> Union[BalsamicTargetedSampleMetadataModel, BalsamicWGSSampleMetadataModel]:
         """Return the sample metadata to include in the report."""
-        sample_metrics: Dict[str, BalsamicQCMetrics] = analysis_metadata.sample_metrics[
+        sample_metrics: dict[str, BalsamicQCMetrics] = analysis_metadata.sample_metrics[
             sample.internal_id
         ]
         million_read_pairs: float = get_million_read_pairs(reads=sample.reads)
@@ -130,8 +130,8 @@ class BalsamicReportAPI(ReportAPI):
         """
         sequencing_type: str = _analysis_metadata.config.analysis.sequencing_type
         analysis_type: str = _analysis_metadata.config.analysis.analysis_type
-        var_callers: Dict[str, BalsamicVarCaller] = _analysis_metadata.config.vcf
-        tool_versions: Dict[str, list] = _analysis_metadata.config.bioinfo_tools_version
+        var_callers: dict[str, BalsamicVarCaller] = _analysis_metadata.config.vcf
+        tool_versions: dict[str, list] = _analysis_metadata.config.bioinfo_tools_version
         analysis_var_callers = list()
         for var_caller_name, var_caller_attributes in var_callers.items():
             if (
@@ -157,7 +157,7 @@ class BalsamicReportAPI(ReportAPI):
         return None
 
     def get_report_accreditation(
-        self, samples: List[SampleModel], analysis_metadata: BalsamicAnalysis
+        self, samples: list[SampleModel], analysis_metadata: BalsamicAnalysis
     ) -> bool:
         """Checks if the report is accredited or not."""
         if analysis_metadata.config.analysis.sequencing_type == "targeted" and next(
@@ -174,20 +174,20 @@ class BalsamicReportAPI(ReportAPI):
     def get_required_fields(self, case: CaseModel) -> dict:
         """Retrieves a dictionary with the delivery report required fields for BALSAMIC."""
         analysis_type: str = case.data_analysis.type
-        required_sample_metadata_fields: List[str] = []
+        required_sample_metadata_fields: list[str] = []
         if BALSAMIC_ANALYSIS_TYPE["tumor_wgs"] in analysis_type:
-            required_sample_metadata_fields: List[
+            required_sample_metadata_fields: list[
                 str
             ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
         elif BALSAMIC_ANALYSIS_TYPE["tumor_normal_wgs"] in analysis_type:
-            required_sample_metadata_fields: List[
+            required_sample_metadata_fields: list[
                 str
             ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
         elif (
             BALSAMIC_ANALYSIS_TYPE["tumor_panel"] in analysis_type
             or BALSAMIC_ANALYSIS_TYPE["tumor_normal_panel"] in analysis_type
         ):
-            required_sample_metadata_fields: List[
+            required_sample_metadata_fields: list[
                 str
             ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
         return {

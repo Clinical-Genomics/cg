@@ -1,7 +1,6 @@
 """Tests for the samples to deliver api"""
 
 import datetime as dt
-from typing import List, Set
 
 from cg.constants import DataDelivery
 from cg.constants.constants import Pipeline
@@ -14,7 +13,7 @@ def test_get_delivery_arguments(case: Family):
     case.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
 
     # WHEN parsing the delivery types
-    delivery_types: Set[str] = case.get_delivery_arguments()
+    delivery_types: set[str] = case.get_delivery_arguments()
 
     # THEN the correct delivery types should be returned
     assert delivery_types == {Pipeline.MIP_DNA, Pipeline.FASTQ}
@@ -30,7 +29,7 @@ def test_list_samples_to_deliver(base_store, helpers):
     assert len(store._get_query(table=Sample).all()) == 1
 
     # WHEN asking for samples to deliver
-    samples_to_deliver: List[Sample] = store.get_samples_to_deliver()
+    samples_to_deliver: list[Sample] = store.get_samples_to_deliver()
     # THEN it should return the sample which is ready to deliver
     assert len(samples_to_deliver) == 1
     assert isinstance(samples_to_deliver[0].reads_updated_at, dt.datetime)
@@ -50,7 +49,7 @@ def test_list_samples_to_deliver_multiple_samples(base_store, helpers):
     assert len(store._get_query(table=Sample).all()) == 2
 
     # WHEN asking for samples to deliver
-    samples_to_deliver: List[Sample] = store.get_samples_to_deliver()
+    samples_to_deliver: list[Sample] = store.get_samples_to_deliver()
     # THEN it should return the sample which is ready to deliver
     assert len(samples_to_deliver) == 1
     assert isinstance(samples_to_deliver[0].reads_updated_at, dt.datetime)

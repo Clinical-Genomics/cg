@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from typing import List
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
@@ -80,7 +79,7 @@ def test_report_deliver_successful(
     rnafusion_context: CGConfig,
     rnafusion_case_id: str,
     rnafusion_deliverables_file_path: Path,
-    deliverables_template_content: List[dict],
+    deliverables_template_content: list[dict],
     mock_analysis_finish,
     caplog: LogCaptureFixture,
     mocker,

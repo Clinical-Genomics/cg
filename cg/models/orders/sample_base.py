@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, constr
 from typing_extensions import Annotated
@@ -96,8 +96,8 @@ class OrderSample(BaseModel):
     organism_other: Optional[str] = None
     original_lab: Optional[str] = None
     original_lab_address: Optional[str] = None
-    phenotype_groups: Optional[List[str]] = None
-    phenotype_terms: Optional[List[str]] = None
+    phenotype_groups: Optional[list[str]] = None
+    phenotype_terms: Optional[list[str]] = None
     pool: Optional[constr(max_length=Pool.name.property.columns[0].type.length)] = None
     post_formalin_fixation_time: Optional[int] = None
     pre_processing_method: Optional[str] = None

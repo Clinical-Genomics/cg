@@ -2,7 +2,7 @@ import datetime as dt
 import logging
 import shutil
 from pathlib import Path
-from typing import List, Union
+from typing import Union
 
 import click
 from dateutil.parser import parse as parse_date
@@ -10,7 +10,7 @@ from dateutil.parser import parse as parse_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
-from cg.exc import DecompressionNeededError, FlowCellsNeededError
+from cg.exc import FlowCellsNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -52,7 +52,7 @@ def ensure_flow_cells_on_disk(context: CGConfig, case_id: str):
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     status_db: Store = context.status_db
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-    if not status_db.is_all_flow_cells_on_disk(case_id=case_id):
+    if not status_db.are_all_flow_cells_on_disk(case_id=case_id):
         if analysis_api.status_db.is_case_down_sampled(case_id=case_id):
             LOG.debug("All samples have been down sampled. Flow cell check not applicable")
             return
@@ -73,11 +73,8 @@ def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
     """Handles cases where decompression is needed before starting analysis."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-    is_decompression_running: bool = analysis_api.resolve_decompression(
-        case_id=case_id, dry_run=dry_run
-    )
-    if is_decompression_running:
-        raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
+
+    analysis_api.resolve_decompression(case_id=case_id, dry_run=dry_run)
 
 
 @click.command("link")
@@ -174,7 +171,7 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.check_analysis_ongoing(case_id=case_id)
 
-    analysis_path: Union[List[Path], Path] = analysis_api.get_case_path(case_id)
+    analysis_path: Union[list[Path], Path] = analysis_api.get_case_path(case_id)
 
     if dry_run:
         LOG.info(f"Would have deleted: {analysis_path}")

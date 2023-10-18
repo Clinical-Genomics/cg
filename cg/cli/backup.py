@@ -1,7 +1,7 @@
 """Backup related CLI commands."""
 import logging
 from pathlib import Path
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, Optional, Union
 
 import click
 import housekeeper.store.models as hk_models
@@ -95,7 +95,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         flow_cell_encryption_api = FlowCellEncryptionAPI(
             binary_path=context.encryption.binary_path,
             dry_run=dry_run,
-            encryption_dir=Path(context.backup.encrypt_dir),
+            encryption_dir=Path(context.backup.encryption_directories.current),
             flow_cell=flow_cell,
             pigz_binary_path=context.pigz.binary_path,
             slurm_api=SlurmAPI(),
@@ -120,7 +120,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
     context.meta_apis["backup_api"] = BackupAPI(
         encryption_api=encryption_api,
-        encrypt_dir=context.backup.encrypt_dir,
+        encryption_directories=context.backup.encryption_directories,
         status=context.status_db,
         tar_api=tar_api,
         pdc_api=pdc_api,
@@ -217,7 +217,7 @@ def retrieve_spring_files(
     status_api: Store = config.status_db
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
 
-    samples: List[Sample] = _get_samples(status_api, object_type, identifier)
+    samples: list[Sample] = _get_samples(status_api, object_type, identifier)
 
     for sample in samples:
         latest_version: hk_models.Version = housekeeper_api.last_version(bundle=sample.internal_id)
@@ -230,14 +230,14 @@ def retrieve_spring_files(
             context.invoke(retrieve_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
 
 
-def _get_samples(status_api: Store, object_type: str, identifier: str) -> List[Sample]:
+def _get_samples(status_api: Store, object_type: str, identifier: str) -> list[Sample]:
     """Gets all samples belonging to a sample, case or flow cell id"""
     get_samples = {
         "sample": status_api.sample,
         "case": status_api.get_samples_by_case_id,
         "flow_cell": status_api.get_samples_from_flow_cell,
     }
-    samples: Union[Sample, List[Sample]] = get_samples[object_type](identifier)
+    samples: Union[Sample, list[Sample]] = get_samples[object_type](identifier)
     return samples if isinstance(samples, list) else [samples]
 
 

@@ -1,6 +1,5 @@
 """Test CLI functions to get flow cells in the Status database."""
 from datetime import datetime
-from typing import List
 
 from click.testing import CliRunner
 
@@ -118,7 +117,7 @@ def test_get_flow_cell_samples(
 ):
     """Test that the output has the samples of the flow cell."""
     # GIVEN a database with a flow cell with related samples
-    samples: List[Sample] = helpers.add_samples(store=disk_store)
+    samples: list[Sample] = helpers.add_samples(store=disk_store)
     flow_cell: Flowcell = helpers.add_flow_cell(store=disk_store, samples=samples)
 
     # WHEN getting a flow cell with the --samples flag

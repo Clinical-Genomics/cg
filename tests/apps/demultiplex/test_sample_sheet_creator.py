@@ -1,6 +1,5 @@
 """Tests for the SampleSheetCreator classes."""
 from pathlib import Path
-from typing import List, Tuple
 
 import pytest
 
@@ -24,7 +23,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
     novaseq_x_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_bcl_convert_samples: List[FlowCellSampleBCLConvert],
+    lims_novaseq_bcl_convert_samples: list[FlowCellSampleBCLConvert],
 ):
     """Test that creating a BCL Convert sample sheet fails if the bcl converter is Bcl2fastq."""
     # GIVEN a NovaSeqX flow cell and samples and the bcl converter is Bcl2fastq
@@ -51,7 +50,7 @@ def test_construct_bcl2fastq_sheet(
     assert bcl2fastq_sample_sheet_creator.lims_samples
 
     # WHEN building the sample sheet
-    sample_sheet_content: List[List[str]] = bcl2fastq_sample_sheet_creator.construct_sample_sheet()
+    sample_sheet_content: list[list[str]] = bcl2fastq_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
     sample_sheet: SampleSheet = get_validated_sample_sheet(
@@ -69,8 +68,8 @@ def test_construct_bcl_convert_sheet(
     assert bcl_convert_sample_sheet_creator.lims_samples
 
     # WHEN building the sample sheet
-    sample_sheet_content: List[
-        List[str]
+    sample_sheet_content: list[
+        list[str]
     ] = bcl_convert_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
@@ -124,8 +123,8 @@ def test_remove_unwanted_samples_no_dual_index(
 
 def test_add_override_cycles_to_novaseqx_samples(
     novaseq_x_flow_cell: FlowCellDirectoryData,
-    bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
-    override_cycles_for_samples_with_updated_indexes: List[str],
+    bcl_convert_samples_with_updated_indexes: list[FlowCellSampleBCLConvert],
+    override_cycles_for_samples_with_updated_indexes: list[str],
 ):
     """Test that OverrideCycles values are generated correctly for NovaSeqX samples."""
     # GIVEN a SampleSheetCreator with samples without Override Cycles added
@@ -148,8 +147,8 @@ def test_add_override_cycles_to_novaseqx_samples(
 
 def test_add_override_cycles_to_novaseqx_samples_reverse_complement(
     novaseq6000_flow_cell,
-    bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
-    override_cycles_for_samples_with_updated_indexes_reverse_complement: List[str],
+    bcl_convert_samples_with_updated_indexes: list[FlowCellSampleBCLConvert],
+    override_cycles_for_samples_with_updated_indexes_reverse_complement: list[str],
 ):
     """Test that OverrideCycles values are generated correctly for reverse complement samples."""
     # GIVEN a SampleSheetCreator with samples without Override Cycles added
@@ -176,8 +175,8 @@ def test_add_override_cycles_to_novaseqx_samples_reverse_complement(
 
 def test_update_barcode_mismatch_values_for_samples(
     novaseq_x_flow_cell: FlowCellDirectoryData,
-    bcl_convert_samples_with_updated_indexes: List[FlowCellSampleBCLConvert],
-    barcode_mismatch_values_for_samples_with_updated_indexes: List[Tuple[int, int]],
+    bcl_convert_samples_with_updated_indexes: list[FlowCellSampleBCLConvert],
+    barcode_mismatch_values_for_samples_with_updated_indexes: list[tuple[int, int]],
 ):
     """."""
     # GIVEN a sample sheet creator with samples with barcode mismatch values equal to 1

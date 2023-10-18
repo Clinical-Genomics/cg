@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from typing import Dict
 
 import pytest
 
@@ -11,7 +10,7 @@ from cg.constants.demultiplexing import (
 
 
 @pytest.fixture
-def raw_bcl2fastq_tile_metrics() -> Dict:
+def raw_bcl2fastq_tile_metrics() -> dict:
     """Metrics for a single tile in a lane."""
     return {
         "Flowcell": "AB1",
@@ -49,7 +48,7 @@ def raw_bcl2fastq_tile_metrics() -> Dict:
 @pytest.fixture
 def bcl2fastq_flow_cell_path(
     tmp_path: Path,
-    raw_bcl2fastq_tile_metrics: Dict,
+    raw_bcl2fastq_tile_metrics: dict,
 ) -> Path:
     """Flow cell with one sample in one lane, two tiles, two paired reads and two undetermined paired reads."""
 

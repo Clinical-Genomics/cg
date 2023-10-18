@@ -27,7 +27,7 @@ from cg.cli.workflow.rnafusion.options import (
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
-from cg.exc import CgError, DecompressionNeededError
+from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -164,7 +164,7 @@ def run(
 @DRY_RUN
 @click.pass_context
 def start(
-    context: CGConfig,
+    context: click.Context,
     case_id: str,
     log: str,
     work_dir: str,
@@ -180,11 +180,8 @@ def start(
     """Start full workflow for CASE ID."""
     LOG.info(f"Starting analysis for {case_id}")
 
-    try:
-        context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
-    except DecompressionNeededError as error:
-        LOG.error(error)
-        raise click.Abort() from error
+    analysis_api: RnafusionAnalysisAPI = context.obj.meta_apis["analysis_api"]
+    analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
     context.invoke(config_case, case_id=case_id, genomes_base=genomes_base, dry_run=dry_run)
     context.invoke(
         run,
@@ -214,6 +211,8 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+        except AnalysisNotReadyError as error:
+            LOG.error(error)
         except CgError as error:
             LOG.error(error)
             exit_code = EXIT_FAIL

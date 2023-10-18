@@ -1,5 +1,4 @@
 import datetime as dt
-from typing import List
 
 from cg.constants import DataDelivery
 from cg.constants.constants import Pipeline
@@ -71,7 +70,7 @@ class MicrobialSubmitter(Submitter):
         data_delivery: DataDelivery,
         order: str,
         ordered: dt.datetime,
-        items: List[dict],
+        items: list[dict],
         ticket_id: str,
     ) -> [Sample]:
         """Store microbial samples in the status database."""
@@ -97,7 +96,7 @@ class MicrobialSubmitter(Submitter):
                         panels=None,
                         ticket=ticket_id,
                     )
-                    case.customer: Customer = customer
+                    case.customer = customer
                     self.status.session.add(case)
                     self.status.session.commit()
 
@@ -119,7 +118,7 @@ class MicrobialSubmitter(Submitter):
                     self.status.session.commit()
 
                 if comment:
-                    case.comment: str = f"Order comment: {comment}"
+                    case.comment = f"Order comment: {comment}"
 
                 new_sample = self.status.add_sample(
                     name=sample_data["name"],
@@ -147,7 +146,7 @@ class MicrobialSubmitter(Submitter):
             self.status.session.commit()
         return sample_objs
 
-    def _fill_in_sample_verified_organism(self, samples: List[MicrobialSample]):
+    def _fill_in_sample_verified_organism(self, samples: list[MicrobialSample]):
         for sample in samples:
             organism_id = sample.organism
             reference_genome = sample.reference_genome

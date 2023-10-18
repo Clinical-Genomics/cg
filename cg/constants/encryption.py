@@ -1,6 +1,5 @@
 """Constants specific for encryption"""
 from enum import Enum
-from typing import List
 
 from cg.utils.enums import ListEnum
 
@@ -24,7 +23,7 @@ class EncryptionUserID(str, Enum):
 
 
 class GPGParameters(ListEnum):
-    ASYMMETRIC_ENCRYPTION: List[str] = [
+    ASYMMETRIC_ENCRYPTION: list[str] = [
         "--encrypt",
         "--recipient",
         EncryptionUserID.HASTA_USER_ID,
@@ -37,7 +36,7 @@ class GPGParameters(ListEnum):
         "--passphrase",
         EncryptionUserID.HASTA_USER_ID,
     ]
-    SYMMETRIC_ENCRYPTION: List[str] = [
+    SYMMETRIC_ENCRYPTION: list[str] = [
         "--symmetric",
         "--cipher-algo",
         CipherAlgorithm.AES256,
@@ -46,13 +45,13 @@ class GPGParameters(ListEnum):
         "None",
         "--passphrase-file",
     ]
-    SYMMETRIC_DECRYPTION: List[str] = [
+    SYMMETRIC_DECRYPTION: list[str] = [
         "--decrypt",
         "--cipher-algo",
         CipherAlgorithm.AES256,
         "--batch",
         "--passphrase-file",
     ]
-    OUTPUT_PARAMETER: List[str] = [
+    OUTPUT_PARAMETER: list[str] = [
         "-o",
     ]

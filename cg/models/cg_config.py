@@ -20,6 +20,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.store import Store
+from cg.store.database import initialize_database
 
 LOG = logging.getLogger(__name__)
 
@@ -40,8 +41,14 @@ class SlurmConfig(BaseModel):
     qos: SlurmQos = SlurmQos.LOW
 
 
+class EncryptionDirectories(BaseModel):
+    current: str
+    nas: str
+    pre_nas: str
+
+
 class BackupConfig(BaseModel):
-    encrypt_dir: str
+    encryption_directories: EncryptionDirectories
     slurm_flow_cell_encryption: SlurmConfig
 
 
@@ -422,7 +429,8 @@ class CGConfig(BaseModel):
         status_db = self.__dict__.get("status_db_")
         if status_db is None:
             LOG.debug("Instantiating status db")
-            status_db = Store(uri=self.database)
+            initialize_database(self.database)
+            status_db = Store()
             self.status_db_ = status_db
         return status_db
 

@@ -2,7 +2,7 @@
 
 import logging
 import traceback
-from typing import List, Optional
+from typing import Optional
 
 import click
 
@@ -68,7 +68,7 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
     nipt_upload_api.set_dry_run(dry_run=dry_run)
 
     all_good = True
-    analyses: List[Analysis] = nipt_upload_api.get_all_upload_analyses()
+    analyses: list[Analysis] = nipt_upload_api.get_all_upload_analyses()
     if not analyses:
         LOG.info("No analyses found to upload")
         return

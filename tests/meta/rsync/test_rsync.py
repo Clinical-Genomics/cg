@@ -2,7 +2,6 @@
 import logging
 import shutil
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -115,7 +114,7 @@ def test_run_rsync_on_slurm_no_cases(rsync_api: RsyncAPI, ticket_id: str, caplog
 
     # WHEN the job is submitted
     with pytest.raises(CgError):
-        sbatch_number: int = rsync_api.run_rsync_on_slurm(ticket=ticket_id, dry_run=True)
+        rsync_api.run_rsync_on_slurm(ticket=ticket_id, dry_run=True)
 
         # THEN check that error is raised based on no cases being present
         assert "Could not find any cases for ticket" in caplog.text
@@ -128,7 +127,7 @@ def test_get_folders_to_deliver(
     # GIVEN a case
 
     # WHEN the function gets the folders
-    folder_list: List[str] = rsync_api.get_folders_to_deliver(
+    folder_list: list[str] = rsync_api.get_folders_to_deliver(
         case_id=case_id, sample_files_present=True, case_files_present=True
     )
 
@@ -146,7 +145,7 @@ def test_concatenate_rsync_commands(
 ):
     """Tests the function to concatenate rsync commands for transferring multiple files."""
     # GIVEN a list with a case and a sample name
-    folder_list: List[str] = [analysis_family["name"], analysis_family["samples"][0]["name"]]
+    folder_list: list[str] = [analysis_family["name"], analysis_family["samples"][0]["name"]]
     source_and_destination_paths = {
         "delivery_source_path": project_dir / customer_id / ticket_id,
         "rsync_destination_path": project_dir / customer_id,

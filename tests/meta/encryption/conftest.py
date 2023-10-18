@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -17,7 +16,7 @@ def flow_cell_encryption_api(
 ) -> FlowCellEncryptionAPI:
     flow_cell_encryption_api = FlowCellEncryptionAPI(
         binary_path=cg_context.encryption.binary_path,
-        encryption_dir=Path(cg_context.backup.encrypt_dir),
+        encryption_dir=Path(cg_context.backup.encryption_directories.current),
         dry_run=True,
         flow_cell=FlowCellDirectoryData(
             flow_cell_path=Path(cg_context.flow_cells_dir, flow_cell_full_name)
@@ -47,7 +46,7 @@ def temporary_passphrase() -> Path:
 
 
 @pytest.fixture
-def test_command() -> List[str]:
+def test_command() -> list[str]:
     """Return a CLI command in the list format required by the Process API."""
     return ["test", "command"]
 
@@ -77,7 +76,7 @@ def encrypted_spring_file_path() -> Path:
 
 
 @pytest.fixture
-def asymmetric_encryption_command(output_file_path: Path, input_file_path: Path) -> List[str]:
+def asymmetric_encryption_command(output_file_path: Path, input_file_path: Path) -> list[str]:
     """Return asymmetric encryption command."""
     return [
         "--encrypt",
@@ -90,7 +89,7 @@ def asymmetric_encryption_command(output_file_path: Path, input_file_path: Path)
 
 
 @pytest.fixture
-def asymmetric_decryption_command(output_file_path: Path, input_file_path: Path) -> List[str]:
+def asymmetric_decryption_command(output_file_path: Path, input_file_path: Path) -> list[str]:
     """Return asymmetric decryption command."""
     return [
         "--decrypt",
@@ -111,7 +110,7 @@ def symmetric_encryption_command(
     input_file_path: Path,
     output_file_path: Path,
     spring_file_path: Path,
-) -> List[str]:
+) -> list[str]:
     """Return symmetric encryption command."""
     return [
         "--symmetric",
@@ -133,7 +132,7 @@ def symmetric_decryption_command(
     encryption_key_file: Path,
     input_file_path: Path,
     output_file_path: Path,
-) -> List:
+) -> list:
     """Return symmetric decryption command."""
     return [
         "--decrypt",
@@ -151,7 +150,7 @@ def symmetric_decryption_command(
 @pytest.fixture
 def spring_symmetric_encryption_command(
     temporary_passphrase: Path, encrypted_spring_file_path: Path, spring_file_path: Path
-) -> List[str]:
+) -> list[str]:
     """Return symmetric encryption command."""
     return [
         "--symmetric",
@@ -171,7 +170,7 @@ def spring_symmetric_encryption_command(
 @pytest.fixture
 def key_asymmetric_encryption_command(
     encrypted_key_file: Path, temporary_passphrase: Path
-) -> List[str]:
+) -> list[str]:
     """Return asymmetric encryption command."""
     return [
         "--encrypt",
@@ -188,7 +187,7 @@ def spring_symmetric_decryption_command(
     encryption_key_file: Path,
     spring_file_path: Path,
     encrypted_spring_file_path,
-) -> List[str]:
+) -> list[str]:
     """Return symmetric decryption_command."""
     return [
         "--decrypt",
@@ -206,7 +205,7 @@ def spring_symmetric_decryption_command(
 @pytest.fixture
 def key_asymmetric_decryption_command(
     encrypted_key_file: Path, encryption_key_file: Path
-) -> List[str]:
+) -> list[str]:
     """Return asymmetric encryption command."""
     return [
         "--decrypt",

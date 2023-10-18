@@ -1,6 +1,5 @@
 import logging
 from collections import defaultdict
-from typing import List, Tuple
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -68,34 +67,34 @@ class FlowCellSampleBCLConvert(FlowCellSample):
 
 
 class SampleSheet(BaseModel):
-    samples: List[FlowCellSample]
+    samples: list[FlowCellSample]
 
-    def get_non_pooled_lanes_and_samples(self) -> List[Tuple[int, str]]:
+    def get_non_pooled_lanes_and_samples(self) -> list[tuple[int, str]]:
         """Return tuples of non-pooled lane and sample ids."""
-        non_pooled_lane_sample_id_pairs: List[Tuple[int, str]] = []
-        non_pooled_samples: List[FlowCellSample] = self.get_non_pooled_samples()
+        non_pooled_lane_sample_id_pairs: list[tuple[int, str]] = []
+        non_pooled_samples: list[FlowCellSample] = self.get_non_pooled_samples()
         for sample in non_pooled_samples:
             non_pooled_lane_sample_id_pairs.append((sample.lane, sample.sample_id))
         return non_pooled_lane_sample_id_pairs
 
-    def get_non_pooled_samples(self) -> List[FlowCellSample]:
+    def get_non_pooled_samples(self) -> list[FlowCellSample]:
         """Return samples that are sequenced solo in their lane."""
         lane_samples = defaultdict(list)
         for sample in self.samples:
             lane_samples[sample.lane].append(sample)
         return [samples[0] for samples in lane_samples.values() if len(samples) == 1]
 
-    def get_sample_ids(self) -> List[str]:
+    def get_sample_ids(self) -> list[str]:
         """Return ids for samples in sheet."""
-        sample_internal_ids: List[str] = []
+        sample_internal_ids: list[str] = []
         for sample in self.samples:
             sample_internal_ids.append(sample.sample_id)
         return list(set(sample_internal_ids))
 
 
 class SampleSheetBcl2Fastq(SampleSheet):
-    samples: List[FlowCellSampleBcl2Fastq]
+    samples: list[FlowCellSampleBcl2Fastq]
 
 
 class SampleSheetBCLConvert(SampleSheet):
-    samples: List[FlowCellSampleBCLConvert]
+    samples: list[FlowCellSampleBCLConvert]
