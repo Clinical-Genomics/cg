@@ -581,22 +581,20 @@ class HousekeeperAPI:
 
     def set_archived_at(self, archival_task_id: int):
         """Sets archived_at to the current time for archive entries with matching archival task id."""
-        archive_entries: list[Archive] = self.housekeeper_api.get_archive_entries(
-            archival_task_id=archival_task_id
-        )
+        archive_entries: list[Archive] = self.get_archive_entries(archival_task_id=archival_task_id)
         if not archive_entries:
             raise HousekeeperArchiveMissingError(
                 f"Could not find any archives with archival_task_id {archival_task_id}"
             )
         for archive in archive_entries:
-            self.housekeeper_api.set_archive_archived_at(
+            self.set_archive_archived_at(
                 archiving_task_id=archival_task_id, file_id=archive.file_id
             )
         self.commit()
 
     def set_retrieved_at(self, retrieval_task_id: int):
         """Sets retrieved_at to the current time for archive entries with matching archival task id."""
-        archive_entries: list[Archive] = self.housekeeper_api.get_archive_entries(
+        archive_entries: list[Archive] = self.get_archive_entries(
             retrieval_task_id=retrieval_task_id
         )
         if not archive_entries:
@@ -604,7 +602,7 @@ class HousekeeperAPI:
                 f"Could not find any archives with retrieval_task_id {retrieval_task_id}"
             )
         for archive in archive_entries:
-            self.housekeeper_api.set_archive_retrieved_at(
+            self.set_archive_retrieved_at(
                 retrieval_task_id=retrieval_task_id, file_id=archive.file_id
             )
         self.commit()
