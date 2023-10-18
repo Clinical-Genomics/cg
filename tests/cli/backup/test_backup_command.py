@@ -30,7 +30,7 @@ def test_backup_flow_cells(
     )
 
     # GIVEN an encrypted flow cell
-    flow_cells_dir = Path(cg_context.backup.encrypt_dir, flow_cell_full_name)
+    flow_cells_dir = Path(cg_context.backup.encryption_directories.current, flow_cell_full_name)
     flow_cells_dir.mkdir(parents=True, exist_ok=True)
     Path(flow_cells_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()
 
@@ -49,7 +49,7 @@ def test_backup_flow_cells_when_dcms_is_running(
     flow_cell_full_name: str,
     mocker,
 ):
-    """Test backing up flow cell in dry run mode when Dcms processing has started."""
+    """Test backing-up flow cell in dry run mode when Dcms processing has started."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a flow cells directory
@@ -76,7 +76,7 @@ def test_backup_flow_cells_when_flow_cell_already_has_backup(
     flow_cell_full_name: str,
     helpers: StoreHelpers,
 ):
-    """Test backing up flow cell in dry run mode when already backed-up."""
+    """Test backing-up flow cell in dry run mode when already backed-up."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a flow cells directory

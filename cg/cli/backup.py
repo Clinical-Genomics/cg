@@ -53,7 +53,7 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
         flow_cell_encryption_api = FlowCellEncryptionAPI(
             binary_path=context.encryption.binary_path,
             dry_run=dry_run,
-            encryption_dir=Path(context.backup.encrypt_dir),
+            encryption_dir=Path(context.backup.encryption_directories.current),
             flow_cell=flow_cell,
             pigz_binary_path=context.pigz.binary_path,
             slurm_api=SlurmAPI(),
