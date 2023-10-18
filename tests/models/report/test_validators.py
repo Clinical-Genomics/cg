@@ -1,7 +1,7 @@
 """Tests delivery report models validators."""
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 from _pytest.logging import LogCaptureFixture
@@ -128,7 +128,7 @@ def test_get_list_as_string():
     """Test if a list is transformed into a string of comma separated values."""
 
     # GIVEN a mock list
-    mock_list: List[str] = ["I am", "a", "list"]
+    mock_list: list[str] = ["I am", "a", "list"]
 
     # WHEN performing the validation
     validated_list: str = get_list_as_string(mock_list)
@@ -185,7 +185,7 @@ def test_get_analysis_type_as_string():
     # GIVEN a WGS analysis type and a model info dictionary
     analysis_type: AnalysisType = AnalysisType.WHOLE_GENOME_SEQUENCING
     model_info: ValidationInfo = ValidationInfo
-    model_info.data: Dict[str, Any] = {"pipeline": Pipeline.MIP_DNA.value}
+    model_info.data: dict[str, Any] = {"pipeline": Pipeline.MIP_DNA.value}
 
     # WHEN performing the validation
     validated_analysis_type: str = get_analysis_type_as_string(
@@ -202,7 +202,7 @@ def test_get_analysis_type_as_string_balsamic():
     # GIVEN a WGS analysis type and a model info dictionary
     analysis_type: str = "tumor_normal_wgs"
     model_info: ValidationInfo = ValidationInfo
-    model_info.data: Dict[str, Any] = {"pipeline": Pipeline.BALSAMIC.value}
+    model_info.data: dict[str, Any] = {"pipeline": Pipeline.BALSAMIC.value}
 
     # WHEN performing the validation
     validated_analysis_type: str = get_analysis_type_as_string(
