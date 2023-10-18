@@ -1,0 +1,11 @@
+FROM python:3.11-slim-buster
+
+LABEL description="Clinical Genomics command center" \
+      url="https://github.com/Clinical-Genomics/cg" \
+      maintainer="support@clinicalgenomics.se"
+
+WORKDIR /app
+COPY . /app
+RUN pip install --no-cache-dir .
+
+ENTRYPOINT ["cg"]
