@@ -33,11 +33,11 @@ class ApplicationModel(BaseModel):
         external: whether the app tag is external or not; source: StatusDB/application/is_external
     """
 
-    tag: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    version: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    prep_category: Annotated[Optional[str], BeforeValidator(get_prep_category_as_string)] = NA_FIELD
-    description: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    limitations: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    tag: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    prep_category: Annotated[str, BeforeValidator(get_prep_category_as_string)] = NA_FIELD
+    description: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    limitations: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     accredited: Optional[bool] = None
     external: Optional[bool] = None
 
@@ -51,8 +51,8 @@ class MethodsModel(BaseModel):
         sequencing: sequencing procedure; source: LIMS/sample/sequencing_method
     """
 
-    library_prep: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    sequencing: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    library_prep: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    sequencing: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
 
 
 class TimestampModel(BaseModel):
@@ -66,10 +66,10 @@ class TimestampModel(BaseModel):
         reads_updated_at: sequencing date; source: StatusDB/sample/reads_updated_at
     """
 
-    ordered_at: Annotated[Optional[str], BeforeValidator(get_date_as_string)] = NA_FIELD
-    received_at: Annotated[Optional[str], BeforeValidator(get_date_as_string)] = NA_FIELD
-    prepared_at: Annotated[Optional[str], BeforeValidator(get_date_as_string)] = NA_FIELD
-    reads_updated_at: Annotated[Optional[str], BeforeValidator(get_date_as_string)] = NA_FIELD
+    ordered_at: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
+    received_at: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
+    prepared_at: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
+    reads_updated_at: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
 
 
 class SampleModel(BaseModel):
@@ -90,13 +90,13 @@ class SampleModel(BaseModel):
         timestamps: processing timestamp attributes
     """
 
-    name: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    id: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    ticket: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    status: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    gender: Annotated[Optional[str], BeforeValidator(get_gender_as_string)] = NA_FIELD
-    source: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    tumour: Annotated[Optional[str], BeforeValidator(get_boolean_as_string)] = NA_FIELD
+    name: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    id: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    ticket: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    status: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    gender: Annotated[str, BeforeValidator(get_gender_as_string)] = NA_FIELD
+    source: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    tumour: Annotated[str, BeforeValidator(get_boolean_as_string)] = NA_FIELD
     application: ApplicationModel
     methods: MethodsModel
     metadata: Union[

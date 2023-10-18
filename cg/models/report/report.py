@@ -28,9 +28,9 @@ class CustomerModel(BaseModel):
         scout_access: whether the customer has access to scout or not; source: statusDB/family/customer/scout_access
     """
 
-    name: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    id: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    invoice_address: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    name: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    id: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    invoice_address: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     scout_access: Optional[bool] = None
 
 
@@ -47,12 +47,12 @@ class ScoutReportFiles(BaseModel):
         smn_tsv: SMN gene variants file (MIP-DNA specific); source: HK
     """
 
-    snv_vcf: Annotated[Optional[str], BeforeValidator(get_path_as_string)] = NA_FIELD
-    snv_research_vcf: Annotated[Optional[str], BeforeValidator(get_path_as_string)] = NA_FIELD
-    sv_vcf: Annotated[Optional[str], BeforeValidator(get_path_as_string)] = NA_FIELD
-    sv_research_vcf: Annotated[Optional[str], BeforeValidator(get_path_as_string)] = NA_FIELD
-    vcf_str: Annotated[Optional[str], BeforeValidator(get_path_as_string)] = NA_FIELD
-    smn_tsv: Annotated[Optional[str], BeforeValidator(get_path_as_string)] = NA_FIELD
+    snv_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    snv_research_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    sv_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    sv_research_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    vcf_str: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    smn_tsv: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
 
 
 class DataAnalysisModel(BaseModel):
@@ -71,14 +71,14 @@ class DataAnalysisModel(BaseModel):
         scout_files: list of file names uploaded to Scout
     """
 
-    customer_pipeline: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    data_delivery: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    pipeline: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    pipeline_version: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    type: Annotated[Optional[str], BeforeValidator(get_analysis_type_as_string)] = NA_FIELD
-    genome_build: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    variant_callers: Annotated[Optional[str], BeforeValidator(get_list_as_string)] = NA_FIELD
-    panels: Annotated[Optional[str], BeforeValidator(get_list_as_string)] = NA_FIELD
+    customer_pipeline: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    data_delivery: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    pipeline: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    pipeline_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    type: Annotated[str, BeforeValidator(get_analysis_type_as_string)] = NA_FIELD
+    genome_build: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    variant_callers: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
+    panels: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     scout_files: ScoutReportFiles
 
     @model_validator(mode="after")
@@ -108,8 +108,8 @@ class CaseModel(BaseModel):
         applications: case associated unique applications
     """
 
-    name: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    id: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
+    name: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    id: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     samples: list[SampleModel]
     data_analysis: DataAnalysisModel
     applications: list[ApplicationModel]
@@ -128,7 +128,7 @@ class ReportModel(BaseModel):
     """
 
     customer: CustomerModel
-    version: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    date: Annotated[Optional[str], BeforeValidator(get_date_as_string)] = NA_FIELD
+    version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    date: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
     case: CaseModel
     accredited: Optional[bool] = None

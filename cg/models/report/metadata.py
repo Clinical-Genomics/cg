@@ -21,8 +21,8 @@ class SampleMetadataModel(BaseModel):
         duplicates: fraction of mapped sequence that is marked as duplicate; source: pipeline workflow
     """
 
-    million_read_pairs: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    duplicates: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
+    million_read_pairs: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    duplicates: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
 
 
 class MipDNASampleMetadataModel(SampleMetadataModel):
@@ -36,11 +36,11 @@ class MipDNASampleMetadataModel(SampleMetadataModel):
         pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: pipeline workflow
     """
 
-    bait_set: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    gender: Annotated[Optional[str], BeforeValidator(get_gender_as_string)] = NA_FIELD
-    mapped_reads: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    mean_target_coverage: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    pct_10x: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
+    bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    gender: Annotated[str, BeforeValidator(get_gender_as_string)] = NA_FIELD
+    mapped_reads: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    mean_target_coverage: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    pct_10x: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
 
 
 class BalsamicSampleMetadataModel(SampleMetadataModel):
@@ -51,8 +51,8 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
             fold_80: fold 80 base penalty; source: pipeline workflow
     """
 
-    mean_insert_size: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    fold_80: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
+    mean_insert_size: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    fold_80: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
 
 
 class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
@@ -66,13 +66,11 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
             pct_500x: percent of targeted bases that are covered to 500X coverage or more; source: pipeline workflow
     """
 
-    bait_set: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    bait_set_version: Annotated[Optional[str], BeforeValidator(get_report_string)] = NA_FIELD
-    median_target_coverage: Annotated[
-        Optional[str], BeforeValidator(get_float_as_string)
-    ] = NA_FIELD
-    pct_250x: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    pct_500x: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
+    bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    bait_set_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    median_target_coverage: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    pct_250x: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    pct_500x: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
 
 
 class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
@@ -84,9 +82,9 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
             pct_60x: fraction of bases that attained at least 15X sequence coverage; source: pipeline workflow
     """
 
-    median_coverage: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    pct_15x: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    pct_60x: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
+    median_coverage: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    pct_15x: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    pct_60x: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
 
 
 class RnafusionSampleMetadataModel(SampleMetadataModel):
@@ -110,18 +108,18 @@ class RnafusionSampleMetadataModel(SampleMetadataModel):
         uniquely_mapped_reads: percentage of mapped reads; source: pipeline workflow
     """
 
-    bias_5_3: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    gc_content: Annotated[Optional[str], BeforeValidator(get_float_as_percentage)] = NA_FIELD
-    input_amount: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    insert_size: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    insert_size_peak: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    mapped_reads: Annotated[Optional[str], BeforeValidator(get_float_as_percentage)] = NA_FIELD
-    mean_length_r1: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    mrna_bases: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    pct_adapter: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    pct_surviving: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    q20_rate: Annotated[Optional[str], BeforeValidator(get_float_as_percentage)] = NA_FIELD
-    q30_rate: Annotated[Optional[str], BeforeValidator(get_float_as_percentage)] = NA_FIELD
-    ribosomal_bases: Annotated[Optional[str], BeforeValidator(get_float_as_percentage)] = NA_FIELD
-    rin: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
-    uniquely_mapped_reads: Annotated[Optional[str], BeforeValidator(get_float_as_string)] = NA_FIELD
+    bias_5_3: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    gc_content: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+    input_amount: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    insert_size: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    insert_size_peak: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    mapped_reads: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+    mean_length_r1: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    mrna_bases: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    pct_adapter: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    pct_surviving: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    q20_rate: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+    q30_rate: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+    ribosomal_bases: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+    rin: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    uniquely_mapped_reads: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
