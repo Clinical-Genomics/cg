@@ -96,6 +96,10 @@ class FlowCellEncryptionError(CgError):
     """Raised when there is a problem with encrypting a flow cell."""
 
 
+class FlowCellAlreadyBackeupError(CgError):
+    """Raised when a flow cell is already backed-up."""
+
+
 class HousekeeperFileMissingError(CgError):
     """
     Exception raised when a file is missing in Housekeeper.

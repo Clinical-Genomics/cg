@@ -12,6 +12,7 @@ from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import (
     DcmsAlreadyRunningError,
+    FlowCellAlreadyBackeupError,
     FlowCellEncryptionError,
     FlowCellError,
     PdcError,
@@ -50,9 +51,6 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
         db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
             flow_cell_name=flow_cell.id
         )
-        if db_flow_cell and db_flow_cell.has_backup:
-            LOG.debug(f"Flow cell: {flow_cell.id} is already backed-up")
-            continue
         flow_cell_encryption_api = FlowCellEncryptionAPI(
             binary_path=context.encryption.binary_path,
             dry_run=dry_run,
@@ -64,8 +62,14 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
             tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
         )
         try:
-            pdc_api.start_flow_cell_backup(flow_cell_encryption_api=flow_cell_encryption_api)
-        except (DcmsAlreadyRunningError, FlowCellEncryptionError) as error:
+            pdc_api.start_flow_cell_backup(
+                db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
+            )
+        except (
+            DcmsAlreadyRunningError,
+            FlowCellAlreadyBackeupError,
+            FlowCellEncryptionError,
+        ) as error:
             logging.debug(f"{error}")
 
         archived_file_count: int = 0
