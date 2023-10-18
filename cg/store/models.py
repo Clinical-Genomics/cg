@@ -114,10 +114,14 @@ class Application(Model):
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+
     versions = orm.relationship(
-        "ApplicationVersion", order_by="ApplicationVersion.version", backref="application"
+        "ApplicationVersion",
+        order_by="ApplicationVersion.version",
+        back_populates="application",
+        cascade_backrefs=False,
     )
-    pipeline_limitations = orm.relationship("ApplicationLimitations", backref="application")
+    pipeline_limitations = orm.relationship("ApplicationLimitations", back_populates="application")
 
     def __str__(self) -> str:
         return self.tag
@@ -164,6 +168,8 @@ class ApplicationVersion(Model):
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     application_id = Column(ForeignKey(Application.id), nullable=False)
 
+    application = orm.relationship(Application, back_populates="versions", cascade_backrefs=False)
+
     def __str__(self) -> str:
         return f"{self.application.tag} ({self.version})"
 
@@ -185,6 +191,8 @@ class ApplicationLimitations(Model):
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+
+    application = orm.relationship(Application, back_populates="pipeline_limitations")
 
     def __str__(self):
         return f"{self.application.tag} – {self.pipeline}"
@@ -212,6 +220,8 @@ class Analysis(Model):
     family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
     uploaded_to_vogue_at = Column(types.DateTime, nullable=True)
 
+    family = orm.relationship("Family", back_populates="analyses", cascade_backrefs=False)
+
     def __str__(self):
         return f"{self.family.internal_id} | {self.completed_at.date()}"
 
@@ -234,7 +244,12 @@ class Bed(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
-    versions = orm.relationship("BedVersion", order_by="BedVersion.version", backref="bed")
+    versions = orm.relationship(
+        "BedVersion",
+        order_by="BedVersion.version",
+        back_populates="bed",
+        cascade_backrefs=False,
+    )
 
     def __str__(self) -> str:
         return self.name
@@ -261,6 +276,8 @@ class BedVersion(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     bed_id = Column(ForeignKey(Bed.id), nullable=False)
+
+    bed = orm.relationship(Bed, back_populates="versions", cascade_backrefs=False)
 
     def __str__(self) -> str:
         return f"{self.bed.name} ({self.version})"
@@ -302,6 +319,11 @@ class Customer(Model):
     invoice_contact = orm.relationship("User", foreign_keys=[invoice_contact_id])
     primary_contact_id = Column(ForeignKey("user.id"))
     primary_contact = orm.relationship("User", foreign_keys=[primary_contact_id])
+
+    panels = orm.relationship("Panel", back_populates="customer", cascade_backrefs=False)
+    users = orm.relationship(
+        "User", secondary=customer_user, back_populates="customers", cascade_backrefs=False
+    )
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -360,7 +382,6 @@ class Family(Model, PriorityMixin):
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
     action = Column(types.Enum(*CASE_ACTIONS))
-    analyses = orm.relationship(Analysis, backref="family", order_by="-Analysis.completed_at")
     _cohorts = Column(types.Text)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -377,6 +398,11 @@ class Family(Model, PriorityMixin):
     priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     synopsis = Column(types.Text)
     tickets = Column(types.VARCHAR)
+
+    analyses = orm.relationship(
+        Analysis, back_populates="family", order_by="-Analysis.completed_at", cascade_backrefs=False
+    )
+    links = orm.relationship("FamilySample", back_populates="family", cascade_backrefs=False)
 
     @property
     def cohorts(self) -> list[str]:
@@ -506,10 +532,10 @@ class FamilySample(Model):
     mother_id = Column(ForeignKey("sample.id"))
     father_id = Column(ForeignKey("sample.id"))
 
-    family = orm.relationship("Family", backref="links")
-    sample = orm.relationship("Sample", foreign_keys=[sample_id], backref="links")
-    mother = orm.relationship("Sample", foreign_keys=[mother_id], backref="mother_links")
-    father = orm.relationship("Sample", foreign_keys=[father_id], backref="father_links")
+    family = orm.relationship(Family, back_populates="links", cascade_backrefs=False)
+    sample = orm.relationship("Sample", foreign_keys=[sample_id], back_populates="links")
+    mother = orm.relationship("Sample", foreign_keys=[mother_id], back_populates="mother_links")
+    father = orm.relationship("Sample", foreign_keys=[father_id], back_populates="father_links")
 
     def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
         """Represent as dictionary"""
@@ -541,11 +567,14 @@ class Flowcell(Model):
     has_backup = Column(types.Boolean, nullable=False, default=False)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
-    samples = orm.relationship("Sample", secondary=flowcell_sample, backref="flowcells")
+    samples = orm.relationship(
+        "Sample", secondary=flowcell_sample, back_populates="flowcells", cascade_backrefs=False
+    )
     sequencing_metrics = orm.relationship(
         "SampleLaneSequencingMetrics",
         back_populates="flowcell",
         cascade="all, delete, delete-orphan",
+        cascade_backrefs=False,
     )
 
     def __str__(self):
@@ -583,7 +612,7 @@ class Panel(Model):
     abbrev = Column(types.String(32), unique=True)
     current_version = Column(types.Float, nullable=False)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
-    customer = orm.relationship(Customer, backref="panels")
+    customer = orm.relationship(Customer, back_populates="panels", cascade_backrefs=False)
     date = Column(types.DateTime, nullable=False)
     gene_count = Column(types.Integer)
     id = Column(types.Integer, primary_key=True)
@@ -619,6 +648,8 @@ class Pool(Model):
     received_at = Column(types.DateTime)
     ticket = Column(types.String(32))
 
+    invoice = orm.relationship("Invoice", back_populates="pools", cascade_backrefs=False)
+
     def to_dict(self):
         return to_dict(model_instance=self)
 
@@ -637,7 +668,7 @@ class Sample(Model, PriorityMixin):
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship("Customer", foreign_keys=[customer_id])
     delivered_at = Column(types.DateTime)
-    deliveries = orm.relationship(Delivery, backref="sample")
+    deliveries = orm.relationship(Delivery, backref="sample", cascade_backrefs=False)
     downsampled_to = Column(types.BigInteger)
     from_sample = Column(types.String(128))
     id = Column(types.Integer, primary_key=True)
@@ -667,7 +698,22 @@ class Sample(Model, PriorityMixin):
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
 
-    sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
+    links = orm.relationship(
+        FamilySample, foreign_keys=[FamilySample.sample_id], back_populates="sample"
+    )
+    mother_links = orm.relationship(
+        FamilySample, foreign_keys=[FamilySample.mother_id], back_populates="mother"
+    )
+    father_links = orm.relationship(
+        FamilySample, foreign_keys=[FamilySample.father_id], back_populates="father"
+    )
+    flowcells = orm.relationship(
+        Flowcell, secondary=flowcell_sample, back_populates="samples", cascade_backrefs=False
+    )
+    sequencing_metrics = orm.relationship(
+        "SampleLaneSequencingMetrics", back_populates="sample", cascade_backrefs=False
+    )
+    invoice = orm.relationship("Invoice", back_populates="samples", cascade_backrefs=False)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -768,8 +814,8 @@ class Invoice(Model):
     price = Column(types.Integer)
     record_type = Column(types.Text)
 
-    samples = orm.relationship(Sample, backref="invoice")
-    pools = orm.relationship(Pool, backref="invoice")
+    samples = orm.relationship(Sample, back_populates="invoice", cascade_backrefs=False)
+    pools = orm.relationship(Pool, back_populates="invoice", cascade_backrefs=False)
 
     def __str__(self):
         return f"{self.customer_id} ({self.invoiced_at})"
@@ -787,7 +833,9 @@ class User(Model):
     is_admin = Column(types.Boolean, default=False)
     order_portal_login = Column(types.Boolean, default=False)
 
-    customers = orm.relationship("Customer", secondary=customer_user, backref="users")
+    customers = orm.relationship(
+        Customer, secondary=customer_user, back_populates="users", cascade_backrefs=False
+    )
 
     def to_dict(self) -> dict:
         """Represent as dictionary."""
@@ -816,7 +864,7 @@ class SampleLaneSequencingMetrics(Model):
     created_at = Column(types.DateTime)
 
     flowcell = orm.relationship(Flowcell, back_populates="sequencing_metrics")
-    sample = orm.relationship(Sample, back_populates="sequencing_metrics")
+    sample = orm.relationship(Sample, back_populates="sequencing_metrics", cascade_backrefs=False)
 
     __table_args__ = (
         UniqueConstraint(
