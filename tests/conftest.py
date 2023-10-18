@@ -37,7 +37,7 @@ from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, EncryptionDirectories
 from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
@@ -2153,6 +2153,14 @@ def encryption_dir(tmp_flow_cells_directory: Path) -> Path:
     return Path(tmp_flow_cells_directory, "encrypt")
 
 
+@pytest.fixture
+def encryption_directories(encryption_dir: Path) -> EncryptionDirectories:
+    """Returns different encryption directories."""
+    return EncryptionDirectories(
+        current=f"/{encryption_dir.as_posix()}/", nas="/ENCRYPT/", pre_nas="/OLD_ENCRYPT/"
+    )
+
+
 @pytest.fixture(name="cg_uri")
 def cg_uri() -> str:
     """Return a cg URI."""
@@ -2186,7 +2194,7 @@ def context_config(
     taxprofiler_dir: Path,
     flow_cells_dir: Path,
     demultiplexed_runs: Path,
-    encryption_dir: Path,
+    encryption_directories: EncryptionDirectories,
 ) -> dict:
     """Return a context config."""
     return {
@@ -2203,7 +2211,7 @@ def context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encrypt_dir": encryption_dir.as_posix(),
+            "encryption_directories": encryption_directories.dict(),
             "slurm_flow_cell_encryption": {
                 "account": "development",
                 "hours": 1,
