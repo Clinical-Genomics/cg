@@ -29,7 +29,8 @@ def test_get_families_with_extended_models(
     test_analysis.family.action: str = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
-    base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # WHEN getting cases to analyse
     cases: list[Query] = list(base_store._get_outer_join_cases_with_analyses_query())
@@ -69,7 +70,8 @@ def test_get_cases_with_samples_query(
     )
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
-    base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # WHEN getting the stored case with its associated samples
     cases: list[Query] = list(base_store._get_join_cases_with_samples_query())
@@ -114,7 +116,8 @@ def test_that_cases_can_have_many_samples(
     case_with_one: Family = helpers.add_case(base_store, "case_with_one_sample")
 
     # GIVEN a database with a case with one sample sequenced sample
-    base_store.relate_sample(case_with_one, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(case_with_one, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # WHEN getting cases to analyse
     cases: list[Family] = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -146,7 +149,8 @@ def test_external_sample_to_re_analyse(
     test_analysis.family.action: str = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one not sequenced external sample
-    base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # WHEN getting cases to analyse
     cases: list[Family] = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -168,7 +172,8 @@ def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelper
     test_case: Family = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
 
     # GIVEN a database with a case with one externally sequenced samples for BALSAMIC analysis
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # WHEN getting cases to analyse
     cases: list[Family] = base_store.cases_to_analyze(pipeline=Pipeline.BALSAMIC)
@@ -193,7 +198,8 @@ def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers, timestamp_
     test_analysis.family.action: str = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
-    base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # WHEN getting cases to analyse
     cases: list[Family] = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -221,7 +227,8 @@ def test_all_samples_and_analysis_completed(
     test_analysis.family.action: Union[None, str] = None
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
-    base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # WHEN getting cases to analyse
     cases: list[Family] = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -242,7 +249,8 @@ def test_specified_analysis_in_result(
     test_case: Family = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
 
     # GIVEN a database with a case with one sequenced samples for BALSAMIC analysis
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # WHEN getting cases to analyse
     cases: list[Family] = base_store.cases_to_analyze(pipeline=Pipeline.BALSAMIC)
@@ -267,7 +275,8 @@ def test_exclude_other_pipeline_analysis_from_result(
     test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # WHEN getting cases to analyse for another pipeline
     cases: list[Family] = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -315,7 +324,8 @@ def test_one_of_one_sequenced_samples(
     test_sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
 
     # GIVEN a database with a case with a sequenced samples and no analysis
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
     assert test_sample.reads_updated_at is not None
 
     # WHEN getting cases to analyse

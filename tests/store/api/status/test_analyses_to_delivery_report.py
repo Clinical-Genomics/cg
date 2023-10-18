@@ -20,9 +20,10 @@ def test_missing(analysis_store: Store, helpers, timestamp_now):
         data_delivery=DataDelivery.SCOUT,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-    analysis_store.relate_sample(
+    link = analysis_store.relate_sample(
         family=analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
     )
+    analysis_store.session.add(link)
     assert sample.delivered_at is not None
     assert analysis.delivery_report_created_at is None
 
