@@ -88,7 +88,7 @@ class DemuxPostProcessingAPI:
         delete_demux_api = DeleteDemuxAPI(
             config=self.config, dry_run=self.dry_run, flow_cell_name=flow_cell_directory_name
         )
-        if delete_demux_api.status_db_presence:
+        if delete_demux_api.is_flow_cell_in_status_db:
             delete_demux_api.delete_flow_cell(
                 demultiplexing_dir=False,
                 run_dir=False,

@@ -54,7 +54,7 @@ def test_get_presence_status_status_db(
     delete_demux_api: DeleteDemuxAPI = delete_demultiplex_api
 
     # WHEN the flowcell name is parsed and fetching the presence of a flowcell in either context
-    empty_presence: bool = delete_demux_api.status_db_presence
+    empty_presence: bool = delete_demux_api.is_flow_cell_in_status_db
 
     # THEN there should be an appropriate presence in both cases
     assert not empty_presence
@@ -65,7 +65,7 @@ def test_get_presence_status_status_db(
         flow_cell_name=bcl2fastq_flow_cell_id,
         sequencer_type="novaseq",
     )
-    populated_presence: bool = delete_demux_api.status_db_presence
+    populated_presence: bool = delete_demux_api.is_flow_cell_in_status_db
 
     # THEN the presence should be updated
     assert populated_presence
