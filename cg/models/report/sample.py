@@ -1,10 +1,15 @@
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel, BeforeValidator
 from typing_extensions import Annotated
 
 from cg.constants import NA_FIELD
-from cg.models.report.metadata import SampleMetadataModel
+from cg.models.report.metadata import (
+    BalsamicTargetedSampleMetadataModel,
+    BalsamicWGSSampleMetadataModel,
+    MipDNASampleMetadataModel,
+    RnafusionSampleMetadataModel,
+)
 from cg.models.report.validators import (
     get_boolean_as_string,
     get_date_as_string,
@@ -94,5 +99,10 @@ class SampleModel(BaseModel):
     tumour: Annotated[Optional[str], BeforeValidator(get_boolean_as_string)] = NA_FIELD
     application: ApplicationModel
     methods: MethodsModel
-    metadata: SampleMetadataModel
+    metadata: Union[
+        MipDNASampleMetadataModel,
+        BalsamicTargetedSampleMetadataModel,
+        BalsamicWGSSampleMetadataModel,
+        RnafusionSampleMetadataModel,
+    ]
     timestamps: TimestampModel
