@@ -16,7 +16,7 @@ def flow_cell_encryption_api(
 ) -> FlowCellEncryptionAPI:
     flow_cell_encryption_api = FlowCellEncryptionAPI(
         binary_path=cg_context.encryption.binary_path,
-        encryption_dir=Path(cg_context.backup.encrypt_dir),
+        encryption_dir=Path(cg_context.backup.encryption_directories.current),
         dry_run=True,
         flow_cell=FlowCellDirectoryData(
             flow_cell_path=Path(cg_context.flow_cells_dir, flow_cell_full_name)
