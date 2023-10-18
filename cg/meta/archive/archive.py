@@ -198,10 +198,23 @@ class SpringArchiveAPI:
     ) -> None:
         """Fetches info on an ongoing job and updates the Archive entry in Housekeeper."""
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
-        is_job_done: bool = archive_handler.is_job_done(job_id=task_id)
+        is_job_done: bool = archive_handler.is_job_done(task_id)
         if is_job_done:
             LOG.info(f"Job with id {task_id} has finished, updating Archive entries.")
             if is_archival:
                 self.housekeeper_api.set_archived_at(task_id)
             else:
                 self.housekeeper_api.set_retrieved_at(task_id)
+        else:
+            LOG.info(f"Job with id {task_id} has not yet finished.")
+
+    def update_status_for_ongoing_tasks(self) -> None:
+        """Updates any started but uncompleted tasks, should they be completed."""
+        archival_jobs: list[int] = [
+            archive.archiving_task_id
+            for archive in self.housekeeper_api.get_ongoing_archival_tasks()
+        ]
+        retrieval_jobs: list[int] = [
+            archive.retrieval_task_id
+            for archive in self.housekeeper_api.get_ongoing_retrieval_tasks()
+        ]

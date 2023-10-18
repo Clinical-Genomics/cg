@@ -606,3 +606,9 @@ class HousekeeperAPI:
                 retrieval_task_id=retrieval_task_id, file_id=archive.file_id
             )
         self.commit()
+
+    def get_ongoing_archival_tasks(self):
+        return self._store.get_ongoing_archiving_tasks()
+
+    def get_ongoing_retrieval_tasks(self):
+        return self._store.get_ongoing_retrieval_tasks()
