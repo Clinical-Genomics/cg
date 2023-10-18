@@ -1,12 +1,14 @@
 """ Module to group PDC related commands """
 
 import logging
+from pathlib import Path
 
 import psutil
 
 from cg.constants.pdc import DSMCParameters
 from cg.exc import FlowCellAlreadyBackeupError, FlowCellEncryptionError, PdcError
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
+from cg.store import Store
 from cg.store.models import Flowcell
 from cg.utils import Process
 
@@ -86,10 +88,36 @@ class PdcAPI:
                 f"Flow cell: {flow_cell_encryption_api.flow_cell.id} encryption process is not complete"
             )
 
+    def backup_flow_cell(
+        self, files_to_archive: list[Path], status_db: Store, db_flow_cell: Flowcell
+    ) -> None:
+        """Back-up flow cell files."""
+        archived_file_count: int = 0
+        for encrypted_file in files_to_archive:
+            try:
+                self.archive_file_to_pdc(file_path=encrypted_file.as_posix())
+                archived_file_count += 1
+            except PdcError:
+                LOG.debug(f"{encrypted_file.as_posix()} cannot be archived")
+            if archived_file_count == len(files_to_archive) and not self.dry_run:
+                status_db.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
+                LOG.debug(f"Flow cell: {db_flow_cell.name} has been backed up")
+
     def start_flow_cell_backup(
-        self, db_flow_cell: Flowcell, flow_cell_encryption_api: FlowCellEncryptionAPI
+        self,
+        db_flow_cell: Flowcell,
+        flow_cell_encryption_api: FlowCellEncryptionAPI,
+        status_db: Store,
     ) -> None:
         """Check if back-up of flow cell is possible and if so starts it."""
         self.validate_flow_cell_backup_possible(
             db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
+        )
+        self.backup_flow_cell(
+            files_to_archive=[
+                flow_cell_encryption_api.final_passphrase_file_path,
+                flow_cell_encryption_api.encrypted_gpg_file_path,
+            ],
+            status_db=status_db,
+            db_flow_cell=db_flow_cell,
         )

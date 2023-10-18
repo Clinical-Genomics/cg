@@ -63,29 +63,17 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
         )
         try:
             pdc_api.start_flow_cell_backup(
-                db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
+                db_flow_cell=db_flow_cell,
+                flow_cell_encryption_api=flow_cell_encryption_api,
+                status_db=status_db,
             )
         except (
             DcmsAlreadyRunningError,
             FlowCellAlreadyBackeupError,
             FlowCellEncryptionError,
+            PdcError,
         ) as error:
             logging.debug(f"{error}")
-
-        archived_file_count: int = 0
-        files_to_archive: list[Path] = [
-            flow_cell_encryption_api.final_passphrase_file_path,
-            flow_cell_encryption_api.encrypted_gpg_file_path,
-        ]
-        for encrypted_file in files_to_archive:
-            try:
-                pdc_api.archive_file_to_pdc(file_path=encrypted_file.as_posix())
-                archived_file_count += 1
-            except PdcError:
-                LOG.debug(f"{encrypted_file.as_posix()} cannot be archived")
-            if archived_file_count == len(files_to_archive) and not dry_run:
-                status_db.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
-                LOG.debug(f"Flow cell: {flow_cell.full_name} has been backed up")
 
 
 @backup.command("encrypt-flow-cells")
