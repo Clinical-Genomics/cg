@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from pydantic import ValidationInfo
 
@@ -47,7 +47,7 @@ def get_date_as_string(date: Optional[datetime]) -> str:
     return str(date.date()) if date else NA_FIELD
 
 
-def get_list_as_string(value: Optional[List[str]]) -> str:
+def get_list_as_string(value: Optional[list[str]]) -> str:
     """Return list elements as comma separated individual string values."""
     return ", ".join(v for v in value) if value else NA_FIELD
 
