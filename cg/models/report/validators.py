@@ -59,7 +59,7 @@ def get_path_as_string(file_path: Optional[str]) -> str:
 
 def get_gender_as_string(gender: Optional[Gender]) -> str:
     """Return a report adapted gender."""
-    return get_report_string(REPORT_GENDER.get(gender)) if gender else NA_FIELD
+    return get_report_string(REPORT_GENDER.get(gender))
 
 
 def get_prep_category_as_string(prep_category: Optional[PrepCategory]) -> str:
