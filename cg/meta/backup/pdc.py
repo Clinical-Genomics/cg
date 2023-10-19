@@ -6,7 +6,7 @@ from pathlib import Path
 import psutil
 
 from cg.constants.pdc import DSMCParameters
-from cg.exc import FlowCellAlreadyBackeupError, FlowCellEncryptionError, PdcError
+from cg.exc import FlowCellAlreadyBackedUpError, FlowCellEncryptionError, PdcError
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.store import Store
 from cg.store.models import Flowcell
@@ -72,21 +72,26 @@ class PdcAPI:
         except Exception as error:
             raise PdcError(f"{error}") from error
 
-    def validate_flow_cell_backup_possible(
+    def validate_is_flow_cell_backup_possible(
         self, db_flow_cell: Flowcell, flow_cell_encryption_api: FlowCellEncryptionAPI
-    ) -> None:
+    ) -> bool:
         """Check if back-up of flow cell is possible.
-        Raises: DcmsAlreadyRunningError if there is already a Dcms process ongoing"""
+        Raises:
+            DcmsAlreadyRunningError if there is already a Dcms process ongoing
+            FlowCellAlreadyBackupError if flow cell is already backed up
+            FlowCellEncryptionError if encryption is not complete
+        """
         if self.is_dcms_running():
             exit(0)
         if db_flow_cell and db_flow_cell.has_backup:
-            raise FlowCellAlreadyBackeupError(
+            raise FlowCellAlreadyBackedUpError(
                 f"Flow cell: {db_flow_cell.name} is already backed-up"
             )
         if not flow_cell_encryption_api.complete_file_path.exists():
             raise FlowCellEncryptionError(
                 f"Flow cell: {flow_cell_encryption_api.flow_cell.id} encryption process is not complete"
             )
+        return True
 
     def backup_flow_cell(
         self, files_to_archive: list[Path], status_db: Store, db_flow_cell: Flowcell
@@ -110,7 +115,7 @@ class PdcAPI:
         status_db: Store,
     ) -> None:
         """Check if back-up of flow cell is possible and if so starts it."""
-        self.validate_flow_cell_backup_possible(
+        self.validate_is_flow_cell_backup_possible(
             db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
         )
         self.backup_flow_cell(

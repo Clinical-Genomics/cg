@@ -12,7 +12,7 @@ from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import (
     DcmsAlreadyRunningError,
-    FlowCellAlreadyBackeupError,
+    FlowCellAlreadyBackedUpError,
     FlowCellEncryptionError,
     FlowCellError,
     PdcError,
@@ -44,7 +44,7 @@ def backup(context: CGConfig):
 @DRY_RUN
 @click.pass_obj
 def backup_flow_cells(context: CGConfig, dry_run: bool):
-    """Backup flow cells."""
+    """Back-up flow cells."""
     pdc_api = PdcAPI(binary_path=context.pdc.binary_path, dry_run=dry_run)
     status_db: Store = context.status_db
     for flow_cell in get_flow_cells_from_path(flow_cells_dir=Path(context.flow_cells_dir)):
@@ -69,7 +69,7 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
             )
         except (
             DcmsAlreadyRunningError,
-            FlowCellAlreadyBackeupError,
+            FlowCellAlreadyBackedUpError,
             FlowCellEncryptionError,
             PdcError,
         ) as error:

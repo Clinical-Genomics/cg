@@ -2,18 +2,51 @@
 from unittest import mock
 
 from cg.meta.backup.pdc import PdcAPI
+from cg.meta.encryption.encryption import FlowCellEncryptionAPI
+from cg.store import Store
+from cg.store.models import Flowcell
+from tests.store_helpers import StoreHelpers
 
 
 def test_is_dcms_process_running(binary_path: str):
-    """Tests checking if Dcms process is running when no Dcms process is running."""
+    """Tests checking if a Dcms process is running when no Dcms process is running."""
     # GIVEN an instance of the PDC API
     pdc_api = PdcAPI(binary_path=binary_path)
 
-    # WHEN checking if dcms is running
+    # WHEN checking if Dcms is running
     is_dmsc_running: bool = pdc_api.is_dcms_running()
 
     # THEN return false
     assert not is_dmsc_running
+
+
+def test_validate_is_flow_cell_backup_possible(
+    base_store: Store,
+    binary_path: str,
+    helpers: StoreHelpers,
+    flow_cell_encryption_api: FlowCellEncryptionAPI,
+):
+    """Tests checking if a back-up of flow-cell is possible."""
+    # GIVEN an instance of the PDC API
+    pdc_api = PdcAPI(binary_path=binary_path)
+
+    # GIVEN a database flow cell
+    db_flow_cell: Flowcell = helpers.add_flow_cell(
+        flow_cell_name=flow_cell_encryption_api.flow_cell.id,
+        store=base_store,
+    )
+
+    # GIVEN that encryption is completed
+    flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
+    flow_cell_encryption_api.complete_file_path.touch()
+
+    # WHEN checking if back-up is possible
+    is_backup_possible: bool = pdc_api.validate_is_flow_cell_backup_possible(
+        db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
+    )
+
+    # THEN return true
+    assert is_backup_possible
 
 
 @mock.patch("cg.meta.backup.pdc.Process")

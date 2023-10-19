@@ -96,7 +96,7 @@ class FlowCellEncryptionError(CgError):
     """Raised when there is a problem with encrypting a flow cell."""
 
 
-class FlowCellAlreadyBackeupError(CgError):
+class FlowCellAlreadyBackedUpError(CgError):
     """Raised when a flow cell is already backed-up."""
 
 
