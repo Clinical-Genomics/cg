@@ -8,7 +8,11 @@ from typing import Optional
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
-from housekeeper.store.database import initialize_database
+from housekeeper.store.database import (
+    create_all_tables,
+    drop_all_tables,
+    initialize_database,
+)
 from housekeeper.store.models import Archive, Bundle, File, Version
 from sqlalchemy.orm import Query
 
@@ -333,11 +337,11 @@ class HousekeeperAPI:
 
     def initialise_db(self):
         """Create all tables in the store."""
-        self._store.create_all()
+        create_all_tables()
 
     def destroy_db(self):
         """Drop all tables in the store."""
-        self._store.drop_all()
+        drop_all_tables()
 
     def add_and_include_file_to_latest_version(
         self, bundle_name: str, file: Path, tags: list
