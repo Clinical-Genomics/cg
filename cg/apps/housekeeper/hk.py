@@ -110,6 +110,7 @@ class HousekeeperAPI:
         )
 
         new_file.version: Version = version_obj
+        self._store.session.add(new_file)
         return new_file
 
     def files(

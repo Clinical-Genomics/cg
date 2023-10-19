@@ -41,12 +41,10 @@ class BaseHandler:
         return (
             self._get_query(table=Family)
             .outerjoin(Analysis)
-            .join(
-                Family.links,
-                FamilySample.sample,
-                ApplicationVersion,
-                Application,
-            )
+            .join(Family.links)
+            .join(FamilySample.sample)
+            .join(ApplicationVersion)
+            .join(Application)
         )
 
     def _get_join_cases_with_samples_query(self) -> Query:
