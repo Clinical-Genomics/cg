@@ -25,7 +25,7 @@ SERVER = "hasta"
 class PdcAPI:
     """Group PDC related commands"""
 
-    def __init__(self, binary_path: str = None, dry_run: bool = False):
+    def __init__(self, binary_path: str, dry_run: bool = False):
         self.process: Process = Process(binary=binary_path)
         self.dry_run: bool = dry_run
 

@@ -11,15 +11,16 @@ from cg.exc import (
 )
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Flowcell
 from tests.store_helpers import StoreHelpers
 
 
-def test_validate_is_dsmc_process_running(binary_path: str):
+def test_validate_is_dsmc_process_running(cg_context: CGConfig, binary_path: str):
     """Tests checking if a Dsmc process is running when no Dsmc process is running."""
     # GIVEN an instance of the PDC API
-    pdc_api = PdcAPI(binary_path=binary_path)
+    pdc_api = cg_context.pdc_api
 
     # WHEN checking if Dsmc is running
     is_dmsc_running: bool = pdc_api.validate_is_dsmc_running()
@@ -30,13 +31,14 @@ def test_validate_is_dsmc_process_running(binary_path: str):
 
 def test_validate_is_flow_cell_backup_possible(
     base_store: Store,
+    cg_context: CGConfig,
     binary_path: str,
     helpers: StoreHelpers,
     flow_cell_encryption_api: FlowCellEncryptionAPI,
 ):
     """Tests checking if a back-up of flow-cell is possible."""
     # GIVEN an instance of the PDC API
-    pdc_api = PdcAPI(binary_path=binary_path)
+    pdc_api = cg_context.pdc_api
 
     # GIVEN a database flow cell which is not backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
@@ -59,6 +61,7 @@ def test_validate_is_flow_cell_backup_possible(
 
 def test_validate_is_flow_cell_backup_when_dsmc_is_already_running(
     base_store: Store,
+    cg_context: CGConfig,
     binary_path: str,
     helpers: StoreHelpers,
     flow_cell_encryption_api: FlowCellEncryptionAPI,
@@ -66,7 +69,7 @@ def test_validate_is_flow_cell_backup_when_dsmc_is_already_running(
 ):
     """Tests checking if a back-up of flow-cell is possible when Dsmc is already running."""
     # GIVEN an instance of the PDC API
-    pdc_api = PdcAPI(binary_path=binary_path)
+    pdc_api = cg_context.pdc_api
 
     # GIVEN a Dsmc process is already running
     mocker.patch.object(PdcAPI, "validate_is_dsmc_running", return_value=True)
@@ -88,13 +91,14 @@ def test_validate_is_flow_cell_backup_when_dsmc_is_already_running(
 
 def test_validate_is_flow_cell_backup_when_already_backed_up(
     base_store: Store,
+    cg_context: CGConfig,
     binary_path: str,
     helpers: StoreHelpers,
     flow_cell_encryption_api: FlowCellEncryptionAPI,
 ):
     """Tests checking if a back-up of flow-cell is possible when flow cell is already backed up."""
     # GIVEN an instance of the PDC API
-    pdc_api = PdcAPI(binary_path=binary_path)
+    pdc_api = cg_context.pdc_api
 
     # GIVEN a database flow cell which is backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
@@ -112,13 +116,14 @@ def test_validate_is_flow_cell_backup_when_already_backed_up(
 
 def test_validate_is_flow_cell_backup_when_encryption_is_not_complete(
     base_store: Store,
+    cg_context: CGConfig,
     binary_path: str,
     helpers: StoreHelpers,
     flow_cell_encryption_api: FlowCellEncryptionAPI,
 ):
     """Tests checking if a back-up of flow-cell is possible when encryption is not complete."""
     # GIVEN an instance of the PDC API
-    pdc_api = PdcAPI(binary_path=binary_path)
+    pdc_api = cg_context.pdc_api
 
     # GIVEN a database flow cell which is backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
@@ -137,6 +142,7 @@ def test_validate_is_flow_cell_backup_when_encryption_is_not_complete(
 
 def test_backup_flow_cell(
     base_store: Store,
+    cg_context: CGConfig,
     binary_path: str,
     helpers: StoreHelpers,
     flow_cell_encryption_api: FlowCellEncryptionAPI,
@@ -144,7 +150,7 @@ def test_backup_flow_cell(
 ):
     """Tests back-up flow cell."""
     # GIVEN an instance of the PDC API
-    pdc_api = PdcAPI(binary_path=binary_path, dry_run=False)
+    pdc_api = cg_context.pdc_api
 
     # GIVEN a mocked archiving call
     mocker.patch.object(PdcAPI, "archive_file_to_pdc", return_value=None)
@@ -172,6 +178,7 @@ def test_backup_flow_cell(
 def test_backup_flow_cell_when_unable_to_archive(
     base_store: Store,
     binary_path: str,
+    cg_context: CGConfig,
     helpers: StoreHelpers,
     flow_cell_encryption_api: FlowCellEncryptionAPI,
     caplog,
@@ -180,7 +187,7 @@ def test_backup_flow_cell_when_unable_to_archive(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN an instance of the PDC API
-    pdc_api = PdcAPI(binary_path=binary_path, dry_run=False)
+    pdc_api = cg_context.pdc_api
 
     # GIVEN a database flow cell which is backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
@@ -206,10 +213,10 @@ def test_backup_flow_cell_when_unable_to_archive(
 
 
 @mock.patch("cg.meta.backup.pdc.Process")
-def test_archive_file_to_pdc(mock_process, binary_path, backup_file_path):
+def test_archive_file_to_pdc(mock_process, cg_context: CGConfig, binary_path, backup_file_path):
     """Tests execution command to archive file to PDC"""
     # GIVEN an instance of the PDC API
-    pdc_api = PdcAPI(binary_path=binary_path)
+    pdc_api = cg_context.pdc_api
     pdc_api.process = mock_process
 
     # WHEN archiving a file to PDC
@@ -222,10 +229,10 @@ def test_archive_file_to_pdc(mock_process, binary_path, backup_file_path):
 
 
 @mock.patch("cg.meta.backup.pdc.Process")
-def test_query_pdc(mock_process, binary_path, backup_file_path):
+def test_query_pdc(mock_process, cg_context: CGConfig, binary_path, backup_file_path):
     """Tests execution command to query files to PDC"""
     # GIVEN an instance of the PDC API
-    pdc_api = PdcAPI(binary_path=binary_path)
+    pdc_api = cg_context.pdc_api
     pdc_api.process = mock_process
 
     # WHEN querying PDC
@@ -236,10 +243,10 @@ def test_query_pdc(mock_process, binary_path, backup_file_path):
 
 
 @mock.patch("cg.meta.backup.pdc.Process")
-def test_retrieve_file_from_pdc(mock_process, binary_path, backup_file_path):
+def test_retrieve_file_from_pdc(mock_process, cg_context: CGConfig, binary_path, backup_file_path):
     """Tests execution command to retrieve files from PDC"""
     # GIVEN an instance of the PDC API
-    pdc_api = PdcAPI(binary_path=binary_path)
+    pdc_api = cg_context.pdc_api
     pdc_api.process = mock_process
 
     # WHEN retrieving a file form PDC

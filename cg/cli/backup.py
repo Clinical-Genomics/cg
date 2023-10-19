@@ -26,7 +26,10 @@ from cg.meta.encryption.encryption import (
 )
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import get_flow_cells_from_path
+from cg.models.flow_cell.flow_cell import (
+    FlowCellDirectoryData,
+    get_flow_cells_from_path,
+)
 from cg.store import Store
 from cg.store.models import Flowcell, Sample
 
@@ -45,9 +48,13 @@ def backup(context: CGConfig):
 @click.pass_obj
 def backup_flow_cells(context: CGConfig, dry_run: bool):
     """Back-up flow cells."""
-    pdc_api = PdcAPI(binary_path=context.pdc.binary_path, dry_run=dry_run)
+    pdc_api = context.pdc_api
+    pdc_api.dry_run = dry_run
     status_db: Store = context.status_db
-    for flow_cell in get_flow_cells_from_path(flow_cells_dir=Path(context.flow_cells_dir)):
+    flow_cells: list[FlowCellDirectoryData] = get_flow_cells_from_path(
+        flow_cells_dir=Path(context.flow_cells_dir)
+    )
+    for flow_cell in flow_cells:
         db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
             flow_cell_name=flow_cell.id
         )
@@ -82,7 +89,10 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
 def encrypt_flow_cells(context: CGConfig, dry_run: bool):
     """Encrypt flow cells."""
     status_db: Store = context.status_db
-    for flow_cell in get_flow_cells_from_path(flow_cells_dir=Path(context.flow_cells_dir)):
+    flow_cells: list[FlowCellDirectoryData] = get_flow_cells_from_path(
+        flow_cells_dir=Path(context.flow_cells_dir)
+    )
+    for flow_cell in flow_cells:
         db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
             flow_cell_name=flow_cell.id
         )
@@ -112,7 +122,8 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
 def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str] = None):
     """Fetch the first flow cell in the requested queue from backup"""
 
-    pdc_api = PdcAPI(binary_path=context.pdc.binary_path, dry_run=dry_run)
+    pdc_api = context.pdc_api
+    pdc_api.dry_run = dry_run
     encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
     context.meta_apis["backup_api"] = BackupAPI(
