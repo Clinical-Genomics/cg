@@ -313,7 +313,10 @@ class Customer(Model):
     is_clinical = Column(types.Boolean, nullable=False, default=False)
 
     collaborations = orm.relationship(
-        "Collaboration", secondary="customer_collaboration", back_populates="customers"
+        "Collaboration",
+        secondary="customer_collaboration",
+        back_populates="customers",
+        cascade_backrefs=False,
     )
 
     delivery_contact_id = Column(ForeignKey("user.id"))
@@ -352,7 +355,10 @@ class Collaboration(Model):
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
     customers = orm.relationship(
-        "Customer", secondary="customer_collaboration", back_populates="collaborations"
+        "Customer",
+        secondary="customer_collaboration",
+        back_populates="collaborations",
+        cascade_backrefs=False,
     )
 
     def __str__(self) -> str:
