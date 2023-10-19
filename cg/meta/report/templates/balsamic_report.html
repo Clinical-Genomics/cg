@@ -252,11 +252,14 @@
               Teknisk beskrivning av analysen: {{ application.tag }}
             </h4>
             <p class="card-text">{{ application.description }}</p>
-            {% if application.limitations %}
-            <h4 class="card-title">
-              Begränsningar av analysen: {{ application.tag }}
-            </h4>
-            <p class="card-text">{{ application.limitations }}</p>
+            {% if application.limitations != 'N/A' %}
+              <h4 class="card-title">
+                Begränsningar av analysen: {{ application.tag }}
+              </h4>
+              <p class="card-text">{{ application.limitations }}</p>
+              {% if application.pipeline_limitations != 'N/A' %}
+                <p class="card-text">{{ application.pipeline_limitations }}</p>
+              {% endif %}
             {% endif %}
           </div>
         {% endfor %}
