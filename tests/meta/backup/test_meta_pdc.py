@@ -63,7 +63,7 @@ def test_validate_is_flow_cell_backup_when_dcms_is_already_running(
     flow_cell_encryption_api: FlowCellEncryptionAPI,
     mocker,
 ):
-    """Tests checking if a back-up of flow-cell is possible."""
+    """Tests checking if a back-up of flow-cell is possible when Dcms is already running."""
     # GIVEN an instance of the PDC API
     pdc_api = PdcAPI(binary_path=binary_path)
 
@@ -91,7 +91,7 @@ def test_validate_is_flow_cell_backup_when_already_backed_up(
     helpers: StoreHelpers,
     flow_cell_encryption_api: FlowCellEncryptionAPI,
 ):
-    """Tests checking if a back-up of flow-cell is possible."""
+    """Tests checking if a back-up of flow-cell is possible when flow cell is already backed up."""
     # GIVEN an instance of the PDC API
     pdc_api = PdcAPI(binary_path=binary_path)
 
@@ -109,13 +109,13 @@ def test_validate_is_flow_cell_backup_when_already_backed_up(
         # THEN error should be raised
 
 
-def test_validate_is_flow_cell_backup_when_encryption_is_not_completee(
+def test_validate_is_flow_cell_backup_when_encryption_is_not_complete(
     base_store: Store,
     binary_path: str,
     helpers: StoreHelpers,
     flow_cell_encryption_api: FlowCellEncryptionAPI,
 ):
-    """Tests checking if a back-up of flow-cell is possible."""
+    """Tests checking if a back-up of flow-cell is possible when encryption is not complete."""
     # GIVEN an instance of the PDC API
     pdc_api = PdcAPI(binary_path=binary_path)
 
@@ -132,6 +132,36 @@ def test_validate_is_flow_cell_backup_when_encryption_is_not_completee(
         )
 
         # THEN error should be raised
+
+
+def test_backup_flow_cell(
+    base_store: Store,
+    binary_path: str,
+    helpers: StoreHelpers,
+    flow_cell_encryption_api: FlowCellEncryptionAPI,
+):
+    """Tests back-up flow cell."""
+    # GIVEN an instance of the PDC API
+    pdc_api = PdcAPI(binary_path=binary_path)
+
+    # GIVEN a database flow cell which is backed up
+    db_flow_cell: Flowcell = helpers.add_flow_cell(
+        flow_cell_name=flow_cell_encryption_api.flow_cell.id,
+        store=base_store,
+    )
+
+    # WHEN backing up flow cell
+    pdc_api.backup_flow_cell(
+        files_to_archive=[
+            flow_cell_encryption_api.final_passphrase_file_path,
+            flow_cell_encryption_api.encrypted_gpg_file_path,
+        ],
+        store=base_store,
+        db_flow_cell=db_flow_cell,
+    )
+
+    # THEN flow cell should hava a back-up
+    assert not db_flow_cell.has_backup
 
 
 @mock.patch("cg.meta.backup.pdc.Process")

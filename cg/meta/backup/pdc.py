@@ -102,7 +102,7 @@ class PdcAPI:
         return True
 
     def backup_flow_cell(
-        self, files_to_archive: list[Path], status_db: Store, db_flow_cell: Flowcell
+        self, files_to_archive: list[Path], store: Store, db_flow_cell: Flowcell
     ) -> None:
         """Back-up flow cell files."""
         archived_file_count: int = 0
@@ -113,7 +113,7 @@ class PdcAPI:
             except PdcError:
                 LOG.debug(f"{encrypted_file.as_posix()} cannot be archived")
             if archived_file_count == len(files_to_archive) and not self.dry_run:
-                status_db.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
+                store.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
                 LOG.debug(f"Flow cell: {db_flow_cell.name} has been backed up")
 
     def start_flow_cell_backup(
@@ -131,6 +131,6 @@ class PdcAPI:
                 flow_cell_encryption_api.final_passphrase_file_path,
                 flow_cell_encryption_api.encrypted_gpg_file_path,
             ],
-            status_db=status_db,
+            store=status_db,
             db_flow_cell=db_flow_cell,
         )
