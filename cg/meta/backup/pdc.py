@@ -46,9 +46,9 @@ class PdcAPI:
             LOG.debug("A Dsmc process is already running")
         return is_dsmc_running
 
-    def archive_file_to_pdc(self, file_path: str, dry_run: bool = False) -> None:
+    def archive_file_to_pdc(self, file_path: str) -> None:
         """Archive a file by storing it on PDC."""
-        if not dry_run:
+        if not self.dry_run:
             self.run_dsmc_command(command=DSMCParameters.ARCHIVE_COMMAND + [file_path])
 
     def query_pdc(self, search_pattern: str) -> None:

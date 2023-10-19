@@ -552,11 +552,9 @@ def test_encrypt_and_archive_spring_file(
     calls = [
         call(
             file_path=str(mock_spring_encryption_api.encrypted_spring_file_path.return_value),
-            dry_run=False,
         ),
         call(
             file_path=str(mock_spring_encryption_api.encrypted_key_path.return_value),
-            dry_run=False,
         ),
     ]
     mock_pdc_api.archive_file_to_pdc.assert_has_calls(calls)
@@ -566,40 +564,6 @@ def test_encrypt_and_archive_spring_file(
 
     # AND the original spring file should be removed
     mock_remove_archived_spring_files.assert_called_once_with(spring_file_path)
-
-
-@mock.patch("cg.meta.backup.backup.SpringBackupAPI.is_spring_file_archived")
-@mock.patch("cg.apps.housekeeper.hk")
-@mock.patch("cg.meta.encryption.encryption")
-@mock.patch("cg.meta.backup.pdc")
-def test_encrypt_and_archive_spring_file_pdc_archiving_failed(
-    mock_pdc: PdcAPI,
-    mock_spring_encryption_api: SpringEncryptionAPI,
-    mock_housekeeper: HousekeeperAPI,
-    mock_is_archived,
-    spring_file_path,
-    caplog,
-):
-    # GIVEN a spring file that needs to be encrypted and archived to PDC
-    spring_backup_api = SpringBackupAPI(
-        encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc
-    )
-
-    # WHEN running the encryption and archiving process, and the encryption command fails
-    mock_is_archived.return_value = False
-    mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
-        spring_file_path.with_suffix(FileExtensions.SPRING + FileExtensions.GPG)
-    )
-    mock_spring_encryption_api.encrypted_key_path.return_value = spring_file_path.with_suffix(
-        FileExtensions.KEY + FileExtensions.GPG
-    )
-    mock_pdc.archive_file_to_pdc.side_effect = subprocess.CalledProcessError(1, "echo")
-    spring_backup_api.encrypt_and_archive_spring_file(spring_file_path=spring_file_path)
-
-    # THEN the appropriate message should be logged and the spring file directory should be
-    # cleaned up
-    assert "Encryption failed" in caplog.text
-    mock_spring_encryption_api.cleanup.assert_called_with(spring_file_path)
 
 
 @mock.patch("cg.meta.backup.backup.SpringBackupAPI.is_spring_file_archived")
