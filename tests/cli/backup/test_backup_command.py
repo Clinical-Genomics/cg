@@ -2,10 +2,10 @@ import logging
 from pathlib import Path
 
 from click.testing import CliRunner
+from psutil import Process
 
 from cg.cli.backup import backup_flow_cells, encrypt_flow_cells, fetch_flow_cell
 from cg.constants import EXIT_SUCCESS, FileExtensions, FlowCellStatus
-from cg.meta.backup.pdc import PdcAPI
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from tests.store_helpers import StoreHelpers
@@ -50,12 +50,12 @@ def test_backup_flow_cells_when_dsmc_is_running(
     mocker,
 ):
     """Test backing-up flow cell in dry run mode when Dsmc processing has started."""
-    caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.ERROR)
 
     # GIVEN a flow cells directory
 
     # GIVEN an ongoing Dsmc process
-    mocker.patch.object(PdcAPI, "validate_is_dsmc_running", return_value=True)
+    mocker.patch.object(Process, "name", return_value="dsmc")
 
     # WHEN backing up flow cells in dry run mode
     result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
@@ -63,8 +63,8 @@ def test_backup_flow_cells_when_dsmc_is_running(
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN communicate flow cell encryption is not completed
-    assert f"Flow cell: {flow_cell_name} encryption process is not complete" not in caplog.text
+    # THEN communicate Dsmc process is already running
+    assert "A Dsmc process is already running" in caplog.text
 
 
 def test_backup_flow_cells_when_flow_cell_already_has_backup(
@@ -80,7 +80,7 @@ def test_backup_flow_cells_when_flow_cell_already_has_backup(
 
     # GIVEN a flow cells directory
 
-    # Given a flow cell with a back-up
+    # GIVEN a flow cell with a back-up
     helpers.add_flow_cell(
         store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=True
     )

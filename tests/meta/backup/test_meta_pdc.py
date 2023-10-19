@@ -22,6 +22,8 @@ def test_validate_is_dsmc_process_running(cg_context: CGConfig, binary_path: str
     # GIVEN an instance of the PDC API
     pdc_api = cg_context.pdc_api
 
+    # GIVEN no Dsmc process is running
+
     # WHEN checking if Dsmc is running
     is_dmsc_running: bool = pdc_api.validate_is_dsmc_running()
 
@@ -39,6 +41,8 @@ def test_validate_is_flow_cell_backup_possible(
     """Tests checking if a back-up of flow-cell is possible."""
     # GIVEN an instance of the PDC API
     pdc_api = cg_context.pdc_api
+
+    # GIVEN no Dsmc process is running
 
     # GIVEN a database flow cell which is not backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
@@ -155,7 +159,7 @@ def test_backup_flow_cell(
     # GIVEN a mocked archiving call
     mocker.patch.object(PdcAPI, "archive_file_to_pdc", return_value=None)
 
-    # GIVEN a database flow cell which is backed up
+    # GIVEN a database flow cell which is not backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
         flow_cell_name=flow_cell_encryption_api.flow_cell.id,
         store=base_store,
@@ -189,7 +193,7 @@ def test_backup_flow_cell_when_unable_to_archive(
     # GIVEN an instance of the PDC API
     pdc_api = cg_context.pdc_api
 
-    # GIVEN a database flow cell which is backed up
+    # GIVEN a database flow cell which is not backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
         flow_cell_name=flow_cell_encryption_api.flow_cell.id,
         store=base_store,
