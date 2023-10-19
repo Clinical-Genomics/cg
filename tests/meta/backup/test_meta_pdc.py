@@ -1,4 +1,5 @@
 """Tests for the meta PdcAPI"""
+import logging
 from unittest import mock
 
 import pytest
@@ -139,10 +140,14 @@ def test_backup_flow_cell(
     binary_path: str,
     helpers: StoreHelpers,
     flow_cell_encryption_api: FlowCellEncryptionAPI,
+    mocker,
 ):
     """Tests back-up flow cell."""
     # GIVEN an instance of the PDC API
-    pdc_api = PdcAPI(binary_path=binary_path)
+    pdc_api = PdcAPI(binary_path=binary_path, dry_run=False)
+
+    # GIVEN a mocked archiving call
+    mocker.patch.object(PdcAPI, "archive_file_to_pdc", return_value=None)
 
     # GIVEN a database flow cell which is backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
@@ -161,7 +166,43 @@ def test_backup_flow_cell(
     )
 
     # THEN flow cell should hava a back-up
-    assert not db_flow_cell.has_backup
+    assert db_flow_cell.has_backup
+
+
+def test_backup_flow_cell_when_unable_to_archive(
+    base_store: Store,
+    binary_path: str,
+    helpers: StoreHelpers,
+    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    caplog,
+):
+    """Tests back-up flow cell when unable to archive."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN an instance of the PDC API
+    pdc_api = PdcAPI(binary_path=binary_path, dry_run=False)
+
+    # GIVEN a database flow cell which is backed up
+    db_flow_cell: Flowcell = helpers.add_flow_cell(
+        flow_cell_name=flow_cell_encryption_api.flow_cell.id,
+        store=base_store,
+    )
+
+    # WHEN backing up flow cell
+    pdc_api.backup_flow_cell(
+        files_to_archive=[
+            flow_cell_encryption_api.final_passphrase_file_path,
+            flow_cell_encryption_api.encrypted_gpg_file_path,
+        ],
+        store=base_store,
+        db_flow_cell=db_flow_cell,
+    )
+
+    # THEN log unable to archive
+    assert (
+        f"{flow_cell_encryption_api.encrypted_gpg_file_path.as_posix()} cannot be archived"
+        in caplog.text
+    )
 
 
 @mock.patch("cg.meta.backup.pdc.Process")
