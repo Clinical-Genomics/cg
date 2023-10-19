@@ -55,8 +55,7 @@ def test_backup_flow_cells_when_dcms_is_running(
     # GIVEN a flow cells directory
 
     # GIVEN an ongoing Dcms process
-    mocker.patch.object(PdcAPI, "is_dcms_running")
-    PdcAPI.is_dcms_running.return_value = True
+    mocker.patch.object(PdcAPI, "validate_is_dcms_running", return_value=True)
 
     # WHEN backing up flow cells in dry run mode
     result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)

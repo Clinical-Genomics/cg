@@ -6,7 +6,12 @@ from pathlib import Path
 import psutil
 
 from cg.constants.pdc import DSMCParameters
-from cg.exc import FlowCellAlreadyBackedUpError, FlowCellEncryptionError, PdcError
+from cg.exc import (
+    DcmsAlreadyRunningError,
+    FlowCellAlreadyBackedUpError,
+    FlowCellEncryptionError,
+    PdcError,
+)
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.store import Store
 from cg.store.models import Flowcell
@@ -24,8 +29,11 @@ class PdcAPI:
         self.process: Process = Process(binary=binary_path)
         self.dry_run: bool = dry_run
 
-    def is_dcms_running(self) -> bool:
-        """Check if a dmcs process is already running on the system."""
+    def validate_is_dcms_running(self) -> bool:
+        """Check if a dmcs process is already running on the system.
+        Raises:
+            Exception: for all non-exit exceptions.
+        """
         is_dcms_running: bool = False
         try:
             for process in psutil.process_iter():
@@ -34,7 +42,7 @@ class PdcAPI:
         except Exception as error:
             LOG.debug(f"{error}")
         if is_dcms_running:
-            LOG.info("A Dcms process is already running")
+            LOG.debug("A Dcms process is already running")
         return is_dcms_running
 
     def archive_file_to_pdc(self, file_path: str, dry_run: bool = False) -> None:
@@ -81,8 +89,8 @@ class PdcAPI:
             FlowCellAlreadyBackupError if flow cell is already backed up
             FlowCellEncryptionError if encryption is not complete
         """
-        if self.is_dcms_running():
-            exit(0)
+        if self.validate_is_dcms_running():
+            raise DcmsAlreadyRunningError("A Dcms process is already running")
         if db_flow_cell and db_flow_cell.has_backup:
             raise FlowCellAlreadyBackedUpError(
                 f"Flow cell: {db_flow_cell.name} is already backed-up"
