@@ -8,6 +8,7 @@ from typing import Optional
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
+from housekeeper.store.database import initialize_database
 from housekeeper.store.models import Archive, Bundle, File, Version
 from sqlalchemy.orm import Query
 
@@ -21,7 +22,8 @@ class HousekeeperAPI:
     """API to decouple cg code from Housekeeper"""
 
     def __init__(self, config: dict) -> None:
-        self._store = Store(config["housekeeper"]["database"], config["housekeeper"]["root"])
+        initialize_database(config["housekeeper"]["database"])
+        self._store = Store(config["housekeeper"]["root"])
         self.root_dir: str = config["housekeeper"]["root"]
 
     def __getattr__(self, name):
