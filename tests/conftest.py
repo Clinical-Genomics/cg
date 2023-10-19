@@ -2554,7 +2554,8 @@ def store_with_users(store: Store, helpers: StoreHelpers) -> Store:
     ]
 
     for email, name, is_admin in user_details:
-        store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
+        user = store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
+        store.session.add(user)
 
     store.session.commit()
 

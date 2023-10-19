@@ -474,16 +474,18 @@ class AnalysisAPI(MetaAPI):
     def ensure_flow_cells_on_disk(self, case_id: str) -> None:
         """Check if flow cells are on disk for given case. If not, request flow cells."""
         if not self._is_flow_cell_check_applicable(case_id):
-            LOG.warning(
+            LOG.info(
                 "Flow cell check is not applicable - "
-                "ensure that the case is neither down sampled nor external."
+                "the case is either down sampled or external."
             )
             return
         if not self.status_db.are_all_flow_cells_on_disk(case_id=case_id):
             self.status_db.request_flow_cells_for_case(case_id)
 
     def is_case_ready_for_analysis(self, case_id: str) -> bool:
-        if not self.status_db.are_all_flow_cells_on_disk(case_id):
+        if self._is_flow_cell_check_applicable(
+            case_id
+        ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
             LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
             return False
         if self.prepare_fastq_api.is_spring_decompression_needed(
