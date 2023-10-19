@@ -29,8 +29,9 @@ class PdcAPI:
         self.process: Process = Process(binary=binary_path)
         self.dry_run: bool = dry_run
 
-    def validate_is_dcms_running(self) -> bool:
-        """Check if a dmcs process is already running on the system.
+    @classmethod
+    def validate_is_dcms_running(cls) -> bool:
+        """Check if a Dmcs process is already running on the system.
         Raises:
             Exception: for all non-exit exceptions.
         """
@@ -46,11 +47,9 @@ class PdcAPI:
         return is_dcms_running
 
     def archive_file_to_pdc(self, file_path: str, dry_run: bool = False) -> None:
-        """Archive a file by storing it on PDC"""
-        command: list = DSMCParameters.ARCHIVE_COMMAND.copy()
-        command.append(file_path)
+        """Archive a file by storing it on PDC."""
         if not dry_run:
-            self.run_dsmc_command(command=command)
+            self.run_dsmc_command(command=DSMCParameters.ARCHIVE_COMMAND + [file_path])
 
     def query_pdc(self, search_pattern: str) -> None:
         """Query PDC based on a given search pattern."""
@@ -85,9 +84,9 @@ class PdcAPI:
     ) -> bool:
         """Check if back-up of flow cell is possible.
         Raises:
-            DcmsAlreadyRunningError if there is already a Dcms process ongoing
-            FlowCellAlreadyBackupError if flow cell is already backed up
-            FlowCellEncryptionError if encryption is not complete
+            DcmsAlreadyRunningError if there is already a Dcms process ongoing.
+            FlowCellAlreadyBackupError if flow cell is already backed up.
+            FlowCellEncryptionError if encryption is not complete.
         """
         if self.validate_is_dcms_running():
             raise DcmsAlreadyRunningError("A Dcms process is already running")
