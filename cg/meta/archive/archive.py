@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Callable, Optional, Type
 
-from housekeeper.store.models import File
+from housekeeper.store.models import Archive, File
 from pydantic import BaseModel, ConfigDict
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -193,6 +193,64 @@ class SpringArchiveAPI:
                 files_and_samples.append(FileAndSample(file=file, sample=sample))
         return files_and_samples
 
+    def update_status_for_ongoing_tasks(self) -> None:
+        """Updates any started but uncompleted tasks, should they be completed."""
+        archival_jobs: list[Archive] = self.housekeeper_api.get_ongoing_archivals()
+        archival_ids_per_location: dict[
+            ArchiveLocations, list[int]
+        ] = self.filter_job_ids_on_archive_location(jobs=archival_jobs, is_archival=True)
+        retrieval_jobs: list[Archive] = self.housekeeper_api.get_ongoing_retrievals()
+        retrieval_ids_per_location: dict[
+            ArchiveLocations, list[int]
+        ] = self.filter_job_ids_on_archive_location(jobs=retrieval_jobs, is_archival=False)
+        for archive_location in ArchiveLocations:
+            self.update_archival_jobs_for_archive_location(
+                archive_location=archive_location,
+                job_ids=archival_ids_per_location.get(archive_location),
+            )
+            self.update_retrieval_jobs_for_archive_location(
+                archive_location=archive_location,
+                job_ids=retrieval_ids_per_location.get(archive_location),
+            )
+
+    def update_ongoing_archivals(self):
+        archival_jobs: list[Archive] = self.housekeeper_api.get_ongoing_archivals()
+        archival_ids_per_location: dict[
+            ArchiveLocations, list[int]
+        ] = self.filter_job_ids_on_archive_location(jobs=archival_jobs, is_archival=True)
+        for archive_location in ArchiveLocations:
+            self.update_archival_jobs_for_archive_location(
+                archive_location=archive_location,
+                job_ids=archival_ids_per_location.get(archive_location),
+            )
+
+    def update_ongoing_retrievals(self):
+        retrieval_jobs: list[Archive] = self.housekeeper_api.get_ongoing_retrievals()
+        retrieval_ids_per_location: dict[
+            ArchiveLocations, list[int]
+        ] = self.filter_job_ids_on_archive_location(jobs=retrieval_jobs, is_archival=False)
+        for archive_location in ArchiveLocations:
+            self.update_retrieval_jobs_for_archive_location(
+                archive_location=archive_location,
+                job_ids=retrieval_ids_per_location.get(archive_location),
+            )
+
+    def update_archival_jobs_for_archive_location(
+        self, archive_location: ArchiveLocations, job_ids: list[int]
+    ):
+        for job_id in job_ids:
+            self.update_ongoing_task(
+                task_id=job_id, archive_location=archive_location, is_archival=True
+            )
+
+    def update_retrieval_jobs_for_archive_location(
+        self, archive_location: ArchiveLocations, job_ids: list[int]
+    ):
+        for job_id in job_ids:
+            self.update_ongoing_task(
+                task_id=job_id, archive_location=archive_location, is_archival=False
+            )
+
     def update_ongoing_task(
         self, task_id: int, archive_location: ArchiveLocations, is_archival: bool
     ) -> None:
@@ -208,13 +266,33 @@ class SpringArchiveAPI:
         else:
             LOG.info(f"Job with id {task_id} has not yet finished.")
 
-    def update_status_for_ongoing_tasks(self) -> None:
-        """Updates any started but uncompleted tasks, should they be completed."""
-        archival_jobs: list[int] = [
-            archive.archiving_task_id
-            for archive in self.housekeeper_api.get_ongoing_archival_tasks()
-        ]
-        retrieval_jobs: list[int] = [
-            archive.retrieval_task_id
-            for archive in self.housekeeper_api.get_ongoing_retrieval_tasks()
-        ]
+    def filter_job_ids_on_archive_location(
+        self, jobs: list[Archive], is_archival: bool
+    ) -> dict[ArchiveLocations, list[int]]:
+        """Given a list of Archive entries, return a dict with ArchiveLocations as keys, with value being a list
+        of archiving_task_ids for that ArchiveLocation."""
+        handled_job_ids: list[int] = []
+        jobs_per_location: dict[ArchiveLocations, list[int]] = {}
+        for job in jobs:
+            archive_location: ArchiveLocations = ArchiveLocations(
+                self.get_archive_location_from_file(job.file)
+            )
+            if is_archival:
+                if job.archiving_task_id in handled_job_ids:
+                    continue
+                if jobs_per_location.get(archive_location):
+                    jobs_per_location[archive_location].append(job.archiving_task_id)
+                else:
+                    jobs_per_location[archive_location] = [job.archiving_task_id]
+            else:
+                if job.retrieval_task_id in handled_job_ids:
+                    continue
+                if jobs_per_location.get(archive_location):
+                    jobs_per_location[archive_location].append(job.retrieval_task_id)
+                else:
+                    jobs_per_location[archive_location] = [job.retrieval_task_id]
+
+        return jobs_per_location
+
+    def get_archive_location_from_file(self, file: File):
+        return self.status_db.get_sample_by_internal_id(file.version.bundle.name).archive_location
