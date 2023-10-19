@@ -198,11 +198,11 @@ class SpringArchiveAPI:
         archival_jobs: list[Archive] = self.housekeeper_api.get_ongoing_archivals()
         archival_ids_per_location: dict[
             ArchiveLocations, list[int]
-        ] = self.filter_job_ids_on_archive_location(jobs=archival_jobs, is_archival=True)
+        ] = self.filter_archival_ids_on_archive_location(archival_jobs)
         retrieval_jobs: list[Archive] = self.housekeeper_api.get_ongoing_retrievals()
         retrieval_ids_per_location: dict[
             ArchiveLocations, list[int]
-        ] = self.filter_job_ids_on_archive_location(jobs=retrieval_jobs, is_archival=False)
+        ] = self.filter_retrieval_ids_on_archive_location(retrieval_jobs)
         for archive_location in ArchiveLocations:
             self.update_archival_jobs_for_archive_location(
                 archive_location=archive_location,
@@ -217,7 +217,7 @@ class SpringArchiveAPI:
         archival_jobs: list[Archive] = self.housekeeper_api.get_ongoing_archivals()
         archival_ids_per_location: dict[
             ArchiveLocations, list[int]
-        ] = self.filter_job_ids_on_archive_location(jobs=archival_jobs, is_archival=True)
+        ] = self.filter_archival_ids_on_archive_location(jobs=archival_jobs)
         for archive_location in ArchiveLocations:
             self.update_archival_jobs_for_archive_location(
                 archive_location=archive_location,
@@ -228,7 +228,7 @@ class SpringArchiveAPI:
         retrieval_jobs: list[Archive] = self.housekeeper_api.get_ongoing_retrievals()
         retrieval_ids_per_location: dict[
             ArchiveLocations, list[int]
-        ] = self.filter_job_ids_on_archive_location(jobs=retrieval_jobs, is_archival=False)
+        ] = self.filter_retrieval_ids_on_archive_location(jobs=retrieval_jobs)
         for archive_location in ArchiveLocations:
             self.update_retrieval_jobs_for_archive_location(
                 archive_location=archive_location,
@@ -266,31 +266,40 @@ class SpringArchiveAPI:
         else:
             LOG.info(f"Job with id {task_id} has not yet finished.")
 
-    def filter_job_ids_on_archive_location(
-        self, jobs: list[Archive], is_archival: bool
+    def filter_archival_ids_on_archive_location(
+        self, jobs: list[Archive]
     ) -> dict[ArchiveLocations, list[int]]:
-        """Given a list of Archive entries, return a dict with ArchiveLocations as keys, with value being a list
-        of archiving_task_ids for that ArchiveLocation."""
         handled_job_ids: list[int] = []
         jobs_per_location: dict[ArchiveLocations, list[int]] = {}
         for job in jobs:
+            if job.archiving_task_id in handled_job_ids:
+                continue
+
             archive_location: ArchiveLocations = ArchiveLocations(
                 self.get_archive_location_from_file(job.file)
             )
-            if is_archival:
-                if job.archiving_task_id in handled_job_ids:
-                    continue
-                if jobs_per_location.get(archive_location):
-                    jobs_per_location[archive_location].append(job.archiving_task_id)
-                else:
-                    jobs_per_location[archive_location] = [job.archiving_task_id]
+            if jobs_per_location.get(archive_location):
+                jobs_per_location[archive_location].append(job.archiving_task_id)
             else:
-                if job.retrieval_task_id in handled_job_ids:
-                    continue
-                if jobs_per_location.get(archive_location):
-                    jobs_per_location[archive_location].append(job.retrieval_task_id)
-                else:
-                    jobs_per_location[archive_location] = [job.retrieval_task_id]
+                jobs_per_location[archive_location] = [job.archiving_task_id]
+        return jobs_per_location
+
+    def filter_retrieval_ids_on_archive_location(
+        self, jobs: list[Archive]
+    ) -> dict[ArchiveLocations, list[int]]:
+        handled_job_ids: list[int] = []
+        jobs_per_location: dict[ArchiveLocations, list[int]] = {}
+        for job in jobs:
+            if job.retrieval_task_id in handled_job_ids:
+                continue
+
+            archive_location: ArchiveLocations = ArchiveLocations(
+                self.get_archive_location_from_file(job.file)
+            )
+            if jobs_per_location.get(archive_location):
+                jobs_per_location[archive_location].append(job.retrieval_task_id)
+            else:
+                jobs_per_location[archive_location] = [job.retrieval_task_id]
 
         return jobs_per_location
 
