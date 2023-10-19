@@ -15,6 +15,7 @@ from cg.store import Store
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
     ApplicationVersion,
     Bed,
     BedVersion,
@@ -196,6 +197,32 @@ class StoreHelpers:
         store.session.add(application)
         store.session.commit()
         return application
+
+    @staticmethod
+    def ensure_application_limitations(
+        store: Store,
+        application: Application,
+        pipeline: str = Pipeline.MIP_DNA,
+        limitations: str = "Dummy limitations",
+        **kwargs,
+    ) -> ApplicationLimitations:
+        """Ensure that application limitations exists in store."""
+        application_limitations: ApplicationLimitations = (
+            store.get_application_limitations_by_tag_and_pipeline(
+                tag=application.tag, pipeline=pipeline
+            )
+        )
+        if application_limitations:
+            return application_limitations
+        application_limitations: ApplicationLimitations = store.add_application_limitations(
+            application=application,
+            pipeline=pipeline,
+            limitations=limitations,
+            **kwargs,
+        )
+        store.session.add(application_limitations)
+        store.session.commit()
+        return application_limitations
 
     @staticmethod
     def ensure_bed_version(store: Store, bed_name: str = "dummy_bed") -> BedVersion:
