@@ -260,6 +260,43 @@ def test_get_archival_status_done(
     assert file.archive.archived_at
 
 
+def test_get_archival_status_not_done(
+    spring_archive_api: SpringArchiveAPI,
+    caplog,
+    ok_ddn_job_status_response,
+    archive_request_json,
+    header_with_test_auth_token,
+):
+    # GIVEN a file with an ongoing archival
+    file: File = spring_archive_api.housekeeper_api.files().first()
+    spring_archive_api.housekeeper_api.add_archives(files=[Path(file.path)], archive_task_id=123)
+
+    # WHEN querying the task id and not getting a "COMPLETED" response
+    with mock.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=AuthToken(
+            access="test_auth_token",
+            expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
+            refresh="test_refresh_token",
+        ),
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_ddn_job_status_response,
+    ), mock.patch.object(
+        GetJobStatusPayload,
+        "post_request",
+        return_value=GetJobStatusResponse(job_id=123, description=JobDescription.RUNNING),
+    ):
+        spring_archive_api.update_ongoing_task(
+            task_id=123, archive_location=ArchiveLocations.KAROLINSKA_BUCKET, is_archival=True
+        )
+
+    # THEN The Archive entry should not have been updated
+    assert not file.archive.archived_at
+
+
 def test_get_retrieval_status_done(
     spring_archive_api: SpringArchiveAPI,
     caplog,
@@ -300,6 +337,46 @@ def test_get_retrieval_status_done(
     assert file.archive.retrieved_at
 
 
+def test_get_retrieval_status_not_done(
+    spring_archive_api: SpringArchiveAPI,
+    caplog,
+    ok_ddn_job_status_response,
+    archive_request_json,
+    header_with_test_auth_token,
+):
+    # GIVEN a file with an ongoing archival
+    file: File = spring_archive_api.housekeeper_api.files().first()
+    spring_archive_api.housekeeper_api.add_archives(files=[Path(file.path)], archive_task_id=123)
+    spring_archive_api.housekeeper_api.set_archive_retrieval_task_id(
+        file_id=file.id, retrieval_task_id=124
+    )
+
+    # WHEN querying the task id and not getting a "COMPLETED" response
+    with mock.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=AuthToken(
+            access="test_auth_token",
+            expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
+            refresh="test_refresh_token",
+        ),
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_ddn_job_status_response,
+    ), mock.patch.object(
+        GetJobStatusPayload,
+        "post_request",
+        return_value=GetJobStatusResponse(job_id=124, description=JobDescription.RUNNING),
+    ):
+        spring_archive_api.update_ongoing_task(
+            task_id=124, archive_location=ArchiveLocations.KAROLINSKA_BUCKET, is_archival=False
+        )
+
+    # THEN The Archive entry should not have been updated
+    assert not file.archive.retrieved_at
+
+
 def test_retrieve_samples(
     spring_archive_api: SpringArchiveAPI,
     caplog,
@@ -311,9 +388,9 @@ def test_retrieve_samples(
     sample_with_spring_file: str,
 ):
     """Test retrieving all archived SPRING files tied to a sample for a Miria customer."""
+
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
     # with the DDN customer having two samples, and the non-DDN having one sample.
-
     files: list[File] = spring_archive_api.housekeeper_api.get_files(
         bundle=sample_with_spring_file, tags=[SequencingFileTag.SPRING]
     )
