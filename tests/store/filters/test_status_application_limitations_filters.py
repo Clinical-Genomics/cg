@@ -26,7 +26,7 @@ def test_filter_get_application_limitations_by_tag(
     # ASSERT that application limitations is a query
     assert isinstance(application_limitations, Query)
 
-    # THEN assert the application limitations was found
+    # THEN assert that the application limitations was found
     assert (
         application_limitations.all()
         and len(application_limitations.all()) == 1
