@@ -34,7 +34,7 @@ pandas
 paramiko
 petname
 psutil
-pydantic>2.0
+pydantic>=2.4
 python-dateutil
 pyyaml
 setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi file-.cairocffi-VERSION
