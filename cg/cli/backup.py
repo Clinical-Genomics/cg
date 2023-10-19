@@ -73,7 +73,7 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
             FlowCellEncryptionError,
             PdcError,
         ) as error:
-            logging.debug(f"{error}")
+            logging.error(f"{error}")
 
 
 @backup.command("encrypt-flow-cells")
@@ -102,7 +102,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         try:
             flow_cell_encryption_api.start_encryption()
         except (FlowCellError, FlowCellEncryptionError) as error:
-            logging.debug(f"{error}")
+            logging.error(f"{error}")
 
 
 @backup.command("fetch-flow-cell")
