@@ -76,7 +76,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_application_limitations_by_tag_and_pipeline(
         self, tag: str, pipeline: Pipeline
-    ) -> ApplicationLimitations:
+    ) -> Optional[ApplicationLimitations]:
         """Return the application limitations given the application tag and data analysis carried out."""
         filter_functions: list[ApplicationLimitationsFilter] = [
             ApplicationLimitationsFilter.FILTER_BY_TAG,

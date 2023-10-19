@@ -2,6 +2,7 @@ from pathlib import Path
 
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 
@@ -15,7 +16,7 @@ def create_mip_metrics_deliverables():
     return MIPMetricsDeliverables(**metrics_deliverables)
 
 
-class MockMipAnalysis:
+class MockMipAnalysis(MipAnalysisAPI):
     """Mock an MIP analysis object"""
 
     def panel(self, case_obj) -> [str]:
