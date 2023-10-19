@@ -270,7 +270,7 @@ class AddHandler(BaseHandler):
     ) -> Panel:
         """Build a new panel record."""
 
-        new_record: Panel = Panel(
+        new_record = Panel(
             name=name, abbrev=abbrev, current_version=version, date=date, gene_count=genes
         )
         new_record.customer = customer
