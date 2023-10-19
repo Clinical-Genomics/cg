@@ -271,7 +271,7 @@ class CGConfig(BaseModel):
     mutacc_auto_api_: MutaccAutoAPI = None
     pigz: Optional[CommonAppConfig] = None
     pdc: Optional[CommonAppConfig] = None
-    pdc_api_: PdcAPI = None
+    pdc_api_: Optional[PdcAPI]
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
     tar: Optional[CommonAppConfig] = None
