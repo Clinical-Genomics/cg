@@ -41,7 +41,7 @@ def test_backup_flow_cells(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_backup_flow_cells_when_dcms_is_running(
+def test_backup_flow_cells_when_dsmc_is_running(
     cli_runner: CliRunner,
     cg_context: CGConfig,
     caplog,
@@ -49,13 +49,13 @@ def test_backup_flow_cells_when_dcms_is_running(
     flow_cell_full_name: str,
     mocker,
 ):
-    """Test backing-up flow cell in dry run mode when Dcms processing has started."""
+    """Test backing-up flow cell in dry run mode when Dsmc processing has started."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a flow cells directory
 
-    # GIVEN an ongoing Dcms process
-    mocker.patch.object(PdcAPI, "validate_is_dcms_running", return_value=True)
+    # GIVEN an ongoing Dsmc process
+    mocker.patch.object(PdcAPI, "validate_is_dsmc_running", return_value=True)
 
     # WHEN backing up flow cells in dry run mode
     result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)

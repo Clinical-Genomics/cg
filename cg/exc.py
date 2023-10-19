@@ -66,7 +66,7 @@ class CleanFlowCellFailedError(CgError):
     """
 
 
-class DcmsAlreadyRunningError(CgError):
+class DsmcAlreadyRunningError(CgError):
     """Raised when there is already a DCms process running on the system."""
 
 

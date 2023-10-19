@@ -11,7 +11,7 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import (
-    DcmsAlreadyRunningError,
+    DsmcAlreadyRunningError,
     FlowCellAlreadyBackedUpError,
     FlowCellEncryptionError,
     FlowCellError,
@@ -68,7 +68,7 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
                 status_db=status_db,
             )
         except (
-            DcmsAlreadyRunningError,
+            DsmcAlreadyRunningError,
             FlowCellAlreadyBackedUpError,
             FlowCellEncryptionError,
             PdcError,

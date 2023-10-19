@@ -7,7 +7,7 @@ import psutil
 
 from cg.constants.pdc import DSMCParameters
 from cg.exc import (
-    DcmsAlreadyRunningError,
+    DsmcAlreadyRunningError,
     FlowCellAlreadyBackedUpError,
     FlowCellEncryptionError,
     PdcError,
@@ -30,21 +30,21 @@ class PdcAPI:
         self.dry_run: bool = dry_run
 
     @classmethod
-    def validate_is_dcms_running(cls) -> bool:
-        """Check if a Dmcs process is already running on the system.
+    def validate_is_dsmc_running(cls) -> bool:
+        """Check if a Dsmc process is already running on the system.
         Raises:
             Exception: for all non-exit exceptions.
         """
-        is_dcms_running: bool = False
+        is_dsmc_running: bool = False
         try:
             for process in psutil.process_iter():
                 if "dsmc" in process.name():
-                    is_dcms_running = True
+                    is_dsmc_running = True
         except Exception as error:
             LOG.debug(f"{error}")
-        if is_dcms_running:
-            LOG.debug("A Dcms process is already running")
-        return is_dcms_running
+        if is_dsmc_running:
+            LOG.debug("A Dsmc process is already running")
+        return is_dsmc_running
 
     def archive_file_to_pdc(self, file_path: str, dry_run: bool = False) -> None:
         """Archive a file by storing it on PDC."""
@@ -84,12 +84,12 @@ class PdcAPI:
     ) -> bool:
         """Check if back-up of flow cell is possible.
         Raises:
-            DcmsAlreadyRunningError if there is already a Dcms process ongoing.
+            DsmcAlreadyRunningError if there is already a Dsmc process ongoing.
             FlowCellAlreadyBackupError if flow cell is already backed up.
             FlowCellEncryptionError if encryption is not complete.
         """
-        if self.validate_is_dcms_running():
-            raise DcmsAlreadyRunningError("A Dcms process is already running")
+        if self.validate_is_dsmc_running():
+            raise DsmcAlreadyRunningError("A Dsmc process is already running")
         if db_flow_cell and db_flow_cell.has_backup:
             raise FlowCellAlreadyBackedUpError(
                 f"Flow cell: {db_flow_cell.name} is already backed-up"
@@ -110,10 +110,10 @@ class PdcAPI:
                 self.archive_file_to_pdc(file_path=encrypted_file.as_posix())
                 archived_file_count += 1
             except PdcError:
-                LOG.debug(f"{encrypted_file.as_posix()} cannot be archived")
+                LOG.warning(f"{encrypted_file.as_posix()} cannot be archived")
             if archived_file_count == len(files_to_archive) and not self.dry_run:
                 store.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
-                LOG.debug(f"Flow cell: {db_flow_cell.name} has been backed up")
+                LOG.info(f"Flow cell: {db_flow_cell.name} has been backed up")
 
     def start_flow_cell_backup(
         self,

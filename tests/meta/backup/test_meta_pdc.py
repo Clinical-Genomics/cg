@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from cg.exc import (
-    DcmsAlreadyRunningError,
+    DsmcAlreadyRunningError,
     FlowCellAlreadyBackedUpError,
     FlowCellEncryptionError,
 )
@@ -16,13 +16,13 @@ from cg.store.models import Flowcell
 from tests.store_helpers import StoreHelpers
 
 
-def test_validate_is_dcms_process_running(binary_path: str):
-    """Tests checking if a Dcms process is running when no Dcms process is running."""
+def test_validate_is_dsmc_process_running(binary_path: str):
+    """Tests checking if a Dsmc process is running when no Dsmc process is running."""
     # GIVEN an instance of the PDC API
     pdc_api = PdcAPI(binary_path=binary_path)
 
-    # WHEN checking if Dcms is running
-    is_dmsc_running: bool = pdc_api.validate_is_dcms_running()
+    # WHEN checking if Dsmc is running
+    is_dmsc_running: bool = pdc_api.validate_is_dsmc_running()
 
     # THEN return false
     assert not is_dmsc_running
@@ -57,19 +57,19 @@ def test_validate_is_flow_cell_backup_possible(
     assert is_backup_possible
 
 
-def test_validate_is_flow_cell_backup_when_dcms_is_already_running(
+def test_validate_is_flow_cell_backup_when_dsmc_is_already_running(
     base_store: Store,
     binary_path: str,
     helpers: StoreHelpers,
     flow_cell_encryption_api: FlowCellEncryptionAPI,
     mocker,
 ):
-    """Tests checking if a back-up of flow-cell is possible when Dcms is already running."""
+    """Tests checking if a back-up of flow-cell is possible when Dsmc is already running."""
     # GIVEN an instance of the PDC API
     pdc_api = PdcAPI(binary_path=binary_path)
 
-    # GIVEN a Dcms process is already running
-    mocker.patch.object(PdcAPI, "validate_is_dcms_running", return_value=True)
+    # GIVEN a Dsmc process is already running
+    mocker.patch.object(PdcAPI, "validate_is_dsmc_running", return_value=True)
 
     # GIVEN a database flow cell which is not backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
@@ -78,7 +78,7 @@ def test_validate_is_flow_cell_backup_when_dcms_is_already_running(
     )
 
     # WHEN checking if back-up is possible
-    with pytest.raises(DcmsAlreadyRunningError):
+    with pytest.raises(DsmcAlreadyRunningError):
         pdc_api.validate_is_flow_cell_backup_possible(
             db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
         )

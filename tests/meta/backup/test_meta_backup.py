@@ -79,7 +79,7 @@ def test_get_archived_encryption_key_path(dsmc_q_archive_output: list[str], flow
     )
 
     # WHEN getting the encryption key path
-    key_path: Path = backup_api.get_archived_encryption_key_path(dcms_output=dsmc_q_archive_output)
+    key_path: Path = backup_api.get_archived_encryption_key_path(dsmc_output=dsmc_q_archive_output)
 
     # THEN this method should return a path object
     assert isinstance(key_path, Path)
@@ -106,7 +106,7 @@ def test_get_archived_flow_cell_path(dsmc_q_archive_output: list[str], flow_cell
     )
 
     # WHEN getting the flow cell path
-    flow_cell_path: Path = backup_api.get_archived_flow_cell_path(dcms_output=dsmc_q_archive_output)
+    flow_cell_path: Path = backup_api.get_archived_flow_cell_path(dsmc_output=dsmc_q_archive_output)
 
     # THEN this method should return a path object
     assert isinstance(flow_cell_path, Path)

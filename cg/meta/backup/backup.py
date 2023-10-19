@@ -86,14 +86,14 @@ class BackupAPI:
             LOG.info(f"{flow_cell.name}: retrieving from PDC")
 
         try:
-            dcms_output: list[str] = self.query_pdc_for_flow_cell(flow_cell.name)
+            dsmc_output: list[str] = self.query_pdc_for_flow_cell(flow_cell.name)
 
         except PdcNoFilesMatchingSearchError as error:
             LOG.error(f"PDC query failed: {error}")
             raise error
 
-        archived_key: Path = self.get_archived_encryption_key_path(dcms_output=dcms_output)
-        archived_flow_cell: Path = self.get_archived_flow_cell_path(dcms_output=dcms_output)
+        archived_key: Path = self.get_archived_encryption_key_path(dsmc_output=dsmc_output)
+        archived_flow_cell: Path = self.get_archived_flow_cell_path(dsmc_output=dsmc_output)
 
         if not self.dry_run:
             return self._process_flow_cell(
@@ -279,11 +279,11 @@ class BackupAPI:
         )
 
     @classmethod
-    def get_archived_flow_cell_path(cls, dcms_output: list[str]) -> Optional[Path]:
+    def get_archived_flow_cell_path(cls, dsmc_output: list[str]) -> Optional[Path]:
         """Get the path of the archived flow cell from a PDC query."""
         flow_cell_line: str = [
             row
-            for row in dcms_output
+            for row in dsmc_output
             if FileExtensions.TAR in row
             and FileExtensions.GZIP in row
             and FileExtensions.GPG in row
@@ -295,11 +295,11 @@ class BackupAPI:
             return archived_flow_cell
 
     @classmethod
-    def get_archived_encryption_key_path(cls, dcms_output: list[str]) -> Optional[Path]:
+    def get_archived_encryption_key_path(cls, dsmc_output: list[str]) -> Optional[Path]:
         """Get the encryption key for the archived flow cell from a PDC query."""
         encryption_key_line: str = [
             row
-            for row in dcms_output
+            for row in dsmc_output
             if FileExtensions.KEY in row
             and FileExtensions.GPG in row
             and FileExtensions.GZIP not in row
