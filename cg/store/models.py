@@ -533,9 +533,15 @@ class FamilySample(Model):
     father_id = Column(ForeignKey("sample.id"))
 
     family = orm.relationship(Family, back_populates="links", cascade_backrefs=False)
-    sample = orm.relationship("Sample", foreign_keys=[sample_id], back_populates="links")
-    mother = orm.relationship("Sample", foreign_keys=[mother_id], back_populates="mother_links")
-    father = orm.relationship("Sample", foreign_keys=[father_id], back_populates="father_links")
+    sample = orm.relationship(
+        "Sample", foreign_keys=[sample_id], back_populates="links", cascade_backrefs=False
+    )
+    mother = orm.relationship(
+        "Sample", foreign_keys=[mother_id], back_populates="mother_links", cascade_backrefs=False
+    )
+    father = orm.relationship(
+        "Sample", foreign_keys=[father_id], back_populates="father_links", cascade_backrefs=False
+    )
 
     def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
         """Represent as dictionary"""
@@ -699,13 +705,22 @@ class Sample(Model, PriorityMixin):
     subject_id = Column(types.String(128))
 
     links = orm.relationship(
-        FamilySample, foreign_keys=[FamilySample.sample_id], back_populates="sample"
+        FamilySample,
+        foreign_keys=[FamilySample.sample_id],
+        back_populates="sample",
+        cascade_backrefs=False,
     )
     mother_links = orm.relationship(
-        FamilySample, foreign_keys=[FamilySample.mother_id], back_populates="mother"
+        FamilySample,
+        foreign_keys=[FamilySample.mother_id],
+        back_populates="mother",
+        cascade_backrefs=False,
     )
     father_links = orm.relationship(
-        FamilySample, foreign_keys=[FamilySample.father_id], back_populates="father"
+        FamilySample,
+        foreign_keys=[FamilySample.father_id],
+        back_populates="father",
+        cascade_backrefs=False,
     )
     flowcells = orm.relationship(
         Flowcell, secondary=flowcell_sample, back_populates="samples", cascade_backrefs=False
