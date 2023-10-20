@@ -189,6 +189,7 @@ Interface to Scout. For uploading analysis results to Scout. It's also used to a
 #### Delivery report
 
 Module to generate Delivery Reports. This module is designed to convey the results of genetic analysis to the customer. It includes information on sample characteristics, laboratory preparation, sequencing attributes, as well as data analysis performance and limitations.
+
 ~~~~
 
 ### Cli
