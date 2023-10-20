@@ -1,5 +1,9 @@
 FROM docker.io/library/python:3.11-slim-bullseye
 
+RUN addgroup -S nonroot \
+    && adduser -S nonroot -G nonroot
+USER nonroot
+
 RUN apt-get update && \
     apt-get install -y git && \
     rm -rf /var/lib/apt/lists/*
