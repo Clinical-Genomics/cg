@@ -1,7 +1,9 @@
 """Functions interacting with housekeeper in the DemuxPostProcessingAPI."""
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, Optional
+
+from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
@@ -176,3 +178,23 @@ def add_sample_sheet_path_to_housekeeper(
         LOG.error(
             f"Sample sheet for flow cell {flow_cell_name} in {flow_cell_directory} was not found, error: {e}"
         )
+
+
+def delete_sequencing_data_from_housekeeper(flow_cell: str, hk_api: HousekeeperAPI) -> None:
+    tag_combinations: list[list[str]] = [
+        [SequencingFileTag.FASTQ.value, flow_cell],
+        [SequencingFileTag.SPRING.value, flow_cell],
+        [SequencingFileTag.SPRING_METADATA.value, flow_cell],
+    ]
+    for tags in tag_combinations:
+        housekeeper_files: Iterable[File] = hk_api.files(tags=tags)
+        for housekeeper_file in housekeeper_files:
+            hk_api.delete_file(file_id=housekeeper_file.id)
+
+
+def delete_sequencing_logs_from_housekeeper(flow_cell: str, hk_api: HousekeeperAPI) -> None:
+    housekeeper_files: Iterable[File] = hk_api.files(
+        bundle=flow_cell, tags=[SequencingFileTag.DEMUX_LOG.value, flow_cell]
+    )
+    for housekeeper_file in housekeeper_files:
+        hk_api.delete_file(file_id=housekeeper_file.id)

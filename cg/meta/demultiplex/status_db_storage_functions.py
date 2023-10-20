@@ -151,3 +151,9 @@ def update_sample_read_count(sample_id: str, q30_threshold: int, store: Store) -
         sample.reads_updated_at = datetime.datetime.now()
     else:
         LOG.warning(f"Cannot find {sample_id} in status_db when adding read counts. Skipping.")
+
+
+def delete_sequencing_metrics_from_statusdb(flow_cell: str, store: Store) -> None:
+    sequencing_metrics = store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell)
+    for metric in sequencing_metrics:
+        store.session.delete(metric)

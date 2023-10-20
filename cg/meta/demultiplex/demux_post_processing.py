@@ -5,11 +5,13 @@ from typing import Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import FlowCellError, MissingFilesError
-from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.meta.demultiplex.housekeeper_storage_functions import (
+    delete_sequencing_data_from_housekeeper,
+    delete_sequencing_logs_from_housekeeper,
     store_flow_cell_data_in_housekeeper,
 )
 from cg.meta.demultiplex.status_db_storage_functions import (
+    delete_sequencing_metrics_from_statusdb,
     store_flow_cell_data_in_status_db,
     store_sequencing_metrics_in_status_db,
     update_sample_read_counts_in_status_db,
@@ -85,18 +87,7 @@ class DemuxPostProcessingAPI:
             LOG.warning(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
             return
 
-        delete_demux_api = DeleteDemuxAPI(
-            config=self.config, dry_run=self.dry_run, flow_cell_name=flow_cell_directory_name
-        )
-        if delete_demux_api.is_flow_cell_in_status_db:
-            delete_demux_api.delete_flow_cell(
-                demultiplexing_dir=False,
-                run_dir=False,
-                housekeeper=True,
-                init_files=False,
-                status_db=True,
-                sample_lane_sequencing_metrics=True,
-            )
+        self.delete_flow_cell_data(flow_cell)
 
         try:
             self.store_flow_cell_data(flow_cell)
@@ -143,3 +134,8 @@ class DemuxPostProcessingAPI:
                 LOG.debug(f"Found directory {flow_cell_dir}")
                 demultiplex_flow_cells.append(flow_cell_dir)
         return demultiplex_flow_cells
+
+    def delete_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
+        delete_sequencing_metrics_from_statusdb(parsed_flow_cell.id, self.status_db)
+        delete_sequencing_data_from_housekeeper(parsed_flow_cell.id, self.hk_api)
+        delete_sequencing_logs_from_housekeeper(parsed_flow_cell.id, self.hk_api)

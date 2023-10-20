@@ -165,14 +165,7 @@ def delete_flow_cell(
         f"Run-dir={True if status_db else run_dir}\nStatusdb={status_db}\n"
         f"\nSample-lane-sequencing-metrics={True if sample_lane_sequencing_metrics else sample_lane_sequencing_metrics}"
     ):
-        delete_demux_api.delete_flow_cell(
-            demultiplexing_dir=demultiplexing_dir,
-            housekeeper=housekeeper,
-            init_files=init_files,
-            sample_lane_sequencing_metrics=sample_lane_sequencing_metrics,
-            run_dir=run_dir,
-            status_db=status_db,
-        )
+        delete_demux_api.delete_flow_cell()
 
 
 @click.command(name="copy-completed-flow-cell")
