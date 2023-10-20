@@ -7,7 +7,4 @@ RUN apt-get update && \
 WORKDIR /app
 
 RUN git clone -b master https://github.com/Clinical-Genomics/cg.git /app
-
 RUN pip install --no-cache-dir .
-
-ENTRYPOINT ["cg"]
