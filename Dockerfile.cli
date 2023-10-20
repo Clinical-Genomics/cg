@@ -1,13 +1,8 @@
 FROM docker.io/library/python:3.11-slim-bullseye
 
-RUN addgroup --system nonroot \
-    && adduser --system nonroot --ingroup nonroot
-
 RUN apt-get update && \
     apt-get install -y git && \
     rm -rf /var/lib/apt/lists/*
-
-USER nonroot
 
 WORKDIR /app
 
