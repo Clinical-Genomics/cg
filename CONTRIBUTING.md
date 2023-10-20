@@ -185,6 +185,10 @@ Internal app for opening tickets in SupportSystems. We use this mainly to link a
 #### Scout (scoutapi)
 
 Interface to Scout. For uploading analysis results to Scout. It's also used to access the generation of gene panels files used in the analysis pipeline.
+
+#### Delivery report
+
+Module to generate Delivery Reports. This module is designed to convey the results of genetic analysis to the customer. It includes information on sample characteristics, laboratory preparation, sequencing attributes, as well as data analysis performance and limitations.
 ~~~~
 
 ### Cli
