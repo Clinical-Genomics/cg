@@ -1,5 +1,6 @@
 """This api should handle everything around demultiplexing."""
 import logging
+import shutil
 from pathlib import Path
 from typing import Optional
 
@@ -116,6 +117,9 @@ class DemultiplexingAPI:
         """Create the path to the stdout logfile."""
         return Path(flow_cell.path, f"{DemultiplexingAPI.get_run_name(flow_cell)}.stdout")
 
+    def remove_demultiplexing_output_directory(self, flow_cell: FlowCellDirectoryData) -> None:
+        shutil.rmtree(self.flow_cell_out_dir_path(flow_cell=flow_cell), ignore_errors=False)
+
     def flow_cell_out_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Create the path to where the demultiplexed result should be produced."""
         return Path(self.demultiplexed_runs_dir, flow_cell.path.name)
@@ -142,15 +146,6 @@ class DemultiplexingAPI:
         return Path(
             self.flow_cell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.DEMUX_COMPLETE
         )
-
-    def is_demultiplexing_completed(self, flow_cell: FlowCellDirectoryData) -> bool:
-        """Check the path to where the demultiplexed result should be produced."""
-        LOG.info(f"Check if demultiplexing is ready for {flow_cell.path}")
-        logfile: Path = self.get_stderr_logfile(flow_cell)
-        if not logfile.exists():
-            LOG.warning(f"Could not find logfile: {logfile}!")
-            return False
-        return self.demultiplexing_completed_path(flow_cell).exists()
 
     def is_demultiplexing_possible(self, flow_cell: FlowCellDirectoryData) -> bool:
         """Check if it is possible to start demultiplexing.
@@ -180,13 +175,6 @@ class DemultiplexingAPI:
             LOG.warning("Demultiplexing has already been started")
             demultiplexing_possible = False
 
-        if self.flow_cell_out_dir_path(flow_cell=flow_cell).exists():
-            LOG.warning("Flow cell out dir exists")
-            demultiplexing_possible = False
-
-        if self.is_demultiplexing_completed(flow_cell):
-            LOG.warning(f"Demultiplexing is already completed for flow cell {flow_cell.id}")
-            demultiplexing_possible = False
         return demultiplexing_possible
 
     def create_demultiplexing_started_file(self, demultiplexing_started_path: Path) -> None:
