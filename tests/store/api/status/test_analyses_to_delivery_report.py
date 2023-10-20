@@ -56,9 +56,10 @@ def test_outdated_analysis(analysis_store, helpers, timestamp_now, timestamp_yes
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
 
     # GIVEN a store sample case relation
-    analysis_store.relate_sample(
+    link = analysis_store.relate_sample(
         family=analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
     )
+    analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_delivery_report
     analyses = analysis_store.analyses_to_delivery_report(pipeline=pipeline).all()

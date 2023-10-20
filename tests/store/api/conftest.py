@@ -478,9 +478,10 @@ def store_with_analyses_for_cases(
             completed_at=timestamp_now,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        analysis_store.relate_sample(
+        link = analysis_store.relate_sample(
             family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
+        analysis_store.session.add(link)
 
     return analysis_store
 
@@ -517,9 +518,10 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
             pipeline=Pipeline.FLUFFY,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        analysis_store.relate_sample(
+        link = analysis_store.relate_sample(
             family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
+        analysis_store.session.add(link)
     return analysis_store
 
 
@@ -556,9 +558,10 @@ def store_with_analyses_for_cases_not_uploaded_microsalt(
             pipeline=Pipeline.MICROSALT,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        analysis_store.relate_sample(
+        link = analysis_store.relate_sample(
             family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
+        analysis_store.session.add(link)
     return analysis_store
 
 
@@ -596,8 +599,9 @@ def store_with_analyses_for_cases_to_deliver(
             pipeline=Pipeline.MIP_DNA,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=None)
-        analysis_store.relate_sample(
+        link = analysis_store.relate_sample(
             family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
+        analysis_store.session.add(link)
 
     return analysis_store

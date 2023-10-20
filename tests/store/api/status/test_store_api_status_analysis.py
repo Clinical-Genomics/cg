@@ -301,8 +301,9 @@ def test_one_of_two_sequenced_samples(
     not_sequenced_sample: Sample = helpers.add_sample(base_store, reads_updated_at=None)
 
     # GIVEN a database with a case with one of one sequenced samples and no analysis
-    base_store.relate_sample(test_case, sequenced_sample, PhenotypeStatus.UNKNOWN)
-    base_store.relate_sample(test_case, not_sequenced_sample, PhenotypeStatus.UNKNOWN)
+    link_1 = base_store.relate_sample(test_case, sequenced_sample, PhenotypeStatus.UNKNOWN)
+    link_2 = base_store.relate_sample(test_case, not_sequenced_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add_all([link_1, link_2])
 
     # WHEN getting cases to analyse
     cases: list[Family] = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA, threshold=True)

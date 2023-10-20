@@ -18,7 +18,8 @@ def test_analysis_included(
         cleaned_at=None,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
-    analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
+    link = analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
+    analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_clean
     analyses_to_clean = analysis_store.get_analyses_to_clean(before=timestamp_now)
