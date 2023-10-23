@@ -158,6 +158,7 @@ RNAFUSION_ANALYSIS_CASE_TAGS = [
     {"qc-metrics"},
     {"multiqc-json"},
     {"delivery-report"},
+    {"fusion-vcf"},
 ]
 
 RNAFUSION_ANALYSIS_SAMPLE_TAGS = []
