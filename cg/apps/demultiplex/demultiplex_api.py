@@ -118,7 +118,8 @@ class DemultiplexingAPI:
         return Path(flow_cell.path, f"{DemultiplexingAPI.get_run_name(flow_cell)}.stdout")
 
     def remove_demultiplexing_output_directory(self, flow_cell: FlowCellDirectoryData) -> None:
-        shutil.rmtree(self.flow_cell_out_dir_path(flow_cell=flow_cell), ignore_errors=False)
+        if not self.dry_run and self.flow_cell_out_dir_path(flow_cell=flow_cell).exists():
+            shutil.rmtree(self.flow_cell_out_dir_path(flow_cell=flow_cell), ignore_errors=False)
 
     def flow_cell_out_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Create the path to where the demultiplexed result should be produced."""
