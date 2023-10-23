@@ -2,12 +2,119 @@ import logging
 from pathlib import Path
 
 from click.testing import CliRunner
+from psutil import Process
 
-from cg.cli.backup import encrypt_flow_cells, fetch_flow_cell
+from cg.cli.backup import backup_flow_cells, encrypt_flow_cells, fetch_flow_cell
 from cg.constants import EXIT_SUCCESS, FileExtensions, FlowCellStatus
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from tests.store_helpers import StoreHelpers
+
+
+def test_backup_flow_cells(
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    caplog,
+    flow_cell_name: str,
+    flow_cell_full_name: str,
+    helpers: StoreHelpers,
+):
+    """Test backing up flow cell in dry run mode."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a flow cells directory
+
+    # Given a flow cell with no back-up
+    helpers.add_flow_cell(
+        store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=False
+    )
+
+    # GIVEN an encrypted flow cell
+    flow_cells_dir = Path(cg_context.backup.encryption_directories.current, flow_cell_full_name)
+    flow_cells_dir.mkdir(parents=True, exist_ok=True)
+    Path(flow_cells_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()
+
+    # WHEN backing up flow cells in dry run mode
+    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+
+    # THEN exits without any errors
+    assert result.exit_code == EXIT_SUCCESS
+
+
+def test_backup_flow_cells_when_dsmc_is_running(
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    caplog,
+    flow_cell_name: str,
+    flow_cell_full_name: str,
+    mocker,
+):
+    """Test backing-up flow cell in dry run mode when Dsmc processing has started."""
+    caplog.set_level(logging.ERROR)
+
+    # GIVEN a flow cells directory
+
+    # GIVEN an ongoing Dsmc process
+    mocker.patch.object(Process, "name", return_value="dsmc")
+
+    # WHEN backing up flow cells in dry run mode
+    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+
+    # THEN exits without any errors
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN communicate Dsmc process is already running
+    assert "A Dsmc process is already running" in caplog.text
+
+
+def test_backup_flow_cells_when_flow_cell_already_has_backup(
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    caplog,
+    flow_cell_name: str,
+    flow_cell_full_name: str,
+    helpers: StoreHelpers,
+):
+    """Test backing-up flow cell in dry run mode when already backed-up."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a flow cells directory
+
+    # GIVEN a flow cell with a back-up
+    helpers.add_flow_cell(
+        store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=True
+    )
+
+    # WHEN backing up flow cells in dry run mode
+    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+
+    # THEN exits without any errors
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN communicate flow cell has already benn backed upped
+    assert f"Flow cell: {flow_cell_name} is already backed-up" in caplog.text
+
+
+def test_backup_flow_cells_when_encryption_is_not_completed(
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    caplog,
+    flow_cell_name: str,
+    flow_cell_full_name: str,
+):
+    """Test backing-up flow cell in dry run mode when encryption is not complete."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a flow cells directory
+
+    # WHEN backing up flow cells in dry run mode
+    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+
+    # THEN exits without any errors
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN communicate flow cell encryption is not completed
+    assert f"Flow cell: {flow_cell_name} encryption process is not complete" in caplog.text
 
 
 def test_encrypt_flow_cells(
@@ -130,7 +237,7 @@ def test_encrypt_flow_cell_when_encryption_already_completed(
     mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
     FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
-    # GIVEN a pending flag file
+    # GIVEN a complete flag file
     flow_cells_dir = Path(cg_context.backup.encryption_directories.current, flow_cell_full_name)
     flow_cells_dir.mkdir(parents=True, exist_ok=True)
     Path(flow_cells_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()

@@ -66,6 +66,10 @@ class CleanFlowCellFailedError(CgError):
     """
 
 
+class DsmcAlreadyRunningError(CgError):
+    """Raised when there is already a DCms process running on the system."""
+
+
 class DecompressionNeededError(CgError):
     """Raised when decompression still needed to start analysis."""
 
@@ -90,6 +94,10 @@ class FlowCellsNeededError(CgError):
 
 class FlowCellEncryptionError(CgError):
     """Raised when there is a problem with encrypting a flow cell."""
+
+
+class FlowCellAlreadyBackedUpError(CgError):
+    """Raised when a flow cell is already backed-up."""
 
 
 class HousekeeperFileMissingError(CgError):
@@ -188,7 +196,11 @@ class LoqusdbDuplicateRecordError(LoqusdbError):
     """Exception related to duplicate records in Loqusdb."""
 
 
-class PdcNoFilesMatchingSearchError(CgError):
+class PdcError(CgError):
+    """Exception raised when PDC API interaction errors."""
+
+
+class PdcNoFilesMatchingSearchError(PdcError):
     """Exception raised when PDC API returns no files matching the search criteria."""
 
 
