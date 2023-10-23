@@ -1,7 +1,7 @@
 FROM docker.io/library/python:3.11-slim-bullseye
 
-RUN addgroup -S nonroot \
-    && adduser -S nonroot -G nonroot
+RUN addgroup --system nonroot \
+    && adduser -S nonroot --group nonroot
 
 USER nonroot
 
