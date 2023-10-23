@@ -199,7 +199,7 @@ class StoreHelpers:
         return application
 
     @staticmethod
-    def ensure_application_limitations(
+    def ensure_application_limitation(
         store: Store,
         application: Application,
         pipeline: str = Pipeline.MIP_DNA,
@@ -207,22 +207,22 @@ class StoreHelpers:
         **kwargs,
     ) -> ApplicationLimitations:
         """Ensure that application limitations exists in store."""
-        application_limitations: ApplicationLimitations = (
-            store.get_application_limitations_by_tag_and_pipeline(
+        application_limitation: ApplicationLimitations = (
+            store.get_application_limitation_by_tag_and_pipeline(
                 tag=application.tag, pipeline=pipeline
             )
         )
-        if application_limitations:
-            return application_limitations
-        application_limitations: ApplicationLimitations = store.add_application_limitations(
+        if application_limitation:
+            return application_limitation
+        application_limitation: ApplicationLimitations = store.add_application_limitation(
             application=application,
             pipeline=pipeline,
             limitations=limitations,
             **kwargs,
         )
-        store.session.add(application_limitations)
+        store.session.add(application_limitation)
         store.session.commit()
-        return application_limitations
+        return application_limitation
 
     @staticmethod
     def ensure_bed_version(store: Store, bed_name: str = "dummy_bed") -> BedVersion:

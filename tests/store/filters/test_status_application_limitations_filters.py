@@ -9,7 +9,7 @@ from cg.store.filters.status_application_limitations_filters import (
 from tests.store.conftest import StoreConstants
 
 
-def test_filter_get_application_limitations_by_tag(
+def test_filter_application_limitations_by_tag(
     store_with_application_limitations: Store,
     tag=StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value,
 ) -> None:
@@ -34,7 +34,7 @@ def test_filter_get_application_limitations_by_tag(
     )
 
 
-def test_filter_get_application_limitations_by_pipeline(
+def test_filter_application_limitations_by_pipeline(
     store_with_application_limitations: Store,
     pipeline=Pipeline.BALSAMIC,
 ) -> None:

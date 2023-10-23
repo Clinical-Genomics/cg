@@ -8,7 +8,7 @@ from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 
 
 def create_mip_metrics_deliverables():
-    """Get an mip_metrics_deliverables object"""
+    """Get an mip_metrics_deliverables object."""
     metrics_deliverables: dict = ReadFile.get_content_from_file(
         file_format=FileFormat.YAML,
         file_path=Path("tests", "fixtures", "apps", "mip", "case_metrics_deliverables.yaml"),
@@ -17,15 +17,15 @@ def create_mip_metrics_deliverables():
 
 
 class MockMipAnalysis(MipAnalysisAPI):
-    """Mock an MIP analysis object"""
+    """Mock MIP analysis object."""
 
     def panel(self, case_obj) -> [str]:
-        """Create the aggregated panel file"""
+        """Create the aggregated panel file."""
         return [""]
 
     @staticmethod
     def get_latest_metadata(family_id=None):
-        """Mock get_latest_metadata"""
+        """Mock get_latest_metadata."""
         # Returns: dict: parsed data
         # Define output dict
         metrics: MIPMetricsDeliverables = create_mip_metrics_deliverables()
@@ -41,6 +41,6 @@ class MockMipAnalysis(MipAnalysisAPI):
 
     @staticmethod
     def convert_panels(customer_id, panels):
-        """Mock convert_panels"""
+        """Mock convert_panels."""
         _ = customer_id, panels
         return ""

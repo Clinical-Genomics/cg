@@ -391,22 +391,22 @@ def test_get_application_limitations_by_tag_and_pipeline(
     tag: str = StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value,
     pipeline: Pipeline = Pipeline.MIP_DNA,
 ) -> ApplicationLimitations:
-    """Test get application limitations by application tag and data analysis."""
+    """Test get application limitations by application tag and pipeline."""
 
     # GIVEN a store with some application limitations
 
     # WHEN filtering by a given application tag and pipeline
-    application_limitations: ApplicationLimitations = (
-        store_with_application_limitations.get_application_limitations_by_tag_and_pipeline(
+    application_limitation: ApplicationLimitations = (
+        store_with_application_limitations.get_application_limitation_by_tag_and_pipeline(
             tag=tag, pipeline=pipeline
         )
     )
 
     # THEN assert that the application limitations was found
     assert (
-        application_limitations
-        and application_limitations.application.tag == tag
-        and application_limitations.pipeline == pipeline
+        application_limitation
+        and application_limitation.application.tag == tag
+        and application_limitation.pipeline == pipeline
     )
 
 

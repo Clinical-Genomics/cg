@@ -123,7 +123,7 @@ class AddHandler(BaseHandler):
         return new_record
 
     @staticmethod
-    def add_application_limitations(
+    def add_application_limitation(
         application: Application,
         pipeline: str,
         limitations: str,

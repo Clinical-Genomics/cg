@@ -309,27 +309,21 @@ def store_with_application_limitations(
     store_with_an_application_with_and_without_attributes: Store, helpers: StoreHelpers
 ) -> Store:
     """Return a store with different application limitations."""
-    helpers.ensure_application_limitations(
+    helpers.ensure_application_limitation(
         store=store_with_an_application_with_and_without_attributes,
         application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
             StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value
         ),
         pipeline=Pipeline.MIP_DNA,
     )
-    helpers.ensure_application_limitations(
-        store=store_with_an_application_with_and_without_attributes,
-        application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
-            StoreConstants.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value
-        ),
-        pipeline=Pipeline.BALSAMIC,
-    )
-    helpers.ensure_application_limitations(
-        store=store_with_an_application_with_and_without_attributes,
-        application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
-            StoreConstants.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value
-        ),
-        pipeline=Pipeline.MIP_DNA,
-    )
+    for pipeline in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]:
+        helpers.ensure_application_limitation(
+            store=store_with_an_application_with_and_without_attributes,
+            application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
+                StoreConstants.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value
+            ),
+            pipeline=pipeline,
+        )
     return store_with_an_application_with_and_without_attributes
 
 

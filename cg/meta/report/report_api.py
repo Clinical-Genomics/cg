@@ -262,14 +262,14 @@ class ReportAPI(MetaAPI):
             LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
         return lims_sample
 
-    def get_pipeline_limitations(self, application_tag: str) -> Optional[str]:
-        """Return pipelien specific limitations given an application tag."""
-        application_limitations: ApplicationLimitations = (
-            self.status_db.get_application_limitations_by_tag_and_pipeline(
+    def get_pipeline_accreditation_limitation(self, application_tag: str) -> str | None:
+        """Return pipeline specific limitations given an application tag."""
+        application_limitation: ApplicationLimitations = (
+            self.status_db.get_application_limitation_by_tag_and_pipeline(
                 tag=application_tag, pipeline=self.analysis_api.pipeline
             )
         )
-        return application_limitations.limitations if application_limitations else None
+        return application_limitation.limitations if application_limitation else None
 
     def get_sample_application_data(self, lims_sample: dict) -> ApplicationModel:
         """Retrieves the analysis application attributes."""
@@ -283,7 +283,7 @@ class ReportAPI(MetaAPI):
                 prep_category=application.prep_category,
                 description=application.description,
                 limitations=application.limitations,
-                pipeline_limitations=self.get_pipeline_limitations(application.tag),
+                pipeline_limitations=self.get_pipeline_accreditation_limitation(application.tag),
                 accredited=application.is_accredited,
                 external=application.is_external,
             )
