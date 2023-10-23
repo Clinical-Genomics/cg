@@ -53,6 +53,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ./
-          file: ./Dockerfile.cli
+          file: ./Dockerfile-cli
           push: true
           tags: ${{ steps.prepare_docker_tags.outputs.tags }}
