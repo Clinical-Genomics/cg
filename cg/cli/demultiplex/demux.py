@@ -59,6 +59,7 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
             continue
 
         if not dry_run:
+            demultiplex_api.remove_demultiplexing_output_directory(flow_cell)
             slurm_job_id: int = demultiplex_api.start_demultiplexing(flow_cell=flow_cell)
             tb_api: TrailblazerAPI = context.trailblazer_api
             demultiplex_api.add_to_trailblazer(
