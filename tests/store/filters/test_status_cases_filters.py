@@ -149,7 +149,8 @@ def test_filter_cases_with_pipeline_when_correct_pipline(
     test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
@@ -202,8 +203,9 @@ def test_filter_cases_with_loqusdb_supported_pipeline(
     test_fluffy_case.customer.loqus_upload = True
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_mip_case, test_sample, PhenotypeStatus.UNKNOWN)
-    base_store.relate_sample(test_fluffy_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link_1 = base_store.relate_sample(test_mip_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link_2 = base_store.relate_sample(test_fluffy_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add_all([link_1, link_2])
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
@@ -228,7 +230,8 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method(
 
     # GIVEN a MIP-DNA associated test case
     test_case_wes: Family = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
-    base_store.relate_sample(test_case_wes, test_sample_wes, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case_wes, test_sample_wes, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
@@ -445,8 +448,9 @@ def test_filter_report_supported_data_delivery_cases(
     test_invalid_case = helpers.add_case(base_store, name="test", data_delivery=DataDelivery.FASTQ)
 
     # GIVEN a database with the test cases
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
-    base_store.relate_sample(test_invalid_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link_1 = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link_2 = base_store.relate_sample(test_invalid_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add_all([link_1, link_2])
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
