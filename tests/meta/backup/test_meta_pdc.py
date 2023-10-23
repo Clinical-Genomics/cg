@@ -33,12 +33,15 @@ def test_validate_is_dsmc_process_running(cg_context: CGConfig, binary_path: str
 
 def test_validate_is_flow_cell_backup_possible(
     base_store: Store,
+    caplog,
     cg_context: CGConfig,
     binary_path: str,
     helpers: StoreHelpers,
     flow_cell_encryption_api: FlowCellEncryptionAPI,
 ):
     """Tests checking if a back-up of flow-cell is possible."""
+    caplog.set_level(logging.DEBUG)
+
     # GIVEN an instance of the PDC API
     pdc_api = cg_context.pdc_api
 
@@ -55,12 +58,12 @@ def test_validate_is_flow_cell_backup_possible(
     flow_cell_encryption_api.complete_file_path.touch()
 
     # WHEN checking if back-up is possible
-    is_backup_possible: bool = pdc_api.validate_is_flow_cell_backup_possible(
+    pdc_api.validate_is_flow_cell_backup_possible(
         db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
     )
 
     # THEN return true
-    assert is_backup_possible
+    assert "Flow cell can be backed up" in caplog.text
 
 
 def test_validate_is_flow_cell_backup_when_dsmc_is_already_running(

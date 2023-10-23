@@ -98,7 +98,7 @@ class PdcAPI:
             raise FlowCellEncryptionError(
                 f"Flow cell: {flow_cell_encryption_api.flow_cell.id} encryption process is not complete"
             )
-        return True
+        LOG.debug("Flow cell can be backed up")
 
     def backup_flow_cell(
         self, files_to_archive: list[Path], store: Store, db_flow_cell: Flowcell
