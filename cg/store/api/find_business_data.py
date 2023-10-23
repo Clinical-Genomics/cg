@@ -10,33 +10,23 @@ from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError, CgError
 from cg.store.api.base import BaseHandler
-from cg.store.filters.status_analysis_filters import (
-    AnalysisFilter,
-    apply_analysis_filter,
+from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
+from cg.store.filters.status_application_limitations_filters import (
+    ApplicationLimitationsFilter,
+    apply_application_limitations_filter,
 )
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_case_sample_filters import (
-    CaseSampleFilter,
-    apply_case_sample_filter,
-)
-from cg.store.filters.status_customer_filters import (
-    CustomerFilter,
-    apply_customer_filter,
-)
-from cg.store.filters.status_flow_cell_filters import (
-    FlowCellFilter,
-    apply_flow_cell_filter,
-)
+from cg.store.filters.status_case_sample_filters import CaseSampleFilter, apply_case_sample_filter
+from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
+from cg.store.filters.status_flow_cell_filters import FlowCellFilter, apply_flow_cell_filter
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
-from cg.store.filters.status_metrics_filters import (
-    SequencingMetricsFilter,
-    apply_metrics_filter,
-)
+from cg.store.filters.status_metrics_filters import SequencingMetricsFilter, apply_metrics_filter
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
     Customer,
     Family,
     FamilySample,
@@ -51,7 +41,7 @@ LOG = logging.getLogger(__name__)
 
 
 class FindBusinessDataHandler(BaseHandler):
-    """Contains methods to find business data model instances"""
+    """Contains methods to find business data model instances."""
 
     def __init__(self, session: Session):
         super().__init__(session=session)
@@ -64,7 +54,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).first()
 
     def has_active_cases_for_sample(self, internal_id: str) -> bool:
-        """Check if there are any active cases for a sample"""
+        """Check if there are any active cases for a sample."""
         sample = self.get_sample_by_internal_id(internal_id=internal_id)
         active_actions = ["analyze", "running"]
 
@@ -83,6 +73,21 @@ class FindBusinessDataHandler(BaseHandler):
             .links[ListIndexes.FIRST.value]
             .sample.application_version.application
         )
+
+    def get_application_limitation_by_tag_and_pipeline(
+        self, tag: str, pipeline: Pipeline
+    ) -> ApplicationLimitations | None:
+        """Return the application limitations given the application tag and pipeline."""
+        filter_functions: list[ApplicationLimitationsFilter] = [
+            ApplicationLimitationsFilter.FILTER_BY_TAG,
+            ApplicationLimitationsFilter.FILTER_BY_PIPELINE,
+        ]
+        return apply_application_limitations_filter(
+            application_limitations=self._get_join_application_limitations_query(),
+            filter_functions=filter_functions,
+            tag=tag,
+            pipeline=pipeline,
+        ).first()
 
     def get_latest_analysis_to_upload_for_pipeline(self, pipeline: str = None) -> list[Analysis]:
         """Return latest not uploaded analysis for each case given a pipeline."""
@@ -244,7 +249,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
 
     def get_customer_id_from_ticket(self, ticket: str) -> str:
-        """Returns the customer related to given ticket"""
+        """Returns the customer related to given ticket."""
         cases: list[Family] = self.get_cases_by_ticket_id(ticket_id=ticket)
         if not cases:
             raise ValueError(f"No case found for ticket {ticket}")
@@ -259,7 +264,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
 
     def get_latest_ticket_from_case(self, case_id: str) -> str:
-        """Returns the ticket from the most recent sample in a case"""
+        """Returns the ticket from the most recent sample in a case."""
         return self.get_case_by_internal_id(internal_id=case_id).latest_ticket
 
     def get_latest_flow_cell_on_case(self, family_id: str) -> Flowcell:

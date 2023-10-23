@@ -15,10 +15,7 @@ from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError
 from cg.io.controller import WriteStream
 from cg.meta.meta import MetaAPI
-from cg.meta.report.field_validators import (
-    get_empty_report_data,
-    get_missing_report_data,
-)
+from cg.meta.report.field_validators import get_empty_report_data, get_missing_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
@@ -30,13 +27,15 @@ from cg.models.report.report import (
     ReportModel,
     ScoutReportFiles,
 )
-from cg.models.report.sample import (
-    ApplicationModel,
-    MethodsModel,
-    SampleModel,
-    TimestampModel,
+from cg.models.report.sample import ApplicationModel, MethodsModel, SampleModel, TimestampModel
+from cg.store.models import (
+    Analysis,
+    Application,
+    ApplicationLimitations,
+    Family,
+    FamilySample,
+    Sample,
 )
-from cg.store.models import Analysis, Application, Family, FamilySample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -263,6 +262,15 @@ class ReportAPI(MetaAPI):
             LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
         return lims_sample
 
+    def get_pipeline_accreditation_limitation(self, application_tag: str) -> str | None:
+        """Return pipeline specific limitations given an application tag."""
+        application_limitation: ApplicationLimitations = (
+            self.status_db.get_application_limitation_by_tag_and_pipeline(
+                tag=application_tag, pipeline=self.analysis_api.pipeline
+            )
+        )
+        return application_limitation.limitations if application_limitation else None
+
     def get_sample_application_data(self, lims_sample: dict) -> ApplicationModel:
         """Retrieves the analysis application attributes."""
         application: Application = self.status_db.get_application_by_tag(
@@ -275,6 +283,7 @@ class ReportAPI(MetaAPI):
                 prep_category=application.prep_category,
                 description=application.description,
                 limitations=application.limitations,
+                pipeline_limitations=self.get_pipeline_accreditation_limitation(application.tag),
                 accredited=application.is_accredited,
                 external=application.is_external,
             )

@@ -38,6 +38,7 @@ class ApplicationModel(BaseModel):
     prep_category: Annotated[str, BeforeValidator(get_prep_category_as_string)] = NA_FIELD
     description: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     limitations: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    pipeline_limitations: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     accredited: Optional[bool] = None
     external: Optional[bool] = None
 
