@@ -1,6 +1,6 @@
 # database
 alembic
-SQLAlchemy~=1.4.0
+SQLAlchemy
 pymysql
 
 # cli
