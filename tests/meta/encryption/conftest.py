@@ -2,32 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.encryption import CipherAlgorithm, EncryptionUserID
-from cg.meta.encryption.encryption import FlowCellEncryptionAPI
-from cg.meta.tar.tar import TarAPI
-from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-
-
-@pytest.fixture
-def flow_cell_encryption_api(
-    cg_context: CGConfig, flow_cell_full_name: str
-) -> FlowCellEncryptionAPI:
-    flow_cell_encryption_api = FlowCellEncryptionAPI(
-        binary_path=cg_context.encryption.binary_path,
-        encryption_dir=Path(cg_context.backup.encryption_directories.current),
-        dry_run=True,
-        flow_cell=FlowCellDirectoryData(
-            flow_cell_path=Path(cg_context.flow_cells_dir, flow_cell_full_name)
-        ),
-        pigz_binary_path=cg_context.pigz.binary_path,
-        slurm_api=SlurmAPI(),
-        sbatch_parameter=cg_context.backup.slurm_flow_cell_encryption.dict(),
-        tar_api=TarAPI(binary_path=cg_context.tar.binary_path, dry_run=True),
-    )
-    flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=True)
-    return flow_cell_encryption_api
 
 
 @pytest.fixture
