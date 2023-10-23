@@ -9,8 +9,8 @@ RUN apt-get update \
     && apt-get clean
 
 WORKDIR /app
+COPY . /app/
 
-RUN git clone -b master https://github.com/Clinical-Genomics/cg.git /app
-RUN pip install --no-cache-dir .
+RUN pip install .
 
 USER nonroot
