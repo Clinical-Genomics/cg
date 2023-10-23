@@ -23,21 +23,24 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.api import LimsAPI
+from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, Pipeline, SequencingFileTag
-from cg.constants.constants import CaseActions, FileFormat, FlowCellStatus, Strandedness
+from cg.constants.constants import CaseActions, FileFormat, Strandedness
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
-from cg.constants.sequencing import Sequencers, SequencingPlatform
+from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Gender
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import write_yaml
+from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
+from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, EncryptionDirectories
 from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
@@ -46,6 +49,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
+from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Customer, Family, Organism, Sample
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
@@ -1764,10 +1768,11 @@ def wgs_application_tag() -> str:
 @pytest.fixture(name="store")
 def store() -> Store:
     """Return a CG store."""
-    _store = Store(uri="sqlite:///")
-    _store.create_all()
+    initialize_database("sqlite:///")
+    _store = Store()
+    create_all_tables()
     yield _store
-    _store.drop_all()
+    drop_all_tables()
 
 
 @pytest.fixture(name="apptag_rna")
@@ -2151,6 +2156,14 @@ def encryption_dir(tmp_flow_cells_directory: Path) -> Path:
     return Path(tmp_flow_cells_directory, "encrypt")
 
 
+@pytest.fixture
+def encryption_directories(encryption_dir: Path) -> EncryptionDirectories:
+    """Returns different encryption directories."""
+    return EncryptionDirectories(
+        current=f"/{encryption_dir.as_posix()}/", nas="/ENCRYPT/", pre_nas="/OLD_ENCRYPT/"
+    )
+
+
 @pytest.fixture(name="cg_uri")
 def cg_uri() -> str:
     """Return a cg URI."""
@@ -2184,7 +2197,7 @@ def context_config(
     taxprofiler_dir: Path,
     flow_cells_dir: Path,
     demultiplexed_runs: Path,
-    encryption_dir: Path,
+    encryption_directories: EncryptionDirectories,
 ) -> dict:
     """Return a context config."""
     return {
@@ -2201,7 +2214,7 @@ def context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encrypt_dir": encryption_dir.as_posix(),
+            "encryption_directories": encryption_directories.dict(),
             "slurm_flow_cell_encryption": {
                 "account": "development",
                 "hours": 1,
@@ -2544,7 +2557,8 @@ def store_with_users(store: Store, helpers: StoreHelpers) -> Store:
     ]
 
     for email, name, is_admin in user_details:
-        store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
+        user = store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
+        store.session.add(user)
 
     store.session.commit()
 
@@ -3222,3 +3236,23 @@ def novaseqx_flow_cell_analysis_incomplete(
 def demultiplex_not_complete_novaseqx_flow_cell(tmp_file: Path) -> Path:
     """Return the path to a NovaseqX flow cell for which demultiplexing is not complete."""
     return tmp_file
+
+
+@pytest.fixture
+def flow_cell_encryption_api(
+    cg_context: CGConfig, flow_cell_full_name: str
+) -> FlowCellEncryptionAPI:
+    flow_cell_encryption_api = FlowCellEncryptionAPI(
+        binary_path=cg_context.encryption.binary_path,
+        encryption_dir=Path(cg_context.backup.encryption_directories.current),
+        dry_run=True,
+        flow_cell=FlowCellDirectoryData(
+            flow_cell_path=Path(cg_context.flow_cells_dir, flow_cell_full_name)
+        ),
+        pigz_binary_path=cg_context.pigz.binary_path,
+        slurm_api=SlurmAPI(),
+        sbatch_parameter=cg_context.backup.slurm_flow_cell_encryption.dict(),
+        tar_api=TarAPI(binary_path=cg_context.tar.binary_path, dry_run=True),
+    )
+    flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=True)
+    return flow_cell_encryption_api
