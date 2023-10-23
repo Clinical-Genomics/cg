@@ -3,8 +3,6 @@ FROM docker.io/library/python:3.11-slim-bullseye
 RUN addgroup --system nonroot \
     && adduser --system --ingroup nonroot nonroot
 
-USER nonroot
-
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/* \
@@ -14,3 +12,5 @@ WORKDIR /app
 
 RUN git clone -b master https://github.com/Clinical-Genomics/cg.git /app
 RUN pip install --no-cache-dir .
+
+USER nonroot
