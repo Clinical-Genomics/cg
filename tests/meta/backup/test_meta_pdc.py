@@ -62,7 +62,7 @@ def test_validate_is_flow_cell_backup_possible(
         db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
     )
 
-    # THEN return true
+    # THEN communicate that it passed
     assert "Flow cell can be backed up" in caplog.text
 
 
