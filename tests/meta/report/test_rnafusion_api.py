@@ -33,4 +33,4 @@ def test_get_sample_metadata(
     )
 
     # THEN the sample metadata should be correctly retrieved and match the expected validated metrics
-    assert sample_metadata.dict() == rnafusion_validated_metrics
+    assert sample_metadata.model_dump() == rnafusion_validated_metrics
