@@ -7,12 +7,13 @@ import pytest
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus
-from cg.constants.constants import CaseActions
+from cg.constants.constants import CaseActions, Pipeline
 from cg.constants.indexes import ListIndexes
 from cg.exc import CgError
 from cg.store import Store
 from cg.store.models import (
     Application,
+    ApplicationLimitations,
     ApplicationVersion,
     Customer,
     Family,
@@ -23,6 +24,7 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
 )
+from tests.store.conftest import StoreConstants
 from tests.store_helpers import StoreHelpers
 
 
@@ -382,6 +384,30 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
 
     # THEN the fetched application should be equal to the application version application
     assert application_version.application == application
+
+
+def test_get_application_limitations_by_tag_and_pipeline(
+    store_with_application_limitations: Store,
+    tag: str = StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value,
+    pipeline: Pipeline = Pipeline.MIP_DNA,
+) -> ApplicationLimitations:
+    """Test get application limitations by application tag and pipeline."""
+
+    # GIVEN a store with some application limitations
+
+    # WHEN filtering by a given application tag and pipeline
+    application_limitation: ApplicationLimitations = (
+        store_with_application_limitations.get_application_limitation_by_tag_and_pipeline(
+            tag=tag, pipeline=pipeline
+        )
+    )
+
+    # THEN assert that the application limitations was found
+    assert (
+        application_limitation
+        and application_limitation.application.tag == tag
+        and application_limitation.pipeline == pipeline
+    )
 
 
 def test_get_case_samples_by_case_id(
