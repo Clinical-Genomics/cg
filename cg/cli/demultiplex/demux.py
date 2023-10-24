@@ -14,7 +14,11 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
-from cg.meta.demultiplex.utils import is_syncing_complete
+from cg.meta.demultiplex.utils import (
+    create_manifest_file,
+    is_syncing_complete,
+    needs_manifest_file,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
@@ -220,3 +224,16 @@ def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
                 source_flow_cell.name,
                 DemultiplexingDirsAndFiles.COPY_COMPLETE,
             ).touch()
+
+
+@click.command(name="create-manifest-files")
+@click.option(
+    "-s",
+    "--source-directory",
+    required=True,
+    help="The path from where the syncing is done.",
+)
+def create_manifest_files(source_directory: str):
+    for source_flow_cell in Path(source_directory).iterdir():
+        if needs_manifest_file(source_flow_cell):
+            create_manifest_file(source_flow_cell)

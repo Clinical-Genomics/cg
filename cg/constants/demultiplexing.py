@@ -37,6 +37,7 @@ class DemultiplexingDirsAndFiles(StrEnum):
     FLOW_CELLS_DIRECTORY_NAME: str = "flow_cells"
     DEMULTIPLEXED_RUNS_DIRECTORY_NAME: str = "demultiplexed_runs"
     OUTPUT_FILE_MANIFEST: str = "Manifest.tsv"
+    CUSTOM_OUTPUT_FILE_MANIFEST: str = "custom_manifest.tsv"
     INTER_OP: str = "InterOp"
 
 

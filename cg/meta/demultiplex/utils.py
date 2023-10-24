@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 from pathlib import Path
 from typing import Optional
@@ -10,7 +11,7 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
-from cg.io.csv import read_csv
+from cg.io.csv import read_csv, write_csv
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.utils.files import (
     get_file_in_directory,
@@ -232,3 +233,30 @@ def get_flow_cell_id(flow_cell_dir_name: str) -> str:
     Example: 230802_A00689_0857_BHGTMFDSX7 -> HGTMFDSX7
     """
     return flow_cell_dir_name.split("_")[-1][1:]
+
+
+def needs_manifest_file(flow_cell_dir: Path) -> bool:
+    """Returns whether a flow cell directory needs a manifest file."""
+    illumina_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST)
+    custom_manifest_file = Path(
+        flow_cell_dir, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST
+    )
+    copy_complete_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE)
+    return (
+        not any((illumina_manifest_file.exists(), custom_manifest_file.exists()))
+        and copy_complete_file.exists()
+    )
+
+
+def create_manifest_file(flow_cell_dir_name: Path) -> None:
+    """Creates a tab separated file containing the paths of all files in the given
+    directory and any subdirectories."""
+    files_in_directory: list[list[str]] = []
+    for subdir, _, files in os.walk(flow_cell_dir_name):
+        for file in files:
+            files_in_directory.append([os.path.join(subdir, file)])
+    write_csv(
+        content=files_in_directory,
+        file_path=Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST),
+        delimiter="\t",
+    )
