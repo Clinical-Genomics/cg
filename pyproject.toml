@@ -16,6 +16,22 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython"
 ]
 
+[package]
+include = [
+    "README.md",
+    "cg/**/*",
+    "cg/server/templates/**/*",
+    "cg/server/invoices/templates/invoices/**/*",
+    "cg/meta/report/templates/**/*",
+    "cg/apps/invoice/templates/**/*",
+    "cg/resources/**/*",
+    "tests/**/*",
+]
+exclude = [
+    "**/__pycache__",
+    "**/*.py[co]",
+]
+
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12"
 
