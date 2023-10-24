@@ -64,8 +64,10 @@ def downgrade():
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
     for analysis in session.query(Analysis).filter(Analysis.pipeline == "raredisease"):
+        print(f"Changing pipeline for Analysis {Analysis.family.internal_id}, {Analysis.completed_at} to mip-dna")
         analysis.pipeline = "mip-dna"
     for family in session.query(Family).filter(Family.data_analysis == "raredisease"):
+        print(f"Changing data_analysis for Family {family.internal_id} to mip-dna")
         family.data_analysis = "mip-dna"
     op.alter_column("family", "data_analysis", type_=old_enum)
     op.alter_column("analysis", "pipeline", type_=old_enum)
