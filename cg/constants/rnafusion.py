@@ -6,3 +6,9 @@ RNAFUSION_METRIC_CONDITIONS: dict = {
     "PCT_RIBOSOMAL_BASES": {"norm": "lt", "threshold": 5},
     "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.7},
 }
+
+RNAFUSION_OPTIONAL_FILE_TAGS: set = {
+    "fusioninspector",
+    "fusioninspector-html",
+    "arriba-visualisation",
+}

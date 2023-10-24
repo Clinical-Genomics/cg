@@ -7,7 +7,7 @@ from typing import Any, Optional
 from cg import resources
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, Strandedness
-from cg.constants.rnafusion import RNAFUSION_METRIC_CONDITIONS
+from cg.constants.rnafusion import RNAFUSION_METRIC_CONDITIONS, RNAFUSION_OPTIONAL_FILE_TAGS
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, MetricsQCError, MissingMetrics
 from cg.io.controller import ReadFile, WriteFile
@@ -147,7 +147,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def report_deliver(self, case_id: str) -> None:
         """Create deliverables file."""
-        deliverables_content: PipelineDeliverables = self.get_deliverables_for_case(case_id=case_id)
+        deliverables_content: PipelineDeliverables = self.get_deliverables_for_case(
+            case_id=case_id, optional_file_tags=RNAFUSION_OPTIONAL_FILE_TAGS
+        )
         self.write_deliverables_file(
             deliverables_content=deliverables_content.dict(),
             file_path=self.get_deliverables_file_path(case_id=case_id),

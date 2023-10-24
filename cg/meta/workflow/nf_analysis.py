@@ -262,7 +262,9 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return deliverables file template content."""
         raise NotImplementedError
 
-    def get_deliverables_for_case(self, case_id: str) -> PipelineDeliverables:
+    def get_deliverables_for_case(
+        self, case_id: str, optional_file_tags: set = {}
+    ) -> PipelineDeliverables:
         """Return PipelineDeliverables for a given case."""
         deliverable_template: list[dict] = self.get_deliverables_template_content()
         files: list[FileDeliverable] = []
@@ -274,5 +276,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 file[deliverable_field] = file[deliverable_field].replace(
                     "PATHTOCASE", str(self.get_case_path(case_id=case_id))
                 )
+            if file["tag"] in optional_file_tags and not Path(file["path"]).exists():
+                LOG.warning(f"Optional file not found. Skipping: {file['path']}")
             files.append(FileDeliverable(**file))
         return PipelineDeliverables(files=files)
