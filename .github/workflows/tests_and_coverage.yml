@@ -22,7 +22,7 @@ jobs:
       - name: Install Poetry
         run: pip install --upgrade poetry
 
-      - name: Cache Poetry dependencies
+      - name: Cache dependencies
         uses: actions/cache@v3
         with:
           path: ~/.cache/pypoetry

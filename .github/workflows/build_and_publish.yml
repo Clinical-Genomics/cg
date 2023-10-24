@@ -28,5 +28,5 @@ jobs:
       - name: Build package
         run: poetry build -f wheel --no-interaction
 
-      - name: Publish package to PyPI
+      - name: Publish distribution 📦 to PyPI
         run: poetry publish -n --build --username __token__ --password ${{ secrets.pypi_password }}
