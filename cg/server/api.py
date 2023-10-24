@@ -441,24 +441,24 @@ def parse_applications():
 
 @BLUEPRINT.route("/applications/<tag>")
 @is_public
-def parse_application(tag):
+def parse_application(tag: str):
     """Return an application tag."""
     application: Application = db.get_application_by_tag(tag=tag)
-    if application is None:
+    if not application:
         return abort(
-            make_response(jsonify(message="application not found"), http.HTTPStatus.NOT_FOUND)
+            make_response(jsonify(message="Application not found"), http.HTTPStatus.NOT_FOUND)
         )
     return jsonify(**application.to_dict())
 
 
 @BLUEPRINT.route("/applications/<tag>/pipeline_limitations")
 @is_public
-def get_application_pipeline_limitations(tag):
+def get_application_pipeline_limitations(tag: str):
     """Return application pipeline specific limitations."""
     application_limitations: list[ApplicationLimitations] = db.get_application_limitations_by_tag(
         tag
     )
-    if application_limitations is None:
+    if not application_limitations:
         return jsonify(message="Application limitations not found"), http.HTTPStatus.NOT_FOUND
     return jsonify([limitation.to_dict() for limitation in application_limitations])
 
