@@ -1,8 +1,12 @@
 """Tests for the prepare_fastq_api"""
 
+from unittest import mock
+
 from cg.apps.crunchy import CrunchyAPI
+from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.models import CompressionData
 from cg.store import Store
 from cg.store.models import Family
 
@@ -132,8 +136,9 @@ def test_no_fastq_in_housekeeper(
     )
     for file in version_object.files:
         assert file.path.endswith(".spring")
+    files_before: int = len([file for file in version_object.files])
 
-    # WHEN checking if fastq files need to be added to housekeeper
+    # WHEN adding any decompressed fastq files
     prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
 
     # THEN assert that no fastq files were added
@@ -142,3 +147,60 @@ def test_no_fastq_in_housekeeper(
     )
     for file in version_object.files:
         assert file.path.endswith(".spring")
+    assert len([file for file in version_object.files]) == files_before
+
+
+def test_add_decompressed_fastqs_loops_through_samples(
+    case_id: str, analysis_store: Store, populated_compress_spring_api: CompressAPI
+):
+    """Tests that given a case id, all samples' fastq files are added to Housekeeper
+    in add_decompressed_fastq_files_to_housekeeper."""
+
+    # GIVEN a case with three samples and a PrepareFastqAPI
+    prepare_fastq_api = PrepareFastqAPI(
+        store=analysis_store, compress_api=populated_compress_spring_api
+    )
+    with mock.patch.object(
+        PrepareFastqAPI, "add_decompressed_sample", return_value=True
+    ) as request_counter:
+        # WHEN adding decompressed fastq files to Housekeeper
+        prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
+
+    case = analysis_store.get_case_by_internal_id(case_id)
+
+    # THEN each sample should have had their fastq files added to Housekeeper.
+    assert request_counter.call_count == len(case.samples)
+
+
+def test_add_decompressed_sample_loops_through_spring(
+    case_id: str,
+    analysis_store: Store,
+    populated_compress_spring_api: CompressAPI,
+    spring_file,
+):
+    """Tests that given a sample id, all fastq files are added to Housekeeper
+    in add_decompressed_sample_to_housekeeper."""
+
+    # GIVEN a case and one of its samples, which in turn has a spring file in Housekeeper but no fastq files
+    prepare_fastq_api = PrepareFastqAPI(
+        store=analysis_store, compress_api=populated_compress_spring_api
+    )
+    case = analysis_store.get_case_by_internal_id(case_id)
+    sample = case.samples[0]
+
+    with mock.patch.object(
+        files,
+        "get_hk_files_dict",
+        return_value={},
+    ), mock.patch.object(
+        files,
+        "get_spring_paths",
+        return_value=[CompressionData(spring_file.with_suffix(""))],
+    ), mock.patch.object(
+        CompressAPI, "add_decompressed_fastq", return_value=True
+    ) as request_submitter:
+        # WHEN adding decompressed fastq files to Housekeeper
+        prepare_fastq_api.add_decompressed_sample(case=case, sample=sample)
+
+    # THEN the related fastq files should have been added to Housekeeper
+    assert request_submitter.call_count == 1
