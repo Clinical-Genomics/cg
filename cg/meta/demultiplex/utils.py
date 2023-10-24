@@ -268,4 +268,5 @@ def create_manifest_file(flow_cell_dir_name: Path) -> None:
 
 
 def flow_cell_sync_confirmed(target_flow_cell_dir: Path) -> bool:
+    LOG.debug(f"Existence of file {target_flow_cell_dir} is {target_flow_cell_dir.exists()}")
     return Path(target_flow_cell_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE).exists()
