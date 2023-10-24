@@ -16,6 +16,7 @@ from cg.exc import FlowCellError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.meta.demultiplex.utils import (
     create_manifest_file,
+    flow_cell_sync_confirmed,
     is_syncing_complete,
     needs_manifest_file,
 )
@@ -215,6 +216,8 @@ def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
     If so it creates a CopyComplete.txt file to show that that is the case."""
     target_flow_cells_dir = Path(context.flow_cells_dir)
     for source_flow_cell in Path(source_directory).iterdir():
+        if flow_cell_sync_confirmed(Path(target_flow_cells_dir, source_flow_cell)):
+            continue
         if is_syncing_complete(
             source_directory=source_flow_cell,
             target_directory=Path(target_flow_cells_dir, source_flow_cell.name),

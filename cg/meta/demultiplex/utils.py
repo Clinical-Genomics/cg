@@ -210,14 +210,15 @@ def is_file_relevant_for_demultiplexing(file: Path) -> bool:
 def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
     """Returns whether all relevant files for demultiplexing have been synced from the source to
     the target."""
-    manifest_file = Path(source_directory, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST)
-    if not manifest_file.exists():
-        LOG.debug(
-            f"{source_directory} does not contain a "
-            f"{DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST} file. Skipping."
-        )
+    manifest_files = [
+        Path(source_directory, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST),
+        Path(source_directory, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST),
+    ]
+    existing_files = [file for file in manifest_files if file.exists()]
+    if not existing_files:
+        LOG.debug(f"{source_directory} does not contain a " f" manifest file. Skipping.")
         return False
-    files_at_source: list[Path] = parse_manifest_file(manifest_file)
+    files_at_source: list[Path] = parse_manifest_file(existing_files[0])
     for file in files_at_source:
         if is_file_relevant_for_demultiplexing(file) and not Path(target_directory, file).exists():
             LOG.info(
@@ -260,3 +261,7 @@ def create_manifest_file(flow_cell_dir_name: Path) -> None:
         file_path=Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST),
         delimiter="\t",
     )
+
+
+def flow_cell_sync_confirmed(target_flow_cell_dir: Path) -> bool:
+    return Path(target_flow_cell_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE).exists()
