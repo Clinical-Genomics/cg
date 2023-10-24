@@ -19,6 +19,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
+from cg.meta.backup.pdc import PdcAPI
 from cg.store import Store
 from cg.store.database import initialize_database
 
@@ -272,6 +273,7 @@ class CGConfig(BaseModel):
     mutacc_auto_api_: MutaccAutoAPI = None
     pigz: Optional[CommonAppConfig] = None
     pdc: Optional[CommonAppConfig] = None
+    pdc_api_: Optional[PdcAPI]
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
     tar: Optional[CommonAppConfig] = None
@@ -308,6 +310,7 @@ class CGConfig(BaseModel):
             "loqusdb_api_": "loqusdb_api",
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
+            "pdc_api_": "pdc_api",
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
@@ -415,6 +418,15 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating mutacc_auto api")
             api = MutaccAutoAPI(config=self.dict())
             self.mutacc_auto_api_ = api
+        return api
+
+    @property
+    def pdc_api(self) -> PdcAPI:
+        api = self.__dict__.get("pdc_api_")
+        if api is None:
+            LOG.debug("Instantiating PDC api")
+            api = PdcAPI(binary_path=self.pdc.binary_path)
+            self.pdc_api_ = api
         return api
 
     @property

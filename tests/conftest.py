@@ -23,6 +23,7 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.api import LimsAPI
+from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, Pipeline, SequencingFileTag
 from cg.constants.constants import CaseActions, FileFormat, Strandedness
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
@@ -32,16 +33,15 @@ from cg.constants.subject import Gender
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import write_yaml
+from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
+from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, EncryptionDirectories
-from cg.models.demultiplex.run_parameters import (
-    RunParametersNovaSeq6000,
-    RunParametersNovaSeqX,
-)
+from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
@@ -2628,6 +2628,12 @@ def strandedness_not_permitted() -> str:
 
 
 @pytest.fixture(scope="session")
+def pipeline_version() -> str:
+    """Return a pipeline version."""
+    return "2.2.0"
+
+
+@pytest.fixture(scope="session")
 def fastq_forward_read_path(housekeeper_dir: Path) -> Path:
     """Path to existing fastq forward read file."""
     fastq_file_path = Path(housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001").with_suffix(
@@ -3235,3 +3241,23 @@ def novaseqx_flow_cell_analysis_incomplete(
 def demultiplex_not_complete_novaseqx_flow_cell(tmp_file: Path) -> Path:
     """Return the path to a NovaseqX flow cell for which demultiplexing is not complete."""
     return tmp_file
+
+
+@pytest.fixture
+def flow_cell_encryption_api(
+    cg_context: CGConfig, flow_cell_full_name: str
+) -> FlowCellEncryptionAPI:
+    flow_cell_encryption_api = FlowCellEncryptionAPI(
+        binary_path=cg_context.encryption.binary_path,
+        encryption_dir=Path(cg_context.backup.encryption_directories.current),
+        dry_run=True,
+        flow_cell=FlowCellDirectoryData(
+            flow_cell_path=Path(cg_context.flow_cells_dir, flow_cell_full_name)
+        ),
+        pigz_binary_path=cg_context.pigz.binary_path,
+        slurm_api=SlurmAPI(),
+        sbatch_parameter=cg_context.backup.slurm_flow_cell_encryption.dict(),
+        tar_api=TarAPI(binary_path=cg_context.tar.binary_path, dry_run=True),
+    )
+    flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=True)
+    return flow_cell_encryption_api
