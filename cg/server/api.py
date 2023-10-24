@@ -460,7 +460,7 @@ def get_application_pipeline_limitations(tag):
     )
     if application_limitations is None:
         return jsonify(message="Application limitations not found"), http.HTTPStatus.NOT_FOUND
-    return jsonify(limitation.to_dict() for limitation in application_limitations)
+    return jsonify([limitation.to_dict() for limitation in application_limitations])
 
 
 @BLUEPRINT.route("/orderform", methods=["POST"])
