@@ -21,7 +21,7 @@ Please check out our [guide for contributing to cg](CONTRIBUTING.md)
 
 ## Installation
 
-Cg written in Python 3.6+ and is available on the [Python Package Index][pypi] (PyPI).
+Cg written in Python 3.9+ and is available on the [Python Package Index][pypi] (PyPI).
 
 ```bash
 pip install cg
