@@ -74,10 +74,18 @@ class FindBusinessDataHandler(BaseHandler):
             .sample.application_version.application
         )
 
+    def get_application_limitations_by_tag(self, tag: str) -> list[ApplicationLimitations] | None:
+        """Return application limitations given the application tag."""
+        return apply_application_limitations_filter(
+            application_limitations=self._get_join_application_limitations_query(),
+            filter_functions=[ApplicationLimitationsFilter.FILTER_BY_TAG],
+            tag=tag,
+        ).all()
+
     def get_application_limitation_by_tag_and_pipeline(
         self, tag: str, pipeline: Pipeline
     ) -> ApplicationLimitations | None:
-        """Return the application limitations given the application tag and pipeline."""
+        """Return an application limitation given the application tag and pipeline."""
         filter_functions: list[ApplicationLimitationsFilter] = [
             ApplicationLimitationsFilter.FILTER_BY_TAG,
             ApplicationLimitationsFilter.FILTER_BY_PIPELINE,
