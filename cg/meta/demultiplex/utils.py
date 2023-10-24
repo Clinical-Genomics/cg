@@ -194,6 +194,7 @@ def get_undetermined_fastqs(lane: int, undetermined_dir_path: Path) -> list[Path
 
 def parse_manifest_file(manifest_file: Path) -> list[Path]:
     """Returns a list with the first entry of each row of the given TSV file."""
+    LOG.debug(f"Parsing manifest file: {manifest_file}")
     files: list[list[str]] = read_csv(file_path=manifest_file, delimiter="\t")
     return [Path(file[0]) for file in files]
 
@@ -216,7 +217,7 @@ def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
     ]
     existing_files = [file for file in manifest_files if file.exists()]
     if not existing_files:
-        LOG.debug(f"{source_directory} does not contain a " f" manifest file. Skipping.")
+        LOG.debug(f"{source_directory} does not contain a manifest file. Skipping.")
         return False
     files_at_source: list[Path] = parse_manifest_file(existing_files[0])
     for file in files_at_source:
@@ -254,8 +255,11 @@ def create_manifest_file(flow_cell_dir_name: Path) -> None:
     directory and any subdirectories."""
     files_in_directory: list[list[str]] = []
     for subdir, _, files in os.walk(flow_cell_dir_name):
-        for file in files:
-            files_in_directory.append([os.path.join(subdir, file)])
+        subdir = Path(subdir).relative_to(flow_cell_dir_name)
+        files_in_directory.extend([Path(subdir, file).as_posix()] for file in files)
+    LOG.info(
+        f"Writing manifest file to {Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST)}"
+    )
     write_csv(
         content=files_in_directory,
         file_path=Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST),

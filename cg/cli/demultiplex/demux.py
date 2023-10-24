@@ -217,6 +217,7 @@ def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
     target_flow_cells_dir = Path(context.flow_cells_dir)
     for source_flow_cell in Path(source_directory).iterdir():
         if flow_cell_sync_confirmed(Path(target_flow_cells_dir, source_flow_cell)):
+            LOG.debug(f"Flow cell {source_flow_cell} has already been confirmed, skipping.")
             continue
         if is_syncing_complete(
             source_directory=source_flow_cell,
