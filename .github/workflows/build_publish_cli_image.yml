@@ -42,10 +42,10 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ github.event_name }}" == "release" ]]; then
-            echo "::set-output name=tags::clinicalgenomics/cg-cli:${{ steps.get_release_version.outputs.version }},clinicalgenomics/cg-cli:latest"
+            echo "::set-output name=tags::clinicalgenomics/cg:cli-${{ steps.get_release_version.outputs.version }},clinicalgenomics/cg:cli-latest"
           else
             BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr "/" "-")
-            echo "::set-output name=tags::clinicalgenomics/cg-cli:$BRANCH_NAME"
+            echo "::set-output name=tags::clinicalgenomics/cg:$cli-{BRANCH_NAME}"
           fi
 
       - name: Build and Push Docker Image
