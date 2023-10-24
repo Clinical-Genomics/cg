@@ -1,4 +1,4 @@
-"""All models aggregated in a base class"""
+"""All models aggregated in a base class."""
 from dataclasses import dataclass
 from typing import Callable, Optional, Type
 
@@ -6,14 +6,12 @@ from sqlalchemy import and_, func
 from sqlalchemy.orm import Query, Session
 
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_customer_filters import (
-    CustomerFilter,
-    apply_customer_filter,
-)
+from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
     ApplicationVersion,
     Customer,
     Family,
@@ -41,12 +39,10 @@ class BaseHandler:
         return (
             self._get_query(table=Family)
             .outerjoin(Analysis)
-            .join(
-                Family.links,
-                FamilySample.sample,
-                ApplicationVersion,
-                Application,
-            )
+            .join(Family.links)
+            .join(FamilySample.sample)
+            .join(ApplicationVersion)
+            .join(Application)
         )
 
     def _get_join_cases_with_samples_query(self) -> Query:
@@ -200,3 +196,9 @@ class BaseHandler:
             .outerjoin(Sample.flowcells)
         )
         return cases_query
+
+    def _get_join_application_limitations_query(self) -> Query:
+        """Return a join query for all application limitations."""
+        return self._get_query(table=ApplicationLimitations).join(
+            ApplicationLimitations.application
+        )

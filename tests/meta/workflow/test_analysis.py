@@ -1,7 +1,7 @@
 """Test for analysis"""
 
 from datetime import datetime
-from typing import List
+
 import mock
 import pytest
 
@@ -141,11 +141,12 @@ def test_ensure_flow_cells_on_disk_check_not_applicable(
         "_is_flow_cell_check_applicable",
         return_value=False,
     ):
+        caplog.set_level("INFO")
         mip_analysis_api.ensure_flow_cells_on_disk(case.internal_id)
 
     # THEN a warning should be logged
     assert (
-        "Flow cell check is not applicable - ensure that the case is neither down sampled nor external."
+        "Flow cell check is not applicable - the case is either down sampled or external."
         in caplog.text
     )
 
