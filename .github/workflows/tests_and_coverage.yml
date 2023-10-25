@@ -20,7 +20,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install Poetry
-        run: pip install --upgrade poetry
+        run: pip install poetry
 
       - name: Cache dependencies
         uses: actions/cache@v3
