@@ -50,6 +50,18 @@ def is_external_application(unused1, unused2, model, unused3):
     return model.application_version.application.is_external if model.application_version else ""
 
 
+def view_sample_concentration_minimum(unused1, unused2, model, unused3):
+    """Column formatter to append unit"""
+    del unused1, unused2, unused3
+    return str(model.application.sample_concentration_minimum_ng_ul) + "ng/uL"
+
+
+def view_sample_concentration_maximum(unused1, unused2, model, unused3):
+    """Column formatter to append unit"""
+    del unused1, unused2, unused3
+    return str(model.application.sample_concentration_maximum_ng_ul) + "ng/uL"
+
+
 class ApplicationView(BaseView):
     """Admin view for Model.Application"""
 
@@ -78,6 +90,10 @@ class ApplicationView(BaseView):
         "updated_at",
         "category",
     ]
+    column_formatters = {
+        "sample_concentration_minimum_ng_ul": view_sample_concentration_minimum,
+        "sample_concentration_maximum_ng_ul": view_sample_concentration_minimum,
+    }
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
     form_excluded_columns = ["category", "versions"]
