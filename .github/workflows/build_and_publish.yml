@@ -21,5 +21,11 @@ jobs:
       - name: Install Poetry
         run: pip install poetry
 
-      - name: Build and publish distribution 📦 to PyPI
-        run: poetry publish -n --build --username __token__ --password ${{ secrets.pypi_password }}
+      - name: Build and Publish Distribution to PyPI 📦
+        env:
+          PYPI_USERNAME: __token__
+          PYPI_PASSWORD: ${{ secrets.pypi_password }}
+        run: |
+          poetry publish --no-interaction --build \
+            --username $PYPI_USERNAME \
+            --password $PYPI_PASSWORD
