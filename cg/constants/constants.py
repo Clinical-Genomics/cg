@@ -233,3 +233,6 @@ class Strandedness(StrEnum):
     FORWARD: str = "forward"
     REVERSE: str = "reverse"
     UNSTRANDED: str = "unstranded"
+
+
+PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.SARS_COV_2]

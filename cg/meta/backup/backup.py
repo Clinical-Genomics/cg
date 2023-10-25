@@ -13,12 +13,13 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.indexes import ListIndexes
 from cg.constants.pdc import PDCExitCodes
 from cg.constants.process import RETURN_WARNING
-from cg.constants.symbols import ASTERISK, FWD_SLASH, NEW_LINE
+from cg.constants.symbols import NEW_LINE
 from cg.exc import ChecksumFailedError, PdcNoFilesMatchingSearchError
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models import CompressionData
+from cg.models.cg_config import EncryptionDirectories
 from cg.store import Store
 from cg.store.models import Flowcell
 from cg.utils.time import get_elapsed_time, get_start_time
@@ -32,7 +33,7 @@ class BackupAPI:
     def __init__(
         self,
         encryption_api: EncryptionAPI,
-        encrypt_dir: str,
+        encryption_directories: EncryptionDirectories,
         status: Store,
         tar_api: TarAPI,
         pdc_api: PdcAPI,
@@ -40,7 +41,7 @@ class BackupAPI:
         dry_run: bool = False,
     ):
         self.encryption_api = encryption_api
-        self.encrypt_dir: str = encrypt_dir
+        self.encryption_directories: EncryptionDirectories = encryption_directories
         self.status: Store = status
         self.tar_api: TarAPI = tar_api
         self.pdc: PdcAPI = pdc_api
@@ -85,14 +86,14 @@ class BackupAPI:
             LOG.info(f"{flow_cell.name}: retrieving from PDC")
 
         try:
-            dcms_output: list[str] = self.query_pdc_for_flow_cell(flow_cell.name)
+            dsmc_output: list[str] = self.query_pdc_for_flow_cell(flow_cell.name)
 
         except PdcNoFilesMatchingSearchError as error:
             LOG.error(f"PDC query failed: {error}")
             raise error
 
-        archived_key: Path = self.get_archived_encryption_key_path(dcms_output=dcms_output)
-        archived_flow_cell: Path = self.get_archived_flow_cell_path(dcms_output=dcms_output)
+        archived_key: Path = self.get_archived_encryption_key_path(dsmc_output=dsmc_output)
+        archived_flow_cell: Path = self.get_archived_flow_cell_path(dsmc_output=dsmc_output)
 
         if not self.dry_run:
             return self._process_flow_cell(
@@ -253,20 +254,20 @@ class BackupAPI:
     def query_pdc_for_flow_cell(self, flow_cell_id: str) -> list[str]:
         """Query PDC for a given flow cell id.
         Raise:
-            CalledProcessError if no archived files were found.
+            CalledProcessError if an error OTHER THAN no files found is raised.
         """
-        search_pattern: str = (
-            f"{ASTERISK}{FWD_SLASH}{ASTERISK}{flow_cell_id}{ASTERISK}{FileExtensions.GPG}"
-        )
         dsmc_output: list[str] = []
-        try:
-            self.pdc.query_pdc(search_pattern=search_pattern)
-            dsmc_output: list[str] = self.pdc.process.stdout.split(NEW_LINE)
-        except subprocess.CalledProcessError as error:
-            if error.returncode != PDCExitCodes.NO_FILES_FOUND:
-                raise error
-            LOG.error(f"No archived files found for PDC query: {search_pattern}")
-        LOG.info(f"Found archived files for PDC query: {search_pattern}")
+        for _, encryption_directory in self.encryption_directories:
+            search_pattern = f"{encryption_directory}*{flow_cell_id}*{FileExtensions.GPG}"
+            try:
+                self.pdc.query_pdc(search_pattern)
+                dsmc_output: list[str] = self.pdc.process.stdout.split(NEW_LINE)
+            except subprocess.CalledProcessError as error:
+                if error.returncode != PDCExitCodes.NO_FILES_FOUND:
+                    raise error
+                LOG.debug(f"No archived files found for PDC query: {search_pattern}")
+                continue
+            LOG.info(f"Found archived files for PDC query: {search_pattern}")
         return dsmc_output
 
     def retrieve_archived_file(self, archived_file: Path, run_dir: Path) -> None:
@@ -278,11 +279,11 @@ class BackupAPI:
         )
 
     @classmethod
-    def get_archived_flow_cell_path(cls, dcms_output: list[str]) -> Optional[Path]:
+    def get_archived_flow_cell_path(cls, dsmc_output: list[str]) -> Optional[Path]:
         """Get the path of the archived flow cell from a PDC query."""
         flow_cell_line: str = [
             row
-            for row in dcms_output
+            for row in dsmc_output
             if FileExtensions.TAR in row
             and FileExtensions.GZIP in row
             and FileExtensions.GPG in row
@@ -294,11 +295,11 @@ class BackupAPI:
             return archived_flow_cell
 
     @classmethod
-    def get_archived_encryption_key_path(cls, dcms_output: list[str]) -> Optional[Path]:
+    def get_archived_encryption_key_path(cls, dsmc_output: list[str]) -> Optional[Path]:
         """Get the encryption key for the archived flow cell from a PDC query."""
         encryption_key_line: str = [
             row
-            for row in dcms_output
+            for row in dsmc_output
             if FileExtensions.KEY in row
             and FileExtensions.GPG in row
             and FileExtensions.GZIP not in row
@@ -346,12 +347,10 @@ class SpringBackupAPI:
             self.encryption_api.key_asymmetric_encryption(spring_file_path)
             self.encryption_api.compare_spring_file_checksums(spring_file_path)
             self.pdc.archive_file_to_pdc(
-                file_path=str(self.encryption_api.encrypted_spring_file_path(spring_file_path)),
-                dry_run=self.dry_run,
+                file_path=str(self.encryption_api.encrypted_spring_file_path(spring_file_path))
             )
             self.pdc.archive_file_to_pdc(
-                file_path=str(self.encryption_api.encrypted_key_path(spring_file_path)),
-                dry_run=self.dry_run,
+                file_path=str(self.encryption_api.encrypted_key_path(spring_file_path))
             )
             self.mark_file_as_archived(spring_file_path)
             self.encryption_api.cleanup(spring_file_path)

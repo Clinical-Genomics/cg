@@ -1,12 +1,14 @@
 """Fixtures for cli analysis tests"""
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import DataDelivery, FlowCellStatus, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store
+from cg.store.api.find_business_data import FindBusinessDataHandler
 from cg.store.models import Family
 from tests.store_helpers import StoreHelpers
 
@@ -239,3 +241,13 @@ def tb_api():
     """Trailblazer API fixture"""
 
     return MockTB()
+
+
+@pytest.fixture()
+def mock_analysis_flow_cell(mocker) -> None:
+    """Mocks the get_flow_cells_by_case method to return a list containing a flow cell whose status is
+    on disk."""
+    flow_cell = Mock()
+    flow_cell.status = FlowCellStatus.ON_DISK
+    mocker.patch.object(FindBusinessDataHandler, "get_flow_cells_by_case")
+    FindBusinessDataHandler.get_flow_cells_by_case.return_value = [flow_cell]

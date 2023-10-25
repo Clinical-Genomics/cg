@@ -304,6 +304,29 @@ def store_with_an_application_with_and_without_attributes(
     return store
 
 
+@pytest.fixture(name="store_with_application_limitations")
+def store_with_application_limitations(
+    store_with_an_application_with_and_without_attributes: Store, helpers: StoreHelpers
+) -> Store:
+    """Return a store with different application limitations."""
+    helpers.ensure_application_limitation(
+        store=store_with_an_application_with_and_without_attributes,
+        application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
+            StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value
+        ),
+        pipeline=Pipeline.MIP_DNA,
+    )
+    for pipeline in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]:
+        helpers.ensure_application_limitation(
+            store=store_with_an_application_with_and_without_attributes,
+            application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
+                StoreConstants.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value
+            ),
+            pipeline=pipeline,
+        )
+    return store_with_an_application_with_and_without_attributes
+
+
 @pytest.fixture(name="applications_store")
 def applications_store(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store populated with applications from excel file"""
@@ -422,7 +445,8 @@ def store_with_analyses_for_cases(
             uploaded_to_vogue_at=timestamp_now,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        analysis_store.relate_sample(
+        link = analysis_store.relate_sample(
             family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
+        analysis_store.session.add(link)
     return analysis_store

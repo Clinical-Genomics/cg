@@ -7,12 +7,13 @@ import pytest
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus
-from cg.constants.constants import CaseActions
+from cg.constants.constants import CaseActions, Pipeline
 from cg.constants.indexes import ListIndexes
 from cg.exc import CgError
 from cg.store import Store
 from cg.store.models import (
     Application,
+    ApplicationLimitations,
     ApplicationVersion,
     Customer,
     Family,
@@ -23,6 +24,7 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
 )
+from tests.store.conftest import StoreConstants
 from tests.store_helpers import StoreHelpers
 
 
@@ -234,7 +236,7 @@ def test_is_all_flow_cells_on_disk_when_no_flow_cell(
     caplog.set_level(logging.DEBUG)
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return false
     assert is_on_disk is False
@@ -243,7 +245,7 @@ def test_is_all_flow_cells_on_disk_when_no_flow_cell(
     assert "No flow cells found" in caplog.text
 
 
-def test_is_all_flow_cells_on_disk_when_not_on_disk(
+def test_are_all_flow_cells_on_disk_when_not_on_disk(
     base_store: Store,
     caplog,
     bcl2fastq_flow_cell_id: str,
@@ -255,14 +257,14 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
     """Test check if all flow cells for samples on a case is on disk when not on disk."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a store with two flow cell
-    flow_cell = helpers.add_flow_cell(
+    helpers.add_flow_cell(
         store=base_store,
         flow_cell_name=bcl2fastq_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.PROCESSING,
     )
 
-    another_flow_cell = helpers.add_flow_cell(
+    helpers.add_flow_cell(
         store=base_store,
         flow_cell_name=bcl_convert_flow_cell_id,
         samples=[sample],
@@ -270,17 +272,13 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
     )
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return false
     assert is_on_disk is False
 
-    # THEN log the status of the flow cell
-    assert f"{flow_cell.name}: {flow_cell.status}" in caplog.text
-    assert f"{another_flow_cell.name}: {another_flow_cell.status}" in caplog.text
 
-
-def test_is_all_flow_cells_on_disk_when_requested(
+def test_are_all_flow_cells_on_disk_when_requested(
     base_store: Store,
     caplog,
     bcl2fastq_flow_cell_id: str,
@@ -291,15 +289,15 @@ def test_is_all_flow_cells_on_disk_when_requested(
 ):
     """Test check if all flow cells for samples on a case is on disk when requested."""
     caplog.set_level(logging.DEBUG)
+
     # GIVEN a store with two flow cell
-    flow_cell = helpers.add_flow_cell(
+    helpers.add_flow_cell(
         store=base_store,
         flow_cell_name=bcl2fastq_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.REMOVED,
     )
-
-    another_flow_cell = helpers.add_flow_cell(
+    helpers.add_flow_cell(
         store=base_store,
         flow_cell_name=bcl_convert_flow_cell_id,
         samples=[sample],
@@ -307,19 +305,13 @@ def test_is_all_flow_cells_on_disk_when_requested(
     )
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return false
     assert is_on_disk is False
 
-    # THEN log the requesting the flow cell
-    assert f"{flow_cell.name}: flow cell not on disk, requesting" in caplog.text
 
-    # THEN log the status of the flow cell
-    assert f"{another_flow_cell.name}: {another_flow_cell.status}" in caplog.text
-
-
-def test_is_all_flow_cells_on_disk(
+def test_are_all_flow_cells_on_disk(
     base_store: Store,
     caplog,
     bcl2fastq_flow_cell_id: str,
@@ -330,21 +322,16 @@ def test_is_all_flow_cells_on_disk(
 ):
     """Test check if all flow cells for samples on a case is on disk."""
     caplog.set_level(logging.DEBUG)
-    # GIVEN a store with two flow cell
-    flow_cell = helpers.add_flow_cell(
-        store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample]
-    )
 
+    # GIVEN a store with two flow cell
+    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
     helpers.add_flow_cell(store=base_store, flow_cell_name=bcl_convert_flow_cell_id)
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return true
     assert is_on_disk is True
-
-    # THEN log the status of the flow cell
-    assert f"{flow_cell.name}: status is {flow_cell.status}" in caplog.text
 
 
 def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket_id: str):
@@ -397,6 +384,54 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
 
     # THEN the fetched application should be equal to the application version application
     assert application_version.application == application
+
+
+def test_get_application_limitations_by_tag(
+    store_with_application_limitations: Store,
+    tag: str = StoreConstants.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value,
+) -> ApplicationLimitations:
+    """Test get application limitations by application tag."""
+
+    # GIVEN a store with some application limitations
+
+    # WHEN filtering by a given application tag
+    application_limitations: list[
+        ApplicationLimitations
+    ] = store_with_application_limitations.get_application_limitations_by_tag(tag=tag)
+
+    # THEN assert that the application limitations were found
+    assert (
+        application_limitations
+        and len(application_limitations) == 2
+        and [
+            application_limitation.application.tag == tag
+            for application_limitation in application_limitations
+        ]
+    )
+
+
+def test_get_application_limitation_by_tag_and_pipeline(
+    store_with_application_limitations: Store,
+    tag: str = StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value,
+    pipeline: Pipeline = Pipeline.MIP_DNA,
+) -> ApplicationLimitations:
+    """Test get application limitations by application tag and pipeline."""
+
+    # GIVEN a store with some application limitations
+
+    # WHEN filtering by a given application tag and pipeline
+    application_limitation: ApplicationLimitations = (
+        store_with_application_limitations.get_application_limitation_by_tag_and_pipeline(
+            tag=tag, pipeline=pipeline
+        )
+    )
+
+    # THEN assert that the application limitation was found
+    assert (
+        application_limitation
+        and application_limitation.application.tag == tag
+        and application_limitation.pipeline == pipeline
+    )
 
 
 def test_get_case_samples_by_case_id(

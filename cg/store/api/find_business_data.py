@@ -10,33 +10,23 @@ from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError, CgError
 from cg.store.api.base import BaseHandler
-from cg.store.filters.status_analysis_filters import (
-    AnalysisFilter,
-    apply_analysis_filter,
+from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
+from cg.store.filters.status_application_limitations_filters import (
+    ApplicationLimitationsFilter,
+    apply_application_limitations_filter,
 )
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_case_sample_filters import (
-    CaseSampleFilter,
-    apply_case_sample_filter,
-)
-from cg.store.filters.status_customer_filters import (
-    CustomerFilter,
-    apply_customer_filter,
-)
-from cg.store.filters.status_flow_cell_filters import (
-    FlowCellFilter,
-    apply_flow_cell_filter,
-)
+from cg.store.filters.status_case_sample_filters import CaseSampleFilter, apply_case_sample_filter
+from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
+from cg.store.filters.status_flow_cell_filters import FlowCellFilter, apply_flow_cell_filter
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
-from cg.store.filters.status_metrics_filters import (
-    SequencingMetricsFilter,
-    apply_metrics_filter,
-)
+from cg.store.filters.status_metrics_filters import SequencingMetricsFilter, apply_metrics_filter
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
     Customer,
     Family,
     FamilySample,
@@ -51,7 +41,7 @@ LOG = logging.getLogger(__name__)
 
 
 class FindBusinessDataHandler(BaseHandler):
-    """Contains methods to find business data model instances"""
+    """Contains methods to find business data model instances."""
 
     def __init__(self, session: Session):
         super().__init__(session=session)
@@ -64,7 +54,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).first()
 
     def has_active_cases_for_sample(self, internal_id: str) -> bool:
-        """Check if there are any active cases for a sample"""
+        """Check if there are any active cases for a sample."""
         sample = self.get_sample_by_internal_id(internal_id=internal_id)
         active_actions = ["analyze", "running"]
 
@@ -83,6 +73,29 @@ class FindBusinessDataHandler(BaseHandler):
             .links[ListIndexes.FIRST.value]
             .sample.application_version.application
         )
+
+    def get_application_limitations_by_tag(self, tag: str) -> list[ApplicationLimitations] | None:
+        """Return application limitations given the application tag."""
+        return apply_application_limitations_filter(
+            application_limitations=self._get_join_application_limitations_query(),
+            filter_functions=[ApplicationLimitationsFilter.FILTER_BY_TAG],
+            tag=tag,
+        ).all()
+
+    def get_application_limitation_by_tag_and_pipeline(
+        self, tag: str, pipeline: Pipeline
+    ) -> ApplicationLimitations | None:
+        """Return an application limitation given the application tag and pipeline."""
+        filter_functions: list[ApplicationLimitationsFilter] = [
+            ApplicationLimitationsFilter.FILTER_BY_TAG,
+            ApplicationLimitationsFilter.FILTER_BY_PIPELINE,
+        ]
+        return apply_application_limitations_filter(
+            application_limitations=self._get_join_application_limitations_query(),
+            filter_functions=filter_functions,
+            tag=tag,
+            pipeline=pipeline,
+        ).first()
 
     def get_latest_analysis_to_upload_for_pipeline(self, pipeline: str = None) -> list[Analysis]:
         """Return latest not uploaded analysis for each case given a pipeline."""
@@ -244,7 +257,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
 
     def get_customer_id_from_ticket(self, ticket: str) -> str:
-        """Returns the customer related to given ticket"""
+        """Returns the customer related to given ticket."""
         cases: list[Family] = self.get_cases_by_ticket_id(ticket_id=ticket)
         if not cases:
             raise ValueError(f"No case found for ticket {ticket}")
@@ -259,7 +272,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
 
     def get_latest_ticket_from_case(self, case_id: str) -> str:
-        """Returns the ticket from the most recent sample in a case"""
+        """Returns the ticket from the most recent sample in a case."""
         return self.get_case_by_internal_id(internal_id=case_id).latest_ticket
 
     def get_latest_flow_cell_on_case(self, family_id: str) -> Flowcell:
@@ -457,29 +470,26 @@ class FindBusinessDataHandler(BaseHandler):
         if flow_cell:
             return flow_cell.samples
 
-    def is_all_flow_cells_on_disk(self, case_id: str) -> bool:
-        """Check if flow cells are on disk for sample before starting the analysis.
-        Flow cells not on disk will be requested.
-        """
+    def are_all_flow_cells_on_disk(self, case_id: str) -> bool:
+        """Check if flow cells are on disk for sample before starting the analysis."""
         flow_cells: Optional[list[Flowcell]] = self.get_flow_cells_by_case(
             case=self.get_case_by_internal_id(internal_id=case_id)
         )
-
         if not flow_cells:
             LOG.info("No flow cells found")
             return False
-        statuses: list[str] = []
+        return all(flow_cell.status == FlowCellStatus.ON_DISK for flow_cell in flow_cells)
+
+    def request_flow_cells_for_case(self, case_id) -> None:
+        """Set the status of removed flow cells to REQUESTED for the given case."""
+        flow_cells: Optional[list[Flowcell]] = self.get_flow_cells_by_case(
+            case=self.get_case_by_internal_id(internal_id=case_id)
+        )
         for flow_cell in flow_cells:
-            LOG.info(f"{flow_cell.name}: checking if flow cell is on disk")
-            LOG.info(f"{flow_cell.name}: status is {flow_cell.status}")
-            statuses += [flow_cell.status] if flow_cell.status else []
-            if not flow_cell.status or flow_cell.status == FlowCellStatus.REMOVED:
-                LOG.info(f"{flow_cell.name}: flow cell not on disk, requesting")
+            if flow_cell.status == FlowCellStatus.REMOVED:
                 flow_cell.status = FlowCellStatus.REQUESTED
-            elif flow_cell.status != FlowCellStatus.ON_DISK:
-                LOG.warning(f"{flow_cell.name}: {flow_cell.status}")
+                LOG.info(f"Setting status for {flow_cell.name} to {FlowCellStatus.REQUESTED}")
         self.session.commit()
-        return all(status == FlowCellStatus.ON_DISK for status in statuses)
 
     def get_invoices_by_status(self, is_invoiced: bool = None) -> list[Invoice]:
         """Return invoices by invoiced status."""

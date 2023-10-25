@@ -8,7 +8,7 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat, PrepCategory
+from cg.constants.constants import CaseActions, FileFormat, PrepCategory
 from cg.io.controller import WriteFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -323,6 +323,7 @@ def balsamic_context(
         internal_id="balsamic_case_wgs_paired_enough_reads",
         name="balsamic_case_wgs_paired_enough_reads",
         data_analysis=Pipeline.BALSAMIC,
+        action=CaseActions.HOLD,
     )
     sample_case_wgs_paired_tumor_enough_reads = helpers.add_sample(
         status_db,
@@ -357,6 +358,7 @@ def balsamic_context(
         internal_id="balsamic_case_wgs_paired",
         name="balsamic_case_wgs_paired",
         data_analysis=Pipeline.BALSAMIC,
+        action=CaseActions.HOLD,
     )
     sample_case_wgs_paired_tumor = helpers.add_sample(
         status_db,
