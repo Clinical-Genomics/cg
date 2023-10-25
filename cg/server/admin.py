@@ -53,13 +53,13 @@ def is_external_application(unused1, unused2, model, unused3):
 def view_sample_concentration_minimum(unused1, unused2, model, unused3):
     """Column formatter to append unit"""
     del unused1, unused2, unused3
-    return str(model.sample_concentration_minimum_ng_ul) + "ng/uL"
+    return str(model.sample_concentration_minimum_ng_per_ul) + "ng/uL"
 
 
 def view_sample_concentration_maximum(unused1, unused2, model, unused3):
     """Column formatter to append unit"""
     del unused1, unused2, unused3
-    return str(model.sample_concentration_maximum_ng_ul) + "ng/uL"
+    return str(model.sample_concentration_maximum_ng_per_ul) + "ng/uL"
 
 
 class ApplicationView(BaseView):
