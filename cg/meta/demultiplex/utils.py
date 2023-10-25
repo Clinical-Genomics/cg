@@ -250,7 +250,7 @@ def needs_manifest_file(flow_cell_dir: Path) -> bool:
     )
 
 
-def create_manifest_file(flow_cell_dir_name: Path) -> None:
+def create_manifest_file(flow_cell_dir_name: Path) -> Path:
     """Creates a tab separated file containing the paths of all files in the given
     directory and any subdirectories."""
     files_in_directory: list[list[str]] = []
@@ -260,11 +260,13 @@ def create_manifest_file(flow_cell_dir_name: Path) -> None:
     LOG.info(
         f"Writing manifest file to {Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST)}"
     )
+    output_path = Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST)
     write_csv(
         content=files_in_directory,
-        file_path=Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST),
+        file_path=output_path,
         delimiter="\t",
     )
+    return output_path
 
 
 def flow_cell_sync_confirmed(target_flow_cell_dir: Path) -> bool:

@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pytest
@@ -9,6 +10,8 @@ from cg.exc import FlowCellError
 from cg.meta.demultiplex.utils import (
     add_flow_cell_name_to_fastq_file_path,
     create_delivery_file_in_flow_cell_directory,
+    create_manifest_file,
+    flow_cell_sync_confirmed,
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_sheet_path_from_flow_cell_dir,
@@ -19,6 +22,7 @@ from cg.meta.demultiplex.utils import (
     is_sample_id_in_directory_name,
     is_syncing_complete,
     is_valid_sample_fastq_file,
+    needs_manifest_file,
     parse_manifest_file,
 )
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -329,6 +333,85 @@ def test_is_syncing_complete_false(
 
     # THEN the syncing should not be deemed complete
     assert not is_directory_synced
+
+
+@pytest.mark.parametrize(
+    "source_files,expected_result",
+    [
+        ([DemultiplexingDirsAndFiles.COPY_COMPLETE], True),
+        ([DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST], False),
+        (
+            [
+                DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST,
+                DemultiplexingDirsAndFiles.COPY_COMPLETE,
+            ],
+            False,
+        ),
+        ([DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST], False),
+        (
+            [
+                DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST,
+                DemultiplexingDirsAndFiles.COPY_COMPLETE,
+            ],
+            False,
+        ),
+    ],
+)
+def test_needs_manifest_file(source_files: list[str], expected_result: bool, tmp_path):
+    """Tests if a manifest file is needed given the files present."""
+    # GIVEN a source directory
+    source_directory = Path(tmp_path, "source")
+    Path(tmp_path, "source").mkdir()
+
+    # GIVEN the files present
+    for file in source_files:
+        Path(source_directory, file).touch()
+
+    # WHEN checking if a manifest file is needed
+    result = needs_manifest_file(source_directory)
+
+    # THEN the result should as expected
+    assert result == expected_result
+
+
+@pytest.mark.parametrize(
+    "source_files,expected_result",
+    [([DemultiplexingDirsAndFiles.COPY_COMPLETE], True), ([], False)],
+)
+def test_flow_cell_sync_confirmed(source_files: list[str], expected_result: bool, tmp_path):
+    """Tests the check that a flow cell sync has been confirmed."""
+    # GIVEN a flow cell directory with the given file present
+    for file in source_files:
+        Path(tmp_path, file).touch()
+
+    # WHEN checking if the flow cell sync has been confirmed
+    result = flow_cell_sync_confirmed(tmp_path)
+
+    # THEN the result should match what we expect
+    assert result == expected_result
+
+
+def test_create_manifest_file(tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert: Path):
+    # GIVEN a flow cell directory with files
+    all_files: list[Path] = []
+    for subdir, _, files in os.walk(tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert):
+        subdir = Path(subdir).relative_to(
+            tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert
+        )
+        all_files.extend([Path(subdir, file) for file in files])
+    # WHEN creating a manifest file
+    manifest_file: Path = create_manifest_file(
+        tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert
+    )
+
+    # THEN a manifest file should be created
+    assert manifest_file.exists()
+
+    # Then all files should be included in the manifest file
+    with open(manifest_file, "r") as manifest_file_handle:
+        files_in_manifest = [Path(file.strip()) for file in manifest_file_handle.readlines()]
+    for file in all_files:
+        assert file in files_in_manifest
 
 
 def test_add_flow_cell_name_to_fastq_file_path(
