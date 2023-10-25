@@ -20,19 +20,19 @@ def upgrade():
     op.add_column(
         table_name="application",
         column=sa.Column(
-            "sample_concentration_minimum_ng_per_ul",
+            "sample_concentration_minimum",
             sa.DECIMAL,
         ),
     )
     op.add_column(
         table_name="application",
         column=sa.Column(
-            "sample_concentration_maximum_ng_per_ul",
+            "sample_concentration_maximum",
             sa.DECIMAL,
         ),
     )
 
 
 def downgrade():
-    op.drop_column(table_name="application", column_name="sample_concentration_maximum_ng_per_ul")
-    op.drop_column(table_name="application", column_name="sample_concentration_minimum_ng_per_ul")
+    op.drop_column(table_name="application", column_name="sample_concentration_maximum")
+    op.drop_column(table_name="application", column_name="sample_concentration_minimum")
