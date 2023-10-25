@@ -20,14 +20,14 @@ def upgrade():
     op.add_column(
         table_name="application",
         column=sa.Column(
-            "sample_concentration_minimum",
+            "sample_concentration_minimum_ng_ul",
             sa.DECIMAL,
         ),
     )
     op.add_column(
         table_name="application",
         column=sa.Column(
-            "sample_concentration_maximum",
+            "sample_concentration_maximum_ng_ul",
             sa.DECIMAL,
         ),
     )
