@@ -30,7 +30,7 @@ ENV GOOGLE_OAUTH_CLIENT_SECRET="1"
 WORKDIR /home/src/app
 COPY pyproject.toml poetry.lock ./ 
 
-RUN pip install poetry \
+RUN pip install --no-cache-dir poetry \
     && poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
 
