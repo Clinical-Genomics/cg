@@ -2,6 +2,7 @@ name: CG Installation Tests
 
 on:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   installations:
