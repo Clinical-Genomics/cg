@@ -21,14 +21,14 @@ def upgrade():
         table_name="application",
         column=sa.Column(
             "sample_concentration_minimum",
-            sa.DECIMAL,
+            sa.DECIMAL(6, 2),
         ),
     )
     op.add_column(
         table_name="application",
         column=sa.Column(
             "sample_concentration_maximum",
-            sa.DECIMAL,
+            sa.DECIMAL(6, 2),
         ),
     )
 
