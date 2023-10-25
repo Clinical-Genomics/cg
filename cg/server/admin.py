@@ -91,8 +91,8 @@ class ApplicationView(BaseView):
         "category",
     ]
     column_formatters = {
-        "sample_concentration_minimum_ng_ul": view_sample_concentration_minimum,
-        "sample_concentration_maximum_ng_ul": view_sample_concentration_minimum,
+        "sample_concentration_minimum_ng_per_ul": view_sample_concentration_minimum,
+        "sample_concentration_maximum_ng_per_ul": view_sample_concentration_minimum,
     }
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
