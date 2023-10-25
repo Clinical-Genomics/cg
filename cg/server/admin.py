@@ -53,13 +53,21 @@ def is_external_application(unused1, unused2, model, unused3):
 def view_sample_concentration_minimum(unused1, unused2, model, unused3):
     """Column formatter to append unit"""
     del unused1, unused2, unused3
-    return str(model.sample_concentration_minimum_ng_per_ul) + "ng/uL"
+    return (
+        str(model.sample_concentration_minimum_ng_per_ul) + " ng/uL"
+        if model.sample_concentration_minimum_ng_per_ul
+        else None
+    )
 
 
 def view_sample_concentration_maximum(unused1, unused2, model, unused3):
     """Column formatter to append unit"""
     del unused1, unused2, unused3
-    return str(model.sample_concentration_maximum_ng_per_ul) + "ng/uL"
+    return (
+        str(model.sample_concentration_maximum_ng_per_ul) + " ng/uL"
+        if model.sample_concentration_maximum_ng_per_ul
+        else None
+    )
 
 
 class ApplicationView(BaseView):
@@ -92,7 +100,7 @@ class ApplicationView(BaseView):
     ]
     column_formatters = {
         "sample_concentration_minimum_ng_per_ul": view_sample_concentration_minimum,
-        "sample_concentration_maximum_ng_per_ul": view_sample_concentration_minimum,
+        "sample_concentration_maximum_ng_per_ul": view_sample_concentration_maximum,
     }
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
