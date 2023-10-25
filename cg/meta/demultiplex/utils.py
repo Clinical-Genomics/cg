@@ -211,11 +211,11 @@ def is_file_relevant_for_demultiplexing(file: Path) -> bool:
 def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
     """Returns whether all relevant files for demultiplexing have been synced from the source to
     the target."""
-    manifest_files = [
+    manifest_files: list[Path] = [
         Path(source_directory, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST),
         Path(source_directory, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST),
     ]
-    existing_files = [file for file in manifest_files if file.exists()]
+    existing_files: list[Path] = [file for file in manifest_files if file.exists()]
     if not existing_files:
         LOG.debug(f"{source_directory} does not contain a manifest file. Skipping.")
         return False
