@@ -27,7 +27,7 @@ def test_get_sample_metadata(
     sample_metadata = report_api_mip_dna.get_sample_metadata(case_mip_dna, sample, mip_metadata)
 
     # THEN check that the sample metadata is correctly retrieved
-    assert sample_metadata == expected_metadata
+    assert sample_metadata.model_dump() == expected_metadata
 
 
 def test_get_sample_coverage(report_api_mip_dna, sample_store, helpers: StoreHelpers, case_mip_dna):
