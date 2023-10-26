@@ -218,8 +218,9 @@ class GetJobStatusPayload(BaseModel):
 
     def post_request(self, url: str, headers: dict) -> GetJobStatusResponse:
         """Sends a request to the given url with the given headers, and its own content as
-        payload. Raises an error if the response code is not ok. Returns the job ID of the
-        launched transfer task.
+        payload. Returns the job ID of the launched transfer task.
+        Raises:
+             HTTPError if the response code is not ok.
         """
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,

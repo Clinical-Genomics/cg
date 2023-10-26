@@ -576,12 +576,14 @@ class HousekeeperAPI:
             tag_names=[SequencingFileTag.FASTQ, flow_cell_id, sample_internal_id],
         )
 
-    def get_archive_entries(self, archival_task_id: int = None, retrieval_task_id: int = None):
+    def get_archive_entries(
+        self, archival_task_id: int = None, retrieval_task_id: int = None
+    ) -> list[Archive]:
         return self._store.get_archives(
             archival_task_id=archival_task_id, retrieval_task_id=retrieval_task_id
         )
 
-    def set_archived_at(self, archival_task_id: int):
+    def set_archived_at(self, archival_task_id: int) -> None:
         """Sets archived_at to the current time for archive entries with matching archival task id.
         Raises:
                 HousekeeperArchiveMissingError if no Archive entries match the given retrieval task id.
@@ -597,7 +599,7 @@ class HousekeeperAPI:
             )
         self.commit()
 
-    def set_retrieved_at(self, retrieval_task_id: int):
+    def set_retrieved_at(self, retrieval_task_id: int) -> None:
         """Sets retrieved_at to the current time for archive entries with matching archival task id.
         Raises:
                 HousekeeperArchiveMissingError if no Archive entries match the given retrieval task id.
