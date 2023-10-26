@@ -6,6 +6,7 @@ from typing import List, Optional
 
 import click
 import coloredlogs
+from sqlalchemy.orm import scoped_session
 
 import cg
 from cg.cli.add import add as add_cmd
@@ -26,9 +27,17 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
 from cg.store.database import create_all_tables, drop_all_tables, get_tables
+from cg.store.database import get_scoped_session_registry
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
+
+
+def teardown_session():
+    """Ensure that the session is closed and all resources are released to the connection pool."""
+    registry: Optional[scoped_session] = get_scoped_session_registry()
+    if registry:
+        registry.remove()
 
 
 @click.group()
@@ -60,6 +69,7 @@ def base(
         else {"database": database}
     )
     context.obj = CGConfig(**raw_config)
+    context.call_on_close(teardown_session)
 
 
 @base.command()
