@@ -208,8 +208,12 @@ def test_filter_cases_with_loqusdb_supported_pipeline(
     test_fluffy_case.customer.loqus_upload = True
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link_1: FamilySample =base_store.relate_sample(test_mip_case, test_sample, PhenotypeStatus.UNKNOWN)
-    link_2: FamilySample =base_store.relate_sample(test_fluffy_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link_1: FamilySample = base_store.relate_sample(
+        test_mip_case, test_sample, PhenotypeStatus.UNKNOWN
+    )
+    link_2: FamilySample = base_store.relate_sample(
+        test_fluffy_case, test_sample, PhenotypeStatus.UNKNOWN
+    )
     base_store.session.add_all([link_1, link_2])
 
     # GIVEN a cases Query
@@ -459,8 +463,10 @@ def test_filter_report_supported_data_delivery_cases(
     test_invalid_case = helpers.add_case(base_store, name="test", data_delivery=DataDelivery.FASTQ)
 
     # GIVEN a database with the test cases
-    link_1: FamilySample =base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
-    link_2: FamilySample =base_store.relate_sample(test_invalid_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link_1: FamilySample = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link_2: FamilySample = base_store.relate_sample(
+        test_invalid_case, test_sample, PhenotypeStatus.UNKNOWN
+    )
     base_store.session.add_all([link_1, link_2])
 
     # GIVEN a cases Query
