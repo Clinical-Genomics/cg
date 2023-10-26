@@ -41,10 +41,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, EncryptionDirectories
-from cg.models.demultiplex.run_parameters import (
-    RunParametersNovaSeq6000,
-    RunParametersNovaSeqX,
-)
+from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
@@ -2626,6 +2623,12 @@ def strandedness() -> str:
 def strandedness_not_permitted() -> str:
     """Return a not permitted strandedness."""
     return "double_stranded"
+
+
+@pytest.fixture(scope="session")
+def pipeline_version() -> str:
+    """Return a pipeline version."""
+    return "2.2.0"
 
 
 @pytest.fixture(scope="session")
