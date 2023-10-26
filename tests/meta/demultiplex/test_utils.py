@@ -7,12 +7,12 @@ from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.exc import FlowCellError
+from cg.io.csv import read_csv
 from cg.meta.demultiplex.utils import (
     add_flow_cell_name_to_fastq_file_path,
     are_all_files_synced,
     create_delivery_file_in_flow_cell_directory,
     create_manifest_file,
-    flow_cell_sync_confirmed,
     get_existing_manifest_file,
     get_lane_from_sample_fastq,
     get_q30_threshold,
@@ -20,11 +20,12 @@ from cg.meta.demultiplex.utils import (
     get_undetermined_fastqs,
     is_file_path_compressed_fastq,
     is_file_relevant_for_demultiplexing,
+    is_flow_cell_sync_confirmed,
     is_lane_in_fastq_file_name,
+    is_manifest_file_required,
     is_sample_id_in_directory_name,
     is_syncing_complete,
     is_valid_sample_fastq_file,
-    needs_manifest_file,
     parse_manifest_file,
 )
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -312,27 +313,27 @@ def test_get_existing_manifest_file_illumina(lsyncd_source_directory: Path):
 
     # THEN the manifest file should be returned
     assert manifest_file == Path(
-        lsyncd_source_directory, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST
+        lsyncd_source_directory, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST
     )
 
 
 def test_get_existing_manifest_file(lsyncd_source_directory: Path):
     # GIVEN a directory with a custom manifest file
-    Path(lsyncd_source_directory, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST).rename(
-        Path(lsyncd_source_directory, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST)
+    Path(lsyncd_source_directory, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST).rename(
+        Path(lsyncd_source_directory, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)
     )
     # WHEN getting the manifest file
     manifest_file: Path = get_existing_manifest_file(lsyncd_source_directory)
 
     # THEN the manifest file should be returned
     assert manifest_file == Path(
-        lsyncd_source_directory, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST
+        lsyncd_source_directory, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST
     )
 
 
 def test_get_existing_manifest_file_missing(lsyncd_source_directory: Path):
     # GIVEN a directory with a missing manifest file
-    Path(lsyncd_source_directory, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST).unlink()
+    Path(lsyncd_source_directory, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST).unlink()
 
     # WHEN getting the manifest file
     manifest_file: Path = get_existing_manifest_file(lsyncd_source_directory)
@@ -407,28 +408,28 @@ def test_is_syncing_complete_false(
 
 
 @pytest.mark.parametrize(
-    "source_files,expected_result",
+    "source_files, expected_result",
     [
         ([DemultiplexingDirsAndFiles.COPY_COMPLETE], True),
-        ([DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST], False),
+        ([DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST], False),
         (
             [
-                DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST,
+                DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST,
                 DemultiplexingDirsAndFiles.COPY_COMPLETE,
             ],
             False,
         ),
-        ([DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST], False),
+        ([DemultiplexingDirsAndFiles.CG_FILE_MANIFEST], False),
         (
             [
-                DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST,
+                DemultiplexingDirsAndFiles.CG_FILE_MANIFEST,
                 DemultiplexingDirsAndFiles.COPY_COMPLETE,
             ],
             False,
         ),
     ],
 )
-def test_needs_manifest_file(source_files: list[str], expected_result: bool, tmp_path):
+def test_is_manifest_file_required(source_files: list[str], expected_result: bool, tmp_path):
     """Tests if a manifest file is needed given the files present."""
     # GIVEN a source directory
     source_directory = Path(tmp_path, "source")
@@ -439,27 +440,27 @@ def test_needs_manifest_file(source_files: list[str], expected_result: bool, tmp
         Path(source_directory, file).touch()
 
     # WHEN checking if a manifest file is needed
-    result = needs_manifest_file(source_directory)
+    is_required = is_manifest_file_required(source_directory)
 
     # THEN the result should as expected
-    assert result == expected_result
+    assert is_required == expected_result
 
 
 @pytest.mark.parametrize(
-    "source_files,expected_result",
+    "source_files, expected_result",
     [([DemultiplexingDirsAndFiles.COPY_COMPLETE], True), ([], False)],
 )
-def test_flow_cell_sync_confirmed(source_files: list[str], expected_result: bool, tmp_path):
-    """Tests the check that a flow cell sync has been confirmed."""
+def test_is_flow_cell_sync_confirmed(source_files: list[str], expected_result: bool, tmp_path):
+    """Tests that a flow cell sync has been confirmed."""
     # GIVEN a flow cell directory with the given file present
     for file in source_files:
         Path(tmp_path, file).touch()
 
     # WHEN checking if the flow cell sync has been confirmed
-    result = flow_cell_sync_confirmed(tmp_path)
+    is_synced = is_flow_cell_sync_confirmed(tmp_path)
 
     # THEN the result should match what we expect
-    assert result == expected_result
+    assert is_synced == expected_result
 
 
 def test_create_manifest_file(tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert: Path):
@@ -479,8 +480,9 @@ def test_create_manifest_file(tmp_flow_cells_directory_ready_for_demultiplexing_
     assert manifest_file.exists()
 
     # Then all files should be included in the manifest file
-    with open(manifest_file, "r") as manifest_file_handle:
-        files_in_manifest = [Path(file.strip()) for file in manifest_file_handle.readlines()]
+    files_in_manifest: list[Path] = [
+        Path(file[0].strip()) for file in read_csv(delimiter="\t", file_path=manifest_file)
+    ]
     for file in all_files:
         assert file in files_in_manifest
 

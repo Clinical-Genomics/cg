@@ -211,8 +211,8 @@ def is_file_relevant_for_demultiplexing(file: Path) -> bool:
 def get_existing_manifest_file(source_directory: Path) -> Optional[Path]:
     """Returns the first existing manifest file in the source directory."""
     manifest_file_paths = [
-        Path(source_directory, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST),
-        Path(source_directory, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST),
+        Path(source_directory, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST),
+        Path(source_directory, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST),
     ]
     for file_path in manifest_file_paths:
         if file_path.exists():
@@ -249,12 +249,10 @@ def get_flow_cell_id(flow_cell_dir_name: str) -> str:
     return flow_cell_dir_name.split("_")[-1][1:]
 
 
-def needs_manifest_file(flow_cell_dir: Path) -> bool:
+def is_manifest_file_required(flow_cell_dir: Path) -> bool:
     """Returns whether a flow cell directory needs a manifest file."""
-    illumina_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST)
-    custom_manifest_file = Path(
-        flow_cell_dir, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST
-    )
+    illumina_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST)
+    custom_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)
     copy_complete_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE)
     return (
         not any((illumina_manifest_file.exists(), custom_manifest_file.exists()))
@@ -270,9 +268,9 @@ def create_manifest_file(flow_cell_dir_name: Path) -> Path:
         subdir = Path(subdir).relative_to(flow_cell_dir_name)
         files_in_directory.extend([Path(subdir, file).as_posix()] for file in files)
     LOG.info(
-        f"Writing manifest file to {Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST)}"
+        f"Writing manifest file to {Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)}"
     )
-    output_path = Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST)
+    output_path = Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)
     write_csv(
         content=files_in_directory,
         file_path=output_path,
@@ -281,5 +279,5 @@ def create_manifest_file(flow_cell_dir_name: Path) -> Path:
     return output_path
 
 
-def flow_cell_sync_confirmed(target_flow_cell_dir: Path) -> bool:
+def is_flow_cell_sync_confirmed(target_flow_cell_dir: Path) -> bool:
     return Path(target_flow_cell_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE).exists()

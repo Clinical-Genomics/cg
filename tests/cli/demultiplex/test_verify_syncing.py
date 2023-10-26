@@ -11,12 +11,13 @@ def test_create_manifest_files_true(tmp_path: Path, cli_runner):
         directory.mkdir()
 
     # GIVEN that both flowcell directories need a manifest file
-    with mock.patch("cg.cli.demultiplex.demux.needs_manifest_file", return_value=True):
-        with mock.patch(
-            "cg.cli.demultiplex.demux.create_manifest_file", return_value=None
-        ) as manifest_creation:
-            # WHEN creating manifest files
-            cli_runner.invoke(cli=create_manifest_files, args=["-s", tmp_path.as_posix()])
+    with mock.patch("cg.cli.demultiplex.demux.needs_manifest_file", return_value=True), mock.patch(
+        "cg.cli.demultiplex.demux.create_manifest_file", return_value=None
+    ) as manifest_creation:
+        # WHEN creating manifest files
+        cli_runner.invoke(
+            cli=create_manifest_files, args=["--source-directory", tmp_path.as_posix()]
+        )
 
     # THEN the manifest files creation should be called for every flowcell directory
     assert manifest_creation.call_count == len(flow_cell_directories)
@@ -34,7 +35,9 @@ def test_create_manifest_files_false(tmp_path: Path, cli_runner):
             "cg.cli.demultiplex.demux.create_manifest_file", return_value=None
         ) as manifest_creation:
             # WHEN creating manifest files
-            cli_runner.invoke(cli=create_manifest_files, args=["-s", tmp_path.as_posix()])
+            cli_runner.invoke(
+                cli=create_manifest_files, args=["--source-directory", tmp_path.as_posix()]
+            )
 
     # THEN the manifest files creation should not be called
     assert not manifest_creation.called

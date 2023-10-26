@@ -16,9 +16,9 @@ from cg.exc import FlowCellError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.meta.demultiplex.utils import (
     create_manifest_file,
-    flow_cell_sync_confirmed,
+    is_flow_cell_sync_confirmed,
+    is_manifest_file_required,
     is_syncing_complete,
-    needs_manifest_file,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -205,7 +205,6 @@ def copy_novaseqx_flow_cells(context: CGConfig):
 
 @click.command(name="confirm-flow-cell-sync")
 @click.option(
-    "-s",
     "--source-directory",
     required=True,
     help="The path from where the syncing is done.",
@@ -214,17 +213,18 @@ def copy_novaseqx_flow_cells(context: CGConfig):
 def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
     """Checks if all relevant files for the demultiplexing have been synced.
     If so it creates a CopyComplete.txt file to show that that is the case."""
-    target_flow_cells_dir = Path(context.flow_cells_dir)
+    target_flow_cells_directory = Path(context.flow_cells_dir)
     for source_flow_cell in Path(source_directory).iterdir():
-        if flow_cell_sync_confirmed(Path(target_flow_cells_dir, source_flow_cell.name)):
+        target_flow_cell = Path(target_flow_cells_directory, source_flow_cell.name)
+        if is_flow_cell_sync_confirmed(target_flow_cell):
             LOG.debug(f"Flow cell {source_flow_cell} has already been confirmed, skipping.")
             continue
         if is_syncing_complete(
             source_directory=source_flow_cell,
-            target_directory=Path(target_flow_cells_dir, source_flow_cell.name),
+            target_directory=Path(target_flow_cells_directory, source_flow_cell.name),
         ):
             Path(
-                target_flow_cells_dir,
+                target_flow_cells_directory,
                 source_flow_cell.name,
                 DemultiplexingDirsAndFiles.COPY_COMPLETE,
             ).touch()
@@ -232,12 +232,11 @@ def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
 
 @click.command(name="create-manifest-files")
 @click.option(
-    "-s",
     "--source-directory",
     required=True,
     help="The path from where the syncing is done.",
 )
 def create_manifest_files(source_directory: str):
     for source_flow_cell in Path(source_directory).iterdir():
-        if needs_manifest_file(source_flow_cell):
+        if is_manifest_file_required(source_flow_cell):
             create_manifest_file(source_flow_cell)
