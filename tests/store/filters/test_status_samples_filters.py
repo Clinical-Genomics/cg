@@ -40,8 +40,10 @@ def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, lo
     case = helpers.add_case(store)
     sample = helpers.add_sample(store, loqusdb_id=loqusdb_id)
     sample_not_uploaded = helpers.add_sample(store, internal_id=sample_id)
-    link_1: FamilySample =sample_store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
-    link_2: FamilySample =sample_store.relate_sample(
+    link_1: FamilySample = sample_store.relate_sample(
+        family=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+    )
+    link_2: FamilySample = sample_store.relate_sample(
         family=case, sample=sample_not_uploaded, status=PhenotypeStatus.UNKNOWN
     )
     sample_store.session.add_all([link_1, link_2])
@@ -64,8 +66,10 @@ def test_get_samples_without_loqusdb_id(helpers, store, sample_store, sample_id,
     case = helpers.add_case(store)
     sample = helpers.add_sample(store)
     sample_uploaded = helpers.add_sample(store, internal_id=sample_id, loqusdb_id=loqusdb_id)
-    link_1: FamilySample =sample_store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
-    link_2: FamilySample =sample_store.relate_sample(
+    link_1: FamilySample = sample_store.relate_sample(
+        family=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+    )
+    link_2: FamilySample = sample_store.relate_sample(
         family=case, sample=sample_uploaded, status=PhenotypeStatus.UNKNOWN
     )
     sample_store.session.add_all([link_1, link_2])

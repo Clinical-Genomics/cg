@@ -143,8 +143,12 @@ def test_get_sequencing_method_exception(
     sample_wes: Sample = helpers.add_sample(
         store, application_tag=external_wes_application_tag, application_type=SequencingMethod.WES
     )
-    link_1: FamilySample =store.relate_sample(family=case, sample=sample_wgs, status=PhenotypeStatus.UNKNOWN)
-    link_2: FamilySample =store.relate_sample(family=case, sample=sample_wes, status=PhenotypeStatus.UNKNOWN)
+    link_1: FamilySample = store.relate_sample(
+        family=case, sample=sample_wgs, status=PhenotypeStatus.UNKNOWN
+    )
+    link_2: FamilySample = store.relate_sample(
+        family=case, sample=sample_wes, status=PhenotypeStatus.UNKNOWN
+    )
     store.session.add_all([link_1, link_2])
 
     # WHEN getting the sequencing method
