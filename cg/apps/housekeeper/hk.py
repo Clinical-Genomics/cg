@@ -504,16 +504,11 @@ class HousekeeperAPI:
         self._store.update_retrieval_task_id(archive=archive, retrieval_task_id=retrieval_task_id)
 
     def get_sample_sheets_from_latest_version(self, flow_cell_id: str) -> list[File]:
-        """Returns the files tagged with 'samplesheet' or 'archived_sample_sheet' for the given bundle."""
+        """Returns the files tagged with 'samplesheet' for the given bundle."""
         try:
-            sheets_with_normal_tag: list[File] = self.get_files_from_latest_version(
+            sample_sheet_files: list[File] = self.get_files_from_latest_version(
                 bundle_name=flow_cell_id, tags=[flow_cell_id, SequencingFileTag.SAMPLE_SHEET]
             ).all()
-            sheets_with_archive_tag: list[File] = self.get_files_from_latest_version(
-                bundle_name=flow_cell_id,
-                tags=[flow_cell_id, SequencingFileTag.ARCHIVED_SAMPLE_SHEET],
-            ).all()
-            sample_sheet_files: list[File] = sheets_with_normal_tag + sheets_with_archive_tag
         except HousekeeperBundleVersionMissingError:
             sample_sheet_files = []
         return sample_sheet_files
