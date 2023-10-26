@@ -2,6 +2,7 @@
 from sqlalchemy.orm import Query
 
 from cg.constants.subject import PhenotypeStatus
+from cg.store.models import FamilySample
 
 
 def test_get_latest_analyses_for_cases_query(
@@ -28,7 +29,7 @@ def test_get_latest_analyses_for_cases_query(
         delivery_reported_at=None,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-    link = analysis_store.relate_sample(
+    link: FamilySample = analysis_store.relate_sample(
         family=analysis_oldest.family, sample=sample, status=PhenotypeStatus.UNKNOWN
     )
     analysis_store.session.add(link)

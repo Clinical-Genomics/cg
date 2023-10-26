@@ -9,6 +9,7 @@ from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus
 from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.store import Store
+from cg.store.models import FamilySample
 from tests.meta.demultiplex.conftest import populated_flow_cell_store
 from tests.store_helpers import StoreHelpers
 
@@ -478,7 +479,7 @@ def store_with_analyses_for_cases(
             completed_at=timestamp_now,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        link = analysis_store.relate_sample(
+        link: FamilySample = analysis_store.relate_sample(
             family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
         analysis_store.session.add(link)
@@ -518,7 +519,7 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
             pipeline=Pipeline.FLUFFY,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        link = analysis_store.relate_sample(
+        link: FamilySample = analysis_store.relate_sample(
             family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
         analysis_store.session.add(link)
@@ -558,7 +559,7 @@ def store_with_analyses_for_cases_not_uploaded_microsalt(
             pipeline=Pipeline.MICROSALT,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        link = analysis_store.relate_sample(
+        link: FamilySample = analysis_store.relate_sample(
             family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
         analysis_store.session.add(link)
@@ -599,7 +600,7 @@ def store_with_analyses_for_cases_to_deliver(
             pipeline=Pipeline.MIP_DNA,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=None)
-        link = analysis_store.relate_sample(
+        link: FamilySample = analysis_store.relate_sample(
             family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
         analysis_store.session.add(link)
