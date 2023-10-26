@@ -9,9 +9,11 @@ from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.utils import (
     add_flow_cell_name_to_fastq_file_path,
+    are_all_files_synced,
     create_delivery_file_in_flow_cell_directory,
     create_manifest_file,
     flow_cell_sync_confirmed,
+    get_existing_manifest_file,
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_sheet_path_from_flow_cell_dir,
@@ -303,6 +305,42 @@ def test_is_file_relevant_for_demultiplexing(file: Path, expected_result: bool):
     assert result == expected_result
 
 
+def test_get_existing_manifest_file_illumina(lsyncd_source_directory: Path):
+    # GIVEN a directory with an Illumina manifest file
+    # WHEN getting the manifest file
+    manifest_file: Path = get_existing_manifest_file(lsyncd_source_directory)
+
+    # THEN the manifest file should be returned
+    assert manifest_file == Path(
+        lsyncd_source_directory, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST
+    )
+
+
+def test_get_existing_manifest_file(lsyncd_source_directory: Path):
+    # GIVEN a directory with a custom manifest file
+    Path(lsyncd_source_directory, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST).rename(
+        Path(lsyncd_source_directory, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST)
+    )
+    # WHEN getting the manifest file
+    manifest_file: Path = get_existing_manifest_file(lsyncd_source_directory)
+
+    # THEN the manifest file should be returned
+    assert manifest_file == Path(
+        lsyncd_source_directory, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST
+    )
+
+
+def test_get_existing_manifest_file_missing(lsyncd_source_directory: Path):
+    # GIVEN a directory with a missing manifest file
+    Path(lsyncd_source_directory, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST).unlink()
+
+    # WHEN getting the manifest file
+    manifest_file: Path = get_existing_manifest_file(lsyncd_source_directory)
+
+    # THEN the manifest file should be returned
+    assert manifest_file is None
+
+
 def test_is_syncing_complete_true(lsyncd_source_directory: Path, lsyncd_target_directory: Path):
     # GIVEN a source directory with a manifest file
 
@@ -311,6 +349,39 @@ def test_is_syncing_complete_true(lsyncd_source_directory: Path, lsyncd_target_d
     # WHEN checking if the syncing is complete
     is_directory_synced: bool = is_syncing_complete(
         source_directory=lsyncd_source_directory, target_directory=lsyncd_target_directory
+    )
+
+    # THEN the syncing should be deemed complete
+    assert is_directory_synced
+
+
+def test_are_all_files_synced_false(
+    novaseq_x_manifest_file, lsyncd_source_directory: Path, lsyncd_target_directory: Path
+):
+    # GIVEN a source directory with a manifest file
+    files_at_source: list[Path] = parse_manifest_file(novaseq_x_manifest_file)
+    # GIVEN a target directory with one file missing
+    Path(lsyncd_target_directory, files_at_source[0]).unlink()
+
+    # WHEN checking if the syncing is complete
+    is_directory_synced: bool = are_all_files_synced(
+        files_at_source=files_at_source, target_directory=lsyncd_target_directory
+    )
+
+    # THEN the syncing should not be deemed complete
+    assert not is_directory_synced
+
+
+def test_are_all_files_synced(
+    novaseq_x_manifest_file, lsyncd_source_directory: Path, lsyncd_target_directory: Path
+):
+    # GIVEN a source directory with a manifest file
+    files_at_source: list[Path] = parse_manifest_file(novaseq_x_manifest_file)
+    # GIVEN a target directory with all relevant files
+
+    # WHEN checking if the syncing is complete
+    is_directory_synced: bool = are_all_files_synced(
+        files_at_source=files_at_source, target_directory=lsyncd_target_directory
     )
 
     # THEN the syncing should be deemed complete

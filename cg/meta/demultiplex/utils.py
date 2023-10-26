@@ -208,26 +208,38 @@ def is_file_relevant_for_demultiplexing(file: Path) -> bool:
     return False
 
 
-def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
-    """Returns whether all relevant files for demultiplexing have been synced from the source to
-    the target."""
-    manifest_files: list[Path] = [
+def get_existing_manifest_file(source_directory: Path) -> Optional[Path]:
+    """Returns the first existing manifest file in the source directory."""
+    manifest_file_paths = [
         Path(source_directory, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST),
         Path(source_directory, DemultiplexingDirsAndFiles.CUSTOM_OUTPUT_FILE_MANIFEST),
     ]
-    existing_files: list[Path] = [file for file in manifest_files if file.exists()]
-    if not existing_files:
-        LOG.debug(f"{source_directory} does not contain a manifest file. Skipping.")
-        return False
-    files_at_source: list[Path] = parse_manifest_file(existing_files[0])
+    for file_path in manifest_file_paths:
+        if file_path.exists():
+            return file_path
+
+
+def are_all_files_synced(files_at_source: list[Path], target_directory: Path) -> bool:
+    """Checks if all relevant files in the source are present in the target directory."""
     for file in files_at_source:
-        if is_file_relevant_for_demultiplexing(file) and not Path(target_directory, file).exists():
-            LOG.info(
-                f"File: {file}, has not been transferred from {source_directory} "
-                f"to {target_directory}"
-            )
+        target_file_path = Path(target_directory, file)
+        if is_file_relevant_for_demultiplexing(file) and not target_file_path.exists():
+            LOG.info(f"File: {file}, has not been transferred from source to {target_directory}")
             return False
     return True
+
+
+def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
+    """Returns whether all relevant files for demultiplexing have been synced from the source to the target."""
+
+    existing_manifest_file = get_existing_manifest_file(source_directory)
+
+    if existing_manifest_file is None:
+        LOG.debug(f"{source_directory} does not contain a manifest file. Skipping.")
+        return False
+
+    files_at_source = parse_manifest_file(existing_manifest_file)
+    return are_all_files_synced(files_at_source, target_directory)
 
 
 def get_flow_cell_id(flow_cell_dir_name: str) -> str:
