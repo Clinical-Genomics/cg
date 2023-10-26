@@ -26,6 +26,7 @@ jobs:
 
       - name: Cache Dependencies
         uses: actions/cache@v3
+        id: cache
         with:
           path: ~/.cache/pypoetry
           key: poetry-${{ hashFiles('**/poetry.lock') }}
