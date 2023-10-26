@@ -582,7 +582,10 @@ class HousekeeperAPI:
         )
 
     def set_archived_at(self, archival_task_id: int):
-        """Sets archived_at to the current time for archive entries with matching archival task id."""
+        """Sets archived_at to the current time for archive entries with matching archival task id.
+        Raises:
+                HousekeeperArchiveMissingError if no Archive entries match the given retrieval task id.
+        """
         archive_entries: list[Archive] = self.get_archive_entries(archival_task_id=archival_task_id)
         if not archive_entries:
             raise HousekeeperArchiveMissingError(
@@ -595,7 +598,10 @@ class HousekeeperAPI:
         self.commit()
 
     def set_retrieved_at(self, retrieval_task_id: int):
-        """Sets retrieved_at to the current time for archive entries with matching archival task id."""
+        """Sets retrieved_at to the current time for archive entries with matching archival task id.
+        Raises:
+                HousekeeperArchiveMissingError if no Archive entries match the given retrieval task id.
+        """
         archive_entries: list[Archive] = self.get_archive_entries(
             retrieval_task_id=retrieval_task_id
         )
