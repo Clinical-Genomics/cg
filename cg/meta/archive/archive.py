@@ -195,25 +195,10 @@ class SpringArchiveAPI:
 
     def update_status_for_ongoing_tasks(self) -> None:
         """Updates any started but uncompleted tasks, should they be completed."""
-        archival_jobs: list[Archive] = self.housekeeper_api.get_ongoing_archivals()
-        archival_ids_per_location: dict[
-            ArchiveLocations, list[int]
-        ] = self.filter_archival_ids_on_archive_location(archival_jobs)
-        retrieval_jobs: list[Archive] = self.housekeeper_api.get_ongoing_retrievals()
-        retrieval_ids_per_location: dict[
-            ArchiveLocations, list[int]
-        ] = self.filter_retrieval_ids_on_archive_location(retrieval_jobs)
-        for archive_location in ArchiveLocations:
-            self.update_archival_jobs_for_archive_location(
-                archive_location=archive_location,
-                job_ids=archival_ids_per_location.get(archive_location),
-            )
-            self.update_retrieval_jobs_for_archive_location(
-                archive_location=archive_location,
-                job_ids=retrieval_ids_per_location.get(archive_location),
-            )
+        self.update_ongoing_archivals()
+        self.update_ongoing_retrievals()
 
-    def update_ongoing_archivals(self):
+    def update_ongoing_archivals(self) -> None:
         archival_jobs: list[Archive] = self.housekeeper_api.get_ongoing_archivals()
         archival_ids_per_location: dict[
             ArchiveLocations, list[int]
@@ -224,7 +209,7 @@ class SpringArchiveAPI:
                 job_ids=archival_ids_per_location.get(archive_location),
             )
 
-    def update_ongoing_retrievals(self):
+    def update_ongoing_retrievals(self) -> None:
         retrieval_jobs: list[Archive] = self.housekeeper_api.get_ongoing_retrievals()
         retrieval_ids_per_location: dict[
             ArchiveLocations, list[int]
@@ -237,7 +222,7 @@ class SpringArchiveAPI:
 
     def update_archival_jobs_for_archive_location(
         self, archive_location: ArchiveLocations, job_ids: list[int]
-    ):
+    ) -> None:
         for job_id in job_ids:
             self.update_ongoing_task(
                 task_id=job_id, archive_location=archive_location, is_archival=True
@@ -245,7 +230,7 @@ class SpringArchiveAPI:
 
     def update_retrieval_jobs_for_archive_location(
         self, archive_location: ArchiveLocations, job_ids: list[int]
-    ):
+    ) -> None:
         for job_id in job_ids:
             self.update_ongoing_task(
                 task_id=job_id, archive_location=archive_location, is_archival=False
@@ -303,5 +288,5 @@ class SpringArchiveAPI:
 
         return jobs_per_location
 
-    def get_archive_location_from_file(self, file: File):
+    def get_archive_location_from_file(self, file: File) -> str:
         return self.status_db.get_sample_by_internal_id(file.version.bundle.name).archive_location
