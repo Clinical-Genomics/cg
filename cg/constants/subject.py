@@ -36,6 +36,7 @@ class PlinkGender(str, Enum):
     def __str__(self) -> str:
         return str.__str__(self.value)
 
+
 class RelationshipStatus(str, Enum):
     HAS_NO_PARENT = 0
 
