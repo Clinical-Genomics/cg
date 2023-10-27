@@ -46,7 +46,7 @@ def test_get_sample_metadata(
     )
 
     # THEN check that the sample metadata is correctly retrieved
-    assert sample_metadata.dict() == expected_metadata
+    assert sample_metadata.model_dump() == expected_metadata
 
 
 def test_get_variant_callers(report_api_balsamic, case_id):
