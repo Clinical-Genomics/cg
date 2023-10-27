@@ -1,5 +1,5 @@
 """Constants related to sequencing."""
-from cg.utils.enums import StrEnum
+from enum import StrEnum
 
 
 class Sequencers(StrEnum):

@@ -3,7 +3,7 @@
 import click
 
 from cg.utils.date import get_date
-from cg.utils.enums import StrEnum
+from enum import StrEnum
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
