@@ -35,7 +35,7 @@ LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 
 def teardown_session():
     """Ensure that the session is closed and all resources are released to the connection pool."""
-    registry: Optional[scoped_session] = get_scoped_session_registry()
+    registry: scoped_session | None = get_scoped_session_registry()
     if registry:
         registry.remove()
 
