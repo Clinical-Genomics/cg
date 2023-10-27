@@ -282,6 +282,7 @@ class ReportAPI(MetaAPI):
                 version=lims_sample.get("application_version"),
                 prep_category=application.prep_category,
                 description=application.description,
+                details=application.details,
                 limitations=application.limitations,
                 pipeline_limitations=self.get_pipeline_accreditation_limitation(application.tag),
                 accredited=application.is_accredited,

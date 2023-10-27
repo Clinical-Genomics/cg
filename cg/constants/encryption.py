@@ -1,10 +1,10 @@
 """Constants specific for encryption"""
-from enum import Enum
+from enum import StrEnum
 
 from cg.utils.enums import ListEnum
 
 
-class CipherAlgorithm(str, Enum):
+class CipherAlgorithm(StrEnum):
     TRIPLE_DES: str = "3DES"
     AES: str = "AES"
     AES192: str = "AES192"
@@ -18,7 +18,7 @@ class CipherAlgorithm(str, Enum):
     TWOFISH: str = "TWOFISH"
 
 
-class EncryptionUserID(str, Enum):
+class EncryptionUserID(StrEnum):
     HASTA_USER_ID: str = '"Clinical Genomics"'
 
 

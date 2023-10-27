@@ -4,7 +4,7 @@ from pathlib import Path
 import click
 
 from cg.constants.sequencing import Sequencers
-from cg.utils.enums import Enum, StrEnum
+from enum import Enum, StrEnum
 
 
 class BclConverter(StrEnum):
