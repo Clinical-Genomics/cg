@@ -316,7 +316,13 @@ class Customer(Model):
     data_archive_location = Column(types.String(32), nullable=False, default="PDC")
     is_clinical = Column(types.Boolean, nullable=False, default=False)
 
-    collaborations = orm.relationship("Collaboration", secondary=customer_collaboration)
+    collaborations = orm.relationship(
+        "Collaboration",
+        secondary="customer_collaboration",
+        back_populates="customers",
+        cascade_backrefs=False,
+    )
+
     delivery_contact_id = Column(ForeignKey("user.id"))
     delivery_contact = orm.relationship("User", foreign_keys=[delivery_contact_id])
     invoice_contact_id = Column(ForeignKey("user.id"))
@@ -352,7 +358,12 @@ class Collaboration(Model):
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
-    customers = orm.relationship(Customer, secondary=customer_collaboration)
+    customers = orm.relationship(
+        "Customer",
+        secondary="customer_collaboration",
+        back_populates="collaborations",
+        cascade_backrefs=False,
+    )
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
