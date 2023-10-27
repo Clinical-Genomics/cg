@@ -1,7 +1,7 @@
-from enum import Enum, IntEnum
+from enum import StrEnum, IntEnum
 
 
-class Gender(str, Enum):
+class Gender(StrEnum):
     FEMALE = "female"
     MALE = "male"
     UNKNOWN = "unknown"
@@ -12,7 +12,7 @@ class Gender(str, Enum):
         return self.value
 
 
-class PhenotypeStatus(str, Enum):
+class PhenotypeStatus(StrEnum):
     UNKNOWN = "unknown"
     UNAFFECTED = "unaffected"
     AFFECTED = "affected"
@@ -28,11 +28,11 @@ class PlinkPhenotypeStatus(IntEnum):
     AFFECTED = 2
 
 
-class PlinkGender(str, Enum):
+class PlinkGender(StrEnum):
     UNKNOWN = 0
     MALE = 1
     FEMALE = 2
 
 
-class RelationshipStatus(str, Enum):
+class RelationshipStatus(StrEnum):
     HAS_NO_PARENT = 0
