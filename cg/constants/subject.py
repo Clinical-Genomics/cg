@@ -28,11 +28,11 @@ class PlinkPhenotypeStatus(IntEnum):
     AFFECTED = 2
 
 
-class PlinkGender(StrEnum):
+class PlinkGender(IntEnum):
     UNKNOWN = 0
     MALE = 1
     FEMALE = 2
 
 
-class RelationshipStatus(StrEnum):
+class RelationshipStatus(IntEnum):
     HAS_NO_PARENT = 0
