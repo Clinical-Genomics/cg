@@ -34,10 +34,10 @@ def downsample_cmd():
 )
 @DRY_RUN
 def downsample_sample(
-    context: CGConfig, case_internal_id: str, input: Tuple[str, float], dry_run: bool
+    context: CGConfig, case_internal_id: str, input_data: Tuple[str, float], dry_run: bool
 ):
     """Downsample reads in one or multiple samples."""
-    for sample_internal_id, reads in input:
+    for sample_internal_id, reads in input_data:
         try:
             downsample_api = DownSampleAPI(
                 config=context,
@@ -65,11 +65,4 @@ def downsample_sample(
 def downsample_case(context: CGConfig, input: Tuple[str, float], dry_run: bool):
     """Downsample reads in all samples in a case."""
     ## TO DO; this has to retrieve samples and then loop over samples like above...
-    for case_internal_id, number_of_reads in input:
-        downsample_api = DownSampleAPI(
-            config=context,
-            dry_run=dry_run,
-            case_internal_id=case_internal_id,
-            number_of_reads=number_of_reads,
-        )
-        downsample_api.downsample_sample()
+    pass

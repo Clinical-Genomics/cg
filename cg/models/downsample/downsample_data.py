@@ -90,6 +90,7 @@ class DownsampleData:
             internal_id=self.downsampled_sample_name,
             sex=self.original_sample.sex,
             order=self.original_sample.order,
+            reads=self.multiply_reads_by_million(),
             downsampled_to=self.multiply_reads_by_million(),
             from_sample=self.original_sample.internal_id,
             tumour=self.original_sample.is_tumour,
