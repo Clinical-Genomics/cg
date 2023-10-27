@@ -1,11 +1,10 @@
 """Tests for cleaning FASTQ files."""
 import logging
 from pathlib import Path
-from typing import Generator, Dict, List
+from typing import Generator
 
 from _pytest.logging import LogCaptureFixture
-
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
@@ -76,7 +75,7 @@ def test_update_hk_fastq(
 
     # GIVEN a Housekeeper version and a compression object
     hk_version: Version = compress_api.hk_api.get_latest_bundle_version(bundle_name=sample_id)
-    fastq: Dict[str, dict] = files.get_fastq_files(sample_id=sample_id, version_obj=hk_version)
+    fastq: dict[str, dict] = files.get_fastq_files(sample_id=sample_id, version_obj=hk_version)
     run: str = list(fastq.keys())[0]
     compression: CompressionData = fastq[run]["compression_data"]
 
@@ -89,19 +88,22 @@ def test_update_hk_fastq(
     )
 
     # THEN assert that the SPRING files have been added to Housekeeper
-    hk_spring_files: List[File] = list(real_housekeeper_api.files(tags=[SequencingFileTag.SPRING]))
-    hk_spring_metadata_files: List[File] = list(
+    hk_spring_files: list[File] = list(real_housekeeper_api.files(tags=[SequencingFileTag.SPRING]))
+    hk_spring_metadata_files: list[File] = list(
         real_housekeeper_api.files(tags=[SequencingFileTag.SPRING_METADATA])
     )
     for spring_file in [hk_spring_files, hk_spring_metadata_files]:
         assert spring_file
+        for tag_name in [tag.name for tag in fastq[run]["hk_first"].tags]:
+            if tag_name != SequencingFileTag.FASTQ:
+                assert tag_name in spring_file.tags
 
     # THEN assert that the SPRING files have been added to bundles directory
     for spring_file in [hk_spring_files[0].path, hk_spring_metadata_files[0].path]:
         assert Path(root_path, spring_file).exists()
 
     # THEN assert that the FASTQ files are removed from Housekeeper
-    hk_fastq_files: List[File] = list(hk_api.files(tags=[SequencingFileTag.FASTQ]))
+    hk_fastq_files: list[File] = list(hk_api.files(tags=[SequencingFileTag.FASTQ]))
     assert not hk_fastq_files
 
 

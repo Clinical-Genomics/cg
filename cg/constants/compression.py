@@ -1,6 +1,5 @@
 """Constants specific for compression."""
 import datetime
-from typing import List
 
 # Constants for crunchy
 FASTQ_FIRST_READ_SUFFIX: str = "_R1_001.fastq.gz"
@@ -113,24 +112,39 @@ MIP_VALIDATION_CASES = [
 
 # List of cases used for validation that we should skip
 RNAFUSION_VALIDATION_CASES = [
-    "cuddlyhen",  # downsampled seracare commercial sample
-    "oncrab",
-    "daringowl",
-    "growndoe",
-    "stablemoray",
-    "truemole",
-    "rightmoray",
-    "handyturtle",
-    "inlab",
-    "honestswine",
-    "holyrodent",
-    "expertboar",
-    "bossmink",
+    "ableheron",
+    "acecoyote",
     "ampleray",
+    "bossmink",
+    "cuddlyhen",
+    "daringowl",
+    "expertboar",
+    "finerracer",
+    "growndoe",
+    "guidedfeline",
+    "handyturtle",
+    "hardygrouse",
+    "holyrodent",
+    "honestswine",
+    "inlab",
+    "justburro",
+    "movedmule",
     "nearbyjoey",
+    "oncrab",
+    "politeglider",
+    "rareosprey",
+    "rightmoray",
+    "stablemoray",
+    "starnewt",
+    "tendergoose",
+    "truemole",
+    "truepigeon",
+    "valuedfowl",
+    "vocallocust",
+    "wantedsawfly",
 ]
 
-TAXPROFILER_VALIDATION_CASES: List[str] = [
+TAXPROFILER_VALIDATION_CASES: list[str] = [
     "richurchin",
 ]
 

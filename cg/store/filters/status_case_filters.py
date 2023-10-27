@@ -1,16 +1,16 @@
 from datetime import datetime
-from typing import Optional, List, Callable
 from enum import Enum
-from cgmodels.cg.constants import Pipeline
+from typing import Callable, Optional
+
 from sqlalchemy import and_, not_, or_
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
-from cg.constants.constants import CaseActions, DataDelivery
+from cg.constants.constants import CaseActions, DataDelivery, Pipeline
 from cg.constants.observations import (
-    LOQUSDB_SUPPORTED_PIPELINES,
-    LOQUSDB_MIP_SEQUENCING_METHODS,
     LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
+    LOQUSDB_MIP_SEQUENCING_METHODS,
+    LOQUSDB_SUPPORTED_PIPELINES,
 )
 from cg.store.models import Analysis, Application, Customer, Family, Sample
 
@@ -40,7 +40,7 @@ def filter_cases_by_customer_entry_id(cases: Query, customer_entry_id: int, **kw
 
 
 def filter_cases_by_customer_entry_ids(
-    cases: Query, customer_entry_ids: List[int], **kwargs
+    cases: Query, customer_entry_ids: list[int], **kwargs
 ) -> Query:
     """Filter cases with matching customer ids."""
     return cases.filter(Family.customer_id.in_(customer_entry_ids)) if customer_entry_ids else cases
@@ -102,7 +102,7 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
             ),
             and_(
                 Family.action.is_(None),
-                Analysis.created_at < Sample.sequenced_at,
+                Analysis.created_at < Sample.reads_updated_at,
             ),
         )
     )
@@ -110,7 +110,7 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
 
 def filter_cases_has_sequence(cases: Query, **kwargs) -> Query:
     """Filter cases that is not sequenced according to record in StatusDB."""
-    return cases.filter(or_(Application.is_external, Sample.sequenced_at.isnot(None)))
+    return cases.filter(or_(Application.is_external, Sample.reads_updated_at.isnot(None)))
 
 
 def filter_cases_not_analysed(cases: Query, **kwargs) -> Query:
@@ -197,12 +197,12 @@ def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
 
 def apply_case_filter(
     cases: Query,
-    filter_functions: List[Callable],
+    filter_functions: list[Callable],
     action: Optional[str] = None,
     case_search: Optional[str] = None,
     creation_date: Optional[datetime] = None,
     customer_entry_id: Optional[int] = None,
-    customer_entry_ids: Optional[List[int]] = None,
+    customer_entry_ids: Optional[list[int]] = None,
     entry_id: Optional[int] = None,
     internal_id: Optional[str] = None,
     internal_id_search: Optional[str] = None,

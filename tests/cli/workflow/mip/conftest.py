@@ -7,7 +7,6 @@ from cg.apps.housekeeper.models import InputBundle
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
 from cg.meta.compress import CompressAPI
-from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
@@ -15,8 +14,8 @@ from cg.models.cg_config import CGConfig
 from cg.store.api.find_business_data import FindBusinessDataHandler
 from cg.store.api.status import StatusHandler
 from cg.store.models import Family
-from tests.store_helpers import StoreHelpers
 from tests.store.conftest import case_obj
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
@@ -185,11 +184,11 @@ def setup_mocks(
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_running")
     PrepareFastqAPI.is_spring_decompression_running.return_value = is_spring_decompression_running
 
-    mocker.patch.object(PrepareFastqAPI, "check_fastq_links")
-    PrepareFastqAPI.check_fastq_links.return_value = None
+    mocker.patch.object(PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper")
+    PrepareFastqAPI.add_decompressed_fastq_files_to_housekeeper.return_value = None
 
     mocker.patch.object(MipDNAAnalysisAPI, "get_panel_bed")
     MipDNAAnalysisAPI.get_panel_bed.return_value = "a_string"
 
-    mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
-    FindBusinessDataHandler.is_all_flow_cells_on_disk.return_value = True
+    mocker.patch.object(FindBusinessDataHandler, "are_all_flow_cells_on_disk")
+    FindBusinessDataHandler.are_all_flow_cells_on_disk.return_value = True

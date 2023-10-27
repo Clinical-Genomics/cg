@@ -1,15 +1,15 @@
 import datetime as dt
 from copy import deepcopy
-from typing import List
 
 import pytest
 
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import DataDelivery, Pipeline, Priority
 from cg.constants.constants import CaseActions, PrepCategory
 from cg.exc import OrderError
+from cg.meta.orders import OrdersAPI
 from cg.meta.orders.api import FastqSubmitter
-from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
 from cg.meta.orders.balsamic_qc_submitter import BalsamicQCSubmitter
+from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
 from cg.meta.orders.balsamic_umi_submitter import BalsamicUmiSubmitter
 from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
 from cg.meta.orders.microbial_submitter import MicrobialSubmitter
@@ -19,10 +19,8 @@ from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn, OrderType
-from cg.meta.orders import OrdersAPI
 from cg.store import Store
 from cg.store.models import Application, Delivery, Family, Pool, Sample
-from cg.constants import Priority
 
 
 def test_pools_to_status(rml_order_to_submit):
@@ -740,7 +738,7 @@ def test_store_existing_case(
     )
 
     base_store.session.close()
-    new_cases: List[Family] = base_store.get_cases()
+    new_cases: list[Family] = base_store.get_cases()
 
     # Save internal id
     stored_cases_internal_ids = dict([(case.name, case.internal_id) for case in new_cases])
@@ -756,7 +754,7 @@ def test_store_existing_case(
     )
 
     base_store.session.close()
-    rerun_cases: List[Family] = base_store.get_cases()
+    rerun_cases: list[Family] = base_store.get_cases()
 
     # THEN the sample ticket should be appended to previos ticket and action set to analyze
     assert rerun_cases[0].tickets == f"{ticket_id},{ticket_id}"

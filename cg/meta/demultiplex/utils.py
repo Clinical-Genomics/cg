@@ -1,21 +1,23 @@
 import logging
 import re
 from pathlib import Path
-from typing import List, Optional
-from cg.apps.demultiplex.sample_sheet.models import SampleSheet
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from typing import Optional
 
+from cg.apps.demultiplex.sample_sheet.models import SampleSheet
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.io.csv import read_csv
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.utils.files import (
+    get_file_in_directory,
+    get_files_matching_pattern,
     is_pattern_in_file_path_name,
     rename_file,
 )
-
-from cg.utils.files import get_file_in_directory, get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
 
@@ -78,7 +80,7 @@ def is_valid_sample_fastq_file(sample_fastq: Path, sample_internal_id: str) -> b
     )
 
 
-def get_valid_sample_fastqs(fastq_paths: List[Path], sample_internal_id: str) -> List[Path]:
+def get_valid_sample_fastqs(fastq_paths: list[Path], sample_internal_id: str) -> list[Path]:
     """Return a list of valid fastq files."""
     return [
         fastq
@@ -89,7 +91,7 @@ def get_valid_sample_fastqs(fastq_paths: List[Path], sample_internal_id: str) ->
 
 def get_sample_fastqs_from_flow_cell(
     flow_cell_directory: Path, sample_internal_id: str
-) -> Optional[List[Path]]:
+) -> Optional[list[Path]]:
     """Retrieve all fastq files for a specific sample in a flow cell directory."""
 
     # The flat output structure for NovaseqX flow cells demultiplexed with BCLConvert on hasta
@@ -125,10 +127,10 @@ def get_sample_fastqs_from_flow_cell(
         bcl_convert_pattern,
         demux_on_sequencer_pattern,
     ]:
-        sample_fastqs: List[Path] = get_files_matching_pattern(
+        sample_fastqs: list[Path] = get_files_matching_pattern(
             directory=flow_cell_directory, pattern=pattern
         )
-        valid_sample_fastqs: List[Path] = get_valid_sample_fastqs(
+        valid_sample_fastqs: list[Path] = get_valid_sample_fastqs(
             fastq_paths=sample_fastqs, sample_internal_id=sample_internal_id
         )
 
@@ -144,19 +146,12 @@ def get_q30_threshold(sequencer_type: Sequencers) -> int:
     return FLOWCELL_Q30_THRESHOLD[sequencer_type]
 
 
-def get_sample_sheet_path(
+def get_sample_sheet_path_from_flow_cell_dir(
     flow_cell_directory: Path,
     sample_sheet_file_name: str = DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
 ) -> Path:
     """Return the path to the sample sheet in the flow cell directory."""
     return get_file_in_directory(directory=flow_cell_directory, file_name=sample_sheet_file_name)
-
-
-def parse_flow_cell_directory_data(
-    flow_cell_directory: Path, bcl_converter: Optional[str] = None
-) -> FlowCellDirectoryData:
-    """Return flow cell data from the flow cell directory."""
-    return FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
 
 
 def add_flow_cell_name_to_fastq_file_path(fastq_file_path: Path, flow_cell_name: str) -> Path:
@@ -183,25 +178,22 @@ def rename_fastq_file_if_needed(fastq_file_path: Path, flow_cell_name: str) -> P
 def get_sample_sheet(flow_cell: FlowCellDirectoryData) -> SampleSheet:
     """Return sample sheet associated with flowcell."""
     sample_sheet_path: Path = flow_cell.get_sample_sheet_path_hk()
-    sample_type = flow_cell.sample_type
-    sample_sheet: SampleSheet = get_sample_sheet_from_file(
-        infile=sample_sheet_path, flow_cell_sample_type=sample_type
-    )
+    sample_sheet: SampleSheet = get_sample_sheet_from_file(sample_sheet_path)
     return sample_sheet
 
 
-def get_undetermined_fastqs(lane: int, flow_cell_path: Path) -> List[Path]:
+def get_undetermined_fastqs(lane: int, undetermined_dir_path: Path) -> list[Path]:
     """Get the undetermined fastq files for a specific lane on a flow cell."""
     undetermined_pattern = f"Undetermined*_L00{lane}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     return get_files_matching_pattern(
-        directory=flow_cell_path,
+        directory=undetermined_dir_path,
         pattern=undetermined_pattern,
     )
 
 
-def parse_manifest_file(manifest_file: Path) -> List[Path]:
+def parse_manifest_file(manifest_file: Path) -> list[Path]:
     """Returns a list with the first entry of each row of the given TSV file."""
-    files: List[List[str]] = read_csv(file_path=manifest_file, delimiter="\t")
+    files: list[list[str]] = read_csv(file_path=manifest_file, delimiter="\t")
     return [Path(file[0]) for file in files]
 
 
@@ -224,7 +216,7 @@ def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
             f"{DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST} file. Skipping."
         )
         return False
-    files_at_source: List[Path] = parse_manifest_file(manifest_file)
+    files_at_source: list[Path] = parse_manifest_file(manifest_file)
     for file in files_at_source:
         if is_file_relevant_for_demultiplexing(file) and not Path(target_directory, file).exists():
             LOG.info(

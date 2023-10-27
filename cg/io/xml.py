@@ -1,10 +1,10 @@
 """Module for reading and writing xml files."""
 
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 from cg.constants import FileExtensions
 from cg.io.validate_path import validate_file_suffix
-from pathlib import Path
 
 
 def read_xml(file_path: Path) -> ET.ElementTree:

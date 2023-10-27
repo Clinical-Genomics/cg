@@ -1,6 +1,6 @@
 """ Create a sample sheet for NovaSeq flow cells."""
 import logging
-from typing import List, Optional, Type, Union
+from typing import Optional, Type, Union
 
 from cg.apps.demultiplex.sample_sheet.index import (
     Index,
@@ -25,8 +25,8 @@ from cg.constants.demultiplexing import (
     SampleSheetBCLConvertSections,
 )
 from cg.exc import SampleSheetError
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParameters
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
 
@@ -37,12 +37,12 @@ class SampleSheetCreator:
     def __init__(
         self,
         flow_cell: FlowCellDirectoryData,
-        lims_samples: List[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]],
+        lims_samples: list[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]],
         force: bool = False,
     ):
         self.flow_cell: FlowCellDirectoryData = flow_cell
         self.flow_cell_id: str = flow_cell.id
-        self.lims_samples: List[
+        self.lims_samples: list[
             Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]
         ] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
@@ -57,7 +57,7 @@ class SampleSheetCreator:
         return self.flow_cell.bcl_converter
 
     @property
-    def valid_indexes(self) -> List[Index]:
+    def valid_indexes(self) -> list[Index]:
         return get_valid_indexes(dual_indexes_only=True)
 
     @property
@@ -90,25 +90,25 @@ class SampleSheetCreator:
     @staticmethod
     def convert_sample_to_header_dict(
         sample: Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq],
-        data_column_names: List[str],
-    ) -> List[str]:
+        data_column_names: list[str],
+    ) -> list[str]:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
         LOG.debug(f"Use sample sheet header {data_column_names}")
         sample_dict = sample.model_dump(by_alias=True)
         return [str(sample_dict[column]) for column in data_column_names]
 
-    def get_additional_sections_sample_sheet(self) -> Optional[List]:
+    def get_additional_sections_sample_sheet(self) -> Optional[list]:
         """Return all sections of the sample sheet that are not the data section."""
         raise NotImplementedError("Impossible to get sample sheet sections from parent class")
 
-    def get_data_section_header_and_columns(self) -> Optional[List[List[str]]]:
+    def get_data_section_header_and_columns(self) -> Optional[list[list[str]]]:
         """Return the header and column names of the data section of the sample sheet."""
         raise NotImplementedError("Impossible to get sample sheet sections from parent class")
 
-    def create_sample_sheet_content(self) -> List[List[str]]:
+    def create_sample_sheet_content(self) -> list[list[str]]:
         """Create sample sheet content with samples."""
         LOG.info("Creating sample sheet content")
-        sample_sheet_content: List[List[str]] = (
+        sample_sheet_content: list[list[str]] = (
             self.get_additional_sections_sample_sheet() + self.get_data_section_header_and_columns()
         )
         for sample in self.lims_samples:
@@ -123,7 +123,7 @@ class SampleSheetCreator:
     def process_samples_for_sample_sheet(self) -> None:
         """Remove unwanted samples and adapt remaining samples."""
         self.remove_unwanted_samples()
-        samples_in_lane: List[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]]
+        samples_in_lane: list[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]]
         self.add_override_cycles_to_samples()
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
             LOG.info(f"Adapting index and barcode mismatch values for samples in lane {lane}")
@@ -134,10 +134,10 @@ class SampleSheetCreator:
             )
             self.update_barcode_mismatch_values_for_samples(samples_in_lane)
 
-    def construct_sample_sheet(self) -> List[List[str]]:
+    def construct_sample_sheet(self) -> list[list[str]]:
         """Construct and validate the sample sheet."""
         self.process_samples_for_sample_sheet()
-        sample_sheet_content: List[List[str]] = self.create_sample_sheet_content()
+        sample_sheet_content: list[list[str]] = self.create_sample_sheet_content()
         if self.force:
             LOG.info("Skipping validation of sample sheet due to force flag")
             return sample_sheet_content
@@ -161,7 +161,7 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
         """Return None for flow cells to be demultiplexed with Bcl2fastq."""
         LOG.debug("No adding of override cycles for Bcl2fastq flow cell")
 
-    def get_additional_sections_sample_sheet(self) -> List[List[str]]:
+    def get_additional_sections_sample_sheet(self) -> list[list[str]]:
         """Return all sections of the sample sheet that are not the data section."""
         return [
             [SampleSheetBcl2FastqSections.Settings.HEADER.value],
@@ -169,7 +169,7 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
             SampleSheetBcl2FastqSections.Settings.BARCODE_MISMATCH_INDEX2.value,
         ]
 
-    def get_data_section_header_and_columns(self) -> List[List[str]]:
+    def get_data_section_header_and_columns(self) -> list[list[str]]:
         """Return the header and column names of the data section of the sample sheet."""
         return [
             [SampleSheetBcl2FastqSections.Data.HEADER.value],
@@ -183,7 +183,7 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
     def __init__(
         self,
         flow_cell: FlowCellDirectoryData,
-        lims_samples: List[FlowCellSampleBCLConvert],
+        lims_samples: list[FlowCellSampleBCLConvert],
         force: bool = False,
     ):
         super().__init__(flow_cell, lims_samples, force)
@@ -191,7 +191,7 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
             raise SampleSheetError(f"Can't use {BclConverter.BCL2FASTQ} with sample sheet v2")
 
     def update_barcode_mismatch_values_for_samples(
-        self, samples: List[FlowCellSampleBCLConvert]
+        self, samples: list[FlowCellSampleBCLConvert]
     ) -> None:
         """Update barcode mismatch values for both indexes of given samples."""
         for sample in samples:
@@ -219,9 +219,9 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
                 )
             sample.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
-    def get_additional_sections_sample_sheet(self) -> List[List[str]]:
+    def get_additional_sections_sample_sheet(self) -> list[list[str]]:
         """Return all sections of the sample sheet that are not the data section."""
-        header_section: List[List[str]] = [
+        header_section: list[list[str]] = [
             [SampleSheetBCLConvertSections.Header.HEADER.value],
             SampleSheetBCLConvertSections.Header.FILE_FORMAT.value,
             [SampleSheetBCLConvertSections.Header.RUN_NAME.value, self.flow_cell_id],
@@ -233,7 +233,7 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
             ],
             SampleSheetBCLConvertSections.Header.INDEX_ORIENTATION_FORWARD.value,
         ]
-        reads_section: List[List[str]] = [
+        reads_section: list[list[str]] = [
             [SampleSheetBCLConvertSections.Reads.HEADER.value],
             [
                 SampleSheetBCLConvertSections.Reads.READ_CYCLES_1.value,
@@ -252,14 +252,14 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
                 self.run_parameters.get_index_2_cycles(),
             ],
         ]
-        settings_section: List[List[str]] = [
+        settings_section: list[list[str]] = [
             [SampleSheetBCLConvertSections.Settings.HEADER.value],
             SampleSheetBCLConvertSections.Settings.SOFTWARE_VERSION.value,
             SampleSheetBCLConvertSections.Settings.FASTQ_COMPRESSION_FORMAT.value,
         ]
         return header_section + reads_section + settings_section
 
-    def get_data_section_header_and_columns(self) -> List[List[str]]:
+    def get_data_section_header_and_columns(self) -> list[list[str]]:
         """Return the header and column names of the data section of the sample sheet."""
         return [
             [SampleSheetBCLConvertSections.Data.HEADER.value],

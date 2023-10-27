@@ -1,15 +1,21 @@
-from datetime import datetime
 from typing import Optional, Union
 
-from cg.constants.subject import Gender
-from pydantic.v1 import BaseModel, validator
-from cg.models.report.metadata import SampleMetadataModel
+from pydantic import BaseModel, BeforeValidator
+from typing_extensions import Annotated
+
+from cg.constants import NA_FIELD
+from cg.models.report.metadata import (
+    BalsamicTargetedSampleMetadataModel,
+    BalsamicWGSSampleMetadataModel,
+    MipDNASampleMetadataModel,
+    RnafusionSampleMetadataModel,
+)
 from cg.models.report.validators import (
-    validate_empty_field,
-    validate_boolean,
-    validate_rml_sample,
-    validate_date,
-    validate_gender,
+    get_boolean_as_string,
+    get_date_as_string,
+    get_gender_as_string,
+    get_prep_category_as_string,
+    get_report_string,
 )
 
 
@@ -27,24 +33,15 @@ class ApplicationModel(BaseModel):
         external: whether the app tag is external or not; source: StatusDB/application/is_external
     """
 
-    tag: Optional[str]
-    version: Union[None, int, str]
-    prep_category: Optional[str]
-    description: Optional[str]
-    limitations: Optional[str]
-    accredited: Optional[bool]
-    external: Optional[bool]
-
-    _prep_category = validator("prep_category", always=True, allow_reuse=True)(validate_rml_sample)
-    _values = validator(
-        "tag",
-        "version",
-        "prep_category",
-        "description",
-        "limitations",
-        always=True,
-        allow_reuse=True,
-    )(validate_empty_field)
+    tag: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    prep_category: Annotated[str, BeforeValidator(get_prep_category_as_string)] = NA_FIELD
+    description: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    details: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    limitations: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    pipeline_limitations: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    accredited: Optional[bool] = None
+    external: Optional[bool] = None
 
 
 class MethodsModel(BaseModel):
@@ -56,12 +53,8 @@ class MethodsModel(BaseModel):
         sequencing: sequencing procedure; source: LIMS/sample/sequencing_method
     """
 
-    library_prep: Optional[str]
-    sequencing: Optional[str]
-
-    _values = validator("library_prep", "sequencing", always=True, allow_reuse=True)(
-        validate_empty_field
-    )
+    library_prep: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    sequencing: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
 
 
 class TimestampModel(BaseModel):
@@ -72,22 +65,13 @@ class TimestampModel(BaseModel):
         ordered_at: order date; source: StatusDB/sample/ordered_at
         received_at: arrival date; source: StatusDB/sample/received_at
         prepared_at: library preparation date; source: StatusDB/sample/prepared_at
-        sequenced_at: sequencing date; source: StatusDB/sample/sequenced_at
+        reads_updated_at: sequencing date; source: StatusDB/sample/reads_updated_at
     """
 
-    ordered_at: Union[None, datetime, str]
-    received_at: Union[None, datetime, str]
-    prepared_at: Union[None, datetime, str]
-    sequenced_at: Union[None, datetime, str]
-
-    _values = validator(
-        "ordered_at",
-        "received_at",
-        "prepared_at",
-        "sequenced_at",
-        always=True,
-        allow_reuse=True,
-    )(validate_date)
+    ordered_at: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
+    received_at: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
+    prepared_at: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
+    reads_updated_at: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
 
 
 class SampleModel(BaseModel):
@@ -108,20 +92,19 @@ class SampleModel(BaseModel):
         timestamps: processing timestamp attributes
     """
 
-    name: Optional[str]
-    id: Optional[str]
-    ticket: Union[None, int, str]
-    status: Optional[str]
-    gender: Optional[str] = Gender.UNKNOWN
-    source: Optional[str]
-    tumour: Union[None, bool, str]
+    name: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    id: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    ticket: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    status: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    gender: Annotated[str, BeforeValidator(get_gender_as_string)] = NA_FIELD
+    source: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    tumour: Annotated[str, BeforeValidator(get_boolean_as_string)] = NA_FIELD
     application: ApplicationModel
     methods: MethodsModel
-    metadata: SampleMetadataModel
+    metadata: Union[
+        MipDNASampleMetadataModel,
+        BalsamicTargetedSampleMetadataModel,
+        BalsamicWGSSampleMetadataModel,
+        RnafusionSampleMetadataModel,
+    ]
     timestamps: TimestampModel
-
-    _tumour = validator("tumour", always=True, allow_reuse=True)(validate_boolean)
-    _gender = validator("gender", always=True, allow_reuse=True)(validate_gender)
-    _values = validator("name", "id", "ticket", "status", "source", always=True, allow_reuse=True)(
-        validate_empty_field
-    )

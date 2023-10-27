@@ -1,10 +1,10 @@
 # database
 alembic
-SQLAlchemy<1.4
+SQLAlchemy
 pymysql
 
 # cli
-Click<7.0
+Click
 
 # server
 blinker
@@ -12,8 +12,9 @@ cachecontrol
 Flask-Admin
 Flask-CORS
 Flask-Dance
-Flask>=1.1.1
+Flask
 flask_wtf
+wtforms==3.0.0
 google-auth
 gunicorn
 requests[security]
@@ -22,18 +23,18 @@ werkzeug
 
 # utils
 cachetools
-cgmodels>=0.11.0
 coloredlogs
 Jinja2
 lxml
 marshmallow>3               # due to code expects behaviour from >3
-markupsafe<2.1            # due to soft_unicode import error from markupsafe
-openpyxl==3.0.10
+markupsafe
+openpyxl
 packaging
 pandas
 paramiko
 petname
-pydantic>2.0
+psutil
+pydantic>=2.4
 python-dateutil
 pyyaml
 setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi file-.cairocffi-VERSION

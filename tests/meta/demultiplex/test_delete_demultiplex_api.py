@@ -1,16 +1,15 @@
 import logging
-import pytest
-
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
+import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import DeleteDemuxError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.store.api import Store
-from cg.store.models import Sample, Flowcell
+from cg.store.models import Flowcell, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -61,7 +60,7 @@ def test_get_presence_status_status_db(
     assert not empty_presence
 
     # WHEN adding a flowcell into the statusdb and checking its updated presence
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=delete_demux_api.status_db,
         flow_cell_name=bcl2fastq_flow_cell_id,
         sequencer_type="novaseq",
@@ -106,7 +105,7 @@ def test_no_active_samples_on_flow_cell(
     # GIVEN a flow cell with no active samples related to it
     store: Store = populated_delete_demultiplex_api.status_db
     flow_cell = store.get_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
-    samples_on_flow_cell: List[Sample] = flow_cell.samples
+    samples_on_flow_cell: list[Sample] = flow_cell.samples
 
     assert samples_on_flow_cell
     for sample in samples_on_flow_cell:
@@ -116,7 +115,7 @@ def test_no_active_samples_on_flow_cell(
     # WHEN checking for active samples on flowcell
     populated_delete_demultiplex_api._set_samples_on_flow_cell()
     active_samples_on_flow_cell: Optional[
-        List[str]
+        list[str]
     ] = populated_delete_demultiplex_api.active_samples_on_flow_cell()
 
     # THEN the no samples on the flowcell should be found active
@@ -132,7 +131,7 @@ def test_active_samples_on_flow_cell(
     # GIVEN a flow cell with active samples related to it
     store: Store = active_flow_cell_store
     flow_cell = store.get_flow_cell_by_name(flow_cell_name=bcl2fastq_flow_cell_id)
-    samples_on_flow_cell: List[Sample] = flow_cell.samples
+    samples_on_flow_cell: list[Sample] = flow_cell.samples
 
     assert samples_on_flow_cell
     for sample in samples_on_flow_cell:
@@ -142,7 +141,7 @@ def test_active_samples_on_flow_cell(
     # WHEN checking for active samples on flowcell
     active_delete_demultiplex_api._set_samples_on_flow_cell()
     active_samples_on_flow_cell: Optional[
-        List[str]
+        list[str]
     ] = active_delete_demultiplex_api.active_samples_on_flow_cell()
 
     # THEN there should be active samples found
@@ -333,7 +332,7 @@ def test_delete_flow_cell_hasta(
 
 
 def test_delete_demultiplexing_init_files(
-    caplog, demultiplexing_init_files: List[Path], populated_delete_demultiplex_api: DeleteDemuxAPI
+    caplog, demultiplexing_init_files: list[Path], populated_delete_demultiplex_api: DeleteDemuxAPI
 ):
     """Test function to remove demultiplexing init files from the filesystem"""
 

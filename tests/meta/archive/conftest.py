@@ -1,9 +1,12 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 from unittest import mock
 
 import pytest
+from housekeeper.store.models import File
+from requests import Response
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
@@ -21,8 +24,6 @@ from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
 from cg.store.models import Customer, Sample
-from housekeeper.store.models import File
-from requests import Response
 from tests.store_helpers import StoreHelpers
 
 
@@ -50,7 +51,7 @@ def ok_ddn_response(ok_response: Response):
 @pytest.fixture(name="archive_request_json")
 def archive_request_json(
     remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
-) -> Dict:
+) -> dict:
     return {
         "osType": "Unix/MacOS",
         "createFolder": False,
@@ -67,7 +68,7 @@ def archive_request_json(
 @pytest.fixture(name="retrieve_request_json")
 def retrieve_request_json(
     remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Returns the body for a retrieval http post towards the DDN Miria API."""
     return {
         "osType": "Unix/MacOS",
@@ -84,7 +85,7 @@ def retrieve_request_json(
 
 
 @pytest.fixture(name="header_with_test_auth_token")
-def header_with_test_auth_token() -> Dict:
+def header_with_test_auth_token() -> dict:
     return {
         "Content-Type": "application/json",
         "accept": "application/json",
@@ -148,7 +149,7 @@ def miria_file_retrieve(local_directory: Path, remote_path: Path) -> MiriaObject
 def transfer_payload(miria_file_archive: MiriaObject) -> TransferPayload:
     """Return a TransferPayload object containing two identical MiriaObject object."""
     return TransferPayload(
-        files_to_transfer=[miria_file_archive, miria_file_archive.copy(deep=True)]
+        files_to_transfer=[miria_file_archive, miria_file_archive.model_copy(deep=True)]
     )
 
 
@@ -215,7 +216,7 @@ def archive_store(
         data_archive_location="PDC",
     )
 
-    new_samples: List[Sample] = [
+    new_samples: list[Sample] = [
         base_store.add_sample(
             name=sample_name,
             sex=Gender.MALE,

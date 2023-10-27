@@ -6,7 +6,7 @@ import pytest
 from cg.cli.generate.report.base import generate_delivery_report
 from cg.constants import Pipeline
 from cg.models.cg_config import CGConfig
-from tests.mocks.report import MockMipDNAReportAPI, MockMipDNAAnalysisAPI
+from tests.mocks.report import MockMipDNAAnalysisAPI, MockMipDNAReportAPI
 
 
 @pytest.fixture

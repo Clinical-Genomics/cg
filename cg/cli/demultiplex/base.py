@@ -2,12 +2,13 @@
 import logging
 
 import click
+
 from cg.cli.demultiplex.demux import (
+    confirm_flow_cell_sync,
+    copy_novaseqx_flow_cells,
+    delete_flow_cell,
     demultiplex_all,
     demultiplex_flow_cell,
-    delete_flow_cell,
-    copy_novaseqx_flow_cells,
-    confirm_flow_cell_sync,
 )
 from cg.cli.demultiplex.finish import finish_group
 from cg.cli.demultiplex.sample_sheet import sample_sheet_commands

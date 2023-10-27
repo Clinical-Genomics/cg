@@ -4,6 +4,8 @@ from unittest import mock
 from urllib.parse import urljoin
 
 import pytest
+from requests import Response
+
 from cg.constants.constants import APIMethods, FileFormat
 from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import APIRequest, WriteStream
@@ -21,7 +23,6 @@ from cg.meta.archive.models import FileAndSample, SampleAndDestination
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
 from cg.store.models import Sample
-from requests import Response
 
 FUNCTION_TO_MOCK = "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content"
 

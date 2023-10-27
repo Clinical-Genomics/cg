@@ -34,7 +34,7 @@
                 {
                     "SampleId": "SVE2528A1_CTGAAGCT",
                     "SampleName": "123456",
-                    "NumberReads": 31039782,
+                    "NumberReads": 1000000,
                     "Yield": 9374014164,
                     "ReadMetrics": [
                         {
@@ -55,7 +55,7 @@
                 }
             ],
             "Undetermined": {
-                "NumberReads": 5293801,
+                "NumberReads": 1000000,
                 "Yield": 1598727902,
                 "ReadMetrics": [
                     {

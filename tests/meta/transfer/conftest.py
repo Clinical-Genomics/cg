@@ -1,12 +1,11 @@
-from typing import List, Generator
+from pathlib import Path
+from typing import Generator
 
 import pytest
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.transfer import TransferLims
 from cg.store import Store
-from pathlib import Path
-
 from tests.mocks.limsmock import MockLimsAPI
 
 
@@ -24,7 +23,7 @@ def external_data_directory(
     cust_folder: Path = tmpdir_factory.mktemp(customer_id, numbered=False)
     ticket_folder: Path = Path(cust_folder, ticket_id)
     ticket_folder.mkdir()
-    samples: List[str] = [f"{cust_sample_id}1", f"{cust_sample_id}2"]
+    samples: list[str] = [f"{cust_sample_id}1", f"{cust_sample_id}2"]
     for sample in samples:
         Path(ticket_folder, sample).mkdir(exist_ok=True, parents=True)
         for read in [1, 2]:

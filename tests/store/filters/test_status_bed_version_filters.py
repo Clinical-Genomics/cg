@@ -1,11 +1,9 @@
-from typing import List
-
 from cg.store import Store
-from cg.store.models import BedVersion
 from cg.store.filters.status_bed_version_filters import (
-    get_bed_version_by_short_name,
     get_bed_version_by_file_name,
+    get_bed_version_by_short_name,
 )
+from cg.store.models import BedVersion
 
 
 def test_get_bed_version_by_file_name(base_store: Store, bed_version_file_name: str):
@@ -44,7 +42,7 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
     # GIVEN a store containing bed version
 
     # WHEN retrieving bed versions
-    bed_versions: List[BedVersion] = get_bed_version_by_short_name(
+    bed_versions: list[BedVersion] = get_bed_version_by_short_name(
         bed_versions=base_store._get_query(table=BedVersion),
         bed_version_short_name=bed_version_short_name,
     )
@@ -61,7 +59,7 @@ def test_get_bed_version_by_short_name_when_no_name(base_store: Store):
     # GIVEN a store containing bed version
 
     # WHEN retrieving bed versions
-    bed_versions: List[BedVersion] = get_bed_version_by_short_name(
+    bed_versions: list[BedVersion] = get_bed_version_by_short_name(
         bed_versions=base_store._get_query(table=BedVersion),
         bed_version_short_name="does_not_exist",
     )

@@ -1,10 +1,9 @@
 """Fixtures for Compress API tests."""
 import copy
-from typing import List, Dict, Any, Generator
-
 import os
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Generator
 
 import pytest
 
@@ -47,7 +46,7 @@ class MockCompressionData:
         spring_path: Path,
         updated: bool = False,
         date: datetime = None,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Return SPRING metadata."""
         metadata = [
             {
@@ -73,7 +72,7 @@ class MockCompressionData:
     def spring_metadata_file(self) -> Path:
         """Return the path to an existing SPRING metadata file."""
 
-        spring_metadata: List[dict] = MockCompressionData._spring_metadata(
+        spring_metadata: list[dict] = MockCompressionData._spring_metadata(
             self.fastq_first, self.fastq_second, self.spring_path
         )
         WriteFile.write_file_from_content(
@@ -86,7 +85,7 @@ class MockCompressionData:
     @property
     def updated_spring_metadata_file(self) -> Path:
         """Return the path to an existing updated SPRING metadata file."""
-        spring_metadata: List[dict] = MockCompressionData._spring_metadata(
+        spring_metadata: list[dict] = MockCompressionData._spring_metadata(
             self.fastq_first, self.fastq_second, self.spring_path, True
         )
         WriteFile.write_file_from_content(
@@ -133,13 +132,13 @@ def compression_files(compression_object: MockCompressionData) -> MockCompressio
 
 @pytest.fixture(name="real_crunchy_api")
 def real_crunchy_api(
-    crunchy_config: Dict[str, Dict[str, Any]]
+    crunchy_config: dict[str, dict[str, Any]]
 ) -> Generator[CrunchyAPI, None, None]:
     """Crunchy API fixture."""
     yield CrunchyAPI(crunchy_config)
 
 
-@pytest.fixture(name="compress_api")
+@pytest.fixture()
 def compress_api(
     demultiplexed_runs: Path,
     real_crunchy_api: CrunchyAPI,

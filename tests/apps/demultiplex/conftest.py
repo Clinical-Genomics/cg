@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from pathlib import Path
 
 import pytest
 
@@ -12,38 +12,38 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreatorBCLConvert,
 )
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 @pytest.fixture
-def bcl_convert_samples_with_updated_indexes() -> List[FlowCellSampleBCLConvert]:
+def bcl_convert_samples_with_updated_indexes() -> list[FlowCellSampleBCLConvert]:
     """Return a list of three FlowCellSampleBCLConvert with updated indexes."""
     sample_1 = FlowCellSampleBCLConvert(
-        lane=1, sample_id="sample 1", index="CAGAAGAT", index2="CAATGTAC"
+        lane=1, sample_id="ACC123", index="CAGAAGAT", index2="CAATGTAC"
     )
     sample_2 = FlowCellSampleBCLConvert(
-        lane=1, sample_id="sample 2", index="CAGAAGAG", index2="CAATGTAT"
+        lane=1, sample_id="ACC456", index="CAGAAGAG", index2="CAATGTAT"
     )
     sample_3 = FlowCellSampleBCLConvert(
-        lane=2, sample_id="sample 3", index="AAGCGATAGA", index2="AACCGCAACA"
+        lane=2, sample_id="ACC789", index="AAGCGATAGA", index2="AACCGCAACA"
     )
     return [sample_1, sample_2, sample_3]
 
 
 @pytest.fixture
-def override_cycles_for_samples_with_updated_indexes() -> List[str]:
+def override_cycles_for_samples_with_updated_indexes() -> list[str]:
     """Return the correspondent Override Cycles values for three samples."""
     return ["Y151;I8N2;N2I8;Y151", "Y151;I8N2;N2I8;Y151", "Y151;I10;I10;Y151"]
 
 
 @pytest.fixture
-def override_cycles_for_samples_with_updated_indexes_reverse_complement() -> List[str]:
+def override_cycles_for_samples_with_updated_indexes_reverse_complement() -> list[str]:
     """Return the correspondent Override Cycles values for three samples."""
     return ["Y151;I8N2;I8N2;Y151", "Y151;I8N2;I8N2;Y151", "Y151;I10;I10;Y151"]
 
 
 @pytest.fixture
-def barcode_mismatch_values_for_samples_with_updated_indexes() -> List[Tuple[int, int]]:
+def barcode_mismatch_values_for_samples_with_updated_indexes() -> list[tuple[int, int]]:
     """Return the pairs of barcode mismatch values corresponding to three samples."""
     return [(0, 0), (0, 0), (1, 1)]
 
@@ -57,7 +57,7 @@ def valid_index() -> Index:
 @pytest.fixture
 def bcl2fastq_sample_sheet_creator(
     bcl2fastq_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
 ) -> SampleSheetCreatorBcl2Fastq:
     """Returns a sample sheet creator for version 1 sample sheets with bcl2fastq format."""
     return SampleSheetCreatorBcl2Fastq(
@@ -69,7 +69,7 @@ def bcl2fastq_sample_sheet_creator(
 @pytest.fixture
 def bcl_convert_sample_sheet_creator(
     bcl_convert_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_bcl_convert_samples: List[FlowCellSampleBCLConvert],
+    lims_novaseq_bcl_convert_samples: list[FlowCellSampleBCLConvert],
 ) -> SampleSheetCreatorBCLConvert:
     """Returns a sample sheet creator for version 2 sample sheets with dragen format."""
     return SampleSheetCreatorBCLConvert(
@@ -82,7 +82,7 @@ def bcl_convert_sample_sheet_creator(
 
 
 @pytest.fixture
-def sample_sheet_line_sample_1() -> List[str]:
+def sample_sheet_line_sample_1() -> list[str]:
     """Return the line in the sample sheet corresponding to a sample."""
     return [
         "HWHMWDMXX",
@@ -100,7 +100,7 @@ def sample_sheet_line_sample_1() -> List[str]:
 
 
 @pytest.fixture
-def sample_sheet_line_sample_2() -> List[str]:
+def sample_sheet_line_sample_2() -> list[str]:
     """Return the line in the sample sheet corresponding to a sample."""
     return [
         "HWHMWDMXX",
@@ -118,7 +118,7 @@ def sample_sheet_line_sample_2() -> List[str]:
 
 
 @pytest.fixture
-def sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
+def sample_sheet_bcl2fastq_data_header() -> list[list[str]]:
     """Return the content of a Bcl2fastq sample sheet data header without samples."""
     return [
         [SampleSheetBcl2FastqSections.Data.HEADER],
@@ -140,8 +140,8 @@ def sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
 
 @pytest.fixture
 def sample_sheet_samples_no_header(
-    sample_sheet_line_sample_1: List[str], sample_sheet_line_sample_2: List[str]
-) -> List[List[str]]:
+    sample_sheet_line_sample_1: list[str], sample_sheet_line_sample_2: list[str]
+) -> list[list[str]]:
     """Return the content of a sample sheet with samples but without a sample header."""
     return [
         [SampleSheetBcl2FastqSections.Data.HEADER],
@@ -152,10 +152,10 @@ def sample_sheet_samples_no_header(
 
 @pytest.fixture
 def valid_sample_sheet_bcl2fastq(
-    sample_sheet_bcl2fastq_data_header: List[List[str]],
-    sample_sheet_line_sample_1: List[str],
-    sample_sheet_line_sample_2: List[str],
-) -> List[List[str]]:
+    sample_sheet_bcl2fastq_data_header: list[list[str]],
+    sample_sheet_line_sample_1: list[str],
+    sample_sheet_line_sample_2: list[str],
+) -> list[list[str]]:
     """Return the content of a valid Bcl2fastq sample sheet."""
     return sample_sheet_bcl2fastq_data_header + [
         sample_sheet_line_sample_1,
@@ -165,8 +165,8 @@ def valid_sample_sheet_bcl2fastq(
 
 @pytest.fixture
 def sample_sheet_bcl2fastq_duplicate_same_lane(
-    valid_sample_sheet_bcl2fastq: List[List[str]], sample_sheet_line_sample_2: List[str]
-) -> List[List[str]]:
+    valid_sample_sheet_bcl2fastq: list[list[str]], sample_sheet_line_sample_2: list[str]
+) -> list[list[str]]:
     """Return the content of a Bcl2fastq sample sheet with a duplicated sample in the same lane."""
     valid_sample_sheet_bcl2fastq.append(sample_sheet_line_sample_2)
     return valid_sample_sheet_bcl2fastq
@@ -174,8 +174,8 @@ def sample_sheet_bcl2fastq_duplicate_same_lane(
 
 @pytest.fixture
 def sample_sheet_bcl2fastq_duplicate_different_lane(
-    valid_sample_sheet_bcl2fastq: List[List[str]],
-) -> List[List[str]]:
+    valid_sample_sheet_bcl2fastq: list[list[str]],
+) -> list[list[str]]:
     """Return the content of a Bcl2fastq sample sheet with a duplicated sample in a different lane."""
     valid_sample_sheet_bcl2fastq.append(
         [
@@ -197,8 +197,8 @@ def sample_sheet_bcl2fastq_duplicate_different_lane(
 
 @pytest.fixture
 def valid_sample_sheet_dragen(
-    sample_sheet_line_sample_1: List[str], sample_sheet_line_sample_2: List[str]
-) -> List[List[str]]:
+    sample_sheet_line_sample_1: list[str], sample_sheet_line_sample_2: list[str]
+) -> list[list[str]]:
     """Return the content of a valid Dragen sample sheet."""
     return [
         [SampleSheetBcl2FastqSections.Data.HEADER],
@@ -222,8 +222,8 @@ def valid_sample_sheet_dragen(
 
 @pytest.fixture
 def sample_sheet_dragen_duplicate_same_lane(
-    valid_sample_sheet_dragen: List[List[str]], sample_sheet_line_sample_2: List[str]
-) -> List[List[str]]:
+    valid_sample_sheet_dragen: list[list[str]], sample_sheet_line_sample_2: list[str]
+) -> list[list[str]]:
     """Return the content of a Dragen sample sheet with a duplicated sample in the same lane."""
     valid_sample_sheet_dragen.append(sample_sheet_line_sample_2)
     return valid_sample_sheet_dragen
@@ -231,8 +231,8 @@ def sample_sheet_dragen_duplicate_same_lane(
 
 @pytest.fixture
 def sample_sheet_dragen_duplicate_different_lane(
-    valid_sample_sheet_dragen: List[List[str]],
-) -> List[List[str]]:
+    valid_sample_sheet_dragen: list[list[str]],
+) -> list[list[str]]:
     """Return the content of a Dragen sample sheet with a duplicated sample in a different lane."""
     valid_sample_sheet_dragen.append(
         [
@@ -321,4 +321,22 @@ def novaseq6000_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBcl2Fas
         index="ATTCCACACT-TGGTCTTGTT",
         SampleName="814206",
         Project="814206",
+    )
+
+
+@pytest.fixture
+def bcl_convert_sample_sheet_path(demultiplexed_runs: Path):
+    return Path(
+        demultiplexed_runs,
+        "230504_A00689_0804_BHY7FFDRX2",
+        "SampleSheet.csv",
+    )
+
+
+@pytest.fixture
+def bcl2fastq_sample_sheet_path(demultiplexed_runs: Path):
+    return Path(
+        demultiplexed_runs,
+        "170407_ST-E00198_0209_BHHKVCALXX",
+        "SampleSheet.csv",
     )

@@ -1,8 +1,8 @@
 import logging
 from pathlib import Path
-from typing import List
 
 import pytest
+
 from cg.constants.demultiplexing import RunParametersXMLNodes
 from cg.constants.sequencing import Sequencers
 from cg.exc import RunParametersError
@@ -222,7 +222,7 @@ def test_get_cycles_novaseq_6000(novaseq_6000_run_parameters: RunParametersNovaS
     # GIVEN a NovaSeq6000 run parameters object
 
     # WHEN getting any read cycle
-    read_cycles: List[int] = [
+    read_cycles: list[int] = [
         novaseq_6000_run_parameters.get_read_1_cycles(),
         novaseq_6000_run_parameters.get_read_2_cycles(),
         novaseq_6000_run_parameters.get_index_1_cycles(),
@@ -240,7 +240,7 @@ def test_get_cycles_novaseq_x(novaseq_x_run_parameters: RunParametersNovaSeqX):
     # GIVEN a NovaSeqX run parameters object
 
     # WHEN getting any read cycle
-    read_cycles: List[int] = [
+    read_cycles: list[int] = [
         novaseq_x_run_parameters.get_read_1_cycles(),
         novaseq_x_run_parameters.get_read_2_cycles(),
         novaseq_x_run_parameters.get_index_1_cycles(),

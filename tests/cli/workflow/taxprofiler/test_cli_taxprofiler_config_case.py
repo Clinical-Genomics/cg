@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from typing import List
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
@@ -12,7 +11,10 @@ from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
+from cg.models.taxprofiler.taxprofiler import (
+    TaxprofilerParameters,
+    TaxprofilerSampleSheetEntry,
+)
 
 
 def test_config_case_default_parameters(
@@ -37,7 +39,7 @@ def test_config_case_default_parameters(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN logs should be as expected
-    expected_logs: List[str] = [
+    expected_logs: list[str] = [
         "Getting sample sheet information",
         "Writing sample sheet",
         "Getting parameters information",
@@ -51,14 +53,14 @@ def test_config_case_default_parameters(
     assert taxprofiler_params_file_path.is_file()
 
     # THEN the sample sheet content should match the expected values
-    sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
+    sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.TXT, file_path=taxprofiler_sample_sheet_path, read_to_string=True
     )
     assert ",".join(TaxprofilerSampleSheetEntry.headers()) in sample_sheet_content
     assert taxprofiler_sample_sheet_content in sample_sheet_content
 
     # THEN the params file should contain all parameters
-    params_content: List[List[str]] = ReadFile.get_content_from_file(
+    params_content: list[list[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.TXT, file_path=taxprofiler_params_file_path, read_to_string=True
     )
     for parameter in vars(taxprofiler_parameters_default).keys():

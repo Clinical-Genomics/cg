@@ -1,14 +1,14 @@
 """Fixtures for deliver commands"""
 
 from pathlib import Path
-from typing import List
 
 import pytest
+from housekeeper.store.models import Version
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from housekeeper.store.models import Version
 from tests.store_helpers import StoreHelpers
 
 # Paths
@@ -41,8 +41,8 @@ def base_context(
 @pytest.fixture
 def mip_delivery_bundle(
     case_hk_bundle_no_files: dict,
-    sample_cram_files: List[Path],
-    sample_ids: List[str],
+    sample_cram_files: list[Path],
+    sample_ids: list[str],
     vcf_file: Path,
 ) -> dict:
     """Return a bundle that includes files used when delivering MIP analysis data"""

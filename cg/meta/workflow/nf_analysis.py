@@ -2,7 +2,7 @@ import logging
 import operator
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
@@ -63,6 +63,10 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_workflow_manager(self) -> str:
         """Get workflow manager from Tower."""
         return WorkflowManager.Tower.value
+
+    def get_pipeline_version(self, case_id: str) -> str:
+        """Get pipeline version from config."""
+        return self.revision
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
@@ -128,7 +132,7 @@ class NfAnalysisAPI(AnalysisAPI):
     @staticmethod
     def extract_read_files(
         metadata: list, forward_read: bool = False, reverse_read: bool = False
-    ) -> List[str]:
+    ) -> list[str]:
         """Extract a list of fastq file paths for either forward or reverse reads."""
         if forward_read and not reverse_read:
             read_direction = 1
@@ -159,9 +163,9 @@ class NfAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def write_sample_sheet(
-        content: List[List[Any]],
+        content: list[list[Any]],
         file_path: Path,
-        header: List[str],
+        header: list[str],
     ) -> None:
         """Write sample sheet CSV file."""
         LOG.debug("Writing sample sheet")
@@ -208,7 +212,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 launch_directory=self.get_case_path(case_id=case_id),
             )
             LOG.info("Pipeline will be executed using nextflow")
-            parameters: List[str] = NextflowHandler.get_nextflow_run_parameters(
+            parameters: list[str] = NextflowHandler.get_nextflow_run_parameters(
                 case_id=case_id,
                 pipeline_path=self.nfcore_pipeline_path,
                 root_dir=self.root_dir,
@@ -241,11 +245,11 @@ class NfAnalysisAPI(AnalysisAPI):
                         trailblazer_config=self.get_trailblazer_config_path(case_id=case_id),
                     )
                 LOG.info(f"Pipeline will be resumed from run {from_tower_id}.")
-                parameters: List[str] = NfTowerHandler.get_tower_relaunch_parameters(
+                parameters: list[str] = NfTowerHandler.get_tower_relaunch_parameters(
                     from_tower_id=from_tower_id, command_args=command_args.dict()
                 )
             else:
-                parameters: List[str] = NfTowerHandler.get_tower_launch_parameters(
+                parameters: list[str] = NfTowerHandler.get_tower_launch_parameters(
                     tower_pipeline=self.tower_pipeline,
                     command_args=command_args.dict(),
                 )
@@ -258,14 +262,14 @@ class NfAnalysisAPI(AnalysisAPI):
             LOG.info(self.process.stdout)
 
     @staticmethod
-    def get_deliverables_template_content() -> List[dict]:
+    def get_deliverables_template_content() -> list[dict]:
         """Return deliverables file template content."""
         raise NotImplementedError
 
     def get_deliverables_for_case(self, case_id: str) -> PipelineDeliverables:
         """Return PipelineDeliverables for a given case."""
-        deliverable_template: List[dict] = self.get_deliverables_template_content()
-        files: List[FileDeliverable] = []
+        deliverable_template: list[dict] = self.get_deliverables_template_content()
+        files: list[FileDeliverable] = []
         for file in deliverable_template:
             for deliverable_field, deliverable_value in file.items():
                 if deliverable_value is None:

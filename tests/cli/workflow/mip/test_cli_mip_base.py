@@ -3,13 +3,16 @@
 import logging
 
 from _pytest.logging import LogCaptureFixture
-from cg.cli.workflow.mip_dna.base import start, start_available
-from cg.constants.process import EXIT_SUCCESS
-from cg.models.cg_config import CGConfig
-from cg.store.models import Family
 from click.testing import CliRunner
 from pytest_mock import MockFixture
+
+from cg.cli.workflow.mip_dna.base import start, start_available
+from cg.constants.process import EXIT_SUCCESS
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.models.cg_config import CGConfig
+from cg.store.models import Family
 from tests.cli.workflow.mip.conftest import setup_mocks
+from tests.store.conftest import case_obj
 
 
 def test_spring_decompression_needed_and_started(
@@ -26,9 +29,8 @@ def test_spring_decompression_needed_and_started(
     # GIVEN all samples in the case has dna application type
     # GIVEN the latest analysis has not started
     # GIVEN spring decompression is needed
-    # GIVEN there is spring files that can be decompressed
-    # GIVEN there is spring files that can be decompressed
-    # GIVEN there is flow cells for the case
+    # GIVEN there are spring files that can be decompressed
+    # GIVEN there are flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=True,
         case_to_analyze=case,
@@ -192,5 +194,5 @@ def test_case_needs_to_be_stored(
     # THEN command should run without errors
     assert result.exit_code == 0
 
-    # THEN fastq files should be added to housekeeper
-    assert "Linking fastq files in housekeeper for case" in caplog.text
+    # THEN the add_decompressed_fastq_files_to_housekeeper method should have been called
+    assert PrepareFastqAPI.add_decompressed_fastq_files_to_housekeeper.call_count

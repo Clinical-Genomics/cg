@@ -3,6 +3,10 @@ from pathlib import Path
 
 import pytest
 from _pytest.logging import LogCaptureFixture
+from click.testing import CliRunner
+from pydantic import ValidationError
+from pytest_mock import MockFixture
+
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -13,9 +17,6 @@ from cg.io.controller import WriteStream
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
-from click.testing import CliRunner
-from pydantic import ValidationError
-from pytest_mock import MockFixture
 
 
 def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):
@@ -125,6 +126,7 @@ def test_valid_case(
     mock_deliverable,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
+    pipeline_version: str,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN case-id
@@ -148,6 +150,14 @@ def test_valid_case(
     assert "Analysis successfully stored in StatusDB" in caplog.text
     assert rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
     assert rnafusion_context.meta_apis["analysis_api"].housekeeper_api.bundle(case_id)
+
+    # THEN pipeline version should be correctly stored
+    assert (
+        rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id)
+        .analyses[0]
+        .pipeline_version
+        == pipeline_version
+    )
 
 
 def test_valid_case_already_added(

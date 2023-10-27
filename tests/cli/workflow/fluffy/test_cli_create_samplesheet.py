@@ -1,11 +1,12 @@
+import datetime as dt
 from pathlib import Path
+
+from click.testing import CliRunner
+
 from cg.cli.workflow.fluffy.base import create_samplesheet
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
-import datetime as dt
-
 from cg.store.models import Flowcell, Sample
 
 
@@ -57,7 +58,6 @@ def test_create_samplesheet_success(
     cli_runner: CliRunner,
     fluffy_case_id_existing: str,
     fluffy_context: CGConfig,
-    samplesheet_path,
     sample: Sample,
     caplog,
     mocker,
@@ -65,10 +65,6 @@ def test_create_samplesheet_success(
     caplog.set_level("INFO")
     fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
     # GIVEN a case_id that does exist in database
-
-    # GIVEN an existing samplesheet in Housekeeper
-    mocker.patch.object(FluffyAnalysisAPI, "get_sample_sheet_housekeeper_path")
-    FluffyAnalysisAPI.get_sample_sheet_housekeeper_path.return_value = samplesheet_path
 
     # GIVEN Concentrations are set in LIMS on sample level
     mocker.patch.object(FluffyAnalysisAPI, "get_concentrations_from_lims")
@@ -106,7 +102,6 @@ def test_create_fluffy_samplesheet_from_bcl_convert_sample_sheet(
     cli_runner: CliRunner,
     fluffy_case_id_existing: str,
     fluffy_context: CGConfig,
-    bcl_convert_samplesheet_path: Path,
     sample: Sample,
     caplog,
     mocker,
@@ -121,10 +116,6 @@ def test_create_fluffy_samplesheet_from_bcl_convert_sample_sheet(
     )
     flow_cell.sequencer_type = "novaseqx"
 
-    # GIVEN an existing samplesheet in Housekeeper
-    mocker.patch.object(FluffyAnalysisAPI, "get_sample_sheet_housekeeper_path")
-    FluffyAnalysisAPI.get_sample_sheet_housekeeper_path.return_value = bcl_convert_samplesheet_path
-
     # GIVEN Concentrations are set in LIMS on sample level
     mocker.patch.object(FluffyAnalysisAPI, "get_concentrations_from_lims")
     FluffyAnalysisAPI.get_concentrations_from_lims.return_value = "20"
@@ -133,7 +124,7 @@ def test_create_fluffy_samplesheet_from_bcl_convert_sample_sheet(
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_name_from_lims_id")
     FluffyAnalysisAPI.get_sample_name_from_lims_id.return_value = "CustName"
 
-    # GIVEN every sample in SampleSheet sequenced_at set in StatusDB
+    # GIVEN every sample in SampleSheet reads_updated_at set in StatusDB
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_sequenced_date")
     FluffyAnalysisAPI.get_sample_sequenced_date.return_value = dt.datetime.now().date()
 

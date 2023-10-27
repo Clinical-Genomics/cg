@@ -1,5 +1,5 @@
 """Module for Rnafusion analysis API tests."""
-from typing import List
+
 
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -19,7 +19,7 @@ def test_parse_analysis(
 
     # GIVEN a Rnafusion analysis API and a list of QC metrics
     analysis_api: RnafusionAnalysisAPI = rnafusion_context.meta_apis["analysis_api"]
-    qc_metrics: List[MetricsBase] = analysis_api.get_multiqc_json_metrics(case_id=rnafusion_case_id)
+    qc_metrics: list[MetricsBase] = analysis_api.get_multiqc_json_metrics(case_id=rnafusion_case_id)
 
     # WHEN extracting the analysis model
     analysis_model: RnafusionAnalysis = analysis_api.parse_analysis(qc_metrics_raw=qc_metrics)

@@ -1,5 +1,6 @@
 from pathlib import Path
-from typing import List
+
+from click import testing
 
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
@@ -8,10 +9,8 @@ from cg.apps.demultiplex.sample_sheet.models import (
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
-from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
-from click import testing
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.get_flow_cell_samples"
 
@@ -20,7 +19,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_no_run_parameters: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
     caplog,
     mocker,
 ):
@@ -58,7 +57,7 @@ def test_create_bcl2fastq_sample_sheet(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_no_sample_sheet: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
     mocker,
 ):
     """Test that creating a Bcl2fastq sample sheet works."""
@@ -73,8 +72,8 @@ def test_create_bcl2fastq_sample_sheet(
     assert not flow_cell.sample_sheet_exists()
 
     # GIVEN that there are no sample sheet in Housekeeper
-    assert not get_sample_sheets_from_latest_version(
-        flow_cell_id=flow_cell.id, hk_api=sample_sheet_context.housekeeper_api
+    assert not sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(
+        flow_cell.id
     )
 
     # GIVEN flow cell samples
@@ -101,16 +100,14 @@ def test_create_bcl2fastq_sample_sheet(
     assert flow_cell.validate_sample_sheet()
 
     # THEN the sample sheet is in Housekeeper
-    assert get_sample_sheets_from_latest_version(
-        flow_cell_id=flow_cell.id, hk_api=sample_sheet_context.housekeeper_api
-    )
+    assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(flow_cell.id)
 
 
 def test_create_dragen_sample_sheet(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_no_sample_sheet: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl_convert_samples: List[FlowCellSampleBCLConvert],
+    lims_novaseq_bcl_convert_samples: list[FlowCellSampleBCLConvert],
     mocker,
 ):
     """Test that creating a Dragen sample sheet works."""
@@ -124,8 +121,8 @@ def test_create_dragen_sample_sheet(
     assert not flow_cell.sample_sheet_exists()
 
     # GIVEN that there are no sample sheet in Housekeeper
-    assert not get_sample_sheets_from_latest_version(
-        flow_cell_id=flow_cell.id, hk_api=sample_sheet_context.housekeeper_api
+    assert not sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(
+        flow_cell.id
     )
 
     # GIVEN flow cell samples
@@ -152,16 +149,14 @@ def test_create_dragen_sample_sheet(
     assert flow_cell.validate_sample_sheet()
 
     # THEN the sample sheet is in Housekeeper
-    assert get_sample_sheets_from_latest_version(
-        flow_cell_id=flow_cell.id, hk_api=sample_sheet_context.housekeeper_api
-    )
+    assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(flow_cell.id)
 
 
 def test_incorrect_bcl2fastq_headers_samplesheet(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_malformed_sample_sheet: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
     mocker,
     caplog,
 ):

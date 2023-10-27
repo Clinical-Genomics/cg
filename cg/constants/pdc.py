@@ -1,5 +1,6 @@
 """PDC related constants"""
-from cg.utils.enums import ListEnum, IntEnum
+from enum import IntEnum
+from cg.utils.enums import ListEnum
 
 
 class DSMCParameters(ListEnum):

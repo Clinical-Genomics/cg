@@ -1,28 +1,25 @@
 """Fixtures for the workflow tests."""
 import datetime
 from pathlib import Path
-from typing import List, Dict
 
 import pytest
-from cgmodels.cg.constants import Pipeline
 
-from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
-from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
-
+from cg.constants.constants import MicrosaltAppTags, MicrosaltQC, Pipeline
 from cg.meta.compress.compress import CompressAPI
-from cg.models.compression_data import CompressionData
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.compression_data import CompressionData
 from cg.store.models import Family, Sample
-from tests.store_helpers import StoreHelpers
-from tests.conftest import base_store
-from tests.meta.compress.conftest import compress_api, real_crunchy_api
-from tests.meta.upload.scout.conftest import another_sample_id
 from tests.cli.workflow.balsamic.conftest import (
+    balsamic_housekeeper_dir,
     fastq_file_l_1_r_1,
     fastq_file_l_2_r_1,
     fastq_file_l_2_r_2,
-    balsamic_housekeeper_dir,
 )
+from tests.meta.compress.conftest import compress_api, real_crunchy_api
+from tests.meta.upload.scout.conftest import another_sample_id
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(scope="function")
@@ -129,13 +126,13 @@ def microsalt_case_qc_fail() -> str:
 
 
 @pytest.fixture(name="qc_pass_microsalt_samples")
-def qc_pass_microsalt_samples() -> List[str]:
+def qc_pass_microsalt_samples() -> list[str]:
     """Return a list of 20 microsalt samples internal_ids."""
     return [f"ACC22222A{i}" for i in range(1, 21)]
 
 
 @pytest.fixture(name="qc_fail_microsalt_samples")
-def qc_fail_microsalt_samples() -> List[str]:
+def qc_fail_microsalt_samples() -> list[str]:
     """Return a list of 20 microsalt samples internal_ids."""
     return [f"ACC11111A{i}" for i in range(1, 21)]
 
@@ -146,8 +143,8 @@ def qc_microsalt_context(
     helpers: StoreHelpers,
     microsalt_case_qc_pass: str,
     microsalt_case_qc_fail: str,
-    qc_pass_microsalt_samples: List[str],
-    qc_fail_microsalt_samples: List[str],
+    qc_pass_microsalt_samples: list[str],
+    qc_fail_microsalt_samples: list[str],
     microsalt_qc_pass_lims_project: str,
     microsalt_qc_fail_lims_project: str,
 ) -> CGConfig:
@@ -170,7 +167,7 @@ def qc_microsalt_context(
             application_tag=MicrosaltAppTags.MWRNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
             reads=MicrosaltQC.TARGET_READS,
-            sequenced_at=datetime.datetime.now(),
+            reads_updated_at=datetime.datetime.now(),
         )
 
         helpers.add_relationship(store=store, case=microsalt_case_qc_pass, sample=sample_to_add)
@@ -190,7 +187,7 @@ def qc_microsalt_context(
             application_tag=MicrosaltAppTags.MWXNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
             reads=MicrosaltQC.TARGET_READS,
-            sequenced_at=datetime.datetime.now(),
+            reads_updated_at=datetime.datetime.now(),
         )
 
         helpers.add_relationship(store=store, case=microsalt_case_qc_fail, sample=sample_to_add)
@@ -209,7 +206,7 @@ def qc_microsalt_context(
 
 
 @pytest.fixture(name="rnafusion_metrics")
-def rnafusion_metrics() -> Dict[str, float]:
+def rnafusion_metrics() -> dict[str, float]:
     """Return Rnafusion raw analysis metrics dictionary."""
     return {
         "after_filtering_gc_content": 0.516984,
@@ -226,3 +223,14 @@ def rnafusion_metrics() -> Dict[str, float]:
         "reads_aligned": 72391566.0,
         "uniquely_mapped_percent": 91.02,
     }
+
+
+@pytest.fixture(name="mip_analysis_api")
+def fixture_mip_analysis_api(
+    cg_context: CGConfig, mip_hk_store, analysis_store
+) -> MipDNAAnalysisAPI:
+    """Return a MIP analysis API."""
+    analysis_api = MipDNAAnalysisAPI(cg_context)
+    analysis_api.housekeeper_api = mip_hk_store
+    analysis_api.status_db = analysis_store
+    return analysis_api

@@ -3,12 +3,12 @@
 import datetime as dt
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Generator
+from typing import Any, Generator
 
 import pytest
+
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-
 from cg.constants import FileExtensions, SequencingFileTag
 from cg.constants.pedigree import Pedigree
 from cg.meta.compress import CompressAPI
@@ -50,7 +50,7 @@ def compress_api() -> MockCompressAPI:
 
 @pytest.fixture
 def real_crunchy_api(
-    crunchy_config: Dict[str, Dict[str, Any]]
+    crunchy_config: dict[str, dict[str, Any]]
 ) -> Generator[CrunchyAPI, None, None]:
     """Return Crunchy API."""
     _api = CrunchyAPI(crunchy_config)

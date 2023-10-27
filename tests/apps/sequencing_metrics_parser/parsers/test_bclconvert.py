@@ -1,13 +1,16 @@
 """This module contains tests for the BCLConvert metrics parser."""
 
-from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
-from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
-    BclConvertQualityMetrics,
-    BclConvertDemuxMetrics,
-)
 from pathlib import Path
-from typing import List
+
 import pytest
+
+from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
+    BclConvertDemuxMetrics,
+    BclConvertQualityMetrics,
+)
+from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import (
+    BclConvertMetricsParser,
+)
 
 
 def test_parse_bcl_convert_metrics(
@@ -49,7 +52,7 @@ def test_parse_bcl_convert_quality_metrics(
     assert isinstance(quality_metrics_model, BclConvertQualityMetrics)
 
     # ASSERT that the parsed quality metrics has the correct values
-    for attr_name, attr_value in quality_metrics_model.dict().items():
+    for attr_name, attr_value in quality_metrics_model.model_dump().items():
         assert getattr(bcl_convert_quality_metric_model_with_data, attr_name) == attr_value
 
 
@@ -67,7 +70,7 @@ def test_parse_bcl_convert_demux_metrics(
     assert isinstance(demux_metrics_model, BclConvertDemuxMetrics)
 
     # ASSERT that the parsed demux metrics has the correct values
-    for attr_name, attr_value in demux_metrics_model.dict().items():
+    for attr_name, attr_value in demux_metrics_model.model_dump().items():
         assert getattr(bcl_convert_demux_metric_model_with_data, attr_name) == attr_value
 
 
@@ -79,7 +82,7 @@ def test_get_sample_internal_ids(
     # GIVEN a parsed BCLConvert metrics
 
     # WHEN getting sample internal ids
-    sample_internal_ids: List[str] = parsed_bcl_convert_metrics.get_sample_internal_ids()
+    sample_internal_ids: list[str] = parsed_bcl_convert_metrics.get_sample_internal_ids()
 
     # THEN assert that the test sample internal id is present
     assert test_sample_internal_id in sample_internal_ids
@@ -98,7 +101,7 @@ def test_get_lanes_for_sample_internal_id(
     # GIVEN a parsed BCLConvert metrics
 
     # WHEN getting lanes for a sample internal id
-    lanes: List[int] = parsed_bcl_convert_metrics.get_lanes_for_sample(
+    lanes: list[int] = parsed_bcl_convert_metrics.get_lanes_for_sample(
         sample_internal_id=test_sample_internal_id
     )
 

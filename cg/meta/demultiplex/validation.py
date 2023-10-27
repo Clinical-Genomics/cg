@@ -1,14 +1,11 @@
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_internal_ids_from_sample_sheet,
-)
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError, MissingFilesError
 from cg.meta.demultiplex.utils import get_sample_fastqs_from_flow_cell
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
 
@@ -48,12 +45,9 @@ def validate_flow_cell_has_fastq_files(flow_cell: FlowCellDirectoryData) -> None
     Raises: MissingFilesError
         When all samples have missing fastq files in the flow cell
     """
-    sample_ids: List[str] = get_sample_internal_ids_from_sample_sheet(
-        sample_sheet_path=flow_cell.get_sample_sheet_path_hk(),
-        flow_cell_sample_type=flow_cell.sample_type,
-    )
+    sample_ids: list[str] = flow_cell.sample_sheet.get_sample_ids()
     for sample_id in sample_ids:
-        fastq_files: Optional[List[Path]] = get_sample_fastqs_from_flow_cell(
+        fastq_files: Optional[list[Path]] = get_sample_fastqs_from_flow_cell(
             flow_cell_directory=flow_cell.path, sample_internal_id=sample_id
         )
         if fastq_files:

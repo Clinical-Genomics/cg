@@ -1,16 +1,17 @@
-from typing import List, Optional
+from typing import Optional
+
+from pydantic import BaseModel
 
 from cg.models.orders.sample_base import OrderSample
-from pydantic import BaseModel
 
 
 # Class for holding information about cases in order
 class OrderCase(BaseModel):
-    cohorts: Optional[List[str]]
+    cohorts: Optional[list[str]]
     name: str
-    panels: Optional[List[str]]
+    panels: Optional[list[str]]
     priority: str
-    samples: List[OrderSample]
+    samples: list[OrderSample]
     synopsis: Optional[str]
 
 
@@ -19,7 +20,7 @@ class OrderPool(BaseModel):
     data_analysis: str
     data_delivery: Optional[str]
     application: str
-    samples: List[OrderSample]
+    samples: list[OrderSample]
 
 
 # This is for validating in data
@@ -32,5 +33,5 @@ class Orderform(BaseModel):
     data_analysis: Optional[str] = None
     data_delivery: Optional[str] = None
     ticket: Optional[int] = None
-    samples: List[OrderSample]
-    cases: Optional[List[OrderCase]] = None
+    samples: list[OrderSample]
+    cases: Optional[list[OrderCase]] = None

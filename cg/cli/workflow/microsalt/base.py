@@ -1,21 +1,20 @@
 """CLI support to start microsalt"""
 
-import datetime as dt
 import logging
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List
 
 import click
+
 from cg.cli.workflow.commands import resolve_compression, store, store_available
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import FileFormat
-from cg.exc import CgError
-from cg.io.controller import WriteStream, WriteFile
+from cg.exc import AnalysisNotReadyError, CgError
+from cg.io.controller import WriteFile, WriteStream
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Analysis, Sample
-from housekeeper.store.models import File
-from cg.meta.workflow.analysis import AnalysisAPI
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -90,13 +89,13 @@ def config_case(
     case_id, sample_id = analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
     )
-    sample_objs: List[Sample] = analysis_api.get_samples(case_id=case_id, sample_id=sample_id)
+    sample_objs: list[Sample] = analysis_api.get_samples(case_id=case_id, sample_id=sample_id)
 
     if not sample_objs:
         LOG.error("No sample found for that ticket/sample_id")
         raise click.Abort
 
-    parameters: List[dict] = [analysis_api.get_parameters(sample_obj) for sample_obj in sample_objs]
+    parameters: list[dict] = [analysis_api.get_parameters(sample_obj) for sample_obj in sample_objs]
     filename: str = sample_id or case_id
     config_case_path: Path = analysis_api.get_config_path(filename=filename)
     if dry_run:
@@ -107,7 +106,7 @@ def config_case(
     WriteFile.write_file_from_content(
         content=parameters, file_format=FileFormat.JSON, file_path=config_case_path
     )
-    LOG.info("Saved config %s", config_case_path)
+    LOG.info(f"Saved config {config_case_path}")
 
 
 @microsalt.command()
@@ -165,9 +164,7 @@ def run(
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
     except Exception as error:
         LOG.warning(
-            "Trailblazer warning: Could not track analysis progress for case %s! %s",
-            case_id,
-            error.__class__.__name__,
+            f"Trailblazer warning: Could not track analysis progress for case {case_id}! {error.__class__.__name__}"
         )
     try:
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
@@ -188,8 +185,10 @@ def start(
     context: click.Context, ticket: bool, sample: bool, unique_id: str, dry_run: bool
 ) -> None:
     """Start whole microSALT workflow by providing case, ticket or sample id"""
-    LOG.info("Starting Microsalt workflow for %s", unique_id)
-
+    LOG.info(f"Starting Microsalt workflow for {unique_id}")
+    if not (sample or ticket):
+        analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
+        analysis_api.prepare_fastq_files(case_id=unique_id, dry_run=dry_run)
     context.invoke(link, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
     context.invoke(config_case, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
     context.invoke(run, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
@@ -207,6 +206,8 @@ def start_available(context: click.Context, dry_run: bool = False):
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, unique_id=case_obj.internal_id, dry_run=dry_run)
+        except AnalysisNotReadyError as error:
+            LOG.error(error)
         except CgError as error:
             LOG.error(error)
             exit_code = EXIT_FAIL

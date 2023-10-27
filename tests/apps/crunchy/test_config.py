@@ -1,15 +1,19 @@
 """Tests the config part of Crunchy."""
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
-from cg.apps.crunchy.files import get_crunchy_metadata, update_metadata_date, update_metadata_paths
+from cg.apps.crunchy.files import (
+    get_crunchy_metadata,
+    update_metadata_date,
+    update_metadata_paths,
+)
 from cg.apps.crunchy.models import CrunchyMetadata
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 
 
 def test_get_spring_metadata_real_file(
-    real_spring_metadata_path: Path, crunchy_config: Dict[str, Dict[str, Any]]
+    real_spring_metadata_path: Path, crunchy_config: dict[str, dict[str, Any]]
 ):
     """Test to parse the content of a real spring metadata file."""
     # GIVEN the path to a file with spring metadata content

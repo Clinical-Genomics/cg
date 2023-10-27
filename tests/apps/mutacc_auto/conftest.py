@@ -3,6 +3,7 @@
 """
 
 import pytest
+
 from cg.apps.mutacc_auto import MutaccAutoAPI
 
 CONFIG = {
