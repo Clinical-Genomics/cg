@@ -4,16 +4,20 @@ from unittest import mock
 
 import pytest
 
+from cg.constants import EXIT_FAIL
+from cg.constants.process import RETURN_WARNING
 from cg.exc import (
     DsmcAlreadyRunningError,
     FlowCellAlreadyBackedUpError,
     FlowCellEncryptionError,
+    PdcError,
 )
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Flowcell
+from tests.meta.backup.conftest import create_process_response
 from tests.store_helpers import StoreHelpers
 
 
@@ -202,21 +206,23 @@ def test_backup_flow_cell_when_unable_to_archive(
         store=base_store,
     )
 
-    # WHEN backing up flow cell
-    pdc_api.backup_flow_cell(
-        files_to_archive=[
-            flow_cell_encryption_api.final_passphrase_file_path,
-            flow_cell_encryption_api.encrypted_gpg_file_path,
-        ],
-        store=base_store,
-        db_flow_cell=db_flow_cell,
-    )
+    # GIVEN that archiving fails
+    with mock.patch(
+        "cg.utils.commands.subprocess.run",
+        return_value=create_process_response(return_code=1),
+    ):
+        # WHEN backing up flow cell
 
-    # THEN log unable to archive
-    assert (
-        f"{flow_cell_encryption_api.encrypted_gpg_file_path.as_posix()} cannot be archived"
-        in caplog.text
-    )
+        # THEN the appropriate error should have been raised
+        with pytest.raises(PdcError):
+            pdc_api.backup_flow_cell(
+                files_to_archive=[
+                    flow_cell_encryption_api.final_passphrase_file_path,
+                    flow_cell_encryption_api.encrypted_gpg_file_path,
+                ],
+                store=base_store,
+                db_flow_cell=db_flow_cell,
+            )
 
 
 @mock.patch("cg.meta.backup.pdc.Process")
@@ -246,7 +252,9 @@ def test_query_pdc(mock_process, cg_context: CGConfig, binary_path, backup_file_
     pdc_api.query_pdc(backup_file_path)
 
     # THEN a dsmc process should be started with parameters 'q archive'
-    mock_process.run_command.assert_called_once_with(parameters=["q", "archive", backup_file_path])
+    mock_process.run_command.assert_called_once_with(
+        parameters=["q", "archive", backup_file_path], dry_run=False
+    )
 
 
 @mock.patch("cg.meta.backup.pdc.Process")
@@ -263,3 +271,36 @@ def test_retrieve_file_from_pdc(mock_process, cg_context: CGConfig, binary_path,
     mock_process.run_command.assert_called_once_with(
         parameters=["retrieve", "-replace=yes", backup_file_path], dry_run=False
     )
+
+
+def test_run_dsmc_command_fail(cg_context: CGConfig):
+    """Test that non-zero, non-warning exit-codes raise an error."""
+    # GIVEN an instance of the PDC API
+    pdc_api = cg_context.pdc_api
+
+    # GIVEN an exit code signifying failure
+    with pytest.raises(PdcError), mock.patch(
+        "cg.utils.commands.subprocess.run",
+        return_value=create_process_response(return_code=EXIT_FAIL),
+    ):
+        # WHEN running a dsmc command
+        pdc_api.run_dsmc_command(["archive", "something"])
+
+        # THEN the appropriate error should have been raised
+
+
+def test_run_dsmc_command_warning(cg_context: CGConfig, caplog):
+    """Test that warning exit-codes do not raise an error."""
+    # GIVEN an instance of the PDC API
+    pdc_api = cg_context.pdc_api
+
+    # GIVEN an exit code signifying a warning
+    with mock.patch(
+        "cg.utils.commands.subprocess.run",
+        return_value=create_process_response(return_code=RETURN_WARNING),
+    ):
+        # WHEN running a dsmc command
+        pdc_api.run_dsmc_command(["archive", "something"])
+
+    # THEN the warning should have been logged
+    assert "WARNING" in caplog.text

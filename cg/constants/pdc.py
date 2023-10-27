@@ -13,3 +13,4 @@ class PDCExitCodes(IntEnum):
 
     SUCCESS: int = 0
     NO_FILES_FOUND: int = 8
+    WARNING: int = 8

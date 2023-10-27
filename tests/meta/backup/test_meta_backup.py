@@ -52,16 +52,6 @@ def test_query_pdc_for_flow_cell(
     assert fnmatch.filter(
         names=caplog.messages, pat=f"Found archived files for PDC query:*{flow_cell_name}*.gpg"
     )
-    # THEN the flow cell is logged as not found for two of the search patterns
-    assert (
-        len(
-            fnmatch.filter(
-                names=caplog.messages,
-                pat=f"No archived files found for PDC query: *{flow_cell_name}*{FileExtensions.GPG}",
-            )
-        )
-        == 2
-    )
 
 
 def test_get_archived_encryption_key_path(dsmc_q_archive_output: list[str], flow_cell_name: str):

@@ -2,10 +2,11 @@
 
 import logging
 from pathlib import Path
+from subprocess import CalledProcessError
 
 import psutil
 
-from cg.constants.pdc import DSMCParameters
+from cg.constants.pdc import DSMCParameters, PDCExitCodes
 from cg.exc import (
     DsmcAlreadyRunningError,
     FlowCellAlreadyBackedUpError,
@@ -55,9 +56,7 @@ class PdcAPI:
         """Query PDC based on a given search pattern."""
         command: list = DSMCParameters.QUERY_COMMAND.copy()
         command.append(search_pattern)
-        LOG.debug("Starting DSMC command:")
-        LOG.debug(f"{self.process.binary} {' '.join(command)}")
-        self.process.run_command(parameters=command)
+        self.run_dsmc_command(command=command)
 
     def retrieve_file_from_pdc(self, file_path: str, target_path: str = None) -> None:
         """Retrieve a file from PDC"""
@@ -76,8 +75,11 @@ class PdcAPI:
         LOG.debug(f"{self.process.binary} {' '.join(command)}")
         try:
             self.process.run_command(parameters=command, dry_run=self.dry_run)
-        except Exception as error:
-            raise PdcError(f"{error}") from error
+        except CalledProcessError as error:
+            if error.returncode == PDCExitCodes.WARNING:
+                LOG.warning(f"{error}")
+                return
+            raise PdcError(message=f"{error}") from error
 
     def validate_is_flow_cell_backup_possible(
         self, db_flow_cell: Flowcell, flow_cell_encryption_api: FlowCellEncryptionAPI
@@ -104,16 +106,10 @@ class PdcAPI:
         self, files_to_archive: list[Path], store: Store, db_flow_cell: Flowcell
     ) -> None:
         """Back-up flow cell files."""
-        archived_file_count: int = 0
         for encrypted_file in files_to_archive:
-            try:
-                self.archive_file_to_pdc(file_path=encrypted_file.as_posix())
-                archived_file_count += 1
-            except PdcError:
-                LOG.warning(f"{encrypted_file.as_posix()} cannot be archived")
-            if archived_file_count == len(files_to_archive) and not self.dry_run:
-                store.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
-                LOG.info(f"Flow cell: {db_flow_cell.name} has been backed up")
+            self.archive_file_to_pdc(file_path=encrypted_file.as_posix())
+            store.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
+            LOG.info(f"Flow cell: {db_flow_cell.name} has been backed up")
 
     def start_flow_cell_backup(
         self,

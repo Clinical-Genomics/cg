@@ -11,7 +11,6 @@ from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
 from cg.constants.constants import FileExtensions, FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.indexes import ListIndexes
-from cg.constants.pdc import PDCExitCodes
 from cg.constants.process import RETURN_WARNING
 from cg.constants.symbols import NEW_LINE
 from cg.exc import ChecksumFailedError, PdcNoFilesMatchingSearchError
@@ -85,12 +84,7 @@ class BackupAPI:
             self.status.session.commit()
             LOG.info(f"{flow_cell.name}: retrieving from PDC")
 
-        try:
-            dsmc_output: list[str] = self.query_pdc_for_flow_cell(flow_cell.name)
-
-        except PdcNoFilesMatchingSearchError as error:
-            LOG.error(f"PDC query failed: {error}")
-            raise error
+        dsmc_output: list[str] = self.query_pdc_for_flow_cell(flow_cell.name)
 
         archived_key: Path = self.get_archived_encryption_key_path(dsmc_output=dsmc_output)
         archived_flow_cell: Path = self.get_archived_flow_cell_path(dsmc_output=dsmc_output)
@@ -254,21 +248,19 @@ class BackupAPI:
     def query_pdc_for_flow_cell(self, flow_cell_id: str) -> list[str]:
         """Query PDC for a given flow cell id.
         Raise:
-            CalledProcessError if an error OTHER THAN no files found is raised.
+            PdcNoFilesMatchingSearchError if no files are found.
         """
-        dsmc_output: list[str] = []
         for _, encryption_directory in self.encryption_directories:
             search_pattern = f"{encryption_directory}*{flow_cell_id}*{FileExtensions.GPG}"
-            try:
-                self.pdc.query_pdc(search_pattern)
-                dsmc_output: list[str] = self.pdc.process.stdout.split(NEW_LINE)
-            except subprocess.CalledProcessError as error:
-                if error.returncode != PDCExitCodes.NO_FILES_FOUND:
-                    raise error
-                LOG.debug(f"No archived files found for PDC query: {search_pattern}")
-                continue
-            LOG.info(f"Found archived files for PDC query: {search_pattern}")
-        return dsmc_output
+            self.pdc.query_pdc(search_pattern)
+            if dsmc_output := self.pdc.process.stdout.split(NEW_LINE):
+                LOG.info(f"Found archived files for PDC query: {search_pattern}")
+                return dsmc_output
+            LOG.debug(f"No archived files found for PDC query: {search_pattern}")
+
+        raise PdcNoFilesMatchingSearchError(
+            message=f"No flow cell files found at PDC for {flow_cell_id}"
+        )
 
     def retrieve_archived_file(self, archived_file: Path, run_dir: Path) -> None:
         """Retrieve the archived file from PDC to a flow cell runs directory."""
