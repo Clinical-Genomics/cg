@@ -6,7 +6,7 @@ class Gender(StrEnum):
     MALE = "male"
     UNKNOWN = "unknown"
     OTHER = "other"
-    MISSING = None
+    MISSING = ""
 
     def __repr__(self):
         return self.value
@@ -16,7 +16,7 @@ class PhenotypeStatus(StrEnum):
     UNKNOWN = "unknown"
     UNAFFECTED = "unaffected"
     AFFECTED = "affected"
-    MISSING = None
+    MISSING = ""
 
     def __repr__(self):
         return self.value
