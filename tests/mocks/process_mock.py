@@ -4,7 +4,7 @@ import copy
 import logging
 from subprocess import CalledProcessError
 
-from cg.constants import RETURN_SUCCESS
+from cg.constants import EXIT_SUCCESS
 from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ class ProcessMock(Process):
             if self.config:
                 self.base_call.extend([self.config_parameter, self.config])
             LOG.debug("Use base call %s", self.base_call)
-        self._exit_code: int = RETURN_SUCCESS
+        self._exit_code: int = EXIT_SUCCESS
         if error:
             self._exit_code = 1
 
@@ -62,14 +62,14 @@ class ProcessMock(Process):
 
         LOG.info("Running command %s", " ".join(command))
         if dry_run:
-            return RETURN_SUCCESS
+            return EXIT_SUCCESS
 
-        if self._exit_code != RETURN_SUCCESS:
+        if self._exit_code != EXIT_SUCCESS:
             LOG.critical("Call %s exit with a non zero exit code", command)
             LOG.critical(self.stderr)
             raise CalledProcessError(self._exit_code, command)
 
-        return RETURN_SUCCESS
+        return EXIT_SUCCESS
 
     def set_stdout(self, text: str):
         """Mock the stdout"""

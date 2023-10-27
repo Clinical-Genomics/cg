@@ -6,7 +6,8 @@ from subprocess import CalledProcessError
 
 import psutil
 
-from cg.constants.pdc import DSMCParameters, PDCExitCodes
+from cg.constants.pdc import DSMCParameters
+from cg.constants.process import EXIT_WARNING
 from cg.exc import (
     DsmcAlreadyRunningError,
     FlowCellAlreadyBackedUpError,
@@ -76,7 +77,7 @@ class PdcAPI:
         try:
             self.process.run_command(parameters=command, dry_run=self.dry_run)
         except CalledProcessError as error:
-            if error.returncode == PDCExitCodes.WARNING:
+            if error.returncode == EXIT_WARNING:
                 LOG.warning(f"{error}")
                 return
             raise PdcError(message=f"{error}") from error

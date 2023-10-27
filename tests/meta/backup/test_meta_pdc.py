@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from cg.constants import EXIT_FAIL
-from cg.constants.process import RETURN_WARNING
+from cg.constants.process import EXIT_WARNING
 from cg.exc import (
     DsmcAlreadyRunningError,
     FlowCellAlreadyBackedUpError,
@@ -297,7 +297,7 @@ def test_run_dsmc_command_warning(cg_context: CGConfig, caplog):
     # GIVEN an exit code signifying a warning
     with mock.patch(
         "cg.utils.commands.subprocess.run",
-        return_value=create_process_response(return_code=RETURN_WARNING),
+        return_value=create_process_response(return_code=EXIT_WARNING),
     ):
         # WHEN running a dsmc command
         pdc_api.run_dsmc_command(["archive", "something"])

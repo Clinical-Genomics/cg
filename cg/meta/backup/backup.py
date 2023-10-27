@@ -11,7 +11,7 @@ from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
 from cg.constants.constants import FileExtensions, FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.indexes import ListIndexes
-from cg.constants.process import RETURN_WARNING
+from cg.constants.process import EXIT_WARNING
 from cg.constants.symbols import NEW_LINE
 from cg.exc import ChecksumFailedError, PdcNoFilesMatchingSearchError
 from cg.meta.backup.pdc import PdcAPI
@@ -203,7 +203,7 @@ class BackupAPI:
                 run_dir=run_dir,
             )
         except subprocess.CalledProcessError as error:
-            if error.returncode == RETURN_WARNING:
+            if error.returncode == EXIT_WARNING:
                 LOG.warning(
                     f"WARNING for retrieval of encryption key of flow cell {flow_cell.name}, please check "
                     "dsmerror.log"
@@ -227,7 +227,7 @@ class BackupAPI:
             if not self.dry_run:
                 self._set_flow_cell_status_to_retrieved(flow_cell)
         except subprocess.CalledProcessError as error:
-            if error.returncode == RETURN_WARNING:
+            if error.returncode == EXIT_WARNING:
                 LOG.warning(
                     f"WARNING for retrieval of flow cell {flow_cell.name}, please check dsmerror.log"
                 )
