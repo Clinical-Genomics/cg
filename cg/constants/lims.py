@@ -1,6 +1,6 @@
 # LIMS constants
 
-from cg.utils.enums import StrEnum
+from enum import StrEnum
 
 YES_NO_LIMS_BOOLEANS = ["require_qc_ok", "tumour", "verified_organism"]
 

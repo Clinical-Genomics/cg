@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 from typing import Optional
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, constr
@@ -9,19 +9,19 @@ from cg.models.orders.validators.sample_base_validators import snake_case
 from cg.store.models import Application, Customer, Family, Pool, Sample
 
 
-class ControlEnum(str, Enum):
+class ControlEnum(StrEnum):
     not_control = ""
     positive = "positive"
     negative = "negative"
 
 
-class SexEnum(str, Enum):
+class SexEnum(StrEnum):
     male = "male"
     female = "female"
     unknown = "unknown"
 
 
-class PriorityEnum(str, Enum):
+class PriorityEnum(StrEnum):
     research = "research"
     standard = "standard"
     priority = "priority"
@@ -29,13 +29,13 @@ class PriorityEnum(str, Enum):
     clinical_trials = "clinical_trials"
 
 
-class ContainerEnum(str, Enum):
+class ContainerEnum(StrEnum):
     no_container = "No container"
     plate = "96 well plate"
     tube = "Tube"
 
 
-class StatusEnum(str, Enum):
+class StatusEnum(StrEnum):
     affected = "affected"
     unaffected = "unaffected"
     unknown = "unknown"
