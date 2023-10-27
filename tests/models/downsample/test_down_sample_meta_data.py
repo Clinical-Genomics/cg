@@ -1,8 +1,5 @@
 """Test for the DownSampleMetaData class."""
-from pathlib import Path
-from unittest.mock import Mock
 
-import mock
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.models.downsample.downsample_data import DownsampleData
@@ -16,7 +13,7 @@ def test_downsample_meta_data_pass_pre_flight(
     downsample_case_internal_id: str,
     downsample_sample_internal_id_1: str,
     number_of_reads_in_millions: int,
-    tmp_path_factory
+    tmp_path_factory,
 ):
     """Test that the pre-flight checks pass when initialising a DownsampleMetaData class."""
     # GIVEN a store with a sample and a case
@@ -41,12 +38,17 @@ def test_downsample_meta_data_pass_pre_flight(
 
     mock_object = DownsampleData
     mock_object.create_down_sampling_working_directory = return_tmp_dir
-    meta_data = DownsampleData(status_db=store_with_case_and_sample_with_reads,
-                               hk_api=downsample_hk_api,
-                               sample_internal_id=downsample_sample_internal_id_1,
-                               case_internal_id=downsample_case_internal_id,
-                               number_of_reads=number_of_reads_in_millions)
+    meta_data = DownsampleData(
+        status_db=store_with_case_and_sample_with_reads,
+        hk_api=downsample_hk_api,
+        sample_internal_id=downsample_sample_internal_id_1,
+        case_internal_id=downsample_case_internal_id,
+        number_of_reads=number_of_reads_in_millions,
+    )
 
     # THEN all necessary models to run the down sample command are created
 
-    assert meta_data.downsampled_sample.internal_id == f"{downsample_sample_internal_id_1}_{number_of_reads_in_millions}M"
+    assert (
+        meta_data.downsampled_sample.internal_id
+        == f"{downsample_sample_internal_id_1}_{number_of_reads_in_millions}M"
+    )

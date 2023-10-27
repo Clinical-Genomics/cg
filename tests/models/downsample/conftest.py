@@ -59,9 +59,6 @@ def number_of_reads_in_millions() -> int:
     return 50
 
 
-
-
-
 @pytest.fixture()
 def downsample_hk_api(
     real_housekeeper_api: HousekeeperAPI,
@@ -70,7 +67,7 @@ def downsample_hk_api(
     downsample_sample_internal_id_2: str,
     timestamp_yesterday: str,
     helpers: StoreHelpers,
-    tmp_path_factory
+    tmp_path_factory,
 ) -> HousekeeperAPI:
     """Return a Housekeeper API with a real database."""
     for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
