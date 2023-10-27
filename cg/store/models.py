@@ -105,6 +105,8 @@ class Application(Model):
     sample_amount = Column(types.Integer)
     sample_volume = Column(types.Text)
     sample_concentration = Column(types.Text)
+    sample_concentration_minimum = Column(types.DECIMAL)
+    sample_concentration_maximum = Column(types.DECIMAL)
     priority_processing = Column(types.Boolean, default=False)
     details = Column(types.Text)
     limitations = Column(types.Text)
@@ -300,6 +302,8 @@ class Customer(Model):
     invoice_address = Column(types.Text, nullable=False)
     invoice_reference = Column(types.String(32), nullable=False)
     is_trusted = Column(types.Boolean, nullable=False, default=False)
+    lab_contact_id = Column(ForeignKey("user.id"))
+    lab_contact = orm.relationship("User", foreign_keys=[lab_contact_id])
     loqus_upload = Column(types.Boolean, nullable=False, default=False)
     name = Column(types.String(128), nullable=False)
     organisation_number = Column(types.String(32))
@@ -312,7 +316,13 @@ class Customer(Model):
     data_archive_location = Column(types.String(32), nullable=False, default="PDC")
     is_clinical = Column(types.Boolean, nullable=False, default=False)
 
-    collaborations = orm.relationship("Collaboration", secondary=customer_collaboration)
+    collaborations = orm.relationship(
+        "Collaboration",
+        secondary="customer_collaboration",
+        back_populates="customers",
+        cascade_backrefs=False,
+    )
+
     delivery_contact_id = Column(ForeignKey("user.id"))
     delivery_contact = orm.relationship("User", foreign_keys=[delivery_contact_id])
     invoice_contact_id = Column(ForeignKey("user.id"))
@@ -348,7 +358,12 @@ class Collaboration(Model):
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
-    customers = orm.relationship(Customer, secondary=customer_collaboration)
+    customers = orm.relationship(
+        "Customer",
+        secondary="customer_collaboration",
+        back_populates="collaborations",
+        cascade_backrefs=False,
+    )
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
