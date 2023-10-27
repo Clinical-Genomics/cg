@@ -1,4 +1,4 @@
-from enum import StrEnum, IntEnum
+from enum import Enum, StrEnum, IntEnum
 
 
 class Gender(StrEnum):
@@ -28,11 +28,16 @@ class PlinkPhenotypeStatus(IntEnum):
     AFFECTED = 2
 
 
-class PlinkGender(IntEnum):
+class PlinkGender(str, Enum):
     UNKNOWN = 0
     MALE = 1
     FEMALE = 2
 
+    def __str__(self) -> str:
+        return str.__str__(self.value)
 
-class RelationshipStatus(IntEnum):
+class RelationshipStatus(str, Enum):
     HAS_NO_PARENT = 0
+
+    def __str__(self) -> str:
+        return str.__str__(self.value)
