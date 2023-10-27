@@ -81,6 +81,8 @@ class DownsampleData:
         """
         Generate a downsampled sample record for StatusDB.
         The new sample contains the original sample internal id and meta data.
+        Raises:
+            ValueError if the downsampled sample already exists in statusDB
         """
         application_version: ApplicationVersion = self.get_application_version(self.original_sample)
         downsampled_sample: Sample = self.status_db.add_sample(

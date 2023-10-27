@@ -44,19 +44,22 @@ def downsample_case_internal_id() -> str:
 @pytest.fixture()
 def downsample_sample_internal_id_1() -> str:
     """Return a sample internal id."""
-    return "ACC1234567"
+    return "ACC12345675213"
 
 
 @pytest.fixture()
 def downsample_sample_internal_id_2() -> str:
     """Return a sample internal id."""
-    return "ACC1234568"
+    return "ACC12345684213"
 
 
 @pytest.fixture()
 def number_of_reads_in_millions() -> int:
     """Return a number of reads in millions."""
     return 50
+
+
+
 
 
 @pytest.fixture()
@@ -67,16 +70,18 @@ def downsample_hk_api(
     downsample_sample_internal_id_2: str,
     timestamp_yesterday: str,
     helpers: StoreHelpers,
+    tmp_path_factory
 ) -> HousekeeperAPI:
     """Return a Housekeeper API with a real database."""
     for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
+        tmp_fastq_file = tmp_path_factory.mktemp(f"{sample_internal_id}.fastq.gz")
         downsample_bundle: Dict = {
             "name": sample_internal_id,
             "created": timestamp_yesterday,
             "expires": timestamp_yesterday,
             "files": [
                 {
-                    "path": fastq_file.as_posix(),
+                    "path": tmp_fastq_file.as_posix(),
                     "archive": False,
                     "tags": [SequencingFileTag.FASTQ, sample_internal_id],
                 }
