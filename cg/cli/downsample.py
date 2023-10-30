@@ -46,7 +46,7 @@ def downsample_sample(
                 dry_run=dry_run,
                 case_id=case_id,
                 sample_id=sample_id,
-                number_of_reads=reads,
+                number_of_reads=float(reads),
             )
             downsample_api.downsample_sample()
         except Exception as error:
