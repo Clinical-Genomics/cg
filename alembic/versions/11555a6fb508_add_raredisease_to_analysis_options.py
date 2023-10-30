@@ -1,8 +1,8 @@
 """Add raredisease to analysis options
 
-Revision ID: 080a5d300c1e
-Revises: db61c62d9bc0
-Create Date: 2023-10-30 12:08:13.955142
+Revision ID: 11555a6fb508
+Revises: 392e49db40fc
+Create Date: 2023-10-30 14:32:00.803388
 
 """
 import sqlalchemy as sa
@@ -12,9 +12,10 @@ from sqlalchemy.orm import declarative_base
 from alembic import op
 from cg.constants import Pipeline
 
+
 # revision identifiers, used by Alembic.
-revision = "080a5d300c1e"
-down_revision = "db61c62d9bc0"
+revision = "11555a6fb508"
+down_revision = "392e49db40fc"
 branch_labels = None
 depends_on = None
 
