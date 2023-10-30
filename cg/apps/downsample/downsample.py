@@ -4,12 +4,14 @@ from pathlib import Path
 from typing import List
 
 from cg.apps.downsample.utils import case_exists_in_statusdb, sample_exists_in_statusdb
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.exc import DownsampleFailedError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
 from cg.models.cg_config import CGConfig
 from cg.models.downsample.downsample_data import DownsampleData
+from cg.store import Store
 from cg.store.models import Family, Sample
 from cg.utils.calculations import multiply_by_million
 from cg.utils.files import get_files_matching_pattern
@@ -28,7 +30,9 @@ class DownSampleAPI(MetaAPI):
     ):
         """Initialize the API."""
         super().__init__(config)
-        self.config = config
+        self.config: CGConfig = config
+        self.status_db: Store = config.status_db
+        self.hk_api: HousekeeperAPI = config.housekeeper_api
         self.sample_id: str = sample_id
         self.number_of_reads: float = number_of_reads
         self.case_id: str = case_id
@@ -77,7 +81,7 @@ class DownSampleAPI(MetaAPI):
         if case_exists_in_statusdb(status_db=self.status_db, case_id=downsampled_case.internal_id):
             raise ValueError(f"Case {downsampled_case.internal_id} already exists in StatusDB.")
         if not self.dry_run:
-            self.status_db.session.add_commit(downsampled_case)
+            self.status_db.session.commit(downsampled_case)
             LOG.info(f"New down sampled case created: {downsampled_case.internal_id}")
             return downsampled_case
         return downsampled_case

@@ -18,6 +18,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
+from cg.apps.downsample.downsample import DownSampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -3259,3 +3260,113 @@ def flow_cell_encryption_api(
     )
     flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=True)
     return flow_cell_encryption_api
+
+
+# Downsample
+@pytest.fixture()
+def store_with_case_and_sample_with_reads(
+    store: Store,
+    helpers: StoreHelpers,
+    downsample_case_internal_id: str,
+    downsample_sample_internal_id_1: str,
+    downsample_sample_internal_id_2: str,
+) -> Store:
+    """Return a store with a case and a sample with reads."""
+    case: Family = helpers.add_case(store=store, internal_id=downsample_case_internal_id)
+
+    for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
+        helpers.add_sample(
+            store=store,
+            internal_id=sample_internal_id,
+            customer_id=case.customer_id,
+            reads=100_000_000,
+        )
+        sample: Sample = store.get_sample_by_internal_id(internal_id=sample_internal_id)
+        helpers.add_relationship(store=store, case=case, sample=sample)
+
+    return store
+
+
+@pytest.fixture()
+def downsample_case_internal_id() -> str:
+    """Return a case internal id."""
+    return "supersonicturtle"
+
+
+@pytest.fixture()
+def downsample_sample_internal_id_1() -> str:
+    """Return a sample internal id."""
+    return "ACC12345675213"
+
+
+@pytest.fixture()
+def downsample_sample_internal_id_2() -> str:
+    """Return a sample internal id."""
+    return "ACC12345684213"
+
+
+@pytest.fixture()
+def number_of_reads_in_millions() -> int:
+    """Return a number of reads in millions."""
+    return 50
+
+
+@pytest.fixture()
+def downsample_hk_api(
+    real_housekeeper_api: HousekeeperAPI,
+    fastq_file: Path,
+    downsample_sample_internal_id_1: str,
+    downsample_sample_internal_id_2: str,
+    timestamp_yesterday: str,
+    helpers: StoreHelpers,
+    tmp_path_factory,
+) -> HousekeeperAPI:
+    """Return a Housekeeper API with a real database."""
+    for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
+        tmp_fastq_file = tmp_path_factory.mktemp(f"{sample_internal_id}.fastq.gz")
+        downsample_bundle: dict = {
+            "name": sample_internal_id,
+            "created": timestamp_yesterday,
+            "expires": timestamp_yesterday,
+            "files": [
+                {
+                    "path": tmp_fastq_file.as_posix(),
+                    "archive": False,
+                    "tags": [SequencingFileTag.FASTQ, sample_internal_id],
+                }
+            ],
+        }
+        helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=downsample_bundle)
+    return real_housekeeper_api
+
+
+@pytest.fixture()
+def downsample_context(
+    cg_context: CGConfig,
+    store_with_case_and_sample_with_reads: Store,
+    downsample_hk_api: HousekeeperAPI,
+) -> CGConfig:
+    """Return cg context with added Store and Housekeeper API."""
+    cg_context.status_db_ = store_with_case_and_sample_with_reads
+    cg_context.housekeeper_api_ = downsample_hk_api
+    return cg_context
+
+
+@pytest.fixture()
+def downsample_api(
+    downsample_context: CGConfig,
+    store_with_case_and_sample_with_reads: Store,
+    downsample_hk_api: HousekeeperAPI,
+    downsample_sample_internal_id_1: str,
+    downsample_case_internal_id: str,
+    number_of_reads_in_millions: int,
+    tmp_path_factory,
+) -> DownSampleAPI:
+    """Return a DownsampleAPI."""
+    downsample_api = DownSampleAPI(
+        config=downsample_context,
+        sample_id=downsample_sample_internal_id_1,
+        number_of_reads=number_of_reads_in_millions,
+        case_id=downsample_case_internal_id,
+    )
+    return downsample_api
