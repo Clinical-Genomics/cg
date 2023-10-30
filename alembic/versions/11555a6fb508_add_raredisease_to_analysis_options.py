@@ -21,7 +21,7 @@ depends_on = None
 
 Base = declarative_base()
 
-old_options = (
+old_analysis_options = (
     "balsamic",
     "balsamic-pon",
     "balsamic-qc",
@@ -38,10 +38,10 @@ old_options = (
     "spring",
     "taxprofiler",
 )
-new_options = sorted(old_options + ("raredisease",))
+new_analysis_options = sorted(old_analysis_options + ("raredisease",))
 
-old_enum = mysql.ENUM(*old_options)
-new_enum = mysql.ENUM(*new_options)
+old_analysis_enum = mysql.ENUM(*old_analysis_options)
+new_analysis_enum = mysql.ENUM(*new_analysis_options)
 
 
 class Analysis(Base):
@@ -57,8 +57,8 @@ class Family(Base):
 
 
 def upgrade():
-    op.alter_column("family", "data_analysis", type_=new_enum)
-    op.alter_column("analysis", "pipeline", type_=new_enum)
+    op.alter_column("family", "data_analysis", type_=new_analysis_enum)
+    op.alter_column("analysis", "pipeline", type_=new_analysis_enum)
 
 
 def downgrade():
@@ -72,6 +72,6 @@ def downgrade():
     for family in session.query(Family).filter(Family.data_analysis == "raredisease"):
         print(f"Changing data_analysis for Family {family.internal_id} to mip-dna")
         family.data_analysis = "mip-dna"
-    op.alter_column("family", "data_analysis", type_=old_enum)
-    op.alter_column("analysis", "pipeline", type_=old_enum)
+    op.alter_column("family", "data_analysis", type_=old_analysis_enum)
+    op.alter_column("analysis", "pipeline", type_=old_analysis_enum)
     session.commit()
