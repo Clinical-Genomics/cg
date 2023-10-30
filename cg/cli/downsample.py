@@ -34,6 +34,7 @@ def downsample():
     " e.g. ACC1234567 30",
 )
 @DRY_RUN
+@click.pass_context
 def downsample_sample(
     context: CGConfig, case_id: str, input_data: Tuple[str, float], dry_run: bool
 ):
@@ -56,31 +57,32 @@ def downsample_sample(
 @downsample.command("store", help="Store the downsampled fastq files in housekeeper.")
 @click.option(
     "-c",
-    "--case--id",
+    "--case-id",
     required=True,
     help="Case identifier used in statusdb, e.g. supersonicturtle. The case information wil be transferred.",
 )
 @click.option(
     "-i",
-    "--input",
+    "--input-data",
     required=True,
     nargs=2,
     multiple=True,
     help="Identifier used in statusdb, e.g. ACC1234567 and the number of reads to down sample to in millions separated by a space."
-    "e.g. ACC1234567 30",
+    " e.g. ACC1234567 30",
 )
 @DRY_RUN
+@click.pass_context
 def store_downsampled_samples(
-    context: CGConfig, case_internal_id: str, input_data: Tuple[str, float], dry_run: bool
+    context: CGConfig, case_id: str, input_data: Tuple[str, float], dry_run: bool
 ):
     """Downsample reads in one or multiple samples."""
-    for sample_internal_id, reads in input_data:
+    for sample_id, reads in input_data:
         try:
             downsample_api = DownSampleAPI(
                 config=context,
                 dry_run=dry_run,
-                case_id=case_internal_id,
-                sample_id=sample_internal_id,
+                case_id=case_id,
+                sample_id=sample_id,
                 number_of_reads=reads,
             )
             downsample_api.add_downsampled_sample_to_housekeeper()
