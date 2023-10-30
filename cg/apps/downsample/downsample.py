@@ -64,7 +64,7 @@ class DownSampleAPI(MetaAPI):
             f"Customer set to: {downsampled_sample.customer}"
         )
         if not self.dry_run:
-            self.status_db.session.add_commit(downsampled_sample)
+            self.status_db.session.commit(downsampled_sample)
             LOG.info(f"Added {downsampled_sample.name} to StatusDB.")
             return downsampled_sample
         return downsampled_sample
@@ -92,12 +92,12 @@ class DownSampleAPI(MetaAPI):
             sample=sample,
             status=self.downsample_data.sample_status(sample=sample),
         )
-        self.status_db.session.add_commit(sample_case_link)
+        self.status_db.session.commit(sample_case_link)
         LOG.info(f"Related sample {sample.internal_id} to {case.internal_id}")
 
     def add_downsampled_sample_case_to_statusdb(self) -> None:
         """
-        Add the down sampled sample and case to statusDB and generate the sample case link.
+        Add the downsampled sample and case to statusDB and generate the sample case link.
         """
         self.add_downsampled_sample_entry_to_statusdb()
         self.add_downsampled_case_to_statusdb()
