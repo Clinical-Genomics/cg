@@ -61,7 +61,7 @@ def test_filter_metrics_for_flow_cell_sample_internal_id_and_lane(
 
     # THEN assert that the query returns the expected metrics
     assert metrics_query[0].flow_cell_name == flow_cell_name
-    assert metrics_query[0].sample_id == sample_id
+    assert metrics_query[0].sample_internal_id == sample_id
     assert metrics_query[0].flow_cell_lane_number == 1
 
 
@@ -108,7 +108,7 @@ def test_filter_metrics_by_sample_internal_id(store_with_sequencing_metrics: Sto
 
     # THEN assert that the query returns the expected metrics
     for metric in metrics_query.all():
-        assert metric.sample_id == sample_id
+        assert metric.sample_internal_id == sample_id
 
 
 def test_filter_above_q30_threshold(store_with_sequencing_metrics: Store):
