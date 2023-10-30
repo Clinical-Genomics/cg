@@ -1,5 +1,4 @@
 """Test for the DownSampleMetaData class."""
-import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.models.downsample.downsample_data import DownsampleData
@@ -54,31 +53,3 @@ def test_downsample_meta_data_pass_pre_flight(
     assert meta_data.downsampled_sample.reads == number_of_reads_in_millions * 1_000_000
     assert meta_data.downsampled_case.name == f"{case.internal_id}_downsampled"
     assert meta_data.has_enough_reads
-
-
-def test_downsample_data_sample_exists(
-    store_with_case_and_sample_with_reads: Store,
-    downsample_hk_api: HousekeeperAPI,
-    downsample_case_internal_id: str,
-    downsample_sample_internal_id_1: str,
-    number_of_reads_in_millions: int,
-    helpers,
-):
-    """Test the DownsampleData class to fail checks if a downsampled sample already exists."""
-    # GIVEN a store with a downsampled sample
-    helpers.add_sample(
-        store=store_with_case_and_sample_with_reads,
-        internal_id=f"{downsample_sample_internal_id_1}_{number_of_reads_in_millions}M",
-    )
-
-    # WHEN making the DownsampleData
-
-    # THEN a ValueError is raised
-    with pytest.raises(ValueError):
-        DownsampleData(
-            status_db=store_with_case_and_sample_with_reads,
-            hk_api=downsample_hk_api,
-            case_internal_id=downsample_case_internal_id,
-            sample_internal_id=downsample_sample_internal_id_1,
-            number_of_reads=number_of_reads_in_millions,
-        )

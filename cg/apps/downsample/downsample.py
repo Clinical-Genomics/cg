@@ -9,7 +9,9 @@ from cg.meta.meta import MetaAPI
 from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
 from cg.models.cg_config import CGConfig
 from cg.models.downsample.downsample_data import DownsampleData
+from cg.models.downsample.utils import case_exists_in_statusdb, sample_exists_in_statusdb
 from cg.store.models import Family, Sample
+from cg.utils.calculations import multiply_by_million
 from cg.utils.files import get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
@@ -51,6 +53,10 @@ class DownSampleAPI(MetaAPI):
     def add_downsampled_sample_entry_to_statusdb(self) -> Sample:
         """Add a down sampled sample entry to StatusDB."""
         downsampled_sample: Sample = self.downsample_data.downsampled_sample
+        if sample_exists_in_statusdb(
+            status_db=self.status_db, sample_id=downsampled_sample.internal_id
+        ):
+            raise ValueError(f"Sample {downsampled_sample.internal_id} already exists in StatusDB.")
         LOG.info(
             f"New downsampled sample created: {downsampled_sample.internal_id} from {downsampled_sample.from_sample}"
             f"Application tag set to: {downsampled_sample.application_version.application.tag}"
@@ -65,14 +71,14 @@ class DownSampleAPI(MetaAPI):
     def add_downsampled_case_to_statusdb(self) -> Family:
         """
         Add a down sampled case entry to StatusDB.
-        Checks if the down sampled case already exists in StatusDB.
         """
         downsampled_case: Family = self.downsample_data.downsampled_case
+        if case_exists_in_statusdb(status_db=self.status_db, case_id=downsampled_case.internal_id):
+            raise ValueError(f"Case {downsampled_case.internal_id} already exists in StatusDB.")
         if not self.dry_run:
             self.status_db.session.add_commit(downsampled_case)
             LOG.info(f"New down sampled case created: {downsampled_case.name}")
             return downsampled_case
-        LOG.info(f"Case {downsampled_case.internal_id} already exists in StatusDB.")
         return downsampled_case
 
     def _link_downsampled_sample_to_case(self, sample: Sample, case: Family) -> None:
@@ -116,7 +122,7 @@ class DownSampleAPI(MetaAPI):
         -Starts a down sample job
         """
         downsample_work_flow = DownsampleWorkflow(
-            number_of_reads=self.downsample_data.multiply_reads_by_million(),
+            number_of_reads=multiply_by_million(self.downsample_data.number_of_reads),
             config=self.config,
             output_fastq_dir=str(self.downsample_data.fastq_file_output_directory),
             input_fastq_dir=str(self.downsample_data.fastq_file_input_directory),
@@ -127,13 +133,13 @@ class DownSampleAPI(MetaAPI):
         downsample_work_flow.write_and_submit_sbatch_script()
 
     def add_downsampled_sample_to_housekeeper(self) -> None:
-        """Add a down sampled sample to housekeeper and include the fastq files."""
+        """Add a downsampled sample to housekeeper and include the fastq files."""
         self.create_downsampled_sample_bundle()
         self.add_downsampled_fastq_files_to_housekeeper()
 
     def create_downsampled_sample_bundle(self) -> None:
-        """Create a new bundle for the down sampled sample in housekeeper."""
-        self.config.housekeeper_api.create_new_bundle_and_version(
+        """Create a new bundle for the downsampled sample in housekeeper."""
+        self.housekeeper_api.create_new_bundle_and_version(
             name=self.downsample_data.downsampled_sample.internal_id
         )
 
@@ -160,4 +166,3 @@ class DownSampleAPI(MetaAPI):
             original_sample=self.downsample_data.original_sample,
             sample_to_downsample=self.downsample_data.downsampled_sample,
         )
-        self.add_downsampled_sample_to_housekeeper()

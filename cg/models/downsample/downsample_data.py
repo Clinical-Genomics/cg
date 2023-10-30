@@ -4,7 +4,6 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Priority, SequencingFileTag
-from cg.models.downsample.utils import case_exists_in_statusdb, sample_exists_in_statusdb
 from cg.store import Store
 from cg.store.models import ApplicationVersion, Family, Sample
 from cg.utils.calculations import multiply_by_million
@@ -94,10 +93,6 @@ class DownsampleData:
             customer=self.original_sample.customer,
             application_version=application_version,
         )
-        if sample_exists_in_statusdb(
-            status_db=self.status_db, sample_id=downsampled_sample.internal_id
-        ):
-            raise ValueError(f"Sample {downsampled_sample.internal_id} already exists in StatusDB.")
         return downsampled_sample
 
     def _generate_statusdb_downsampled_case(
@@ -113,8 +108,7 @@ class DownsampleData:
             ticket=self.original_case.latest_ticket,
         )
         downsampled_case.customer = self.original_case.customer
-        if case_exists_in_statusdb(status_db=self.status_db, case_id=downsampled_case.internal_id):
-            raise ValueError(f"Case {downsampled_case.internal_id} already exists in StatusDB.")
+
         return downsampled_case
 
     def has_enough_reads_to_downsample(self) -> bool:

@@ -52,17 +52,36 @@ def downsample_sample(
             continue
 
 
-@downsample_cmd.command(
-    "case", help="Down sample reads in all samples in a case to the same number of reads."
+@downsample_cmd.command("store", help="Store the downsampled fastq files in housekeeper.")
+@click.option(
+    "-c",
+    "--case--id",
+    required=True,
+    help="Case identifier used in statusdb, e.g. supersonicturtle. The case information wil be transferred.",
 )
 @click.option(
-    "-input",
+    "-i",
     "--input",
     required=True,
-    help="Case identifier used in statusdb and the number of reads to downsample to in millions.  e.g. subsonicrabbit 30.",
+    multiple=True,
+    help="Identifier used in statusdb, e.g. ACC1234567 and the number of reads to down sample to in millions separated by a space."
+    "e.g. ACC1234567 30",
 )
 @DRY_RUN
-def downsample_case(context: CGConfig, input: Tuple[str, float], dry_run: bool):
-    """Downsample reads in all samples in a case."""
-    ## TO DO; this has to retrieve samples and then loop over samples like above...
-    pass
+def store_downsampled_samples(
+    context: CGConfig, case_internal_id: str, input_data: Tuple[str, float], dry_run: bool
+):
+    """Downsample reads in one or multiple samples."""
+    for sample_internal_id, reads in input_data:
+        try:
+            downsample_api = DownSampleAPI(
+                config=context,
+                dry_run=dry_run,
+                case_internal_id=case_internal_id,
+                sample_internal_id=sample_internal_id,
+                number_of_reads=reads,
+            )
+            downsample_api.add_downsampled_sample_to_housekeeper()
+        except Exception as error:
+            LOG.info(repr(error))
+            continue
