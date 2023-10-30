@@ -27,24 +27,12 @@ Cg written in Python 3.9+ and is available on the [Python Package Index][pypi] (
 pip install cg
 ```
 
-If you would like to install the latest development version, use poetry
+If you would like to install the latest development version, use [poetry](https://python-poetry.org/docs/).
 
 ```bash
 git clone https://github.com/Clinical-Genomics/cg
 cd cg
 poetry install
-```
-
-or with pipenv
-To install CG either use pipenv (as described in contributing) and run
-```bash
-pipenv install -e .
-```
-
-or (without pipenv)
-
-```bash
-pip install -r requirements-dev.txt --editable .
 ```
 
 
