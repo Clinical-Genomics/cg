@@ -43,6 +43,7 @@ class DownSampleAPI(MetaAPI):
         try:
             return DownsampleData(
                 status_db=self.status_db,
+                hk_api=self.housekeeper_api,
                 sample_id=self.sample_id,
                 number_of_reads=self.number_of_reads,
                 case_id=self.case_id,
@@ -77,7 +78,7 @@ class DownSampleAPI(MetaAPI):
             raise ValueError(f"Case {downsampled_case.internal_id} already exists in StatusDB.")
         if not self.dry_run:
             self.status_db.session.add_commit(downsampled_case)
-            LOG.info(f"New down sampled case created: {downsampled_case.name}")
+            LOG.info(f"New down sampled case created: {downsampled_case.internal_id}")
             return downsampled_case
         return downsampled_case
 
