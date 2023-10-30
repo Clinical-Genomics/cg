@@ -16,7 +16,7 @@ from cg.cli.compress.base import compress, decompress
 from cg.cli.delete.base import delete
 from cg.cli.deliver.base import deliver as deliver_cmd
 from cg.cli.demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
-from cg.cli.downsample import downsample_cmd
+from cg.cli.downsample import downsample
 from cg.cli.generate.base import generate as generate_cmd
 from cg.cli.get import get
 from cg.cli.set.base import set_cmd
@@ -112,4 +112,4 @@ base.add_command(store_cmd)
 base.add_command(deliver_cmd)
 base.add_command(demultiplex_cmd)
 base.add_command(generate_cmd)
-base.add_command(downsample_cmd)
+base.add_command(downsample)

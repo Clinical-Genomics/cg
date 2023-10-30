@@ -64,6 +64,7 @@ def downsample_sample(
     "-i",
     "--input",
     required=True,
+    nargs=2,
     multiple=True,
     help="Identifier used in statusdb, e.g. ACC1234567 and the number of reads to down sample to in millions separated by a space."
     "e.g. ACC1234567 30",
