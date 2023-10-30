@@ -252,6 +252,9 @@
               Teknisk beskrivning av analysen: {{ application.tag }}
             </h4>
             <p class="card-text">{{ application.description }}</p>
+            {% if application.details != 'N/A' %}
+              <p class="card-text">{{ application.details }}</p>
+            {% endif %}
             {% if application.limitations != 'N/A' %}
               <h4 class="card-title">
                 Begränsningar av analysen: {{ application.tag }}
