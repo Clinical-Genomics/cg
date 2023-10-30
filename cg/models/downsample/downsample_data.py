@@ -4,6 +4,7 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Priority, SequencingFileTag
+from cg.models.downsample.utils import case_exists_in_statusdb, sample_exists_in_statusdb
 from cg.store import Store
 from cg.store.models import ApplicationVersion, Family, Sample
 from cg.utils.calculations import multiply_by_million
@@ -93,7 +94,7 @@ class DownsampleData:
             customer=self.original_sample.customer,
             application_version=application_version,
         )
-        if self.sample_exists_in_statusdb(downsampled_sample.internal_id):
+        if sample_exists_in_statusdb(status_db=self.status_db, sample_id=self.sample_internal_id):
             raise ValueError(f"Sample {downsampled_sample.internal_id} already exists in StatusDB.")
         return downsampled_sample
 
@@ -110,23 +111,9 @@ class DownsampleData:
             ticket=self.original_case.latest_ticket,
         )
         downsampled_case.customer = self.original_case.customer
-        if self.case_exists_in_statusdb(downsampled_case.internal_id):
+        if case_exists_in_statusdb(status_db=self.status_db, case_id=downsampled_case.internal_id):
             raise ValueError(f"Case {downsampled_case.internal_id} already exists in StatusDB.")
         return downsampled_case
-
-    def case_exists_in_statusdb(self, case_internal_id: str) -> bool:
-        """Check if a case exists in StatusDB."""
-        case: Family = self.status_db.get_case_by_internal_id(case_internal_id)
-        if case:
-            return True
-        return False
-
-    def sample_exists_in_statusdb(self, sample_internal_id: str) -> bool:
-        """Check if a sample exists in StatusDB."""
-        sample: Sample = self.status_db.get_sample_by_internal_id(sample_internal_id)
-        if sample:
-            return True
-        return False
 
     def has_enough_reads_to_downsample(self) -> bool:
         """Check if the sample has enough reads to downsample."""
