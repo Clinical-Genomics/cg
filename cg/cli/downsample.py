@@ -42,8 +42,8 @@ def downsample_sample(
             downsample_api = DownSampleAPI(
                 config=context,
                 dry_run=dry_run,
-                case_internal_id=case_internal_id,
-                sample_internal_id=sample_internal_id,
+                case_id=case_internal_id,
+                sample_id=sample_internal_id,
                 number_of_reads=reads,
             )
             downsample_api.downsample_sample()
@@ -77,8 +77,8 @@ def store_downsampled_samples(
             downsample_api = DownSampleAPI(
                 config=context,
                 dry_run=dry_run,
-                case_internal_id=case_internal_id,
-                sample_internal_id=sample_internal_id,
+                case_id=case_internal_id,
+                sample_id=sample_internal_id,
                 number_of_reads=reads,
             )
             downsample_api.add_downsampled_sample_to_housekeeper()

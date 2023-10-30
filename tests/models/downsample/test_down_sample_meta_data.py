@@ -40,8 +40,8 @@ def test_downsample_meta_data_pass_pre_flight(
     meta_data = DownsampleData(
         status_db=store_with_case_and_sample_with_reads,
         hk_api=downsample_hk_api,
-        sample_internal_id=downsample_sample_internal_id_1,
-        case_internal_id=downsample_case_internal_id,
+        sample_id=downsample_sample_internal_id_1,
+        case_id=downsample_case_internal_id,
         number_of_reads=number_of_reads_in_millions,
     )
 

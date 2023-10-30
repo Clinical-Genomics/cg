@@ -21,17 +21,17 @@ class DownSampleAPI(MetaAPI):
     def __init__(
         self,
         config: CGConfig,
-        sample_internal_id: str,
+        sample_id: str,
         number_of_reads: float,
-        case_internal_id: str,
+        case_id: str,
         dry_run: bool = False,
     ):
         """Initialize the API."""
         super().__init__(config)
         self.config = config
-        self.sample_internal_id: str = sample_internal_id
+        self.sample_id: str = sample_id
         self.number_of_reads: float = number_of_reads
-        self.case_internal_id: str = case_internal_id
+        self.case_id: str = case_id
         self.dry_run: bool = dry_run
         self.downsample_data: DownsampleData = self.get_meta_data()
 
@@ -43,9 +43,9 @@ class DownSampleAPI(MetaAPI):
         try:
             return DownsampleData(
                 status_db=self.status_db,
-                sample_internal_id=self.sample_internal_id,
+                sample_id=self.sample_id,
                 number_of_reads=self.number_of_reads,
-                case_internal_id=self.case_internal_id,
+                case_id=self.case_id,
             )
         except Exception as error:
             raise DownsampleFailedError(repr(error))

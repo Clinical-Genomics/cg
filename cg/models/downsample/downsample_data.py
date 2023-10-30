@@ -16,9 +16,9 @@ class DownsampleData:
         self,
         status_db: Store,
         hk_api: HousekeeperAPI,
-        sample_internal_id: str,
+        sample_id: str,
         number_of_reads: float,
-        case_internal_id: str,
+        case_id: str,
     ):
         """Initialize the downsample data and perform integrity checks.
         Raises:
@@ -27,24 +27,24 @@ class DownsampleData:
         """
         self.status_db: Store = status_db
         self.housekeeper_api: HousekeeperAPI = hk_api
-        self.sample_internal_id: str = sample_internal_id
+        self.sample_id: str = sample_id
         self.number_of_reads: float = number_of_reads
-        self.case_internal_id: str = case_internal_id
+        self.case_id: str = case_id
         self.original_sample: Sample = self.get_sample_to_downsample()
         self.original_case: Family = self.get_case_to_downsample()
         self.has_enough_reads: bool = self.has_enough_reads_to_downsample()
         self.downsampled_sample: Sample = self._generate_statusdb_downsampled_sample_record()
         self.downsampled_case: Family = self._generate_statusdb_downsampled_case()
         self.create_down_sampling_working_directory()
-        LOG.info(f"Downsample Data checks completed for {self.sample_internal_id}")
+        LOG.info(f"Downsample Data checks completed for {self.sample_id}")
 
     @property
     def downsampled_sample_name(
         self,
     ) -> str:
         """Return a new sample name with the number of reads to which it is down sampled in millions appended."""
-        new_name: str = f"{self.sample_internal_id}_{self.number_of_reads}M"
-        LOG.info(f"Changed {self.sample_internal_id} to {new_name}")
+        new_name: str = f"{self.sample_id}_{self.number_of_reads}M"
+        LOG.info(f"Changed {self.sample_id} to {new_name}")
         return new_name
 
     @property
@@ -52,22 +52,22 @@ class DownsampleData:
         self,
     ) -> str:
         """Return a case name with _downsampled appended."""
-        new_name: str = f"{self.case_internal_id}_downsampled"
-        LOG.info(f"Changed {self.case_internal_id} to {new_name}")
+        new_name: str = f"{self.case_id}_downsampled"
+        LOG.info(f"Changed {self.case_id} to {new_name}")
         return new_name
 
     def get_sample_to_downsample(self) -> Sample:
         """Check if a sample exists in StatusDB."""
-        sample: Sample = self.status_db.get_sample_by_internal_id(self.sample_internal_id)
+        sample: Sample = self.status_db.get_sample_by_internal_id(self.sample_id)
         if not sample:
-            raise ValueError(f"Sample {self.sample_internal_id} not found in StatusDB.")
+            raise ValueError(f"Sample {self.sample_id} not found in StatusDB.")
         return sample
 
     def get_case_to_downsample(self) -> Family:
         """Check if a case exists in StatusDB."""
-        case: Family = self.status_db.get_case_by_internal_id(self.case_internal_id)
+        case: Family = self.status_db.get_case_by_internal_id(self.case_id)
         if not case:
-            raise ValueError(f"Case {self.case_internal_id} not found in StatusDB.")
+            raise ValueError(f"Case {self.case_id} not found in StatusDB.")
         return case
 
     def _generate_statusdb_downsampled_sample_record(
