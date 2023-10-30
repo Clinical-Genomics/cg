@@ -112,6 +112,11 @@ class CompressAPI:
         for compression in compressions:
             if not self.crunchy_api.is_spring_decompression_possible(compression_obj=compression):
                 LOG.info(f"SPRING to FASTQ decompression not possible for {sample_id}")
+                if self.crunchy_api.is_compression_pending(compression):
+                    LOG.info(
+                        f"Spring file {compression.spring_path.as_posix()} is already being decompressed."
+                    )
+                    continue
                 if not self.backup_api.is_to_be_retrieved_and_decrypted(
                     spring_file_path=compression.spring_path
                 ):
