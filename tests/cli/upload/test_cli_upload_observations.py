@@ -21,7 +21,7 @@ from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Family, FamilySample, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -143,8 +143,12 @@ def test_get_sequencing_method_exception(
     sample_wes: Sample = helpers.add_sample(
         store, application_tag=external_wes_application_tag, application_type=SequencingMethod.WES
     )
-    link_1 = store.relate_sample(family=case, sample=sample_wgs, status=PhenotypeStatus.UNKNOWN)
-    link_2 = store.relate_sample(family=case, sample=sample_wes, status=PhenotypeStatus.UNKNOWN)
+    link_1: FamilySample = store.relate_sample(
+        family=case, sample=sample_wgs, status=PhenotypeStatus.UNKNOWN
+    )
+    link_2: FamilySample = store.relate_sample(
+        family=case, sample=sample_wes, status=PhenotypeStatus.UNKNOWN
+    )
     store.session.add_all([link_1, link_2])
 
     # WHEN getting the sequencing method
