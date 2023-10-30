@@ -1,7 +1,0 @@
-coveralls
-mock
-pre-commit
-pytest-cov
-pytest-mock
-pytest
-ruff
