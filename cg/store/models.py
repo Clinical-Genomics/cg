@@ -387,7 +387,9 @@ class Family(Model, PriorityMixin):
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship(Customer, foreign_keys=[customer_id])
     data_analysis = Column(types.Enum(*list(Pipeline)))
-    data_delivery = Column(types.Enum(*list(DataDelivery)))
+    data_delivery = Column(
+        types.Enum(DataDelivery, values_callable=lambda obj: [e.value for e in obj])
+    )
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
@@ -396,7 +398,7 @@ class Family(Model, PriorityMixin):
 
     priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     synopsis = Column(types.Text)
-    tickets = Column(types.VARCHAR)
+    tickets = Column(types.VARCHAR(128))
 
     analyses = orm.relationship(
         Analysis, back_populates="family", order_by="-Analysis.completed_at"
