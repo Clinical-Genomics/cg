@@ -209,7 +209,7 @@ def test_backup_flow_cell_when_unable_to_archive(
     # GIVEN that archiving fails
     with mock.patch(
         "cg.utils.commands.subprocess.run",
-        return_value=create_process_response(return_code=1),
+        return_value=create_process_response(return_code=EXIT_FAIL),
     ):
         # WHEN backing up flow cell
 
