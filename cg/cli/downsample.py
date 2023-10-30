@@ -34,7 +34,7 @@ def downsample():
     " e.g. ACC1234567 30",
 )
 @DRY_RUN
-@click.pass_context
+@click.pass_obj
 def downsample_sample(
     context: CGConfig, case_id: str, input_data: Tuple[str, float], dry_run: bool
 ):
@@ -71,7 +71,7 @@ def downsample_sample(
     " e.g. ACC1234567 30",
 )
 @DRY_RUN
-@click.pass_context
+@click.pass_obj
 def store_downsampled_samples(
     context: CGConfig, case_id: str, input_data: Tuple[str, float], dry_run: bool
 ):
