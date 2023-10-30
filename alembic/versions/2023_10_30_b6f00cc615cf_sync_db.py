@@ -20,12 +20,6 @@ def upgrade():
     op.alter_column(
         "application", "min_sequencing_depth", existing_type=mysql.INTEGER(), nullable=False
     )
-    op.drop_constraint(
-        "application_limitations_ibfk_1", "application_limitations", type_="foreignkey"
-    )
-    op.create_foreign_key(
-        None, "application_limitations", "application", ["application_id"], ["id"]
-    )
     op.alter_column(
         "family",
         "action",
@@ -98,15 +92,6 @@ def downgrade():
         existing_type=sa.Enum("analyze", "hold", "running"),
         type_=mysql.ENUM("analyze", "running", "hold"),
         existing_nullable=True,
-    )
-    op.drop_constraint(None, "application_limitations", type_="foreignkey")
-    op.create_foreign_key(
-        "application_limitations_ibfk_1",
-        "application_limitations",
-        "application",
-        ["application_id"],
-        ["id"],
-        ondelete="CASCADE",
     )
     op.alter_column(
         "application", "min_sequencing_depth", existing_type=mysql.INTEGER(), nullable=True
