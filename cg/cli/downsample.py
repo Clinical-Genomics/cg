@@ -26,7 +26,7 @@ def downsample():
 )
 @click.option(
     "-i",
-    "--input",
+    "--input-data",
     required=True,
     nargs=2,
     multiple=True,
@@ -35,16 +35,16 @@ def downsample():
 )
 @DRY_RUN
 def downsample_sample(
-    context: CGConfig, case_internal_id: str, input_data: Tuple[str, float], dry_run: bool
+    context: CGConfig, case_id: str, input_data: Tuple[str, float], dry_run: bool
 ):
     """Downsample reads in one or multiple samples."""
-    for sample_internal_id, reads in input_data:
+    for sample_id, reads in input_data:
         try:
             downsample_api = DownSampleAPI(
                 config=context,
                 dry_run=dry_run,
-                case_id=case_internal_id,
-                sample_id=sample_internal_id,
+                case_id=case_id,
+                sample_id=sample_id,
                 number_of_reads=reads,
             )
             downsample_api.downsample_sample()
