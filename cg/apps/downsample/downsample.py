@@ -161,6 +161,3 @@ class DownSampleAPI(MetaAPI):
             sample_to_downsample=self.downsample_data.downsampled_sample,
         )
         self.add_downsampled_sample_to_housekeeper()
-
-
-

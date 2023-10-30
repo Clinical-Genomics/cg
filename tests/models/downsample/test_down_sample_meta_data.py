@@ -49,7 +49,8 @@ def test_downsample_meta_data_pass_pre_flight(
     # THEN all necessary models to run the down sample command are created
     assert (
         meta_data.downsampled_sample.internal_id
-        == f"{downsample_sample_internal_id_1}_{number_of_reads_in_millions}M"
+        == f"{sample.internal_id}_{number_of_reads_in_millions}M"
     )
     assert meta_data.downsampled_sample.reads == number_of_reads_in_millions * 1_000_000
-    assert meta_data.downsampled_case.name == f"{downsample_case_internal_id}_downsampled"
+    assert meta_data.downsampled_case.name == f"{case.internal_id}_downsampled"
+    assert meta_data.has_enough_reads

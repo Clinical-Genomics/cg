@@ -6,6 +6,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Priority, SequencingFileTag
 from cg.store import Store
 from cg.store.models import ApplicationVersion, Family, Sample
+from cg.utils.calculations import multiply_by_million
 
 LOG = logging.getLogger(__name__)
 
@@ -36,12 +37,6 @@ class DownsampleData:
         self.downsampled_case: Family = self._generate_statusdb_downsampled_case()
         self.create_down_sampling_working_directory()
         LOG.info(f"Downsample Data checks completed for {self.sample_internal_id}")
-
-    def multiply_reads_by_million(
-        self,
-    ) -> int:
-        """Multiply the given number of reads by a million."""
-        return int(self.number_of_reads * 1_000_000)
 
     @property
     def downsampled_sample_name(
@@ -90,8 +85,8 @@ class DownsampleData:
             internal_id=self.downsampled_sample_name,
             sex=self.original_sample.sex,
             order=self.original_sample.order,
-            reads=self.multiply_reads_by_million(),
-            downsampled_to=self.multiply_reads_by_million(),
+            reads=multiply_by_million(self.number_of_reads),
+            downsampled_to=multiply_by_million(self.number_of_reads),
             from_sample=self.original_sample.internal_id,
             tumour=self.original_sample.is_tumour,
             priority=Priority.standard,
@@ -146,7 +141,7 @@ class DownsampleData:
     def fastq_file_input_directory(self) -> Path:
         """Get the latest version directory for a sample in housekeeper."""
         return Path(
-            self.config.housekeeper_api.get_file_from_latest_version(
+            self.housekeeper_api.get_file_from_latest_version(
                 bundle_name=self.original_sample.internal_id, tags={SequencingFileTag.FASTQ}
             ).path
         ).parent
