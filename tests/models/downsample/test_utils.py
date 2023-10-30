@@ -1,5 +1,5 @@
 """Tests for the DownsampleData utility functions."""
-from cg.models.downsample.utils import case_exists_in_statusdb, sample_exists_in_statusdb
+from cg.apps.downsample.utils import case_exists_in_statusdb, sample_exists_in_statusdb
 from cg.store import Store
 
 

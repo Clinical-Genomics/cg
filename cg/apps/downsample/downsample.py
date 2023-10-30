@@ -3,13 +3,13 @@ import logging
 from pathlib import Path
 from typing import List
 
+from cg.apps.downsample.utils import case_exists_in_statusdb, sample_exists_in_statusdb
 from cg.constants import SequencingFileTag
 from cg.exc import DownsampleFailedError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
 from cg.models.cg_config import CGConfig
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.models.downsample.utils import case_exists_in_statusdb, sample_exists_in_statusdb
 from cg.store.models import Family, Sample
 from cg.utils.calculations import multiply_by_million
 from cg.utils.files import get_files_matching_pattern
