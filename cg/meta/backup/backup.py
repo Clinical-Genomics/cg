@@ -11,9 +11,8 @@ from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
 from cg.constants.constants import FileExtensions, FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.indexes import ListIndexes
-from cg.constants.process import EXIT_WARNING
 from cg.constants.symbols import NEW_LINE
-from cg.exc import ChecksumFailedError, PdcNoFilesMatchingSearchError
+from cg.exc import ChecksumFailedError, PdcError, PdcNoFilesMatchingSearchError
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
@@ -202,18 +201,12 @@ class BackupAPI:
                 archived_file=archived_key,
                 run_dir=run_dir,
             )
-        except subprocess.CalledProcessError as error:
-            if error.returncode == EXIT_WARNING:
-                LOG.warning(
-                    f"WARNING for retrieval of encryption key of flow cell {flow_cell.name}, please check "
-                    "dsmerror.log"
-                )
-            else:
-                LOG.error(f"{flow_cell.name}: key retrieval failed")
-                if not self.dry_run:
-                    flow_cell.status = FlowCellStatus.REQUESTED
-                    self.status.session.commit()
-                raise error
+        except PdcError as error:
+            LOG.error(f"{flow_cell.name}: key retrieval failed")
+            if not self.dry_run:
+                flow_cell.status = FlowCellStatus.REQUESTED
+                self.status.session.commit()
+            raise error
 
     def retrieve_archived_flow_cell(
         self, archived_flow_cell: Path, flow_cell: Flowcell, run_dir: Path
@@ -226,19 +219,12 @@ class BackupAPI:
             )
             if not self.dry_run:
                 self._set_flow_cell_status_to_retrieved(flow_cell)
-        except subprocess.CalledProcessError as error:
-            if error.returncode == EXIT_WARNING:
-                LOG.warning(
-                    f"WARNING for retrieval of flow cell {flow_cell.name}, please check dsmerror.log"
-                )
-                if not self.dry_run:
-                    self._set_flow_cell_status_to_retrieved(flow_cell)
-            else:
-                LOG.error(f"{flow_cell.name}: run directory retrieval failed")
-                if not self.dry_run:
-                    flow_cell.status = FlowCellStatus.REQUESTED
-                    self.status.session.commit()
-                raise error
+        except PdcError as error:
+            LOG.error(f"{flow_cell.name}: run directory retrieval failed")
+            if not self.dry_run:
+                flow_cell.status = FlowCellStatus.REQUESTED
+                self.status.session.commit()
+            raise error
 
     def _set_flow_cell_status_to_retrieved(self, flow_cell: Flowcell):
         flow_cell.status = FlowCellStatus.RETRIEVED
