@@ -13,14 +13,14 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-def downsample_cmd():
+def downsample():
     """Downsample reads in a sample."""
 
 
-@downsample_cmd.command("samples", help="Downsample reads in one or multiple samples in a case.")
+@downsample.command("samples", help="Downsample reads in one or multiple samples in a case.")
 @click.option(
     "-c",
-    "--case--id",
+    "--case-id",
     required=True,
     help="Case identifier used in statusdb, e.g. supersonicturtle. The case information wil be transferred.",
 )
@@ -28,9 +28,10 @@ def downsample_cmd():
     "-i",
     "--input",
     required=True,
+    nargs=2,
     multiple=True,
     help="Identifier used in statusdb, e.g. ACC1234567 and the number of reads to down sample to in millions separated by a space."
-    "e.g. ACC1234567 30",
+    " e.g. ACC1234567 30",
 )
 @DRY_RUN
 def downsample_sample(
@@ -52,7 +53,7 @@ def downsample_sample(
             continue
 
 
-@downsample_cmd.command("store", help="Store the downsampled fastq files in housekeeper.")
+@downsample.command("store", help="Store the downsampled fastq files in housekeeper.")
 @click.option(
     "-c",
     "--case--id",

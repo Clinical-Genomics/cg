@@ -133,7 +133,7 @@ class DownsampleData:
     def fastq_file_output_directory(self):
         """Get the output directory for the downsampled sample."""
         ## TO DO add path to config in servers
-        return Path("home", "proj", "production", "downsample", self.downsampled_sample.internal_id)
+        return Path("home", "proj", "stage", "downsample", self.downsampled_sample.internal_id)
 
     @staticmethod
     def sample_status(sample: Sample) -> str:
