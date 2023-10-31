@@ -80,10 +80,7 @@ def test_incompressible_cases_are_not_processable(
     # GIVEN a store with a case that is marked as incompressible
     status_db: Store = populated_compress_context.status_db
 
-    incompressible_case: Family = helpers.add_case(
-        store=status_db,
-        internal_id="incompressible"
-    )
+    incompressible_case: Family = helpers.add_case(store=status_db, internal_id="incompressible")
     incompressible_case.created_at = dt.datetime.now() - dt.timedelta(days=1000)
     incompressible_case.is_compressible = False
 
