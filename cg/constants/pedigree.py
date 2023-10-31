@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class Pedigree(str, Enum):
+class Pedigree(StrEnum):
     FATHER = "father"
     MOTHER = "mother"
     CHILD = "child"

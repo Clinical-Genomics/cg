@@ -386,7 +386,31 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
     assert application_version.application == application
 
 
-def test_get_application_limitations_by_tag_and_pipeline(
+def test_get_application_limitations_by_tag(
+    store_with_application_limitations: Store,
+    tag: str = StoreConstants.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value,
+) -> ApplicationLimitations:
+    """Test get application limitations by application tag."""
+
+    # GIVEN a store with some application limitations
+
+    # WHEN filtering by a given application tag
+    application_limitations: list[
+        ApplicationLimitations
+    ] = store_with_application_limitations.get_application_limitations_by_tag(tag=tag)
+
+    # THEN assert that the application limitations were found
+    assert (
+        application_limitations
+        and len(application_limitations) == 2
+        and [
+            application_limitation.application.tag == tag
+            for application_limitation in application_limitations
+        ]
+    )
+
+
+def test_get_application_limitation_by_tag_and_pipeline(
     store_with_application_limitations: Store,
     tag: str = StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value,
     pipeline: Pipeline = Pipeline.MIP_DNA,
@@ -402,7 +426,7 @@ def test_get_application_limitations_by_tag_and_pipeline(
         )
     )
 
-    # THEN assert that the application limitations was found
+    # THEN assert that the application limitation was found
     assert (
         application_limitation
         and application_limitation.application.tag == tag
