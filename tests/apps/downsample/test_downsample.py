@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.downsample.downsample import DownSampleAPI
+from cg.models.cg_config import CGConfig
 from cg.store.models import Sample
 
 
@@ -95,4 +96,36 @@ def test_add_fastq_files_to_housekeeper(downsample_api: DownSampleAPI, tmp_path_
 
     assert downsample_api.housekeeper_api.get_files(
         bundle=downsample_api.downsample_data.downsampled_sample.internal_id, tags=["fastq"]
+    )
+
+
+def test_downsample_api_adding_a_second_sample_to_case(
+    downsample_api: DownSampleAPI,
+    downsample_sample_internal_id_2: str,
+    downsample_case_internal_id: str,
+    downsample_context: CGConfig,
+):
+    """Test that subsequent samples are added to the given case."""
+    # GIVEN a DownsampleAPI with a sample and case added
+    downsample_api.add_downsampled_sample_case_to_statusdb()
+    downsample_context.status_db_ = downsample_api.status_db
+    downsample_context.housekeeper_api_ = downsample_api.housekeeper_api
+
+    # WHEN generating a new DownsampleAPI for the same case with a different sample
+    new_downsample_api = DownSampleAPI(
+        config=downsample_context,
+        sample_id=downsample_sample_internal_id_2,
+        case_id=downsample_case_internal_id,
+        number_of_reads=50,
+    )
+
+    # THEN adding the sample to statusDB adds the sample and generates the links
+    new_downsample_api.add_downsampled_sample_case_to_statusdb()
+
+    assert new_downsample_api.status_db.get_sample_by_internal_id(
+        new_downsample_api.downsample_data.downsampled_sample.internal_id
+    )
+    assert (
+        new_downsample_api.downsample_data.downsampled_case.name
+        == downsample_api.downsample_data.downsampled_case.name
     )

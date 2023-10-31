@@ -97,6 +97,7 @@ class DownSampleAPI(MetaAPI):
                 f"Would relate sample {sample} to case {case.internal_id} with name {case.name}"
             )
             return
+
         sample_case_link: FamilySample = self.status_db.relate_sample(
             family=case,
             sample=sample,

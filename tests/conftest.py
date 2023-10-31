@@ -3282,9 +3282,7 @@ def store_with_case_and_sample_with_reads(
 ) -> Store:
     """Return a store with a case and a sample with reads."""
     case: Family = helpers.add_case(
-        store=store,
-        internal_id=downsample_case_internal_id,
-        name=f"{downsample_case_internal_id}_downsampled",
+        store=store, internal_id=downsample_case_internal_id, name=downsample_case_internal_id
     )
 
     for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:

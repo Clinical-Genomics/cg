@@ -11,7 +11,7 @@ def test_case_exists_in_statusdb(
     # WHEN checking if a case that is in the store exists
     does_exist: bool = case_exists_in_statusdb(
         status_db=store_with_case_and_sample_with_reads,
-        case_name=f"{downsample_case_internal_id}_downsampled",
+        case_name=downsample_case_internal_id,
     )
     # THEN the case does exist
     assert does_exist
