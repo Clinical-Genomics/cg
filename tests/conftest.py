@@ -308,6 +308,7 @@ def base_config_dict() -> dict:
         "delivery_path": "path/to/delivery",
         "flow_cells_dir": "path/to/flow_cells",
         "demultiplexed_flow_cells_dir": "path/to/demultiplexed_flow_cells_dir",
+        "downsample": "path/to/downsample_dir",
         "housekeeper": {
             "database": "sqlite:///",
             "root": "path/to/root",
@@ -2084,10 +2085,10 @@ def cg_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("cg")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def downsample_dir(tmp_path_factory) -> Path:
     """Return a temporary downsample directory for testing."""
-    return tmp_path_factory.mktemp("downsample")
+    return tmp_path_factory.mktemp("downsample", numbered=True)
 
 
 @pytest.fixture(name="swegen_dir")
@@ -3352,7 +3353,7 @@ def downsample_hk_api(
     return real_housekeeper_api
 
 
-@pytest.fixture()
+@pytest.fixture(scope="function")
 def downsample_context(
     cg_context: CGConfig,
     store_with_case_and_sample_with_reads: Store,
@@ -3364,7 +3365,7 @@ def downsample_context(
     return cg_context
 
 
-@pytest.fixture()
+@pytest.fixture(scope="function")
 def downsample_api(
     downsample_context: CGConfig,
     store_with_case_and_sample_with_reads: Store,
@@ -3375,10 +3376,9 @@ def downsample_api(
     tmp_path_factory,
 ) -> DownSampleAPI:
     """Return a DownsampleAPI."""
-    downsample_api = DownSampleAPI(
+    return DownSampleAPI(
         config=downsample_context,
         sample_id=downsample_sample_internal_id_1,
         number_of_reads=number_of_reads_in_millions,
         case_id=downsample_case_internal_id,
     )
-    return downsample_api

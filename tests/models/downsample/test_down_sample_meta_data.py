@@ -30,19 +30,13 @@ def test_downsample_meta_data_pass_pre_flight(
     assert downsample_hk_api.get_latest_bundle_version(sample.internal_id)
 
     # WHEN initialising the DownsampleData class
-    tmp_path = tmp_path_factory.mktemp("tmp")
-
-    def return_tmp_dir(path=tmp_path):
-        return path
-
-    mock_object = DownsampleData
-    mock_object.create_down_sampling_working_directory = return_tmp_dir
     meta_data = DownsampleData(
         status_db=store_with_case_and_sample_with_reads,
         hk_api=downsample_hk_api,
         sample_id=downsample_sample_internal_id_1,
         case_id=downsample_case_internal_id,
         number_of_reads=number_of_reads_in_millions,
+        out_dir=tmp_path_factory.mktemp("tmp"),
     )
 
     # THEN all necessary models to run the down sample command are created

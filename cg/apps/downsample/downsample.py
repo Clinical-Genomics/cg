@@ -12,7 +12,7 @@ from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
 from cg.models.cg_config import CGConfig
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Family, FamilySample, Sample
 from cg.utils.calculations import multiply_by_million
 from cg.utils.files import get_files_matching_pattern
 
@@ -97,7 +97,7 @@ class DownSampleAPI(MetaAPI):
                 f"Would relate sample {sample} to case {case.internal_id} with name {case.name}"
             )
             return
-        sample_case_link = self.status_db.relate_sample(
+        sample_case_link: FamilySample = self.status_db.relate_sample(
             family=case,
             sample=sample,
             status=self.downsample_data.sample_status(sample=sample),
