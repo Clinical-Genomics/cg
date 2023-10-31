@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 from housekeeper.store.models import File
+from sqlalchemy.exc import OperationalError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
@@ -230,20 +231,22 @@ class BackupAPI:
                 archived_file=archived_flow_cell,
                 run_dir=run_dir,
             )
-            if not self.dry_run:
-                self._set_flow_cell_status_to_retrieved(flow_cell)
         except subprocess.CalledProcessError as error:
             if error.returncode == RETURN_WARNING:
                 LOG.warning(
                     f"WARNING for retrieval of flow cell {flow_cell.name}, please check dsmerror.log"
                 )
-                if not self.dry_run:
-                    self._set_flow_cell_status_to_retrieved(flow_cell)
             else:
                 LOG.error(f"{flow_cell.name}: run directory retrieval failed")
                 if not self.dry_run:
                     flow_cell.status = FlowCellStatus.REQUESTED
                     self.status.session.commit()
+                raise error
+        if not self.dry_run:
+            try:
+                self._set_flow_cell_status_to_retrieved(flow_cell)
+            except OperationalError as error:
+                LOG.error(f"Could not set status for flow cell {flow_cell.name}: {error}")
                 raise error
 
     def _set_flow_cell_status_to_retrieved(self, flow_cell: Flowcell):
