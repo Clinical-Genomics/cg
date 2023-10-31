@@ -10,7 +10,8 @@ def test_case_exists_in_statusdb(
 
     # WHEN checking if a case that is in the store exists
     does_exist: bool = case_exists_in_statusdb(
-        status_db=store_with_case_and_sample_with_reads, case_id=downsample_case_internal_id
+        status_db=store_with_case_and_sample_with_reads,
+        case_name=f"{downsample_case_internal_id}_downsampled",
     )
     # THEN the case does exist
     assert does_exist
@@ -23,7 +24,8 @@ def test_case_does_not_exist_in_statusdb(
 
     # WHEN checking if a case that is not in the store exists
     does_exist: bool = case_exists_in_statusdb(
-        status_db=store_with_case_and_sample_with_reads, case_id="does_not_exist"
+        status_db=store_with_case_and_sample_with_reads,
+        case_name="does_not_exist",
     )
     # THEN the case does not exist
     assert not does_exist

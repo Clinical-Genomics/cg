@@ -115,7 +115,7 @@ class DownsampleData:
 
     def has_enough_reads_to_downsample(self) -> bool:
         """Check if the sample has enough reads to downsample."""
-        if not self.original_sample.reads > multiply_by_million(self.number_of_reads):
+        if not multiply_by_million(self.number_of_reads) <= self.original_sample.reads:
             raise ValueError(
                 f"Sample {self.original_sample.internal_id} does not have enough reads ({self.original_sample.reads}) to down sample to "
                 f"{self.number_of_reads}M."
