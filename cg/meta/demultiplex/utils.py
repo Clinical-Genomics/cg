@@ -208,7 +208,7 @@ def is_file_relevant_for_demultiplexing(file: Path) -> bool:
     return False
 
 
-def get_existing_manifest_file(source_directory: Path) -> Optional[Path]:
+def get_existing_manifest_file(source_directory: Path) -> Path | None:
     """Returns the first existing manifest file in the source directory."""
     manifest_file_paths = [
         Path(source_directory, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST),
@@ -231,15 +231,14 @@ def are_all_files_synced(files_at_source: list[Path], target_directory: Path) ->
 
 def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
     """Returns whether all relevant files for demultiplexing have been synced from the source to the target."""
+    existing_manifest_file: Path | None = get_existing_manifest_file(source_directory)
 
-    existing_manifest_file = get_existing_manifest_file(source_directory)
-
-    if existing_manifest_file is None:
+    if not existing_manifest_file:
         LOG.debug(f"{source_directory} does not contain a manifest file. Skipping.")
         return False
 
-    files_at_source = parse_manifest_file(existing_manifest_file)
-    return are_all_files_synced(files_at_source, target_directory)
+    files_at_source: list[Path] = parse_manifest_file(existing_manifest_file)
+    return are_all_files_synced(files_at_source=files_at_source, target_directory=target_directory)
 
 
 def get_flow_cell_id(flow_cell_dir_name: str) -> str:

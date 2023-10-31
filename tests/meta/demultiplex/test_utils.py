@@ -308,6 +308,7 @@ def test_is_file_relevant_for_demultiplexing(file: Path, expected_result: bool):
 
 def test_get_existing_manifest_file_illumina(lsyncd_source_directory: Path):
     # GIVEN a directory with an Illumina manifest file
+
     # WHEN getting the manifest file
     manifest_file: Path = get_existing_manifest_file(lsyncd_source_directory)
 
@@ -322,6 +323,7 @@ def test_get_existing_manifest_file(lsyncd_source_directory: Path):
     Path(lsyncd_source_directory, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST).rename(
         Path(lsyncd_source_directory, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)
     )
+
     # WHEN getting the manifest file
     manifest_file: Path = get_existing_manifest_file(lsyncd_source_directory)
 
@@ -357,10 +359,11 @@ def test_is_syncing_complete_true(lsyncd_source_directory: Path, lsyncd_target_d
 
 
 def test_are_all_files_synced_false(
-    novaseq_x_manifest_file, lsyncd_source_directory: Path, lsyncd_target_directory: Path
+    novaseq_x_manifest_file: Path, lsyncd_source_directory: Path, lsyncd_target_directory: Path
 ):
     # GIVEN a source directory with a manifest file
     files_at_source: list[Path] = parse_manifest_file(novaseq_x_manifest_file)
+
     # GIVEN a target directory with one file missing
     Path(lsyncd_target_directory, files_at_source[0]).unlink()
 
@@ -374,10 +377,11 @@ def test_are_all_files_synced_false(
 
 
 def test_are_all_files_synced(
-    novaseq_x_manifest_file, lsyncd_source_directory: Path, lsyncd_target_directory: Path
+    novaseq_x_manifest_file: Path, lsyncd_source_directory: Path, lsyncd_target_directory: Path
 ):
     # GIVEN a source directory with a manifest file
     files_at_source: list[Path] = parse_manifest_file(novaseq_x_manifest_file)
+
     # GIVEN a target directory with all relevant files
 
     # WHEN checking if the syncing is complete
@@ -429,7 +433,7 @@ def test_is_syncing_complete_false(
         ),
     ],
 )
-def test_is_manifest_file_required(source_files: list[str], expected_result: bool, tmp_path):
+def test_is_manifest_file_required(source_files: list[str], expected_result: bool, tmp_path: Path):
     """Tests if a manifest file is needed given the files present."""
     # GIVEN a source directory
     source_directory = Path(tmp_path, "source")
@@ -450,7 +454,9 @@ def test_is_manifest_file_required(source_files: list[str], expected_result: boo
     "source_files, expected_result",
     [([DemultiplexingDirsAndFiles.COPY_COMPLETE], True), ([], False)],
 )
-def test_is_flow_cell_sync_confirmed(source_files: list[str], expected_result: bool, tmp_path):
+def test_is_flow_cell_sync_confirmed(
+    source_files: list[str], expected_result: bool, tmp_path: Path
+):
     """Tests that a flow cell sync has been confirmed."""
     # GIVEN a flow cell directory with the given file present
     for file in source_files:

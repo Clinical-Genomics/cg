@@ -15,7 +15,9 @@ def test_create_manifest_files_true(
     second_flowcell_directory = Path(
         shutil.copytree(
             first_flowcell_directory,
-            Path(tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert.parent, "flowcell2"),
+            Path(
+                tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert.parent, "flowcell_2"
+            ),
         )
     )
 
@@ -51,7 +53,9 @@ def test_create_manifest_files_false(
     second_flowcell_directory = Path(
         shutil.copytree(
             first_flowcell_directory,
-            Path(tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert.parent, "flowcell2"),
+            Path(
+                tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert.parent, "flowcell_2"
+            ),
         )
     )
 
