@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 import coloredlogs
@@ -32,6 +33,8 @@ from cg.store.models import (
 )
 
 from . import admin, api, ext, invoices
+
+LOG = logging.getLogger(__name__)
 
 
 def create_app():
@@ -140,6 +143,9 @@ def _register_teardowns(app: Flask):
         Remove the database session to ensure database resources are
         released when a request has been processed.
         """
-        scoped_session_registry: Optional[scoped_session] = get_scoped_session_registry()
-        if scoped_session_registry:
-            scoped_session_registry.remove()
+        registry: Optional[scoped_session] = get_scoped_session_registry()
+        if registry:
+            try:
+                registry.remove()
+            except Exception as e:
+                LOG.error(f"An error occurred while removing the session: {e}")
