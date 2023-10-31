@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 import pytest
@@ -29,6 +28,7 @@ from cg.meta.demultiplex.utils import (
     parse_manifest_file,
 )
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from tests.meta.demultiplex.conftest import get_all_files_in_directory_tree
 
 
 def test_validate_sample_fastq_with_valid_file():
@@ -465,12 +465,9 @@ def test_is_flow_cell_sync_confirmed(source_files: list[str], expected_result: b
 
 def test_create_manifest_file(tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert: Path):
     # GIVEN a flow cell directory with files
-    all_files: list[Path] = []
-    for subdir, _, files in os.walk(tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert):
-        subdir = Path(subdir).relative_to(
-            tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert
-        )
-        all_files.extend([Path(subdir, file) for file in files])
+    all_files: list[Path] = get_all_files_in_directory_tree(
+        tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert
+    )
     # WHEN creating a manifest file
     manifest_file: Path = create_manifest_file(
         tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert
