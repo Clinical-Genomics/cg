@@ -25,27 +25,6 @@ def upgrade():
         existing_nullable=True,
     )
     op.alter_column(
-        "family",
-        "data_delivery",
-        existing_type=mysql.VARCHAR(length=64),
-        type_=sa.Enum(
-            "analysis",
-            "analysis-scout",
-            "fastq",
-            "fastq-scout",
-            "fastq_qc",
-            "fastq-analysis",
-            "fastq_qc-analysis",
-            "fastq-analysis-scout",
-            "nipt-viewer",
-            "no-delivery",
-            "scout",
-            "statina",
-            name="datadelivery",
-        ),
-        existing_nullable=True,
-    )
-    op.alter_column(
         "flowcell",
         "status",
         existing_type=mysql.ENUM("ondisk", "processing", "removed", "requested", "retrieved"),
@@ -60,27 +39,6 @@ def downgrade():
         "status",
         existing_type=sa.Enum("ondisk", "removed", "requested", "processing", "retrieved"),
         type_=mysql.ENUM("ondisk", "processing", "removed", "requested", "retrieved"),
-        existing_nullable=True,
-    )
-    op.alter_column(
-        "family",
-        "data_delivery",
-        existing_type=sa.Enum(
-            "analysis",
-            "analysis-scout",
-            "fastq",
-            "fastq-scout",
-            "fastq_qc",
-            "fastq-analysis",
-            "fastq_qc-analysis",
-            "fastq-analysis-scout",
-            "nipt-viewer",
-            "no-delivery",
-            "scout",
-            "statina",
-            name="datadelivery",
-        ),
-        type_=mysql.VARCHAR(length=64),
         existing_nullable=True,
     )
     op.alter_column(
