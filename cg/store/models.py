@@ -390,6 +390,7 @@ class Family(Model, PriorityMixin):
     data_delivery = Column(types.Enum(*list(DataDelivery)))
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
+    is_compressible = Column(types.Boolean, nullable=False, default=True)
     name = Column(types.String(128), nullable=False)
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     _panels = Column(types.Text)
