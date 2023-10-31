@@ -2084,6 +2084,12 @@ def cg_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("cg")
 
 
+@pytest.fixture(scope="session")
+def downsample_dir(tmp_path_factory) -> Path:
+    """Return a temporary downsample directory for testing."""
+    return tmp_path_factory.mktemp("downsample")
+
+
 @pytest.fixture(name="swegen_dir")
 def swegen_dir(tmpdir_factory, tmp_path) -> Path:
     """SweGen temporary directory containing mocked reference files."""
@@ -2195,6 +2201,7 @@ def context_config(
     taxprofiler_dir: Path,
     flow_cells_dir: Path,
     demultiplexed_runs: Path,
+    downsample_dir: Path,
     encryption_directories: EncryptionDirectories,
 ) -> dict:
     """Return a context config."""
@@ -2203,6 +2210,7 @@ def context_config(
         "delivery_path": str(cg_dir),
         "flow_cells_dir": str(flow_cells_dir),
         "demultiplexed_flow_cells_dir": str(demultiplexed_runs),
+        "downsample": str(downsample_dir),
         "email_base_settings": {
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",

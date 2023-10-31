@@ -3,9 +3,9 @@ from cg.store import Store
 from cg.store.models import Family, Sample
 
 
-def case_exists_in_statusdb(status_db: Store, case_id: str) -> bool:
+def case_exists_in_statusdb(status_db: Store, case_name: str) -> bool:
     """Check if a case exists in StatusDB."""
-    case: Family = status_db.get_case_by_internal_id(case_id)
+    case: Family = status_db.get_case_by_name(case_name)
     if case:
         return True
     return False

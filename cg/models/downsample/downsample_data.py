@@ -19,6 +19,7 @@ class DownsampleData:
         sample_id: str,
         number_of_reads: float,
         case_id: str,
+        out_dir: Path,
     ):
         """Initialize the downsample data and perform integrity checks.
         Raises:
@@ -30,6 +31,7 @@ class DownsampleData:
         self.sample_id: str = sample_id
         self.number_of_reads: float = number_of_reads
         self.case_id: str = case_id
+        self.out_dir: Path = out_dir
         self.original_sample: Sample = self.get_sample_to_downsample()
         self.original_case: Family = self.get_case_to_downsample()
         self.has_enough_reads: bool = self.has_enough_reads_to_downsample()
@@ -133,7 +135,7 @@ class DownsampleData:
     def fastq_file_output_directory(self):
         """Get the output directory for the downsampled sample."""
         ## TO DO add path to config in servers
-        return Path("home", "proj", "stage", "downsample", self.downsampled_sample.internal_id)
+        return Path(self.out_dir, self.downsampled_sample.internal_id)
 
     @staticmethod
     def sample_status(sample: Sample) -> str:
