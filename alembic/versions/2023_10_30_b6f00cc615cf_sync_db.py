@@ -18,9 +18,6 @@ depends_on = None
 
 def upgrade():
     op.alter_column(
-        "application", "min_sequencing_depth", existing_type=mysql.INTEGER(), nullable=False
-    )
-    op.alter_column(
         "family",
         "action",
         existing_type=mysql.ENUM("analyze", "running", "hold"),
@@ -92,7 +89,4 @@ def downgrade():
         existing_type=sa.Enum("analyze", "hold", "running"),
         type_=mysql.ENUM("analyze", "running", "hold"),
         existing_nullable=True,
-    )
-    op.alter_column(
-        "application", "min_sequencing_depth", existing_type=mysql.INTEGER(), nullable=True
     )
