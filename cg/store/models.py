@@ -397,7 +397,7 @@ class Family(Model, PriorityMixin):
 
     priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     synopsis = Column(types.Text)
-    tickets = Column(types.VARCHAR)
+    tickets = Column(types.VARCHAR(128))
 
     analyses = orm.relationship(
         Analysis, back_populates="family", order_by="-Analysis.completed_at"
