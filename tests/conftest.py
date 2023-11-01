@@ -18,7 +18,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.apps.downsample.downsample import DownSampleAPI
+from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -3372,9 +3372,9 @@ def downsample_api(
     downsample_case_internal_id: str,
     number_of_reads_in_millions: int,
     tmp_path_factory,
-) -> DownSampleAPI:
+) -> DownsampleAPI:
     """Return a DownsampleAPI."""
-    return DownSampleAPI(
+    return DownsampleAPI(
         config=downsample_context,
         sample_id=downsample_sample_internal_id_1,
         number_of_reads=number_of_reads_in_millions,

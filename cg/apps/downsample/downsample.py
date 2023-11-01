@@ -19,7 +19,7 @@ from cg.utils.files import get_files_matching_pattern
 LOG = logging.getLogger(__name__)
 
 
-class DownSampleAPI(MetaAPI):
+class DownsampleAPI(MetaAPI):
     def __init__(
         self,
         config: CGConfig,
@@ -38,6 +38,7 @@ class DownSampleAPI(MetaAPI):
         self.case_id: str = case_id
         self.dry_run: bool = dry_run
         self.downsample_data: DownsampleData = self.get_meta_data()
+        LOG.info(f"Starting DownsampleAPI for sample {sample_id}.")
 
     def get_meta_data(self) -> DownsampleData:
         """Return the DownSampleData.
@@ -128,7 +129,7 @@ class DownSampleAPI(MetaAPI):
         self.prepare_fastq_api.compress_api.decompress_spring(sample.internal_id)
         LOG.info("Re-run down sample command when decompression is done.")
 
-    def start_downsample_job(self, original_sample: Sample, sample_to_downsample: Sample) -> None:
+    def start_downsample_job(self, original_sample: Sample, sample_to_downsample: Sample) -> int:
         """
         Start a down sample job for a sample.
         -Retrieves input directory from the latest version of a sample bundle in housekeeper
@@ -143,7 +144,7 @@ class DownSampleAPI(MetaAPI):
             downsampled_sample=sample_to_downsample,
             dry_run=self.dry_run,
         )
-        downsample_work_flow.write_and_submit_sbatch_script()
+        return downsample_work_flow.write_and_submit_sbatch_script()
 
     def create_downsampled_sample_bundle(self) -> None:
         """Create a new bundle for the downsampled sample in housekeeper."""
@@ -151,16 +152,18 @@ class DownSampleAPI(MetaAPI):
             name=self.downsample_data.downsampled_sample.internal_id
         )
 
-    def downsample_sample(self) -> None:
+    def downsample_sample(self) -> int | None:
         """Down sample a sample."""
         if self.is_decompression_needed(self.downsample_data.original_case):
             self.start_decompression(self.downsample_data.original_sample)
             return
         self.add_downsampled_sample_case_to_statusdb()
-        self.start_downsample_job(
+        submitted_job: int = self.start_downsample_job(
             original_sample=self.downsample_data.original_sample,
             sample_to_downsample=self.downsample_data.downsampled_sample,
         )
+        LOG.info(f"Downsample job started with id {submitted_job}.")
+        return submitted_job
 
     def add_downsampled_fastq_files_to_housekeeper(self) -> None:
         """Add down sampled fastq files to housekeeper."""

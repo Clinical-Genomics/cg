@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import Optional
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.meta.workflow.downsample.sbatch import WORKFLOW_TEMPLATE
@@ -33,34 +32,20 @@ class DownsampleWorkflow:
         self.original_sample: Sample = original_sample
         self.output_fastq_dir: str = output_fastq_dir
         self.slurm_api: SlurmAPI = SlurmAPI()
-        self._account: str
-        self._memory: str
-        self._number_tasks: str
-        self._time: str
-        self._quality_of_service: str
-        self._email: str
+        self._account: str = "production"
+        self._memory: str = "100"
+        self._number_tasks: str = 2
+        self._time: str = "10:00:00"
+        self._quality_of_service: str = "normal"
+        self._email: str = "hiseq.clinical@scilifelab.se"
 
     @property
     def account(self) -> str:
         return self._account
 
-    @account.setter
-    def account(self, account: Optional[str]) -> None:
-        if account:
-            self._account = account
-        else:
-            self._account = "production"
-
     @property
     def email(self) -> str:
         return self._email
-
-    @email.setter
-    def email(self, email: Optional[str]) -> None:
-        if email:
-            self._email = email
-        else:
-            self._email = ""
 
     @property
     def bin_downsample(self) -> str:
@@ -77,13 +62,6 @@ class DownsampleWorkflow:
     def memory(self) -> str:
         LOG.info(f"Memory: {self._memory}")
         return self._memory
-
-    @memory.setter
-    def memory(self, memory: Optional[str]) -> None:
-        if memory:
-            self._memory = memory
-        else:
-            self._memory = "100"
 
     @property
     def number_tasks(self) -> str:
@@ -106,13 +84,6 @@ class DownsampleWorkflow:
     def quality_of_service(self) -> str:
         LOG.info(f"Submitting job with qos: {self._quality_of_service}")
         return self._quality_of_service
-
-    @quality_of_service.setter
-    def quality_of_service(self, quality_of_service: Optional[None]) -> None:
-        if quality_of_service:
-            self._quality_of_service = quality_of_service
-        else:
-            self._quality_of_service = "normal"
 
     @property
     def sbatch_content(self) -> str:
@@ -145,13 +116,6 @@ class DownsampleWorkflow:
     def time(self) -> str:
         LOG.info(f"Time for down sampling: {self._time}")
         return self._time
-
-    @time.setter
-    def time(self, time: Optional[str]) -> None:
-        if time:
-            self._time = time
-        else:
-            self._time = "10:00:00"
 
     def write_and_submit_sbatch_script(self) -> int:
         sbatch_path = Path(self.output_fastq_dir, self.sbatch_name)

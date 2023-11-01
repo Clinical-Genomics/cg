@@ -5,7 +5,7 @@ from typing import Tuple
 
 import click
 
-from cg.apps.downsample.downsample import DownSampleAPI
+from cg.apps.downsample.downsample import DownsampleAPI
 from cg.constants.constants import DRY_RUN
 from cg.models.cg_config import CGConfig
 
@@ -41,7 +41,7 @@ def downsample_sample(
     """Downsample reads in one or multiple samples."""
     for sample_id, reads in input_data:
         try:
-            downsample_api = DownSampleAPI(
+            downsample_api = DownsampleAPI(
                 config=context,
                 dry_run=dry_run,
                 case_id=case_id,
@@ -78,7 +78,7 @@ def store_downsampled_samples(
     """Downsample reads in one or multiple samples."""
     for sample_id, reads in input_data:
         try:
-            downsample_api = DownSampleAPI(
+            downsample_api = DownsampleAPI(
                 config=context,
                 dry_run=dry_run,
                 case_id=case_id,

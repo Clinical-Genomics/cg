@@ -4,12 +4,12 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.downsample.downsample import DownSampleAPI
+from cg.apps.downsample.downsample import DownsampleAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Sample
 
 
-def test_add_downsampled_case_entry_to_statusdb(downsample_api: DownSampleAPI, caplog) -> None:
+def test_add_downsampled_case_entry_to_statusdb(downsample_api: DownsampleAPI, caplog) -> None:
     """Test to add the downsampled case entry to StatusDB."""
     # GIVEN a DownsampleAPI
     caplog.set_level(level=logging.INFO)
@@ -30,7 +30,7 @@ def test_add_downsampled_case_entry_to_statusdb(downsample_api: DownSampleAPI, c
     )
 
 
-def test_add_downsampled_sample_entry_to_statusdb(downsample_api: DownSampleAPI) -> None:
+def test_add_downsampled_sample_entry_to_statusdb(downsample_api: DownsampleAPI) -> None:
     """Test to add the downsampled sample entry to StatusDB."""
     # GIVEN a DownsampleAPI
 
@@ -49,7 +49,7 @@ def test_add_downsampled_sample_entry_to_statusdb(downsample_api: DownSampleAPI)
         downsample_api.add_downsampled_sample_entry_to_statusdb()
 
 
-def test_add_sample_case_links(downsample_api: DownSampleAPI):
+def test_add_sample_case_links(downsample_api: DownsampleAPI):
     """Test to link samples to cases in StatusDB."""
 
     # GIVEN a DownsampleAPI and a downsampled case and sample in StatusDB
@@ -75,7 +75,7 @@ def test_add_sample_case_links(downsample_api: DownSampleAPI):
     assert sample.links
 
 
-def test_add_fastq_files_to_housekeeper(downsample_api: DownSampleAPI, tmp_path_factory):
+def test_add_fastq_files_to_housekeeper(downsample_api: DownsampleAPI, tmp_path_factory):
     """Test to add downsampled fastq files to housekeeper."""
 
     # GIVEN a downsample api and downsampled fastq files
@@ -100,7 +100,7 @@ def test_add_fastq_files_to_housekeeper(downsample_api: DownSampleAPI, tmp_path_
 
 
 def test_downsample_api_adding_a_second_sample_to_case(
-    downsample_api: DownSampleAPI,
+    downsample_api: DownsampleAPI,
     downsample_sample_internal_id_2: str,
     downsample_case_internal_id: str,
     downsample_context: CGConfig,
@@ -112,7 +112,7 @@ def test_downsample_api_adding_a_second_sample_to_case(
     downsample_context.housekeeper_api_ = downsample_api.housekeeper_api
 
     # WHEN generating a new DownsampleAPI for the same case with a different sample
-    new_downsample_api = DownSampleAPI(
+    new_downsample_api = DownsampleAPI(
         config=downsample_context,
         sample_id=downsample_sample_internal_id_2,
         case_id=downsample_case_internal_id,
@@ -129,3 +129,17 @@ def test_downsample_api_adding_a_second_sample_to_case(
         new_downsample_api.downsample_data.downsampled_case.name
         == downsample_api.downsample_data.downsampled_case.name
     )
+
+
+def test_start_downsample_job(downsample_api: DownsampleAPI, mocker):
+    """Test that a downsample job can be started."""
+
+    # GIVEN a DownsampleAPI
+    downsample_api.dry_run = True
+    # WHEN starting a downsample job
+    mocker.patch.object(DownsampleAPI, "is_decompression_needed")
+    DownsampleAPI.is_decompression_needed.return_value = False
+    submitted_job: int = downsample_api.downsample_sample()
+
+    # THEN a job is submitted
+    assert submitted_job
