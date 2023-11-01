@@ -47,7 +47,6 @@ class DownsampleData:
     ) -> str:
         """Return a new sample name with the number of reads to which it is down sampled in millions appended."""
         new_name: str = f"{self.sample_id}_{self.number_of_reads}M"
-        LOG.info(f"Changed {self.sample_id} to {new_name}")
         return new_name
 
     @property
@@ -56,7 +55,6 @@ class DownsampleData:
     ) -> str:
         """Return a case name with _downsampled appended."""
         new_name: str = f"{self.case_id}_downsampled"
-        LOG.info(f"Changed {self.case_id} to {new_name}")
         return new_name
 
     def get_sample_to_downsample(self) -> Sample:

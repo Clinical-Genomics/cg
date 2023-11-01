@@ -119,9 +119,16 @@ class DownsampleAPI(MetaAPI):
             case=self.downsample_data.downsampled_case,
         )
 
-    def is_decompression_needed(self, case) -> bool:
-        """Check if decompression is needed for the specified case."""
-        return self.prepare_fastq_api.is_spring_decompression_needed(case.internal_id)
+    def is_decompression_needed(self, sample) -> bool:
+        """Check if decompression is needed for the specified case.
+        Decompression is needed if there are no files with fastq tag found for the sample in housekeeper.
+        """
+        needs_decompression: bool = False
+        if not self.housekeeper_api.get_files(
+            self.downsample_data.original_sample.internal_id, tags=["fastq"]
+        ):
+            needs_decompression = True
+        return needs_decompression
 
     def start_decompression(self, sample: Sample) -> None:
         """Start decompression of spring compressed fastq files for the given sample."""
