@@ -136,5 +136,4 @@ class PdcAPI:
     @staticmethod
     def was_file_found(dsmc_output: str) -> bool:
         """Check if file was found in PDC."""
-        LOG.debug(f"Output is: {dsmc_output}")
         return NO_FILE_FOUND_ANSWER not in dsmc_output
