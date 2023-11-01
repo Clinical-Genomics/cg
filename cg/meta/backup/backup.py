@@ -239,9 +239,9 @@ class BackupAPI:
         for _, encryption_directory in self.encryption_directories:
             search_pattern = f"{encryption_directory}*{flow_cell_id}*{FileExtensions.GPG}"
             self.pdc.query_pdc(search_pattern)
-            if dsmc_output := self.pdc.process.stdout.split(NEW_LINE):
+            if self.pdc.was_file_found(self.pdc.process.stdout):
                 LOG.info(f"Found archived files for PDC query: {search_pattern}")
-                return dsmc_output
+                return self.pdc.process.stdout.split(NEW_LINE)
             LOG.debug(f"No archived files found for PDC query: {search_pattern}")
 
         raise PdcNoFilesMatchingSearchError(

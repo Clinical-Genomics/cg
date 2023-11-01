@@ -22,6 +22,7 @@ from cg.utils import Process
 LOG = logging.getLogger(__name__)
 
 SERVER = "hasta"
+NO_FILE_FOUND_ANSWER = "ANS1092W"
 
 
 class PdcAPI:
@@ -131,3 +132,8 @@ class PdcAPI:
             store=status_db,
             db_flow_cell=db_flow_cell,
         )
+
+    @staticmethod
+    def was_file_found(dsmc_output: str) -> bool:
+        """Check if file was found in PDC."""
+        return NO_FILE_FOUND_ANSWER not in dsmc_output
