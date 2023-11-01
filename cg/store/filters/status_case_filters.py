@@ -190,6 +190,11 @@ def filter_running_cases(cases: Query, **kwargs) -> Query:
     return cases.filter(Family.action == CaseActions.RUNNING)
 
 
+def filter_compressible_cases(cases: Query, **kwargs) -> Query:
+    """Filter cases which are running."""
+    return cases.filter(Family.is_compressible)
+
+
 def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
     """Order cases by created at."""
     return cases.order_by(Family.created_at.desc())
@@ -256,6 +261,7 @@ class CaseFilter(Enum):
     FILTER_HAS_INACTIVE_ANALYSIS: Callable = filter_inactive_analysis_cases
     FILTER_HAS_SEQUENCE: Callable = filter_cases_has_sequence
     FILTER_IS_RUNNING: Callable = filter_running_cases
+    FILTER_IS_COMPRESSIBLE: Callable = filter_compressible_cases
     FILTER_NEW_BY_ORDER_DATE: Callable = filter_newer_cases_by_order_date
     FILTER_NOT_ANALYSED: Callable = filter_cases_not_analysed
     FILTER_OLD_BY_CREATION_DATE: Callable = filter_older_cases_by_creation_date
