@@ -1,13 +1,12 @@
-"""Module for modeling run parameters file parsing."""
+"""Module for parsing sequencing run metadata from RunParameters file."""
 import logging
 from pathlib import Path
-from typing import Optional
 from xml.etree import ElementTree
 
 from cg.constants.demultiplexing import RunParametersXMLNodes
-from cg.constants.sequencing import Sequencers
+from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.exc import RunParametersError
-from cg.io.xml import read_xml
+from cg.io.xml import read_xml, validate_node_exists
 
 LOG = logging.getLogger(__name__)
 
@@ -20,59 +19,66 @@ class RunParameters:
         self.tree: ElementTree = read_xml(file_path=run_parameters_path)
         self.validate_instrument()
 
+    def validate_instrument(self) -> None:
+        """Raise an error if the parent class was instantiated."""
+        raise NotImplementedError(
+            "Parent class instantiated. "
+            "Instantiate instead RunParametersNovaSeq6000 or RunParametersNovaSeqX"
+        )
+
     @property
     def index_length(self) -> int:
         """Return the length of the indexes if they are equal, raise an error otherwise."""
         index_one_length: int = self.get_index_1_cycles()
         index_two_length: int = self.get_index_2_cycles()
-        if index_one_length != index_two_length:
+        if index_one_length != index_two_length and not isinstance(self, RunParametersHiSeq):
             raise RunParametersError("Index lengths are not the same!")
         return index_one_length
 
-    @staticmethod
-    def node_not_found(node: Optional[ElementTree.Element], name: str) -> None:
-        """Raise exception if the given node is not found."""
-        if node is None:
-            message = f"Could not determine {name}"
-            LOG.warning(message)
-            raise RunParametersError(message)
+    def get_tree_node(self, node_name: str, name: str) -> ElementTree.Element:
+        """Return the node of a tree given its name if it exists."""
+        xml_node = self.tree.find(node_name)
+        validate_node_exists(node=xml_node, name=name)
+        return xml_node
 
-    def validate_instrument(self) -> None:
-        """Raise an error if the parent class was instantiated."""
-        raise NotImplementedError(
-            "Parent class instantiated. Instantiate instead RunParametersNovaSeq6000 or RunParametersNovaSeqX"
-        )
+    def get_node_string_value(self, node_name: str, name: str) -> str:
+        """Return the value of the node as a string if its validation passes."""
+        return self.get_tree_node(node_name=node_name, name=name).text
+
+    def get_node_integer_value(self, node_name: str, name: str) -> int:
+        """Return the value of the node as an integer if its validation passes."""
+        return int(self.get_tree_node(node_name=node_name, name=name).text)
 
     @property
-    def control_software_version(self) -> Optional[str]:
+    def control_software_version(self) -> str | None:
         """Return the control software version if existent."""
         raise NotImplementedError(
             "Impossible to retrieve control software version from parent class"
         )
 
     @property
-    def reagent_kit_version(self) -> Optional[str]:
+    def reagent_kit_version(self) -> str | None:
         """Return the reagent kit version if existent."""
         raise NotImplementedError("Impossible to retrieve reagent kit version from parent class")
 
     @property
-    def sequencer(self) -> Optional[str]:
+    def sequencer(self) -> str | None:
         """Return the sequencer associated with the current run parameters."""
         raise NotImplementedError("Impossible to retrieve sequencer from parent class")
 
-    def get_index_1_cycles(self) -> int:
+    def get_index_1_cycles(self) -> int | None:
         """Return the number of cycles in the first index read."""
         raise NotImplementedError("Impossible to retrieve index1 cycles from parent class")
 
-    def get_index_2_cycles(self) -> int:
+    def get_index_2_cycles(self) -> int | None:
         """Return the number of cycles in the second index read."""
         raise NotImplementedError("Impossible to retrieve index2 cycles from parent class")
 
-    def get_read_1_cycles(self) -> int:
+    def get_read_1_cycles(self) -> int | None:
         """Return the number of cycles in the first read."""
         raise NotImplementedError("Impossible to retrieve read1 cycles from parent class")
 
-    def get_read_2_cycles(self) -> int:
+    def get_read_2_cycles(self) -> int | None:
         """Return the number of cycles in the second read."""
         raise NotImplementedError("Impossible to retrieve read2 cycles from parent class")
 
@@ -89,15 +95,62 @@ class RunParameters:
         )
 
 
+class RunParametersHiSeq(RunParameters):
+    """Specific class for parsing run parameters of HiSeq2500 sequencing."""
+
+    def validate_instrument(self) -> None:
+        """Raise an error if the class was not instantiated with a HiSeq file."""
+        node_name: str = RunParametersXMLNodes.APPLICATION_NAME
+        application: str = self.get_node_string_value(node_name=node_name, name="Instrument")
+        if application != RunParametersXMLNodes.HISEQ_APPLICATION:
+            raise RunParametersError("The file parsed does not correspond to a HiSeq instrument")
+
+    @property
+    def control_software_version(self) -> None:
+        """Return None for run parameters associated with HiSeq sequencing."""
+        return
+
+    @property
+    def reagent_kit_version(self) -> None:
+        """Return None for run parameters associated with HiSeq sequencing."""
+        return
+
+    @property
+    def sequencer(self) -> str:
+        """Return the sequencer associated with the current run parameters."""
+        node_name: str = RunParametersXMLNodes.SEQUENCER_ID
+        sequencer: str = self.get_node_string_value(node_name=node_name, name="Sequencer ID")
+        return sequencer_types.get(sequencer)
+
+    def get_index_1_cycles(self) -> int:
+        """Return the number of cycles in the first index read."""
+        node_name: str = RunParametersXMLNodes.INDEX_1_HISEQ
+        return self.get_node_integer_value(node_name=node_name, name="length of index one")
+
+    def get_index_2_cycles(self) -> int:
+        """Return the number of cycles in the second index read."""
+        node_name: str = RunParametersXMLNodes.INDEX_2_HISEQ
+        return self.get_node_integer_value(node_name=node_name, name="length of index two")
+
+    def get_read_1_cycles(self) -> int:
+        """Return the number of cycles in the first read."""
+        node_name: str = RunParametersXMLNodes.READ_1_HISEQ
+        return self.get_node_integer_value(node_name=node_name, name="length of reads one")
+
+    def get_read_2_cycles(self) -> int:
+        """Return the number of cycles in the second read."""
+        node_name: str = RunParametersXMLNodes.READ_2_HISEQ
+        return self.get_node_integer_value(node_name=node_name, name="length of reads two")
+
+
 class RunParametersNovaSeq6000(RunParameters):
     """Specific class for parsing run parameters of NovaSeq6000 sequencing."""
 
     def validate_instrument(self) -> None:
         """Raise an error if the class was not instantiated with a NovaSeq6000 file."""
         node_name: str = RunParametersXMLNodes.APPLICATION
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        self.node_not_found(node=xml_node, name="Instrument")
-        if xml_node.text != RunParametersXMLNodes.NOVASEQ_6000_APPLICATION:
+        application: str = self.get_node_string_value(node_name=node_name, name="Instrument")
+        if application != RunParametersXMLNodes.NOVASEQ_6000_APPLICATION:
             raise RunParametersError(
                 "The file parsed does not correspond to a NovaSeq6000 instrument"
             )
@@ -106,15 +159,13 @@ class RunParametersNovaSeq6000(RunParameters):
     def control_software_version(self) -> str:
         """Return the control software version."""
         node_name: str = RunParametersXMLNodes.APPLICATION_VERSION
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        self.node_not_found(node=xml_node, name="control software version")
-        return xml_node.text
+        return self.get_node_string_value(node_name=node_name, name="control software version")
 
     @property
     def reagent_kit_version(self) -> str:
         """Return the reagent kit version if existent, return 'unknown' otherwise."""
         node_name: str = RunParametersXMLNodes.REAGENT_KIT_VERSION
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
+        xml_node: ElementTree.Element | None = self.tree.find(node_name)
         if xml_node is None:
             LOG.warning("Could not determine reagent kit version")
             LOG.info("Set reagent kit version to 'unknown'")
@@ -124,32 +175,26 @@ class RunParametersNovaSeq6000(RunParameters):
     @property
     def sequencer(self) -> str:
         """Return the sequencer associated with the current run parameters."""
-        return Sequencers.NOVASEQ.value
-
-    def get_node_integer_value(self, node_name: str, name: str) -> int:
-        """Return the value of the node as an integer."""
-        xml_node = self.tree.find(node_name)
-        self.node_not_found(node=xml_node, name=name)
-        return int(xml_node.text)
+        return Sequencers.NOVASEQ
 
     def get_index_1_cycles(self) -> int:
         """Return the number of cycles in the first index read."""
-        node_name = RunParametersXMLNodes.INDEX_1_NOVASEQ_6000
+        node_name: str = RunParametersXMLNodes.INDEX_1_NOVASEQ_6000
         return self.get_node_integer_value(node_name=node_name, name="length of index one")
 
     def get_index_2_cycles(self) -> int:
         """Return the number of cycles in the second index read."""
-        node_name = RunParametersXMLNodes.INDEX_2_NOVASEQ_6000
+        node_name: str = RunParametersXMLNodes.INDEX_2_NOVASEQ_6000
         return self.get_node_integer_value(node_name=node_name, name="length of index two")
 
     def get_read_1_cycles(self) -> int:
         """Return the number of cycles in the first read."""
-        node_name = RunParametersXMLNodes.READ_1_NOVASEQ_6000
+        node_name: str = RunParametersXMLNodes.READ_1_NOVASEQ_6000
         return self.get_node_integer_value(node_name=node_name, name="length of reads one")
 
     def get_read_2_cycles(self) -> int:
         """Return the number of cycles in the second read."""
-        node_name = RunParametersXMLNodes.READ_2_NOVASEQ_6000
+        node_name: str = RunParametersXMLNodes.READ_2_NOVASEQ_6000
         return self.get_node_integer_value(node_name=node_name, name="length of reads two")
 
 
@@ -159,9 +204,8 @@ class RunParametersNovaSeqX(RunParameters):
     def validate_instrument(self) -> None:
         """Raise an error if the class was not instantiated with a NovaSeqX file."""
         node_name: str = RunParametersXMLNodes.INSTRUMENT_TYPE
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        self.node_not_found(node=xml_node, name="Instrument")
-        if xml_node.text != RunParametersXMLNodes.NOVASEQ_X_INSTRUMENT:
+        application: str = self.get_node_string_value(node_name=node_name, name="Instrument")
+        if application != RunParametersXMLNodes.NOVASEQ_X_INSTRUMENT:
             raise RunParametersError("The file parsed does not correspond to a NovaSeqX instrument")
 
     @property
@@ -177,18 +221,19 @@ class RunParametersNovaSeqX(RunParameters):
     @property
     def sequencer(self) -> str:
         """Return the sequencer associated with the current run parameters."""
-        return Sequencers.NOVASEQX.value
+        return Sequencers.NOVASEQX
 
     @property
     def read_parser(self) -> dict[str, int]:
         """Return read and index cycle values parsed as a dictionary."""
         cycle_mapping: dict[str, int] = {}
-        planned_reads: Optional[ElementTree.Element] = self.tree.find(
-            RunParametersXMLNodes.PLANNED_READS
+        planned_reads_tree: ElementTree.Element = self.get_tree_node(
+            node_name=RunParametersXMLNodes.PLANNED_READS, name="Planned Reads"
         )
-        self.node_not_found(node=planned_reads, name="PlannedReads")
-        read_elem: ElementTree.Element
-        for read_elem in planned_reads.findall(RunParametersXMLNodes.INNER_READ):
+        planned_reads: list[ElementTree.Element] = planned_reads_tree.findall(
+            RunParametersXMLNodes.INNER_READ
+        )
+        for read_elem in planned_reads:
             read_name: str = read_elem.get(RunParametersXMLNodes.READ_NAME)
             cycles: int = int(read_elem.get(RunParametersXMLNodes.CYCLES))
             cycle_mapping[read_name] = cycles

@@ -45,8 +45,11 @@ class RunParametersXMLNodes(StrEnum):
 
     # Node names
     APPLICATION: str = ".Application"
+    APPLICATION_NAME: str = ".//ApplicationName"
     APPLICATION_VERSION: str = ".ApplicationVersion"
     CYCLES: str = "Cycles"
+    INDEX_1_HISEQ: str = ".//IndexRead1"
+    INDEX_2_HISEQ: str = ".//IndexRead2"
     INDEX_1_NOVASEQ_6000: str = "./IndexRead1NumberOfCycles"
     INDEX_2_NOVASEQ_6000: str = "./IndexRead2NumberOfCycles"
     INDEX_1_NOVASEQ_X: str = "Index1"
@@ -54,14 +57,18 @@ class RunParametersXMLNodes(StrEnum):
     INNER_READ: str = ".//Read"
     INSTRUMENT_TYPE: str = ".InstrumentType"
     PLANNED_READS: str = "./PlannedReads"
+    READ_1_HISEQ: str = ".//Read1"
+    READ_2_HISEQ: str = ".//Read2"
     READ_1_NOVASEQ_6000: str = "./Read1NumberOfCycles"
     READ_2_NOVASEQ_6000: str = "./Read2NumberOfCycles"
     READ_1_NOVASEQ_X: str = "Read1"
     READ_2_NOVASEQ_X: str = "Read2"
     READ_NAME: str = "ReadName"
     REAGENT_KIT_VERSION: str = "./RfidsInfo/SbsConsumableVersion"
+    SEQUENCER_ID: str = ".//ScannerID"
 
     # Node Values
+    HISEQ_APPLICATION: str = "HiSeq Control Software"
     NOVASEQ_6000_APPLICATION: str = "NovaSeq Control Software"
     NOVASEQ_X_INSTRUMENT: str = "NovaSeqXPlus"
     UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"

@@ -39,9 +39,35 @@ def test_run_parameters_parent_class_fails(
         )
 
 
+def test_run_parameters_hiseq_x(hiseq_x_single_index_run_parameters_path: Path):
+    """Tests that creating a HiSeq RunParameters with a HiSeq2500 path file works."""
+    # GIVEN a valid HiSeq2500 run parameters file path
+
+    # WHEN creating a HiSeq2500 RunParameters object
+
+    # THEN the created object is of the correct type and has the correct attributes
+
+
+def test_run_parameters_hiseq_2500(hiseq_2500_double_index_run_parameters_path: Path):
+    """Tests that creating a HiSeq RunParameters with a HiSeq2500 path file works."""
+    # GIVEN a valid HiSeq2500 run parameters file path
+
+    # WHEN creating a HiSeq2500 RunParameters object
+
+    # THEN the created object is of the correct type and has the correct attributes
+
+
+def test_run_parameters_hiseq_wrong_file():
+    """Tests that creating a RunParameters HiSeq2500 object with the wrong file fails."""
+    # GIVEN a file path with a run parameters file from an instrument different from HiSeq2500
+
+    # WHEN trying to create a HiSeq2500 RunParameters object with the file
+
+    # THEN an error is raised
+
+
 def test_run_parameters_novaseq_6000(novaseq_6000_run_parameters_path: Path):
     """Tests that creating a RunParameters NovaSeq6000 object with the correct file works."""
-
     # GIVEN a valid NovaSeq6000 run parameters file path
 
     # WHEN creating a NovaSeq6000 RunParameters object
@@ -67,7 +93,6 @@ def test_run_parameters_novaseq_6000_wrong_file(novaseq_x_run_parameters_path: P
 
 def test_run_parameters_novaseq_x(novaseq_x_run_parameters_path: Path):
     """Tests that creating a RunParameters NovaSeqX object with the correct file works."""
-
     # GIVEN a valid NovaSeqX run parameters file path
 
     # WHEN creating a NovaSeqX RunParameters object
@@ -87,6 +112,15 @@ def test_run_parameters_novaseq_x_wrong_file(novaseq_6000_run_parameters_path: P
         # THEN an error is raised
         RunParametersNovaSeqX(run_parameters_path=novaseq_6000_run_parameters_path)
         assert str(exc_info.value) == "The file parsed does not correspond to a NovaSeqX instrument"
+
+
+def test_reagent_kit_version_hiseq_2500():
+    """Test that getting reagent kit version from a HiSeq2500 run parameters returns None."""
+    # GIVEN a valid RunParameters object for HiSeq2500
+
+    # WHEN fetching the reagent kit version
+
+    # THEN the reagent kit version is None
 
 
 def test_reagent_kit_version(novaseq_6000_run_parameters: RunParametersNovaSeq6000):
@@ -126,6 +160,15 @@ def test_reagent_kit_version_novaseq_x(novaseq_x_run_parameters: RunParametersNo
     assert not novaseq_x_run_parameters.reagent_kit_version
 
 
+def test_control_software_version_hiseq_2500():
+    """Test that getting control software version from a HiSeq2500 run parameters returns None."""
+    # GIVEN a valid RunParameters object for HiSeq2500
+
+    # WHEN fetching the control software version
+
+    # THEN the control software version is None
+
+
 def test_control_software_version(novaseq_6000_run_parameters: RunParametersNovaSeq6000):
     """Test that getting control software version from a correct file returns an expected value."""
     # GIVEN a valid RunParameters object for NovaSeq6000
@@ -161,6 +204,24 @@ def test_control_software_version_novaseq_x(novaseq_x_run_parameters: RunParamet
     assert not novaseq_x_run_parameters.control_software_version
 
 
+def test_index_length_hiseq_2500_single_index():
+    """Test that getting the index length from a HiSeq2500 run parameters file returns an int."""
+    # GIVEN a valid RunParametersHiSeq2500 object
+
+    # WHEN getting the index length
+
+    # THEN the index length is an int
+
+
+def test_index_length_hiseq_2500_double_index():
+    """Test that getting the index length from a HiSeq2500 run parameters file returns an int."""
+    # GIVEN a valid RunParametersHiSeq2500 object
+
+    # WHEN getting the index length
+
+    # THEN the index length is an int
+
+
 def test_index_length_novaseq_6000(
     novaseq_6000_run_parameters: RunParametersNovaSeq6000,
 ):
@@ -185,12 +246,20 @@ def test_index_length_novaseq_x(
     assert isinstance(novaseq_x_run_parameters.index_length, int)
 
 
-def test_index_length_novaseq_6000_different_length(
-    run_parameters_novaseq_6000_different_index_path: Path,
-    run_parameters_novaseq_x_different_index_path: Path,
-):
+def test_index_length_hiseq_2500_different_length():
     """Test that getting the index length from a file with different index cycles fails."""
     # GIVEN a RunParameters object created from a file with different index cycles
+
+    # WHEN fetching index length
+
+    # THEN assert that an exception was raised since the index cycles are different
+
+
+def test_index_length_novaseq_6000_different_length(
+    run_parameters_novaseq_6000_different_index_path: Path,
+):
+    """Test that getting the index length from a file with different index cycles fails."""
+    # GIVEN a NovaSeq6000 RunParameters object created from a file with different index cycles
     run_parameters_novaseq_6000 = RunParametersNovaSeq6000(
         run_parameters_path=run_parameters_novaseq_6000_different_index_path
     )
@@ -206,7 +275,7 @@ def test_index_length_novaseq_x_different_length(
     run_parameters_novaseq_x_different_index_path: Path,
 ):
     """Test that getting the index length from a file with different index cycles fails."""
-    # GIVEN a RunParameters object created from a file with different index cycles
+    # GIVEN a NovaSeqX RunParameters object created from a file with different index cycles
     run_parameters_novaseq_x = RunParametersNovaSeqX(
         run_parameters_path=run_parameters_novaseq_x_different_index_path
     )
@@ -215,6 +284,15 @@ def test_index_length_novaseq_x_different_length(
         # THEN assert that an exception was raised since the index cycles are different
         run_parameters_novaseq_x.index_length
         assert str(exc_info.value) == "Index lengths are not the same!"
+
+
+def test_get_cycles_hiseq_2500():
+    """Test."""
+    # GIVEN a HiSeq2500 run parameters object
+
+    # WHEN getting any read cycle
+
+    # THEN all read cycles are non-negative integers
 
 
 def test_get_cycles_novaseq_6000(novaseq_6000_run_parameters: RunParametersNovaSeq6000):
