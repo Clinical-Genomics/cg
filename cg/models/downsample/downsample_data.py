@@ -4,7 +4,7 @@ from pathlib import Path
 
 from cg.apps.downsample.utils import case_exists_in_statusdb
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Priority, SequencingFileTag
+from cg.constants import Priority
 from cg.store import Store
 from cg.store.models import ApplicationVersion, Family, Sample
 from cg.utils.calculations import multiply_by_million
@@ -128,11 +128,9 @@ class DownsampleData:
         LOG.debug(
             f"Trying to get input fastq directory for {self.original_sample.internal_id} from Housekeeper."
         )
-        return Path(
-            self.housekeeper_api.get_files(
-                bundle=self.original_sample.internal_id, tags=[SequencingFileTag.FASTQ]
-            ).all()[0]
-        ).parent.resolve()
+        return self.housekeeper_api.get_latest_bundle_version(
+            bundle_name=self.original_sample.internal_id,
+        ).full_path
 
     @property
     def fastq_file_output_directory(self):
