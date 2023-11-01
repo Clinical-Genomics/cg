@@ -2,9 +2,8 @@ import logging
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
-from cg.cli.workflow.raredisease.base import (
-    raredisease,
-)
+
+from cg.cli.workflow.raredisease.base import raredisease
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 

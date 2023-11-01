@@ -34,7 +34,7 @@ class DownsampleWorkflow:
         self.slurm_api: SlurmAPI = SlurmAPI()
         self._account: str = "production"
         self._memory: str = "100"
-        self._number_tasks: str = 2
+        self._number_tasks: str = "2"
         self._time: str = "10:00:00"
         self._quality_of_service: str = "normal"
         self._email: str = "hiseq.clinical@scilifelab.se"
