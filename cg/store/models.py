@@ -390,13 +390,14 @@ class Family(Model, PriorityMixin):
     data_delivery = Column(types.Enum(*list(DataDelivery)))
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
+    is_compressible = Column(types.Boolean, nullable=False, default=True)
     name = Column(types.String(128), nullable=False)
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     _panels = Column(types.Text)
 
     priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     synopsis = Column(types.Text)
-    tickets = Column(types.VARCHAR)
+    tickets = Column(types.VARCHAR(128))
 
     analyses = orm.relationship(
         Analysis, back_populates="family", order_by="-Analysis.completed_at"
