@@ -125,16 +125,18 @@ class DownsampleData:
     @property
     def fastq_file_input_directory(self) -> Path:
         """Get the latest version directory for a sample in housekeeper."""
+        LOG.debug(
+            f"Trying to get input fastq directory for {self.original_sample.internal_id} from Housekeeper."
+        )
         return Path(
-            self.housekeeper_api.get_file_from_latest_version(
-                bundle_name=self.original_sample.internal_id, tags={SequencingFileTag.FASTQ}
-            ).path
-        ).parent
+            self.housekeeper_api.get_files(
+                bundle=self.original_sample.internal_id, tags=[SequencingFileTag.FASTQ]
+            ).all()[0]
+        ).parent.resolve()
 
     @property
     def fastq_file_output_directory(self):
         """Get the output directory for the downsampled sample."""
-        ## TO DO add path to config in servers
         return Path(self.out_dir, self.downsampled_sample.internal_id)
 
     @staticmethod
