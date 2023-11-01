@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 from housekeeper.store.models import File
+from sqlalchemy.exc import OperationalError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS

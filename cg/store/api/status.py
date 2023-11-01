@@ -229,6 +229,7 @@ class StatusHandler(BaseHandler):
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.FILTER_HAS_INACTIVE_ANALYSIS,
             CaseFilter.FILTER_OLD_BY_CREATION_DATE,
+            CaseFilter.FILTER_IS_COMPRESSIBLE,
         ]
         return apply_case_filter(
             filter_functions=case_filter_functions,
