@@ -123,6 +123,7 @@ class DownsampleAPI(MetaAPI):
         """Check if decompression is needed for the specified case.
         Decompression is needed if there are no files with fastq tag found for the sample in housekeeper.
         """
+        LOG.debug("Checking if decompression is needed.")
         needs_decompression: bool = False
         if not self.housekeeper_api.get_files(
             self.downsample_data.original_sample.internal_id, tags=["fastq"]
@@ -164,6 +165,7 @@ class DownsampleAPI(MetaAPI):
         if self.is_decompression_needed(self.downsample_data.original_case):
             self.start_decompression(self.downsample_data.original_sample)
             return
+        LOG.debug("No Decompression needed.")
         self.add_downsampled_sample_case_to_statusdb()
         submitted_job: int = self.start_downsample_job(
             original_sample=self.downsample_data.original_sample,
