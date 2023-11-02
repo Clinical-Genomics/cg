@@ -57,19 +57,13 @@ def downsample_sample(
 
 
 @downsample.command("store", help="Store the downsampled fastq files in housekeeper.")
-@click.option(
-    "-s",
-    "--sample_ids",
-    required=True,
-    multiple=True,
-    help="Identifier for the downsampled samples ( e.g. ACC1223432_2.0M) that you would like to store. Can supply multiple.",
-)
-@DRY_RUN
+@click.argument("sample_ids", type=str, nargs=-1)
 @click.pass_obj
 def store_downsampled_samples(context: CGConfig, sample_ids: list[str]):
     """Store fastq files for downsampled samples in Housekeeper."""
     for sample_id in sample_ids:
         downsample_dir: str = str(Path(context.downsample, sample_id))
+        LOG.debug(f"Searching for fastq files in : {downsample_dir}")
         try:
             add_downsampled_sample_to_housekeeper(
                 housekeeper_api=context.housekeeper_api,
