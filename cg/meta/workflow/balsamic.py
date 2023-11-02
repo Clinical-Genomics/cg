@@ -51,6 +51,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.conda_env = config.balsamic.conda_env
         self.bed_path = config.balsamic.bed_path
         self.cadd_path = config.balsamic.cadd_path
+        self.genome_interval_path = config.balsamic.genome_interval_path
+        self.gnomad_af5_path = config.balsamic.gnomad_af5_path
+        self.gens_coverage_female_path = config.balsamic.gens_coverage_female_path
+        self.gens_coverage_male_path = config.balsamic.gens_coverage_male_path
         self.email = config.balsamic.slurm.mail_user
         self.loqusdb_path = config.balsamic.loqusdb_path
         self.pon_path = config.balsamic.pon_path
@@ -443,16 +447,20 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             if verified_panel_bed
             else None
         )
+        verified_gender: Gender = gender or self.get_verified_gender(sample_data=sample_data)
 
         config_case: dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.pipeline,
             "genome_version": genome_version,
-            "gender": gender or self.get_verified_gender(sample_data=sample_data),
+            "gender": verified_gender,
             "panel_bed": verified_panel_bed,
             "pon_cnn": verified_pon,
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
+            "gens_coverage_pon": self.gens_coverage_female_path
+            if gender == Gender.FEMALE
+            else self.gens_coverage_male_path,
         }
         config_case.update(self.get_verified_samples(case_id=case_id))
         config_case.update(self.get_parsed_observation_file_paths(observations))
@@ -561,6 +569,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),
                 "--cadd-annotations": self.cadd_path,
+                "--genome-interval": self.genome_interval_path,
+                "--gnomad-min-af5": self.gnomad_af5_path,
+                "--gens-coverage-pon": arguments.get("gens_coverage_pon"),
                 "--swegen-snv": arguments.get("swegen_snv"),
                 "--swegen-sv": arguments.get("swegen_sv"),
                 "--clinical-snv-observations": arguments.get("clinical_snv"),
