@@ -16,16 +16,8 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython"
 ]
 
-[package]
 include = [
-    "README.md",
     "cg/**/*",
-    "cg/server/templates/**/*",
-    "cg/server/invoices/templates/invoices/**/*",
-    "cg/meta/report/templates/**/*",
-    "cg/apps/invoice/templates/**/*",
-    "cg/resources/**/*",
-    "tests/**/*",
 ]
 exclude = [
     "**/__pycache__",
@@ -91,9 +83,6 @@ pytest-cov = "4.1.0"
 pytest-mock = "3.11.1"
 pytest = "7.4.2"
 ruff = "0.0.292"
-
-[build]
-include = ["**/*"]
 
 [tool.poetry.scripts]
 cg = "cg.cli.base:base"
