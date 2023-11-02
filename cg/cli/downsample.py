@@ -62,7 +62,7 @@ def downsample_sample(
     "--sample_id",
     required=True,
     multiple=True,
-    help="All Identifiers for the downsampled samples ( e.g. ACC1223432_2.0M) that you would like to store.",
+    help="Identifier for the downsampled samples ( e.g. ACC1223432_2.0M) that you would like to store. Can supply multiple.",
 )
 @DRY_RUN
 @click.pass_obj

@@ -49,6 +49,7 @@ class DownsampleWorkflow:
 
     @property
     def bin_downsample(self) -> str:
+        """The path to the downsample.sh script on Hasta."""
         return Path("home", "proj", "production", "bin", "downsample.sh").name
 
     @property
@@ -67,13 +68,6 @@ class DownsampleWorkflow:
     def number_tasks(self) -> str:
         LOG.info(f"Number of tasks: {self._number_tasks}")
         return self._number_tasks
-
-    @number_tasks.setter
-    def number_tasks(self, number_tasks: str) -> None:
-        if number_tasks:
-            self._number_tasks = number_tasks
-        else:
-            self._number_tasks = "2"
 
     @property
     def original_sample_reads(self) -> int:
