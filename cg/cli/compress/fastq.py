@@ -10,7 +10,6 @@ from cg.cli.compress.helpers import (
     compress_sample_fastqs_in_cases,
     correct_spring_paths,
     get_cases_to_process,
-    is_case_ignored,
     update_compress_api,
 )
 from cg.constants.constants import DRY_RUN
@@ -91,8 +90,6 @@ def clean_fastq(context: CGConfig, case_id: Optional[str], days_back: int, dry_r
 
     cleaned_inds = 0
     for case in cases:
-        if is_case_ignored(case_id=case.internal_id):
-            continue
         samples: Iterable[str] = store.get_sample_ids_by_case_id(case_id=case.internal_id)
         for sample_id in samples:
             was_cleaned: bool = compress_api.clean_fastq(sample_id=sample_id)

@@ -3,7 +3,7 @@
 from click.testing import CliRunner
 
 from cg.cli.get import get
-from cg.constants import RETURN_SUCCESS
+from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Analysis
@@ -19,7 +19,7 @@ def test_get_analysis_bad_case(cli_runner: CliRunner, base_context: CGConfig):
     result = cli_runner.invoke(get, ["analysis", name], obj=base_context)
 
     # THEN it should error about missing case instead of getting a analysis
-    assert result.exit_code != RETURN_SUCCESS
+    assert result.exit_code != EXIT_SUCCESS
 
 
 def test_get_analysis_required(
@@ -35,7 +35,7 @@ def test_get_analysis_required(
     result = cli_runner.invoke(get, ["analysis", internal_id], obj=base_context)
 
     # THEN it should have been gotten
-    assert result.exit_code == RETURN_SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     assert str(analysis.started_at) in result.output
     assert analysis.pipeline in result.output
     assert analysis.pipeline_version in result.output

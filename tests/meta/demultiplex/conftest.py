@@ -1,3 +1,4 @@
+import os
 import shutil
 from collections import namedtuple
 from datetime import datetime
@@ -538,3 +539,12 @@ def bcl_convert_sample_id_with_non_pooled_undetermined_reads() -> str:
 def bcl_convert_non_pooled_sample_read_count() -> int:
     """Based on the data in 230504_A00689_0804_BHY7FFDRX2, the sum of all reads - mapped and undetermined."""
     return 4000000
+
+
+def get_all_files_in_directory_tree(directory: Path) -> list[Path]:
+    """Get the relative paths of all files in a directory and its subdirectories."""
+    files_in_directory: list[Path] = []
+    for subdir, _, files in os.walk(directory):
+        subdir = Path(subdir).relative_to(directory)
+        files_in_directory.extend([Path(subdir, file) for file in files])
+    return files_in_directory

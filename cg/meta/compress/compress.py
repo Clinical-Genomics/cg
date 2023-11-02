@@ -112,12 +112,19 @@ class CompressAPI:
         for compression in compressions:
             if not self.crunchy_api.is_spring_decompression_possible(compression_obj=compression):
                 LOG.info(f"SPRING to FASTQ decompression not possible for {sample_id}")
+                if self.crunchy_api.is_compression_pending(
+                    compression
+                ) or self.crunchy_api.is_spring_decompression_done(compression):
+                    LOG.info(
+                        f"Spring file {compression.spring_path.as_posix()} is already being decompressed."
+                    )
+                    continue
                 if not self.backup_api.is_to_be_retrieved_and_decrypted(
                     spring_file_path=compression.spring_path
                 ):
                     LOG.warning(f"Could not find {compression.spring_path} on disk")
                     return False
-                LOG.info("Until the SPRING file is retrieved from PDC and decrypted")
+                LOG.info("The SPRING file will be retrieved from PDC and decrypted")
                 self.backup_api.retrieve_and_decrypt_spring_file(
                     spring_file_path=Path(compression.spring_path)
                 )

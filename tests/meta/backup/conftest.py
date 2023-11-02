@@ -1,12 +1,11 @@
 import fnmatch
-import subprocess
 from pathlib import Path
+from subprocess import CompletedProcess
 from typing import Callable
 
 import pytest
 
 from cg.constants import FileExtensions
-from cg.constants.pdc import PDCExitCodes
 from cg.models.cg_config import EncryptionDirectories
 
 
@@ -14,13 +13,9 @@ from cg.models.cg_config import EncryptionDirectories
 def mock_pdc_query_method(archived_flow_cells: list[str]) -> Callable:
     """Returns a mock method mimicking the pattern search made by the dsmc q archive command."""
 
-    def mock_method(search_pattern: str) -> list[str]:
-        match = fnmatch.filter(archived_flow_cells, search_pattern)
-        if not match:
-            raise subprocess.CalledProcessError(
-                cmd="dummy_method", returncode=PDCExitCodes.NO_FILES_FOUND
-            )
-        return match[0]
+    def mock_method(search_pattern: str) -> list[str] | None:
+        if match := fnmatch.filter(archived_flow_cells, search_pattern):
+            return match
 
     return mock_method
 
@@ -78,3 +73,14 @@ def archived_flow_cell() -> Path:
 def archived_key() -> Path:
     """Path of archived key"""
     return Path("/path/to/archived/encryption_key.key.gpg")
+
+
+def create_process_response(
+    return_code: int, args: str = "", std_out: str = "", std_err: str = ""
+) -> CompletedProcess:
+    return CompletedProcess(
+        args=args,
+        returncode=return_code,
+        stderr=std_err.encode("utf-8"),
+        stdout=std_out.encode("utf-8"),
+    )
