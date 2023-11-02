@@ -14,7 +14,7 @@ from cg.store.models import (
     ApplicationLimitations,
     ApplicationVersion,
     Customer,
-    Family,
+    Case,
     FamilySample,
     Flowcell,
 )
@@ -37,9 +37,9 @@ class BaseHandler:
     def _get_outer_join_cases_with_analyses_query(self) -> Query:
         """Return a query for all cases in the database with an analysis."""
         return (
-            self._get_query(table=Family)
+            self._get_query(table=Case)
             .outerjoin(Analysis)
-            .join(Family.links)
+            .join(Case.links)
             .join(FamilySample.sample)
             .join(ApplicationVersion)
             .join(Application)
@@ -48,10 +48,10 @@ class BaseHandler:
     def _get_join_cases_with_samples_query(self) -> Query:
         """Return a join query for all cases in the database with samples."""
         return (
-            self._get_query(table=Family)
-            .join(Family.links)
+            self._get_query(table=Case)
+            .join(Case.links)
             .join(FamilySample.sample)
-            .join(Family.customer)
+            .join(Case.customer)
         )
 
     def _get_join_analysis_case_query(self) -> Query:
@@ -66,7 +66,7 @@ class BaseHandler:
 
     def _get_join_case_and_sample_query(self) -> Query:
         """Return join case sample query."""
-        return self._get_query(table=Family).join(Family.links).join(FamilySample.sample)
+        return self._get_query(table=Case).join(Case.links).join(FamilySample.sample)
 
     def _get_join_sample_and_customer_query(self) -> Query:
         """Return join sample and customer query."""
@@ -78,7 +78,7 @@ class BaseHandler:
 
     def _get_join_sample_family_query(self) -> Query:
         """Return a join sample case relationship query."""
-        return self._get_query(table=Sample).join(Family.links).join(FamilySample.sample)
+        return self._get_query(table=Sample).join(Case.links).join(FamilySample.sample)
 
     def _get_join_sample_application_version_query(self) -> Query:
         """Return join sample to application version query."""
@@ -92,8 +92,8 @@ class BaseHandler:
         """Return join analysis to sample to case query."""
         return (
             self._get_query(table=Analysis)
-            .join(Family)
-            .join(Family.links)
+            .join(Case)
+            .join(Case.links)
             .join(FamilySample.sample)
         )
 
@@ -101,7 +101,7 @@ class BaseHandler:
         """Return a subquery with the case internal id and the date of its latest analysis."""
         case_and_date: Query = (
             self._get_join_analysis_case_query()
-            .group_by(Family.id)
+            .group_by(Case.id)
             .with_entities(Analysis.family_id, func.max(Analysis.started_at).label("started_at"))
             .subquery()
         )
@@ -131,7 +131,7 @@ class BaseHandler:
         priority: str,
         sample_id: str,
     ) -> Query:
-        cases_query: Query = self._get_query(table=Family)
+        cases_query: Query = self._get_query(table=Case)
         filter_functions: list[Callable] = []
 
         filter_case_order_date = None
@@ -163,7 +163,7 @@ class BaseHandler:
         # customer filters
         customer_filters: list[Callable] = []
         if customer_id or exclude_customer_id:
-            cases_query = cases_query.join(Family.customer)
+            cases_query = cases_query.join(Case.customer)
 
         if customer_id:
             customer_filters.append(CustomerFilter.FILTER_BY_INTERNAL_ID)
@@ -180,18 +180,18 @@ class BaseHandler:
 
         # sample filters
         if sample_id:
-            cases_query = cases_query.join(Family.links).join(FamilySample.sample)
+            cases_query = cases_query.join(Case.links).join(FamilySample.sample)
             cases_query = apply_sample_filter(
                 samples=cases_query,
                 filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID_PATTERN],
                 internal_id_pattern=sample_id,
             )
         else:
-            cases_query = cases_query.outerjoin(Family.links).outerjoin(FamilySample.sample)
+            cases_query = cases_query.outerjoin(Case.links).outerjoin(FamilySample.sample)
 
         # other joins
         cases_query = (
-            cases_query.outerjoin(Family.analyses)
+            cases_query.outerjoin(Case.analyses)
             .outerjoin(Sample.invoice)
             .outerjoin(Sample.flowcells)
         )

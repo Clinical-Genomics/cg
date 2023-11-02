@@ -9,7 +9,7 @@ from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
-from cg.store.models import ApplicationVersion, Customer, Family, FamilySample, Sample
+from cg.store.models import ApplicationVersion, Customer, Case, FamilySample, Sample
 
 
 class FastqSubmitter(Submitter):
@@ -57,7 +57,7 @@ class FastqSubmitter(Submitter):
 
     def create_maf_case(self, sample_obj: Sample) -> None:
         """Add a MAF case to the Status database."""
-        case: Family = self.status.add_case(
+        case: Case = self.status.add_case(
             data_analysis=Pipeline(Pipeline.MIP_DNA),
             data_delivery=DataDelivery(DataDelivery.NO_DELIVERY),
             name="_".join([sample_obj.name, "MAF"]),
@@ -83,7 +83,7 @@ class FastqSubmitter(Submitter):
         if not customer:
             raise OrderError(f"Unknown customer: {customer_id}")
         new_samples = []
-        case: Family = self.status.get_case_by_name_and_customer(
+        case: Case = self.status.get_case_by_name_and_customer(
             customer=customer, case_name=ticket_id
         )
         submitted_case: dict = items[0]

@@ -219,7 +219,7 @@ class Analysis(Model):
     family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
     uploaded_to_vogue_at = Column(types.DateTime, nullable=True)
 
-    family = orm.relationship("Family", back_populates="analyses")
+    family = orm.relationship("Case", back_populates="analyses")
 
     def __str__(self):
         return f"{self.family.internal_id} | {self.completed_at.date()}"
@@ -376,7 +376,7 @@ class Delivery(Model):
         return to_dict(model_instance=self)
 
 
-class Family(Model, PriorityMixin):
+class Case(Model, PriorityMixin):
     __tablename__ = "family"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
@@ -532,7 +532,7 @@ class FamilySample(Model):
     mother_id = Column(ForeignKey("sample.id"))
     father_id = Column(ForeignKey("sample.id"))
 
-    family = orm.relationship(Family, back_populates="links")
+    family = orm.relationship(Case, back_populates="links")
     sample = orm.relationship("Sample", foreign_keys=[sample_id], back_populates="links")
     mother = orm.relationship("Sample", foreign_keys=[mother_id], back_populates="mother_links")
     father = orm.relationship("Sample", foreign_keys=[father_id], back_populates="father_links")

@@ -16,7 +16,7 @@ from cg.store.models import (
     ApplicationLimitations,
     ApplicationVersion,
     Customer,
-    Family,
+    Case,
     FamilySample,
     Flowcell,
     Invoice,
@@ -90,7 +90,7 @@ def test_get_flow_cells_by_case(
     base_store: Store,
     bcl2fastq_flow_cell_id: str,
     bcl_convert_flow_cell_id: str,
-    case: Family,
+    case: Case,
     helpers: StoreHelpers,
     sample: Sample,
 ):
@@ -478,7 +478,7 @@ def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples:
 
     # GIVEN a database containing some cases but not a specific case
     case_id: str = "some_case"
-    case: Family = store_with_multiple_cases_and_samples.get_case_by_internal_id(
+    case: Case = store_with_multiple_cases_and_samples.get_case_by_internal_id(
         internal_id=case_id
     )
 
@@ -543,7 +543,7 @@ def test_verify_case_exists_with_no_case_samples(
         assert "Case {case_id} has no samples in in Status DB!" in caplog.text
 
 
-def test_is_case_down_sampled_true(base_store: Store, case: Family, sample_id: str):
+def test_is_case_down_sampled_true(base_store: Store, case: Case, sample_id: str):
     """Tests the down sampling check when all samples are down sampled."""
     # GIVEN a case where all samples are down sampled
     for sample in case.samples:
@@ -557,7 +557,7 @@ def test_is_case_down_sampled_true(base_store: Store, case: Family, sample_id: s
     assert is_down_sampled
 
 
-def test_is_case_down_sampled_false(base_store: Store, case: Family, sample_id: str):
+def test_is_case_down_sampled_false(base_store: Store, case: Case, sample_id: str):
     """Tests the down sampling check when none of the samples are down sampled."""
     # GIVEN a case where all samples are not down sampled
     for sample in case.samples:
@@ -571,7 +571,7 @@ def test_is_case_down_sampled_false(base_store: Store, case: Family, sample_id: 
 
 
 def test_is_case_external_true(
-    base_store: Store, case: Family, helpers: StoreHelpers, sample_id: str
+    base_store: Store, case: Case, helpers: StoreHelpers, sample_id: str
 ):
     """Tests the external case check when all the samples are external."""
     # GIVEN a case where all samples are not external
@@ -589,7 +589,7 @@ def test_is_case_external_true(
     assert is_external
 
 
-def test_is_case_external_false(base_store: Store, case: Family, sample_id: str):
+def test_is_case_external_false(base_store: Store, case: Case, sample_id: str):
     """Tests the external case check when none of the samples are external."""
     # GIVEN a case where all samples are not external
     for sample in case.samples:
@@ -752,13 +752,13 @@ def test_get_pools_to_render_with_customer_and_order_enquiry(
 def test_get_case_by_name_and_customer_case_found(store_with_multiple_cases_and_samples: Store):
     """Test that a case can be found by customer and case name."""
     # GIVEN a database with multiple cases for a customer
-    case: Family = store_with_multiple_cases_and_samples._get_query(table=Family).first()
+    case: Case = store_with_multiple_cases_and_samples._get_query(table=Case).first()
     customer: Customer = store_with_multiple_cases_and_samples._get_query(table=Customer).first()
 
     assert case.customer == customer
 
     # WHEN fetching a case by customer and case name
-    filtered_case: Family = store_with_multiple_cases_and_samples.get_case_by_name_and_customer(
+    filtered_case: Case = store_with_multiple_cases_and_samples.get_case_by_name_and_customer(
         customer=customer,
         case_name=case.name,
     )
@@ -789,7 +789,7 @@ def test_get_cases_not_analysed_by_sample_internal_id_multiple_cases(
 ):
     """Test that multiple cases are returned when more than one case matches the sample internal id."""
     # GIVEN a store with multiple cases having the same sample internal id
-    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
 
     # Set all cases to not analysed and HOLD action
     for case in cases_query.all():

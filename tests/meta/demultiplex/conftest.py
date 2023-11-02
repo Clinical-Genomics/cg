@@ -16,7 +16,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.api import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 from tests.store_helpers import StoreHelpers
 
 FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_internal_ids")
@@ -102,7 +102,7 @@ def populated_flow_cell_store(
 
     populated_flow_cell_store: Store = store
     sample: Sample = helpers.add_sample(store=populated_flow_cell_store, internal_id=sample_id)
-    family: Family = helpers.add_case(store=populated_flow_cell_store, internal_id=family_name)
+    family: Case = helpers.add_case(store=populated_flow_cell_store, internal_id=family_name)
     helpers.add_relationship(
         store=populated_flow_cell_store,
         sample=sample,
@@ -128,7 +128,7 @@ def active_flow_cell_store(
     """Populate a store with a Novaseq flow cell, with active samples on it."""
     active_flow_cell_store: Store = base_store
     sample: Sample = helpers.add_sample(store=active_flow_cell_store, internal_id=sample_id)
-    family: Family = helpers.add_case(
+    family: Case = helpers.add_case(
         store=active_flow_cell_store, internal_id=family_name, action="running"
     )
     helpers.add_relationship(

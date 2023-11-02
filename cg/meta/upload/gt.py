@@ -9,7 +9,7 @@ from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.constants.subject import Gender
 from cg.io.controller import ReadFile
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
-from cg.store.models import Analysis, Family, Sample
+from cg.store.models import Analysis, Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ class UploadGenotypesAPI(object):
         return data
 
     def _get_samples_sex_mip(
-        self, case_obj: Family, hk_version: housekeeper_models.Version
+        self, case_obj: Case, hk_version: housekeeper_models.Version
     ) -> dict:
         qc_metrics_file = self.get_qcmetrics_file(hk_version)
         analysis_sexes = self.analysis_sex(qc_metrics_file)
@@ -69,7 +69,7 @@ class UploadGenotypesAPI(object):
             }
         return samples_sex
 
-    def _get_samples_sex_balsamic(self, case_obj: Family) -> dict:
+    def _get_samples_sex_balsamic(self, case_obj: Case) -> dict:
         samples_sex = {}
         for link_obj in case_obj.links:
             if link_obj.sample.is_tumour:
@@ -126,7 +126,7 @@ class UploadGenotypesAPI(object):
         return self.hk.files(version=version_id, tags=["genotype"]).all()
 
     @staticmethod
-    def is_suitable_for_genotype_upload(case_obj: Family) -> bool:
+    def is_suitable_for_genotype_upload(case_obj: Case) -> bool:
         """Check if a cancer case is contains WGS and normal sample."""
 
         samples: list[Sample] = case_obj.samples

@@ -10,7 +10,7 @@ from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.compression_data import CompressionData
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 from tests.cli.workflow.balsamic.conftest import (
     balsamic_housekeeper_dir,
     fastq_file_l_1_r_1,
@@ -153,7 +153,7 @@ def qc_microsalt_context(
     store = analysis_api.status_db
 
     # Create MWR microsalt case that passes QC
-    microsalt_case_qc_pass: Family = helpers.add_case(
+    microsalt_case_qc_pass: Case = helpers.add_case(
         store=store,
         internal_id=microsalt_case_qc_pass,
         name=microsalt_case_qc_pass,
@@ -173,7 +173,7 @@ def qc_microsalt_context(
         helpers.add_relationship(store=store, case=microsalt_case_qc_pass, sample=sample_to_add)
 
     # Create a microsalt MWX case that fails QC
-    microsalt_case_qc_fail: Family = helpers.add_case(
+    microsalt_case_qc_fail: Case = helpers.add_case(
         store=store,
         internal_id=microsalt_case_qc_fail,
         name=microsalt_case_qc_fail,

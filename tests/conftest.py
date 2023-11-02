@@ -47,7 +47,7 @@ from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
-from cg.store.models import Bed, BedVersion, Customer, Family, Organism, Sample
+from cg.store.models import Bed, BedVersion, Customer, Case, Organism, Sample
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -2815,7 +2815,7 @@ def rnafusion_context(
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
     # Create textbook case with enough reads
-    case_enough_reads: Family = helpers.add_case(
+    case_enough_reads: Case = helpers.add_case(
         store=status_db,
         internal_id=rnafusion_case_id,
         name=rnafusion_case_id,
@@ -2837,7 +2837,7 @@ def rnafusion_context(
     )
 
     # Create case without enough reads
-    case_not_enough_reads: Family = helpers.add_case(
+    case_not_enough_reads: Case = helpers.add_case(
         store=status_db,
         internal_id=case_id_not_enough_reads,
         name=case_id_not_enough_reads,
@@ -3066,7 +3066,7 @@ def taxprofiler_context(
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
-    taxprofiler_case: Family = helpers.add_case(
+    taxprofiler_case: Case = helpers.add_case(
         store=status_db,
         internal_id=taxprofiler_case_id,
         name=taxprofiler_case_id,

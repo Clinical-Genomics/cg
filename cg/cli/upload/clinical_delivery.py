@@ -14,7 +14,7 @@ from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
 
     click.echo(click.style("----------------- Clinical-delivery -----------------"))
 
-    case: Family = context.obj.status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = context.obj.status_db.get_case_by_internal_id(internal_id=case_id)
     delivery_types: set[str] = case.get_delivery_arguments()
     is_sample_delivery: bool
     is_case_delivery: bool
@@ -105,7 +105,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
                     f"Upload to clinical-delivery for {analysis_obj.family.internal_id} has already started, skipping"
                 )
             continue
-        case: Family = analysis_obj.family
+        case: Case = analysis_obj.family
         LOG.info(f"Uploading family: {case.internal_id}")
         analysis_obj.upload_started_at = dt.datetime.now()
         try:

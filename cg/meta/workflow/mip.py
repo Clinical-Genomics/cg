@@ -23,7 +23,7 @@ from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_config import MipBaseConfig
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
-from cg.store.models import BedVersion, Family, FamilySample, Sample
+from cg.store.models import BedVersion, Case, FamilySample, Sample
 
 CLI_OPTIONS = {
     "config": {"option": "--config_file"},
@@ -104,7 +104,7 @@ class MipAnalysisAPI(AnalysisAPI):
         """
 
         # Validate and reformat to MIP pedigree config format
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         return ConfigHandler.make_pedigree_config(
             data={
                 "case": case_obj.internal_id,
@@ -138,7 +138,7 @@ class MipAnalysisAPI(AnalysisAPI):
             "expected_coverage": link_obj.sample.application_version.application.min_sequencing_depth,
         }
 
-    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample) -> Path:
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
         """Return the path to the FASTQ destination directory."""
         return Path(
             self.root,
@@ -286,9 +286,9 @@ class MipAnalysisAPI(AnalysisAPI):
                 return True
         return False
 
-    def get_cases_to_analyze(self) -> list[Family]:
+    def get_cases_to_analyze(self) -> list[Case]:
         """Return cases to analyze."""
-        cases_query: list[Family] = self.status_db.cases_to_analyze(
+        cases_query: list[Case] = self.status_db.cases_to_analyze(
             pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
         cases_to_analyze = []

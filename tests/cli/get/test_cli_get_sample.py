@@ -7,7 +7,7 @@ from cg.cli.get import get
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Flowcell, Sample
+from cg.store.models import Case, Flowcell, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -145,7 +145,7 @@ def test_get_sample_no_cases_with_case(
 ):
     """Test that the --no-cases flag does not show case info"""
     # GIVEN a database with a sample with related samples
-    case: Family = helpers.add_case(disk_store)
+    case: Case = helpers.add_case(disk_store)
     sample: Sample = helpers.add_sample(disk_store)
     helpers.add_relationship(disk_store, sample=sample, case=case)
 
@@ -178,7 +178,7 @@ def test_get_sample_cases_with_case(
 ):
     """Test that the --cases flag does show case info"""
     # GIVEN a database with a sample with related samples
-    case: Family = helpers.add_case(disk_store)
+    case: Case = helpers.add_case(disk_store)
     sample: Sample = helpers.add_sample(disk_store)
     helpers.add_relationship(disk_store, sample=sample, case=case)
 

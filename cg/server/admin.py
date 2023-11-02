@@ -244,7 +244,7 @@ class CollaborationView(BaseView):
 
 
 class FamilyView(BaseView):
-    """Admin view for Model.Family"""
+    """Admin view for Model.Case"""
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["action", "comment"]

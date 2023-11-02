@@ -12,7 +12,7 @@ from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.models import CompressionData
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class PrepareFastqAPI:
 
     def get_compression_objects(self, case_id: str) -> list[CompressionData]:
         """Return a list of compression objects"""
-        case: Family = self.store.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
         compression_objects = []
         for link in case.links:
             sample: Sample = link.sample
@@ -41,7 +41,7 @@ class PrepareFastqAPI:
         return compression_objects
 
     @staticmethod
-    def _should_skip_sample(case: Family, sample: Sample):
+    def _should_skip_sample(case: Case, sample: Sample):
         """
         For some pipelines, we want to start a partial analysis disregarding the samples with no reads.
         This method returns true if we should skip the sample.
@@ -77,12 +77,12 @@ class PrepareFastqAPI:
 
     def add_decompressed_fastq_files_to_housekeeper(self, case_id: str) -> None:
         """Adds decompressed FASTQ files to Housekeeper for a case, if there are any."""
-        case: Family = self.store.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
         for link in case.links:
             sample: Sample = link.sample
             self.add_decompressed_sample(sample=sample, case=case)
 
-    def add_decompressed_sample(self, sample: Sample, case: Family) -> None:
+    def add_decompressed_sample(self, sample: Sample, case: Case) -> None:
         """Adds decompressed FASTQ files to Housekeeper for a sample, if there are any."""
         sample_id = sample.internal_id
         if self._should_skip_sample(case=case, sample=sample):
@@ -97,7 +97,7 @@ class PrepareFastqAPI:
             )
 
     def add_decompressed_spring_object(
-        self, compression: CompressionData, fastq_files: dict[Path, File], sample: Family
+        self, compression: CompressionData, fastq_files: dict[Path, File], sample: Case
     ) -> None:
         """Adds decompressed FASTQ files to Housekeeper related to a single spring file."""
         result = True

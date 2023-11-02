@@ -9,7 +9,7 @@ from cg.constants import DataDelivery, FlowCellStatus, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.api.find_business_data import FindBusinessDataHandler
-from cg.store.models import Family
+from cg.store.models import Case
 from tests.store_helpers import StoreHelpers
 
 
@@ -94,21 +94,21 @@ def fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_id: str) 
 
 
 @pytest.fixture(scope="function")
-def dna_case(analysis_store, helpers) -> Family:
+def dna_case(analysis_store, helpers) -> Case:
     """Case with DNA application"""
     cust = helpers.ensure_customer(analysis_store)
     return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="dna_case")
 
 
 @pytest.fixture(scope="function")
-def rna_case(analysis_store, helpers) -> Family:
+def rna_case(analysis_store, helpers) -> Case:
     """Case with RNA application"""
     cust = helpers.ensure_customer(analysis_store)
     return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="rna_case")
 
 
 @pytest.fixture(scope="function")
-def dna_rna_mix_case(analysis_store, helpers) -> Family:
+def dna_rna_mix_case(analysis_store, helpers) -> Case:
     """Case with MIP analysis type DNA and RNA application"""
     cust = helpers.ensure_customer(analysis_store)
     return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="dna_rna_mix_case")

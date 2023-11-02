@@ -17,7 +17,7 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family, Flowcell, Sample
+from cg.store.models import Case, Flowcell, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -145,7 +145,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         Links fastq files from Housekeeper to case working directory
         """
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         latest_flow_cell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
         workdir_path = self.get_workdir_path(case_id=case_id)
         if workdir_path.exists() and not dry_run:
@@ -257,7 +257,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         ]
         self.process.run_command(command_args, dry_run=dry_run)
 
-    def get_cases_to_store(self) -> list[Family]:
+    def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,
         and is ready to be stored in Housekeeper."""
         return [
