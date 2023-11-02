@@ -59,7 +59,7 @@ def downsample_sample(
 @downsample.command("store", help="Store the downsampled fastq files in housekeeper.")
 @click.option(
     "-s",
-    "--sample_id",
+    "--sample_ids",
     required=True,
     multiple=True,
     help="Identifier for the downsampled samples ( e.g. ACC1223432_2.0M) that you would like to store. Can supply multiple.",
