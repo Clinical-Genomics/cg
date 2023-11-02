@@ -183,26 +183,36 @@
         "BALSAMIC_version": "8.2.5",
         "config_creation_date": "2021-12-28 13:12"
     },
-    "samples": {
-        "concatenated_ACC0000A0_XXXXXX_R": {
-            "file_prefix": "concatenated_ACC0000A0_XXXXXX_R",
-            "sample_name": "ACC0000A0",
+    "samples": [
+        {
             "type": "normal",
-            "readpair_suffix": [
-                "1",
-                "2"
-            ]
+            "name": "ACC0000A0",
+            "fastq_info": {
+                "H3CVVDRXY_ACC0000A0_S68_L001": {
+                    "fwd": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A0_S68_L001_R1_001.fastq.gz",
+                    "rev": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A0_S68_L001_R2_001.fastq.gz"
+                },
+                "H3CVVDRXY_ACC0000A0_S68_L002": {
+                    "fwd": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A0_S68_L002_R1_001.fastq.gz",
+                    "rev": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A0_S68_L002_R2_001.fastq.gz"
+                }
+            }
         },
-        "concatenated_ACC0000A1_XXXXXX_R": {
-            "file_prefix": "concatenated_ACC0000A1_XXXXXX_R",
-            "sample_name": "ACC0000A1",
+        {
             "type": "tumor",
-            "readpair_suffix": [
-                "1",
-                "2"
-            ]
+            "name": "ACC0000A1",
+            "fastq_info": {
+                "H3CVVDRXY_ACC0000A1_S68_L001": {
+                    "fwd": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A1_S68_L001_R1_001.fastq.gz",
+                    "rev": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A1_S68_L001_R2_001.fastq.gz"
+                },
+                "H3CVVDRXY_ACC0000A1_S68_L002": {
+                    "fwd": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A1_S68_L002_R1_001.fastq.gz",
+                    "rev": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A1_S68_L002_R2_001.fastq.gz"
+                }
+            }
         }
-    },
+    ],
     "reference": {
         "reference_genome": "/mock/path/balsamic_cache/8.2.5/hg19/genome/human_g1k_v37.fasta",
         "dbsnp": "/mock/path/balsamic_cache/8.2.5/hg19/variants/dbsnp_grch37_b138.vcf.gz",

@@ -1,5 +1,4 @@
 """Module for Balsamic PON Analysis API."""
-
 import logging
 from pathlib import Path
 
@@ -32,6 +31,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
         panel_bed: str,
         pon_cnn: str,
         observations: list[str],
+        cache_version: str,
         dry_run: bool = False,
     ) -> None:
         """Creates a config file for BALSAMIC PON analysis."""
@@ -51,6 +51,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
                 "--panel-bed": verified_panel_bed,
                 "--genome-version": genome_version,
                 "--balsamic-cache": self.balsamic_cache,
+                "--cache-version": cache_version,
                 "--version": self.get_next_pon_version(verified_panel_bed),
             }
         )
