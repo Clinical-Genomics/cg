@@ -47,7 +47,7 @@ def add_downsampled_fastq_files_to_housekeeper(
     """Add down sampled fastq files to housekeeper."""
     fastq_file_paths: list[Path] = get_files_matching_pattern(
         directory=Path(fastq_file_output_directory),
-        pattern=f"*{sample_id}*.{SequencingFileTag.FASTQ}.gz",
+        pattern=f"*{sample_id.split(sep='_')[0]}*.{SequencingFileTag.FASTQ}.gz",
     )
     if not fastq_file_paths:
         raise FileNotFoundError(
@@ -58,7 +58,7 @@ def add_downsampled_fastq_files_to_housekeeper(
         housekeeper_api.add_and_include_file_to_latest_version(
             bundle_name=sample_id,
             file=fastq_file_path,
-            tags=[SequencingFileTag.FASTQ],
+            tags=[SequencingFileTag.FASTQ, sample_id],
         )
 
 
