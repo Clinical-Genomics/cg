@@ -55,9 +55,7 @@ class UploadGenotypesAPI(object):
             raise ValueError(f"Pipeline {analysis_obj.pipeline} does not support Genotype upload")
         return data
 
-    def _get_samples_sex_mip(
-        self, case_obj: Case, hk_version: housekeeper_models.Version
-    ) -> dict:
+    def _get_samples_sex_mip(self, case_obj: Case, hk_version: housekeeper_models.Version) -> dict:
         qc_metrics_file = self.get_qcmetrics_file(hk_version)
         analysis_sexes = self.analysis_sex(qc_metrics_file)
         samples_sex = {}

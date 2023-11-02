@@ -123,9 +123,7 @@ def mip_rna_case(mip_rna_context: CGConfig, case_id: str):
 
 
 @pytest.fixture(name="mip_rna_analysis")
-def mip_rna_analysis(
-    mip_rna_context: CGConfig, helpers: StoreHelpers, mip_rna_case: Case
-) -> Case:
+def mip_rna_analysis(mip_rna_context: CGConfig, helpers: StoreHelpers, mip_rna_case: Case) -> Case:
     """Return a MIP RNA analysis."""
     return helpers.add_analysis(
         store=mip_rna_context.status_db,

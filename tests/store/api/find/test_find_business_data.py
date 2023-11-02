@@ -478,9 +478,7 @@ def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples:
 
     # GIVEN a database containing some cases but not a specific case
     case_id: str = "some_case"
-    case: Case = store_with_multiple_cases_and_samples.get_case_by_internal_id(
-        internal_id=case_id
-    )
+    case: Case = store_with_multiple_cases_and_samples.get_case_by_internal_id(internal_id=case_id)
 
     assert not case
 

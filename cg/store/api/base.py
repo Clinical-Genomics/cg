@@ -90,12 +90,7 @@ class BaseHandler:
 
     def _get_join_analysis_sample_family_query(self) -> Query:
         """Return join analysis to sample to case query."""
-        return (
-            self._get_query(table=Analysis)
-            .join(Case)
-            .join(Case.links)
-            .join(FamilySample.sample)
-        )
+        return self._get_query(table=Analysis).join(Case).join(Case.links).join(FamilySample.sample)
 
     def _get_subquery_with_latest_case_analysis_date(self) -> Query:
         """Return a subquery with the case internal id and the date of its latest analysis."""
