@@ -28,6 +28,8 @@ def add_downsampled_sample_to_housekeeper(
     fastq_file_output_directory: str, sample_id: str, housekeeper_api: HousekeeperAPI
 ) -> None:
     """Add a downsampled sample to housekeeper and include the fastq files."""
+    if not Path(fastq_file_output_directory).exists():
+        raise FileExistsError(f"Cannot find: {fastq_file_output_directory}")
     create_downsampled_sample_bundle(sample_id=sample_id, housekeeper_api=housekeeper_api)
     add_downsampled_fastq_files_to_housekeeper(
         sample_id=sample_id,
