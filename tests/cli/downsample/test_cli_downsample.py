@@ -39,3 +39,6 @@ def test_store_downsampled_fastq_files(
         f"{downsample_sample_internal_id_2}_5M",
     ]:
         assert downsample_context.housekeeper_api.get_latest_bundle_version(sample_id)
+        assert downsample_context.housekeeper_api.get_file_from_latest_version(
+            bundle_name=sample_id, tags=["fastq"]
+        )

@@ -1,4 +1,5 @@
 """Utility functions for the downsampledata module."""
+import logging
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -6,6 +7,8 @@ from cg.constants import SequencingFileTag
 from cg.store import Store
 from cg.store.models import Family, Sample
 from cg.utils.files import get_files_matching_pattern
+
+LOG = logging.getLogger(__name__)
 
 
 def case_exists_in_statusdb(status_db: Store, case_name: str) -> bool:
@@ -47,6 +50,7 @@ def add_downsampled_fastq_files_to_housekeeper(
         pattern=f"*{sample_id}*.{SequencingFileTag.FASTQ}.gz",
     )
     for fastq_file_path in fastq_file_paths:
+        LOG.debug(f"Found file: {fastq_file_path}")
         housekeeper_api.add_and_include_file_to_latest_version(
             bundle_name=sample_id,
             file=fastq_file_path,
