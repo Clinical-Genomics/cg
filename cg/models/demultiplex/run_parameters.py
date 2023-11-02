@@ -22,16 +22,20 @@ class RunParameters:
     def validate_instrument(self) -> None:
         """Raise an error if the parent class was instantiated."""
         raise NotImplementedError(
-            "Parent class instantiated. "
-            "Instantiate instead RunParametersNovaSeq6000 or RunParametersNovaSeqX"
+            "Parent class instantiated. Instantiate instead RunParametersHiSeq, "
+            "RunParametersNovaSeq6000 or RunParametersNovaSeqX"
         )
+
+    def is_single_index(self) -> bool:
+        """Return False if the sequencing is not HiSeq. Overriden in HiSeq"""
+        return False
 
     @property
     def index_length(self) -> int:
         """Return the length of the indexes if they are equal, raise an error otherwise."""
         index_one_length: int = self.get_index_1_cycles()
         index_two_length: int = self.get_index_2_cycles()
-        if index_one_length != index_two_length and not isinstance(self, RunParametersHiSeq):
+        if index_one_length != index_two_length and not self.is_single_index():
             raise RunParametersError("Index lengths are not the same!")
         return index_one_length
 
@@ -52,35 +56,33 @@ class RunParameters:
     @property
     def control_software_version(self) -> str | None:
         """Return the control software version if existent."""
-        raise NotImplementedError(
-            "Impossible to retrieve control software version from parent class"
-        )
+        raise NotImplementedError
 
     @property
     def reagent_kit_version(self) -> str | None:
         """Return the reagent kit version if existent."""
-        raise NotImplementedError("Impossible to retrieve reagent kit version from parent class")
+        raise NotImplementedError
 
     @property
     def sequencer(self) -> str | None:
         """Return the sequencer associated with the current run parameters."""
-        raise NotImplementedError("Impossible to retrieve sequencer from parent class")
+        raise NotImplementedError
 
     def get_index_1_cycles(self) -> int | None:
         """Return the number of cycles in the first index read."""
-        raise NotImplementedError("Impossible to retrieve index1 cycles from parent class")
+        raise NotImplementedError
 
     def get_index_2_cycles(self) -> int | None:
         """Return the number of cycles in the second index read."""
-        raise NotImplementedError("Impossible to retrieve index2 cycles from parent class")
+        raise NotImplementedError
 
     def get_read_1_cycles(self) -> int | None:
         """Return the number of cycles in the first read."""
-        raise NotImplementedError("Impossible to retrieve read1 cycles from parent class")
+        raise NotImplementedError
 
     def get_read_2_cycles(self) -> int | None:
         """Return the number of cycles in the second read."""
-        raise NotImplementedError("Impossible to retrieve read2 cycles from parent class")
+        raise NotImplementedError
 
     def __str__(self):
         return f"RunParameters(path={self.path}, sequencer={self.sequencer})"
@@ -99,11 +101,22 @@ class RunParametersHiSeq(RunParameters):
     """Specific class for parsing run parameters of HiSeq2500 sequencing."""
 
     def validate_instrument(self) -> None:
-        """Raise an error if the class was not instantiated with a HiSeq file."""
+        """Validate if a HiSeq file was used to instantiate the class.
+        Raises:
+            RunParametersError if the run parameters file is not HiSeq"""
         node_name: str = RunParametersXMLNodes.APPLICATION_NAME
-        application: str = self.get_node_string_value(node_name=node_name, name="Instrument")
-        if application != RunParametersXMLNodes.HISEQ_APPLICATION:
-            raise RunParametersError("The file parsed does not correspond to a HiSeq instrument")
+        application: ElementTree.Element | None = self.tree.find(node_name)
+        if application is not None and application.text == RunParametersXMLNodes.HISEQ_APPLICATION:
+            return
+        raise RunParametersError("The file parsed does not correspond to a HiSeq instrument")
+
+    def is_single_index(self) -> bool:
+        """Return whether the sequencing was done with a single index."""
+        node_name: str = RunParametersXMLNodes.PLANNED_READS_HISEQ
+        reads: ElementTree.Element = self.get_tree_node(node_name=node_name, name="Planned Reads")
+        if self.get_index_2_cycles() == 0 and len(list(reads)) == 3:
+            return True
+        return False
 
     @property
     def control_software_version(self) -> None:
@@ -147,13 +160,17 @@ class RunParametersNovaSeq6000(RunParameters):
     """Specific class for parsing run parameters of NovaSeq6000 sequencing."""
 
     def validate_instrument(self) -> None:
-        """Raise an error if the class was not instantiated with a NovaSeq6000 file."""
+        """Validate if a NovaSeq6000 file was used to instantiate the class.
+        Raises:
+            RunParametersError if the run parameters file is not NovaSeq6000"""
         node_name: str = RunParametersXMLNodes.APPLICATION
-        application: str = self.get_node_string_value(node_name=node_name, name="Instrument")
-        if application != RunParametersXMLNodes.NOVASEQ_6000_APPLICATION:
-            raise RunParametersError(
-                "The file parsed does not correspond to a NovaSeq6000 instrument"
-            )
+        application: ElementTree.Element | None = self.tree.find(node_name)
+        if (
+            application is not None
+            and application.text == RunParametersXMLNodes.NOVASEQ_6000_APPLICATION
+        ):
+            return
+        raise RunParametersError("The file parsed does not correspond to a NovaSeq6000 instrument")
 
     @property
     def control_software_version(self) -> str:
@@ -202,11 +219,14 @@ class RunParametersNovaSeqX(RunParameters):
     """Specific class for parsing run parameters of NovaSeqX sequencing."""
 
     def validate_instrument(self) -> None:
-        """Raise an error if the class was not instantiated with a NovaSeqX file."""
+        """Validate if a NovaSeqX file was used to instantiate the class.
+        Raises:
+            RunParametersError if the run parameters file is not NovaSeqX"""
         node_name: str = RunParametersXMLNodes.INSTRUMENT_TYPE
-        application: str = self.get_node_string_value(node_name=node_name, name="Instrument")
-        if application != RunParametersXMLNodes.NOVASEQ_X_INSTRUMENT:
-            raise RunParametersError("The file parsed does not correspond to a NovaSeqX instrument")
+        instrument: ElementTree.Element | None = self.tree.find(node_name)
+        if instrument is not None and instrument.text == RunParametersXMLNodes.NOVASEQ_X_INSTRUMENT:
+            return
+        raise RunParametersError("The file parsed does not correspond to a NovaSeqX instrument")
 
     @property
     def control_software_version(self) -> None:
@@ -228,7 +248,7 @@ class RunParametersNovaSeqX(RunParameters):
         """Return read and index cycle values parsed as a dictionary."""
         cycle_mapping: dict[str, int] = {}
         planned_reads_tree: ElementTree.Element = self.get_tree_node(
-            node_name=RunParametersXMLNodes.PLANNED_READS, name="Planned Reads"
+            node_name=RunParametersXMLNodes.PLANNED_READS_NOVASEQ_X, name="Planned Reads"
         )
         planned_reads: list[ElementTree.Element] = planned_reads_tree.findall(
             RunParametersXMLNodes.INNER_READ
