@@ -1,7 +1,6 @@
 """API that handles downsampling of samples."""
 import logging
 from pathlib import Path
-from typing import List
 
 from cg.apps.downsample.utils import case_exists_in_statusdb, sample_exists_in_statusdb
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -14,7 +13,6 @@ from cg.models.downsample.downsample_data import DownsampleData
 from cg.store import Store
 from cg.store.models import Family, FamilySample, Sample
 from cg.utils.calculations import multiply_by_million
-from cg.utils.files import get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
 
@@ -155,12 +153,6 @@ class DownsampleAPI(MetaAPI):
         )
         return downsample_work_flow.write_and_submit_sbatch_script()
 
-    def create_downsampled_sample_bundle(self) -> None:
-        """Create a new bundle for the downsampled sample in housekeeper."""
-        self.housekeeper_api.create_new_bundle_and_version(
-            name=self.downsample_data.downsampled_sample.internal_id
-        )
-
     def downsample_sample(self) -> int | None:
         """Down sample a sample."""
         if self.is_decompression_needed():
@@ -168,27 +160,10 @@ class DownsampleAPI(MetaAPI):
             return
         LOG.debug("No Decompression needed.")
         self.add_downsampled_sample_case_to_statusdb()
+        self.downsample_data.create_down_sampling_working_directory()
         submitted_job: int = self.start_downsample_job(
             original_sample=self.downsample_data.original_sample,
             sample_to_downsample=self.downsample_data.downsampled_sample,
         )
         LOG.info(f"Downsample job started with id {submitted_job}.")
         return submitted_job
-
-    def add_downsampled_fastq_files_to_housekeeper(self) -> None:
-        """Add down sampled fastq files to housekeeper."""
-        fastq_file_paths: List[Path] = get_files_matching_pattern(
-            directory=self.downsample_data.fastq_file_output_directory,
-            pattern=f"*{self.downsample_data.downsampled_sample.internal_id}*.{SequencingFileTag.FASTQ}.gz",
-        )
-        for fastq_file_path in fastq_file_paths:
-            self.housekeeper_api.add_and_include_file_to_latest_version(
-                bundle_name=self.downsample_data.downsampled_sample.internal_id,
-                file=fastq_file_path,
-                tags=[SequencingFileTag.FASTQ],
-            )
-
-    def add_downsampled_sample_to_housekeeper(self) -> None:
-        """Add a downsampled sample to housekeeper and include the fastq files."""
-        self.create_downsampled_sample_bundle()
-        self.add_downsampled_fastq_files_to_housekeeper()

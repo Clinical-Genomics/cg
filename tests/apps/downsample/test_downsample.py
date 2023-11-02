@@ -1,6 +1,5 @@
 """Tests for the DownsampleAPI."""
 import logging
-from pathlib import Path
 
 import pytest
 
@@ -73,30 +72,6 @@ def test_add_sample_case_links(downsample_api: DownsampleAPI):
         downsample_api.downsample_data.downsampled_sample.internal_id
     )
     assert sample.links
-
-
-def test_add_fastq_files_to_housekeeper(downsample_api: DownsampleAPI, tmp_path_factory):
-    """Test to add downsampled fastq files to housekeeper."""
-
-    # GIVEN a downsample api and downsampled fastq files
-    tmp_path_factory.mktemp(
-        Path(
-            f"{downsample_api.downsample_data.fastq_file_output_directory}",
-            "{downsample_api.downsample_data.downsampled_sample.internal_id}.fastq.gz",
-        ).name,
-    )
-
-    # WHEN adding fastq files to housekeeper
-    downsample_api.add_downsampled_sample_to_housekeeper()
-
-    # THEN fastq files are added to the downsampled bundle
-    assert downsample_api.housekeeper_api.get_latest_bundle_version(
-        downsample_api.downsample_data.downsampled_sample.internal_id
-    )
-
-    assert downsample_api.housekeeper_api.get_files(
-        bundle=downsample_api.downsample_data.downsampled_sample.internal_id, tags=["fastq"]
-    )
 
 
 def test_downsample_api_adding_a_second_sample_to_case(
