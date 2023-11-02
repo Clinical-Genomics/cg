@@ -56,7 +56,10 @@ def downsample_sample(
             continue
 
 
-@downsample.command("store", help="Store the downsampled fastq files in housekeeper.")
+@downsample.command(
+    "store",
+    help="Store the downsampled fastq files in housekeeper. Usage: cg downsample store ACC123145_2.0M ACC1231_30.0M",
+)
 @click.argument("sample_ids", type=str, nargs=-1)
 @click.pass_obj
 def store_downsampled_samples(context: CGConfig, sample_ids: list[str]):

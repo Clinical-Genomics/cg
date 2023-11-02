@@ -45,6 +45,7 @@ def add_downsampled_fastq_files_to_housekeeper(
     fastq_file_output_directory: str, sample_id: str, housekeeper_api: HousekeeperAPI
 ) -> None:
     """Add down sampled fastq files to housekeeper."""
+    LOG.debug(f"Looking for fastq files in {fastq_file_output_directory}")
     fastq_file_paths: list[Path] = get_files_matching_pattern(
         directory=Path(fastq_file_output_directory),
         pattern=f"*{sample_id}*.{SequencingFileTag.FASTQ}.gz",
