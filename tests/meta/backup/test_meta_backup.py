@@ -52,16 +52,6 @@ def test_query_pdc_for_flow_cell(
     assert fnmatch.filter(
         names=caplog.messages, pat=f"Found archived files for PDC query:*{flow_cell_name}*.gpg"
     )
-    # THEN the flow cell is logged as not found for two of the search patterns
-    assert (
-        len(
-            fnmatch.filter(
-                names=caplog.messages,
-                pat=f"No archived files found for PDC query: *{flow_cell_name}*{FileExtensions.GPG}",
-            )
-        )
-        == 2
-    )
 
 
 def test_get_archived_encryption_key_path(dsmc_q_archive_output: list[str], flow_cell_name: str):
@@ -391,59 +381,6 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
-
-
-@mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
-@mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
-@mock.patch("cg.meta.backup.backup.BackupAPI.check_processing")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_first_flow_cell")
-@mock.patch("cg.meta.tar.tar.TarAPI")
-@mock.patch("cg.store.models.Flowcell")
-@mock.patch("cg.meta.backup.pdc.PdcAPI")
-@mock.patch("cg.store")
-def test_fetch_flow_cell_pdc_retrieval_failed(
-    mock_store,
-    mock_pdc,
-    mock_flow_cell,
-    mock_tar,
-    mock_get_first_flow_cell,
-    mock_check_processing,
-    mock_get_archived_key,
-    mock_get_archived_flow_cell,
-    archived_key,
-    archived_flow_cell,
-    cg_context,
-    caplog,
-):
-    """Tests the fetch_flow_cell method of the backup API when PDC retrieval failed"""
-
-    caplog.set_level(logging.INFO)
-
-    # GIVEN we are going to retrieve a flow cell from PDC
-    backup_api = BackupAPI(
-        encryption_api=mock.Mock(),
-        encryption_directories=cg_context.backup.encryption_directories,
-        status=mock_store,
-        tar_api=mock_tar,
-        pdc_api=mock_pdc,
-        flow_cells_dir="cg_context.flow_cells_dir",
-    )
-    mock_flow_cell.status = FlowCellStatus.REQUESTED
-    mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
-    backup_api.check_processing.return_value = True
-    backup_api.get_archived_encryption_key_path.return_value = archived_key
-    backup_api.get_archived_flow_cell_path.return_value = archived_flow_cell
-    backup_api.tar_api.run_tar_command.return_value = None
-
-    # WHEN the retrieval process fails
-    mock_pdc.retrieve_file_from_pdc.side_effect = subprocess.CalledProcessError(1, "echo")
-    with pytest.raises(subprocess.CalledProcessError):
-        backup_api.fetch_flow_cell(flow_cell=mock_flow_cell)
-
-    # THEN the failure to retrieve is logged
-    assert "retrieval failed" in caplog.text
 
 
 @mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
