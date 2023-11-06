@@ -45,7 +45,7 @@ def downsample_sample(
     for sample_id, reads in input_data:
         try:
             downsample_api.downsample_sample(
-                case_id=case_id, sample_id=sample_id, number_of_reads=reads
+                case_id=case_id, sample_id=sample_id, number_of_reads=float(reads)
             )
         except Exception as error:
             LOG.info(repr(error))

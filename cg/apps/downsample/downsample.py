@@ -28,7 +28,7 @@ class DownsampleAPI(MetaAPI):
         self.dry_run: bool = dry_run
 
     def get_downsample_data(
-        self, sample_id: str, number_of_reads: int, case_id: str
+        self, sample_id: str, number_of_reads: float, case_id: str
     ) -> DownsampleData:
         """Return the DownSampleData.
         Raises:
@@ -151,7 +151,7 @@ class DownsampleAPI(MetaAPI):
         )
         return downsample_work_flow.write_and_submit_sbatch_script()
 
-    def downsample_sample(self, sample_id: str, case_id: str, number_of_reads: int) -> int | None:
+    def downsample_sample(self, sample_id: str, case_id: str, number_of_reads: float) -> int | None:
         """Downsample a sample."""
         LOG.info(f"Starting Downsampling for sample {sample_id}.")
         downsample_data: DownsampleData = self.get_downsample_data(
