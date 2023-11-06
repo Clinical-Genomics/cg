@@ -251,6 +251,8 @@ class SpringArchiveAPI:
     def sort_archival_ids_on_archive_location(
         self, jobs: list[Archive]
     ) -> dict[ArchiveLocations, list[int]]:
+        """Returns a dictionary with keys being ArchiveLocations and the values being the subset of the given
+        archival jobs which should be archived there."""
         handled_job_ids: list[int] = []
         jobs_per_location: dict[ArchiveLocations, list[int]] = {}
         for job in jobs:
@@ -269,6 +271,8 @@ class SpringArchiveAPI:
     def sort_retrieval_ids_on_archive_location(
         self, jobs: list[Archive]
     ) -> dict[ArchiveLocations, list[int]]:
+        """Returns a dictionary with keys being ArchiveLocations and the values being the subset of the given
+        retrieval jobs which should be archived there."""
         handled_job_ids: list[int] = []
         jobs_per_location: dict[ArchiveLocations, list[int]] = {}
         for job in jobs:
