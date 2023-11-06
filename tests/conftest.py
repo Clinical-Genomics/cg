@@ -43,6 +43,7 @@ from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, EncryptionDirectories
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
+from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
@@ -3363,20 +3364,28 @@ def downsample_context(
     return cg_context
 
 
-@pytest.fixture(scope="function")
-def downsample_api(
+@pytest.fixture
+def downsample_data(
     downsample_context: CGConfig,
-    store_with_case_and_sample_with_reads: Store,
-    downsample_hk_api: HousekeeperAPI,
     downsample_sample_internal_id_1: str,
     downsample_case_internal_id: str,
     number_of_reads_in_millions: int,
-    tmp_path_factory,
+) -> DownsampleData:
+    return DownsampleData(
+        status_db=downsample_context.status_db_,
+        hk_api=downsample_context.housekeeper_api_,
+        sample_id=downsample_sample_internal_id_1,
+        case_id=downsample_case_internal_id,
+        number_of_reads=number_of_reads_in_millions,
+        out_dir=Path(downsample_context.downsample_dir),
+    )
+
+
+@pytest.fixture(scope="function")
+def downsample_api(
+    downsample_context: CGConfig,
 ) -> DownsampleAPI:
     """Return a DownsampleAPI."""
     return DownsampleAPI(
         config=downsample_context,
-        sample_id=downsample_sample_internal_id_1,
-        number_of_reads=number_of_reads_in_millions,
-        case_id=downsample_case_internal_id,
     )

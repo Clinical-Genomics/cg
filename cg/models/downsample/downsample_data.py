@@ -21,11 +21,7 @@ class DownsampleData:
         case_id: str,
         out_dir: Path,
     ):
-        """Initialize the downsample data and perform integrity checks.
-        Raises:
-            ValueError
-            FileExistsError
-        """
+        """Initialize the downsample data and perform integrity checks."""
         self.status_db: Store = status_db
         self.housekeeper_api: HousekeeperAPI = hk_api
         self.sample_id: str = sample_id
@@ -44,26 +40,31 @@ class DownsampleData:
         self,
     ) -> str:
         """Return a new sample name with the number of reads to which it is down sampled in millions appended."""
-        new_name: str = f"{self.sample_id}_{self.number_of_reads}M"
-        return new_name
+        return f"{self.sample_id}_{self.number_of_reads}M"
 
     @property
     def downsampled_case_name(
         self,
     ) -> str:
         """Return a case name with _downsampled appended."""
-        new_name: str = f"{self.case_id}_downsampled"
-        return new_name
+        return f"{self.case_id}_downsampled"
 
     def get_sample_to_downsample(self) -> Sample:
-        """Check if a sample exists in StatusDB."""
+        """
+        Check if a sample exists in StatusDB.
+        Raises:
+            ValueError
+        """
         sample: Sample = self.status_db.get_sample_by_internal_id(self.sample_id)
         if not sample:
             raise ValueError(f"Sample {self.sample_id} not found in StatusDB.")
         return sample
 
     def get_case_to_downsample(self) -> Family:
-        """Check if a case exists in StatusDB."""
+        """
+        Check if a case exists in StatusDB.
+            Raises: ValueError
+        """
         case: Family = self.status_db.get_case_by_internal_id(self.case_id)
         if not case:
             raise ValueError(f"Case {self.case_id} not found in StatusDB.")
@@ -74,9 +75,7 @@ class DownsampleData:
     ) -> Sample:
         """
         Generate a downsampled sample record for StatusDB.
-        The new sample contains the original sample internal id and meta data.
-        Raises:
-            ValueError if the downsampled sample already exists in statusDB
+        The new sample contains the original sample internal id and meta data.usDB
         """
         application_version: ApplicationVersion = self.get_application_version(self.original_sample)
         downsampled_sample: Sample = self.status_db.add_sample(
@@ -112,7 +111,11 @@ class DownsampleData:
         return downsampled_case
 
     def has_enough_reads_to_downsample(self) -> bool:
-        """Check if the sample has enough reads to downsample."""
+        """
+        Check if the sample has enough reads to downsample.
+        Raises:
+            ValueError
+        """
         if multiply_by_million(self.number_of_reads) > self.original_sample.reads:
             raise ValueError(
                 f"Sample {self.original_sample.internal_id} does not have enough reads ({self.original_sample.reads}) to down sample to "
@@ -151,7 +154,11 @@ class DownsampleData:
         return self.status_db.get_current_application_version_by_tag(application_tag)
 
     def create_down_sampling_working_directory(self) -> Path:
-        """Create a working directory for the downsample job."""
+        """
+        Create a working directory for the downsample job.
+        Raises:
+            FileExistsError
+        """
         working_directory: Path = self.fastq_file_output_directory
         if working_directory.exists():
             raise FileExistsError(f"Working directory {working_directory} already exists.")

@@ -18,21 +18,15 @@ class DownsampleAPI(MetaAPI):
     def __init__(
         self,
         config: CGConfig,
-        sample_id: str,
-        number_of_reads: float,
-        case_id: str,
         dry_run: bool = False,
     ):
         """Initialize the API."""
         super().__init__(config)
-        self.sample_id: str = sample_id
-        self.number_of_reads: float = number_of_reads
-        self.case_id: str = case_id
         self.dry_run: bool = dry_run
-        self.downsample_data: DownsampleData = self.get_meta_data()
-        LOG.info(f"Starting DownsampleAPI for sample {sample_id}.")
 
-    def get_meta_data(self) -> DownsampleData:
+    def get_downsample_data(
+        self, sample_id: str, number_of_reads: int, case_id: str
+    ) -> DownsampleData:
         """Return the DownSampleData.
         Raises:
             DownsampleFailedError
@@ -41,17 +35,17 @@ class DownsampleAPI(MetaAPI):
             return DownsampleData(
                 status_db=self.status_db,
                 hk_api=self.housekeeper_api,
-                sample_id=self.sample_id,
-                number_of_reads=self.number_of_reads,
-                case_id=self.case_id,
+                sample_id=sample_id,
+                number_of_reads=number_of_reads,
+                case_id=case_id,
                 out_dir=Path(self.config.downsample_dir),
             )
         except Exception as error:
             raise DownsampleFailedError(repr(error))
 
-    def store_downsampled_sample(self) -> Sample:
+    def store_downsampled_sample(self, downsample_data: DownsampleData) -> Sample:
         """Add a down sampled sample entry to StatusDB."""
-        downsampled_sample: Sample = self.downsample_data.downsampled_sample
+        downsampled_sample: Sample = downsample_data.downsampled_sample
         if self.status_db.sample_with_id_exists(sample_id=downsampled_sample.internal_id):
             raise ValueError(f"Sample {downsampled_sample.internal_id} already exists in StatusDB.")
         LOG.info(
@@ -66,11 +60,11 @@ class DownsampleAPI(MetaAPI):
             return downsampled_sample
         return downsampled_sample
 
-    def store_downsampled_case(self) -> Family | None:
+    def store_downsampled_case(self, downsample_data: DownsampleData) -> Family | None:
         """
         Add a down sampled case entry to StatusDB.
         """
-        downsampled_case: Family = self.downsample_data.downsampled_case
+        downsampled_case: Family = downsample_data.downsampled_case
         if self.status_db.case_with_name_exists(case_name=downsampled_case.name):
             LOG.info(f"Case with name {downsampled_case.name} already exists in StatusDB.")
             return
@@ -81,7 +75,9 @@ class DownsampleAPI(MetaAPI):
             return downsampled_case
         return downsampled_case
 
-    def _link_downsampled_sample_to_case(self, sample: Sample, case: Family) -> None:
+    def _link_downsampled_sample_to_case(
+        self, downsample_data: DownsampleData, sample: Sample, case: Family
+    ) -> None:
         """Create a link between sample and case in statusDB."""
         if self.dry_run:
             LOG.info(
@@ -91,31 +87,32 @@ class DownsampleAPI(MetaAPI):
         sample_case_link: FamilySample = self.status_db.relate_sample(
             family=case,
             sample=sample,
-            status=self.downsample_data.sample_status(sample=sample),
+            status=downsample_data.sample_status(sample=sample),
         )
         self.status_db.session.add(sample_case_link)
         self.status_db.session.commit()
         LOG.info(f"Related sample {sample.internal_id} to {case.internal_id}")
 
-    def add_downsampled_sample_case_to_statusdb(self) -> None:
+    def store_downsampled_sample_case(self, downsample_data: DownsampleData) -> None:
         """
         Add the downsampled sample and case to statusDB and generate the sample case link.
         """
-        self.store_downsampled_sample()
-        self.store_downsampled_case()
+        self.store_downsampled_sample(downsample_data)
+        self.store_downsampled_case(downsample_data)
         self._link_downsampled_sample_to_case(
-            sample=self.downsample_data.downsampled_sample,
-            case=self.downsample_data.downsampled_case,
+            downsample_data=downsample_data,
+            sample=downsample_data.downsampled_sample,
+            case=downsample_data.downsampled_case,
         )
 
-    def is_decompression_needed(self) -> bool:
+    def is_decompression_needed(self, downsample_data: DownsampleData) -> bool:
         """Check if decompression is needed for the specified case.
         Decompression is needed if there are no files with fastq tag found for the sample in housekeeper.
         """
         LOG.debug("Checking if decompression is needed.")
         is_decompression_needed: bool = False
         if not self.housekeeper_api.get_files(
-            bundle=self.downsample_data.original_sample.internal_id,
+            bundle=downsample_data.original_sample.internal_id,
             tags=[SequencingFileTag.FASTQ],
         ):
             is_decompression_needed = True
@@ -127,34 +124,40 @@ class DownsampleAPI(MetaAPI):
         self.prepare_fastq_api.compress_api.decompress_spring(sample.internal_id)
         LOG.info("Re-run down sample command when decompression is done.")
 
-    def start_downsample_job(self, original_sample: Sample, sample_to_downsample: Sample) -> int:
+    def start_downsample_job(
+        self,
+        downsample_data: DownsampleData,
+    ) -> int:
         """
         Start a down sample job for a sample.
         -Retrieves input directory from the latest version of a sample bundle in housekeeper
         -Starts a down sample job
         """
         downsample_work_flow = DownsampleWorkflow(
-            number_of_reads=multiply_by_million(self.downsample_data.number_of_reads),
+            number_of_reads=multiply_by_million(downsample_data.number_of_reads),
             config=self.config,
-            output_fastq_dir=str(self.downsample_data.fastq_file_output_directory),
-            input_fastq_dir=str(self.downsample_data.fastq_file_input_directory),
-            original_sample=original_sample,
-            downsampled_sample=sample_to_downsample,
+            output_fastq_dir=str(downsample_data.fastq_file_output_directory),
+            input_fastq_dir=str(downsample_data.fastq_file_input_directory),
+            original_sample=downsample_data.original_sample,
+            downsampled_sample=downsample_data.downsampled_sample,
             dry_run=self.dry_run,
         )
         return downsample_work_flow.write_and_submit_sbatch_script()
 
-    def downsample_sample(self) -> int | None:
-        """Down sample a sample."""
-        if self.is_decompression_needed():
-            self.start_decompression(self.downsample_data.original_sample)
+    def downsample_sample(self, sample_id: str, case_id: str, number_of_reads: int) -> int | None:
+        """Downsample a sample."""
+        LOG.info(f"Starting Downsampling for sample {sample_id}.")
+        downsample_data: DownsampleData = self.get_downsample_data(
+            sample_id=sample_id, case_id=case_id, number_of_reads=number_of_reads
+        )
+        if self.is_decompression_needed(downsample_data):
+            self.start_decompression(downsample_data.original_sample)
             return
         LOG.debug("No Decompression needed.")
-        self.add_downsampled_sample_case_to_statusdb()
-        self.downsample_data.create_down_sampling_working_directory()
+        self.store_downsampled_sample_case(downsample_data=downsample_data)
+        downsample_data.create_down_sampling_working_directory()
         submitted_job: int = self.start_downsample_job(
-            original_sample=self.downsample_data.original_sample,
-            sample_to_downsample=self.downsample_data.downsampled_sample,
+            downsample_data=downsample_data,
         )
         LOG.info(f"Downsample job started with id {submitted_job}.")
         return submitted_job
