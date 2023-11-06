@@ -44,7 +44,7 @@ class DownsampleAPI(MetaAPI):
                 sample_id=self.sample_id,
                 number_of_reads=self.number_of_reads,
                 case_id=self.case_id,
-                out_dir=Path(self.config.downsample),
+                out_dir=Path(self.config.downsample_dir),
             )
         except Exception as error:
             raise DownsampleFailedError(repr(error))

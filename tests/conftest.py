@@ -308,7 +308,7 @@ def base_config_dict() -> dict:
         "delivery_path": "path/to/delivery",
         "flow_cells_dir": "path/to/flow_cells",
         "demultiplexed_flow_cells_dir": "path/to/demultiplexed_flow_cells_dir",
-        "downsample": "path/to/downsample_dir",
+        "downsample_dir": "path/to/downsample_dir",
         "housekeeper": {
             "database": "sqlite:///",
             "root": "path/to/root",
@@ -2211,7 +2211,7 @@ def context_config(
         "delivery_path": str(cg_dir),
         "flow_cells_dir": str(flow_cells_dir),
         "demultiplexed_flow_cells_dir": str(demultiplexed_runs),
-        "downsample": str(downsample_dir),
+        "downsample_dir": str(downsample_dir),
         "email_base_settings": {
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",

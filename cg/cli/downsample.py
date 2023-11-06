@@ -65,7 +65,7 @@ def downsample_sample(
 def store_downsampled_samples(context: CGConfig, sample_ids: list[str]):
     """Store fastq files for downsampled samples in Housekeeper."""
     for sample_id in sample_ids:
-        downsample_dir: str = str(Path(context.downsample, sample_id))
+        downsample_dir: str = str(Path(context.downsample_dir, sample_id))
         LOG.debug(f"Searching for fastq files in : {downsample_dir}")
         try:
             store_downsampled_sample_bundle(
