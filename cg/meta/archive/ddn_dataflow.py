@@ -21,7 +21,6 @@ from cg.meta.archive.models import (
 )
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
-from cg.utils.enums import StrEnum
 
 LOG = logging.getLogger(__name__)
 

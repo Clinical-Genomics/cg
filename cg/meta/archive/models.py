@@ -54,11 +54,6 @@ class ArchiveHandler:
         pass
 
     @abstractmethod
-    def retrieve_file(self, file_and_sample: FileAndSample):
-        """Retrieves the specified archived file."""
-        pass
-
-    @abstractmethod
     def convert_into_transfer_data(
         self, files_and_samples: list[FileAndSample], is_archiving: bool = True
     ) -> list[FileTransferData]:
