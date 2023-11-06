@@ -78,8 +78,7 @@ class FlowCellDirectoryData:
     def sequenced_at(self) -> list[str]:
         """Return the sequencing date for the flow cell."""
         date_part: str = self.full_name[:6]
-        return datetime.strptime(date_part, "%y%m%d")
-
+        return datetime.datetime.strptime(date_part, "%y%m%d")
 
     @property
     def sample_sheet_path(self) -> Path:
