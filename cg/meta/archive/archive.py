@@ -16,6 +16,9 @@ from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 DEFAULT_SPRING_ARCHIVE_COUNT = 200
+ARCHIVE_HANDLERS: dict[str, Type[ArchiveHandler]] = {
+    ArchiveLocations.KAROLINSKA_BUCKET: DDNDataFlowClient
+}
 
 
 class ArchiveModels(BaseModel):
@@ -51,11 +54,6 @@ def filter_samples_on_archive_location(
         for sample_and_destination in samples_and_destinations
         if sample_and_destination.sample.archive_location == archive_location
     ]
-
-
-ARCHIVE_HANDLERS: dict[str, Type[ArchiveHandler]] = {
-    ArchiveLocations.KAROLINSKA_BUCKET: DDNDataFlowClient
-}
 
 
 class SpringArchiveAPI:
@@ -188,8 +186,7 @@ class SpringArchiveAPI:
         adds it to the list which is returned."""
         files_and_samples: list[FileAndSample] = []
         for file in files_to_archive:
-            sample: Optional[Sample] = self.get_sample(file)
-            if sample:
+            if sample := self.get_sample(file):
                 files_and_samples.append(FileAndSample(file=file, sample=sample))
         return files_and_samples
 
@@ -202,7 +199,7 @@ class SpringArchiveAPI:
         archival_jobs: list[Archive] = self.housekeeper_api.get_ongoing_archivals()
         archival_ids_per_location: dict[
             ArchiveLocations, list[int]
-        ] = self.filter_archival_ids_on_archive_location(jobs=archival_jobs)
+        ] = self.sort_archival_ids_on_archive_location(jobs=archival_jobs)
         for archive_location in ArchiveLocations:
             self.update_archival_jobs_for_archive_location(
                 archive_location=archive_location,
@@ -213,7 +210,7 @@ class SpringArchiveAPI:
         retrieval_jobs: list[Archive] = self.housekeeper_api.get_ongoing_retrievals()
         retrieval_ids_per_location: dict[
             ArchiveLocations, list[int]
-        ] = self.filter_retrieval_ids_on_archive_location(jobs=retrieval_jobs)
+        ] = self.sort_retrieval_ids_on_archive_location(jobs=retrieval_jobs)
         for archive_location in ArchiveLocations:
             self.update_retrieval_jobs_for_archive_location(
                 archive_location=archive_location,
@@ -251,7 +248,7 @@ class SpringArchiveAPI:
         else:
             LOG.info(f"Job with id {task_id} has not yet finished.")
 
-    def filter_archival_ids_on_archive_location(
+    def sort_archival_ids_on_archive_location(
         self, jobs: list[Archive]
     ) -> dict[ArchiveLocations, list[int]]:
         handled_job_ids: list[int] = []
@@ -269,7 +266,7 @@ class SpringArchiveAPI:
                 jobs_per_location[archive_location] = [job.archiving_task_id]
         return jobs_per_location
 
-    def filter_retrieval_ids_on_archive_location(
+    def sort_retrieval_ids_on_archive_location(
         self, jobs: list[Archive]
     ) -> dict[ArchiveLocations, list[int]]:
         handled_job_ids: list[int] = []

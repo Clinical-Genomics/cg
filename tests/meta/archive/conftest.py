@@ -16,6 +16,7 @@ from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.archive.ddn_dataflow import (
     ROOT_TO_TRIM,
+    AuthToken,
     DDNDataFlowClient,
     MiriaObject,
     TransferPayload,
@@ -110,8 +111,27 @@ def header_with_test_auth_token() -> dict:
 
 @pytest.fixture
 def ddn_auth_token_response(ok_response: Response):
-    ok_response._content = b'{"access": "test_auth_token", "expire":15, "test_refresh_token"}'
+    ok_response._content = b'{"access": "test_auth_token", "expire":15, "test_refresh_token":""}'
     return ok_response
+
+
+@pytest.fixture
+def test_auth_token() -> AuthToken:
+    return AuthToken(
+        access="test_auth_token",
+        expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
+        refresh="test_refresh_token",
+    )
+
+
+@pytest.fixture
+def archival_job_id() -> int:
+    return 123
+
+
+@pytest.fixture
+def retrieval_job_id() -> int:
+    return 124
 
 
 @pytest.fixture
