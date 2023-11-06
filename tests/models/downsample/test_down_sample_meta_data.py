@@ -46,4 +46,3 @@ def test_downsample_meta_data_pass_pre_flight(
     )
     assert meta_data.downsampled_sample.reads == number_of_reads_in_millions * 1_000_000
     assert meta_data.downsampled_case.name == f"{case.internal_id}_downsampled"
-    assert meta_data.has_enough_reads

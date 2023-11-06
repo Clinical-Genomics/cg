@@ -44,7 +44,11 @@ class DownsampleAPI(MetaAPI):
             raise DownsampleFailedError(repr(error))
 
     def store_downsampled_sample(self, downsample_data: DownsampleData) -> Sample:
-        """Add a down sampled sample entry to StatusDB."""
+        """
+        Add a down sampled sample entry to StatusDB.
+        Raises:
+            ValueError
+        """
         downsampled_sample: Sample = downsample_data.downsampled_sample
         if self.status_db.sample_with_id_exists(sample_id=downsampled_sample.internal_id):
             raise ValueError(f"Sample {downsampled_sample.internal_id} already exists in StatusDB.")
@@ -79,16 +83,17 @@ class DownsampleAPI(MetaAPI):
         self, downsample_data: DownsampleData, sample: Sample, case: Family
     ) -> None:
         """Create a link between sample and case in statusDB."""
-        if self.dry_run:
-            LOG.info(
-                f"Would relate sample {sample} to case {case.internal_id} with name {case.name}"
-            )
-            return
         sample_case_link: FamilySample = self.status_db.relate_sample(
             family=case,
             sample=sample,
             status=downsample_data.sample_status(sample=sample),
         )
+        if self.dry_run:
+            LOG.info(
+                f"Would relate sample {sample} to case {case.internal_id} with name {case.name}"
+            )
+            return
+
         self.status_db.session.add(sample_case_link)
         self.status_db.session.commit()
         LOG.info(f"Related sample {sample.internal_id} to {case.internal_id}")
@@ -107,7 +112,7 @@ class DownsampleAPI(MetaAPI):
 
     def is_decompression_needed(self, downsample_data: DownsampleData) -> bool:
         """Check if decompression is needed for the specified case.
-        Decompression is needed if there are no files with fastq tag found for the sample in housekeeper.
+        Decompression is needed if there are no files with fastq tag found for the sample in Housekeeper.
         """
         LOG.debug("Checking if decompression is needed.")
         is_decompression_needed: bool = False
@@ -118,19 +123,13 @@ class DownsampleAPI(MetaAPI):
             is_decompression_needed = True
         return is_decompression_needed
 
-    def start_decompression(self, sample: Sample) -> None:
-        """Start decompression of spring compressed fastq files for the given sample."""
-        LOG.info(f"Decompression for {sample.internal_id} is needed.")
-        self.prepare_fastq_api.compress_api.decompress_spring(sample.internal_id)
-        LOG.info("Re-run down sample command when decompression is done.")
-
     def start_downsample_job(
         self,
         downsample_data: DownsampleData,
     ) -> int:
         """
         Start a down sample job for a sample.
-        -Retrieves input directory from the latest version of a sample bundle in housekeeper
+        -Retrieves input directory from the latest version of a sample bundle in Housekeeper
         -Starts a down sample job
         """
         downsample_work_flow = DownsampleWorkflow(
@@ -151,7 +150,9 @@ class DownsampleAPI(MetaAPI):
             sample_id=sample_id, case_id=case_id, number_of_reads=number_of_reads
         )
         if self.is_decompression_needed(downsample_data):
-            self.start_decompression(downsample_data.original_sample)
+            self.prepare_fastq_api.compress_api.decompress_spring(
+                downsample_data.original_sample.internal_id
+            )
             return
         LOG.debug("No Decompression needed.")
         self.store_downsampled_sample_case(downsample_data=downsample_data)

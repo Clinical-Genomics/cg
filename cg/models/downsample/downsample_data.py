@@ -30,7 +30,7 @@ class DownsampleData:
         self.out_dir: Path = out_dir
         self.original_sample: Sample = self.get_sample_to_downsample()
         self.original_case: Family = self.get_case_to_downsample()
-        self.has_enough_reads: bool = self.has_enough_reads_to_downsample()
+        self.has_enough_reads: bool = self.validate_enough_reads_to_downsample()
         self.downsampled_sample: Sample = self._generate_statusdb_downsampled_sample_record()
         self.downsampled_case: Family = self._generate_statusdb_downsampled_case()
         LOG.info(f"Downsample Data checks completed for {self.sample_id}")
@@ -110,7 +110,7 @@ class DownsampleData:
         downsampled_case.customer = self.original_case.customer
         return downsampled_case
 
-    def has_enough_reads_to_downsample(self) -> bool:
+    def validate_enough_reads_to_downsample(self) -> None:
         """
         Check if the sample has enough reads to downsample.
         Raises:
@@ -121,7 +121,6 @@ class DownsampleData:
                 f"Sample {self.original_sample.internal_id} does not have enough reads ({self.original_sample.reads}) to down sample to "
                 f"{self.number_of_reads}M."
             )
-        return True
 
     @property
     def fastq_file_input_directory(self) -> Path:
