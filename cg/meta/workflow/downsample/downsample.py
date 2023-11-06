@@ -48,9 +48,9 @@ class DownsampleWorkflow:
         return self._email
 
     @property
-    def bin_downsample(self) -> str:
+    def downsample_script_path(self) -> str:
         """The path to the downsample.sh script on Hasta."""
-        return Path("home", "proj", "production", "bin", "downsample.sh").name
+        return self.config.downsample_script
 
     @property
     def job_name(self) -> str:
@@ -83,7 +83,7 @@ class DownsampleWorkflow:
     def sbatch_content(self) -> str:
         return WORKFLOW_TEMPLATE.format(
             account=self.account,
-            bin_downsample=self.bin_downsample,
+            bin_downsample=self.downsample_script_path,
             config_path=self.config,
             downsample_to=str(self.number_of_reads),
             bundle=self.downsampled_sample.internal_id if not self.dry_run else "dry_run",

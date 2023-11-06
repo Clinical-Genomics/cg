@@ -6,7 +6,7 @@ from cg.store import Store
 from cg.store.models import Family, Sample
 
 
-def test_downsample_meta_data_pass_pre_flight(
+def test_downsample_meta_data_pass_checks(
     store_with_case_and_sample_with_reads: Store,
     downsample_hk_api: HousekeeperAPI,
     downsample_case_internal_id: str,
@@ -14,7 +14,7 @@ def test_downsample_meta_data_pass_pre_flight(
     number_of_reads_in_millions: int,
     tmp_path_factory,
 ):
-    """Test that the pre-flight checks pass when initialising a DownsampleMetaData class."""
+    """Test that the checks pass when initialising a DownsampleData class."""
     # GIVEN a store with a sample and a case
     case: Family = store_with_case_and_sample_with_reads.get_case_by_internal_id(
         internal_id=downsample_case_internal_id

@@ -30,7 +30,7 @@ class DownsampleData:
         self.out_dir: Path = out_dir
         self.original_sample: Sample = self.get_sample_to_downsample()
         self.original_case: Family = self.get_case_to_downsample()
-        self.has_enough_reads: bool = self.validate_enough_reads_to_downsample()
+        self.validate_enough_reads_to_downsample()
         self.downsampled_sample: Sample = self._generate_statusdb_downsampled_sample_record()
         self.downsampled_case: Family = self._generate_statusdb_downsampled_case()
         LOG.info(f"Downsample Data checks completed for {self.sample_id}")
@@ -77,7 +77,7 @@ class DownsampleData:
         Generate a downsampled sample record for StatusDB.
         The new sample contains the original sample internal id and meta data.usDB
         """
-        application_version: ApplicationVersion = self.get_application_version(self.original_sample)
+        application_version: ApplicationVersion = self.get_application_version()
         downsampled_sample: Sample = self.status_db.add_sample(
             name=self.downsampled_sample_name,
             internal_id=self.downsampled_sample_name,
@@ -137,20 +137,15 @@ class DownsampleData:
         """Get the output directory for the downsampled sample."""
         return Path(self.out_dir, self.downsampled_sample.internal_id)
 
-    @staticmethod
-    def sample_status(sample: Sample) -> str:
+    def get_sample_status(
+        self,
+    ) -> str:
         """Return the status of a sample."""
-        return sample.links[0].status if sample.links else "unknown"
+        return self.original_sample.links[0].status if self.original_sample.links else "unknown"
 
-    @staticmethod
-    def get_application_tag(sample: Sample) -> str:
-        """Return the application for a sample."""
-        return sample.application_version.application.tag
-
-    def get_application_version(self, sample: Sample) -> ApplicationVersion:
+    def get_application_version(self) -> ApplicationVersion:
         """Return the application version for a sample."""
-        application_tag: str = self.get_application_tag(sample)
-        return self.status_db.get_current_application_version_by_tag(application_tag)
+        return self.original_sample.application_version
 
     def create_down_sampling_working_directory(self) -> Path:
         """

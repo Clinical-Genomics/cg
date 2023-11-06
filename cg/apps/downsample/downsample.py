@@ -2,10 +2,13 @@
 import logging
 from pathlib import Path
 
-from cg.constants import SequencingFileTag
+from housekeeper.store.models import Version
+
 from cg.exc import DownsampleFailedError
+from cg.meta.compress import files
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
+from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.store.models import Family, FamilySample, Sample
@@ -86,7 +89,7 @@ class DownsampleAPI(MetaAPI):
         sample_case_link: FamilySample = self.status_db.relate_sample(
             family=case,
             sample=sample,
-            status=downsample_data.sample_status(sample=sample),
+            status=downsample_data.get_sample_status(),
         )
         if self.dry_run:
             LOG.info(
@@ -115,13 +118,22 @@ class DownsampleAPI(MetaAPI):
         Decompression is needed if there are no files with fastq tag found for the sample in Housekeeper.
         """
         LOG.debug("Checking if decompression is needed.")
-        is_decompression_needed: bool = False
-        if not self.housekeeper_api.get_files(
-            bundle=downsample_data.original_sample.internal_id,
-            tags=[SequencingFileTag.FASTQ],
-        ):
-            is_decompression_needed = True
-        return is_decompression_needed
+        compression_objects = self.get_sample_compression_objects(
+            downsample_data.original_sample.internal_id
+        )
+        return any(
+            not self.crunchy_api.is_compression_pending(compression_object)
+            and not compression_object.pair_exists()
+            for compression_object in compression_objects
+        )
+
+    def get_sample_compression_objects(self, sample_id: str) -> list[CompressionData]:
+        compression_objects: list[CompressionData] = []
+        version_obj: Version = self.prepare_fastq_api.compress_api.hk_api.get_latest_bundle_version(
+            bundle_name=sample_id
+        )
+        compression_objects.extend(files.get_spring_paths(version_obj))
+        return compression_objects
 
     def start_downsample_job(
         self,
