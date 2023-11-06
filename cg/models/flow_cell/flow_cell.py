@@ -78,7 +78,7 @@ class FlowCellDirectoryData:
     @property
     def sequenced_at(self) -> list[str]:
         """Return the sequencing date for the flow cell."""
-        date_part: str = self.full_name[:6]
+        date_part: str = self.full_name.split("_")[0]
         return parse_date(date_part)
 
     @property
