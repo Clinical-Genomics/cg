@@ -47,7 +47,7 @@ class DownsampleData:
         self,
     ) -> str:
         """Return a case name with _downsampled appended."""
-        return f"{self.case_id}_downsampled"
+        return f"{self.get_case_to_downsample().name}_downsampled"
 
     def get_sample_to_downsample(self) -> Sample:
         """

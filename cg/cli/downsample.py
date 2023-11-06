@@ -6,6 +6,7 @@ from typing import Tuple
 
 import click
 
+from cg.apps.demultiplex.sample_sheet.validators import validate_sample_id
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.downsample.utils import store_downsampled_sample_bundle
 from cg.constants.constants import DRY_RUN
@@ -44,6 +45,7 @@ def downsample_sample(
     downsample_api = DownsampleAPI(config=context, dry_run=dry_run)
     for sample_id, reads in input_data:
         try:
+            validate_sample_id(sample_id)
             downsample_api.downsample_sample(
                 case_id=case_id, sample_id=sample_id, number_of_reads=float(reads)
             )
