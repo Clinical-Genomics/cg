@@ -3,6 +3,7 @@ import datetime
 import logging
 from pathlib import Path
 from typing import Optional, Type, Union
+from cg.models.flow_cell.utils import parse_date
 
 from pydantic import ValidationError
 from typing_extensions import Literal
@@ -78,7 +79,7 @@ class FlowCellDirectoryData:
     def sequenced_at(self) -> list[str]:
         """Return the sequencing date for the flow cell."""
         date_part: str = self.full_name[:6]
-        return datetime.datetime.strptime(date_part, "%y%m%d")
+        return parse_date(date_part)
 
     @property
     def sample_sheet_path(self) -> Path:
