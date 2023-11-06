@@ -46,9 +46,9 @@ class DownsampleAPI(MetaAPI):
         except Exception as error:
             raise DownsampleFailedError(repr(error))
 
-    def store_downsampled_sample(self, downsample_data: DownsampleData) -> Sample:
+    def store_downsampled_sample(self, downsample_data: DownsampleData) -> None:
         """
-        Add a down sampled sample entry to StatusDB.
+        Add a downsampled sample entry to StatusDB.
         Raises:
             ValueError
         """
@@ -64,10 +64,8 @@ class DownsampleAPI(MetaAPI):
             self.status_db.session.add(downsampled_sample)
             self.status_db.session.commit()
             LOG.info(f"Added {downsampled_sample.name} to StatusDB.")
-            return downsampled_sample
-        return downsampled_sample
 
-    def store_downsampled_case(self, downsample_data: DownsampleData) -> Family | None:
+    def store_downsampled_case(self, downsample_data: DownsampleData) -> None:
         """
         Add a down sampled case entry to StatusDB.
         """
@@ -79,8 +77,6 @@ class DownsampleAPI(MetaAPI):
             self.status_db.session.add(downsampled_case)
             self.status_db.session.commit()
             LOG.info(f"New down sampled case created: {downsampled_case.internal_id}")
-            return downsampled_case
-        return downsampled_case
 
     def _link_downsampled_sample_to_case(
         self, downsample_data: DownsampleData, sample: Sample, case: Family
