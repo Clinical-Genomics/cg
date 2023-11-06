@@ -1,5 +1,6 @@
 """Tests for the status_db_storage_functions module of the demultiplexing post post-processing module."""
 
+from datetime import datetime
 from mock import MagicMock
 
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
@@ -61,7 +62,10 @@ def test_update_sample_read_count(demultiplex_context: CGConfig, timestamp_yeste
 
     # WHEN calling update_sample_read_count
     update_sample_read_count(
-        sample_id=sample_internal_id, q30_threshold=q30_threshold, store=status_db
+        sample_id=sample_internal_id,
+        q30_threshold=q30_threshold,
+        sequenced_at=datetime.now(),
+        store=status_db,
     )
 
     # THEN get_sample_by_internal_id is called with the correct argument
