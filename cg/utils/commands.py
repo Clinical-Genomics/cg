@@ -7,7 +7,7 @@ import logging
 import subprocess
 from subprocess import CalledProcessError
 
-from cg.constants.process import RETURN_SUCCESS
+from cg.constants.process import EXIT_SUCCESS
 
 LOG = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ class Process:
         LOG.info("Running command %s", " ".join(command))
         if dry_run:
             LOG.info("Dry run: process call will not be executed!!")
-            return RETURN_SUCCESS
+            return EXIT_SUCCESS
 
         if self.environment:
             res = subprocess.run(
@@ -100,7 +100,7 @@ class Process:
 
         self.stdout = res.stdout.decode("utf-8").rstrip()
         self.stderr = res.stderr.decode("utf-8").rstrip()
-        if res.returncode != RETURN_SUCCESS:
+        if res.returncode != EXIT_SUCCESS:
             LOG.critical("Call %s exit with a non zero exit code", command)
             LOG.critical(self.stderr)
             raise CalledProcessError(res.returncode, command)
