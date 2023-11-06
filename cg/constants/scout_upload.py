@@ -86,4 +86,6 @@ BALSAMIC_UMI_SAMPLE_TAGS = dict(
 )
 
 
-RNAFUSION_SAMPLE_TAGS = {}
+RNAFUSION_SAMPLE_TAGS = dict(
+    alignment_file={"cram"},
+)

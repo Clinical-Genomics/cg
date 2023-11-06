@@ -25,6 +25,7 @@ class Reviewer(BaseModel):
 
 class ScoutIndividual(BaseModel):
     alignment_path: Optional[str] = None
+    rna_alignment_path: Optional[str] = None
     analysis_type: Annotated[
         Literal[
             "external",
