@@ -13,7 +13,7 @@ def test_add_downsampled_case_entry_to_statusdb(downsample_api: DownsampleAPI, c
     # GIVEN a DownsampleAPI
     caplog.set_level(level=logging.INFO)
     # WHEN adding a downsampled case to statusDB
-    downsample_api.add_downsampled_case_to_statusdb()
+    downsample_api.store_downsampled_case()
 
     # THEN a downsampled case is added to the store
     assert downsample_api.status_db.get_case_by_name(
@@ -21,7 +21,7 @@ def test_add_downsampled_case_entry_to_statusdb(downsample_api: DownsampleAPI, c
     )
 
     # WHEN adding the downsampled case again
-    downsample_api.add_downsampled_case_to_statusdb()
+    downsample_api.store_downsampled_case()
     # THEN a log info is added
     assert (
         f"Case with name {downsample_api.downsample_data.downsampled_case.name} already exists in StatusDB."
@@ -34,7 +34,7 @@ def test_add_downsampled_sample_entry_to_statusdb(downsample_api: DownsampleAPI)
     # GIVEN a DownsampleAPI
 
     # WHEN adding a downsampled sample to statusDB
-    downsample_api.add_downsampled_sample_entry_to_statusdb()
+    downsample_api.store_downsampled_sample()
 
     # THEN a downsampled sample is added to the store
     assert downsample_api.status_db.get_sample_by_internal_id(
@@ -45,15 +45,15 @@ def test_add_downsampled_sample_entry_to_statusdb(downsample_api: DownsampleAPI)
 
     # THEN a ValueError is raised
     with pytest.raises(ValueError):
-        downsample_api.add_downsampled_sample_entry_to_statusdb()
+        downsample_api.store_downsampled_sample()
 
 
 def test_add_sample_case_links(downsample_api: DownsampleAPI):
     """Test to link samples to cases in StatusDB."""
 
     # GIVEN a DownsampleAPI and a downsampled case and sample in StatusDB
-    downsample_api.add_downsampled_case_to_statusdb()
-    downsample_api.add_downsampled_sample_entry_to_statusdb()
+    downsample_api.store_downsampled_case()
+    downsample_api.store_downsampled_sample()
 
     # GIVEN the links are not established
     sample: Sample = downsample_api.status_db.get_sample_by_internal_id(

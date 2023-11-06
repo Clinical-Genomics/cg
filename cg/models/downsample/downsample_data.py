@@ -2,7 +2,6 @@
 import logging
 from pathlib import Path
 
-from cg.apps.downsample.utils import case_exists_in_statusdb
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Priority
 from cg.store import Store
@@ -99,7 +98,7 @@ class DownsampleData:
         self,
     ) -> Family:
         """Generate a case for the downsampled samples. The new case uses existing case data."""
-        if case_exists_in_statusdb(status_db=self.status_db, case_name=self.downsampled_case_name):
+        if self.status_db.case_with_name_exists(case_name=self.downsampled_case_name):
             return self.status_db.get_case_by_name(self.downsampled_case_name)
         downsampled_case: Family = self.status_db.add_case(
             data_analysis=self.original_case.data_analysis,

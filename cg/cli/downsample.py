@@ -7,7 +7,7 @@ from typing import Tuple
 import click
 
 from cg.apps.downsample.downsample import DownsampleAPI
-from cg.apps.downsample.utils import add_downsampled_sample_to_housekeeper
+from cg.apps.downsample.utils import store_downsampled_sample_bundle
 from cg.constants.constants import DRY_RUN
 from cg.models.cg_config import CGConfig
 
@@ -68,7 +68,7 @@ def store_downsampled_samples(context: CGConfig, sample_ids: list[str]):
         downsample_dir: str = str(Path(context.downsample, sample_id))
         LOG.debug(f"Searching for fastq files in : {downsample_dir}")
         try:
-            add_downsampled_sample_to_housekeeper(
+            store_downsampled_sample_bundle(
                 housekeeper_api=context.housekeeper_api,
                 sample_id=sample_id,
                 fastq_file_output_directory=downsample_dir,

@@ -2,15 +2,12 @@
 import logging
 from pathlib import Path
 
-from cg.apps.downsample.utils import case_exists_in_statusdb, sample_exists_in_statusdb
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.exc import DownsampleFailedError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
 from cg.models.cg_config import CGConfig
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.store import Store
 from cg.store.models import Family, FamilySample, Sample
 from cg.utils.calculations import multiply_by_million
 
@@ -28,9 +25,6 @@ class DownsampleAPI(MetaAPI):
     ):
         """Initialize the API."""
         super().__init__(config)
-        self.config: CGConfig = config
-        self.status_db: Store = config.status_db
-        self.hk_api: HousekeeperAPI = config.housekeeper_api
         self.sample_id: str = sample_id
         self.number_of_reads: float = number_of_reads
         self.case_id: str = case_id
@@ -55,12 +49,10 @@ class DownsampleAPI(MetaAPI):
         except Exception as error:
             raise DownsampleFailedError(repr(error))
 
-    def add_downsampled_sample_entry_to_statusdb(self) -> Sample:
+    def store_downsampled_sample(self) -> Sample:
         """Add a down sampled sample entry to StatusDB."""
         downsampled_sample: Sample = self.downsample_data.downsampled_sample
-        if sample_exists_in_statusdb(
-            status_db=self.status_db, sample_id=downsampled_sample.internal_id
-        ):
+        if self.status_db.sample_with_id_exists(sample_id=downsampled_sample.internal_id):
             raise ValueError(f"Sample {downsampled_sample.internal_id} already exists in StatusDB.")
         LOG.info(
             f"New downsampled sample created: {downsampled_sample.internal_id} from {downsampled_sample.from_sample}"
@@ -74,12 +66,12 @@ class DownsampleAPI(MetaAPI):
             return downsampled_sample
         return downsampled_sample
 
-    def add_downsampled_case_to_statusdb(self) -> Family | None:
+    def store_downsampled_case(self) -> Family | None:
         """
         Add a down sampled case entry to StatusDB.
         """
         downsampled_case: Family = self.downsample_data.downsampled_case
-        if case_exists_in_statusdb(status_db=self.status_db, case_name=downsampled_case.name):
+        if self.status_db.case_with_name_exists(case_name=downsampled_case.name):
             LOG.info(f"Case with name {downsampled_case.name} already exists in StatusDB.")
             return
         if not self.dry_run:
@@ -96,7 +88,6 @@ class DownsampleAPI(MetaAPI):
                 f"Would relate sample {sample} to case {case.internal_id} with name {case.name}"
             )
             return
-
         sample_case_link: FamilySample = self.status_db.relate_sample(
             family=case,
             sample=sample,
@@ -110,8 +101,8 @@ class DownsampleAPI(MetaAPI):
         """
         Add the downsampled sample and case to statusDB and generate the sample case link.
         """
-        self.add_downsampled_sample_entry_to_statusdb()
-        self.add_downsampled_case_to_statusdb()
+        self.store_downsampled_sample()
+        self.store_downsampled_case()
         self._link_downsampled_sample_to_case(
             sample=self.downsample_data.downsampled_sample,
             case=self.downsample_data.downsampled_case,

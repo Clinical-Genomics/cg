@@ -765,3 +765,17 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID],
             internal_id=sample_internal_id,
         ).all()
+
+    def case_with_name_exists(self, case_name: str) -> bool:
+        """Check if a case exists in StatusDB."""
+        case: Family = self.get_case_by_name(case_name)
+        if case:
+            return True
+        return False
+
+    def sample_with_id_exists(self, sample_id: str) -> bool:
+        """Check if a sample exists in StatusDB."""
+        sample: Sample = self.get_sample_by_internal_id(sample_id)
+        if sample:
+            return True
+        return False
