@@ -4,9 +4,11 @@ import logging
 
 import click
 
+from cg.apps.gens import GensAPI
 from cg.cli.generate.report.base import generate_delivery_report
 from cg.cli.upload.clinical_delivery import upload_clinical_delivery
 from cg.cli.upload.genotype import upload_genotypes
+from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.scout import upload_to_scout
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
@@ -38,6 +40,11 @@ class BalsamicUploadAPI(UploadAPI):
 
         # Clinical delivery
         ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
+
+        if GensAPI.is_suitable_for_upload(case):
+            ctx.invoke(upload_to_gens, case_id=case.internal_id)
+        else:
+            LOG.info(f"Balsamic case {case.internal_id} is not compatible for Gens upload")
 
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
