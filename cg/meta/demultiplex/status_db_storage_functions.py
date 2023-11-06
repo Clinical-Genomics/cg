@@ -131,12 +131,17 @@ def update_sample_read_counts_in_status_db(
     """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
     q30_threshold: int = get_q30_threshold(flow_cell_data.sequencer_type)
     sample_internal_ids: list[str] = flow_cell_data.sample_sheet.get_sample_ids()
+    sequenced_at: datetime = flow_cell_data.sequenced_at
     for sample_id in sample_internal_ids:
-        update_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold, store=store)
+        update_sample_read_count(
+            sample_id=sample_id, q30_threshold=q30_threshold, sequenced_at=sequenced_at, store=store
+        )
     store.session.commit()
 
 
-def update_sample_read_count(sample_id: str, q30_threshold: int, store: Store) -> None:
+def update_sample_read_count(
+    sample_id: str, q30_threshold: int, sequenced_at: datetime, store: Store
+) -> None:
     """Update the read count for a sample in status db with all reads exceeding the q30 threshold from the sequencing metrics table."""
     sample: Optional[Sample] = store.get_sample_by_internal_id(sample_id)
     if sample:
@@ -148,6 +153,5 @@ def update_sample_read_count(sample_id: str, q30_threshold: int, store: Store) -
             f"Updating sample {sample_id} with read count {sample_read_count} and setting sequenced at."
         )
         sample.reads = sample_read_count
-        sample.reads_updated_at = datetime.datetime.now()
-    else:
+        sample.reads_updated_at = sequenced_at
         LOG.warning(f"Cannot find {sample_id} in status_db when adding read counts. Skipping.")
