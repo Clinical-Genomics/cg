@@ -168,5 +168,4 @@ class DownsampleAPI(MetaAPI):
         submitted_job: int = self.start_downsample_job(
             downsample_data=downsample_data,
         )
-        LOG.info(f"Downsample job started with id {submitted_job}.")
         return submitted_job
