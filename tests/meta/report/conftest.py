@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List
 
 import pytest
 
@@ -22,10 +21,12 @@ from tests.mocks.report import MockChanjo, MockHousekeeperMipDNAReportAPI
 
 @pytest.fixture(scope="function")
 def report_api_mip_dna(
-    cg_context: CGConfig, lims_samples: List[dict], report_store: Store
+    cg_context: CGConfig, lims_samples: list[dict], report_store: Store
 ) -> MipDNAReportAPI:
     """MIP DNA ReportAPI fixture."""
-    cg_context.meta_apis["analysis_api"] = MockMipAnalysis()
+    cg_context.meta_apis["analysis_api"] = MockMipAnalysis(
+        config=cg_context, pipeline=Pipeline.MIP_DNA
+    )
     cg_context.status_db_ = report_store
     cg_context.lims_api_ = MockLimsAPI(cg_context, lims_samples)
     cg_context.chanjo_api_ = MockChanjo()
@@ -35,7 +36,7 @@ def report_api_mip_dna(
 
 @pytest.fixture(scope="function")
 def report_api_balsamic(
-    cg_context: CGConfig, lims_samples: List[dict], report_store: Store
+    cg_context: CGConfig, lims_samples: list[dict], report_store: Store
 ) -> BalsamicReportAPI:
     """BALSAMIC ReportAPI fixture."""
     cg_context.meta_apis["analysis_api"] = MockBalsamicAnalysis(cg_context)
@@ -47,7 +48,7 @@ def report_api_balsamic(
 
 @pytest.fixture(scope="function")
 def report_api_rnafusion(
-    rnafusion_context: CGConfig, lims_samples: List[dict]
+    rnafusion_context: CGConfig, lims_samples: list[dict]
 ) -> RnafusionReportAPI:
     """Rnafusion report API fixture."""
     rnafusion_context.lims_api_ = MockLimsAPI(rnafusion_context, lims_samples)
@@ -74,9 +75,9 @@ def case_samples_data(case_id: str, report_api_mip_dna: MipDNAReportAPI):
 
 
 @pytest.fixture(scope="function")
-def mip_analysis_api() -> MockMipAnalysis:
+def mip_analysis_api(cg_context: CGConfig) -> MockMipAnalysis:
     """MIP analysis mock data."""
-    return MockMipAnalysis()
+    return MockMipAnalysis(config=cg_context, pipeline=Pipeline.MIP_DNA)
 
 
 @pytest.fixture(scope="session")
@@ -88,7 +89,7 @@ def lims_family(fixtures_dir: Path) -> dict:
 
 
 @pytest.fixture(scope="session")
-def lims_samples(lims_family: dict) -> List[dict]:
+def lims_samples(lims_family: dict) -> list[dict]:
     """Returns the samples of a lims case."""
     return lims_family["samples"]
 
@@ -114,7 +115,7 @@ def report_store(analysis_store, helpers, timestamp_yesterday):
 
 
 @pytest.fixture(scope="session")
-def rnafusion_validated_metrics() -> Dict[str, str]:
+def rnafusion_validated_metrics() -> dict[str, str]:
     """Return Rnafusion raw analysis metrics dictionary."""
     return {
         "gc_content": "51.7",

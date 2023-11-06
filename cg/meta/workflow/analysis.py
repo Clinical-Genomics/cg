@@ -4,16 +4,16 @@ import os
 import shutil
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
-from cg.constants.constants import AnalysisType, WorkflowManager
+from cg.constants.constants import AnalysisType, CaseActions, WorkflowManager
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
-from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
+from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
@@ -38,7 +38,7 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     @property
-    def threshold_reads(self):
+    def use_read_count_threshold(self) -> bool:
         """Defines whether the threshold for adequate read count should be passed for all samples
         when determining if the analysis for a case should be automatically started"""
         return False
@@ -92,7 +92,7 @@ class AnalysisAPI(MetaAPI):
         """Get workflow manager for a given pipeline."""
         return WorkflowManager.Slurm.value
 
-    def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
+    def get_case_path(self, case_id: str) -> Union[list[Path], Path]:
         """Path to case working directory."""
         raise NotImplementedError
 
@@ -138,7 +138,7 @@ class AnalysisAPI(MetaAPI):
         """Storing bundle data in Housekeeper for CASE_ID"""
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         bundle_data: dict = self.get_hermes_transformed_deliverables(case_id)
-        bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
+        bundle_result: tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
             bundle_data=bundle_data
         )
         if not bundle_result:
@@ -246,18 +246,18 @@ class AnalysisAPI(MetaAPI):
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
         )
 
-    def get_analyses_to_clean(self, before: dt.datetime) -> List[Analysis]:
+    def get_analyses_to_clean(self, before: dt.datetime) -> list[Analysis]:
         analyses_to_clean = self.status_db.get_analyses_to_clean(
             pipeline=self.pipeline, before=before
         )
         return analyses_to_clean
 
-    def get_cases_to_analyze(self) -> List[Family]:
+    def get_cases_to_analyze(self) -> list[Family]:
         return self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.threshold_reads
+            pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
 
-    def get_cases_to_store(self) -> List[Family]:
+    def get_cases_to_store(self) -> list[Family]:
         """Return cases where analysis finished successfully,
         and is ready to be stored in Housekeeper."""
         return [
@@ -266,7 +266,7 @@ class AnalysisAPI(MetaAPI):
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
         ]
 
-    def get_cases_to_qc(self) -> List[Family]:
+    def get_cases_to_qc(self) -> list[Family]:
         """Return cases where analysis finished successfully,
         and is ready for QC metrics checks."""
         return [
@@ -279,7 +279,7 @@ class AnalysisAPI(MetaAPI):
         """Return the path to the FASTQ destination directory."""
         raise NotImplementedError
 
-    def gather_file_metadata_for_sample(self, sample_obj: Sample) -> List[dict]:
+    def gather_file_metadata_for_sample(self, sample_obj: Sample) -> list[dict]:
         return [
             self.fastq_handler.parse_file_data(file_obj.full_path)
             for file_obj in self.housekeeper_api.files(
@@ -296,7 +296,7 @@ class AnalysisAPI(MetaAPI):
         """
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: "", 2: ""}
-        files: List[dict] = self.gather_file_metadata_for_sample(sample_obj=sample_obj)
+        files: list[dict] = self.gather_file_metadata_for_sample(sample_obj=sample_obj)
         sorted_files = sorted(files, key=lambda k: k["path"])
         fastq_dir = self.get_sample_fastq_destination_dir(case=case_obj, sample=sample_obj)
         fastq_dir.mkdir(parents=True, exist_ok=True)
@@ -401,27 +401,19 @@ class AnalysisAPI(MetaAPI):
             self.set_statusdb_action(case_id=case_id, action="analyze")
         LOG.info("Decompression started for %s", case_id)
 
-    def resolve_decompression(self, case_id: str, dry_run: bool) -> bool:
+    def resolve_decompression(self, case_id: str, dry_run: bool) -> None:
         """
-        Handles decompression automatically for case.
-        Return True if decompression is running
+        Decompresses a case if needed and adds new fastq files to Housekeeper.
         """
         if self.prepare_fastq_api.is_spring_decompression_needed(case_id):
             self.decompress_case(case_id=case_id, dry_run=dry_run)
-            return True
+            return
 
         if self.prepare_fastq_api.is_spring_decompression_running(case_id):
-            self.set_statusdb_action(case_id=case_id, action="analyze")
-            return True
+            self.set_statusdb_action(case_id=case_id, action=CaseActions.ANALYZE)
+            return
 
-        LOG.info("Linking fastq files in housekeeper for case %s", case_id)
-        self.prepare_fastq_api.check_fastq_links(case_id)
-
-        if self.prepare_fastq_api.is_spring_decompression_needed(case_id):
-            return True
-
-        LOG.info("Decompression for case %s not needed", case_id)
-        return False
+        self.prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
 
     @staticmethod
     def get_date_from_file_path(file_path: Path) -> dt.datetime.date:
@@ -453,7 +445,7 @@ class AnalysisAPI(MetaAPI):
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
             self.status_db.session.commit()
 
-    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[list[Path], Path]) -> int:
         """Remove workflow run directory."""
 
         try:
@@ -472,3 +464,41 @@ class AnalysisAPI(MetaAPI):
             LOG.info(f"Cleaned {case_path}")
             self.clean_analyses(case_id=case_id)
             return EXIT_SUCCESS
+
+    def _is_flow_cell_check_applicable(self, case_id) -> bool:
+        """Returns true if the case is neither down sampled nor external."""
+        return not (
+            self.status_db.is_case_down_sampled(case_id) or self.status_db.is_case_external(case_id)
+        )
+
+    def ensure_flow_cells_on_disk(self, case_id: str) -> None:
+        """Check if flow cells are on disk for given case. If not, request flow cells."""
+        if not self._is_flow_cell_check_applicable(case_id):
+            LOG.info(
+                "Flow cell check is not applicable - "
+                "the case is either down sampled or external."
+            )
+            return
+        if not self.status_db.are_all_flow_cells_on_disk(case_id=case_id):
+            self.status_db.request_flow_cells_for_case(case_id)
+
+    def is_case_ready_for_analysis(self, case_id: str) -> bool:
+        if self._is_flow_cell_check_applicable(
+            case_id
+        ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
+            LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
+            return False
+        if self.prepare_fastq_api.is_spring_decompression_needed(
+            case_id
+        ) or self.prepare_fastq_api.is_spring_decompression_running(case_id):
+            LOG.warning(f"Case {case_id} is not ready - not all files are decompressed.")
+            return False
+        return True
+
+    def prepare_fastq_files(self, case_id: str, dry_run: bool) -> None:
+        """Retrieves or decompresses fastq files if needed, upon which an AnalysisNotReady error
+        is raised."""
+        self.ensure_flow_cells_on_disk(case_id)
+        self.resolve_decompression(case_id, dry_run=dry_run)
+        if not self.is_case_ready_for_analysis(case_id):
+            raise AnalysisNotReadyError("FASTQ file are not present for the analysis to start")

@@ -1,7 +1,7 @@
 """Gene panel specific constants."""
-from typing import List
 
-from cg.utils.enums import StrEnum
+
+from enum import StrEnum
 
 GENOME_BUILD_37 = "37"
 GENOME_BUILD_38 = "GRCh38"
@@ -40,7 +40,7 @@ class GenePanelMasterList(StrEnum):
     STROKE: str = "STROKE"
 
     @classmethod
-    def get_panel_names(cls, panels=None) -> List[str]:
+    def get_panel_names(cls, panels=None) -> list[str]:
         """Return requested panel names from Master list, or all panels if none are specified."""
         return (
             [panel_name.value for panel_name in panels]

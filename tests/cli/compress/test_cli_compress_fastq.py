@@ -2,7 +2,6 @@
 
 import datetime as dt
 import logging
-from typing import List
 
 from click.testing import CliRunner
 
@@ -40,7 +39,7 @@ def test_get_cases_to_process(
     status_db.session.commit()
 
     # WHEN running the compress command
-    cases: List[Family] = get_cases_to_process(days_back=1, store=status_db)
+    cases: list[Family] = get_cases_to_process(days_back=1, store=status_db)
 
     # THEN assert cases are returned
     assert cases
@@ -61,7 +60,7 @@ def test_get_cases_to_process_when_no_case(
     status_db: Store = populated_compress_context.status_db
 
     # WHEN running the compress command
-    cases: List[Family] = get_cases_to_process(
+    cases: list[Family] = get_cases_to_process(
         case_id=case_id_does_not_exist, days_back=1, store=status_db
     )
 
@@ -70,6 +69,26 @@ def test_get_cases_to_process_when_no_case(
 
     # THEN assert we log no cases where found
     assert f"Could not find case {case_id_does_not_exist}" in caplog.text
+
+
+def test_incompressible_cases_are_not_processable(
+    helpers: StoreHelpers,
+    populated_compress_context: CGConfig,
+):
+    """Test that cases that are marked as incompressible are not processable."""
+
+    # GIVEN a store with a case that is marked as incompressible
+    status_db: Store = populated_compress_context.status_db
+
+    incompressible_case: Family = helpers.add_case(store=status_db, internal_id="incompressible")
+    incompressible_case.created_at = dt.datetime.now() - dt.timedelta(days=1000)
+    incompressible_case.is_compressible = False
+
+    # WHEN retrieving the processable cases
+    processable_cases: list[Family] = get_cases_to_process(days_back=1, store=status_db)
+
+    # THEN assert that the incompressible case is not processable
+    assert incompressible_case not in processable_cases
 
 
 def test_compress_fastq_cli_no_family(compress_context: CGConfig, cli_runner: CliRunner, caplog):
@@ -150,7 +169,7 @@ def test_compress_fastq_cli_case_id(
     assert res.exit_code == 0
 
     # THEN assert it was communicated that no families where found
-    assert f"individuals in 1 (completed) cases where compressed" in caplog.text
+    assert "individuals in 1 (completed) cases where compressed" in caplog.text
 
 
 def test_compress_fastq_cli_multiple_family(

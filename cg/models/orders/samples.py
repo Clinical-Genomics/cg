@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from pydantic.v1 import BaseModel, constr, validator
 
@@ -100,9 +100,9 @@ class Of1508Sample(OrderInSample):
     post_formalin_fixation_time: Optional[int]
     tissue_block_size: Optional[str]
     # "Not Required"
-    cohorts: Optional[List[str]]
-    phenotype_groups: Optional[List[str]]
-    phenotype_terms: Optional[List[str]]
+    cohorts: Optional[list[str]]
+    phenotype_groups: Optional[list[str]]
+    phenotype_terms: Optional[list[str]]
     require_qc_ok: bool = False
     quantity: Optional[int]
     subject_id: Optional[
@@ -138,7 +138,7 @@ class Of1508Sample(OrderInSample):
 class MipDnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_DNA
     # "Required if data analysis in Scout or vcf delivery"
-    panels: List[constr(min_length=1, max_length=Panel.abbrev.property.columns[0].type.length)]
+    panels: list[constr(min_length=1, max_length=Panel.abbrev.property.columns[0].type.length)]
     status: StatusEnum
 
 

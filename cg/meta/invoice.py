@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Union
+from typing import Any, Optional, Union
 
 from pydantic.v1 import ValidationError
 
@@ -90,8 +90,8 @@ class InvoiceAPI:
     def get_invoice_report(self, cost_center: str) -> Optional[dict]:
         """Return invoice information as dictionary to generate Excel report."""
 
-        records: List[dict] = []
-        pooled_samples: List = []
+        records: list[dict] = []
+        pooled_samples = []
 
         for raw_record in self.raw_records:
             if self.record_type == RecordType.Pool:

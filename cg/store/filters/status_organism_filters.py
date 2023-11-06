@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 from sqlalchemy.orm import Query
 
@@ -19,7 +19,7 @@ class OrganismFilter(Enum):
 
 def apply_organism_filter(
     organisms: Query,
-    filter_functions: List[Callable],
+    filter_functions: list[Callable],
     internal_id: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""

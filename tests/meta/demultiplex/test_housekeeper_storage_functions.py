@@ -1,7 +1,6 @@
 """Tests for the housekeeper storage functions of the demultiplexing post post-processing module."""
 
 from pathlib import Path
-from typing import List, Set
 
 from housekeeper.store.models import File
 from mock import MagicMock, call
@@ -168,7 +167,7 @@ def test_add_demux_logs_to_housekeeper(
     )
 
     # GIVEN a demux log in the run directory
-    demux_log_file_paths: List[Path] = [
+    demux_log_file_paths: list[Path] = [
         Path(
             demux_post_processing_api.flow_cells_dir,
             f"{bcl_convert_flow_cell.full_name}",
@@ -197,7 +196,7 @@ def test_add_demux_logs_to_housekeeper(
         bundle=bcl_convert_flow_cell.id,
     ).all()
 
-    expected_file_names: List[str] = []
+    expected_file_names: list[str] = []
     for file_path in demux_log_file_paths:
         expected_file_names.append(file_path.name.split("/")[-1])
 
@@ -226,5 +225,5 @@ def test_store_fastq_path_in_housekeeper_correct_tags(
 
     # THEN the file was added to Housekeeper with the correct tags
     file: File = populated_housekeeper_api.get_files(bundle=sample_id).first()
-    expected_tags: Set[str] = {SequencingFileTag.FASTQ.value, novaseq6000_flow_cell.id, sample_id}
-    assert set([tag.name for tag in file.tags]) == expected_tags
+    expected_tags: set[str] = {SequencingFileTag.FASTQ.value, novaseq6000_flow_cell.id, sample_id}
+    assert {tag.name for tag in file.tags} == expected_tags

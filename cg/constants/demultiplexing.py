@@ -1,11 +1,10 @@
 """Constants related to demultiplexing."""
 from pathlib import Path
-from typing import Dict, List
 
 import click
 
 from cg.constants.sequencing import Sequencers
-from cg.utils.enums import Enum, StrEnum
+from enum import Enum, StrEnum
 
 
 class BclConverter(StrEnum):
@@ -37,7 +36,8 @@ class DemultiplexingDirsAndFiles(StrEnum):
     BCL_CONVERT: str = "BCLConvert"
     FLOW_CELLS_DIRECTORY_NAME: str = "flow_cells"
     DEMULTIPLEXED_RUNS_DIRECTORY_NAME: str = "demultiplexed_runs"
-    OUTPUT_FILE_MANIFEST: str = "Manifest.tsv"
+    ILLUMINA_FILE_MANIFEST: str = "Manifest.tsv"
+    CG_FILE_MANIFEST: str = "file_manifest.tsv"
     INTER_OP: str = "InterOp"
 
 
@@ -73,8 +73,8 @@ class SampleSheetBcl2FastqSections:
 
     class Settings(Enum):
         HEADER: str = "[Settings]"
-        BARCODE_MISMATCH_INDEX1: List[str] = ["BarcodeMismatchesIndex1", "0"]
-        BARCODE_MISMATCH_INDEX2: List[str] = ["BarcodeMismatchesIndex2", "0"]
+        BARCODE_MISMATCH_INDEX1: list[str] = ["BarcodeMismatchesIndex1", "0"]
+        BARCODE_MISMATCH_INDEX2: list[str] = ["BarcodeMismatchesIndex2", "0"]
 
     class Data(Enum):
         HEADER: str = "[Data]"
@@ -90,7 +90,7 @@ class SampleSheetBcl2FastqSections:
         OPERATOR: str = "Operator"
         SAMPLE_PROJECT_BCL2FASTQ: str = "Project"
 
-        COLUMN_NAMES: List[str] = [
+        COLUMN_NAMES: list[str] = [
             FLOW_CELL_ID,
             LANE,
             SAMPLE_INTERNAL_ID_BCL2FASTQ,
@@ -110,14 +110,14 @@ class SampleSheetBCLConvertSections:
 
     class Header(Enum):
         HEADER: str = "[Header]"
-        FILE_FORMAT: List[str] = ["FileFormatVersion", "2"]
+        FILE_FORMAT: list[str] = ["FileFormatVersion", "2"]
         RUN_NAME: str = "RunName"
         INSTRUMENT_PLATFORM_TITLE: str = "InstrumentPlatform"
-        INSTRUMENT_PLATFORM_VALUE: Dict[str, str] = {
+        INSTRUMENT_PLATFORM_VALUE: dict[str, str] = {
             Sequencers.NOVASEQ: "NovaSeq6000",
             Sequencers.NOVASEQX: "NovaSeqXSeries",
         }
-        INDEX_ORIENTATION_FORWARD: List[str] = ["IndexOrientation", "Forward"]
+        INDEX_ORIENTATION_FORWARD: list[str] = ["IndexOrientation", "Forward"]
 
     class Reads(StrEnum):
         HEADER: str = "[Reads]"
@@ -128,8 +128,8 @@ class SampleSheetBCLConvertSections:
 
     class Settings(Enum):
         HEADER: str = "[BCLConvert_Settings]"
-        SOFTWARE_VERSION: List[str] = ["SoftwareVersion", "4.1.7"]
-        FASTQ_COMPRESSION_FORMAT: List[str] = ["FastqCompressionFormat", "gzip"]
+        SOFTWARE_VERSION: list[str] = ["SoftwareVersion", "4.1.7"]
+        FASTQ_COMPRESSION_FORMAT: list[str] = ["FastqCompressionFormat", "gzip"]
 
     class Data(Enum):
         HEADER: str = "[BCLConvert_Data]"
@@ -143,7 +143,7 @@ class SampleSheetBCLConvertSections:
         BARCODE_MISMATCHES_1: str = "BarcodeMismatchesIndex1"
         BARCODE_MISMATCHES_2: str = "BarcodeMismatchesIndex2"
 
-        COLUMN_NAMES: List[str] = [
+        COLUMN_NAMES: list[str] = [
             LANE,
             SAMPLE_INTERNAL_ID,
             INDEX_1,

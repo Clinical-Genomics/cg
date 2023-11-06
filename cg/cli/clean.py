@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import click
 from housekeeper.store.models import File, Version
@@ -121,9 +121,9 @@ def scout_finished_cases(
 ) -> None:
     """Clean up of solved and archived Scout cases."""
     scout_api: ScoutAPI = context.obj.scout_api
-    bundles: List[str] = []
+    bundles: list[str] = []
     for status in [ScoutTag.ARCHIVED.value, ScoutTag.SOLVED.value]:
-        cases: List[ScoutExportCase] = scout_api.get_cases(status=status, reruns=False)
+        cases: list[ScoutExportCase] = scout_api.get_cases(status=status, reruns=False)
         cases_added: int = 0
         for case in cases:
             analysis_time_delta: timedelta = get_timedelta_from_date(date=case.analysis_date)
@@ -205,7 +205,7 @@ def hk_bundle_files(
             "started_at_before": date_threshold,
         },
     )
-    analyses: List[Analysis] = function_dispatcher()
+    analyses: list[Analysis] = function_dispatcher()
 
     size_cleaned: int = 0
     for analysis in analyses:
@@ -229,7 +229,7 @@ def hk_bundle_files(
             f"pipeline: {analysis.pipeline}; "
             f"date {analysis.started_at}"
         )
-        version_files: List[File] = housekeeper_api.get_files(
+        version_files: list[File] = housekeeper_api.get_files(
             bundle=analysis.family.internal_id, tags=tags, version=hk_bundle_version.id
         ).all()
         for version_file in version_files:
@@ -257,7 +257,7 @@ def hk_bundle_files(
 def clean_flow_cells(context: CGConfig, dry_run: bool):
     """Remove flow cells from the flow cells and demultiplexed runs folder."""
 
-    directories_to_check: List[Path] = []
+    directories_to_check: list[Path] = []
     for path in [Path(context.flow_cells_dir), Path(context.demultiplexed_flow_cells_dir)]:
         directories_to_check.extend(get_directories_in_path(path))
     exit_code = EXIT_SUCCESS

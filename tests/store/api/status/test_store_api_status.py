@@ -1,6 +1,5 @@
 """Tests for store API status module."""
 
-from typing import List
 
 from sqlalchemy.orm import Query
 
@@ -18,7 +17,8 @@ def test_case_in_uploaded_observations(helpers: StoreHelpers, sample_store: Stor
     analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
-    sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    sample_store.session.add(link)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is not None
@@ -37,7 +37,8 @@ def test_case_not_in_uploaded_observations(helpers: StoreHelpers, sample_store: 
     analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store)
-    sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    sample_store.session.add(link)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is None
@@ -56,7 +57,8 @@ def test_case_in_observations_to_upload(helpers: StoreHelpers, sample_store: Sto
     analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store)
-    sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    sample_store.session.add(link)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is None
@@ -77,7 +79,8 @@ def test_case_not_in_observations_to_upload(
     analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
-    sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    sample_store.session.add(link)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is not None
@@ -95,7 +98,7 @@ def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
     helpers.add_analysis(store=sample_store)
 
     # WHEN fetching all analyses that are ready for upload
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload()
     ]
 
@@ -109,7 +112,7 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
     helpers.add_analysis(store=sample_store, completed_at=timestamp)
 
     # WHEN fetching all analysis that are ready for upload without specifying pipeline
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=None)
     ]
 
@@ -123,7 +126,7 @@ def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, ti
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
 
     # WHEN fetching all analyses that are ready for upload and analysed with MIP
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=None)
     ]
 
@@ -138,7 +141,7 @@ def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, 
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=pipeline)
 
     # WHEN fetching all pipelines that are analysed with MIP
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=pipeline)
     ]
 
@@ -154,7 +157,7 @@ def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_sto
     helpers.add_analysis(store=sample_store, completed_at=None, pipeline=pipeline)
 
     # WHEN fetching all analyses that are ready for upload and analysed by MIP
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=pipeline)
     ]
 
@@ -168,7 +171,7 @@ def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
 
     # WHEN fetching all analyses that was analysed with MIP
-    records: List[Analysis] = [
+    records: list[Analysis] = [
         analysis_obj
         for analysis_obj in sample_store.get_analyses_to_upload(pipeline=Pipeline.FASTQ)
     ]
@@ -182,7 +185,7 @@ def test_set_case_action(analysis_store: Store, case_id):
     # Given a store with a case with action None
     action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
 
-    assert action == None
+    assert action is None
 
     # When setting the case to "analyze"
     analysis_store.set_case_action(case_internal_id=case_id, action="analyze")

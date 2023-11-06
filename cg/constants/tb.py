@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 
 
 class AnalysisStatus:
@@ -12,7 +12,7 @@ class AnalysisStatus:
     QC: str = "qc"
 
 
-class AnalysisTypes(str, Enum):
+class AnalysisTypes(StrEnum):
     WGS: str = "wgs"
     WES: str = "wes"
     TGS: str = "tgs"

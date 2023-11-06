@@ -1,7 +1,6 @@
 import datetime as dt
 import logging
 from abc import ABC, abstractmethod
-from typing import List
 
 from cg.apps.lims import LimsAPI
 from cg.models.orders.order import OrderIn
@@ -30,12 +29,12 @@ class Submitter(ABC):
 
     @abstractmethod
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: int, items: List[dict]
-    ) -> List[Model]:
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: int, items: list[dict]
+    ) -> list[Model]:
         pass
 
     @staticmethod
-    def _fill_in_sample_ids(samples: List[dict], lims_map: dict, id_key: str = "internal_id"):
+    def _fill_in_sample_ids(samples: list[dict], lims_map: dict, id_key: str = "internal_id"):
         """Fill in LIMS sample ids."""
         for sample in samples:
             LOG.debug(f"{sample['name']}: link sample to LIMS")
@@ -44,7 +43,7 @@ class Submitter(ABC):
                 LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
                 sample[id_key] = internal_id
 
-    def _add_missing_reads(self, samples: List[Sample]):
+    def _add_missing_reads(self, samples: list[Sample]):
         """Add expected reads/reads missing."""
         for sample_obj in samples:
             LOG.info(f"{sample_obj.internal_id}: add missing reads in LIMS")

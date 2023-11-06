@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 from sqlalchemy import and_, not_, or_
 from sqlalchemy.orm import Query
@@ -40,7 +40,7 @@ def filter_cases_by_customer_entry_id(cases: Query, customer_entry_id: int, **kw
 
 
 def filter_cases_by_customer_entry_ids(
-    cases: Query, customer_entry_ids: List[int], **kwargs
+    cases: Query, customer_entry_ids: list[int], **kwargs
 ) -> Query:
     """Filter cases with matching customer ids."""
     return cases.filter(Family.customer_id.in_(customer_entry_ids)) if customer_entry_ids else cases
@@ -190,6 +190,11 @@ def filter_running_cases(cases: Query, **kwargs) -> Query:
     return cases.filter(Family.action == CaseActions.RUNNING)
 
 
+def filter_compressible_cases(cases: Query, **kwargs) -> Query:
+    """Filter cases which are running."""
+    return cases.filter(Family.is_compressible)
+
+
 def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
     """Order cases by created at."""
     return cases.order_by(Family.created_at.desc())
@@ -197,12 +202,12 @@ def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
 
 def apply_case_filter(
     cases: Query,
-    filter_functions: List[Callable],
+    filter_functions: list[Callable],
     action: Optional[str] = None,
     case_search: Optional[str] = None,
     creation_date: Optional[datetime] = None,
     customer_entry_id: Optional[int] = None,
-    customer_entry_ids: Optional[List[int]] = None,
+    customer_entry_ids: Optional[list[int]] = None,
     entry_id: Optional[int] = None,
     internal_id: Optional[str] = None,
     internal_id_search: Optional[str] = None,
@@ -256,6 +261,7 @@ class CaseFilter(Enum):
     FILTER_HAS_INACTIVE_ANALYSIS: Callable = filter_inactive_analysis_cases
     FILTER_HAS_SEQUENCE: Callable = filter_cases_has_sequence
     FILTER_IS_RUNNING: Callable = filter_running_cases
+    FILTER_IS_COMPRESSIBLE: Callable = filter_compressible_cases
     FILTER_NEW_BY_ORDER_DATE: Callable = filter_newer_cases_by_order_date
     FILTER_NOT_ANALYSED: Callable = filter_cases_not_analysed
     FILTER_OLD_BY_CREATION_DATE: Callable = filter_older_cases_by_creation_date

@@ -3,7 +3,7 @@
 import click
 
 from cg.utils.date import get_date
-from cg.utils.enums import StrEnum
+from enum import StrEnum
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
@@ -104,6 +104,7 @@ class Pipeline(StrEnum):
     MICROSALT: str = "microsalt"
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
+    RAREDISEASE: str = "raredisease"
     RNAFUSION: str = "rnafusion"
     RSYNC: str = "rsync"
     SARS_COV_2: str = "sars-cov-2"
@@ -153,6 +154,7 @@ class HastaSlurmPartitions(StrEnum):
 
 class FileExtensions(StrEnum):
     BED: str = ".bed"
+    COMPLETE: str = ".complete"
     CRAM: str = ".cram"
     CSV: str = ".csv"
     FASTQ: str = ".fastq"
@@ -161,7 +163,10 @@ class FileExtensions(StrEnum):
     JSON: str = ".json"
     KEY: str = ".key"
     LOG: str = ".log"
+    MD5SUM: str = ".md5sum"
     NO_EXTENSION: str = ""
+    PASS_PHRASE: str = ".passphrase"
+    PENDING: str = ".pending"
     SBATCH: str = ".sbatch"
     SPRING: str = ".spring"
     TAR: str = ".tar"
@@ -228,3 +233,6 @@ class Strandedness(StrEnum):
     FORWARD: str = "forward"
     REVERSE: str = "reverse"
     UNSTRANDED: str = "unstranded"
+
+
+PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.SARS_COV_2]

@@ -1,7 +1,6 @@
 """Fixtures for crunchy API."""
 import logging
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -20,7 +19,7 @@ def real_spring_metadata_path(apps_dir: Path) -> Path:
 
 
 @pytest.fixture
-def spring_metadata(compression_object: CompressionData) -> List[dict]:
+def spring_metadata(compression_object: CompressionData) -> list[dict]:
     """Return meta data information."""
     return [
         {
@@ -40,13 +39,13 @@ def spring_metadata(compression_object: CompressionData) -> List[dict]:
 
 
 @pytest.fixture
-def crunchy_metadata_object(spring_metadata: List[dict]) -> CrunchyMetadata:
+def crunchy_metadata_object(spring_metadata: list[dict]) -> CrunchyMetadata:
     """Return Crunchy metadata."""
     return CrunchyMetadata(files=spring_metadata)
 
 
 @pytest.fixture
-def spring_metadata_file(compression_object: CompressionData, spring_metadata: List[dict]) -> Path:
+def spring_metadata_file(compression_object: CompressionData, spring_metadata: list[dict]) -> Path:
     """Return the path to a populated SPRING metadata file."""
     metadata_path = compression_object.spring_metadata_path
     WriteFile.write_file_from_content(

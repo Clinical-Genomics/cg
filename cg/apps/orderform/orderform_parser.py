@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, Hashable, Iterable, List, Optional, Set
+from typing import Hashable, Iterable, Optional
 
 from pydantic import BaseModel, ConfigDict, constr
 
@@ -18,7 +18,7 @@ class OrderformParser(BaseModel):
     """Class to parse orderforms"""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    samples: List[OrderSample] = []
+    samples: list[OrderSample] = []
     project_type: Optional[OrderType] = None
     delivery_type: Optional[DataDelivery] = None
     customer_id: constr(
@@ -31,7 +31,7 @@ class OrderformParser(BaseModel):
         """Parse the orderform information"""
         raise NotImplementedError
 
-    def group_cases(self) -> Dict[str, List[OrderSample]]:
+    def group_cases(self) -> dict[str, list[OrderSample]]:
         """Group samples in cases."""
         LOG.info("Group samples under respective case")
         cases = {}
@@ -48,12 +48,12 @@ class OrderformParser(BaseModel):
             LOG.info("Could not find any cases")
         return cases
 
-    def get_pools(self) -> List[OrderPool]:
+    def get_pools(self) -> list[OrderPool]:
         """create pools from samples
 
         Check that all samples from one pool has the same application
         """
-        pools: Dict[str, OrderPool] = {}
+        pools: dict[str, OrderPool] = {}
         sample: OrderSample
         for sample in self.samples:
             pool_name = sample.pool
@@ -91,14 +91,14 @@ class OrderformParser(BaseModel):
         @param default_value:   default value to use if item has an empty value of attr
         @return:                a value with the attribute of item in items
         """
-        values: Set[Hashable] = set(getattr(item, attr, default_value) for item in items)
+        values: set[Hashable] = set(getattr(item, attr, default_value) for item in items)
         if len(values) > 1:
             raise OrderFormError(f"multiple values [{values}] for '{attr}' for '{items_id}'")
 
         return values.pop()
 
     @staticmethod
-    def _get_single_set(items_id: str, items: Iterable, attr: str) -> Set[Hashable]:
+    def _get_single_set(items_id: str, items: Iterable, attr: str) -> set[Hashable]:
         """
         Get single value (set) from a bunch of items, will raise if value not same on all items
         @param items_id: id of items group (e.g. case-id)
@@ -106,7 +106,7 @@ class OrderformParser(BaseModel):
         @param attr:     one attribute of item containing a list (e.g. panels)
         @return:         a set with the attribute of item in items
         """
-        values: Set[Hashable] = set()
+        values: set[Hashable] = set()
         for item_idx, item in enumerate(items):
             if item_idx == 0:
                 values = set(getattr(item, attr)) if getattr(item, attr) else set()
@@ -115,7 +115,7 @@ class OrderformParser(BaseModel):
         return values
 
     @staticmethod
-    def expand_case(case_id: str, case_samples: List[OrderSample]) -> OrderCase:
+    def expand_case(case_id: str, case_samples: list[OrderSample]) -> OrderCase:
         """Fill-in information about case."""
 
         priority: Hashable[str] = OrderformParser._get_single_value(
@@ -124,10 +124,10 @@ class OrderformParser(BaseModel):
         synopsis: Hashable[str] = OrderformParser._get_single_value(
             items_id=case_id, items=case_samples, attr="synopsis"
         )
-        cohorts: Set[Hashable[str]] = OrderformParser._get_single_set(
+        cohorts: set[Hashable[str]] = OrderformParser._get_single_set(
             items_id=case_id, items=case_samples, attr="cohorts"
         )
-        panels: Set[Hashable[str]] = OrderformParser._get_single_set(
+        panels: set[Hashable[str]] = OrderformParser._get_single_set(
             items_id=case_id, items=case_samples, attr="panels"
         )
 
@@ -142,8 +142,8 @@ class OrderformParser(BaseModel):
 
     def generate_orderform(self) -> Orderform:
         """Generate an orderform"""
-        cases_map: Dict[str, List[OrderSample]] = self.group_cases()
-        case_objs: List[OrderCase] = []
+        cases_map: dict[str, list[OrderSample]] = self.group_cases()
+        case_objs: list[OrderCase] = []
         for case_id in cases_map:
             case_objs.append(self.expand_case(case_id=case_id, case_samples=cases_map[case_id]))
         return Orderform(

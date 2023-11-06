@@ -1,17 +1,20 @@
-from datetime import datetime
-from typing import List, Optional, Union
+import logging
+from typing import Optional
 
-from pydantic.v1 import BaseModel, root_validator, validator
+from pydantic import BaseModel, BeforeValidator, model_validator
+from typing_extensions import Annotated
 
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import NA_FIELD, REPORT_SUPPORTED_PIPELINES
 from cg.models.report.sample import ApplicationModel, SampleModel
 from cg.models.report.validators import (
-    validate_date,
-    validate_empty_field,
-    validate_list,
-    validate_path,
-    validate_supported_pipeline,
+    get_analysis_type_as_string,
+    get_date_as_string,
+    get_list_as_string,
+    get_path_as_string,
+    get_report_string,
 )
+
+LOG = logging.getLogger(__name__)
 
 
 class CustomerModel(BaseModel):
@@ -25,14 +28,10 @@ class CustomerModel(BaseModel):
         scout_access: whether the customer has access to scout or not; source: statusDB/family/customer/scout_access
     """
 
-    name: Optional[str]
-    id: Optional[str]
-    invoice_address: Optional[str]
-    scout_access: Optional[bool]
-
-    _values = validator("name", "id", "invoice_address", always=True, allow_reuse=True)(
-        validate_empty_field
-    )
+    name: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    id: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    invoice_address: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    scout_access: Optional[bool] = None
 
 
 class ScoutReportFiles(BaseModel):
@@ -48,23 +47,12 @@ class ScoutReportFiles(BaseModel):
         smn_tsv: SMN gene variants file (MIP-DNA specific); source: HK
     """
 
-    snv_vcf: Optional[str]
-    snv_research_vcf: Optional[str]
-    sv_vcf: Optional[str]
-    sv_research_vcf: Optional[str]
-    vcf_str: Optional[str]
-    smn_tsv: Optional[str]
-
-    _str_values = validator(
-        "snv_vcf",
-        "snv_research_vcf",
-        "sv_vcf",
-        "sv_research_vcf",
-        "vcf_str",
-        "smn_tsv",
-        always=True,
-        allow_reuse=True,
-    )(validate_path)
+    snv_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    snv_research_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    sv_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    sv_research_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    vcf_str: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    smn_tsv: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
 
 
 class DataAnalysisModel(BaseModel):
@@ -83,30 +71,29 @@ class DataAnalysisModel(BaseModel):
         scout_files: list of file names uploaded to Scout
     """
 
-    customer_pipeline: Optional[Pipeline]
-    data_delivery: Optional[DataDelivery]
-    pipeline: Optional[Pipeline]
-    pipeline_version: Optional[str]
-    type: Optional[str]
-    genome_build: Optional[str]
-    variant_callers: Union[None, List[str], str]
-    panels: Union[None, List[str], str]
+    customer_pipeline: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    data_delivery: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    pipeline: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    pipeline_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    type: Annotated[str, BeforeValidator(get_analysis_type_as_string)] = NA_FIELD
+    genome_build: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    variant_callers: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
+    panels: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     scout_files: ScoutReportFiles
 
-    _values = root_validator(pre=True, allow_reuse=True)(validate_supported_pipeline)
-    _str_values = validator(
-        "customer_pipeline",
-        "data_delivery",
-        "pipeline",
-        "pipeline_version",
-        "type",
-        "genome_build",
-        always=True,
-        allow_reuse=True,
-    )(validate_empty_field)
-    _list_values = validator("variant_callers", "panels", always=True, allow_reuse=True)(
-        validate_list
-    )
+    @model_validator(mode="after")
+    def check_supported_pipeline(self) -> "DataAnalysisModel":
+        """Check if the report generation supports a specific pipeline and analysis type."""
+        if self.pipeline != self.customer_pipeline:
+            LOG.error(
+                f"The analysis requested by the customer ({self.customer_pipeline}) does not match the one "
+                f"executed ({self.pipeline})"
+            )
+            raise ValueError
+        if self.pipeline not in REPORT_SUPPORTED_PIPELINES:
+            LOG.error(f"The pipeline {self.pipeline} does not support delivery report generation")
+            raise ValueError
+        return self
 
 
 class CaseModel(BaseModel):
@@ -121,13 +108,11 @@ class CaseModel(BaseModel):
         applications: case associated unique applications
     """
 
-    name: Optional[str]
-    id: Optional[str]
-    samples: List[SampleModel]
+    name: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    id: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    samples: list[SampleModel]
     data_analysis: DataAnalysisModel
-    applications: List[ApplicationModel]
-
-    _name = validator("name", always=True, allow_reuse=True)(validate_empty_field)
+    applications: list[ApplicationModel]
 
 
 class ReportModel(BaseModel):
@@ -143,10 +128,7 @@ class ReportModel(BaseModel):
     """
 
     customer: CustomerModel
-    version: Union[None, int, str]
-    date: Union[None, datetime, str]
+    version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    date: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
     case: CaseModel
-    accredited: Optional[bool]
-
-    _version = validator("version", always=True, allow_reuse=True)(validate_empty_field)
-    _date = validator("date", always=True, allow_reuse=True)(validate_date)
+    accredited: Optional[bool] = None

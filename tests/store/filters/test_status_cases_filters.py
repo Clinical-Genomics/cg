@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Union
+from typing import Union
 
 from sqlalchemy.orm import Query
 
@@ -29,7 +29,7 @@ from cg.store.filters.status_case_filters import (
     filter_report_supported_data_delivery_cases,
     filter_running_cases,
 )
-from cg.store.models import Analysis, Family, Sample
+from cg.store.models import Analysis, Family, FamilySample, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -45,7 +45,8 @@ def test_filter_cases_has_sequence(
     test_case = helpers.add_case(base_store)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
@@ -70,7 +71,8 @@ def test_filter_cases_has_sequence_when_external(base_store: Store, helpers: Sto
     test_case = helpers.add_case(base_store)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
@@ -95,7 +97,8 @@ def test_filter_cases_has_sequence_when_not_sequenced(base_store: Store, helpers
     test_case = helpers.add_case(base_store)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
@@ -122,7 +125,8 @@ def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
     test_case = helpers.add_case(base_store)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
@@ -149,13 +153,14 @@ def test_filter_cases_with_pipeline_when_correct_pipline(
     test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
-    cases: List[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.BALSAMIC))
+    cases: list[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.BALSAMIC))
 
     # THEN cases should contain the test case
     assert cases
@@ -173,13 +178,14 @@ def test_filter_cases_with_pipeline_when_incorrect_pipline(
     test_case: Family = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
-    cases: List[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.MIP_DNA))
+    cases: list[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.MIP_DNA))
 
     # THEN cases should not contain the test case
     assert not cases
@@ -202,14 +208,19 @@ def test_filter_cases_with_loqusdb_supported_pipeline(
     test_fluffy_case.customer.loqus_upload = True
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_mip_case, test_sample, PhenotypeStatus.UNKNOWN)
-    base_store.relate_sample(test_fluffy_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link_1: FamilySample = base_store.relate_sample(
+        test_mip_case, test_sample, PhenotypeStatus.UNKNOWN
+    )
+    link_2: FamilySample = base_store.relate_sample(
+        test_fluffy_case, test_sample, PhenotypeStatus.UNKNOWN
+    )
+    base_store.session.add_all([link_1, link_2])
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases with pipeline
-    cases: List[Query] = list(filter_cases_with_loqusdb_supported_pipeline(cases=cases))
+    cases: list[Query] = list(filter_cases_with_loqusdb_supported_pipeline(cases=cases))
 
     # THEN only the Loqusdb supported case should be extracted
     assert test_mip_case in cases
@@ -228,7 +239,8 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method(
 
     # GIVEN a MIP-DNA associated test case
     test_case_wes: Family = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
-    base_store.relate_sample(test_case_wes, test_sample_wes, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case_wes, test_sample_wes, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
@@ -257,7 +269,8 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
 
     # GIVEN a MIP-DNA associated test case
     test_case_wts: Family = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
-    base_store.relate_sample(test_case_wts, test_sample_wts, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case_wts, test_sample_wts, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
@@ -291,7 +304,8 @@ def test_filter_cases_for_analysis(
     test_analysis.family.action: str = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
@@ -320,7 +334,8 @@ def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     test_case = helpers.add_case(base_store)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
@@ -355,7 +370,8 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
     test_analysis.family.action: Union[None, str] = None
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN an old analysis
     test_analysis.created_at = timestamp_yesterday
@@ -390,7 +406,8 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
     test_analysis.family.action: Union[None, str] = None
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
@@ -417,7 +434,8 @@ def test_filter_cases_with_scout_data_delivery(
     test_case = helpers.add_case(base_store, data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
@@ -445,8 +463,11 @@ def test_filter_report_supported_data_delivery_cases(
     test_invalid_case = helpers.add_case(base_store, name="test", data_delivery=DataDelivery.FASTQ)
 
     # GIVEN a database with the test cases
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
-    base_store.relate_sample(test_invalid_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link_1: FamilySample = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link_2: FamilySample = base_store.relate_sample(
+        test_invalid_case, test_sample, PhenotypeStatus.UNKNOWN
+    )
+    base_store.session.add_all([link_1, link_2])
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
@@ -660,7 +681,7 @@ def test_filter_running_cases_with_running_cases(store_with_multiple_cases_and_s
     """Test that at least one case is returned when at least one case has a running action."""
     # GIVEN a store containing cases with at least one "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
-    actions: List[str] = [case.action for case in cases_query.all()]
+    actions: list[str] = [case.action for case in cases_query.all()]
     assert CaseActions.RUNNING in actions
 
     # WHEN getting active cases

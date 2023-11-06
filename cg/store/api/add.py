@@ -1,6 +1,6 @@
-import datetime as dt
 import logging
-from typing import List, Optional
+from datetime import datetime
+from typing import Optional
 
 import petname
 
@@ -9,6 +9,7 @@ from cg.store.api.base import BaseHandler
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
     ApplicationVersion,
     Bed,
     BedVersion,
@@ -104,7 +105,7 @@ class AddHandler(BaseHandler):
         self,
         application: Application,
         version: int,
-        valid_from: dt.datetime,
+        valid_from: datetime,
         prices: dict,
         **kwargs,
     ) -> ApplicationVersion:
@@ -120,6 +121,27 @@ class AddHandler(BaseHandler):
             setattr(new_record, f"price_{price_key}", prices[price_key])
         new_record.application = application
         return new_record
+
+    @staticmethod
+    def add_application_limitation(
+        application: Application,
+        pipeline: str,
+        limitations: str,
+        comment: str = "Dummy comment",
+        created_at: datetime = datetime.now(),
+        updated_at: datetime = datetime.now(),
+        **kwargs,
+    ) -> ApplicationLimitations:
+        """Build a new application limitations record."""
+        return ApplicationLimitations(
+            application=application,
+            pipeline=pipeline,
+            limitations=limitations,
+            comment=comment,
+            created_at=created_at,
+            updated_at=updated_at,
+            **kwargs,
+        )
 
     def add_bed(self, name: str) -> Bed:
         """Build a new bed record."""
@@ -142,9 +164,9 @@ class AddHandler(BaseHandler):
         downsampled_to: int = None,
         internal_id: str = None,
         order: str = None,
-        ordered: dt.datetime = None,
+        ordered: datetime = None,
         priority: Priority = None,
-        received: dt.datetime = None,
+        received: datetime = None,
         original_ticket: str = None,
         tumour: bool = False,
         **kwargs,
@@ -161,7 +183,7 @@ class AddHandler(BaseHandler):
             is_tumour=tumour,
             name=name,
             order=order,
-            ordered_at=ordered or dt.datetime.now(),
+            ordered_at=ordered or datetime.now(),
             original_ticket=original_ticket,
             priority=priority,
             received_at=received,
@@ -175,8 +197,8 @@ class AddHandler(BaseHandler):
         data_delivery: DataDelivery,
         name: str,
         ticket: str,
-        panels: Optional[List[str]] = None,
-        cohorts: Optional[List[str]] = None,
+        panels: Optional[list[str]] = None,
+        cohorts: Optional[list[str]] = None,
         priority: Optional[Priority] = Priority.standard,
         synopsis: Optional[str] = None,
     ) -> Family:
@@ -224,7 +246,7 @@ class AddHandler(BaseHandler):
         flow_cell_name: str,
         sequencer_name: str,
         sequencer_type: str,
-        date: dt.datetime,
+        date: datetime,
         flow_cell_status: Optional[str] = FlowCellStatus.ON_DISK,
         has_backup: Optional[bool] = False,
     ) -> Flowcell:
@@ -242,10 +264,10 @@ class AddHandler(BaseHandler):
         self,
         pipeline: Pipeline,
         version: str = None,
-        completed_at: dt.datetime = None,
+        completed_at: datetime = None,
         primary: bool = False,
-        uploaded: dt.datetime = None,
-        started_at: dt.datetime = None,
+        uploaded: datetime = None,
+        started_at: datetime = None,
         **kwargs,
     ) -> Analysis:
         """Build a new Analysis record."""
@@ -265,12 +287,12 @@ class AddHandler(BaseHandler):
         name: str,
         abbrev: str,
         version: float,
-        date: dt.datetime = None,
+        date: datetime = None,
         genes: int = None,
     ) -> Panel:
         """Build a new panel record."""
 
-        new_record: Panel = Panel(
+        new_record = Panel(
             name=name, abbrev=abbrev, current_version=version, date=date, gene_count=genes
         )
         new_record.customer = customer
@@ -281,20 +303,20 @@ class AddHandler(BaseHandler):
         customer: Customer,
         name: str,
         order: str,
-        ordered: dt.datetime,
+        ordered: datetime,
         application_version: ApplicationVersion,
         ticket: str = None,
         comment: str = None,
-        received_at: dt.datetime = None,
+        received_at: datetime = None,
         invoice_id: int = None,
         no_invoice: bool = None,
-        delivered_at: dt.datetime = None,
+        delivered_at: datetime = None,
     ) -> Pool:
         """Build a new Pool record."""
 
         new_record: Pool = Pool(
             name=name,
-            ordered_at=ordered or dt.datetime.now(),
+            ordered_at=ordered or datetime.now(),
             order=order,
             ticket=ticket,
             received_at=received_at,
@@ -326,13 +348,13 @@ class AddHandler(BaseHandler):
     def add_invoice(
         self,
         customer: Customer,
-        samples: List[Sample] = None,
-        microbial_samples: List[Sample] = None,
-        pools: List[Pool] = None,
+        samples: list[Sample] = None,
+        microbial_samples: list[Sample] = None,
+        pools: list[Pool] = None,
         comment: str = None,
         discount: int = 0,
         record_type: str = None,
-        invoiced_at: Optional[dt.datetime] = None,
+        invoiced_at: Optional[datetime] = None,
     ):
         """Build a new Invoice record."""
 

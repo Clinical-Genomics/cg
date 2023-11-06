@@ -1,6 +1,6 @@
 """Module to read or write yaml files"""
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import yaml
 
@@ -27,7 +27,7 @@ def write_yaml_stream(content: Any) -> str:
     return yaml.dump(content)
 
 
-def write_yaml_nextflow_style(content: Dict[str, Any], file_path: Path) -> None:
+def write_yaml_nextflow_style(content: dict[str, Any], file_path: Path) -> None:
     """Write content to yaml file accepted by Nextflow with non-quoted booleans and quoted strings."""
     with open(file_path, "w") as outfile:
         for key, value in content.items():

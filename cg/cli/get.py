@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Iterable, List, Optional
+from typing import Iterable, Optional
 
 import click
 from tabulate import tabulate
@@ -41,7 +41,7 @@ def get(context: click.Context, identifier: Optional[str]):
 @click.option("-hf", "--hide-flow-cell", is_flag=True, help="Hide related flow cells")
 @click.argument("sample-ids", nargs=-1)
 @click.pass_context
-def get_sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids: List[str]):
+def get_sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids: list[str]):
     """Get information about a sample."""
     status_db: Store = context.obj.status_db
     for sample_id in sample_ids:
@@ -61,7 +61,7 @@ def get_sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample
         ]
         click.echo(tabulate([row], headers=SAMPLE_HEADERS, tablefmt="psql"))
         if cases:
-            case_ids: List[str] = [
+            case_ids: list[str] = [
                 link_obj.family.internal_id for link_obj in existing_sample.links
             ]
             context.invoke(get_case, case_ids=case_ids, samples=False)
@@ -129,11 +129,11 @@ def get_case(
     samples: bool,
     relate: bool,
     analyses: bool,
-    case_ids: List[str],
+    case_ids: list[str],
 ):
     """Get information about a case."""
     status_db: Store = context.obj.status_db
-    status_db_cases: List[Family] = []
+    status_db_cases: list[Family] = []
     if name:
         customer: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
         if not customer:
@@ -152,7 +152,7 @@ def get_case(
 
     for status_db_case in status_db_cases:
         LOG.debug(f"{status_db_case.internal_id}: get info about case")
-        row: List[str] = [
+        row: list[str] = [
             status_db_case.internal_id,
             status_db_case.name,
             status_db_case.customer.internal_id,
@@ -164,7 +164,7 @@ def get_case(
         if relate:
             context.invoke(get_case_relations, case_id=status_db_case.internal_id)
         if samples:
-            sample_ids: List[str] = [
+            sample_ids: list[str] = [
                 link_obj.sample.internal_id for link_obj in status_db_case.links
             ]
             context.invoke(get_sample, sample_ids=sample_ids, cases=False)
@@ -183,7 +183,7 @@ def get_flow_cell(context: click.Context, samples: bool, flow_cell_id: str):
     if not existing_flow_cell:
         LOG.error(f"{flow_cell_id}: flow cell not found")
         raise click.Abort
-    row: List[str] = [
+    row: list[str] = [
         existing_flow_cell.name,
         existing_flow_cell.sequencer_type,
         existing_flow_cell.sequencer_name,
@@ -193,7 +193,7 @@ def get_flow_cell(context: click.Context, samples: bool, flow_cell_id: str):
     ]
     click.echo(tabulate([row], headers=FLOW_CELL_HEADERS, tablefmt="psql"))
     if samples:
-        sample_ids: List[str] = [
+        sample_ids: list[str] = [
             sample_obj.internal_id for sample_obj in existing_flow_cell.samples
         ]
         if sample_ids:

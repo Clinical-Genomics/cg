@@ -1,8 +1,8 @@
+import os
 import shutil
 from collections import namedtuple
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
 
 import pytest
 
@@ -31,7 +31,7 @@ def tmp_demulitplexing_dir(demultiplexed_runs: Path, bcl2fastq_flow_cell_full_na
 
 
 @pytest.fixture(name="tmp_fastq_paths")
-def temp_fastq_paths(tmp_demulitplexing_dir: Path) -> List[Path]:
+def temp_fastq_paths(tmp_demulitplexing_dir: Path) -> list[Path]:
     """Return a list of temporary dummy fastq paths."""
     fastqs = [
         Path(tmp_demulitplexing_dir, "fastq_1.fastq.gz"),
@@ -108,7 +108,7 @@ def populated_flow_cell_store(
         sample=sample,
         case=family,
     )
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=populated_flow_cell_store,
         flow_cell_name=bcl2fastq_flow_cell_id,
         sequencer_type="novaseq",
@@ -136,7 +136,7 @@ def active_flow_cell_store(
         sample=sample,
         case=family,
     )
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=active_flow_cell_store,
         flow_cell_name=bcl2fastq_flow_cell_id,
         sequencer_type="novaseq",
@@ -150,7 +150,7 @@ def sample_level_housekeeper_api(
     bcl2fastq_flow_cell_id: str,
     real_housekeeper_api: HousekeeperAPI,
     sample_id: str,
-    tmp_fastq_paths: List[Path],
+    tmp_fastq_paths: list[Path],
     helpers,
 ) -> HousekeeperAPI:
     """Return a mocked Housekeeper API, containing a sample bundle with related FASTQ files."""
@@ -173,7 +173,7 @@ def flow_cell_name_housekeeper_api(
     bcl2fastq_flow_cell_id: str,
     real_housekeeper_api: HousekeeperAPI,
     sample_id: str,
-    tmp_fastq_paths: List[Path],
+    tmp_fastq_paths: list[Path],
     tmp_sample_sheet_path: Path,
     helpers,
 ) -> HousekeeperAPI:
@@ -321,8 +321,8 @@ def delete_demultiplex_api(
 
 @pytest.fixture(scope="session")
 def flow_cell_info_map(
-    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: List[str],
-    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: List[str],
+    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: list[str],
+    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: list[str],
     flow_cell_directory_name_demultiplexed_with_bcl_convert_flat: Path,
     flow_cell_directory_name_demultiplexed_with_bcl_convert: Path,
     flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer: Path,
@@ -330,7 +330,7 @@ def flow_cell_info_map(
     flow_cell_name_demultiplexed_with_bcl_convert: str,
     flow_cell_directory_name_demultiplexed_with_bcl2fastq: Path,
     flow_cell_name_demultiplexed_with_bcl2fastq: str,
-) -> Dict[str, FlowCellInfo]:
+) -> dict[str, FlowCellInfo]:
     """Returns a dict with the suitable fixtures for different demultiplexing softwares and
     settings. Keys are string, values are named tuples FlowCellInfo."""
     return {
@@ -394,7 +394,7 @@ def flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer() -> str:
 @pytest.fixture(name="demultiplexing_init_files")
 def tmp_demultiplexing_init_files(
     bcl2fastq_flow_cell_id: str, populated_delete_demultiplex_api: DeleteDemuxAPI
-) -> List[Path]:
+) -> list[Path]:
     """Return a list of demultiplexing init files present in the run directory."""
     run_path: Path = populated_delete_demultiplex_api.run_path
     slurm_job_id_file_path: Path = Path(run_path, "slurm_job_ids.yaml")
@@ -402,7 +402,7 @@ def tmp_demultiplexing_init_files(
     error_log_path: Path = Path(run_path, f"{bcl2fastq_flow_cell_id}_demultiplex.stderr")
     log_path: Path = Path(run_path, f"{bcl2fastq_flow_cell_id}_demultiplex.stdout")
 
-    demultiplexing_init_files: List[Path] = [
+    demultiplexing_init_files: list[Path] = [
         slurm_job_id_file_path,
         demux_script_file_path,
         error_log_path,
@@ -418,7 +418,7 @@ def tmp_demultiplexing_init_files(
 def bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
     """Return a folder structure that resembles a bcl2fastq run folder."""
     base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "bcl2fastq")))
-    folders: List[str] = ["l1t21", "l1t11", "l2t11", "l2t21"]
+    folders: list[str] = ["l1t21", "l1t11", "l2t11", "l2t21"]
 
     for folder in folders:
         new_dir: Path = Path(base_dir, folder)
@@ -431,7 +431,7 @@ def bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
 def not_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
     """Return a folder structure that does not resemble a bcl2fastq run folder."""
     base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "not_bcl2fastq")))
-    folders: List[str] = ["just", "some", "folders"]
+    folders: list[str] = ["just", "some", "folders"]
 
     for folder in folders:
         new_dir: Path = Path(base_dir, folder)
@@ -539,3 +539,12 @@ def bcl_convert_sample_id_with_non_pooled_undetermined_reads() -> str:
 def bcl_convert_non_pooled_sample_read_count() -> int:
     """Based on the data in 230504_A00689_0804_BHY7FFDRX2, the sum of all reads - mapped and undetermined."""
     return 4000000
+
+
+def get_all_files_in_directory_tree(directory: Path) -> list[Path]:
+    """Get the relative paths of all files in a directory and its subdirectories."""
+    files_in_directory: list[Path] = []
+    for subdir, _, files in os.walk(directory):
+        subdir = Path(subdir).relative_to(directory)
+        files_in_directory.extend([Path(subdir, file) for file in files])
+    return files_in_directory

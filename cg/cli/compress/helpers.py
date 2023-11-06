@@ -4,13 +4,12 @@ import logging
 import os
 from math import ceil
 from pathlib import Path
-from typing import Iterator, List, Optional
+from typing import Iterator, Optional
 
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.compression import (
-    CASES_TO_IGNORE,
     CRUNCHY_MIN_GB_PER_PROCESS,
     MAX_READS_PER_GB,
 )
@@ -27,18 +26,19 @@ LOG = logging.getLogger(__name__)
 
 def get_cases_to_process(
     days_back: int, store: Store, case_id: Optional[str] = None
-) -> Optional[List[Family]]:
+) -> Optional[list[Family]]:
     """Return cases to process."""
-    cases: List[Family] = []
+    cases: list[Family] = []
     if case_id:
-        case: Family = store.get_case_by_internal_id(internal_id=case_id)
+        case: Family = store.get_case_by_internal_id(case_id)
         if not case:
             LOG.warning(f"Could not find case {case_id}")
             return
-        cases.append(case)
+        if case.is_compressible:
+            cases.append(case)
     else:
         date_threshold: dt.datetime = get_date_days_ago(days_ago=days_back)
-        cases: List[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
+        cases: list[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
     return cases
 
 
@@ -51,14 +51,6 @@ def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
 
     for link_obj in case_obj.links:
         yield link_obj.sample.internal_id
-
-
-def is_case_ignored(case_id: str) -> bool:
-    """Check if case should be skipped."""
-    if case_id in CASES_TO_IGNORE:
-        LOG.debug(f"Skipping case: {case_id}")
-        return True
-    return False
 
 
 def set_memory_according_to_reads(
@@ -108,9 +100,9 @@ def get_versions(hk_api: HousekeeperAPI, bundle_name: str = None) -> Iterator[Ve
         if not bundle:
             LOG.info(f"Could not find bundle {bundle_name}")
             return
-        bundles: List[Bundle] = [bundle]
+        bundles: list[Bundle] = [bundle]
     else:
-        bundles: List[Bundle] = hk_api.bundles()
+        bundles: list[Bundle] = hk_api.bundles()
 
     for bundle in bundles:
         LOG.debug(f"Check for versions in {bundle.name}")
@@ -136,7 +128,7 @@ def get_true_dir(dir_path: Path) -> Optional[Path]:
 
 def compress_sample_fastqs_in_cases(
     compress_api: CompressAPI,
-    cases: List[Family],
+    cases: list[Family],
     dry_run: bool,
     number_of_conversions: int,
     hours: int = None,
@@ -150,8 +142,6 @@ def compress_sample_fastqs_in_cases(
         case_converted = True
         if case_conversion_count >= number_of_conversions:
             break
-        if is_case_ignored(case_id=case.internal_id):
-            continue
 
         LOG.info(f"Searching for FASTQ files in case {case.internal_id}")
         if not case.links:

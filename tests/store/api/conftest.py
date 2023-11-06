@@ -1,5 +1,4 @@
 import datetime as dt
-from typing import List
 
 import pytest
 
@@ -10,6 +9,7 @@ from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus
 from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.store import Store
+from cg.store.models import FamilySample
 from tests.meta.demultiplex.conftest import populated_flow_cell_store
 from tests.store_helpers import StoreHelpers
 
@@ -140,14 +140,14 @@ def re_sequenced_sample_store(
 
     one_day_ahead_of_now = timestamp_now + dt.timedelta(days=1)
 
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=re_sequenced_sample_store,
         flow_cell_name=bcl_convert_flow_cell_id,
         samples=[store_sample],
         date=timestamp_now,
     )
 
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=re_sequenced_sample_store,
         flow_cell_name=bcl2fastq_flow_cell_id,
         samples=[store_sample],
@@ -200,7 +200,7 @@ def store_failing_sequencing_qc(
         customer_id="fluffy_customer",
     )
 
-    helpers.add_flowcell(
+    helpers.add_flow_cell(
         store=store,
         flow_cell_name=bcl2fastq_flow_cell_id,
         samples=[store_sample],
@@ -404,13 +404,13 @@ def store_with_active_sample_running(store: Store, helpers: StoreHelpers) -> Sto
 
 
 @pytest.fixture(name="three_customer_ids")
-def three_customer_ids() -> List[str]:
+def three_customer_ids() -> list[str]:
     """Return three customer ids."""
     yield ["".join(["cust00", str(number)]) for number in range(3)]
 
 
 @pytest.fixture(name="three_pool_names")
-def three_pool_names() -> List[str]:
+def three_pool_names() -> list[str]:
     """Return three customer ids."""
     yield ["_".join(["test_pool", str(number)]) for number in range(3)]
 
@@ -479,9 +479,10 @@ def store_with_analyses_for_cases(
             completed_at=timestamp_now,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        analysis_store.relate_sample(
+        link: FamilySample = analysis_store.relate_sample(
             family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
+        analysis_store.session.add(link)
 
     return analysis_store
 
@@ -518,9 +519,10 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
             pipeline=Pipeline.FLUFFY,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        analysis_store.relate_sample(
+        link: FamilySample = analysis_store.relate_sample(
             family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
+        analysis_store.session.add(link)
     return analysis_store
 
 
@@ -557,9 +559,10 @@ def store_with_analyses_for_cases_not_uploaded_microsalt(
             pipeline=Pipeline.MICROSALT,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        analysis_store.relate_sample(
+        link: FamilySample = analysis_store.relate_sample(
             family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
+        analysis_store.session.add(link)
     return analysis_store
 
 
@@ -597,8 +600,9 @@ def store_with_analyses_for_cases_to_deliver(
             pipeline=Pipeline.MIP_DNA,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=None)
-        analysis_store.relate_sample(
+        link: FamilySample = analysis_store.relate_sample(
             family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
+        analysis_store.session.add(link)
 
     return analysis_store

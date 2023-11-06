@@ -1,5 +1,4 @@
 import copy
-from typing import Dict
 
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
@@ -29,7 +28,7 @@ def test_get_sample_metadata(
     )
 
     # GIVEN the expected output
-    expected_metadata: Dict[str, str] = {
+    expected_metadata: dict[str, str] = {
         "million_read_pairs": "10.0",
         "duplicates": "93.1",
         "mean_insert_size": "178.19",
@@ -47,7 +46,7 @@ def test_get_sample_metadata(
     )
 
     # THEN check that the sample metadata is correctly retrieved
-    assert sample_metadata.dict() == expected_metadata
+    assert sample_metadata.model_dump() == expected_metadata
 
 
 def test_get_variant_callers(report_api_balsamic, case_id):

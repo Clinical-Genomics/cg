@@ -3,7 +3,7 @@
 import datetime as dt
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Generator
+from typing import Any, Generator
 
 import pytest
 
@@ -50,7 +50,7 @@ def compress_api() -> MockCompressAPI:
 
 @pytest.fixture
 def real_crunchy_api(
-    crunchy_config: Dict[str, Dict[str, Any]]
+    crunchy_config: dict[str, dict[str, Any]]
 ) -> Generator[CrunchyAPI, None, None]:
     """Return Crunchy API."""
     _api = CrunchyAPI(crunchy_config)

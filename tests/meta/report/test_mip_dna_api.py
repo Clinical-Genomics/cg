@@ -1,14 +1,14 @@
 from cg.constants import REPORT_GENDER
+from tests.store_helpers import StoreHelpers
 
 
 def test_get_sample_metadata(
-    report_api_mip_dna, mip_analysis_api, case_mip_dna, sample_store, helpers
+    report_api_mip_dna, mip_analysis_api, case_mip_dna, sample_store, helpers: StoreHelpers
 ):
     """Tests sample metadata extraction."""
 
     # GIVEN a mock sample and the latest metadata
-    sample = helpers.add_sample(sample_store)
-    sample.internal_id = "ADM1"
+    sample = helpers.add_sample(sample_store, internal_id="ADM1")
     sample.reads = None
     mip_metadata = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
 
@@ -27,16 +27,15 @@ def test_get_sample_metadata(
     sample_metadata = report_api_mip_dna.get_sample_metadata(case_mip_dna, sample, mip_metadata)
 
     # THEN check that the sample metadata is correctly retrieved
-    assert sample_metadata == expected_metadata
+    assert sample_metadata.model_dump() == expected_metadata
 
 
-def test_get_sample_coverage(report_api_mip_dna, sample_store, helpers, case_mip_dna):
+def test_get_sample_coverage(report_api_mip_dna, sample_store, helpers: StoreHelpers, case_mip_dna):
     """Checks the sample coverage retrieval from Chanjo."""
 
     # GIVEN a case and a sample with a specific ID
     case_mip_dna.panels = []
-    sample = helpers.add_sample(sample_store)
-    sample.internal_id = "ADM2"
+    sample = helpers.add_sample(store=sample_store, internal_id="ADM2")
 
     # WHEN retrieving the sample coverage
     sample_coverage = report_api_mip_dna.get_sample_coverage(sample, case_mip_dna)

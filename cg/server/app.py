@@ -1,10 +1,14 @@
+from typing import Optional
+
 import coloredlogs
 import requests
 from flask import Flask, redirect, session, url_for
 from flask_admin.base import AdminIndexView
 from flask_dance.consumer import oauth_authorized
 from flask_dance.contrib.google import google, make_google_blueprint
+from sqlalchemy.orm import scoped_session
 
+from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
     Analysis,
     Application,
@@ -41,7 +45,7 @@ def create_app():
     return app
 
 
-def _load_config(app):
+def _load_config(app: Flask):
     app.config.from_object(__name__.replace("app", "config"))
 
 
@@ -57,7 +61,7 @@ def _configure_extensions(app: Flask):
     if app.config["OSTICKET_API_KEY"]:
         ext.osticket.init_app(app)
     ext.admin.init_app(app, index_view=AdminIndexView(endpoint="admin"))
-    app.json_encoder = ext.CustomJSONEncoder
+    app.json_provider_class = ext.CustomJSONEncoder
 
 
 def _initialize_logging(app):
@@ -132,4 +136,10 @@ def _register_teardowns(app: Flask):
 
     @app.teardown_appcontext
     def remove_database_session(exception=None):
-        ext.db.session.remove()
+        """
+        Remove the database session to ensure database resources are
+        released when a request has been processed.
+        """
+        scoped_session_registry: Optional[scoped_session] = get_scoped_session_registry()
+        if scoped_session_registry:
+            scoped_session_registry.remove()

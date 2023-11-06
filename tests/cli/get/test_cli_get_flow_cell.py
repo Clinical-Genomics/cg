@@ -1,6 +1,5 @@
 """Test CLI functions to get flow cells in the Status database."""
 from datetime import datetime
-from typing import List
 
 from click.testing import CliRunner
 
@@ -28,7 +27,7 @@ def test_get_flow_cell_required(
 ):
     """Test to get a flow cell using only the required arguments."""
     # GIVEN a database with a flow cell
-    flow_cell: Flowcell = helpers.add_flowcell(store=disk_store)
+    flow_cell: Flowcell = helpers.add_flow_cell(store=disk_store)
 
     # WHEN getting a flow cell
     result = cli_runner.invoke(get, ["flow-cell", flow_cell.name], obj=base_context)
@@ -42,7 +41,7 @@ def test_get_flow_cell_output(
 ):
     """Test that the output has the data of the flow cell."""
     # GIVEN a database with a flow cell with data
-    flow_cell: Flowcell = helpers.add_flowcell(disk_store)
+    flow_cell: Flowcell = helpers.add_flow_cell(disk_store)
 
     # WHEN getting a flow cell
     result = cli_runner.invoke(get, ["flow-cell", flow_cell.name], obj=base_context)
@@ -63,7 +62,7 @@ def test_get_flow_cell_archived_at_none(
 ):
     """Test that the output when archived at is none."""
     # GIVEN a database with a flow cell with data
-    flow_cell: Flowcell = helpers.add_flowcell(store=disk_store, archived_at=None)
+    flow_cell: Flowcell = helpers.add_flow_cell(store=disk_store, archived_at=None)
 
     # WHEN getting a flow cell
     result = cli_runner.invoke(get, ["flow-cell", flow_cell.name], obj=base_context)
@@ -84,7 +83,7 @@ def test_get_flow_cell_archived_at_date(
 ):
     """Test that the output has the data of the flow cell."""
     # GIVEN a database with a flowcell with data
-    flow_cell: Flowcell = helpers.add_flowcell(store=disk_store, archived_at=timestamp)
+    flow_cell: Flowcell = helpers.add_flow_cell(store=disk_store, archived_at=timestamp)
 
     # WHEN getting a flow cell
     result = cli_runner.invoke(get, ["flow-cell", flow_cell.name], obj=base_context)
@@ -101,7 +100,7 @@ def test_get_flow_cell_samples_without_samples(
 ):
     """Test that the output without samples."""
     # GIVEN a database with a flow cell without related samples
-    flow_cell: Flowcell = helpers.add_flowcell(disk_store)
+    flow_cell: Flowcell = helpers.add_flow_cell(disk_store)
 
     # WHEN getting a flow cell with the --samples flag
     result = cli_runner.invoke(get, ["flow-cell", flow_cell.name, "--samples"], obj=base_context)
@@ -118,8 +117,8 @@ def test_get_flow_cell_samples(
 ):
     """Test that the output has the samples of the flow cell."""
     # GIVEN a database with a flow cell with related samples
-    samples: List[Sample] = helpers.add_samples(store=disk_store)
-    flow_cell: Flowcell = helpers.add_flowcell(store=disk_store, samples=samples)
+    samples: list[Sample] = helpers.add_samples(store=disk_store)
+    flow_cell: Flowcell = helpers.add_flow_cell(store=disk_store, samples=samples)
 
     # WHEN getting a flow cell with the --samples flag
     result = cli_runner.invoke(get, ["flow-cell", flow_cell.name, "--samples"], obj=base_context)
@@ -137,7 +136,7 @@ def test_get_flow_cell_no_samples_without_samples(
 ):
     """Test that the output shows no samples of the flow cell."""
     # GIVEN a database with a flow cell without related samples
-    flow_cell: Flowcell = helpers.add_flowcell(disk_store)
+    flow_cell: Flowcell = helpers.add_flow_cell(disk_store)
 
     # WHEN getting a flow cell with the --no-samples flag
     result = cli_runner.invoke(get, ["flow-cell", flow_cell.name, "--no-samples"], obj=base_context)
@@ -152,7 +151,7 @@ def test_get_flow_cell_no_samples_with_samples(
     """Test that the output has the data of the flow cell."""
     # GIVEN a database with a flow cell with related samples
     samples: Sample = helpers.add_samples(store=disk_store)
-    flow_cell: Flowcell = helpers.add_flowcell(store=disk_store, samples=samples)
+    flow_cell: Flowcell = helpers.add_flow_cell(store=disk_store, samples=samples)
 
     # WHEN getting a flow cell with the --no-samples flag
     result = cli_runner.invoke(get, ["flow-cell", flow_cell.name, "--no-samples"], obj=base_context)

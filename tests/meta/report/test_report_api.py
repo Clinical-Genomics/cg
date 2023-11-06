@@ -2,27 +2,17 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List
 
+import pytest
 from _pytest.logging import LogCaptureFixture
 
-from cg.constants import REPORT_GENDER
+from cg.constants import REPORT_GENDER, Pipeline
 from cg.exc import DeliveryReportError
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.report.report import (
-    CaseModel,
-    CustomerModel,
-    DataAnalysisModel,
-    ReportModel,
-)
-from cg.models.report.sample import (
-    ApplicationModel,
-    MethodsModel,
-    SampleModel,
-    TimestampModel,
-)
+from cg.models.report.report import CaseModel, CustomerModel, DataAnalysisModel, ReportModel
+from cg.models.report.sample import ApplicationModel, MethodsModel, SampleModel, TimestampModel
 from cg.store import Store
 from cg.store.models import Analysis, Family, FamilySample
 from tests.meta.report.helper import recursive_assert
@@ -74,7 +64,7 @@ def test_render_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dn
     )
 
     # WHEN rendering the report
-    rendered_report: str = report_api_mip_dna.render_delivery_report(report_data.dict())
+    rendered_report: str = report_api_mip_dna.render_delivery_report(report_data.model_dump())
 
     # THEN validate rendered report
     assert len(rendered_report) > 0
@@ -98,7 +88,7 @@ def test_get_validated_report_data(report_api_mip_dna: MipDNAReportAPI, case_mip
     report_data: ReportModel = report_api_mip_dna.validate_report_fields(
         case_mip_dna.internal_id, report_data, force_report=False
     )
-    recursive_assert(report_data.dict())
+    recursive_assert(report_data.model_dump())
 
 
 def test_validate_report_empty_fields(
@@ -191,7 +181,7 @@ def test_get_customer_data(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Fa
     customer_data: CustomerModel = report_api_mip_dna.get_customer_data(case_mip_dna)
 
     # THEN check if the retrieved customer data corresponds to the expected one
-    assert customer_data == expected_customer
+    assert customer_data.model_dump() == expected_customer
 
 
 def test_get_report_version_version(
@@ -246,8 +236,8 @@ def test_get_samples_data(
     report_api_mip_dna: MipDNAReportAPI,
     mip_analysis_api: MipDNAAnalysisAPI,
     case_mip_dna: Family,
-    case_samples_data: List[FamilySample],
-    lims_samples: List[dict],
+    case_samples_data: list[FamilySample],
+    lims_samples: list[dict],
 ):
     """Validates the retrieved sample data."""
 
@@ -279,8 +269,8 @@ def test_get_samples_data(
 
 def test_get_lims_sample(
     report_api_mip_dna: MipDNAReportAPI,
-    case_samples_data: List[FamilySample],
-    lims_samples: List[dict],
+    case_samples_data: list[FamilySample],
+    lims_samples: list[dict],
 ):
     """Tests lims data extraction."""
 
@@ -298,8 +288,8 @@ def test_get_lims_sample(
 
 def test_get_sample_application_data(
     report_api_mip_dna: MipDNAReportAPI,
-    case_samples_data: List[FamilySample],
-    lims_samples: List[dict],
+    case_samples_data: list[FamilySample],
+    lims_samples: list[dict],
 ):
     """Tests sample application data extraction."""
 
@@ -329,10 +319,10 @@ def test_get_unique_applications(
 
     # GIVEN a list of samples sharing the same application
     mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
-    samples: List[SampleModel] = report_api_mip_dna.get_samples_data(case_mip_dna, mip_metadata)
+    samples: list[SampleModel] = report_api_mip_dna.get_samples_data(case_mip_dna, mip_metadata)
 
     # WHEN calling the application filtering function
-    unique_applications: List[ApplicationModel] = report_api_mip_dna.get_unique_applications(
+    unique_applications: list[ApplicationModel] = report_api_mip_dna.get_unique_applications(
         samples
     )
 
@@ -341,7 +331,7 @@ def test_get_unique_applications(
 
 
 def test_get_sample_methods_data(
-    report_api_mip_dna: MipDNAReportAPI, case_samples_data: List[FamilySample]
+    report_api_mip_dna: MipDNAReportAPI, case_samples_data: list[FamilySample]
 ):
     """Tests sample methods retrieval from lims."""
 
@@ -358,7 +348,7 @@ def test_get_sample_methods_data(
     sample_methods: MethodsModel = report_api_mip_dna.get_sample_methods_data(sample_id)
 
     # THEN check the agreement between expected and extracted values
-    assert sample_methods == expected_sample_methods
+    assert sample_methods.model_dump() == expected_sample_methods
 
 
 def test_get_case_analysis_data(
@@ -382,9 +372,66 @@ def test_get_case_analysis_data(
     assert case_analysis_data.scout_files
 
 
+def test_get_case_analysis_data_pipeline_match_error(
+    report_api_mip_dna: MipDNAReportAPI,
+    mip_analysis_api: MipDNAAnalysisAPI,
+    case_mip_dna: Family,
+    caplog: LogCaptureFixture,
+):
+    """Test validation error if a customer requested pipeline does not match the data analysis."""
+
+    # GIVEN a pre-built case and a MIP-DNA analysis that has been started as Balsamic
+    mip_analysis: Analysis = case_mip_dna.analyses[0]
+    mip_analysis.pipeline = Pipeline.BALSAMIC
+
+    # GIVEN a mip analysis mock metadata
+    mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
+
+    # WHEN retrieving analysis information
+
+    # THEN a validation error should be raised
+    with pytest.raises(ValueError):
+        report_api_mip_dna.get_case_analysis_data(
+            case=case_mip_dna, analysis=mip_analysis, analysis_metadata=mip_metadata
+        )
+    assert (
+        f"The analysis requested by the customer ({Pipeline.MIP_DNA}) does not match the one executed "
+        f"({mip_analysis.pipeline})" in caplog.text
+    )
+
+
+def test_get_case_analysis_data_pipeline_not_supported(
+    report_api_mip_dna: MipDNAReportAPI,
+    mip_analysis_api: MipDNAAnalysisAPI,
+    case_mip_dna: Family,
+    caplog: LogCaptureFixture,
+):
+    """Test validation error if the analysis pipeline is not supported by the delivery report workflow."""
+
+    # GIVEN a pre-built case with Fluffy as data analysis
+    case_mip_dna.data_analysis = Pipeline.FLUFFY
+    mip_analysis: Analysis = case_mip_dna.analyses[0]
+    mip_analysis.pipeline = Pipeline.FLUFFY
+
+    # GIVEN a mip analysis mock metadata
+    mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
+
+    # WHEN retrieving data analysis information
+
+    # THEN a validation error should be raised
+    with pytest.raises(ValueError):
+        report_api_mip_dna.get_case_analysis_data(
+            case=case_mip_dna, analysis=mip_analysis, analysis_metadata=mip_metadata
+        )
+    assert (
+        f"The pipeline {case_mip_dna.data_analysis} does not support delivery report generation"
+        in caplog.text
+    )
+
+
 def test_get_sample_timestamp_data(
     report_api_mip_dna: MipDNAReportAPI,
-    case_samples_data: List[FamilySample],
+    case_samples_data: list[FamilySample],
     timestamp_yesterday: datetime,
 ):
     """Checks that the sample timestamp information is correctly retrieved from StatusDB."""
@@ -405,4 +452,4 @@ def test_get_sample_timestamp_data(
     )
 
     # THEN check if the dates are correctly retrieved
-    assert sample_timestamp_data == expected_case_samples_data
+    assert sample_timestamp_data.model_dump() == expected_case_samples_data

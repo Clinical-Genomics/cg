@@ -6,7 +6,7 @@ Create Date: 2021-05-03 09:21:58.047779
 
 """
 from sqlalchemy import Column, String, orm, types
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 from alembic import op
 

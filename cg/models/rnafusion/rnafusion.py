@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from pydantic.v1 import BaseModel, Field
 
@@ -71,11 +71,11 @@ class RnafusionSampleSheetEntry(NextflowSampleSheetEntry):
     strandedness: Strandedness
 
     @staticmethod
-    def headers() -> List[str]:
+    def headers() -> list[str]:
         """Return sample sheet headers."""
         return ["sample", "fastq_1", "fastq_2", "strandedness"]
 
-    def reformat_sample_content(self) -> List[List[str]]:
+    def reformat_sample_content(self) -> list[list[str]]:
         """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
         return [
             [self.name, fastq_forward_read_path, fastq_reverse_read_path, str(self.strandedness)]
@@ -92,4 +92,4 @@ class RnafusionAnalysis(AnalysisModel):
         sample_metrics: retrieved QC metrics associated to a sample
     """
 
-    sample_metrics: Dict[str, RnafusionQCMetrics]
+    sample_metrics: dict[str, RnafusionQCMetrics]

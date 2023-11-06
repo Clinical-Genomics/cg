@@ -1,6 +1,6 @@
 """Test how the api handles versions."""
 import datetime
-from typing import Any, Dict
+from typing import Any
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from tests.small_helpers import SmallHelpers
@@ -46,7 +46,7 @@ def test_get_version_non_existing(housekeeper_api: HousekeeperAPI, timestamp: da
 def test_get_version_existing(
     housekeeper_api: HousekeeperAPI,
     timestamp_yesterday: datetime.datetime,
-    hk_bundle_data: Dict[str, Any],
+    hk_bundle_data: dict[str, Any],
 ):
     """Test to get a version when there is a bundle and a version."""
     # GIVEN a populated housekeeper_api

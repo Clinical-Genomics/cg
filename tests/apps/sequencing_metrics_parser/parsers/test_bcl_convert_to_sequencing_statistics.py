@@ -1,6 +1,5 @@
 """Test for the bcl_convert_to_sequencing_statistics parser."""
 from pathlib import Path
-from typing import List
 
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import (
     BclConvertMetricsParser,
@@ -20,7 +19,7 @@ def test_create_sequencing_statistics_from_bcl_convert_metrics(
     # GIVEN a parsed bcl convert metrics file
 
     # WHEN creating sequencing statistics from bcl convert metrics
-    sequencing_statistics_list: List[
+    sequencing_statistics_list: list[
         SampleLaneSequencingMetrics
     ] = create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell(
         flow_cell_dir=bcl_convert_metrics_dir_path,
@@ -45,7 +44,7 @@ def test_create_undetermined_sequencing_statistics_from_bcl_convert_metrics(
     # GIVEN a directory with a flow cell demultiplexed with bcl convert with undetermined reads
 
     # WHEN creating undetermined sequencing statistics from bcl convert metrics
-    metrics: List[SampleLaneSequencingMetrics] = create_bcl_convert_undetermined_metrics(
+    metrics: list[SampleLaneSequencingMetrics] = create_bcl_convert_undetermined_metrics(
         flow_cell_dir=bcl_convert_metrics_dir_path,
         non_pooled_lane_sample_pairs=[(1, "sample_id")],
     )
@@ -63,7 +62,7 @@ def test_create_undetermined_sequencing_statistics_from_bcl_convert_metrics_for_
     # GIVEN a directory with a flow cell demultiplexed with bcl convert without undetermined reads in a lane
 
     # WHEN creating undetermined sequencing statistics from bcl convert metrics specifying an existing lane without undetermined reads
-    metrics: List[SampleLaneSequencingMetrics] = create_bcl_convert_undetermined_metrics(
+    metrics: list[SampleLaneSequencingMetrics] = create_bcl_convert_undetermined_metrics(
         flow_cell_dir=bcl_convert_metrics_dir_path,
         non_pooled_lane_sample_pairs=[(2, "sample_id")],
     )

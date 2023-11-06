@@ -1,19 +1,35 @@
 """Backup related CLI commands."""
 import logging
 from pathlib import Path
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, Optional, Union
 
 import click
 import housekeeper.store.models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.exc import (
+    DsmcAlreadyRunningError,
+    FlowCellAlreadyBackedUpError,
+    FlowCellEncryptionError,
+    FlowCellError,
+    PdcError,
+)
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
-from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
+from cg.meta.encryption.encryption import (
+    EncryptionAPI,
+    FlowCellEncryptionAPI,
+    SpringEncryptionAPI,
+)
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
+from cg.models.flow_cell.flow_cell import (
+    FlowCellDirectoryData,
+    get_flow_cells_from_path,
+)
 from cg.store import Store
 from cg.store.models import Flowcell, Sample
 
@@ -27,6 +43,78 @@ def backup(context: CGConfig):
     pass
 
 
+@backup.command("flow-cells")
+@DRY_RUN
+@click.pass_obj
+def backup_flow_cells(context: CGConfig, dry_run: bool):
+    """Back-up flow cells."""
+    pdc_api = context.pdc_api
+    pdc_api.dry_run = dry_run
+    status_db: Store = context.status_db
+    flow_cells: list[FlowCellDirectoryData] = get_flow_cells_from_path(
+        flow_cells_dir=Path(context.flow_cells_dir)
+    )
+    for flow_cell in flow_cells:
+        db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
+            flow_cell_name=flow_cell.id
+        )
+        flow_cell_encryption_api = FlowCellEncryptionAPI(
+            binary_path=context.encryption.binary_path,
+            dry_run=dry_run,
+            encryption_dir=Path(context.backup.encryption_directories.current),
+            flow_cell=flow_cell,
+            pigz_binary_path=context.pigz.binary_path,
+            slurm_api=SlurmAPI(),
+            sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
+            tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
+        )
+        try:
+            pdc_api.start_flow_cell_backup(
+                db_flow_cell=db_flow_cell,
+                flow_cell_encryption_api=flow_cell_encryption_api,
+                status_db=status_db,
+            )
+        except (
+            DsmcAlreadyRunningError,
+            FlowCellAlreadyBackedUpError,
+            FlowCellEncryptionError,
+            PdcError,
+        ) as error:
+            logging.error(f"{error}")
+
+
+@backup.command("encrypt-flow-cells")
+@DRY_RUN
+@click.pass_obj
+def encrypt_flow_cells(context: CGConfig, dry_run: bool):
+    """Encrypt flow cells."""
+    status_db: Store = context.status_db
+    flow_cells: list[FlowCellDirectoryData] = get_flow_cells_from_path(
+        flow_cells_dir=Path(context.flow_cells_dir)
+    )
+    for flow_cell in flow_cells:
+        db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
+            flow_cell_name=flow_cell.id
+        )
+        if db_flow_cell and db_flow_cell.has_backup:
+            LOG.debug(f"Flow cell: {flow_cell.id} is already backed-up")
+            continue
+        flow_cell_encryption_api = FlowCellEncryptionAPI(
+            binary_path=context.encryption.binary_path,
+            dry_run=dry_run,
+            encryption_dir=Path(context.backup.encryption_directories.current),
+            flow_cell=flow_cell,
+            pigz_binary_path=context.pigz.binary_path,
+            slurm_api=SlurmAPI(),
+            sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
+            tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
+        )
+        try:
+            flow_cell_encryption_api.start_encryption()
+        except (FlowCellError, FlowCellEncryptionError) as error:
+            logging.error(f"{error}")
+
+
 @backup.command("fetch-flow-cell")
 @click.option("-f", "--flow-cell-id", help="Retrieve a specific flow cell, ex. 'HCK2KDSXX'")
 @DRY_RUN
@@ -34,12 +122,13 @@ def backup(context: CGConfig):
 def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str] = None):
     """Fetch the first flow cell in the requested queue from backup"""
 
-    pdc_api = PdcAPI(binary_path=context.pdc.binary_path, dry_run=dry_run)
+    pdc_api = context.pdc_api
+    pdc_api.dry_run = dry_run
     encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
     context.meta_apis["backup_api"] = BackupAPI(
         encryption_api=encryption_api,
-        encrypt_dir=context.backup.encrypt_dir,
+        encryption_directories=context.backup.encryption_directories,
         status=context.status_db,
         tar_api=tar_api,
         pdc_api=pdc_api,
@@ -83,9 +172,7 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
     LOG.info("Getting all spring files from Housekeeper.")
     spring_files: Iterable[hk_models.File] = housekeeper_api.files(
         tags=[SequencingFileTag.SPRING]
-    ).filter(
-        hk_models.File.path.like(f"%{config.environment}/{config.demultiplexed_flow_cells_dir}%")
-    )
+    ).filter(hk_models.File.path.like(f"%{config.environment}/{config.demultiplex.out_dir}%"))
     for spring_file in spring_files:
         LOG.info("Attempting encryption and PDC archiving for file %s", spring_file.path)
         if Path(spring_file.path).exists():
@@ -138,7 +225,7 @@ def retrieve_spring_files(
     status_api: Store = config.status_db
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
 
-    samples: List[Sample] = _get_samples(status_api, object_type, identifier)
+    samples: list[Sample] = _get_samples(status_api, object_type, identifier)
 
     for sample in samples:
         latest_version: hk_models.Version = housekeeper_api.last_version(bundle=sample.internal_id)
@@ -151,14 +238,14 @@ def retrieve_spring_files(
             context.invoke(retrieve_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
 
 
-def _get_samples(status_api: Store, object_type: str, identifier: str) -> List[Sample]:
+def _get_samples(status_api: Store, object_type: str, identifier: str) -> list[Sample]:
     """Gets all samples belonging to a sample, case or flow cell id"""
     get_samples = {
         "sample": status_api.sample,
         "case": status_api.get_samples_by_case_id,
         "flow_cell": status_api.get_samples_from_flow_cell,
     }
-    samples: Union[Sample, List[Sample]] = get_samples[object_type](identifier)
+    samples: Union[Sample, list[Sample]] = get_samples[object_type](identifier)
     return samples if isinstance(samples, list) else [samples]
 
 

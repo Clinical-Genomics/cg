@@ -1,7 +1,8 @@
 import logging
+import os
 import re
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from cg.apps.demultiplex.sample_sheet.models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
@@ -10,7 +11,7 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
-from cg.io.csv import read_csv
+from cg.io.csv import read_csv, write_csv
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.utils.files import (
     get_file_in_directory,
@@ -80,7 +81,7 @@ def is_valid_sample_fastq_file(sample_fastq: Path, sample_internal_id: str) -> b
     )
 
 
-def get_valid_sample_fastqs(fastq_paths: List[Path], sample_internal_id: str) -> List[Path]:
+def get_valid_sample_fastqs(fastq_paths: list[Path], sample_internal_id: str) -> list[Path]:
     """Return a list of valid fastq files."""
     return [
         fastq
@@ -91,7 +92,7 @@ def get_valid_sample_fastqs(fastq_paths: List[Path], sample_internal_id: str) ->
 
 def get_sample_fastqs_from_flow_cell(
     flow_cell_directory: Path, sample_internal_id: str
-) -> Optional[List[Path]]:
+) -> Optional[list[Path]]:
     """Retrieve all fastq files for a specific sample in a flow cell directory."""
 
     # The flat output structure for NovaseqX flow cells demultiplexed with BCLConvert on hasta
@@ -127,10 +128,10 @@ def get_sample_fastqs_from_flow_cell(
         bcl_convert_pattern,
         demux_on_sequencer_pattern,
     ]:
-        sample_fastqs: List[Path] = get_files_matching_pattern(
+        sample_fastqs: list[Path] = get_files_matching_pattern(
             directory=flow_cell_directory, pattern=pattern
         )
-        valid_sample_fastqs: List[Path] = get_valid_sample_fastqs(
+        valid_sample_fastqs: list[Path] = get_valid_sample_fastqs(
             fastq_paths=sample_fastqs, sample_internal_id=sample_internal_id
         )
 
@@ -182,7 +183,7 @@ def get_sample_sheet(flow_cell: FlowCellDirectoryData) -> SampleSheet:
     return sample_sheet
 
 
-def get_undetermined_fastqs(lane: int, undetermined_dir_path: Path) -> List[Path]:
+def get_undetermined_fastqs(lane: int, undetermined_dir_path: Path) -> list[Path]:
     """Get the undetermined fastq files for a specific lane on a flow cell."""
     undetermined_pattern = f"Undetermined*_L00{lane}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     return get_files_matching_pattern(
@@ -191,9 +192,10 @@ def get_undetermined_fastqs(lane: int, undetermined_dir_path: Path) -> List[Path
     )
 
 
-def parse_manifest_file(manifest_file: Path) -> List[Path]:
+def parse_manifest_file(manifest_file: Path) -> list[Path]:
     """Returns a list with the first entry of each row of the given TSV file."""
-    files: List[List[str]] = read_csv(file_path=manifest_file, delimiter="\t")
+    LOG.debug(f"Parsing manifest file: {manifest_file}")
+    files: list[list[str]] = read_csv(file_path=manifest_file, delimiter="\t")
     return [Path(file[0]) for file in files]
 
 
@@ -206,25 +208,37 @@ def is_file_relevant_for_demultiplexing(file: Path) -> bool:
     return False
 
 
-def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
-    """Returns whether all relevant files for demultiplexing have been synced from the source to
-    the target."""
-    manifest_file = Path(source_directory, DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST)
-    if not manifest_file.exists():
-        LOG.debug(
-            f"{source_directory} does not contain a "
-            f"{DemultiplexingDirsAndFiles.OUTPUT_FILE_MANIFEST} file. Skipping."
-        )
-        return False
-    files_at_source: List[Path] = parse_manifest_file(manifest_file)
+def get_existing_manifest_file(source_directory: Path) -> Path | None:
+    """Returns the first existing manifest file in the source directory."""
+    manifest_file_paths = [
+        Path(source_directory, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST),
+        Path(source_directory, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST),
+    ]
+    for file_path in manifest_file_paths:
+        if file_path.exists():
+            return file_path
+
+
+def are_all_files_synced(files_at_source: list[Path], target_directory: Path) -> bool:
+    """Checks if all relevant files in the source are present in the target directory."""
     for file in files_at_source:
-        if is_file_relevant_for_demultiplexing(file) and not Path(target_directory, file).exists():
-            LOG.info(
-                f"File: {file}, has not been transferred from {source_directory} "
-                f"to {target_directory}"
-            )
+        target_file_path = Path(target_directory, file)
+        if is_file_relevant_for_demultiplexing(file) and not target_file_path.exists():
+            LOG.info(f"File: {file}, has not been transferred from source to {target_directory}")
             return False
     return True
+
+
+def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
+    """Returns whether all relevant files for demultiplexing have been synced from the source to the target."""
+    existing_manifest_file: Path | None = get_existing_manifest_file(source_directory)
+
+    if not existing_manifest_file:
+        LOG.debug(f"{source_directory} does not contain a manifest file. Skipping.")
+        return False
+
+    files_at_source: list[Path] = parse_manifest_file(existing_manifest_file)
+    return are_all_files_synced(files_at_source=files_at_source, target_directory=target_directory)
 
 
 def get_flow_cell_id(flow_cell_dir_name: str) -> str:
@@ -232,3 +246,37 @@ def get_flow_cell_id(flow_cell_dir_name: str) -> str:
     Example: 230802_A00689_0857_BHGTMFDSX7 -> HGTMFDSX7
     """
     return flow_cell_dir_name.split("_")[-1][1:]
+
+
+def is_manifest_file_required(flow_cell_dir: Path) -> bool:
+    """Returns whether a flow cell directory needs a manifest file."""
+    illumina_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST)
+    custom_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)
+    copy_complete_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE)
+    return (
+        not any((illumina_manifest_file.exists(), custom_manifest_file.exists()))
+        and copy_complete_file.exists()
+    )
+
+
+def create_manifest_file(flow_cell_dir_name: Path) -> Path:
+    """Creates a tab separated file containing the paths of all files in the given
+    directory and any subdirectories."""
+    files_in_directory: list[list[str]] = []
+    for subdir, _, files in os.walk(flow_cell_dir_name):
+        subdir = Path(subdir).relative_to(flow_cell_dir_name)
+        files_in_directory.extend([Path(subdir, file).as_posix()] for file in files)
+    LOG.info(
+        f"Writing manifest file to {Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)}"
+    )
+    output_path = Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)
+    write_csv(
+        content=files_in_directory,
+        file_path=output_path,
+        delimiter="\t",
+    )
+    return output_path
+
+
+def is_flow_cell_sync_confirmed(target_flow_cell_dir: Path) -> bool:
+    return Path(target_flow_cell_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE).exists()

@@ -3,7 +3,6 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import List, Set
 
 LOG = logging.getLogger(__name__)
 
@@ -23,12 +22,12 @@ def get_file_in_directory(directory: Path, file_name: str) -> Path:
     raise FileNotFoundError(f"File {file_name} not found in {directory}")
 
 
-def get_files_matching_pattern(directory: Path, pattern: str) -> List[Path]:
+def get_files_matching_pattern(directory: Path, pattern: str) -> list[Path]:
     """Search for all files in a directory that match a pattern."""
     return list(directory.glob(pattern))
 
 
-def get_all_files_in_dir(base_path: Path) -> Set[Path]:
+def get_all_files_in_dir(base_path: Path) -> set[Path]:
     """Get a set of all files relative to the given base path."""
     return {file.relative_to(base_path) for file in base_path.rglob("*") if file.is_file()}
 
@@ -72,7 +71,7 @@ def remove_directory_and_contents(directory_path):
         raise OSError(f"Failed to remove the directory {directory_path} and its contents: {error}")
 
 
-def get_directories_in_path(path: Path) -> List[Path]:
+def get_directories_in_path(path: Path) -> list[Path]:
     """Get all directories for a specified path.
     Raises FileNotFoundError if the path does not exist.
     """
