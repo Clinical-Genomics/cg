@@ -4,6 +4,7 @@ from pathlib import Path
 
 from housekeeper.store.models import Version
 
+from cg.apps.demultiplex.sample_sheet.validators import validate_sample_id
 from cg.exc import DownsampleFailedError
 from cg.meta.compress import files
 from cg.meta.meta import MetaAPI
@@ -154,6 +155,7 @@ class DownsampleAPI(MetaAPI):
     def downsample_sample(self, sample_id: str, case_id: str, number_of_reads: float) -> int | None:
         """Downsample a sample."""
         LOG.info(f"Starting Downsampling for sample {sample_id}.")
+        validate_sample_id(sample_id)
         downsample_data: DownsampleData = self.get_downsample_data(
             sample_id=sample_id, case_id=case_id, number_of_reads=number_of_reads
         )
