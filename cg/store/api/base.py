@@ -15,7 +15,7 @@ from cg.store.models import (
     ApplicationVersion,
     Customer,
     Case,
-    FamilySample,
+    CaseSample,
     Flowcell,
 )
 from cg.store.models import Model as ModelBase
@@ -40,7 +40,7 @@ class BaseHandler:
             self._get_query(table=Case)
             .outerjoin(Analysis)
             .join(Case.links)
-            .join(FamilySample.sample)
+            .join(CaseSample.sample)
             .join(ApplicationVersion)
             .join(Application)
         )
@@ -50,7 +50,7 @@ class BaseHandler:
         return (
             self._get_query(table=Case)
             .join(Case.links)
-            .join(FamilySample.sample)
+            .join(CaseSample.sample)
             .join(Case.customer)
         )
 
@@ -60,11 +60,11 @@ class BaseHandler:
 
     def _get_join_case_sample_query(self) -> Query:
         """Return join case sample query."""
-        return self._get_query(table=FamilySample).join(FamilySample.case).join(FamilySample.sample)
+        return self._get_query(table=CaseSample).join(CaseSample.case).join(CaseSample.sample)
 
     def _get_join_case_and_sample_query(self) -> Query:
         """Return join case sample query."""
-        return self._get_query(table=Case).join(Case.links).join(FamilySample.sample)
+        return self._get_query(table=Case).join(Case.links).join(CaseSample.sample)
 
     def _get_join_sample_and_customer_query(self) -> Query:
         """Return join sample and customer query."""
@@ -76,7 +76,7 @@ class BaseHandler:
 
     def _get_join_sample_family_query(self) -> Query:
         """Return a join sample case relationship query."""
-        return self._get_query(table=Sample).join(Case.links).join(FamilySample.sample)
+        return self._get_query(table=Sample).join(Case.links).join(CaseSample.sample)
 
     def _get_join_sample_application_version_query(self) -> Query:
         """Return join sample to application version query."""
@@ -88,7 +88,7 @@ class BaseHandler:
 
     def _get_join_analysis_sample_family_query(self) -> Query:
         """Return join analysis to sample to case query."""
-        return self._get_query(table=Analysis).join(Case).join(Case.links).join(FamilySample.sample)
+        return self._get_query(table=Analysis).join(Case).join(Case.links).join(CaseSample.sample)
 
     def _get_subquery_with_latest_case_analysis_date(self) -> Query:
         """Return a subquery with the case internal id and the date of its latest analysis."""
@@ -173,14 +173,14 @@ class BaseHandler:
 
         # sample filters
         if sample_id:
-            cases_query = cases_query.join(Case.links).join(FamilySample.sample)
+            cases_query = cases_query.join(Case.links).join(CaseSample.sample)
             cases_query = apply_sample_filter(
                 samples=cases_query,
                 filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID_PATTERN],
                 internal_id_pattern=sample_id,
             )
         else:
-            cases_query = cases_query.outerjoin(Case.links).outerjoin(FamilySample.sample)
+            cases_query = cases_query.outerjoin(Case.links).outerjoin(CaseSample.sample)
 
         # other joins
         cases_query = (

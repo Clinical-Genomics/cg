@@ -17,7 +17,7 @@ from cg.store.models import (
     Customer,
     Delivery,
     Case,
-    FamilySample,
+    CaseSample,
     Flowcell,
     Invoice,
     Organism,
@@ -231,10 +231,10 @@ class AddHandler(BaseHandler):
         status: str,
         mother: Sample = None,
         father: Sample = None,
-    ) -> FamilySample:
+    ) -> CaseSample:
         """Relate a sample record to a family record."""
 
-        new_record: FamilySample = FamilySample(status=status)
+        new_record: CaseSample = CaseSample(status=status)
         new_record.case = family
         new_record.sample = sample
         new_record.mother = mother

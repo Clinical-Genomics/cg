@@ -9,7 +9,7 @@ from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
-from cg.store.models import ApplicationVersion, Customer, Case, FamilySample, Sample
+from cg.store.models import ApplicationVersion, Customer, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -265,12 +265,12 @@ class CaseSubmitter(Submitter):
                 sample_mother: Sample = case_samples.get(sample.get(Pedigree.MOTHER))
                 sample_father: Sample = case_samples.get(sample.get(Pedigree.FATHER))
                 with self.status.session.no_autoflush:
-                    case_sample: FamilySample = self.status.get_case_sample_link(
+                    case_sample: CaseSample = self.status.get_case_sample_link(
                         case_internal_id=status_db_case.internal_id,
                         sample_internal_id=sample["internal_id"],
                     )
                 if not case_sample:
-                    case_sample: FamilySample = self._create_link(
+                    case_sample: CaseSample = self._create_link(
                         case_obj=status_db_case,
                         family_samples=case_samples,
                         father_obj=sample_father,

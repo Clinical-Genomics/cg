@@ -9,7 +9,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.models.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
-from cg.store.models import Analysis, FamilySample, Sample
+from cg.store.models import Analysis, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ class ScoutConfigBuilder:
         self.include_phenotype_terms()
 
     def add_common_sample_info(
-        self, config_sample: ScoutIndividual, case_sample: FamilySample
+        self, config_sample: ScoutIndividual, case_sample: CaseSample
     ) -> None:
         """Add the information to a sample that is common for different analysis types"""
         sample_id: str = case_sample.sample.internal_id
@@ -64,7 +64,7 @@ class ScoutConfigBuilder:
     def add_common_sample_files(
         self,
         config_sample: ScoutIndividual,
-        case_sample: FamilySample,
+        case_sample: CaseSample,
     ) -> None:
         """Add common sample files for different analysis types."""
         sample_id: str = case_sample.sample.internal_id
@@ -72,7 +72,7 @@ class ScoutConfigBuilder:
         self.include_sample_alignment_file(config_sample=config_sample)
         self.include_sample_files(config_sample=config_sample)
 
-    def build_config_sample(self, case_sample: FamilySample) -> ScoutIndividual:
+    def build_config_sample(self, case_sample: CaseSample) -> ScoutIndividual:
         """Build a sample for the scout load config"""
         raise NotImplementedError
 
@@ -91,7 +91,7 @@ class ScoutConfigBuilder:
     def include_phenotype_terms(self) -> None:
         LOG.info("Adding phenotype terms to scout load config")
         phenotype_terms: set[str] = set()
-        link_obj: FamilySample
+        link_obj: CaseSample
         for link_obj in self.analysis_obj.case.links:
             sample_obj: Sample = link_obj.sample
             for phenotype_term in sample_obj.phenotype_terms:
@@ -107,7 +107,7 @@ class ScoutConfigBuilder:
     def include_phenotype_groups(self) -> None:
         LOG.info("Adding phenotype groups to scout load config")
         phenotype_groups: set[str] = set()
-        link_obj: FamilySample
+        link_obj: CaseSample
         for link_obj in self.analysis_obj.case.links:
             sample_obj: Sample = link_obj.sample
             for phenotype_group in sample_obj.phenotype_groups:

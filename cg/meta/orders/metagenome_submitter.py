@@ -8,7 +8,7 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.models.orders.samples import MetagenomeSample
-from cg.store.models import ApplicationVersion, Customer, Case, FamilySample, Sample
+from cg.store.models import ApplicationVersion, Customer, Case, CaseSample, Sample
 
 
 class MetagenomeSubmitter(Submitter):
@@ -128,7 +128,7 @@ class MetagenomeSubmitter(Submitter):
                     self.status.session.add(case)
                     self.status.session.commit()
 
-                new_relationship: FamilySample = self.status.relate_sample(
+                new_relationship: CaseSample = self.status.relate_sample(
                     family=case, sample=new_sample, status=StatusEnum.unknown
                 )
                 self.status.session.add(new_relationship)

@@ -12,7 +12,7 @@ from cg.store.models import (
     ApplicationVersion,
     Customer,
     Case,
-    FamilySample,
+    CaseSample,
     Pool,
     Sample,
 )
@@ -168,7 +168,7 @@ class PoolSubmitter(Submitter):
                     no_invoice=True,
                 )
                 new_samples.append(new_sample)
-                link: FamilySample = self.status.relate_sample(
+                link: CaseSample = self.status.relate_sample(
                     family=case, sample=new_sample, status="unknown"
                 )
                 self.status.session.add(link)

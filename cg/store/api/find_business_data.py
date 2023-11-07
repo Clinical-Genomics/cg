@@ -29,7 +29,7 @@ from cg.store.models import (
     ApplicationLimitations,
     Customer,
     Case,
-    FamilySample,
+    CaseSample,
     Flowcell,
     Invoice,
     Pool,
@@ -231,7 +231,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Return all cases."""
         return self._get_query(table=Case).all()
 
-    def get_case_samples_by_case_id(self, case_internal_id: str) -> list[FamilySample]:
+    def get_case_samples_by_case_id(self, case_internal_id: str) -> list[CaseSample]:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
             filter_functions=[CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID],
@@ -528,7 +528,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
         return pools + samples
 
-    def get_case_sample_link(self, case_internal_id: str, sample_internal_id: str) -> FamilySample:
+    def get_case_sample_link(self, case_internal_id: str, sample_internal_id: str) -> CaseSample:
         """Return a case-sample link between a family and a sample."""
         filter_functions: list[CaseSampleFilter] = [
             CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID,
