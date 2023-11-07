@@ -7,7 +7,7 @@ from housekeeper.store.models import File, Version
 from pydantic.v1 import ValidationError
 
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat, SampleType
+from cg.constants.constants import FileFormat, SampleType, PrepCategory
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.indexes import ListIndexes
 from cg.constants.observations import ObservationsFileWildcards
@@ -416,6 +416,16 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return verified_observations
 
+    def get_verified_gens_file_paths(self, gender: Gender) -> Optional[dict]:
+        """Return a list of file path arguments for Gens."""
+        return {
+            "genome_interval": self.genome_interval_path,
+            "gnomad_min_af5": self.gnomad_af5_path,
+            "gens_coverage_pon": self.gens_coverage_female_path
+            if gender == Gender.FEMALE
+            else self.gens_coverage_male_path,
+        }
+
     def get_swegen_verified_path(self, variants: Variants) -> Optional[str]:
         """Return verified SweGen path."""
         swegen_file: str = self.get_latest_file_by_pattern(
@@ -458,12 +468,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "pon_cnn": verified_pon,
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
-            "gens_coverage_pon": self.gens_coverage_female_path
-            if gender == Gender.FEMALE
-            else self.gens_coverage_male_path,
         }
         config_case.update(self.get_verified_samples(case_id=case_id))
         config_case.update(self.get_parsed_observation_file_paths(observations))
+        config_case.update(
+            self.get_verified_gens_file_paths(gender=verified_gender)
+        ) if not verified_panel_bed else None
 
         return config_case
 
@@ -569,8 +579,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),
                 "--cadd-annotations": self.cadd_path,
-                "--genome-interval": self.genome_interval_path,
-                "--gnomad-min-af5": self.gnomad_af5_path,
+                "--genome-interval": arguments.get("genome_interval"),
+                "--gnomad-min-af5": arguments.get("gnomad_min_af5"),
                 "--gens-coverage-pon": arguments.get("gens_coverage_pon"),
                 "--swegen-snv": arguments.get("swegen_snv"),
                 "--swegen-sv": arguments.get("swegen_sv"),
