@@ -27,6 +27,12 @@ def downsample():
     help="Case identifier used in statusdb, e.g. supersonicturtle. The case information wil be transferred.",
 )
 @click.option(
+    "-cn",
+    "--case-name",
+    required=True,
+    help="Case name that is used as name for the downsampled case.",
+)
+@click.option(
     "-i",
     "--input-data",
     required=True,
@@ -38,14 +44,17 @@ def downsample():
 @DRY_RUN
 @click.pass_obj
 def downsample_sample(
-    context: CGConfig, case_id: str, input_data: Tuple[str, float], dry_run: bool
+    context: CGConfig, case_id: str, case_name: str, input_data: Tuple[str, float], dry_run: bool
 ):
     """Downsample reads in one or multiple samples."""
     downsample_api = DownsampleAPI(config=context, dry_run=dry_run)
     for sample_id, reads in input_data:
         try:
             downsample_api.downsample_sample(
-                case_id=case_id, sample_id=sample_id, number_of_reads=float(reads)
+                case_id=case_id,
+                sample_id=sample_id,
+                number_of_reads=float(reads),
+                case_name=case_name,
             )
         except Exception as error:
             LOG.info(repr(error))

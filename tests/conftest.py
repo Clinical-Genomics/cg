@@ -3367,10 +3367,16 @@ def downsample_context(
 
 
 @pytest.fixture
+def downsample_case_name():
+    return "subsonichedgehog"
+
+
+@pytest.fixture
 def downsample_data(
     downsample_context: CGConfig,
     downsample_sample_internal_id_1: str,
     downsample_case_internal_id: str,
+    downsample_case_name: str,
     number_of_reads_in_millions: int,
 ) -> DownsampleData:
     return DownsampleData(
@@ -3378,6 +3384,7 @@ def downsample_data(
         hk_api=downsample_context.housekeeper_api_,
         sample_id=downsample_sample_internal_id_1,
         case_id=downsample_case_internal_id,
+        case_name=downsample_case_name,
         number_of_reads=number_of_reads_in_millions,
         out_dir=Path(downsample_context.downsample_dir),
     )

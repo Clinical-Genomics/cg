@@ -29,7 +29,7 @@ class DownsampleAPI(MetaAPI):
         self.dry_run: bool = dry_run
 
     def get_downsample_data(
-        self, sample_id: str, number_of_reads: float, case_id: str
+        self, sample_id: str, number_of_reads: float, case_id: str, case_name: str
     ) -> DownsampleData:
         """Return the DownSampleData.
         Raises:
@@ -42,6 +42,7 @@ class DownsampleAPI(MetaAPI):
                 sample_id=sample_id,
                 number_of_reads=number_of_reads,
                 case_id=case_id,
+                case_name=case_name,
                 out_dir=Path(self.config.downsample_dir),
             )
         except Exception as error:
@@ -152,12 +153,17 @@ class DownsampleAPI(MetaAPI):
         )
         return downsample_work_flow.write_and_submit_sbatch_script()
 
-    def downsample_sample(self, sample_id: str, case_id: str, number_of_reads: float) -> int | None:
+    def downsample_sample(
+        self, sample_id: str, case_name: str, case_id: str, number_of_reads: float
+    ) -> int | None:
         """Downsample a sample."""
         LOG.info(f"Starting Downsampling for sample {sample_id}.")
         validate_sample_id(sample_id)
         downsample_data: DownsampleData = self.get_downsample_data(
-            sample_id=sample_id, case_id=case_id, number_of_reads=number_of_reads
+            sample_id=sample_id,
+            case_id=case_id,
+            number_of_reads=number_of_reads,
+            case_name=case_name,
         )
         if self.is_decompression_needed(downsample_data):
             self.prepare_fastq_api.compress_api.decompress_spring(

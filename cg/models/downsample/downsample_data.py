@@ -19,6 +19,7 @@ class DownsampleData:
         sample_id: str,
         number_of_reads: float,
         case_id: str,
+        case_name: str,
         out_dir: Path,
     ):
         """Initialize the downsample data and perform integrity checks."""
@@ -28,6 +29,7 @@ class DownsampleData:
         self.number_of_reads: float = number_of_reads
         self.case_id: str = case_id
         self.out_dir: Path = out_dir
+        self.case_name: str = case_name
         self.original_sample: Sample = self.get_sample_to_downsample()
         self.original_case: Family = self.get_case_to_downsample()
         self.validate_enough_reads_to_downsample()
@@ -47,7 +49,7 @@ class DownsampleData:
         self,
     ) -> str:
         """Return a case name with _downsampled appended."""
-        return f"{self.get_case_to_downsample().name}_downsampled"
+        return f"{self.case_name}_downsampled"
 
     def get_sample_to_downsample(self) -> Sample:
         """
