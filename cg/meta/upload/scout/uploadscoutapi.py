@@ -426,9 +426,7 @@ class UploadScoutAPI:
         self, dna_sample: Sample, collaborators: set[Customer]
     ) -> list[str]:
         """Maps a list of uploaded DNA cases linked to DNA sample."""
-        potential_cases_related_to_dna_sample: list[Case] = [
-            dna_sample_family_relation.case for dna_sample_family_relation in dna_sample.links
-        ]
+        potential_cases_related_to_dna_sample: list[Case] = [link.case for link in dna_sample.links]
         return self.filter_cases_related_to_dna_sample(
             list_of_dna_cases=potential_cases_related_to_dna_sample, collaborators=collaborators
         )
