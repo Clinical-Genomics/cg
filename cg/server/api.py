@@ -32,7 +32,7 @@ from cg.store.models import (
     Application,
     ApplicationLimitations,
     Customer,
-    Family,
+    Case,
     Flowcell,
     Pool,
     Sample,
@@ -169,7 +169,7 @@ def get_cases():
     action: str = request.args.get("action")
 
     customers: list[Customer] = _get_current_customers()
-    cases: list[Family] = _get_cases(enquiry=enquiry, action=action, customers=customers)
+    cases: list[Case] = _get_cases(enquiry=enquiry, action=action, customers=customers)
 
     nr_cases: int = len(cases)
     cases_with_links: list[dict] = [case.to_dict(links=True) for case in cases]
@@ -183,7 +183,7 @@ def _get_current_customers() -> Optional[list[Customer]]:
 
 def _get_cases(
     enquiry: Optional[str], action: Optional[str], customers: Optional[list[Customer]]
-) -> list[Family]:
+) -> list[Case]:
     """Get cases based on the provided filters."""
     return db.get_cases_by_customers_action_and_case_search(
         case_search=enquiry,
@@ -195,7 +195,7 @@ def _get_cases(
 @BLUEPRINT.route("/cases/<case_id>")
 def parse_case(case_id):
     """Return a case with links."""
-    case: Family = db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = db.get_case_by_internal_id(internal_id=case_id)
     if case is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
@@ -226,7 +226,7 @@ def parse_families_in_collaboration():
 @BLUEPRINT.route("/families_in_collaboration/<family_id>")
 def parse_family_in_collaboration(family_id):
     """Return a family with links."""
-    case: Family = db.get_case_by_internal_id(internal_id=family_id)
+    case: Case = db.get_case_by_internal_id(internal_id=family_id)
     customer: Customer = db.get_customer_by_internal_id(
         customer_internal_id=request.args.get("customer")
     )

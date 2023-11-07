@@ -10,7 +10,7 @@ from cg.meta.meta import MetaAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Analysis, Family
+from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class UploadAPI(MetaAPI):
             status_db=config.status_db,
         )
 
-    def upload(self, ctx: click.Context, case: Family, restart: bool) -> None:
+    def upload(self, ctx: click.Context, case: Case, restart: bool) -> None:
         """Uploads pipeline specific analysis data and files"""
 
         raise NotImplementedError
@@ -52,7 +52,7 @@ class UploadAPI(MetaAPI):
         )
 
     @staticmethod
-    def verify_analysis_upload(case_obj: Family, restart: bool) -> None:
+    def verify_analysis_upload(case_obj: Case, restart: bool) -> None:
         """Verifies the state of an analysis upload in StatusDB"""
 
         if not case_obj.data_delivery:

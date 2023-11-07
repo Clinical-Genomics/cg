@@ -13,7 +13,7 @@ from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
 from cg.exc import MissingFilesError
 from cg.store import Store
-from cg.store.models import Family, FamilySample, Sample
+from cg.store.models import Case, FamilySample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ class DeliverAPI:
         LOG.info(f"Set dry run to {dry_run}")
         self.dry_run = dry_run
 
-    def deliver_files(self, case_obj: Family):
+    def deliver_files(self, case_obj: Case):
         """Deliver all files for a case.
 
         If there are sample tags deliver all files for the samples as well.
@@ -283,7 +283,7 @@ class DeliverAPI:
         LOG.info(f"Setting customer_id to {customer_id}")
         self.customer_id = customer_id
 
-    def set_customer_id(self, case_obj: Family) -> None:
+    def set_customer_id(self, case_obj: Case) -> None:
         """Set the customer_id for this upload"""
         self._set_customer_id(case_obj.customer.internal_id)
 

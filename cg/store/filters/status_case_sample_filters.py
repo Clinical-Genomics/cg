@@ -3,14 +3,14 @@ from typing import Callable, Optional
 
 from sqlalchemy.orm import Query
 
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 
 def get_samples_in_case_by_internal_id(
     case_samples: Query, case_internal_id: str, **kwargs
 ) -> Query:
     """Return samples associated with a case."""
-    return case_samples.filter(Family.internal_id == case_internal_id)
+    return case_samples.filter(Case.internal_id == case_internal_id)
 
 
 def get_cases_with_sample_by_internal_id(case_samples: Query, sample_internal_id: str, **kwargs):

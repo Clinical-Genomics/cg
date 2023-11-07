@@ -18,7 +18,7 @@ from cg.models.scout.scout_load_config import (
     ScoutLoadConfig,
     ScoutMipIndividual,
 )
-from cg.store.models import Analysis, Family, FamilySample
+from cg.store.models import Analysis, Case, FamilySample
 
 LOG = logging.getLogger(__name__)
 
@@ -186,7 +186,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
     def is_multi_sample_case(load_config: ScoutLoadConfig) -> bool:
         return len(load_config.samples) > 1
 
-    def run_madeline(self, family_obj: Family) -> Path:
+    def run_madeline(self, family_obj: Case) -> Path:
         """Generate a madeline file for an analysis. Use customer sample names"""
         samples = [
             {

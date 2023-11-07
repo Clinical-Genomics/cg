@@ -11,7 +11,7 @@ from cg.models.orders.samples import RmlSample
 from cg.store.models import (
     ApplicationVersion,
     Customer,
-    Family,
+    Case,
     FamilySample,
     Pool,
     Sample,
@@ -126,7 +126,7 @@ class PoolSubmitter(Submitter):
                 )
             priority: str = pool["priority"]
             case_name: str = self.create_case_name(ticket=ticket_id, pool_name=pool["name"])
-            case: Family = self.status.get_case_by_name_and_customer(
+            case: Case = self.status.get_case_by_name_and_customer(
                 customer=customer, case_name=case_name
             )
             if not case:

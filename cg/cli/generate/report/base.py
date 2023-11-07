@@ -24,7 +24,7 @@ from cg.cli.generate.report.utils import (
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import CgError
 from cg.meta.report.report_api import ReportAPI
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ def generate_delivery_report(
 ) -> None:
     """Creates a delivery report for the provided case."""
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
-    case: Family = get_report_case(context, case_id)
+    case: Case = get_report_case(context, case_id)
     report_api: ReportAPI = get_report_api(context, case)
     analysis_date: datetime = get_report_analysis_started(case, report_api, analysis_started_at)
 

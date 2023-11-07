@@ -6,7 +6,7 @@ from cg.cli.add import add
 from cg.constants import DataDelivery, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Customer, Family, Panel
+from cg.store.models import Customer, Case, Panel
 from tests.store_helpers import StoreHelpers
 
 CLI_OPTION_ANALYSIS = Pipeline.BALSAMIC_UMI
@@ -47,7 +47,7 @@ def test_add_case_required(
 
     # THEN it should be added
     assert result.exit_code == 0
-    case_query = disk_store._get_query(table=Family)
+    case_query = disk_store._get_query(table=Case)
     assert case_query.count() == 1
     assert case_query.first().name == name
     assert case_query.first().panels == [panel_id]
@@ -88,7 +88,7 @@ def test_add_case_bad_pipeline(
 
     # THEN it should not be added
     assert result.exit_code != 0
-    assert disk_store._get_query(table=Family).count() == 0
+    assert disk_store._get_query(table=Case).count() == 0
 
 
 def test_add_case_bad_data_delivery(
@@ -125,7 +125,7 @@ def test_add_case_bad_data_delivery(
 
     # THEN it should not be added
     assert result.exit_code != 0
-    assert disk_store._get_query(table=Family).count() == 0
+    assert disk_store._get_query(table=Case).count() == 0
 
 
 def test_add_case_bad_customer(cli_runner: CliRunner, base_context: CGConfig, ticket_id: str):
@@ -156,7 +156,7 @@ def test_add_case_bad_customer(cli_runner: CliRunner, base_context: CGConfig, ti
 
     # THEN it should complain about missing customer instead of adding a case
     assert result.exit_code == 1
-    assert disk_store._get_query(table=Family).count() == 0
+    assert disk_store._get_query(table=Case).count() == 0
 
 
 def test_add_case_bad_panel(
@@ -190,7 +190,7 @@ def test_add_case_bad_panel(
 
     # THEN it should complain about missing panel instead of adding a case
     assert result.exit_code == 1
-    assert disk_store._get_query(table=Family).count() == 0
+    assert disk_store._get_query(table=Case).count() == 0
 
 
 def test_add_case_priority(
@@ -229,7 +229,7 @@ def test_add_case_priority(
 
     # THEN it should be added
     assert result.exit_code == 0
-    case_query = disk_store._get_query(table=Family)
+    case_query = disk_store._get_query(table=Case)
 
     assert case_query.count() == 1
     assert case_query.first().priority_human == priority
