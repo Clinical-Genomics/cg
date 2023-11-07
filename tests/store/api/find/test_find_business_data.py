@@ -964,3 +964,55 @@ def test_get_sample_lane_sequencing_metrics_by_flow_cell_name(
     assert metrics
     for metric in metrics:
         assert metric.flow_cell_name == flow_cell_name
+
+
+def test_case_with_name_exists(
+    store_with_case_and_sample_with_reads: Store, downsample_case_internal_id: str
+):
+    # GIVEN a store with a case and a sample
+
+    # WHEN checking if a case that is in the store exists
+    does_exist: bool = store_with_case_and_sample_with_reads.case_with_name_exists(
+        case_name=downsample_case_internal_id,
+    )
+    # THEN the case does exist
+    assert does_exist
+
+
+def test_case_with_name_does_not_exist(
+    store_with_case_and_sample_with_reads: Store,
+):
+    # GIVEN a store with a case
+
+    # WHEN checking if a case that is not in the store exists
+    does_exist: bool = store_with_case_and_sample_with_reads.case_with_name_exists(
+        case_name="does_not_exist",
+    )
+    # THEN the case does not exist
+    assert not does_exist
+
+
+def test_sample_with_id_does_exist(
+    store_with_case_and_sample_with_reads: Store, downsample_sample_internal_id_1: str
+):
+    # GIVEN a store with a sample
+
+    # WHEN checking if a sample that is in the store exists
+    does_exist: bool = store_with_case_and_sample_with_reads.sample_with_id_exists(
+        sample_id=downsample_sample_internal_id_1
+    )
+
+    # THEN the sample does exist
+    assert does_exist
+
+
+def test_sample_with_id_does_not_exist(store_with_case_and_sample_with_reads: Store):
+    # GIVEN a store with a sample
+
+    # WHEN checking if a sample that is not in the store exists
+    does_exist: bool = store_with_case_and_sample_with_reads.sample_with_id_exists(
+        sample_id="does_not_exist"
+    )
+
+    # THEN the sample does not exist
+    assert not does_exist

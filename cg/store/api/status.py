@@ -9,19 +9,10 @@ from cg.constants import CASE_ACTIONS, FlowCellStatus, Pipeline
 from cg.constants.constants import CaseActions
 from cg.constants.invoice import CustomerNames
 from cg.store.api.base import BaseHandler
-from cg.store.filters.status_analysis_filters import (
-    AnalysisFilter,
-    apply_analysis_filter,
-)
-from cg.store.filters.status_application_filters import (
-    ApplicationFilter,
-    apply_application_filter,
-)
+from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
+from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_flow_cell_filters import (
-    FlowCellFilter,
-    apply_flow_cell_filter,
-)
+from cg.store.filters.status_flow_cell_filters import FlowCellFilter, apply_flow_cell_filter
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
 from cg.store.models import Analysis, Customer, Family, Flowcell, Pool, Sample

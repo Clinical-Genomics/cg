@@ -9,10 +9,7 @@ from typing import Iterator, Optional
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.compression import (
-    CRUNCHY_MIN_GB_PER_PROCESS,
-    MAX_READS_PER_GB,
-)
+from cg.constants.compression import CRUNCHY_MIN_GB_PER_PROCESS, MAX_READS_PER_GB
 from cg.constants.slurm import Slurm
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
