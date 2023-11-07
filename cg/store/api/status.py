@@ -9,19 +9,10 @@ from cg.constants import CASE_ACTIONS, FlowCellStatus, Pipeline
 from cg.constants.constants import CaseActions
 from cg.constants.invoice import CustomerNames
 from cg.store.api.base import BaseHandler
-from cg.store.filters.status_analysis_filters import (
-    AnalysisFilter,
-    apply_analysis_filter,
-)
-from cg.store.filters.status_application_filters import (
-    ApplicationFilter,
-    apply_application_filter,
-)
+from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
+from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_flow_cell_filters import (
-    FlowCellFilter,
-    apply_flow_cell_filter,
-)
+from cg.store.filters.status_flow_cell_filters import FlowCellFilter, apply_flow_cell_filter
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
 from cg.store.models import Analysis, Customer, Family, Flowcell, Pool, Sample
@@ -394,9 +385,9 @@ class StatusHandler(BaseHandler):
             )
             case_data.samples_sequenced = len(
                 [
-                    link.sample.reads_updated_at
+                    link.sample.last_sequenced_at
                     for link in case_obj.links
-                    if link.sample.reads_updated_at
+                    if link.sample.last_sequenced_at
                 ]
             )
             case_data.samples_delivered = len(
@@ -450,9 +441,9 @@ class StatusHandler(BaseHandler):
 
             if case_data.samples_to_sequence > 0 and case_data.samples_sequenced_bool:
                 case_data.samples_sequenced_at = max(
-                    link.sample.reads_updated_at
+                    link.sample.last_sequenced_at
                     for link in case_obj.links
-                    if link.sample.reads_updated_at is not None
+                    if link.sample.last_sequenced_at is not None
                 )
 
             if case_data.samples_to_deliver > 0 and case_data.samples_delivered_bool:

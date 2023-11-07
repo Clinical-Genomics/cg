@@ -741,7 +741,7 @@ class StoreHelpers:
 
         samples: list[Sample] = cls.add_samples(store=base_store, nr_samples=nr_samples)
         for sample in samples:
-            sample.reads_updated_at: datetime = sequenced_at
+            sample.last_sequenced_at: datetime = sequenced_at
         case: Family = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
         cls.relate_samples(base_store=base_store, case=case, samples=samples)
         return case
