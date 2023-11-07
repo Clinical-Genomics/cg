@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.downsample.downsample import DownsampleAPI
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.store.models import Sample
@@ -126,8 +127,8 @@ def test_start_downsample_job(
     # GIVEN a DownsampleAPI
     downsample_api.dry_run = True
     # WHEN starting a downsample job
-    mocker.patch.object(DownsampleAPI, "is_decompression_needed")
-    DownsampleAPI.is_decompression_needed.return_value = False
+    mocker.patch.object(PrepareFastqAPI, "is_sample_decompression_needed")
+    PrepareFastqAPI.is_sample_decompression_needed.return_value = False
     submitted_job: int = downsample_api.downsample_sample(
         sample_id=downsample_sample_internal_id_1,
         case_id=downsample_case_internal_id,

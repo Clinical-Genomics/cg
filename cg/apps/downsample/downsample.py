@@ -86,11 +86,7 @@ class DownsampleAPI(MetaAPI):
             status=downsample_data.get_sample_status(),
         )
         if self.dry_run:
-            LOG.info(
-                f"Would relate sample {sample} to case {case.internal_id} with name {case.name}"
-            )
             return
-
         self.status_db.session.add(sample_case_link)
         self.status_db.session.commit()
         LOG.info(f"Related sample {sample.internal_id} to {case.internal_id}")
