@@ -1,10 +1,10 @@
 """Constants related to demultiplexing."""
+from enum import Enum, StrEnum
 from pathlib import Path
 
 import click
 
 from cg.constants.sequencing import Sequencers
-from enum import Enum, StrEnum
 
 
 class BclConverter(StrEnum):

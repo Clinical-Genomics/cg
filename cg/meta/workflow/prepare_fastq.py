@@ -40,6 +40,24 @@ class PrepareFastqAPI:
             compression_objects.extend(files.get_spring_paths(version_obj))
         return compression_objects
 
+    def get_sample_compression_objects(self, sample_id: str) -> list[CompressionData]:
+        compression_objects: list[CompressionData] = []
+        version_obj: Version = self.compress_api.hk_api.get_latest_bundle_version(
+            bundle_name=sample_id
+        )
+        compression_objects.extend(files.get_spring_paths(version_obj))
+        return compression_objects
+
+    def is_sample_decompression_needed(self, sample_id: str) -> bool:
+        """Check if decompression is needed for the specified sample."""
+        LOG.debug(f"Checking if decompression is needed for {sample_id}.")
+        compression_objects = self.get_sample_compression_objects(sample_id=sample_id)
+        return any(
+            not self.crunchy_api.is_compression_pending(compression_object)
+            and not compression_object.pair_exists()
+            for compression_object in compression_objects
+        )
+
     @staticmethod
     def _should_skip_sample(case: Family, sample: Sample):
         """

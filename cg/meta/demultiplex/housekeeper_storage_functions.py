@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
 from cg.meta.demultiplex.utils import (
@@ -50,13 +49,9 @@ def store_undetermined_fastq_files(
         tuple[int, str]
     ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 
-    undetermined_dir_path: Path = flow_cell.path
-    if flow_cell.bcl_converter != BclConverter.BCL2FASTQ:
-        undetermined_dir_path = Path(flow_cell.path, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
-
     for lane, sample_id in non_pooled_lanes_and_samples:
         undetermined_fastqs: list[Path] = get_undetermined_fastqs(
-            lane=lane, undetermined_dir_path=undetermined_dir_path
+            lane=lane, flow_cell_path=flow_cell.path
         )
 
         for fastq_path in undetermined_fastqs:

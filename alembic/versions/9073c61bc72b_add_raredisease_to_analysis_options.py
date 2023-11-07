@@ -12,7 +12,6 @@ from sqlalchemy.orm import declarative_base
 from alembic import op
 from cg.constants import Pipeline
 
-
 # revision identifiers, used by Alembic.
 revision = "9073c61bc72b"
 down_revision = "b6f00cc615cf"
