@@ -442,7 +442,7 @@ class SampleView(BaseView):
         "comment",
         "downsampled_to",
         "is_tumour",
-        "reads_updated_at",
+        "last_sequenced_at",
         "sex",
     ]
     column_filters = ["customer.internal_id", "priority", "sex", "application_version.application"]
