@@ -283,10 +283,10 @@ class CaseView(BaseView):
         """column formatter to open this view"""
         del unused1, unused2, unused3
         markup = ""
-        if model.family:
+        if model.case:
             markup += Markup(
                 " <a href='%s'>%s</a>"
-                % (url_for("case.index_view", search=model.family.internal_id), model.family)
+                % (url_for("case.index_view", search=model.case.internal_id), model.case)
             )
 
         return markup
@@ -504,7 +504,7 @@ class SampleView(BaseView):
             sample: Sample = db.get_sample_by_entry_id(entry_id=int(entry_id))
 
             sample_case_ids: list[str] = [
-                case_sample.family.internal_id for case_sample in sample.links
+                case_sample.case.internal_id for case_sample in sample.links
             ]
             all_associated_case_ids.update(sample_case_ids)
 
@@ -564,7 +564,7 @@ class DeliveryView(BaseView):
 
 
 class FamilySampleView(BaseView):
-    """Admin view for Model.FamilySample"""
+    """Admin view for Model.caseSample"""
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["status"]
