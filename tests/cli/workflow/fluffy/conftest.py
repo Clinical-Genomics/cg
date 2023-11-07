@@ -54,7 +54,7 @@ def sample() -> Sample:
         name="sample_name",
         order="sample_project",
         control="positive",
-        reads_updated_at=dt.datetime.now(),
+        last_sequenced_at=dt.datetime.now(),
     )
 
 
@@ -168,7 +168,7 @@ def fluffy_context(
         is_tumour=False,
         application_type="tgs",
         reads=100,
-        reads_updated_at=dt.datetime.now(),
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_flow_cell(
         fluffy_analysis_api.status_db, flow_cell_name="flowcell", samples=[example_fluffy_sample]

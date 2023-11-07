@@ -181,13 +181,19 @@ def get_sample_sheet(flow_cell: FlowCellDirectoryData) -> SampleSheet:
     return sample_sheet
 
 
-def get_undetermined_fastqs(lane: int, undetermined_dir_path: Path) -> list[Path]:
+def get_undetermined_fastqs(lane: int, flow_cell_path: Path) -> list[Path]:
     """Get the undetermined fastq files for a specific lane on a flow cell."""
     undetermined_pattern = f"Undetermined*_L00{lane}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    return get_files_matching_pattern(
-        directory=undetermined_dir_path,
+    undetermined_in_root: list[Path] = get_files_matching_pattern(
+        directory=flow_cell_path,
         pattern=undetermined_pattern,
     )
+    unaligned_path = Path(flow_cell_path, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
+    undetermined_in_unaligned: list[Path] = get_files_matching_pattern(
+        directory=unaligned_path,
+        pattern=undetermined_pattern,
+    )
+    return undetermined_in_root + undetermined_in_unaligned
 
 
 def parse_manifest_file(manifest_file: Path) -> list[Path]:

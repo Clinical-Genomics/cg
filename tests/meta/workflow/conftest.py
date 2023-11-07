@@ -167,7 +167,7 @@ def qc_microsalt_context(
             application_tag=MicrosaltAppTags.MWRNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
             reads=MicrosaltQC.TARGET_READS,
-            reads_updated_at=datetime.datetime.now(),
+            last_sequenced_at=datetime.datetime.now(),
         )
 
         helpers.add_relationship(store=store, case=microsalt_case_qc_pass, sample=sample_to_add)
@@ -187,7 +187,7 @@ def qc_microsalt_context(
             application_tag=MicrosaltAppTags.MWXNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
             reads=MicrosaltQC.TARGET_READS,
-            reads_updated_at=datetime.datetime.now(),
+            last_sequenced_at=datetime.datetime.now(),
         )
 
         helpers.add_relationship(store=store, case=microsalt_case_qc_fail, sample=sample_to_add)

@@ -356,7 +356,7 @@ class ReportAPI(MetaAPI):
             ordered_at=sample.ordered_at,
             received_at=sample.received_at,
             prepared_at=sample.prepared_at,
-            reads_updated_at=sample.reads_updated_at,
+            reads_updated_at=sample.last_sequenced_at,
         )
 
     def get_sample_metadata(

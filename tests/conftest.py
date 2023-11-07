@@ -2005,7 +2005,7 @@ def sample_store(base_store: Store) -> Store:
             sex=Gender.MALE,
             received=datetime.now(),
             prepared_at=datetime.now(),
-            reads_updated_at=datetime.now(),
+            last_sequenced_at=datetime.now(),
             reads=(310 * 1000000),
         ),
         base_store.add_sample(
@@ -2018,12 +2018,12 @@ def sample_store(base_store: Store) -> Store:
         base_store.add_sample(
             name="to-deliver",
             sex=Gender.MALE,
-            reads_updated_at=datetime.now(),
+            last_sequenced_at=datetime.now(),
         ),
         base_store.add_sample(
             name="delivered",
             sex=Gender.MALE,
-            reads_updated_at=datetime.now(),
+            last_sequenced_at=datetime.now(),
             delivered_at=datetime.now(),
             no_invoice=False,
         ),
@@ -2838,7 +2838,7 @@ def rnafusion_context(
     sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        reads_updated_at=datetime.now(),
+        last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=apptag_rna,
     )
@@ -2860,7 +2860,7 @@ def rnafusion_context(
     sample_not_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id_not_enough_reads,
-        reads_updated_at=datetime.now(),
+        last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_not_pass,
         application_tag=apptag_rna,
     )
@@ -3089,7 +3089,7 @@ def taxprofiler_context(
     taxprofiler_sample: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        reads_updated_at=datetime.now(),
+        last_sequenced_at=datetime.now(),
         name=sample_name,
         reads=total_sequenced_reads_pass,
     )

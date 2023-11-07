@@ -110,7 +110,7 @@ def _log_sample_process_information(sample: Sample):
     LOG.info(f"Can NOT delete processed sample: {sample.internal_id}")
     LOG.info(f"Sample was received: {sample.received_at}")
     LOG.info(f"Sample was prepared: {sample.prepared_at}")
-    LOG.info(f"Sample's reads were updated: {sample.reads_updated_at}")
+    LOG.info(f"Sample's reads were updated: {sample.last_sequenced_at}")
     LOG.info(f"Sample was delivered: {sample.delivered_at}")
     LOG.info(f"Sample has invoice: {sample.invoice_id}")
 
@@ -128,7 +128,7 @@ def _has_sample_been_lab_processed(sample: Sample) -> datetime.datetime:
     return (
         sample.received_at
         or sample.prepared_at
-        or sample.reads_updated_at
+        or sample.last_sequenced_at
         or sample.delivered_at
         or sample.invoice_id
     )

@@ -171,9 +171,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
     def get_sample_sequenced_date(self, sample_id: str) -> Optional[dt.date]:
         sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
-        reads_updated_at: dt.datetime = sample_obj.reads_updated_at
-        if reads_updated_at:
-            return reads_updated_at.date()
+        last_sequenced_at: dt.datetime = sample_obj.last_sequenced_at
+        if last_sequenced_at:
+            return last_sequenced_at.date()
 
     def get_sample_control_status(self, sample_id: str) -> bool:
         sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)

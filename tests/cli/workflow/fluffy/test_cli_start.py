@@ -59,7 +59,7 @@ def test_start_available(
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_name_from_lims_id")
     FluffyAnalysisAPI.get_sample_name_from_lims_id.return_value = "CustName"
 
-    # GIVEN every sample in SampleSheet reads_updated_at set in StatusDB
+    # GIVEN every sample in SampleSheet last_sequenced_at set in StatusDB
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_sequenced_date")
     FluffyAnalysisAPI.get_sample_sequenced_date.return_value = dt.datetime.now().date()
 
