@@ -9,36 +9,31 @@ from typing import Iterator, Optional
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.compression import (
-    CASES_TO_IGNORE,
-    CRUNCHY_MIN_GB_PER_PROCESS,
-    MAX_READS_PER_GB,
-)
+from cg.constants.compression import CRUNCHY_MIN_GB_PER_PROCESS, MAX_READS_PER_GB
 from cg.constants.slurm import Slurm
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 from cg.utils.date import get_date_days_ago
 
 LOG = logging.getLogger(__name__)
 
 
-def get_cases_to_process(
-    days_back: int, store: Store, case_id: Optional[str] = None
-) -> Optional[list[Family]]:
+def get_cases_to_process(days_back: int, store: Store, case_id: Optional[str] = None) -> list[Case]:
     """Return cases to process."""
-    cases: list[Family] = []
+    cases: list[Case] = []
     if case_id:
-        case: Family = store.get_case_by_internal_id(internal_id=case_id)
+        case: Case = store.get_case_by_internal_id(case_id)
         if not case:
             LOG.warning(f"Could not find case {case_id}")
             return
-        cases.append(case)
+        if case.is_compressible:
+            cases.append(case)
     else:
         date_threshold: dt.datetime = get_date_days_ago(days_ago=days_back)
-        cases: list[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
+        cases: list[Case] = store.get_cases_to_compress(date_threshold=date_threshold)
     return cases
 
 
@@ -51,14 +46,6 @@ def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
 
     for link_obj in case_obj.links:
         yield link_obj.sample.internal_id
-
-
-def is_case_ignored(case_id: str) -> bool:
-    """Check if case should be skipped."""
-    if case_id in CASES_TO_IGNORE:
-        LOG.debug(f"Skipping case: {case_id}")
-        return True
-    return False
 
 
 def set_memory_according_to_reads(
@@ -136,7 +123,7 @@ def get_true_dir(dir_path: Path) -> Optional[Path]:
 
 def compress_sample_fastqs_in_cases(
     compress_api: CompressAPI,
-    cases: list[Family],
+    cases: list[Case],
     dry_run: bool,
     number_of_conversions: int,
     hours: int = None,
@@ -150,8 +137,6 @@ def compress_sample_fastqs_in_cases(
         case_converted = True
         if case_conversion_count >= number_of_conversions:
             break
-        if is_case_ignored(case_id=case.internal_id):
-            continue
 
         LOG.info(f"Searching for FASTQ files in case {case.internal_id}")
         if not case.links:

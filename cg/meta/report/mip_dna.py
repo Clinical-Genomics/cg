@@ -26,7 +26,7 @@ from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.models.report.metadata import MipDNASampleMetadataModel
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class MipDNAReportAPI(ReportAPI):
         self.analysis_api: MipDNAAnalysisAPI = analysis_api
 
     def get_sample_metadata(
-        self, case: Family, sample: Sample, analysis_metadata: MipAnalysis
+        self, case: Case, sample: Sample, analysis_metadata: MipAnalysis
     ) -> MipDNASampleMetadataModel:
         """Fetches the MIP DNA sample metadata to include in the report."""
         parsed_metrics = get_sample_id_metric(
@@ -56,7 +56,7 @@ class MipDNAReportAPI(ReportAPI):
             duplicates=parsed_metrics.duplicate_reads,
         )
 
-    def get_sample_coverage(self, sample: Sample, case: Family) -> dict:
+    def get_sample_coverage(self, sample: Sample, case: Case) -> dict:
         """Calculates coverage values for a specific sample."""
         genes = self.get_genes_from_scout(panels=case.panels)
         sample_coverage = self.chanjo_api.sample_coverage(

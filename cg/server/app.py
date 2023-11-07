@@ -1,10 +1,14 @@
+from typing import Optional
+
 import coloredlogs
 import requests
 from flask import Flask, redirect, session, url_for
 from flask_admin.base import AdminIndexView
 from flask_dance.consumer import oauth_authorized
 from flask_dance.contrib.google import google, make_google_blueprint
+from sqlalchemy.orm import scoped_session
 
+from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
     Analysis,
     Application,
@@ -15,7 +19,7 @@ from cg.store.models import (
     Collaboration,
     Customer,
     Delivery,
-    Family,
+    Case,
     FamilySample,
     Flowcell,
     Invoice,
@@ -117,7 +121,7 @@ def _register_admin_views():
     )
 
     # Business data views
-    ext.admin.add_view(admin.FamilyView(Family, ext.db.session))
+    ext.admin.add_view(admin.CaseView(Case, ext.db.session))
     ext.admin.add_view(admin.FamilySampleView(FamilySample, ext.db.session))
     ext.admin.add_view(admin.SampleView(Sample, ext.db.session))
     ext.admin.add_view(admin.PoolView(Pool, ext.db.session))
@@ -132,4 +136,10 @@ def _register_teardowns(app: Flask):
 
     @app.teardown_appcontext
     def remove_database_session(exception=None):
-        ext.db.session.remove()
+        """
+        Remove the database session to ensure database resources are
+        released when a request has been processed.
+        """
+        scoped_session_registry: Optional[scoped_session] = get_scoped_session_registry()
+        if scoped_session_registry:
+            scoped_session_registry.remove()

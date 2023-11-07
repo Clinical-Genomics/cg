@@ -3,11 +3,11 @@ import datetime as dt
 
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Analysis, Family
+from cg.store.models import Analysis, Case
 from tests.cli.workflow.conftest import tb_api
 
 
-def test_mip_dna_update_uploaded_at(mip_dna_context: CGConfig, mip_dna_case: Family):
+def test_mip_dna_update_uploaded_at(mip_dna_context: CGConfig, mip_dna_case: Case):
     """Test setting uploaded at for a finished analysis."""
     # GIVEN an analysis that should be uploaded
     upload_api: UploadAPI = UploadAPI(

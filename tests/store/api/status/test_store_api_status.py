@@ -17,7 +17,8 @@ def test_case_in_uploaded_observations(helpers: StoreHelpers, sample_store: Stor
     analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
-    sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    sample_store.session.add(link)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is not None
@@ -36,7 +37,8 @@ def test_case_not_in_uploaded_observations(helpers: StoreHelpers, sample_store: 
     analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store)
-    sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    sample_store.session.add(link)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is None
@@ -55,7 +57,8 @@ def test_case_in_observations_to_upload(helpers: StoreHelpers, sample_store: Sto
     analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store)
-    sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    sample_store.session.add(link)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is None
@@ -76,7 +79,8 @@ def test_case_not_in_observations_to_upload(
     analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
-    sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
+    sample_store.session.add(link)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is not None
@@ -181,7 +185,7 @@ def test_set_case_action(analysis_store: Store, case_id):
     # Given a store with a case with action None
     action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
 
-    assert action == None
+    assert action is None
 
     # When setting the case to "analyze"
     analysis_store.set_case_action(case_internal_id=case_id, action="analyze")
@@ -197,7 +201,7 @@ def test_sequencing_qc_priority_express_sample_with_one_half_of_the_reads(
     """Test if priority express sample(s), having more than 50% of the application target reads, pass sample QC."""
 
     # GIVEN a database with a case which has an express sample with half the amount of reads
-    sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
+    sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
     application: Application = sample.application_version.application
     application.target_reads = 40
     sample.reads = 20
@@ -216,7 +220,7 @@ def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
     """Test if priority standard sample(s), having more than 50% of the application target reads, pass sample QC."""
 
     # GIVEN a database with a case which has an normal sample with half the amount of reads
-    sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
+    sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
     application: Application = sample.application_version.application
     application.target_reads = 40
     sample.reads = 20

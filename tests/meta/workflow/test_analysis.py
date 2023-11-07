@@ -1,7 +1,7 @@
 """Test for analysis"""
 
 from datetime import datetime
-from typing import List
+
 import mock
 import pytest
 
@@ -14,7 +14,7 @@ from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 
 
 @pytest.mark.parametrize(
@@ -78,7 +78,7 @@ def test_is_flow_cell_check_applicable(mip_analysis_api: MipDNAAnalysisAPI, anal
     down-sampled nor external samples."""
 
     # GIVEN a case
-    case: Family = analysis_store.get_cases()[0]
+    case: Case = analysis_store.get_cases()[0]
 
     # GIVEN that no samples are down-sampled nor external
     for sample in case.samples:
@@ -97,7 +97,7 @@ def test_is_flow_cell_check_not_applicable_when_external(
     down-sampled nor external samples."""
 
     # GIVEN a case
-    case: Family = analysis_store.get_cases()[0]
+    case: Case = analysis_store.get_cases()[0]
 
     # WHEN marking all of its samples as external
     for sample in case.samples:
@@ -115,7 +115,7 @@ def test_is_flow_cell_check_not_applicable_when_down_sampled(
     down-sampled nor external samples."""
 
     # GIVEN a case
-    case: Family = analysis_store.get_cases()[0]
+    case: Case = analysis_store.get_cases()[0]
 
     # WHEN marking all of its samples as down sampled from TestSample
     for sample in case.samples:
@@ -133,7 +133,7 @@ def test_ensure_flow_cells_on_disk_check_not_applicable(
     when is_flow_cell_check_applicable returns false."""
 
     # GIVEN a case
-    case: Family = analysis_store.get_cases()[0]
+    case: Case = analysis_store.get_cases()[0]
 
     # WHEN _is_flow_cell_check_available returns False
     with mock.patch.object(
@@ -141,11 +141,12 @@ def test_ensure_flow_cells_on_disk_check_not_applicable(
         "_is_flow_cell_check_applicable",
         return_value=False,
     ):
+        caplog.set_level("INFO")
         mip_analysis_api.ensure_flow_cells_on_disk(case.internal_id)
 
     # THEN a warning should be logged
     assert (
-        "Flow cell check is not applicable - ensure that the case is neither down sampled nor external."
+        "Flow cell check is not applicable - the case is either down sampled or external."
         in caplog.text
     )
 
@@ -157,7 +158,7 @@ def test_ensure_flow_cells_on_disk_does_not_request_flow_cells(
     when is_flow_cell_check_applicable returns True and all flow cells are ON_DISK already."""
 
     # GIVEN a case
-    case: Family = analysis_store.get_cases()[0]
+    case: Case = analysis_store.get_cases()[0]
 
     helpers.add_flow_cell(
         analysis_store,
@@ -190,7 +191,7 @@ def test_ensure_flow_cells_on_disk_does_request_flow_cells(
     when is_flow_cell_check_applicable returns True.."""
 
     # GIVEN a case with a REMOVED flow cell
-    case: Family = analysis_store.get_cases()[0]
+    case: Case = analysis_store.get_cases()[0]
     helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flow_cell_test",
@@ -220,7 +221,7 @@ def test_is_case_ready_for_analysis_true(
     files need no decompression nor are being decompressed currently."""
 
     # GIVEN a case and a flow cell with status ON_DISK
-    case: Family = analysis_store.get_cases()[0]
+    case: Case = analysis_store.get_cases()[0]
     helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flowcell_test",
@@ -247,7 +248,7 @@ def test_is_case_ready_for_analysis_decompression_needed(
     files need decompression."""
 
     # GIVEN a case and a flow cell
-    case: Family = analysis_store.get_cases()[0]
+    case: Case = analysis_store.get_cases()[0]
     helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flowcell_test",
@@ -277,7 +278,7 @@ def test_is_case_ready_for_analysis_decompression_running(
     files are being decompressed currently."""
 
     # GIVEN a case and a flow cell
-    case: Family = analysis_store.get_cases()[0]
+    case: Case = analysis_store.get_cases()[0]
     helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flowcell_test",
@@ -302,7 +303,7 @@ def test_prepare_fastq_files_success(mip_analysis_api: MipDNAAnalysisAPI, analys
     and no spring decompression is needed nor is running."""
 
     # GIVEN a case with a flow cell ON_DISK
-    case: Family = analysis_store.get_cases()[0]
+    case: Case = analysis_store.get_cases()[0]
     helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flowcell_test",
@@ -333,7 +334,7 @@ def test_prepare_fastq_files_decompression_needed(
     when running prepare_fastq_files."""
 
     # GIVEN a case with its flow cell with status ON_DISK
-    case: Family = analysis_store.get_cases()[0]
+    case: Case = analysis_store.get_cases()[0]
     helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flowcell_test",
@@ -365,7 +366,7 @@ def test_prepare_fastq_files_decompression_running(
     when running prepare_fastq_files."""
 
     # GIVEN a case with all its flow cells being ON_DISK
-    case: Family = analysis_store.get_cases()[0]
+    case: Case = analysis_store.get_cases()[0]
     helpers.add_flow_cell(
         analysis_store,
         flow_cell_name="flowcell_test",

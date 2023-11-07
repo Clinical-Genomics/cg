@@ -9,7 +9,7 @@ from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
-from cg.store.models import ApplicationVersion, Customer, Family, FamilySample, Sample
+from cg.store.models import ApplicationVersion, Customer, Case, FamilySample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -122,7 +122,7 @@ class CaseSubmitter(Submitter):
         if lims_map:
             self._fill_in_sample_ids(samples=samples, lims_map=lims_map)
 
-        new_cases: list[Family] = self.store_items_in_status(
+        new_cases: list[Case] = self.store_items_in_status(
             customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"] if project_data else dt.datetime.now(),
@@ -220,24 +220,24 @@ class CaseSubmitter(Submitter):
 
     def store_items_in_status(
         self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: list[dict]
-    ) -> list[Family]:
+    ) -> list[Case]:
         """Store cases, samples and their relationship in the Status database."""
         customer: Customer = self.status.get_customer_by_internal_id(
             customer_internal_id=customer_id
         )
-        new_cases: list[Family] = []
+        new_cases: list[Case] = []
 
         for case in items:
-            status_db_case: Family = self.status.get_case_by_internal_id(
+            status_db_case: Case = self.status.get_case_by_internal_id(
                 internal_id=case["internal_id"]
             )
             if not status_db_case:
-                new_case: Family = self._create_case(
+                new_case: Case = self._create_case(
                     case=case, customer_obj=customer, ticket=ticket_id
                 )
                 new_cases.append(new_case)
                 self._update_case_panel(panels=case["panels"], case=new_case)
-                status_db_case: Family = new_case
+                status_db_case: Case = new_case
             else:
                 self._append_ticket(ticket_id=ticket_id, case=status_db_case)
                 self._update_action(action=CaseActions.ANALYZE, case=status_db_case)
@@ -289,17 +289,17 @@ class CaseSubmitter(Submitter):
         return new_cases
 
     @staticmethod
-    def _update_case_panel(panels: list[str], case: Family) -> None:
+    def _update_case_panel(panels: list[str], case: Case) -> None:
         """Update case panels."""
         case.panels = panels
 
     @staticmethod
-    def _append_ticket(ticket_id: str, case: Family) -> None:
+    def _append_ticket(ticket_id: str, case: Case) -> None:
         """Add a ticket to the case."""
         case.tickets = f"{case.tickets},{ticket_id}"
 
     @staticmethod
-    def _update_action(action: str, case: Family) -> None:
+    def _update_action(action: str, case: Case) -> None:
         """Update action of a case."""
         case.action = action
 

@@ -21,7 +21,7 @@ from cg.models.observations.input_files import (
     MipDNAObservationsInputFiles,
 )
 from cg.store import Store
-from cg.store.models import Analysis, Customer, Family
+from cg.store.models import Analysis, Customer, Case
 
 LOG = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class ObservationsAPI:
         self.loqusdb_somatic_config: CommonAppConfig = config.loqusdb_somatic
         self.loqusdb_tumor_config: CommonAppConfig = config.loqusdb_tumor
 
-    def upload(self, case: Family) -> None:
+    def upload(self, case: Case) -> None:
         """Upload observations to Loqusdb."""
         self.check_customer_loqusdb_permissions(case.customer)
         input_files: Union[
@@ -46,7 +46,7 @@ class ObservationsAPI:
         self.load_observations(case=case, input_files=input_files)
 
     def get_observations_input_files(
-        self, case: Family
+        self, case: Case
     ) -> Union[MipDNAObservationsInputFiles, BalsamicObservationsInputFiles]:
         """Fetch input files from a case to upload to Loqusdb."""
         analysis: Analysis = case.analyses[0]
@@ -80,7 +80,7 @@ class ObservationsAPI:
 
     @staticmethod
     def is_duplicate(
-        case: Family,
+        case: Case,
         loqusdb_api: LoqusdbAPI,
         profile_vcf_path: Optional[Path],
         profile_threshold: Optional[float],
@@ -96,7 +96,7 @@ class ObservationsAPI:
         )
         return bool(loqusdb_case or duplicate or case.loqusdb_uploaded_samples)
 
-    def update_statusdb_loqusdb_id(self, samples: list[Family], loqusdb_id: Optional[str]) -> None:
+    def update_statusdb_loqusdb_id(self, samples: list[Case], loqusdb_id: Optional[str]) -> None:
         """Update Loqusdb ID field in StatusDB for each of the provided samples."""
         for sample in samples:
             sample.loqusdb_id = loqusdb_id
@@ -117,7 +117,7 @@ class ObservationsAPI:
 
     def load_observations(
         self,
-        case: Family,
+        case: Case,
         input_files: Union[MipDNAObservationsInputFiles, BalsamicObservationsInputFiles],
     ) -> None:
         """Load observation counts to Loqusdb."""
@@ -129,6 +129,6 @@ class ObservationsAPI:
         """Extract observations files given a housekeeper version."""
         raise NotImplementedError
 
-    def delete_case(self, case: Family) -> None:
+    def delete_case(self, case: Case) -> None:
         """Delete case observations from Loqusdb."""
         raise NotImplementedError

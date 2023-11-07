@@ -1,6 +1,6 @@
 """Module for archiving and retrieving folders via DDN Dataflow."""
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Optional
 from urllib.parse import urljoin
@@ -28,7 +28,7 @@ DESTINATION_ATTRIBUTE: str = "destination"
 SOURCE_ATTRIBUTE: str = "source"
 
 
-class DataflowEndpoints(str, Enum):
+class DataflowEndpoints(StrEnum):
     """Enum containing all DDN dataflow endpoints used."""
 
     ARCHIVE_FILES = "files/archive"

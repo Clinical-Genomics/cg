@@ -3,6 +3,7 @@
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
+from cg.store.models import FamilySample
 from cg.utils.date import get_date
 
 
@@ -20,9 +21,10 @@ def test_missing(analysis_store: Store, helpers, timestamp_now):
         data_delivery=DataDelivery.SCOUT,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-    analysis_store.relate_sample(
+    link: FamilySample = analysis_store.relate_sample(
         family=analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
     )
+    analysis_store.session.add(link)
     assert sample.delivered_at is not None
     assert analysis.delivery_report_created_at is None
 
@@ -55,9 +57,10 @@ def test_outdated_analysis(analysis_store, helpers, timestamp_now, timestamp_yes
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
 
     # GIVEN a store sample case relation
-    analysis_store.relate_sample(
+    link: FamilySample = analysis_store.relate_sample(
         family=analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
     )
+    analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_delivery_report
     analyses = analysis_store.analyses_to_delivery_report(pipeline=pipeline).all()

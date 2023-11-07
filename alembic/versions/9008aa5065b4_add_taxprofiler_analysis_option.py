@@ -48,7 +48,7 @@ class Analysis(Base):
     pipeline = sa.Column(sa.types.Enum(*list(Pipeline)))
 
 
-class Family(Base):
+class Case(Base):
     __tablename__ = "family"
     id = sa.Column(sa.types.Integer, primary_key=True)
     data_analysis = sa.Column(sa.types.Enum(*list(Pipeline)))
@@ -64,6 +64,6 @@ def downgrade():
     session = sa.orm.Session(bind=bind)
     for analysis in session.query(Analysis).filter(Analysis.pipeline == "taxprofiler"):
         analysis.pipeline = "fastq"
-    for family in session.query(Family).filter(Family.data_analysis == "taxprofiler"):
+    for family in session.query(Case).filter(Case.data_analysis == "taxprofiler"):
         family.data_analysis = "fastq"
     session.commit()
