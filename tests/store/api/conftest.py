@@ -135,7 +135,7 @@ def re_sequenced_sample_store(
         reads=1200000000,
         store=re_sequenced_sample_store,
         original_ticket=ticket_id,
-        reads_updated_at=timestamp_now,
+        last_sequenced_at=timestamp_now,
     )
 
     one_day_ahead_of_now = timestamp_now + dt.timedelta(days=1)
@@ -196,7 +196,7 @@ def store_failing_sequencing_qc(
         reads=5,
         store=store,
         original_ticket=ticket_id,
-        reads_updated_at=timestamp_now,
+        last_sequenced_at=timestamp_now,
         customer_id="fluffy_customer",
     )
 

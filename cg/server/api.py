@@ -30,6 +30,7 @@ from cg.server.ext import db, lims, osticket
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
     Customer,
     Case,
     Flowcell,
@@ -37,7 +38,6 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
     User,
-    ApplicationLimitations,
 )
 
 LOG = logging.getLogger(__name__)

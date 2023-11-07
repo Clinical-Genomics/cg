@@ -109,7 +109,7 @@ class MutantAnalysisAPI(AnalysisAPI):
             ),
             date_arrival=str(sample_obj.received_at),
             date_libprep=str(sample_obj.prepared_at),
-            date_sequencing=str(sample_obj.reads_updated_at),
+            date_sequencing=str(sample_obj.last_sequenced_at),
             selection_criteria=self.lims_api.get_sample_attribute(
                 lims_id=sample_obj.internal_id, key="selection_criteria"
             ),
