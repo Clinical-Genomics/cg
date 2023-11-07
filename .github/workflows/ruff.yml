@@ -12,6 +12,6 @@ jobs:
       - name: Ruff action
         uses: chartboost/ruff-action@v1
         with:
-          args: "check --ignore F401,E501 . --fix"
+          args: "check --ignore F401,E501 --fix"
           version: "1"
 
