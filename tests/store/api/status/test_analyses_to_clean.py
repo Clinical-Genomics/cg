@@ -3,7 +3,7 @@ from datetime import datetime
 
 from cg.constants import Pipeline
 from cg.store import Store
-from cg.store.models import FamilySample
+from cg.store.models import CaseSample
 
 
 def test_analysis_included(
@@ -19,7 +19,7 @@ def test_analysis_included(
         cleaned_at=None,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
-    link: FamilySample = analysis_store.relate_sample(
+    link: CaseSample = analysis_store.relate_sample(
         family=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
@@ -39,7 +39,7 @@ def test_analysis_excluded(analysis_store: Store, helpers, timestamp_now: dateti
         analysis_store, started_at=timestamp_now, uploaded_at=None, cleaned_at=None
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-    link: FamilySample = analysis_store.relate_sample(
+    link: CaseSample = analysis_store.relate_sample(
         family=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
@@ -66,7 +66,7 @@ def test_pipeline_included(
         cleaned_at=None,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
-    link: FamilySample = analysis_store.relate_sample(
+    link: CaseSample = analysis_store.relate_sample(
         family=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
@@ -95,7 +95,7 @@ def test_pipeline_excluded(analysis_store: Store, helpers, timestamp_now: dateti
         cleaned_at=None,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-    link: FamilySample = analysis_store.relate_sample(
+    link: CaseSample = analysis_store.relate_sample(
         family=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
@@ -120,7 +120,7 @@ def test_non_cleaned_included(
         cleaned_at=None,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
-    link: FamilySample = analysis_store.relate_sample(
+    link: CaseSample = analysis_store.relate_sample(
         family=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
@@ -143,7 +143,7 @@ def test_cleaned_excluded(analysis_store: Store, helpers, timestamp_now: datetim
         cleaned_at=timestamp_now,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-    link: FamilySample = analysis_store.relate_sample(
+    link: CaseSample = analysis_store.relate_sample(
         family=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
