@@ -48,10 +48,7 @@ class BaseHandler:
     def _get_join_cases_with_samples_query(self) -> Query:
         """Return a join query for all cases in the database with samples."""
         return (
-            self._get_query(table=Case)
-            .join(Case.links)
-            .join(CaseSample.sample)
-            .join(Case.customer)
+            self._get_query(table=Case).join(Case.links).join(CaseSample.sample).join(Case.customer)
         )
 
     def _get_join_analysis_case_query(self) -> Query:
