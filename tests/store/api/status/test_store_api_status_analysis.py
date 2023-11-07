@@ -18,7 +18,7 @@ def test_get_families_with_extended_models(
     """Test that a query is returned from the database."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(
@@ -62,7 +62,7 @@ def test_get_cases_with_samples_query(
     """Test that a case and samples query is returned from the database."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(
@@ -109,8 +109,8 @@ def test_that_cases_can_have_many_samples(
     )
 
     # GIVEN a sequnced sample
-    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
-    assert test_sample.reads_updated_at
+    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
+    assert test_sample.last_sequenced_at
 
     # GIVEN a case with one sample
     case_with_one: Family = helpers.add_case(base_store, "case_with_one_sample")
@@ -137,7 +137,7 @@ def test_external_sample_to_re_analyse(
     with completed analysis show up among the cases to analyse."""
 
     # GIVEN a sample which is not sequenced and external
-    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=None, is_external=True)
+    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=None, is_external=True)
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(
@@ -166,7 +166,7 @@ def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelper
     """Test that a case with one external sample that has no specified data_analysis does not show up."""
 
     # GIVEN an externally sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=None, is_external=True)
+    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=None, is_external=True)
 
     # GIVEN a cancer case
     test_case: Family = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
@@ -187,7 +187,7 @@ def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers, timestamp_
     with completed analysis do show up among the cases to analyse."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(
@@ -218,7 +218,7 @@ def test_all_samples_and_analysis_completed(
     analysis don't show up among the cases to analyse."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(base_store, completed_at=timestamp_now)
@@ -243,7 +243,7 @@ def test_specified_analysis_in_result(
     """Test that a case with one sample that has specified data_analysis does show up."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a cancer case
     test_case: Family = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
@@ -269,7 +269,7 @@ def test_exclude_other_pipeline_analysis_from_result(
     others."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a cancer case
     test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
@@ -295,10 +295,10 @@ def test_one_of_two_sequenced_samples(
     test_case: Family = helpers.add_case(base_store)
 
     # GIVEN a sequenced sample
-    sequenced_sample: Sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
+    sequenced_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a NOT sequenced sample
-    not_sequenced_sample: Sample = helpers.add_sample(base_store, reads_updated_at=None)
+    not_sequenced_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=None)
 
     # GIVEN a database with a case with one of one sequenced samples and no analysis
     link_1: FamilySample = base_store.relate_sample(
@@ -326,12 +326,12 @@ def test_one_of_one_sequenced_samples(
     test_case: Family = helpers.add_case(base_store)
 
     # GIVEN a sequenced sample
-    test_sample = helpers.add_sample(base_store, reads_updated_at=timestamp_now)
+    test_sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a database with a case with a sequenced samples and no analysis
     link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
-    assert test_sample.reads_updated_at is not None
+    assert test_sample.last_sequenced_at is not None
 
     # WHEN getting cases to analyse
     cases: list[Family] = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)

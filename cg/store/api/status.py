@@ -394,9 +394,9 @@ class StatusHandler(BaseHandler):
             )
             case_data.samples_sequenced = len(
                 [
-                    link.sample.reads_updated_at
+                    link.sample.last_sequenced_at
                     for link in case_obj.links
-                    if link.sample.reads_updated_at
+                    if link.sample.last_sequenced_at
                 ]
             )
             case_data.samples_delivered = len(
@@ -450,9 +450,9 @@ class StatusHandler(BaseHandler):
 
             if case_data.samples_to_sequence > 0 and case_data.samples_sequenced_bool:
                 case_data.samples_sequenced_at = max(
-                    link.sample.reads_updated_at
+                    link.sample.last_sequenced_at
                     for link in case_obj.links
-                    if link.sample.reads_updated_at is not None
+                    if link.sample.last_sequenced_at is not None
                 )
 
             if case_data.samples_to_deliver > 0 and case_data.samples_delivered_bool:
