@@ -126,25 +126,26 @@ def metric_exists_in_status_db(metric: SampleLaneSequencingMetrics, store: Store
 
 
 def store_sample_data_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
-    """
-    Update samples on the flow cell with read counts and sequencing date.
-    The read counts are calculated from the sequencing metrics.
-    """
+    """Update samples on the flow cell with read counts and sequencing date."""
     q30_threshold: int = get_q30_threshold(flow_cell.sequencer_type)
     sample_internal_ids: list[str] = flow_cell.sample_sheet.get_sample_ids()
     sequenced_at: datetime = flow_cell.sequenced_at
+
     for sample_id in sample_internal_ids:
         sample: Optional[Sample] = store.get_sample_by_internal_id(sample_id)
+
         if not sample:
             LOG.warning(f"Cannot find {sample_id}. Skipping.")
             continue
+
         update_sample_read_count(sample=sample, q30_threshold=q30_threshold, store=store)
-        update_sample_sequencing_date(sample=sample, sequenced_at=sequenced_at, store=store)
+        update_sample_sequencing_date(sample=sample, sequenced_at=sequenced_at)
+
     store.session.commit()
 
 
 def update_sample_read_count(sample: Sample, q30_threshold: int, store: Store) -> None:
-    """Update the read count for a sample in status db with all reads exceeding the q30 threshold from the sequencing metrics table."""
+    """Update the read count with reads passing the q30 threshold."""
     sample_read_count: int = store.get_number_of_reads_for_sample_passing_q30_threshold(
         sample_internal_id=sample.internal_id,
         q30_threshold=q30_threshold,
@@ -153,7 +154,7 @@ def update_sample_read_count(sample: Sample, q30_threshold: int, store: Store) -
     sample.reads = sample_read_count
 
 
-def update_sample_sequencing_date(sample: Sample, sequenced_at: datetime, store: Store) -> None:
+def update_sample_sequencing_date(sample: Sample, sequenced_at: datetime) -> None:
     """Update the last sequenced at date for a sample in status db."""
     if not sample.last_sequenced_at or sample.last_sequenced_at < sequenced_at:
         LOG.debug(f"Updating sample {sample.internal_id} with new sequencing date .")
