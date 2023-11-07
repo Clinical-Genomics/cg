@@ -29,7 +29,7 @@ def downsample():
     "-c",
     "--case-id",
     required=True,
-    help="Case identifier used in statusdb, e.g. supersonicturtle. The case information wil be transferred.",
+    help="Case identifier used in statusdb, e.g. supersonicturtle. The case information wil be transferred to the downsampled case.",
 )
 @click.option(
     "-cn",
@@ -68,7 +68,9 @@ def downsample_sample(
 
 @downsample.command(
     "store",
-    help="Store the downsampled fastq files in housekeeper. Usage: cg downsample store ACC123145_2.0M ACC1231_30.0M",
+    help="Store the downsampled fastq files in housekeeper.\n "
+    "Make sure the downsample sbtach job has finished before using this command! \n"
+    "Usage: cg downsample store ACC123145_2.0M ACC1231_30.0M",
 )
 @click.argument("sample_ids", type=str, nargs=-1)
 @click.pass_obj
