@@ -38,7 +38,7 @@ def test_store_available_fastq_analysis(
 
     # GIVEN a case with no analysis, a sample that has been sequenced and a fastq context
     sample_obj: Sample = fastq_context.status_db.get_sample_by_internal_id(internal_id=sample_id)
-    sample_obj.reads_updated_at = datetime.now()
+    sample_obj.last_sequenced_at = datetime.now()
 
     # GIVEN a case with no analysis but which is to be analyzed, a sample that has been sequenced and a fastq context
     case_obj: Family = helpers.add_case_with_sample(
@@ -47,7 +47,7 @@ def test_store_available_fastq_analysis(
     assert not case_obj.analyses
     case_obj.data_analysis = Pipeline.FASTQ
     case_obj.action = CaseActions.ANALYZE
-    case_obj.samples[0].reads_updated_at = datetime.now()
+    case_obj.samples[0].last_sequenced_at = datetime.now()
 
     # WHEN the store_available_fastq_analysis command is invoked
     cli_runner.invoke(store_available_fastq_analysis, ["--dry-run"], obj=fastq_context)
