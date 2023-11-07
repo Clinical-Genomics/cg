@@ -49,7 +49,7 @@ from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
-from cg.store.models import Bed, BedVersion, Customer, Case, Organism, Sample, Family
+from cg.store.models import Bed, BedVersion, Customer, Case, Organism, Sample
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -3284,7 +3284,7 @@ def store_with_case_and_sample_with_reads(
     downsample_sample_internal_id_2: str,
 ) -> Store:
     """Return a store with a case and a sample with reads."""
-    case: Family = helpers.add_case(
+    case: Case = helpers.add_case(
         store=store, internal_id=downsample_case_internal_id, name=downsample_case_internal_id
     )
 
