@@ -93,9 +93,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
             )
             continue
         if analysis_obj.upload_started_at:
-            if trailblazer_api.is_latest_analysis_completed(
-                case_id=analysis_obj.case.internal_id
-            ):
+            if trailblazer_api.is_latest_analysis_completed(case_id=analysis_obj.case.internal_id):
                 LOG.info(
                     f"The upload for {analysis_obj.case.internal_id} is completed, setting uploaded at to {dt.datetime.now()}"
                 )

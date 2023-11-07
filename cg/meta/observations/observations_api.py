@@ -51,9 +51,7 @@ class ObservationsAPI:
         """Fetch input files from a case to upload to Loqusdb."""
         analysis: Analysis = case.analyses[0]
         analysis_date: datetime = analysis.started_at or analysis.completed_at
-        hk_version: Version = self.housekeeper_api.version(
-            analysis.case.internal_id, analysis_date
-        )
+        hk_version: Version = self.housekeeper_api.version(analysis.case.internal_id, analysis_date)
         return self.extract_observations_files_from_hk(hk_version)
 
     def get_loqusdb_api(self, loqusdb_instance: LoqusdbInstance) -> LoqusdbAPI:
