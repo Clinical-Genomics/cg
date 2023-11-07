@@ -41,47 +41,24 @@ def test_add_single_sequencing_metrics_entry_to_statusdb(
     )
 
 
-def test_update_sample_read_count(demultiplex_context: CGConfig, timestamp_yesterday):
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    # GIVEN a sample id and a q30 threshold
-    sample_internal_id: str = "sample_1"
-    q30_threshold: int = 0
-
+def test_update_sample_read_count():
     # GIVEN a sample and a read count
     sample = MagicMock()
     read_count: int = 100
-    sample.last_sequenced_at = timestamp_yesterday
 
     # GIVEN a mocked status_db
     status_db = MagicMock()
-    status_db.get_sample_by_internal_id.return_value = sample
     status_db.get_number_of_reads_for_sample_passing_q30_threshold.return_value = read_count
-    demux_post_processing_api.status_db = status_db
 
-    # WHEN calling update_sample_read_count
+    # WHEN updating the sample read count
     update_sample_read_count(
-        sample_id=sample_internal_id,
-        q30_threshold=q30_threshold,
-        sequenced_at=datetime.now(),
+        sample=sample,
+        q30_threshold=0,
         store=status_db,
     )
 
-    # THEN get_sample_by_internal_id is called with the correct argument
-    status_db.get_sample_by_internal_id.assert_called_with(sample_internal_id)
-
-    # THEN get_number_of_reads_for_sample_passing_q30_threshold is called with the correct arguments
-    status_db.get_number_of_reads_for_sample_passing_q30_threshold.assert_called_with(
-        sample_internal_id=sample_internal_id,
-        q30_threshold=q30_threshold,
-    )
-
-    # THEN the calculated_read_count has been updated with the read count for the sample
+    # THEN the reads has been updated with the read count for the sample
     assert sample.reads == read_count
-
-    # THEN the last_sequenced_at has been updated with a new timestamp
-    assert sample.last_sequenced_at > timestamp_yesterday
 
 
 def test_metric_has_sample_in_statusdb(demultiplex_context: CGConfig):
