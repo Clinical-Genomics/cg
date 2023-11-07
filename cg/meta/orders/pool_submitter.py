@@ -169,7 +169,7 @@ class PoolSubmitter(Submitter):
                 )
                 new_samples.append(new_sample)
                 link: CaseSample = self.status.relate_sample(
-                    family=case, sample=new_sample, status="unknown"
+                    case=case, sample=new_sample, status="unknown"
                 )
                 self.status.session.add(link)
             new_delivery = self.status.add_delivery(destination="caesar", pool=new_pool)

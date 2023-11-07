@@ -321,7 +321,7 @@ def link_sample_to_case(
             raise click.Abort
 
     new_record: CaseSample = status_db.relate_sample(
-        family=case_obj, sample=sample, status=status, mother=mother, father=father
+        case=case_obj, sample=sample, status=status, mother=mother, father=father
     )
     status_db.session.add(new_record)
     status_db.session.commit()

@@ -311,7 +311,7 @@ class CaseSubmitter(Submitter):
 
     def _create_link(self, case_obj, family_samples, father_obj, mother_obj, sample):
         link_obj = self.status.relate_sample(
-            family=case_obj,
+            case=case_obj,
             sample=family_samples[sample["name"]],
             status=sample["status"],
             mother=mother_obj,

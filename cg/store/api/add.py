@@ -226,7 +226,7 @@ class AddHandler(BaseHandler):
 
     def relate_sample(
         self,
-        family: Case,
+        case: Case,
         sample: Sample,
         status: str,
         mother: Sample = None,
@@ -235,7 +235,7 @@ class AddHandler(BaseHandler):
         """Relate a sample record to a family record."""
 
         new_record: CaseSample = CaseSample(status=status)
-        new_record.case = family
+        new_record.case = case
         new_record.sample = sample
         new_record.mother = mother
         new_record.father = father

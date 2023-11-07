@@ -81,7 +81,7 @@ class DownsampleAPI(MetaAPI):
     ) -> None:
         """Create a link between sample and case in statusDB."""
         sample_case_link: CaseSample = self.status_db.relate_sample(
-            family=case,
+            case=case,
             sample=sample,
             status=downsample_data.get_sample_status(),
         )

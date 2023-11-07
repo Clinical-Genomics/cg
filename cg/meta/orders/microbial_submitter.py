@@ -145,7 +145,7 @@ class MicrobialSubmitter(Submitter):
                 priority = new_sample.priority
                 sample_objs.append(new_sample)
                 link: CaseSample = self.status.relate_sample(
-                    family=case, sample=new_sample, status="unknown"
+                    case=case, sample=new_sample, status="unknown"
                 )
                 self.status.session.add(link)
                 new_samples.append(new_sample)

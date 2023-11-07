@@ -36,7 +36,7 @@ def test_observations(
     case: Case = helpers.add_case(store)
     case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(store, application_type=SequencingMethod.WES)
-    link = store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    link = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
     store.session.add(link)
 
     # WHEN trying to do a dry run upload to Loqusdb
@@ -97,7 +97,7 @@ def test_get_observations_api(base_context: CGConfig, helpers: StoreHelpers):
     # GIVEN a Loqusdb supported case
     case: Case = helpers.add_case(store, data_analysis=Pipeline.MIP_DNA)
     sample: Sample = helpers.add_sample(store, application_type=SequencingMethod.WES)
-    link = store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    link = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
     store.session.add(link)
 
     # WHEN retrieving the observation API
@@ -115,7 +115,7 @@ def test_get_sequencing_method(base_context: CGConfig, helpers: StoreHelpers):
     # GIVEN a case object with a WGS sequencing method
     case: Case = helpers.add_case(store)
     sample: Sample = helpers.add_sample(store, application_type=SequencingMethod.WGS)
-    link = store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    link = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
     store.session.add(link)
 
     # WHEN getting the sequencing method
@@ -144,10 +144,10 @@ def test_get_sequencing_method_exception(
         store, application_tag=external_wes_application_tag, application_type=SequencingMethod.WES
     )
     link_1: CaseSample = store.relate_sample(
-        family=case, sample=sample_wgs, status=PhenotypeStatus.UNKNOWN
+        case=case, sample=sample_wgs, status=PhenotypeStatus.UNKNOWN
     )
     link_2: CaseSample = store.relate_sample(
-        family=case, sample=sample_wes, status=PhenotypeStatus.UNKNOWN
+        case=case, sample=sample_wes, status=PhenotypeStatus.UNKNOWN
     )
     store.session.add_all([link_1, link_2])
 
