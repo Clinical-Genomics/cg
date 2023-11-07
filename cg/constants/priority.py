@@ -1,7 +1,5 @@
 """Priority specific constants"""
-from enum import IntEnum
-
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 
 
 class SlurmQos(StrEnum):

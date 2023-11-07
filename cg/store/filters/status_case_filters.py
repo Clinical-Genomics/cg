@@ -102,7 +102,7 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
             ),
             and_(
                 Family.action.is_(None),
-                Analysis.created_at < Sample.reads_updated_at,
+                Analysis.created_at < Sample.last_sequenced_at,
             ),
         )
     )
@@ -110,7 +110,7 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
 
 def filter_cases_has_sequence(cases: Query, **kwargs) -> Query:
     """Filter cases that is not sequenced according to record in StatusDB."""
-    return cases.filter(or_(Application.is_external, Sample.reads_updated_at.isnot(None)))
+    return cases.filter(or_(Application.is_external, Sample.last_sequenced_at.isnot(None)))
 
 
 def filter_cases_not_analysed(cases: Query, **kwargs) -> Query:
