@@ -52,7 +52,7 @@ def test_update_sample_read_count(demultiplex_context: CGConfig, timestamp_yeste
     # GIVEN a sample and a read count
     sample = MagicMock()
     read_count: int = 100
-    sample.reads_updated_at = timestamp_yesterday
+    sample.last_sequenced_at = timestamp_yesterday
 
     # GIVEN a mocked status_db
     status_db = MagicMock()
@@ -80,8 +80,8 @@ def test_update_sample_read_count(demultiplex_context: CGConfig, timestamp_yeste
     # THEN the calculated_read_count has been updated with the read count for the sample
     assert sample.reads == read_count
 
-    # THEN the reads_updated_at has been updated with a new timestamp
-    assert sample.reads_updated_at > timestamp_yesterday
+    # THEN the last_sequenced_at has been updated with a new timestamp
+    assert sample.last_sequenced_at > timestamp_yesterday
 
 
 def test_metric_has_sample_in_statusdb(demultiplex_context: CGConfig):

@@ -153,5 +153,5 @@ def update_sample_read_count(
             f"Updating sample {sample_id} with read count {sample_read_count} and setting sequenced at."
         )
         sample.reads = sample_read_count
-        sample.reads_updated_at = sequenced_at
+        sample.last_sequenced_at = sequenced_at
         LOG.warning(f"Cannot find {sample_id} in status_db when adding read counts. Skipping.")

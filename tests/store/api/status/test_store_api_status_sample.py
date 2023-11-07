@@ -59,7 +59,7 @@ def test_samples_to_sequence(sample_store):
             [
                 sample
                 for sample in sample_store._get_query(table=Sample).all()
-                if sample.reads_updated_at
+                if sample.last_sequenced_at
             ]
         )
         >= 1
@@ -78,7 +78,7 @@ def test_samples_to_sequence(sample_store):
         ["sequenced-partly", "received-prepared"]
     )
     for sample in sequence_samples:
-        assert sample.reads_updated_at is None
+        assert sample.last_sequenced_at is None
         if sample.name == "sequenced-partly":
             assert sample.reads > 0
 

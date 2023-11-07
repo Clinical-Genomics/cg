@@ -34,13 +34,13 @@ def analysis_store(base_store: Store, workflow_case_id: str, helpers: StoreHelpe
     case = helpers.add_case(_store, workflow_case_id, data_analysis=Pipeline.MIP_DNA)
 
     dna_sample = helpers.add_sample(
-        _store, "dna_sample", is_rna=False, reads_updated_at=datetime.now(), reads=10000000
+        _store, "dna_sample", is_rna=False, last_sequenced_at=datetime.now(), reads=10000000
     )
     helpers.add_relationship(_store, sample=dna_sample, case=case)
 
     case = helpers.add_case(_store, "rna_case", data_analysis=Pipeline.MIP_RNA)
     rna_sample = helpers.add_sample(
-        _store, "rna_sample", is_rna=True, reads_updated_at=datetime.now(), reads=10000000
+        _store, "rna_sample", is_rna=True, last_sequenced_at=datetime.now(), reads=10000000
     )
     helpers.add_relationship(_store, sample=rna_sample, case=case)
 
@@ -63,7 +63,7 @@ def fastq_context(
     containing a fastq case"""
     _store = cg_context.status_db
     # Add fastq case to db
-    fastq_case["samples"][0]["reads_updated_at"] = datetime.now()
+    fastq_case["samples"][0]["last_sequenced_at"] = datetime.now()
     helpers.ensure_case_from_dict(store=_store, case_info=fastq_case)
     return cg_context
 
