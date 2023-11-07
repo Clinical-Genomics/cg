@@ -135,7 +135,7 @@ def filter_cases_with_loqusdb_supported_pipeline(
         if pipeline
         else cases.filter(Case.data_analysis.in_(LOQUSDB_SUPPORTED_PIPELINES))
     )
-    return records.filter(Customer.loqus_upload == True)
+    return records.filter(Customer.loqus_upload.is_(True))
 
 
 def filter_cases_with_loqusdb_supported_sequencing_method(

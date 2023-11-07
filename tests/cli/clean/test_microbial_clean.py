@@ -57,7 +57,7 @@ def test_dry_run(
     assert microsalt_case_clean_dry in caplog.text
 
     # THEN the analysis should still be in the analyses_to_clean query since this is a dry-ryn
-    assert analysis_to_clean.cleaned_at == None
+    assert analysis_to_clean.cleaned_at is None
     assert analysis_to_clean in base_store.get_analyses_to_clean(pipeline=Pipeline.MICROSALT)
 
 

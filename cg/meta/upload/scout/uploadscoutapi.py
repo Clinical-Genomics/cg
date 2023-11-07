@@ -67,7 +67,6 @@ class UploadScoutAPI:
         hk_version_obj: Version = self.housekeeper.last_version(analysis_obj.family.internal_id)
         LOG.debug("Found housekeeper version %s", hk_version_obj.id)
 
-        load_config: ScoutLoadConfig
         LOG.info("Found pipeline %s", analysis_obj.pipeline)
         config_builder = self.get_config_builder(analysis=analysis_obj, hk_version=hk_version_obj)
 
@@ -305,8 +304,7 @@ class UploadScoutAPI:
                 )
 
             LOG.debug(f"Splice junctions bed file {splice_junctions_bed.path} found")
-            dna_sample_id: str
-            dna_cases: list[str]
+
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading splice junctions bed file for sample {dna_sample_name} "

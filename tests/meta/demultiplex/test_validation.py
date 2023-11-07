@@ -24,7 +24,7 @@ def test_is_demultiplexing_complete_true(tmp_path: Path):
     result = is_demultiplexing_complete(tmp_path)
 
     # THEN the result should be True
-    assert result == True
+    assert result is True
 
 
 def test_is_demultiplexing_complete_false(tmp_path: Path):
@@ -34,7 +34,7 @@ def test_is_demultiplexing_complete_false(tmp_path: Path):
     result = is_demultiplexing_complete(tmp_path)
 
     # THEN the result should be False
-    assert result == False
+    assert result is False
 
 
 def test_is_flow_cell_ready_for_delivery_true(tmp_path: Path):
@@ -45,7 +45,7 @@ def test_is_flow_cell_ready_for_delivery_true(tmp_path: Path):
     result = is_flow_cell_ready_for_delivery(tmp_path)
 
     # THEN the result should be True
-    assert result == True
+    assert result is True
 
 
 def test_is_flow_cell_ready_for_delivery_false(tmp_path: Path):
@@ -55,7 +55,7 @@ def test_is_flow_cell_ready_for_delivery_false(tmp_path: Path):
     result = is_flow_cell_ready_for_delivery(tmp_path)
 
     # THEN the result should be False
-    assert result == False
+    assert result is False
 
 
 def test_validate_sample_sheet_exists_raises_error(bcl2fastq_flow_cell_dir: Path):

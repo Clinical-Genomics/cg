@@ -23,7 +23,7 @@ def test_assert_invoice_api(get_invoice_api_sample):
     api: InvoiceAPI = get_invoice_api_sample
     # THEN a report should be generated
     report = api.get_invoice_report(CostCenters.ki)
-    assert type(report) == dict
+    assert isinstance(report, dict)
 
 
 def test_invoice_api_sample(get_invoice_api_sample, record_type: str = RecordType.Sample):
@@ -39,7 +39,7 @@ def test_invoice_api_sample(get_invoice_api_sample, record_type: str = RecordTyp
 
     # THEN get_invoice_report returns a dictionary
     invoice_dict: dict = api.get_invoice_report(CostCenters.ki)
-    assert type(invoice_dict) == dict
+    assert isinstance(invoice_dict, dict)
 
     # THEN prepare_invoice_report should set priority to standard
     assert api.invoice_info.priority == PriorityTerms.STANDARD
@@ -63,7 +63,7 @@ def test_invoice_api_nipt_customer(
 
     # THEN get_invoice_report returns a dictionary
     invoice_dict = api.get_invoice_report(CostCenters.ki)
-    assert type(invoice_dict) == dict
+    assert isinstance(invoice_dict, dict)
 
     # THEN prepare_invoice_report should set priority to standard
     assert api.invoice_info.priority == PriorityTerms.STANDARD

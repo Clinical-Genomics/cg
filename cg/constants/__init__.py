@@ -22,7 +22,7 @@ from cg.constants.housekeeper_tags import HK_FASTQ_TAGS, HK_MULTIQC_HTML_TAG, Se
 from cg.constants.paths import TMP_DIR
 from cg.constants.priority import Priority
 from cg.constants.process import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.report import *
+from cg.constants.report import *  # noqa: F403
 from cg.constants.sample_sources import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD
 from cg.constants.symbols import SINGLE_QUOTE, SPACE

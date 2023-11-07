@@ -33,5 +33,5 @@ def write_yaml_nextflow_style(content: dict[str, Any], file_path: Path) -> None:
         for key, value in content.items():
             if isinstance(value, Path):
                 value: str = value.as_posix()
-            quotes = '"' if type(value) is str else ""
+            quotes = '"' if isinstance(value, str) else ""
             outfile.write(f"{key}: {quotes}{value}{quotes}\n")

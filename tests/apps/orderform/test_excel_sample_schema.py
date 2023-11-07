@@ -53,7 +53,7 @@ def test_excel_unknown_source_type(minimal_excel_sample: dict):
     # WHEN creating a excel sample
     with pytest.raises(ValidationError):
         # THEN assert that a validation error is raised since source does not exist
-        excel_sample: ExcelSample = ExcelSample(**minimal_excel_sample)
+        ExcelSample(**minimal_excel_sample)
 
 
 def test_excel_datetime_to_date_conversion(minimal_excel_sample: dict):
