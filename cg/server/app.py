@@ -121,7 +121,7 @@ def _register_admin_views():
     )
 
     # Business data views
-    ext.admin.add_view(admin.CaseView(Case, ext.db.session))
+    ext.admin.add_view(admin.FamilyView(Case, ext.db.session))
     ext.admin.add_view(admin.FamilySampleView(FamilySample, ext.db.session))
     ext.admin.add_view(admin.SampleView(Sample, ext.db.session))
     ext.admin.add_view(admin.PoolView(Pool, ext.db.session))

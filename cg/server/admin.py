@@ -243,7 +243,7 @@ class CollaborationView(BaseView):
     column_searchable_list = ["internal_id", "name"]
 
 
-class CaseView(BaseView):
+class FamilyView(BaseView):
     """Admin view for Model.Case"""
 
     column_default_sort = ("created_at", True)
@@ -286,7 +286,7 @@ class CaseView(BaseView):
         if model.family:
             markup += Markup(
                 " <a href='%s'>%s</a>"
-                % (url_for("case.index_view", search=model.family.internal_id), model.family)
+                % (url_for("family.index_view", search=model.family.internal_id), model.family)
             )
 
         return markup
@@ -392,7 +392,7 @@ class AnalysisView(BaseView):
     column_default_sort = ("created_at", True)
     column_editable_list = ["is_primary"]
     column_filters = ["pipeline", "pipeline_version", "is_primary"]
-    column_formatters = {"case": CaseView.view_family_link}
+    column_formatters = {"family": FamilyView.view_family_link}
     column_searchable_list = [
         "family.internal_id",
         "family.name",
@@ -570,7 +570,7 @@ class FamilySampleView(BaseView):
     column_editable_list = ["status"]
     column_filters = ["status"]
     column_formatters = {
-        "case": CaseView.view_family_link,
+        "family": FamilyView.view_family_link,
         "sample": SampleView.view_sample_link,
     }
     column_searchable_list = ["family.internal_id", "family.name", "sample.internal_id"]
