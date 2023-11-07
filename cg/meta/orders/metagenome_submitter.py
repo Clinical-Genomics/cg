@@ -8,7 +8,7 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.models.orders.samples import MetagenomeSample
-from cg.store.models import ApplicationVersion, Customer, Family, FamilySample, Sample
+from cg.store.models import ApplicationVersion, Customer, Case, FamilySample, Sample
 
 
 class MetagenomeSubmitter(Submitter):
@@ -88,7 +88,7 @@ class MetagenomeSubmitter(Submitter):
         if customer is None:
             raise OrderError(f"unknown customer: {customer_id}")
         new_samples = []
-        case: Family = self.status.get_case_by_name_and_customer(
+        case: Case = self.status.get_case_by_name_and_customer(
             customer=customer, case_name=str(ticket_id)
         )
         case_dict: dict = items[0]

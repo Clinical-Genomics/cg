@@ -235,7 +235,8 @@ class CGConfig(BaseModel):
     email_base_settings: EmailBaseSettings
     flow_cells_dir: str
     demultiplexed_flow_cells_dir: str
-
+    downsample_dir: str
+    downsample_script: str
     # Base APIs that always should exist
     status_db_: Store = None
     housekeeper: HousekeeperConfig

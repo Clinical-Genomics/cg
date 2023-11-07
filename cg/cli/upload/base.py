@@ -39,7 +39,7 @@ from cg.meta.upload.rnafusion.rnafusion import RnafusionUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)
@@ -67,7 +67,7 @@ def upload(context: click.Context, case_id: Optional[str], restart: bool):
     elif case_id:  # Provided case ID without a subcommand: upload everything
         try:
             upload_api.analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-            case: Family = upload_api.status_db.get_case_by_internal_id(internal_id=case_id)
+            case: Case = upload_api.status_db.get_case_by_internal_id(internal_id=case_id)
             upload_api.verify_analysis_upload(case_obj=case, restart=restart)
         except AnalysisAlreadyUploadedError:
             # Analysis being uploaded or it has been already uploaded
