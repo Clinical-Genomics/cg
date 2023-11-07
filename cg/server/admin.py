@@ -286,7 +286,7 @@ class FamilyView(BaseView):
         if model.family:
             markup += Markup(
                 " <a href='%s'>%s</a>"
-                % (url_for("family.index_view", search=model.family.internal_id), model.family)
+                % (url_for("case.index_view", search=model.family.internal_id), model.family)
             )
 
         return markup
