@@ -392,10 +392,10 @@ class AnalysisView(BaseView):
     column_default_sort = ("created_at", True)
     column_editable_list = ["is_primary"]
     column_filters = ["pipeline", "pipeline_version", "is_primary"]
-    column_formatters = {"family": CaseView.view_family_link}
+    column_formatters = {"case": CaseView.view_family_link}
     column_searchable_list = [
-        "family.internal_id",
-        "family.name",
+        "case.internal_id",
+        "case.name",
     ]
     form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
 
@@ -570,10 +570,10 @@ class FamilySampleView(BaseView):
     column_editable_list = ["status"]
     column_filters = ["status"]
     column_formatters = {
-        "family": CaseView.view_family_link,
+        "case": CaseView.view_family_link,
         "sample": SampleView.view_sample_link,
     }
-    column_searchable_list = ["family.internal_id", "family.name", "sample.internal_id"]
+    column_searchable_list = ["case.internal_id", "case.name", "sample.internal_id"]
     create_modal = True
     edit_modal = True
 
