@@ -8,7 +8,7 @@ from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 from tests.store_helpers import StoreHelpers
 
 
@@ -90,5 +90,5 @@ def samples_missing_in_inbox(
 
 
 @pytest.fixture(name="deliver_api_destination_path")
-def deliver_api_destination_path(customer_id: str, case: Family, ticket_id: str) -> Path:
+def deliver_api_destination_path(customer_id: str, case: Case, ticket_id: str) -> Path:
     return Path(customer_id, INBOX_NAME, ticket_id, case.name)

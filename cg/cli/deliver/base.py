@@ -12,7 +12,7 @@ from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -95,15 +95,15 @@ def deliver_analysis(
             ignore_missing_bundles=ignore_missing_bundles,
         )
         deliver_api.set_dry_run(dry_run)
-        cases: list[Family] = []
+        cases: list[Case] = []
         if case_id:
-            case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+            case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
             if not case_obj:
                 LOG.warning("Could not find case %s", case_id)
                 return
             cases.append(case_obj)
         else:
-            cases: list[Family] = status_db.get_cases_by_ticket_id(ticket_id=ticket)
+            cases: list[Case] = status_db.get_cases_by_ticket_id(ticket_id=ticket)
             if not cases:
                 LOG.warning("Could not find cases for ticket %s", ticket)
                 return

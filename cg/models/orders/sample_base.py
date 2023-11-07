@@ -6,7 +6,7 @@ from typing_extensions import Annotated
 
 from cg.constants import DataDelivery, Pipeline
 from cg.models.orders.validators.sample_base_validators import snake_case
-from cg.store.models import Application, Customer, Family, Pool, Sample
+from cg.store.models import Application, Customer, Case, Pool, Sample
 
 
 class ControlEnum(StrEnum):
@@ -70,7 +70,7 @@ class OrderSample(BaseModel):
         constr(
             pattern=NAME_PATTERN,
             min_length=2,
-            max_length=Family.name.property.columns[0].type.length,
+            max_length=Case.name.property.columns[0].type.length,
         )
     ] = None
     father: Optional[
