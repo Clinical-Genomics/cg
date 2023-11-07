@@ -17,8 +17,18 @@ depends_on = None
 
 
 def upgrade():
-    op.alter_column("sample", "reads_updated_at", new_column_name="last_sequenced_at")
+    op.alter_column(
+        "sample",
+        "reads_updated_at",
+        new_column_name="last_sequenced_at",
+        existing_type=sa.DateTime(),
+    )
 
 
 def downgrade():
-    op.alter_column("sample", "last_sequenced_at", new_column_name="reads_updated_at")
+    op.alter_column(
+        "sample",
+        "last_sequenced_at",
+        new_column_name="reads_updated_at",
+        existing_type=sa.DateTime(),
+    )
