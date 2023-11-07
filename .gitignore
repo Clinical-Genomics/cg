@@ -110,3 +110,6 @@ local/
 
 # Secrets
 alembic.ini
+
+# ruff
+.ruff_cache

@@ -1,0 +1,99 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "cg"
+version = "52.0.6"
+description = "Clinical Genomics command center"
+authors = ["Clinical Genomics <support@clinicalgenomics.se>"]
+readme = "README.md"
+homepage = "https://github.com/Clinical-Genomics/cg"
+repository = "https://github.com/Clinical-Genomics/cg"
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+include = [
+  "README.md",
+  "cg/**/*",
+  "tests/**/*"
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+
+# Database
+alembic = "*"
+SQLAlchemy = "*"
+PyMySQL = "*"
+
+# CLI
+click = "*"
+
+# Server
+blinker = "*"
+CacheControl = "*"
+Flask-Admin = "*"
+Flask-CORS = "*"
+Flask-Dance = "*"
+Flask = "*"
+Flask-WTF = "*"
+WTForms = "*"
+google-auth = "*"
+gunicorn = "*"
+requests = "*"
+sendmail-container = "*"
+werkzeug = "*"
+
+# Utils
+cachetools = "*"
+coloredlogs = "*"
+Jinja2 = "*"
+lxml = "*"
+marshmallow = "*"
+MarkupSafe = "*"
+openpyxl = "*"
+packaging = "*"
+pandas = "*"
+paramiko = "*"
+petname = "*"
+psutil = "*"
+pydantic = "*"
+python-dateutil = "*"
+PyYAML = "*"
+tabulate = "*"
+typing_extensions = "*"
+urllib3 = "*"
+
+# Apps
+genologics = "*"
+housekeeper = "*"
+
+
+[tool.poetry.dev-dependencies]
+coveralls = "*"
+mock = "*"
+pre-commit = "*"
+pytest-cov = "*"
+pytest-mock = "*"
+pytest = "*"
+ruff = "*"
+
+[tool.poetry.scripts]
+cg = "cg.cli.base:base"
+
+
+# Configurations
+[tool.black]
+line-length = 100
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["alembic"]
+ignore = ["E501", "F401"]
