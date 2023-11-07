@@ -30,7 +30,7 @@ def test_get_latest_analyses_for_cases_query(
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     link: FamilySample = analysis_store.relate_sample(
-        family=analysis_oldest.family, sample=sample, status=PhenotypeStatus.UNKNOWN
+        family=analysis_oldest.case, sample=sample, status=PhenotypeStatus.UNKNOWN
     )
     analysis_store.session.add(link)
 

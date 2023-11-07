@@ -93,5 +93,5 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         LOG.info("Building samples")
         db_sample: FamilySample
 
-        for db_sample in self.analysis_obj.family.links:
+        for db_sample in self.analysis_obj.case.links:
             self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))

@@ -62,7 +62,7 @@ def get_sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample
         click.echo(tabulate([row], headers=SAMPLE_HEADERS, tablefmt="psql"))
         if cases:
             case_ids: list[str] = [
-                link_obj.family.internal_id for link_obj in existing_sample.links
+                link_obj.case.internal_id for link_obj in existing_sample.links
             ]
             context.invoke(get_case, case_ids=case_ids, samples=False)
         if not hide_flow_cell:

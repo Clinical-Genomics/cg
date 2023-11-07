@@ -155,7 +155,7 @@ def test_get_sample_no_cases_with_case(
     # THEN all related cases should be listed in the output
     assert result.exit_code == EXIT_SUCCESS
     for family_sample in disk_store._get_query(table=Sample).first().links:
-        assert family_sample.family.internal_id not in result.output
+        assert family_sample.case.internal_id not in result.output
 
 
 def test_get_sample_cases_without_case(
@@ -188,7 +188,7 @@ def test_get_sample_cases_with_case(
     # THEN all related families should be listed in the output
     assert result.exit_code == EXIT_SUCCESS
     for link in disk_store._get_query(table=Sample).first().links:
-        assert link.family.internal_id in result.output
+        assert link.case.internal_id in result.output
 
 
 def test_hide_sample_flowcells_without_flowcell(

@@ -173,7 +173,7 @@ class AnalysisAPI(MetaAPI):
             completed_at=dt.datetime.now(),
             primary=(len(case_obj.analyses) == 0),
         )
-        new_analysis.family = case_obj
+        new_analysis.case = case_obj
         if dry_run:
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return

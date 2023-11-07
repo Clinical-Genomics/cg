@@ -446,7 +446,7 @@ def store_with_analyses_for_cases(
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: FamilySample = analysis_store.relate_sample(
-            family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
+            family=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
         analysis_store.session.add(link)
     return analysis_store

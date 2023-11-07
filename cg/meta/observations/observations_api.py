@@ -52,7 +52,7 @@ class ObservationsAPI:
         analysis: Analysis = case.analyses[0]
         analysis_date: datetime = analysis.started_at or analysis.completed_at
         hk_version: Version = self.housekeeper_api.version(
-            analysis.family.internal_id, analysis_date
+            analysis.case.internal_id, analysis_date
         )
         return self.extract_observations_files_from_hk(hk_version)
 

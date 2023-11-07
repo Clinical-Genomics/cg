@@ -1,3 +1,4 @@
+
 """This script tests the cli methods to set families to status-db"""
 import logging
 
@@ -65,7 +66,7 @@ def test_delete_case_with_analysis(
     # GIVEN a database with a case with an analysis
     base_store: Store = base_context.status_db
     analysis_obj = helpers.add_analysis(base_store)
-    case_id = analysis_obj.family.internal_id
+    case_id = analysis_obj.case.internal_id
 
     # WHEN deleting a case
 

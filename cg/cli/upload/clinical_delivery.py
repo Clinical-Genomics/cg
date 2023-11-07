@@ -87,25 +87,25 @@ def auto_fastq(context: click.Context, dry_run: bool):
     status_db: Store = context.obj.status_db
     trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
     for analysis_obj in status_db.get_analyses_to_upload(pipeline=Pipeline.FASTQ):
-        if analysis_obj.family.analyses[0].uploaded_at:
+        if analysis_obj.case.analyses[0].uploaded_at:
             LOG.debug(
-                f"Newer analysis already uploaded for {analysis_obj.family.internal_id}, skipping"
+                f"Newer analysis already uploaded for {analysis_obj.case.internal_id}, skipping"
             )
             continue
         if analysis_obj.upload_started_at:
             if trailblazer_api.is_latest_analysis_completed(
-                case_id=analysis_obj.family.internal_id
+                case_id=analysis_obj.case.internal_id
             ):
                 LOG.info(
-                    f"The upload for {analysis_obj.family.internal_id} is completed, setting uploaded at to {dt.datetime.now()}"
+                    f"The upload for {analysis_obj.case.internal_id} is completed, setting uploaded at to {dt.datetime.now()}"
                 )
                 analysis_obj.uploaded_at = dt.datetime.now()
             else:
                 LOG.debug(
-                    f"Upload to clinical-delivery for {analysis_obj.family.internal_id} has already started, skipping"
+                    f"Upload to clinical-delivery for {analysis_obj.case.internal_id} has already started, skipping"
                 )
             continue
-        case: Case = analysis_obj.family
+        case: Case = analysis_obj.case
         LOG.info(f"Uploading family: {case.internal_id}")
         analysis_obj.upload_started_at = dt.datetime.now()
         try:

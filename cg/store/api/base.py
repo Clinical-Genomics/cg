@@ -56,12 +56,12 @@ class BaseHandler:
 
     def _get_join_analysis_case_query(self) -> Query:
         """Return join analysis case query."""
-        return self._get_query(table=Analysis).join(Analysis.family)
+        return self._get_query(table=Analysis).join(Analysis.case)
 
     def _get_join_case_sample_query(self) -> Query:
         """Return join case sample query."""
         return (
-            self._get_query(table=FamilySample).join(FamilySample.family).join(FamilySample.sample)
+            self._get_query(table=FamilySample).join(FamilySample.case).join(FamilySample.sample)
         )
 
     def _get_join_case_and_sample_query(self) -> Query:

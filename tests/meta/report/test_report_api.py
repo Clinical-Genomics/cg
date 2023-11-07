@@ -195,7 +195,7 @@ def test_get_report_version_version(
     # GIVEN a specific set of analyses
     last_analysis: Analysis = helpers.add_analysis(store, completed_at=datetime.now())
     first_analysis: Analysis = helpers.add_analysis(
-        store, last_analysis.family, completed_at=timestamp_yesterday
+        store, last_analysis.case, completed_at=timestamp_yesterday
     )
 
     # WHEN retrieving the version

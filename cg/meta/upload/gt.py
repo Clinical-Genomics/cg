@@ -40,16 +40,16 @@ class UploadGenotypesAPI(object):
         }
 
         """
-        case_id = analysis_obj.family.internal_id
+        case_id = analysis_obj.case.internal_id
         LOG.info("Fetching upload genotype data for %s", case_id)
         hk_version = self.hk.last_version(case_id)
         hk_bcf = self.get_bcf_file(hk_version)
         data = {"bcf": hk_bcf.full_path}
         if analysis_obj.pipeline in [Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]:
-            data["samples_sex"] = self._get_samples_sex_balsamic(case_obj=analysis_obj.family)
+            data["samples_sex"] = self._get_samples_sex_balsamic(case_obj=analysis_obj.case)
         elif analysis_obj.pipeline == Pipeline.MIP_DNA:
             data["samples_sex"] = self._get_samples_sex_mip(
-                case_obj=analysis_obj.family, hk_version=hk_version
+                case_obj=analysis_obj.case, hk_version=hk_version
             )
         else:
             raise ValueError(f"Pipeline {analysis_obj.pipeline} does not support Genotype upload")

@@ -102,14 +102,14 @@ def upload_all_completed_analyses(context: click.Context, pipeline: Pipeline = N
 
     exit_code = 0
     for analysis_obj in status_db.get_analyses_to_upload(pipeline=pipeline):
-        if analysis_obj.family.analyses[0].uploaded_at is not None:
+        if analysis_obj.case.analyses[0].uploaded_at is not None:
             LOG.warning(
-                f"Skipping upload for case {analysis_obj.family.internal_id}. "
-                f"It has been already uploaded at {analysis_obj.family.analyses[0].uploaded_at}."
+                f"Skipping upload for case {analysis_obj.case.internal_id}. "
+                f"It has been already uploaded at {analysis_obj.case.analyses[0].uploaded_at}."
             )
             continue
 
-        case_id = analysis_obj.family.internal_id
+        case_id = analysis_obj.case.internal_id
         LOG.info("Uploading analysis for case: %s", case_id)
         try:
             context.invoke(upload, case_id=case_id)
