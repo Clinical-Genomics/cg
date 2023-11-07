@@ -1,5 +1,5 @@
 from cg.store import Store
-from cg.store.models import Family, FamilySample, Flowcell, Sample
+from cg.store.models import Case, FamilySample, Flowcell, Sample
 
 
 def test_delete_flow_cell(bcl2fastq_flow_cell_id: str, populated_flow_cell_store: Store):
@@ -109,10 +109,10 @@ def test_store_api_delete_non_existing_case(
     """Test that nothing happens when trying to delete a case that does not exist."""
 
     # GIVEN a database containing some cases but not a specific case
-    case: Family = store_with_multiple_cases_and_samples.get_case_by_internal_id(
+    case: Case = store_with_multiple_cases_and_samples.get_case_by_internal_id(
         internal_id=case_id_does_not_exist
     )
-    existing_cases: list[Family] = store_with_multiple_cases_and_samples.get_cases()
+    existing_cases: list[Case] = store_with_multiple_cases_and_samples.get_cases()
 
     assert not case
     assert existing_cases
@@ -123,7 +123,7 @@ def test_store_api_delete_non_existing_case(
     )
 
     # THEN no case has been deleted and nothing happens
-    remaining_cases: list[Family] = store_with_multiple_cases_and_samples.get_cases()
+    remaining_cases: list[Case] = store_with_multiple_cases_and_samples.get_cases()
 
     assert len(remaining_cases) == len(existing_cases)
 

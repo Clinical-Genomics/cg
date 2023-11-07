@@ -13,7 +13,7 @@ from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.store.api.find_business_data import FindBusinessDataHandler
 from cg.store.api.status import StatusHandler
-from cg.store.models import Family
+from cg.store.models import Case
 from tests.store.conftest import case_obj
 from tests.store_helpers import StoreHelpers
 
@@ -157,7 +157,7 @@ def mip_dna_context(
 def setup_mocks(
     mocker,
     can_at_least_one_sample_be_decompressed: bool = False,
-    case_to_analyze: Family = None,
+    case_to_analyze: Case = None,
     decompress_spring: bool = False,
     has_latest_analysis_started: bool = False,
     is_spring_decompression_needed: bool = False,

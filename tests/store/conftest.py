@@ -8,7 +8,7 @@ import pytest
 from cg.constants import Pipeline
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store
-from cg.store.models import Analysis, Application, Customer, Family, FamilySample, Organism, Sample
+from cg.store.models import Analysis, Application, Customer, Case, FamilySample, Organism, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -159,7 +159,7 @@ def microbial_store(
 
 
 @pytest.fixture(name="case")
-def case_obj(analysis_store: Store) -> Family:
+def case_obj(analysis_store: Store) -> Case:
     """Return a case models object."""
     return analysis_store.get_cases()[0]
 
@@ -206,7 +206,7 @@ def store_with_a_sample_that_has_many_attributes_and_one_without(
         sequence_start=timestamp_now,
         delivered_at=timestamp_now,
         received_at=timestamp_now,
-        reads_updated_at=timestamp_now,
+        last_sequenced_at=timestamp_now,
         prepared_at=timestamp_now,
         invoiced_at=timestamp_now,
         application_version_id=StoreConstants.APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES.value,
@@ -238,7 +238,7 @@ def store_with_a_sample_that_has_many_attributes_and_one_without(
         is_tumour=False,
         delivered_at=None,
         received_at=None,
-        reads_updated_at=None,
+        last_sequenced_at=None,
         prepared_at=None,
         subject_id=None,
         invoice_id=None,
@@ -385,7 +385,7 @@ def store_with_an_invoice_with_and_without_attributes(
 def store_with_older_and_newer_analyses(
     base_store: Store,
     helpers: StoreHelpers,
-    case: Family,
+    case: Case,
     timestamp_now: dt.datetime,
     timestamp_yesterday: dt.datetime,
     old_timestamp: dt.datetime,

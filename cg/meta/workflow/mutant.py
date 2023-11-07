@@ -10,7 +10,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
-from cg.store.models import Application, Family, Sample
+from cg.store.models import Application, Case, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class MutantAnalysisAPI(AnalysisAPI):
     def _is_nanopore(self, application: Application) -> bool:
         return application.tag[3:6] == "ONT"
 
-    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample) -> Path:
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
         """Return the path to the FASTQ destination directory."""
         application: str = sample.application_version.application
         if self._is_nanopore(application=application):
@@ -109,7 +109,7 @@ class MutantAnalysisAPI(AnalysisAPI):
             ),
             date_arrival=str(sample_obj.received_at),
             date_libprep=str(sample_obj.prepared_at),
-            date_sequencing=str(sample_obj.reads_updated_at),
+            date_sequencing=str(sample_obj.last_sequenced_at),
             selection_criteria=self.lims_api.get_sample_attribute(
                 lims_id=sample_obj.internal_id, key="selection_criteria"
             ),
@@ -186,7 +186,7 @@ class MutantAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
 
-    def get_cases_to_store(self) -> list[Family]:
+    def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis has a deliverables file,
         and is ready to be stored in Housekeeper."""
         return [
@@ -204,7 +204,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         ]
 
     def link_nanopore_fastq_for_sample(
-        self, case_obj: Family, sample_obj: Sample, concatenate: bool = False
+        self, case_obj: Case, sample_obj: Sample, concatenate: bool = False
     ) -> None:
         """
         Link FASTQ files for a nanopore sample to working directory.

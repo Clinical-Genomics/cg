@@ -23,7 +23,7 @@ from cg.models.report.metadata import RnafusionSampleMetadataModel
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
 from cg.models.rnafusion.rnafusion import RnafusionAnalysis, RnafusionQCMetrics
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 
 class RnafusionReportAPI(ReportAPI):
@@ -34,7 +34,7 @@ class RnafusionReportAPI(ReportAPI):
         self.analysis_api: RnafusionAnalysisAPI = analysis_api
 
     def get_sample_metadata(
-        self, case: Family, sample: Sample, analysis_metadata: RnafusionAnalysis
+        self, case: Case, sample: Sample, analysis_metadata: RnafusionAnalysis
     ) -> RnafusionSampleMetadataModel:
         """Return the sample metadata to include in the report."""
         sample_metrics: RnafusionQCMetrics = analysis_metadata.sample_metrics[sample.internal_id]

@@ -17,7 +17,7 @@ from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 from cg.utils.email import send_mail
 
 LOG = logging.getLogger(__name__)
@@ -281,7 +281,7 @@ class FOHMUploadAPI:
         """Update timestamp for cases which started being processed as batch"""
         if self._dry_run:
             return
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         case_obj.analyses[0].upload_started_at = dt.datetime.now()
         self.status_db.session.commit()
 
@@ -289,6 +289,6 @@ class FOHMUploadAPI:
         """Update timestamp for cases which uploaded successfully"""
         if self._dry_run:
             return
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         case_obj.analyses[0].uploaded_at = dt.datetime.now()
         self.status_db.session.commit()

@@ -14,12 +14,12 @@ from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.report.report import CaseModel, CustomerModel, DataAnalysisModel, ReportModel
 from cg.models.report.sample import ApplicationModel, MethodsModel, SampleModel, TimestampModel
 from cg.store import Store
-from cg.store.models import Analysis, Family, FamilySample
+from cg.store.models import Analysis, Case, FamilySample
 from tests.meta.report.helper import recursive_assert
 from tests.store_helpers import StoreHelpers
 
 
-def test_create_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family):
+def test_create_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case):
     """Tests the creation of the rendered delivery report."""
 
     # GIVEN a pre-built case
@@ -36,7 +36,7 @@ def test_create_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dn
 
 
 def test_create_delivery_report_file(
-    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family, tmp_path: Path
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case, tmp_path: Path
 ):
     """Tests file generation containing the delivery report data."""
 
@@ -55,7 +55,7 @@ def test_create_delivery_report_file(
     assert created_report_file.exists()
 
 
-def test_render_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family):
+def test_render_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case):
     """Tests delivery report rendering."""
 
     # GIVEN a generated report
@@ -71,7 +71,7 @@ def test_render_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dn
     assert "html" in rendered_report
 
 
-def test_get_validated_report_data(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family):
+def test_get_validated_report_data(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case):
     """Tests report data retrieval."""
 
     # GIVEN a valid case
@@ -92,7 +92,7 @@ def test_get_validated_report_data(report_api_mip_dna: MipDNAReportAPI, case_mip
 
 
 def test_validate_report_empty_fields(
-    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family, caplog: LogCaptureFixture
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case, caplog: LogCaptureFixture
 ):
     """Tests the validations of allowed empty report fields."""
     caplog.set_level(logging.INFO)
@@ -118,7 +118,7 @@ def test_validate_report_empty_fields(
 
 
 def test_validate_report_missing_fields(
-    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family, caplog: LogCaptureFixture
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case, caplog: LogCaptureFixture
 ):
     """Tests the validations of empty required report fields."""
 
@@ -144,7 +144,7 @@ def test_validate_report_missing_fields(
 
 
 def test_get_validated_report_data_external_sample(
-    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case
 ):
     """Tests report data retrieval."""
 
@@ -164,7 +164,7 @@ def test_get_validated_report_data_external_sample(
     assert report_data
 
 
-def test_get_customer_data(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Family):
+def test_get_customer_data(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case):
     """Checks that the retrieved customer data is the expected one."""
 
     # GIVEN a pre-built case
@@ -210,7 +210,7 @@ def test_get_report_version_version(
 def test_get_case_data(
     report_api_mip_dna: MipDNAReportAPI,
     mip_analysis_api: MipDNAAnalysisAPI,
-    case_mip_dna: Family,
+    case_mip_dna: Case,
     family_name: str,
 ):
     """Tests the extracted case data."""
@@ -235,7 +235,7 @@ def test_get_case_data(
 def test_get_samples_data(
     report_api_mip_dna: MipDNAReportAPI,
     mip_analysis_api: MipDNAAnalysisAPI,
-    case_mip_dna: Family,
+    case_mip_dna: Case,
     case_samples_data: list[FamilySample],
     lims_samples: list[dict],
 ):
@@ -313,7 +313,7 @@ def test_get_sample_application_data(
 
 
 def test_get_unique_applications(
-    report_api_mip_dna: MipDNAReportAPI, mip_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Family
+    report_api_mip_dna: MipDNAReportAPI, mip_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Case
 ):
     """Tests unique applications filtering."""
 
@@ -352,7 +352,7 @@ def test_get_sample_methods_data(
 
 
 def test_get_case_analysis_data(
-    report_api_mip_dna: MipDNAReportAPI, mip_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Family
+    report_api_mip_dna: MipDNAReportAPI, mip_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Case
 ):
     """Tests data analysis parameters retrieval."""
 
@@ -375,7 +375,7 @@ def test_get_case_analysis_data(
 def test_get_case_analysis_data_pipeline_match_error(
     report_api_mip_dna: MipDNAReportAPI,
     mip_analysis_api: MipDNAAnalysisAPI,
-    case_mip_dna: Family,
+    case_mip_dna: Case,
     caplog: LogCaptureFixture,
 ):
     """Test validation error if a customer requested pipeline does not match the data analysis."""
@@ -403,7 +403,7 @@ def test_get_case_analysis_data_pipeline_match_error(
 def test_get_case_analysis_data_pipeline_not_supported(
     report_api_mip_dna: MipDNAReportAPI,
     mip_analysis_api: MipDNAAnalysisAPI,
-    case_mip_dna: Family,
+    case_mip_dna: Case,
     caplog: LogCaptureFixture,
 ):
     """Test validation error if the analysis pipeline is not supported by the delivery report workflow."""

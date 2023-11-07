@@ -219,7 +219,7 @@ class Analysis(Model):
     family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
     uploaded_to_vogue_at = Column(types.DateTime, nullable=True)
 
-    family = orm.relationship("Family", back_populates="analyses")
+    family = orm.relationship("Case", back_populates="analyses")
 
     def __str__(self):
         return f"{self.family.internal_id} | {self.completed_at.date()}"
@@ -376,7 +376,7 @@ class Delivery(Model):
         return to_dict(model_instance=self)
 
 
-class Family(Model, PriorityMixin):
+class Case(Model, PriorityMixin):
     __tablename__ = "family"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
@@ -437,8 +437,8 @@ class Family(Model, PriorityMixin):
         for link in self.links:
             if link.sample.application_version.application.is_external:
                 sequenced_dates.append(link.sample.ordered_at)
-            elif link.sample.reads_updated_at:
-                sequenced_dates.append(link.sample.reads_updated_at)
+            elif link.sample.last_sequenced_at:
+                sequenced_dates.append(link.sample.last_sequenced_at)
         return max(sequenced_dates, default=None)
 
     @property
@@ -532,7 +532,7 @@ class FamilySample(Model):
     mother_id = Column(ForeignKey("sample.id"))
     father_id = Column(ForeignKey("sample.id"))
 
-    family = orm.relationship(Family, back_populates="links")
+    family = orm.relationship(Case, back_populates="links")
     sample = orm.relationship("Sample", foreign_keys=[sample_id], back_populates="links")
     mother = orm.relationship("Sample", foreign_keys=[mother_id], back_populates="mother_links")
     father = orm.relationship("Sample", foreign_keys=[father_id], back_populates="father_links")
@@ -688,7 +688,7 @@ class Sample(Model, PriorityMixin):
 
     priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     reads = Column(types.BigInteger, default=0)
-    reads_updated_at = Column(types.DateTime)
+    last_sequenced_at = Column(types.DateTime)
     received_at = Column(types.DateTime)
     reference_genome = Column(types.String(255))
     sequence_start = Column(types.DateTime)
@@ -760,8 +760,8 @@ class Sample(Model, PriorityMixin):
         """Get the current sample state."""
         if self.delivered_at:
             return f"Delivered {self.delivered_at.date()}"
-        if self.reads_updated_at:
-            return f"Sequenced {self.reads_updated_at.date()}"
+        if self.last_sequenced_at:
+            return f"Sequenced {self.last_sequenced_at.date()}"
         if self.sequence_start:
             return f"Sequencing {self.sequence_start.date()}"
         if self.received_at:

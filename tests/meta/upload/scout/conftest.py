@@ -18,7 +18,7 @@ from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import MipLoadConfig
 from cg.store import Store
-from cg.store.models import Analysis, Family, Sample
+from cg.store.models import Analysis, Case, Sample
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -504,7 +504,7 @@ def mip_dna_analysis(
 ) -> Analysis:
     """Return a MIP DNA analysis object."""
     helpers.add_synopsis_to_case(store=analysis_store_trio, case_id=case_id)
-    case: Family = analysis_store_trio.get_case_by_internal_id(internal_id=case_id)
+    case: Case = analysis_store_trio.get_case_by_internal_id(internal_id=case_id)
     analysis: Analysis = helpers.add_analysis(
         store=analysis_store_trio,
         case=case,

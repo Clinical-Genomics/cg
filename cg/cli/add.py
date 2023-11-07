@@ -13,7 +13,7 @@ from cg.store.models import (
     ApplicationVersion,
     Collaboration,
     Customer,
-    Family,
+    Case,
     FamilySample,
     Panel,
     Sample,
@@ -264,7 +264,7 @@ def add_case(
             LOG.error(f"{panel_abbreviation}: panel not found")
             raise click.Abort
 
-    new_case: Family = status_db.add_case(
+    new_case: Case = status_db.add_case(
         data_analysis=data_analysis,
         data_delivery=data_delivery,
         name=name,
@@ -298,7 +298,7 @@ def link_sample_to_case(
     status_db: Store = context.status_db
     mother: Optional[Sample] = None
     father: Optional[Sample] = None
-    case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     if case_obj is None:
         LOG.error("%s: family not found", case_id)
         raise click.Abort
