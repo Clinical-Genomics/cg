@@ -28,4 +28,4 @@ class Analysis(Analysis):
     def __init__(self):
         self.id = 1
         self.completed_at = datetime.datetime.now()
-        self.family: Case = Case()
+        self.case: Case = Case()

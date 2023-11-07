@@ -168,7 +168,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         concatenated_fastq_name: str = self.fastq_handler.get_concatenated_name(linked_fastq_name)
         return Path(
             self.root_dir,
-            link_object.family.internal_id,
+            link_object.case.internal_id,
             "fastq",
             concatenated_fastq_name,
         )
@@ -544,7 +544,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return panel_bed
         if self.get_application_type(link_object.sample) not in self.__BALSAMIC_BED_APPLICATIONS:
             return None
-        return self.get_target_bed_from_lims(link_object.family.internal_id)
+        return self.get_target_bed_from_lims(link_object.case.internal_id)
 
     def get_pipeline_version(self, case_id: str) -> str:
         LOG.debug("Fetch pipeline version")

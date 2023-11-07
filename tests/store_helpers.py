@@ -315,7 +315,7 @@ class StoreHelpers:
             analysis.uploaded_to_vogue_at = uploaded_to_vogue_at
 
         analysis.limitations = "A limitation"
-        analysis.family = case
+        analysis.case = case
         store.session.add(analysis)
         store.session.commit()
         return analysis

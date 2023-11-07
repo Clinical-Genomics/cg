@@ -14,6 +14,7 @@ class MockAnalysis:
 
     def __init__(self, case_obj: Case, started_at: datetime):
         self.case_obj = case_obj
+        self.case = case_obj
         self.started_at = started_at
 
     @property

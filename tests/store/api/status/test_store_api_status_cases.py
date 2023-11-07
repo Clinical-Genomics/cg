@@ -159,7 +159,7 @@ def test_case_action(base_store: Store, helpers):
     analysis = helpers.add_analysis(
         base_store, completed_at=datetime.now(), uploaded_at=datetime.now()
     )
-    analysis.family.action = "analyze"
+    analysis.case.action = "analyze"
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -167,7 +167,7 @@ def test_case_action(base_store: Store, helpers):
     # THEN cases should contain info on analysis (case) action
     assert cases
     for case in cases:
-        assert case.get("case_action") == analysis.family.action
+        assert case.get("case_action") == analysis.case.action
 
 
 def test_analysis_dates_for_rerun(base_store: Store, helpers):
@@ -177,7 +177,7 @@ def test_analysis_dates_for_rerun(base_store: Store, helpers):
     analysis = helpers.add_analysis(
         base_store, completed_at=datetime.now(), uploaded_at=datetime.now()
     )
-    analysis.family.action = "analyze"
+    analysis.case.action = "analyze"
 
     # WHEN getting active cases
     cases = base_store.cases()

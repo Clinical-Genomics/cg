@@ -22,7 +22,7 @@ def test_missing(analysis_store: Store, helpers, timestamp_now):
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     link: FamilySample = analysis_store.relate_sample(
-        family=analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
+        family=analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
     )
     analysis_store.session.add(link)
     assert sample.delivered_at is not None
@@ -58,7 +58,7 @@ def test_outdated_analysis(analysis_store, helpers, timestamp_now, timestamp_yes
 
     # GIVEN a store sample case relation
     link: FamilySample = analysis_store.relate_sample(
-        family=analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
+        family=analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
     )
     analysis_store.session.add(link)
 

@@ -210,7 +210,7 @@ def hk_bundle_files(
     size_cleaned: int = 0
     for analysis in analyses:
         LOG.info(f"Cleaning analysis {analysis}")
-        bundle_name: str = analysis.family.internal_id
+        bundle_name: str = analysis.case.internal_id
         hk_bundle_version: Optional[Version] = housekeeper_api.version(
             bundle=bundle_name, date=analysis.started_at
         )
@@ -230,7 +230,7 @@ def hk_bundle_files(
             f"date {analysis.started_at}"
         )
         version_files: list[File] = housekeeper_api.get_files(
-            bundle=analysis.family.internal_id, tags=tags, version=hk_bundle_version.id
+            bundle=analysis.case.internal_id, tags=tags, version=hk_bundle_version.id
         ).all()
         for version_file in version_files:
             file_path: Path = Path(version_file.full_path)

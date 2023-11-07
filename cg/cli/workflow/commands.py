@@ -198,7 +198,7 @@ def past_run_dirs(
     LOG.info(f"Cleaning {len(possible_cleanups)} analyses created before {before}")
 
     for analysis in possible_cleanups:
-        case_id = analysis.family.internal_id
+        case_id = analysis.case.internal_id
         try:
             LOG.info("Cleaning %s output for %s", analysis_api.pipeline, case_id)
             context.invoke(clean_run_dir, yes=yes, case_id=case_id, dry_run=dry_run)

@@ -26,10 +26,10 @@ def test_get_families_with_extended_models(
     )
 
     # Given an action set to analyze
-    test_analysis.family.action: str = CaseActions.ANALYZE
+    test_analysis.case.action: str = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
-    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
@@ -70,7 +70,7 @@ def test_get_cases_with_samples_query(
     )
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
-    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # WHEN getting the stored case with its associated samples
@@ -146,10 +146,10 @@ def test_external_sample_to_re_analyse(
     assert test_analysis.completed_at
 
     # Given an action set to analyze
-    test_analysis.family.action: str = CaseActions.ANALYZE
+    test_analysis.case.action: str = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one not sequenced external sample
-    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
@@ -159,7 +159,7 @@ def test_external_sample_to_re_analyse(
     assert cases
 
     # THEN test case should be among the cases returned for analysis
-    assert test_analysis.family in cases
+    assert test_analysis.case in cases
 
 
 def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelpers):
@@ -195,10 +195,10 @@ def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers, timestamp_
     )
 
     # Given an action set to analyze
-    test_analysis.family.action: str = CaseActions.ANALYZE
+    test_analysis.case.action: str = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
-    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
@@ -208,7 +208,7 @@ def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers, timestamp_
     assert cases
 
     # THEN test case should be among the cases returned for analysis
-    assert test_analysis.family in cases
+    assert test_analysis.case in cases
 
 
 def test_all_samples_and_analysis_completed(
@@ -224,10 +224,10 @@ def test_all_samples_and_analysis_completed(
     test_analysis: Analysis = helpers.add_analysis(base_store, completed_at=timestamp_now)
 
     # Given a completed analysis
-    test_analysis.family.action: Union[None, str] = None
+    test_analysis.case.action: Union[None, str] = None
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
-    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
@@ -363,7 +363,7 @@ def test_get_analyses_for_case_and_pipeline_before(
     # THEN assert that the analyses before the given date are returned
     for analysis in analyses:
         assert analysis.started_at < timestamp_now
-        assert analysis.family.internal_id == case_id
+        assert analysis.case.internal_id == case_id
         assert analysis.pipeline == pipeline
 
 
@@ -387,7 +387,7 @@ def test_get_analyses_for_case_before(
     # THEN assert that the analyses before the given date are returned
     for analysis in analyses:
         assert analysis.started_at < timestamp_now
-        assert analysis.family.internal_id == case_id
+        assert analysis.case.internal_id == case_id
 
 
 def test_get_analyses_for_pipeline_before(

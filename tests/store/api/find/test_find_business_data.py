@@ -38,7 +38,7 @@ def test_get_analysis_by_case_entry_id_and_started_at(
 
     # WHEN getting analysis via case_id and start date
     db_analysis = sample_store.get_analysis_by_case_entry_id_and_started_at(
-        case_entry_id=analysis.family.id, started_at_date=analysis.started_at
+        case_entry_id=analysis.case.id, started_at_date=analysis.started_at
     )
 
     # THEN the analysis should have been retrieved
@@ -469,7 +469,7 @@ def test_get_case_sample_link(
     # THEN the returned element is a FamilySample object
     assert isinstance(case_sample, FamilySample)
     # THEN the returned family sample has the correct case and sample internal ids
-    assert case_sample.family.internal_id == case_id
+    assert case_sample.case.internal_id == case_id
     assert case_sample.sample.internal_id == sample_id
 
 
