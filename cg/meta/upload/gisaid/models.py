@@ -2,14 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
-from pydantic import (
-    BaseModel,
-    BeforeValidator,
-    FieldValidationInfo,
-    field_validator,
-    model_validator,
-)
-from typing_extensions import Annotated
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from cg.meta.upload.gisaid.constants import AUTHORS
 
@@ -49,6 +42,7 @@ class UploadFiles(BaseModel):
 
 
 class GisaidSample(BaseModel):
+    model_config = ConfigDict(coerce_numbers_to_str=True)
     case_id: str
     cg_lims_id: str
     submitter: str
@@ -64,7 +58,7 @@ class GisaidSample(BaseModel):
     covv_location: Optional[str] = None
     covv_host: Optional[str] = "Human"
     covv_gender: Optional[str] = "unknown"
-    covv_patient_age: Annotated[Optional[str], BeforeValidator(lambda v: str(v))] = "unknown"
+    covv_patient_age: Optional[str] = "unknown"
     covv_patient_status: Optional[str] = "unknown"
     covv_seq_technology: Optional[str] = "Illumina NovaSeq"
     covv_orig_lab_addr: Optional[str] = None
