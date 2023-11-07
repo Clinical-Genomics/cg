@@ -32,4 +32,4 @@ def test_dry_arguments(cli_runner: CliRunner, base_context: CGConfig, ticket_id,
 
     # THEN command should mention missing arguments
     assert result.exit_code == EXIT_SUCCESS
-    assert f"Running command" in caplog.text
+    assert "Running command" in caplog.text

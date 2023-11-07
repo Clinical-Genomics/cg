@@ -127,7 +127,7 @@ def test_submit_sbatch_script_invalid_sbatch_response(
     # GIVEN some sbatch content
     # GIVEN the path to a sbatch file
     # GIVEN that the slurm system responds with something unexpected
-    slurm_api.process.set_stdout(text=f"something went wrong")
+    slurm_api.process.set_stdout(text="something went wrong")
 
     # WHEN submitting the job
     job_number: int = slurm_api.submit_sbatch(

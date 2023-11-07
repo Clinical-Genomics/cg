@@ -83,7 +83,7 @@ def test_spring_decompression_needed_and_start_failed(
     assert result.exit_code == 0
 
     # THEN it should be announced that spring decompression is needed but fail to start
-    assert f"Decompression failed to start for" in caplog.text
+    assert "Decompression failed to start for" in caplog.text
 
 
 def test_spring_decompression_needed_and_cant_start(
@@ -120,7 +120,7 @@ def test_spring_decompression_needed_and_cant_start(
     assert result.exit_code == 0
 
     # THEN it should be announced that spring decompression is needed but fail to start
-    assert f"Decompression can not be started for" in caplog.text
+    assert "Decompression can not be started for" in caplog.text
 
 
 def test_decompression_cant_start_and_is_running(
@@ -157,7 +157,7 @@ def test_decompression_cant_start_and_is_running(
     assert result.exit_code == 0
 
     # THEN it should be announced that spring decompression is needed but fail to start
-    assert f"Decompression is running for" in caplog.text
+    assert "Decompression is running for" in caplog.text
 
 
 def test_case_needs_to_be_stored(

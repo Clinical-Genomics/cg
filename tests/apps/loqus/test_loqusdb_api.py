@@ -87,13 +87,13 @@ def test_load_parameters(
     # THEN assert that the expected params are included in the call
     assert f"--case-id {case_id}" in caplog.text
     assert f"--variant-file {observations_input_files.snv_vcf_path}" in caplog.text
-    assert f"--sv-variants" not in caplog.text
+    assert "--sv-variants" not in caplog.text
     assert f"--check-profile {observations_input_files.profile_vcf_path}" in caplog.text
     assert f"--family-file {observations_input_files.family_ped_path}" in caplog.text
-    assert f"--max-window" not in caplog.text
+    assert "--max-window" not in caplog.text
     assert f"--gq-threshold {MipDNALoadParameters.GQ_THRESHOLD.value}" in caplog.text
     assert f"--hard-threshold {MipDNALoadParameters.HARD_THRESHOLD.value}" in caplog.text
-    assert f"--soft-threshold" not in caplog.text
+    assert "--soft-threshold" not in caplog.text
 
 
 def test_load_exception(

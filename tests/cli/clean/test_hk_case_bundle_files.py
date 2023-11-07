@@ -56,7 +56,7 @@ def test_clean_hk_case_files_too_old(cli_runner: CliRunner, clean_context: CGCon
     # THEN it should be successful
     assert result.exit_code == 0
     # THEN it should report not having cleaned anything
-    assert f"Process freed 0.0 GB" in caplog.text
+    assert "Process freed 0.0 GB" in caplog.text
 
 
 def test_clean_hk_case_files_single_analysis(

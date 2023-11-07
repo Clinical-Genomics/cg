@@ -82,7 +82,7 @@ class MockCrunchyAPI(CrunchyAPI):
             return False
 
         if self._compression_done_all:
-            print(f"Compression done")
+            print("Compression done")
             return False
 
         compression_possible = self._compression_possible_files.get(

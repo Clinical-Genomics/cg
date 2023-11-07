@@ -30,4 +30,4 @@ def send_mail(email_info: EmailInfo) -> None:
                 msg=msg.as_string(),
             )
         except Exception:
-            raise EmailNotSentError(message=f"Email could not be sent")
+            raise EmailNotSentError(message="Email could not be sent")

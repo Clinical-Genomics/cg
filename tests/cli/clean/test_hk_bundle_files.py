@@ -22,7 +22,7 @@ def test_clean_hk_bundle_files_no_files(cli_runner: CliRunner, cg_context: CGCon
     # THEN assert it exits with success
     assert result.exit_code == 0
     # THEN assert it was communicated that no files where found
-    assert f"Process freed 0.0GB. Dry run: False" in caplog.text
+    assert "Process freed 0.0GB. Dry run: False" in caplog.text
 
 
 def test_clean_hk_bundle_files_dry_run(
