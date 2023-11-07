@@ -21,9 +21,7 @@ from cg.utils.date import get_date_days_ago
 LOG = logging.getLogger(__name__)
 
 
-def get_cases_to_process(
-    days_back: int, store: Store, case_id: Optional[str] = None
-) -> Optional[list[Case]]:
+def get_cases_to_process(days_back: int, store: Store, case_id: Optional[str] = None) -> list[Case]:
     """Return cases to process."""
     cases: list[Case] = []
     if case_id:
