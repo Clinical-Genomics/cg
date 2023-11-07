@@ -2,14 +2,10 @@
 import logging
 from pathlib import Path
 
-from housekeeper.store.models import Version
-
 from cg.apps.demultiplex.sample_sheet.validators import validate_sample_id
 from cg.exc import DownsampleFailedError
-from cg.meta.compress import files
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
-from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.store.models import Family, FamilySample, Sample
@@ -111,28 +107,6 @@ class DownsampleAPI(MetaAPI):
             case=downsample_data.downsampled_case,
         )
 
-    def is_decompression_needed(self, downsample_data: DownsampleData) -> bool:
-        """Check if decompression is needed for the specified case.
-        Decompression is needed if there are no files with fastq tag found for the sample in Housekeeper.
-        """
-        LOG.debug("Checking if decompression is needed.")
-        compression_objects = self.get_sample_compression_objects(
-            downsample_data.original_sample.internal_id
-        )
-        return any(
-            not self.crunchy_api.is_compression_pending(compression_object)
-            and not compression_object.pair_exists()
-            for compression_object in compression_objects
-        )
-
-    def get_sample_compression_objects(self, sample_id: str) -> list[CompressionData]:
-        compression_objects: list[CompressionData] = []
-        version_obj: Version = self.prepare_fastq_api.compress_api.hk_api.get_latest_bundle_version(
-            bundle_name=sample_id
-        )
-        compression_objects.extend(files.get_spring_paths(version_obj))
-        return compression_objects
-
     def start_downsample_job(
         self,
         downsample_data: DownsampleData,
@@ -165,7 +139,9 @@ class DownsampleAPI(MetaAPI):
             number_of_reads=number_of_reads,
             case_name=case_name,
         )
-        if self.is_decompression_needed(downsample_data):
+        if self.prepare_fastq_api.is_sample_decompression_needed(
+            downsample_data.original_sample.internal_id
+        ):
             self.prepare_fastq_api.compress_api.decompress_spring(
                 downsample_data.original_sample.internal_id
             )

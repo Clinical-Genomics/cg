@@ -19,7 +19,12 @@ def downsample():
     """Downsample reads in a sample."""
 
 
-@downsample.command("samples", help="Downsample reads in one or multiple samples in a case.")
+@downsample.command(
+    "samples",
+    help="Downsample reads in one or multiple samples in a case. Usage: \n"
+    "For a single sample: cg downsample samples -c supersonicturtle -cn new_case_name -i ACC1234 0.1\n"
+    "For multiple samples:cg downsample samples -c supersonicturtle -cn new_case_name -i ACC1234 0.1 -i ACC12324 10",
+)
 @click.option(
     "-c",
     "--case-id",
@@ -39,7 +44,7 @@ def downsample():
     nargs=2,
     multiple=True,
     help="Identifier used in statusdb, e.g. ACC1234567 and the number of reads to down sample to in millions separated by a space"
-    " e.g. ACC1234567 30. Multiple inputs can be provided.",
+    " e.g. ACC1234567 30.0. Multiple inputs can be provided.",
 )
 @DRY_RUN
 @click.pass_obj
