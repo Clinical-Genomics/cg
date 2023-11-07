@@ -1,6 +1,5 @@
-""" Trailblazer API for cg """ ""
+""" Trailblazer API for cg."""
 import datetime
-import datetime as dt
 import logging
 from typing import Any, Optional
 
@@ -66,37 +65,6 @@ class TrailblazerAPI:
             )
         LOG.debug(f"RESPONSE BODY {response.text}")
         return ReadStream.get_content_from_stream(file_format=FileFormat.JSON, stream=response.text)
-
-    def analyses(
-        self,
-        case_id: str = None,
-        query: str = None,
-        status: str = None,
-        deleted: bool = None,
-        temp: bool = False,
-        before: dt.datetime = None,
-        is_visible: bool = None,
-        family: str = None,
-        data_analysis: Pipeline = None,
-    ) -> list:
-        request_body = {
-            "case_id": case_id,
-            "status": status,
-            "query": query,
-            "deleted": deleted,
-            "temp": temp,
-            "before": str(before) if before else None,
-            "is_visible": is_visible,
-            "family": family,
-            "data_analysis": data_analysis.upper() if data_analysis else None,
-        }
-        response = self.query_trailblazer(command="query-analyses", request_body=request_body)
-        if response:
-            if isinstance(response, list):
-                return [TrailblazerAnalysis.model_validate(analysis) for analysis in response]
-            if isinstance(response, dict):
-                return [TrailblazerAnalysis.model_validate(response)]
-        return response
 
     def get_latest_analysis(self, case_id: str) -> Optional[TrailblazerAnalysis]:
         request_body = {
