@@ -51,7 +51,7 @@ class RunParameters:
 
     def get_node_integer_value(self, node_name: str, name: str) -> int:
         """Return the value of the node as an integer if its validation passes."""
-        return int(self.get_tree_node(node_name=node_name, name=name).text)
+        return int(self.get_node_string_value(node_name=node_name, name=name))
 
     @property
     def control_software_version(self) -> str | None:
@@ -106,9 +106,8 @@ class RunParametersHiSeq(RunParameters):
             RunParametersError if the run parameters file is not HiSeq"""
         node_name: str = RunParametersXMLNodes.APPLICATION_NAME
         application: ElementTree.Element | None = self.tree.find(node_name)
-        if application is not None and application.text == RunParametersXMLNodes.HISEQ_APPLICATION:
-            return
-        raise RunParametersError("The file parsed does not correspond to a HiSeq instrument")
+        if application is None or application.text != RunParametersXMLNodes.HISEQ_APPLICATION:
+            raise RunParametersError("The file parsed does not correspond to a HiSeq instrument")
 
     def is_single_index(self) -> bool:
         """Return whether the sequencing was done with a single index."""
@@ -166,11 +165,12 @@ class RunParametersNovaSeq6000(RunParameters):
         node_name: str = RunParametersXMLNodes.APPLICATION
         application: ElementTree.Element | None = self.tree.find(node_name)
         if (
-            application is not None
-            and application.text == RunParametersXMLNodes.NOVASEQ_6000_APPLICATION
+            application is None
+            or application.text != RunParametersXMLNodes.NOVASEQ_6000_APPLICATION
         ):
-            return
-        raise RunParametersError("The file parsed does not correspond to a NovaSeq6000 instrument")
+            raise RunParametersError(
+                "The file parsed does not correspond to a NovaSeq6000 instrument"
+            )
 
     @property
     def control_software_version(self) -> str:
@@ -224,9 +224,8 @@ class RunParametersNovaSeqX(RunParameters):
             RunParametersError if the run parameters file is not NovaSeqX"""
         node_name: str = RunParametersXMLNodes.INSTRUMENT_TYPE
         instrument: ElementTree.Element | None = self.tree.find(node_name)
-        if instrument is not None and instrument.text == RunParametersXMLNodes.NOVASEQ_X_INSTRUMENT:
-            return
-        raise RunParametersError("The file parsed does not correspond to a NovaSeqX instrument")
+        if instrument is None or instrument.text != RunParametersXMLNodes.NOVASEQ_X_INSTRUMENT:
+            raise RunParametersError("The file parsed does not correspond to a NovaSeqX instrument")
 
     @property
     def control_software_version(self) -> None:
