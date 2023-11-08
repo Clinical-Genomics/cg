@@ -104,7 +104,7 @@ class BaseHandler:
         return analyses.join(
             case_and_date_subquery,
             and_(
-                Analysis.case_id == case_and_date_subquery.c.family_id,
+                Analysis.case_id == case_and_date_subquery.c.case_id,
                 Analysis.started_at == case_and_date_subquery.c.started_at,
             ),
         )

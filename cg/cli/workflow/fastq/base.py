@@ -33,7 +33,7 @@ def store_fastq_analysis(context: click.Context, case_id: str, dry_run: bool = F
         completed_at=dt.datetime.now(),
         primary=True,
         started_at=dt.datetime.now(),
-        family_id=case_obj.id,
+        case_id=case_obj.id,
     )
     if dry_run:
         return
