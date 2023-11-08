@@ -41,7 +41,7 @@ class UploadGenotypesAPI(object):
 
         """
         case_id = analysis_obj.case.internal_id
-        LOG.info("Fetching upload genotype data for %s", case_id)
+        LOG.info(f"Fetching upload genotype data for {case_id}")
         hk_version = self.hk.last_version(case_id)
         hk_bcf = self.get_bcf_file(hk_version)
         data = {"bcf": hk_bcf.full_path}
@@ -92,7 +92,7 @@ class UploadGenotypesAPI(object):
         genotype_files: list = self._get_genotype_files(version_id=hk_version_obj.id)
         for genotype_file in genotype_files:
             if self._is_variant_file(genotype_file=genotype_file):
-                LOG.debug("Found bcf file %s", genotype_file.full_path)
+                LOG.debug(f"Found bcf file {genotype_file.full_path}")
                 return genotype_file
         raise FileNotFoundError(f"No vcf or bcf file found for bundle {hk_version_obj.bundle_id}")
 
@@ -101,7 +101,7 @@ class UploadGenotypesAPI(object):
         hk_qcmetrics = self.hk.files(
             version=hk_version_obj.id, tags=HkMipAnalysisTag.QC_METRICS
         ).first()
-        LOG.debug("Found qc metrics file %s", hk_qcmetrics.full_path)
+        LOG.debug(f"Found qc metrics file {hk_qcmetrics.full_path}")
         return Path(hk_qcmetrics.full_path)
 
     @staticmethod

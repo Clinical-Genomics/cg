@@ -115,12 +115,7 @@ class TransferLims(object):
                 if status_date is None:
                     continue
 
-                LOG.info(
-                    "Found %s date for pool id %s: %s",
-                    status_type.value,
-                    pool_obj.id,
-                    status_date,
-                )
+                LOG.info(f"Found {status_type.value} date for pool id {pool_obj.id}: {status_date}")
                 setattr(pool_obj, f"{status_type.value}_at", status_date)
                 self.status.session.commit()
                 break
@@ -146,7 +141,7 @@ class TransferLims(object):
         name of the pool object it's part of"""
         if sample_obj.udf.get("pool name") is None:
             LOG.warning(
-                "No pool name found for sample %s (sample name %s, project %s)",
+                f"No pool name found for sample {sample_obj} (sample name {sample_obj.name}, project {sample_obj.project.name})",
                 sample_obj.id,
                 sample_obj.name,
                 sample_obj.project.name,
@@ -156,7 +151,7 @@ class TransferLims(object):
         sample_pool_name = sample_obj.udf["pool name"]
         if sample_pool_name != pool_obj.name:
             LOG.warning(
-                "The udf 'pool name' of the sample (%s) does not match the name of the pool (%s))",
+                f"The udf 'pool name' of the sample ({sample_pool_name}) does not match the name of the pool ({pool_obj.name}))",
                 sample_pool_name,
                 pool_obj.name,
             )
