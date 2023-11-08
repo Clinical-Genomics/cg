@@ -26,7 +26,6 @@ class DemultiplexingDirsAndFiles(StrEnum):
     Hiseq_X_TILE_DIR: str = "l1t11"
     RTACOMPLETE: str = "RTAComplete.txt"
     RUN_PARAMETERS: str = "RunParameters.xml"
-    RUN_PARAMETERS_LOWER_CASE: str = "runParameters.xml"
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
     BCL2FASTQ_TILE_DIR_PATTERN: str = r"l\dt\d{2}"
