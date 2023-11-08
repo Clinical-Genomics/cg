@@ -117,7 +117,7 @@ def _log_sample_process_information(sample: Sample):
 
 def _log_sample_links(sample: Sample):
     for sample_link in sample.links:
-        LOG.info(f"Sample is linked to: {sample_link.family.internal_id}")
+        LOG.info(f"Sample is linked to: {sample_link.case.internal_id}")
     for sample_link in sample.mother_links:
         LOG.info(f"Sample is linked as mother to: {sample_link.mother.internal_id}")
     for sample_link in sample.father_links:

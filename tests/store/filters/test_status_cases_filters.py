@@ -29,7 +29,7 @@ from cg.store.filters.status_case_filters import (
     filter_report_supported_data_delivery_cases,
     filter_running_cases,
 )
-from cg.store.models import Analysis, Case, FamilySample, Sample
+from cg.store.models import Analysis, Case, CaseSample, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -208,10 +208,10 @@ def test_filter_cases_with_loqusdb_supported_pipeline(
     test_fluffy_case.customer.loqus_upload = True
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link_1: FamilySample = base_store.relate_sample(
+    link_1: CaseSample = base_store.relate_sample(
         test_mip_case, test_sample, PhenotypeStatus.UNKNOWN
     )
-    link_2: FamilySample = base_store.relate_sample(
+    link_2: CaseSample = base_store.relate_sample(
         test_fluffy_case, test_sample, PhenotypeStatus.UNKNOWN
     )
     base_store.session.add_all([link_1, link_2])
@@ -301,10 +301,10 @@ def test_filter_cases_for_analysis(
     )
 
     # Given an action set to analyze
-    test_analysis.family.action: str = CaseActions.ANALYZE
+    test_analysis.case.action: str = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN a cases Query
@@ -367,10 +367,10 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
     test_analysis: Analysis = helpers.add_analysis(base_store, pipeline=Pipeline.MIP_DNA)
 
     # Given an action set to None
-    test_analysis.family.action: Union[None, str] = None
+    test_analysis.case.action: Union[None, str] = None
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN an old analysis
@@ -403,10 +403,10 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
     test_analysis: Analysis = helpers.add_analysis(base_store, pipeline=Pipeline.MIP_DNA)
 
     # Given an action set to None
-    test_analysis.family.action: Union[None, str] = None
+    test_analysis.case.action: Union[None, str] = None
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link = base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+    link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN a cases Query
@@ -463,8 +463,8 @@ def test_filter_report_supported_data_delivery_cases(
     test_invalid_case = helpers.add_case(base_store, name="test", data_delivery=DataDelivery.FASTQ)
 
     # GIVEN a database with the test cases
-    link_1: FamilySample = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
-    link_2: FamilySample = base_store.relate_sample(
+    link_1: CaseSample = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
+    link_2: CaseSample = base_store.relate_sample(
         test_invalid_case, test_sample, PhenotypeStatus.UNKNOWN
     )
     base_store.session.add_all([link_1, link_2])

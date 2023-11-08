@@ -64,7 +64,7 @@ class UploadScoutAPI:
 
         # Fetch last version from housekeeper
         # This should be safe since analyses are only added if data is analysed
-        hk_version_obj: Version = self.housekeeper.last_version(analysis_obj.family.internal_id)
+        hk_version_obj: Version = self.housekeeper.last_version(analysis_obj.case.internal_id)
         LOG.debug("Found housekeeper version %s", hk_version_obj.id)
 
         load_config: ScoutLoadConfig
@@ -426,9 +426,7 @@ class UploadScoutAPI:
         self, dna_sample: Sample, collaborators: set[Customer]
     ) -> list[str]:
         """Maps a list of uploaded DNA cases linked to DNA sample."""
-        potential_cases_related_to_dna_sample: list[Case] = [
-            dna_sample_family_relation.family for dna_sample_family_relation in dna_sample.links
-        ]
+        potential_cases_related_to_dna_sample: list[Case] = [link.case for link in dna_sample.links]
         return self.filter_cases_related_to_dna_sample(
             list_of_dna_cases=potential_cases_related_to_dna_sample, collaborators=collaborators
         )

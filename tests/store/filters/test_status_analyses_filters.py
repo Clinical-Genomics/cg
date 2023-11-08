@@ -249,7 +249,7 @@ def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case:
     # THEN only the analysis belonging to the case should be retrieved
     assert analysis not in analyses
     assert analysis_other_case in analyses
-    assert analysis_other_case.family == case
+    assert analysis_other_case.case == case
 
 
 def test_filter_analysis_started_before(
@@ -262,7 +262,7 @@ def test_filter_analysis_started_before(
         store=base_store, started_at=timestamp_now - timedelta(days=1)
     )
     analysis: Analysis = helpers.add_analysis(
-        store=base_store, started_at=timestamp_now, case=analysis_old.family
+        store=base_store, started_at=timestamp_now, case=analysis_old.case
     )
 
     # WHEN filtering the analyses by started_at
@@ -286,7 +286,7 @@ def test_filter_analysis_not_cleaned(
     # GIVEN a set of mock analyses
     analysis_cleaned: Analysis = helpers.add_analysis(store=base_store, cleaned_at=timestamp_now)
     analysis: Analysis = helpers.add_analysis(
-        store=base_store, cleaned_at=None, case=analysis_cleaned.family
+        store=base_store, cleaned_at=None, case=analysis_cleaned.case
     )
 
     # WHEN filtering the analyses by cleaned_at
@@ -312,7 +312,7 @@ def test_filter_analyses_by_started_at(
     analysis_started_old: Analysis = helpers.add_analysis(
         store=base_store,
         started_at=timestamp_yesterday,
-        case=analysis_started_now.family,
+        case=analysis_started_now.case,
     )
 
     # WHEN filtering the analyses by started_at

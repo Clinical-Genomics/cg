@@ -529,11 +529,11 @@ def mip_dna_analysis(
 def balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a Balsamic analysis object."""
     analysis_obj.pipeline = Pipeline.BALSAMIC
-    for link_object in analysis_obj.family.links:
+    for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
             PrepCategory.WHOLE_EXOME_SEQUENCING
         )
-        link_object.family.data_analysis = Pipeline.BALSAMIC
+        link_object.case.data_analysis = Pipeline.BALSAMIC
     return analysis_obj
 
 
@@ -541,11 +541,11 @@ def balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
 def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a Balsamic UMI analysis object."""
     analysis_obj.pipeline = Pipeline.BALSAMIC_UMI
-    for link_object in analysis_obj.family.links:
+    for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
             PrepCategory.WHOLE_EXOME_SEQUENCING
         )
-        link_object.family.data_analysis = Pipeline.BALSAMIC_UMI
+        link_object.case.data_analysis = Pipeline.BALSAMIC_UMI
 
     return analysis_obj
 
@@ -554,12 +554,12 @@ def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
 def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a RNAfusion analysis object."""
     analysis_obj.pipeline = Pipeline.RNAFUSION
-    for link_object in analysis_obj.family.links:
+    for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
             PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING
         )
-        link_object.family.data_analysis = Pipeline.RNAFUSION
-        link_object.family.panels = None
+        link_object.case.data_analysis = Pipeline.RNAFUSION
+        link_object.case.panels = None
     return analysis_obj
 
 

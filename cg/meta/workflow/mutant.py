@@ -96,11 +96,11 @@ class MutantAnalysisAPI(AnalysisAPI):
     def get_sample_parameters(self, sample_obj: Sample) -> MutantSampleConfig:
         return MutantSampleConfig(
             CG_ID_sample=sample_obj.internal_id,
-            case_ID=sample_obj.links[0].family.internal_id,
+            case_ID=sample_obj.links[0].case.internal_id,
             Customer_ID_sample=sample_obj.name,
             customer_id=sample_obj.customer.internal_id,
             sequencing_qc_pass=sample_obj.sequencing_qc,
-            CG_ID_project=sample_obj.links[0].family.name,
+            CG_ID_project=sample_obj.links[0].case.name,
             Customer_ID_project=sample_obj.original_ticket,
             application_tag=sample_obj.application_version.application.tag,
             method_libprep=str(self.lims_api.get_prep_method(lims_id=sample_obj.internal_id)),
