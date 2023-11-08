@@ -267,11 +267,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
         try:
             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
         except Exception as exception_object:
-            LOG.error(
-                f"Error storing {case_obj.internal_id}: {exception_object}",
-                case_obj.internal_id,
-                exception_object,
-            )
+            LOG.error(f"Error storing {case_obj.internal_id}: {exception_object}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

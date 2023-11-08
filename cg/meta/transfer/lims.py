@@ -141,19 +141,14 @@ class TransferLims(object):
         name of the pool object it's part of"""
         if sample_obj.udf.get("pool name") is None:
             LOG.warning(
-                f"No pool name found for sample {sample_obj} (sample name {sample_obj.name}, project {sample_obj.project.name})",
-                sample_obj.id,
-                sample_obj.name,
-                sample_obj.project.name,
+                f"No pool name found for sample {sample_obj} (sample name {sample_obj.name}, project {sample_obj.project.name})"
             )
             return False
 
         sample_pool_name = sample_obj.udf["pool name"]
         if sample_pool_name != pool_obj.name:
             LOG.warning(
-                f"The udf 'pool name' of the sample ({sample_pool_name}) does not match the name of the pool ({pool_obj.name}))",
-                sample_pool_name,
-                pool_obj.name,
+                f"The udf 'pool name' of the sample ({sample_pool_name}) does not match the name of the pool ({pool_obj.name}))"
             )
             return False
         return True
