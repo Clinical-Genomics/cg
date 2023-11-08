@@ -579,6 +579,10 @@ class HousekeeperAPI:
     def get_archive_entries(
         self, archival_task_id: int = None, retrieval_task_id: int = None
     ) -> list[Archive]:
+        """Returns all archives matching the provided task ids. If no task ids are provided, all archive entries are
+        returned. If only an archival_task_id is provided, filtering is only done on that parameter and vice versa
+        with retrieval_task_id.
+        """
         return self._store.get_archives(
             archival_task_id=archival_task_id, retrieval_task_id=retrieval_task_id
         )
