@@ -11,9 +11,7 @@ from cg.store.filters.status_metrics_filters import (
     filter_total_read_count_for_sample,
 )
 from cg.store.models import SampleLaneSequencingMetrics
-from tests.meta.demultiplex.conftest import (
-    flow_cell_name_demultiplexed_with_bcl_convert,
-)
+from tests.meta.demultiplex.conftest import flow_cell_name_demultiplexed_with_bcl_convert
 
 
 def test_filter_total_read_count_for_sample(

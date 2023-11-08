@@ -29,8 +29,9 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_without_invoice_id,
     filter_samples_without_loqusdb_id,
 )
-from cg.store.models import FamilySample, Sample
+from cg.store.models import CaseSample, Sample
 from tests.store.conftest import StoreConstants
+from tests.store_helpers import StoreHelpers
 
 
 def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, loqusdb_id):
@@ -40,11 +41,11 @@ def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, lo
     case = helpers.add_case(store)
     sample = helpers.add_sample(store, loqusdb_id=loqusdb_id)
     sample_not_uploaded = helpers.add_sample(store, internal_id=sample_id)
-    link_1: FamilySample = sample_store.relate_sample(
-        family=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+    link_1: CaseSample = sample_store.relate_sample(
+        case=case, sample=sample, status=PhenotypeStatus.UNKNOWN
     )
-    link_2: FamilySample = sample_store.relate_sample(
-        family=case, sample=sample_not_uploaded, status=PhenotypeStatus.UNKNOWN
+    link_2: CaseSample = sample_store.relate_sample(
+        case=case, sample=sample_not_uploaded, status=PhenotypeStatus.UNKNOWN
     )
     sample_store.session.add_all([link_1, link_2])
 
@@ -59,26 +60,22 @@ def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, lo
     assert sample_not_uploaded not in uploaded_samples
 
 
-def test_get_samples_without_loqusdb_id(helpers, store, sample_store, sample_id, loqusdb_id):
+def test_get_samples_without_loqusdb_id(
+    helpers: StoreHelpers, sample_store: Store, sample_id, loqusdb_id
+):
     """Test sample extraction without Loqusdb ID."""
 
     # GIVEN a sample observations that has not been uploaded to Loqusdb
-    case = helpers.add_case(store)
-    sample = helpers.add_sample(store)
-    sample_uploaded = helpers.add_sample(store, internal_id=sample_id, loqusdb_id=loqusdb_id)
-    link_1: FamilySample = sample_store.relate_sample(
-        family=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+    sample = helpers.add_sample(sample_store)
+    sample_uploaded = helpers.add_sample(
+        store=sample_store, internal_id=sample_id, loqusdb_id=loqusdb_id
     )
-    link_2: FamilySample = sample_store.relate_sample(
-        family=case, sample=sample_uploaded, status=PhenotypeStatus.UNKNOWN
-    )
-    sample_store.session.add_all([link_1, link_2])
 
     # GIVEN a sample query
-    samples: Query = store._get_query(table=Sample)
+    samples: Query = sample_store._get_query(table=Sample)
 
     # WHEN retrieving the Loqusdb not uploaded samples
-    not_uploaded_samples = filter_samples_without_loqusdb_id(samples=samples)
+    not_uploaded_samples = filter_samples_without_loqusdb_id(samples)
 
     # THEN the obtained sample should match the expected one
     assert sample in not_uploaded_samples
@@ -246,7 +243,7 @@ def test_filter_samples_is_sequenced(
     assert len(samples.all()) == 1
 
     # THEN the sample should have a sequenced at date
-    assert samples.all()[0].reads_updated_at is not None
+    assert samples.all()[0].last_sequenced_at is not None
 
 
 def test_filter_samples_is_not_sequenced(
@@ -273,7 +270,7 @@ def test_filter_samples_is_not_sequenced(
     assert len(samples.all()) == 1
 
     # THEN the sample should not have a sequenced at date
-    assert samples.all()[0].reads_updated_at is None
+    assert samples.all()[0].last_sequenced_at is None
 
 
 def test_filter_samples_do_invoice(
@@ -650,7 +647,7 @@ def test_filter_samples_by_identifier_name_and_value_unique_sample(
         "reference_genome": sample.reference_genome,
         "sequence_start": sample.sequence_start,
         "sex": sample.sex,
-        "reads_updated_at": sample.reads_updated_at,
+        "last_sequenced_at": sample.last_sequenced_at,
         "subject_id": sample.subject_id,
     }
     for key, value in identifiers.items():

@@ -1,5 +1,6 @@
-from cg.constants.constants import Pipeline
 from enum import StrEnum
+
+from cg.constants.constants import Pipeline
 
 
 class OrderType(StrEnum):
