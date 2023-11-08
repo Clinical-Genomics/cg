@@ -46,6 +46,7 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersHiSeq,
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
+)
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
@@ -3354,7 +3355,7 @@ def store_with_case_and_sample_with_reads(
     downsample_sample_internal_id_2: str,
 ) -> Store:
     """Return a store with a case and a sample with reads."""
-    case: Family = helpers.add_case(
+    case: Case = helpers.add_case(
         store=store, internal_id=downsample_case_internal_id, name=downsample_case_internal_id
     )
 
