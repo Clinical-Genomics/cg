@@ -4,9 +4,9 @@ on: [ push, pull_request ]
 
 jobs:
   ruff-format:
+    runs-on: ubuntu-latest
     permissions:
       contents: write
-    runs-on: ubuntu-latest
     steps:
       - name: Check out git repository
         uses: actions/checkout@v3.3.0      
@@ -26,5 +26,8 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "ruff code formatter"
+          commit_user_name: clingen-sthlm
+          commit_user_email: ${{ secrets.BUMPVERSION_EMAIL }}
+          commit_author: Author ${{ secrets.BUMPVERSION_AUTHOR }}
 
 
