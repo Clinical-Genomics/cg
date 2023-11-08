@@ -28,6 +28,6 @@ jobs:
           commit_message: "ruff code formatter"
           commit_user_name: clingen-sthlm
           commit_user_email: ${{ secrets.BUMPVERSION_EMAIL }}
-          commit_author: Author ${{ secrets.BUMPVERSION_AUTHOR }}
+          commit_author: ${{ secrets.BUMPVERSION_AUTHOR }}
 
 
