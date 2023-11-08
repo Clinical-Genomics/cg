@@ -3,9 +3,11 @@ from pathlib import Path
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_sample_sheet_path_to_housekeeper,
+)
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 def test_is_sample_sheet_in_housekeeper_exists(

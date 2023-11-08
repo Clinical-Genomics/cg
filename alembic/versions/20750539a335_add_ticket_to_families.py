@@ -5,14 +5,15 @@ Revises: 2968d39ac35f
 Create Date: 2022-07-22 08:43:36.271777
 
 """
-from alembic import op
-import sqlalchemy as sa
-from sqlalchemy.dialects import mysql
 import datetime as dt
 
+import sqlalchemy as sa
+from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
+
+from alembic import op
 
 revision = "20750539a335"
 down_revision = "2968d39ac35f"
@@ -22,7 +23,7 @@ depends_on = None
 Base = declarative_base()
 
 
-class Family(Base):
+class Case(Base):
     __tablename__ = "family"
 
     id = sa.Column(sa.types.Integer, primary_key=True)
@@ -36,7 +37,7 @@ class FamilySample(Base):
     family_id = sa.Column(sa.ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
     sample_id = sa.Column(sa.ForeignKey("sample.id", ondelete="CASCADE"), nullable=False)
 
-    family = sa.orm.relationship("Family", backref="links")
+    family = sa.orm.relationship("Case", backref="links")
     sample = sa.orm.relationship("Sample", foreign_keys=[sample_id], backref="links")
 
 
@@ -59,7 +60,7 @@ def upgrade():
     op.add_column("family", sa.Column("tickets", type_=mysql.VARCHAR(128), nullable=True))
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
-    for family in session.query(Family):
+    for family in session.query(Case):
         if len(family.links) == 0:
             continue
         family.tickets = sorted(

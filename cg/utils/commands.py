@@ -6,9 +6,8 @@ import copy
 import logging
 import subprocess
 from subprocess import CalledProcessError
-from typing import Dict, List
 
-from cg.constants.process import RETURN_SUCCESS
+from cg.constants.process import EXIT_SUCCESS
 
 LOG = logging.getLogger(__name__)
 
@@ -42,7 +41,7 @@ class Process:
         self.environment: str = environment
         self.launch_directory: str = launch_directory
         LOG.debug("Initialising Process with binary: %s", self.binary)
-        self.base_call: List[str] = [self.binary]
+        self.base_call: list[str] = [self.binary]
 
         if conda_binary:
             LOG.debug(f"Activating environment with conda run for binary: {self.conda_binary}")
@@ -59,7 +58,7 @@ class Process:
         self._stdout = ""
         self._stderr = ""
 
-    def export_variables(self, export: Dict[str, str]) -> None:
+    def export_variables(self, export: dict[str, str]) -> None:
         """Export variables prior to execution."""
         if export:
             self.base_call.insert(
@@ -84,7 +83,7 @@ class Process:
         LOG.info("Running command %s", " ".join(command))
         if dry_run:
             LOG.info("Dry run: process call will not be executed!!")
-            return RETURN_SUCCESS
+            return EXIT_SUCCESS
 
         if self.environment:
             res = subprocess.run(
@@ -101,7 +100,7 @@ class Process:
 
         self.stdout = res.stdout.decode("utf-8").rstrip()
         self.stderr = res.stderr.decode("utf-8").rstrip()
-        if res.returncode != RETURN_SUCCESS:
+        if res.returncode != EXIT_SUCCESS:
             LOG.critical("Call %s exit with a non zero exit code", command)
             LOG.critical(self.stderr)
             raise CalledProcessError(res.returncode, command)
@@ -111,7 +110,7 @@ class Process:
     def get_command(self, parameters: list = None) -> str:
         """Returns a command string given a list of parameters."""
 
-        command: List[str] = copy.deepcopy(self.base_call)
+        command: list[str] = copy.deepcopy(self.base_call)
         if parameters:
             command.extend(parameters)
 

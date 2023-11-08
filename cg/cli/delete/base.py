@@ -3,9 +3,13 @@
 import logging
 
 import click
+
 from cg.cli.delete.case import delete_case
 from cg.cli.delete.cases import delete_cases
-from cg.cli.delete.observations import delete_observations, delete_available_observations
+from cg.cli.delete.observations import (
+    delete_available_observations,
+    delete_observations,
+)
 
 LOG = logging.getLogger(__name__)
 

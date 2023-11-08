@@ -1,15 +1,14 @@
 """Set case attributes in the status database."""
 import logging
-from typing import List, Optional, Tuple
+from typing import Optional
+
 import click
 
-from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline
+from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline, Priority
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Customer, Family, Panel
+from cg.store.models import Customer, Case, Panel
 from cg.utils.click.EnumChoice import EnumChoice
-
-from cg.constants import Priority
 
 LOG = logging.getLogger(__name__)
 
@@ -43,13 +42,13 @@ def set_case(
     data_analysis: Optional[Pipeline],
     data_delivery: Optional[DataDelivery],
     priority: Optional[Priority],
-    panel_abbreviations: Optional[Tuple[str]],
+    panel_abbreviations: Optional[tuple[str]],
     case_id: str,
     customer_id: Optional[str],
 ):
     """Update information about a case."""
 
-    options: List[str] = [
+    options: list[str] = [
         action,
         panel_abbreviations,
         priority,
@@ -60,7 +59,7 @@ def set_case(
     abort_on_empty_options(options=options)
 
     status_db: Store = context.status_db
-    case: Family = get_case(case_id=case_id, status_db=status_db)
+    case: Case = get_case(case_id=case_id, status_db=status_db)
 
     if action:
         update_action(case=case, action=action)
@@ -83,14 +82,14 @@ def set_case(
     status_db.session.commit()
 
 
-def abort_on_empty_options(options: List[str]) -> None:
+def abort_on_empty_options(options: list[str]) -> None:
     if not any(options):
         LOG.error("Nothing to change")
         raise click.Abort
 
 
-def get_case(case_id: str, status_db: Store) -> Family:
-    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+def get_case(case_id: str, status_db: Store) -> Case:
+    case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
 
     if case is None:
         LOG.error(f"Can't find case {case_id}")
@@ -99,13 +98,13 @@ def get_case(case_id: str, status_db: Store) -> Family:
     return case
 
 
-def update_action(case: Family, action: str) -> None:
+def update_action(case: Case, action: str) -> None:
     """Update case action."""
     LOG.info(f"Update action: {case.action or 'NA'} -> {action}")
     case.action = action
 
 
-def update_customer(case: Family, customer_id: str, status_db: Store) -> None:
+def update_customer(case: Case, customer_id: str, status_db: Store) -> None:
     customer_obj: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
 
     if customer_obj is None:
@@ -116,17 +115,17 @@ def update_customer(case: Family, customer_id: str, status_db: Store) -> None:
     case.customer = customer_obj
 
 
-def update_data_analysis(case: Family, data_analysis: Pipeline) -> None:
+def update_data_analysis(case: Case, data_analysis: Pipeline) -> None:
     LOG.info(f"Update data_analysis: {case.data_analysis or 'NA'} -> {data_analysis}")
     case.data_analysis = data_analysis
 
 
-def update_data_delivery(case: Family, data_delivery: DataDelivery) -> None:
+def update_data_delivery(case: Case, data_delivery: DataDelivery) -> None:
     LOG.info(f"Update data_delivery: {case.data_delivery or 'NA'} -> {data_delivery}")
     case.data_delivery = data_delivery
 
 
-def update_panels(case: Family, panel_abbreviations: List[str], status_db: Store) -> None:
+def update_panels(case: Case, panel_abbreviations: list[str], status_db: Store) -> None:
     for panel_abbreviation in panel_abbreviations:
         panel: Panel = status_db.get_panel_by_abbreviation(abbreviation=panel_abbreviation)
         if panel is None:
@@ -136,7 +135,7 @@ def update_panels(case: Family, panel_abbreviations: List[str], status_db: Store
     case.panels = panel_abbreviations
 
 
-def update_priority(case: Family, priority: Priority) -> None:
+def update_priority(case: Case, priority: Priority) -> None:
     """Update case priority."""
     LOG.info(f"Update priority: {case.priority.name} -> {priority.name}")
     case.priority = priority

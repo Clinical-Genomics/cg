@@ -1,5 +1,5 @@
 """RNAfusion delivery report API."""
-from typing import List, Optional
+from typing import Optional
 
 from cg.constants import (
     REQUIRED_APPLICATION_FIELDS,
@@ -23,7 +23,7 @@ from cg.models.report.metadata import RnafusionSampleMetadataModel
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
 from cg.models.rnafusion.rnafusion import RnafusionAnalysis, RnafusionQCMetrics
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 
 class RnafusionReportAPI(ReportAPI):
@@ -34,7 +34,7 @@ class RnafusionReportAPI(ReportAPI):
         self.analysis_api: RnafusionAnalysisAPI = analysis_api
 
     def get_sample_metadata(
-        self, case: Family, sample: Sample, analysis_metadata: RnafusionAnalysis
+        self, case: Case, sample: Sample, analysis_metadata: RnafusionAnalysis
     ) -> RnafusionSampleMetadataModel:
         """Return the sample metadata to include in the report."""
         sample_metrics: RnafusionQCMetrics = analysis_metadata.sample_metrics[sample.internal_id]
@@ -67,7 +67,7 @@ class RnafusionReportAPI(ReportAPI):
         return GenomeVersion.hg38.value
 
     def get_report_accreditation(
-        self, samples: List[SampleModel], analysis_metadata: AnalysisModel
+        self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
         """Checks if the report is accredited or not. Rnafusion is not an accredited workflow."""
         return False

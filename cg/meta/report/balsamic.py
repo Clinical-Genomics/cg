@@ -1,22 +1,22 @@
 import logging
-from typing import List, Union, Optional, Dict
+from typing import Optional, Union
 
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 
 from cg.constants import (
+    BALSAMIC_ANALYSIS_TYPE,
     BALSAMIC_REPORT_ACCREDITED_PANELS,
-    REQUIRED_REPORT_FIELDS,
-    REQUIRED_CUSTOMER_FIELDS,
-    REQUIRED_CASE_FIELDS,
     REQUIRED_APPLICATION_FIELDS,
+    REQUIRED_CASE_FIELDS,
+    REQUIRED_CUSTOMER_FIELDS,
     REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS,
+    REQUIRED_REPORT_FIELDS,
     REQUIRED_SAMPLE_BALSAMIC_FIELDS,
-    REQUIRED_SAMPLE_METHODS_FIELDS,
-    REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS,
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS,
-    BALSAMIC_ANALYSIS_TYPE,
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS,
+    REQUIRED_SAMPLE_METHODS_FIELDS,
+    REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     Pipeline,
 )
 from cg.constants.scout_upload import BALSAMIC_CASE_TAGS
@@ -26,9 +26,9 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.config import BalsamicVarCaller
 from cg.models.balsamic.metrics import (
+    BalsamicQCMetrics,
     BalsamicTargetedQCMetrics,
     BalsamicWGSQCMetrics,
-    BalsamicQCMetrics,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import (
@@ -37,7 +37,7 @@ from cg.models.report.metadata import (
 )
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
-from cg.store.models import Family, Sample, BedVersion, Bed
+from cg.store.models import Bed, BedVersion, Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -50,10 +50,10 @@ class BalsamicReportAPI(ReportAPI):
         self.analysis_api: BalsamicAnalysisAPI = analysis_api
 
     def get_sample_metadata(
-        self, case: Family, sample: Sample, analysis_metadata: BalsamicAnalysis
+        self, case: Case, sample: Sample, analysis_metadata: BalsamicAnalysis
     ) -> Union[BalsamicTargetedSampleMetadataModel, BalsamicWGSSampleMetadataModel]:
         """Return the sample metadata to include in the report."""
-        sample_metrics: Dict[str, BalsamicQCMetrics] = analysis_metadata.sample_metrics[
+        sample_metrics: dict[str, BalsamicQCMetrics] = analysis_metadata.sample_metrics[
             sample.internal_id
         ]
         million_read_pairs: float = get_million_read_pairs(reads=sample.reads)
@@ -115,7 +115,7 @@ class BalsamicReportAPI(ReportAPI):
             else None
         )
 
-    def get_data_analysis_type(self, case: Family) -> Optional[str]:
+    def get_data_analysis_type(self, case: Case) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
         return self.analysis_api.get_bundle_deliverables_type(case_id=case.internal_id)
 
@@ -130,8 +130,8 @@ class BalsamicReportAPI(ReportAPI):
         """
         sequencing_type: str = _analysis_metadata.config.analysis.sequencing_type
         analysis_type: str = _analysis_metadata.config.analysis.analysis_type
-        var_callers: Dict[str, BalsamicVarCaller] = _analysis_metadata.config.vcf
-        tool_versions: Dict[str, list] = _analysis_metadata.config.bioinfo_tools_version
+        var_callers: dict[str, BalsamicVarCaller] = _analysis_metadata.config.vcf
+        tool_versions: dict[str, list] = _analysis_metadata.config.bioinfo_tools_version
         analysis_var_callers = list()
         for var_caller_name, var_caller_attributes in var_callers.items():
             if (
@@ -157,7 +157,7 @@ class BalsamicReportAPI(ReportAPI):
         return None
 
     def get_report_accreditation(
-        self, samples: List[SampleModel], analysis_metadata: BalsamicAnalysis
+        self, samples: list[SampleModel], analysis_metadata: BalsamicAnalysis
     ) -> bool:
         """Checks if the report is accredited or not."""
         if analysis_metadata.config.analysis.sequencing_type == "targeted" and next(
@@ -174,20 +174,20 @@ class BalsamicReportAPI(ReportAPI):
     def get_required_fields(self, case: CaseModel) -> dict:
         """Retrieves a dictionary with the delivery report required fields for BALSAMIC."""
         analysis_type: str = case.data_analysis.type
-        required_sample_metadata_fields: List[str] = []
+        required_sample_metadata_fields: list[str] = []
         if BALSAMIC_ANALYSIS_TYPE["tumor_wgs"] in analysis_type:
-            required_sample_metadata_fields: List[
+            required_sample_metadata_fields: list[
                 str
             ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
         elif BALSAMIC_ANALYSIS_TYPE["tumor_normal_wgs"] in analysis_type:
-            required_sample_metadata_fields: List[
+            required_sample_metadata_fields: list[
                 str
             ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
         elif (
             BALSAMIC_ANALYSIS_TYPE["tumor_panel"] in analysis_type
             or BALSAMIC_ANALYSIS_TYPE["tumor_normal_panel"] in analysis_type
         ):
-            required_sample_metadata_fields: List[
+            required_sample_metadata_fields: list[
                 str
             ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
         return {

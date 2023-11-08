@@ -2,7 +2,7 @@
 import logging
 import pathlib
 import tempfile
-from typing import Iterable, List
+from typing import Iterable
 
 from cg.utils import Process
 
@@ -17,7 +17,7 @@ class MadelineAPI:
         self.process = Process(binary=self.madeline_binary)
 
     @staticmethod
-    def make_ped(family_id: str, samples: List[dict]) -> Iterable[str]:
+    def make_ped(family_id: str, samples: list[dict]) -> Iterable[str]:
         """Yield lines that are used as madeline input."""
         columns = {
             "family": "FamilyId",
@@ -56,7 +56,7 @@ class MadelineAPI:
         )
         return content.replace(script_tag, "")
 
-    def run(self, family_id: str, samples: List[dict], out_path: str = None) -> pathlib.Path:
+    def run(self, family_id: str, samples: list[dict], out_path: str = None) -> pathlib.Path:
         """Run madeline and generate a file with the results."""
         if out_path:
             out_path = pathlib.Path(out_path)

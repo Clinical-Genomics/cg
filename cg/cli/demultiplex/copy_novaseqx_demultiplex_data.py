@@ -1,8 +1,8 @@
 import logging
-from pathlib import Path
 import os
 import shutil
-from typing import List, Optional
+from pathlib import Path
+from typing import Optional
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 
@@ -36,17 +36,17 @@ def get_latest_analysis_path(flow_cell_dir: Path) -> Optional[Path]:
     analysis_path: Path = Path(flow_cell_dir, DemultiplexingDirsAndFiles.ANALYSIS)
     if not analysis_path.exists():
         return None
-    analysis_versions: List[Path] = get_sorted_analysis_versions(analysis_path)
+    analysis_versions: list[Path] = get_sorted_analysis_versions(analysis_path)
     return analysis_versions[0] if analysis_versions else None
 
 
-def get_sorted_analysis_versions(analysis_path: Path) -> List[Path]:
+def get_sorted_analysis_versions(analysis_path: Path) -> list[Path]:
     """Get a sorted list of analysis version paths for a Novaseqx flow cell."""
 
     def sort_by_name(version: Path) -> int:
         return int(version.name)
 
-    analysis_versions_paths: List[Path] = [
+    analysis_versions_paths: list[Path] = [
         version_path for version_path in analysis_path.iterdir() if version_path.is_dir()
     ]
     return sorted(analysis_versions_paths, key=sort_by_name, reverse=True)

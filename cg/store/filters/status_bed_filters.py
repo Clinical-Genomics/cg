@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Callable
+from typing import Callable, Optional
 
 from sqlalchemy.orm import Query
 
@@ -37,7 +37,7 @@ class BedFilter(Enum):
 
 def apply_bed_filter(
     beds: Query,
-    filter_functions: List[Callable],
+    filter_functions: list[Callable],
     bed_entry_id: Optional[int] = None,
     bed_name: Optional[str] = None,
 ) -> Query:

@@ -3,14 +3,14 @@ from datetime import datetime
 
 import click.exceptions
 import pytest
-from cg.constants import Pipeline
 
 from cg.cli.generate.report.utils import (
-    get_report_case,
+    get_report_analysis_started,
     get_report_api,
     get_report_api_pipeline,
-    get_report_analysis_started,
+    get_report_case,
 )
+from cg.constants import Pipeline
 from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
 from tests.mocks.report import MockMipDNAReportAPI
 

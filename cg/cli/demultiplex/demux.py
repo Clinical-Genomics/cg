@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 import click
+
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
@@ -13,9 +14,14 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
-from cg.meta.demultiplex.utils import is_syncing_complete
+from cg.meta.demultiplex.utils import (
+    create_manifest_file,
+    is_flow_cell_sync_confirmed,
+    is_manifest_file_required,
+    is_syncing_complete,
+)
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
 
@@ -199,7 +205,6 @@ def copy_novaseqx_flow_cells(context: CGConfig):
 
 @click.command(name="confirm-flow-cell-sync")
 @click.option(
-    "-s",
     "--source-directory",
     required=True,
     help="The path from where the syncing is done.",
@@ -208,14 +213,30 @@ def copy_novaseqx_flow_cells(context: CGConfig):
 def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
     """Checks if all relevant files for the demultiplexing have been synced.
     If so it creates a CopyComplete.txt file to show that that is the case."""
-    target_flow_cells_dir = Path(context.flow_cells_dir)
+    target_flow_cells_directory = Path(context.flow_cells_dir)
     for source_flow_cell in Path(source_directory).iterdir():
+        target_flow_cell = Path(target_flow_cells_directory, source_flow_cell.name)
+        if is_flow_cell_sync_confirmed(target_flow_cell):
+            LOG.debug(f"Flow cell {source_flow_cell} has already been confirmed, skipping.")
+            continue
         if is_syncing_complete(
             source_directory=source_flow_cell,
-            target_directory=Path(target_flow_cells_dir, source_flow_cell.name),
+            target_directory=Path(target_flow_cells_directory, source_flow_cell.name),
         ):
             Path(
-                target_flow_cells_dir,
+                target_flow_cells_directory,
                 source_flow_cell.name,
                 DemultiplexingDirsAndFiles.COPY_COMPLETE,
             ).touch()
+
+
+@click.command(name="create-manifest-files")
+@click.option(
+    "--source-directory",
+    required=True,
+    help="The path from where the syncing is done.",
+)
+def create_manifest_files(source_directory: str):
+    for source_flow_cell in Path(source_directory).iterdir():
+        if is_manifest_file_required(source_flow_cell):
+            create_manifest_file(source_flow_cell)

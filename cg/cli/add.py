@@ -1,7 +1,8 @@
 import logging
-from typing import List, Optional, Tuple
+from typing import Optional
 
 import click
+
 from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline, Priority
 from cg.constants.subject import Gender
 from cg.meta.transfer.external_data import ExternalDataAPI
@@ -12,8 +13,8 @@ from cg.store.models import (
     ApplicationVersion,
     Collaboration,
     Customer,
-    Family,
-    FamilySample,
+    Case,
+    CaseSample,
     Panel,
     Sample,
     User,
@@ -78,7 +79,7 @@ def add_customer(
     context: CGConfig,
     internal_id: str,
     name: str,
-    collaboration_internal_ids: Optional[List[str]],
+    collaboration_internal_ids: Optional[list[str]],
     invoice_address: str,
     invoice_reference: str,
     data_archive_location: str,
@@ -95,7 +96,7 @@ def add_customer(
         LOG.error(f"{existing_customer.name}: customer already added")
         raise click.Abort
 
-    collaborations: List[Collaboration] = [
+    collaborations: list[Collaboration] = [
         status_db.get_collaboration_by_internal_id(internal_id=collaboration_internal_id)
         for collaboration_internal_id in collaboration_internal_ids
     ]
@@ -241,7 +242,7 @@ def add_sample(
 def add_case(
     context: CGConfig,
     priority: Priority,
-    panel_abbreviations: Tuple[str],
+    panel_abbreviations: tuple[str],
     data_analysis: Pipeline,
     data_delivery: DataDelivery,
     customer_id: str,
@@ -263,7 +264,7 @@ def add_case(
             LOG.error(f"{panel_abbreviation}: panel not found")
             raise click.Abort
 
-    new_case: Family = status_db.add_case(
+    new_case: Case = status_db.add_case(
         data_analysis=data_analysis,
         data_delivery=data_delivery,
         name=name,
@@ -297,7 +298,7 @@ def link_sample_to_case(
     status_db: Store = context.status_db
     mother: Optional[Sample] = None
     father: Optional[Sample] = None
-    case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     if case_obj is None:
         LOG.error("%s: family not found", case_id)
         raise click.Abort
@@ -319,8 +320,8 @@ def link_sample_to_case(
             LOG.error("%s: father not found", father_id)
             raise click.Abort
 
-    new_record: FamilySample = status_db.relate_sample(
-        family=case_obj, sample=sample, status=status, mother=mother, father=father
+    new_record: CaseSample = status_db.relate_sample(
+        case=case_obj, sample=sample, status=status, mother=mother, father=father
     )
     status_db.session.add(new_record)
     status_db.session.commit()

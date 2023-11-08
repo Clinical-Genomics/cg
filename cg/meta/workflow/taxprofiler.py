@@ -2,15 +2,17 @@
 
 import logging
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 from cg.constants import Pipeline
 from cg.constants.sequencing import SequencingPlatform
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.nf_analysis import PipelineParameters
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
-from cg.store.models import Family, Sample
+from cg.models.taxprofiler.taxprofiler import (
+    TaxprofilerParameters,
+    TaxprofilerSampleSheetEntry,
+)
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -41,14 +43,14 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, instrument_platform: SequencingPlatform.ILLUMINA, fasta: str = ""
-    ) -> List[List[str]]:
+    ) -> list[list[str]]:
         """Get sample sheet content per sample."""
         sample_name: str = sample.name
-        sample_metadata: List[str] = self.gather_file_metadata_for_sample(sample)
-        fastq_forward_read_paths: List[str] = self.extract_read_files(
+        sample_metadata: list[str] = self.gather_file_metadata_for_sample(sample)
+        fastq_forward_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
         )
-        fastq_reverse_read_paths: List[str] = self.extract_read_files(
+        fastq_reverse_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, reverse_read=True
         )
         sample_sheet_entry = TaxprofilerSampleSheetEntry(
@@ -66,10 +68,10 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         case_id: str,
         instrument_platform: SequencingPlatform.ILLUMINA,
         fasta: str = "",
-    ) -> List[List[Any]]:
+    ) -> list[list[Any]]:
         """Write sample sheet for Taxprofiler analysis in case folder."""
-        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_sheet_content: List = []
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        sample_sheet_content = []
         LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
         LOG.debug("Getting sample sheet information")
         for link in case.links:
@@ -101,7 +103,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     ) -> None:
         """Create sample sheet file and parameters file for Taxprofiler analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
-        sample_sheet_content: List[List[Any]] = self.get_sample_sheet_content(
+        sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(
             case_id=case_id,
             instrument_platform=instrument_platform,
             fasta=fasta,

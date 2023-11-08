@@ -6,24 +6,25 @@ from datetime import datetime
 from typing import Optional, Union
 
 import click
-from sqlalchemy.orm import Query
-from cgmodels.cg.constants import Pipeline
 from pydantic.v1 import ValidationError
+from sqlalchemy.orm import Query
 
-from cg.cli.upload.observations.utils import get_observations_case_to_upload, get_observations_api
-from cg.exc import LoqusdbError, CaseNotFoundError
-from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
-from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
-from cg.store import Store
-from cg.store.models import Family
-
+from cg.cli.upload.observations.utils import (
+    get_observations_api,
+    get_observations_case_to_upload,
+)
 from cg.cli.workflow.commands import (
     ARGUMENT_CASE_ID,
     OPTION_DRY,
     OPTION_LOQUSDB_SUPPORTED_PIPELINES,
 )
+from cg.constants.constants import Pipeline
+from cg.exc import CaseNotFoundError, LoqusdbError
+from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
+from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
-
+from cg.store import Store
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ def upload_observations_to_loqusdb(context: CGConfig, case_id: Optional[str], dr
     click.echo(click.style("----------------- OBSERVATIONS -----------------"))
 
     with contextlib.suppress(LoqusdbError):
-        case: Family = get_observations_case_to_upload(context, case_id)
+        case: Case = get_observations_case_to_upload(context, case_id)
         observations_api: Union[
             MipDNAObservationsAPI, BalsamicObservationsAPI
         ] = get_observations_api(context, case)

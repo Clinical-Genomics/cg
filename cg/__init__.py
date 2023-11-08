@@ -1,4 +1,2 @@
-import pkg_resources
-
 __title__ = "cg"
-__version__ = "49.4.4"
+__version__ = "52.0.10"

@@ -97,6 +97,10 @@ Enhancement suggestions are tracked as [GitHub issues](https://guides.github.com
 
 First of all, make sure that you are managing your python versions that are used on your machine, [never use the OS native python](https://docs.python-guide.org/starting/installation/). Suggested ways to handle python version are either through [homebrew](https://brew.sh/#install)(OSX), [pyenv](https://github.com/pyenv/pyenv) or [conda](https://docs.anaconda.com/anaconda/install/).
 
+For local development, it is recommended to use Poetry. Ensure that you have Poetry installed and run
+```bash
+poetry install
+```
 
 On our servers where the production and stage versions of CG are run the packages are maintained by using conda environments. For local development it is suggested to follow the [python packaging guidelines](https://packaging.python.org/tutorials/managing-dependencies/) where it is suggested to manage your local python environment with [pipenv](https://pipenv.pypa.io/en/latest/). CG has a Pipfile.lock file which will ensure that the installation will work if the environment is set up in the correct way. To use a **combination of conda and pipenv** make sure that you point to the conda installation of python when creating your pipenv virtual environment (`pipenv --python=$(conda run which python) --site-packages`) more about that [here](https://pipenv.pypa.io/en/latest/advanced/#pipenv-and-other-python-distributions) and in [this](https://stackoverflow.com/questions/50546339/pipenv-with-conda) stack overflow thread. (It is not necessary to use conda on for local development)
 
@@ -185,6 +189,11 @@ Internal app for opening tickets in SupportSystems. We use this mainly to link a
 #### Scout (scoutapi)
 
 Interface to Scout. For uploading analysis results to Scout. It's also used to access the generation of gene panels files used in the analysis pipeline.
+
+#### Delivery report
+
+Module to generate Delivery Reports. This module is designed to convey the results of genetic analysis to the customer. It includes information on sample characteristics, laboratory preparation, sequencing attributes, as well as data analysis performance and limitations.
+
 ~~~~
 
 ### Cli

@@ -1,18 +1,19 @@
 """Tests for RNA part of the scout upload API"""
 import logging
-from typing import Generator, List, Set
+from typing import Generator, Set
 
-import cg.store as Store
 import pytest
 from _pytest.logging import LogCaptureFixture
+from housekeeper.store.models import File
+
+import cg.store as Store
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import RNADNACollection, UploadScoutAPI
-from cg.store.models import Family, Sample
-from housekeeper.store.models import File
+from cg.store.models import Case, Sample
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
 
@@ -500,7 +501,7 @@ def test_get_application_prep_category(
 
     dna_sample: Sample = rna_store.get_sample_by_internal_id(dna_sample_son_id)
     another_rna_sample_id: Sample = rna_store.get_sample_by_internal_id(another_rna_sample_id)
-    all_son_rna_dna_samples: List[Sample] = [dna_sample, another_rna_sample_id]
+    all_son_rna_dna_samples: list[Sample] = [dna_sample, another_rna_sample_id]
 
     # WHEN running the method to filter a list of Sample objects containing RNA and DNA samples connected by subject_id
     only_son_dna_samples = upload_scout_api._get_application_prep_category(all_son_rna_dna_samples)
@@ -520,11 +521,11 @@ def test_create_rna_dna_collections(
     """Test that the create_rna_dna_collections returns a list of RNADNACollections."""
 
     # GIVEN an RNA case with RNA samples that are connected by subject ID to DNA samples in a DNA case
-    rna_case: Family = rna_store.get_case_by_internal_id(rna_case_id)
+    rna_case: Case = rna_store.get_case_by_internal_id(rna_case_id)
 
     # WHEN running the method to create a list of RNADNACollections
     # with the relationships between RNA/DNA samples and DNA cases
-    rna_dna_collections: List[RNADNACollection] = upload_scout_api.create_rna_dna_collections(
+    rna_dna_collections: list[RNADNACollection] = upload_scout_api.create_rna_dna_collections(
         rna_case
     )
 
@@ -543,14 +544,14 @@ def test_add_rna_sample(
     """Test that for a given RNA case the RNA samples are added to the RNADNACollections."""
 
     # GIVEN an RNA case and the associated RNA samples
-    rna_case: Family = rna_store.get_case_by_internal_id(internal_id=rna_case_id)
-    rna_sample_list: List[Sample] = (
+    rna_case: Case = rna_store.get_case_by_internal_id(internal_id=rna_case_id)
+    rna_sample_list: list[Sample] = (
         rna_store._get_query(table=Sample).filter(Sample.internal_id.like("rna")).all()
     )
 
     # WHEN running the method to create a list of RNADNACollections
     # with the relationships between RNA/DNA samples and DNA cases
-    rna_dna_collections: List[RNADNACollection] = upload_scout_api.create_rna_dna_collections(
+    rna_dna_collections: list[RNADNACollection] = upload_scout_api.create_rna_dna_collections(
         rna_case
     )
 
@@ -593,7 +594,7 @@ def test_add_dna_cases_to_dna_sample(
 
     # GIVEN an RNA sample, a DNA sample, and a DNA case
     rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
-    dna_case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
+    dna_case: Case = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
 
     # WHEN adding creating the RNADNACollection
     rna_dna_collection: RNADNACollection = upload_scout_api.create_rna_dna_collection(rna_sample)
@@ -614,14 +615,14 @@ def test_map_dna_cases_to_dna_sample_incorrect_pipeline(
     # GIVEN an RNA sample and a DNA sample
 
     dna_sample: Sample = rna_store.get_sample_by_internal_id(dna_sample_son_id)
-    dna_case: Family = rna_store.get_case_by_internal_id(dna_case_id)
+    dna_case: Case = rna_store.get_case_by_internal_id(dna_case_id)
     rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
 
     # GIVEN that the DNA case has a different pipeline than the expected pipeline
     dna_case.data_analysis = Pipeline.FASTQ
 
     # WHEN mapping the DNA case name to the DNA sample name in the related DNA cases
-    related_dna_cases: List[str] = upload_scout_api._dna_cases_related_to_dna_sample(
+    related_dna_cases: list[str] = upload_scout_api._dna_cases_related_to_dna_sample(
         dna_sample=dna_sample,
         collaborators=rna_sample.customer.collaborators,
     )
@@ -642,14 +643,14 @@ def test_map_dna_cases_to_dna_sample_incorrect_customer(
     # GIVEN an RNA sample, a DNA sample, and a rna-dna case map
 
     dna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=dna_sample_son_id)
-    dna_case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
+    dna_case: Case = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
     rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
 
     # GIVEN that the DNA case has a different customer than the expected customer
     dna_case.customer_id = 1000
 
     # WHEN mapping the DNA case name to the DNA sample name in the rna-dna-sample-case map
-    dna_cases: List[str] = upload_scout_api._dna_cases_related_to_dna_sample(
+    dna_cases: list[str] = upload_scout_api._dna_cases_related_to_dna_sample(
         dna_sample=dna_sample,
         collaborators=rna_sample.customer.collaborators,
     )
@@ -667,7 +668,7 @@ def test_get_multiqc_html_report(
     """Test that the multiqc html report is returned."""
 
     # GIVEN a DNA case with a multiqc-htlml report
-    case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
+    case: Case = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
     multiqc_file: File = mip_dna_analysis_hk_api.files(
         bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
     )[0]
@@ -778,7 +779,7 @@ def test_upload_rna_report_to_not_yet_uploaded_dna_case_in_scout(
     dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
         case_id=rna_case_id
     )
-    dna_case: Family = rna_store.get_case_by_internal_id(internal_id=list(dna_case_ids)[0])
+    dna_case: Case = rna_store.get_case_by_internal_id(internal_id=list(dna_case_ids)[0])
     dna_case.analyses[0].uploaded_at = None
 
     # WHEN trying to upload the report

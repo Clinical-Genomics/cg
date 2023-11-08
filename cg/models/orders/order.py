@@ -1,11 +1,9 @@
-from typing import Optional, Any
+from typing import Any, Optional
 
-from pydantic.v1 import BaseModel, constr, conlist
+from pydantic.v1 import BaseModel, conlist, constr
 
 from cg.models.orders.constants import OrderType
-from cg.models.orders.samples import (
-    sample_class_for,
-)
+from cg.models.orders.samples import sample_class_for
 from cg.store.models import Customer, Sample
 
 

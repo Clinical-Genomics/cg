@@ -1,6 +1,5 @@
 """Constants for Processes"""
 
-RETURN_SUCCESS = 0
-RETURN_WARNING = 8
 EXIT_SUCCESS = 0
+EXIT_WARNING = 8
 EXIT_FAIL = 1

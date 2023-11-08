@@ -1,4 +1,7 @@
 """Tests for the status_db_storage_functions module of the demultiplexing post post-processing module."""
+
+from mock import MagicMock
+
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.status_db_storage_functions import (
     add_samples_to_flow_cell_in_status_db,
@@ -8,7 +11,7 @@ from cg.meta.demultiplex.status_db_storage_functions import (
 )
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from mock import MagicMock
+from cg.store.models import Sample
 
 
 def test_add_single_sequencing_metrics_entry_to_statusdb(
@@ -38,39 +41,23 @@ def test_add_single_sequencing_metrics_entry_to_statusdb(
     )
 
 
-def test_update_sample_read_count(demultiplex_context: CGConfig):
-    # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
-
-    # GIVEN a sample id and a q30 threshold
-    sample_internal_id = "sample_1"
-    q30_threshold = 0
-
+def test_update_sample_read_count():
     # GIVEN a sample and a read count
-    sample = MagicMock()
-    read_count = 100
+    sample = Sample()
+    read_count: int = 100
 
     # GIVEN a mocked status_db
     status_db = MagicMock()
-    status_db.get_sample_by_internal_id.return_value = sample
     status_db.get_number_of_reads_for_sample_passing_q30_threshold.return_value = read_count
-    demux_post_processing_api.status_db = status_db
 
-    # WHEN calling update_sample_read_count
+    # WHEN updating the sample read count
     update_sample_read_count(
-        sample_id=sample_internal_id, q30_threshold=q30_threshold, store=status_db
+        sample=sample,
+        q30_threshold=0,
+        store=status_db,
     )
 
-    # THEN get_sample_by_internal_id is called with the correct argument
-    status_db.get_sample_by_internal_id.assert_called_with(sample_internal_id)
-
-    # THEN get_number_of_reads_for_sample_passing_q30_threshold is called with the correct arguments
-    status_db.get_number_of_reads_for_sample_passing_q30_threshold.assert_called_with(
-        sample_internal_id=sample_internal_id,
-        q30_threshold=q30_threshold,
-    )
-
-    # THEN the calculated_read_count has been updated with the read count for the sample
+    # THEN the reads has been updated with the read count for the sample
     assert sample.reads == read_count
 
 

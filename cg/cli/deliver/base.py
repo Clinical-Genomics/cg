@@ -1,18 +1,18 @@
 """CLI for delivering files with CG"""
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import click
-from cg.meta.rsync.rsync_api import RsyncAPI
+
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver_ticket import DeliverTicketAPI
-
+from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ def deliver_analysis(
     context: CGConfig,
     case_id: Optional[str],
     ticket: Optional[str],
-    delivery_type: List[str],
+    delivery_type: list[str],
     dry_run: bool,
     force_all: bool,
     ignore_missing_bundles: bool,
@@ -95,15 +95,15 @@ def deliver_analysis(
             ignore_missing_bundles=ignore_missing_bundles,
         )
         deliver_api.set_dry_run(dry_run)
-        cases: List[Family] = []
+        cases: list[Case] = []
         if case_id:
-            case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+            case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
             if not case_obj:
                 LOG.warning("Could not find case %s", case_id)
                 return
             cases.append(case_obj)
         else:
-            cases: List[Family] = status_db.get_cases_by_ticket_id(ticket_id=ticket)
+            cases: list[Case] = status_db.get_cases_by_ticket_id(ticket_id=ticket)
             if not cases:
                 LOG.warning("Could not find cases for ticket %s", ticket)
                 return
@@ -157,7 +157,7 @@ def concatenate(context: click.Context, ticket: str, dry_run: bool):
 @click.pass_context
 def deliver_ticket(
     context: click.Context,
-    delivery_type: List[str],
+    delivery_type: list[str],
     dry_run: bool,
     force_all: bool,
     ticket: str,

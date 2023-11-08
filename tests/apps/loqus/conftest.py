@@ -1,14 +1,15 @@
 """ Conftest for Loqusdb API."""
-from typing import Dict
+
 
 import pytest
+
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from tests.mocks.process_mock import ProcessMock
 from tests.models.observations.conftest import (
-    observations_input_files_raw,
     observations_input_files,
+    observations_input_files_raw,
 )
 
 LOQUSDB_OUTPUT = (
@@ -97,7 +98,7 @@ LOQUSDB_DELETE_NONEXISTING_STDERR = b"""2022-09-22 11:40:04 username loqusdb.com
 
 
 @pytest.fixture
-def loqusdb_config_dict() -> Dict[LoqusdbInstance, dict]:
+def loqusdb_config_dict() -> dict[LoqusdbInstance, dict]:
     """Return Loqusdb config dictionary."""
     return {
         LoqusdbInstance.WGS: {"binary_path": "binary", "config_path": "config"},
@@ -109,7 +110,7 @@ def loqusdb_config_dict() -> Dict[LoqusdbInstance, dict]:
 
 @pytest.fixture
 def cg_config_locusdb(
-    loqusdb_config_dict: Dict[LoqusdbInstance, dict], cg_config_object: CGConfig
+    loqusdb_config_dict: dict[LoqusdbInstance, dict], cg_config_object: CGConfig
 ) -> CGConfig:
     """Return CG config for Loqusdb."""
     cg_config_object.loqusdb = CommonAppConfig(**loqusdb_config_dict[LoqusdbInstance.WGS])
@@ -122,13 +123,13 @@ def cg_config_locusdb(
 
 
 @pytest.fixture
-def loqusdb_binary_path(loqusdb_config_dict: Dict[LoqusdbInstance, dict]) -> str:
+def loqusdb_binary_path(loqusdb_config_dict: dict[LoqusdbInstance, dict]) -> str:
     """Return Loqusdb binary path."""
     return loqusdb_config_dict[LoqusdbInstance.WGS]["binary_path"]
 
 
 @pytest.fixture
-def loqusdb_config_path(loqusdb_config_dict: Dict[LoqusdbInstance, dict]) -> str:
+def loqusdb_config_path(loqusdb_config_dict: dict[LoqusdbInstance, dict]) -> str:
     """Return Loqusdb config dictionary."""
     return loqusdb_config_dict[LoqusdbInstance.WGS]["config_path"]
 

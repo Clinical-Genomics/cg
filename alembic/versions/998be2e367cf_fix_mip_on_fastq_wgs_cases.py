@@ -6,14 +6,13 @@ Create Date: 2021-02-26 10:03:23.560737
 
 """
 from datetime import datetime
-from typing import List
+
+import sqlalchemy as sa
+from sqlalchemy import orm
+from sqlalchemy.orm import declarative_base
 
 from alembic import op
-import sqlalchemy as sa
-from cg.constants import Pipeline, DataDelivery, PREP_CATEGORIES
-
-from sqlalchemy import orm
-from sqlalchemy.ext.declarative import declarative_base
+from cg.constants import PREP_CATEGORIES, DataDelivery, Pipeline
 
 Base = declarative_base()
 
@@ -30,7 +29,7 @@ class Customer(Base):
     id = sa.Column(sa.types.Integer, primary_key=True)
 
 
-class Family(Base):
+class Case(Base):
     __tablename__ = "family"
 
     id = sa.Column(sa.types.Integer, primary_key=True)
@@ -45,7 +44,7 @@ class Family(Base):
     ordered_at = sa.Column(sa.types.DateTime, default=datetime.now)
 
     @property
-    def panels(self) -> List[str]:
+    def panels(self) -> list[str]:
         """Return a list of panels."""
         return self._panels.split(",") if self._panels else []
 
@@ -64,7 +63,7 @@ class FamilySample(Base):
     mother_id = sa.Column(sa.ForeignKey("sample.id"))
     father_id = sa.Column(sa.ForeignKey("sample.id"))
 
-    family = orm.relationship("Family", backref="links")
+    family = orm.relationship("Case", backref="links")
     sample = orm.relationship("Sample", foreign_keys=[sample_id], backref="links")
     mother = orm.relationship("Sample", foreign_keys=[mother_id], backref="mother_links")
     father = orm.relationship("Sample", foreign_keys=[father_id], backref="father_links")
@@ -108,12 +107,12 @@ def upgrade():
     count = 0
     # change records that should have been run with MIP for MAF
     for family in (
-        session.query(Family)
-        .filter(Family.customer_id == 1)
-        .filter(Family.data_delivery == DataDelivery.FASTQ)
-        .filter(Family.data_analysis == Pipeline.FASTQ)
-        .filter(Family.priority == "research")
-        .filter(Family.ordered_at >= datetime(year=2021, month=2, day=2))
+        session.query(Case)
+        .filter(Case.customer_id == 1)
+        .filter(Case.data_delivery == DataDelivery.FASTQ)
+        .filter(Case.data_analysis == Pipeline.FASTQ)
+        .filter(Case.priority == "research")
+        .filter(Case.ordered_at >= datetime(year=2021, month=2, day=2))
     ):
         if len(family.links) > 1:
             print(f"skipping case that has more than one link: {family}")
@@ -140,12 +139,12 @@ def downgrade():
 
     count = 0
     for family in (
-        session.query(Family)
-        .filter(Family.customer_id == 1)
-        .filter(Family.data_delivery == DataDelivery.FASTQ)
-        .filter(Family.data_analysis == Pipeline.MIP_DNA)
-        .filter(Family.priority == "research")
-        .filter(Family.ordered_at >= datetime(year=2021, month=2, day=2))
+        session.query(Case)
+        .filter(Case.customer_id == 1)
+        .filter(Case.data_delivery == DataDelivery.FASTQ)
+        .filter(Case.data_analysis == Pipeline.MIP_DNA)
+        .filter(Case.priority == "research")
+        .filter(Case.ordered_at >= datetime(year=2021, month=2, day=2))
     ):
         if len(family.links) > 1:
             print(f"skipping case that has more than one link: {family}")

@@ -5,17 +5,17 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
-from cg.apps.housekeeper.hk import HousekeeperAPI
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
+from cg.constants.invoice import CustomerNames
 from cg.constants.sequencing import Sequencers
+from cg.meta.invoice import InvoiceAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
-from cg.store.models import Customer, ApplicationVersion, Invoice, Sample
-from tests.store_helpers import StoreHelpers
+from cg.store.models import ApplicationVersion, Customer, Invoice, Sample
 from tests.mocks.limsmock import MockLimsAPI
-from cg.constants.invoice import CustomerNames
-from cg.meta.invoice import InvoiceAPI
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(scope="function")
@@ -149,7 +149,7 @@ def flowcell_store(base_store: Store, stats_sample_data: dict) -> Generator[Stor
         sample.customer = customer
         sample.application_version = application_version
         sample.received_at = dt.datetime.now()
-        sample.sequenced_at = dt.datetime.now()
+        sample.last_sequenced_at = dt.datetime.now()
         base_store.session.add(sample)
     base_store.session.commit()
     yield base_store

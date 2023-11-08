@@ -7,10 +7,10 @@ Create Date: 2021-04-08 08:04:11.763421
 """
 from datetime import datetime
 
-from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 
@@ -22,7 +22,7 @@ depends_on = None
 Base = declarative_base()
 
 
-class Family(Base):
+class Case(Base):
     __tablename__ = "family"
 
     id = sa.Column(sa.types.Integer, primary_key=True)
@@ -36,7 +36,7 @@ class Family(Base):
 
 
 def find_family_by_avatar_url(avatar_url, session):
-    return session.query(Family).filter_by(avatar_url=avatar_url).first()
+    return session.query(Case).filter_by(avatar_url=avatar_url).first()
 
 
 def upgrade():

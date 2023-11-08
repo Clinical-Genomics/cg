@@ -1,16 +1,23 @@
-"""Tests for the meta EncryptionAPI and SpringEncryptionAPI"""
+"""Tests for the meta EncryptionAPIs."""
 import logging
 import pathlib
+import shutil
+from pathlib import Path
 
 import mock
 import pytest
 
-from cg.exc import ChecksumFailedError
-from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
+from cg.exc import FlowCellEncryptionError, FlowCellError
+from cg.meta.encryption.encryption import (
+    EncryptionAPI,
+    FlowCellEncryptionAPI,
+    SpringEncryptionAPI,
+)
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 @mock.patch("cg.utils.Process")
-def test_run_gpg_command(mock_process, binary_path, test_command):
+def test_run_gpg_command(mock_process, binary_path: str, test_command: list[str]):
     """Tests the run_gpg_command method"""
     # GIVEN a CLI command input for the Process API
     command = test_command
@@ -26,7 +33,7 @@ def test_run_gpg_command(mock_process, binary_path, test_command):
 
 
 @mock.patch("cg.utils.Process")
-def test_run_gpg_command_dry_run(mock_process, binary_path, test_command):
+def test_run_gpg_command_dry_run(mock_process, binary_path: str, test_command: list[str]):
     """Tests the run_gpg_command method"""
     # GIVEN a CLI command input for the Process API
     command = test_command
@@ -40,7 +47,7 @@ def test_run_gpg_command_dry_run(mock_process, binary_path, test_command):
     encryption_api.process.run_command.assert_called_once_with(command, dry_run=True)
 
 
-def test_generate_temporary_passphrase(mocker, binary_path):
+def test_generate_temporary_passphrase(mocker, binary_path: str):
     """Tests generating a temporary passphrase"""
     # GIVEN an instance of the encryption API
     encryption_api = EncryptionAPI(binary_path=binary_path, dry_run=True)
@@ -55,7 +62,10 @@ def test_generate_temporary_passphrase(mocker, binary_path):
 
 
 def test_get_asymmetric_encryption_command(
-    binary_path, input_file, output_file, asymmetric_encryption_command
+    binary_path: str,
+    input_file_path: Path,
+    output_file_path: Path,
+    asymmetric_encryption_command: list[str],
 ):
     """Tests creating the asymmetric encryption command"""
     # GIVEN an input file and an output file for a gpg command
@@ -63,7 +73,7 @@ def test_get_asymmetric_encryption_command(
 
     # WHEN generating the GPG command for asymmetric_encryption
     result = encryption_api.get_asymmetric_encryption_command(
-        input_file=input_file, output_file=output_file
+        input_file=input_file_path, output_file=output_file_path
     )
 
     # THEN the correct parameters should be returned
@@ -71,7 +81,10 @@ def test_get_asymmetric_encryption_command(
 
 
 def test_get_asymmetric_decryption_command(
-    binary_path, input_file, output_file, asymmetric_decryption_command
+    binary_path: str,
+    input_file_path: Path,
+    output_file_path: Path,
+    asymmetric_decryption_command: list[str],
 ):
     """Tests creating the asymmetric decryption command"""
     # GIVEN an input file and an output file for a gpg command
@@ -79,7 +92,7 @@ def test_get_asymmetric_decryption_command(
 
     # WHEN generating the GPG command for asymmetric_decryption
     result = encryption_api.get_asymmetric_decryption_command(
-        input_file=input_file, output_file=output_file
+        input_file=input_file_path, output_file=output_file_path
     )
 
     # THEN the correct parameters should be returned
@@ -89,20 +102,20 @@ def test_get_asymmetric_decryption_command(
 @mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.generate_temporary_passphrase_file")
 def test_get_symmetric_encryption_command(
     mock_passphrase,
-    binary_path,
-    input_file,
-    output_file,
-    temporary_passphrase,
-    symmetric_encryption_command,
+    binary_path: str,
+    input_file_path: Path,
+    output_file_path: Path,
+    temporary_passphrase: Path,
+    symmetric_encryption_command: list[str],
 ):
     """Tests creating the symmetric encryption command"""
     # GIVEN an input file and an output file for a gpg command
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
-    mock_passphrase.return_value = temporary_passphrase
+    mock_passphrase.return_value = temporary_passphrase.as_posix()
 
     # WHEN generating the GPG command for symmetric_encryption
     result = encryption_api.get_symmetric_encryption_command(
-        input_file=input_file, output_file=output_file
+        input_file=input_file_path, output_file=output_file_path
     )
 
     # THEN the correct parameters should be returned
@@ -110,7 +123,11 @@ def test_get_symmetric_encryption_command(
 
 
 def test_get_symmetric_decryption_command(
-    binary_path, input_file, output_file, encryption_key_file, symmetric_decryption_command
+    binary_path: str,
+    input_file_path: Path,
+    output_file_path: Path,
+    encryption_key_file: str,
+    symmetric_decryption_command: list[str],
 ):
     """Tests creating the symmetric decryption command"""
     # GIVEN an input file and an output file for a gpg command
@@ -118,7 +135,7 @@ def test_get_symmetric_decryption_command(
 
     # WHEN generating the GPG command for symmetric_decryption
     result = encryption_api.get_symmetric_decryption_command(
-        input_file=input_file, output_file=output_file, encryption_key=encryption_key_file
+        input_file=input_file_path, output_file=output_file_path, encryption_key=encryption_key_file
     )
 
     # THEN the correct parameters should be returned
@@ -133,18 +150,18 @@ def test_spring_symmetric_encryption(
     mock_process,
     mock_passphrase,
     mock_encrypted_spring_file,
-    binary_path,
-    encrypted_spring_file_path,
-    spring_file_path,
-    spring_symmetric_encryption_command,
-    temporary_passphrase,
+    binary_path: str,
+    encrypted_spring_file_path: Path,
+    spring_file_path: Path,
+    spring_symmetric_encryption_command: list[str],
+    temporary_passphrase: Path,
 ):
     """Tests encrypting a spring file"""
     # GIVEN a spring file
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
     encryption_api.process = mock_process()
     mock_encrypted_spring_file.return_value = encrypted_spring_file_path
-    mock_passphrase.return_value = temporary_passphrase
+    mock_passphrase.return_value = temporary_passphrase.as_posix()
 
     # WHEN symmetrically encrypting the spring file
     encryption_api.spring_symmetric_encryption(spring_file_path=spring_file_path)
@@ -161,18 +178,18 @@ def test_key_asymmetric_encryption(
     mock_process,
     mock_passphrase,
     mock_encrypted_key_file,
-    binary_path,
-    encrypted_key_file,
-    key_asymmetric_encryption_command,
-    spring_file_path,
-    temporary_passphrase,
+    binary_path: str,
+    encrypted_key_file: Path,
+    key_asymmetric_encryption_command: list[str],
+    spring_file_path: Path,
+    temporary_passphrase: Path,
 ):
     """Tests encrypting an encryption key"""
     # GIVEN a temporary passphrase
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
     encryption_api.process = mock_process()
     mock_encrypted_key_file.return_value = encrypted_key_file
-    mock_passphrase.return_value = temporary_passphrase
+    mock_passphrase.return_value = temporary_passphrase.as_posix()
 
     # WHEN asymmetrically encrypting the temporary passphrase
     encryption_api.key_asymmetric_encryption(spring_file_path=spring_file_path)
@@ -187,10 +204,10 @@ def test_key_asymmetric_encryption(
 def test_spring_symmetric_decryption(
     mock_process,
     mock_encrypted_spring_file_path,
-    binary_path,
-    encrypted_spring_file_path,
-    spring_symmetric_decryption_command,
-    spring_file_path,
+    binary_path: str,
+    encrypted_spring_file_path: Path,
+    spring_symmetric_decryption_command: list[str],
+    spring_file_path: Path,
 ):
     """Tests decrypting a spring file"""
     # GIVEN an encrypted spring file
@@ -213,10 +230,10 @@ def test_spring_symmetric_decryption(
 def test_key_asymmetric_decryption(
     mock_process,
     mock_encrypted_key_file,
-    binary_path,
-    encrypted_key_file,
-    key_asymmetric_decryption_command,
-    spring_file_path,
+    binary_path: str,
+    encrypted_key_file: Path,
+    key_asymmetric_decryption_command: list[str],
+    spring_file_path: Path,
 ):
     """Tests decrypting a encryption key file"""
     # GIVEN an encryption encryption key
@@ -233,7 +250,9 @@ def test_key_asymmetric_decryption(
 
 @mock.patch("pathlib.Path.unlink")
 @mock.patch("cg.utils.Process")
-def test_cleanup_all_files(mock_process, mock_unlink, binary_path, spring_file_path, caplog):
+def test_cleanup_all_files(
+    mock_process, mock_unlink, binary_path: str, spring_file_path: Path, caplog
+):
     """ """
     # GIVEN there are files to clean up: decrypted spring file, encrypted spring file, encrypted
     # encryption key and encryption key
@@ -257,8 +276,8 @@ def test_cleanup_all_files(mock_process, mock_unlink, binary_path, spring_file_p
 def test_cleanup_no_files(
     mock_process,
     mock_unlink,
-    binary_path,
-    spring_file_path,
+    binary_path: str,
+    spring_file_path: Path,
     caplog,
 ):
     """ """
@@ -281,3 +300,193 @@ def test_cleanup_no_files(
     assert "No encrypted spring file to clean up, continuing cleanup" in caplog.text
     assert "No encrypted key file to clean up, continuing cleanup" in caplog.text
     assert "No existing key file to clean up, cleanup process completed" in caplog.text
+
+
+def test_flow_cell_encryption_api(flow_cell_encryption_api: FlowCellEncryptionAPI):
+    """Tests instantiating flow cell encryption API."""
+    # GIVEN a FlowCellEncryptionAPI
+
+    # WHEN instantiating the API
+
+    # THEN return a FlowCellEncryptionAPI object
+    assert isinstance(flow_cell_encryption_api, FlowCellEncryptionAPI)
+
+
+def test_get_flow_cell_symmetric_encryption_command(
+    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    output_file_path: Path,
+    temporary_passphrase: Path,
+):
+    # GIVEN a FlowCellEncryptionAPI
+
+    # WHEN getting the command
+    command: str = flow_cell_encryption_api.get_flow_cell_symmetric_encryption_command(
+        output_file=output_file_path, passphrase_file_path=temporary_passphrase
+    )
+
+    # THEN return a string
+    assert isinstance(command, str)
+
+
+def test_get_flow_cell_symmetric_decryption_command(
+    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    input_file_path: Path,
+    temporary_passphrase: Path,
+):
+    # GIVEN a FlowCellEncryptionAPI
+
+    # WHEN getting the command
+    command: str = flow_cell_encryption_api.get_flow_cell_symmetric_decryption_command(
+        input_file=input_file_path, passphrase_file_path=temporary_passphrase
+    )
+
+    # THEN return a string
+    assert isinstance(command, str)
+
+
+def test_create_pending_file(
+    flow_cell_encryption_api: FlowCellEncryptionAPI,
+):
+    # GIVEN a FlowCellEncryptionAPI
+
+    # WHEN checking if encryption is possible
+    flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
+    flow_cell_encryption_api.dry_run = False
+    flow_cell_encryption_api.create_pending_file(
+        pending_path=flow_cell_encryption_api.pending_file_path
+    )
+
+    # THEN pending file should exist
+    assert flow_cell_encryption_api.pending_file_path.exists()
+
+    # Clean-up
+    shutil.rmtree(flow_cell_encryption_api.flow_cell_encryption_dir)
+
+
+def test_create_pending_file_when_dry_run(
+    flow_cell_encryption_api: FlowCellEncryptionAPI,
+):
+    # GIVEN a FlowCellEncryptionAPI
+
+    # WHEN checking if encryption is possible
+    flow_cell_encryption_api.create_pending_file(
+        pending_path=flow_cell_encryption_api.pending_file_path
+    )
+
+    # THEN pending file should not exist
+    assert not flow_cell_encryption_api.pending_file_path.exists()
+
+
+def test_is_encryption_possible(flow_cell_encryption_api: FlowCellEncryptionAPI, mocker):
+    # GIVEN a FlowCellEncryptionAPI
+
+    # GIVEN that sequencing is ready
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
+
+    # WHEN checking if encryption is possible
+    is_possible: bool = flow_cell_encryption_api.is_encryption_possible()
+
+    # THEN return True
+    assert is_possible
+
+
+def test_is_encryption_possible_when_sequencing_not_ready(
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str, mocker
+):
+    caplog.set_level(logging.ERROR)
+
+    # GIVEN a FlowCellEncryptionAPI
+
+    # GIVEN that sequencing is not ready
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    FlowCellDirectoryData.is_flow_cell_ready.return_value = False
+
+    # WHEN checking if encryption is possible
+    with pytest.raises(FlowCellError):
+        flow_cell_encryption_api.is_encryption_possible()
+
+        # THEN error should be raised
+        assert f"Flow cell: {flow_cell_name} is not ready" in caplog.text
+
+
+def test_is_encryption_possible_when_encryption_is_completed(
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str, mocker
+):
+    # GIVEN a FlowCellEncryptionAPI
+
+    # GIVEN that sequencing is ready
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
+
+    # GIVEN that encryption is completed
+    flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
+    flow_cell_encryption_api.complete_file_path.touch()
+
+    # WHEN checking if encryption is possible
+    with pytest.raises(FlowCellEncryptionError):
+        flow_cell_encryption_api.is_encryption_possible()
+
+        # THEN error should be raised
+        assert f"Encryption already completed for flow cell: {flow_cell_name}" in caplog.text
+
+    # Clean-up
+    shutil.rmtree(flow_cell_encryption_api.flow_cell_encryption_dir)
+
+
+def test_is_encryption_possible_when_encryption_is_pending(
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str, mocker
+):
+    # GIVEN a FlowCellEncryptionAPI
+
+    # GIVEN that sequencing is ready
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
+
+    # GIVEN that encryption is pending
+    flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
+    flow_cell_encryption_api.pending_file_path.touch()
+
+    # WHEN checking if encryption is possible
+    with pytest.raises(FlowCellEncryptionError):
+        flow_cell_encryption_api.is_encryption_possible()
+
+        # THEN error should be raised
+        assert f"Encryption already started for flow cell: {flow_cell_name}" in caplog.text
+
+    # Clean-up
+    shutil.rmtree(flow_cell_encryption_api.flow_cell_encryption_dir)
+
+
+def test_encrypt_flow_cell(
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, mocker, sbatch_job_number: int
+):
+    caplog.set_level(logging.INFO)
+    # GIVEN a FlowCellEncryptionAPI
+
+    # GIVEN that sequencing is ready
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
+
+    # WHEN encrypting flow cell
+    flow_cell_encryption_api.encrypt_flow_cell()
+
+    # THEN sbatch should be submitted
+    assert f"Flow cell encryption running as job {sbatch_job_number}" in caplog.text
+
+
+def test_start_encryption(
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, mocker, sbatch_job_number: int
+):
+    caplog.set_level(logging.INFO)
+    # GIVEN a FlowCellEncryptionAPI
+
+    # GIVEN that sequencing is ready
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
+
+    # WHEN trying to start encrypting flow cell
+    flow_cell_encryption_api.start_encryption()
+
+    # THEN sbatch should be submitted
+    assert f"Flow cell encryption running as job {sbatch_job_number}" in caplog.text

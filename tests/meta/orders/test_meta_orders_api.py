@@ -2,19 +2,17 @@ import datetime as dt
 from unittest.mock import patch
 
 import pytest
-from cgmodels.cg.constants import Pipeline
-
-from cg.store.models import Customer, Family
-from tests.store_helpers import StoreHelpers
 
 from cg.constants import DataDelivery
+from cg.constants.constants import Pipeline
 from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.samples import MipDnaSample
 from cg.store import Store
-from cg.store.models import Pool, Sample
+from cg.store.models import Customer, Case, Pool, Sample
+from tests.store_helpers import StoreHelpers
 
 SUBMITTERS = [
     "fastq_submitter",
@@ -81,7 +79,7 @@ def test_submit(
             assert record.ticket == ticket_id
         elif isinstance(record, Sample):
             assert record.original_ticket == ticket_id
-        elif isinstance(record, Family):
+        elif isinstance(record, Case):
             for link_obj in record.links:
                 assert link_obj.sample.original_ticket == ticket_id
 
@@ -245,7 +243,7 @@ def test_submit_duplicate_sample_case_name(
     for sample in order_data.samples:
         case_id = sample.family_name
         if not store.get_case_by_name_and_customer(customer=customer, case_name=case_id):
-            case: Family = store.add_case(
+            case: Case = store.add_case(
                 data_analysis=Pipeline.MIP_DNA,
                 data_delivery=DataDelivery.SCOUT,
                 name=case_id,

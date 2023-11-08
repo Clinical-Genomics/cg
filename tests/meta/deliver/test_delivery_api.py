@@ -1,20 +1,19 @@
 """Tests for delivery API"""
 
 from pathlib import Path
-from typing import List, Set
 
-from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.constants import Pipeline
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
-from cg.store.models import FamilySample, Sample, Family
-from tests.store_helpers import StoreHelpers
-from tests.store.conftest import case_obj
+from cg.store.models import Case, CaseSample, Sample
 from tests.cli.deliver.conftest import fastq_delivery_bundle, mip_delivery_bundle
+from tests.store.conftest import case_obj
+from tests.store_helpers import StoreHelpers
 
 
 def test_get_delivery_path(
@@ -50,11 +49,11 @@ def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str
     assert version
 
     # GIVEN that a case object exists in the database
-    link_objs: List[FamilySample] = deliver_api.store.get_case_samples_by_case_id(
+    link_objs: list[CaseSample] = deliver_api.store.get_case_samples_by_case_id(
         case_internal_id=case_id
     )
-    samples: List[Sample] = [link.sample for link in link_objs]
-    sample_ids: Set[str] = set([sample.internal_id for sample in samples])
+    samples: list[Sample] = [link.sample for link in link_objs]
+    sample_ids: set[str] = {sample.internal_id for sample in samples}
 
     # WHEN fetching all case files from the delivery api
     bundle_latest_files = deliver_api.get_case_files_from_version(
@@ -100,9 +99,9 @@ def test_get_case_files_from_version(
     assert len(version.files) == 2
 
     # GIVEN the sample ids of the samples
-    link_objs: List[FamilySample] = analysis_store.get_case_samples_by_case_id(case_id)
-    samples: List[Sample] = [link.sample for link in link_objs]
-    sample_ids: Set[str] = set([sample.internal_id for sample in samples])
+    link_objs: list[CaseSample] = analysis_store.get_case_samples_by_case_id(case_id)
+    samples: list[Sample] = [link.sample for link in link_objs]
+    sample_ids: set[str] = {sample.internal_id for sample in samples}
 
     # WHEN fetching the case files
     case_files = deliver_api.get_case_files_from_version(version=version, sample_ids=sample_ids)
@@ -156,7 +155,7 @@ def test_get_sample_files_from_version(
 def test_get_delivery_scope_case_only():
     """Testing the delivery scope of a case only delivery."""
     # GIVEN a case only delivery type
-    delivery_type: Set[str] = {Pipeline.MIP_DNA}
+    delivery_type: set[str] = {Pipeline.MIP_DNA}
 
     # WHEN getting the delivery scope
     sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
@@ -204,7 +203,7 @@ def test_deliver_files_enough_reads(
 ):
     """Tests the deliver_files method for a sample with enough reads."""
     # GIVEN a case to be delivered and a sample with enough reads
-    case: Family = deliver_api.store.get_case_by_internal_id(internal_id=case_id)
+    case: Case = deliver_api.store.get_case_by_internal_id(internal_id=case_id)
     sample: Sample = deliver_api.store.get_sample_by_internal_id(sample_id)
     helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)
     helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
@@ -228,7 +227,7 @@ def test_deliver_files_not_enough_reads(
 ):
     """Tests the deliver_files method for a sample with too few reads."""
     # GIVEN a case to be delivered and a sample with too few reads
-    case: Family = deliver_api.store.get_case_by_internal_id(internal_id=case_id)
+    case: Case = deliver_api.store.get_case_by_internal_id(internal_id=case_id)
     sample: Sample = deliver_api.store.get_sample_by_internal_id(sample_id)
     sample.reads = 1
     helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)
@@ -255,7 +254,7 @@ def test_deliver_files_not_enough_reads_force(
 ):
     """Tests the deliver_files method for a sample with too few reads but with override."""
     # GIVEN a case to be delivered and a sample with too few reads
-    case: Family = deliver_api.store.get_case_by_internal_id(internal_id=case_id)
+    case: Case = deliver_api.store.get_case_by_internal_id(internal_id=case_id)
     sample: Sample = deliver_api.store.get_sample_by_internal_id(sample_id)
     sample.reads = 1
     helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)

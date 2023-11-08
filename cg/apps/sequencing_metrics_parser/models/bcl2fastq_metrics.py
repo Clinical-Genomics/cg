@@ -1,4 +1,5 @@
-from typing import List, Optional
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -16,7 +17,7 @@ class TileReads(BaseModel):
     sample_id: str = Field(..., alias="SampleId", min_length=1)
     tile_sample_reads: int = Field(..., alias="NumberReads", ge=0)
     tile_sample_yield: int = Field(..., alias="Yield", ge=0)
-    tile_sample_read_metrics: List[ReadMetric] = Field(..., alias="ReadMetrics")
+    tile_sample_read_metrics: list[ReadMetric] = Field(..., alias="ReadMetrics")
 
 
 class UndeterminedTileReads(BaseModel):
@@ -24,14 +25,14 @@ class UndeterminedTileReads(BaseModel):
 
     tile_total_reads: int = Field(..., alias="NumberReads", ge=0)
     tile_total_yield: int = Field(..., alias="Yield", ge=0)
-    tile_read_metrics: List[ReadMetric] = Field(..., alias="ReadMetrics")
+    tile_read_metrics: list[ReadMetric] = Field(..., alias="ReadMetrics")
 
 
 class ConversionResult(BaseModel):
     """Demultiplexing results and undetermined reads for a tile within a lane."""
 
     lane: int = Field(..., alias="LaneNumber", gt=0)
-    tile_reads: List[TileReads] = Field(..., alias="DemuxResults")
+    tile_reads: list[TileReads] = Field(..., alias="DemuxResults")
     tile_undetermined_reads: Optional[UndeterminedTileReads] = Field(None, alias="Undetermined")
 
 
@@ -39,7 +40,7 @@ class SampleLaneTileMetrics(BaseModel):
     """Metrics for samples on a tile in a lane on a flow cell from a bcl2fastq run."""
 
     flow_cell_name: str = Field(..., alias="Flowcell", min_length=1)
-    conversion_results: List[ConversionResult] = Field(..., alias="ConversionResults")
+    conversion_results: list[ConversionResult] = Field(..., alias="ConversionResults")
 
 
 class SampleLaneMetrics(BaseModel):

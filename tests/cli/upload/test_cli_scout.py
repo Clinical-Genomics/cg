@@ -1,18 +1,18 @@
 import logging
+
 import mock
 from click.testing import CliRunner, Result
 
-from cg.constants import Pipeline, EXIT_SUCCESS
 from cg.cli.upload.scout import create_scout_load_config, get_upload_api
-from cg.models.cg_config import CGConfig
+from cg.constants import EXIT_SUCCESS, Pipeline
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family
-
-from tests.store_helpers import StoreHelpers
+from cg.store.models import Case
 from tests.mocks.scout import MockScoutLoadConfig
+from tests.store_helpers import StoreHelpers
 
 
 def test_get_upload_api(cg_context: CGConfig, case_id: str, helpers: StoreHelpers):
@@ -20,7 +20,7 @@ def test_get_upload_api(cg_context: CGConfig, case_id: str, helpers: StoreHelper
     status_db: Store = cg_context.status_db
 
     # GIVEN a case with a balsamic analysis
-    case: Family = helpers.ensure_case(
+    case: Case = helpers.ensure_case(
         store=status_db, data_analysis=Pipeline.BALSAMIC, case_id=case_id
     )
     helpers.add_analysis(store=status_db, pipeline=Pipeline.BALSAMIC, case=case)
@@ -44,7 +44,7 @@ def test_create_scout_load_config(
     status_db: Store = cg_context.status_db
 
     # GIVEN a case with a balsamic analysis
-    case: Family = helpers.ensure_case(
+    case: Case = helpers.ensure_case(
         store=status_db, data_analysis=Pipeline.BALSAMIC, case_id=case_id
     )
     helpers.add_analysis(store=status_db, pipeline=Pipeline.BALSAMIC, case=case)

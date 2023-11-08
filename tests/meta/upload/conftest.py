@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Dict
 
 import pytest
 
@@ -14,15 +13,13 @@ from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Analysis, Sample
-
+from cg.store.models import Analysis, Case, Sample
 from tests.cli.workflow.mip.conftest import (
-    mip_rna_context,
-    mip_dna_context,
-    mip_case_ids,
     mip_case_id,
+    mip_case_ids,
+    mip_dna_context,
+    mip_rna_context,
 )
-
 from tests.store_helpers import StoreHelpers
 
 
@@ -77,7 +74,7 @@ def upload_genotypes_api(
 
 @pytest.fixture(scope="function")
 def coverage_upload_api(
-    chanjo_config: Dict[str, Dict[str, str]], populated_housekeeper_api: HousekeeperAPI
+    chanjo_config: dict[str, dict[str, str]], populated_housekeeper_api: HousekeeperAPI
 ):
     """Return a upload coverage API."""
     return UploadCoverageApi(
@@ -92,12 +89,12 @@ def genotype_analysis_sex() -> dict:
 
 
 @pytest.fixture(name="mip_dna_case")
-def mip_dna_case(mip_dna_context: CGConfig, helpers: StoreHelpers) -> Family:
+def mip_dna_case(mip_dna_context: CGConfig, helpers: StoreHelpers) -> Case:
     """Return a MIP DNA case."""
 
     store: Store = mip_dna_context.status_db
 
-    mip_dna_case: Family = helpers.add_case(
+    mip_dna_case: Case = helpers.add_case(
         store=store,
         internal_id="mip-dna-case",
         name="mip-dna-case",
@@ -126,9 +123,7 @@ def mip_rna_case(mip_rna_context: CGConfig, case_id: str):
 
 
 @pytest.fixture(name="mip_rna_analysis")
-def mip_rna_analysis(
-    mip_rna_context: CGConfig, helpers: StoreHelpers, mip_rna_case: Family
-) -> Family:
+def mip_rna_analysis(mip_rna_context: CGConfig, helpers: StoreHelpers, mip_rna_case: Case) -> Case:
     """Return a MIP RNA analysis."""
     return helpers.add_analysis(
         store=mip_rna_context.status_db,

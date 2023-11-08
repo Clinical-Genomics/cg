@@ -2,15 +2,14 @@
 
 import datetime as dt
 import logging
-from typing import List
+
+from click.testing import CliRunner
 
 from cg.cli.compress.fastq import fastq_cmd, get_cases_to_process
 from cg.constants import Pipeline
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
 from cg.store import Store
-from cg.store.models import Family
-
+from cg.store.models import Case
 from tests.store_helpers import StoreHelpers
 
 MOCK_SET_MEM_ACCORDING_TO_READS_PATH: str = "cg.cli.compress.helpers.set_memory_according_to_reads"
@@ -29,7 +28,7 @@ def test_get_cases_to_process(
 
     # GIVEN a context with a case that can be compressed
 
-    valid_compressable_case: Family = helpers.add_case(
+    valid_compressable_case: Case = helpers.add_case(
         store=status_db,
         name=case_id,
         internal_id=case_id,
@@ -40,7 +39,7 @@ def test_get_cases_to_process(
     status_db.session.commit()
 
     # WHEN running the compress command
-    cases: List[Family] = get_cases_to_process(days_back=1, store=status_db)
+    cases: list[Case] = get_cases_to_process(days_back=1, store=status_db)
 
     # THEN assert cases are returned
     assert cases
@@ -61,7 +60,7 @@ def test_get_cases_to_process_when_no_case(
     status_db: Store = populated_compress_context.status_db
 
     # WHEN running the compress command
-    cases: List[Family] = get_cases_to_process(
+    cases: list[Case] = get_cases_to_process(
         case_id=case_id_does_not_exist, days_back=1, store=status_db
     )
 
@@ -70,6 +69,26 @@ def test_get_cases_to_process_when_no_case(
 
     # THEN assert we log no cases where found
     assert f"Could not find case {case_id_does_not_exist}" in caplog.text
+
+
+def test_incompressible_cases_are_not_processable(
+    helpers: StoreHelpers,
+    populated_compress_context: CGConfig,
+):
+    """Test that cases that are marked as incompressible are not processable."""
+
+    # GIVEN a store with a case that is marked as incompressible
+    status_db: Store = populated_compress_context.status_db
+
+    incompressible_case: Case = helpers.add_case(store=status_db, internal_id="incompressible")
+    incompressible_case.created_at = dt.datetime.now() - dt.timedelta(days=1000)
+    incompressible_case.is_compressible = False
+
+    # WHEN retrieving the processable cases
+    processable_cases: list[Case] = get_cases_to_process(days_back=1, store=status_db)
+
+    # THEN assert that the incompressible case is not processable
+    assert incompressible_case not in processable_cases
 
 
 def test_compress_fastq_cli_no_family(compress_context: CGConfig, cli_runner: CliRunner, caplog):
@@ -118,7 +137,7 @@ def test_compress_fastq_cli_case_id(
 
     # GIVEN a context with a case that can be compressed
 
-    valid_compressable_case: Family = helpers.add_case(
+    valid_compressable_case: Case = helpers.add_case(
         store=status_db,
         name=case_id,
         internal_id=case_id,
@@ -150,7 +169,7 @@ def test_compress_fastq_cli_case_id(
     assert res.exit_code == 0
 
     # THEN assert it was communicated that no families where found
-    assert f"individuals in 1 (completed) cases where compressed" in caplog.text
+    assert "individuals in 1 (completed) cases where compressed" in caplog.text
 
 
 def test_compress_fastq_cli_multiple_family(
@@ -159,7 +178,7 @@ def test_compress_fastq_cli_multiple_family(
     """Test to run the compress command with multiple families."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a database with multiple families
-    nr_cases = populated_multiple_compress_context.status_db._get_query(table=Family).count()
+    nr_cases = populated_multiple_compress_context.status_db._get_query(table=Case).count()
     assert nr_cases > 1
 
     # GIVEN no adjusting according to readsa
@@ -183,7 +202,7 @@ def test_compress_fastq_cli_multiple_set_limit(
     compress_context = populated_multiple_compress_context
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with more families than the limit
-    nr_cases = compress_context.status_db._get_query(table=Family).count()
+    nr_cases = compress_context.status_db._get_query(table=Case).count()
     limit = 5
     assert nr_cases > limit
 

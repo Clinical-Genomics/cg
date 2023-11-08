@@ -5,14 +5,13 @@ Revises: 6d74453565f2
 Create Date: 2021-03-16 12:05:13.275423
 
 """
-from cg.constants import Pipeline, DataDelivery
+import sqlalchemy as sa
+from sqlalchemy import Column, orm, types
 from sqlalchemy.dialects import mysql
+from sqlalchemy.orm import declarative_base
 
 from alembic import op
-import sqlalchemy as sa
-
-from sqlalchemy import orm, Column, types
-from sqlalchemy.ext.declarative import declarative_base
+from cg.constants import DataDelivery, Pipeline
 
 Base = declarative_base()
 
@@ -23,7 +22,7 @@ branch_labels = None
 depends_on = None
 
 
-class Family(Base):
+class Case(Base):
     __tablename__ = "family"
 
     id = sa.Column(sa.types.Integer, primary_key=True)
@@ -53,9 +52,9 @@ def upgrade():
     op.alter_column("analysis", "pipeline", type_=new_enum)
 
     for family in (
-        session.query(Family)
-        .filter(Family.data_delivery == str(DataDelivery.FASTQ))
-        .filter(Family.data_analysis == "")
+        session.query(Case)
+        .filter(Case.data_delivery == str(DataDelivery.FASTQ))
+        .filter(Case.data_analysis == "")
     ):
         print(f"Altering family: {str(family)}")
         family.data_analysis = str(Pipeline.SARS_COV_2)

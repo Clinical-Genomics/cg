@@ -2,6 +2,7 @@
 import logging
 
 import pytest
+
 from cg.apps.crunchy import CrunchyAPI
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, WriteFile

@@ -1,18 +1,16 @@
-from typing import List, Tuple, Iterable
 import datetime as dt
+from typing import Iterable
 
 from sqlalchemy.orm import Query
 
 from cg.store import Store
 from cg.store.filters.status_application_version_filters import (
-    filter_application_versions_by_application_entry_id,
     filter_application_versions_before_valid_from,
+    filter_application_versions_by_application_entry_id,
     filter_application_versions_by_application_version_entry_id,
     order_application_versions_by_valid_from_desc,
 )
 from cg.store.models import Application, ApplicationVersion
-
-from tests.store_helpers import StoreHelpers
 
 
 def test_filter_application_version_by_application_entry_id_correct_id(
@@ -36,7 +34,7 @@ def test_filter_application_version_by_application_entry_id_correct_id(
     assert app_version_query.count() > filtered_app_version_query.count()
 
     # THEN the application id of all the filtered query entries is equal to the id used to filter
-    application_ids: List[int] = [
+    application_ids: list[int] = [
         application_version.application_id
         for application_version in filtered_app_version_query.all()
     ]
@@ -123,7 +121,7 @@ def test_filter_application_versions_before_valid_from_future_date(
     )
 
     # THEN the filtered query has the same elements as the unfiltered query
-    app_version_pair: Iterable[Tuple[ApplicationVersion, ApplicationVersion]] = zip(
+    app_version_pair: Iterable[tuple[ApplicationVersion, ApplicationVersion]] = zip(
         app_version_query.all(), filtered_app_version_query.all()
     )
     assert all(non_filtered == filtered for non_filtered, filtered in app_version_pair)
@@ -175,7 +173,7 @@ def test_order_application_versions_by_valid_from_desc(
     app_version_query: Query = base_store._get_query(table=ApplicationVersion)
 
     # WHEN ordering the query by `valid_from`
-    ordered_app_versions: List[ApplicationVersion] = list(
+    ordered_app_versions: list[ApplicationVersion] = list(
         order_application_versions_by_valid_from_desc(application_versions=app_version_query)
     )
     n_app_versions: int = len(ordered_app_versions)

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, AfterValidator
+from pydantic import AfterValidator, BaseModel
 from typing_extensions import Annotated
 
 from cg.models.workflow.validators import get_first_word

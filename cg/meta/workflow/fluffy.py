@@ -3,8 +3,7 @@ import logging
 import shutil
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
-
+from typing import Optional
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
@@ -12,16 +11,13 @@ from sqlalchemy.orm import Query
 from cg.apps.demultiplex.sample_sheet.models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_sheet_from_file,
-    get_sample_type_from_sequencer_type,
 )
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import WriteFile
-from cg.meta.demultiplex.housekeeper_storage_functions import get_sample_sheets_from_latest_version
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family, Flowcell, Sample
+from cg.store.models import Case, Flowcell, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -62,7 +58,7 @@ class FluffySample(BaseModel):
 
 
 class FluffySampleSheet(BaseModel):
-    samples: List[FluffySample]
+    samples: list[FluffySample]
 
     def write_sample_sheet(self, out_path: Path) -> None:
         LOG.info(f"Writing fluffy sample sheet to {out_path}")
@@ -87,7 +83,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         )
 
     @property
-    def threshold_reads(self):
+    def use_read_count_threshold(self) -> bool:
         return False
 
     @property
@@ -149,7 +145,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         Links fastq files from Housekeeper to case working directory
         """
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         latest_flow_cell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
         workdir_path = self.get_workdir_path(case_id=case_id)
         if workdir_path.exists() and not dry_run:
@@ -175,9 +171,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
     def get_sample_sequenced_date(self, sample_id: str) -> Optional[dt.date]:
         sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
-        sequenced_at: dt.datetime = sample_obj.sequenced_at
-        if sequenced_at:
-            return sequenced_at.date()
+        last_sequenced_at: dt.datetime = sample_obj.last_sequenced_at
+        if last_sequenced_at:
+            return last_sequenced_at.date()
 
     def get_sample_control_status(self, sample_id: str) -> bool:
         sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
@@ -210,30 +206,13 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
         return FluffySampleSheet(samples=fluffy_sample_sheet_rows)
 
-    def get_sample_sheet_housekeeper_path(self, flowcell_name: str) -> Path:
-        """Returns the path to original sample sheet file that is added to Housekeeper."""
-        sample_sheet_files: list = get_sample_sheets_from_latest_version(
-            flow_cell_id=flowcell_name, hk_api=self.housekeeper_api
-        )
-        if not sample_sheet_files:
-            LOG.error(
-                f"Sample sheet file for flowcell {flowcell_name} could not be found in Housekeeper!"
-            )
-            raise HousekeeperFileMissingError
-        return Path(sample_sheet_files[0].full_path)
-
     def make_sample_sheet(self, case_id: str, dry_run: bool) -> None:
         """
         Create SampleSheet.csv file in working directory and add desired values to the file
         """
         flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(case_id)
-        sample_sheet_housekeeper_path: Path = self.get_sample_sheet_housekeeper_path(flow_cell.name)
-        flow_cell_sample_type = get_sample_type_from_sequencer_type(flow_cell.sequencer_type)
-
-        sample_sheet: SampleSheet = get_sample_sheet_from_file(
-            infile=sample_sheet_housekeeper_path,
-            flow_cell_sample_type=flow_cell_sample_type,
-        )
+        sample_sheet_path: Path = self.housekeeper_api.get_sample_sheet_path(flow_cell.name)
+        sample_sheet: SampleSheet = get_sample_sheet_from_file(sample_sheet_path)
 
         if not dry_run:
             Path(self.root_dir, case_id).mkdir(parents=True, exist_ok=True)
@@ -278,7 +257,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         ]
         self.process.run_command(command_args, dry_run=dry_run)
 
-    def get_cases_to_store(self) -> List[Family]:
+    def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,
         and is ready to be stored in Housekeeper."""
         return [

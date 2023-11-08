@@ -1,13 +1,13 @@
 """This script tests the cli methods to get samples in status-db"""
-from typing import List
+
+
+from click.testing import CliRunner
 
 from cg.cli.get import get
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from click.testing import CliRunner
-
-from cg.store.models import Flowcell, Sample, Family
+from cg.store.models import Case, Flowcell, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -145,7 +145,7 @@ def test_get_sample_no_cases_with_case(
 ):
     """Test that the --no-cases flag does not show case info"""
     # GIVEN a database with a sample with related samples
-    case: Family = helpers.add_case(disk_store)
+    case: Case = helpers.add_case(disk_store)
     sample: Sample = helpers.add_sample(disk_store)
     helpers.add_relationship(disk_store, sample=sample, case=case)
 
@@ -155,7 +155,7 @@ def test_get_sample_no_cases_with_case(
     # THEN all related cases should be listed in the output
     assert result.exit_code == EXIT_SUCCESS
     for family_sample in disk_store._get_query(table=Sample).first().links:
-        assert family_sample.family.internal_id not in result.output
+        assert family_sample.case.internal_id not in result.output
 
 
 def test_get_sample_cases_without_case(
@@ -178,7 +178,7 @@ def test_get_sample_cases_with_case(
 ):
     """Test that the --cases flag does show case info"""
     # GIVEN a database with a sample with related samples
-    case: Family = helpers.add_case(disk_store)
+    case: Case = helpers.add_case(disk_store)
     sample: Sample = helpers.add_sample(disk_store)
     helpers.add_relationship(disk_store, sample=sample, case=case)
 
@@ -188,7 +188,7 @@ def test_get_sample_cases_with_case(
     # THEN all related families should be listed in the output
     assert result.exit_code == EXIT_SUCCESS
     for link in disk_store._get_query(table=Sample).first().links:
-        assert link.family.internal_id in result.output
+        assert link.case.internal_id in result.output
 
 
 def test_hide_sample_flowcells_without_flowcell(
@@ -197,7 +197,7 @@ def test_hide_sample_flowcells_without_flowcell(
     """Test that we can query samples and hide flow cell even when there are none."""
     # GIVEN a database with a sample without related flow cell
     sample = helpers.add_sample(disk_store)
-    returned_flow_cell: List[Flowcell] = disk_store._get_query(table=Flowcell)
+    returned_flow_cell: list[Flowcell] = disk_store._get_query(table=Flowcell)
     assert not list(returned_flow_cell)
 
     # WHEN getting a sample with the --hide-flow-cell flag
@@ -214,7 +214,7 @@ def test_get_sample_flowcells_with_flowcell(
 ):
     """Test query samples and hide flow cell, ensuring that no flow cell name is in the output."""
     # GIVEN a database with a sample and a related flow cell
-    flow_cell = helpers.add_flowcell(disk_store)
+    flow_cell = helpers.add_flow_cell(disk_store)
     sample = helpers.add_sample(disk_store, flowcell=flow_cell)
     returned_flow_cell: Flowcell = disk_store.get_flow_cell_by_name(flow_cell_name=flow_cell.name)
     assert sample in returned_flow_cell.samples

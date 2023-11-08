@@ -1,27 +1,25 @@
 """Interactions with the gisaid cli upload_results_to_gisaid"""
 import logging
 import re
-from pathlib import Path
-from typing import List, Dict, Optional
-import pandas as pd
-
-from cg.constants.constants import SARS_COV_REGEX, FileFormat
-from housekeeper.store.models import File
 import tempfile
+from pathlib import Path
+from typing import Optional
+
+import pandas as pd
+from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.constants.constants import SARS_COV_REGEX, FileFormat
+from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Sample
 from cg.utils import Process
-from .constants import HEADERS
-from .models import GisaidSample, GisaidAccession
 
-from cg.exc import (
-    HousekeeperFileMissingError,
-)
+from .constants import HEADERS
+from .models import GisaidAccession, GisaidSample
 
 LOG = logging.getLogger(__name__)
 
@@ -64,7 +62,7 @@ class GisaidAPI:
         completion_df = completion_df[completion_df["provnummer"].str.contains(SARS_COV_REGEX)]
         return completion_df
 
-    def get_gisaid_sample_list(self, case_id: str) -> List[Sample]:
+    def get_gisaid_sample_list(self, case_id: str) -> list[Sample]:
         """Get list of Sample objects eligeble for upload.
         The criteria is that the sample reached 20x coverage for >95% bases.
         The sample will be included in completion file."""
@@ -82,10 +80,10 @@ class GisaidAPI:
         """Get path to gisaid csv"""
         return Path(self.mutant_root_dir, case_id, "results", f"{case_id}.csv")
 
-    def get_gisaid_samples(self, case_id: str) -> List[GisaidSample]:
+    def get_gisaid_samples(self, case_id: str) -> list[GisaidSample]:
         """Get list of Gisaid sample objects."""
 
-        samples: List[Sample] = self.get_gisaid_sample_list(case_id=case_id)
+        samples: list[Sample] = self.get_gisaid_sample_list(case_id=case_id)
         gisaid_samples = []
         for sample in samples:
             sample_id: str = sample.internal_id
@@ -113,7 +111,7 @@ class GisaidAPI:
             gisaid_samples.append(gisaid_sample)
         return gisaid_samples
 
-    def create_gisaid_fasta(self, gisaid_samples: List[GisaidSample], case_id: str) -> None:
+    def create_gisaid_fasta(self, gisaid_samples: list[GisaidSample], case_id: str) -> None:
         """Writing a new fasta with headers adjusted for gisaid upload_results_to_gisaid"""
 
         gisaid_fasta_file = self.housekeeper_api.get_file_from_latest_version(
@@ -124,7 +122,7 @@ class GisaidAPI:
         else:
             gisaid_fasta_path: Path = self.get_gisaid_fasta_path(case_id=case_id)
 
-        fasta_lines: List[str] = []
+        fasta_lines: list[str] = []
 
         for sample in gisaid_samples:
             fasta_file: File = self.housekeeper_api.get_file_from_latest_version(
@@ -151,10 +149,10 @@ class GisaidAPI:
             bundle_name=case_id, file=gisaid_fasta_path, tags=["gisaid-fasta", case_id]
         )
 
-    def create_gisaid_csv(self, gisaid_samples: List[GisaidSample], case_id: str) -> None:
+    def create_gisaid_csv(self, gisaid_samples: list[GisaidSample], case_id: str) -> None:
         """Create csv file for gisaid upload"""
         samples_df = pd.DataFrame(
-            data=[gisaid_sample.dict() for gisaid_sample in gisaid_samples],
+            data=[gisaid_sample.model_dump() for gisaid_sample in gisaid_samples],
             columns=HEADERS,
         )
 
@@ -254,11 +252,11 @@ class GisaidAPI:
 
     def append_log(self, temp_log: Path, gisaid_log: Path) -> None:
         """Appends temp log to gisaid log and delete temp file"""
-        new_log_data: List = ReadFile.get_content_from_file(
+        new_log_data = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=temp_log.absolute()
         )
         if gisaid_log.stat().st_size != 0:
-            old_log_data: List = ReadFile.get_content_from_file(
+            old_log_data = ReadFile.get_content_from_file(
                 file_format=FileFormat.JSON, file_path=gisaid_log.absolute()
             )
             new_log_data.extend(old_log_data)
@@ -268,7 +266,7 @@ class GisaidAPI:
         )
         temp_log.unlink()
 
-    def get_accession_numbers(self, case_id: str) -> Dict[str, str]:
+    def get_accession_numbers(self, case_id: str) -> dict[str, str]:
         """Parse accession numbers and sample ids from log file"""
 
         LOG.info("Parsing accession numbers from log file")

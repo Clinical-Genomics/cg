@@ -10,21 +10,21 @@ from housekeeper.store.models import Version
 
 from cg.cli.generate.report.options import (
     ARGUMENT_CASE_ID,
-    OPTION_FORCE_REPORT,
     OPTION_DRY_RUN,
-    OPTION_STARTED_AT,
+    OPTION_FORCE_REPORT,
     OPTION_PIPELINE,
+    OPTION_STARTED_AT,
 )
 from cg.cli.generate.report.utils import (
-    get_report_case,
-    get_report_api,
     get_report_analysis_started,
+    get_report_api,
     get_report_api_pipeline,
+    get_report_case,
 )
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import CgError
 from cg.meta.report.report_api import ReportAPI
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ def generate_delivery_report(
 ) -> None:
     """Creates a delivery report for the provided case."""
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
-    case: Family = get_report_case(context, case_id)
+    case: Case = get_report_case(context, case_id)
     report_api: ReportAPI = get_report_api(context, case)
     analysis_date: datetime = get_report_analysis_started(case, report_api, analysis_started_at)
 

@@ -13,8 +13,12 @@ from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig, ScoutMipIndividual
-from cg.store.models import Analysis, Family, FamilySample
+from cg.models.scout.scout_load_config import (
+    MipLoadConfig,
+    ScoutLoadConfig,
+    ScoutMipIndividual,
+)
+from cg.store.models import Analysis, Case, CaseSample
 
 LOG = logging.getLogger(__name__)
 
@@ -44,7 +48,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
 
         self.add_common_info_to_load_config()
         mip_analysis_data: MipAnalysis = self.mip_analysis_api.get_latest_metadata(
-            self.analysis_obj.family.internal_id
+            self.analysis_obj.case.internal_id
         )
         self.load_config.human_genome_build = (
             "38" if "38" in mip_analysis_data.genome_build else "37"
@@ -55,7 +59,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
 
         self.load_config.gene_panels = (
             self.mip_analysis_api.convert_panels(
-                self.analysis_obj.family.customer.internal_id, self.analysis_obj.family.panels
+                self.analysis_obj.case.customer.internal_id, self.analysis_obj.case.panels
             )
             or None
         )
@@ -63,22 +67,22 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.include_case_files()
 
         LOG.info("Building samples")
-        db_sample: FamilySample
-        for db_sample in self.analysis_obj.family.links:
+        db_sample: CaseSample
+        for db_sample in self.analysis_obj.case.links:
             self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
         self.include_pedigree_picture()
 
     def include_pedigree_picture(self) -> None:
         if self.is_multi_sample_case(self.load_config):
             if self.is_family_case(self.load_config):
-                svg_path: Path = self.run_madeline(self.analysis_obj.family)
+                svg_path: Path = self.run_madeline(self.analysis_obj.case)
                 self.load_config.madeline = str(svg_path)
             else:
                 LOG.info("family of unconnected samples - skip pedigree graph")
         else:
             LOG.info("family of 1 sample - skip pedigree graph")
 
-    def build_config_sample(self, case_sample: FamilySample) -> ScoutMipIndividual:
+    def build_config_sample(self, case_sample: CaseSample) -> ScoutMipIndividual:
         """Build a sample with mip specific information"""
 
         config_sample = ScoutMipIndividual()
@@ -182,7 +186,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
     def is_multi_sample_case(load_config: ScoutLoadConfig) -> bool:
         return len(load_config.samples) > 1
 
-    def run_madeline(self, family_obj: Family) -> Path:
+    def run_madeline(self, family_obj: Case) -> Path:
         """Generate a madeline file for an analysis. Use customer sample names"""
         samples = [
             {

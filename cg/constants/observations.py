@@ -1,8 +1,7 @@
 """Loqusdb related constants."""
-from enum import Enum
+from enum import Enum, StrEnum
 
-from cgmodels.cg.constants import Pipeline, StrEnum
-
+from cg.constants.constants import Pipeline
 from cg.constants.sequencing import SequencingMethod
 
 LOQUSDB_ID = "_id"

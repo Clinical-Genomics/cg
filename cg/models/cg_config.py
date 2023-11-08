@@ -1,6 +1,9 @@
 import logging
 from typing import Optional
 
+from pydantic.v1 import BaseModel, EmailStr, Field
+from typing_extensions import Literal
+
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -16,9 +19,9 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
+from cg.meta.backup.pdc import PdcAPI
 from cg.store import Store
-from pydantic.v1 import BaseModel, EmailStr, Field
-from typing_extensions import Literal
+from cg.store.database import initialize_database
 
 LOG = logging.getLogger(__name__)
 
@@ -27,28 +30,6 @@ class Sequencers(BaseModel):
     hiseqx: str
     hiseqga: str
     novaseq: str
-
-
-class EncryptionDirs(BaseModel):
-    current: str
-    legacy: str
-
-
-class FlowCellRunDirs(Sequencers):
-    pass
-
-
-class BackupConfig(BaseModel):
-    encrypt_dir: EncryptionDirs
-
-
-class CleanDirs(BaseModel):
-    sample_sheets_dir_name: str
-    flow_cell_run_dirs: FlowCellRunDirs
-
-
-class CleanConfig(BaseModel):
-    flow_cells: CleanDirs
 
 
 class SlurmConfig(BaseModel):
@@ -61,14 +42,23 @@ class SlurmConfig(BaseModel):
     qos: SlurmQos = SlurmQos.LOW
 
 
+class EncryptionDirectories(BaseModel):
+    current: str
+    nas: str
+    pre_nas: str
+
+
+class BackupConfig(BaseModel):
+    encryption_directories: EncryptionDirectories
+    slurm_flow_cell_encryption: SlurmConfig
+
+
 class HousekeeperConfig(BaseModel):
     database: str
     root: str
 
 
 class DemultiplexConfig(BaseModel):
-    run_dir: str
-    out_dir: str
     slurm: SlurmConfig
 
 
@@ -245,7 +235,8 @@ class CGConfig(BaseModel):
     email_base_settings: EmailBaseSettings
     flow_cells_dir: str
     demultiplexed_flow_cells_dir: str
-
+    downsample_dir: str
+    downsample_script: str
     # Base APIs that always should exist
     status_db_: Store = None
     housekeeper: HousekeeperConfig
@@ -255,7 +246,6 @@ class CGConfig(BaseModel):
     backup: BackupConfig = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
-    clean: Optional[CleanConfig] = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
@@ -280,7 +270,9 @@ class CGConfig(BaseModel):
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
+    pigz: Optional[CommonAppConfig] = None
     pdc: Optional[CommonAppConfig] = None
+    pdc_api_: Optional[PdcAPI]
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
     tar: Optional[CommonAppConfig] = None
@@ -317,6 +309,7 @@ class CGConfig(BaseModel):
             "loqusdb_api_": "loqusdb_api",
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
+            "pdc_api_": "pdc_api",
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
@@ -427,6 +420,15 @@ class CGConfig(BaseModel):
         return api
 
     @property
+    def pdc_api(self) -> PdcAPI:
+        api = self.__dict__.get("pdc_api_")
+        if api is None:
+            LOG.debug("Instantiating PDC api")
+            api = PdcAPI(binary_path=self.pdc.binary_path)
+            self.pdc_api_ = api
+        return api
+
+    @property
     def scout_api(self) -> ScoutAPI:
         api = self.__dict__.get("scout_api_")
         if api is None:
@@ -440,7 +442,8 @@ class CGConfig(BaseModel):
         status_db = self.__dict__.get("status_db_")
         if status_db is None:
             LOG.debug("Instantiating status db")
-            status_db = Store(uri=self.database)
+            initialize_database(self.database)
+            status_db = Store()
             self.status_db_ = status_db
         return status_db
 

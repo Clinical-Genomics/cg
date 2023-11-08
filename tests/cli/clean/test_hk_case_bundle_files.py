@@ -1,15 +1,15 @@
 import datetime as dt
 import logging
 
+from click.testing import CliRunner
+
 from cg.cli.clean import hk_case_bundle_files
+from cg.constants.constants import Pipeline
 from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Analysis
-from cgmodels.cg.constants import Pipeline
-from click.testing import CliRunner
 from cg.utils.date import get_date_days_ago
-
 from tests.store_helpers import StoreHelpers
 
 
@@ -77,7 +77,7 @@ def test_clean_hk_case_files_single_analysis(
     analysis: Analysis = helpers.add_analysis(
         store=store, started_at=date_days_ago, completed_at=date_days_ago, pipeline=pipeline
     )
-    bundle_name: str = analysis.family.internal_id
+    bundle_name: str = analysis.case.internal_id
 
     # GIVEN a housekeeper api with some files
     hk_bundle_data["name"] = bundle_name
@@ -116,7 +116,7 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     analysis: Analysis = helpers.add_analysis(
         store=store, started_at=date_days_ago, completed_at=date_days_ago, pipeline=pipeline
     )
-    bundle_name: str = analysis.family.internal_id
+    bundle_name: str = analysis.case.internal_id
 
     # GIVEN a housekeeper api with some file with protected tags
     protected_tags = WORKFLOW_PROTECTED_TAGS[pipeline][0]

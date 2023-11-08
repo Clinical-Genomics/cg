@@ -1,10 +1,11 @@
 from enum import Enum
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, Optional
+
+from sqlalchemy import or_
+from sqlalchemy.orm import Query
 
 from cg.constants.constants import SampleType
 from cg.store.models import Customer, Sample
-from sqlalchemy import or_
-from sqlalchemy.orm import Query
 
 
 def filter_samples_by_internal_id(internal_id: str, samples: Query, **kwargs) -> Query:
@@ -65,12 +66,12 @@ def filter_samples_is_not_down_sampled(samples: Query, **kwargs) -> Query:
 
 def filter_samples_is_sequenced(samples: Query, **kwargs) -> Query:
     """Return samples that are sequenced."""
-    return samples.filter(Sample.sequenced_at.isnot(None))
+    return samples.filter(Sample.last_sequenced_at.isnot(None))
 
 
 def filter_samples_is_not_sequenced(samples: Query, **kwargs) -> Query:
     """Return samples that are not sequenced."""
-    return samples.filter(Sample.sequenced_at.is_(None))
+    return samples.filter(Sample.last_sequenced_at.is_(None))
 
 
 def filter_samples_do_invoice(samples: Query, **kwargs) -> Query:
@@ -79,7 +80,7 @@ def filter_samples_do_invoice(samples: Query, **kwargs) -> Query:
 
 
 def filter_samples_by_entry_customer_ids(
-    samples: Query, customer_entry_ids: List[int], **kwargs
+    samples: Query, customer_entry_ids: list[int], **kwargs
 ) -> Query:
     """Return samples by customer id."""
     return samples.filter(Sample.customer_id.in_(customer_entry_ids))
@@ -157,14 +158,14 @@ def filter_samples_by_identifier_name_and_value(
 
 
 def apply_sample_filter(
-    filter_functions: List[Callable],
+    filter_functions: list[Callable],
     samples: Query,
     entry_id: Optional[int] = None,
     internal_id: Optional[str] = None,
     tissue_type: Optional[SampleType] = None,
     data_analysis: Optional[str] = None,
     invoice_id: Optional[int] = None,
-    customer_entry_ids: Optional[List[int]] = None,
+    customer_entry_ids: Optional[list[int]] = None,
     subject_id: Optional[str] = None,
     name: Optional[str] = None,
     customer: Optional[Customer] = None,

@@ -1,6 +1,7 @@
 """Constants specific for encryption"""
+from enum import StrEnum
 
-from cg.utils.enums import ListEnum, StrEnum
+from cg.utils.enums import ListEnum
 
 
 class CipherAlgorithm(StrEnum):
@@ -18,11 +19,11 @@ class CipherAlgorithm(StrEnum):
 
 
 class EncryptionUserID(StrEnum):
-    HASTA_USER_ID: str = "Clinical Genomics"
+    HASTA_USER_ID: str = '"Clinical Genomics"'
 
 
 class GPGParameters(ListEnum):
-    ASYMMETRIC_ENCRYPTION: list = [
+    ASYMMETRIC_ENCRYPTION: list[str] = [
         "--encrypt",
         "--recipient",
         EncryptionUserID.HASTA_USER_ID,
@@ -35,7 +36,7 @@ class GPGParameters(ListEnum):
         "--passphrase",
         EncryptionUserID.HASTA_USER_ID,
     ]
-    SYMMETRIC_ENCRYPTION: list = [
+    SYMMETRIC_ENCRYPTION: list[str] = [
         "--symmetric",
         "--cipher-algo",
         CipherAlgorithm.AES256,
@@ -44,13 +45,13 @@ class GPGParameters(ListEnum):
         "None",
         "--passphrase-file",
     ]
-    SYMMETRIC_DECRYPTION: list = [
+    SYMMETRIC_DECRYPTION: list[str] = [
         "--decrypt",
         "--cipher-algo",
         CipherAlgorithm.AES256,
         "--batch",
         "--passphrase-file",
     ]
-    OUTPUT_PARAMETER: list = [
+    OUTPUT_PARAMETER: list[str] = [
         "-o",
     ]

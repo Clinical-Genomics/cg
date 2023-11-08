@@ -1,22 +1,22 @@
-from enum import Enum, IntEnum
+from enum import Enum, IntEnum, StrEnum
 
 
-class Gender(str, Enum):
+class Gender(StrEnum):
     FEMALE = "female"
     MALE = "male"
     UNKNOWN = "unknown"
     OTHER = "other"
-    MISSING = None
+    MISSING = ""
 
     def __repr__(self):
         return self.value
 
 
-class PhenotypeStatus(str, Enum):
+class PhenotypeStatus(StrEnum):
     UNKNOWN = "unknown"
     UNAFFECTED = "unaffected"
     AFFECTED = "affected"
-    MISSING = None
+    MISSING = ""
 
     def __repr__(self):
         return self.value
@@ -33,6 +33,12 @@ class PlinkGender(str, Enum):
     MALE = 1
     FEMALE = 2
 
+    def __str__(self) -> str:
+        return str.__str__(self.value)
+
 
 class RelationshipStatus(str, Enum):
     HAS_NO_PARENT = 0
+
+    def __str__(self) -> str:
+        return str.__str__(self.value)

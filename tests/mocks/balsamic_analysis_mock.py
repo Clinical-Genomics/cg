@@ -1,12 +1,11 @@
 from pathlib import Path
-from typing import Tuple
 
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 
 
-def get_balsamic_raw_data() -> Tuple[dict, dict]:
+def get_balsamic_raw_data() -> tuple[dict, dict]:
     """Extracts mock BALSAMIC analysis data"""
 
     config: dict = ReadFile.get_content_from_file(

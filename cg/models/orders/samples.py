@@ -1,7 +1,9 @@
-from typing import List, Optional
+from typing import Optional
+
+from pydantic.v1 import BaseModel, constr, validator
 
 from cg.constants import DataDelivery
-from cg.constants.constants import GenomeVersion
+from cg.constants.constants import GenomeVersion, Pipeline
 from cg.models.orders.order import OrderType
 from cg.models.orders.sample_base import (
     NAME_PATTERN,
@@ -11,9 +13,7 @@ from cg.models.orders.sample_base import (
     SexEnum,
     StatusEnum,
 )
-from cg.store.models import Application, Family, Organism, Panel, Pool, Sample
-from cgmodels.cg.constants import Pipeline
-from pydantic.v1 import BaseModel, constr, validator
+from cg.store.models import Application, Case, Organism, Panel, Pool, Sample
 
 
 class OptionalIntValidator:
@@ -69,7 +69,7 @@ class Of1508Sample(OrderInSample):
     family_name: constr(
         regex=NAME_PATTERN,
         min_length=2,
-        max_length=Family.name.property.columns[0].type.length,
+        max_length=Case.name.property.columns[0].type.length,
     )
     case_internal_id: Optional[
         constr(max_length=Sample.internal_id.property.columns[0].type.length)
@@ -100,9 +100,9 @@ class Of1508Sample(OrderInSample):
     post_formalin_fixation_time: Optional[int]
     tissue_block_size: Optional[str]
     # "Not Required"
-    cohorts: Optional[List[str]]
-    phenotype_groups: Optional[List[str]]
-    phenotype_terms: Optional[List[str]]
+    cohorts: Optional[list[str]]
+    phenotype_groups: Optional[list[str]]
+    phenotype_terms: Optional[list[str]]
     require_qc_ok: bool = False
     quantity: Optional[int]
     subject_id: Optional[
@@ -138,7 +138,7 @@ class Of1508Sample(OrderInSample):
 class MipDnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_DNA
     # "Required if data analysis in Scout or vcf delivery"
-    panels: List[constr(min_length=1, max_length=Panel.abbrev.property.columns[0].type.length)]
+    panels: list[constr(min_length=1, max_length=Panel.abbrev.property.columns[0].type.length)]
     status: StatusEnum
 
 

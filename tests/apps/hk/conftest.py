@@ -1,14 +1,11 @@
 """Fixtures for the housekeeper tests."""
-from pathlib import Path
-from typing import List
-
 import datetime
+from pathlib import Path
 
 import pytest
-
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from housekeeper.store.models import Bundle
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 
 
@@ -48,7 +45,7 @@ def hk_tag() -> str:
 
 
 @pytest.fixture
-def tags() -> List[str]:
+def tags() -> list[str]:
     """Return a list of Housekeeper tags."""
     return ["bed"]
 

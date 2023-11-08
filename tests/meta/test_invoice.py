@@ -1,14 +1,11 @@
 import mock
 
-
-from cg.meta.invoice import InvoiceAPI
-
 from cg.constants.invoice import CostCenters
-from cg.constants.sequencing import RecordType
 from cg.constants.priority import PriorityTerms
-from cg.store.models import Pool, Sample
-
+from cg.constants.sequencing import RecordType
+from cg.meta.invoice import InvoiceAPI
 from cg.models.invoice.invoice import InvoiceInfo
+from cg.store.models import Pool, Sample
 
 
 def test_instantiate_invoice_api(get_invoice_api_sample):

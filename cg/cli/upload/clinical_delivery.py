@@ -2,19 +2,19 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import Set
 
 import click
+
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import Pipeline
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.constants.constants import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
+from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
 from cg.store import Store
-from cg.store.models import Family
-from cgmodels.trailblazer.constants import AnalysisTypes
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -29,8 +29,8 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
 
     click.echo(click.style("----------------- Clinical-delivery -----------------"))
 
-    case: Family = context.obj.status_db.get_case_by_internal_id(internal_id=case_id)
-    delivery_types: Set[str] = case.get_delivery_arguments()
+    case: Case = context.obj.status_db.get_case_by_internal_id(internal_id=case_id)
+    delivery_types: set[str] = case.get_delivery_arguments()
     is_sample_delivery: bool
     is_case_delivery: bool
     is_complete_delivery: bool
@@ -83,35 +83,39 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
 def auto_fastq(context: click.Context, dry_run: bool):
     """Starts upload of all not previously uploaded cases with analysis type fastq to
     clinical-delivery."""
-
+    exit_code: int = EXIT_SUCCESS
     status_db: Store = context.obj.status_db
     trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
     for analysis_obj in status_db.get_analyses_to_upload(pipeline=Pipeline.FASTQ):
-        if analysis_obj.family.analyses[0].uploaded_at:
-            LOG.warning(
-                "Newer analysis already uploaded for %s, skipping",
-                analysis_obj.family.internal_id,
+        if analysis_obj.case.analyses[0].uploaded_at:
+            LOG.debug(
+                f"Newer analysis already uploaded for {analysis_obj.case.internal_id}, skipping"
             )
             continue
         if analysis_obj.upload_started_at:
-            if trailblazer_api.is_latest_analysis_completed(
-                case_id=analysis_obj.family.internal_id
-            ):
+            if trailblazer_api.is_latest_analysis_completed(case_id=analysis_obj.case.internal_id):
                 LOG.info(
-                    "The upload for %s is completed, setting uploaded at to %s",
-                    analysis_obj.family.internal_id,
-                    dt.datetime.now(),
+                    f"The upload for {analysis_obj.case.internal_id} is completed, setting uploaded at to {dt.datetime.now()}"
                 )
                 analysis_obj.uploaded_at = dt.datetime.now()
             else:
-                LOG.warning(
-                    "Upload to clinical-delivery for %s has already started, skipping",
-                    analysis_obj.family.internal_id,
+                LOG.debug(
+                    f"Upload to clinical-delivery for {analysis_obj.case.internal_id} has already started, skipping"
                 )
             continue
-        case: Family = analysis_obj.family
-        LOG.info("Uploading family: %s", case.internal_id)
+        case: Case = analysis_obj.case
+        LOG.info(f"Uploading family: {case.internal_id}")
         analysis_obj.upload_started_at = dt.datetime.now()
-        context.invoke(upload_clinical_delivery, case_id=case.internal_id, dry_run=dry_run)
-        if not dry_run:
-            status_db.session.commit()
+        try:
+            context.invoke(upload_clinical_delivery, case_id=case.internal_id, dry_run=dry_run)
+        except Exception as error:
+            LOG.error(f"Upload of case {case.internal_id} failed")
+            LOG.error(error)
+            exit_code: int = EXIT_FAIL
+            continue
+
+    if not dry_run:
+        status_db.session.commit()
+
+    if exit_code == EXIT_FAIL:
+        raise click.Abort

@@ -1,11 +1,14 @@
 """Handler to delete data objects"""
 
-from typing import List
 
-from cg.store.filters.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilter
-from cg.store.models import Flowcell, Family, Sample, SampleLaneSequencingMetrics
-from cg.store.api.base import BaseHandler
 from sqlalchemy.orm import Session
+
+from cg.store.api.base import BaseHandler
+from cg.store.filters.status_flow_cell_filters import (
+    FlowCellFilter,
+    apply_flow_cell_filter,
+)
+from cg.store.models import Case, Flowcell, Sample, SampleLaneSequencingMetrics
 
 
 class DeleteDataHandler(BaseHandler):
@@ -20,7 +23,7 @@ class DeleteDataHandler(BaseHandler):
         flow_cell: Flowcell = apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
             flow_cell_name=flow_cell_id,
-            filter_functions=[FlowCellFilter.GET_BY_NAME],
+            filter_functions=[FlowCellFilter.FILTER_BY_NAME],
         ).first()
 
         if flow_cell:
@@ -34,10 +37,10 @@ class DeleteDataHandler(BaseHandler):
                 self.session.delete(case_sample)
             self.session.commit()
 
-    def delete_cases_without_samples(self, case_internal_ids: List[str]) -> None:
+    def delete_cases_without_samples(self, case_internal_ids: list[str]) -> None:
         """Delete any cases specified in case_ids without samples."""
         for case_internal_id in case_internal_ids:
-            case: Family = self.get_case_by_internal_id(internal_id=case_internal_id)
+            case: Case = self.get_case_by_internal_id(internal_id=case_internal_id)
             if case and not case.links:
                 self.session.delete(case)
         self.session.commit()
@@ -46,7 +49,7 @@ class DeleteDataHandler(BaseHandler):
         self, flow_cell_name: str
     ) -> None:
         """Delete all entries in sample_lane_sequencing_metrics for a flow cell."""
-        metrics: List[
+        metrics: list[
             SampleLaneSequencingMetrics
         ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
         for metric in metrics:

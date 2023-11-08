@@ -106,7 +106,7 @@ def test_generate_config_adds_meta_result_key(
     )
 
     # THEN the config should contain the rank model version used
-    assert result_data.dict()[result_key]
+    assert result_data.model_dump()[result_key]
 
 
 def test_generate_config_adds_sample_paths(

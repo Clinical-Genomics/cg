@@ -1,6 +1,7 @@
 from enum import Enum
-from typing import Callable, List, Optional
-from sqlalchemy import func, and_
+from typing import Callable, Optional
+
+from sqlalchemy import func
 from sqlalchemy.orm import Query
 
 from cg.store.models import SampleLaneSequencingMetrics
@@ -58,7 +59,7 @@ class SequencingMetricsFilter(Enum):
 
 def apply_metrics_filter(
     metrics: Query,
-    filter_functions: List[Callable],
+    filter_functions: list[Callable],
     sample_internal_id: Optional[str] = None,
     flow_cell_name: Optional[str] = None,
     lane: Optional[int] = None,

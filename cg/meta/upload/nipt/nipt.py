@@ -2,21 +2,21 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import List, Optional
-
-import requests
-from requests import Response
+from typing import Optional
 
 import paramiko
+import requests
+from housekeeper.store.models import File
+from requests import Response
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
 from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
-from cg.meta.upload.nipt.models import StatinaUploadFiles, FlowCellQ30AndReads
+from cg.meta.upload.nipt.models import FlowCellQ30AndReads, StatinaUploadFiles
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Analysis, Flowcell, Family
-from housekeeper.store.models import File
-from cg.apps.tb import TrailblazerAPI
+from cg.store.models import Analysis, Case, Flowcell
 
 LOG = logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ class NiptUploadAPI:
         """Get the result file for a NIPT analysis from Housekeeper"""
 
         if not tags:
-            tags: List[str] = self.RESULT_FILE_TAGS
+            tags: list[str] = self.RESULT_FILE_TAGS
 
         hk_all_results_file: File = self.housekeeper_api.get_file_from_latest_version(
             bundle_name=case_id, tags=tags
@@ -103,7 +103,7 @@ class NiptUploadAPI:
 
         return results_file
 
-    def get_all_upload_analyses(self) -> List[Analysis]:
+    def get_all_upload_analyses(self) -> list[Analysis]:
         """Gets all nipt analyses that are ready to be uploaded"""
         return self.status_db.get_latest_analysis_to_upload_for_pipeline(pipeline=Pipeline.FLUFFY)
 
@@ -131,7 +131,7 @@ class NiptUploadAPI:
     def update_analysis_uploaded_at_date(self, case_id: str) -> Analysis:
         """Updates analysis_uploaded_at for the uploaded analysis"""
 
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_obj: Analysis = case_obj.analyses[0]
 
         if not self.dry_run:
@@ -146,7 +146,7 @@ class NiptUploadAPI:
     def update_analysis_upload_started_date(self, case_id: str) -> Analysis:
         """Updates analysis_upload_started_at for the uploaded analysis"""
 
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_obj: Analysis = case_obj.analyses[0]
 
         if not self.dry_run:

@@ -1,24 +1,23 @@
 """CLI function to compress FASTQ files into SPRING archives."""
 
 import logging
-from typing import Iterable, List, Optional
+from typing import Iterable, Optional
 
 import click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress.helpers import (
-    correct_spring_paths,
-    update_compress_api,
-    is_case_ignored,
-    get_cases_to_process,
     compress_sample_fastqs_in_cases,
+    correct_spring_paths,
+    get_cases_to_process,
+    update_compress_api,
 )
 from cg.constants.constants import DRY_RUN
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -52,7 +51,7 @@ def fastq_cmd(
     LOG.info("Running compress FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
-    cases: List[Family] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
+    cases: list[Case] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         LOG.info("No cases to compress")
         return None
@@ -85,14 +84,12 @@ def clean_fastq(context: CGConfig, case_id: Optional[str], days_back: int, dry_r
     store: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
 
-    cases: List[Family] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
+    cases: list[Case] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         return
 
     cleaned_inds = 0
     for case in cases:
-        if is_case_ignored(case_id=case.internal_id):
-            continue
         samples: Iterable[str] = store.get_sample_ids_by_case_id(case_id=case.internal_id)
         for sample_id in samples:
             was_cleaned: bool = compress_api.clean_fastq(sample_id=sample_id)

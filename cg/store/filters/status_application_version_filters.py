@@ -1,7 +1,8 @@
-from enum import Enum
 from datetime import datetime
+from enum import Enum
+from typing import Callable
+
 from sqlalchemy.orm import Query
-from typing import List, Callable
 
 from cg.store.models import ApplicationVersion
 
@@ -35,7 +36,7 @@ def filter_application_versions_by_application_version_entry_id(
 
 
 def apply_application_versions_filter(
-    filter_functions: List[Callable],
+    filter_functions: list[Callable],
     application_versions: Query,
     application_entry_id: int = None,
     application_version_entry_id: int = None,

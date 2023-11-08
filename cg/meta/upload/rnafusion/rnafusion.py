@@ -7,11 +7,11 @@ import click
 from cg.cli.generate.report.base import generate_delivery_report
 from cg.cli.upload.clinical_delivery import upload_clinical_delivery
 from cg.cli.upload.scout import upload_to_scout
-from cg.constants import DataDelivery, REPORT_SUPPORTED_DATA_DELIVERY
+from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Analysis, Family
+from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class RnafusionUploadAPI(UploadAPI):
         self.analysis_api: RnafusionAnalysisAPI = RnafusionAnalysisAPI(config)
         super().__init__(config=config, analysis_api=self.analysis_api)
 
-    def upload(self, ctx: click.Context, case: Family, restart: bool) -> None:
+    def upload(self, ctx: click.Context, case: Case, restart: bool) -> None:
         """Upload Rnafusion analysis data and files."""
         analysis: Analysis = case.analyses[0]
         self.update_upload_started_at(analysis=analysis)

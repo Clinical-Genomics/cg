@@ -1,10 +1,11 @@
+import datetime as dt
+
+from click.testing import CliRunner
+
 from cg.cli.workflow.fluffy.base import start_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
-import datetime as dt
-
 from cg.store.models import Sample
 
 
@@ -58,7 +59,7 @@ def test_start_available(
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_name_from_lims_id")
     FluffyAnalysisAPI.get_sample_name_from_lims_id.return_value = "CustName"
 
-    # GIVEN every sample in SampleSheet sequenced_at set in StatusDB
+    # GIVEN every sample in SampleSheet last_sequenced_at set in StatusDB
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_sequenced_date")
     FluffyAnalysisAPI.get_sample_sequenced_date.return_value = dt.datetime.now().date()
 

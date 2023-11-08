@@ -1,19 +1,19 @@
 import logging
-from typing import List, Optional, Iterable
+from typing import Iterable, Optional
 
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 
 from cg.constants import (
-    REQUIRED_REPORT_FIELDS,
-    REQUIRED_CUSTOMER_FIELDS,
-    REQUIRED_CASE_FIELDS,
     REQUIRED_APPLICATION_FIELDS,
+    REQUIRED_CASE_FIELDS,
+    REQUIRED_CUSTOMER_FIELDS,
     REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS,
-    REQUIRED_SAMPLE_MIP_DNA_FIELDS,
-    REQUIRED_SAMPLE_METHODS_FIELDS,
-    REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
+    REQUIRED_REPORT_FIELDS,
     REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS,
     REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS,
+    REQUIRED_SAMPLE_METHODS_FIELDS,
+    REQUIRED_SAMPLE_MIP_DNA_FIELDS,
+    REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     Pipeline,
 )
 from cg.constants.scout_upload import MIP_CASE_TAGS
@@ -26,7 +26,7 @@ from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.models.report.metadata import MipDNASampleMetadataModel
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class MipDNAReportAPI(ReportAPI):
         self.analysis_api: MipDNAAnalysisAPI = analysis_api
 
     def get_sample_metadata(
-        self, case: Family, sample: Sample, analysis_metadata: MipAnalysis
+        self, case: Case, sample: Sample, analysis_metadata: MipAnalysis
     ) -> MipDNASampleMetadataModel:
         """Fetches the MIP DNA sample metadata to include in the report."""
         parsed_metrics = get_sample_id_metric(
@@ -56,7 +56,7 @@ class MipDNAReportAPI(ReportAPI):
             duplicates=parsed_metrics.duplicate_reads,
         )
 
-    def get_sample_coverage(self, sample: Sample, case: Family) -> dict:
+    def get_sample_coverage(self, sample: Sample, case: Case) -> dict:
         """Calculates coverage values for a specific sample."""
         genes = self.get_genes_from_scout(panels=case.panels)
         sample_coverage = self.chanjo_api.sample_coverage(
@@ -80,7 +80,7 @@ class MipDNAReportAPI(ReportAPI):
         return analysis_metadata.genome_build
 
     def get_report_accreditation(
-        self, samples: List[SampleModel], analysis_metadata: MipAnalysis = None
+        self, samples: list[SampleModel], analysis_metadata: MipAnalysis = None
     ) -> bool:
         """Checks if the report is accredited or not by evaluating each of the sample process accreditations."""
         for sample in samples:

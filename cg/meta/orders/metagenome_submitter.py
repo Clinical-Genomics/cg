@@ -1,16 +1,14 @@
 import datetime as dt
-from typing import List
-
-from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery
+from cg.constants.constants import Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.models.orders.samples import MetagenomeSample
-from cg.store.models import Customer, Family, FamilySample, Sample, ApplicationVersion
+from cg.store.models import ApplicationVersion, Customer, Case, CaseSample, Sample
 
 
 class MetagenomeSubmitter(Submitter):
@@ -18,7 +16,7 @@ class MetagenomeSubmitter(Submitter):
         self._validate_sample_names_are_unique(samples=order.samples, customer_id=order.customer)
 
     def _validate_sample_names_are_unique(
-        self, samples: List[MetagenomeSample], customer_id: str
+        self, samples: list[MetagenomeSample], customer_id: str
     ) -> None:
         """Validate that the names of all samples are unused."""
         customer: Customer = self.status.get_customer_by_internal_id(
@@ -81,8 +79,8 @@ class MetagenomeSubmitter(Submitter):
         order: str,
         ordered: dt.datetime,
         ticket_id: str,
-        items: List[dict],
-    ) -> List[Sample]:
+        items: list[dict],
+    ) -> list[Sample]:
         """Store samples in the status database."""
         customer: Customer = self.status.get_customer_by_internal_id(
             customer_internal_id=customer_id
@@ -90,7 +88,7 @@ class MetagenomeSubmitter(Submitter):
         if customer is None:
             raise OrderError(f"unknown customer: {customer_id}")
         new_samples = []
-        case: Family = self.status.get_case_by_name_and_customer(
+        case: Case = self.status.get_case_by_name_and_customer(
             customer=customer, case_name=str(ticket_id)
         )
         case_dict: dict = items[0]
@@ -126,12 +124,12 @@ class MetagenomeSubmitter(Submitter):
                         priority=case_dict["priority"],
                         ticket=ticket_id,
                     )
-                    case.customer: Customer = customer
+                    case.customer = customer
                     self.status.session.add(case)
                     self.status.session.commit()
 
-                new_relationship: FamilySample = self.status.relate_sample(
-                    family=case, sample=new_sample, status=StatusEnum.unknown
+                new_relationship: CaseSample = self.status.relate_sample(
+                    case=case, sample=new_sample, status=StatusEnum.unknown
                 )
                 self.status.session.add(new_relationship)
 
