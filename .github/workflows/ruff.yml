@@ -4,14 +4,26 @@ on: [ push, pull_request ]
 
 jobs:
   ruff-format:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out git repository
-        uses: actions/checkout@v3       
+        uses: actions/checkout@v3.3.0      
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          persist-credentials: false 
       
       - name: Ruff action
         uses: chartboost/ruff-action@v1
         with:
-          args: "check --fix --ignore F401,E501,F811"
+          args: "check --fix --ignore F401,E501,F811 --line-length 100 --exclude **/alembic"
           version: "0.1.4"
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "ruff code formatter"
+
 
