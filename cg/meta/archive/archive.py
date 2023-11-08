@@ -191,7 +191,7 @@ class SpringArchiveAPI:
         return files_and_samples
 
     def update_status_for_ongoing_tasks(self) -> None:
-        """Updates any ongoing jobs with a finished timestamp, should they be completed."""
+        """Updates any completed jobs with a finished timestamp."""
         self.update_ongoing_archivals()
         self.update_ongoing_retrievals()
 
