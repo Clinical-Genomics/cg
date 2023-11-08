@@ -40,7 +40,7 @@ def view_family_sample_link(unused1, unused2, model, unused3):
 
     return Markup(
         "<a href='%s'>%s</a>"
-        % (url_for("familysample.index_view", search=model.internal_id), model.internal_id)
+        % (url_for("casesample.index_view", search=model.internal_id), model.internal_id)
     )
 
 
@@ -563,7 +563,7 @@ class DeliveryView(BaseView):
     edit_modal = True
 
 
-class FamilySampleView(BaseView):
+class CaseSampleView(BaseView):
     """Admin view for Model.caseSample"""
 
     column_default_sort = ("created_at", True)

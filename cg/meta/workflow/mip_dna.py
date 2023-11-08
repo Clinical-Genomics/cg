@@ -6,7 +6,7 @@ from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.pedigree import Pedigree
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, FamilySample
+from cg.store.models import Case, CaseSample
 from cg.utils import Process
 
 
@@ -50,7 +50,7 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
         return self._process
 
     def config_sample(
-        self, link_obj: FamilySample, panel_bed: Optional[str]
+        self, link_obj: CaseSample, panel_bed: Optional[str]
     ) -> dict[str, Union[str, int, None]]:
         """Return config sample data."""
         sample_data: dict[str, Union[str, int]] = self.get_sample_data(link_obj=link_obj)

@@ -13,7 +13,7 @@ from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
 from cg.exc import MissingFilesError
 from cg.store import Store
-from cg.store.models import Case, FamilySample, Sample
+from cg.store.models import Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ class DeliverAPI:
                 LOG.info(f"Could not find any version for {case_id}")
             elif not self.skip_missing_bundle:
                 raise SyntaxError(f"Could not find any version for {case_id}")
-        links: list[FamilySample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
+        links: list[CaseSample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
         if not links:
             LOG.warning(f"Could not find any samples linked to case {case_id}")
             return
@@ -98,7 +98,7 @@ class DeliverAPI:
         if not self.sample_tags:
             return
 
-        link: FamilySample
+        link: CaseSample
         for link in links:
             if link.sample.sequencing_qc or self.deliver_failed_samples:
                 sample_id: str = link.sample.internal_id

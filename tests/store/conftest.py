@@ -8,7 +8,7 @@ import pytest
 from cg.constants import Pipeline
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store
-from cg.store.models import Analysis, Application, Customer, Case, FamilySample, Organism, Sample
+from cg.store.models import Analysis, Application, Customer, Case, CaseSample, Organism, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -445,8 +445,8 @@ def store_with_analyses_for_cases(
             uploaded_to_vogue_at=timestamp_now,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        link: FamilySample = analysis_store.relate_sample(
-            family=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
+        link: CaseSample = analysis_store.relate_sample(
+            case=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
         analysis_store.session.add(link)
     return analysis_store
