@@ -18,7 +18,7 @@ from cg.models.scout.scout_load_config import (
     ScoutLoadConfig,
     ScoutMipIndividual,
 )
-from cg.store.models import Analysis, Case, FamilySample
+from cg.store.models import Analysis, Case, CaseSample
 
 LOG = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.include_case_files()
 
         LOG.info("Building samples")
-        db_sample: FamilySample
+        db_sample: CaseSample
         for db_sample in self.analysis_obj.case.links:
             self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
         self.include_pedigree_picture()
@@ -82,7 +82,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         else:
             LOG.info("family of 1 sample - skip pedigree graph")
 
-    def build_config_sample(self, case_sample: FamilySample) -> ScoutMipIndividual:
+    def build_config_sample(self, case_sample: CaseSample) -> ScoutMipIndividual:
         """Build a sample with mip specific information"""
 
         config_sample = ScoutMipIndividual()

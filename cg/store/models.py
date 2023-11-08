@@ -400,7 +400,7 @@ class Case(Model, PriorityMixin):
     tickets = Column(types.VARCHAR(128))
 
     analyses = orm.relationship(Analysis, back_populates="case", order_by="-Analysis.completed_at")
-    links = orm.relationship("FamilySample", back_populates="case")
+    links = orm.relationship("CaseSample", back_populates="case")
 
     @property
     def cohorts(self) -> list[str]:
@@ -515,7 +515,7 @@ class Case(Model, PriorityMixin):
         return data
 
 
-class FamilySample(Model):
+class CaseSample(Model):
     __tablename__ = "family_sample"
     __table_args__ = (UniqueConstraint("family_id", "sample_id", name="_family_sample_uc"),)
 
@@ -694,13 +694,13 @@ class Sample(Model, PriorityMixin):
     subject_id = Column(types.String(128))
 
     links = orm.relationship(
-        FamilySample, foreign_keys=[FamilySample.sample_id], back_populates="sample"
+        CaseSample, foreign_keys=[CaseSample.sample_id], back_populates="sample"
     )
     mother_links = orm.relationship(
-        FamilySample, foreign_keys=[FamilySample.mother_id], back_populates="mother"
+        CaseSample, foreign_keys=[CaseSample.mother_id], back_populates="mother"
     )
     father_links = orm.relationship(
-        FamilySample, foreign_keys=[FamilySample.father_id], back_populates="father"
+        CaseSample, foreign_keys=[CaseSample.father_id], back_populates="father"
     )
     flowcells = orm.relationship(Flowcell, secondary=flowcell_sample, back_populates="samples")
     sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")

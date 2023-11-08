@@ -25,7 +25,7 @@ from cg.models.balsamic.metrics import (
     BalsamicWGSQCMetrics,
 )
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, FamilySample, Sample
+from cg.store.models import Case, CaseSample, Sample
 from cg.utils import Process
 from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
 
@@ -154,7 +154,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 case_obj=case_obj, sample_obj=link.sample, concatenate=True
             )
 
-    def get_concatenated_fastq_path(self, link_object: FamilySample) -> Path:
+    def get_concatenated_fastq_path(self, link_object: CaseSample) -> Path:
         """Returns path to the concatenated FASTQ file of a sample"""
         file_collection: list[dict] = self.gather_file_metadata_for_sample(link_object.sample)
         fastq_data = file_collection[0]
@@ -538,7 +538,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return application_types.pop().lower()
 
     def resolve_target_bed(
-        self, panel_bed: Optional[str], link_object: FamilySample
+        self, panel_bed: Optional[str], link_object: CaseSample
     ) -> Optional[str]:
         if panel_bed:
             return panel_bed

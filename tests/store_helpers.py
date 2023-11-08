@@ -22,7 +22,7 @@ from cg.store.models import (
     Collaboration,
     Customer,
     Case,
-    FamilySample,
+    CaseSample,
     Flowcell,
     Invoice,
     Organism,
@@ -653,10 +653,10 @@ class StoreHelpers:
         status: str = PhenotypeStatus.UNKNOWN,
         father: Sample = None,
         mother: Sample = None,
-    ) -> FamilySample:
+    ) -> CaseSample:
         """Utility function to link a sample to a case."""
         link = store.relate_sample(
-            sample=sample, family=case, status=status, father=father, mother=mother
+            sample=sample, case=case, status=status, father=father, mother=mother
         )
         store.session.add(link)
         store.session.commit()
@@ -724,7 +724,7 @@ class StoreHelpers:
 
         for sample in samples:
             link = base_store.relate_sample(
-                family=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+                case=case, sample=sample, status=PhenotypeStatus.UNKNOWN
             )
             base_store.session.add(link)
             base_store.session.commit()

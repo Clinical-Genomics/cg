@@ -23,7 +23,7 @@ from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_config import MipBaseConfig
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
-from cg.store.models import BedVersion, Case, FamilySample, Sample
+from cg.store.models import BedVersion, Case, CaseSample, Sample
 
 CLI_OPTIONS = {
     "config": {"option": "--config_file"},
@@ -127,7 +127,7 @@ class MipAnalysisAPI(AnalysisAPI):
         LOG.info("Config file saved to %s", pedigree_config_path)
 
     @staticmethod
-    def get_sample_data(link_obj: FamilySample) -> dict[str, Union[str, int]]:
+    def get_sample_data(link_obj: CaseSample) -> dict[str, Union[str, int]]:
         """Return sample specific data."""
         return {
             "sample_id": link_obj.sample.internal_id,
@@ -335,7 +335,7 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "analysis", "slurm_job_ids.yaml")
 
-    def config_sample(self, link_obj: FamilySample, panel_bed: str) -> dict:
+    def config_sample(self, link_obj: CaseSample, panel_bed: str) -> dict:
         raise NotImplementedError
 
     def get_pipeline_version(self, case_id: str) -> str:
