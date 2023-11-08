@@ -24,13 +24,13 @@
   tag: arriba
 - format: cram
   id: CASEID
-  path: PATHTOCASE/cram_starfusion/CASEID.cram
+  path: PATHTOCASE/cram_starfusion/CASEID.star_for_starfusion.Aligned.sortedByCoord.out.cram
   path_index: ~
   step: star-fusion
   tag: star-fusion-cram
 - format: html
   id: CASEID
-  path: PATHTOCASE/fusionreport/CASEID/index.html
+  path: PATHTOCASE/fusionreport/CASEID/CASEID_fusionreport_index.html
   path_index: ~
   step: report
   tag: fusionreport
@@ -48,7 +48,7 @@
   tag: fusioninspector-html
 - format: pdf
   id: CASEID
-  path: PATHTOCASE/arriba_visualisation/CASEID.pdf
+  path: PATHTOCASE/arriba_visualisation/CASEID_combined_fusions_arriba_visualisation.pdf
   path_index: ~
   step: arriba
   tag: arriba-visualisation
