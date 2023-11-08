@@ -259,9 +259,7 @@ class SpringArchiveAPI:
             if job.archiving_task_id in handled_job_ids:
                 continue
 
-            archive_location: ArchiveLocations = ArchiveLocations(
-                self.get_archive_location_from_file(job.file)
-            )
+            archive_location = ArchiveLocations(self.get_archive_location_from_file(job.file))
             if jobs_per_location.get(archive_location):
                 jobs_per_location[archive_location].append(job.archiving_task_id)
             else:
@@ -279,9 +277,7 @@ class SpringArchiveAPI:
             if job.retrieval_task_id in handled_job_ids:
                 continue
 
-            archive_location: ArchiveLocations = ArchiveLocations(
-                self.get_archive_location_from_file(job.file)
-            )
+            archive_location = ArchiveLocations(self.get_archive_location_from_file(job.file))
             if jobs_per_location.get(archive_location):
                 jobs_per_location[archive_location].append(job.retrieval_task_id)
             else:
