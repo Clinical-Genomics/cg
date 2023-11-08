@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Type
 
 import pytest
+from _pytest.fixtures import FixtureRequest
 
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
@@ -9,6 +10,8 @@ from cg.apps.demultiplex.sample_sheet.models import (
 )
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.sequencing import Sequencers
+from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
@@ -144,6 +147,30 @@ def test_get_run_parameters_when_non_existing(demultiplexed_runs: Path):
     with pytest.raises(FileNotFoundError):
         # THEN assert that a FileNotFound error is raised
         flow_cell.run_parameters
+
+
+@pytest.mark.parametrize(
+    "flow_cell_fixture, expected_sequencer",
+    [
+        ("hiseq_2500_flow_cell", Sequencers.HISEQGA),
+        ("hiseq_x_flow_cell", Sequencers.HISEQX),
+        ("novaseq_6000_flow_cell", Sequencers.NOVASEQ),
+        ("novaseq_x_flow_cell", Sequencers.NOVASEQX),
+    ],
+)
+def test_flow_cell_run_parameters_type(
+    flow_cell_fixture: str, expected_sequencer: str, request: FixtureRequest
+):
+    """Test that the run parameters of the flow cell is of teh expected type."""
+    # GIVEN a flow cell without _run_parameters
+    flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture)
+    assert not flow_cell._run_parameters
+
+    # WHEN creating the run parameters of the flow cell
+    run_parameters: RunParameters = flow_cell.run_parameters
+
+    # THEN the run parameters sequencer is the same as of the flow cell
+    assert run_parameters.sequencer == expected_sequencer
 
 
 def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bclconvert: Path):

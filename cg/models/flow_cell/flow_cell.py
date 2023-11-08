@@ -24,11 +24,18 @@ from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.exc import FlowCellError, SampleSheetError
 from cg.models.demultiplex.run_parameters import (
     RunParameters,
+    RunParametersHiSeq,
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
 
 LOG = logging.getLogger(__name__)
+RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
+    Sequencers.HISEQGA: RunParametersHiSeq,
+    Sequencers.HISEQX: RunParametersHiSeq,
+    Sequencers.NOVASEQ: RunParametersNovaSeq6000,
+    Sequencers.NOVASEQX: RunParametersNovaSeqX,
+}
 
 
 class FlowCellDirectoryData:
@@ -109,10 +116,8 @@ class FlowCellDirectoryData:
             LOG.warning(message)
             raise FileNotFoundError(message)
         if not self._run_parameters:
-            self._run_parameters = (
-                RunParametersNovaSeqX(run_parameters_path=self.run_parameters_path)
-                if self.sequencer_type == Sequencers.NOVASEQX
-                else RunParametersNovaSeq6000(run_parameters_path=self.run_parameters_path)
+            self._run_parameters = RUN_PARAMETERS_CONSTRUCTOR[self.sequencer_type](
+                run_parameters_path=self.run_parameters_path
             )
         return self._run_parameters
 

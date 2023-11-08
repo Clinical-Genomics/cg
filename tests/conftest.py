@@ -1392,6 +1392,18 @@ def novaseq_x_run_parameters(
 
 
 @pytest.fixture(scope="session")
+def hiseq_2500_flow_cell(hiseq_2500_flow_cell_dir: Path) -> FlowCellDirectoryData:
+    """."""
+    return FlowCellDirectoryData(flow_cell_path=hiseq_2500_flow_cell_dir)
+
+
+@pytest.fixture(scope="session")
+def hiseq_x_flow_cell(hiseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
+    """."""
+    return FlowCellDirectoryData(flow_cell_path=hiseq_x_flow_cell_dir)
+
+
+@pytest.fixture(scope="session")
 def bcl2fastq_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a flow cell object with flow cell that is demultiplexed."""
     return FlowCellDirectoryData(
@@ -1415,6 +1427,12 @@ def bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> FlowCellDirectoryD
     return FlowCellDirectoryData(
         flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
     )
+
+
+@pytest.fixture(scope="session")
+def novaseq_6000_flow_cell(bcl_convert_flow_cell: FlowCellDirectoryData) -> FlowCellDirectoryData:
+    """Return a NovaSeq6000 flow cell object."""
+    return bcl_convert_flow_cell
 
 
 @pytest.fixture(scope="function")
