@@ -196,10 +196,10 @@ class SpringArchiveAPI:
         self.update_ongoing_retrievals()
 
     def update_ongoing_archivals(self) -> None:
-        archival_jobs: list[Archive] = self.housekeeper_api.get_ongoing_archivals()
+        ongoing_archivals: list[Archive] = self.housekeeper_api.get_ongoing_archivals()
         archival_ids_per_location: dict[
             ArchiveLocations, list[int]
-        ] = self.sort_archival_ids_on_archive_location(jobs=archival_jobs)
+        ] = self.sort_archival_ids_on_archive_location(ongoing_archivals)
         for archive_location in ArchiveLocations:
             self.update_archival_jobs_for_archive_location(
                 archive_location=archive_location,
@@ -207,10 +207,10 @@ class SpringArchiveAPI:
             )
 
     def update_ongoing_retrievals(self) -> None:
-        retrieval_jobs: list[Archive] = self.housekeeper_api.get_ongoing_retrievals()
+        ongoing_retrievals: list[Archive] = self.housekeeper_api.get_ongoing_retrievals()
         retrieval_ids_per_location: dict[
             ArchiveLocations, list[int]
-        ] = self.sort_retrieval_ids_on_archive_location(jobs=retrieval_jobs)
+        ] = self.sort_retrieval_ids_on_archive_location(ongoing_retrievals)
         for archive_location in ArchiveLocations:
             self.update_retrieval_jobs_for_archive_location(
                 archive_location=archive_location,
