@@ -92,7 +92,7 @@ def config_case(
     sample_objs: list[Sample] = analysis_api.get_samples(case_id=case_id, sample_id=sample_id)
 
     if not sample_objs:
-        LOG.error("No sample found for that ticket/sample_id")
+        LOG.error(f"No sample found for that ticket/sample_id")
         raise click.Abort
 
     parameters: list[dict] = [analysis_api.get_parameters(sample_obj) for sample_obj in sample_objs]
@@ -170,7 +170,7 @@ def run(
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
         analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
     except:
-        LOG.error("Failed to run analysis!")
+        LOG.error(f"Failed to run analysis!")
         analysis_api.set_statusdb_action(case_id=case_id, action=None)
         raise
 
