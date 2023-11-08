@@ -219,16 +219,16 @@ class Analysis(Model):
     family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
     uploaded_to_vogue_at = Column(types.DateTime, nullable=True)
 
-    family = orm.relationship("Family", back_populates="analyses")
+    case = orm.relationship("Case", back_populates="analyses")
 
     def __str__(self):
-        return f"{self.family.internal_id} | {self.completed_at.date()}"
+        return f"{self.case.internal_id} | {self.completed_at.date()}"
 
     def to_dict(self, family: bool = True):
         """Represent as dictionary"""
         data = to_dict(model_instance=self)
         if family:
-            data["family"] = self.family.to_dict()
+            data["family"] = self.case.to_dict()
         return data
 
 
@@ -376,7 +376,7 @@ class Delivery(Model):
         return to_dict(model_instance=self)
 
 
-class Family(Model, PriorityMixin):
+class Case(Model, PriorityMixin):
     __tablename__ = "family"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
@@ -399,10 +399,8 @@ class Family(Model, PriorityMixin):
     synopsis = Column(types.Text)
     tickets = Column(types.VARCHAR(128))
 
-    analyses = orm.relationship(
-        Analysis, back_populates="family", order_by="-Analysis.completed_at"
-    )
-    links = orm.relationship("FamilySample", back_populates="family")
+    analyses = orm.relationship(Analysis, back_populates="case", order_by="-Analysis.completed_at")
+    links = orm.relationship("CaseSample", back_populates="case")
 
     @property
     def cohorts(self) -> list[str]:
@@ -517,7 +515,7 @@ class Family(Model, PriorityMixin):
         return data
 
 
-class FamilySample(Model):
+class CaseSample(Model):
     __tablename__ = "family_sample"
     __table_args__ = (UniqueConstraint("family_id", "sample_id", name="_family_sample_uc"),)
 
@@ -532,7 +530,7 @@ class FamilySample(Model):
     mother_id = Column(ForeignKey("sample.id"))
     father_id = Column(ForeignKey("sample.id"))
 
-    family = orm.relationship(Family, back_populates="links")
+    case = orm.relationship(Case, back_populates="links")
     sample = orm.relationship("Sample", foreign_keys=[sample_id], back_populates="links")
     mother = orm.relationship("Sample", foreign_keys=[mother_id], back_populates="mother_links")
     father = orm.relationship("Sample", foreign_keys=[father_id], back_populates="father_links")
@@ -548,11 +546,11 @@ class FamilySample(Model):
             data["mother"] = self.mother.to_dict() if self.mother else None
             data["father"] = self.father.to_dict() if self.father else None
         if family:
-            data["family"] = self.family.to_dict()
+            data["family"] = self.case.to_dict()
         return data
 
     def __str__(self) -> str:
-        return f"{self.family.internal_id} | {self.sample.internal_id}"
+        return f"{self.case.internal_id} | {self.sample.internal_id}"
 
 
 class Flowcell(Model):
@@ -696,13 +694,13 @@ class Sample(Model, PriorityMixin):
     subject_id = Column(types.String(128))
 
     links = orm.relationship(
-        FamilySample, foreign_keys=[FamilySample.sample_id], back_populates="sample"
+        CaseSample, foreign_keys=[CaseSample.sample_id], back_populates="sample"
     )
     mother_links = orm.relationship(
-        FamilySample, foreign_keys=[FamilySample.mother_id], back_populates="mother"
+        CaseSample, foreign_keys=[CaseSample.mother_id], back_populates="mother"
     )
     father_links = orm.relationship(
-        FamilySample, foreign_keys=[FamilySample.father_id], back_populates="father"
+        CaseSample, foreign_keys=[CaseSample.father_id], back_populates="father"
     )
     flowcells = orm.relationship(Flowcell, secondary=flowcell_sample, back_populates="samples")
     sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")

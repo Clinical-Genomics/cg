@@ -5,7 +5,7 @@ from click.testing import CliRunner
 from cg.cli.add import add
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import FamilySample
+from cg.store.models import CaseSample
 from tests.store_helpers import StoreHelpers
 
 
@@ -26,10 +26,10 @@ def test_add_relationship_required(cli_runner: CliRunner, base_context: CGConfig
 
     # THEN it should be added
     assert result.exit_code == 0
-    family_sample_query = disk_store._get_query(table=FamilySample)
+    family_sample_query = disk_store._get_query(table=CaseSample)
 
     assert family_sample_query.count() == 1
-    assert family_sample_query.first().family.internal_id == case_id
+    assert family_sample_query.first().case.internal_id == case_id
     assert family_sample_query.first().sample.internal_id == sample_id
 
 
@@ -56,7 +56,7 @@ def test_add_relationship_bad_sample(cli_runner: CliRunner, base_context: CGConf
 
     # THEN it should complain on missing sample instead of adding a relationship
     assert result.exit_code == 1
-    assert disk_store._get_query(table=FamilySample).count() == 0
+    assert disk_store._get_query(table=CaseSample).count() == 0
 
 
 def test_add_relationship_bad_family(cli_runner: CliRunner, base_context: CGConfig, helpers):
@@ -83,7 +83,7 @@ def test_add_relationship_bad_family(cli_runner: CliRunner, base_context: CGConf
 
     # THEN it should complain in missing case instead of adding a relationship
     assert result.exit_code == 1
-    assert disk_store._get_query(table=FamilySample).count() == 0
+    assert disk_store._get_query(table=CaseSample).count() == 0
 
 
 def test_add_relationship_bad_status(cli_runner: CliRunner, base_context: CGConfig, helpers):
@@ -112,7 +112,7 @@ def test_add_relationship_bad_status(cli_runner: CliRunner, base_context: CGConf
 
     # THEN it should complain on bad status instead of adding a relationship
     assert result.exit_code == 2
-    assert disk_store._get_query(table=FamilySample).count() == 0
+    assert disk_store._get_query(table=CaseSample).count() == 0
 
 
 def test_add_relationship_mother(
@@ -146,7 +146,7 @@ def test_add_relationship_mother(
 
     # THEN it should be added
     assert result.exit_code == 0
-    family_sample_query = disk_store._get_query(table=FamilySample)
+    family_sample_query = disk_store._get_query(table=CaseSample)
     assert family_sample_query.count() == 1
     assert family_sample_query.first().mother.internal_id == mother_id
 
@@ -181,7 +181,7 @@ def test_add_relationship_bad_mother(
 
     # THEN it should not be added
     assert result.exit_code == 1
-    assert disk_store._get_query(table=FamilySample).count() == 0
+    assert disk_store._get_query(table=CaseSample).count() == 0
 
 
 def test_add_relationship_father(
@@ -218,7 +218,7 @@ def test_add_relationship_father(
 
     # THEN it should be added
     assert result.exit_code == 0
-    family_sample_query = disk_store._get_query(table=FamilySample)
+    family_sample_query = disk_store._get_query(table=CaseSample)
     assert family_sample_query.count() == 1
     assert family_sample_query.first().father.internal_id == father_id
 
@@ -255,4 +255,4 @@ def test_add_relationship_bad_father(
 
     # THEN it should not be added
     assert result.exit_code == 1
-    assert disk_store._get_query(table=FamilySample).count() == 0
+    assert disk_store._get_query(table=CaseSample).count() == 0

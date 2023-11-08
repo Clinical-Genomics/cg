@@ -5,7 +5,7 @@ from pathlib import Path
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Priority
 from cg.store import Store
-from cg.store.models import ApplicationVersion, Family, Sample
+from cg.store.models import ApplicationVersion, Case, Sample
 from cg.utils.calculations import multiply_by_million
 
 LOG = logging.getLogger(__name__)
@@ -31,10 +31,10 @@ class DownsampleData:
         self.out_dir: Path = out_dir
         self.case_name: str = case_name
         self.original_sample: Sample = self.get_sample_to_downsample()
-        self.original_case: Family = self.get_case_to_downsample()
+        self.original_case: Case = self.get_case_to_downsample()
         self.validate_enough_reads_to_downsample()
         self.downsampled_sample: Sample = self._generate_statusdb_downsampled_sample_record()
-        self.downsampled_case: Family = self._generate_statusdb_downsampled_case()
+        self.downsampled_case: Case = self._generate_statusdb_downsampled_case()
         LOG.info(f"Downsample Data checks completed for {self.sample_id}")
 
     @property
@@ -62,12 +62,12 @@ class DownsampleData:
             raise ValueError(f"Sample {self.sample_id} not found in StatusDB.")
         return sample
 
-    def get_case_to_downsample(self) -> Family:
+    def get_case_to_downsample(self) -> Case:
         """
         Check if a case exists in StatusDB.
             Raises: ValueError
         """
-        case: Family = self.status_db.get_case_by_internal_id(self.case_id)
+        case: Case = self.status_db.get_case_by_internal_id(self.case_id)
         if not case:
             raise ValueError(f"Case {self.case_id} not found in StatusDB.")
         return case
@@ -97,11 +97,11 @@ class DownsampleData:
 
     def _generate_statusdb_downsampled_case(
         self,
-    ) -> Family:
+    ) -> Case:
         """Generate a case for the downsampled samples. The new case uses existing case data."""
         if self.status_db.case_with_name_exists(case_name=self.downsampled_case_name):
             return self.status_db.get_case_by_name(self.downsampled_case_name)
-        downsampled_case: Family = self.status_db.add_case(
+        downsampled_case: Case = self.status_db.add_case(
             data_analysis=self.original_case.data_analysis,
             data_delivery=self.original_case.data_delivery,
             name=self.downsampled_case_name,

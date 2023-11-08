@@ -8,7 +8,7 @@ import click
 from cg.cli.get import get_case as print_case
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ def delete_case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
     sample.
     """
     status_db: Store = context.obj.status_db
-    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     if not case:
         LOG.error(f"Could not find case {case_id}")
         raise click.Abort
@@ -58,7 +58,7 @@ def delete_case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
     status_db.session.commit()
 
 
-def _delete_links_and_samples(case_obj: Family, dry_run: bool, status_db: Store, yes: bool):
+def _delete_links_and_samples(case_obj: Case, dry_run: bool, status_db: Store, yes: bool):
     """Delete all links from a case to samples"""
     samples_to_delete: list[Sample] = []
     for case_link in case_obj.links:
@@ -117,7 +117,7 @@ def _log_sample_process_information(sample: Sample):
 
 def _log_sample_links(sample: Sample):
     for sample_link in sample.links:
-        LOG.info(f"Sample is linked to: {sample_link.family.internal_id}")
+        LOG.info(f"Sample is linked to: {sample_link.case.internal_id}")
     for sample_link in sample.mother_links:
         LOG.info(f"Sample is linked as mother to: {sample_link.mother.internal_id}")
     for sample_link in sample.father_links:

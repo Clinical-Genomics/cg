@@ -8,7 +8,7 @@ from cg.meta.meta import MetaAPI
 from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
 from cg.models.cg_config import CGConfig
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.store.models import Family, FamilySample, Sample
+from cg.store.models import Case, CaseSample, Sample
 from cg.utils.calculations import multiply_by_million
 
 LOG = logging.getLogger(__name__)
@@ -67,7 +67,7 @@ class DownsampleAPI(MetaAPI):
         """
         Add a down sampled case entry to StatusDB.
         """
-        downsampled_case: Family = downsample_data.downsampled_case
+        downsampled_case: Case = downsample_data.downsampled_case
         if self.status_db.case_with_name_exists(case_name=downsampled_case.name):
             LOG.info(f"Case with name {downsampled_case.name} already exists in StatusDB.")
             return
@@ -77,11 +77,11 @@ class DownsampleAPI(MetaAPI):
             LOG.info(f"New down sampled case created: {downsampled_case.internal_id}")
 
     def _link_downsampled_sample_to_case(
-        self, downsample_data: DownsampleData, sample: Sample, case: Family
+        self, downsample_data: DownsampleData, sample: Sample, case: Case
     ) -> None:
         """Create a link between sample and case in statusDB."""
-        sample_case_link: FamilySample = self.status_db.relate_sample(
-            family=case,
+        sample_case_link: CaseSample = self.status_db.relate_sample(
+            case=case,
             sample=sample,
             status=downsample_data.get_sample_status(),
         )

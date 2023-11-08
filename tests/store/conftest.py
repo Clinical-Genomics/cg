@@ -8,7 +8,7 @@ import pytest
 from cg.constants import Pipeline
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store
-from cg.store.models import Analysis, Application, Customer, Family, FamilySample, Organism, Sample
+from cg.store.models import Analysis, Application, Customer, Case, CaseSample, Organism, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -159,7 +159,7 @@ def microbial_store(
 
 
 @pytest.fixture(name="case")
-def case_obj(analysis_store: Store) -> Family:
+def case_obj(analysis_store: Store) -> Case:
     """Return a case models object."""
     return analysis_store.get_cases()[0]
 
@@ -385,7 +385,7 @@ def store_with_an_invoice_with_and_without_attributes(
 def store_with_older_and_newer_analyses(
     base_store: Store,
     helpers: StoreHelpers,
-    case: Family,
+    case: Case,
     timestamp_now: dt.datetime,
     timestamp_yesterday: dt.datetime,
     old_timestamp: dt.datetime,
@@ -445,8 +445,8 @@ def store_with_analyses_for_cases(
             uploaded_to_vogue_at=timestamp_now,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        link: FamilySample = analysis_store.relate_sample(
-            family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
+        link: CaseSample = analysis_store.relate_sample(
+            case=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
         analysis_store.session.add(link)
     return analysis_store

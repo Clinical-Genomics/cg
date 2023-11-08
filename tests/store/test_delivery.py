@@ -4,10 +4,10 @@ import datetime as dt
 
 from cg.constants import DataDelivery
 from cg.constants.constants import Pipeline
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 
-def test_get_delivery_arguments(case: Family):
+def test_get_delivery_arguments(case: Case):
     """Testing the parsing of delivery arguments from the case data_delivery."""
     # GIVEN a DataDelivery
     case.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
