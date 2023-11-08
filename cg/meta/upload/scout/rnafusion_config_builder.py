@@ -56,6 +56,12 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
             self.get_file_from_hk(getattr(self.case_tags, scout_key)),
         )
 
+    def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
+        """Include the RNA sample alignment file."""
+        config_sample.rna_alignment_path = self.get_sample_file(
+            hk_tags=self.sample_tags.alignment_file, sample_id=config_sample.sample_id
+        )
+
     def build_config_sample(self, case_sample: CaseSample) -> ScoutCancerIndividual:
         """Build a sample with rnafusion specific information."""
         config_sample = ScoutCancerIndividual()
