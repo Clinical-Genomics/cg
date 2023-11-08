@@ -30,7 +30,7 @@ class CleanAPI:
         for analysis in self.status_db.get_analyses_for_pipeline_started_at_before(
             pipeline=pipeline, started_at_before=before
         ):
-            bundle_name = analysis.family.internal_id
+            bundle_name = analysis.case.internal_id
 
             hk_bundle_version: Optional[Version] = self.housekeeper_api.version(
                 bundle=bundle_name, date=analysis.started_at

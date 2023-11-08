@@ -271,7 +271,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         if not sample:
             LOG.error("No sample found with id: %s", unique_id)
             raise click.Abort
-        case_id = sample.links[0].family.internal_id
+        case_id = sample.links[0].case.internal_id
         sample_id = sample.internal_id
         return case_id, sample_id
 

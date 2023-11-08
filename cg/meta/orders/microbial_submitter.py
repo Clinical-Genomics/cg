@@ -10,7 +10,7 @@ from cg.store.models import (
     ApplicationVersion,
     Customer,
     Case,
-    FamilySample,
+    CaseSample,
     Organism,
     Sample,
 )
@@ -144,8 +144,8 @@ class MicrobialSubmitter(Submitter):
 
                 priority = new_sample.priority
                 sample_objs.append(new_sample)
-                link: FamilySample = self.status.relate_sample(
-                    family=case, sample=new_sample, status="unknown"
+                link: CaseSample = self.status.relate_sample(
+                    case=case, sample=new_sample, status="unknown"
                 )
                 self.status.session.add(link)
                 new_samples.append(new_sample)

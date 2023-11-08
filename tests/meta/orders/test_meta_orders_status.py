@@ -268,11 +268,11 @@ def test_store_samples(orders_api, base_store, fastq_status_data, ticket_id: str
     first_sample = new_samples[0]
     assert len(first_sample.links) == 2
     family_link = first_sample.links[0]
-    assert family_link.family in base_store.get_cases()
+    assert family_link.case in base_store.get_cases()
     for sample in new_samples:
         assert len(sample.deliveries) == 1
-    assert family_link.family.data_analysis
-    assert family_link.family.data_delivery in [DataDelivery.FASTQ, DataDelivery.NO_DELIVERY]
+    assert family_link.case.data_analysis
+    assert family_link.case.data_delivery in [DataDelivery.FASTQ, DataDelivery.NO_DELIVERY]
 
 
 def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data, ticket_id: str):
@@ -316,7 +316,7 @@ def test_store_fastq_samples_non_tumour_wgs_to_mip(orders_api, base_store, fastq
     )
 
     # THEN the analysis for the case should be MAF
-    assert new_samples[0].links[0].family.data_analysis == Pipeline.MIP_DNA
+    assert new_samples[0].links[0].case.data_analysis == Pipeline.MIP_DNA
 
 
 def test_store_fastq_samples_tumour_wgs_to_fastq(
@@ -342,7 +342,7 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
     )
 
     # THEN the analysis for the case should be FASTQ
-    assert new_samples[0].links[0].family.data_analysis == Pipeline.FASTQ
+    assert new_samples[0].links[0].case.data_analysis == Pipeline.FASTQ
 
 
 def test_store_fastq_samples_non_wgs_as_fastq(
@@ -374,7 +374,7 @@ def test_store_fastq_samples_non_wgs_as_fastq(
     )
 
     # THEN the analysis for the case should be fastq (none)
-    assert new_samples[0].links[0].family.data_analysis == Pipeline.FASTQ
+    assert new_samples[0].links[0].case.data_analysis == Pipeline.FASTQ
 
 
 def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data, ticket_id: str):

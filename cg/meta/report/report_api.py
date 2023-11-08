@@ -33,7 +33,7 @@ from cg.store.models import (
     Application,
     ApplicationLimitations,
     Case,
-    FamilySample,
+    CaseSample,
     Sample,
 )
 
@@ -115,7 +115,7 @@ class ReportAPI(MetaAPI):
             :MAX_ITEMS_TO_RETRIEVE
         ]
         for analysis_obj in analyses:
-            case: Case = analysis_obj.family
+            case: Case = analysis_obj.case
             last_version: Version = self.housekeeper_api.last_version(bundle=case.internal_id)
             hk_file: File = self.housekeeper_api.get_files(
                 bundle=case.internal_id, version=last_version.id if last_version else None
@@ -134,7 +134,7 @@ class ReportAPI(MetaAPI):
         analyses: Query = self.status_db.analyses_to_upload_delivery_reports(pipeline=pipeline)[
             :MAX_ITEMS_TO_RETRIEVE
         ]
-        return [analysis_obj.family for analysis_obj in analyses]
+        return [analysis_obj.case for analysis_obj in analyses]
 
     def update_delivery_report_date(self, case: Case, analysis_date: datetime) -> None:
         """Updates the date when delivery report was created."""
@@ -201,7 +201,7 @@ class ReportAPI(MetaAPI):
         """
         version = None
         if analysis:
-            version = len(analysis.family.analyses) - analysis.family.analyses.index(analysis)
+            version = len(analysis.case.analyses) - analysis.case.analyses.index(analysis)
         return version
 
     def get_case_data(
@@ -228,7 +228,7 @@ class ReportAPI(MetaAPI):
     def get_samples_data(self, case: Case, analysis_metadata: AnalysisModel) -> list[SampleModel]:
         """Extracts all the samples associated to a specific case and their attributes."""
         samples = list()
-        case_samples: list[FamilySample] = self.status_db.get_case_samples_by_case_id(
+        case_samples: list[CaseSample] = self.status_db.get_case_samples_by_case_id(
             case_internal_id=case.internal_id
         )
         for case_sample in case_samples:

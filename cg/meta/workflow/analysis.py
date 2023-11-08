@@ -18,7 +18,7 @@ from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
-from cg.store.models import Analysis, BedVersion, Case, FamilySample, Sample
+from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -173,7 +173,7 @@ class AnalysisAPI(MetaAPI):
             completed_at=dt.datetime.now(),
             primary=(len(case_obj.analyses) == 0),
         )
-        new_analysis.family = case_obj
+        new_analysis.case = case_obj
         if dry_run:
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
@@ -379,7 +379,7 @@ class AnalysisAPI(MetaAPI):
             self.decompression_running(case_id=case_id)
             return
         case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        link: FamilySample
+        link: CaseSample
         any_decompression_started = False
         for link in case_obj.links:
             sample_id: str = link.sample.internal_id

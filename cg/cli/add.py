@@ -14,7 +14,7 @@ from cg.store.models import (
     Collaboration,
     Customer,
     Case,
-    FamilySample,
+    CaseSample,
     Panel,
     Sample,
     User,
@@ -320,8 +320,8 @@ def link_sample_to_case(
             LOG.error("%s: father not found", father_id)
             raise click.Abort
 
-    new_record: FamilySample = status_db.relate_sample(
-        family=case_obj, sample=sample, status=status, mother=mother, father=father
+    new_record: CaseSample = status_db.relate_sample(
+        case=case_obj, sample=sample, status=status, mother=mother, father=father
     )
     status_db.session.add(new_record)
     status_db.session.commit()

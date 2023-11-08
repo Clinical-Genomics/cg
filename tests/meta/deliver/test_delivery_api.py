@@ -10,7 +10,7 @@ from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
-from cg.store.models import Case, FamilySample, Sample
+from cg.store.models import Case, CaseSample, Sample
 from tests.cli.deliver.conftest import fastq_delivery_bundle, mip_delivery_bundle
 from tests.store.conftest import case_obj
 from tests.store_helpers import StoreHelpers
@@ -49,7 +49,7 @@ def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str
     assert version
 
     # GIVEN that a case object exists in the database
-    link_objs: list[FamilySample] = deliver_api.store.get_case_samples_by_case_id(
+    link_objs: list[CaseSample] = deliver_api.store.get_case_samples_by_case_id(
         case_internal_id=case_id
     )
     samples: list[Sample] = [link.sample for link in link_objs]
@@ -99,7 +99,7 @@ def test_get_case_files_from_version(
     assert len(version.files) == 2
 
     # GIVEN the sample ids of the samples
-    link_objs: list[FamilySample] = analysis_store.get_case_samples_by_case_id(case_id)
+    link_objs: list[CaseSample] = analysis_store.get_case_samples_by_case_id(case_id)
     samples: list[Sample] = [link.sample for link in link_objs]
     sample_ids: set[str] = {sample.internal_id for sample in samples}
 
