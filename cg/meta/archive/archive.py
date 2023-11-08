@@ -249,41 +249,62 @@ class SpringArchiveAPI:
             LOG.info(f"Job with id {task_id} has not yet finished.")
 
     def sort_archival_ids_on_archive_location(
-        self, jobs: list[Archive]
+        self, archive_entries: list[Archive]
     ) -> dict[ArchiveLocations, list[int]]:
         """Returns a dictionary with keys being ArchiveLocations and the values being the subset of the given
         archival jobs which should be archived there."""
-        handled_job_ids: list[int] = []
-        jobs_per_location: dict[ArchiveLocations, list[int]] = {}
-        for job in jobs:
-            if job.archiving_task_id in handled_job_ids:
-                continue
 
-            archive_location = ArchiveLocations(self.get_archive_location_from_file(job.file))
-            if jobs_per_location.get(archive_location):
-                jobs_per_location[archive_location].append(job.archiving_task_id)
-            else:
-                jobs_per_location[archive_location] = [job.archiving_task_id]
+        jobs_per_location: dict[ArchiveLocations, list[int]] = {}
+        jobs_and_locations: set[
+            tuple[int, ArchiveLocations]
+        ] = self.get_unique_archival_ids_and_their_archive_location(archive_entries)
+
+        for archive_location in ArchiveLocations:
+            jobs_per_location[ArchiveLocations(archive_location)] = [
+                job_and_location[0]
+                for job_and_location in jobs_and_locations
+                if job_and_location[1] == archive_location
+            ]
         return jobs_per_location
 
+    def get_unique_archival_ids_and_their_archive_location(
+        self, archive_entries: list[Archive]
+    ) -> set[tuple[int, ArchiveLocations]]:
+        return set(
+            [
+                (archive.archiving_task_id, self.get_archive_location_from_file(archive.file))
+                for archive in archive_entries
+            ]
+        )
+
     def sort_retrieval_ids_on_archive_location(
-        self, jobs: list[Archive]
+        self, archive_entries: list[Archive]
     ) -> dict[ArchiveLocations, list[int]]:
         """Returns a dictionary with keys being ArchiveLocations and the values being the subset of the given
         retrieval jobs which should be archived there."""
-        handled_job_ids: list[int] = []
         jobs_per_location: dict[ArchiveLocations, list[int]] = {}
-        for job in jobs:
-            if job.retrieval_task_id in handled_job_ids:
-                continue
-
-            archive_location = ArchiveLocations(self.get_archive_location_from_file(job.file))
-            if jobs_per_location.get(archive_location):
-                jobs_per_location[archive_location].append(job.retrieval_task_id)
-            else:
-                jobs_per_location[archive_location] = [job.retrieval_task_id]
-
+        jobs_and_locations: set[
+            tuple[int, ArchiveLocations]
+        ] = self.get_unique_retrieval_ids_and_their_archive_location(archive_entries)
+        for archive_location in ArchiveLocations:
+            jobs_per_location[ArchiveLocations(archive_location)] = [
+                job_and_location[0]
+                for job_and_location in jobs_and_locations
+                if job_and_location[1] == archive_location
+            ]
         return jobs_per_location
 
-    def get_archive_location_from_file(self, file: File) -> str:
-        return self.status_db.get_sample_by_internal_id(file.version.bundle.name).archive_location
+    def get_unique_retrieval_ids_and_their_archive_location(
+        self, archive_entries: list[Archive]
+    ) -> set[tuple[int, ArchiveLocations]]:
+        return set(
+            [
+                (archive.retrieval_task_id, self.get_archive_location_from_file(archive.file))
+                for archive in archive_entries
+            ]
+        )
+
+    def get_archive_location_from_file(self, file: File) -> ArchiveLocations:
+        return ArchiveLocations(
+            self.status_db.get_sample_by_internal_id(file.version.bundle.name).archive_location
+        )
