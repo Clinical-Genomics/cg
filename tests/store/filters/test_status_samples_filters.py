@@ -246,7 +246,7 @@ def test_filter_samples_is_sequenced(
     assert len(samples.all()) == 1
 
     # THEN the sample should have a sequenced at date
-    assert samples.all()[0].reads_updated_at is not None
+    assert samples.all()[0].last_sequenced_at is not None
 
 
 def test_filter_samples_is_not_sequenced(
@@ -273,7 +273,7 @@ def test_filter_samples_is_not_sequenced(
     assert len(samples.all()) == 1
 
     # THEN the sample should not have a sequenced at date
-    assert samples.all()[0].reads_updated_at is None
+    assert samples.all()[0].last_sequenced_at is None
 
 
 def test_filter_samples_do_invoice(
@@ -650,7 +650,7 @@ def test_filter_samples_by_identifier_name_and_value_unique_sample(
         "reference_genome": sample.reference_genome,
         "sequence_start": sample.sequence_start,
         "sex": sample.sex,
-        "reads_updated_at": sample.reads_updated_at,
+        "last_sequenced_at": sample.last_sequenced_at,
         "subject_id": sample.subject_id,
     }
     for key, value in identifiers.items():

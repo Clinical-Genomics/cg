@@ -8,7 +8,7 @@ from cg.constants.indexes import ListIndexes
 from cg.exc import BalsamicStartError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family
+from cg.store.models import Case
 from cg.utils.utils import build_command_from_dict
 
 LOG = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
         dry_run: bool = False,
     ) -> None:
         """Creates a config file for BALSAMIC PON analysis."""
-        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_parameters: dict = self.get_sample_params(case_id=case_id, panel_bed=panel_bed)
         if not sample_parameters:
             LOG.error(f"{case_id} has no samples tagged for Balsamic PON analysis")

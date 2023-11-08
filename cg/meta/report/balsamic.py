@@ -37,7 +37,7 @@ from cg.models.report.metadata import (
 )
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
-from cg.store.models import Bed, BedVersion, Family, Sample
+from cg.store.models import Bed, BedVersion, Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class BalsamicReportAPI(ReportAPI):
         self.analysis_api: BalsamicAnalysisAPI = analysis_api
 
     def get_sample_metadata(
-        self, case: Family, sample: Sample, analysis_metadata: BalsamicAnalysis
+        self, case: Case, sample: Sample, analysis_metadata: BalsamicAnalysis
     ) -> Union[BalsamicTargetedSampleMetadataModel, BalsamicWGSSampleMetadataModel]:
         """Return the sample metadata to include in the report."""
         sample_metrics: dict[str, BalsamicQCMetrics] = analysis_metadata.sample_metrics[
@@ -115,7 +115,7 @@ class BalsamicReportAPI(ReportAPI):
             else None
         )
 
-    def get_data_analysis_type(self, case: Family) -> Optional[str]:
+    def get_data_analysis_type(self, case: Case) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
         return self.analysis_api.get_bundle_deliverables_type(case_id=case.internal_id)
 

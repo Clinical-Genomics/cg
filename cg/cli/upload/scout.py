@@ -23,7 +23,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     status_db: Store = context.status_db
 
     LOG.info("Fetching family object")
-    case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
 
     if not case_obj.analyses:
         LOG.warning("Could not find analyses for %s", case_id)
@@ -214,7 +214,7 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     status_db: Store = context.status_db
-    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     scout_report_type, multiqc_report = scout_upload_api.get_multiqc_html_report(
         case_id=case_id, pipeline=case.data_analysis
     )
@@ -234,7 +234,7 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
         )
 
 
-def get_upload_api(case: Family, cg_config: CGConfig) -> UploadAPI:
+def get_upload_api(case: Case, cg_config: CGConfig) -> UploadAPI:
     """Return the upload API based on the data analysis type"""
 
     analysis_apis: dict[Pipeline, UploadAPI] = {

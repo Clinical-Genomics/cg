@@ -22,7 +22,7 @@ from cg.exc import (
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
-from cg.store.models import Family
+from cg.store.models import Case
 from cg.utils.dict import get_full_path_dictionary
 
 LOG = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self.loqusdb_somatic_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.SOMATIC)
         self.loqusdb_tumor_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.TUMOR)
 
-    def load_observations(self, case: Family, input_files: BalsamicObservationsInputFiles) -> None:
+    def load_observations(self, case: Case, input_files: BalsamicObservationsInputFiles) -> None:
         """Load observation counts to Loqusdb for a Balsamic case."""
         if self.sequencing_method not in LOQUSDB_BALSAMIC_SEQUENCING_METHODS:
             LOG.error(
@@ -66,7 +66,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
 
     def load_cancer_observations(
-        self, case: Family, input_files: BalsamicObservationsInputFiles, loqusdb_api: LoqusdbAPI
+        self, case: Case, input_files: BalsamicObservationsInputFiles, loqusdb_api: LoqusdbAPI
     ) -> None:
         """Load cancer observations to a specific Loqusdb API."""
         is_somatic_db: bool = "somatic" in str(loqusdb_api.config_path)
@@ -113,7 +113,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         }
         return BalsamicObservationsInputFiles(**get_full_path_dictionary(input_files))
 
-    def delete_case(self, case: Family) -> None:
+    def delete_case(self, case: Case) -> None:
         """Delete cancer case observations from Loqusdb."""
         loqusdb_apis: list[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
         for loqusdb_api in loqusdb_apis:

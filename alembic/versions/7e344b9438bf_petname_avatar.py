@@ -22,7 +22,7 @@ depends_on = None
 Base = declarative_base()
 
 
-class Family(Base):
+class Case(Base):
     __tablename__ = "family"
 
     id = sa.Column(sa.types.Integer, primary_key=True)
@@ -36,7 +36,7 @@ class Family(Base):
 
 
 def find_family_by_avatar_url(avatar_url, session):
-    return session.query(Family).filter_by(avatar_url=avatar_url).first()
+    return session.query(Case).filter_by(avatar_url=avatar_url).first()
 
 
 def upgrade():

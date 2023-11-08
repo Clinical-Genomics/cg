@@ -25,7 +25,7 @@ from cg.models.balsamic.metrics import (
     BalsamicWGSQCMetrics,
 )
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family, FamilySample, Sample
+from cg.store.models import Case, FamilySample, Sample
 from cg.utils import Process
 from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
 
@@ -83,8 +83,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.root_dir, case_id)
 
-    def get_cases_to_analyze(self) -> list[Family]:
-        cases_query: list[Family] = self.status_db.cases_to_analyze(
+    def get_cases_to_analyze(self) -> list[Case]:
+        cases_query: list[Case] = self.status_db.cases_to_analyze(
             pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
         cases_to_analyze = []
@@ -143,7 +143,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         LOG.info("Found analysis type %s", analysis_type)
         return analysis_type
 
-    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample = None) -> Path:
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample = None) -> Path:
         """Return the path to the FASTQ destination directory."""
         return Path(self.get_case_path(case.internal_id), FileFormat.FASTQ)
 
@@ -168,7 +168,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         concatenated_fastq_name: str = self.fastq_handler.get_concatenated_name(linked_fastq_name)
         return Path(
             self.root_dir,
-            link_object.family.internal_id,
+            link_object.case.internal_id,
             "fastq",
             concatenated_fastq_name,
         )
@@ -544,7 +544,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return panel_bed
         if self.get_application_type(link_object.sample) not in self.__BALSAMIC_BED_APPLICATIONS:
             return None
-        return self.get_target_bed_from_lims(link_object.family.internal_id)
+        return self.get_target_bed_from_lims(link_object.case.internal_id)
 
     def get_pipeline_version(self, case_id: str) -> str:
         LOG.debug("Fetch pipeline version")

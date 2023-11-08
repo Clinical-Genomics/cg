@@ -20,7 +20,7 @@ def test_analysis_included(
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: FamilySample = analysis_store.relate_sample(
-        family=analysis.family, sample=sample, status="unknown"
+        family=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
 
@@ -40,7 +40,7 @@ def test_analysis_excluded(analysis_store: Store, helpers, timestamp_now: dateti
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     link: FamilySample = analysis_store.relate_sample(
-        family=analysis.family, sample=sample, status="unknown"
+        family=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
 
@@ -67,7 +67,7 @@ def test_pipeline_included(
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: FamilySample = analysis_store.relate_sample(
-        family=analysis.family, sample=sample, status="unknown"
+        family=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
 
@@ -96,7 +96,7 @@ def test_pipeline_excluded(analysis_store: Store, helpers, timestamp_now: dateti
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     link: FamilySample = analysis_store.relate_sample(
-        family=analysis.family, sample=sample, status="unknown"
+        family=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
 
@@ -121,7 +121,7 @@ def test_non_cleaned_included(
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: FamilySample = analysis_store.relate_sample(
-        family=analysis.family, sample=sample, status="unknown"
+        family=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
 
@@ -144,7 +144,7 @@ def test_cleaned_excluded(analysis_store: Store, helpers, timestamp_now: datetim
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     link: FamilySample = analysis_store.relate_sample(
-        family=analysis.family, sample=sample, status="unknown"
+        family=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
 

@@ -6,7 +6,7 @@ from click.testing import CliRunner
 from cg.cli.delete.case import delete_case as delete_case_command
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, FamilySample, Sample
+from cg.store.models import Case, FamilySample, Sample
 from tests.store_helpers import StoreHelpers
 
 SUCCESS = 0
@@ -19,7 +19,7 @@ def test_delete_case_without_options(
     # GIVEN a database with a case
     base_store: Store = base_context.status_db
     helpers.add_case(base_store)
-    case_query = base_store._get_query(table=Family)
+    case_query = base_store._get_query(table=Case)
     assert case_query.count() == 1
 
     # WHEN deleting a case
@@ -55,7 +55,7 @@ def test_delete_case_without_links(
     result = cli_runner.invoke(delete_case_command, [case_id, "--yes"], obj=base_context)
     # THEN it should have been deleted
     assert result.exit_code == SUCCESS
-    assert base_store._get_query(table=Family).count() == 0
+    assert base_store._get_query(table=Case).count() == 0
 
 
 def test_delete_case_with_analysis(
@@ -65,7 +65,7 @@ def test_delete_case_with_analysis(
     # GIVEN a database with a case with an analysis
     base_store: Store = base_context.status_db
     analysis_obj = helpers.add_analysis(base_store)
-    case_id = analysis_obj.family.internal_id
+    case_id = analysis_obj.case.internal_id
 
     # WHEN deleting a case
 
@@ -73,7 +73,7 @@ def test_delete_case_with_analysis(
 
     # THEN it should not have been deleted
     assert result.exit_code != SUCCESS
-    assert base_store._get_query(table=Family).count() == 1
+    assert base_store._get_query(table=Case).count() == 1
 
 
 def test_delete_case_with_dry_run(
@@ -87,7 +87,7 @@ def test_delete_case_with_dry_run(
     sample = helpers.add_sample(base_store)
     helpers.add_relationship(store=base_store, case=case_obj, sample=sample)
 
-    case_query = base_store._get_query(table=Family)
+    case_query = base_store._get_query(table=Case)
     family_sample_query = base_store._get_query(table=FamilySample)
     sample_query = base_store._get_query(table=Sample)
 
@@ -127,7 +127,7 @@ def test_delete_case_without_yes(
 
     # THEN it should not have been deleted
     assert result.exit_code != SUCCESS
-    case_query = base_store._get_query(table=Family)
+    case_query = base_store._get_query(table=Case)
     assert case_query.count() == 1
 
 
@@ -140,7 +140,7 @@ def test_delete_case_with_links(cli_runner: CliRunner, base_context: CGConfig, h
     sample = helpers.add_sample(base_store)
     helpers.add_relationship(store=base_store, case=case_obj, sample=sample)
 
-    case_query = base_store._get_query(table=Family)
+    case_query = base_store._get_query(table=Case)
     family_sample_query = base_store._get_query(table=FamilySample)
     sample_query = base_store._get_query(table=Sample)
 
@@ -171,7 +171,7 @@ def test_delete_case_with_links_to_other_case(
     case_obj2 = helpers.add_case(base_store, "second_case_linked_to_sample")
     helpers.add_relationship(store=base_store, case=case_obj2, sample=sample)
 
-    case_query = base_store._get_query(table=Family)
+    case_query = base_store._get_query(table=Case)
     family_sample_query = base_store._get_query(table=FamilySample)
     sample_query = base_store._get_query(table=Sample)
 
@@ -205,7 +205,7 @@ def test_delete_case_with_father_links(
     helpers.add_relationship(
         store=base_store, case=case_obj2, sample=sample_child, father=sample_father
     )
-    case_query = base_store._get_query(table=Family)
+    case_query = base_store._get_query(table=Case)
     family_sample_query = base_store._get_query(table=FamilySample)
     sample_query = base_store._get_query(table=Sample)
 
@@ -238,7 +238,7 @@ def test_delete_mother_case(cli_runner: CliRunner, base_context: CGConfig, helpe
         store=base_store, case=case_child, sample=sample_child, mother=sample_mother
     )
 
-    case_query = base_store._get_query(table=Family)
+    case_query = base_store._get_query(table=Case)
     family_sample_query = base_store._get_query(table=FamilySample)
     sample_query = base_store._get_query(table=Sample)
 
@@ -270,7 +270,7 @@ def test_delete_child_case(cli_runner: CliRunner, base_context: CGConfig, helper
         store=base_store, case=case_child, sample=sample_child, mother=sample_mother
     )
 
-    case_query = base_store._get_query(table=Family)
+    case_query = base_store._get_query(table=Case)
     family_sample_query = base_store._get_query(table=FamilySample)
     sample_query = base_store._get_query(table=Sample)
 
@@ -306,7 +306,7 @@ def test_delete_trio_case(cli_runner: CliRunner, base_context: CGConfig, helpers
         mother=sample_mother,
         father=sample_father,
     )
-    case_query = base_store._get_query(table=Family)
+    case_query = base_store._get_query(table=Case)
     family_sample_query = base_store._get_query(table=FamilySample)
     sample_query = base_store._get_query(table=Sample)
 

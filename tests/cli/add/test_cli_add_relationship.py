@@ -29,7 +29,7 @@ def test_add_relationship_required(cli_runner: CliRunner, base_context: CGConfig
     family_sample_query = disk_store._get_query(table=FamilySample)
 
     assert family_sample_query.count() == 1
-    assert family_sample_query.first().family.internal_id == case_id
+    assert family_sample_query.first().case.internal_id == case_id
     assert family_sample_query.first().sample.internal_id == sample_id
 
 
