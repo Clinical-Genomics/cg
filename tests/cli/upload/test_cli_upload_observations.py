@@ -21,7 +21,7 @@ from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Case, CaseSample, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -33,10 +33,11 @@ def test_observations(
     store: Store = base_context.status_db
 
     # GIVEN a case ready to be uploaded to Loqusdb
-    case: Family = helpers.add_case(store)
+    case: Case = helpers.add_case(store)
     case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(store, application_type=SequencingMethod.WES)
-    store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    link = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    store.session.add(link)
 
     # WHEN trying to do a dry run upload to Loqusdb
     result = cli_runner.invoke(
@@ -53,7 +54,7 @@ def test_get_observations_case(base_context: CGConfig, helpers: StoreHelpers):
     store: Store = base_context.status_db
 
     # GIVEN an observations valid case
-    case: Family = helpers.add_case(store)
+    case: Case = helpers.add_case(store)
 
     # WHEN retrieving a case given a specific case ID
     extracted_case = get_observations_case(base_context, case.internal_id, upload=True)
@@ -79,7 +80,7 @@ def test_get_observations_case_to_upload(base_context: CGConfig, helpers: StoreH
     store: Store = base_context.status_db
 
     # GIVEN a case ready to be uploaded to Loqusdb
-    case: Family = helpers.add_case(store)
+    case: Case = helpers.add_case(store)
     case.customer.loqus_upload = True
 
     # WHEN retrieving a case given a specific case ID
@@ -94,9 +95,10 @@ def test_get_observations_api(base_context: CGConfig, helpers: StoreHelpers):
     store: Store = base_context.status_db
 
     # GIVEN a Loqusdb supported case
-    case: Family = helpers.add_case(store, data_analysis=Pipeline.MIP_DNA)
+    case: Case = helpers.add_case(store, data_analysis=Pipeline.MIP_DNA)
     sample: Sample = helpers.add_sample(store, application_type=SequencingMethod.WES)
-    store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    link = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    store.session.add(link)
 
     # WHEN retrieving the observation API
     observations_api: MipDNAObservationsAPI = get_observations_api(base_context, case)
@@ -111,9 +113,10 @@ def test_get_sequencing_method(base_context: CGConfig, helpers: StoreHelpers):
     store: Store = base_context.status_db
 
     # GIVEN a case object with a WGS sequencing method
-    case: Family = helpers.add_case(store)
+    case: Case = helpers.add_case(store)
     sample: Sample = helpers.add_sample(store, application_type=SequencingMethod.WGS)
-    store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    link = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    store.session.add(link)
 
     # WHEN getting the sequencing method
     sequencing_method: SequencingMethod = get_sequencing_method(case)
@@ -133,15 +136,20 @@ def test_get_sequencing_method_exception(
     store: Store = base_context.status_db
 
     # GIVEN a case object with a WGS and WES mixed sequencing methods
-    case: Family = helpers.add_case(store)
+    case: Case = helpers.add_case(store)
     sample_wgs: Sample = helpers.add_sample(
         store, application_tag=wgs_application_tag, application_type=SequencingMethod.WGS
     )
     sample_wes: Sample = helpers.add_sample(
         store, application_tag=external_wes_application_tag, application_type=SequencingMethod.WES
     )
-    store.relate_sample(family=case, sample=sample_wgs, status=PhenotypeStatus.UNKNOWN)
-    store.relate_sample(family=case, sample=sample_wes, status=PhenotypeStatus.UNKNOWN)
+    link_1: CaseSample = store.relate_sample(
+        case=case, sample=sample_wgs, status=PhenotypeStatus.UNKNOWN
+    )
+    link_2: CaseSample = store.relate_sample(
+        case=case, sample=sample_wes, status=PhenotypeStatus.UNKNOWN
+    )
+    store.session.add_all([link_1, link_2])
 
     # WHEN getting the sequencing method
     with pytest.raises(LoqusdbUploadCaseError):

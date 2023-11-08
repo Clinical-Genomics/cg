@@ -8,7 +8,7 @@ from cg.store.filters.status_flow_cell_filters import (
     FlowCellFilter,
     apply_flow_cell_filter,
 )
-from cg.store.models import Family, Flowcell, Sample, SampleLaneSequencingMetrics
+from cg.store.models import Case, Flowcell, Sample, SampleLaneSequencingMetrics
 
 
 class DeleteDataHandler(BaseHandler):
@@ -40,7 +40,7 @@ class DeleteDataHandler(BaseHandler):
     def delete_cases_without_samples(self, case_internal_ids: list[str]) -> None:
         """Delete any cases specified in case_ids without samples."""
         for case_internal_id in case_internal_ids:
-            case: Family = self.get_case_by_internal_id(internal_id=case_internal_id)
+            case: Case = self.get_case_by_internal_id(internal_id=case_internal_id)
             if case and not case.links:
                 self.session.delete(case)
         self.session.commit()

@@ -4,7 +4,7 @@
 from cg.meta.report.rnafusion import RnafusionReportAPI
 from cg.models.report.metadata import RnafusionSampleMetadataModel
 from cg.models.rnafusion.rnafusion import RnafusionAnalysis
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 
 def test_get_sample_metadata(
@@ -17,7 +17,7 @@ def test_get_sample_metadata(
     """Test Rnafusion sample metadata extraction."""
 
     # GIVEN a Rnafusion case and associated sample
-    case: Family = report_api_rnafusion.status_db.get_case_by_internal_id(
+    case: Case = report_api_rnafusion.status_db.get_case_by_internal_id(
         internal_id=rnafusion_case_id
     )
     sample: Sample = report_api_rnafusion.status_db.get_sample_by_internal_id(internal_id=sample_id)
@@ -33,4 +33,4 @@ def test_get_sample_metadata(
     )
 
     # THEN the sample metadata should be correctly retrieved and match the expected validated metrics
-    assert sample_metadata.dict() == rnafusion_validated_metrics
+    assert sample_metadata.model_dump() == rnafusion_validated_metrics

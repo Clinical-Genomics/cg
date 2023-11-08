@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Union
 
 import click
+from dateutil.parser import parse as parse_date
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
@@ -23,7 +25,6 @@ from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from dateutil.parser import parse as parse_date
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", help="Simulate process without executing", is_flag=True
@@ -197,7 +198,7 @@ def past_run_dirs(
     LOG.info(f"Cleaning {len(possible_cleanups)} analyses created before {before}")
 
     for analysis in possible_cleanups:
-        case_id = analysis.family.internal_id
+        case_id = analysis.case.internal_id
         try:
             LOG.info("Cleaning %s output for %s", analysis_api.pipeline, case_id)
             context.invoke(clean_run_dir, yes=yes, case_id=case_id, dry_run=dry_run)

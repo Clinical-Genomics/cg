@@ -14,7 +14,7 @@ from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
 
     click.echo(click.style("----------------- Clinical-delivery -----------------"))
 
-    case: Family = context.obj.status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = context.obj.status_db.get_case_by_internal_id(internal_id=case_id)
     delivery_types: set[str] = case.get_delivery_arguments()
     is_sample_delivery: bool
     is_case_delivery: bool
@@ -87,25 +87,23 @@ def auto_fastq(context: click.Context, dry_run: bool):
     status_db: Store = context.obj.status_db
     trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
     for analysis_obj in status_db.get_analyses_to_upload(pipeline=Pipeline.FASTQ):
-        if analysis_obj.family.analyses[0].uploaded_at:
+        if analysis_obj.case.analyses[0].uploaded_at:
             LOG.debug(
-                f"Newer analysis already uploaded for {analysis_obj.family.internal_id}, skipping"
+                f"Newer analysis already uploaded for {analysis_obj.case.internal_id}, skipping"
             )
             continue
         if analysis_obj.upload_started_at:
-            if trailblazer_api.is_latest_analysis_completed(
-                case_id=analysis_obj.family.internal_id
-            ):
+            if trailblazer_api.is_latest_analysis_completed(case_id=analysis_obj.case.internal_id):
                 LOG.info(
-                    f"The upload for {analysis_obj.family.internal_id} is completed, setting uploaded at to {dt.datetime.now()}"
+                    f"The upload for {analysis_obj.case.internal_id} is completed, setting uploaded at to {dt.datetime.now()}"
                 )
                 analysis_obj.uploaded_at = dt.datetime.now()
             else:
                 LOG.debug(
-                    f"Upload to clinical-delivery for {analysis_obj.family.internal_id} has already started, skipping"
+                    f"Upload to clinical-delivery for {analysis_obj.case.internal_id} has already started, skipping"
                 )
             continue
-        case: Family = analysis_obj.family
+        case: Case = analysis_obj.case
         LOG.info(f"Uploading family: {case.internal_id}")
         analysis_obj.upload_started_at = dt.datetime.now()
         try:

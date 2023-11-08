@@ -9,13 +9,13 @@ from cg.constants.priority import SlurmAccount, SlurmQos
 from cg.exc import CgError
 from cg.meta.rsync import RsyncAPI
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 from tests.meta.deliver.conftest import all_samples_in_inbox, dummy_file_name
 from tests.store.conftest import case_obj
 
 
 def test_get_source_and_destination_paths(
-    mutant_case: Family, rsync_api: RsyncAPI, ticket_id: str, mocker
+    mutant_case: Case, rsync_api: RsyncAPI, ticket_id: str, mocker
 ):
     """Test generating the source path before rsync."""
 
@@ -76,13 +76,13 @@ def test_make_log_dir(rsync_api: RsyncAPI, ticket_id: str, caplog):
 
 
 def test_run_rsync_on_slurm(
-    microsalt_case: Family, rsync_api: RsyncAPI, ticket_id: str, caplog, mocker, helpers
+    microsalt_case: Case, rsync_api: RsyncAPI, ticket_id: str, caplog, mocker, helpers
 ):
     """Test for running rsync using SLURM."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a valid microsalt case
-    case: Family = microsalt_case
+    case: Case = microsalt_case
 
     # GIVEN paths needed to run rsync
     mocker.patch.object(RsyncAPI, "get_source_and_destination_paths")
@@ -182,7 +182,7 @@ def test_concatenate_rsync_commands(
 
 def test_slurm_rsync_single_case(
     all_samples_in_inbox: Path,
-    case: Family,
+    case: Case,
     destination_path: Path,
     rsync_api: RsyncAPI,
     caplog,
@@ -219,7 +219,7 @@ def test_slurm_rsync_single_case(
 
 def test_slurm_rsync_single_case_missing_file(
     all_samples_in_inbox: Path,
-    case: Family,
+    case: Case,
     destination_path: Path,
     rsync_api: RsyncAPI,
     caplog,

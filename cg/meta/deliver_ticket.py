@@ -11,7 +11,7 @@ from cg.constants.delivery import INBOX_NAME
 from cg.exc import CgError
 from cg.meta.meta import MetaAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 PREFIX_TO_CONCATENATE = ["MWG", "MWL", "MWM", "MWR", "MWX"]
@@ -22,11 +22,11 @@ class DeliverTicketAPI(MetaAPI):
         super().__init__(config)
         self.delivery_path: Path = Path(config.delivery_path)
 
-    def get_all_cases_from_ticket(self, ticket: str) -> list[Family]:
+    def get_all_cases_from_ticket(self, ticket: str) -> list[Case]:
         return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
 
     def get_inbox_path(self, ticket: str) -> Path:
-        cases: list[Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: list[Case] = self.get_all_cases_from_ticket(ticket=ticket)
         if not cases:
             raise CgError(
                 f"The customer id was not identified since no cases for ticket {ticket} was found"
@@ -44,7 +44,7 @@ class DeliverTicketAPI(MetaAPI):
         return True
 
     def generate_date_tag(self, ticket: str) -> datetime.datetime:
-        cases: list[Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: list[Case] = self.get_all_cases_from_ticket(ticket=ticket)
         return cases[0].ordered_at
 
     def generate_output_filename(
@@ -91,7 +91,7 @@ class DeliverTicketAPI(MetaAPI):
 
     def get_samples_from_ticket(self, ticket: str) -> list:
         all_samples = []
-        cases: list[Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: list[Case] = self.get_all_cases_from_ticket(ticket=ticket)
         for case in cases:
             for link_obj in case.links:
                 all_samples.append(link_obj.sample.name)
@@ -166,7 +166,7 @@ class DeliverTicketAPI(MetaAPI):
         return app_tag
 
     def check_if_concatenation_is_needed(self, ticket: str) -> bool:
-        cases: list[Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: list[Case] = self.get_all_cases_from_ticket(ticket=ticket)
         case_id = cases[0].internal_id
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         samples: list[Sample] = [link.sample for link in case_obj.links]

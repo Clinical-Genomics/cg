@@ -3,12 +3,12 @@ from typing import Callable, Optional
 
 from sqlalchemy.orm import Query
 
-from cg.store.models import Family, FamilySample, Flowcell
+from cg.store.models import Case, CaseSample, Flowcell
 
 
-def filter_flow_cells_by_case(case: Family, flow_cells: Query, **kwargs) -> Query:
+def filter_flow_cells_by_case(case: Case, flow_cells: Query, **kwargs) -> Query:
     """Return flow cells by case id."""
-    return flow_cells.filter(FamilySample.family == case)
+    return flow_cells.filter(CaseSample.case == case)
 
 
 def filter_flow_cell_by_name(flow_cells: Query, flow_cell_name: str, **kwargs) -> Query:
@@ -31,7 +31,7 @@ def filter_flow_cells_with_statuses(
 def apply_flow_cell_filter(
     flow_cells: Query,
     filter_functions: list[Callable],
-    case: Optional[Family] = None,
+    case: Optional[Case] = None,
     flow_cell_name: Optional[str] = None,
     name_search: Optional[str] = None,
     flow_cell_statuses: Optional[list[str]] = None,

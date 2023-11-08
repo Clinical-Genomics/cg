@@ -17,7 +17,7 @@ from cg.meta.observations.balsamic_observations_api import BalsamicObservationsA
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ LOG = logging.getLogger(__name__)
 def delete_observations(context: CGConfig, case_id: str, dry_run: bool, yes: bool):
     """Delete a case from Loqusdb and reset the Loqusdb IDs in StatusDB."""
 
-    case: Family = get_observations_case(context, case_id, upload=False)
+    case: Case = get_observations_case(context, case_id, upload=False)
     observations_api: Union[MipDNAObservationsAPI, BalsamicObservationsAPI] = get_observations_api(
         context, case
     )
