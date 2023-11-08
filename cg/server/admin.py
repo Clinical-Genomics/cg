@@ -40,7 +40,7 @@ def view_family_sample_link(unused1, unused2, model, unused3):
 
     return Markup(
         "<a href='%s'>%s</a>"
-        % (url_for("familysample.index_view", search=model.internal_id), model.internal_id)
+        % (url_for("casesample.index_view", search=model.internal_id), model.internal_id)
     )
 
 
@@ -283,10 +283,10 @@ class CaseView(BaseView):
         """column formatter to open this view"""
         del unused1, unused2, unused3
         markup = ""
-        if model.family:
+        if model.case:
             markup += Markup(
                 " <a href='%s'>%s</a>"
-                % (url_for("case.index_view", search=model.family.internal_id), model.family)
+                % (url_for("case.index_view", search=model.case.internal_id), model.case)
             )
 
         return markup
@@ -392,10 +392,10 @@ class AnalysisView(BaseView):
     column_default_sort = ("created_at", True)
     column_editable_list = ["is_primary"]
     column_filters = ["pipeline", "pipeline_version", "is_primary"]
-    column_formatters = {"family": CaseView.view_family_link}
+    column_formatters = {"case": CaseView.view_family_link}
     column_searchable_list = [
-        "family.internal_id",
-        "family.name",
+        "case.internal_id",
+        "case.name",
     ]
     form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
 
@@ -504,7 +504,7 @@ class SampleView(BaseView):
             sample: Sample = db.get_sample_by_entry_id(entry_id=int(entry_id))
 
             sample_case_ids: list[str] = [
-                case_sample.family.internal_id for case_sample in sample.links
+                case_sample.case.internal_id for case_sample in sample.links
             ]
             all_associated_case_ids.update(sample_case_ids)
 
@@ -563,17 +563,17 @@ class DeliveryView(BaseView):
     edit_modal = True
 
 
-class FamilySampleView(BaseView):
-    """Admin view for Model.FamilySample"""
+class CaseSampleView(BaseView):
+    """Admin view for Model.caseSample"""
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["status"]
     column_filters = ["status"]
     column_formatters = {
-        "family": CaseView.view_family_link,
+        "case": CaseView.view_family_link,
         "sample": SampleView.view_sample_link,
     }
-    column_searchable_list = ["family.internal_id", "family.name", "sample.internal_id"]
+    column_searchable_list = ["case.internal_id", "case.name", "sample.internal_id"]
     create_modal = True
     edit_modal = True
 

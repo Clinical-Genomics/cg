@@ -17,7 +17,7 @@ from cg.store.models import (
     ApplicationVersion,
     Customer,
     Case,
-    FamilySample,
+    CaseSample,
     Flowcell,
     Invoice,
     Pool,
@@ -38,7 +38,7 @@ def test_get_analysis_by_case_entry_id_and_started_at(
 
     # WHEN getting analysis via case_id and start date
     db_analysis = sample_store.get_analysis_by_case_entry_id_and_started_at(
-        case_entry_id=analysis.family.id, started_at_date=analysis.started_at
+        case_entry_id=analysis.case.id, started_at_date=analysis.started_at
     )
 
     # THEN the analysis should have been retrieved
@@ -438,18 +438,18 @@ def test_get_case_samples_by_case_id(
     store_with_analyses_for_cases: Store,
     case_id: str,
 ):
-    """Test that getting case-samples by case id returns a list of FamilySamples."""
+    """Test that getting case-samples by case id returns a list of CaseSamples."""
     # GIVEN a store with case-samples and a case id
 
     # WHEN fetching the case-samples matching the case id
-    case_samples: list[FamilySample] = store_with_analyses_for_cases.get_case_samples_by_case_id(
+    case_samples: list[CaseSample] = store_with_analyses_for_cases.get_case_samples_by_case_id(
         case_internal_id=case_id
     )
 
     # THEN a list of case-samples should be returned
     assert case_samples
     assert isinstance(case_samples, list)
-    assert isinstance(case_samples[0], FamilySample)
+    assert isinstance(case_samples[0], CaseSample)
 
 
 def test_get_case_sample_link(
@@ -457,19 +457,20 @@ def test_get_case_sample_link(
     case_id: str,
     sample_id: str,
 ):
-    """Test that the returned element is a FamilySample with the correct case and sample internal ids."""
+    """Test that the returned element is a CaseSample with the correct case and sample internal ids."""
     # GIVEN a store with case-samples and valid case and sample internal ids
 
     # WHEN fetching a case-sample with case and sample internal ids
-    case_sample: FamilySample = store_with_analyses_for_cases.get_case_sample_link(
+    case_sample: CaseSample = store_with_analyses_for_cases.get_case_sample_link(
         case_internal_id=case_id,
         sample_internal_id=sample_id,
     )
 
-    # THEN the returned element is a FamilySample object
-    assert isinstance(case_sample, FamilySample)
+    # THEN the returned element is a CaseSample
+    assert isinstance(case_sample, CaseSample)
+
     # THEN the returned family sample has the correct case and sample internal ids
-    assert case_sample.family.internal_id == case_id
+    assert case_sample.case.internal_id == case_id
     assert case_sample.sample.internal_id == sample_id
 
 

@@ -63,7 +63,7 @@ def test_get_analyses_to_deliver_for_pipeline(
 
     # THEN only the newest analysis should be returned
     for analysis in analyses:
-        assert analysis.family.internal_id in ["test_case_1", "yellowhog"]
+        assert analysis.case.internal_id in ["test_case_1", "yellowhog"]
         assert analysis.uploaded_at is None
         assert analysis.pipeline == pipeline
 

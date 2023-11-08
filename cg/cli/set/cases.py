@@ -26,7 +26,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> list[Case]
     cases: set[Case] = set()
     for sample in samples_by_id:
         for link in sample.links:
-            cases.add(link.family)
+            cases.add(link.case)
 
     return list(cases)
 

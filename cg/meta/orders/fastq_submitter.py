@@ -9,7 +9,7 @@ from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
-from cg.store.models import ApplicationVersion, Customer, Case, FamilySample, Sample
+from cg.store.models import ApplicationVersion, Customer, Case, CaseSample, Sample
 
 
 class FastqSubmitter(Submitter):
@@ -68,8 +68,8 @@ class FastqSubmitter(Submitter):
         case.customer = self.status.get_customer_by_internal_id(
             customer_internal_id=CustomerNames.CG_INTERNAL_CUSTOMER
         )
-        relationship: FamilySample = self.status.relate_sample(
-            family=case, sample=sample_obj, status=StatusEnum.unknown
+        relationship: CaseSample = self.status.relate_sample(
+            case=case, sample=sample_obj, status=StatusEnum.unknown
         )
         self.status.session.add_all([case, relationship])
 
@@ -126,7 +126,7 @@ class FastqSubmitter(Submitter):
                     self.create_maf_case(sample_obj=new_sample)
                 case.customer = customer
                 new_relationship = self.status.relate_sample(
-                    family=case, sample=new_sample, status=StatusEnum.unknown
+                    case=case, sample=new_sample, status=StatusEnum.unknown
                 )
                 new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
                 self.status.session.add_all([case, new_relationship, new_delivery])
