@@ -1,5 +1,7 @@
 from enum import StrEnum
 
+from cg.constants.housekeeper_tags import AlignmentFileTag
+
 
 class GenomeBuild(StrEnum):
     hg19: str = "37"
@@ -87,5 +89,5 @@ BALSAMIC_UMI_SAMPLE_TAGS = dict(
 
 
 RNAFUSION_SAMPLE_TAGS = dict(
-    alignment_file={"cram"},
+    alignment_file={AlignmentFileTag.CRAM},
 )
