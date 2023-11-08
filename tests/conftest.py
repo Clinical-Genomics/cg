@@ -1391,13 +1391,13 @@ def novaseq_x_run_parameters(
     return RunParametersNovaSeqX(run_parameters_path=novaseq_x_run_parameters_path)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def hiseq_2500_flow_cell(hiseq_2500_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """."""
     return FlowCellDirectoryData(flow_cell_path=hiseq_2500_flow_cell_dir)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def hiseq_x_flow_cell(hiseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """."""
     return FlowCellDirectoryData(flow_cell_path=hiseq_x_flow_cell_dir)
@@ -1421,7 +1421,7 @@ def novaseq_flow_cell_demultiplexed_with_bcl2fastq(
     )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a bcl_convert flow cell object with flow cell that is demultiplexed."""
     return FlowCellDirectoryData(
@@ -1429,7 +1429,7 @@ def bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> FlowCellDirectoryD
     )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def novaseq_6000_flow_cell(bcl_convert_flow_cell: FlowCellDirectoryData) -> FlowCellDirectoryData:
     """Return a NovaSeq6000 flow cell object."""
     return bcl_convert_flow_cell
@@ -1449,7 +1449,7 @@ def bcl2fastq_flow_cell_id(bcl2fastq_flow_cell: FlowCellDirectoryData) -> str:
     return bcl2fastq_flow_cell.id
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def bcl_convert_flow_cell_id(bcl_convert_flow_cell: FlowCellDirectoryData) -> str:
     """Return flow cell id from bcl_convert flow cell object."""
     return bcl_convert_flow_cell.id

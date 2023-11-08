@@ -4,7 +4,7 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 from cg.constants.demultiplexing import RunParametersXMLNodes
-from cg.constants.sequencing import Sequencers, sequencer_types
+from cg.constants.sequencing import Sequencers, SEQUENCER_TYPES
 from cg.exc import RunParametersError
 from cg.io.xml import read_xml, validate_node_exists
 
@@ -132,7 +132,7 @@ class RunParametersHiSeq(RunParameters):
         """Return the sequencer associated with the current run parameters."""
         node_name: str = RunParametersXMLNodes.SEQUENCER_ID
         sequencer: str = self.get_node_string_value(node_name=node_name, name="Sequencer ID")
-        return sequencer_types.get(sequencer)
+        return SEQUENCER_TYPES.get(sequencer)
 
     def get_index_1_cycles(self) -> int:
         """Return the number of cycles in the first index read."""

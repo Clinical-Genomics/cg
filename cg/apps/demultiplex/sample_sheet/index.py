@@ -81,7 +81,7 @@ def is_reverse_complement_needed(run_parameters: RunParameters) -> bool:
     and the new reagent kit version (NEW_REAGENT_KIT_VERSION), then it requires reverse complement.
     If the run is NovaSeqX, does not require reverse complement.
     """
-    if run_parameters.sequencer == Sequencers.NOVASEQX:
+    if run_parameters.sequencer != Sequencers.NOVASEQ:
         return False
     control_software_version: str = run_parameters.control_software_version
     reagent_kit_version: str = run_parameters.reagent_kit_version

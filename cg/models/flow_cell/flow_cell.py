@@ -20,7 +20,7 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysi
 from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
-from cg.constants.sequencing import Sequencers, sequencer_types
+from cg.constants.sequencing import Sequencers, SEQUENCER_TYPES
 from cg.exc import FlowCellError, SampleSheetError
 from cg.models.demultiplex.run_parameters import (
     RunParameters,
@@ -135,7 +135,7 @@ class FlowCellDirectoryData:
         self,
     ) -> Literal[Sequencers.HISEQX, Sequencers.HISEQGA, Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
         """Return the sequencer type."""
-        return sequencer_types[self.machine_name]
+        return SEQUENCER_TYPES[self.machine_name]
 
     def get_bcl_converter(self, bcl_converter: str) -> str:
         """
