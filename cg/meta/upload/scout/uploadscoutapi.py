@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 from housekeeper.store.models import File, Version
-from pydantic.v1.dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
