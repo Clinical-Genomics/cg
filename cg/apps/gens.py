@@ -2,7 +2,7 @@
 import logging
 
 from cg.constants.constants import PrepCategory
-from cg.store.models import Family
+from cg.store.models import Case
 from cg.utils import Process
 from cg.utils.dict import get_list_from_dictionary
 
@@ -44,7 +44,7 @@ class GensAPI:
         self.process.run_command(parameters=load_call_params, dry_run=self.dry_run)
 
     @staticmethod
-    def is_suitable_for_upload(case: Family) -> bool:
+    def is_suitable_for_upload(case: Case) -> bool:
         """Check if a cancer case supports Gens upload."""
         return all(
             sample.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING for sample in case.samples
