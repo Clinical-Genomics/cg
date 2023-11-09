@@ -46,7 +46,7 @@ class FlowCellDirectoryData:
         LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
         self.path: Path = flow_cell_path
         self.machine_name: str = ""
-        self._run_parameters: Optional[RunParameters] = None
+        self._run_parameters: RunParameters | None = None
         self.run_date: datetime.datetime = datetime.datetime.now()
         self.machine_number: int = 0
         self.base_name: str = ""  # Base name is flow cell-id + flow cell position

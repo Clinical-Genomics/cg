@@ -1,5 +1,6 @@
 """Module for parsing sequencing run metadata from RunParameters file."""
 import logging
+from abc import abstractmethod
 from pathlib import Path
 from xml.etree import ElementTree
 
@@ -54,35 +55,38 @@ class RunParameters:
         return int(self.get_node_string_value(node_name=node_name, name=name))
 
     @property
+    @abstractmethod
     def control_software_version(self) -> str | None:
         """Return the control software version if existent."""
-        raise NotImplementedError
+        pass
 
     @property
+    @abstractmethod
     def reagent_kit_version(self) -> str | None:
         """Return the reagent kit version if existent."""
-        raise NotImplementedError
+        pass
 
     @property
+    @abstractmethod
     def sequencer(self) -> str | None:
         """Return the sequencer associated with the current run parameters."""
-        raise NotImplementedError
+        pass
 
     def get_index_1_cycles(self) -> int | None:
         """Return the number of cycles in the first index read."""
-        raise NotImplementedError
+        pass
 
     def get_index_2_cycles(self) -> int | None:
         """Return the number of cycles in the second index read."""
-        raise NotImplementedError
+        pass
 
     def get_read_1_cycles(self) -> int | None:
         """Return the number of cycles in the first read."""
-        raise NotImplementedError
+        pass
 
     def get_read_2_cycles(self) -> int | None:
         """Return the number of cycles in the second read."""
-        raise NotImplementedError
+        pass
 
     def __str__(self):
         return f"RunParameters(path={self.path}, sequencer={self.sequencer})"
@@ -103,7 +107,7 @@ class RunParametersHiSeq(RunParameters):
     def validate_instrument(self) -> None:
         """Validate if a HiSeq file was used to instantiate the class.
         Raises:
-            RunParametersError if the run parameters file is not HiSeq"""
+            RunParametersError if the run parameters file is not HiSeq."""
         node_name: str = RunParametersXMLNodes.APPLICATION_NAME
         application: ElementTree.Element | None = self.tree.find(node_name)
         if application is None or application.text != RunParametersXMLNodes.HISEQ_APPLICATION:
@@ -113,9 +117,7 @@ class RunParametersHiSeq(RunParameters):
         """Return whether the sequencing was done with a single index."""
         node_name: str = RunParametersXMLNodes.PLANNED_READS_HISEQ
         reads: ElementTree.Element = self.get_tree_node(node_name=node_name, name="Planned Reads")
-        if self.get_index_2_cycles() == 0 and len(list(reads)) == 3:
-            return True
-        return False
+        return self.get_index_2_cycles() == 0 and len(list(reads)) == 3
 
     @property
     def control_software_version(self) -> None:
@@ -161,7 +163,7 @@ class RunParametersNovaSeq6000(RunParameters):
     def validate_instrument(self) -> None:
         """Validate if a NovaSeq6000 file was used to instantiate the class.
         Raises:
-            RunParametersError if the run parameters file is not NovaSeq6000"""
+            RunParametersError if the run parameters file is not NovaSeq6000."""
         node_name: str = RunParametersXMLNodes.APPLICATION
         application: ElementTree.Element | None = self.tree.find(node_name)
         if (
@@ -221,7 +223,7 @@ class RunParametersNovaSeqX(RunParameters):
     def validate_instrument(self) -> None:
         """Validate if a NovaSeqX file was used to instantiate the class.
         Raises:
-            RunParametersError if the run parameters file is not NovaSeqX"""
+            RunParametersError if the run parameters file is not NovaSeqX."""
         node_name: str = RunParametersXMLNodes.INSTRUMENT_TYPE
         instrument: ElementTree.Element | None = self.tree.find(node_name)
         if instrument is None or instrument.text != RunParametersXMLNodes.NOVASEQ_X_INSTRUMENT:
