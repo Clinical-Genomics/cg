@@ -88,9 +88,10 @@ class SpringArchiveAPI:
         )
 
     def archive_all_non_archived_spring_files(
-        self, spring_file_count_limit: int = DEFAULT_SPRING_ARCHIVE_COUNT
+        self, spring_file_count_limit: int = DEFAULT_SPRING_ARCHIVE_COUNT, dry_run: bool = False
     ) -> None:
-        """Archives all non archived spring files."""
+        """Archives all non archived spring files. If a limit is provided, the amount of files archived are limited
+        to that amount."""
 
         files_to_archive: list[File] = self.housekeeper_api.get_all_non_archived_spring_files()[
             :spring_file_count_limit
@@ -190,7 +191,7 @@ class SpringArchiveAPI:
                 files_and_samples.append(FileAndSample(file=file, sample=sample))
         return files_and_samples
 
-    def update_status_for_ongoing_tasks(self) -> None:
+    def update_statuses_for_ongoing_tasks(self) -> None:
         """Updates any completed jobs with a finished timestamp."""
         self.update_ongoing_archivals()
         self.update_ongoing_retrievals()
