@@ -12,7 +12,7 @@ from cg.meta.archive.ddn_dataflow import DDNDataFlowClient
 from cg.meta.archive.models import ArchiveHandler, FileAndSample, SampleAndDestination
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
-from cg.store.models import Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 DEFAULT_SPRING_ARCHIVE_COUNT = 200
@@ -103,12 +103,12 @@ class SpringArchiveAPI:
                 archive_location=archive_location,
             )
 
-    def retrieve_samples(self, sample_internal_ids: list[str]) -> None:
+    def retrieve_case(self, case_id: str):
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        self.retrieve_samples([link.sample for link in case.links])
+
+    def retrieve_samples(self, samples: list[Sample]) -> None:
         """Retrieves the archived spring files for a list of samples."""
-        samples: list[Sample] = [
-            self.status_db.get_sample_by_internal_id(sample_internal_id)
-            for sample_internal_id in sample_internal_ids
-        ]
         samples_and_destinations: list[SampleAndDestination] = self.join_destinations_and_samples(
             samples
         )

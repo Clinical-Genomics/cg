@@ -344,7 +344,10 @@ def test_retrieve_samples(
         "api_request_from_content",
         return_value=ok_ddn_response,
     ) as mock_request_submitter:
-        spring_archive_api.retrieve_samples([sample_with_spring_file])
+        sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(
+            sample_with_spring_file
+        )
+        spring_archive_api.retrieve_samples([sample])
 
     retrieve_sample_request_json = retrieve_request_json.copy()
     retrieve_sample_request_json["pathInfo"][0]["destination"] = (

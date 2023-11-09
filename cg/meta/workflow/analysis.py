@@ -14,6 +14,7 @@ from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priori
 from cg.constants.constants import AnalysisType, CaseActions, WorkflowManager
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
+from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
@@ -483,11 +484,16 @@ class AnalysisAPI(MetaAPI):
             self.status_db.request_flow_cells_for_case(case_id)
 
     def is_case_ready_for_analysis(self, case_id: str) -> bool:
-        if self._is_flow_cell_check_applicable(
-            case_id
-        ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
-            LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
-            return False
+        if self.get_archive_location_for_case(case_id) == "PDC":
+            if self._is_flow_cell_check_applicable(
+                case_id
+            ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
+                LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
+                return False
+        else:
+            if not self.are_all_files_present(case_id):
+                LOG.warning(f"Case {case_id} is not ready - some files are archived.")
+                return False
         if self.prepare_fastq_api.is_spring_decompression_needed(
             case_id
         ) or self.prepare_fastq_api.is_spring_decompression_running(case_id):
@@ -498,7 +504,31 @@ class AnalysisAPI(MetaAPI):
     def prepare_fastq_files(self, case_id: str, dry_run: bool) -> None:
         """Retrieves or decompresses fastq files if needed, upon which an AnalysisNotReady error
         is raised."""
-        self.ensure_flow_cells_on_disk(case_id)
+        self.ensure_files_are_not_archived(case_id)
         self.resolve_decompression(case_id, dry_run=dry_run)
         if not self.is_case_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ file are not present for the analysis to start")
+
+    def ensure_files_are_not_archived(self, case_id):
+        if self.get_archive_location_for_case(case_id) == "PDC":
+            self.ensure_flow_cells_on_disk(case_id)
+        else:
+            if not self.are_all_files_present(case_id):
+                spring_archive_api = SpringArchiveAPI(
+                    status_db=self.status_db,
+                    housekeeper_api=self.housekeeper_api,
+                    data_flow_config=self.config.data_flow_config,
+                )
+                spring_archive_api.retrieve_case(case_id)
+
+    def are_all_files_present(self, case_id):
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        for sample in [link.sample for link in case.links]:
+            if (files := self.housekeeper_api.get_archived_files(sample.internal_id)) and not all(
+                file.archive.retrieved_at for file in files
+            ):
+                return False
+        return True
+
+    def get_archive_location_for_case(self, case_id: str):
+        return self.status_db.get_case_by_internal_id(case_id).customer.data_archive_location
