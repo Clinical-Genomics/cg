@@ -11,10 +11,10 @@ from cg.store import Store
 from cg.store.models import (
     Application,
     ApplicationVersion,
-    Collaboration,
-    Customer,
     Case,
     CaseSample,
+    Collaboration,
+    Customer,
     Panel,
     Sample,
     User,
@@ -300,24 +300,24 @@ def link_sample_to_case(
     father: Optional[Sample] = None
     case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     if case_obj is None:
-        LOG.error("%s: family not found", case_id)
+        LOG.error(f"{case_id}: family not found")
         raise click.Abort
 
     sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
     if sample is None:
-        LOG.error("%s: sample not found", sample_id)
+        LOG.error(f"{sample_id}: sample not found")
         raise click.Abort
 
     if mother_id:
         mother: Sample = status_db.get_sample_by_internal_id(internal_id=mother_id)
         if mother is None:
-            LOG.error("%s: mother not found", mother_id)
+            LOG.error(f"{mother_id}: mother not found")
             raise click.Abort
 
     if father_id:
         father: Sample = status_db.get_sample_by_internal_id(internal_id=father_id)
         if father is None:
-            LOG.error("%s: father not found", father_id)
+            LOG.error(f"{father_id}: father not found")
             raise click.Abort
 
     new_record: CaseSample = status_db.relate_sample(
@@ -325,7 +325,7 @@ def link_sample_to_case(
     )
     status_db.session.add(new_record)
     status_db.session.commit()
-    LOG.info("related %s to %s", case_obj.internal_id, sample.internal_id)
+    LOG.info(f"related {case_id} to {sample_id}")
 
 
 @add.command("external")

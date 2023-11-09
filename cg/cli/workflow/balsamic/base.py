@@ -245,7 +245,7 @@ def start_available(context: click.Context, dry_run: bool = False):
             LOG.error(error)
             exit_code = EXIT_FAIL
         except Exception as error:
-            LOG.error("Unspecified error occurred: %s", error)
+            LOG.error(f"Unspecified error occurred: {error}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
@@ -272,11 +272,11 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_store():
-        LOG.info("Storing deliverables for %s", case_obj.internal_id)
+        LOG.info(f"Storing deliverables for {case_obj.internal_id}")
         try:
             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
         except Exception as exception_object:
-            LOG.error("Error storing %s: %s", case_obj.internal_id, exception_object)
+            LOG.error(f"Error storing {case_obj.internal_id}: {exception_object}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

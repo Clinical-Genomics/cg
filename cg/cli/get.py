@@ -7,7 +7,7 @@ from tabulate import tabulate
 
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Customer, Case, Flowcell, Sample
+from cg.store.models import Case, Customer, Flowcell, Sample
 
 LOG = logging.getLogger(__name__)
 ANALYSIS_HEADERS = ["Analysis Date", "Pipeline", "Version"]
@@ -45,7 +45,7 @@ def get_sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample
     """Get information about a sample."""
     status_db: Store = context.obj.status_db
     for sample_id in sample_ids:
-        LOG.debug("%s: get info about sample", sample_id)
+        LOG.debug(f"{sample_id}: get info about sample")
         existing_sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
         if existing_sample is None:
             LOG.warning(f"{sample_id}: sample doesn't exist")

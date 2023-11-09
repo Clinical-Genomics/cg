@@ -69,9 +69,9 @@ def run(context: CGConfig, case_id: str, dry_run: bool, config: str, external_re
     # Submit analysis for tracking in Trailblazer
     try:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-        LOG.info("Submitted case %s to Trailblazer!", case_id)
+        LOG.info(f"Submitted case {case_id} to Trailblazer!")
     except Exception as error:
-        LOG.warning("Unable to submit job file to Trailblazer, raised error: %s", error)
+        LOG.warning(f"Unable to submit job file to Trailblazer, raised error: {error}")
 
     analysis_api.set_statusdb_action(case_id=case_id, action="running")
 
@@ -92,7 +92,7 @@ def start(
     """
     Starts full Fluffy analysis workflow
     """
-    LOG.info("Starting full Fluffy workflow for %s", case_id)
+    LOG.info(f"Starting full Fluffy workflow for {case_id}")
     if dry_run:
         LOG.info("Dry run: the executed commands will not produce output!")
     analysis_api: FluffyAnalysisAPI = context.obj.meta_apis["analysis_api"]
@@ -120,7 +120,7 @@ def start_available(context: click.Context, dry_run: bool = False):
             LOG.error(error)
             exit_code = EXIT_FAIL
         except Exception as error:
-            LOG.error("Unspecified error occurred: %s", error)
+            LOG.error(f"Unspecified error occurred: {error}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

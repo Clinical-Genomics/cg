@@ -46,9 +46,9 @@ def nipt_upload_case(context: click.Context, case_id: Optional[str], dry_run: bo
         context.invoke(batch, case_id=case_id, force=force, dry_run=dry_run)
         context.invoke(nipt_upload_ftp_case, case_id=case_id, force=force, dry_run=dry_run)
         nipt_upload_api.update_analysis_uploaded_at_date(case_id)
-        LOG.info("%s: analysis uploaded!", case_id)
+        LOG.info(f"{case_id}: analysis uploaded!")
     else:
-        LOG.error("Uploading case failed: %s", case_id)
+        LOG.error(f"Uploading case failed: {case_id}")
         LOG.error(
             f"Flowcell did not pass one of the following QC parameters:\n"
             f"target_reads={nipt_upload_api.target_reads(case_id=case_id)}, Q30_threshold={Q30_THRESHOLD}"
@@ -79,7 +79,7 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
         if nipt_upload_api.flowcell_passed_qc_value(
             case_id=internal_id, q30_threshold=Q30_THRESHOLD
         ):
-            LOG.info("Uploading case: %s", internal_id)
+            LOG.info(f"Uploading case: {internal_id}")
             try:
                 context.invoke(nipt_upload_case, case_id=internal_id, dry_run=dry_run)
             except AnalysisUploadError:

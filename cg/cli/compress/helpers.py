@@ -41,7 +41,7 @@ def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
     """Fetch individual ids from cases that are ready for SPRING compression"""
     case_obj = store.get_case_by_internal_id(internal_id=case_id)
     if not case_obj:
-        LOG.error("Could not find case %s", case_id)
+        LOG.error(f"Could not find case {case_id}")
         raise CaseNotFoundError("")
 
     for link_obj in case_obj.links:
@@ -201,9 +201,7 @@ def correct_spring_paths(
                 LOG.info("Could not find spring and/or spring metadata files, skipping")
                 continue
             LOG.info(
-                "Moving existing spring file (and config) %s to hk bundle path %s",
-                true_spring_path,
-                spring_path,
+                f"Moving existing spring file (and config) {true_spring_path} to hk bundle path {spring_path}"
             )
             if not dry_run:
                 # We know from above that the spring path does not exist

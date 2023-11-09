@@ -111,5 +111,5 @@ def get_report_analysis_started(
     ):
         LOG.error(f"There is no analysis started at {analysis_started_at}")
         raise click.Abort
-    LOG.info("Using analysis started at: %s", analysis_started_at)
+    LOG.info(f"Using analysis started at: {analysis_started_at}")
     return analysis_started_at
