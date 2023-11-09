@@ -16,13 +16,13 @@ depends_on = None
 
 
 def upgrade():
+    # Drop foreign key constraints that reference the unique constraint to be dropped
+    op.drop_constraint("analysis_ibfk_1", "analysis", type_="foreignkey")
+    op.drop_constraint("family_sample_ibfk_1", "family_sample", type_="foreignkey")
+
     # Rename tables
     op.rename_table("family", "case")
     op.rename_table("family_sample", "case_sample")
-
-    # Drop foreign key constraints that reference the unique constraint to be dropped
-    op.drop_constraint("analysis_ibfk_1", "analysis", type_="foreignkey")
-    op.drop_constraint("case_sample_ibfk_1", "case_sample", type_="foreignkey")
 
     # Rename foreign keys
     op.alter_column("analysis", "family_id", new_column_name="case_id", existing_type=sa.Integer())
