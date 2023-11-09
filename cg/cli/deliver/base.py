@@ -99,13 +99,13 @@ def deliver_analysis(
         if case_id:
             case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
             if not case_obj:
-                LOG.warning("Could not find case %s", case_id)
+                LOG.warning(f"Could not find case {case_id}")
                 return
             cases.append(case_obj)
         else:
             cases: list[Case] = status_db.get_cases_by_ticket_id(ticket_id=ticket)
             if not cases:
-                LOG.warning("Could not find cases for ticket %s", ticket)
+                LOG.warning(f"Could not find cases for ticket {ticket}")
                 return
 
         for case_obj in cases:
@@ -123,7 +123,7 @@ def rsync(context: CGConfig, ticket: str, dry_run: bool):
     tb_api: TrailblazerAPI = context.trailblazer_api
     rsync_api: RsyncAPI = RsyncAPI(config=context)
     slurm_id = rsync_api.run_rsync_on_slurm(ticket=ticket, dry_run=dry_run)
-    LOG.info("Rsync to the delivery server running as job %s", slurm_id)
+    LOG.info(f"Rsync to the delivery server running as job {slurm_id}")
     rsync_api.add_to_trailblazer_api(
         tb_api=tb_api, slurm_job_id=slurm_id, ticket=ticket, dry_run=dry_run
     )
