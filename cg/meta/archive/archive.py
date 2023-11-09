@@ -88,7 +88,7 @@ class SpringArchiveAPI:
         )
 
     def archive_all_non_archived_spring_files(
-        self, spring_file_count_limit: int = DEFAULT_SPRING_ARCHIVE_COUNT, dry_run: bool = False
+        self, spring_file_count_limit: int = DEFAULT_SPRING_ARCHIVE_COUNT
     ) -> None:
         """Archives all non archived spring files. If a limit is provided, the amount of files archived are limited
         to that amount."""
