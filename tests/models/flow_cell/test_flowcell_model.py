@@ -1,3 +1,5 @@
+import os
+import sys
 from pathlib import Path
 from typing import Type
 
@@ -11,11 +13,12 @@ from cg.apps.demultiplex.sample_sheet.models import (
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers
+from cg.exc import FlowCellError
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
-def test_flowcell_id(bcl2fastq_flow_cell_dir: Path):
+def test_flow_cell_id(bcl2fastq_flow_cell_dir: Path):
     """Test parsing of flow cell id."""
     # GIVEN the path to a finished flow cell run
     # GIVEN the flow cell id
@@ -28,7 +31,7 @@ def test_flowcell_id(bcl2fastq_flow_cell_dir: Path):
     assert flowcell_obj.id == flowcell_id
 
 
-def test_flowcell_position(bcl2fastq_flow_cell_dir: Path):
+def test_flow_cell_position(bcl2fastq_flow_cell_dir: Path):
     """Test getting flow cell position."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
@@ -134,19 +137,38 @@ def test_flow_cell_directory_data_with_novaseq_flow_cell_directory(
     assert flow_cell.bcl_converter == BclConverter.DRAGEN
 
 
-def test_get_run_parameters_when_non_existing(demultiplexed_runs: Path):
-    # GIVEN a flowcell object with a directory without run parameters
-    flowcell_path: Path = Path(
-        demultiplexed_runs,
-        "201203_D00483_0200_AHVKJCDRXX",
-    )
-    flow_cell = FlowCellDirectoryData(flow_cell_path=flowcell_path)
-    assert flow_cell.run_parameters_path.exists() is False
+@pytest.mark.parametrize(
+    "flow_cell_fixture, expected_run_parameters_file_name",
+    [
+        ("hiseq_x_flow_cell", DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE),
+        ("hiseq_2500_flow_cell", DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE),
+    ],
+)
+def test_run_parameters_path(
+    flow_cell_fixture: str, expected_run_parameters_file_name: str, request: FixtureRequest
+):
+    """."""
+    # GIVEN a flow cell with a run parameters
+    flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture)
 
-    # WHEN fetching the run parameters object
-    with pytest.raises(FileNotFoundError):
-        # THEN assert that a FileNotFound error is raised
-        flow_cell.run_parameters
+    # WHEN getting the run parameters file name
+    run_parameters_path: Path = flow_cell.run_parameters_path
+
+    # THEN it should exist and be the expected one
+    assert run_parameters_path.exists()
+    assert run_parameters_path.name == expected_run_parameters_file_name
+
+
+def test_run_parameters_path_when_non_existing(tmp_flow_cells_directory_no_run_parameters: Path):
+    """Test that getting the path of the run parameters path fails if the file does not exist."""
+    # GIVEN a flowcell object with a directory without a run parameters file
+    flow_cell = FlowCellDirectoryData(flow_cell_path=tmp_flow_cells_directory_no_run_parameters)
+
+    # WHEN fetching the run parameters path
+    with pytest.raises(FlowCellError) as exc:
+        # THEN a FlowCellError is raised
+        flow_cell.run_parameters_path
+    assert "No run parameters file found in flow cell" in str(exc.value)
 
 
 @pytest.mark.parametrize(
@@ -161,7 +183,7 @@ def test_get_run_parameters_when_non_existing(demultiplexed_runs: Path):
 def test_flow_cell_run_parameters_type(
     flow_cell_fixture: str, expected_sequencer: str, request: FixtureRequest
 ):
-    """Test that the run parameters of the flow cell is of teh expected type."""
+    """Test that the run parameters of the flow cell is of the expected type."""
     # GIVEN a flow cell without _run_parameters
     flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture)
     assert not flow_cell._run_parameters

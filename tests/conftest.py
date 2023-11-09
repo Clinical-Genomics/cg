@@ -859,7 +859,7 @@ def tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq() -> str:
     return "211101_D00483_0615_AHLG5GDRXY"
 
 
-@pytest.fixture(name="tmp_flow_cells_directory_no_run_parameters")
+@pytest.fixture
 def tmp_flow_cells_directory_no_run_parameters(
     tmp_flow_cell_name_no_run_parameters: str, tmp_flow_cells_directory: Path
 ) -> Path:
@@ -1305,7 +1305,7 @@ def hiseq_x_single_index_run_parameters_path(
     hiseq_x_flow_cell_dir: Path,
 ) -> Path:
     """Return the path to a HiSeqX run parameters file with single index."""
-    return Path(hiseq_x_flow_cell_dir, "runParameters.xml")
+    return Path(hiseq_x_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE)
 
 
 @pytest.fixture(scope="session")
@@ -1313,19 +1313,19 @@ def hiseq_2500_double_index_run_parameters_path(
     hiseq_2500_flow_cell_dir: Path,
 ) -> Path:
     """Return the path to a HiSeqX run parameters file with single index."""
-    return Path(hiseq_2500_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS)
+    return Path(hiseq_2500_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
 
 
 @pytest.fixture(scope="session")
 def novaseq_6000_run_parameters_path(bcl2fastq_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeq6000 run parameters file."""
-    return Path(bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS)
+    return Path(bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
 
 
 @pytest.fixture(scope="session")
 def novaseq_x_run_parameters_path(novaseq_x_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeqX run parameters file."""
-    return Path(novaseq_x_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS)
+    return Path(novaseq_x_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
 
 
 @pytest.fixture(scope="function")

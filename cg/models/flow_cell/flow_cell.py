@@ -1,6 +1,7 @@
 """Module for modeling flow cells."""
 import datetime
 import logging
+import os
 from pathlib import Path
 from typing import Optional, Type, Union
 from cg.models.flow_cell.utils import parse_date
@@ -93,7 +94,7 @@ class FlowCellDirectoryData:
         """
         Return sample sheet path.
         """
-        return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME.value)
+        return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
 
     def set_sample_sheet_path_hk(self, hk_path: Path):
         self._sample_sheet_path_hk = hk_path
@@ -105,16 +106,21 @@ class FlowCellDirectoryData:
 
     @property
     def run_parameters_path(self) -> Path:
-        """Return path to run parameters file."""
-        return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS)
+        """Return path to run parameters file if it exists.
+        Raises:
+            FlowCellError if the flow cell has no run parameters file."""
+        if DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE in os.listdir(self.path):
+            return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
+        elif DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE in os.listdir(self.path):
+            return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE)
+        else:
+            message: str = f"No run parameters file found in flow cell {self.full_name}"
+            LOG.error(message)
+            raise FlowCellError(message)
 
     @property
     def run_parameters(self) -> RunParameters:
         """Return run parameters object."""
-        if not self.run_parameters_path.exists():
-            message = f"Could not find run parameters file {self.run_parameters_path}"
-            LOG.warning(message)
-            raise FileNotFoundError(message)
         if not self._run_parameters:
             self._run_parameters = RUN_PARAMETERS_CONSTRUCTOR[self.sequencer_type](
                 run_parameters_path=self.run_parameters_path
