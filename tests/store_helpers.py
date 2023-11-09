@@ -292,9 +292,7 @@ class StoreHelpers:
         if not case:
             case = StoreHelpers.add_case(store, data_analysis=pipeline, data_delivery=data_delivery)
 
-        analysis = store.add_analysis(
-            pipeline=pipeline, version=pipeline_version, case_id=case.id
-        )
+        analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version, case_id=case.id)
 
         analysis.started_at = started_at or datetime.now()
         if completed_at:
