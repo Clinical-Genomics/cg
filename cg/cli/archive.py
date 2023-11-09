@@ -28,11 +28,11 @@ def archive_all_non_archived_files(context: CGConfig, limit: Optional[int] = Non
     spring_archive_api.archive_all_non_archived_spring_files(spring_file_count_limit=limit)
 
 
-@archive.command("update-archival-status")
+@archive.command("update-job-statuses")
 @click.option(help="Update statuses for all ongoing archivals and retrievals.")
 @DRY_RUN
 @click.pass_obj
-def update_job_status(context: CGConfig):
+def update_job_statuses(context: CGConfig):
     """Query an ongoing archival job and update Housekeeper if it is finished."""
     spring_archive_api: SpringArchiveAPI = SpringArchiveAPI(
         status_db=context.status_db,
