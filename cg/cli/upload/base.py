@@ -110,7 +110,7 @@ def upload_all_completed_analyses(context: click.Context, pipeline: Pipeline = N
             continue
 
         case_id = analysis_obj.case.internal_id
-        LOG.info("Uploading analysis for case: %s", case_id)
+        LOG.info(f"Uploading analysis for case: {case_id}")
         try:
             context.invoke(upload, case_id=case_id)
         except Exception:

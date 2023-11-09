@@ -155,11 +155,11 @@ class RsyncAPI(MetaAPI):
     def create_log_dir(self, dry_run: bool) -> None:
         """Create log dir."""
         log_dir: Path = self.log_dir
-        LOG.info("Creating folder: %s", log_dir)
+        LOG.info(f"Creating folder: {log_dir}")
         if log_dir.exists():
-            LOG.warning("Could not create %s, this folder already exist", log_dir)
+            LOG.warning(f"Could not create {log_dir}, this folder already exist")
         elif dry_run:
-            LOG.info("Would have created path %s, but this is a dry run", log_dir)
+            LOG.info(f"Would have created path {log_dir}, but this is a dry run")
         else:
             log_dir.mkdir(parents=True, exist_ok=True)
 
