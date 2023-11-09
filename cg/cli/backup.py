@@ -19,17 +19,10 @@ from cg.exc import (
 )
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
-from cg.meta.encryption.encryption import (
-    EncryptionAPI,
-    FlowCellEncryptionAPI,
-    SpringEncryptionAPI,
-)
+from cg.meta.encryption.encryption import EncryptionAPI, FlowCellEncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-    get_flow_cells_from_path,
-)
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData, get_flow_cells_from_path
 from cg.store import Store
 from cg.store.models import Flowcell, Sample
 

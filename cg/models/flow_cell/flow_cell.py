@@ -3,7 +3,6 @@ import datetime
 import logging
 from pathlib import Path
 from typing import Optional, Type, Union
-from cg.models.flow_cell.utils import parse_date
 
 from pydantic import ValidationError
 from typing_extensions import Literal
@@ -13,9 +12,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBCLConvert,
     SampleSheet,
 )
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-)
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
@@ -27,6 +24,7 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
+from cg.models.flow_cell.utils import parse_date
 
 LOG = logging.getLogger(__name__)
 

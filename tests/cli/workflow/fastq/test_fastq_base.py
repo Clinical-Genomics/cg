@@ -1,10 +1,7 @@
 import logging
 from datetime import datetime
 
-from cg.cli.workflow.fastq.base import (
-    store_available_fastq_analysis,
-    store_fastq_analysis,
-)
+from cg.cli.workflow.fastq.base import store_available_fastq_analysis, store_fastq_analysis
 from cg.constants.constants import CaseActions, Pipeline
 from cg.store.models import Analysis, Case, Sample
 

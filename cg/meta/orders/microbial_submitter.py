@@ -6,14 +6,7 @@ from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import MicrobialSample
-from cg.store.models import (
-    ApplicationVersion,
-    Customer,
-    Case,
-    CaseSample,
-    Organism,
-    Sample,
-)
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Organism, Sample
 
 
 class MicrobialSubmitter(Submitter):

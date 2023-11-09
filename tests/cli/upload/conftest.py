@@ -14,11 +14,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat, Pipeline
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.constants.housekeeper_tags import (
-    HK_DELIVERY_REPORT_TAG,
-    GensAnalysisTag,
-    HkMipAnalysisTag,
-)
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, GensAnalysisTag, HkMipAnalysisTag
 from cg.io.controller import ReadFile
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI

@@ -8,7 +8,7 @@ import pytest
 from cg.constants import Pipeline
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store
-from cg.store.models import Analysis, Application, Customer, Case, CaseSample, Organism, Sample
+from cg.store.models import Analysis, Application, Case, CaseSample, Customer, Organism, Sample
 from tests.store_helpers import StoreHelpers
 
 

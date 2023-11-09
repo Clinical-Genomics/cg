@@ -9,11 +9,7 @@ from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.loqus import LoqusdbAPI
-from cg.constants.observations import (
-    LoqusdbBalsamicCustomers,
-    LoqusdbInstance,
-    LoqusdbMipCustomers,
-)
+from cg.constants.observations import LoqusdbBalsamicCustomers, LoqusdbInstance, LoqusdbMipCustomers
 from cg.exc import LoqusdbUploadCaseError
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import (
@@ -21,7 +17,7 @@ from cg.models.observations.input_files import (
     MipDNAObservationsInputFiles,
 )
 from cg.store import Store
-from cg.store.models import Analysis, Customer, Case
+from cg.store.models import Analysis, Case, Customer
 
 LOG = logging.getLogger(__name__)
 

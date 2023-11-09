@@ -4,10 +4,7 @@
 from sqlalchemy.orm import Session
 
 from cg.store.api.base import BaseHandler
-from cg.store.filters.status_flow_cell_filters import (
-    FlowCellFilter,
-    apply_flow_cell_filter,
-)
+from cg.store.filters.status_flow_cell_filters import FlowCellFilter, apply_flow_cell_filter
 from cg.store.models import Case, Flowcell, Sample, SampleLaneSequencingMetrics
 
 

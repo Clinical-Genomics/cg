@@ -15,10 +15,7 @@ from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError
 from cg.io.controller import WriteStream
 from cg.meta.meta import MetaAPI
-from cg.meta.report.field_validators import (
-    get_empty_report_data,
-    get_missing_report_data,
-)
+from cg.meta.report.field_validators import get_empty_report_data, get_missing_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
@@ -30,20 +27,8 @@ from cg.models.report.report import (
     ReportModel,
     ScoutReportFiles,
 )
-from cg.models.report.sample import (
-    ApplicationModel,
-    MethodsModel,
-    SampleModel,
-    TimestampModel,
-)
-from cg.store.models import (
-    Analysis,
-    Application,
-    ApplicationLimitations,
-    Case,
-    CaseSample,
-    Sample,
-)
+from cg.models.report.sample import ApplicationModel, MethodsModel, SampleModel, TimestampModel
+from cg.store.models import Analysis, Application, ApplicationLimitations, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 

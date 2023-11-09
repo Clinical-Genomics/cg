@@ -11,7 +11,7 @@ from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.samples import MipDnaSample
 from cg.store import Store
-from cg.store.models import Customer, Case, Pool, Sample
+from cg.store.models import Case, Customer, Pool, Sample
 from tests.store_helpers import StoreHelpers
 
 SUBMITTERS = [

@@ -1,7 +1,7 @@
 """Mock models from the store. Used for processing them without using the store"""
 import datetime
 
-from cg.store.models import Analysis, Customer, Case
+from cg.store.models import Analysis, Case, Customer
 
 
 class Customer(Customer):

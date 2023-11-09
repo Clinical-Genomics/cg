@@ -6,7 +6,7 @@ from cg.cli.add import add
 from cg.constants import DataDelivery, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Customer, Case, Panel
+from cg.store.models import Case, Customer, Panel
 from tests.store_helpers import StoreHelpers
 
 CLI_OPTION_ANALYSIS = Pipeline.BALSAMIC_UMI

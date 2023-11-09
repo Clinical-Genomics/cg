@@ -14,11 +14,7 @@ from cg.constants.observations import (
     MipDNAObservationsAnalysisTag,
 )
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import (
-    CaseNotFoundError,
-    LoqusdbDuplicateRecordError,
-    LoqusdbUploadCaseError,
-)
+from cg.exc import CaseNotFoundError, LoqusdbDuplicateRecordError, LoqusdbUploadCaseError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles

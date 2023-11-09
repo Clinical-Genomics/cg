@@ -12,7 +12,7 @@ from cg.constants.observations import (
     LOQUSDB_MIP_SEQUENCING_METHODS,
     LOQUSDB_SUPPORTED_PIPELINES,
 )
-from cg.store.models import Analysis, Application, Customer, Case, Sample
+from cg.store.models import Analysis, Application, Case, Customer, Sample
 
 
 def filter_cases_by_action(cases: Query, action: str, **kwargs) -> Query:

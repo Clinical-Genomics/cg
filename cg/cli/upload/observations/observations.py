@@ -9,10 +9,7 @@ import click
 from pydantic.v1 import ValidationError
 from sqlalchemy.orm import Query
 
-from cg.cli.upload.observations.utils import (
-    get_observations_api,
-    get_observations_case_to_upload,
-)
+from cg.cli.upload.observations.utils import get_observations_api, get_observations_case_to_upload
 from cg.cli.workflow.commands import (
     ARGUMENT_CASE_ID,
     OPTION_DRY,

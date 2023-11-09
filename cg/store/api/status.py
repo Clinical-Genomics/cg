@@ -15,7 +15,7 @@ from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
 from cg.store.filters.status_flow_cell_filters import FlowCellFilter, apply_flow_cell_filter
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
-from cg.store.models import Analysis, Customer, Case, Flowcell, Pool, Sample
+from cg.store.models import Analysis, Case, Customer, Flowcell, Pool, Sample
 
 
 class StatusHandler(BaseHandler):

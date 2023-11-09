@@ -13,9 +13,9 @@ from cg.store.models import (
     Application,
     ApplicationLimitations,
     ApplicationVersion,
-    Customer,
     Case,
     CaseSample,
+    Customer,
     Flowcell,
 )
 from cg.store.models import Model as ModelBase

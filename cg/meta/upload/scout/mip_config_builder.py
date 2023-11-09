@@ -13,11 +13,7 @@ from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.scout.scout_load_config import (
-    MipLoadConfig,
-    ScoutLoadConfig,
-    ScoutMipIndividual,
-)
+from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig, ScoutMipIndividual
 from cg.store.models import Analysis, Case, CaseSample
 
 LOG = logging.getLogger(__name__)

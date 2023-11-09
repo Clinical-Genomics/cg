@@ -8,7 +8,7 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.models.orders.samples import MetagenomeSample
-from cg.store.models import ApplicationVersion, Customer, Case, CaseSample, Sample
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
 
 
 class MetagenomeSubmitter(Submitter):

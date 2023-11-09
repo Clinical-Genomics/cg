@@ -5,13 +5,7 @@ from typing import Any, Optional, Union
 from pydantic.v1 import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import (
-    COLLABORATORS,
-    COMBOS,
-    FileExtensions,
-    GenePanelMasterList,
-    Pipeline,
-)
+from cg.constants import COLLABORATORS, COMBOS, FileExtensions, GenePanelMasterList, Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError

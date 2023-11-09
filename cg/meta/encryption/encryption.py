@@ -11,10 +11,7 @@ from cg.constants import SPACE, FileExtensions
 from cg.constants.encryption import EncryptionUserID, GPGParameters
 from cg.constants.priority import SlurmQos
 from cg.exc import ChecksumFailedError, FlowCellEncryptionError, FlowCellError
-from cg.meta.encryption.sbatch import (
-    FLOW_CELL_ENCRYPT_COMMANDS,
-    FLOW_CELL_ENCRYPT_ERROR,
-)
+from cg.meta.encryption.sbatch import FLOW_CELL_ENCRYPT_COMMANDS, FLOW_CELL_ENCRYPT_ERROR
 from cg.meta.tar.tar import TarAPI
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.slurm.sbatch import Sbatch

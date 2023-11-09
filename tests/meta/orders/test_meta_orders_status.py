@@ -20,7 +20,7 @@ from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store import Store
-from cg.store.models import Application, Delivery, Case, Pool, Sample
+from cg.store.models import Application, Case, Delivery, Pool, Sample
 
 
 def test_pools_to_status(rml_order_to_submit):

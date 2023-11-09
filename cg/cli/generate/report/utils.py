@@ -5,11 +5,7 @@ from typing import Optional
 
 import click
 
-from cg.constants import (
-    REPORT_SUPPORTED_DATA_DELIVERY,
-    REPORT_SUPPORTED_PIPELINES,
-    Pipeline,
-)
+from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, REPORT_SUPPORTED_PIPELINES, Pipeline
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI

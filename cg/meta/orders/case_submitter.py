@@ -9,7 +9,7 @@ from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
-from cg.store.models import ApplicationVersion, Customer, Case, CaseSample, Sample
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
 
 LOG = logging.getLogger(__name__)
 

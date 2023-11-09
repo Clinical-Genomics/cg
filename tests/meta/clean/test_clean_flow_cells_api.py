@@ -172,6 +172,79 @@ def test_can_flow_cell_be_deleted(flow_cell_clean_api_can_be_removed: CleanFlowC
     assert can_be_deleted
 
 
+def test_can_flow_cell_be_deleted_no_spring_with_fastq(
+    flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
+):
+    """Test that a flow cell can be deleted when it has fastq files but no spring files."""
+    # GIVEN a flow cell that can be deleted
+
+    with mock.patch(
+        "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
+        return_value=True,
+    ):
+        with mock.patch(
+            "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.has_spring_meta_data_files_for_samples_in_housekeeper",
+            return_value=False,
+        ):
+            # WHEN checking that the flow cell can be deleted
+            can_be_deleted: bool = (
+                flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
+            )
+
+    # THEN the check whether the flow cell can be deleted returns True
+    assert can_be_deleted
+
+
+def test_can_flow_cell_be_deleted_spring_no_fastq(
+    flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
+):
+    """Test that a flow cell can be deleted when it has spring files but no fastq files."""
+    # GIVEN a flow cell that can be deleted
+
+    with mock.patch(
+        "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
+        return_value=True,
+    ):
+        with mock.patch(
+            "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.has_fastq_files_for_samples_in_housekeeper",
+            return_value=False,
+        ):
+            # WHEN checking that the flow cell can be deleted
+            can_be_deleted: bool = (
+                flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
+            )
+
+    # THEN the check whether the flow cell can be deleted returns True
+    assert can_be_deleted
+
+
+def test_can_flow_cell_be_deleted_no_spring_no_fastq(
+    flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
+):
+    """Test that a flow cell can not be deleted when it has no spring files and no fastq files."""
+    # GIVEN a flow cell that can be deleted
+
+    with mock.patch(
+        "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
+        return_value=True,
+    ):
+        with mock.patch(
+            "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.has_fastq_files_for_samples_in_housekeeper",
+            return_value=False,
+        ):
+            with mock.patch(
+                "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.has_spring_meta_data_files_for_samples_in_housekeeper",
+                return_value=False,
+            ):
+                # WHEN checking that the flow cell can be deleted
+                can_be_deleted: bool = (
+                    flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
+                )
+
+    # THEN the check whether the flow cell can be deleted returns True
+    assert not can_be_deleted
+
+
 def test_delete_flow_cell_directory(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
     """Test that a flow cell directory is removed."""
     # GIVEN a flow cell that can be removed

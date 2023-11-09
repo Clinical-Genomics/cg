@@ -8,9 +8,7 @@ from cg.apps.sequencing_metrics_parser.api import (
     create_undetermined_non_pooled_metrics,
 )
 from cg.constants import FlowCellStatus
-from cg.meta.demultiplex.combine_sequencing_metrics import (
-    combine_mapped_metrics_with_undetermined,
-)
+from cg.meta.demultiplex.combine_sequencing_metrics import combine_mapped_metrics_with_undetermined
 from cg.meta.demultiplex.utils import get_q30_threshold
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store import Store

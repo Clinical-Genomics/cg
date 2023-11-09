@@ -8,14 +8,7 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import SexEnum
 from cg.models.orders.samples import RmlSample
-from cg.store.models import (
-    ApplicationVersion,
-    Customer,
-    Case,
-    CaseSample,
-    Pool,
-    Sample,
-)
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Pool, Sample
 
 
 class PoolSubmitter(Submitter):
