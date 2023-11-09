@@ -42,7 +42,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
         LOG.info(f"No delivery of files requested for case {case_id}")
         return
 
-    LOG.debug("Delivery types are: %s", delivery_types)
+    LOG.debug(f"Delivery types are: {delivery_types}")
     for delivery_type in delivery_types:
         DeliverAPI(
             store=context.obj.status_db,
@@ -74,7 +74,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             data_analysis=Pipeline.RSYNC,
             ticket=case.latest_ticket,
         )
-    LOG.info("Transfer of case %s started with SLURM job id %s", case_id, job_id)
+    LOG.info(f"Transfer of case {case_id} started with SLURM job id {job_id}")
 
 
 @click.command("all-fastq")

@@ -54,13 +54,13 @@ class ArchiveHandler:
         pass
 
     @abstractmethod
-    def retrieve_file(self, file_and_sample: FileAndSample):
-        """Retrieves the specified archived file."""
-        pass
-
-    @abstractmethod
     def convert_into_transfer_data(
         self, files_and_samples: list[FileAndSample], is_archiving: bool = True
     ) -> list[FileTransferData]:
         """Converts the provided files_and_samples into a list of objects formatted for the specific archiving flow."""
+        pass
+
+    @abstractmethod
+    def is_job_done(self, job_id: int) -> bool:
+        """Returns true if job has been completed, false otherwise."""
         pass

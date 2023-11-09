@@ -25,7 +25,7 @@ def fastq(context: click.Context):
 @click.pass_context
 def store_fastq_analysis(context: click.Context, case_id: str, dry_run: bool = False):
     """Creates an analysis object in status-db for the given fast case"""
-    LOG.info("Creating an analysis for case %s", case_id)
+    LOG.info(f"Creating an analysis for case {case_id}")
     status_db: Store = context.obj.status_db
     case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     new_analysis: Analysis = status_db.add_analysis(

@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 from housekeeper.store.models import File, Version
-from pydantic.v1.dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -24,7 +24,7 @@ from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
-from cg.store.models import Analysis, Customer, Case, Sample
+from cg.store.models import Analysis, Case, Customer, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -65,9 +65,8 @@ class UploadScoutAPI:
         # Fetch last version from housekeeper
         # This should be safe since analyses are only added if data is analysed
         hk_version_obj: Version = self.housekeeper.last_version(analysis_obj.case.internal_id)
-        LOG.debug("Found housekeeper version %s", hk_version_obj.id)
+        LOG.debug(f"Found housekeeper version {hk_version_obj.id}")
 
-        load_config: ScoutLoadConfig
         LOG.info("Found pipeline %s", analysis_obj.pipeline)
         config_builder = self.get_config_builder(analysis=analysis_obj, hk_version=hk_version_obj)
 
@@ -305,8 +304,6 @@ class UploadScoutAPI:
                 )
 
             LOG.debug(f"Splice junctions bed file {splice_junctions_bed.path} found")
-            dna_sample_id: str
-            dna_cases: list[str]
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading splice junctions bed file for sample {dna_sample_name} "
