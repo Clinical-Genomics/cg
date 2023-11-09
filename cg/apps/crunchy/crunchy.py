@@ -47,7 +47,7 @@ class CrunchyAPI:
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run."""
         LOG.info("Updating compress api")
-        LOG.info("Set dry run to %s", dry_run)
+        LOG.info(f"Set dry run to {dry_run}")
         self.dry_run = dry_run
         self.slurm_api.set_dry_run(dry_run=dry_run)
 
@@ -56,7 +56,7 @@ class CrunchyAPI:
     def is_compression_pending(compression_obj: CompressionData) -> bool:
         """Check if compression/decompression has started but not finished."""
         if compression_obj.pending_exists():
-            LOG.info("Compression/decompression is pending for %s", compression_obj.run_name)
+            LOG.info(f"Compression/decompression is pending for {compression_obj.run_name}")
             return True
         LOG.info("Compression/decompression is not running")
         return False
@@ -99,7 +99,7 @@ class CrunchyAPI:
 
         """
         if compression_obj.pending_exists():
-            LOG.info("Compression/decompression is pending for %s", compression_obj.run_name)
+            LOG.info(f"Compression/decompression is pending for {compression_obj.run_name}")
             return False
 
         if not compression_obj.spring_exists():
@@ -203,7 +203,7 @@ class CrunchyAPI:
     @staticmethod
     def create_pending_file(pending_path: Path, dry_run: bool) -> None:
         """Create a pending flag file."""
-        LOG.info("Creating pending flag %s", pending_path)
+        LOG.info(f"Creating pending flag {pending_path}")
         if dry_run:
             return
         pending_path.touch(exist_ok=False)
@@ -254,7 +254,7 @@ class CrunchyAPI:
         sbatch_number: int = self.slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
-        LOG.info("Fastq compression running as job %s", sbatch_number)
+        LOG.info(f"Fastq compression running as job {sbatch_number}")
         return sbatch_number
 
     def spring_to_fastq(self, compression_obj: CompressionData, sample_id: str = "") -> int:
@@ -307,7 +307,7 @@ class CrunchyAPI:
         sbatch_number: int = self.slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
-        LOG.info("Spring decompression running as job %s", sbatch_number)
+        LOG.info(f"Spring decompression running as job {sbatch_number}")
         return sbatch_number
 
     @staticmethod

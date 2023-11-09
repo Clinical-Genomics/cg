@@ -43,7 +43,7 @@ class OrderformParser(BaseModel):
                 cases[case_id] = []
             cases[case_id].append(sample)
         if cases:
-            LOG.info("Found cases %s", ", ".join(cases.keys()))
+            LOG.info(f"Found cases {', '.join(cases.keys())}")
         else:
             LOG.info("Could not find any cases")
         return cases

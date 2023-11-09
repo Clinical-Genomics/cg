@@ -113,7 +113,7 @@ class Of1508Sample(OrderInSample):
     @validator("container", "container_name", "name", "source", "subject_id", "volume")
     def required_for_new_samples(cls, value, values, **kwargs):
         if not value and not values.get("internal_id"):
-            raise ValueError("required for new sample '%s'" % (values.get("name")))
+            raise ValueError(f"required for new sample {values.get('name')}")
         return value
 
     @validator(
