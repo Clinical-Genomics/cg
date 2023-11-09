@@ -64,7 +64,7 @@ class MipDNAReportAPI(ReportAPI):
         )
         if sample_coverage:
             return sample_coverage
-        LOG.warning("Could not calculate sample coverage for: %s", sample.internal_id)
+        LOG.warning(f"Could not calculate sample coverage for: {sample.internal_id}")
         return dict()
 
     def get_genes_from_scout(self, panels: list) -> list:

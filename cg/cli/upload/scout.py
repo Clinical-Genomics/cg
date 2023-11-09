@@ -69,7 +69,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
 
     if not case_obj.analyses:
-        LOG.warning("Could not find analyses for %s", case_id)
+        LOG.warning(f"Could not find analyses for {case_id}")
         raise click.Abort
 
     context.meta_apis["upload_api"]: UploadAPI = get_upload_api(cg_config=context, case=case_obj)
@@ -81,11 +81,11 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     try:
         scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
     except SyntaxError as error:
-        LOG.warning("%s", error)
+        LOG.warning(repr(error))
         raise click.Abort from error
-    LOG.info("Found load config %s", scout_load_config)
+    LOG.info(f"Found load config {scout_load_config}")
     root_dir: str = context.meta_apis["upload_api"].analysis_api.root
-    LOG.info("Set root dir to %s", root_dir)
+    LOG.info(f"Set root dir to {root_dir}")
     file_path: Path = Path(root_dir, case_id, "scout_load.yaml")
 
     if print_console:
@@ -94,11 +94,11 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
                 content=scout_load_config.dict(exclude_none=True), file_format=FileFormat.YAML
             )
         )
-        LOG.info("Would save file to %s", file_path)
+        LOG.info(f"Would save file to {file_path}")
         return
 
     if file_path.exists():
-        LOG.warning("Scout load config %s already exists", file_path)
+        LOG.warning(f"Scout load config {file_path} already exists")
         if re_upload:
             LOG.info("Deleting old load config")
             file_path.unlink()

@@ -31,7 +31,7 @@ class HousekeeperAPI:
         self.root_dir: str = config["housekeeper"]["root"]
 
     def __getattr__(self, name):
-        LOG.warning("Called undefined %s on %s, please wrap", name, self.__class__.__name__)
+        LOG.warning(f"Called undefined {name} on {self.__class__.__name__}, please wrap")
         return getattr(self._store, name)
 
     def new_bundle(self, name: str, created_at: dt.datetime = None) -> Bundle:
@@ -216,7 +216,7 @@ class HousekeeperAPI:
         """
         version_root_dir: Path = Path(root_dir, version_obj.relative_root_dir)
         version_root_dir.mkdir(parents=True, exist_ok=True)
-        LOG.info("Created new bundle version dir: %s", version_root_dir)
+        LOG.info(f"Created new bundle version dir: {version_root_dir}")
         return Path(version_root_dir, Path(file_obj.path).name)
 
     def include_file(self, file_obj: File, version_obj: Version) -> File:

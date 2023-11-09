@@ -7,7 +7,7 @@ import click
 from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline, Priority
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Customer, Case, Panel
+from cg.store.models import Case, Customer, Panel
 from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)
@@ -108,7 +108,7 @@ def update_customer(case: Case, customer_id: str, status_db: Store) -> None:
     customer_obj: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
 
     if customer_obj is None:
-        LOG.error("Unknown customer: %s", customer_id)
+        LOG.error(f"Unknown customer: {customer_id}")
         raise click.Abort
 
     LOG.info(f"Update customer: {case.customer.internal_id} -> {customer_id}")

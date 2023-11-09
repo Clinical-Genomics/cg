@@ -128,7 +128,7 @@ class TrailblazerAPI:
             "ticket": ticket,
             "workflow_manager": workflow_manager,
         }
-        LOG.debug("Submitting job to Trailblazer: %s", request_body)
+        LOG.debug(f"Submitting job to Trailblazer: {request_body}")
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
         if response:
             return TrailblazerAnalysis.model_validate(response)
