@@ -64,4 +64,4 @@ def downgrade():
 
     # Recreate foreign key constraints referencing the original unique constraint
     op.create_foreign_key("analysis_ibfk_1", "analysis", "family", ["family_id"], ["id"])
-    op.create_foreign_key("case_sample_ibfk_1", "family_sample", "family", ["family_id"], ["id"])
+    op.create_foreign_key("family_sample_ibfk_1", "family_sample", "family", ["family_id"], ["id"])
