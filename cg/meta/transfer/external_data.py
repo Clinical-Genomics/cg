@@ -34,9 +34,9 @@ class ExternalDataAPI(MetaAPI):
         timestamp_str: str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
         folder_name: Path = Path("_".join([ticket, timestamp_str]))
         log_dir: Path = Path(self.base_path, folder_name)
-        LOG.info("Creating folder: %s", log_dir)
+        LOG.info(f"Creating folder: {log_dir}")
         if dry_run:
-            LOG.info("Would have created path %s, but this is a dry run", log_dir)
+            LOG.info(f"Would have created path {log_dir}, but this is a dry run")
             return log_dir
         log_dir.mkdir(parents=True, exist_ok=False)
         return log_dir
@@ -93,7 +93,7 @@ class ExternalDataAPI(MetaAPI):
         all_fastqs: list[Path] = []
         for leaf in sample_folder.glob("*fastq.gz"):
             abs_path: Path = sample_folder.joinpath(leaf)
-            LOG.info("Found file %s inside folder %s" % (str(abs_path), sample_folder))
+            LOG.info(f"Found file {str(abs_path)} inside folder {sample_folder}")
             all_fastqs.append(abs_path)
         return all_fastqs
 
@@ -127,7 +127,7 @@ class ExternalDataAPI(MetaAPI):
     ):
         """Adds the given fastq files to the the hk-bundle"""
         for path in fastq_paths:
-            LOG.info("Adding path %s to bundle %s in housekeeper" % (path, lims_sample_id))
+            LOG.info(f"Adding path {path} to bundle {lims_sample_id} in housekeeper")
             self.housekeeper_api.add_file(path=path, version_obj=last_version, tags=HK_FASTQ_TAGS)
 
     def get_failed_fastq_paths(self, fastq_paths_to_add: list[Path]) -> list[Path]:

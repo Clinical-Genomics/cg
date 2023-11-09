@@ -112,7 +112,7 @@ def generate_available_delivery_reports(
     else:
         for case in cases_without_delivery_report:
             case_id: str = case.internal_id
-            LOG.info("Generating delivery report for case: %s", case_id)
+            LOG.info(f"Generating delivery report for case: {case_id}")
             try:
                 context.invoke(
                     generate_delivery_report,
@@ -122,23 +122,15 @@ def generate_available_delivery_reports(
                 )
             except FileNotFoundError as error:
                 LOG.error(
-                    "The delivery report generation is missing a file for case: %s, %s",
-                    case_id,
-                    error,
+                    f"The delivery report generation is missing a file for case: {case_id}, {error}"
                 )
                 exit_code = EXIT_FAIL
             except CgError as error:
-                LOG.error(
-                    "The delivery report generation failed for case: %s, %s",
-                    case_id,
-                    error,
-                )
+                LOG.error(f"The delivery report generation failed for case: {case_id}, {error}")
                 exit_code = EXIT_FAIL
             except Exception as error:
                 LOG.error(
-                    "Unspecified error when generating the delivery report for case: %s, %s",
-                    case_id,
-                    error,
+                    f"Unspecified error when generating the delivery report for case: {case_id}, {error}"
                 )
                 exit_code = EXIT_FAIL
 

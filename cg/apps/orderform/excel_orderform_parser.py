@@ -34,7 +34,7 @@ class ExcelOrderformParser(OrderformParser):
 
     def check_orderform_version(self, document_title: str) -> None:
         """Raise an error if the orderform is too new or too old for the order portal"""
-        LOG.info("Validating that %s is a correct orderform version", document_title)
+        LOG.info(f"Validating that {document_title} is a correct orderform version")
         for valid_orderform in self.VALID_ORDERFORMS:
             if valid_orderform in document_title:
                 return
@@ -45,7 +45,7 @@ class ExcelOrderformParser(OrderformParser):
 
         for name in sheet_names:
             if name in self.SHEET_NAMES:
-                LOG.info("Found sheet name %s", name)
+                LOG.info(f"Found sheet name {name}")
                 return name
         raise OrderFormError("'orderform' sheet not found in Excel file")
 
@@ -60,11 +60,11 @@ class ExcelOrderformParser(OrderformParser):
                 continue
             information_sheet: Worksheet = workbook[sheet_name]
             document_title = information_sheet.cell(1, 3).value
-            LOG.info("Found document title %s", document_title)
+            LOG.info(f"Found document title {document_title}")
             return document_title
 
         document_title = orderform_sheet.cell(1, 2).value
-        LOG.info("Found document title %s", document_title)
+        LOG.info(f"Found document title {document_title}")
         return document_title
 
     @staticmethod
@@ -195,7 +195,7 @@ class ExcelOrderformParser(OrderformParser):
     def parse_orderform(self, excel_path: str) -> None:
         """Parse out information from an order form"""
 
-        LOG.info("Open excel workbook from file %s", excel_path)
+        LOG.info(f"Open excel workbook from file {excel_path}")
         workbook: Workbook = openpyxl.load_workbook(
             filename=excel_path, read_only=True, data_only=True
         )

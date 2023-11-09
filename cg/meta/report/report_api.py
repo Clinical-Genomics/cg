@@ -15,7 +15,10 @@ from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError
 from cg.io.controller import WriteStream
 from cg.meta.meta import MetaAPI
-from cg.meta.report.field_validators import get_empty_report_data, get_missing_report_data
+from cg.meta.report.field_validators import (
+    get_empty_report_data,
+    get_missing_report_data,
+)
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
@@ -27,7 +30,12 @@ from cg.models.report.report import (
     ReportModel,
     ScoutReportFiles,
 )
-from cg.models.report.sample import ApplicationModel, MethodsModel, SampleModel, TimestampModel
+from cg.models.report.sample import (
+    ApplicationModel,
+    MethodsModel,
+    SampleModel,
+    TimestampModel,
+)
 from cg.store.models import (
     Analysis,
     Application,
@@ -259,7 +267,7 @@ class ReportAPI(MetaAPI):
         try:
             lims_sample: dict = self.lims_api.sample(sample_id)
         except requests.exceptions.HTTPError as ex:
-            LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
+            LOG.info(f"Could not fetch sample {sample_id} from LIMS: {ex}")
         return lims_sample
 
     def get_pipeline_accreditation_limitation(self, application_tag: str) -> str | None:
@@ -309,7 +317,7 @@ class ReportAPI(MetaAPI):
             library_prep = self.lims_api.get_prep_method(lims_id=sample_id)
             sequencing = self.lims_api.get_sequencing_method(lims_id=sample_id)
         except requests.exceptions.HTTPError as ex:
-            LOG.info("Could not fetch sample (%s) methods from LIMS: %s", sample_id, ex)
+            LOG.info(f"Could not fetch sample ({sample_id}) methods from LIMS: {ex}")
 
         return MethodsModel(library_prep=library_prep, sequencing=sequencing)
 
