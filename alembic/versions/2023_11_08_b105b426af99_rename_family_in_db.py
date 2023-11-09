@@ -42,24 +42,26 @@ def upgrade():
 
 
 def downgrade():
-    # Rename tables
+    # Drop foreign key constraints before renaming them back
+    op.drop_constraint("analysis_ibfk_1", "analysis", type_="foreignkey")
+    op.drop_constraint("case_sample_ibfk_1", "case_sample", type_="foreignkey")
+
+    # Drop the unique constraint
+    op.drop_constraint("_case_sample_uc", "case_sample", type_="unique")
+
+    # Rename foreign keys back to original before renaming tables
+    op.alter_column("analysis", "case_id", new_column_name="family_id", existing_type=sa.Integer())
+    op.alter_column(
+        "case_sample", "case_id", new_column_name="family_id", existing_type=sa.Integer()
+    )
+
+    # Rename tables back to original
     op.rename_table("case", "family")
     op.rename_table("case_sample", "family_sample")
-
-    # Drop foreign key constraints before renaming them back
-    op.drop_constraint('analysis_ibfk_1', 'analysis', type_='foreignkey')
-    op.drop_constraint('case_sample_ibfk_1', 'case_sample', type_='foreignkey')
-
-    # Rename foreign keys
-    op.alter_column("analysis", "case_id", new_column_name="family_id", existing_type=sa.Integer())
-    op.alter_column("case_sample", "case_id", new_column_name="family_id", existing_type=sa.Integer())
-
-    # Drop the new unique constraint
-    op.drop_constraint("_case_sample_uc", "family_sample", type_="unique")
 
     # Recreate the original unique constraint
     op.create_unique_constraint("_family_sample_uc", "family_sample", ["family_id", "sample_id"])
 
     # Recreate foreign key constraints referencing the original unique constraint
-    op.create_foreign_key('analysis_ibfk_1', 'analysis', 'family', ['family_id'], ['id'])
-    op.create_foreign_key('case_sample_ibfk_1', 'family_sample', 'family', ['family_id'], ['id'])
+    op.create_foreign_key("analysis_ibfk_1", "analysis", "family", ["family_id"], ["id"])
+    op.create_foreign_key("case_sample_ibfk_1", "family_sample", "family", ["family_id"], ["id"])
