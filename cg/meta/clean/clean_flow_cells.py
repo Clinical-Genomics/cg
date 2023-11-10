@@ -120,7 +120,11 @@ class CleanFlowCellAPI:
         )
 
     def has_sample_fastq_or_spring_files_in_housekeeper(self) -> bool:
-        """Check if a flow cell has fastq or spring files in housekeeper."""
+        """
+        Check if a flow cell has fastq or spring files in housekeeper.
+        Raises:
+            HousekeeperFileMissingError
+        """
         if not self.has_fastq_files_for_samples_in_housekeeper() and not (
             self.has_spring_files_for_samples_in_housekeeper()
             and self.has_spring_meta_data_files_for_samples_in_housekeeper()
