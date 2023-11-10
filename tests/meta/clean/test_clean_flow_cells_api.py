@@ -310,7 +310,7 @@ def test_flow_cell_has_not_fastq_files_in_housekeeper(
 
     # WHEN checking whether a sample on a flow cell has fastq files
 
-    # THEN nothing the flow cell has no fastq files in housekeeper.
+    # THEN the flow cell has no fastq files in housekeeper.
     assert not flow_cell_clean_api_can_not_be_removed.has_fastq_files_for_samples_in_housekeeper()
     assert SequencingFileTag.FASTQ in caplog.text
 
