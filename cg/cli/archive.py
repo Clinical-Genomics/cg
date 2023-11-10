@@ -3,7 +3,6 @@ import logging
 import click
 from click.core import ParameterSource
 
-from cg.constants.constants import DRY_RUN
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.models.cg_config import CGConfig
 
@@ -33,7 +32,6 @@ def archive():
     default=False,
     show_default=True,
 )
-@DRY_RUN
 @click.pass_obj
 def archive_spring_files(context: CGConfig, limit: int | None, archive_all: bool):
     """Archives non-archived spring files.
@@ -46,8 +44,8 @@ def archive_spring_files(context: CGConfig, limit: int | None, archive_all: bool
         and limit
         and archive_all
     ):
-        LOG.warning(
-            "Incorrect input parameters - please do not provide both a limit and set --archive-all to true."
+        click.echo(
+            "Incorrect input parameters - please do not provide both a limit and set --archive-all."
         )
         raise click.Abort
 
@@ -62,8 +60,6 @@ def archive_spring_files(context: CGConfig, limit: int | None, archive_all: bool
 
 
 @archive.command("update-job-statuses")
-@click.option(help="Update statuses for all ongoing archivals and retrievals.")
-@DRY_RUN
 @click.pass_obj
 def update_job_statuses(context: CGConfig):
     """Queries ongoing jobs and updates Housekeeper for the ones that have finished."""
