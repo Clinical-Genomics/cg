@@ -3,7 +3,7 @@ import datetime
 import logging
 import os
 from pathlib import Path
-from typing import Optional, Type, Union
+from typing import Type, Union
 from cg.models.flow_cell.utils import parse_date
 
 from pydantic import ValidationError
@@ -42,7 +42,7 @@ RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
 class FlowCellDirectoryData:
     """Class to collect information about flow cell directories and their particular files."""
 
-    def __init__(self, flow_cell_path: Path, bcl_converter: Optional[str] = None):
+    def __init__(self, flow_cell_path: Path, bcl_converter: str | None = None):
         LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
         self.path: Path = flow_cell_path
         self.machine_name: str = ""
@@ -53,8 +53,8 @@ class FlowCellDirectoryData:
         self.id: str = ""
         self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_dir_name()
-        self.bcl_converter: Optional[str] = self.get_bcl_converter(bcl_converter)
-        self._sample_sheet_path_hk: Optional[Path] = None
+        self.bcl_converter: str = self.get_bcl_converter(bcl_converter)
+        self._sample_sheet_path_hk: Path | None = None
 
     def parse_flow_cell_dir_name(self):
         """Parse relevant information from flow cell name.
