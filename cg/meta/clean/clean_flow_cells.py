@@ -20,15 +20,16 @@ LOG = logging.getLogger(__name__)
 
 class CleanFlowCellAPI:
     """
-            Handles the cleaning of flow cells in the flow cells and demultiplexed runs directories.
+    Handles the cleaning of flow cells in the flow cells and demultiplexed runs directories.
     Requirements for cleaning:
             Flow cell is older than 21 days
             Flow cell is backed up
             Flow cell is in StatusDB
             Flow cell has sequencing metrics in StatusDB
-            Flow cell has fastq files in Housekeeper
-            Flow cell has SPRING files in Housekeeper
-            Flow cell has SPRING metadata in Housekeeper
+            Flow cell has fastq files in Housekeeper or
+                Flow cell has SPRING files in Housekeeper
+                and
+                Flow cell has SPRING metadata in Housekeeper
             Flow cell has a sample sheet in Housekeeper
     """
 
@@ -76,11 +77,7 @@ class CleanFlowCellAPI:
                 self.is_flow_cell_in_statusdb(),
                 self.is_flow_cell_backed_up(),
                 self.has_sequencing_metrics_in_statusdb(),
-                self.has_fastq_files_for_samples_in_housekeeper()
-                or (
-                    self.has_spring_meta_data_files_for_samples_in_housekeeper()
-                    and self.has_spring_files_for_samples_in_housekeeper()
-                ),
+                self.has_sample_fastq_or_spring_files_in_housekeeper(),
                 self.has_sample_sheet_in_housekeeper(),
             ]
         )
@@ -122,6 +119,18 @@ class CleanFlowCellAPI:
             self.get_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.SPRING_METADATA)
         )
 
+    def has_sample_fastq_or_spring_files_in_housekeeper(self) -> bool:
+        """Check if a flow cell has fastq or spring files in housekeeper."""
+        if not self.has_fastq_files_for_samples_in_housekeeper() and not (
+            self.has_spring_files_for_samples_in_housekeeper()
+            and self.has_spring_meta_data_files_for_samples_in_housekeeper()
+        ):
+            raise HousekeeperFileMissingError(
+                f"Flow cell {self.flow_cell.id} is missing fastq and spring files for some samples. "
+                f"Info can be found in debug mode."
+            )
+        return True
+
     def get_flow_cell_from_status_db(self) -> Optional[Flowcell]:
         """
         Get the flow cell entry from StatusDB.
@@ -148,7 +157,7 @@ class CleanFlowCellAPI:
             )
         return metrics
 
-    def get_files_for_samples_on_flow_cell_with_tag(self, tag: str) -> Optional[list[File]]:
+    def get_files_for_samples_on_flow_cell_with_tag(self, tag: str) -> list[File] | None:
         """
         Return the files with the specified tag for all samples on a Flow cell.
         """
@@ -162,7 +171,8 @@ class CleanFlowCellAPI:
                 ).all()
             )
             if not files:
-                raise HousekeeperFileMissingError(
+                LOG.debug(
                     f"No files with tag {tag} found for sample {bundle_name} on flow cell {self.flow_cell.id}"
                 )
+                return None
         return files

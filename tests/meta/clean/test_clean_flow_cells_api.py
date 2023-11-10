@@ -237,12 +237,10 @@ def test_can_flow_cell_be_deleted_no_spring_no_fastq(
                 return_value=False,
             ):
                 # WHEN checking that the flow cell can be deleted
-                can_be_deleted: bool = (
-                    flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
-                )
 
-    # THEN the check whether the flow cell can be deleted returns True
-    assert not can_be_deleted
+                # THEN a HousekeeperFileMissingError is raised
+                with pytest.raises(HousekeeperFileMissingError):
+                    flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
 
 
 def test_delete_flow_cell_directory(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
