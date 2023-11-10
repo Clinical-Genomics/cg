@@ -15,7 +15,6 @@ from cg.store import Store
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
-DEFAULT_SPRING_ARCHIVE_COUNT = 200
 ARCHIVE_HANDLERS: dict[str, Type[ArchiveHandler]] = {
     ArchiveLocations.KAROLINSKA_BUCKET: DDNDataFlowClient
 }
@@ -87,9 +86,7 @@ class SpringArchiveAPI:
             archive_task_id=archive_task_id,
         )
 
-    def archive_all_non_archived_spring_files(
-        self, spring_file_count_limit: int = DEFAULT_SPRING_ARCHIVE_COUNT
-    ) -> None:
+    def archive_all_non_archived_spring_files(self, spring_file_count_limit: int | None) -> None:
         """Archives all non archived spring files. If a limit is provided, the amount of files archived are limited
         to that amount."""
 

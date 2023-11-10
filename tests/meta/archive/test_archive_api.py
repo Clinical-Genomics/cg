@@ -198,7 +198,7 @@ def test_archive_all_non_archived_spring_files(
         "api_request_from_content",
         return_value=ok_ddn_response,
     ) as mock_request_submitter:
-        spring_archive_api.archive_all_non_archived_spring_files()
+        spring_archive_api.archive_all_non_archived_spring_files(200)
 
     # THEN the DDN archiving function should have been called with the correct destination and source.
     mock_request_submitter.assert_called_with(
