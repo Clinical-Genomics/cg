@@ -166,7 +166,7 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
 
     def add_override_cycles_to_samples(self) -> None:
         """Return None for flow cells to be demultiplexed with Bcl2fastq."""
-        LOG.debug("No adding of override cycles for Bcl2fastq flow cell")
+        LOG.debug("Skipping adding of override cycles for Bcl2fastq flow cell")
 
     def get_additional_sections_sample_sheet(self) -> list[list[str]]:
         """Return all sections of the sample sheet that are not the data section."""
