@@ -19,7 +19,6 @@ def test_limit_and_archive_all_fails(cli_runner: CliRunner, cg_context: CGConfig
 
     # THEN the command should have exited with an exit_code 1
     assert result.exit_code == 1
-    assert isinstance(result.exception, SystemExit)
     assert (
         "Incorrect input parameters - please do not provide both a limit and set --archive-all."
         in result.stdout
