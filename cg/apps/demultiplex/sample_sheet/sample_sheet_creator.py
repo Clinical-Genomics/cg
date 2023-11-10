@@ -234,21 +234,21 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
             SampleSheetBCLConvertSections.Header.INDEX_ORIENTATION_FORWARD.value,
         ]
         reads_section: list[list[str]] = [
-            [SampleSheetBCLConvertSections.Reads.HEADER.value],
+            [SampleSheetBCLConvertSections.Reads.HEADER],
             [
-                SampleSheetBCLConvertSections.Reads.READ_CYCLES_1.value,
+                SampleSheetBCLConvertSections.Reads.READ_CYCLES_1,
                 self.run_parameters.get_read_1_cycles(),
             ],
             [
-                SampleSheetBCLConvertSections.Reads.READ_CYCLES_2.value,
+                SampleSheetBCLConvertSections.Reads.READ_CYCLES_2,
                 self.run_parameters.get_read_2_cycles(),
             ],
             [
-                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_1.value,
+                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_1,
                 self.run_parameters.get_index_1_cycles(),
             ],
             [
-                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2.value,
+                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2,
                 self.run_parameters.get_index_2_cycles(),
             ],
         ]
