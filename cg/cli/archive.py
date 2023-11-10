@@ -1,12 +1,9 @@
-import logging
-
 import click
 from click.core import ParameterSource
 
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.models.cg_config import CGConfig
 
-LOG = logging.getLogger(__name__)
 DEFAULT_SPRING_ARCHIVE_COUNT = 200
 
 
