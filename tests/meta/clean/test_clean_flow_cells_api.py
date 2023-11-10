@@ -191,7 +191,7 @@ def test_can_flow_cell_be_deleted_no_spring_with_fastq(
                 flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
             )
 
-            # THEN the check whether the flow cell can be deleted returns True
+    # THEN the check whether the flow cell can be deleted returns True
     assert can_be_deleted
 
 
@@ -214,7 +214,7 @@ def test_can_flow_cell_be_deleted_spring_no_fastq(
                 flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
             )
 
-            # THEN the check whether the flow cell can be deleted returns True
+    # THEN the check whether the flow cell can be deleted returns True
     assert can_be_deleted
 
 
@@ -241,7 +241,7 @@ def test_can_flow_cell_be_deleted_no_spring_no_fastq(
                     flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
                 )
 
-                # THEN the check whether the flow cell can be deleted returns True
+    # THEN the check whether the flow cell can be deleted returns True
     assert not can_be_deleted
 
 
