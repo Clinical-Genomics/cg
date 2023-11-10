@@ -76,9 +76,11 @@ class CleanFlowCellAPI:
                 self.is_flow_cell_in_statusdb(),
                 self.is_flow_cell_backed_up(),
                 self.has_sequencing_metrics_in_statusdb(),
-                self.has_fastq_files_for_samples_in_housekeeper(),
-                self.has_spring_meta_data_files_for_samples_in_housekeeper(),
-                self.has_spring_files_for_samples_in_housekeeper(),
+                self.has_fastq_files_for_samples_in_housekeeper()
+                or (
+                    self.has_spring_meta_data_files_for_samples_in_housekeeper()
+                    and self.has_spring_files_for_samples_in_housekeeper()
+                ),
                 self.has_sample_sheet_in_housekeeper(),
             ]
         )
