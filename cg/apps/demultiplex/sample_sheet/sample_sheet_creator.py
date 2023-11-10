@@ -24,6 +24,7 @@ from cg.constants.demultiplexing import (
     SampleSheetBcl2FastqSections,
     SampleSheetBCLConvertSections,
 )
+from cg.constants.sequencing import Sequencers
 from cg.exc import SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -76,7 +77,9 @@ class SampleSheetCreator:
         raise NotImplementedError("Impossible to add override cycles to samples from parent class")
 
     def remove_unwanted_samples(self) -> None:
-        """Filter out samples with single indexes."""
+        """Filter out samples with single indexes if applicable."""
+        if self.flow_cell.sequencer_type in [Sequencers.HISEQGA, Sequencers.HISEQX]:
+            return
         LOG.info("Removing all samples without dual indexes")
         samples_to_keep = []
         sample: Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]
