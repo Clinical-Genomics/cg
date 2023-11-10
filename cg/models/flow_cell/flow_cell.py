@@ -114,7 +114,7 @@ class FlowCellDirectoryData:
         elif DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE in os.listdir(self.path):
             return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE)
         else:
-            message: str = f"No run parameters file found in flow cell {self.full_name}"
+            message: str = f"No run parameters file found in flow cell {self.path}"
             LOG.error(message)
             raise FlowCellError(message)
 
