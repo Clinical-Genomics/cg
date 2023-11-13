@@ -104,8 +104,17 @@ class SpringArchiveAPI:
             )
 
     def retrieve_case(self, case_id: str):
-        case: Case = self.status_db.get_case_by_internal_id(case_id)
-        self.retrieve_samples([link.sample for link in case.links])
+        case = self.status_db.get_case_by_internal_id(case_id)
+        self.retrieve_samples(self.get_archived_samples(case))
+
+    def get_archived_samples(self, case: Case):
+        return [
+            link.sample
+            for link in case.links
+            if self.housekeeper_api.get_archived_files(
+                bundle_name=link.sample.internal_id, tags=[SequencingFileTag.SPRING]
+            )
+        ]
 
     def retrieve_samples(self, samples: list[Sample]) -> None:
         """Retrieves the archived spring files for a list of samples."""

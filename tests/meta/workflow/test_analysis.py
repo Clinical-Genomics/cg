@@ -4,11 +4,14 @@ from datetime import datetime
 
 import mock
 import pytest
+from housekeeper.store.models import File
 
 from cg.constants import FlowCellStatus, GenePanelMasterList, Priority
+from cg.constants.archiving import ArchiveLocations
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import Sequencers
 from cg.exc import AnalysisNotReadyError
+from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -389,3 +392,52 @@ def test_prepare_fastq_files_decompression_running(
             # WHEN running prepare_fastq_files
             # THEN an AnalysisNotReadyError should be thrown
             mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
+
+
+def test_prepare_fastq_files_request_DDN(
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, archived_file: File
+):
+    """Tests that samples are requested via DDN for a Clinical customer, if files are archived."""
+
+    # GIVEN a case belonging to a non-PDC customer with at least one archived spring file
+    case: Case = analysis_store.get_cases()[0]
+    case.customer.data_archive_location = ArchiveLocations.KAROLINSKA_BUCKET
+
+    # GIVEN that at least one file is archived and not retrieved
+    with mock.patch.object(
+        PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
+    ), mock.patch.object(
+        PrepareFastqAPI, "is_spring_decompression_running", return_value=False
+    ), mock.patch.object(
+        PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
+    ), mock.patch.object(
+        SpringArchiveAPI, "retrieve_samples"
+    ) as request_submitter:
+        with pytest.raises(AnalysisNotReadyError):
+            # WHEN running prepare_fastq_files
+            # THEN an AnalysisNotReadyError should be thrown
+            mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
+
+    # THEN retrieve_samples should have been invoked
+    assert request_submitter.call_count == 1
+
+
+def test_prepare_fastq_files_does_not_request_DDN(
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store
+):
+    """Tests that samples are requested via DDN for a Clinical customer, if files are archived."""
+
+    # GIVEN a case belonging to a non-PDC customer
+    case: Case = analysis_store.get_cases()[0]
+    case.customer.data_archive_location = ArchiveLocations.KAROLINSKA_BUCKET
+
+    with mock.patch.object(
+        PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
+    ), mock.patch.object(
+        PrepareFastqAPI, "is_spring_decompression_running", return_value=False
+    ), mock.patch.object(
+        PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
+    ):
+        # WHEN running prepare_fastq_files
+        # THEN no error should be raised
+        mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)

@@ -426,7 +426,7 @@ class HousekeeperAPI:
         """Returns all non-archived_files from a given bundle, tagged with the given tags"""
         return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags or [])
 
-    def get_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> list[File]:
+    def get_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
         """Returns all archived_files from a given bundle, tagged with the given tags"""
         return self._store.get_archived_files(bundle_name=bundle_name, tags=tags or [])
 

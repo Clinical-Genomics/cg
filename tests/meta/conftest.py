@@ -5,9 +5,10 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
+from housekeeper.store.models import Bundle, File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.housekeeper_tags import HkMipAnalysisTag
+from cg.constants.housekeeper_tags import HkMipAnalysisTag, SequencingFileTag
 from cg.constants.invoice import CustomerNames
 from cg.constants.sequencing import Sequencers
 from cg.meta.invoice import InvoiceAPI
@@ -210,3 +211,25 @@ def invoice_api_pool_generic_customer(
         customer_id=customer_id,
     )
     return InvoiceAPI(store, lims_api, invoice)
+
+
+@pytest.fixture
+def archived_file(helpers, real_housekeeper_api, archival_job_id, sample_id) -> File:
+    bundle: Bundle = real_housekeeper_api.create_new_bundle_and_version(sample_id)
+    file = real_housekeeper_api.add_file(
+        path="sample/version/file_name.spring",
+        version_obj=bundle.versions[0],
+        tags=[SequencingFileTag.SPRING],
+    )
+    real_housekeeper_api.add_archives(files=[Path(file.path)], archive_task_id=archival_job_id)
+    return file
+
+
+@pytest.fixture
+def archival_job_id() -> int:
+    return 123
+
+
+@pytest.fixture
+def retrieval_job_id() -> int:
+    return 124

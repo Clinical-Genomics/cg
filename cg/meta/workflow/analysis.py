@@ -10,7 +10,14 @@ import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.constants import (
+    CASE_ACTIONS,
+    EXIT_FAIL,
+    EXIT_SUCCESS,
+    Pipeline,
+    Priority,
+    SequencingFileTag,
+)
 from cg.constants.constants import AnalysisType, CaseActions, WorkflowManager
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
@@ -510,6 +517,7 @@ class AnalysisAPI(MetaAPI):
             raise AnalysisNotReadyError("FASTQ file are not present for the analysis to start")
 
     def ensure_files_are_not_archived(self, case_id):
+        """Checks if any files are archived and submits a job to retrieve any which are."""
         if self.get_archive_location_for_case(case_id) == "PDC":
             self.ensure_flow_cells_on_disk(case_id)
         else:
@@ -524,9 +532,11 @@ class AnalysisAPI(MetaAPI):
     def are_all_files_present(self, case_id):
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         for sample in [link.sample for link in case.links]:
-            if (files := self.housekeeper_api.get_archived_files(sample.internal_id)) and not all(
-                file.archive.retrieved_at for file in files
-            ):
+            if (
+                files := self.housekeeper_api.get_archived_files(
+                    bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING]
+                )
+            ) and not all(file.archive.retrieved_at for file in files):
                 return False
         return True
 
