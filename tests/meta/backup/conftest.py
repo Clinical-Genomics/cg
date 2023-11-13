@@ -1,6 +1,5 @@
 import fnmatch
 from pathlib import Path
-from subprocess import CompletedProcess
 from typing import Callable
 
 import pytest
@@ -73,14 +72,3 @@ def archived_flow_cell() -> Path:
 def archived_key() -> Path:
     """Path of archived key"""
     return Path("/path/to/archived/encryption_key.key.gpg")
-
-
-def create_process_response(
-    return_code: int, args: str = "", std_out: str = "", std_err: str = ""
-) -> CompletedProcess:
-    return CompletedProcess(
-        args=args,
-        returncode=return_code,
-        stderr=std_err.encode("utf-8"),
-        stdout=std_out.encode("utf-8"),
-    )

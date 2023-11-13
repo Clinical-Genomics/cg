@@ -7,6 +7,7 @@ import shutil
 from copy import deepcopy
 from datetime import MAXYEAR, datetime, timedelta
 from pathlib import Path
+from subprocess import CompletedProcess
 from typing import Any, Generator, Union
 
 import pytest
@@ -41,7 +42,10 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, EncryptionDirectories
-from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
+from cg.models.demultiplex.run_parameters import (
+    RunParametersNovaSeq6000,
+    RunParametersNovaSeqX,
+)
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
@@ -2378,7 +2382,7 @@ def context_config(
             "tower_pipeline": "taxprofiler",
         },
         "scout": {
-            "binary_path": "echo",
+            "binary_path": "bin/scout",
             "config_path": "scout-stage.yaml",
         },
         "statina": {
@@ -3259,3 +3263,14 @@ def flow_cell_encryption_api(
     )
     flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=True)
     return flow_cell_encryption_api
+
+
+def create_process_response(
+    return_code: int = 0, args: str = "", std_out: str = "", std_err: str = ""
+) -> CompletedProcess:
+    return CompletedProcess(
+        args=args,
+        returncode=return_code,
+        stderr=std_err.encode("utf-8"),
+        stdout=std_out.encode("utf-8"),
+    )
