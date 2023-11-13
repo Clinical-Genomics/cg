@@ -13,18 +13,6 @@ from tests.conftest import create_process_response
 LOG = logging.getLogger(__name__)
 
 
-def test_cg_workflow_mip_dna_panel(cli_runner, case_id, mip_dna_context):
-    """Test print the MIP dna panel command to console"""
-
-    # GIVEN a cli function
-
-    # WHEN we run a case in dry run mode
-    result = cli_runner.invoke(panel, [case_id], obj=mip_dna_context)
-
-    # THEN the command should be printed
-    assert result.exit_code == 0
-
-
 def test_panel_file_is_written(
     case_id: str, cli_runner: CliRunner, mip_dna_context: CGConfig, scout_panel_output: str
 ):
