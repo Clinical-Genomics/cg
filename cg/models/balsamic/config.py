@@ -120,7 +120,7 @@ class BalsamicVarCaller(BaseModel):
     """
 
     mutation: str
-    type: str
+    mutation_type: str
     analysis_type: list[str]
     sequencing_type: list[str]
     workflow_solution: list[str]
