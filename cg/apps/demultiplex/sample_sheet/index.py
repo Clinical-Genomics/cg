@@ -151,11 +151,11 @@ def get_hamming_distance_index_2(
     shortest_index_length: int = min(len(sequence_1), len(sequence_2))
     return (
         get_hamming_distance(
-            str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
+            str_1=sequence_1[-shortest_index_length:], str_2=sequence_2[-shortest_index_length:]
         )
         if is_reverse_complement
         else get_hamming_distance(
-            str_1=sequence_1[-shortest_index_length:], str_2=sequence_2[-shortest_index_length:]
+            str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
         )
     )
 

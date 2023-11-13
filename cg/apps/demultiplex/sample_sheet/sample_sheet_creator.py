@@ -213,9 +213,9 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
             if sample_index_len < flow_cell_index_len:
                 index1_cycles = f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
                 index2_cycles = (
-                    f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
+                    f"N{flow_cell_index_len - sample_index_len}I{sample_index_len};"
                     if self.is_reverse_complement
-                    else f"N{flow_cell_index_len - sample_index_len}I{sample_index_len};"
+                    else f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
                 )
             sample.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
