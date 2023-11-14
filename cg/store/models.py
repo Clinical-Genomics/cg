@@ -216,7 +216,7 @@ class Analysis(Model):
     is_primary = Column(types.Boolean, default=False)
 
     created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
-    family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
+    case_id = Column(ForeignKey("case.id", ondelete="CASCADE"), nullable=False)
     uploaded_to_vogue_at = Column(types.DateTime, nullable=True)
 
     case = orm.relationship("Case", back_populates="analyses")
@@ -377,7 +377,7 @@ class Delivery(Model):
 
 
 class Case(Model, PriorityMixin):
-    __tablename__ = "family"
+    __tablename__ = "case"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
     action = Column(types.Enum(*CASE_ACTIONS))
@@ -516,11 +516,11 @@ class Case(Model, PriorityMixin):
 
 
 class CaseSample(Model):
-    __tablename__ = "family_sample"
-    __table_args__ = (UniqueConstraint("family_id", "sample_id", name="_family_sample_uc"),)
+    __tablename__ = "case_sample"
+    __table_args__ = (UniqueConstraint("case_id", "sample_id", name="_case_sample_uc"),)
 
     id = Column(types.Integer, primary_key=True)
-    family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
+    case_id = Column(ForeignKey("case.id", ondelete="CASCADE"), nullable=False)
     sample_id = Column(ForeignKey("sample.id", ondelete="CASCADE"), nullable=False)
     status = Column(types.Enum(*STATUS_OPTIONS), default="unknown", nullable=False)
 
