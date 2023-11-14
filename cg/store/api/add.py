@@ -16,8 +16,8 @@ from cg.store.models import (
     Collaboration,
     Customer,
     Delivery,
-    Family,
-    FamilySample,
+    Case,
+    CaseSample,
     Flowcell,
     Invoice,
     Organism,
@@ -201,8 +201,8 @@ class AddHandler(BaseHandler):
         cohorts: Optional[list[str]] = None,
         priority: Optional[Priority] = Priority.standard,
         synopsis: Optional[str] = None,
-    ) -> Family:
-        """Build a new Family record."""
+    ) -> Case:
+        """Build a new Case record."""
 
         # generate a unique case id
         while True:
@@ -212,7 +212,7 @@ class AddHandler(BaseHandler):
             else:
                 LOG.debug(f"{internal_id} already used - trying another id")
 
-        return Family(
+        return Case(
             cohorts=cohorts,
             data_analysis=str(data_analysis),
             data_delivery=str(data_delivery),
@@ -226,16 +226,16 @@ class AddHandler(BaseHandler):
 
     def relate_sample(
         self,
-        family: Family,
+        case: Case,
         sample: Sample,
         status: str,
         mother: Sample = None,
         father: Sample = None,
-    ) -> FamilySample:
+    ) -> CaseSample:
         """Relate a sample record to a family record."""
 
-        new_record: FamilySample = FamilySample(status=status)
-        new_record.family = family
+        new_record: CaseSample = CaseSample(status=status)
+        new_record.case = case
         new_record.sample = sample
         new_record.mother = mother
         new_record.father = father

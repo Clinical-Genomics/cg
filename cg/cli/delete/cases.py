@@ -4,7 +4,7 @@ import click
 
 from cg.cli.delete.case import delete_case
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 CONFIRM = "Continue?"
 
@@ -17,13 +17,13 @@ def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Sto
     return store.get_samples_by_any_id(**identifier_args)
 
 
-def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [Family]:
+def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [Case]:
     """Get cases that have samples that match identifiers if given"""
     samples_by_id = _get_samples_by_identifiers(identifiers, store)
     _cases = set()
     for sample in samples_by_id:
         for link in sample.links:
-            _cases.add(link.family)
+            _cases.add(link.case)
 
     return _cases
 

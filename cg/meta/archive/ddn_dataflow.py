@@ -1,6 +1,7 @@
 """Module for archiving and retrieving folders via DDN Dataflow."""
+import logging
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Optional
 from urllib.parse import urljoin
@@ -21,6 +22,8 @@ from cg.meta.archive.models import (
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
 
+LOG = logging.getLogger(__name__)
+
 OSTYPE: str = "Unix/MacOS"
 ROOT_TO_TRIM: str = "/home"
 
@@ -28,13 +31,27 @@ DESTINATION_ATTRIBUTE: str = "destination"
 SOURCE_ATTRIBUTE: str = "source"
 
 
-class DataflowEndpoints(str, Enum):
+class DataflowEndpoints(StrEnum):
     """Enum containing all DDN dataflow endpoints used."""
 
     ARCHIVE_FILES = "files/archive"
     GET_AUTH_TOKEN = "auth/token"
     REFRESH_AUTH_TOKEN = "auth/token/refresh"
     RETRIEVE_FILES = "files/retrieve"
+    GET_JOB_STATUS = "getJobStatus"
+
+
+class JobDescription(StrEnum):
+    """Enum for the different job statuses which can be returned via Miria."""
+
+    CANCELED = "Canceled"
+    COMPLETED = "Completed"
+    CREATION = "Creation"
+    IN_QUEUE = "In Queue"
+    REFUSED = "Refused"
+    RUNNING = "Running"
+    SUSPENDED = "Suspended"
+    TERMINATED_ON_ERROR = "Terminated on Error"
 
 
 class MiriaObject(FileTransferData):
@@ -156,6 +173,62 @@ class TransferJob(BaseModel):
     API."""
 
     job_id: int
+
+
+class SubJob(BaseModel):
+    """Model representing the response fields in a subjob returned in a get_job_status post."""
+
+    subjob_id: int
+    subjob_type: str
+    status: int
+    description: str
+    progress: float
+    total_rate: int
+    throughput: int
+    estimated_end: datetime
+    estimated_left: int
+
+
+class GetJobStatusResponse(BaseModel):
+    """Model representing the response fields from a get_job_status post."""
+
+    request_date: Optional[datetime] = None
+    operation: Optional[str] = None
+    job_id: int
+    type: Optional[str] = None
+    status: Optional[int] = None
+    description: str
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    durationTime: Optional[int] = None
+    priority: Optional[int] = None
+    progress: Optional[float] = None
+    subjobs: Optional[list[SubJob]] = None
+
+
+class GetJobStatusPayload(BaseModel):
+    """Model representing the payload for a get_job_status request."""
+
+    job_id: int
+    subjob_id: Optional[int] = None
+    related_jobs: Optional[bool] = None
+    main_subjob: Optional[bool] = None
+    debug: Optional[bool] = None
+
+    def post_request(self, url: str, headers: dict) -> GetJobStatusResponse:
+        """Sends a request to the given url with the given headers, and its own content as
+        payload. Returns the job ID of the launched transfer task.
+        Raises:
+             HTTPError if the response code is not ok.
+        """
+        response: Response = APIRequest.api_request_from_content(
+            api_method=APIMethods.POST,
+            url=url,
+            headers=headers,
+            json=self.model_dump(),
+        )
+        response.raise_for_status()
+        return GetJobStatusResponse.model_validate(response.json())
 
 
 class DDNDataFlowClient(ArchiveHandler):
@@ -281,3 +354,17 @@ class DDNDataFlowClient(ArchiveHandler):
             )
             for file_and_sample in files_and_samples
         ]
+
+    def is_job_done(self, job_id: int) -> bool:
+        get_job_status_payload = GetJobStatusPayload(job_id=job_id)
+        get_job_status_response: GetJobStatusResponse = get_job_status_payload.post_request(
+            url=urljoin(self.url, DataflowEndpoints.GET_JOB_STATUS),
+            headers=dict(self.headers, **self.auth_header),
+        )
+        if get_job_status_response.description == JobDescription.COMPLETED:
+            return True
+        LOG.info(
+            f"Job with id {job_id} has not been completed. "
+            f"Current job description is {get_job_status_response.description}"
+        )
+        return False

@@ -24,7 +24,7 @@ from cg.meta.observations.balsamic_observations_api import BalsamicObservationsA
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ def upload_observations_to_loqusdb(context: CGConfig, case_id: Optional[str], dr
     click.echo(click.style("----------------- OBSERVATIONS -----------------"))
 
     with contextlib.suppress(LoqusdbError):
-        case: Family = get_observations_case_to_upload(context, case_id)
+        case: Case = get_observations_case_to_upload(context, case_id)
         observations_api: Union[
             MipDNAObservationsAPI, BalsamicObservationsAPI
         ] = get_observations_api(context, case)

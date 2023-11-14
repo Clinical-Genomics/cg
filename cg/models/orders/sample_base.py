@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 from typing import Optional
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, constr
@@ -6,22 +6,22 @@ from typing_extensions import Annotated
 
 from cg.constants import DataDelivery, Pipeline
 from cg.models.orders.validators.sample_base_validators import snake_case
-from cg.store.models import Application, Customer, Family, Pool, Sample
+from cg.store.models import Application, Case, Customer, Pool, Sample
 
 
-class ControlEnum(str, Enum):
+class ControlEnum(StrEnum):
     not_control = ""
     positive = "positive"
     negative = "negative"
 
 
-class SexEnum(str, Enum):
+class SexEnum(StrEnum):
     male = "male"
     female = "female"
     unknown = "unknown"
 
 
-class PriorityEnum(str, Enum):
+class PriorityEnum(StrEnum):
     research = "research"
     standard = "standard"
     priority = "priority"
@@ -29,13 +29,13 @@ class PriorityEnum(str, Enum):
     clinical_trials = "clinical_trials"
 
 
-class ContainerEnum(str, Enum):
+class ContainerEnum(StrEnum):
     no_container = "No container"
     plate = "96 well plate"
     tube = "Tube"
 
 
-class StatusEnum(str, Enum):
+class StatusEnum(StrEnum):
     affected = "affected"
     unaffected = "unaffected"
     unknown = "unknown"
@@ -45,10 +45,10 @@ NAME_PATTERN = r"^[A-Za-z0-9-]*$"
 
 
 class OrderSample(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True, populate_by_name=True)
-    age_at_sampling: Annotated[
-        Optional[str], BeforeValidator(lambda x: str(x) if x else None)
-    ] = None
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True, populate_by_name=True, coerce_numbers_to_str=True
+    )
+    age_at_sampling: Optional[str] = None
     application: constr(max_length=Application.tag.property.columns[0].type.length)
     capture_kit: Optional[str] = None
     collection_date: Optional[str] = None
@@ -70,7 +70,7 @@ class OrderSample(BaseModel):
         constr(
             pattern=NAME_PATTERN,
             min_length=2,
-            max_length=Family.name.property.columns[0].type.length,
+            max_length=Case.name.property.columns[0].type.length,
         )
     ] = None
     father: Optional[
@@ -123,6 +123,6 @@ class OrderSample(BaseModel):
     tumour: bool = False
     tumour_purity: Optional[int] = None
     verified_organism: Optional[bool] = None
-    volume: Annotated[Optional[str], BeforeValidator(lambda x: str(x))] = None
+    volume: Optional[str] = None
     well_position: Optional[str] = None
     well_position_rml: Optional[str] = None

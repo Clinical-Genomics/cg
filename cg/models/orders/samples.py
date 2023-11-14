@@ -13,7 +13,7 @@ from cg.models.orders.sample_base import (
     SexEnum,
     StatusEnum,
 )
-from cg.store.models import Application, Family, Organism, Panel, Pool, Sample
+from cg.store.models import Application, Case, Organism, Panel, Pool, Sample
 
 
 class OptionalIntValidator:
@@ -69,7 +69,7 @@ class Of1508Sample(OrderInSample):
     family_name: constr(
         regex=NAME_PATTERN,
         min_length=2,
-        max_length=Family.name.property.columns[0].type.length,
+        max_length=Case.name.property.columns[0].type.length,
     )
     case_internal_id: Optional[
         constr(max_length=Sample.internal_id.property.columns[0].type.length)
@@ -113,7 +113,7 @@ class Of1508Sample(OrderInSample):
     @validator("container", "container_name", "name", "source", "subject_id", "volume")
     def required_for_new_samples(cls, value, values, **kwargs):
         if not value and not values.get("internal_id"):
-            raise ValueError("required for new sample '%s'" % (values.get("name")))
+            raise ValueError(f"required for new sample {values.get('name')}")
         return value
 
     @validator(

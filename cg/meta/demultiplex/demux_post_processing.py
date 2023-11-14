@@ -11,7 +11,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
 from cg.meta.demultiplex.status_db_storage_functions import (
     store_flow_cell_data_in_status_db,
     store_sequencing_metrics_in_status_db,
-    update_sample_read_counts_in_status_db,
+    store_sample_data_in_status_db,
 )
 from cg.meta.demultiplex.utils import create_delivery_file_in_flow_cell_directory
 from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
@@ -110,9 +110,7 @@ class DemuxPostProcessingAPI:
             store=self.status_db,
         )
         store_sequencing_metrics_in_status_db(flow_cell=parsed_flow_cell, store=self.status_db)
-        update_sample_read_counts_in_status_db(
-            flow_cell_data=parsed_flow_cell, store=self.status_db
-        )
+        store_sample_data_in_status_db(flow_cell=parsed_flow_cell, store=self.status_db)
         store_flow_cell_data_in_housekeeper(
             flow_cell=parsed_flow_cell,
             hk_api=self.hk_api,

@@ -64,6 +64,10 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get workflow manager from Tower."""
         return WorkflowManager.Tower.value
 
+    def get_pipeline_version(self, case_id: str) -> str:
+        """Get pipeline version from config."""
+        return self.revision
+
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
         return Path(self.root_dir, case_id)

@@ -44,17 +44,17 @@ def process_solved(
     for case in finished_cases:
         number_processed += 1
         if customers and case.owner not in customers:
-            LOG.info("skipping %s: Not valid customer %s", case.id, case.owner)
+            LOG.info(f"skipping {case.id}: Not valid customer {case.owner}")
             continue
         if dry_run:
-            LOG.info("Would process case %s with mutacc", case.id)
+            LOG.info(f"Would process case {case.id} with mutacc")
             continue
 
-        LOG.info("Start processing case %s with mutacc", case.id)
+        LOG.info(f"Start processing case {case.id} with mutacc")
         mutacc_upload_api.extract_reads(case)
 
     if number_processed == 0:
-        LOG.info("No cases were solved within the last %s days", days_ago)
+        LOG.info(f"No cases were solved within the last {days_ago} days")
 
 
 @click.command("processed-solved")

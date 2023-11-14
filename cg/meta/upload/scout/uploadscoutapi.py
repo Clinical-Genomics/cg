@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 from housekeeper.store.models import File, Version
-from pydantic.v1.dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -24,7 +24,7 @@ from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
-from cg.store.models import Analysis, Customer, Family, Sample
+from cg.store.models import Analysis, Case, Customer, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -64,10 +64,9 @@ class UploadScoutAPI:
 
         # Fetch last version from housekeeper
         # This should be safe since analyses are only added if data is analysed
-        hk_version_obj: Version = self.housekeeper.last_version(analysis_obj.family.internal_id)
-        LOG.debug("Found housekeeper version %s", hk_version_obj.id)
+        hk_version_obj: Version = self.housekeeper.last_version(analysis_obj.case.internal_id)
+        LOG.debug(f"Found housekeeper version {hk_version_obj.id}")
 
-        load_config: ScoutLoadConfig
         LOG.info("Found pipeline %s", analysis_obj.pipeline)
         config_builder = self.get_config_builder(analysis=analysis_obj, hk_version=hk_version_obj)
 
@@ -164,7 +163,7 @@ class UploadScoutAPI:
 
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> set[str]:
         """Return a set of unique DNA cases related to an RNA case."""
-        case: Family = self.status_db.get_case_by_internal_id(case_id)
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
         rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(case)
         unique_dna_cases_related_to_rna_case: set[str] = set()
         for rna_dna_collection in rna_dna_collections:
@@ -289,7 +288,7 @@ class UploadScoutAPI:
         """Upload splice_junctions_bed file for a case to Scout."""
 
         status_db: Store = self.status_db
-        rna_case: Family = status_db.get_case_by_internal_id(case_id)
+        rna_case: Case = status_db.get_case_by_internal_id(case_id)
 
         rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
         for rna_dna_collection in rna_dna_collections:
@@ -305,8 +304,6 @@ class UploadScoutAPI:
                 )
 
             LOG.debug(f"Splice junctions bed file {splice_junctions_bed.path} found")
-            dna_sample_id: str
-            dna_cases: list[str]
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading splice junctions bed file for sample {dna_sample_name} "
@@ -383,7 +380,7 @@ class UploadScoutAPI:
 
         return config_builders[analysis.pipeline]
 
-    def create_rna_dna_collections(self, rna_case: Family) -> list[RNADNACollection]:
+    def create_rna_dna_collections(self, rna_case: Case) -> list[RNADNACollection]:
         return [self.create_rna_dna_collection(link.sample) for link in rna_case.links]
 
     def create_rna_dna_collection(self, rna_sample: Sample) -> RNADNACollection:
@@ -426,16 +423,14 @@ class UploadScoutAPI:
         self, dna_sample: Sample, collaborators: set[Customer]
     ) -> list[str]:
         """Maps a list of uploaded DNA cases linked to DNA sample."""
-        potential_cases_related_to_dna_sample: list[Family] = [
-            dna_sample_family_relation.family for dna_sample_family_relation in dna_sample.links
-        ]
+        potential_cases_related_to_dna_sample: list[Case] = [link.case for link in dna_sample.links]
         return self.filter_cases_related_to_dna_sample(
             list_of_dna_cases=potential_cases_related_to_dna_sample, collaborators=collaborators
         )
 
     @staticmethod
     def filter_cases_related_to_dna_sample(
-        list_of_dna_cases: list[Family], collaborators: set[Customer]
+        list_of_dna_cases: list[Case], collaborators: set[Customer]
     ) -> list[str]:
         """Filters the given list of DNA samples and returns a subset of uploaded cases ordered by customers in the
         specified list of collaborators and within the correct pipeline."""

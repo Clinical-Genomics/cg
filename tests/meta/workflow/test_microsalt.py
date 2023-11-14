@@ -9,7 +9,7 @@ from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import ControlEnum
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
 
@@ -28,7 +28,7 @@ def test_qc_check_fail(
     microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
 
     # GIVEN a case that is to be stored
-    microsalt_case: Family = store.get_case_by_internal_id(internal_id=microsalt_case_qc_fail)
+    microsalt_case: Case = store.get_case_by_internal_id(internal_id=microsalt_case_qc_fail)
     for index in range(4):
         microsalt_case.samples[index].reads = 1000
 
@@ -60,7 +60,7 @@ def test_qc_check_pass(
     microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
 
     # GIVEN a case that is to be stored
-    microsalt_case: Family = store.get_case_by_internal_id(internal_id=microsalt_case_qc_pass)
+    microsalt_case: Case = store.get_case_by_internal_id(internal_id=microsalt_case_qc_pass)
     microsalt_case.samples[1].control = ControlEnum.negative
     microsalt_case.samples[1].reads = 1100000
 
@@ -93,7 +93,7 @@ def test_qc_check_negative_control_fail(
     microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
 
     # GIVEN a case that is to be stored
-    microsalt_case: Family = store.get_case_by_internal_id(internal_id=microsalt_case_qc_fail)
+    microsalt_case: Case = store.get_case_by_internal_id(internal_id=microsalt_case_qc_fail)
     microsalt_case.samples[0].control = ControlEnum.negative
 
     mocker.patch.object(MicrosaltAnalysisAPI, "create_qc_done_file")
@@ -152,8 +152,8 @@ def test_get_cases_to_store(
     helpers.ensure_case(store=store, data_analysis=Pipeline.MICROSALT, action=CaseActions.RUNNING)
 
     # WHEN getting the cases to store in Housekeeper
-    cases_to_store: list[Family] = analysis_api.get_cases_to_store()
-    case: Family = cases_to_store[0]
+    cases_to_store: list[Case] = analysis_api.get_cases_to_store()
+    case: Case = cases_to_store[0]
 
     # THEN a list with one microsalt case is returned
     assert len(cases_to_store) == 1
