@@ -492,22 +492,30 @@ class AnalysisAPI(MetaAPI):
             self.status_db.request_flow_cells_for_case(case_id)
 
     def is_case_ready_for_analysis(self, case_id: str) -> bool:
-        if self.get_archive_location_for_case(case_id) == ArchiveLocations.PDC:
-            if self._is_flow_cell_check_applicable(
-                case_id
-            ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
-                LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
-                return False
-        else:
-            if not self.are_all_files_present(case_id):
-                LOG.warning(f"Case {case_id} is not ready - some files are archived.")
-                return False
+        """Returns True if no files need to be retrieved from an external location and if all Spring files are
+        decompressed."""
+        if self.does_any_file_need_to_be_retrieved(case_id):
+            return False
         if self.prepare_fastq_api.is_spring_decompression_needed(
             case_id
         ) or self.prepare_fastq_api.is_spring_decompression_running(case_id):
             LOG.warning(f"Case {case_id} is not ready - not all files are decompressed.")
             return False
         return True
+
+    def does_any_file_need_to_be_retrieved(self, case_id: str) -> bool:
+        """Checks whether we need to retrieve files from an external data location."""
+        if self.get_archive_location_for_case(case_id) == ArchiveLocations.PDC:
+            if self._is_flow_cell_check_applicable(
+                case_id
+            ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
+                LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
+                return True
+        else:
+            if not self.are_all_files_present(case_id):
+                LOG.warning(f"Case {case_id} is not ready - some files are archived.")
+                return True
+        return False
 
     def prepare_fastq_files(self, case_id: str, dry_run: bool) -> None:
         """Retrieves or decompresses fastq files if needed, upon which an AnalysisNotReady error
