@@ -45,7 +45,7 @@ class AddHandler(BaseHandler):
             random_id = petname.Generate(2, separator="", letters=10)
             if not self.get_case_by_internal_id(random_id):
                 return random_id
-    
+
     def add_customer(
         self,
         internal_id: str,
