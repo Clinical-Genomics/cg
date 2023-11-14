@@ -394,7 +394,7 @@ def test_prepare_fastq_files_decompression_running(
             mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
 
 
-def test_prepare_fastq_files_request_DDN(
+def test_prepare_fastq_files_request_ddn(
     mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, archived_file: File
 ):
     """Tests that samples are requested via DDN for a Clinical customer, if files are archived."""
@@ -422,12 +422,14 @@ def test_prepare_fastq_files_request_DDN(
     assert request_submitter.call_count == 1
 
 
-def test_prepare_fastq_files_does_not_request_DDN(
+def test_prepare_fastq_files_does_not_request_ddn(
     mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store
 ):
-    """Tests that samples are requested via DDN for a Clinical customer, if files are archived."""
+    """Tests that samples are not requested via DDN for a Clinical customer, if no files are archived."""
 
     # GIVEN a case belonging to a non-PDC customer
+
+    # GIVEN that all no files have entries in the Archive table
     case: Case = analysis_store.get_cases()[0]
     case.customer.data_archive_location = ArchiveLocations.KAROLINSKA_BUCKET
 
