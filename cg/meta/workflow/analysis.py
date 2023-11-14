@@ -18,6 +18,7 @@ from cg.constants import (
     Priority,
     SequencingFileTag,
 )
+from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import AnalysisType, CaseActions, WorkflowManager
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
@@ -491,7 +492,7 @@ class AnalysisAPI(MetaAPI):
             self.status_db.request_flow_cells_for_case(case_id)
 
     def is_case_ready_for_analysis(self, case_id: str) -> bool:
-        if self.get_archive_location_for_case(case_id) == "PDC":
+        if self.get_archive_location_for_case(case_id) == ArchiveLocations.PDC:
             if self._is_flow_cell_check_applicable(
                 case_id
             ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
@@ -516,9 +517,9 @@ class AnalysisAPI(MetaAPI):
         if not self.is_case_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ file are not present for the analysis to start")
 
-    def ensure_files_are_not_archived(self, case_id):
+    def ensure_files_are_not_archived(self, case_id: str):
         """Checks if any files are archived and submits a job to retrieve any which are."""
-        if self.get_archive_location_for_case(case_id) == "PDC":
+        if self.get_archive_location_for_case(case_id) == ArchiveLocations.PDC:
             self.ensure_flow_cells_on_disk(case_id)
         else:
             if not self.are_all_files_present(case_id):
@@ -529,7 +530,9 @@ class AnalysisAPI(MetaAPI):
                 )
                 spring_archive_api.retrieve_case(case_id)
 
-    def are_all_files_present(self, case_id):
+    def are_all_files_present(self, case_id: str) -> bool:
+        """Returns true if no Spring files are archived in the data location used by the customer tied to the given
+        case, and false otherwise."""
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         for sample in [link.sample for link in case.links]:
             if (
@@ -540,5 +543,5 @@ class AnalysisAPI(MetaAPI):
                 return False
         return True
 
-    def get_archive_location_for_case(self, case_id: str):
+    def get_archive_location_for_case(self, case_id: str) -> str:
         return self.status_db.get_case_by_internal_id(case_id).customer.data_archive_location

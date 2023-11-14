@@ -403,7 +403,7 @@ class HousekeeperAPI:
         return self.files(version=version.id, tags=tags)
 
     def is_fastq_or_spring_in_all_bundles(self, bundle_names: list[str]) -> bool:
-        """Return whether or not all FASTQ/SPRING files are included for the given bundles."""
+        """Return whether all FASTQ/SPRING files are included for the given bundles."""
         sequencing_files_in_hk: dict[str, bool] = {}
         if not bundle_names:
             return False
@@ -423,11 +423,11 @@ class HousekeeperAPI:
         return all(sequencing_files_in_hk.values())
 
     def get_non_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> list[File]:
-        """Returns all non-archived_files from a given bundle, tagged with the given tags"""
+        """Returns all non-archived files from a given bundle, tagged with the given tags"""
         return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags or [])
 
     def get_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
-        """Returns all archived_files from a given bundle, tagged with the given tags"""
+        """Returns all archived files from a given bundle, tagged with the given tags"""
         return self._store.get_archived_files(bundle_name=bundle_name, tags=tags or [])
 
     def add_archives(self, files: list[Path], archive_task_id: int) -> None:

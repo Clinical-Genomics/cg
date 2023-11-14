@@ -98,16 +98,21 @@ class SpringArchiveAPI:
         files_and_samples: list[FileAndSample] = self.add_samples_to_files(files_to_archive)
 
         for archive_location in ArchiveLocations:
-            self.archive_to_location(
-                files_and_samples=files_and_samples,
-                archive_location=archive_location,
-            )
+            if archive_location != ArchiveLocations.PDC:
+                self.archive_to_location(
+                    files_and_samples=files_and_samples,
+                    archive_location=archive_location,
+                )
 
-    def retrieve_case(self, case_id: str):
+    def retrieve_case(self, case_id: str) -> None:
+        """Submits jobs to retrieve any archived files belonging to the given case, and updates the Archive entries
+        with the retrieval job id."""
         case = self.status_db.get_case_by_internal_id(case_id)
-        self.retrieve_samples(self.get_archived_samples(case))
+        self.retrieve_samples(self.get_samples_with_archived_spring_files(case))
 
-    def get_archived_samples(self, case: Case):
+    def get_samples_with_archived_spring_files(self, case: Case) -> list[Sample]:
+        """Returns a list of samples which have archived Spring files, i.e. they have entries in the Archive table
+        in Housekeeper."""
         return [
             link.sample
             for link in case.links
