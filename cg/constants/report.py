@@ -1,5 +1,4 @@
-# Delivery report constants
-
+"""Delivery report constants."""
 from cg.constants import DataDelivery
 from cg.constants.constants import Pipeline
 
@@ -72,23 +71,23 @@ REQUIRED_APPLICATION_FIELDS = [
 ]
 
 # Data analysis required fields
-_REQUIRED_DATA_ANALYSIS_FIELDS = [
+REQUIRED_DATA_ANALYSIS_FIELDS = [
     "customer_pipeline",
     "pipeline",
     "pipeline_version",
     "genome_build",
 ]
 
-REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS = _REQUIRED_DATA_ANALYSIS_FIELDS + [
+REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS = REQUIRED_DATA_ANALYSIS_FIELDS + [
     "panels",
 ]
 
-REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS = _REQUIRED_DATA_ANALYSIS_FIELDS + [
+REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS = REQUIRED_DATA_ANALYSIS_FIELDS + [
     "type",
     "variant_callers",
 ]
 
-REQUIRED_DATA_ANALYSIS_RNAFUSION_FIELDS = _REQUIRED_DATA_ANALYSIS_FIELDS
+REQUIRED_DATA_ANALYSIS_RNAFUSION_FIELDS = REQUIRED_DATA_ANALYSIS_FIELDS
 
 # Sample required fields
 _REQUIRED_SAMPLE_FIELDS = [

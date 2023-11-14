@@ -18,6 +18,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     Pipeline,
+    REQUIRED_DATA_ANALYSIS_FIELDS,
 )
 from cg.constants.scout_upload import BALSAMIC_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
@@ -174,6 +175,11 @@ class BalsamicReportAPI(ReportAPI):
     def get_required_fields(self, case: CaseModel) -> dict:
         """Retrieves a dictionary with the delivery report required fields for BALSAMIC."""
         analysis_type: str = case.data_analysis.type
+        required_data_analysis_fields: list[str] = (
+            REQUIRED_DATA_ANALYSIS_FIELDS
+            if self.analysis_api.pipeline == Pipeline.BALSAMIC_QC
+            else REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS
+        )
         required_sample_metadata_fields: list[str] = []
         if BALSAMIC_ANALYSIS_TYPE["tumor_wgs"] in analysis_type:
             required_sample_metadata_fields: list[
@@ -197,7 +203,7 @@ class BalsamicReportAPI(ReportAPI):
             "applications": self.get_application_required_fields(
                 case=case, required_fields=REQUIRED_APPLICATION_FIELDS
             ),
-            "data_analysis": REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS,
+            "data_analysis": required_data_analysis_fields,
             "samples": self.get_sample_required_fields(
                 case=case, required_fields=REQUIRED_SAMPLE_BALSAMIC_FIELDS
             ),
