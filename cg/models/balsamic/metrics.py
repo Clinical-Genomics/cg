@@ -26,7 +26,6 @@ class BalsamicQCMetrics(BaseModel):
 
     mean_insert_size: Optional[float]
     fold_80_base_penalty: Optional[float]
-    relatedness: Optional[float]
 
 
 class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
