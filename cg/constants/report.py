@@ -8,6 +8,7 @@ BALSAMIC_REPORT_ACCREDITED_PANELS = ["gmsmyeloid"]
 REPORT_SUPPORTED_PIPELINES = (
     Pipeline.BALSAMIC,
     Pipeline.BALSAMIC_UMI,
+    Pipeline.BALSAMIC_QC,
     Pipeline.MIP_DNA,
     Pipeline.RNAFUSION,
 )

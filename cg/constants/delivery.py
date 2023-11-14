@@ -42,6 +42,7 @@ BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
 ]
 
 BALSAMIC_QC_ANALYSIS_CASE_TAGS = [
+    {"delivery-report"},
     {"multiqc-html"},
 ]
 
