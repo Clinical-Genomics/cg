@@ -59,7 +59,7 @@ class FindBusinessDataHandler(BaseHandler):
         active_actions = ["analyze", "running"]
 
         for family_sample in sample.links:
-            case: Case = self.get_case_by_entry_id(entry_id=family_sample.family_id)
+            case: Case = self.get_case_by_entry_id(entry_id=family_sample.case_id)
             if case.action in active_actions:
                 return True
 

@@ -23,7 +23,7 @@ def test_store_fastq_analysis(caplog, another_case_id: str, cli_runner, fastq_co
     assert (
         len(
             fastq_context.status_db._get_query(table=Analysis)
-            .filter(Analysis.family_id == case_obj.id)
+            .filter(Analysis.case_id == case_obj.id)
             .all()
         )
         > 0
