@@ -65,7 +65,7 @@ class MadelineAPI:
             out_path = output_dir / "madeline.xml"
 
         output_prefix = str(out_path.with_suffix(""))
-        LOG.info("Generate madeline output to %s", out_path)
+        LOG.info(f"Generate madeline output to {out_path}")
 
         ped_stream = self.make_ped(family_id, samples)
 

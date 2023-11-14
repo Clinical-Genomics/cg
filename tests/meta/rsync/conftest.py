@@ -4,11 +4,11 @@ import pytest
 
 from cg.constants.constants import Pipeline
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family
+from cg.store.models import Case
 
 
 @pytest.fixture
-def mutant_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> Family:
+def mutant_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> Case:
     """Return mutant case"""
     case = helpers.add_case(
         store=cg_context.status_db,
@@ -20,7 +20,7 @@ def mutant_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> 
 
 
 @pytest.fixture
-def microsalt_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> Family:
+def microsalt_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> Case:
     """Return mutant case"""
     case = helpers.add_case(
         store=cg_context.status_db,

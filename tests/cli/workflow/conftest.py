@@ -9,7 +9,7 @@ from cg.constants import DataDelivery, FlowCellStatus, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.api.find_business_data import FindBusinessDataHandler
-from cg.store.models import Family
+from cg.store.models import Case
 from tests.store_helpers import StoreHelpers
 
 
@@ -34,13 +34,13 @@ def analysis_store(base_store: Store, workflow_case_id: str, helpers: StoreHelpe
     case = helpers.add_case(_store, workflow_case_id, data_analysis=Pipeline.MIP_DNA)
 
     dna_sample = helpers.add_sample(
-        _store, "dna_sample", is_rna=False, reads_updated_at=datetime.now(), reads=10000000
+        _store, "dna_sample", is_rna=False, last_sequenced_at=datetime.now(), reads=10000000
     )
     helpers.add_relationship(_store, sample=dna_sample, case=case)
 
     case = helpers.add_case(_store, "rna_case", data_analysis=Pipeline.MIP_RNA)
     rna_sample = helpers.add_sample(
-        _store, "rna_sample", is_rna=True, reads_updated_at=datetime.now(), reads=10000000
+        _store, "rna_sample", is_rna=True, last_sequenced_at=datetime.now(), reads=10000000
     )
     helpers.add_relationship(_store, sample=rna_sample, case=case)
 
@@ -63,7 +63,7 @@ def fastq_context(
     containing a fastq case"""
     _store = cg_context.status_db
     # Add fastq case to db
-    fastq_case["samples"][0]["reads_updated_at"] = datetime.now()
+    fastq_case["samples"][0]["last_sequenced_at"] = datetime.now()
     helpers.ensure_case_from_dict(store=_store, case_info=fastq_case)
     return cg_context
 
@@ -94,21 +94,21 @@ def fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_id: str) 
 
 
 @pytest.fixture(scope="function")
-def dna_case(analysis_store, helpers) -> Family:
+def dna_case(analysis_store, helpers) -> Case:
     """Case with DNA application"""
     cust = helpers.ensure_customer(analysis_store)
     return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="dna_case")
 
 
 @pytest.fixture(scope="function")
-def rna_case(analysis_store, helpers) -> Family:
+def rna_case(analysis_store, helpers) -> Case:
     """Case with RNA application"""
     cust = helpers.ensure_customer(analysis_store)
     return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="rna_case")
 
 
 @pytest.fixture(scope="function")
-def dna_rna_mix_case(analysis_store, helpers) -> Family:
+def dna_rna_mix_case(analysis_store, helpers) -> Case:
     """Case with MIP analysis type DNA and RNA application"""
     cust = helpers.ensure_customer(analysis_store)
     return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="dna_rna_mix_case")

@@ -9,7 +9,7 @@ from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.constants.subject import Gender
 from cg.io.controller import ReadFile
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
-from cg.store.models import Analysis, Family, Sample
+from cg.store.models import Analysis, Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -40,24 +40,22 @@ class UploadGenotypesAPI(object):
         }
 
         """
-        case_id = analysis_obj.family.internal_id
-        LOG.info("Fetching upload genotype data for %s", case_id)
+        case_id = analysis_obj.case.internal_id
+        LOG.info(f"Fetching upload genotype data for {case_id}")
         hk_version = self.hk.last_version(case_id)
         hk_bcf = self.get_bcf_file(hk_version)
         data = {"bcf": hk_bcf.full_path}
         if analysis_obj.pipeline in [Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]:
-            data["samples_sex"] = self._get_samples_sex_balsamic(case_obj=analysis_obj.family)
+            data["samples_sex"] = self._get_samples_sex_balsamic(case_obj=analysis_obj.case)
         elif analysis_obj.pipeline == Pipeline.MIP_DNA:
             data["samples_sex"] = self._get_samples_sex_mip(
-                case_obj=analysis_obj.family, hk_version=hk_version
+                case_obj=analysis_obj.case, hk_version=hk_version
             )
         else:
             raise ValueError(f"Pipeline {analysis_obj.pipeline} does not support Genotype upload")
         return data
 
-    def _get_samples_sex_mip(
-        self, case_obj: Family, hk_version: housekeeper_models.Version
-    ) -> dict:
+    def _get_samples_sex_mip(self, case_obj: Case, hk_version: housekeeper_models.Version) -> dict:
         qc_metrics_file = self.get_qcmetrics_file(hk_version)
         analysis_sexes = self.analysis_sex(qc_metrics_file)
         samples_sex = {}
@@ -69,7 +67,7 @@ class UploadGenotypesAPI(object):
             }
         return samples_sex
 
-    def _get_samples_sex_balsamic(self, case_obj: Family) -> dict:
+    def _get_samples_sex_balsamic(self, case_obj: Case) -> dict:
         samples_sex = {}
         for link_obj in case_obj.links:
             if link_obj.sample.is_tumour:
@@ -94,7 +92,7 @@ class UploadGenotypesAPI(object):
         genotype_files: list = self._get_genotype_files(version_id=hk_version_obj.id)
         for genotype_file in genotype_files:
             if self._is_variant_file(genotype_file=genotype_file):
-                LOG.debug("Found bcf file %s", genotype_file.full_path)
+                LOG.debug(f"Found bcf file {genotype_file.full_path}")
                 return genotype_file
         raise FileNotFoundError(f"No vcf or bcf file found for bundle {hk_version_obj.bundle_id}")
 
@@ -103,7 +101,7 @@ class UploadGenotypesAPI(object):
         hk_qcmetrics = self.hk.files(
             version=hk_version_obj.id, tags=HkMipAnalysisTag.QC_METRICS
         ).first()
-        LOG.debug("Found qc metrics file %s", hk_qcmetrics.full_path)
+        LOG.debug(f"Found qc metrics file {hk_qcmetrics.full_path}")
         return Path(hk_qcmetrics.full_path)
 
     @staticmethod
@@ -126,7 +124,7 @@ class UploadGenotypesAPI(object):
         return self.hk.files(version=version_id, tags=["genotype"]).all()
 
     @staticmethod
-    def is_suitable_for_genotype_upload(case_obj: Family) -> bool:
+    def is_suitable_for_genotype_upload(case_obj: Case) -> bool:
         """Check if a cancer case is contains WGS and normal sample."""
 
         samples: list[Sample] = case_obj.samples

@@ -12,7 +12,6 @@ from sqlalchemy.orm import declarative_base
 from alembic import op
 from cg.constants import Pipeline
 
-
 # revision identifiers, used by Alembic.
 revision = "9073c61bc72b"
 down_revision = "b6f00cc615cf"
@@ -50,7 +49,7 @@ class Analysis(Base):
     pipeline = sa.Column(sa.types.Enum(*list(Pipeline)))
 
 
-class Family(Base):
+class Case(Base):
     __tablename__ = "family"
     id = sa.Column(sa.types.Integer, primary_key=True)
     data_analysis = sa.Column(sa.types.Enum(*list(Pipeline)))
@@ -69,8 +68,8 @@ def downgrade():
             f"Changing pipeline for Analysis {Analysis.family.internal_id}, {Analysis.completed_at} to mip-dna"
         )
         analysis.pipeline = "mip-dna"
-    for family in session.query(Family).filter(Family.data_analysis == "raredisease"):
-        print(f"Changing data_analysis for Family {family.internal_id} to mip-dna")
+    for family in session.query(Case).filter(Case.data_analysis == "raredisease"):
+        print(f"Changing data_analysis for Case {family.internal_id} to mip-dna")
         family.data_analysis = "mip-dna"
     op.alter_column("family", "data_analysis", type_=old_analysis_enum)
     op.alter_column("analysis", "pipeline", type_=old_analysis_enum)

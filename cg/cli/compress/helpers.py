@@ -9,28 +9,23 @@ from typing import Iterator, Optional
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.compression import (
-    CRUNCHY_MIN_GB_PER_PROCESS,
-    MAX_READS_PER_GB,
-)
+from cg.constants.compression import CRUNCHY_MIN_GB_PER_PROCESS, MAX_READS_PER_GB
 from cg.constants.slurm import Slurm
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 from cg.utils.date import get_date_days_ago
 
 LOG = logging.getLogger(__name__)
 
 
-def get_cases_to_process(
-    days_back: int, store: Store, case_id: Optional[str] = None
-) -> Optional[list[Family]]:
+def get_cases_to_process(days_back: int, store: Store, case_id: Optional[str] = None) -> list[Case]:
     """Return cases to process."""
-    cases: list[Family] = []
+    cases: list[Case] = []
     if case_id:
-        case: Family = store.get_case_by_internal_id(case_id)
+        case: Case = store.get_case_by_internal_id(case_id)
         if not case:
             LOG.warning(f"Could not find case {case_id}")
             return
@@ -38,7 +33,7 @@ def get_cases_to_process(
             cases.append(case)
     else:
         date_threshold: dt.datetime = get_date_days_ago(days_ago=days_back)
-        cases: list[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
+        cases: list[Case] = store.get_cases_to_compress(date_threshold=date_threshold)
     return cases
 
 
@@ -46,7 +41,7 @@ def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
     """Fetch individual ids from cases that are ready for SPRING compression"""
     case_obj = store.get_case_by_internal_id(internal_id=case_id)
     if not case_obj:
-        LOG.error("Could not find case %s", case_id)
+        LOG.error(f"Could not find case {case_id}")
         raise CaseNotFoundError("")
 
     for link_obj in case_obj.links:
@@ -128,7 +123,7 @@ def get_true_dir(dir_path: Path) -> Optional[Path]:
 
 def compress_sample_fastqs_in_cases(
     compress_api: CompressAPI,
-    cases: list[Family],
+    cases: list[Case],
     dry_run: bool,
     number_of_conversions: int,
     hours: int = None,
@@ -206,9 +201,7 @@ def correct_spring_paths(
                 LOG.info("Could not find spring and/or spring metadata files, skipping")
                 continue
             LOG.info(
-                "Moving existing spring file (and config) %s to hk bundle path %s",
-                true_spring_path,
-                spring_path,
+                f"Moving existing spring file (and config) {true_spring_path} to hk bundle path {spring_path}"
             )
             if not dry_run:
                 # We know from above that the spring path does not exist

@@ -29,7 +29,7 @@ class Customer(Base):
     id = sa.Column(sa.types.Integer, primary_key=True)
 
 
-class Family(Base):
+class Case(Base):
     __tablename__ = "family"
 
     id = sa.Column(sa.types.Integer, primary_key=True)
@@ -63,7 +63,7 @@ class FamilySample(Base):
     mother_id = sa.Column(sa.ForeignKey("sample.id"))
     father_id = sa.Column(sa.ForeignKey("sample.id"))
 
-    family = orm.relationship("Family", backref="links")
+    family = orm.relationship("Case", backref="links")
     sample = orm.relationship("Sample", foreign_keys=[sample_id], backref="links")
     mother = orm.relationship("Sample", foreign_keys=[mother_id], backref="mother_links")
     father = orm.relationship("Sample", foreign_keys=[father_id], backref="father_links")
@@ -108,11 +108,11 @@ def upgrade():
     count = 0
     # change records that should is tumour and should not be sent to MAF
     for family in (
-        session.query(Family)
-        .filter(Family.customer_id == 1)
-        .filter(Family.data_delivery == DataDelivery.FASTQ)
-        .filter(Family.data_analysis == Pipeline.MIP_DNA)
-        .filter(Family.priority == "research")
+        session.query(Case)
+        .filter(Case.customer_id == 1)
+        .filter(Case.data_delivery == DataDelivery.FASTQ)
+        .filter(Case.data_analysis == Pipeline.MIP_DNA)
+        .filter(Case.priority == "research")
     ):
         if len(family.links) > 1:
             print(f"skipping case that has more than one link: {family}")
@@ -142,11 +142,11 @@ def downgrade():
 
     count = 0
     for family in (
-        session.query(Family)
-        .filter(Family.customer_id == 1)
-        .filter(Family.data_delivery == DataDelivery.FASTQ)
-        .filter(Family.data_analysis == Pipeline.FASTQ)
-        .filter(Family.priority == "research")
+        session.query(Case)
+        .filter(Case.customer_id == 1)
+        .filter(Case.data_delivery == DataDelivery.FASTQ)
+        .filter(Case.data_analysis == Pipeline.FASTQ)
+        .filter(Case.priority == "research")
     ):
         if len(family.links) > 1:
             print(f"skipping case that has more than one link: {family}")

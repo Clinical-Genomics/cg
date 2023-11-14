@@ -10,7 +10,7 @@ from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models import CompressionData
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 
 
 def test_is_spring_decompression_needed_when_true(
@@ -26,7 +26,7 @@ def test_is_spring_decompression_needed_when_true(
         store=analysis_store_single_case, compress_api=populated_compress_spring_api
     )
     # GIVEN a store with a case that has linked samples
-    case_obj: Family = analysis_store_single_case.get_case_by_internal_id(internal_id=case_id)
+    case_obj: Case = analysis_store_single_case.get_case_by_internal_id(internal_id=case_id)
     assert case_obj
     # GIVEN that the case has linked samples
     link_objects = [link_obj for link_obj in case_obj.links]
@@ -57,7 +57,7 @@ def test_is_spring_decompression_needed_when_false(
         store=analysis_store_single_case, compress_api=populated_compress_api_fastq_spring
     )
     # GIVEN a store with a case that has linked samples
-    case_obj: Family = analysis_store_single_case.get_case_by_internal_id(internal_id=case_id)
+    case_obj: Case = analysis_store_single_case.get_case_by_internal_id(internal_id=case_id)
     assert case_obj
     # GIVEN that the case has linked samples
     link_objects = [link_obj for link_obj in case_obj.links]

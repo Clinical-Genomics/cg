@@ -11,7 +11,7 @@ from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.report.rnafusion import RnafusionReportAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 from tests.apps.scout.conftest import MockScoutApi
 from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.limsmock import MockLimsAPI
@@ -57,13 +57,13 @@ def report_api_rnafusion(
 
 
 @pytest.fixture(scope="function")
-def case_mip_dna(case_id: str, report_api_mip_dna: MipDNAReportAPI) -> Family:
+def case_mip_dna(case_id: str, report_api_mip_dna: MipDNAReportAPI) -> Case:
     """MIP DNA case instance."""
     return report_api_mip_dna.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
 @pytest.fixture(scope="function")
-def case_balsamic(case_id: str, report_api_balsamic: BalsamicReportAPI) -> Family:
+def case_balsamic(case_id: str, report_api_balsamic: BalsamicReportAPI) -> Case:
     """BALSAMIC case instance."""
     return report_api_balsamic.status_db.get_case_by_internal_id(internal_id=case_id)
 
@@ -109,7 +109,7 @@ def report_store(analysis_store, helpers, timestamp_yesterday):
         family_sample.sample.ordered_at = timestamp_yesterday - timedelta(days=2)
         family_sample.sample.received_at = timestamp_yesterday - timedelta(days=1)
         family_sample.sample.prepared_at = timestamp_yesterday
-        family_sample.sample.reads_updated_at = timestamp_yesterday
+        family_sample.sample.last_sequenced_at = timestamp_yesterday
         family_sample.sample.delivered_at = datetime.now()
     return analysis_store
 

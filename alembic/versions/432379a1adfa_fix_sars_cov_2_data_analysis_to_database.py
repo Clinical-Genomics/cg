@@ -22,7 +22,7 @@ branch_labels = None
 depends_on = None
 
 
-class Family(Base):
+class Case(Base):
     __tablename__ = "family"
 
     id = sa.Column(sa.types.Integer, primary_key=True)
@@ -52,9 +52,9 @@ def upgrade():
     op.alter_column("analysis", "pipeline", type_=new_enum)
 
     for family in (
-        session.query(Family)
-        .filter(Family.data_delivery == str(DataDelivery.FASTQ))
-        .filter(Family.data_analysis == "")
+        session.query(Case)
+        .filter(Case.data_delivery == str(DataDelivery.FASTQ))
+        .filter(Case.data_analysis == "")
     ):
         print(f"Altering family: {str(family)}")
         family.data_analysis = str(Pipeline.SARS_COV_2)
