@@ -423,11 +423,11 @@ class HousekeeperAPI:
         return all(sequencing_files_in_hk.values())
 
     def get_non_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> list[File]:
-        """Returns all non-archived files from a given bundle, tagged with the given tags"""
+        """Returns all non-archived files from a given bundle, tagged with the given tags."""
         return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags or [])
 
     def get_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
-        """Returns all archived files from a given bundle, tagged with the given tags"""
+        """Returns all archived files from a given bundle, tagged with the given tags."""
         return self._store.get_archived_files(bundle_name=bundle_name, tags=tags or [])
 
     def add_archives(self, files: list[Path], archive_task_id: int) -> None:
