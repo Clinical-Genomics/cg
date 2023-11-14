@@ -45,13 +45,13 @@ def ddn_dataflow_config(
 
 @pytest.fixture
 def ok_ddn_response(ok_response: Response):
-    ok_response._content = b'{"job_id": "123"}'
+    ok_response._content = b'{"jobId": "123"}'
     return ok_response
 
 
 @pytest.fixture
 def ok_ddn_job_status_response(ok_response: Response):
-    ok_response._content = b'{"job_id": "123", "description": "Completed"}'
+    ok_response._content = b'{"jobId": "123", "status": "Completed"}'
     return ok_response
 
 
@@ -69,15 +69,7 @@ def archive_request_json(
             }
         ],
         "metadataList": [],
-    }
-
-
-@pytest.fixture
-def get_job_status_request_json(
-    remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
-) -> dict:
-    return {
-        "job_id": 123,
+        "settings": [],
     }
 
 
@@ -97,6 +89,7 @@ def retrieve_request_json(
             }
         ],
         "metadataList": [],
+        "settings": [],
     }
 
 

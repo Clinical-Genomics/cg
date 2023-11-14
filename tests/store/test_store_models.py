@@ -1,6 +1,5 @@
 from cg.store import Store
 from cg.store.models import Application, ApplicationVersion, Customer
-from tests.cli.conftest import application_tag
 from tests.store_helpers import StoreHelpers
 
 

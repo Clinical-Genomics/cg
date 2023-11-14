@@ -303,6 +303,7 @@ def test_archive_folders(
             "osType": OSTYPE,
             "createFolder": False,
             "metadataList": [],
+            "settings": [],
         },
     )
 
@@ -349,6 +350,7 @@ def test_retrieve_samples(
             "osType": OSTYPE,
             "createFolder": False,
             "metadataList": [],
+            "settings": [],
         },
     )
 

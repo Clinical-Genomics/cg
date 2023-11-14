@@ -19,7 +19,7 @@ from cg.meta.archive.ddn_dataflow import (
     DDNDataFlowClient,
     GetJobStatusPayload,
     GetJobStatusResponse,
-    JobDescription,
+    JobStatus,
     MiriaObject,
 )
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
@@ -222,7 +222,7 @@ def test_archive_all_non_archived_spring_files(
 
 @pytest.mark.parametrize(
     "job_status, should_date_be_set",
-    [(JobDescription.COMPLETED, True), (JobDescription.RUNNING, False)],
+    [(JobStatus.COMPLETED, True), (JobStatus.RUNNING, False)],
 )
 def test_get_archival_status(
     spring_archive_api: SpringArchiveAPI,
@@ -232,7 +232,7 @@ def test_get_archival_status(
     header_with_test_auth_token,
     test_auth_token: AuthToken,
     archival_job_id: int,
-    job_status: JobDescription,
+    job_status: JobStatus,
     should_date_be_set: bool,
 ):
     # GIVEN a file with an ongoing archival
@@ -250,8 +250,8 @@ def test_get_archival_status(
         return_value=ok_ddn_job_status_response,
     ), mock.patch.object(
         GetJobStatusPayload,
-        "post_request",
-        return_value=GetJobStatusResponse(job_id=archival_job_id, description=job_status),
+        "get_status",
+        return_value=GetJobStatusResponse(job_id=archival_job_id, status=job_status),
     ):
         spring_archive_api.update_ongoing_task(
             task_id=archival_job_id,
@@ -265,7 +265,7 @@ def test_get_archival_status(
 
 @pytest.mark.parametrize(
     "job_status, should_date_be_set",
-    [(JobDescription.COMPLETED, True), (JobDescription.RUNNING, False)],
+    [(JobStatus.COMPLETED, True), (JobStatus.RUNNING, False)],
 )
 def test_get_retrieval_status(
     spring_archive_api: SpringArchiveAPI,
@@ -296,8 +296,8 @@ def test_get_retrieval_status(
         return_value=ok_ddn_job_status_response,
     ), mock.patch.object(
         GetJobStatusPayload,
-        "post_request",
-        return_value=GetJobStatusResponse(job_id=retrieval_job_id, description=job_status),
+        "get_status",
+        return_value=GetJobStatusResponse(job_id=retrieval_job_id, status=job_status),
     ):
         spring_archive_api.update_ongoing_task(
             task_id=retrieval_job_id,
