@@ -34,12 +34,18 @@ LOG = logging.getLogger(__name__)
 class AddHandler(BaseHandler):
     """Methods related to adding new data to the store."""
 
-    def generate_unique_petname(self) -> str:
+    def generate_readable_sample_id(self) -> str:
         while True:
             random_id = petname.Generate(3, separator="")
-            if not self.get_sample_by_internal_id(internal_id=random_id):
+            if not self.get_sample_by_internal_id(random_id):
                 return random_id
 
+    def generate_readable_case_id(self) -> str:
+        while True:
+            random_id = petname.Generate(3, separator="")
+            if not self.get_case_by_internal_id(random_id):
+                return random_id
+    
     def add_customer(
         self,
         internal_id: str,
@@ -173,7 +179,7 @@ class AddHandler(BaseHandler):
     ) -> Sample:
         """Build a new Sample record."""
 
-        internal_id = internal_id or self.generate_unique_petname()
+        internal_id = internal_id or self.generate_readable_sample_id()
         priority = priority or (Priority.research if downsampled_to else Priority.standard)
         return Sample(
             comment=comment,
@@ -204,7 +210,7 @@ class AddHandler(BaseHandler):
     ) -> Case:
         """Build a new Case record."""
 
-        internal_id: str = self.generate_unique_petname()
+        internal_id: str = self.generate_readable_case_id()
         return Case(
             cohorts=cohorts,
             data_analysis=str(data_analysis),
