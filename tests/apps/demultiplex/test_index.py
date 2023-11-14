@@ -126,7 +126,7 @@ def test_update_barcode_mismatch_values_for_sample(
     assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_2 == 0
 
 
-def test_update_barcode_mismatch_values_for_sample(
+def test_update_barcode_mismatch_values_for_sample_duplicate_samples(
     novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
 ):
     """Test that a sample does not compare to itself when adapting barcode mismatching values."""
@@ -278,7 +278,7 @@ def test_get_hamming_distance_index_2_different_lengths_no_reverse_complement():
     """Test that hamming distance between indexes with same suffix but different lengths is zero."""
     # GIVEN two index_2 sequences with the same suffixes but different lengths
     sequence_1: str = "GATTACA"
-    sequence_2: str = "XXGATTACA"
+    sequence_2: str = "GATTACAXX"
 
     # WHEN getting the hamming distance between them in any order
 
@@ -317,7 +317,7 @@ def test_get_hamming_distance_index_2_different_lengths_reverse_complement():
     """Test that hamming distance between indexes with same prefix is zero if reverse complement."""
     # GIVEN two index_2 sequences with the same prefixes but different lengths
     sequence_1: str = "GATTACA"
-    sequence_2: str = "GATTACAXX"
+    sequence_2: str = "XXGATTACA"
 
     # WHEN getting the hamming distance between them in any order with reverse complement
 
@@ -356,7 +356,7 @@ def test_get_hamming_distance_index_2_different_prefixes_no_reverse_complement()
     """Test that hamming distance for index 2 counts different characters from the right."""
     # GIVEN two index_2 sequences different lengths differing by two characters
     # when aligned to the right
-    sequence_1: str = "XXACA"
+    sequence_1: str = "GATXX"
     sequence_2: str = "GATTACA"
 
     # WHEN getting the hamming distance between them in any order

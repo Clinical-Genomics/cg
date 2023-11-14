@@ -33,13 +33,13 @@ def bcl_convert_samples_with_updated_indexes() -> list[FlowCellSampleBCLConvert]
 @pytest.fixture
 def override_cycles_for_samples_with_updated_indexes() -> list[str]:
     """Return the correspondent Override Cycles values for three samples."""
-    return ["Y151;I8N2;N2I8;Y151", "Y151;I8N2;N2I8;Y151", "Y151;I10;I10;Y151"]
+    return ["Y151;I8N2;I8N2;Y151", "Y151;I8N2;I8N2;Y151", "Y151;I10;I10;Y151"]
 
 
 @pytest.fixture
 def override_cycles_for_samples_with_updated_indexes_reverse_complement() -> list[str]:
     """Return the correspondent Override Cycles values for three samples."""
-    return ["Y151;I8N2;I8N2;Y151", "Y151;I8N2;I8N2;Y151", "Y151;I10;I10;Y151"]
+    return ["Y151;I8N2;N2I8;Y151", "Y151;I8N2;N2I8;Y151", "Y151;I10;I10;Y151"]
 
 
 @pytest.fixture
