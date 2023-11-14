@@ -177,6 +177,7 @@
               {% else %}
                 <th>Täckningsgrad 250x [%]</th>
                 <th>Täckningsgrad 500x [%]</th>
+                <th>GC Dropout [%]</th>
               {% endif %}
                 <th>Duplikat [%]</th>
                 <th>Medelfragmentlängd [baspar]</th>
@@ -200,6 +201,7 @@
                     <td>{{ sample.metadata.median_target_coverage }}</td>
                     <td>{{ sample.metadata.pct_250x }}</td>
                     <td>{{ sample.metadata.pct_500x }}</td>
+                    <td>{{ sample.metadata.gc_dropout }}</td>
                   {% endif %}
                   <td>{{ sample.metadata.duplicates }}</td>
                   <td>{{ sample.metadata.mean_insert_size }}</td>
@@ -215,6 +217,9 @@
               <ins>Duplikat</ins>: Sekvenseringsläsningar som är i duplikat och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserad bibliotek eller djup sekvensering.<br>
               <ins>Medelfragmentlängd</ins>: Medelstorlek av provbiblioteken som laddats på sekvenseringsinstrument. <200bp kan tyda på degraderade provmaterial (t.ex. FFPE), innan biblioteksberedning.<br>
               <ins>Fold 80 base penalty</ins>: Jämnhet av täckningsgraden över alla gener i analyspanlen. Ett värde mellan 1.0-1.8 visar god jämnhet.<br>
+              {% if "panelsekvensering" in case.data_analysis.type %}
+                <ins>GC dropout</ins>: A measure of how undercovered >= 50% GC regions are relative to the mean. E.g. if the value is 5% this implies that 5% of total reads that should have mapped to GC<=50% regions mapped elsewhere.<br>
+              {% endif %}
               <br>
               Värdena presenterade för <ins>Täckningsgrad</ins> och <ins>Mediantäckning</ins> är efter borttagning av duplikata läsningar.
             </caption>
