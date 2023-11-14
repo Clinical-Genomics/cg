@@ -214,22 +214,29 @@ def invoice_api_pool_generic_customer(
 
 
 @pytest.fixture
-def archived_file(helpers, real_housekeeper_api, archival_job_id, sample_id) -> File:
+def archived_file(
+    helpers: StoreHelpers,
+    real_housekeeper_api: HousekeeperAPI,
+    archival_job_id_miria,
+    sample_id: str,
+) -> File:
     bundle: Bundle = real_housekeeper_api.create_new_bundle_and_version(sample_id)
-    file = real_housekeeper_api.add_file(
+    file: File = real_housekeeper_api.add_file(
         path="sample/version/file_name.spring",
         version_obj=bundle.versions[0],
         tags=[SequencingFileTag.SPRING],
     )
-    real_housekeeper_api.add_archives(files=[Path(file.path)], archive_task_id=archival_job_id)
+    real_housekeeper_api.add_archives(
+        files=[Path(file.path)], archive_task_id=archival_job_id_miria
+    )
     return file
 
 
 @pytest.fixture
-def archival_job_id() -> int:
+def archival_job_id_miria() -> int:
     return 123
 
 
 @pytest.fixture
-def retrieval_job_id() -> int:
+def retrieval_job_id_miria() -> int:
     return 124

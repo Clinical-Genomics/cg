@@ -231,7 +231,7 @@ def test_get_archival_status(
     archive_request_json,
     header_with_test_auth_token,
     test_auth_token: AuthToken,
-    archival_job_id: int,
+    archival_job_id_miria,
     job_status: JobDescription,
     should_date_be_set: bool,
 ):
@@ -251,10 +251,10 @@ def test_get_archival_status(
     ), mock.patch.object(
         GetJobStatusPayload,
         "post_request",
-        return_value=GetJobStatusResponse(job_id=archival_job_id, description=job_status),
+        return_value=GetJobStatusResponse(job_id=archival_job_id_miria, description=job_status),
     ):
         spring_archive_api.update_ongoing_task(
-            task_id=archival_job_id,
+            task_id=archival_job_id_miria,
             archive_location=ArchiveLocations.KAROLINSKA_BUCKET,
             is_archival=True,
         )
@@ -273,7 +273,7 @@ def test_get_retrieval_status(
     ok_ddn_job_status_response,
     archive_request_json,
     header_with_test_auth_token,
-    retrieval_job_id: int,
+    retrieval_job_id_miria,
     test_auth_token,
     job_status,
     should_date_be_set,
@@ -297,10 +297,10 @@ def test_get_retrieval_status(
     ), mock.patch.object(
         GetJobStatusPayload,
         "post_request",
-        return_value=GetJobStatusResponse(job_id=retrieval_job_id, description=job_status),
+        return_value=GetJobStatusResponse(job_id=retrieval_job_id_miria, description=job_status),
     ):
         spring_archive_api.update_ongoing_task(
-            task_id=retrieval_job_id,
+            task_id=retrieval_job_id_miria,
             archive_location=ArchiveLocations.KAROLINSKA_BUCKET,
             is_archival=False,
         )
