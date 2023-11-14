@@ -27,6 +27,8 @@ def test_get_sample_metadata(
         case_balsamic.internal_id
     )
 
+    print(balsamic_metadata.sample_metrics)
+
     # GIVEN the expected output
     expected_metadata: dict[str, str] = {
         "million_read_pairs": "10.0",
@@ -38,6 +40,7 @@ def test_get_sample_metadata(
         "median_target_coverage": "5323.0",
         "pct_250x": "N/A",
         "pct_500x": "N/A",
+        "gc_dropout": "1.01",
     }
 
     # WHEN retrieving the sample metadata
