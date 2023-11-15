@@ -39,15 +39,18 @@ class PdcAPI:
             Exception: for all non-exit exceptions.
         """
         is_dsmc_running: bool = False
+        dsmc_count: int = 0
         try:
             for process in psutil.process_iter():
                 LOG.debug(process.name())
-                if "dsmc" in process.name():
-                    is_dsmc_running = True
+                if "dsmc" == process.name():
+                    dsmc_count += 1
         except Exception as error:
             LOG.debug(f"{error}")
+        if dsmc_count >= 3:
+            is_dsmc_running = True
         if is_dsmc_running:
-            LOG.debug("A Dsmc process is already running")
+            LOG.debug("Too many Dsmc processes are already running")
         return is_dsmc_running
 
     def archive_file_to_pdc(self, file_path: str) -> None:
