@@ -42,6 +42,7 @@ class PdcAPI:
         try:
             for process in psutil.process_iter():
                 if "dsmc" in process.name():
+                    LOG.debug(process.name())
                     is_dsmc_running = True
         except Exception as error:
             LOG.debug(f"{error}")
