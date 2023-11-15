@@ -63,8 +63,8 @@ def test_backup_flow_cells_when_dsmc_is_running(
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN communicate Dsmc process is already running
-    assert "A Dsmc process is already running" in caplog.text
+    # THEN communicate too many Dsmc processes are already running
+    assert "Too many Dsmc processes are already running" in caplog.text
 
 
 def test_backup_flow_cells_when_flow_cell_already_has_backup(
