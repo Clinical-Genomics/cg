@@ -36,13 +36,13 @@ class AddHandler(BaseHandler):
 
     def generate_readable_sample_id(self) -> str:
         while True:
-            random_id = petname.Generate(3, separator="")
+            random_id: str = petname.Generate(3, separator="")
             if not self.get_sample_by_internal_id(random_id):
                 return random_id
 
     def generate_readable_case_id(self) -> str:
         while True:
-            random_id = petname.Generate(2, separator="", letters=10)
+            random_id: str = petname.Generate(2, separator="", letters=10)
             if not self.get_case_by_internal_id(random_id):
                 return random_id
 
