@@ -23,7 +23,7 @@
   step: arriba
   tag: arriba
 - format: cram
-  id: CASEID
+  id: SAMPLEID
   path: PATHTOCASE/cram_starfusion/CASEID.star_for_starfusion.Aligned.sortedByCoord.out.cram
   path_index: ~
   step: star-fusion
