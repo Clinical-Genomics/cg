@@ -512,25 +512,25 @@ class AnalysisAPI(MetaAPI):
                 LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
                 return True
         else:
-            if not self.are_all_files_present(case_id):
+            if not self.are_all_spring_files_present(case_id):
                 LOG.warning(f"Case {case_id} is not ready - some files are archived.")
                 return True
         return False
 
     def prepare_fastq_files(self, case_id: str, dry_run: bool) -> None:
-        """Retrieves or decompresses fastq files if needed, upon which an AnalysisNotReady error
+        """Retrieves or decompresses Spring files if needed. If so, an AnalysisNotReady error
         is raised."""
-        self.ensure_files_are_not_archived(case_id)
+        self.ensure_spring_files_are_not_archived(case_id)
         self.resolve_decompression(case_id, dry_run=dry_run)
         if not self.is_case_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ file are not present for the analysis to start")
 
-    def ensure_files_are_not_archived(self, case_id: str):
-        """Checks if any files are archived and submits a job to retrieve any which are."""
+    def ensure_spring_files_are_not_archived(self, case_id: str):
+        """Checks if any Spring files are archived and submits a job to retrieve any which are."""
         if self.get_archive_location_for_case(case_id) == ArchiveLocations.PDC:
             self.ensure_flow_cells_on_disk(case_id)
         else:
-            if not self.are_all_files_present(case_id):
+            if not self.are_all_spring_files_present(case_id):
                 spring_archive_api = SpringArchiveAPI(
                     status_db=self.status_db,
                     housekeeper_api=self.housekeeper_api,
@@ -538,7 +538,7 @@ class AnalysisAPI(MetaAPI):
                 )
                 spring_archive_api.retrieve_case(case_id)
 
-    def are_all_files_present(self, case_id: str) -> bool:
+    def are_all_spring_files_present(self, case_id: str) -> bool:
         """Returns true if no Spring files are archived in the data location used by the customer tied to the given
         case, and false otherwise."""
         case: Case = self.status_db.get_case_by_internal_id(case_id)
