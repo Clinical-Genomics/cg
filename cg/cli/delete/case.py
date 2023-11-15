@@ -84,7 +84,7 @@ def _delete_sample(dry_run: bool, sample: Sample, status_db: Store, yes: bool):
         return
 
     if _is_sample_linked(sample):
-        LOG.info("Can NOT delete sample: %s", sample.internal_id)
+        LOG.info(f"Can NOT delete sample: {sample.internal_id}")
         _log_sample_links(sample)
         return
 

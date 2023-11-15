@@ -37,7 +37,7 @@ def get_tmp_dir(prefix: str, suffix: str, base: str = None) -> str:
     with tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix, dir=base) as dir_name:
         tmp_dir_path = dir_name
 
-    LOG.info("Created temporary dir %s", tmp_dir_path)
+    LOG.info(f"Created temporary dir {tmp_dir_path}")
     return tmp_dir_path
 
 
