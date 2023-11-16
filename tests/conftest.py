@@ -2161,16 +2161,16 @@ def microsalt_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def encryption_dir(tmp_flow_cells_directory: Path) -> Path:
-    """Return a temporary directory for encryption testing."""
+def pdc_archiving_dir(tmp_flow_cells_directory: Path) -> Path:
+    """Return a temporary directory for PDC archiving testing."""
     return Path(tmp_flow_cells_directory, "encrypt", "*")
 
 
 @pytest.fixture
-def encryption_directories(encryption_dir: Path) -> PDCArchivingDirectories:
-    """Returns different encryption directories."""
+def pdc_archiving_directories(pdc_archiving_dir: Path) -> PDCArchivingDirectories:
+    """Returns different PDC archiving directories."""
     return PDCArchivingDirectories(
-        current=f"/{encryption_dir.as_posix()}/", nas="/ENCRYPT/", pre_nas="/OLD_ENCRYPT/"
+        current=f"/{pdc_archiving_dir.as_posix()}/", nas="/ENCRYPT/", pre_nas="/OLD_ENCRYPT/"
     )
 
 
@@ -2208,7 +2208,7 @@ def context_config(
     flow_cells_dir: Path,
     demultiplexed_runs: Path,
     downsample_dir: Path,
-    encryption_directories: PDCArchivingDirectories,
+    pdc_archiving_directories: PDCArchivingDirectories,
 ) -> dict:
     """Return a context config."""
     return {
@@ -2227,7 +2227,7 @@ def context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "pdc_archiving_directories": encryption_directories.dict(),
+            "pdc_archiving_directories": pdc_archiving_directories.dict(),
             "slurm_flow_cell_encryption": {
                 "account": "development",
                 "hours": 1,
@@ -2280,7 +2280,10 @@ def context_config(
                 "mail_user": email_address,
             },
         },
-        "encryption": {"binary_path": "bin/gpg", "encryption_dir": encryption_directories.current},
+        "encryption": {
+            "binary_path": "bin/gpg",
+            "encryption_dir": pdc_archiving_directories.current,
+        },
         "external": {
             "caesar": "server.name.se:/path/%s/on/caesar",
             "hasta": "/path/on/hasta/%s",

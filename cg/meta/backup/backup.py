@@ -31,7 +31,7 @@ class BackupAPI:
     def __init__(
         self,
         encryption_api: EncryptionAPI,
-        encryption_directories: PDCArchivingDirectories,
+        pdc_archiving_directories: PDCArchivingDirectories,
         status: Store,
         tar_api: TarAPI,
         pdc_api: PdcAPI,
@@ -39,7 +39,7 @@ class BackupAPI:
         dry_run: bool = False,
     ):
         self.encryption_api = encryption_api
-        self.encryption_directories: PDCArchivingDirectories = encryption_directories
+        self.pdc_archiving_directories: PDCArchivingDirectories = pdc_archiving_directories
         self.status: Store = status
         self.tar_api: TarAPI = tar_api
         self.pdc: PdcAPI = pdc_api
@@ -236,7 +236,7 @@ class BackupAPI:
         Raise:
             PdcNoFilesMatchingSearchError if no files are found.
         """
-        for _, encryption_directory in self.encryption_directories:
+        for _, encryption_directory in self.pdc_archiving_directories:
             search_pattern = f"{encryption_directory}*{flow_cell_id}*{FileExtensions.GPG}"
             self.pdc.query_pdc(search_pattern)
             if self.pdc.was_file_found(self.pdc.process.stderr):
