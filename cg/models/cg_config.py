@@ -54,7 +54,7 @@ class PDCArchivingDirectories(BaseModel):
 
 
 class BackupConfig(BaseModel):
-    encryption_directories: PDCArchivingDirectories
+    pdc_archiving_directories: PDCArchivingDirectories
     slurm_flow_cell_encryption: SlurmConfig
 
 

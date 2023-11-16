@@ -286,7 +286,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     # GIVEN we check if a flow cell needs to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        encryption_directories=cg_context.backup.encryption_directories,
+        encryption_directories=cg_context.backup.pdc_archiving_directories,
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
@@ -349,7 +349,7 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     # GIVEN we want to retrieve a specific flow cell from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        encryption_directories=cg_context.backup.encryption_directories,
+        encryption_directories=cg_context.backup.pdc_archiving_directories,
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
@@ -409,7 +409,7 @@ def test_fetch_flow_cell_integration(
     # GIVEN we want to retrieve a specific flow cell from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        encryption_directories=cg_context.backup.encryption_directories,
+        encryption_directories=cg_context.backup.pdc_archiving_directories,
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),

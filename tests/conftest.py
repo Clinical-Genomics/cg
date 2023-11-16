@@ -2227,7 +2227,7 @@ def context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encryption_directories": encryption_directories.dict(),
+            "pdc_archiving_directories": encryption_directories.dict(),
             "slurm_flow_cell_encryption": {
                 "account": "development",
                 "hours": 1,
@@ -3263,7 +3263,7 @@ def flow_cell_encryption_api(
 ) -> FlowCellEncryptionAPI:
     flow_cell_encryption_api = FlowCellEncryptionAPI(
         binary_path=cg_context.encryption.binary_path,
-        encryption_dir=Path(cg_context.backup.encryption_directories.current),
+        encryption_dir=Path(cg_context.backup.pdc_archiving_directories.current),
         dry_run=True,
         flow_cell=FlowCellDirectoryData(
             flow_cell_path=Path(cg_context.flow_cells_dir, flow_cell_full_name)
