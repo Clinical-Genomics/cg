@@ -42,14 +42,17 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, EncryptionDirectories
-from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
+from cg.models.demultiplex.run_parameters import (
+    RunParametersNovaSeq6000,
+    RunParametersNovaSeqX,
+)
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
-from cg.store.models import Bed, BedVersion, Customer, Case, Organism, Sample
+from cg.store.models import Bed, BedVersion, Case, Customer, Organism, Sample
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -2160,7 +2163,7 @@ def microsalt_dir(tmpdir_factory) -> Path:
 @pytest.fixture
 def encryption_dir(tmp_flow_cells_directory: Path) -> Path:
     """Return a temporary directory for encryption testing."""
-    return Path(tmp_flow_cells_directory, "encrypt")
+    return Path(tmp_flow_cells_directory, "encrypt", "*")
 
 
 @pytest.fixture
@@ -2277,7 +2280,7 @@ def context_config(
                 "mail_user": email_address,
             },
         },
-        "encryption": {"binary_path": "bin/gpg"},
+        "encryption": {"binary_path": "bin/gpg", "encryption_dir": encryption_directories.current},
         "external": {
             "caesar": "server.name.se:/path/%s/on/caesar",
             "hasta": "/path/on/hasta/%s",
@@ -3284,7 +3287,7 @@ def store_with_case_and_sample_with_reads(
     downsample_sample_internal_id_2: str,
 ) -> Store:
     """Return a store with a case and a sample with reads."""
-    case: Family = helpers.add_case(
+    case: Case = helpers.add_case(
         store=store, internal_id=downsample_case_internal_id, name=downsample_case_internal_id
     )
 
