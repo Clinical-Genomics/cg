@@ -6,7 +6,7 @@ from typing import Callable
 import pytest
 
 from cg.constants import FileExtensions
-from cg.models.cg_config import EncryptionDirectories
+from cg.models.cg_config import PDCArchivingDirectories
 
 
 @pytest.fixture
@@ -42,7 +42,7 @@ Accessing as node: SLLCLINICAL
 
 
 @pytest.fixture()
-def archived_flow_cells(encryption_directories: EncryptionDirectories) -> list[str]:
+def archived_flow_cells(encryption_directories: PDCArchivingDirectories) -> list[str]:
     """Returns a list of archived flow cells."""
     return [
         f"{encryption_directories.current}/new_flow_cell{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}",

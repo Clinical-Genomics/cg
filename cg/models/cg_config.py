@@ -47,14 +47,14 @@ class Encryption(BaseModel):
     binary_path: str
 
 
-class EncryptionDirectories(BaseModel):
+class PDCArchivingDirectories(BaseModel):
     current: str
     nas: str
     pre_nas: str
 
 
 class BackupConfig(BaseModel):
-    encryption_directories: EncryptionDirectories
+    encryption_directories: PDCArchivingDirectories
     slurm_flow_cell_encryption: SlurmConfig
 
 

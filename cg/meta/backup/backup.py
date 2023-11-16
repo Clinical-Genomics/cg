@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Optional
 
 from housekeeper.store.models import File
-from sqlalchemy.exc import OperationalError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
@@ -18,7 +17,7 @@ from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models import CompressionData
-from cg.models.cg_config import EncryptionDirectories
+from cg.models.cg_config import PDCArchivingDirectories
 from cg.store import Store
 from cg.store.models import Flowcell
 from cg.utils.time import get_elapsed_time, get_start_time
@@ -32,7 +31,7 @@ class BackupAPI:
     def __init__(
         self,
         encryption_api: EncryptionAPI,
-        encryption_directories: EncryptionDirectories,
+        encryption_directories: PDCArchivingDirectories,
         status: Store,
         tar_api: TarAPI,
         pdc_api: PdcAPI,
@@ -40,7 +39,7 @@ class BackupAPI:
         dry_run: bool = False,
     ):
         self.encryption_api = encryption_api
-        self.encryption_directories: EncryptionDirectories = encryption_directories
+        self.encryption_directories: PDCArchivingDirectories = encryption_directories
         self.status: Store = status
         self.tar_api: TarAPI = tar_api
         self.pdc: PdcAPI = pdc_api

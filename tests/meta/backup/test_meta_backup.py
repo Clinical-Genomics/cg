@@ -16,7 +16,7 @@ from cg.exc import ChecksumFailedError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
-from cg.models.cg_config import EncryptionDirectories
+from cg.models.cg_config import PDCArchivingDirectories
 from tests.mocks.hk_mock import MockFile
 
 
@@ -28,7 +28,7 @@ def test_query_pdc_for_flow_cell(
     caplog,
     flow_cell_name: str,
     mock_pdc_query_method: Callable,
-    encryption_directories: EncryptionDirectories,
+    encryption_directories: PDCArchivingDirectories,
 ):
     """Tests query PDC for a flow cell with a mock PDC query."""
     caplog.set_level(logging.DEBUG)

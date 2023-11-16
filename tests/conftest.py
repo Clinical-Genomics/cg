@@ -41,7 +41,7 @@ from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
-from cg.models.cg_config import CGConfig, EncryptionDirectories
+from cg.models.cg_config import CGConfig, PDCArchivingDirectories
 from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
@@ -2167,9 +2167,9 @@ def encryption_dir(tmp_flow_cells_directory: Path) -> Path:
 
 
 @pytest.fixture
-def encryption_directories(encryption_dir: Path) -> EncryptionDirectories:
+def encryption_directories(encryption_dir: Path) -> PDCArchivingDirectories:
     """Returns different encryption directories."""
-    return EncryptionDirectories(
+    return PDCArchivingDirectories(
         current=f"/{encryption_dir.as_posix()}/", nas="/ENCRYPT/", pre_nas="/OLD_ENCRYPT/"
     )
 
@@ -2208,7 +2208,7 @@ def context_config(
     flow_cells_dir: Path,
     demultiplexed_runs: Path,
     downsample_dir: Path,
-    encryption_directories: EncryptionDirectories,
+    encryption_directories: PDCArchivingDirectories,
 ) -> dict:
     """Return a context config."""
     return {
