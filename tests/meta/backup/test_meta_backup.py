@@ -16,7 +16,7 @@ from cg.exc import ChecksumFailedError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
-from cg.models.cg_config import PDCArchivingDirectories
+from cg.models.cg_config import PDCArchivingDirectory
 from tests.mocks.hk_mock import MockFile
 
 
@@ -28,7 +28,7 @@ def test_query_pdc_for_flow_cell(
     caplog,
     flow_cell_name: str,
     mock_pdc_query_method: Callable,
-    pdc_archiving_directories: PDCArchivingDirectories,
+    pdc_archiving_directories: PDCArchivingDirectory,
 ):
     """Tests query PDC for a flow cell with a mock PDC query."""
     caplog.set_level(logging.DEBUG)
@@ -36,7 +36,7 @@ def test_query_pdc_for_flow_cell(
     # GIVEN a Backup API
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        pdc_archiving_directories=pdc_archiving_directories,
+        pdc_archiving_directory=pdc_archiving_directories,
         status=mock.Mock(),
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -61,7 +61,7 @@ def test_get_archived_encryption_key_path(dsmc_q_archive_output: list[str], flow
     # GIVEN a Backup API
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        pdc_archiving_directories=mock.Mock(),
+        pdc_archiving_directory=mock.Mock(),
         status=mock.Mock(),
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -88,7 +88,7 @@ def test_get_archived_flow_cell_path(dsmc_q_archive_output: list[str], flow_cell
     # GIVEN a Backup API
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        pdc_archiving_directories=mock.Mock(),
+        pdc_archiving_directory=mock.Mock(),
         status=mock.Mock(),
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -114,7 +114,7 @@ def test_maximum_processing_queue_full(mock_store):
     # GIVEN a flow cell needs to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        pdc_archiving_directories=mock.Mock(),
+        pdc_archiving_directory=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -134,7 +134,7 @@ def test_maximum_processing_queue_not_full(mock_store):
     # GIVEN a flow cell needs to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        pdc_archiving_directories=mock.Mock(),
+        pdc_archiving_directory=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -154,7 +154,7 @@ def test_get_first_flow_cell_next_requested(mock_store, mock_flow_cell):
     # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        pdc_archiving_directories=mock.Mock(),
+        pdc_archiving_directory=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -176,7 +176,7 @@ def test_get_first_flow_cell_no_flow_cell_requested(mock_store):
     # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        pdc_archiving_directories=mock.Mock(),
+        pdc_archiving_directory=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -202,7 +202,7 @@ def test_fetch_flow_cell_processing_queue_full(mock_flow_cell, mock_check_proces
     # GIVEN we check if a flow cell needs to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        pdc_archiving_directories=mock.Mock(),
+        pdc_archiving_directory=mock.Mock(),
         status=mock.Mock(),
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -235,7 +235,7 @@ def test_fetch_flow_cell_no_flow_cells_requested(
     # GIVEN we check if a flow cell needs to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        pdc_archiving_directories=mock.Mock(),
+        pdc_archiving_directory=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -286,7 +286,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     # GIVEN we check if a flow cell needs to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        pdc_archiving_directories=cg_context.backup.pdc_archiving_directories,
+        pdc_archiving_directory=cg_context.backup.pdc_archiving_directory,
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
@@ -349,7 +349,7 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     # GIVEN we want to retrieve a specific flow cell from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        pdc_archiving_directories=cg_context.backup.pdc_archiving_directories,
+        pdc_archiving_directory=cg_context.backup.pdc_archiving_directory,
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
@@ -409,7 +409,7 @@ def test_fetch_flow_cell_integration(
     # GIVEN we want to retrieve a specific flow cell from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        pdc_archiving_directories=cg_context.backup.pdc_archiving_directories,
+        pdc_archiving_directory=cg_context.backup.pdc_archiving_directory,
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
