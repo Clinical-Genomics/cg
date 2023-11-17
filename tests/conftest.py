@@ -2167,7 +2167,7 @@ def pdc_archiving_dir(tmp_flow_cells_directory: Path) -> Path:
 
 
 @pytest.fixture
-def pdc_archiving_directories(pdc_archiving_dir: Path) -> PDCArchivingDirectory:
+def pdc_archiving_directory(pdc_archiving_dir: Path) -> PDCArchivingDirectory:
     """Returns different PDC archiving directories."""
     return PDCArchivingDirectory(
         current=f"/{pdc_archiving_dir.as_posix()}/", nas="/ENCRYPT/", pre_nas="/OLD_ENCRYPT/"
@@ -2208,7 +2208,7 @@ def context_config(
     flow_cells_dir: Path,
     demultiplexed_runs: Path,
     downsample_dir: Path,
-    pdc_archiving_directories: PDCArchivingDirectory,
+    pdc_archiving_directory: PDCArchivingDirectory,
 ) -> dict:
     """Return a context config."""
     return {
@@ -2227,7 +2227,7 @@ def context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "pdc_archiving_directory": pdc_archiving_directories.dict(),
+            "pdc_archiving_directory": pdc_archiving_directory.dict(),
             "slurm_flow_cell_encryption": {
                 "account": "development",
                 "hours": 1,
@@ -2282,7 +2282,7 @@ def context_config(
         },
         "encryption": {
             "binary_path": "bin/gpg",
-            "encryption_dir": pdc_archiving_directories.current,
+            "encryption_dir": pdc_archiving_directory.current,
         },
         "external": {
             "caesar": "server.name.se:/path/%s/on/caesar",

@@ -28,7 +28,7 @@ def test_query_pdc_for_flow_cell(
     caplog,
     flow_cell_name: str,
     mock_pdc_query_method: Callable,
-    pdc_archiving_directories: PDCArchivingDirectory,
+    pdc_archiving_directory: PDCArchivingDirectory,
 ):
     """Tests query PDC for a flow cell with a mock PDC query."""
     caplog.set_level(logging.DEBUG)
@@ -36,7 +36,7 @@ def test_query_pdc_for_flow_cell(
     # GIVEN a Backup API
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
-        pdc_archiving_directory=pdc_archiving_directories,
+        pdc_archiving_directory=pdc_archiving_directory,
         status=mock.Mock(),
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
