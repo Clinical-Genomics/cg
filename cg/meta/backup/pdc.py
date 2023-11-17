@@ -114,8 +114,9 @@ class PdcAPI:
         for encrypted_file in files_to_archive:
             if not self.dry_run:
                 self.archive_file_to_pdc(file_path=encrypted_file.as_posix())
-                store.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
-                LOG.info(f"Flow cell: {db_flow_cell.name} has been backed up")
+        if not self.dry_run:
+            store.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
+            LOG.info(f"Flow cell: {db_flow_cell.name} has been backed up")
 
     def start_flow_cell_backup(
         self,
