@@ -177,7 +177,7 @@ class TransferJob(BaseModel):
     """Model representing th response fields of an archive or retrieve reqeust to the Dataflow
     API."""
 
-    job_id: int = Field(serialization_alias="jobId")
+    job_id: int = Field(alias="jobId")
 
 
 class GetJobStatusResponse(BaseModel):
@@ -329,7 +329,7 @@ class DDNDataFlowClient(ArchiveHandler):
         ]
 
     def is_job_done(self, job_id: int) -> bool:
-        get_job_status_payload = GetJobStatusPayload(job_id=job_id)
+        get_job_status_payload = GetJobStatusPayload(id=job_id)
         get_job_status_response: GetJobStatusResponse = get_job_status_payload.get_status(
             url=urljoin(self.url, DataflowEndpoints.GET_JOB_STATUS + str(job_id)),
             headers=dict(self.headers, **self.auth_header),
