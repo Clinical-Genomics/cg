@@ -151,12 +151,14 @@
                 <td>{{ case.data_analysis.type }}</td>
               </tr>
             </tbody>
-            <caption>
-              <strong>Tillämpade filter för variantanrop</strong>: {{ case.data_analysis.variant_callers }}<br>
-              <a href="https://balsamic.readthedocs.io/en/latest/balsamic_filters.html">
-                https://balsamic.readthedocs.io/en/latest/balsamic_filters.html
-              </a>
-            </caption>
+              {% if case.data_analysis.variant_callers != 'N/A' %}
+                <caption>
+                  <strong>Tillämpade filter för variantanrop</strong>: {{ case.data_analysis.variant_callers }}<br>
+                  <a href="https://balsamic.readthedocs.io/en/latest/balsamic_filters.html">
+                    https://balsamic.readthedocs.io/en/latest/balsamic_filters.html
+                  </a>
+                </caption>
+              {% endif %}
           </table>
         </div>
 
