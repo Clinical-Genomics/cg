@@ -206,6 +206,7 @@ def test_archive_all_non_archived_spring_files(
         url="some/api/files/archive",
         headers=header_with_test_auth_token,
         json=archive_request_json,
+        verify=False,
     )
 
     # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper while no other
@@ -357,6 +358,7 @@ def test_retrieve_samples(
         url="some/api/files/retrieve",
         headers=header_with_test_auth_token,
         json=retrieve_sample_request_json,
+        verify=False,
     )
 
     # THEN the Archive entry should have a retrieval task id set

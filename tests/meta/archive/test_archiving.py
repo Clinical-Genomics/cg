@@ -304,6 +304,7 @@ def test_archive_folders(
             "createFolder": False,
             "metadataList": [],
         },
+        verify=False,
     )
 
 
@@ -350,6 +351,7 @@ def test_retrieve_samples(
             "createFolder": False,
             "metadataList": [],
         },
+        verify=False,
     )
 
 
