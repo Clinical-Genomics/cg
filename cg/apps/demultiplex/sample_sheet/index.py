@@ -131,7 +131,7 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
     return index_string + INDEX_TWO_PAD_SEQUENCE
 
 
-def get_hamming_distance_index_1(sequence_1: str, sequence_2: str) -> int:
+def get_hamming_distance_for_indices(sequence_1: str, sequence_2: str) -> int:
     """Get the hamming distance between two index 1 sequences.
     In the case that one sequence is longer than the other, the distance is calculated between
     the shortest sequence and the first segment of equal length of the longest sequence."""
@@ -141,29 +141,9 @@ def get_hamming_distance_index_1(sequence_1: str, sequence_2: str) -> int:
     )
 
 
-def get_hamming_distance_index_2(
-    sequence_1: str, sequence_2: str, is_reverse_complement: bool
-) -> int:
-    """Get the hamming distance between two index 2 sequences.
-    In the case that one sequence is longer than the other, the distance is calculated between
-    the shortest sequence and the last segment of equal length of the longest sequence.
-    If the sample requires reverse complement, the calculation is the same as for index 1."""
-    shortest_index_length: int = min(len(sequence_1), len(sequence_2))
-    return (
-        get_hamming_distance(
-            str_1=sequence_1[-shortest_index_length:], str_2=sequence_2[-shortest_index_length:]
-        )
-        if is_reverse_complement
-        else get_hamming_distance(
-            str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
-        )
-    )
-
-
 def update_barcode_mismatch_values_for_sample(
     sample_to_update: FlowCellSampleBCLConvert,
     samples_to_compare_to: list[FlowCellSampleBCLConvert],
-    is_reverse_complement: bool,
 ) -> None:
     """Updates the sample's barcode mismatch values.
     If a sample index has a hamming distance to any other sample lower than the threshold
@@ -174,7 +154,9 @@ def update_barcode_mismatch_values_for_sample(
             continue
         index_1, index_2 = get_index_pair(sample=sample_to_compare_to)
         if (
-            get_hamming_distance_index_1(sequence_1=index_1_sample_to_update, sequence_2=index_1)
+            get_hamming_distance_for_indices(
+                sequence_1=index_1_sample_to_update, sequence_2=index_1
+            )
             < MINIMUM_HAMMING_DISTANCE
         ):
             LOG.debug(
@@ -182,10 +164,8 @@ def update_barcode_mismatch_values_for_sample(
             )
             sample_to_update.barcode_mismatches_1 = 0
         if (
-            get_hamming_distance_index_2(
-                sequence_1=index_2_sample_to_update,
-                sequence_2=index_2,
-                is_reverse_complement=is_reverse_complement,
+            get_hamming_distance_for_indices(
+                sequence_1=index_2_sample_to_update, sequence_2=index_2
             )
             < MINIMUM_HAMMING_DISTANCE
         ):

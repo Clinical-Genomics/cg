@@ -196,9 +196,7 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         """Update barcode mismatch values for both indexes of given samples."""
         for sample in samples:
             update_barcode_mismatch_values_for_sample(
-                sample_to_update=sample,
-                samples_to_compare_to=samples,
-                is_reverse_complement=self.is_reverse_complement,
+                sample_to_update=sample, samples_to_compare_to=samples
             )
 
     def add_override_cycles_to_samples(self) -> None:
@@ -212,11 +210,7 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
             sample_index_len: int = len(get_index_pair(sample)[0])
             if sample_index_len < flow_cell_index_len:
                 index1_cycles = f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
-                index2_cycles = (
-                    f"N{flow_cell_index_len - sample_index_len}I{sample_index_len};"
-                    if self.is_reverse_complement
-                    else f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
-                )
+                index2_cycles = f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
             sample.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
     def get_additional_sections_sample_sheet(self) -> list[list[str]]:
