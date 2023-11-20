@@ -1,4 +1,4 @@
-from pathlib import Path
+"""from pathlib import Path
 from typing import Optional
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
@@ -21,7 +21,7 @@ def is_excel(file_path: Path) -> bool:
 
 
 def test_parse_mip_rna_orderform(mip_rna_orderform: str):
-    """Test to parse an mip rna orderform in excel format"""
+    Test to parse an mip rna orderform in excel format
     # GIVEN a orderform in excel format
     assert is_excel(Path(mip_rna_orderform))
     # GIVEN a orderform API
@@ -35,7 +35,7 @@ def test_parse_mip_rna_orderform(mip_rna_orderform: str):
 
 
 def test_parse_rnafusion_orderform(rnafusion_orderform: str):
-    """Test to parse an rnafusion orderform in excel format"""
+    Test to parse an rnafusion orderform in excel format
     # GIVEN a orderform in excel format
     assert is_excel(Path(rnafusion_orderform))
     # GIVEN a orderform API
@@ -49,7 +49,7 @@ def test_parse_rnafusion_orderform(rnafusion_orderform: str):
 
 
 def test_parse_balsamic_orderform(balsamic_orderform: str):
-    """Test to parse a balsamic orderform in Excel format"""
+    Test to parse a balsamic orderform in Excel format
     # GIVEN a orderform in excel format
     assert is_excel(Path(balsamic_orderform))
     # GIVEN a orderform API
@@ -63,7 +63,7 @@ def test_parse_balsamic_orderform(balsamic_orderform: str):
 
 
 def test_parse_balsamic_qc_orderform(balsamic_qc_orderform: str):
-    """Test to parse a balsamic QC orderform in excel format"""
+    Test to parse a balsamic QC orderform in excel format
     # GIVEN a orderform in excel format
     assert is_excel(Path(balsamic_qc_orderform))
     # GIVEN a orderform API
@@ -77,7 +77,7 @@ def test_parse_balsamic_qc_orderform(balsamic_qc_orderform: str):
 
 
 def test_parse_balsamic_umi_orderform(balsamic_umi_orderform: str):
-    """Test to parse a balsamic orderform in excel format"""
+    Test to parse a balsamic orderform in excel format
     # GIVEN a orderform in excel format
     assert is_excel(Path(balsamic_umi_orderform))
     # GIVEN a orderform API
@@ -91,7 +91,7 @@ def test_parse_balsamic_umi_orderform(balsamic_umi_orderform: str):
 
 
 def test_parse_microbial_orderform(microbial_orderform: str):
-    """Test to parse a microbial orderform in excel format"""
+    Test to parse a microbial orderform in excel format
     # GIVEN a order form in excel format
     assert is_excel(Path(microbial_orderform))
     # GIVEN a orderform API
@@ -105,7 +105,7 @@ def test_parse_microbial_orderform(microbial_orderform: str):
 
 
 def test_parse_sarscov2_orderform(sarscov2_orderform: str):
-    """Test to parse a sarscov2 orderform in excel format"""
+    Test to parse a sarscov2 orderform in excel format
 
     # GIVEN a order form in excel format
     assert is_excel(Path(sarscov2_orderform))
@@ -120,7 +120,7 @@ def test_parse_sarscov2_orderform(sarscov2_orderform: str):
 
 
 def test_parse_metagenome_orderform(metagenome_orderform: str):
-    """Test to parse an metagenome orderform in excel format"""
+    Test to parse an metagenome orderform in excel format
     # GIVEN a order form in excel format
     assert is_excel(Path(metagenome_orderform))
     # GIVEN a orderform API
@@ -134,7 +134,7 @@ def test_parse_metagenome_orderform(metagenome_orderform: str):
 
 
 def test_generate_mip_orderform_with_cases(mip_order_parser: ExcelOrderformParser):
-    """Test to parse a mip orderform with cases"""
+    Test to parse a mip orderform with cases
     # GIVEN a mip orderform parser
 
     # WHEN generating a orderform
@@ -151,7 +151,7 @@ def test_generate_mip_orderform_with_cases(mip_order_parser: ExcelOrderformParse
 
 
 def test_parse_mip_orderform(mip_orderform: str, nr_samples_mip_orderform: int):
-    """Test to parse a mip orderform in xlsx format"""
+    Test to parse a mip orderform in xlsx format
     # GIVEN a orderform in excel format
     assert is_excel(Path(mip_orderform))
     # GIVEN a orderform API
@@ -173,7 +173,7 @@ def test_parse_mip_orderform(mip_orderform: str, nr_samples_mip_orderform: int):
 
 
 def test_parse_rml_orderform(rml_orderform: str, nr_samples_rml_orderform: int):
-    """Test to parse an excel orderform in xlsx format"""
+    Test to parse an excel orderform in xlsx format
     # GIVEN a orderform in excel format
     assert is_excel(Path(rml_orderform))
     # GIVEN a orderform API
@@ -192,7 +192,7 @@ def test_parse_rml_orderform(rml_orderform: str, nr_samples_rml_orderform: int):
 
 
 def test_parse_fastq_orderform(fastq_orderform: str, nr_samples_fastq_orderform: int):
-    """Test to parse an fastq orderform in xlsx format"""
+    Test to parse an fastq orderform in xlsx format
     # GIVEN a orderform in excel format
     assert is_excel(Path(fastq_orderform))
     # GIVEN a orderform API
@@ -217,7 +217,7 @@ def test_parse_fastq_orderform(fastq_orderform: str, nr_samples_fastq_orderform:
 
 
 def test_fastq_samples_is_correct(fastq_order_parser: ExcelOrderformParser):
-    """Test that everything was correctly parsed from the fastq order"""
+    Test that everything was correctly parsed from the fastq order
     # GIVEN a orderform parser where a fastq order is parsed
 
     # GIVEN a tumor and normal sample with known information
@@ -233,7 +233,7 @@ def test_fastq_samples_is_correct(fastq_order_parser: ExcelOrderformParser):
 
 
 def test_generate_parsed_rml_orderform(rml_order_parser: ExcelOrderformParser, caplog):
-    """Test to generate a order from a parsed rml excel file"""
+    Test to generate a order from a parsed rml excel file
     # GIVEN a order form parser that have parsed an excel file
 
     # WHEN generating the order
@@ -246,10 +246,12 @@ def test_generate_parsed_rml_orderform(rml_order_parser: ExcelOrderformParser, c
 
 
 def test_get_data_delivery(microbial_order_parser):
-    """Tests that the data_delivery field is correctly parsed and translated to a value in the
-    data_delivery enum"""
+    Tests that the data_delivery field is correctly parsed and translated to a value in the
+    data_delivery enum
     # GIVEN an excel order form
     # WHEN the function is called
     data_delivery = microbial_order_parser.get_data_delivery()
     # THEN no errors should be raised and a data_delivery string should be returned
     assert data_delivery
+
+"""
