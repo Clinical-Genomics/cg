@@ -151,7 +151,7 @@
                 <td>{{ case.data_analysis.type }}</td>
               </tr>
             </tbody>
-              {% if case.data_analysis.variant_callers != 'N/A' %}
+              {% if case.data_analysis.pipeline != 'balsamic-qc' %}
                 <caption>
                   <strong>Tillämpade filter för variantanrop</strong>: {{ case.data_analysis.variant_callers }}<br>
                   <a href="https://balsamic.readthedocs.io/en/latest/balsamic_filters.html">
