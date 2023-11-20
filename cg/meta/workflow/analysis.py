@@ -18,7 +18,6 @@ from cg.constants import (
     Priority,
     SequencingFileTag,
 )
-from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import AnalysisType, CaseActions, WorkflowManager
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
@@ -505,12 +504,11 @@ class AnalysisAPI(MetaAPI):
 
     def does_any_file_need_to_be_retrieved(self, case_id: str) -> bool:
         """Checks whether we need to retrieve files from an external data location."""
-        if self.get_archive_location_for_case(case_id) == ArchiveLocations.PDC:
-            if self._is_flow_cell_check_applicable(
-                case_id
-            ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
-                LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
-                return True
+        if self._is_flow_cell_check_applicable(
+            case_id
+        ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
+            LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
+            return True
         else:
             if not self.are_all_spring_files_present(case_id):
                 LOG.warning(f"Case {case_id} is not ready - some files are archived.")
@@ -527,16 +525,14 @@ class AnalysisAPI(MetaAPI):
 
     def ensure_spring_files_are_not_archived(self, case_id: str):
         """Checks if any Spring files are archived and submits a job to retrieve any which are."""
-        if self.get_archive_location_for_case(case_id) == ArchiveLocations.PDC:
-            self.ensure_flow_cells_on_disk(case_id)
-        else:
-            if not self.are_all_spring_files_present(case_id):
-                spring_archive_api = SpringArchiveAPI(
-                    status_db=self.status_db,
-                    housekeeper_api=self.housekeeper_api,
-                    data_flow_config=self.config.data_flow_config,
-                )
-                spring_archive_api.retrieve_case(case_id)
+        self.ensure_flow_cells_on_disk(case_id)
+        if not self.are_all_spring_files_present(case_id):
+            spring_archive_api = SpringArchiveAPI(
+                status_db=self.status_db,
+                housekeeper_api=self.housekeeper_api,
+                data_flow_config=self.config.data_flow_config,
+            )
+            spring_archive_api.retrieve_case(case_id)
 
     def are_all_spring_files_present(self, case_id: str) -> bool:
         """Returns true if no Spring files are archived in the data location used by the customer tied to the given

@@ -220,6 +220,7 @@ def archived_file(
     archival_job_id_miria,
     sample_id: str,
 ) -> File:
+    """A spring file in the sample_id bundle which has an Archive entry with retrieved_at not set."""
     bundle: Bundle = real_housekeeper_api.create_new_bundle_and_version(sample_id)
     file: File = real_housekeeper_api.add_file(
         path="sample/version/file_name.spring",
@@ -228,6 +229,22 @@ def archived_file(
     )
     real_housekeeper_api.add_archives(
         files=[Path(file.path)], archive_task_id=archival_job_id_miria
+    )
+    return file
+
+
+@pytest.fixture
+def non_archived_file(
+    helpers: StoreHelpers,
+    real_housekeeper_api: HousekeeperAPI,
+    father_sample_id: str,
+) -> File:
+    """A file in the father_sample_id bundle with no archive entry."""
+    bundle: Bundle = real_housekeeper_api.create_new_bundle_and_version(father_sample_id)
+    file: File = real_housekeeper_api.add_file(
+        path="sample/version/file_name.spring",
+        version_obj=bundle.versions[0],
+        tags=[SequencingFileTag.SPRING],
     )
     return file
 

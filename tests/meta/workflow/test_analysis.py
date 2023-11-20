@@ -18,6 +18,7 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store
 from cg.store.models import Case
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.mark.parametrize(
@@ -423,7 +424,7 @@ def test_prepare_fastq_files_request_miria(
 
 
 def test_prepare_fastq_files_does_not_request_miria(
-    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, helpers: StoreHelpers
 ):
     """Tests that samples' input files are not requested via DDN for a Clinical customer, if no files are archived."""
 
@@ -432,6 +433,17 @@ def test_prepare_fastq_files_does_not_request_miria(
     # GIVEN that no files have entries in the Archive table
     case: Case = analysis_store.get_cases()[0]
     case.customer.data_archive_location = ArchiveLocations.KAROLINSKA_BUCKET
+
+    # GIVEN that all flow cells have status on disk
+    helpers.add_flow_cell(
+        analysis_store,
+        flow_cell_name="flowcell_test",
+        archived_at=datetime.now(),
+        sequencer_type=Sequencers.NOVASEQ,
+        samples=analysis_store.get_samples_by_case_id(case.internal_id),
+        status=FlowCellStatus.ON_DISK,
+        date=datetime.now(),
+    )
 
     with mock.patch.object(
         PrepareFastqAPI, "is_spring_decompression_needed", return_value=False
@@ -443,3 +455,94 @@ def test_prepare_fastq_files_does_not_request_miria(
         # WHEN running prepare_fastq_files
         # THEN no error should be raised
         mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
+
+
+def test_are_all_spring_files_present_true_when_all_present(
+    mip_analysis_api: MipDNAAnalysisAPI,
+    analysis_store: Store,
+    non_archived_file: File,
+    case_id: str,
+    father_sample_id: str,
+    helpers: StoreHelpers,
+):
+    """Tests that are_all_spring_files_present returns True when no files for a case are archived."""
+
+    # GIVEN that the only Spring file belonging to a case has no Archive entry
+
+    # WHEN checking if all spring files are present
+
+    # THEN the result should be True
+    assert mip_analysis_api.are_all_spring_files_present(case_id)
+
+
+def test_are_all_spring_files_present_false_when_none_present(
+    mip_analysis_api: MipDNAAnalysisAPI,
+    analysis_store: Store,
+    archived_file: File,
+    case_id: str,
+    sample_id: str,
+):
+    """Tests that are_all_spring_files_present returns False when all files for a case are archived."""
+
+    # GIVEN that the only Spring file belonging to a case has an Archive entry which has retrieved_at not set
+
+    # WHEN checking if all spring files are present
+
+    # THEN the result should be False
+    assert not mip_analysis_api.are_all_spring_files_present(case_id)
+
+
+@pytest.mark.parametrize("flow_cell_status", [FlowCellStatus.REMOVED, FlowCellStatus.ON_DISK])
+def test_does_any_spring_file_need_to_be_retrieved_flow_cell_status(
+    mip_analysis_api: MipDNAAnalysisAPI,
+    analysis_store: Store,
+    helpers: StoreHelpers,
+    flow_cell_status: str,
+):
+    """Tests that does_any_spring_file_need_to_be_retrieved returns True if one of the false if one of
+    the flow cells has status 'removed' and False if the status is instead 'ondisk'."""
+
+    # GIVEN a case with a flow cell with 'removed' status
+    case: Case = analysis_store.get_cases()[0]
+    helpers.add_flow_cell(
+        analysis_store,
+        flow_cell_name="flowcell_test",
+        archived_at=datetime.now(),
+        sequencer_type=Sequencers.NOVASEQ,
+        samples=analysis_store.get_samples_by_case_id(case.internal_id),
+        status=flow_cell_status,
+        date=datetime.now(),
+    )
+
+    # WHEN checking if any files need to be retrieved
+
+    # THEN the outcome should be False if the flow cell status is on disk but not otherwise
+    if flow_cell_status == FlowCellStatus.ON_DISK:
+        assert not mip_analysis_api.does_any_file_need_to_be_retrieved(case.internal_id)
+    else:
+        assert mip_analysis_api.does_any_file_need_to_be_retrieved(case.internal_id)
+
+
+def test_does_any_spring_file_need_to_be_retrieved_archived_file(
+    mip_analysis_api: MipDNAAnalysisAPI,
+    analysis_store: Store,
+    case_id: str,
+    archived_file: File,
+    non_archived_file: File,
+):
+    """Tests that does_any_spring_file_need_to_be_retrieved returns true if no flow cell is removed but some
+    files need to be retrieved via Miria."""
+
+    assert mip_analysis_api.does_any_file_need_to_be_retrieved(case_id)
+
+
+def test_does_any_spring_file_need_to_be_retrieved_files_present(
+    mip_analysis_api: MipDNAAnalysisAPI,
+    analysis_store: Store,
+    case_id: str,
+    non_archived_file: File,
+):
+    """Tests that does_any_spring_file_need_to_be_retrieved returns true if no flow cell is removed and no
+    files need to be retrieved via Miria."""
+
+    assert mip_analysis_api.does_any_file_need_to_be_retrieved(case_id)
