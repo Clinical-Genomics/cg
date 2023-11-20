@@ -43,7 +43,6 @@ class PdcAPI:
         dsmc_process_count: int = 0
         try:
             for process in psutil.process_iter():
-                LOG.debug(process.name())
                 if "dsmc" == process.name():
                     dsmc_process_count += 1
         except Exception as error:
