@@ -86,7 +86,7 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
     median_coverage: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     pct_15x: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     pct_60x: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    pct_pf_reads_improper_pairs: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    pct_reads_improper_pairs: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
 
 
 class RnafusionSampleMetadataModel(SampleMetadataModel):

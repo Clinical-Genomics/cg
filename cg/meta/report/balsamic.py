@@ -105,7 +105,7 @@ class BalsamicReportAPI(ReportAPI):
             duplicates=self.get_wgs_percent_duplication(sample_metrics=sample_metrics),
             mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
-            pct_pf_reads_improper_pairs=sample_metrics.pct_pf_reads_improper_pairs
+            pct_reads_improper_pairs=sample_metrics.pct_pf_reads_improper_pairs
             if sample_metrics
             else None,
         )
