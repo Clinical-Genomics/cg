@@ -42,14 +42,19 @@ class SlurmConfig(BaseModel):
     qos: SlurmQos = SlurmQos.LOW
 
 
-class EncryptionDirectories(BaseModel):
+class Encryption(BaseModel):
+    encryption_dir: str
+    binary_path: str
+
+
+class PDCArchivingDirectory(BaseModel):
     current: str
     nas: str
     pre_nas: str
 
 
 class BackupConfig(BaseModel):
-    encryption_directories: EncryptionDirectories
+    pdc_archiving_directory: PDCArchivingDirectory
     slurm_flow_cell_encryption: SlurmConfig
 
 
@@ -228,15 +233,15 @@ class DataFlowConfig(BaseModel):
 
 class CGConfig(BaseModel):
     database: str
-    environment: Literal["production", "stage"] = "stage"
-    madeline_exe: str
     delivery_path: str
-    max_flowcells: Optional[int]
-    email_base_settings: EmailBaseSettings
-    flow_cells_dir: str
     demultiplexed_flow_cells_dir: str
     downsample_dir: str
     downsample_script: str
+    email_base_settings: EmailBaseSettings
+    environment: Literal["production", "stage"] = "stage"
+    flow_cells_dir: str
+    madeline_exe: str
+    max_flowcells: Optional[int]
     # Base APIs that always should exist
     status_db_: Store = None
     housekeeper: HousekeeperConfig
@@ -252,7 +257,7 @@ class CGConfig(BaseModel):
     data_flow_config: Optional[DataFlowConfig] = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
-    encryption: Optional[CommonAppConfig] = None
+    encryption: Encryption | None = None
     external: ExternalConfig = None
     genotype: CommonAppConfig = None
     genotype_api_: GenotypeAPI = None
