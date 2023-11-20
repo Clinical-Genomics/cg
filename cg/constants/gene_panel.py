@@ -38,6 +38,7 @@ class GenePanelMasterList(StrEnum):
     SKD: str = "SKD"
     SOVM: str = "SOVM"
     STROKE: str = "STROKE"
+    AID: str = "AID"
 
     @classmethod
     def get_panel_names(cls, panels=None) -> list[str]:
