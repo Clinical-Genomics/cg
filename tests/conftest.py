@@ -41,15 +41,18 @@ from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
-from cg.models.cg_config import CGConfig, EncryptionDirectories
-from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
+from cg.models.cg_config import CGConfig, PDCArchivingDirectory
+from cg.models.demultiplex.run_parameters import (
+    RunParametersNovaSeq6000,
+    RunParametersNovaSeqX,
+)
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
-from cg.store.models import Bed, BedVersion, Customer, Case, Organism, Sample
+from cg.store.models import Bed, BedVersion, Case, Customer, Organism, Sample
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -2158,16 +2161,16 @@ def microsalt_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def encryption_dir(tmp_flow_cells_directory: Path) -> Path:
-    """Return a temporary directory for encryption testing."""
-    return Path(tmp_flow_cells_directory, "encrypt")
+def pdc_archiving_dir(tmp_flow_cells_directory: Path) -> Path:
+    """Return a temporary directory for PDC archiving testing."""
+    return Path(tmp_flow_cells_directory, "encrypt", "*")
 
 
 @pytest.fixture
-def encryption_directories(encryption_dir: Path) -> EncryptionDirectories:
-    """Returns different encryption directories."""
-    return EncryptionDirectories(
-        current=f"/{encryption_dir.as_posix()}/", nas="/ENCRYPT/", pre_nas="/OLD_ENCRYPT/"
+def pdc_archiving_directory(pdc_archiving_dir: Path) -> PDCArchivingDirectory:
+    """Returns different PDC archiving directories."""
+    return PDCArchivingDirectory(
+        current=f"/{pdc_archiving_dir.as_posix()}/", nas="/ENCRYPT/", pre_nas="/OLD_ENCRYPT/"
     )
 
 
@@ -2205,7 +2208,7 @@ def context_config(
     flow_cells_dir: Path,
     demultiplexed_runs: Path,
     downsample_dir: Path,
-    encryption_directories: EncryptionDirectories,
+    pdc_archiving_directory: PDCArchivingDirectory,
 ) -> dict:
     """Return a context config."""
     return {
@@ -2224,7 +2227,7 @@ def context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encryption_directories": encryption_directories.dict(),
+            "pdc_archiving_directory": pdc_archiving_directory.dict(),
             "slurm_flow_cell_encryption": {
                 "account": "development",
                 "hours": 1,
@@ -2283,7 +2286,10 @@ def context_config(
                 "mail_user": email_address,
             },
         },
-        "encryption": {"binary_path": "bin/gpg"},
+        "encryption": {
+            "binary_path": "bin/gpg",
+            "encryption_dir": pdc_archiving_directory.current,
+        },
         "external": {
             "caesar": "server.name.se:/path/%s/on/caesar",
             "hasta": "/path/on/hasta/%s",
@@ -3266,7 +3272,7 @@ def flow_cell_encryption_api(
 ) -> FlowCellEncryptionAPI:
     flow_cell_encryption_api = FlowCellEncryptionAPI(
         binary_path=cg_context.encryption.binary_path,
-        encryption_dir=Path(cg_context.backup.encryption_directories.current),
+        encryption_dir=Path(cg_context.backup.pdc_archiving_directory.current),
         dry_run=True,
         flow_cell=FlowCellDirectoryData(
             flow_cell_path=Path(cg_context.flow_cells_dir, flow_cell_full_name)
@@ -3290,7 +3296,7 @@ def store_with_case_and_sample_with_reads(
     downsample_sample_internal_id_2: str,
 ) -> Store:
     """Return a store with a case and a sample with reads."""
-    case: Family = helpers.add_case(
+    case: Case = helpers.add_case(
         store=store, internal_id=downsample_case_internal_id, name=downsample_case_internal_id
     )
 
