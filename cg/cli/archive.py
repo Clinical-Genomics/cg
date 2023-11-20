@@ -8,7 +8,6 @@ DEFAULT_SPRING_ARCHIVE_COUNT = 200
 
 
 @click.group()
-@click.pass_obj
 def archive():
     """Archive utilities."""
     pass
