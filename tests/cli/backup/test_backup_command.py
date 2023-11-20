@@ -30,9 +30,9 @@ def test_backup_flow_cells(
     )
 
     # GIVEN an encrypted flow cell
-    flow_cells_dir = Path(cg_context.backup.encryption_directories.current, flow_cell_full_name)
-    flow_cells_dir.mkdir(parents=True, exist_ok=True)
-    Path(flow_cells_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()
+    flow_cells_encrypt_dir = Path(cg_context.encryption.encryption_dir, flow_cell_full_name)
+    flow_cells_encrypt_dir.mkdir(parents=True, exist_ok=True)
+    Path(flow_cells_encrypt_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()
 
     # WHEN backing up flow cells in dry run mode
     result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
@@ -192,7 +192,7 @@ def test_encrypt_flow_cell_when_encryption_already_started(
     cli_runner: CliRunner,
     cg_context: CGConfig,
     caplog,
-    encryption_dir: Path,
+    pdc_archiving_dir: Path,
     flow_cell_name: str,
     flow_cell_full_name: str,
     mocker,
@@ -205,9 +205,9 @@ def test_encrypt_flow_cell_when_encryption_already_started(
     FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # GIVEN a pending flag file
-    flow_cells_dir = Path(cg_context.backup.encryption_directories.current, flow_cell_full_name)
-    flow_cells_dir.mkdir(parents=True, exist_ok=True)
-    Path(flow_cells_dir, flow_cell_name).with_suffix(FileExtensions.PENDING).touch()
+    flow_cells_encrypt_dir = Path(cg_context.encryption.encryption_dir, flow_cell_full_name)
+    flow_cells_encrypt_dir.mkdir(parents=True, exist_ok=True)
+    Path(flow_cells_encrypt_dir, flow_cell_name).with_suffix(FileExtensions.PENDING).touch()
 
     # GIVEN a flow cells directory
 
@@ -225,7 +225,7 @@ def test_encrypt_flow_cell_when_encryption_already_completed(
     cli_runner: CliRunner,
     cg_context: CGConfig,
     caplog,
-    encryption_dir: Path,
+    pdc_archiving_dir: Path,
     flow_cell_name: str,
     flow_cell_full_name: str,
     mocker,
@@ -238,9 +238,9 @@ def test_encrypt_flow_cell_when_encryption_already_completed(
     FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # GIVEN a complete flag file
-    flow_cells_dir = Path(cg_context.backup.encryption_directories.current, flow_cell_full_name)
-    flow_cells_dir.mkdir(parents=True, exist_ok=True)
-    Path(flow_cells_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()
+    flow_cells_encrypt_dir = Path(cg_context.encryption.encryption_dir, flow_cell_full_name)
+    flow_cells_encrypt_dir.mkdir(parents=True, exist_ok=True)
+    Path(flow_cells_encrypt_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()
 
     # GIVEN a flow cells directory
 
