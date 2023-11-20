@@ -140,6 +140,7 @@ class TransferPayload(BaseModel):
             url=url,
             headers=headers,
             json=self.model_dump(),
+            verify=False,
         )
         response.raise_for_status()
         return TransferJob.model_validate(response.json())
@@ -226,6 +227,7 @@ class GetJobStatusPayload(BaseModel):
             url=url,
             headers=headers,
             json=self.model_dump(),
+            verify=False,
         )
         response.raise_for_status()
         return GetJobStatusResponse.model_validate(response.json())
@@ -261,6 +263,7 @@ class DDNDataFlowClient(ArchiveHandler):
                 name=self.user,
                 password=self.password,
             ).model_dump(),
+            verify=False,
         )
         if not response.ok:
             raise DdnDataflowAuthenticationError(message=response.text)
@@ -276,6 +279,7 @@ class DDNDataFlowClient(ArchiveHandler):
             url=urljoin(base=self.url, url=DataflowEndpoints.REFRESH_AUTH_TOKEN),
             headers=self.headers,
             json=RefreshPayload(refresh=self.refresh_token).model_dump(),
+            verify=False,
         )
         response_content: AuthToken = AuthToken.model_validate(response.json())
         self.auth_token: str = response_content.access
