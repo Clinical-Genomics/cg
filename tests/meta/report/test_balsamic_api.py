@@ -27,8 +27,6 @@ def test_get_sample_metadata(
         case_balsamic.internal_id
     )
 
-    print(balsamic_metadata.sample_metrics)
-
     # GIVEN the expected output
     expected_metadata: dict[str, str] = {
         "million_read_pairs": "10.0",
