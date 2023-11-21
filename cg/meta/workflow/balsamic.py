@@ -1,4 +1,4 @@
-"""Module for Balsamic Analysis API"""
+"""Module for Balsamic Analysis API."""
 import logging
 from pathlib import Path
 from typing import Optional, Union
