@@ -42,8 +42,9 @@ class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
     pct_target_bases_500x: float | None
     pct_target_bases_1000x: float | None
     pct_off_bait: float | None
+    gc_dropout: float | None
+
     _pct_values = validator(
-        "percent_duplication",
         "pct_target_bases_50x",
         "pct_target_bases_100x",
         "pct_target_bases_250x",
@@ -62,6 +63,7 @@ class BalsamicWGSQCMetrics(BalsamicQCMetrics):
     pct_30x: float | None
     pct_60x: float | None
     pct_100x: float | None
+    pct_pf_reads_improper_pairs: float | None
 
     _pct_values = validator(
         "pct_15x",
