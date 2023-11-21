@@ -566,32 +566,32 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         options = build_command_from_dict(
             {
                 "--analysis-dir": self.root_dir,
+                "--analysis-workflow": arguments.get("analysis_workflow"),
                 "--balsamic-cache": self.balsamic_cache,
                 "--cache-version": cache_version,
-                "--fastq-path": self.get_sample_fastq_destination_dir(
-                    self.status_db.get_case_by_internal_id(case_id)
-                ),
-                "--case-id": arguments.get("case_id"),
-                "--gender": arguments.get("gender"),
-                "--analysis-workflow": arguments.get("analysis_workflow"),
-                "--genome-version": arguments.get("genome_version"),
-                "--panel-bed": arguments.get("panel_bed"),
-                "--pon-cnn": arguments.get("pon_cnn"),
-                "--umi-trim-length": arguments.get("umi_trim_length"),
-                "--tumor-sample-name": arguments.get("tumor_sample_name"),
-                "--normal-sample-name": arguments.get("normal_sample_name"),
                 "--cadd-annotations": self.cadd_path,
-                "--genome-interval": arguments.get("genome_interval"),
-                "--gnomad-min-af5": arguments.get("gnomad_min_af5"),
-                "--gens-coverage-pon": arguments.get("gens_coverage_pon"),
-                "--swegen-snv": arguments.get("swegen_snv"),
-                "--swegen-sv": arguments.get("swegen_sv"),
-                "--clinical-snv-observations": arguments.get("clinical_snv"),
-                "--clinical-sv-observations": arguments.get("clinical_sv"),
                 "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
                 "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
                 "--cancer-somatic-sv-observations": arguments.get("cancer_somatic_sv"),
+                "--case-id": arguments.get("case_id"),
+                "--clinical-snv-observations": arguments.get("clinical_snv"),
+                "--clinical-sv-observations": arguments.get("clinical_sv"),
+                "--fastq-path": self.get_sample_fastq_destination_dir(
+                    self.status_db.get_case_by_internal_id(case_id)
+                ),
+                "--gender": arguments.get("gender"),
+                "--genome-interval": arguments.get("genome_interval"),
+                "--genome-version": arguments.get("genome_version"),
+                "--gens-coverage-pon": arguments.get("gens_coverage_pon"),
+                "--gnomad-min-af5": arguments.get("gnomad_min_af5"),
+                "--normal-sample-name": arguments.get("normal_sample_name"),
+                "--panel-bed": arguments.get("panel_bed"),
+                "--pon-cnn": arguments.get("pon_cnn"),
+                "--swegen-snv": arguments.get("swegen_snv"),
+                "--swegen-sv": arguments.get("swegen_sv"),
+                "--tumor-sample-name": arguments.get("tumor_sample_name"),
+                "--umi-trim-length": arguments.get("umi_trim_length"),
             }
         )
         parameters = command + options
