@@ -418,7 +418,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return verified_observations
 
-    def get_verified_gens_file_paths(self, gender: Gender) -> Optional[dict]:
+    def get_verified_gens_file_paths(self, gender: Gender) -> Optional[dict[str, str]]:
         """Return a list of file path arguments for Gens."""
         return {
             "genome_interval": self.genome_interval_path,
