@@ -23,6 +23,7 @@ LOG = logging.getLogger(__name__)
 
 SERVER = "hasta"
 NO_FILE_FOUND_ANSWER = "ANS1092W"
+MAX_NR_OF_DSMC_PROCESSES: int = 3
 
 
 class PdcAPI:
@@ -39,14 +40,16 @@ class PdcAPI:
             Exception: for all non-exit exceptions.
         """
         is_dsmc_running: bool = False
+        dsmc_process_count: int = 0
         try:
             for process in psutil.process_iter():
-                if "dsmc" in process.name():
-                    is_dsmc_running = True
+                if "dsmc" == process.name():
+                    dsmc_process_count += 1
         except Exception as error:
             LOG.debug(f"{error}")
-        if is_dsmc_running:
-            LOG.debug("A Dsmc process is already running")
+        if dsmc_process_count >= MAX_NR_OF_DSMC_PROCESSES:
+            is_dsmc_running = True
+            LOG.debug("Too many Dsmc processes are already running")
         return is_dsmc_running
 
     def archive_file_to_pdc(self, file_path: str) -> None:
@@ -93,7 +96,7 @@ class PdcAPI:
             FlowCellEncryptionError if encryption is not complete.
         """
         if self.validate_is_dsmc_running():
-            raise DsmcAlreadyRunningError("A Dsmc process is already running")
+            raise DsmcAlreadyRunningError("Too many Dsmc processes are already running")
         if db_flow_cell and db_flow_cell.has_backup:
             raise FlowCellAlreadyBackedUpError(
                 f"Flow cell: {db_flow_cell.name} is already backed-up"
@@ -111,8 +114,9 @@ class PdcAPI:
         for encrypted_file in files_to_archive:
             if not self.dry_run:
                 self.archive_file_to_pdc(file_path=encrypted_file.as_posix())
-                store.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
-                LOG.info(f"Flow cell: {db_flow_cell.name} has been backed up")
+        if not self.dry_run:
+            store.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
+            LOG.info(f"Flow cell: {db_flow_cell.name} has been backed up")
 
     def start_flow_cell_backup(
         self,
