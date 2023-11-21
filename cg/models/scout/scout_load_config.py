@@ -92,7 +92,7 @@ class ScoutLoadConfig(BaseModel):
     analysis_date: Optional[datetime] = None
     samples: list[ScoutIndividual] = []
 
-    delivery_report: Optional[str] = None
+    delivery_report: str
     coverage_qc_report: Optional[str] = None
     cnv_report: Optional[str] = None
     multiqc: Optional[str] = None
