@@ -1,3 +1,4 @@
+import os
 import shutil
 from collections import namedtuple
 from datetime import datetime
@@ -9,13 +10,11 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_sample_sheet_path_to_housekeeper,
-)
+from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.api import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 from tests.store_helpers import StoreHelpers
 
 FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_internal_ids")
@@ -101,7 +100,7 @@ def populated_flow_cell_store(
 
     populated_flow_cell_store: Store = store
     sample: Sample = helpers.add_sample(store=populated_flow_cell_store, internal_id=sample_id)
-    family: Family = helpers.add_case(store=populated_flow_cell_store, internal_id=family_name)
+    family: Case = helpers.add_case(store=populated_flow_cell_store, internal_id=family_name)
     helpers.add_relationship(
         store=populated_flow_cell_store,
         sample=sample,
@@ -127,7 +126,7 @@ def active_flow_cell_store(
     """Populate a store with a Novaseq flow cell, with active samples on it."""
     active_flow_cell_store: Store = base_store
     sample: Sample = helpers.add_sample(store=active_flow_cell_store, internal_id=sample_id)
-    family: Family = helpers.add_case(
+    family: Case = helpers.add_case(
         store=active_flow_cell_store, internal_id=family_name, action="running"
     )
     helpers.add_relationship(
@@ -538,3 +537,12 @@ def bcl_convert_sample_id_with_non_pooled_undetermined_reads() -> str:
 def bcl_convert_non_pooled_sample_read_count() -> int:
     """Based on the data in 230504_A00689_0804_BHY7FFDRX2, the sum of all reads - mapped and undetermined."""
     return 4000000
+
+
+def get_all_files_in_directory_tree(directory: Path) -> list[Path]:
+    """Get the relative paths of all files in a directory and its subdirectories."""
+    files_in_directory: list[Path] = []
+    for subdir, _, files in os.walk(directory):
+        subdir = Path(subdir).relative_to(directory)
+        files_in_directory.extend([Path(subdir, file) for file in files])
+    return files_in_directory

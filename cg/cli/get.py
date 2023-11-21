@@ -7,11 +7,11 @@ from tabulate import tabulate
 
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Customer, Family, Flowcell, Sample
+from cg.store.models import Case, Customer, Flowcell, Sample
 
 LOG = logging.getLogger(__name__)
 ANALYSIS_HEADERS = ["Analysis Date", "Pipeline", "Version"]
-FAMILY_HEADERS = ["Family", "Name", "Customer", "Priority", "Panels", "Action"]
+FAMILY_HEADERS = ["Case", "Name", "Customer", "Priority", "Panels", "Action"]
 FLOW_CELL_HEADERS = ["Flowcell", "Type", "Sequencer", "Date", "Archived?", "Status"]
 LINK_HEADERS = ["Sample", "Mother", "Father"]
 SAMPLE_HEADERS = ["Sample", "Name", "Customer", "Application", "State", "Priority", "External?"]
@@ -45,7 +45,7 @@ def get_sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample
     """Get information about a sample."""
     status_db: Store = context.obj.status_db
     for sample_id in sample_ids:
-        LOG.debug("%s: get info about sample", sample_id)
+        LOG.debug(f"{sample_id}: get info about sample")
         existing_sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
         if existing_sample is None:
             LOG.warning(f"{sample_id}: sample doesn't exist")
@@ -61,9 +61,7 @@ def get_sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample
         ]
         click.echo(tabulate([row], headers=SAMPLE_HEADERS, tablefmt="psql"))
         if cases:
-            case_ids: list[str] = [
-                link_obj.family.internal_id for link_obj in existing_sample.links
-            ]
+            case_ids: list[str] = [link_obj.case.internal_id for link_obj in existing_sample.links]
             context.invoke(get_case, case_ids=case_ids, samples=False)
         if not hide_flow_cell:
             for sample_flow_cell in existing_sample.flowcells:
@@ -77,7 +75,7 @@ def get_sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample
 def get_analysis(context: CGConfig, case_id: str):
     """Get information about case analysis."""
     status_db: Store = context.status_db
-    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     if case is None:
         LOG.error(f"{case_id}: case doesn't exist")
         raise click.Abort
@@ -98,7 +96,7 @@ def get_analysis(context: CGConfig, case_id: str):
 def get_case_relations(context: CGConfig, case_id: str):
     """Get information about case relations."""
     status_db: Store = context.status_db
-    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     if case is None:
         LOG.error(f"{case_id}: case doesn't exist")
         raise click.Abort
@@ -133,18 +131,18 @@ def get_case(
 ):
     """Get information about a case."""
     status_db: Store = context.obj.status_db
-    status_db_cases: list[Family] = []
+    status_db_cases: list[Case] = []
     if name:
         customer: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
         if not customer:
             LOG.error(f"{customer_id}: customer not found")
             raise click.Abort
-        status_db_cases: Iterable[Family] = status_db.get_cases_by_customer_and_case_name_search(
+        status_db_cases: Iterable[Case] = status_db.get_cases_by_customer_and_case_name_search(
             customer=customer, case_name_search=case_ids[-1]
         )
     else:
         for case_id in case_ids:
-            existing_case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+            existing_case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
             if not existing_case:
                 LOG.error(f"{case_id}: case doesn't exist")
                 raise click.Abort

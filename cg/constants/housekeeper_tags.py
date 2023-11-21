@@ -1,8 +1,9 @@
 """File tags for files in Housekeeper."""
 
 
+from enum import StrEnum
+
 from cg.constants.constants import Pipeline
-from cg.utils.enums import StrEnum
 
 
 class AlignmentFileTag(StrEnum):
@@ -35,7 +36,6 @@ class ScoutTag(StrEnum):
 class SequencingFileTag(StrEnum):
     """Tags for sequencing files."""
 
-    ARCHIVED_SAMPLE_SHEET: str = "archived_sample_sheet"
     CGSTATS_LOG: str = "log"
     FASTQ: str = "fastq"
     SAMPLE_SHEET: str = "samplesheet"

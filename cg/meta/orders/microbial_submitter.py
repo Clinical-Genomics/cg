@@ -9,8 +9,8 @@ from cg.models.orders.samples import MicrobialSample
 from cg.store.models import (
     ApplicationVersion,
     Customer,
-    Family,
-    FamilySample,
+    Case,
+    CaseSample,
     Organism,
     Sample,
 )
@@ -90,12 +90,12 @@ class MicrobialSubmitter(Submitter):
 
         with self.status.session.no_autoflush:
             for sample_data in items:
-                case: Family = self.status.get_case_by_name_and_customer(
+                case: Case = self.status.get_case_by_name_and_customer(
                     customer=customer, case_name=ticket_id
                 )
 
                 if not case:
-                    case: Family = self.status.add_case(
+                    case: Case = self.status.add_case(
                         data_analysis=data_analysis,
                         data_delivery=data_delivery,
                         name=ticket_id,
@@ -144,8 +144,8 @@ class MicrobialSubmitter(Submitter):
 
                 priority = new_sample.priority
                 sample_objs.append(new_sample)
-                link: FamilySample = self.status.relate_sample(
-                    family=case, sample=new_sample, status="unknown"
+                link: CaseSample = self.status.relate_sample(
+                    case=case, sample=new_sample, status="unknown"
                 )
                 self.status.session.add(link)
                 new_samples.append(new_sample)

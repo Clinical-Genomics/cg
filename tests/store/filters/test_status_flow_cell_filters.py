@@ -10,13 +10,13 @@ from cg.store.filters.status_flow_cell_filters import (
     filter_flow_cells_by_case,
     filter_flow_cells_with_statuses,
 )
-from cg.store.models import Family, Flowcell, Sample
+from cg.store.models import Case, Flowcell, Sample
 from tests.store_helpers import StoreHelpers
 
 
 def test_get_flow_cells_by_case(
     base_store: Store,
-    case: Family,
+    case: Case,
     bcl2fastq_flow_cell_id: str,
     helpers: StoreHelpers,
     sample: Sample,
@@ -42,7 +42,7 @@ def test_get_flow_cells_by_case(
 
 def test_get_flow_cells_by_case_when_no_flow_cell_for_case(
     base_store: Store,
-    case: Family,
+    case: Case,
 ):
     """Test that a flow cell is not returned when there is a flow cell with no matching flow cell for case."""
 

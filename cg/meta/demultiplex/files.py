@@ -42,16 +42,14 @@ def move_dragen_fastq_files(project_directory: Path, dry_run: bool = False) -> N
 
     for dragen_fastq_file in project_directory.iterdir():
         LOG.debug(
-            "Derive sample name from fastq file %s: %s",
-            dragen_fastq_file,
-            get_dragen_sample_name(dragen_fastq_file),
+            f"Derive sample name from fastq file {dragen_fastq_file}: {get_dragen_sample_name(dragen_fastq_file)}",
         )
         dragen_sample_name: str = get_dragen_sample_name(dragen_fastq_file)
-        LOG.debug("Create sample directory %s:", project_directory / dragen_sample_name)
+        LOG.debug(f"Create sample directory {project_directory / dragen_sample_name}:")
         if not dry_run:
             (project_directory / dragen_sample_name).mkdir(exist_ok=True)
         target_directory: Path = project_directory / dragen_sample_name / dragen_fastq_file.name
-        LOG.debug("Move fastq file into sample directory: %s", target_directory)
+        LOG.debug(f"Move fastq file into sample directory: {target_directory}")
         if not dry_run:
             dragen_fastq_file.rename(target_directory)
 

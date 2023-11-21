@@ -18,6 +18,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
+from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -40,17 +41,18 @@ from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
-from cg.models.cg_config import CGConfig, EncryptionDirectories
+from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
+from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store import Store
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
-from cg.store.models import Bed, BedVersion, Customer, Family, Organism, Sample
+from cg.store.models import Bed, BedVersion, Case, Customer, Organism, Sample
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -310,6 +312,8 @@ def base_config_dict() -> dict:
         "delivery_path": "path/to/delivery",
         "flow_cells_dir": "path/to/flow_cells",
         "demultiplexed_flow_cells_dir": "path/to/demultiplexed_flow_cells_dir",
+        "downsample_dir": "path/to/downsample_dir",
+        "downsample_script": "downsample.sh",
         "housekeeper": {
             "database": "sqlite:///",
             "root": "path/to/root",
@@ -2004,7 +2008,7 @@ def sample_store(base_store: Store) -> Store:
             sex=Gender.MALE,
             received=datetime.now(),
             prepared_at=datetime.now(),
-            reads_updated_at=datetime.now(),
+            last_sequenced_at=datetime.now(),
             reads=(310 * 1000000),
         ),
         base_store.add_sample(
@@ -2017,12 +2021,12 @@ def sample_store(base_store: Store) -> Store:
         base_store.add_sample(
             name="to-deliver",
             sex=Gender.MALE,
-            reads_updated_at=datetime.now(),
+            last_sequenced_at=datetime.now(),
         ),
         base_store.add_sample(
             name="delivered",
             sex=Gender.MALE,
-            reads_updated_at=datetime.now(),
+            last_sequenced_at=datetime.now(),
             delivered_at=datetime.now(),
             no_invoice=False,
         ),
@@ -2084,6 +2088,12 @@ def balsamic_dir(tmpdir_factory) -> Path:
 def cg_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for cg testing."""
     return tmpdir_factory.mktemp("cg")
+
+
+@pytest.fixture(scope="function")
+def downsample_dir(tmp_path_factory) -> Path:
+    """Return a temporary downsample directory for testing."""
+    return tmp_path_factory.mktemp("downsample", numbered=True)
 
 
 @pytest.fixture(name="swegen_dir")
@@ -2151,16 +2161,16 @@ def microsalt_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def encryption_dir(tmp_flow_cells_directory: Path) -> Path:
-    """Return a temporary directory for encryption testing."""
-    return Path(tmp_flow_cells_directory, "encrypt")
+def pdc_archiving_dir(tmp_flow_cells_directory: Path) -> Path:
+    """Return a temporary directory for PDC archiving testing."""
+    return Path(tmp_flow_cells_directory, "encrypt", "*")
 
 
 @pytest.fixture
-def encryption_directories(encryption_dir: Path) -> EncryptionDirectories:
-    """Returns different encryption directories."""
-    return EncryptionDirectories(
-        current=f"/{encryption_dir.as_posix()}/", nas="/ENCRYPT/", pre_nas="/OLD_ENCRYPT/"
+def pdc_archiving_directory(pdc_archiving_dir: Path) -> PDCArchivingDirectory:
+    """Returns different PDC archiving directories."""
+    return PDCArchivingDirectory(
+        current=f"/{pdc_archiving_dir.as_posix()}/", nas="/ENCRYPT/", pre_nas="/OLD_ENCRYPT/"
     )
 
 
@@ -2197,7 +2207,8 @@ def context_config(
     taxprofiler_dir: Path,
     flow_cells_dir: Path,
     demultiplexed_runs: Path,
-    encryption_directories: EncryptionDirectories,
+    downsample_dir: Path,
+    pdc_archiving_directory: PDCArchivingDirectory,
 ) -> dict:
     """Return a context config."""
     return {
@@ -2205,6 +2216,8 @@ def context_config(
         "delivery_path": str(cg_dir),
         "flow_cells_dir": str(flow_cells_dir),
         "demultiplexed_flow_cells_dir": str(demultiplexed_runs),
+        "downsample_dir": str(downsample_dir),
+        "downsample_script": "downsample.sh",
         "email_base_settings": {
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",
@@ -2214,7 +2227,7 @@ def context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encryption_directories": encryption_directories.dict(),
+            "pdc_archiving_directory": pdc_archiving_directory.dict(),
             "slurm_flow_cell_encryption": {
                 "account": "development",
                 "hours": 1,
@@ -2267,7 +2280,10 @@ def context_config(
                 "mail_user": email_address,
             },
         },
-        "encryption": {"binary_path": "bin/gpg"},
+        "encryption": {
+            "binary_path": "bin/gpg",
+            "encryption_dir": pdc_archiving_directory.current,
+        },
         "external": {
             "caesar": "server.name.se:/path/%s/on/caesar",
             "hasta": "/path/on/hasta/%s",
@@ -2629,6 +2645,12 @@ def strandedness_not_permitted() -> str:
 
 
 @pytest.fixture(scope="session")
+def pipeline_version() -> str:
+    """Return a pipeline version."""
+    return "2.2.0"
+
+
+@pytest.fixture(scope="session")
 def fastq_forward_read_path(housekeeper_dir: Path) -> Path:
     """Path to existing fastq forward read file."""
     fastq_file_path = Path(housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001").with_suffix(
@@ -2812,7 +2834,7 @@ def rnafusion_context(
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
     # Create textbook case with enough reads
-    case_enough_reads: Family = helpers.add_case(
+    case_enough_reads: Case = helpers.add_case(
         store=status_db,
         internal_id=rnafusion_case_id,
         name=rnafusion_case_id,
@@ -2822,7 +2844,7 @@ def rnafusion_context(
     sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        reads_updated_at=datetime.now(),
+        last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=apptag_rna,
     )
@@ -2834,7 +2856,7 @@ def rnafusion_context(
     )
 
     # Create case without enough reads
-    case_not_enough_reads: Family = helpers.add_case(
+    case_not_enough_reads: Case = helpers.add_case(
         store=status_db,
         internal_id=case_id_not_enough_reads,
         name=case_id_not_enough_reads,
@@ -2844,7 +2866,7 @@ def rnafusion_context(
     sample_not_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id_not_enough_reads,
-        reads_updated_at=datetime.now(),
+        last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_not_pass,
         application_tag=apptag_rna,
     )
@@ -3063,7 +3085,7 @@ def taxprofiler_context(
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
-    taxprofiler_case: Family = helpers.add_case(
+    taxprofiler_case: Case = helpers.add_case(
         store=status_db,
         internal_id=taxprofiler_case_id,
         name=taxprofiler_case_id,
@@ -3073,7 +3095,7 @@ def taxprofiler_context(
     taxprofiler_sample: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        reads_updated_at=datetime.now(),
+        last_sequenced_at=datetime.now(),
         name=sample_name,
         reads=total_sequenced_reads_pass,
     )
@@ -3244,7 +3266,7 @@ def flow_cell_encryption_api(
 ) -> FlowCellEncryptionAPI:
     flow_cell_encryption_api = FlowCellEncryptionAPI(
         binary_path=cg_context.encryption.binary_path,
-        encryption_dir=Path(cg_context.backup.encryption_directories.current),
+        encryption_dir=Path(cg_context.backup.pdc_archiving_directory.current),
         dry_run=True,
         flow_cell=FlowCellDirectoryData(
             flow_cell_path=Path(cg_context.flow_cells_dir, flow_cell_full_name)
@@ -3256,3 +3278,129 @@ def flow_cell_encryption_api(
     )
     flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=True)
     return flow_cell_encryption_api
+
+
+# Downsample
+@pytest.fixture()
+def store_with_case_and_sample_with_reads(
+    store: Store,
+    helpers: StoreHelpers,
+    downsample_case_internal_id: str,
+    downsample_sample_internal_id_1: str,
+    downsample_sample_internal_id_2: str,
+) -> Store:
+    """Return a store with a case and a sample with reads."""
+    case: Case = helpers.add_case(
+        store=store, internal_id=downsample_case_internal_id, name=downsample_case_internal_id
+    )
+
+    for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
+        helpers.add_sample(
+            store=store,
+            internal_id=sample_internal_id,
+            customer_id=case.customer_id,
+            reads=100_000_000,
+        )
+        sample: Sample = store.get_sample_by_internal_id(internal_id=sample_internal_id)
+        helpers.add_relationship(store=store, case=case, sample=sample)
+
+    return store
+
+
+@pytest.fixture()
+def downsample_case_internal_id() -> str:
+    """Return a case internal id."""
+    return "supersonicturtle"
+
+
+@pytest.fixture()
+def downsample_sample_internal_id_1() -> str:
+    """Return a sample internal id."""
+    return "ACC12345675213"
+
+
+@pytest.fixture()
+def downsample_sample_internal_id_2() -> str:
+    """Return a sample internal id."""
+    return "ACC12345684213"
+
+
+@pytest.fixture()
+def number_of_reads_in_millions() -> int:
+    """Return a number of reads in millions."""
+    return 50
+
+
+@pytest.fixture()
+def downsample_hk_api(
+    real_housekeeper_api: HousekeeperAPI,
+    fastq_file: Path,
+    downsample_sample_internal_id_1: str,
+    downsample_sample_internal_id_2: str,
+    timestamp_yesterday: str,
+    helpers: StoreHelpers,
+    tmp_path_factory,
+) -> HousekeeperAPI:
+    """Return a Housekeeper API with a real database."""
+    for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
+        tmp_fastq_file = tmp_path_factory.mktemp(f"{sample_internal_id}.fastq.gz")
+        downsample_bundle: dict = {
+            "name": sample_internal_id,
+            "created": timestamp_yesterday,
+            "expires": timestamp_yesterday,
+            "files": [
+                {
+                    "path": tmp_fastq_file.as_posix(),
+                    "archive": False,
+                    "tags": [SequencingFileTag.FASTQ, sample_internal_id],
+                }
+            ],
+        }
+        helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=downsample_bundle)
+    return real_housekeeper_api
+
+
+@pytest.fixture(scope="function")
+def downsample_context(
+    cg_context: CGConfig,
+    store_with_case_and_sample_with_reads: Store,
+    downsample_hk_api: HousekeeperAPI,
+) -> CGConfig:
+    """Return cg context with added Store and Housekeeper API."""
+    cg_context.status_db_ = store_with_case_and_sample_with_reads
+    cg_context.housekeeper_api_ = downsample_hk_api
+    return cg_context
+
+
+@pytest.fixture
+def downsample_case_name():
+    return "subsonichedgehog"
+
+
+@pytest.fixture
+def downsample_data(
+    downsample_context: CGConfig,
+    downsample_sample_internal_id_1: str,
+    downsample_case_internal_id: str,
+    downsample_case_name: str,
+    number_of_reads_in_millions: int,
+) -> DownsampleData:
+    return DownsampleData(
+        status_db=downsample_context.status_db_,
+        hk_api=downsample_context.housekeeper_api_,
+        sample_id=downsample_sample_internal_id_1,
+        case_id=downsample_case_internal_id,
+        case_name=downsample_case_name,
+        number_of_reads=number_of_reads_in_millions,
+        out_dir=Path(downsample_context.downsample_dir),
+    )
+
+
+@pytest.fixture(scope="function")
+def downsample_api(
+    downsample_context: CGConfig,
+) -> DownsampleAPI:
+    """Return a DownsampleAPI."""
+    return DownsampleAPI(
+        config=downsample_context,
+    )

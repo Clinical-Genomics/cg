@@ -1,0 +1,17 @@
+FROM docker.io/library/python:3.11-slim-bullseye
+
+RUN addgroup --system nonroot \
+    && adduser --system --ingroup nonroot nonroot
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir poetry
+
+COPY pyproject.toml poetry.lock /app/
+
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-dev --no-interaction --no-ansi
+
+COPY . /app/
+
+USER nonroot

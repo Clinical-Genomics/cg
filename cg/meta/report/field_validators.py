@@ -8,14 +8,14 @@ from cg.models.report.report import ReportModel
 
 
 def get_million_read_pairs(reads: int) -> Optional[float]:
-    """Represents the number of sequencing reads as millions of read pairs."""
+    """Return number of sequencing reads as millions of read pairs."""
     return (
         round(reads / SCALE_TO_MILLION_READ_PAIRS, 1) if reads or isinstance(reads, int) else None
     )
 
 
 def get_missing_fields(empty_fields: list, required_fields: list) -> list:
-    """Extracts the missing fields that are required to generate successfully the delivery report."""
+    """Return missing fields that are required to generate successfully the delivery report."""
     missing_fields = list()
     for field in empty_fields:
         if field in required_fields:
@@ -24,7 +24,7 @@ def get_missing_fields(empty_fields: list, required_fields: list) -> list:
 
 
 def get_empty_fields(report_data: dict) -> list:
-    """Returns a list of empty report fields."""
+    """Return list of empty report fields."""
     empty_fields = list()
     for field, value in report_data.items():
         if not value or value == NA_FIELD:
@@ -35,7 +35,7 @@ def get_empty_fields(report_data: dict) -> list:
 
 
 def get_empty_report_data(report_data: ReportModel) -> dict:
-    """Retrieve empty fields from a report data model."""
+    """Return empty fields from a report data model."""
     empty_fields = {
         "report": get_empty_fields(report_data=report_data.model_dump()),
         "customer": get_empty_fields(report_data=report_data.customer.model_dump()),
@@ -73,7 +73,7 @@ def get_empty_report_data(report_data: ReportModel) -> dict:
 
 
 def get_missing_report_data(empty_fields: dict, required_fields: dict) -> dict:
-    """Retrieve the missing required fields from a report data model."""
+    """Return missing required fields from a report data model."""
     nested_sources = ["applications", "samples", "methods", "timestamps", "metadata"]
     missing_fields = dict()
     for source in empty_fields:

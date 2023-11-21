@@ -80,6 +80,10 @@ class DeliveryReportError(CgError):
     """
 
 
+class DownsampleFailedError(CgError):
+    """Exception related to downsampling of samples."""
+
+
 class EmailNotSentError(CgError):
     """Raised when email not sent."""
 
@@ -113,6 +117,12 @@ class HousekeeperFileMissingError(CgError):
 class HousekeeperBundleVersionMissingError(CgError):
     """
     Exception raised when bundle version is missing in Housekeeper.
+    """
+
+
+class HousekeeperArchiveMissingError(CgError):
+    """
+    Exception raised when an archive is missing in Housekeeper.
     """
 
 

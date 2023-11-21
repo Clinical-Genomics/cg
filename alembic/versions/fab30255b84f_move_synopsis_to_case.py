@@ -22,7 +22,7 @@ branch_labels = None
 depends_on = None
 
 
-class Family(Base):
+class Case(Base):
     __tablename__ = "family"
 
     id = sa.Column(sa.types.Integer, primary_key=True)
@@ -62,7 +62,7 @@ class FamilySample(Base):
     mother_id = sa.Column(sa.ForeignKey("sample.id"))
     father_id = sa.Column(sa.ForeignKey("sample.id"))
 
-    family = orm.relationship("Family", backref="links")
+    family = orm.relationship("Case", backref="links")
     sample = orm.relationship("Sample", foreign_keys=[sample_id], backref="links")
     mother = orm.relationship("Sample", foreign_keys=[mother_id], backref="mother_links")
     father = orm.relationship("Sample", foreign_keys=[father_id], backref="father_links")
@@ -122,10 +122,10 @@ def downgrade():
     op.add_column("sample", sa.Column("_cohorts", sa.TEXT))
 
     # copy data from family._synopsis to sample._synopsis
-    for family in session.query(Family).filter(Family._synopsis.isnot(None)):
+    for family in session.query(Case).filter(Case._synopsis.isnot(None)):
         for link in family.links:
             link.sample._synopsis = family._synopsis
-    for family in session.query(Family).filter(Family._cohorts.isnot(None)):
+    for family in session.query(Case).filter(Case._cohorts.isnot(None)):
         for link in family.links:
             link.sample._cohorts = family._cohorts
     session.commit()

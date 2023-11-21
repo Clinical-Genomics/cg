@@ -6,6 +6,7 @@ from typing import List, Optional
 
 import click
 import coloredlogs
+from sqlalchemy.orm import scoped_session
 
 import cg
 from cg.cli.add import add as add_cmd
@@ -15,6 +16,7 @@ from cg.cli.compress.base import compress, decompress
 from cg.cli.delete.base import delete
 from cg.cli.deliver.base import deliver as deliver_cmd
 from cg.cli.demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
+from cg.cli.downsample import downsample
 from cg.cli.generate.base import generate as generate_cmd
 from cg.cli.get import get
 from cg.cli.set.base import set_cmd
@@ -25,10 +27,22 @@ from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.store.database import create_all_tables, drop_all_tables, get_tables
+from cg.store.database import (
+    create_all_tables,
+    drop_all_tables,
+    get_scoped_session_registry,
+    get_tables,
+)
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
+
+
+def teardown_session():
+    """Ensure that the session is closed and all resources are released to the connection pool."""
+    registry: scoped_session | None = get_scoped_session_registry()
+    if registry:
+        registry.remove()
 
 
 @click.group()
@@ -60,6 +74,7 @@ def base(
         else {"database": database}
     )
     context.obj = CGConfig(**raw_config)
+    context.call_on_close(teardown_session)
 
 
 @base.command()
@@ -97,3 +112,4 @@ base.add_command(store_cmd)
 base.add_command(deliver_cmd)
 base.add_command(demultiplex_cmd)
 base.add_command(generate_cmd)
+base.add_command(downsample)

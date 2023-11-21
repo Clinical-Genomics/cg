@@ -1,9 +1,8 @@
 """Loqusdb related constants."""
-from enum import Enum
+from enum import Enum, StrEnum
 
 from cg.constants.constants import Pipeline
 from cg.constants.sequencing import SequencingMethod
-from cg.utils.enums import StrEnum
 
 LOQUSDB_ID = "_id"
 LOQUSDB_SUPPORTED_PIPELINES = [Pipeline.MIP_DNA, Pipeline.BALSAMIC]

@@ -6,7 +6,7 @@ from click.testing import CliRunner
 from cg.cli.upload.base import upload
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 from tests.store_helpers import StoreHelpers
 
 
@@ -38,7 +38,7 @@ def test_upload_force_restart(cli_runner: CliRunner, base_context: CGConfig, hel
 
     # GIVEN an analysis that is already uploading
     disk_store: Store = base_context.status_db
-    case: Family = helpers.add_case(disk_store)
+    case: Case = helpers.add_case(disk_store)
     case_id: str = case.internal_id
 
     helpers.add_analysis(disk_store, case=case, uploading=True)

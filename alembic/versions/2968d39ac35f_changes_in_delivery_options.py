@@ -53,7 +53,7 @@ downgrade_map = {
 }
 
 
-class Family(Base):
+class Case(Base):
     __tablename__ = "family"
     id = Column(types.Integer, primary_key=True)
     data_delivery = Column(types.VARCHAR(64))
@@ -64,7 +64,7 @@ def upgrade():
     op.alter_column("family", "data_delivery", type_=types.VARCHAR(64))
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
-    for case in session.query(Family):
+    for case in session.query(Case):
         if case.data_delivery in removed_options:
             case.data_delivery = update_map[case.data_delivery]
 
@@ -74,7 +74,7 @@ def upgrade():
 def downgrade():
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
-    for case in session.query(Family):
+    for case in session.query(Case):
         if case.data_delivery == "":
             case.data_delivery = None
         if case.data_delivery in added_options:

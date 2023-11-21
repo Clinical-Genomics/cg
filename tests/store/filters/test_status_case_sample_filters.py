@@ -24,7 +24,7 @@ def test_get_samples_in_case_by_internal_id_valid_id(
     assert 0 < filtered_query.count() < case_sample_query.count()
     # THEN the case_samples in the filtered query have the correct case internal id
     for case_sample in filtered_query.all():
-        assert case_sample.family.internal_id == case_id
+        assert case_sample.case.internal_id == case_id
 
 
 def test_get_samples_in_case_by_internal_id_nonexistent_id(

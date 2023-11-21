@@ -31,9 +31,9 @@ class TicketHandler:
         ticket_match = re.fullmatch(r"#([0-9]{6})", name)
         if ticket_match:
             ticket_id = ticket_match.group(1)
-            LOG.info("%s: detected ticket in order name", ticket_id)
+            LOG.info(f"{ticket_id}: detected ticket in order name")
             return ticket_id
-        LOG.info("Could not detected ticket number in name %s", name)
+        LOG.info(f"Could not detected ticket number in name {name}")
         return None
 
     def create_ticket(
@@ -181,7 +181,7 @@ class TicketHandler:
         self, order: OrderIn, user_name: str, user_mail: str, project: str, ticket_number: str
     ) -> None:
         """Appends a new order message to the ticket selected by the customer"""
-        LOG.info("Connecting order to ticket %s", ticket_number)
+        LOG.info(f"Connecting order to ticket {ticket_number}")
         message: str = self.add_existing_ticket_header(
             message=self.create_xml_sample_list(order=order, user_name=user_name),
             order=order,
