@@ -78,7 +78,7 @@
   tag: software-versions
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/vcf_collect/CASEID_fusion_data.vcf
+  path: PATHTOCASE/vcf/CASEID_fusion_data.vcf.gz
   path_index: ~
   step: vcf-collect
   tag: fusion-vcf
