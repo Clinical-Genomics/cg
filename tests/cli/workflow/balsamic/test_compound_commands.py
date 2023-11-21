@@ -181,13 +181,12 @@ def test_store_available(
     assert case_id_success in caplog.text
     assert balsamic_context.status_db.get_case_by_internal_id(case_id_success).action == "running"
 
-    # GIVEN a mocked housekeeper API
+    # GIVEN a mocked Housekeeper API
     balsamic_context.housekeeper_api_ = real_housekeeper_api
     balsamic_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # GIVEN a mocked report deliver command
-    mocker.patch.object(BalsamicAnalysisAPI, "report_deliver")
-    BalsamicAnalysisAPI.report_deliver.return_value = None
+    mocker.patch.object(BalsamicAnalysisAPI, "report_deliver", return_value=None)
 
     # WHEN running command
     result = cli_runner.invoke(store_available, obj=balsamic_context)
