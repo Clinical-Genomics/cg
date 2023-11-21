@@ -134,7 +134,7 @@ class TransferPayload(BaseModel):
             url: URL to which the POST goes to.
             headers: Headers which are set in the request
         Raises:
-            HTTPError if the response status is not okay.
+            HTTPError if the response status is not successful.
             ValidationError if the response does not conform to the expected response structure.
         Returns:
             The job ID of the launched transfer task.
@@ -196,7 +196,7 @@ class GetJobStatusPayload(BaseModel):
         """Sends a get request to the given url with the given headers.
         Returns the parsed status response of the task specified in the URL.
         Raises:
-             HTTPError if the response code is not ok."""
+             HTTPError if the response code is not successful."""
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.GET, url=url, headers=headers, json={}
         )
