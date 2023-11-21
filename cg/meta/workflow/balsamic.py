@@ -7,7 +7,7 @@ from housekeeper.store.models import File, Version
 from pydantic.v1 import ValidationError, EmailStr
 
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat, SampleType, PrepCategory
+from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.indexes import ListIndexes
 from cg.constants.observations import ObservationsFileWildcards

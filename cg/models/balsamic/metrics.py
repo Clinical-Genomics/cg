@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic.v1 import BaseModel, validator
 
 from cg.models.deliverables.metric_deliverables import MetricCondition, MetricsBase
@@ -18,15 +16,15 @@ class BalsamicMetricsBase(MetricsBase):
         condition: balsamic metric validation condition
     """
 
-    condition: Optional[MetricCondition]
+    condition: MetricCondition | None
 
 
 class BalsamicQCMetrics(BaseModel):
     """BALSAMIC common QC metrics"""
 
-    fold_80_base_penalty: Optional[float]
-    mean_insert_size: Optional[float]
-    percent_duplication: Optional[float]
+    fold_80_base_penalty: float | None
+    mean_insert_size: float | None
+    percent_duplication: float | None
 
     _percent_duplication = validator("percent_duplication", allow_reuse=True)(
         percent_value_validation
@@ -36,14 +34,14 @@ class BalsamicQCMetrics(BaseModel):
 class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
     """BALSAMIC targeted QC metrics"""
 
-    mean_target_coverage: Optional[float]
-    median_target_coverage: Optional[float]
-    pct_target_bases_50x: Optional[float]
-    pct_target_bases_100x: Optional[float]
-    pct_target_bases_250x: Optional[float]
-    pct_target_bases_500x: Optional[float]
-    pct_target_bases_1000x: Optional[float]
-    pct_off_bait: Optional[float]
+    mean_target_coverage: float | None
+    median_target_coverage: float | None
+    pct_target_bases_50x: float | None
+    pct_target_bases_100x: float | None
+    pct_target_bases_250x: float | None
+    pct_target_bases_500x: float | None
+    pct_target_bases_1000x: float | None
+    pct_off_bait: float | None
 
     _pct_values = validator(
         "percent_duplication",
@@ -60,11 +58,11 @@ class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
 class BalsamicWGSQCMetrics(BalsamicQCMetrics):
     """BALSAMIC WGS QC metrics"""
 
-    median_coverage: Optional[float]
-    pct_15x: Optional[float]
-    pct_30x: Optional[float]
-    pct_60x: Optional[float]
-    pct_100x: Optional[float]
+    median_coverage: float | None
+    pct_15x: float | None
+    pct_30x: float | None
+    pct_60x: float | None
+    pct_100x: float | None
 
     _pct_values = validator(
         "pct_15x",
