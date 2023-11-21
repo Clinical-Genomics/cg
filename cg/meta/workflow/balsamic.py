@@ -158,6 +158,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return Path(self.get_case_path(case.internal_id), FileFormat.FASTQ)
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
+        """Link fastq files from Housekeeper to Balsamic case working directory."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case.links:
             self.link_fastq_files_for_sample(case_obj=case, sample_obj=link.sample)
