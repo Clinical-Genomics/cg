@@ -28,6 +28,7 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, Pipeline, SequencingFileTag
 from cg.constants.constants import CaseActions, FileFormat, Strandedness
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Gender
@@ -42,10 +43,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
-from cg.models.demultiplex.run_parameters import (
-    RunParametersNovaSeq6000,
-    RunParametersNovaSeqX,
-)
+from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
@@ -1498,6 +1496,7 @@ def hk_bundle_sample_path(sample_id: str, timestamp: datetime) -> Path:
 def hk_bundle_data(
     case_id: str,
     bed_file: Path,
+    delivery_report_html: Path,
     timestamp_yesterday: datetime,
     sample_id: str,
     father_sample_id: str,
@@ -1513,7 +1512,12 @@ def hk_bundle_data(
                 "path": bed_file.as_posix(),
                 "archive": False,
                 "tags": ["bed", sample_id, father_sample_id, mother_sample_id, "coverage"],
-            }
+            },
+            {
+                "path": delivery_report_html.as_posix(),
+                "archive": False,
+                "tags": [HK_DELIVERY_REPORT_TAG],
+            },
         ],
     }
 

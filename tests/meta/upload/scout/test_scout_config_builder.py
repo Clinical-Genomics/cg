@@ -68,20 +68,6 @@ def test_rnafusion_config_builder(
     assert isinstance(file_handler.case_tags, CaseTags)
 
 
-def test_include_delivery_report_mip(mip_config_builder: MipConfigBuilder):
-    """Test include delivery report."""
-    # GIVEN a config builder with data
-
-    # GIVEN a config without a delivery report
-    assert mip_config_builder.load_config.delivery_report is None
-
-    # WHEN including the delivery report
-    mip_config_builder.include_delivery_report()
-
-    # THEN assert that the delivery report was added
-    assert mip_config_builder.load_config.delivery_report is not None
-
-
 def test_include_synopsis(mip_config_builder: MipConfigBuilder):
     """Test include synopsis."""
     # GIVEN a config builder with some data

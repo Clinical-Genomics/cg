@@ -4,11 +4,8 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import PrepCategory
-from cg.constants.scout_upload import (
-    RNAFUSION_CASE_TAGS,
-    RNAFUSION_SAMPLE_TAGS,
-    GenomeBuild,
-)
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.scout_upload import RNAFUSION_CASE_TAGS, RNAFUSION_SAMPLE_TAGS, GenomeBuild
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.models.scout.scout_load_config import RnafusionLoadConfig, ScoutCancerIndividual
@@ -26,7 +23,9 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         )
         self.case_tags: CaseTags = CaseTags(**RNAFUSION_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**RNAFUSION_SAMPLE_TAGS)
-        self.load_config: RnafusionLoadConfig = RnafusionLoadConfig(track="cancer")
+        self.load_config: RnafusionLoadConfig = RnafusionLoadConfig(
+            track="cancer", delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG})
+        )
 
     def build_load_config(self) -> None:
         """Build a rnafusion-specific load config for uploading a case to scout."""

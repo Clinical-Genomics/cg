@@ -7,11 +7,13 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.models.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
 from cg.store.models import Analysis, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
+
 
 # Maps keys that are used in scout load config on tags that are used in scout
 
@@ -25,7 +27,9 @@ class ScoutConfigBuilder:
         self.lims_api: LimsAPI = lims_api
         self.case_tags: CaseTags
         self.sample_tags: SampleTags
-        self.load_config: ScoutLoadConfig = ScoutLoadConfig()
+        self.load_config: ScoutLoadConfig = ScoutLoadConfig(
+            delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG})
+        )
 
     def add_common_info_to_load_config(self) -> None:
         """Add the mandatory common information to a scout load config object"""
@@ -137,12 +141,6 @@ class ScoutConfigBuilder:
         LOG.info("Include MultiQC report to case")
         self.load_config.multiqc = self.get_file_from_hk(
             hk_tags=self.case_tags.multiqc_report, latest=True
-        )
-
-    def include_delivery_report(self) -> None:
-        LOG.info("Include delivery report to case")
-        self.load_config.delivery_report = self.get_file_from_hk(
-            hk_tags=self.case_tags.delivery_report, latest=True
         )
 
     def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
