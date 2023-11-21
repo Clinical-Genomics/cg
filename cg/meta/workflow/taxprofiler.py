@@ -128,6 +128,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         metrics = self.get_multiqc_json_metrics(
             case_id=case_id, pipeline_metrics=TAXPROFILER_METRIC_CONDITIONS
         )
+        LOG.info ("Metrics " + metrics)
 
         if dry_run:
             LOG.info(
