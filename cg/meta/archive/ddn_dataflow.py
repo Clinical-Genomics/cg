@@ -192,7 +192,7 @@ class GetJobStatusPayload(BaseModel):
 
     id: int
 
-    def get_status(self, url: str, headers: dict) -> GetJobStatusResponse:
+    def get_job_status(self, url: str, headers: dict) -> GetJobStatusResponse:
         """Sends a get request to the given url with the given headers.
         Returns the parsed status response of the task specified in the URL.
         Raises:
@@ -330,7 +330,7 @@ class DDNDataFlowClient(ArchiveHandler):
 
     def is_job_done(self, job_id: int) -> bool:
         get_job_status_payload = GetJobStatusPayload(id=job_id)
-        get_job_status_response: GetJobStatusResponse = get_job_status_payload.get_status(
+        get_job_status_response: GetJobStatusResponse = get_job_status_payload.get_job_status(
             url=urljoin(self.url, DataflowEndpoints.GET_JOB_STATUS + str(job_id)),
             headers=dict(self.headers, **self.auth_header),
         )

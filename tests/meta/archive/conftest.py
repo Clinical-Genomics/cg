@@ -44,13 +44,13 @@ def ddn_dataflow_config(
 
 
 @pytest.fixture
-def ok_ddn_response(ok_response: Response):
+def ok_miria_response(ok_response: Response):
     ok_response._content = b'{"jobId": "123"}'
     return ok_response
 
 
 @pytest.fixture
-def ok_ddn_job_status_response(ok_response: Response):
+def ok_miria_job_status_response(ok_response: Response):
     ok_response._content = b'{"jobId": "123", "status": "Completed"}'
     return ok_response
 
@@ -103,7 +103,7 @@ def header_with_test_auth_token() -> dict:
 
 
 @pytest.fixture
-def ddn_auth_token_response(ok_response: Response):
+def miria_auth_token_response(ok_response: Response):
     ok_response._content = b'{"access": "test_auth_token", "expire":15, "test_refresh_token":""}'
     return ok_response
 

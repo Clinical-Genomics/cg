@@ -179,7 +179,7 @@ def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAP
 def test_archive_all_non_archived_spring_files(
     spring_archive_api: SpringArchiveAPI,
     caplog,
-    ok_ddn_response,
+    ok_miria_response,
     archive_request_json,
     header_with_test_auth_token,
     test_auth_token: AuthToken,
@@ -196,7 +196,7 @@ def test_archive_all_non_archived_spring_files(
     ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_response,
+        return_value=ok_miria_response,
     ) as mock_request_submitter:
         spring_archive_api.archive_all_non_archived_spring_files()
 
@@ -227,7 +227,7 @@ def test_archive_all_non_archived_spring_files(
 def test_get_archival_status(
     spring_archive_api: SpringArchiveAPI,
     caplog,
-    ok_ddn_job_status_response,
+    ok_miria_job_status_response,
     archive_request_json,
     header_with_test_auth_token,
     test_auth_token: AuthToken,
@@ -247,10 +247,10 @@ def test_get_archival_status(
     ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_job_status_response,
+        return_value=ok_miria_job_status_response,
     ), mock.patch.object(
         GetJobStatusPayload,
-        "get_status",
+        "get_job_status",
         return_value=GetJobStatusResponse(job_id=archival_job_id, status=job_status),
     ):
         spring_archive_api.update_ongoing_task(
@@ -270,7 +270,7 @@ def test_get_archival_status(
 def test_get_retrieval_status(
     spring_archive_api: SpringArchiveAPI,
     caplog,
-    ok_ddn_job_status_response,
+    ok_miria_job_status_response,
     archive_request_json,
     header_with_test_auth_token,
     retrieval_job_id: int,
@@ -293,10 +293,10 @@ def test_get_retrieval_status(
     ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_job_status_response,
+        return_value=ok_miria_job_status_response,
     ), mock.patch.object(
         GetJobStatusPayload,
-        "get_status",
+        "get_job_status",
         return_value=GetJobStatusResponse(job_id=retrieval_job_id, status=job_status),
     ):
         spring_archive_api.update_ongoing_task(
@@ -312,7 +312,7 @@ def test_get_retrieval_status(
 def test_retrieve_samples(
     spring_archive_api: SpringArchiveAPI,
     caplog,
-    ok_ddn_response,
+    ok_miria_response,
     trimmed_local_path,
     local_storage_repository,
     retrieve_request_json,
@@ -342,7 +342,7 @@ def test_retrieve_samples(
     ), mock.patch.object(MiriaObject, "trim_path", return_value=True), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_response,
+        return_value=ok_miria_response,
     ) as mock_request_submitter:
         spring_archive_api.retrieve_samples([sample_with_spring_file])
 

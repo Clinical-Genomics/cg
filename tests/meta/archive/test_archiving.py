@@ -272,7 +272,7 @@ def test_archive_folders(
     local_storage_repository: str,
     file_and_sample: FileAndSample,
     trimmed_local_path: str,
-    ok_ddn_response: Response,
+    ok_miria_response,
 ):
     """Tests that the archiving function correctly formats the input and sends API request."""
 
@@ -281,7 +281,7 @@ def test_archive_folders(
     with mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_response,
+        return_value=ok_miria_response,
     ) as mock_request_submitter:
         job_id: int = ddn_dataflow_client.archive_files([file_and_sample])
 
@@ -315,7 +315,7 @@ def test_retrieve_samples(
     archive_store: Store,
     trimmed_local_path: str,
     sample_id: str,
-    ok_ddn_response: Response,
+    ok_miria_response,
 ):
     """Tests that the retrieve function correctly formats the input and sends API request."""
 
@@ -328,7 +328,7 @@ def test_retrieve_samples(
 
     # WHEN running the retrieve method and providing a SampleAndDestination object
     with mock.patch.object(
-        APIRequest, "api_request_from_content", return_value=ok_ddn_response
+        APIRequest, "api_request_from_content", return_value=ok_miria_response
     ) as mock_request_submitter:
         job_id: int = ddn_dataflow_client.retrieve_samples([sample_and_destination])
 
