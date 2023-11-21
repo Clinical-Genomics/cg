@@ -81,7 +81,7 @@ def test_config_case_dry_run(
     # WHEN performing a dry-run
     result = cli_runner.invoke(config_case, [taxprofiler_case_id, "-d"], obj=taxprofiler_context)
 
-    # THEN command should should exit succesfully
+    # THEN command should exit succesfully
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN sample sheet and parameters information should be collected

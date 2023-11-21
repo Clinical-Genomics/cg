@@ -16,6 +16,18 @@ from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.utils import Process
+from cg.models.deliverables.metric_deliverables import (
+    MetricsBase,
+    MultiqcDataJson,
+)
+from cg.store.models import Case
+from cg.io.json import read_json
+from cg.io.controller import ReadFile, WriteFile
+from cg.models.deliverables.metric_deliverables import (
+    MetricsDeliverablesCondition,
+)
+from cg.exc import CgError, MetricsQCError
+from cg.constants.tb import AnalysisStatus
 
 LOG = logging.getLogger(__name__)
 
@@ -280,3 +292,56 @@ class NfAnalysisAPI(AnalysisAPI):
                 )
             files.append(FileDeliverable(**file))
         return PipelineDeliverables(files=files)
+
+    def get_multiqc_json_path(self, case_id: str) -> Path:
+        """Return the path of the multiqc_data.json file."""
+        return Path(self.root_dir, case_id, "multiqc", "multiqc_data", "multiqc_data.json")
+
+    def get_multiqc_json_metrics(self, case_id: str, pipeline_metrics: Optional[dict] = None) -> list[MetricsBase]:
+        """Get a multiqc_data.json file and returns metrics and values formatted."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        sample_id: str = case.links[0].sample.internal_id
+        multiqc_json: MultiqcDataJson = MultiqcDataJson(
+            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
+        )
+        metrics_values: dict = {}
+        for key in multiqc_json.report_general_stats_data:
+            if case_id in key:
+                metrics_values.update(list(key.values())[0])
+        return [
+            MetricsBase(
+                header=None,
+                id=sample_id,
+                input="multiqc_data.json",
+                name=metric_name,
+                step="multiqc",
+                value=metric_value,
+                condition=pipeline_metrics.get(metric_name, None),
+            )
+            for metric_name, metric_value in metrics_values.items()
+        ]
+
+    def validate_qc_metrics(self, case_id: str, dry_run: bool = False) -> None:
+        """Validate the information from a qc metrics deliverable file."""
+
+        if dry_run:
+            LOG.info("Dry-run: QC metrics validation would be performed")
+            return
+
+        LOG.info("Validating QC metrics")
+        try:
+            metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
+            qc_metrics_raw: dict = ReadFile.get_content_from_file(
+                file_format=FileFormat.YAML, file_path=metrics_deliverables_path
+            )
+            MetricsDeliverablesCondition(**qc_metrics_raw)
+        except MetricsQCError as error:
+            LOG.error(f"QC metrics failed for {case_id}")
+            self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
+            self.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
+            raise MetricsQCError from error
+        except CgError as error:
+            LOG.error(f"Could not create metrics deliverables file: {error}")
+            self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.ERROR)
+            raise CgError from error
+        self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)

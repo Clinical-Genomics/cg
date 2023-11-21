@@ -13,6 +13,9 @@ from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerSampleSheetEntry,
 )
 from cg.store.models import Case, Sample
+from cg.io.controller import ReadFile, WriteFile
+from cg.constants.constants import FileFormat
+from cg.constants.metric_conditions import TAXPROFILER_METRIC_CONDITIONS
 
 LOG = logging.getLogger(__name__)
 
@@ -118,3 +121,21 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             header=TaxprofilerSampleSheetEntry.headers(),
         )
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
+
+    def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
+        """Write <case>_metrics_deliverables.yaml file."""
+        metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
+        metrics = self.get_multiqc_json_metrics(case_id=case_id, pipeline_metrics=TAXPROFILER_METRIC_CONDITIONS)
+
+        if dry_run:
+            LOG.info(
+                f"Dry-run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
+            )
+            return
+
+        LOG.info(f"Writing metrics deliverables file to {metrics_deliverables_path.as_posix()}")
+        WriteFile.write_file_from_content(
+            content={"metrics": [metric.dict() for metric in metrics]},
+            file_format=FileFormat.YAML,
+            file_path=metrics_deliverables_path,
+        )

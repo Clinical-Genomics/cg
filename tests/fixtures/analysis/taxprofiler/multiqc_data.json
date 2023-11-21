@@ -1,0 +1,82 @@
+{
+    "report_data_sources": {},
+    "report_general_stats_data": [
+        {"taxprofiler_case": {"percent_gc": 42.0, "avg_sequence_length": 151.0, "median_sequence_length": 151}},
+        {
+            "taxprofiler_case": {
+                "filtering_result_passed_filter_reads": 24852660.0,
+                "filtering_result_low_quality_reads": 372156.0,
+                "filtering_result_too_many_N_reads": 154.0,
+                "filtering_result_too_short_reads": 9578.0,
+                "filtering_result_too_long_reads": 0.0,
+                "pct_duplication": 7.334789999999999,
+                "after_filtering_total_reads": 24852660.0,
+                "after_filtering_total_bases": 3735816318.0,
+                "after_filtering_q20_bases": 3629460903.0,
+                "after_filtering_q30_bases": 3443616589.0,
+                "after_filtering_q20_rate": 0.971531,
+                "after_filtering_q30_rate": 0.921784,
+                "after_filtering_read1_mean_length": 150.0,
+                "after_filtering_read2_mean_length": 150.0,
+                "after_filtering_gc_content": 0.420932,
+                "before_filtering_total_reads": 25234548.0,
+                "pct_surviving": 98.48664616461528,
+                "adapter_cutting_adapter_trimmed_reads": 249076.0,
+                "adapter_cutting_adapter_trimmed_bases": 16162359.0,
+                "pct_adapter": 0.9870436355745307
+            }
+        },
+        {
+            "taxprofiler_case": {
+                "total_reads": 11730624,
+                "paired_total": 11730624,
+                "paired_aligned_none": 1382406,
+                "paired_aligned_one": 8487306,
+                "paired_aligned_multi": 1860912,
+                "paired_aligned_discord_one": 676525,
+                "paired_aligned_mate_none": 567931,
+                "paired_aligned_mate_one": 359805,
+                "paired_aligned_mate_multi": 484026,
+                "overall_alignment_rate": 97.58,
+                "paired_aligned_mate_multi_halved": 242013.0,
+                "paired_aligned_mate_none_halved": 283965.5,
+                "paired_aligned_mate_one_halved": 179902.5
+            }
+        },
+        {
+            "taxprofiler_case_1": {
+                "Input reads": 24810472,
+                "Input bases": 3729762485,
+                "Low entropy discards reads": 10362,
+                "Low entropy discards reads percent": 0.04,
+                "Low entropy discards bases": 1507893,
+                "Low entropy discards bases percent": 0.04,
+                "Total Removed reads": 10362,
+                "Total Removed reads percent": 0.04,
+                "Total Removed bases": 1507893,
+                "Total Removed bases percent": 0.04,
+                "Result reads": 24800110,
+                "Result reads percent": 99.96,
+                "Result bases": 3728254592,
+                "Result bases percent": 99.96
+        },
+            "taxprofiler_case_2": {
+                "Input reads": 23581080,
+                "Input bases": 3547722769,
+                "Low entropy discards reads": 12282,
+                "Low entropy discards reads percent": 0.05,
+                "Low entropy discards bases": 1813848,
+                "Low entropy discards bases percent": 0.05,
+                "Total Removed reads": 12282,
+                "Total Removed reads percent": 0.05,
+                "Total Removed bases": 1813848,
+                "Total Removed bases percent": 0.05,
+                "Result reads": 23568798,
+                "Result reads percent": 99.95,
+                "Result bases": 3545908921,
+                "Result bases percent": 99.95
+            }
+            }
+    ],
+    "report_general_stats_headers": []
+}

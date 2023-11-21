@@ -210,3 +210,26 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
+
+
+@taxprofiler.command("metrics-deliver")
+@ARGUMENT_CASE_ID
+@DRY_RUN
+@click.pass_obj
+def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Create and validate a metrics deliverables file for given case id.
+    If QC metrics are met it sets the status in Trailblazer to complete.
+    If failed, it sets it as failed and adds a comment with information of the failed metrics."""
+
+    analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+
+    try:
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
+    except CgError as error:
+        raise click.Abort() from error
+
+    analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
+    try:
+        analysis_api.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
+    except CgError as error:
+        raise click.Abort() from error
