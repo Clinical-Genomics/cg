@@ -4,13 +4,14 @@ from pathlib import Path
 from typing import Optional, Union
 
 from housekeeper.store.models import File, Version
-from pydantic.v1 import ValidationError
+from pydantic.v1 import ValidationError, EmailStr
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, SampleType, PrepCategory
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.indexes import ListIndexes
 from cg.constants.observations import ObservationsFileWildcards
+from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Gender
 from cg.exc import BalsamicStartError, CgError
@@ -44,23 +45,23 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         pipeline: Pipeline = Pipeline.BALSAMIC,
     ):
         super().__init__(config=config, pipeline=pipeline)
-        self.account = config.balsamic.slurm.account
-        self.binary_path = config.balsamic.binary_path
-        self.balsamic_cache = config.balsamic.balsamic_cache
-        self.conda_binary = config.balsamic.conda_binary
-        self.conda_env = config.balsamic.conda_env
-        self.bed_path = config.balsamic.bed_path
-        self.cadd_path = config.balsamic.cadd_path
-        self.genome_interval_path = config.balsamic.genome_interval_path
-        self.gnomad_af5_path = config.balsamic.gnomad_af5_path
-        self.gens_coverage_female_path = config.balsamic.gens_coverage_female_path
-        self.gens_coverage_male_path = config.balsamic.gens_coverage_male_path
-        self.email = config.balsamic.slurm.mail_user
-        self.loqusdb_path = config.balsamic.loqusdb_path
-        self.pon_path = config.balsamic.pon_path
-        self.qos = config.balsamic.slurm.qos
-        self.root_dir = config.balsamic.root
-        self.swegen_path = config.balsamic.swegen_path
+        self.account: str = config.balsamic.slurm.account
+        self.binary_path: str = config.balsamic.binary_path
+        self.balsamic_cache: str = config.balsamic.balsamic_cache
+        self.conda_binary: str = config.balsamic.conda_binary
+        self.conda_env: str = config.balsamic.conda_env
+        self.bed_path: str = config.balsamic.bed_path
+        self.cadd_path: str = config.balsamic.cadd_path
+        self.genome_interval_path: str = config.balsamic.genome_interval_path
+        self.gnomad_af5_path: str = config.balsamic.gnomad_af5_path
+        self.gens_coverage_female_path: str = config.balsamic.gens_coverage_female_path
+        self.gens_coverage_male_path: str = config.balsamic.gens_coverage_male_path
+        self.email: EmailStr = config.balsamic.slurm.mail_user
+        self.loqusdb_path: str = config.balsamic.loqusdb_path
+        self.pon_path: str = config.balsamic.pon_path
+        self.qos: SlurmQos = config.balsamic.slurm.qos
+        self.root_dir: str = config.balsamic.root
+        self.swegen_path: str = config.balsamic.swegen_path
 
     @property
     def root(self) -> str:
