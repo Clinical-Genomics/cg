@@ -19,7 +19,9 @@ def test_parse_analysis(
 
     # GIVEN a Rnafusion analysis API and a list of QC metrics
     analysis_api: RnafusionAnalysisAPI = rnafusion_context.meta_apis["analysis_api"]
-    qc_metrics: list[MetricsBase] = analysis_api.get_multiqc_json_metrics(case_id=rnafusion_case_id, pipeline_metrics=rnafusion_multiqc_json_metrics)
+    qc_metrics: list[MetricsBase] = analysis_api.get_multiqc_json_metrics(
+        case_id=rnafusion_case_id, pipeline_metrics=rnafusion_multiqc_json_metrics
+    )
 
     # WHEN extracting the analysis model
     analysis_model: RnafusionAnalysis = analysis_api.parse_analysis(qc_metrics_raw=qc_metrics)

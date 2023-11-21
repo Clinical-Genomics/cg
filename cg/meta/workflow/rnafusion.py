@@ -166,7 +166,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
         """Write <case>_metrics_deliverables.yaml file."""
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-        metrics = self.get_multiqc_json_metrics(case_id=case_id, pipeline_metrics=RNAFUSION_METRIC_CONDITIONS)
+        metrics = self.get_multiqc_json_metrics(
+            case_id=case_id, pipeline_metrics=RNAFUSION_METRIC_CONDITIONS
+        )
         self.ensure_mandatory_metrics_present(metrics=metrics)
 
         if dry_run:
@@ -195,5 +197,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_latest_metadata(self, case_id: str) -> RnafusionAnalysis:
         """Return the latest metadata of a specific Rnafusion case."""
-        qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id, RNAFUSION_METRIC_CONDITIONS)
+        qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(
+            case_id, RNAFUSION_METRIC_CONDITIONS
+        )
         return self.parse_analysis(qc_metrics_raw=qc_metrics)

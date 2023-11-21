@@ -125,7 +125,9 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
         """Write <case>_metrics_deliverables.yaml file."""
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-        metrics = self.get_multiqc_json_metrics(case_id=case_id, pipeline_metrics=TAXPROFILER_METRIC_CONDITIONS)
+        metrics = self.get_multiqc_json_metrics(
+            case_id=case_id, pipeline_metrics=TAXPROFILER_METRIC_CONDITIONS
+        )
 
         if dry_run:
             LOG.info(

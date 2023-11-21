@@ -3117,10 +3117,15 @@ def taxprofiler_context(
 
 @pytest.fixture(scope="function")
 def taxprofiler_mock_analysis_finish(
-    taxprofiler_dir: Path, taxprofiler_case_id: str, taxprofiler_multiqc_json_metrics: dict, tower_id: int
+    taxprofiler_dir: Path,
+    taxprofiler_case_id: str,
+    taxprofiler_multiqc_json_metrics: dict,
+    tower_id: int,
 ) -> None:
     """Create analysis_finish file for testing."""
-    Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info"), parents=True, exist_ok=True)
+    Path.mkdir(
+        Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info"), parents=True, exist_ok=True
+    )
     Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info", "software_versions.yml").touch(
         exist_ok=True
     )
