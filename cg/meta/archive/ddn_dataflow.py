@@ -193,7 +193,7 @@ class GetJobStatusPayload(BaseModel):
     id: int
 
     def get_job_status(self, url: str, headers: dict) -> GetJobStatusResponse:
-        """Sends a get request to the given url with the given headers.
+        """Sends a get request to the given URL with the given headers.
         Returns the parsed status response of the task specified in the URL.
         Raises:
              HTTPError if the response code is not successful."""
