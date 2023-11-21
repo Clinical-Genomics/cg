@@ -2272,6 +2272,7 @@ def context_config(
             "destination_path": "server.name.se:/some",
             "mail_user": email_address,
         },
+        "data_input": {"input_dir_path": str(cg_dir)},
         "demultiplex": {
             "run_dir": "tests/fixtures/apps/demultiplexing/flow_cells/nova_seq_6000",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",

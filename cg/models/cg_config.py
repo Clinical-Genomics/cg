@@ -53,6 +53,10 @@ class PDCArchivingDirectory(BaseModel):
     pre_nas: str
 
 
+class DataInput(BaseModel):
+    input_dir_path: str
+
+
 class BackupConfig(BaseModel):
     pdc_archiving_directory: PDCArchivingDirectory
     slurm_flow_cell_encryption: SlurmConfig
@@ -253,6 +257,7 @@ class CGConfig(BaseModel):
     chanjo_api_: ChanjoAPI = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
+    data_input: DataInput = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
     data_flow_config: Optional[DataFlowConfig] = None
     demultiplex: DemultiplexConfig = None
