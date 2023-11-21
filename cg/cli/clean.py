@@ -262,6 +262,7 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
         Path(context.data_input.input_dir_path),
         Path(context.flow_cells_dir),
         Path(context.demultiplexed_flow_cells_dir),
+        Path(context.encryption.encryption_dir),
     ]:
         directories_to_check.extend(get_directories_in_path(path))
     exit_code = EXIT_SUCCESS
