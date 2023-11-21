@@ -28,7 +28,7 @@ class BalsamicConfigAnalysis(BaseModel):
 
 
 class BalsamicConfigSample(BaseModel):
-    """Sample attributes used for BALSAMIC analysis
+    """Sample attributes used for Balsamic analysis.
 
     Attributes:
         type (str): sample type (tumor or normal)
@@ -40,7 +40,7 @@ class BalsamicConfigSample(BaseModel):
 
 
 class BalsamicConfigReference(BaseModel):
-    """Metadata of reference files
+    """Metadata of reference files.
 
     Attributes:
         reference_genome: reference genome fasta file
@@ -53,7 +53,7 @@ class BalsamicConfigReference(BaseModel):
     @validator("reference_genome_version", always=True)
     def extract_genome_version_from_path(cls, value: Optional[str], values: dict) -> str:
         """
-        Returns the genome version from the reference path:
+        Return the genome version from the reference path:
         /home/proj/stage/cancer/balsamic_cache/X.X.X/hg19/genome/human_g1k_v37.fasta
         """
 
@@ -61,7 +61,7 @@ class BalsamicConfigReference(BaseModel):
 
 
 class BalsamicConfigPanel(BaseModel):
-    """Balsamic attributes of a panel BED file
+    """Balsamic attributes of a panel BED file.
 
     Attributes:
         capture_kit: string representation of a panel BED filename
@@ -87,7 +87,7 @@ class BalsamicConfigPanel(BaseModel):
 
 
 class BalsamicConfigQC(BaseModel):
-    """Config QC attributes
+    """Config QC attributes.
 
     Attributes:
         picard_rmdup: if the duplicates has been removed or not
@@ -109,7 +109,7 @@ class BalsamicConfigQC(BaseModel):
 
 
 class BalsamicVarCaller(BaseModel):
-    """Variant caller attributes model
+    """Variant caller attributes model.
 
     Attributes:
         mutation: if it addresses somatic or germline mutations
@@ -127,7 +127,7 @@ class BalsamicVarCaller(BaseModel):
 
 
 class BalsamicConfigJSON(BaseModel):
-    """Model for BALSAMIC analysis config validation
+    """Model for BALSAMIC analysis config validation.
 
     Attributes:
         analysis: config analysis attributes
