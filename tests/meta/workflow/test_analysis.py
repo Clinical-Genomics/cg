@@ -379,7 +379,7 @@ def test_prepare_fastq_files_request_miria(
 def test_prepare_fastq_files_does_not_request_miria(
     mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, helpers: StoreHelpers
 ):
-    """Tests that samples' input files are not requested via DDN for a Clinical customer, if no files are archived."""
+    """Tests that samples' input files are not requested via Miria for a Clinical customer, if no files are archived."""
 
     # GIVEN a case belonging to a non-PDC customer
 
