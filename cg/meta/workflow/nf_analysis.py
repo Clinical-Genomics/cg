@@ -4,6 +4,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
+from cg.store.models import Sample
+
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
 from cg.constants.nextflow import NFX_WORK_DIR
@@ -269,12 +271,14 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_deliverables_for_case(self, case_id: str) -> PipelineDeliverables:
         """Return PipelineDeliverables for a given case."""
         deliverable_template: list[dict] = self.get_deliverables_template_content()
+        sample_id: str = self.status_db.get_samples_by_case_id(case_id).pop().internal_id
         files: list[FileDeliverable] = []
         for file in deliverable_template:
             for deliverable_field, deliverable_value in file.items():
                 if deliverable_value is None:
                     continue
                 file[deliverable_field] = file[deliverable_field].replace("CASEID", case_id)
+                file[deliverable_field] = file[deliverable_field].replace("SAMPLEID", sample_id)
                 file[deliverable_field] = file[deliverable_field].replace(
                     "PATHTOCASE", str(self.get_case_path(case_id=case_id))
                 )

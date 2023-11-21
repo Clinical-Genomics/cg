@@ -67,10 +67,9 @@ class ScoutConfigBuilder:
         case_sample: CaseSample,
     ) -> None:
         """Add common sample files for different analysis types."""
-        sample_id: str = case_sample.sample.internal_id
-        LOG.info(f"Adding common files for sample {sample_id}")
-        self.include_sample_alignment_file(config_sample=config_sample)
-        self.include_sample_files(config_sample=config_sample)
+        LOG.info(f"Adding common files for sample {case_sample.sample.internal_id}")
+        self.include_sample_alignment_file(config_sample)
+        self.include_sample_files(config_sample)
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutIndividual:
         """Build a sample for the scout load config"""
@@ -80,9 +79,9 @@ class ScoutConfigBuilder:
         """Build a load config for uploading a case to scout"""
         raise NotImplementedError
 
-    def include_sample_files(self, config_sample: ScoutIndividual) -> None:
+    def include_sample_files(self, _config_sample: ScoutIndividual) -> None:
         """Include all files that are used on sample level in Scout"""
-        raise NotImplementedError
+        return None
 
     def include_case_files(self) -> None:
         """Include all files that are used on case level in scout"""
