@@ -28,6 +28,12 @@
   path_index: ~
   step: star-fusion
   tag: star-fusion-cram
+- format: cram
+  id: SAMPLEID
+  path: PATHTOCASE/cram_starfusion/CASEID.star_for_starfusion.Aligned.sortedByCoord.out.cram.crai
+  path_index: ~
+  step: star-fusion
+  tag: star-fusion-cram-index
 - format: html
   id: CASEID
   path: PATHTOCASE/fusionreport/CASEID/CASEID_fusionreport_index.html
