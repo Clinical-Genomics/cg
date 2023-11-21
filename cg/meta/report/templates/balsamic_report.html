@@ -170,15 +170,17 @@
                 <th>Läspar [M]</th>
                 <th>Mediantäckning [baser]</th>
               {% if "helgenomsekvensering" in case.data_analysis.type %}
-                  {% if "normal" in case.data_analysis.type %}
-                    <th>Täckningsgrad 15x [%]</th>
-                    <th>Täckningsgrad 60x [%]</th>
-                  {% else %}
-                    <th>Täckningsgrad 60x [%]</th>
-                  {% endif %}
+                {% if "normal" in case.data_analysis.type %}
+                  <th>Täckningsgrad 15x [%]</th>
+                  <th>Täckningsgrad 60x [%]</th>
+                {% else %}
+                  <th>Täckningsgrad 60x [%]</th>
+                {% endif %}
+                <th>Läsningar med felaktiga par [%]</th>
               {% else %}
                 <th>Täckningsgrad 250x [%]</th>
                 <th>Täckningsgrad 500x [%]</th>
+                <th>GC Dropout [%]</th>
               {% endif %}
                 <th>Duplikat [%]</th>
                 <th>Medelfragmentlängd [baspar]</th>
@@ -198,10 +200,12 @@
                     {% else %}
                       <td>{{ sample.metadata.pct_60x }}</td>
                     {% endif %}
+                    <td>{{ sample.metadata.pct_reads_improper_pairs }}</td>
                   {% else %}
                     <td>{{ sample.metadata.median_target_coverage }}</td>
                     <td>{{ sample.metadata.pct_250x }}</td>
                     <td>{{ sample.metadata.pct_500x }}</td>
+                    <td>{{ sample.metadata.gc_dropout }}</td>
                   {% endif %}
                   <td>{{ sample.metadata.duplicates }}</td>
                   <td>{{ sample.metadata.mean_insert_size }}</td>
@@ -217,6 +221,11 @@
               <ins>Duplikat</ins>: Sekvenseringsläsningar som är i duplikat och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserad bibliotek eller djup sekvensering.<br>
               <ins>Medelfragmentlängd</ins>: Medelstorlek av provbiblioteken som laddats på sekvenseringsinstrument. <200bp kan tyda på degraderade provmaterial (t.ex. FFPE), innan biblioteksberedning.<br>
               <ins>Fold 80 base penalty</ins>: Jämnhet av täckningsgraden över alla gener i analyspanlen. Ett värde mellan 1.0-1.8 visar god jämnhet.<br>
+              {% if "helgenomsekvensering" in case.data_analysis.type %}
+                <ins>Läsningar med felaktiga par</ins>: Andelen (primära) läsningar som inte är korrekt parvis justerade.<br>
+              {% else %}
+                <ins>GC dropout</ins>: Ett mått på hur dåligt täckta områden, med >= 50% GC innehåll, är i jämförelse med medelvärdet. Om värdet är 5%, innebär det att 5% av alla läsningar som borde ha kartlagts till områden med GC<=50%, kartlades någon annanstans.<br>
+              {% endif %}
               <br>
               Värdena presenterade för <ins>Täckningsgrad</ins> och <ins>Mediantäckning</ins> är efter borttagning av duplikata läsningar.
             </caption>

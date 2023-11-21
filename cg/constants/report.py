@@ -151,6 +151,7 @@ REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS: list[
     "median_target_coverage",
     "pct_250x",
     "pct_500x",
+    "gc_dropout",
 ]
 
 REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS: list[
@@ -158,6 +159,7 @@ REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS: list[
 ] = _REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS + [
     "median_coverage",
     "pct_60x",
+    "pct_reads_improper_pairs",
 ]
 
 REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS: list[
