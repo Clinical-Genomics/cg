@@ -483,11 +483,12 @@ class AnalysisAPI(MetaAPI):
             self.status_db.request_flow_cells_for_case(case_id)
 
     def is_case_ready_for_analysis(self, case_id: str) -> bool:
-        if self._is_flow_cell_check_applicable(
-            case_id
-        ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
-            LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
-            return False
+        # TODO: Uncomment before merging
+        # if self._is_flow_cell_check_applicable(
+        #     case_id
+        # ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
+        #     LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
+        #     return False
         if self.prepare_fastq_api.is_spring_decompression_needed(
             case_id
         ) or self.prepare_fastq_api.is_spring_decompression_running(case_id):
