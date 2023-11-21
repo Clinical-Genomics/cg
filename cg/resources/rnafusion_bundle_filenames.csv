@@ -70,6 +70,12 @@
   path_index: ~
   step: software-versions
   tag: software-versions
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/vcf_collect/CASEID_fusion_data.vcf
+  path_index: ~
+  step: vcf-collect
+  tag: fusion-vcf
 - format: json
   id: CASEID
   path: PATHTOCASE/multiqc/multiqc_data/multiqc_data.json

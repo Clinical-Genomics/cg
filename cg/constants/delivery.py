@@ -2,19 +2,19 @@
 
 from cg.constants.constants import Pipeline
 
-ONLY_ONE_CASE_PER_TICKET = [
+ONLY_ONE_CASE_PER_TICKET: list[Pipeline] = [
     Pipeline.FASTQ,
     Pipeline.MICROSALT,
     Pipeline.SARS_COV_2,
 ]
 
-SKIP_MISSING = [
+SKIP_MISSING: list[Pipeline] = [
     Pipeline.FASTQ,
     Pipeline.MICROSALT,
     Pipeline.SARS_COV_2,
 ]
 
-BALSAMIC_ANALYSIS_CASE_TAGS = [
+BALSAMIC_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"delivery-report"},
     {"multiqc-html"},
     {"metrics"},
@@ -36,21 +36,22 @@ BALSAMIC_ANALYSIS_CASE_TAGS = [
     {"vcf2cytosure"},
 ]
 
-BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
+BALSAMIC_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"cram"},
     {"cram-index"},
 ]
 
-BALSAMIC_QC_ANALYSIS_CASE_TAGS = [
+BALSAMIC_QC_ANALYSIS_CASE_TAGS: list[set[str]] = [
+    {"delivery-report"},
     {"multiqc-html"},
 ]
 
-BALSAMIC_QC_ANALYSIS_SAMPLE_TAGS = [
+BALSAMIC_QC_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"qc-cram"},
     {"qc-cram-index"},
 ]
 
-BALSAMIC_UMI_ANALYSIS_CASE_TAGS = [
+BALSAMIC_UMI_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"vcf-umi-snv"},
     {"vcf-umi-snv-index"},
     {"vcf-umi-snv-research"},
@@ -61,7 +62,7 @@ BALSAMIC_UMI_ANALYSIS_CASE_TAGS = [
 
 BALSAMIC_UMI_ANALYSIS_CASE_TAGS.extend(BALSAMIC_ANALYSIS_CASE_TAGS)
 
-BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS = [
+BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"umi-cram"},
     {"umi-cram-index"},
 ]
@@ -69,7 +70,7 @@ BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS = [
 BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS.extend(BALSAMIC_ANALYSIS_SAMPLE_TAGS)
 
 
-MIP_DNA_ANALYSIS_CASE_TAGS = [
+MIP_DNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"delivery-report"},
     {"vcf-clinical-sv-bin"},
     {"vcf-clinical-sv-bin-index"},
@@ -93,9 +94,14 @@ MIP_DNA_ANALYSIS_CASE_TAGS = [
     {"vcf-sv-research-index"},
 ]
 
-MIP_DNA_ANALYSIS_SAMPLE_TAGS = [{"bam"}, {"bam-index"}, {"cram"}, {"cram-index"}]
+MIP_DNA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
+    {"bam"},
+    {"bam-index"},
+    {"cram"},
+    {"cram-index"},
+]
 
-MIP_RNA_ANALYSIS_CASE_TAGS = [
+MIP_RNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"fusion", "clinical", "pdf"},
     {"fusion", "research", "pdf"},
     {"fusion", "vcf"},
@@ -107,7 +113,7 @@ MIP_RNA_ANALYSIS_CASE_TAGS = [
     {"multiqc-html"},
 ]
 
-MIP_RNA_ANALYSIS_SAMPLE_TAGS = [
+MIP_RNA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"fusion", "star-fusion"},
     {"fusion", "arriba"},
     {"cram"},
@@ -117,7 +123,7 @@ MIP_RNA_ANALYSIS_SAMPLE_TAGS = [
     {"salmon-quant"},
 ]
 
-MICROSALT_ANALYSIS_CASE_TAGS = [
+MICROSALT_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"microsalt-qc"},
     {"microsalt-type"},
     {"assembly"},
@@ -126,24 +132,24 @@ MICROSALT_ANALYSIS_CASE_TAGS = [
     {"reference-alignment-deduplicated"},
 ]
 
-MICROSALT_ANALYSIS_SAMPLE_TAGS = []
+MICROSALT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
 
-FASTQ_ANALYSIS_CASE_TAGS = []
+FASTQ_ANALYSIS_CASE_TAGS: list[set[str]] = []
 
-FASTQ_ANALYSIS_SAMPLE_TAGS = [
+FASTQ_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"fastq"},
 ]
 
-SARSCOV2_ANALYSIS_CASE_TAGS = [
+SARSCOV2_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"pangolin"},
     {"ks-delivery"},
 ]
 
-SARSCOV2_ANALYSIS_SAMPLE_TAGS = [
+SARSCOV2_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"fastq"},
 ]
 
-RNAFUSION_ANALYSIS_CASE_TAGS = [
+RNAFUSION_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"fusion", "arriba"},
     {"fusion", "star-fusion"},
     {"fusion", "fusioncatcher"},
@@ -158,12 +164,13 @@ RNAFUSION_ANALYSIS_CASE_TAGS = [
     {"qc-metrics"},
     {"multiqc-json"},
     {"delivery-report"},
+    {"fusion-vcf"},
 ]
 
-RNAFUSION_ANALYSIS_SAMPLE_TAGS = []
+RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
 
 
-PIPELINE_ANALYSIS_TAG_MAP = {
+PIPELINE_ANALYSIS_TAG_MAP: dict[Pipeline, dict] = {
     Pipeline.BALSAMIC: {
         "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
         "sample_tags": BALSAMIC_ANALYSIS_SAMPLE_TAGS,
@@ -204,5 +211,5 @@ PIPELINE_ANALYSIS_TAG_MAP = {
 
 PIPELINE_ANALYSIS_OPTIONS = PIPELINE_ANALYSIS_TAG_MAP.keys()
 
-INBOX_NAME = "inbox"
-OUTBOX_NAME = "outbox"
+INBOX_NAME: str = "inbox"
+OUTBOX_NAME: str = "outbox"
