@@ -297,7 +297,9 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return the path of the multiqc_data.json file."""
         return Path(self.root_dir, case_id, "multiqc", "multiqc_data", "multiqc_data.json")
 
-    def get_multiqc_json_metrics(self, case_id: str, pipeline_metrics: Optional[dict] = None) -> list[MetricsBase]:
+    def get_multiqc_json_metrics(
+        self, case_id: str, pipeline_metrics: Optional[dict] = None
+    ) -> list[MetricsBase]:
         """Get a multiqc_data.json file and returns metrics and values formatted."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_id: str = case.links[0].sample.internal_id
