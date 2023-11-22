@@ -240,17 +240,8 @@ def fixture_mip_analysis_api(
 def taxprofiler_metrics() -> dict[str, float]:
     """Return Taxprofiler raw analysis metrics dictionary."""
     return {
-        "total_reads": 11730624,
-        "paired_total": 11730624,
-        "paired_aligned_none": 1382406,
-        "paired_aligned_one": 8487306,
-        "paired_aligned_multi": 1860912,
-        "paired_aligned_discord_one": 676525,
-        "paired_aligned_mate_none": 567931,
-        "paired_aligned_mate_one": 359805,
-        "paired_aligned_mate_multi": 484026,
-        "overall_alignment_rate": 97.58,
-        "paired_aligned_mate_multi_halved": 242013.0,
-        "paired_aligned_mate_none_halved": 283965.5,
-        "paired_aligned_mate_one_halved": 179902.5,
+        "after_filtering_total_reads": 24810472.0,
+        "reads_mapped": 19014950.0,
+        "before_filtering_total_reads": 25173558.0,
+        "paired_aligned_none": 1409340,
     }
