@@ -2161,9 +2161,11 @@ def microsalt_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def pdc_archiving_dir(tmp_flow_cells_directory: Path) -> Path:
+def pdc_archiving_dir(
+    tmp_flow_cell_name_no_run_parameters: str, tmp_flow_cells_directory: Path, tmp_path
+) -> Path:
     """Return a temporary directory for PDC archiving testing."""
-    return Path(tmp_flow_cells_directory, "encrypt", "*")
+    return Path(tmp_flow_cells_directory, tmp_flow_cell_name_no_run_parameters)
 
 
 @pytest.fixture
@@ -2278,6 +2280,7 @@ def context_config(
             "destination_path": "server.name.se:/some",
             "mail_user": email_address,
         },
+        "data_input": {"input_dir_path": str(cg_dir)},
         "demultiplex": {
             "run_dir": "tests/fixtures/apps/demultiplexing/flow_cells/nova_seq_6000",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
