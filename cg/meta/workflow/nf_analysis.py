@@ -20,7 +20,7 @@ from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
     MultiqcDataJson,
 )
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 from cg.io.json import read_json
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.deliverables.metric_deliverables import (
@@ -303,13 +303,14 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get a multiqc_data.json file and returns metrics and values formatted."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_id: str = case.links[0].sample.internal_id
+        sample: Sample = self.get_sample_by_internal_id(internal_id=sample_id)
         LOG.info("Sample_id" + sample_id)
         multiqc_json: MultiqcDataJson = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
         )
         metrics_values: dict = {}
         for key in multiqc_json.report_general_stats_data:
-            if sample_id in key or case_id in key:
+            if case_id in key or sample in key:
                 metrics_values.update(list(key.values())[0])
         return [
             MetricsBase(
