@@ -55,6 +55,7 @@ class CaseTags(BaseModel):
     RNAfusion_inspector_research: Optional[set[str]] = Field(
         None, description="RNAfusion inspector report containing all fusions"
     )
+    fusion_vcf: Optional[set[str]] = Field(None, description="Converted RNA fusion file to SV VCF")
     multiqc_rna: Optional[set[str]] = Field(None, description="MultiQC report for RNA samples")
     vcf_mei: Optional[set[str]] = Field(
         None, description="VCF with mobile element insertions, clinical"

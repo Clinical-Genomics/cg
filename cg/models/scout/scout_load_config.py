@@ -143,3 +143,4 @@ class RnafusionLoadConfig(ScoutLoadConfig):
     RNAfusion_report: Optional[str] = None
     RNAfusion_report_research: Optional[str] = None
     samples: list[ScoutCancerIndividual] = []
+    vcf_fusion: Optional[str] = None

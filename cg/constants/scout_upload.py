@@ -59,6 +59,7 @@ RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
     RNAfusion_inspector={"fusioninspector-html", "clinical"},
     RNAfusion_inspector_research={"fusioninspector-html", "research"},
     delivery_report={"delivery-report"},
+    vcf_fusion={"vcf-fusion"},
 )
 
 MIP_SAMPLE_TAGS = dict(
