@@ -81,7 +81,7 @@
   path: PATHTOCASE/vcf/CASEID_fusion_data.vcf.gz
   path_index: ~
   step: vcf-collect
-  tag: fusion-vcf
+  tag: vcf-fusion
 - format: tab
   id: CASEID
   path: PATHTOCASE/star_for_starfusion/CASEID.ReadsPerGene.out.tab

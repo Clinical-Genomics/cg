@@ -163,7 +163,7 @@ RNAFUSION_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"qc-metrics"},
     {"multiqc-json"},
     {"delivery-report"},
-    {"fusion-vcf"},
+    {"vcf-fusion"},
     {"gene-counts"},
 ]
 
