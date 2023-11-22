@@ -16,7 +16,7 @@ class RnafusionQCMetrics(BaseModel):
     after_filtering_q30_rate: Optional[float]
     after_filtering_read1_mean_length: Optional[float]
     before_filtering_total_reads: Optional[float]
-    bias_5_3: Optional[float]
+    median_5prime_to_3prime_bias: Optional[float]
     pct_adapter: Optional[float]
     pct_mrna_bases: Optional[float]
     pct_ribosomal_bases: Optional[float]
