@@ -246,6 +246,7 @@ class CGConfig(BaseModel):
     flow_cells_dir: str
     madeline_exe: str
     max_flowcells: Optional[int]
+    data_input: DataInput | None = None
     # Base APIs that always should exist
     status_db_: Store = None
     housekeeper: HousekeeperConfig
@@ -257,7 +258,6 @@ class CGConfig(BaseModel):
     chanjo_api_: ChanjoAPI = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
-    data_input: DataInput = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
     data_flow_config: Optional[DataFlowConfig] = None
     demultiplex: DemultiplexConfig = None
