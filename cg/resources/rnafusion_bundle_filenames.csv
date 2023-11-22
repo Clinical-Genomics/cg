@@ -87,7 +87,7 @@
   path: PATHTOCASE/star_for_starfusion/CASEID.ReadsPerGene.out.tab
   path_index: ~
   step: star-align
-  tag: gene-counts
+  tag: star-align-gene-counts
 - format: json
   id: CASEID
   path: PATHTOCASE/multiqc/multiqc_data/multiqc_data.json
