@@ -309,8 +309,8 @@ class NfAnalysisAPI(AnalysisAPI):
         )
         metrics_values: dict = {}
         for key in multiqc_json.report_general_stats_data:
-            if case_id in key:
-                LOG.info("key " + case_id)
+            if sample_id in key:
+                LOG.info("key " + sample_id)
                 metrics_values.update(list(key.values())[0])
         return [
             MetricsBase(
