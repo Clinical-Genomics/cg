@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from cg.constants import Pipeline
 from cg.constants.sequencing import SequencingPlatform
@@ -16,6 +16,11 @@ from cg.store.models import Case, Sample
 from cg.io.controller import ReadFile, WriteFile
 from cg.constants.constants import FileFormat
 from cg.constants.metric_conditions import TAXPROFILER_METRIC_CONDITIONS
+from cg.models.deliverables.metric_deliverables import (
+    MetricsBase,
+    MultiqcDataJson,
+)
+from cg.io.json import read_json
 
 LOG = logging.getLogger(__name__)
 
@@ -125,6 +130,9 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
         """Write <case>_metrics_deliverables.yaml file."""
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        for link in case.links:
+            LOG.info("Link " + str(link))
         metrics = self.get_multiqc_json_metrics(
             case_id=case_id, pipeline_metrics=TAXPROFILER_METRIC_CONDITIONS
         )
