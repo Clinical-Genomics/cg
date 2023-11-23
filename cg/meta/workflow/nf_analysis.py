@@ -303,14 +303,12 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get a multiqc_data.json file and returns metrics and values formatted."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_id: str = case.links[0].sample.internal_id
-        sample: Sample = self.get_sample_by_internal_id(internal_id=sample_id)
-        LOG.info("Sample_id" + sample_id)
         multiqc_json: MultiqcDataJson = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
         )
         metrics_values: dict = {}
         for key in multiqc_json.report_general_stats_data:
-            if case_id in key or sample in key:
+            if case_id in key:
                 metrics_values.update(list(key.values())[0])
         return [
             MetricsBase(
