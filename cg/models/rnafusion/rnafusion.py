@@ -37,12 +37,7 @@ class RnafusionParameters(PipelineParameters):
     cram: str = "arriba,starfusion"
     fastp_trim: bool = True
     fusioncatcher: bool = True
-    fusioninspector_filter: bool = False
-    fusionreport_filter: bool = False
-    pizzly: bool = False
-    squid: bool = False
     starfusion: bool = True
-    trim: bool = False
     trim_tail: int = 50
 
 
