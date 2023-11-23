@@ -1,8 +1,6 @@
 """RNAfusion delivery report API."""
 from typing import Optional
 
-from fastapi import requests
-
 from cg.constants import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -41,17 +39,12 @@ class RnafusionReportAPI(ReportAPI):
         """Return sample metadata to include in the report."""
         sample_metrics: RnafusionQCMetrics = analysis_metadata.sample_metrics[sample.internal_id]
 
-        # Skip LIMS data collection if downsampled or external
-        if (
-            isinstance(Sample.downsampled_to, int)
-            or Sample.application_version.application.is_external
-        ):
+        # Skip LIMS data collection if down sampled
+        if sample.downsampled_to:
             input_amount = None
             rin = None
         else:
-            input_amount = (
-                self.lims_api.get_latest_rna_input_amount(sample_id=sample.internal_id),
-            )
+            input_amount = self.lims_api.get_latest_rna_input_amount(sample_id=sample.internal_id)
             rin = self.lims_api.get_sample_rin(sample_id=sample.internal_id)
 
         return RnafusionSampleMetadataModel(
