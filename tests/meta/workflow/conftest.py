@@ -214,7 +214,7 @@ def rnafusion_metrics() -> dict[str, float]:
         "after_filtering_q30_rate": 0.929476,
         "after_filtering_read1_mean_length": 99.0,
         "before_filtering_total_reads": 149984042.0,
-        "bias_5_3": 1.07,
+        "median_5prime_to_3prime_bias": 1.1211,
         "pct_adapter": 12.005654574904709,
         "pct_mrna_bases": 85.9731,
         "pct_ribosomal_bases": 0.6581,
