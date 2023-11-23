@@ -220,7 +220,7 @@ def rnafusion_metrics() -> dict[str, float]:
         "pct_ribosomal_bases": 0.6581,
         "pct_surviving": 99.42004630065911,
         "pct_duplication": 14.8643,
-        "reads_aligned": 72391566.0,
+        "read_pairs_examined": 72391566.0,
         "uniquely_mapped_percent": 91.02,
     }
 

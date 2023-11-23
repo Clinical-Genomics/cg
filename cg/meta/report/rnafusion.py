@@ -45,7 +45,7 @@ class RnafusionReportAPI(ReportAPI):
             input_amount=self.lims_api.get_latest_rna_input_amount(sample_id=sample.internal_id),
             insert_size=None,
             insert_size_peak=None,
-            mapped_reads=sample_metrics.reads_aligned
+            mapped_reads=sample_metrics.read_pairs_examined
             * 2
             / sample_metrics.before_filtering_total_reads,
             mean_length_r1=sample_metrics.after_filtering_read1_mean_length,

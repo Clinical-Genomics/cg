@@ -22,7 +22,7 @@ class RnafusionQCMetrics(BaseModel):
     pct_ribosomal_bases: Optional[float]
     pct_surviving: Optional[float]
     pct_duplication: Optional[float]
-    reads_aligned: Optional[float]
+    read_pairs_examined: Optional[float]
     uniquely_mapped_percent: Optional[float]
 
 
