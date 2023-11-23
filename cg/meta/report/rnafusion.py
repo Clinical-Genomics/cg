@@ -42,7 +42,10 @@ class RnafusionReportAPI(ReportAPI):
         sample_metrics: RnafusionQCMetrics = analysis_metadata.sample_metrics[sample.internal_id]
 
         # Skip LIMS data collection if downsampled or external
-        if Sample.downsampled_to or Sample.application_version.application.is_external:
+        if (
+            isinstance(Sample.downsampled_to, int)
+            or Sample.application_version.application.is_external
+        ):
             input_amount = None
             rin = None
         else:
