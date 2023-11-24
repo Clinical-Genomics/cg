@@ -39,7 +39,7 @@ class DemultiplexingScenario(BaseModel):
 
 
 @pytest.mark.parametrize(
-    "demultiplexing_scenario",
+    "scenario",
     [
         DemultiplexingScenario(
             flow_cell_directory="flow_cell_directory_name_demultiplexed_with_bcl_convert",

@@ -102,10 +102,10 @@ def test_is_file_path_compressed_fastq_with_invalid_file():
 
 
 def test_is_lane_in_fastq_file_name_with_valid_file():
-    # GIVEN a valid manifest_file containing lane number
+    # GIVEN a valid file containing lane number
     file_path = Path("sample_L0002.fastq.gz")
 
-    # WHEN checking if the lane number is in the fastq manifest_file name
+    # WHEN checking if the lane number is in the fastq file name
     is_lane_in_name: bool = is_lane_in_fastq_file_name(file_path)
 
     # THEN the result should be True
@@ -157,7 +157,7 @@ def test_get_lane_from_sample_fastq_file_path():
         f"_R1_001{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     )
 
-    # WHEN we get lane from the sample fastq manifest_file path
+    # WHEN we get lane from the sample fastq file path
     result_lane: int = get_lane_from_sample_fastq(sample_fastq_path)
 
     # THEN we should get the correct lane
