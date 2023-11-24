@@ -1210,43 +1210,43 @@ def flow_cells_demux_all_dir(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "flow_cells_demux_all")
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to a dir with demultiplexing results where nothing has been cleaned."""
     return Path(demultiplex_fixtures, "demultiplexed-runs-unfinished")
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def hiseq_x_flow_cell_name() -> str:
     """Return the full name of a HiSeq2500 flow cell with only one index."""
     return "160202_ST-E00266_0064_AHKHHGCCXX"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def hiseq_2500_flow_cell_name() -> str:
     """Return the full name of a HiSeq2500 flow cell with double indexes."""
     return "180504_D00410_0608_BHGYGYBCX2"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def bcl2fastq_flow_cell_full_name() -> str:
     """Return full flow cell name."""
     return "201203_D00483_0200_AHVKJCDRXX"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def bcl_convert_flow_cell_full_name() -> str:
     """Return the full name of a bcl_convert flow cell."""
     return "211101_A00187_0615_AHLG5GDRZZ"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def novaseq_x_flow_cell_full_name() -> str:
     """Return the full name of a NovaSeqX flow cell."""
     return "20230508_LH00188_0003_A22522YLT3"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def novaseq_x_manifest_file(novaseq_x_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeqX manifest file."""
     return Path(novaseq_x_flow_cell_dir, "Manifest.tsv")
