@@ -32,31 +32,31 @@ def test_set_dry_run(
     assert post_demux_api.dry_run is True
 
 
-class Scenario(BaseModel):
+class DemultiplexingScenario(BaseModel):
     flow_cell_directory: str
     flow_cell_name: str
     samples_ids: str
 
 
 @pytest.mark.parametrize(
-    "scenario",
+    "demultiplexing_scenario",
     [
-        Scenario(
+        DemultiplexingScenario(
             flow_cell_directory="flow_cell_directory_name_demultiplexed_with_bcl_convert",
             flow_cell_name="flow_cell_name_demultiplexed_with_bcl_convert",
             samples_ids="bcl_convert_demultiplexed_flow_cell_sample_internal_ids",
         ),
-        Scenario(
+        DemultiplexingScenario(
             flow_cell_directory="flow_cell_directory_name_demultiplexed_with_bcl2fastq",
             flow_cell_name="flow_cell_name_demultiplexed_with_bcl2fastq",
             samples_ids="bcl2fastq_demultiplexed_flow_cell_sample_internal_ids",
         ),
-        Scenario(
+        DemultiplexingScenario(
             flow_cell_directory="flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer",
             flow_cell_name="flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer",
             samples_ids="bcl_convert_demultiplexed_flow_cell_sample_internal_ids",
         ),
-        Scenario(
+        DemultiplexingScenario(
             flow_cell_directory="flow_cell_directory_name_demultiplexed_with_bcl_convert_flat",
             flow_cell_name="flow_cell_name_demultiplexed_with_bcl_convert",
             samples_ids="bcl_convert_demultiplexed_flow_cell_sample_internal_ids",
@@ -65,7 +65,7 @@ class Scenario(BaseModel):
     ids=["BCLConvert tree", "BCL2FASTQ", "BCLConvert on sequencer", "BCLConvert flat"],
 )
 def test_post_processing_of_flow_cell(
-    scenario: Scenario,
+    scenario: DemultiplexingScenario,
     demultiplex_context: CGConfig,
     request,
     tmp_demultiplexed_runs_directory: Path,
@@ -146,10 +146,6 @@ def test_post_processing_of_flow_cell(
     )
 
     assert delivery_path.exists()
-
-
-def assert_flow_cell_added_to_housekeeper(sample_ids: list[str]) -> None:
-    pass
 
 
 def test_get_all_demultiplexed_flow_cell_out_dirs(
