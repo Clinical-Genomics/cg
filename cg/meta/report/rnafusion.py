@@ -40,10 +40,9 @@ class RnafusionReportAPI(ReportAPI):
         sample_metrics: RnafusionQCMetrics = analysis_metadata.sample_metrics[sample.internal_id]
 
         # Skip LIMS data collection if down sampled
-        if sample.downsampled_to:
-            input_amount = None
-            rin = None
-        else:
+        input_amount = None
+        rin = None
+        if not sample.downsampled_to:
             input_amount = self.lims_api.get_latest_rna_input_amount(sample_id=sample.internal_id)
             rin = self.lims_api.get_sample_rin(sample_id=sample.internal_id)
 
