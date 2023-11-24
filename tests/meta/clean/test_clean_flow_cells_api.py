@@ -237,12 +237,10 @@ def test_can_flow_cell_be_deleted_no_spring_no_fastq(
                 return_value=False,
             ):
                 # WHEN checking that the flow cell can be deleted
-                can_be_deleted: bool = (
-                    flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
-                )
 
-    # THEN the check whether the flow cell can be deleted returns True
-    assert not can_be_deleted
+                # THEN a HousekeeperFileMissingError is raised
+                with pytest.raises(HousekeeperFileMissingError):
+                    flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
 
 
 def test_delete_flow_cell_directory(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
@@ -312,10 +310,9 @@ def test_flow_cell_has_not_fastq_files_in_housekeeper(
 
     # WHEN checking whether a sample on a flow cell has fastq files
 
-    # THEN a HousekeeperFileMissingError is raised
-    with pytest.raises(HousekeeperFileMissingError):
-        flow_cell_clean_api_can_not_be_removed.has_fastq_files_for_samples_in_housekeeper()
-        assert SequencingFileTag.SPRING in caplog.text
+    # THEN the flow cell has no fastq files in housekeeper.
+    assert not flow_cell_clean_api_can_not_be_removed.has_fastq_files_for_samples_in_housekeeper()
+    assert SequencingFileTag.FASTQ in caplog.text
 
 
 def test_flow_cell_has_not_spring_files_in_housekeeper(
@@ -332,10 +329,9 @@ def test_flow_cell_has_not_spring_files_in_housekeeper(
 
     # WHEN checking whether a sample on a flow cell has spring files
 
-    # THEN a HousekeeperFileMissingError is raised
-    with pytest.raises(HousekeeperFileMissingError):
-        flow_cell_clean_api_can_not_be_removed.has_spring_files_for_samples_in_housekeeper()
-        assert SequencingFileTag.SPRING in caplog.text
+    # THEN the flow cell has no spring files for samples in housekeeper
+    assert not flow_cell_clean_api_can_not_be_removed.has_spring_files_for_samples_in_housekeeper()
+    assert SequencingFileTag.SPRING in caplog.text
 
 
 def test_flow_cell_has_not_spring_meta_data_files_in_housekeeper(
@@ -352,7 +348,25 @@ def test_flow_cell_has_not_spring_meta_data_files_in_housekeeper(
 
     # WHEN checking whether a sample on a flow cell has spring files
 
+    # THEN the flow cell has no spring metadata files in housekeeper
+
+    assert (
+        not flow_cell_clean_api_can_not_be_removed.has_spring_meta_data_files_for_samples_in_housekeeper()
+    )
+    assert SequencingFileTag.SPRING_METADATA in caplog.text
+
+
+def test_has_no_sample_files_in_housekeeper(
+    flow_cell_clean_api_can_not_be_removed: CleanFlowCellAPI,
+    store_with_flow_cell_not_to_clean: Store,
+    housekeeper_api_with_flow_cell_not_to_clean: HousekeeperAPI,
+):
+    # GIVEN a flow cell that has entries in StatusDB but does not have any files in Housekeeper for its samples
+    flow_cell_clean_api_can_not_be_removed.status_db = store_with_flow_cell_not_to_clean
+    flow_cell_clean_api_can_not_be_removed.hk_api = housekeeper_api_with_flow_cell_not_to_clean
+
+    # WHEN checking whether a sample on a flow cell has files in housekeeper
+
     # THEN a HousekeeperFileMissingError is raised
     with pytest.raises(HousekeeperFileMissingError):
-        flow_cell_clean_api_can_not_be_removed.has_spring_meta_data_files_for_samples_in_housekeeper()
-        assert SequencingFileTag.SPRING_METADATA in caplog.text
+        flow_cell_clean_api_can_not_be_removed.has_sample_fastq_or_spring_files_in_housekeeper()

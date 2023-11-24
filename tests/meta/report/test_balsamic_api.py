@@ -38,6 +38,7 @@ def test_get_sample_metadata(
         "median_target_coverage": "5323.0",
         "pct_250x": "N/A",
         "pct_500x": "N/A",
+        "gc_dropout": "1.01",
     }
 
     # WHEN retrieving the sample metadata

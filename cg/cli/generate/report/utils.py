@@ -11,11 +11,13 @@ from cg.constants import (
     Pipeline,
 )
 from cg.meta.report.balsamic import BalsamicReportAPI
+from cg.meta.report.balsamic_qc import BalsamicQCReportAPI
 from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.report.rnafusion import RnafusionReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
@@ -84,6 +86,9 @@ def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> Repor
         ),
         Pipeline.BALSAMIC_UMI: BalsamicUmiReportAPI(
             config=context.obj, analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)
+        ),
+        Pipeline.BALSAMIC_QC: BalsamicQCReportAPI(
+            config=context.obj, analysis_api=BalsamicQCAnalysisAPI(config=context.obj)
         ),
         Pipeline.MIP_DNA: MipDNAReportAPI(
             config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
