@@ -1216,31 +1216,31 @@ def demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "demultiplexed-runs-unfinished")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def hiseq_x_flow_cell_name() -> str:
     """Return the full name of a HiSeq2500 flow cell with only one index."""
     return "160202_ST-E00266_0064_AHKHHGCCXX"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def hiseq_2500_flow_cell_name() -> str:
     """Return the full name of a HiSeq2500 flow cell with double indexes."""
     return "180504_D00410_0608_BHGYGYBCX2"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def bcl2fastq_flow_cell_full_name() -> str:
     """Return full flow cell name."""
     return "201203_D00483_0200_AHVKJCDRXX"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def bcl_convert_flow_cell_full_name() -> str:
     """Return the full name of a bcl_convert flow cell."""
     return "211101_A00187_0615_AHLG5GDRZZ"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def novaseq_x_flow_cell_full_name() -> str:
     """Return the full name of a NovaSeqX flow cell."""
     return "20230508_LH00188_0003_A22522YLT3"
@@ -1393,13 +1393,13 @@ def novaseq_x_run_parameters(
 
 @pytest.fixture(scope="module")
 def hiseq_2500_flow_cell(hiseq_2500_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """."""
+    """Return a HiSeq2500 flow cell."""
     return FlowCellDirectoryData(flow_cell_path=hiseq_2500_flow_cell_dir)
 
 
 @pytest.fixture(scope="module")
 def hiseq_x_flow_cell(hiseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """."""
+    """Return a HiSeq2500 flow cell."""
     return FlowCellDirectoryData(flow_cell_path=hiseq_x_flow_cell_dir)
 
 
@@ -1463,8 +1463,8 @@ def demultiplexing_delivery_file(bcl2fastq_flow_cell: FlowCellDirectoryData) -> 
 
 @pytest.fixture(name="hiseq_x_tile_dir")
 def hiseq_x_tile_dir(bcl2fastq_flow_cell: FlowCellDirectoryData) -> Path:
-    """Return Hiseq X tile dir."""
-    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.Hiseq_X_TILE_DIR)
+    """Return HiSeqX tile dir."""
+    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.HISEQ_X_TILE_DIR)
 
 
 @pytest.fixture(name="lims_novaseq_samples_file")
