@@ -87,6 +87,7 @@ class EncryptionAPI:
             [
                 self.binary_path,
                 "--encrypt",
+                "--yes",
                 "--recipient",
                 EncryptionUserID.HASTA_USER_ID,
                 "--output",
