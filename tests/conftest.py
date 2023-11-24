@@ -1722,8 +1722,8 @@ def analysis_store_trio(analysis_store: Store) -> Generator[Store, None, None]:
     yield analysis_store
 
 
-@pytest.fixture(name="analysis_store_single_case")
-def analysis_store_single(
+@pytest.fixture
+def analysis_store_single_case(
     base_store: Store, analysis_family_single_case: Store, helpers: StoreHelpers
 ):
     """Set up a store instance with a single ind case for testing analysis API."""
