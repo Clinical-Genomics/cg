@@ -7,6 +7,7 @@ import shutil
 from copy import deepcopy
 from datetime import MAXYEAR, datetime, timedelta
 from pathlib import Path
+from subprocess import CompletedProcess
 from typing import Any, Generator, Union
 
 import pytest
@@ -2400,7 +2401,7 @@ def context_config(
             "tower_pipeline": "taxprofiler",
         },
         "scout": {
-            "binary_path": "echo",
+            "binary_path": "bin/scout",
             "config_path": "scout-stage.yaml",
         },
         "statina": {
@@ -3281,6 +3282,18 @@ def flow_cell_encryption_api(
     )
     flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=True)
     return flow_cell_encryption_api
+
+
+def create_process_response(
+    return_code: int = 0, args: str = "", std_out: str = "", std_err: str = ""
+) -> CompletedProcess:
+    """Returns a CompletedProcess object with default parameters."""
+    return CompletedProcess(
+        args=args,
+        returncode=return_code,
+        stderr=std_err.encode("utf-8"),
+        stdout=std_out.encode("utf-8"),
+    )
 
 
 # Downsample
