@@ -289,7 +289,7 @@ def test_parse_manifest_file(novaseq_x_manifest_file: Path):
 
 
 @pytest.mark.parametrize(
-    "manifest_file, expected_result",
+    "file, expected_result",
     [
         (Path("flow_cell_dir", DemultiplexingDirsAndFiles.DATA, "some_file.txt"), True),
         (Path("flow_cell_dir", DemultiplexingDirsAndFiles.INTER_OP, "some_file.txt"), True),
