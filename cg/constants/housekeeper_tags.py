@@ -1,8 +1,9 @@
 """File tags for files in Housekeeper."""
 
 
-from cg.constants.constants import Pipeline
 from enum import StrEnum
+
+from cg.constants.constants import Pipeline
 
 
 class AlignmentFileTag(StrEnum):

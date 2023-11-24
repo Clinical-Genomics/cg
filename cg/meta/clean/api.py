@@ -30,7 +30,7 @@ class CleanAPI:
         for analysis in self.status_db.get_analyses_for_pipeline_started_at_before(
             pipeline=pipeline, started_at_before=before
         ):
-            bundle_name = analysis.family.internal_id
+            bundle_name = analysis.case.internal_id
 
             hk_bundle_version: Optional[Version] = self.housekeeper_api.version(
                 bundle=bundle_name, date=analysis.started_at
@@ -65,15 +65,13 @@ class CleanAPI:
         for protected_tags in protected_tags_lists:
             if set(protected_tags).issubset(set(file_tags)):
                 LOG.debug(
-                    "File %s has the protected tag(s) %s, skipping.",
-                    file.full_path,
-                    protected_tags,
+                    f"File {file.full_path} has the protected tag(s) {protected_tags}, skipping."
                 )
                 _has_protected_tags = True
                 break
 
         if not _has_protected_tags:
-            LOG.info("File %s has no protected tags.", file.full_path)
+            LOG.info(f"File {file.full_path} has no protected tags.")
         return _has_protected_tags
 
     def get_unprotected_existing_bundle_files(self, before: datetime) -> Iterator[File]:
@@ -83,7 +81,7 @@ class CleanAPI:
         for pipeline in Pipeline:
             protected_tags_lists = WORKFLOW_PROTECTED_TAGS.get(pipeline)
             if not protected_tags_lists:
-                LOG.debug("No protected tags defined for %s, skipping", pipeline)
+                LOG.debug(f"No protected tags defined for {pipeline}, skipping")
                 continue
 
             hk_files: list[File]
@@ -98,7 +96,7 @@ class CleanAPI:
 
                     file_path: Path = Path(hk_file.full_path)
                     if not file_path.exists():
-                        LOG.info("File %s not on disk.", file_path)
+                        LOG.info(f"File {file_path} not on disk.")
                         continue
-                    LOG.info("File %s found on disk.", file_path)
+                    LOG.info(f"File {file_path} found on disk.")
                     yield hk_file

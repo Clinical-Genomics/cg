@@ -6,7 +6,7 @@ import click
 from cg.cli.set.case import set_case
 from cg.constants import CASE_ACTIONS, Priority
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 from cg.utils.click.EnumChoice import EnumChoice
 
 CONFIRM = "Continue?"
@@ -20,13 +20,13 @@ def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Sto
     return list(store.get_samples_by_any_id(**identifier_args))
 
 
-def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> list[Family]:
+def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> list[Case]:
     """Get cases that have samples that match identifiers if given"""
     samples_by_id: list[Sample] = _get_samples_by_identifiers(identifiers, store)
-    cases: set[Family] = set()
+    cases: set[Case] = set()
     for sample in samples_by_id:
         for link in sample.links:
-            cases.add(link.family)
+            cases.add(link.case)
 
     return list(cases)
 
@@ -58,7 +58,7 @@ def set_cases(
 ):
     """Set values on many families at the same time"""
     store: Store = context.obj.status_db
-    cases_to_alter: list[Family] = _get_cases(identifiers, store)
+    cases_to_alter: list[Case] = _get_cases(identifiers, store)
 
     if not cases_to_alter:
         LOG.error("No cases to alter!")

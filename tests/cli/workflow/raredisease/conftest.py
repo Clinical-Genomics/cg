@@ -1,6 +1,7 @@
 """Fixtures for cli workflow raredisease tests"""
 
 import pytest
+
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 

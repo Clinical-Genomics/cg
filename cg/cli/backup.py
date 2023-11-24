@@ -61,7 +61,7 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
         flow_cell_encryption_api = FlowCellEncryptionAPI(
             binary_path=context.encryption.binary_path,
             dry_run=dry_run,
-            encryption_dir=Path(context.backup.encryption_directories.current),
+            encryption_dir=Path(context.encryption.encryption_dir),
             flow_cell=flow_cell,
             pigz_binary_path=context.pigz.binary_path,
             slurm_api=SlurmAPI(),
@@ -102,7 +102,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         flow_cell_encryption_api = FlowCellEncryptionAPI(
             binary_path=context.encryption.binary_path,
             dry_run=dry_run,
-            encryption_dir=Path(context.backup.encryption_directories.current),
+            encryption_dir=Path(context.encryption.encryption_dir),
             flow_cell=flow_cell,
             pigz_binary_path=context.pigz.binary_path,
             slurm_api=SlurmAPI(),
@@ -128,7 +128,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
     context.meta_apis["backup_api"] = BackupAPI(
         encryption_api=encryption_api,
-        encryption_directories=context.backup.encryption_directories,
+        pdc_archiving_directory=context.backup.pdc_archiving_directory,
         status=context.status_db,
         tar_api=tar_api,
         pdc_api=pdc_api,
@@ -174,13 +174,12 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
         tags=[SequencingFileTag.SPRING]
     ).filter(hk_models.File.path.like(f"%{config.environment}/{config.demultiplex.out_dir}%"))
     for spring_file in spring_files:
-        LOG.info("Attempting encryption and PDC archiving for file %s", spring_file.path)
+        LOG.info(f"Attempting encryption and PDC archiving for file {spring_file.path}")
         if Path(spring_file.path).exists():
             context.invoke(archive_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
         else:
             LOG.warning(
-                "Spring file %s found in Housekeeper, but not on disk! Archiving process skipped!",
-                spring_file.path,
+                f"Spring file {spring_file.path} found in Housekeeper, but not on disk! Archiving process skipped!"
             )
 
 
@@ -255,14 +254,14 @@ def _get_samples(status_api: Store, object_type: str, identifier: str) -> list[S
 @click.pass_obj
 def retrieve_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
     """Retrieve a spring file from PDC"""
-    LOG.info("Attempting PDC retrieval and decryption file %s", spring_file_path)
+    LOG.info(f"Attempting PDC retrieval and decryption file {spring_file_path}")
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
     pdc_api: PdcAPI = PdcAPI(binary_path=config.pdc.binary_path, dry_run=dry_run)
     encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
         binary_path=config.encryption.binary_path,
         dry_run=dry_run,
     )
-    LOG.debug("Start spring retrieval if not dry run mode=%s", dry_run)
+    LOG.debug(f"Start spring retrieval if not dry run mode={dry_run}")
     spring_backup_api: SpringBackupAPI = SpringBackupAPI(
         encryption_api=encryption_api,
         hk_api=housekeeper_api,

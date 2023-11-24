@@ -1,16 +1,14 @@
 """ Test the CLI for mip-dna panel"""
-import logging
 from pathlib import Path
 
 import mock
 from click.testing import CliRunner
 
 from cg.cli.workflow.mip_dna.base import panel
+from cg.io.txt import read_txt
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
 from tests.conftest import create_process_response
-
-LOG = logging.getLogger(__name__)
 
 
 def test_panel_file_is_written(
@@ -34,5 +32,5 @@ def test_panel_file_is_written(
     assert panel_file.exists()
 
     # THEN the file should contain the output from scout
-    with open(panel_file, "r") as file_handle:
-        assert file_handle.read() == scout_panel_output
+    file_content: str = read_txt(file_path=panel_file, read_to_string=True)
+    assert file_content == scout_panel_output

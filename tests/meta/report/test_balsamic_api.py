@@ -4,13 +4,13 @@ from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.report.metadata import BalsamicTargetedSampleMetadataModel
 from cg.store import Store
-from cg.store.models import BedVersion, Family, Sample
+from cg.store.models import BedVersion, Case, Sample
 from tests.store_helpers import StoreHelpers
 
 
 def test_get_sample_metadata(
     report_api_balsamic: BalsamicReportAPI,
-    case_balsamic: Family,
+    case_balsamic: Case,
     helpers: StoreHelpers,
     sample_store: Store,
 ):
@@ -38,6 +38,7 @@ def test_get_sample_metadata(
         "median_target_coverage": "5323.0",
         "pct_250x": "N/A",
         "pct_500x": "N/A",
+        "gc_dropout": "1.01",
     }
 
     # WHEN retrieving the sample metadata

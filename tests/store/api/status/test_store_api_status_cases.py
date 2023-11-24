@@ -2,13 +2,13 @@ from datetime import datetime, timedelta
 
 from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline, Priority
 from cg.store import Store
-from cg.store.models import Analysis, Family, FamilySample
+from cg.store.models import Analysis, Case, CaseSample
 
 
 def test_delivered_at_affects_tat(base_store: Store, helpers):
     """test that the estimated turnaround time is affected by the delivered_at date"""
 
-    # GIVEN a database with a case and a samples receive_at, prepared_at, reads_updated_at,
+    # GIVEN a database with a case and a samples receive_at, prepared_at, last_sequenced_at,
     # delivered_at one week ago
     new_case = add_case(helpers, base_store, ordered_days_ago=7)
     one_week_ago = datetime.now() - timedelta(days=7)
@@ -17,7 +17,7 @@ def test_delivered_at_affects_tat(base_store: Store, helpers):
         ordered_at=one_week_ago,
         received_at=one_week_ago,
         prepared_at=one_week_ago,
-        reads_updated_at=one_week_ago,
+        last_sequenced_at=one_week_ago,
         delivered_at=one_week_ago,
     )
     link = base_store.relate_sample(new_case, one_week_old_sample, "unknown")
@@ -33,9 +33,9 @@ def test_delivered_at_affects_tat(base_store: Store, helpers):
 
 
 def test_sequenced_at_affects_tat(base_store: Store, helpers):
-    """test that the estimated turnaround time is affected by the reads_updated_at date"""
+    """test that the estimated turnaround time is affected by the last_sequenced_at date"""
 
-    # GIVEN a database with a case and a samples receive_at, prepared_at, reads_updated_at one week
+    # GIVEN a database with a case and a samples receive_at, prepared_at, last_sequenced_at one week
     # ago
     new_case = add_case(helpers, base_store, ordered_days_ago=7)
     one_week_ago = datetime.now() - timedelta(days=7)
@@ -44,7 +44,7 @@ def test_sequenced_at_affects_tat(base_store: Store, helpers):
         ordered_at=one_week_ago,
         received_at=one_week_ago,
         prepared_at=one_week_ago,
-        reads_updated_at=one_week_ago,
+        last_sequenced_at=one_week_ago,
     )
     link = base_store.relate_sample(new_case, one_week_old_sample, "unknown")
     base_store.session.add(link)
@@ -113,10 +113,10 @@ def test_samples_flowcell(base_store: Store, helpers):
     new_case = add_case(helpers, base_store)
     sample_on_flowcell = helpers.add_sample(base_store)
     flowcell = helpers.add_flow_cell(base_store, samples=[sample_on_flowcell], status="ondisk")
-    link_1: FamilySample = base_store.relate_sample(new_case, sample_on_flowcell, "unknown")
+    link_1: CaseSample = base_store.relate_sample(new_case, sample_on_flowcell, "unknown")
     base_store.session.add(link_1)
     sample_not_on_flowcell = helpers.add_sample(base_store)
-    link_2: FamilySample = base_store.relate_sample(new_case, sample_not_on_flowcell, "unknown")
+    link_2: CaseSample = base_store.relate_sample(new_case, sample_not_on_flowcell, "unknown")
     base_store.session.add(link_2)
 
     # WHEN getting active cases
@@ -159,7 +159,7 @@ def test_case_action(base_store: Store, helpers):
     analysis = helpers.add_analysis(
         base_store, completed_at=datetime.now(), uploaded_at=datetime.now()
     )
-    analysis.family.action = "analyze"
+    analysis.case.action = "analyze"
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -167,7 +167,7 @@ def test_case_action(base_store: Store, helpers):
     # THEN cases should contain info on analysis (case) action
     assert cases
     for case in cases:
-        assert case.get("case_action") == analysis.family.action
+        assert case.get("case_action") == analysis.case.action
 
 
 def test_analysis_dates_for_rerun(base_store: Store, helpers):
@@ -177,7 +177,7 @@ def test_analysis_dates_for_rerun(base_store: Store, helpers):
     analysis = helpers.add_analysis(
         base_store, completed_at=datetime.now(), uploaded_at=datetime.now()
     )
-    analysis.family.action = "analyze"
+    analysis.case.action = "analyze"
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -198,8 +198,8 @@ def test_received_at_is_newest_date(base_store: Store, helpers):
     yesteryear = datetime.now() - timedelta(days=365)
     newest_sample = helpers.add_sample(base_store, received_at=yesterday)
     oldest_sample = helpers.add_sample(base_store, received_at=yesteryear)
-    link_1: FamilySample = base_store.relate_sample(new_case, newest_sample, "unknown")
-    link_2: FamilySample = base_store.relate_sample(new_case, oldest_sample, "unknown")
+    link_1: CaseSample = base_store.relate_sample(new_case, newest_sample, "unknown")
+    link_2: CaseSample = base_store.relate_sample(new_case, oldest_sample, "unknown")
     base_store.session.add_all([link_1, link_2])
 
     # WHEN getting active cases
@@ -220,8 +220,8 @@ def test_prepared_at_is_newest_date(base_store: Store, helpers):
     yesteryear = datetime.now() - timedelta(days=365)
     newest_sample = helpers.add_sample(base_store, prepared_at=yesterday)
     oldest_sample = helpers.add_sample(base_store, prepared_at=yesteryear)
-    link_1: FamilySample = base_store.relate_sample(new_case, newest_sample, "unknown")
-    link_2: FamilySample = base_store.relate_sample(new_case, oldest_sample, "unknown")
+    link_1: CaseSample = base_store.relate_sample(new_case, newest_sample, "unknown")
+    link_2: CaseSample = base_store.relate_sample(new_case, oldest_sample, "unknown")
     base_store.session.add_all([link_1, link_2])
 
     # WHEN getting active cases
@@ -240,10 +240,10 @@ def test_sequenced_at_is_newest_date(base_store: Store, helpers):
     new_case = add_case(helpers, base_store)
     yesterday = datetime.now() - timedelta(days=1)
     yesteryear = datetime.now() - timedelta(days=365)
-    newest_sample = helpers.add_sample(base_store, reads_updated_at=yesterday)
-    oldest_sample = helpers.add_sample(base_store, reads_updated_at=yesteryear)
-    link_1: FamilySample = base_store.relate_sample(new_case, newest_sample, "unknown")
-    link_2: FamilySample = base_store.relate_sample(new_case, oldest_sample, "unknown")
+    newest_sample = helpers.add_sample(base_store, last_sequenced_at=yesterday)
+    oldest_sample = helpers.add_sample(base_store, last_sequenced_at=yesteryear)
+    link_1: CaseSample = base_store.relate_sample(new_case, newest_sample, "unknown")
+    link_2: CaseSample = base_store.relate_sample(new_case, oldest_sample, "unknown")
     base_store.session.add_all([link_1, link_2])
 
     # WHEN getting active cases
@@ -252,7 +252,7 @@ def test_sequenced_at_is_newest_date(base_store: Store, helpers):
     # THEN cases should contain the date the samples were most recently sequenced
     assert cases
     for case in cases:
-        assert case.get("samples_sequenced_at").date() == newest_sample.reads_updated_at.date()
+        assert case.get("samples_sequenced_at").date() == newest_sample.last_sequenced_at.date()
 
 
 def test_delivered_at_is_newest_date(base_store: Store, helpers):
@@ -264,8 +264,8 @@ def test_delivered_at_is_newest_date(base_store: Store, helpers):
     yesteryear = datetime.now() - timedelta(days=365)
     newest_sample = helpers.add_sample(base_store, delivered_at=yesterday)
     oldest_sample = helpers.add_sample(base_store, delivered_at=yesteryear)
-    link_1: FamilySample = base_store.relate_sample(new_case, newest_sample, "unknown")
-    link_2: FamilySample = base_store.relate_sample(new_case, oldest_sample, "unknown")
+    link_1: CaseSample = base_store.relate_sample(new_case, newest_sample, "unknown")
+    link_2: CaseSample = base_store.relate_sample(new_case, oldest_sample, "unknown")
     base_store.session.add_all([link_1, link_2])
 
     # WHEN getting active cases
@@ -292,8 +292,8 @@ def test_invoiced_at_is_newest_invoice_date(base_store: Store, helpers):
     invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
     oldest_sample.invoice = invoice
     oldest_sample.invoice.invoiced_at = yesteryear
-    link_1: FamilySample = base_store.relate_sample(new_case, newest_sample, "unknown")
-    link_2: FamilySample = base_store.relate_sample(new_case, oldest_sample, "unknown")
+    link_1: CaseSample = base_store.relate_sample(new_case, newest_sample, "unknown")
+    link_2: CaseSample = base_store.relate_sample(new_case, oldest_sample, "unknown")
     base_store.session.add_all([link_1, link_2])
 
     # WHEN getting active cases
@@ -348,7 +348,7 @@ def test_sequenced_at(base_store: Store, helpers):
 
     # GIVEN a database with a case and a sequenced date
     new_case = add_case(helpers, base_store)
-    sample = helpers.add_sample(base_store, reads_updated_at=datetime.now())
+    sample = helpers.add_sample(base_store, last_sequenced_at=datetime.now())
     link = base_store.relate_sample(new_case, sample, "unknown")
     base_store.session.add(link)
 
@@ -598,12 +598,12 @@ def test_show_multiple_data_analysis(base_store: Store, helpers):
     data_analysis = Pipeline.BALSAMIC
     new_case = add_case(helpers, base_store, data_analysis=data_analysis)
     sample1 = helpers.add_sample(base_store)
-    link_1: FamilySample = base_store.relate_sample(new_case, sample1, "unknown")
+    link_1: CaseSample = base_store.relate_sample(new_case, sample1, "unknown")
     base_store.session.add(link_1)
     new_case2 = add_case(helpers, base_store, case_id="new_case2", data_analysis=data_analysis)
     sample2 = helpers.add_sample(base_store)
-    link_2: FamilySample = base_store.relate_sample(new_case, sample2, "unknown")
-    link_3: FamilySample = base_store.relate_sample(new_case2, sample2, "unknown")
+    link_2: CaseSample = base_store.relate_sample(new_case, sample2, "unknown")
+    link_3: CaseSample = base_store.relate_sample(new_case2, sample2, "unknown")
     base_store.session.add_all([link_2, link_3])
     base_store.session.commit()
 
@@ -868,7 +868,7 @@ def test_only_sequenced_cases(base_store: Store, helpers):
 
     # GIVEN a database with an sequenced case
     new_case = add_case(helpers, base_store)
-    sample = helpers.add_sample(base_store, reads_updated_at=datetime.now())
+    sample = helpers.add_sample(base_store, last_sequenced_at=datetime.now())
     link = base_store.relate_sample(new_case, sample, "unknown")
     base_store.session.add(link)
     neg_new_case = add_case(helpers, base_store, "neg_new_case")
@@ -1025,7 +1025,7 @@ def test_exclude_sequenced_cases(base_store: Store, helpers):
 
     # GIVEN a database with an sequenced case
     new_case = add_case(helpers, base_store)
-    sample = helpers.add_sample(base_store, reads_updated_at=datetime.now())
+    sample = helpers.add_sample(base_store, last_sequenced_at=datetime.now())
     link = base_store.relate_sample(new_case, sample, "unknown")
     base_store.session.add(link)
 
@@ -1177,12 +1177,12 @@ def test_samples_bool_true(base_store: Store, helpers):
         base_store,
         received_at=datetime.now(),
         prepared_at=datetime.now(),
-        reads_updated_at=datetime.now(),
+        last_sequenced_at=datetime.now(),
         delivered_at=datetime.now(),
     )
     assert sample.received_at
     assert sample.prepared_at
-    assert sample.reads_updated_at
+    assert sample.last_sequenced_at
     assert sample.delivered_at
     sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
     sample.invoice.invoiced_at = datetime.now()
@@ -1307,7 +1307,7 @@ def test_analysis_completed_at(base_store: Store, helpers):
     # GIVEN a database with an analysis that is completed
     analysis = helpers.add_analysis(base_store, completed_at=datetime.now())
     assert analysis.completed_at is not None
-    assert base_store._get_query(table=Family).count() == 1
+    assert base_store._get_query(table=Case).count() == 1
     assert base_store._get_query(table=Analysis).count() == 1
 
     # WHEN getting active cases
@@ -1342,8 +1342,8 @@ def test_one_of_two_samples_received(base_store: Store, helpers):
     new_case = add_case(helpers, base_store)
     sample_received = helpers.add_sample(base_store, "sample_received", received_at=datetime.now())
     sample_not_received = helpers.add_sample(base_store, "sample_not_received", received_at=None)
-    link_1: FamilySample = base_store.relate_sample(new_case, sample_received, "unknown")
-    link_2: FamilySample = base_store.relate_sample(new_case, sample_not_received, "unknown")
+    link_1: CaseSample = base_store.relate_sample(new_case, sample_received, "unknown")
+    link_2: CaseSample = base_store.relate_sample(new_case, sample_not_received, "unknown")
     base_store.session.add_all([link_1, link_2])
     assert sample_received.received_at is not None
     assert sample_not_received.received_at is None
@@ -1363,10 +1363,10 @@ def test_one_sequenced_sample(base_store: Store, helpers):
 
     # GIVEN a database with a case with a sequenced sample
     new_case = add_case(helpers, base_store)
-    sample = helpers.add_sample(base_store, reads_updated_at=datetime.now())
+    sample = helpers.add_sample(base_store, last_sequenced_at=datetime.now())
     link = base_store.relate_sample(new_case, sample, "unknown")
     base_store.session.add(link)
-    assert sample.reads_updated_at is not None
+    assert sample.last_sequenced_at is not None
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -1426,7 +1426,7 @@ def test_one_sample(base_store: Store, helpers):
     assert sample.received_at is None
     assert sample.prepared_at is None
     assert sample.delivered_at is None
-    assert sample.reads_updated_at is None
+    assert sample.last_sequenced_at is None
 
     # WHEN getting active cases
     cases = base_store.cases()

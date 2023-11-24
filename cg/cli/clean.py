@@ -210,7 +210,7 @@ def hk_bundle_files(
     size_cleaned: int = 0
     for analysis in analyses:
         LOG.info(f"Cleaning analysis {analysis}")
-        bundle_name: str = analysis.family.internal_id
+        bundle_name: str = analysis.case.internal_id
         hk_bundle_version: Optional[Version] = housekeeper_api.version(
             bundle=bundle_name, date=analysis.started_at
         )
@@ -230,7 +230,7 @@ def hk_bundle_files(
             f"date {analysis.started_at}"
         )
         version_files: list[File] = housekeeper_api.get_files(
-            bundle=analysis.family.internal_id, tags=tags, version=hk_bundle_version.id
+            bundle=analysis.case.internal_id, tags=tags, version=hk_bundle_version.id
         ).all()
         for version_file in version_files:
             file_path: Path = Path(version_file.full_path)
@@ -258,7 +258,12 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
     """Remove flow cells from the flow cells and demultiplexed runs folder."""
 
     directories_to_check: list[Path] = []
-    for path in [Path(context.flow_cells_dir), Path(context.demultiplexed_flow_cells_dir)]:
+    for path in [
+        Path(context.data_input.input_dir_path),
+        Path(context.flow_cells_dir),
+        Path(context.demultiplexed_flow_cells_dir),
+        Path(context.encryption.encryption_dir),
+    ]:
         directories_to_check.extend(get_directories_in_path(path))
     exit_code = EXIT_SUCCESS
     for flow_cell_directory in directories_to_check:

@@ -1,4 +1,4 @@
-from enum import Enum, StrEnum, IntEnum
+from enum import Enum, IntEnum, StrEnum
 
 
 class Gender(StrEnum):

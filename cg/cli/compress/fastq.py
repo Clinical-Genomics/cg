@@ -17,7 +17,7 @@ from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ def fastq_cmd(
     LOG.info("Running compress FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
-    cases: list[Family] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
+    cases: list[Case] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         LOG.info("No cases to compress")
         return None
@@ -84,7 +84,7 @@ def clean_fastq(context: CGConfig, case_id: Optional[str], days_back: int, dry_r
     store: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
 
-    cases: list[Family] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
+    cases: list[Case] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         return
 
