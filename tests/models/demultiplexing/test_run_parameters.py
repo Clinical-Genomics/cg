@@ -72,7 +72,10 @@ def test_run_parameters_hiseq_wrong_file(novaseq_6000_run_parameters_path: Path)
     with pytest.raises(RunParametersError) as exc_info:
         # THEN a RunParametersError is raised
         RunParametersHiSeq(run_parameters_path=novaseq_6000_run_parameters_path)
-    assert str(exc_info.value) == "The file parsed does not correspond to a HiSeq instrument"
+    assert (
+        f"Could not find node {RunParametersXMLNodes.APPLICATION_NAME} in the run parameters file"
+        in str(exc_info.value)
+    )
 
 
 def test_run_parameters_novaseq_6000(novaseq_6000_run_parameters_path: Path):
@@ -95,7 +98,10 @@ def test_run_parameters_novaseq_6000_wrong_file(novaseq_x_run_parameters_path: P
     with pytest.raises(RunParametersError) as exc_info:
         # THEN a RunParametersError is raised
         RunParametersNovaSeq6000(run_parameters_path=novaseq_x_run_parameters_path)
-    assert str(exc_info.value) == "The file parsed does not correspond to a NovaSeq6000 instrument"
+    assert (
+        str(exc_info.value)
+        == f"The file parsed does not correspond to {RunParametersXMLNodes.NOVASEQ_6000_APPLICATION}"
+    )
 
 
 def test_run_parameters_novaseq_x(novaseq_x_run_parameters_path: Path):
@@ -118,7 +124,25 @@ def test_run_parameters_novaseq_x_wrong_file(novaseq_6000_run_parameters_path: P
     with pytest.raises(RunParametersError) as exc_info:
         # THEN a RunParametersError is raised
         RunParametersNovaSeqX(run_parameters_path=novaseq_6000_run_parameters_path)
-    assert str(exc_info.value) == "The file parsed does not correspond to a NovaSeqX instrument"
+    assert (
+        f"Could not find node {RunParametersXMLNodes.INSTRUMENT_TYPE} in the run parameters"
+        in str(exc_info.value)
+    )
+
+
+def test_run_parameters_novaseq_x_file_wrong_instrument(run_parameters_wrong_instrument: Path):
+    """Test that initialising a NovaSeqX with a RunParameters file with a wrong instrument fails."""
+    # GIVEN a RunParameters file with a wrong instrument
+
+    # WHEN initialising the NovaSeqX
+    with pytest.raises(RunParametersError) as exc_info:
+        # THEN assert that an exception was raised since the control software version was not found
+        RunParametersNovaSeqX(run_parameters_path=run_parameters_wrong_instrument)
+
+    assert (
+        str(exc_info.value)
+        == f"The file parsed does not correspond to {RunParametersXMLNodes.NOVASEQ_X_INSTRUMENT}"
+    )
 
 
 @pytest.mark.parametrize(
@@ -241,7 +265,10 @@ def test_control_software_version_novaseq_6000_no_version(
         # THEN assert that an exception was raised since the control software version was not found
         run_parameters_missing_versions.control_software_version
 
-    assert "Could not determine control software version" in caplog.text
+    assert (
+        f"Could not find node with name {RunParametersXMLNodes.APPLICATION_VERSION} in XML tree"
+        in caplog.text
+    )
 
 
 @pytest.mark.parametrize(

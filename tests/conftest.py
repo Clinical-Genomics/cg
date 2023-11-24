@@ -1301,6 +1301,12 @@ def run_parameters_missing_versions_path(run_parameters_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
+def run_parameters_wrong_instrument(run_parameters_dir: Path) -> Path:
+    """Return a NovaSeqX run parameters file path with a wrong instrument value."""
+    return Path(run_parameters_dir, "RunParameters_novaseq_X_wrong_instrument.xml")
+
+
+@pytest.fixture(scope="session")
 def hiseq_x_single_index_run_parameters_path(
     hiseq_x_flow_cell_dir: Path,
 ) -> Path:

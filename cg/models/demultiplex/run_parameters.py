@@ -5,9 +5,9 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 from cg.constants.demultiplexing import RunParametersXMLNodes
-from cg.constants.sequencing import Sequencers, SEQUENCER_TYPES
-from cg.exc import RunParametersError
-from cg.io.xml import read_xml, validate_node_exists
+from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
+from cg.exc import RunParametersError, XMLError
+from cg.io.xml import get_tree_node, read_xml
 
 LOG = logging.getLogger(__name__)
 
@@ -27,6 +27,22 @@ class RunParameters:
             "RunParametersNovaSeq6000 or RunParametersNovaSeqX"
         )
 
+    def _validate_instrument(self, node_name: str, node_value: str):
+        """Fetches the node from an XML file and compares it with the expected value.
+        Raises:
+            RunParametersError if the node does not have the expected value."""
+        try:
+            application: ElementTree.Element | None = get_tree_node(
+                tree=self.tree, node_name=node_name
+            )
+        except XMLError:
+            raise RunParametersError(
+                f"Could not find node {node_name} in the run parameters file. "
+                "Check that the correct run parameters file is used"
+            )
+        if application.text != node_value:
+            raise RunParametersError(f"The file parsed does not correspond to {node_value}")
+
     def is_single_index(self) -> bool:
         """Return False if the sequencing is not HiSeq. Overriden in HiSeq"""
         return False
@@ -40,19 +56,13 @@ class RunParameters:
             raise RunParametersError("Index lengths are not the same!")
         return index_one_length
 
-    def get_tree_node(self, node_name: str, name: str) -> ElementTree.Element:
-        """Return the node of a tree given its name if it exists."""
-        xml_node = self.tree.find(node_name)
-        validate_node_exists(node=xml_node, name=name)
-        return xml_node
-
-    def get_node_string_value(self, node_name: str, name: str) -> str:
+    def get_node_string_value(self, node_name: str) -> str:
         """Return the value of the node as a string if its validation passes."""
-        return self.get_tree_node(node_name=node_name, name=name).text
+        return get_tree_node(tree=self.tree, node_name=node_name).text
 
-    def get_node_integer_value(self, node_name: str, name: str) -> int:
+    def get_node_integer_value(self, node_name: str) -> int:
         """Return the value of the node as an integer if its validation passes."""
-        return int(self.get_node_string_value(node_name=node_name, name=name))
+        return int(self.get_node_string_value(node_name=node_name))
 
     @property
     @abstractmethod
@@ -72,18 +82,22 @@ class RunParameters:
         """Return the sequencer associated with the current run parameters."""
         pass
 
+    @abstractmethod
     def get_index_1_cycles(self) -> int | None:
         """Return the number of cycles in the first index read."""
         pass
 
+    @abstractmethod
     def get_index_2_cycles(self) -> int | None:
         """Return the number of cycles in the second index read."""
         pass
 
+    @abstractmethod
     def get_read_1_cycles(self) -> int | None:
         """Return the number of cycles in the first read."""
         pass
 
+    @abstractmethod
     def get_read_2_cycles(self) -> int | None:
         """Return the number of cycles in the second read."""
         pass
@@ -105,18 +119,16 @@ class RunParametersHiSeq(RunParameters):
     """Specific class for parsing run parameters of HiSeq2500 sequencing."""
 
     def validate_instrument(self) -> None:
-        """Validate if a HiSeq file was used to instantiate the class.
-        Raises:
-            RunParametersError if the run parameters file is not HiSeq."""
-        node_name: str = RunParametersXMLNodes.APPLICATION_NAME
-        application: ElementTree.Element | None = self.tree.find(node_name)
-        if application is None or application.text != RunParametersXMLNodes.HISEQ_APPLICATION:
-            raise RunParametersError("The file parsed does not correspond to a HiSeq instrument")
+        """Validate if a HiSeq file was used to instantiate the class."""
+        self._validate_instrument(
+            node_name=RunParametersXMLNodes.APPLICATION_NAME,
+            node_value=RunParametersXMLNodes.HISEQ_APPLICATION,
+        )
 
     def is_single_index(self) -> bool:
         """Return whether the sequencing was done with a single index."""
         node_name: str = RunParametersXMLNodes.PLANNED_READS_HISEQ
-        reads: ElementTree.Element = self.get_tree_node(node_name=node_name, name="Planned Reads")
+        reads: ElementTree.Element = get_tree_node(tree=self.tree, node_name=node_name)
         return self.get_index_2_cycles() == 0 and len(list(reads)) == 3
 
     @property
@@ -133,52 +145,45 @@ class RunParametersHiSeq(RunParameters):
     def sequencer(self) -> str:
         """Return the sequencer associated with the current run parameters."""
         node_name: str = RunParametersXMLNodes.SEQUENCER_ID
-        sequencer: str = self.get_node_string_value(node_name=node_name, name="Sequencer ID")
+        sequencer: str = self.get_node_string_value(node_name=node_name)
         return SEQUENCER_TYPES.get(sequencer)
 
     def get_index_1_cycles(self) -> int:
         """Return the number of cycles in the first index read."""
         node_name: str = RunParametersXMLNodes.INDEX_1_HISEQ
-        return self.get_node_integer_value(node_name=node_name, name="length of index one")
+        return self.get_node_integer_value(node_name=node_name)
 
     def get_index_2_cycles(self) -> int:
         """Return the number of cycles in the second index read."""
         node_name: str = RunParametersXMLNodes.INDEX_2_HISEQ
-        return self.get_node_integer_value(node_name=node_name, name="length of index two")
+        return self.get_node_integer_value(node_name=node_name)
 
     def get_read_1_cycles(self) -> int:
         """Return the number of cycles in the first read."""
         node_name: str = RunParametersXMLNodes.READ_1_HISEQ
-        return self.get_node_integer_value(node_name=node_name, name="length of reads one")
+        return self.get_node_integer_value(node_name=node_name)
 
     def get_read_2_cycles(self) -> int:
         """Return the number of cycles in the second read."""
         node_name: str = RunParametersXMLNodes.READ_2_HISEQ
-        return self.get_node_integer_value(node_name=node_name, name="length of reads two")
+        return self.get_node_integer_value(node_name=node_name)
 
 
 class RunParametersNovaSeq6000(RunParameters):
     """Specific class for parsing run parameters of NovaSeq6000 sequencing."""
 
     def validate_instrument(self) -> None:
-        """Validate if a NovaSeq6000 file was used to instantiate the class.
-        Raises:
-            RunParametersError if the run parameters file is not NovaSeq6000."""
-        node_name: str = RunParametersXMLNodes.APPLICATION
-        application: ElementTree.Element | None = self.tree.find(node_name)
-        if (
-            application is None
-            or application.text != RunParametersXMLNodes.NOVASEQ_6000_APPLICATION
-        ):
-            raise RunParametersError(
-                "The file parsed does not correspond to a NovaSeq6000 instrument"
-            )
+        """Validate if a NovaSeq6000 file was used to instantiate the class."""
+        self._validate_instrument(
+            node_name=RunParametersXMLNodes.APPLICATION,
+            node_value=RunParametersXMLNodes.NOVASEQ_6000_APPLICATION,
+        )
 
     @property
     def control_software_version(self) -> str:
         """Return the control software version."""
         node_name: str = RunParametersXMLNodes.APPLICATION_VERSION
-        return self.get_node_string_value(node_name=node_name, name="control software version")
+        return self.get_node_string_value(node_name=node_name)
 
     @property
     def reagent_kit_version(self) -> str:
@@ -199,35 +204,33 @@ class RunParametersNovaSeq6000(RunParameters):
     def get_index_1_cycles(self) -> int:
         """Return the number of cycles in the first index read."""
         node_name: str = RunParametersXMLNodes.INDEX_1_NOVASEQ_6000
-        return self.get_node_integer_value(node_name=node_name, name="length of index one")
+        return self.get_node_integer_value(node_name=node_name)
 
     def get_index_2_cycles(self) -> int:
         """Return the number of cycles in the second index read."""
         node_name: str = RunParametersXMLNodes.INDEX_2_NOVASEQ_6000
-        return self.get_node_integer_value(node_name=node_name, name="length of index two")
+        return self.get_node_integer_value(node_name=node_name)
 
     def get_read_1_cycles(self) -> int:
         """Return the number of cycles in the first read."""
         node_name: str = RunParametersXMLNodes.READ_1_NOVASEQ_6000
-        return self.get_node_integer_value(node_name=node_name, name="length of reads one")
+        return self.get_node_integer_value(node_name=node_name)
 
     def get_read_2_cycles(self) -> int:
         """Return the number of cycles in the second read."""
         node_name: str = RunParametersXMLNodes.READ_2_NOVASEQ_6000
-        return self.get_node_integer_value(node_name=node_name, name="length of reads two")
+        return self.get_node_integer_value(node_name=node_name)
 
 
 class RunParametersNovaSeqX(RunParameters):
     """Specific class for parsing run parameters of NovaSeqX sequencing."""
 
     def validate_instrument(self) -> None:
-        """Validate if a NovaSeqX file was used to instantiate the class.
-        Raises:
-            RunParametersError if the run parameters file is not NovaSeqX."""
-        node_name: str = RunParametersXMLNodes.INSTRUMENT_TYPE
-        instrument: ElementTree.Element | None = self.tree.find(node_name)
-        if instrument is None or instrument.text != RunParametersXMLNodes.NOVASEQ_X_INSTRUMENT:
-            raise RunParametersError("The file parsed does not correspond to a NovaSeqX instrument")
+        """Validate if a NovaSeqX file was used to instantiate the class."""
+        self._validate_instrument(
+            node_name=RunParametersXMLNodes.INSTRUMENT_TYPE,
+            node_value=RunParametersXMLNodes.NOVASEQ_X_INSTRUMENT,
+        )
 
     @property
     def control_software_version(self) -> None:
@@ -248,8 +251,8 @@ class RunParametersNovaSeqX(RunParameters):
     def read_parser(self) -> dict[str, int]:
         """Return read and index cycle values parsed as a dictionary."""
         cycle_mapping: dict[str, int] = {}
-        planned_reads_tree: ElementTree.Element = self.get_tree_node(
-            node_name=RunParametersXMLNodes.PLANNED_READS_NOVASEQ_X, name="Planned Reads"
+        planned_reads_tree: ElementTree.Element = get_tree_node(
+            tree=self.tree, node_name=RunParametersXMLNodes.PLANNED_READS_NOVASEQ_X
         )
         planned_reads: list[ElementTree.Element] = planned_reads_tree.findall(
             RunParametersXMLNodes.INNER_READ
