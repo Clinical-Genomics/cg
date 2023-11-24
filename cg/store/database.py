@@ -1,5 +1,3 @@
-from typing import List
-
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.engine.reflection import Inspector
@@ -51,7 +49,7 @@ def drop_all_tables() -> None:
     Model.metadata.drop_all(bind=session.get_bind())
 
 
-def get_tables() -> List[str]:
+def get_tables() -> list[str]:
     """Get a list of all tables in status db."""
     engine: Engine = get_engine()
     inspector: Inspector = inspect(engine)
