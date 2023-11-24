@@ -1,7 +1,7 @@
 """Backup related CLI commands."""
 import logging
 from pathlib import Path
-from typing import Iterable, Union
+from typing import Iterable
 
 import click
 import housekeeper.store.models as hk_models
@@ -240,7 +240,7 @@ def _get_samples(status_api: Store, object_type: str, identifier: str) -> list[S
         "case": status_api.get_samples_by_case_id,
         "flow_cell": status_api.get_samples_from_flow_cell,
     }
-    samples: Union[Sample, list[Sample]] = get_samples[object_type](identifier)
+    samples: Sample | list[Sample] = get_samples[object_type](identifier)
     return samples if isinstance(samples, list) else [samples]
 
 

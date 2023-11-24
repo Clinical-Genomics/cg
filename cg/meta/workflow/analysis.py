@@ -4,7 +4,6 @@ import os
 import shutil
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Union
 
 import click
 from housekeeper.store.models import Bundle, Version
@@ -92,7 +91,7 @@ class AnalysisAPI(MetaAPI):
         """Get workflow manager for a given pipeline."""
         return WorkflowManager.Slurm.value
 
-    def get_case_path(self, case_id: str) -> Union[list[Path], Path]:
+    def get_case_path(self, case_id: str) -> list[Path] | Path:
         """Path to case working directory."""
         raise NotImplementedError
 
@@ -443,7 +442,7 @@ class AnalysisAPI(MetaAPI):
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
             self.status_db.session.commit()
 
-    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[list[Path], Path]) -> int:
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
         """Remove workflow run directory."""
 
         try:

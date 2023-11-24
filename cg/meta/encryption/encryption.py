@@ -4,7 +4,6 @@ import subprocess
 from io import TextIOWrapper
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Union
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import SPACE, FileExtensions
@@ -148,7 +147,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         encryption_dir: Path,
         flow_cell: FlowCellDirectoryData,
         pigz_binary_path: str,
-        sbatch_parameter: dict[str, Union[str, int]],
+        sbatch_parameter: dict[str, str | int],
         slurm_api: SlurmAPI,
         tar_api: TarAPI,
         dry_run: bool = False,

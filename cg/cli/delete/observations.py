@@ -1,7 +1,6 @@
 """Delete observations CLI."""
 
 import logging
-from typing import Union
 
 import click
 from sqlalchemy.orm import Query
@@ -31,7 +30,7 @@ def delete_observations(context: CGConfig, case_id: str, dry_run: bool, yes: boo
     """Delete a case from Loqusdb and reset the Loqusdb IDs in StatusDB."""
 
     case: Case = get_observations_case(context, case_id, upload=False)
-    observations_api: Union[MipDNAObservationsAPI, BalsamicObservationsAPI] = get_observations_api(
+    observations_api: MipDNAObservationsAPI | BalsamicObservationsAPI = get_observations_api(
         context, case
     )
 

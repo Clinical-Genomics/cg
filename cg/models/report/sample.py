@@ -1,5 +1,3 @@
-from typing import Union
-
 from pydantic import BaseModel, BeforeValidator
 from typing_extensions import Annotated
 
@@ -101,10 +99,5 @@ class SampleModel(BaseModel):
     tumour: Annotated[str, BeforeValidator(get_boolean_as_string)] = NA_FIELD
     application: ApplicationModel
     methods: MethodsModel
-    metadata: Union[
-        MipDNASampleMetadataModel,
-        BalsamicTargetedSampleMetadataModel,
-        BalsamicWGSSampleMetadataModel,
-        RnafusionSampleMetadataModel,
-    ]
+    metadata: MipDNASampleMetadataModel | BalsamicTargetedSampleMetadataModel | BalsamicWGSSampleMetadataModel | RnafusionSampleMetadataModel
     timestamps: TimestampModel

@@ -1,5 +1,4 @@
 import logging
-from typing import Union
 
 from housekeeper.store.models import File, Version
 
@@ -52,7 +51,7 @@ class BalsamicReportAPI(ReportAPI):
 
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: BalsamicAnalysis
-    ) -> Union[BalsamicTargetedSampleMetadataModel, BalsamicWGSSampleMetadataModel]:
+    ) -> BalsamicTargetedSampleMetadataModel | BalsamicWGSSampleMetadataModel:
         """Return sample metadata to include in the report."""
         sample_metrics: dict[str, BalsamicQCMetrics] = analysis_metadata.sample_metrics[
             sample.internal_id

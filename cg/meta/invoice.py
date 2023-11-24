@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any
 
 from pydantic.v1 import ValidationError
 
@@ -41,7 +41,7 @@ class InvoiceAPI:
             self.record_type = RecordType.Sample
             self.raw_records = self.invoice_obj.samples
 
-    def get_customer_by_cost_center(self, cost_center: str) -> Union[Customer, str]:
+    def get_customer_by_cost_center(self, cost_center: str) -> Customer | str:
         """Return the costumer based on cost center."""
         return (
             self.db.get_customer_by_internal_id(customer_internal_id=CustomerNames.cust999)

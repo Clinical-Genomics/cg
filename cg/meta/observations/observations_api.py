@@ -3,7 +3,6 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Union
 
 from housekeeper.store.models import Version
 
@@ -40,14 +39,14 @@ class ObservationsAPI:
     def upload(self, case: Case) -> None:
         """Upload observations to Loqusdb."""
         self.check_customer_loqusdb_permissions(case.customer)
-        input_files: Union[
-            MipDNAObservationsInputFiles, BalsamicObservationsInputFiles
-        ] = self.get_observations_input_files(case)
+        input_files: MipDNAObservationsInputFiles | BalsamicObservationsInputFiles = (
+            self.get_observations_input_files(case)
+        )
         self.load_observations(case=case, input_files=input_files)
 
     def get_observations_input_files(
         self, case: Case
-    ) -> Union[MipDNAObservationsInputFiles, BalsamicObservationsInputFiles]:
+    ) -> MipDNAObservationsInputFiles | BalsamicObservationsInputFiles:
         """Fetch input files from a case to upload to Loqusdb."""
         analysis: Analysis = case.analyses[0]
         analysis_date: datetime = analysis.started_at or analysis.completed_at
@@ -109,21 +108,21 @@ class ObservationsAPI:
             raise LoqusdbUploadCaseError
         LOG.info(f"Valid customer {customer.internal_id} for Loqusdb uploads")
 
-    def get_loqusdb_customers(self) -> Union[LoqusdbMipCustomers, LoqusdbBalsamicCustomers]:
+    def get_loqusdb_customers(self) -> LoqusdbMipCustomers | LoqusdbBalsamicCustomers:
         """Returns the customers that are entitled to Loqusdb uploads."""
         raise NotImplementedError
 
     def load_observations(
         self,
         case: Case,
-        input_files: Union[MipDNAObservationsInputFiles, BalsamicObservationsInputFiles],
+        input_files: MipDNAObservationsInputFiles | BalsamicObservationsInputFiles,
     ) -> None:
         """Load observation counts to Loqusdb."""
         raise NotImplementedError
 
     def extract_observations_files_from_hk(
         self, hk_version: Version
-    ) -> Union[MipDNAObservationsInputFiles, BalsamicObservationsInputFiles]:
+    ) -> MipDNAObservationsInputFiles | BalsamicObservationsInputFiles:
         """Extract observations files given a housekeeper version."""
         raise NotImplementedError
 

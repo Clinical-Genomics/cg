@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Union
 
 from pydantic.v1 import BaseModel, Field, conlist, validator
 
@@ -53,7 +52,7 @@ class FileDeliverable(BaseModel):
     tag: str
 
     @validator("path", "path_index", pre=True)
-    def path_exist(cls, file_path: Union[str, Path]) -> str | None:
+    def path_exist(cls, file_path: str | Path) -> str | None:
         if file_path is not None:
             path = Path(file_path)
             if not path.exists():

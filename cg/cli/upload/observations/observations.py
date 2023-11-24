@@ -3,7 +3,6 @@
 import contextlib
 import logging
 from datetime import datetime
-from typing import Union
 
 import click
 from pydantic.v1 import ValidationError
@@ -40,9 +39,9 @@ def upload_observations_to_loqusdb(context: CGConfig, case_id: str | None, dry_r
 
     with contextlib.suppress(LoqusdbError):
         case: Case = get_observations_case_to_upload(context, case_id)
-        observations_api: Union[
-            MipDNAObservationsAPI, BalsamicObservationsAPI
-        ] = get_observations_api(context, case)
+        observations_api: MipDNAObservationsAPI | BalsamicObservationsAPI = get_observations_api(
+            context, case
+        )
 
         if dry_run:
             LOG.info(f"Dry run. Would upload observations for {case.internal_id}.")

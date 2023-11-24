@@ -1,7 +1,7 @@
 """Handler to find business data objects."""
 import datetime as dt
 import logging
-from typing import Callable, Iterator, Union
+from typing import Callable, Iterator
 
 from sqlalchemy.orm import Query, Session
 
@@ -529,7 +529,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_pools_and_samples_for_invoice_by_invoice_id(
         self, *, invoice_id: int = None
-    ) -> list[Union[Pool, Sample]]:
+    ) -> list[Pool | Sample]:
         """Return all pools and samples for an invoice."""
         pools: list[Pool] = apply_pool_filter(
             pools=self._get_query(table=Pool),

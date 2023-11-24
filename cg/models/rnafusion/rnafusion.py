@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Union
 
 from pydantic.v1 import BaseModel, Field
 
@@ -49,11 +48,11 @@ class RnafusionParameters(PipelineParameters):
 class CommandArgs(BaseModel):
     """Model for arguments and options supported."""
 
-    log: Union[str, Path] | None
+    log: str | Path | None
     resume: bool | None
     profile: str | None
     stub: bool | None
-    config: Union[str, Path] | None
+    config: str | Path | None
     name: str | None
     revision: str | None
     wait: str | None
@@ -61,8 +60,8 @@ class CommandArgs(BaseModel):
     with_tower: bool | None
     use_nextflow: bool | None
     compute_env: str | None
-    work_dir: Union[str, Path] | None
-    params_file: Union[str, Path] | None
+    work_dir: str | Path | None
+    params_file: str | Path | None
 
 
 class RnafusionSampleSheetEntry(NextflowSampleSheetEntry):

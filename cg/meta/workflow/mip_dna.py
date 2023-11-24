@@ -1,5 +1,3 @@
-from typing import Union
-
 from cg.constants import DEFAULT_CAPTURE_KIT, Pipeline
 from cg.constants.constants import AnalysisType
 from cg.constants.gene_panel import GENOME_BUILD_37
@@ -51,9 +49,9 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
 
     def config_sample(
         self, link_obj: CaseSample, panel_bed: str | None
-    ) -> dict[str, Union[str, int, None]]:
+    ) -> dict[str, str | int | None]:
         """Return config sample data."""
-        sample_data: dict[str, Union[str, int]] = self.get_sample_data(link_obj=link_obj)
+        sample_data: dict[str, str | int] = self.get_sample_data(link_obj=link_obj)
         if sample_data["analysis_type"] == AnalysisType.WHOLE_GENOME_SEQUENCING:
             sample_data["capture_kit"]: str = panel_bed or DEFAULT_CAPTURE_KIT
         else:

@@ -1,8 +1,7 @@
-"""Module for Balsamic Analysis API"""
+"""Module for Balsamic Analysis API."""
 
 import logging
 from pathlib import Path
-from typing import Union
 
 from housekeeper.store.models import File, Version
 from pydantic.v1 import ValidationError
@@ -280,8 +279,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return sorted_pon_files[0].as_posix() if sorted_pon_files else None
 
     @staticmethod
-    def get_verified_gender(sample_data: dict) -> Union[Gender.FEMALE, Gender.MALE]:
-        """Takes a dict with samples and attributes, and returns a verified case gender provided by the customer"""
+    def get_verified_gender(sample_data: dict) -> str:
+        """Takes a dict with samples and attributes, and returns a verified case gender provided by the customer."""
 
         gender = next(iter(sample_data.values()))["gender"]
 
@@ -340,7 +339,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "normal": normal_sample_path,
         }
 
-    def get_latest_raw_file_data(self, case_id: str, tags: list) -> Union[dict, list]:
+    def get_latest_raw_file_data(self, case_id: str, tags: list) -> dict | list:
         """Retrieves the data of the latest file associated to a specific case ID and a list of tags."""
 
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
@@ -402,7 +401,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     @staticmethod
     def cast_metrics_type(
         sequencing_type: str, metrics: dict
-    ) -> Union[BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics]:
+    ) -> BalsamicTargetedQCMetrics | BalsamicWGSQCMetrics:
         """Cast metrics model type according to the sequencing type"""
 
         if metrics:

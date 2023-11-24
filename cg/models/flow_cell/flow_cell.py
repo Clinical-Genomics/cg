@@ -2,7 +2,7 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import Type, Union
+from typing import Type
 
 from pydantic import ValidationError
 from typing_extensions import Literal
@@ -119,7 +119,7 @@ class FlowCellDirectoryData:
     @property
     def sample_type(
         self,
-    ) -> Union[Type[FlowCellSampleBcl2Fastq], Type[FlowCellSampleBCLConvert]]:
+    ) -> Type[FlowCellSampleBcl2Fastq] | Type[FlowCellSampleBCLConvert]:
         """Return the sample class used in the flow cell."""
         if self.bcl_converter == BclConverter.BCL2FASTQ:
             return FlowCellSampleBcl2Fastq

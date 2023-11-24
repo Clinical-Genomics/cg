@@ -1,6 +1,5 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Union
 
 from pydantic.v1 import BaseModel, validator
 
@@ -22,7 +21,7 @@ class BalsamicConfigAnalysis(BaseModel):
     analysis_workflow: str
     sequencing_type: str
     BALSAMIC_version: str
-    config_creation_date: Union[datetime, str]
+    config_creation_date: datetime | str
 
 
 class BalsamicConfigSample(BaseModel):
