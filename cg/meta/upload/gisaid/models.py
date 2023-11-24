@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
@@ -14,8 +14,8 @@ class FastaFile(BaseModel):
 
 class GisaidAccession(BaseModel):
     log_message: str
-    accession_nr: Optional[str] = None
-    sample_id: Optional[str] = None
+    accession_nr: str | None = None
+    sample_id: str | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -51,20 +51,20 @@ class GisaidSample(BaseModel):
     fn: str
     covv_collection_date: str
     covv_subm_sample_id: str
-    covv_virus_name: Optional[str] = None
-    covv_orig_lab: Optional[str] = None
-    covv_type: Optional[str] = "betacoronavirus"
-    covv_passage: Optional[str] = "Original"
-    covv_location: Optional[str] = None
-    covv_host: Optional[str] = "Human"
-    covv_gender: Optional[str] = "unknown"
-    covv_patient_age: Optional[str] = "unknown"
-    covv_patient_status: Optional[str] = "unknown"
-    covv_seq_technology: Optional[str] = "Illumina NovaSeq"
-    covv_orig_lab_addr: Optional[str] = None
-    covv_subm_lab: Optional[str] = "Karolinska University Hospital"
-    covv_subm_lab_addr: Optional[str] = "171 76 Stockholm, Sweden"
-    covv_authors: Optional[str] = " ,".join(AUTHORS)
+    covv_virus_name: str | None = None
+    covv_orig_lab: str | None = None
+    covv_type: str | None = "betacoronavirus"
+    covv_passage: str | None = "Original"
+    covv_location: str | None = None
+    covv_host: str | None = "Human"
+    covv_gender: str | None = "unknown"
+    covv_patient_age: str | None = "unknown"
+    covv_patient_status: str | None = "unknown"
+    covv_seq_technology: str | None = "Illumina NovaSeq"
+    covv_orig_lab_addr: str | None = None
+    covv_subm_lab: str | None = "Karolinska University Hospital"
+    covv_subm_lab_addr: str | None = "171 76 Stockholm, Sweden"
+    covv_authors: str | None = " ,".join(AUTHORS)
 
     @model_validator(mode="before")
     @classmethod

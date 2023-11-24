@@ -1,7 +1,6 @@
 """Tests the findbusinessdata part of the Cg store API."""
 import logging
 from datetime import datetime
-from typing import Optional
 
 import pytest
 from sqlalchemy.orm import Query
@@ -15,9 +14,9 @@ from cg.store.models import (
     Application,
     ApplicationLimitations,
     ApplicationVersion,
-    Customer,
     Case,
     CaseSample,
+    Customer,
     Flowcell,
     Invoice,
     Pool,
@@ -896,7 +895,7 @@ def test_get_number_of_reads_for_sample_passing_q30_threshold(
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
 
     # GIVEN a metric for a specific sample
-    sample_metric: Optional[SampleLaneSequencingMetrics] = metrics.filter(
+    sample_metric: SampleLaneSequencingMetrics | None = metrics.filter(
         SampleLaneSequencingMetrics.sample_internal_id == sample_id
     ).first()
     assert sample_metric

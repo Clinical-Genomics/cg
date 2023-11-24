@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 from pydantic.v1 import ValidationError
 
@@ -85,13 +85,13 @@ class MipAnalysisAPI(AnalysisAPI):
         """Get case analysis sample info path"""
         return Path(self.root, case_id, "analysis", f"{case_id}_qc_sample_info.yaml")
 
-    def get_panel_bed(self, panel_bed: str = None) -> Optional[str]:
+    def get_panel_bed(self, panel_bed: str = None) -> str | None:
         """Check and return BED gene panel."""
         if not panel_bed:
             return None
         if panel_bed.endswith(FileExtensions.BED):
             return panel_bed
-        bed_version: Optional[BedVersion] = self.status_db.get_bed_version_by_short_name(
+        bed_version: BedVersion | None = self.status_db.get_bed_version_by_short_name(
             bed_version_short_name=panel_bed
         )
         if not bed_version:

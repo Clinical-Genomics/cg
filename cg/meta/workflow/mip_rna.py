@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Union
 
 from cg.constants import Pipeline
 from cg.constants.gene_panel import GENOME_BUILD_38
@@ -48,9 +48,7 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
             )
         return self._process
 
-    def config_sample(
-        self, link_obj, panel_bed: Optional[str] = None
-    ) -> dict[str, Union[str, int]]:
+    def config_sample(self, link_obj, panel_bed: str | None = None) -> dict[str, Union[str, int]]:
         sample_data: dict[str, Union[str, int]] = self.get_sample_data(link_obj)
         if link_obj.mother:
             sample_data[Pedigree.MOTHER.value]: str = link_obj.mother.internal_id

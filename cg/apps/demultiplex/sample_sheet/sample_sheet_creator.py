@@ -1,6 +1,6 @@
 """ Create a sample sheet for NovaSeq flow cells."""
 import logging
-from typing import Optional, Type, Union
+from typing import Type, Union
 
 from cg.apps.demultiplex.sample_sheet.index import (
     Index,
@@ -97,11 +97,11 @@ class SampleSheetCreator:
         sample_dict = sample.model_dump(by_alias=True)
         return [str(sample_dict[column]) for column in data_column_names]
 
-    def get_additional_sections_sample_sheet(self) -> Optional[list]:
+    def get_additional_sections_sample_sheet(self) -> list | None:
         """Return all sections of the sample sheet that are not the data section."""
         raise NotImplementedError("Impossible to get sample sheet sections from parent class")
 
-    def get_data_section_header_and_columns(self) -> Optional[list[list[str]]]:
+    def get_data_section_header_and_columns(self) -> list[list[str]] | None:
         """Return the header and column names of the data section of the sample sheet."""
         raise NotImplementedError("Impossible to get sample sheet sections from parent class")
 

@@ -1,5 +1,5 @@
 """Code for validating an upload via CLI"""
-from typing import Optional
+
 
 import click
 
@@ -13,7 +13,7 @@ from .utils import suggest_cases_to_upload
 @click.command()
 @click.argument("family_id", required=False)
 @click.pass_obj
-def validate(context: CGConfig, family_id: Optional[str]):
+def validate(context: CGConfig, family_id: str | None):
     """Validate a family of samples."""
 
     status_db: Store = context.status_db

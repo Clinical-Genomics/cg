@@ -2,7 +2,6 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import Optional
 
 import paramiko
 import requests
@@ -76,7 +75,7 @@ class NiptUploadAPI:
         LOG.debug(f"Flow cell {flow_cell.name} passed QC for case {case_id}.")
         return True
 
-    def get_housekeeper_results_file(self, case_id: str, tags: Optional[list] = None) -> str:
+    def get_housekeeper_results_file(self, case_id: str, tags: list | None = None) -> str:
         """Get the result file for a NIPT analysis from Housekeeper"""
 
         if not tags:

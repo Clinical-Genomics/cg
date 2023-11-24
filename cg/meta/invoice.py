@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 from pydantic.v1 import ValidationError
 
@@ -29,7 +29,7 @@ class InvoiceAPI:
         self.raw_records = []
         self._set_record_type()
         self.genologics_lims: FlaskLims = genologics_lims
-        self.invoice_info: Optional[InvoiceInfo] = None
+        self.invoice_info: InvoiceInfo | None = None
 
     def _set_record_type(self):
         """Define the record_type based on the invoice object.
@@ -57,8 +57,8 @@ class InvoiceAPI:
         return customer.invoice_contact
 
     def get_contact(
-        self, customer: Customer, customer_invoice_contact: Optional[User], msg: str
-    ) -> Optional[InvoiceContact]:
+        self, customer: Customer, customer_invoice_contact: User | None, msg: str
+    ) -> InvoiceContact | None:
         """Return the contact information."""
         try:
             contact = InvoiceContact(
@@ -74,7 +74,7 @@ class InvoiceAPI:
             self.log.append(msg)
             return None
 
-    def get_contact_info(self, cost_center: str) -> Optional[InvoiceContact]:
+    def get_contact_info(self, cost_center: str) -> InvoiceContact | None:
         """Return contact info for a customer."""
 
         msg = (
@@ -87,7 +87,7 @@ class InvoiceAPI:
             customer_invoice_contact=customer_invoice_contact, customer=customer, msg=msg
         )
 
-    def get_invoice_report(self, cost_center: str) -> Optional[dict]:
+    def get_invoice_report(self, cost_center: str) -> dict | None:
         """Return invoice information as dictionary to generate Excel report."""
 
         records: list[dict] = []
@@ -131,7 +131,7 @@ class InvoiceAPI:
             self.log.append("ValidationError in InvoiceReport class.")
             return None
 
-    def _discount_price(self, record: Sample or Pool, discount: int = 0) -> Optional[int]:
+    def _discount_price(self, record: Sample or Pool, discount: int = 0) -> int | None:
         """Return discount price for a sample or pool."""
         priority = self.get_priority(record, for_discount_price=True)
         full_price = getattr(record.application_version, f"price_{priority}")
@@ -142,7 +142,7 @@ class InvoiceAPI:
 
     def _cost_center_split_factor(
         self, price: int, cost_center: str, percent_kth: int, tag: str, version: str
-    ) -> Optional[int]:
+    ) -> int | None:
         """Return split price based on cost center."""
         if price:
             try:
@@ -186,9 +186,7 @@ class InvoiceAPI:
 
         return invoice_info
 
-    def get_application(
-        self, record: Sample or Pool, discount: int
-    ) -> Optional[InvoiceApplication]:
+    def get_application(self, record: Sample or Pool, discount: int) -> InvoiceApplication | None:
         """Return the application information."""
         try:
             application = InvoiceApplication(
@@ -265,7 +263,7 @@ class InvoiceAPI:
         """Set invoice_info."""
         self.invoice_info = invoice_info
 
-    def total_price(self) -> Optional[float]:
+    def total_price(self) -> float | None:
         """Return the total price for all records in the invoice."""
 
         discount = self.invoice_obj.discount

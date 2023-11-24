@@ -1,6 +1,5 @@
 """Model MIP sample info"""
 import datetime
-from typing import Optional
 
 from pydantic.v1 import BaseModel, Field, validator
 
@@ -8,8 +7,8 @@ from pydantic.v1 import BaseModel, Field, validator
 class MipBaseSampleInfo(BaseModel):
     """This model is used when validating the mip sample info file"""
 
-    family_id_: Optional[str] = Field(None, alias="family_id")
-    case_id: Optional[str]
+    family_id_: str | None = Field(None, alias="family_id")
+    case_id: str | None
     human_genome_build_: dict = Field(..., alias="human_genome_build")
     genome_build: str = None
     program_: dict = Field(None, alias="program")

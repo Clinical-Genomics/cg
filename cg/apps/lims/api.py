@@ -1,7 +1,7 @@
 """Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
-from typing import Optional, Union
+from typing import Union
 
 from dateutil.parser import parse as parse_date
 from genologics.entities import Artifact, Process, Sample
@@ -418,7 +418,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def _get_last_used_input_amount(
         self, input_amounts: list[tuple[dt.datetime, float]]
-    ) -> Optional[float]:
+    ) -> float | None:
         """Return the latest used input amount."""
         sorted_input_amounts: list[tuple[dt.datetime, float]] = self._sort_by_date_run(
             input_amounts

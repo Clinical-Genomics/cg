@@ -2,7 +2,6 @@
 
 import logging
 import os.path
-from typing import Optional
 
 from flask import Flask
 
@@ -45,7 +44,7 @@ class MockOsTicket(OsTicket):
 
     def open_ticket(
         self, attachment: dict, email: str, message: str, name: str, subject: str
-    ) -> Optional[str]:
+    ) -> str | None:
         """Open a new ticket through the REST API."""
         if self._should_fail:
             LOG.error("res.text: %s, reason: %s", self._ticket_nr, "Unknown reason")

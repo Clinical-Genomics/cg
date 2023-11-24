@@ -2,7 +2,7 @@
 import logging
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 import click
 import coloredlogs
@@ -57,7 +57,7 @@ def teardown_session():
 def base(
     context: click.Context,
     config: click.Path,
-    database: Optional[str],
+    database: str | None,
     log_level: str,
     verbose: bool,
 ):

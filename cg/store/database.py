@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.engine.base import Engine
@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session, scoped_session, sessionmaker
 from cg.exc import CgError
 from cg.store.models import Model
 
-SESSION: Optional[scoped_session] = None
-ENGINE: Optional[Engine] = None
+SESSION: scoped_session | None = None
+ENGINE: Engine | None = None
 
 
 def initialize_database(db_uri: str) -> None:
@@ -27,7 +27,7 @@ def get_session() -> Session:
     return SESSION
 
 
-def get_scoped_session_registry() -> Optional[scoped_session]:
+def get_scoped_session_registry() -> scoped_session | None:
     """Get the scoped session registry for status db."""
     return SESSION
 

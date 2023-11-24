@@ -12,7 +12,7 @@ import re
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 import click
 
@@ -148,15 +148,13 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
         return Path(self.get_case_fastq_path(case_id=case.internal_id), sample.internal_id)
 
-    def link_fastq_files(
-        self, case_id: str, sample_id: Optional[str], dry_run: bool = False
-    ) -> None:
+    def link_fastq_files(self, case_id: str, sample_id: str | None, dry_run: bool = False) -> None:
         case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         samples: list[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
         for sample_obj in samples:
             self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
 
-    def get_samples(self, case_id: str, sample_id: Optional[str] = None) -> list[Sample]:
+    def get_samples(self, case_id: str, sample_id: str | None = None) -> list[Sample]:
         """Returns a list of samples to configure
         If sample_id is specified, will return a list with only this sample_id.
         Otherwise, returns all samples in given case"""
@@ -236,7 +234,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def resolve_case_sample_id(
         self, sample: bool, ticket: bool, unique_id: Any
-    ) -> tuple[str, Optional[str]]:
+    ) -> tuple[str, str | None]:
         """Resolve case_id and sample_id w based on input arguments."""
         if ticket and sample:
             LOG.error("Flags -t and -s are mutually exclusive!")

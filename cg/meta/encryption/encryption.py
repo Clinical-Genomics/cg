@@ -4,7 +4,7 @@ import subprocess
 from io import TextIOWrapper
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Optional, Union
+from typing import Union
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import SPACE, FileExtensions
@@ -240,7 +240,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         )
         return SPACE.join(decryption_parameters)
 
-    def is_encryption_possible(self) -> Optional[bool]:
+    def is_encryption_possible(self) -> bool | None:
         """Check if requirements for encryption are meet.
         Raises:
             FlowCellError if sequencing is not ready, encryption is pending or complete.

@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Callable, Optional, Type
+from typing import Callable, Type
 
 from housekeeper.store.models import Archive, File
 from pydantic import BaseModel, ConfigDict
@@ -169,11 +169,9 @@ class SpringArchiveAPI:
                 file_id=file.id, retrieval_task_id=retrieval_task_id
             )
 
-    def get_sample(self, file: File) -> Optional[Sample]:
+    def get_sample(self, file: File) -> Sample | None:
         """Fetches the Sample corresponding to a File and logs if a Sample is not found."""
-        sample: Optional[Sample] = self.status_db.get_sample_by_internal_id(
-            file.version.bundle.name
-        )
+        sample: Sample | None = self.status_db.get_sample_by_internal_id(file.version.bundle.name)
         if not sample:
             LOG.warning(
                 f"No sample found in status_db corresponding to sample_id {file.version.bundle.name}."

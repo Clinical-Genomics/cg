@@ -3,7 +3,7 @@
 import contextlib
 import logging
 from datetime import datetime
-from typing import Optional, Union
+from typing import Union
 
 import click
 from pydantic.v1 import ValidationError
@@ -33,7 +33,7 @@ LOG = logging.getLogger(__name__)
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_obj
-def upload_observations_to_loqusdb(context: CGConfig, case_id: Optional[str], dry_run: bool):
+def upload_observations_to_loqusdb(context: CGConfig, case_id: str | None, dry_run: bool):
     """Upload observations from an analysis to Loqusdb."""
 
     click.echo(click.style("----------------- OBSERVATIONS -----------------"))
@@ -56,7 +56,7 @@ def upload_observations_to_loqusdb(context: CGConfig, case_id: Optional[str], dr
 @OPTION_DRY
 @click.pass_context
 def upload_available_observations_to_loqusdb(
-    context: click.Context, pipeline: Optional[Pipeline], dry_run: bool
+    context: click.Context, pipeline: Pipeline | None, dry_run: bool
 ):
     """Uploads the available observations to Loqusdb."""
 

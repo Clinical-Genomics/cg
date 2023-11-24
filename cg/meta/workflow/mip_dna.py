@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Union
 
 from cg.constants import DEFAULT_CAPTURE_KIT, Pipeline
 from cg.constants.constants import AnalysisType
@@ -50,14 +50,14 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
         return self._process
 
     def config_sample(
-        self, link_obj: CaseSample, panel_bed: Optional[str]
+        self, link_obj: CaseSample, panel_bed: str | None
     ) -> dict[str, Union[str, int, None]]:
         """Return config sample data."""
         sample_data: dict[str, Union[str, int]] = self.get_sample_data(link_obj=link_obj)
         if sample_data["analysis_type"] == AnalysisType.WHOLE_GENOME_SEQUENCING:
             sample_data["capture_kit"]: str = panel_bed or DEFAULT_CAPTURE_KIT
         else:
-            sample_data["capture_kit"]: Optional[str] = panel_bed or self.get_target_bed_from_lims(
+            sample_data["capture_kit"]: str | None = panel_bed or self.get_target_bed_from_lims(
                 case_id=link_obj.case.internal_id
             )
         if link_obj.mother:
