@@ -183,7 +183,7 @@ class TransferJob(BaseModel):
 class GetJobStatusResponse(BaseModel):
     """Model representing the response fields from a get_job_status post."""
 
-    job_id: int = Field(serialization_alias="id")
+    job_id: int = Field(alias="id")
     status: str
 
 
