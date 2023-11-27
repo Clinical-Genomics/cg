@@ -1,21 +1,24 @@
 """All models aggregated in a base class."""
 from dataclasses import dataclass
-from typing import Callable, Optional, Type
+from typing import Callable, Type
 
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Query, Session
 
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
+from cg.store.filters.status_customer_filters import (
+    CustomerFilter,
+    apply_customer_filter,
+)
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
 from cg.store.models import (
     Analysis,
     Application,
     ApplicationLimitations,
     ApplicationVersion,
-    Customer,
     Case,
     CaseSample,
+    Customer,
     Flowcell,
 )
 from cg.store.models import Model as ModelBase
@@ -111,7 +114,7 @@ class BaseHandler:
 
     def _get_filtered_case_query(
         self,
-        case_action: Optional[str],
+        case_action: str | None,
         customer_id: str,
         data_analysis: str,
         days: int,

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, Optional
+from typing import Callable
 
 from sqlalchemy.orm import Query
 
@@ -31,10 +31,10 @@ def filter_flow_cells_with_statuses(
 def apply_flow_cell_filter(
     flow_cells: Query,
     filter_functions: list[Callable],
-    case: Optional[Case] = None,
-    flow_cell_name: Optional[str] = None,
-    name_search: Optional[str] = None,
-    flow_cell_statuses: Optional[list[str]] = None,
+    case: Case | None = None,
+    flow_cell_name: str | None = None,
+    name_search: str | None = None,
+    flow_cell_statuses: list[str] | None = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
