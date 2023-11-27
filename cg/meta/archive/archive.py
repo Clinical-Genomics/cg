@@ -78,13 +78,17 @@ class SpringArchiveAPI:
         selected_files: [list[FileAndSample]] = filter_files_on_archive_location(
             files_and_samples=files_and_samples, archive_location=archive_location
         )
-        archive_task_id: int = self.archive_files(
-            files=selected_files, archive_location=archive_location
-        )
-        self.housekeeper_api.add_archives(
-            files=[Path(file_and_sample.file.path) for file_and_sample in selected_files],
-            archive_task_id=archive_task_id,
-        )
+        if selected_files:
+            LOG.info(f"Will try to archive {len(selected_files)} to {archive_location}")
+            archive_task_id: int = self.archive_files(
+                files=selected_files, archive_location=archive_location
+            )
+            self.housekeeper_api.add_archives(
+                files=[Path(file_and_sample.file.path) for file_and_sample in selected_files],
+                archive_task_id=archive_task_id,
+            )
+        else:
+            LOG.info(f"No files to archive for archive location: {archive_location}")
 
     def archive_all_non_archived_spring_files(self, spring_file_count_limit: int | None) -> None:
         """Archives all non archived spring files. If a limit is provided, the amount of files archived are limited
