@@ -6,7 +6,7 @@ from pathlib import Path
 from urllib.parse import urljoin
 
 from housekeeper.store.models import File
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from requests.models import Response
 
 from cg.constants.constants import APIMethods
@@ -179,7 +179,7 @@ class TransferJob(BaseModel):
     """Model representing th response fields of an archive or retrieve reqeust to the Dataflow
     API."""
 
-    job_id: int
+    job_id: int = Field(alias="jobId")
 
 
 class SubJob(BaseModel):
