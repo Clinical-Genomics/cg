@@ -7,7 +7,8 @@ import shutil
 from copy import deepcopy
 from datetime import MAXYEAR, datetime, timedelta
 from pathlib import Path
-from typing import Any, Generator, Union
+from subprocess import CompletedProcess
+from typing import Any, Generator
 
 import pytest
 from housekeeper.store.models import File, Version
@@ -1722,8 +1723,8 @@ def analysis_store_trio(analysis_store: Store) -> Generator[Store, None, None]:
     yield analysis_store
 
 
-@pytest.fixture(name="analysis_store_single_case")
-def analysis_store_single(
+@pytest.fixture
+def analysis_store_single_case(
     base_store: Store, analysis_family_single_case: Store, helpers: StoreHelpers
 ):
     """Set up a store instance with a single ind case for testing analysis API."""
@@ -2400,7 +2401,7 @@ def context_config(
             "tower_pipeline": "taxprofiler",
         },
         "scout": {
-            "binary_path": "echo",
+            "binary_path": "bin/scout",
             "config_path": "scout-stage.yaml",
         },
         "statina": {
@@ -3159,7 +3160,7 @@ def store_with_sequencing_metrics(
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
-    sample_sequencing_metrics_details: list[Union[str, str, int, int, float, int]] = [
+    sample_sequencing_metrics_details: list[str | int | float] = [
         (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
         (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 2, 2_000_000, 85.5, 30),
@@ -3281,6 +3282,18 @@ def flow_cell_encryption_api(
     )
     flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=True)
     return flow_cell_encryption_api
+
+
+def create_process_response(
+    return_code: int = 0, args: str = "", std_out: str = "", std_err: str = ""
+) -> CompletedProcess:
+    """Returns a CompletedProcess object with default parameters."""
+    return CompletedProcess(
+        args=args,
+        returncode=return_code,
+        stderr=std_err.encode("utf-8"),
+        stdout=std_out.encode("utf-8"),
+    )
 
 
 # Downsample

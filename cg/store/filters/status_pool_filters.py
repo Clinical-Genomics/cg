@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, Optional
+from typing import Callable
 
 from sqlalchemy.orm import Query
 
@@ -74,13 +74,13 @@ def filter_pools_by_customer(pools: Query, customer: Customer, **kwargs) -> Quer
 def apply_pool_filter(
     filter_functions: list[Callable],
     pools: Query,
-    invoice_id: Optional[int] = None,
-    entry_id: Optional[int] = None,
-    name: Optional[str] = None,
-    customer_ids: Optional[list[int]] = None,
-    name_enquiry: Optional[str] = None,
-    order_enquiry: Optional[str] = None,
-    customer: Optional[Customer] = None,
+    invoice_id: int | None = None,
+    entry_id: int | None = None,
+    name: str | None = None,
+    customer_ids: list[int] | None = None,
+    name_enquiry: str | None = None,
+    order_enquiry: str | None = None,
+    customer: Customer | None = None,
 ) -> Query:
     """Apply filtering functions to the pool queries and return filtered results"""
 

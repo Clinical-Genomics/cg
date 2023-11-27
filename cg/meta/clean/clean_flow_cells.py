@@ -1,7 +1,6 @@
 """An API that handles the cleaning of flow cells."""
 import logging
 from pathlib import Path
-from typing import Optional
 
 from housekeeper.store.models import File
 
@@ -135,7 +134,7 @@ class CleanFlowCellAPI:
             )
         return True
 
-    def get_flow_cell_from_status_db(self) -> Optional[Flowcell]:
+    def get_flow_cell_from_status_db(self) -> Flowcell | None:
         """
         Get the flow cell entry from StatusDB.
         Raises:
@@ -146,7 +145,7 @@ class CleanFlowCellAPI:
             raise ValueError(f"Flow cell {self.flow_cell.id} not found in StatusDB.")
         return flow_cell
 
-    def get_sequencing_metrics_for_flow_cell(self) -> Optional[list[SampleLaneSequencingMetrics]]:
+    def get_sequencing_metrics_for_flow_cell(self) -> list[SampleLaneSequencingMetrics] | None:
         """
         Get the SampleLaneSequencingMetrics entries for a flow cell.
         Raises:

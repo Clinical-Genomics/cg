@@ -4,7 +4,6 @@ import os
 import shutil
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Optional, Union
 
 import click
 from housekeeper.store.models import Bundle, Version
@@ -92,7 +91,7 @@ class AnalysisAPI(MetaAPI):
         """Get workflow manager for a given pipeline."""
         return WorkflowManager.Slurm.value
 
-    def get_case_path(self, case_id: str) -> Union[list[Path], Path]:
+    def get_case_path(self, case_id: str) -> list[Path] | Path:
         """Path to case working directory."""
         raise NotImplementedError
 
@@ -115,7 +114,7 @@ class AnalysisAPI(MetaAPI):
         """
         raise NotImplementedError
 
-    def get_bundle_deliverables_type(self, case_id: str) -> Optional[str]:
+    def get_bundle_deliverables_type(self, case_id: str) -> str | None:
         return None
 
     @staticmethod
@@ -227,9 +226,7 @@ class AnalysisAPI(MetaAPI):
             LOG.warning("Could not retrieve %s workflow version!", self.pipeline)
             return "0.0.0"
 
-    def set_statusdb_action(
-        self, case_id: str, action: Optional[str], dry_run: bool = False
-    ) -> None:
+    def set_statusdb_action(self, case_id: str, action: str | None, dry_run: bool = False) -> None:
         """
         Set one of the allowed actions on a case in StatusDB.
         """
@@ -331,7 +328,7 @@ class AnalysisAPI(MetaAPI):
             self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
             self.fastq_handler.remove_files(value)
 
-    def get_target_bed_from_lims(self, case_id: str) -> Optional[str]:
+    def get_target_bed_from_lims(self, case_id: str) -> str | None:
         """Get target bed filename from LIMS."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample: Sample = case.links[0].sample
@@ -342,7 +339,7 @@ class AnalysisAPI(MetaAPI):
         target_bed_shortname: str = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if not target_bed_shortname:
             return None
-        bed_version: Optional[BedVersion] = self.status_db.get_bed_version_by_short_name(
+        bed_version: BedVersion | None = self.status_db.get_bed_version_by_short_name(
             bed_version_short_name=target_bed_shortname
         )
         if not bed_version:
@@ -422,7 +419,7 @@ class AnalysisAPI(MetaAPI):
         """
         return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
 
-    def get_additional_naming_metadata(self, sample_obj: Sample) -> Optional[str]:
+    def get_additional_naming_metadata(self, sample_obj: Sample) -> str | None:
         return None
 
     def get_latest_metadata(self, case_id: str) -> AnalysisModel:
@@ -445,7 +442,7 @@ class AnalysisAPI(MetaAPI):
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
             self.status_db.session.commit()
 
-    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[list[Path], Path]) -> int:
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
         """Remove workflow run directory."""
 
         try:

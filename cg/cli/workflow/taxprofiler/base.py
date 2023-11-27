@@ -1,7 +1,6 @@
 """CLI support to create config and/or start TAXPROFILER."""
 
 import logging
-from typing import Optional
 
 import click
 from pydantic.v1 import ValidationError
@@ -95,7 +94,7 @@ def run(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
-    nf_tower_id: Optional[str],
+    nf_tower_id: str | None,
     dry_run: bool,
 ) -> None:
     """Run taxprofiler analysis for a case."""
@@ -164,7 +163,7 @@ def start(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
-    nf_tower_id: Optional[str],
+    nf_tower_id: str | None,
     dry_run: bool,
 ) -> None:
     """Start full workflow for case id."""

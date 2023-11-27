@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import Optional
 
 from sqlalchemy.orm import Query, Session
 from typing_extensions import Literal
@@ -9,13 +8,22 @@ from cg.constants import CASE_ACTIONS, FlowCellStatus, Pipeline
 from cg.constants.constants import CaseActions
 from cg.constants.invoice import CustomerNames
 from cg.store.api.base import BaseHandler
-from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
-from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
+from cg.store.filters.status_analysis_filters import (
+    AnalysisFilter,
+    apply_analysis_filter,
+)
+from cg.store.filters.status_application_filters import (
+    ApplicationFilter,
+    apply_application_filter,
+)
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_flow_cell_filters import FlowCellFilter, apply_flow_cell_filter
+from cg.store.filters.status_flow_cell_filters import (
+    FlowCellFilter,
+    apply_flow_cell_filter,
+)
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
-from cg.store.models import Analysis, Customer, Case, Flowcell, Pool, Sample
+from cg.store.models import Analysis, Case, Customer, Flowcell, Pool, Sample
 
 
 class StatusHandler(BaseHandler):
@@ -123,7 +131,7 @@ class StatusHandler(BaseHandler):
         internal_id: str = None,
         name: str = None,
         days: int = 0,
-        case_action: Optional[str] = None,
+        case_action: str | None = None,
         priority: str = None,
         customer_id: str = None,
         exclude_customer_id: str = None,
@@ -236,7 +244,7 @@ class StatusHandler(BaseHandler):
             entry_id=entry_id,
         ).first()
 
-    def get_sample_by_internal_id(self, internal_id: str) -> Optional[Sample]:
+    def get_sample_by_internal_id(self, internal_id: str) -> Sample | None:
         """Return a sample by lims id."""
         return apply_sample_filter(
             filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID],

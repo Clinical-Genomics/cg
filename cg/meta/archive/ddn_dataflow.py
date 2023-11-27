@@ -3,7 +3,6 @@ import logging
 from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
-from typing import Optional
 from urllib.parse import urljoin
 
 from housekeeper.store.models import File
@@ -170,7 +169,7 @@ class AuthToken(BaseModel):
 
     access: str
     expire: int
-    refresh: Optional[str] = None
+    refresh: str | None = None
 
 
 class TransferJob(BaseModel):
