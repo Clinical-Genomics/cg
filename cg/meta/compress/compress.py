@@ -310,7 +310,7 @@ class CompressAPI:
     def get_fastq_tag_names(self, spring_path: Path) -> list[str]:
         """Returns a list containing all non-spring tag names of the specified file,
         together with the fastq tag name."""
-        spring_file: File = self.hk_api.files(path=spring_path.as_posix()).first()
+        spring_file: File = self.hk_api.get_file_insensitive_path(path=spring_path)
         spring_file_tags: list[str] = self.hk_api.get_tag_names_from_file(spring_file)
         spring_file_tags.remove(SequencingFileTag.SPRING)
         return spring_file_tags + [SequencingFileTag.FASTQ]
