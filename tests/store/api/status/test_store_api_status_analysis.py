@@ -1,6 +1,5 @@
 """This script tests the cli methods to add cases to status-db"""
 from datetime import datetime
-from typing import Union
 
 from sqlalchemy.orm import Query
 
@@ -224,7 +223,7 @@ def test_all_samples_and_analysis_completed(
     test_analysis: Analysis = helpers.add_analysis(base_store, completed_at=timestamp_now)
 
     # Given a completed analysis
-    test_analysis.case.action: Union[None, str] = None
+    test_analysis.case.action: str | None = None
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
     link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)

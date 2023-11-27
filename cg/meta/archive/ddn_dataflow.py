@@ -3,7 +3,6 @@ import logging
 from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
-from typing import Optional
 from urllib.parse import urljoin
 
 from housekeeper.store.models import File
@@ -165,7 +164,7 @@ class AuthToken(BaseModel):
 
     access: str
     expire: int
-    refresh: Optional[str] = None
+    refresh: str | None = None
 
 
 class TransferJob(BaseModel):
@@ -192,28 +191,28 @@ class SubJob(BaseModel):
 class GetJobStatusResponse(BaseModel):
     """Model representing the response fields from a get_job_status post."""
 
-    request_date: Optional[datetime] = None
-    operation: Optional[str] = None
+    request_date: datetime | None = None
+    operation: str | None = None
     job_id: int
-    type: Optional[str] = None
-    status: Optional[int] = None
+    type: str | None = None
+    status: int | None = None
     description: str
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-    durationTime: Optional[int] = None
-    priority: Optional[int] = None
-    progress: Optional[float] = None
-    subjobs: Optional[list[SubJob]] = None
+    start_date: datetime | None = None
+    end_date: datetime | None = None
+    durationTime: int | None = None
+    priority: int | None = None
+    progress: float | None = None
+    subjobs: list[SubJob] | None = None
 
 
 class GetJobStatusPayload(BaseModel):
     """Model representing the payload for a get_job_status request."""
 
     job_id: int
-    subjob_id: Optional[int] = None
-    related_jobs: Optional[bool] = None
-    main_subjob: Optional[bool] = None
-    debug: Optional[bool] = None
+    subjob_id: int | None = None
+    related_jobs: bool | None = None
+    main_subjob: bool | None = None
+    debug: bool | None = None
 
     def post_request(self, url: str, headers: dict) -> GetJobStatusResponse:
         """Sends a request to the given url with the given headers, and its own content as

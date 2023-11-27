@@ -1,7 +1,6 @@
 """Functions interacting with housekeeper in the DemuxPostProcessingAPI."""
 import logging
 from pathlib import Path
-from typing import Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
@@ -96,7 +95,7 @@ def add_sample_fastq_files_to_housekeeper(
     sample_internal_ids: list[str] = flow_cell.sample_sheet.get_sample_ids()
 
     for sample_internal_id in sample_internal_ids:
-        sample_fastq_paths: Optional[list[Path]] = get_sample_fastqs_from_flow_cell(
+        sample_fastq_paths: list[Path] | None = get_sample_fastqs_from_flow_cell(
             flow_cell_directory=flow_cell.path, sample_internal_id=sample_internal_id
         )
 
