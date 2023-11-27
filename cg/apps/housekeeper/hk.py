@@ -137,9 +137,9 @@ class HousekeeperAPI:
         file: File = self.files(path=path.as_posix()).first()
         if not file:
             if path.is_absolute():
-                file = self.files(path=str(path).replace(self.root_dir, "")).first()
+                file = self.files(path=str(path).replace(f"{self.root_dir}/", "")).first()
             else:
-                file = self.files(path=self.root_dir + str(path)).first()
+                file = self.files(path=f"{self.root_dir}/{path}").first()
         return file
 
     @staticmethod
