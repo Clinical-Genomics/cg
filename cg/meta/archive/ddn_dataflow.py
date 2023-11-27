@@ -135,6 +135,13 @@ class TransferPayload(BaseModel):
             The job ID of the launched transfer task.
         """
 
+        LOG.info(
+            "Sending request with headers: \n"
+            + f"{headers} \n"
+            + "and body: \n"
+            + f"{self.model_dump()}"
+        )
+
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=url,
@@ -222,6 +229,14 @@ class GetJobStatusPayload(BaseModel):
         Raises:
              HTTPError if the response code is not ok.
         """
+
+        LOG.info(
+            "Sending request with headers: \n"
+            + f"{headers} \n"
+            + "and body: \n"
+            + f"{self.model_dump()}"
+        )
+
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=url,
