@@ -1,5 +1,5 @@
 """RNAfusion delivery report API."""
-from typing import Optional
+
 
 from cg.constants import (
     REQUIRED_APPLICATION_FIELDS,
@@ -72,7 +72,7 @@ class RnafusionReportAPI(ReportAPI):
         """Checks if the report is accredited or not. Rnafusion is not an accredited workflow."""
         return False
 
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
         """Return file path of the uploaded to Scout file given its tag."""
         return None
 

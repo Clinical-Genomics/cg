@@ -1,7 +1,6 @@
 import logging
 import re
 from pathlib import Path
-from typing import Optional
 
 from housekeeper.store.models import Version
 
@@ -163,7 +162,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         )
 
     @staticmethod
-    def extract_generic_filepath(file_path: Optional[str]) -> Optional[str]:
+    def extract_generic_filepath(file_path: str | None) -> str | None:
         """Remove a file's suffix and identifying integer or X/Y
         Example:
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes

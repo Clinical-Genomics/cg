@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from pydantic.v1 import validator
 
@@ -70,13 +70,13 @@ class MIPMetricsDeliverables(MetricsDeliverables):
         "MEDIAN_TARGET_COVERAGE": MedianTargetCoverage,
         "gender": GenderCheck,
     }
-    duplicate_reads: Optional[list[DuplicateReads]]
-    mapped_reads: Optional[list[MIPMappedReads]]
-    mean_insert_size: Optional[list[MeanInsertSize]]
-    median_target_coverage: Optional[list[MedianTargetCoverage]]
-    predicted_sex: Optional[list[GenderCheck]]
+    duplicate_reads: list[DuplicateReads] | None
+    mapped_reads: list[MIPMappedReads] | None
+    mean_insert_size: list[MeanInsertSize] | None
+    median_target_coverage: list[MedianTargetCoverage] | None
+    predicted_sex: list[GenderCheck] | None
     sample_metric_to_parse: list[str] = SAMPLE_METRICS_TO_PARSE
-    sample_id_metrics: Optional[list[MIPParsedMetrics]]
+    sample_id_metrics: list[MIPParsedMetrics] | None
 
     @validator("duplicate_reads", always=True)
     def set_duplicate_reads(cls, _, values: dict) -> list[DuplicateReads]:

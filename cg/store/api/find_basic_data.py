@@ -1,6 +1,5 @@
 """Handler to find basic data objects"""
 import datetime as dt
-from typing import Optional
 
 from sqlalchemy.orm import Query, Session
 
@@ -78,7 +77,7 @@ class FindBasicDataHandler(BaseHandler):
             .all()
         )
 
-    def get_current_application_version_by_tag(self, tag: str) -> Optional[ApplicationVersion]:
+    def get_current_application_version_by_tag(self, tag: str) -> ApplicationVersion | None:
         """Return the current application version for an application tag."""
         application = self.get_application_by_tag(tag=tag)
         if not application:

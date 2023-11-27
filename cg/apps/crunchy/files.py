@@ -1,9 +1,8 @@
 import logging
 import tempfile
-from datetime import datetime
+from datetime import date, datetime
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Optional
 
 from cg.apps.crunchy.models import CrunchyFile, CrunchyMetadata
 from cg.constants.constants import FileFormat
@@ -64,7 +63,7 @@ def get_crunchy_metadata(metadata_path: Path) -> CrunchyMetadata:
     return metadata
 
 
-def get_file_updated_at(crunchy_metadata: CrunchyMetadata) -> Optional[datetime.date]:
+def get_file_updated_at(crunchy_metadata: CrunchyMetadata) -> date | None:
     """Check if a SPRING metadata file has been updated and return the date when updated"""
     return crunchy_metadata.files[0].updated
 

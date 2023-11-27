@@ -1,6 +1,5 @@
 """Fixtures for observations."""
 
-from typing import Optional
 
 import pytest
 
@@ -42,14 +41,14 @@ class MockLoqusdbAPI(LoqusdbAPI):
         return dict(variants=15)
 
     @staticmethod
-    def get_case(*args, **kwargs) -> Optional[dict]:
+    def get_case(*args, **kwargs) -> dict | None:
         """Mock get_case method."""
         _ = args
         _ = kwargs
         return {"case_id": "case_id", LOQUSDB_ID: "123"}
 
     @staticmethod
-    def get_duplicate(*args, **kwargs) -> Optional[dict]:
+    def get_duplicate(*args, **kwargs) -> dict | None:
         """Mock get_duplicate method."""
         _ = args
         _ = kwargs

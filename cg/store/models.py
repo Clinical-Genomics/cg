@@ -1,6 +1,5 @@
 import datetime as dt
 import re
-from typing import Optional
 
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 from sqlalchemy.orm import declarative_base
@@ -421,16 +420,16 @@ class Case(Model, PriorityMixin):
         self._panels = ",".join(panel_list) if panel_list else None
 
     @property
-    def latest_ticket(self) -> Optional[str]:
+    def latest_ticket(self) -> str | None:
         """Returns the last ticket the family was ordered in"""
         return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
-    def latest_analyzed(self) -> Optional[dt.datetime]:
+    def latest_analyzed(self) -> dt.datetime | None:
         return self.analyses[0].completed_at if self.analyses else None
 
     @property
-    def latest_sequenced(self) -> Optional[dt.datetime]:
+    def latest_sequenced(self) -> dt.datetime | None:
         sequenced_dates = []
         for link in self.links:
             if link.sample.application_version.application.is_external:
