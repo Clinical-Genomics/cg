@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic.v1 import BaseModel, constr, validator
 
 from cg.constants import DataDelivery
@@ -18,23 +16,23 @@ from cg.store.models import Application, Case, Organism, Panel, Pool, Sample
 
 class OptionalIntValidator:
     @classmethod
-    def str_to_int(cls, v: str) -> Optional[int]:
+    def str_to_int(cls, v: str) -> int | None:
         return int(v) if v else None
 
 
 class OptionalFloatValidator:
     @classmethod
-    def str_to_float(cls, v: str) -> Optional[float]:
+    def str_to_float(cls, v: str) -> float | None:
         return float(v) if v else None
 
 
 class OrderInSample(BaseModel):
     # Order portal specific
-    internal_id: Optional[constr(max_length=Sample.internal_id.property.columns[0].type.length)]
+    internal_id: constr(max_length=Sample.internal_id.property.columns[0].type.length) | None
     _suitable_project: OrderType = None
     application: constr(max_length=Application.tag.property.columns[0].type.length)
-    comment: Optional[constr(max_length=Sample.comment.property.columns[0].type.length)]
-    skip_reception_control: Optional[bool] = None
+    comment: constr(max_length=Sample.comment.property.columns[0].type.length) | None
+    skip_reception_control: bool | None = None
     data_analysis: Pipeline
     data_delivery: DataDelivery
     name: constr(
@@ -54,61 +52,57 @@ class OrderInSample(BaseModel):
 class Of1508Sample(OrderInSample):
     # Orderform 1508
     # Order portal specific
-    internal_id: Optional[constr(max_length=Sample.internal_id.property.columns[0].type.length)]
+    internal_id: constr(max_length=Sample.internal_id.property.columns[0].type.length) | None
     # "required for new samples"
-    name: Optional[
-        constr(
-            regex=NAME_PATTERN,
-            min_length=2,
-            max_length=Sample.name.property.columns[0].type.length,
-        )
-    ]
+    name: constr(
+        regex=NAME_PATTERN,
+        min_length=2,
+        max_length=Sample.name.property.columns[0].type.length,
+    ) | None
 
     # customer
-    age_at_sampling: Optional[float]
+    age_at_sampling: float | None
     family_name: constr(
         regex=NAME_PATTERN,
         min_length=2,
         max_length=Case.name.property.columns[0].type.length,
     )
-    case_internal_id: Optional[
-        constr(max_length=Sample.internal_id.property.columns[0].type.length)
-    ]
+    case_internal_id: constr(max_length=Sample.internal_id.property.columns[0].type.length) | None
     sex: SexEnum = SexEnum.unknown
     tumour: bool = False
-    source: Optional[str]
-    control: Optional[str]
-    volume: Optional[str]
-    container: Optional[ContainerEnum]
+    source: str | None
+    control: str | None
+    volume: str | None
+    container: ContainerEnum | None
     # "required if plate for new samples"
-    container_name: Optional[str]
-    well_position: Optional[str]
+    container_name: str | None
+    well_position: str | None
     # "Required if samples are part of trio/family"
-    mother: Optional[
-        constr(regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length)
-    ]
-    father: Optional[
-        constr(regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length)
-    ]
+    mother: constr(
+        regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length
+    ) | None
+    father: constr(
+        regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length
+    ) | None
     # This information is required for panel analysis
-    capture_kit: Optional[str]
+    capture_kit: str | None
     # This information is required for panel- or exome analysis
-    elution_buffer: Optional[str]
-    tumour_purity: Optional[int]
+    elution_buffer: str | None
+    tumour_purity: int | None
     # "This information is optional for FFPE-samples for new samples"
-    formalin_fixation_time: Optional[int]
-    post_formalin_fixation_time: Optional[int]
-    tissue_block_size: Optional[str]
+    formalin_fixation_time: int | None
+    post_formalin_fixation_time: int | None
+    tissue_block_size: str | None
     # "Not Required"
-    cohorts: Optional[list[str]]
-    phenotype_groups: Optional[list[str]]
-    phenotype_terms: Optional[list[str]]
+    cohorts: list[str] | None
+    phenotype_groups: list[str] | None
+    phenotype_terms: list[str] | None
     require_qc_ok: bool = False
-    quantity: Optional[int]
-    subject_id: Optional[
-        constr(regex=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length)
-    ]
-    synopsis: Optional[str]
+    quantity: int | None
+    subject_id: constr(
+        regex=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length
+    ) | None
+    synopsis: str | None
 
     @validator("container", "container_name", "name", "source", "subject_id", "volume")
     def required_for_new_samples(cls, value, values, **kwargs):
@@ -123,7 +117,7 @@ class Of1508Sample(OrderInSample):
         "quantity",
         pre=True,
     )
-    def str_to_int(cls, v: str) -> Optional[int]:
+    def str_to_int(cls, v: str) -> int | None:
         return OptionalIntValidator.str_to_int(v=v)
 
     @validator(
@@ -131,7 +125,7 @@ class Of1508Sample(OrderInSample):
         "volume",
         pre=True,
     )
-    def str_to_float(cls, v: str) -> Optional[float]:
+    def str_to_float(cls, v: str) -> float | None:
         return OptionalFloatValidator.str_to_float(v=v)
 
 
@@ -148,7 +142,7 @@ class BalsamicSample(Of1508Sample):
 
 class BalsamicQCSample(Of1508Sample):
     _suitable_project = OrderType.BALSAMIC_QC
-    reference_genome: Optional[GenomeVersion]
+    reference_genome: GenomeVersion | None
 
 
 class BalsamicUmiSample(Of1508Sample):
@@ -168,21 +162,21 @@ class FastqSample(OrderInSample):
 
     # Orderform 1508
     # "required"
-    container: Optional[ContainerEnum]
+    container: ContainerEnum | None
     sex: SexEnum = SexEnum.unknown
     source: str
     tumour: bool
     # "required if plate"
-    container_name: Optional[str]
-    well_position: Optional[str]
+    container_name: str | None
+    well_position: str | None
     elution_buffer: str
     # This information is required for panel analysis
-    capture_kit: Optional[str]
+    capture_kit: str | None
     # "Not Required"
-    quantity: Optional[int]
+    quantity: int | None
 
     @validator("quantity", pre=True)
-    def str_to_int(cls, v: str) -> Optional[int]:
+    def str_to_int(cls, v: str) -> int | None:
         return OptionalIntValidator.str_to_int(v=v)
 
 
@@ -194,19 +188,19 @@ class RmlSample(OrderInSample):
     # "This information is required"
     pool: constr(max_length=Pool.name.property.columns[0].type.length)
     concentration: float
-    concentration_sample: Optional[float]
+    concentration_sample: float | None
     index: str
-    index_number: Optional[str]
+    index_number: str | None
     # "Required if Plate"
-    rml_plate_name: Optional[str]
-    well_position_rml: Optional[str]
+    rml_plate_name: str | None
+    well_position_rml: str | None
     # "Automatically generated (if not custom) or custom"
-    index_sequence: Optional[str]
+    index_sequence: str | None
     # "Not required"
-    control: Optional[str]
+    control: str | None
 
     @validator("concentration_sample", pre=True)
-    def str_to_float(cls, v: str) -> Optional[float]:
+    def str_to_float(cls, v: str) -> float | None:
         return OptionalFloatValidator.str_to_float(v=v)
 
 
@@ -220,24 +214,24 @@ class MetagenomeSample(OrderInSample):
 
     # 1605 Orderform Microbial Metagenomes- 16S
     # "This information is required"
-    container: Optional[ContainerEnum]
+    container: ContainerEnum | None
     elution_buffer: str
     source: str
     # "Required if Plate"
-    container_name: Optional[str]
-    well_position: Optional[str]
+    container_name: str | None
+    well_position: str | None
     # "This information is not required"
-    concentration_sample: Optional[float]
-    quantity: Optional[int]
-    extraction_method: Optional[str]
-    control: Optional[ControlEnum]
+    concentration_sample: float | None
+    quantity: int | None
+    extraction_method: str | None
+    control: ControlEnum | None
 
     @validator("quantity", pre=True)
-    def str_to_int(cls, v: str) -> Optional[int]:
+    def str_to_int(cls, v: str) -> int | None:
         return OptionalIntValidator.str_to_int(v=v)
 
     @validator("concentration_sample", pre=True)
-    def str_to_float(cls, v: str) -> Optional[float]:
+    def str_to_float(cls, v: str) -> float | None:
         return OptionalFloatValidator.str_to_float(v=v)
 
 
@@ -247,27 +241,25 @@ class MicrobialSample(OrderInSample):
     organism: constr(max_length=Organism.internal_id.property.columns[0].type.length)
     reference_genome: constr(max_length=Sample.reference_genome.property.columns[0].type.length)
     elution_buffer: str
-    extraction_method: Optional[str]
+    extraction_method: str | None
     container: ContainerEnum
     # "Required if Plate"
-    container_name: Optional[str]
-    well_position: Optional[str]
+    container_name: str | None
+    well_position: str | None
     # "Required if "Other" is chosen in column "Species""
-    organism_other: Optional[
-        constr(max_length=Organism.internal_id.property.columns[0].type.length)
-    ]
+    organism_other: constr(max_length=Organism.internal_id.property.columns[0].type.length) | None
     # "These fields are not required"
-    concentration_sample: Optional[float]
-    quantity: Optional[int]
-    verified_organism: Optional[bool]  # sent to LIMS
-    control: Optional[str]
+    concentration_sample: float | None
+    quantity: int | None
+    verified_organism: bool | None  # sent to LIMS
+    control: str | None
 
     @validator("quantity", pre=True)
-    def str_to_int(cls, v: str) -> Optional[int]:
+    def str_to_int(cls, v: str) -> int | None:
         return OptionalIntValidator.str_to_int(v=v)
 
     @validator("concentration_sample", pre=True)
-    def str_to_float(cls, v: str) -> Optional[float]:
+    def str_to_float(cls, v: str) -> float | None:
         return OptionalFloatValidator.str_to_float(v=v)
 
 
@@ -290,7 +282,7 @@ class SarsCov2Sample(MicrobialSample):
     region: str
     region_code: str
     selection_criteria: str
-    volume: Optional[str]
+    volume: str | None
 
 
 def sample_class_for(project: OrderType):

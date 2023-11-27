@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from typing import Optional
 
 import click
 from pydantic.v1 import ValidationError
@@ -98,7 +97,7 @@ def run(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
-    nf_tower_id: Optional[str],
+    nf_tower_id: str | None,
     dry_run: bool,
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""

@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from typing import Optional
 
 import petname
 
@@ -13,11 +12,11 @@ from cg.store.models import (
     ApplicationVersion,
     Bed,
     BedVersion,
+    Case,
+    CaseSample,
     Collaboration,
     Customer,
     Delivery,
-    Case,
-    CaseSample,
     Flowcell,
     Invoice,
     Organism,
@@ -197,10 +196,10 @@ class AddHandler(BaseHandler):
         data_delivery: DataDelivery,
         name: str,
         ticket: str,
-        panels: Optional[list[str]] = None,
-        cohorts: Optional[list[str]] = None,
-        priority: Optional[Priority] = Priority.standard,
-        synopsis: Optional[str] = None,
+        panels: list[str] | None = None,
+        cohorts: list[str] | None = None,
+        priority: Priority | None = Priority.standard,
+        synopsis: str | None = None,
     ) -> Case:
         """Build a new Case record."""
 
@@ -247,8 +246,8 @@ class AddHandler(BaseHandler):
         sequencer_name: str,
         sequencer_type: str,
         date: datetime,
-        flow_cell_status: Optional[str] = FlowCellStatus.ON_DISK,
-        has_backup: Optional[bool] = False,
+        flow_cell_status: str | None = FlowCellStatus.ON_DISK,
+        has_backup: bool | None = False,
     ) -> Flowcell:
         """Build a new Flowcell record."""
         return Flowcell(
@@ -354,7 +353,7 @@ class AddHandler(BaseHandler):
         comment: str = None,
         discount: int = 0,
         record_type: str = None,
-        invoiced_at: Optional[datetime] = None,
+        invoiced_at: datetime | None = None,
     ):
         """Build a new Invoice record."""
 

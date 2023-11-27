@@ -1,7 +1,6 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import Optional
 
 from housekeeper.store.models import Version
 
@@ -45,12 +44,12 @@ class ExternalDataAPI(MetaAPI):
         self,
         customer: str,
         ticket: str,
-        cust_sample_id: Optional[str] = "",
+        cust_sample_id: str | None = "",
     ) -> Path:
         """Returns the path to where the sample files are fetched from"""
         return Path(self.source_path % customer, ticket, cust_sample_id)
 
-    def get_destination_path(self, customer: str, lims_sample_id: Optional[str] = "") -> Path:
+    def get_destination_path(self, customer: str, lims_sample_id: str | None = "") -> Path:
         """Returns the path to where the files are to be transferred"""
         return Path(self.destination_path % customer, lims_sample_id)
 
@@ -105,7 +104,7 @@ class ExternalDataAPI(MetaAPI):
         all_fastq_in_folder: list[Path] = self.get_all_fastq(sample_folder=fastq_folder)
         return all_fastq_in_folder
 
-    def check_fastq_md5sum(self, fastq_path) -> Optional[Path]:
+    def check_fastq_md5sum(self, fastq_path) -> Path | None:
         """Returns the path of the input file if it does not match its md5sum"""
         if Path(str(fastq_path) + ".md5").exists():
             given_md5sum: str = extract_md5sum(md5sum_file=Path(str(fastq_path) + ".md5"))
@@ -133,7 +132,7 @@ class ExternalDataAPI(MetaAPI):
     def get_failed_fastq_paths(self, fastq_paths_to_add: list[Path]) -> list[Path]:
         failed_sum_paths: list[Path] = []
         for path in fastq_paths_to_add:
-            failed_path: Optional[Path] = self.check_fastq_md5sum(path)
+            failed_path: Path | None = self.check_fastq_md5sum(path)
             if failed_path:
                 failed_sum_paths.append(failed_path)
         return failed_sum_paths

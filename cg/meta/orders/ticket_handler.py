@@ -2,7 +2,7 @@ import logging
 import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Optional
+from typing import Any
 
 from sendmail_container import FormDataRequest
 
@@ -25,7 +25,7 @@ class TicketHandler:
         self.status_db: Store = status_db
 
     @staticmethod
-    def parse_ticket_number(name: str) -> Optional[str]:
+    def parse_ticket_number(name: str) -> str | None:
         """Try to parse a ticket number from a string"""
         # detect manual ticket assignment
         ticket_match = re.fullmatch(r"#([0-9]{6})", name)
@@ -38,7 +38,7 @@ class TicketHandler:
 
     def create_ticket(
         self, order: OrderIn, user_name: str, user_mail: str, project: str
-    ) -> Optional[int]:
+    ) -> int | None:
         """Create a ticket and return the ticket number"""
         message: str = self.create_new_ticket_header(
             message=self.create_xml_sample_list(order=order, user_name=user_name),
@@ -46,7 +46,7 @@ class TicketHandler:
             project=project,
         )
         attachment: dict = self.create_attachment(order=order)
-        ticket_nr: Optional[str] = self.osticket.open_ticket(
+        ticket_nr: str | None = self.osticket.open_ticket(
             name=user_name,
             email=user_mail,
             subject=order.name,
@@ -105,19 +105,19 @@ class TicketHandler:
         return message
 
     @staticmethod
-    def add_sample_apptag_to_message(message: str, application: Optional[str]) -> str:
+    def add_sample_apptag_to_message(message: str, application: str | None) -> str:
         if application:
             message += f", application: {application}"
         return message
 
     @staticmethod
-    def add_sample_case_name_to_message(message: str, case_name: Optional[str]) -> str:
+    def add_sample_case_name_to_message(message: str, case_name: str | None) -> str:
         if case_name:
             message += f", case: {case_name}"
         return message
 
     def add_existing_sample_info_to_message(
-        self, message: str, customer_id: str, internal_id: Optional[str]
+        self, message: str, customer_id: str, internal_id: str | None
     ) -> str:
         if not internal_id:
             return message
@@ -132,23 +132,23 @@ class TicketHandler:
         return message
 
     @staticmethod
-    def add_sample_priority_to_message(message: str, priority: Optional[str]) -> str:
+    def add_sample_priority_to_message(message: str, priority: str | None) -> str:
         if priority:
             message += f", priority: {priority}"
         return message
 
     @staticmethod
-    def add_sample_comment_to_message(message: str, comment: Optional[str]) -> str:
+    def add_sample_comment_to_message(message: str, comment: str | None) -> str:
         if comment:
             message += f", {comment}"
         return message
 
-    def add_order_comment_to_message(self, message: str, comment: Optional[str]) -> str:
+    def add_order_comment_to_message(self, message: str, comment: str | None) -> str:
         if comment:
             message += f"{self.NEW_LINE}{comment}."
         return message
 
-    def add_user_name_to_message(self, message: str, name: Optional[str]) -> str:
+    def add_user_name_to_message(self, message: str, name: str | None) -> str:
         if name:
             message += f"{self.NEW_LINE}{name}"
         return message

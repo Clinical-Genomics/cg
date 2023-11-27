@@ -1,6 +1,5 @@
 """Housekeeper models"""
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -14,5 +13,5 @@ class InputFile(BaseModel):
 class InputBundle(BaseModel):
     name: str
     created: datetime = datetime.now()
-    expires: Optional[datetime] = None
+    expires: datetime | None = None
     files: list[InputFile]
