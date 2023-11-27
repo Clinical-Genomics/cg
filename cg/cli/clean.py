@@ -121,7 +121,7 @@ def scout_finished_cases(
     """Clean up of solved and archived Scout cases."""
     scout_api: ScoutAPI = context.obj.scout_api
     bundles: list[str] = []
-    for status in [ScoutTag.ARCHIVED.value, ScoutTag.SOLVED.value]:
+    for status in [ScoutTag.ARCHIVED, ScoutTag.SOLVED]:
         cases: list[ScoutExportCase] = scout_api.get_cases(status=status, reruns=False)
         cases_added: int = 0
         for case in cases:
