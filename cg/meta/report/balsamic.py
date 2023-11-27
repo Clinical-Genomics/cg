@@ -18,6 +18,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     Pipeline,
+    REQUIRED_DATA_ANALYSIS_FIELDS,
 )
 from cg.constants.scout_upload import BALSAMIC_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
@@ -43,7 +44,7 @@ LOG = logging.getLogger(__name__)
 
 
 class BalsamicReportAPI(ReportAPI):
-    """API to create BALSAMIC delivery reports."""
+    """API to create Balsamic delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: BalsamicAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)
@@ -52,7 +53,7 @@ class BalsamicReportAPI(ReportAPI):
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: BalsamicAnalysis
     ) -> Union[BalsamicTargetedSampleMetadataModel, BalsamicWGSSampleMetadataModel]:
-        """Return the sample metadata to include in the report."""
+        """Return sample metadata to include in the report."""
         sample_metrics: dict[str, BalsamicQCMetrics] = analysis_metadata.sample_metrics[
             sample.internal_id
         ]
@@ -73,7 +74,7 @@ class BalsamicReportAPI(ReportAPI):
         sample_metrics: BalsamicTargetedQCMetrics,
         analysis_metadata: BalsamicAnalysis,
     ) -> BalsamicTargetedSampleMetadataModel:
-        """Returns a report metadata for BALSAMIC TGS analysis."""
+        """Return report metadata for Balsamic TGS analysis."""
         bed_version: BedVersion = self.status_db.get_bed_version_by_file_name(
             analysis_metadata.config.panel.capture_kit
         )
@@ -90,12 +91,13 @@ class BalsamicReportAPI(ReportAPI):
             duplicates=sample_metrics.percent_duplication if sample_metrics else None,
             mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
+            gc_dropout=sample_metrics.gc_dropout if sample_metrics else None,
         )
 
     def get_wgs_metadata(
         self, million_read_pairs: float, sample_metrics: BalsamicWGSQCMetrics
     ) -> BalsamicWGSSampleMetadataModel:
-        """Returns a report metadata for BALSAMIC WGS analysis."""
+        """Return report metadata for Balsamic WGS analysis."""
         return BalsamicWGSSampleMetadataModel(
             million_read_pairs=million_read_pairs,
             median_coverage=sample_metrics.median_coverage if sample_metrics else None,
@@ -104,11 +106,14 @@ class BalsamicReportAPI(ReportAPI):
             duplicates=self.get_wgs_percent_duplication(sample_metrics=sample_metrics),
             mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
+            pct_reads_improper_pairs=sample_metrics.pct_pf_reads_improper_pairs
+            if sample_metrics
+            else None,
         )
 
     @staticmethod
     def get_wgs_percent_duplication(sample_metrics: BalsamicWGSQCMetrics):
-        """Returns the duplication percentage taking into account both reads."""
+        """Return duplication percentage taking into account both reads."""
         return (
             (sample_metrics.percent_duplication_r1 + sample_metrics.percent_duplication_r2) / 2
             if sample_metrics
@@ -116,7 +121,7 @@ class BalsamicReportAPI(ReportAPI):
         )
 
     def get_data_analysis_type(self, case: Case) -> Optional[str]:
-        """Retrieves the data analysis type carried out."""
+        """Return data analysis type carried out."""
         return self.analysis_api.get_bundle_deliverables_type(case_id=case.internal_id)
 
     def get_genome_build(self, analysis_metadata: BalsamicAnalysis) -> str:
@@ -125,7 +130,7 @@ class BalsamicReportAPI(ReportAPI):
 
     def get_variant_callers(self, _analysis_metadata: BalsamicAnalysis) -> list:
         """
-        Extracts the list of BALSAMIC variant-calling filters and their versions (if available) from the
+        Return list of Balsamic variant-calling filters and their versions (if available) from the
         config.json file.
         """
         sequencing_type: str = _analysis_metadata.config.analysis.sequencing_type
@@ -150,7 +155,7 @@ class BalsamicReportAPI(ReportAPI):
     def get_variant_caller_version(
         var_caller_name: str, var_caller_versions: dict
     ) -> Optional[str]:
-        """Returns the version of a specific BALSAMIC tool."""
+        """Return version of a specific Balsamic tool."""
         for tool_name, versions in var_caller_versions.items():
             if tool_name in var_caller_name:
                 return versions[0]
@@ -172,8 +177,13 @@ class BalsamicReportAPI(ReportAPI):
         return False
 
     def get_required_fields(self, case: CaseModel) -> dict:
-        """Retrieves a dictionary with the delivery report required fields for BALSAMIC."""
+        """Return a dictionary with the delivery report required fields for Balsamic."""
         analysis_type: str = case.data_analysis.type
+        required_data_analysis_fields: list[str] = (
+            REQUIRED_DATA_ANALYSIS_FIELDS
+            if self.analysis_api.pipeline == Pipeline.BALSAMIC_QC
+            else REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS
+        )
         required_sample_metadata_fields: list[str] = []
         if BALSAMIC_ANALYSIS_TYPE["tumor_wgs"] in analysis_type:
             required_sample_metadata_fields: list[
@@ -197,7 +207,7 @@ class BalsamicReportAPI(ReportAPI):
             "applications": self.get_application_required_fields(
                 case=case, required_fields=REQUIRED_APPLICATION_FIELDS
             ),
-            "data_analysis": REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS,
+            "data_analysis": required_data_analysis_fields,
             "samples": self.get_sample_required_fields(
                 case=case, required_fields=REQUIRED_SAMPLE_BALSAMIC_FIELDS
             ),
@@ -213,15 +223,15 @@ class BalsamicReportAPI(ReportAPI):
         }
 
     def get_template_name(self) -> str:
-        """Retrieves the template name to render the delivery report."""
+        """Return template name to render the delivery report."""
         return Pipeline.BALSAMIC + "_report.html"
 
     def get_upload_case_tags(self) -> dict:
-        """Retrieves BALSAMIC upload case tags."""
+        """Return Balsamic upload case tags."""
         return BALSAMIC_CASE_TAGS
 
     def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
-        """Return the file path of the uploaded to Scout file given its tag."""
+        """Return file path of the uploaded to Scout file given its tag."""
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
         tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
         uploaded_file: File = self.housekeeper_api.get_latest_file(

@@ -53,6 +53,10 @@ class PDCArchivingDirectory(BaseModel):
     pre_nas: str
 
 
+class DataInput(BaseModel):
+    input_dir_path: str
+
+
 class BackupConfig(BaseModel):
     pdc_archiving_directory: PDCArchivingDirectory
     slurm_flow_cell_encryption: SlurmConfig
@@ -242,6 +246,7 @@ class CGConfig(BaseModel):
     flow_cells_dir: str
     madeline_exe: str
     max_flowcells: Optional[int]
+    data_input: DataInput | None = None
     # Base APIs that always should exist
     status_db_: Store = None
     housekeeper: HousekeeperConfig
