@@ -2,7 +2,6 @@
 
 import logging
 import traceback
-from typing import Optional
 
 import click
 
@@ -29,7 +28,7 @@ def nipt():
 @click.option("--dry-run", is_flag=True)
 @click.option("--force", is_flag=True, help="Force upload of case to databases, despite qc")
 @click.pass_context
-def nipt_upload_case(context: click.Context, case_id: Optional[str], dry_run: bool, force: bool):
+def nipt_upload_case(context: click.Context, case_id: str | None, dry_run: bool, force: bool):
     """Upload NIPT result files for a case"""
 
     LOG.info("*** NIPT UPLOAD START ***")

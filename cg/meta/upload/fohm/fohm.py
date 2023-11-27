@@ -4,7 +4,6 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
 import paramiko
@@ -24,7 +23,7 @@ LOG = logging.getLogger(__name__)
 
 
 class FOHMUploadAPI:
-    def __init__(self, config: CGConfig, dry_run: bool = False, datestr: Optional[str] = None):
+    def __init__(self, config: CGConfig, dry_run: bool = False, datestr: str | None = None):
         self.config: CGConfig = config
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.lims_api: LimsAPI = config.lims_api

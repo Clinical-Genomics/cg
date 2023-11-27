@@ -2,7 +2,6 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
 import click
 from housekeeper.store.models import File, Version
@@ -179,10 +178,10 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 @click.pass_obj
 def hk_bundle_files(
     context: CGConfig,
-    case_id: Optional[str],
+    case_id: str | None,
     tags: list,
-    days_old: Optional[int],
-    pipeline: Optional[Pipeline],
+    days_old: int | None,
+    pipeline: Pipeline | None,
     dry_run: bool,
 ):
     """Remove files found in Housekeeper bundles."""
@@ -211,7 +210,7 @@ def hk_bundle_files(
     for analysis in analyses:
         LOG.info(f"Cleaning analysis {analysis}")
         bundle_name: str = analysis.case.internal_id
-        hk_bundle_version: Optional[Version] = housekeeper_api.version(
+        hk_bundle_version: Version | None = housekeeper_api.version(
             bundle=bundle_name, date=analysis.started_at
         )
         if not hk_bundle_version:

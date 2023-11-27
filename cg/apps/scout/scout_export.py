@@ -1,7 +1,6 @@
 """Schemas for scout serialisation"""
 
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 from typing_extensions import Annotated, Literal
@@ -22,7 +21,7 @@ from cg.constants.subject import (
 
 class Individual(BaseModel):
     model_config = ConfigDict(coerce_numbers_to_str=True)
-    bam_file: Optional[str] = None
+    bam_file: str | None = None
     individual_id: str
     sex: Annotated[
         Literal[PlinkGender.UNKNOWN, PlinkGender.MALE, PlinkGender.FEMALE, Gender.OTHER],
@@ -52,11 +51,11 @@ class Phenotype(BaseModel):
 class Gene(BaseModel):
     model_config = ConfigDict(coerce_numbers_to_str=True)
     hgnc_id: int
-    hgnc_symbol: Optional[str] = None
-    region_annotation: Optional[str] = None
-    functional_annotation: Optional[str] = None
-    sift_prediction: Optional[str] = None
-    polyphen_prediction: Optional[str] = None
+    hgnc_symbol: str | None = None
+    region_annotation: str | None = None
+    functional_annotation: str | None = None
+    sift_prediction: str | None = None
+    polyphen_prediction: str | None = None
 
 
 class DiagnosisPhenotypes(BaseModel):
@@ -64,7 +63,7 @@ class DiagnosisPhenotypes(BaseModel):
     disease_nr: int
     disease_id: str
     description: str
-    individuals: Optional[list[dict[str, str]]] = None
+    individuals: list[dict[str, str]] | None = None
 
 
 class ScoutExportCase(BaseModel):
@@ -72,18 +71,18 @@ class ScoutExportCase(BaseModel):
     id: str = Field(str, alias="_id")
     analysis_date: datetime
     owner: str
-    causatives: Optional[list[str]] = None
+    causatives: list[str] | None = None
     collaborators: list[str] = []
     individuals: list[Individual]
     genome_build: Annotated[str, BeforeValidator(convert_genome_build)] = GENOME_BUILD_37
-    panels: Optional[list[Panel]] = None
-    rank_model_version: Optional[str] = None
-    sv_rank_model_version: Optional[str] = None
+    panels: list[Panel] | None = None
+    rank_model_version: str | None = None
+    sv_rank_model_version: str | None = None
     rank_score_threshold: int = 5
-    phenotype_terms: Optional[list[Phenotype]] = None
-    phenotype_groups: Optional[list[Phenotype]] = None
-    diagnosis_phenotypes: Optional[list[DiagnosisPhenotypes]] = None
-    diagnosis_genes: Optional[list[int]] = None
+    phenotype_terms: list[Phenotype] | None = None
+    phenotype_groups: list[Phenotype] | None = None
+    diagnosis_phenotypes: list[DiagnosisPhenotypes] | None = None
+    diagnosis_genes: list[int] | None = None
 
 
 class Genotype(BaseModel):
@@ -101,14 +100,14 @@ class Variant(BaseModel):
     variant_id: str
     chromosome: str
     position: int
-    dbsnp_id: Optional[str] = None
+    dbsnp_id: str | None = None
     reference: str
     alternative: str
-    quality: Optional[float] = None
-    filters: Optional[list[str]] = None
+    quality: float | None = None
+    filters: list[str] | None = None
     end: int
     rank_score: int
     category: str
     sub_category: str
-    genes: Optional[list[Gene]] = None
+    genes: list[Gene] | None = None
     samples: list[Genotype]

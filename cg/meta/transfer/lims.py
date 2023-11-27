@@ -1,6 +1,5 @@
 import logging
 from enum import Enum
-from typing import Union
 
 import genologics.entities
 
@@ -105,7 +104,7 @@ class TransferLims(object):
             if not self._is_pool_valid(pool_obj, ticket, number_of_samples):
                 continue
 
-            samples_in_pool: Union[dict[str:str], list[genologics.Sample]] = self.lims.get_samples(
+            samples_in_pool: dict[str, str] | list[genologics.Sample] = self.lims.get_samples(
                 projectname=ticket
             )
             for sample_obj in samples_in_pool:

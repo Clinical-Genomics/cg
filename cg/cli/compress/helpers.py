@@ -4,7 +4,7 @@ import logging
 import os
 from math import ceil
 from pathlib import Path
-from typing import Iterator, Optional
+from typing import Iterator
 
 from housekeeper.store.models import Bundle, Version
 
@@ -21,7 +21,7 @@ from cg.utils.date import get_date_days_ago
 LOG = logging.getLogger(__name__)
 
 
-def get_cases_to_process(days_back: int, store: Store, case_id: Optional[str] = None) -> list[Case]:
+def get_cases_to_process(days_back: int, store: Store, case_id: str | None = None) -> list[Case]:
     """Return cases to process."""
     cases: list[Case] = []
     if case_id:
@@ -49,8 +49,8 @@ def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
 
 
 def set_memory_according_to_reads(
-    sample_id: str, sample_reads: Optional[int] = None, sample_process_mem: Optional[int] = None
-) -> Optional[int]:
+    sample_id: str, sample_reads: int | None = None, sample_process_mem: int | None = None
+) -> int | None:
     """Set SLURM sample process memory depending on number of sample reads if sample_process_mem is not set."""
     if sample_process_mem:
         return sample_process_mem
@@ -108,7 +108,7 @@ def get_versions(hk_api: HousekeeperAPI, bundle_name: str = None) -> Iterator[Ve
         yield last_version
 
 
-def get_true_dir(dir_path: Path) -> Optional[Path]:
+def get_true_dir(dir_path: Path) -> Path | None:
     """Loop over the files in a directory, if any symlinks are found return the parent dir of the
     origin file."""
     # Check if there are any links to fastq files in the directory
@@ -142,7 +142,7 @@ def compress_sample_fastqs_in_cases(
         if not case.links:
             continue
         for case_link in case.links:
-            sample_process_mem: Optional[int] = set_memory_according_to_reads(
+            sample_process_mem: int | None = set_memory_according_to_reads(
                 sample_process_mem=mem,
                 sample_id=case_link.sample.internal_id,
                 sample_reads=case_link.sample.reads,

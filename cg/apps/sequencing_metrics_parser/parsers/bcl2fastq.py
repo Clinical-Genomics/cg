@@ -1,7 +1,7 @@
 import logging
 import os
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Iterable
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
     ReadMetric,
@@ -151,7 +151,7 @@ def get_metrics_for_non_pooled_samples(
     """Get metrics for non pooled samples and set sample ids."""
     non_pooled_metrics: list[SampleLaneMetrics] = []
     for lane, sample_id in non_pooled_lane_sample_pairs:
-        metric: Optional[SampleLaneMetrics] = lane_metrics.get(lane)
+        metric: SampleLaneMetrics | None = lane_metrics.get(lane)
         if not metric:
             continue
         metric.sample_id = sample_id

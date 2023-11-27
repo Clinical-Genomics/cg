@@ -2,7 +2,7 @@ import logging
 import operator
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
@@ -38,19 +38,19 @@ class NfAnalysisAPI(AnalysisAPI):
     def __init__(self, config: CGConfig, pipeline: Pipeline):
         super().__init__(config=config, pipeline=pipeline)
         self.pipeline: Pipeline = pipeline
-        self.root_dir: Optional[str] = None
-        self.nfcore_pipeline_path: Optional[str] = None
-        self.references: Optional[str] = None
-        self.profile: Optional[str] = None
-        self.conda_env: Optional[str] = None
-        self.conda_binary: Optional[str] = None
-        self.tower_binary_path: Optional[str] = None
-        self.tower_pipeline: Optional[str] = None
-        self.account: Optional[str] = None
-        self.email: Optional[str] = None
-        self.compute_env: Optional[str] = None
-        self.revision: Optional[str] = None
-        self.nextflow_binary_path: Optional[str] = None
+        self.root_dir: str | None = None
+        self.nfcore_pipeline_path: str | None = None
+        self.references: str | None = None
+        self.profile: str | None = None
+        self.conda_env: str | None = None
+        self.conda_binary: str | None = None
+        self.tower_binary_path: str | None = None
+        self.tower_pipeline: str | None = None
+        self.account: str | None = None
+        self.email: str | None = None
+        self.compute_env: str | None = None
+        self.revision: str | None = None
+        self.nextflow_binary_path: str | None = None
 
     @property
     def root(self) -> str:
@@ -68,7 +68,7 @@ class NfAnalysisAPI(AnalysisAPI):
     def process(self, process: Process):
         self._process = process
 
-    def get_profile(self, profile: Optional[str] = None) -> str:
+    def get_profile(self, profile: str | None = None) -> str:
         """Get NF profiles."""
         return profile or self.profile
 
@@ -91,7 +91,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
 
     @staticmethod
-    def get_nextflow_config_path(nextflow_config: Optional[str] = None) -> Optional[Path]:
+    def get_nextflow_config_path(nextflow_config: str | None = None) -> Path | None:
         """Path to Nextflow config file."""
         if nextflow_config:
             return Path(nextflow_config).absolute()
@@ -112,7 +112,7 @@ class NfAnalysisAPI(AnalysisAPI):
             FileExtensions.YAML
         )
 
-    def get_params_file_path(self, case_id: str, params_file: Optional[Path] = None) -> Path:
+    def get_params_file_path(self, case_id: str, params_file: Path | None = None) -> Path:
         """Return parameters file or a path where the default parameters file for a case id should be located."""
         if params_file:
             return Path(params_file).absolute()
@@ -135,7 +135,7 @@ class NfAnalysisAPI(AnalysisAPI):
             f"{case_id}_{pipeline}_nextflow_{launch_time}",
         ).with_suffix(FileExtensions.LOG)
 
-    def get_workdir_path(self, case_id: str, work_dir: Optional[Path] = None) -> Path:
+    def get_workdir_path(self, case_id: str, work_dir: Path | None = None) -> Path:
         """Path to NF work directory."""
         if work_dir:
             return work_dir.absolute()
