@@ -2,18 +2,25 @@
 import logging
 from typing import Type
 
+from packaging.version import parse
+
 from cg.apps.demultiplex.sample_sheet.index import (
+    NEW_CONTROL_SOFTWARE_VERSION,
+    NEW_REAGENT_KIT_VERSION,
     Index,
     get_index_pair,
     get_valid_indexes,
     is_dual_index,
-    is_reverse_complement_needed,
     update_barcode_mismatch_values_for_sample,
     update_indexes_for_samples,
 )
 from cg.apps.demultiplex.sample_sheet.models import (
+    NO_REVERSE_COMPLEMENTS,
+    NOVASEQ_6000_POST_1_5_KITS,
+    NOVASEQ_X_INDEX_SETTINGS,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
+    IndexSettings,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_samples_by_lane,
@@ -24,6 +31,7 @@ from cg.constants.demultiplexing import (
     SampleSheetBcl2FastqSections,
     SampleSheetBCLConvertSections,
 )
+from cg.constants.sequencing import Sequencers
 from cg.exc import SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -48,6 +56,15 @@ class SampleSheetCreator:
             FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
         ] = flow_cell.sample_type
         self.force: bool = force
+        self.index_settings: IndexSettings = self._get_index_settings()
+
+    def _get_index_settings(self) -> IndexSettings:
+        """Returns the correct index-related settings for the run in question"""
+        if self.run_parameters.sequencer == Sequencers.NOVASEQX:
+            return NOVASEQ_X_INDEX_SETTINGS
+        if self._is_novaseq6000_post_1_5_kit:
+            return NOVASEQ_6000_POST_1_5_KITS
+        return NO_REVERSE_COMPLEMENTS
 
     @property
     def bcl_converter(self) -> str:
@@ -59,9 +76,17 @@ class SampleSheetCreator:
         return get_valid_indexes(dual_indexes_only=True)
 
     @property
-    def is_reverse_complement(self) -> bool:
-        """Return whether the samples require reverse complement."""
-        return is_reverse_complement_needed(run_parameters=self.run_parameters)
+    def _is_novaseq6000_post_1_5_kit(self) -> bool:
+        """
+        Returns whether sequencing was performed before the 1.5 consumables kits.
+        This is indicated by the software version and the reagent kit fields in the run parameters.
+        """
+        if parse(self.run_parameters.control_software_version) < parse(
+            NEW_CONTROL_SOFTWARE_VERSION
+        ):
+            return False
+        if parse(self.run_parameters.reagent_kit_version) < parse(NEW_REAGENT_KIT_VERSION):
+            return False
 
     def update_barcode_mismatch_values_for_samples(self, *args) -> None:
         """Updates barcode mismatch values for samples if applicable."""
@@ -128,7 +153,7 @@ class SampleSheetCreator:
             update_indexes_for_samples(
                 samples=samples_in_lane,
                 index_cycles=self.run_parameters.index_length,
-                is_reverse_complement=self.is_reverse_complement,
+                perform_reverse_complement=self.index_settings.should_i5_be_reverse_complimented,
             )
             self.update_barcode_mismatch_values_for_samples(samples_in_lane)
 
@@ -194,7 +219,9 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         """Update barcode mismatch values for both indexes of given samples."""
         for sample in samples:
             update_barcode_mismatch_values_for_sample(
-                sample_to_update=sample, samples_to_compare_to=samples
+                sample_to_update=sample,
+                samples_to_compare_to=samples,
+                is_reverse_complement=self.index_settings.should_i5_be_reverse_complimented,
             )
 
     def add_override_cycles_to_samples(self) -> None:
@@ -208,7 +235,11 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
             sample_index_len: int = len(get_index_pair(sample)[0])
             if sample_index_len < flow_cell_index_len:
                 index1_cycles = f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
-                index2_cycles = f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
+                index2_cycles = (
+                    f"N{flow_cell_index_len - sample_index_len}I{sample_index_len};"
+                    if self.index_settings.are_i5_override_cycles_reverse_complemented
+                    else f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
+                )
             sample.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
     def get_additional_sections_sample_sheet(self) -> list[list[str]]:

@@ -163,7 +163,7 @@ def test_pad_and_reverse_complement_sample_indexes_reverse_complement_padding(
     pad_and_reverse_complement_sample_indexes(
         sample=sample,
         index_cycles=novaseq_6000_run_parameters.index_length,
-        is_reverse_complement=is_reverse_complement_needed(
+        perform_reverse_complement=is_reverse_complement_needed(
             run_parameters=novaseq_6000_run_parameters
         ),
     )
@@ -195,7 +195,7 @@ def test_pad_and_reverse_complement_sample_indexes_reverse_complement_no_padding
     pad_and_reverse_complement_sample_indexes(
         sample=sample,
         index_cycles=novaseq_6000_run_parameters.index_length,
-        is_reverse_complement=is_reverse_complement_needed(
+        perform_reverse_complement=is_reverse_complement_needed(
             run_parameters=novaseq_6000_run_parameters
         ),
     )
@@ -227,7 +227,9 @@ def test_pad_and_reverse_complement_sample_indexes_no_reverse_complement_no_padd
     pad_and_reverse_complement_sample_indexes(
         sample=sample,
         index_cycles=novaseq_x_run_parameters.index_length,
-        is_reverse_complement=is_reverse_complement_needed(run_parameters=novaseq_x_run_parameters),
+        perform_reverse_complement=is_reverse_complement_needed(
+            run_parameters=novaseq_x_run_parameters
+        ),
     )
 
     # THEN the first index was correctly adapted
