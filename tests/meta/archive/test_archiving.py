@@ -301,7 +301,7 @@ def test_archive_folders(
                 }
             ],
             "osType": OSTYPE,
-            "createFolder": False,
+            "createFolder": True,
             "metadataList": [],
         },
         verify=False,
@@ -348,7 +348,7 @@ def test_retrieve_samples(
                 }
             ],
             "osType": OSTYPE,
-            "createFolder": False,
+            "createFolder": True,
             "metadataList": [],
         },
         verify=False,

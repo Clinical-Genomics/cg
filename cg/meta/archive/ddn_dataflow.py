@@ -100,7 +100,7 @@ class TransferPayload(BaseModel):
 
     files_to_transfer: list[MiriaObject]
     osType: str = OSTYPE
-    createFolder: bool = False
+    createFolder: bool = True
 
     def trim_paths(self, attribute_to_trim: str):
         """Trims the source path from its root directory for all objects in the transfer."""
