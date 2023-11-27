@@ -1,6 +1,5 @@
 """Functions that deal with modifications of the indexes."""
 import logging
-from typing import Union
 
 from packaging import version
 from pydantic import BaseModel
@@ -199,7 +198,7 @@ def pad_and_reverse_complement_sample_indexes(
 
 
 def update_indexes_for_samples(
-    samples: list[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]],
+    samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq],
     index_cycles: int,
     is_reverse_complement: bool,
 ) -> None:

@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Iterable, Optional
+from typing import Iterable
 
 import click
 from tabulate import tabulate
@@ -20,7 +20,7 @@ SAMPLE_HEADERS = ["Sample", "Name", "Customer", "Application", "State", "Priorit
 @click.group(invoke_without_command=True)
 @click.option("-i", "--identifier", help="made a guess what type you are looking for")
 @click.pass_context
-def get(context: click.Context, identifier: Optional[str]):
+def get(context: click.Context, identifier: str | None):
     """Get information about records in the database."""
     if identifier:
         if re.match(r"^[A-Z]{3}[0-9]{4,5}[A-Z]{1}[1-9]{1,3}$", identifier):

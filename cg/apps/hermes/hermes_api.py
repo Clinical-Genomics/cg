@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from cg.apps.housekeeper import models as hk_models
 from cg.utils.commands import Process
@@ -18,7 +17,7 @@ class HermesApi:
         self.process = Process(binary=config["hermes"]["binary_path"])
 
     def convert_deliverables(
-        self, deliverables_file: Path, pipeline: str, analysis_type: Optional[str] = None
+        self, deliverables_file: Path, pipeline: str, analysis_type: str | None = None
     ) -> CGDeliverables:
         """Convert deliverables file in raw pipeline format to CG format with hermes"""
         LOG.info("Converting pipeline deliverables to CG deliverables")
@@ -40,8 +39,8 @@ class HermesApi:
         bundle_name: str,
         deliverables: Path,
         pipeline: str,
-        analysis_type: Optional[str],
-        created: Optional[datetime],
+        analysis_type: str | None,
+        created: datetime | None,
     ) -> hk_models.InputBundle:
         """Convert pipeline deliverables to housekeeper bundle ready to be inserted into hk"""
         cg_deliverables: CGDeliverables = self.convert_deliverables(
@@ -53,7 +52,7 @@ class HermesApi:
 
     @staticmethod
     def get_housekeeper_bundle(
-        deliverables: CGDeliverables, bundle_name: str, created: Optional[datetime] = None
+        deliverables: CGDeliverables, bundle_name: str, created: datetime | None = None
     ) -> hk_models.InputBundle:
         """Convert a deliverables object to a housekeeper object"""
         bundle_info = {

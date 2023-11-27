@@ -1,6 +1,6 @@
 """ Create a sample sheet for NovaSeq flow cells."""
 import logging
-from typing import Optional, Type, Union
+from typing import Type
 
 from cg.apps.demultiplex.sample_sheet.index import (
     Index,
@@ -37,17 +37,15 @@ class SampleSheetCreator:
     def __init__(
         self,
         flow_cell: FlowCellDirectoryData,
-        lims_samples: list[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]],
+        lims_samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq],
         force: bool = False,
     ):
         self.flow_cell: FlowCellDirectoryData = flow_cell
         self.flow_cell_id: str = flow_cell.id
-        self.lims_samples: list[
-            Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]
-        ] = lims_samples
+        self.lims_samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
         self.sample_type: Type[
-            Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]
+            FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
         ] = flow_cell.sample_type
         self.force: bool = force
 
@@ -79,7 +77,7 @@ class SampleSheetCreator:
         """Filter out samples with single indexes."""
         LOG.info("Removing all samples without dual indexes")
         samples_to_keep = []
-        sample: Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]
+        sample: FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
         for sample in self.lims_samples:
             if not is_dual_index(sample.index):
                 LOG.warning(f"Removing sample {sample} since it does not have dual index")
@@ -89,7 +87,7 @@ class SampleSheetCreator:
 
     @staticmethod
     def convert_sample_to_header_dict(
-        sample: Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq],
+        sample: FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq,
         data_column_names: list[str],
     ) -> list[str]:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
@@ -97,11 +95,11 @@ class SampleSheetCreator:
         sample_dict = sample.model_dump(by_alias=True)
         return [str(sample_dict[column]) for column in data_column_names]
 
-    def get_additional_sections_sample_sheet(self) -> Optional[list]:
+    def get_additional_sections_sample_sheet(self) -> list | None:
         """Return all sections of the sample sheet that are not the data section."""
         raise NotImplementedError("Impossible to get sample sheet sections from parent class")
 
-    def get_data_section_header_and_columns(self) -> Optional[list[list[str]]]:
+    def get_data_section_header_and_columns(self) -> list[list[str]] | None:
         """Return the header and column names of the data section of the sample sheet."""
         raise NotImplementedError("Impossible to get sample sheet sections from parent class")
 
@@ -123,7 +121,7 @@ class SampleSheetCreator:
     def process_samples_for_sample_sheet(self) -> None:
         """Remove unwanted samples and adapt remaining samples."""
         self.remove_unwanted_samples()
-        samples_in_lane: list[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]]
+        samples_in_lane: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq]
         self.add_override_cycles_to_samples()
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
             LOG.info(f"Adapting index and barcode mismatch values for samples in lane {lane}")

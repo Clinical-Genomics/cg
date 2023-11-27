@@ -1,7 +1,6 @@
 """Code for uploading to scout via CLI"""
 import logging
 from pathlib import Path
-from typing import Optional
 
 import click
 from housekeeper.store.models import File, Version
@@ -140,7 +139,7 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 
     tag_name: str = UploadScoutAPI.get_load_config_tag()
     version: Version = housekeeper_api.last_version(bundle=case_id)
-    scout_config_file: Optional[File] = housekeeper_api.get_latest_file_from_version(
+    scout_config_file: File | None = housekeeper_api.get_latest_file_from_version(
         version=version, tags={tag_name}
     )
 

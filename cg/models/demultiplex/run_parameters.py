@@ -1,7 +1,6 @@
 """Module for modeling run parameters file parsing."""
 import logging
 from pathlib import Path
-from typing import Optional
 from xml.etree import ElementTree
 
 from cg.constants.demultiplexing import RunParametersXMLNodes
@@ -30,7 +29,7 @@ class RunParameters:
         return index_one_length
 
     @staticmethod
-    def node_not_found(node: Optional[ElementTree.Element], name: str) -> None:
+    def node_not_found(node: ElementTree.Element | None, name: str) -> None:
         """Raise exception if the given node is not found."""
         if node is None:
             message = f"Could not determine {name}"
@@ -44,19 +43,19 @@ class RunParameters:
         )
 
     @property
-    def control_software_version(self) -> Optional[str]:
+    def control_software_version(self) -> str | None:
         """Return the control software version if existent."""
         raise NotImplementedError(
             "Impossible to retrieve control software version from parent class"
         )
 
     @property
-    def reagent_kit_version(self) -> Optional[str]:
+    def reagent_kit_version(self) -> str | None:
         """Return the reagent kit version if existent."""
         raise NotImplementedError("Impossible to retrieve reagent kit version from parent class")
 
     @property
-    def sequencer(self) -> Optional[str]:
+    def sequencer(self) -> str | None:
         """Return the sequencer associated with the current run parameters."""
         raise NotImplementedError("Impossible to retrieve sequencer from parent class")
 
@@ -95,7 +94,7 @@ class RunParametersNovaSeq6000(RunParameters):
     def validate_instrument(self) -> None:
         """Raise an error if the class was not instantiated with a NovaSeq6000 file."""
         node_name: str = RunParametersXMLNodes.APPLICATION
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
+        xml_node: ElementTree.Element | None = self.tree.find(node_name)
         self.node_not_found(node=xml_node, name="Instrument")
         if xml_node.text != RunParametersXMLNodes.NOVASEQ_6000_APPLICATION:
             raise RunParametersError(
@@ -106,7 +105,7 @@ class RunParametersNovaSeq6000(RunParameters):
     def control_software_version(self) -> str:
         """Return the control software version."""
         node_name: str = RunParametersXMLNodes.APPLICATION_VERSION
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
+        xml_node: ElementTree.Element | None = self.tree.find(node_name)
         self.node_not_found(node=xml_node, name="control software version")
         return xml_node.text
 
@@ -114,7 +113,7 @@ class RunParametersNovaSeq6000(RunParameters):
     def reagent_kit_version(self) -> str:
         """Return the reagent kit version if existent, return 'unknown' otherwise."""
         node_name: str = RunParametersXMLNodes.REAGENT_KIT_VERSION
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
+        xml_node: ElementTree.Element | None = self.tree.find(node_name)
         if xml_node is None:
             LOG.warning("Could not determine reagent kit version")
             LOG.info("Set reagent kit version to 'unknown'")
@@ -159,7 +158,7 @@ class RunParametersNovaSeqX(RunParameters):
     def validate_instrument(self) -> None:
         """Raise an error if the class was not instantiated with a NovaSeqX file."""
         node_name: str = RunParametersXMLNodes.INSTRUMENT_TYPE
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
+        xml_node: ElementTree.Element | None = self.tree.find(node_name)
         self.node_not_found(node=xml_node, name="Instrument")
         if xml_node.text != RunParametersXMLNodes.NOVASEQ_X_INSTRUMENT:
             raise RunParametersError("The file parsed does not correspond to a NovaSeqX instrument")
@@ -183,7 +182,7 @@ class RunParametersNovaSeqX(RunParameters):
     def read_parser(self) -> dict[str, int]:
         """Return read and index cycle values parsed as a dictionary."""
         cycle_mapping: dict[str, int] = {}
-        planned_reads: Optional[ElementTree.Element] = self.tree.find(
+        planned_reads: ElementTree.Element | None = self.tree.find(
             RunParametersXMLNodes.PLANNED_READS
         )
         self.node_not_found(node=planned_reads, name="PlannedReads")

@@ -1,5 +1,5 @@
 """RNAfusion delivery report API."""
-from typing import Optional
+
 
 from cg.constants import (
     REQUIRED_APPLICATION_FIELDS,
@@ -36,7 +36,7 @@ class RnafusionReportAPI(ReportAPI):
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: RnafusionAnalysis
     ) -> RnafusionSampleMetadataModel:
-        """Return the sample metadata to include in the report."""
+        """Return sample metadata to include in the report."""
         sample_metrics: RnafusionQCMetrics = analysis_metadata.sample_metrics[sample.internal_id]
         return RnafusionSampleMetadataModel(
             bias_5_3=sample_metrics.bias_5_3,
@@ -63,7 +63,7 @@ class RnafusionReportAPI(ReportAPI):
         )
 
     def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
-        """Returns the build version of the genome reference of a specific case."""
+        """Return build version of the genome reference of a specific case."""
         return GenomeVersion.hg38.value
 
     def get_report_accreditation(
@@ -72,16 +72,16 @@ class RnafusionReportAPI(ReportAPI):
         """Checks if the report is accredited or not. Rnafusion is not an accredited workflow."""
         return False
 
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
-        """Return the file path of the uploaded to Scout file given its tag."""
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
+        """Return file path of the uploaded to Scout file given its tag."""
         return None
 
     def get_template_name(self) -> str:
-        """Retrieves the template name to render the delivery report."""
+        """Return template name to render the delivery report."""
         return Pipeline.RNAFUSION + "_report.html"
 
     def get_required_fields(self, case: CaseModel) -> dict:
-        """Return a dictionary with the delivery report required fields for Rnafusion."""
+        """Return dictionary with the delivery report required fields for Rnafusion."""
         return {
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,

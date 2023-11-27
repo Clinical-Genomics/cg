@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from typing import Optional
 
 from housekeeper.store.models import File, Version
 from pydantic.dataclasses import dataclass
@@ -97,7 +96,7 @@ class UploadScoutAPI:
         LOG.info(f"Adding load config {config_file_path} to Housekeeper.")
         tag_name: str = self.get_load_config_tag()
         version: Version = self.housekeeper.last_version(case_id)
-        uploaded_config_file: Optional[File] = self.housekeeper.get_latest_file_from_version(
+        uploaded_config_file: File | None = self.housekeeper.get_latest_file_from_version(
             version=version, tags={tag_name}
         )
         if uploaded_config_file:
@@ -117,7 +116,7 @@ class UploadScoutAPI:
 
     def get_multiqc_html_report(
         self, case_id: str, pipeline: Pipeline
-    ) -> tuple[ScoutCustomCaseReportTags, Optional[File]]:
+    ) -> tuple[ScoutCustomCaseReportTags, File | None]:
         """Return a multiqc report for a case in Housekeeper."""
         if pipeline == Pipeline.MIP_RNA:
             return (
@@ -129,7 +128,7 @@ class UploadScoutAPI:
             self.housekeeper.files(bundle=case_id, tags=HK_MULTIQC_HTML_TAG).first(),
         )
 
-    def get_fusion_report(self, case_id: str, research: bool) -> Optional[File]:
+    def get_fusion_report(self, case_id: str, research: bool) -> File | None:
         """Return a fusion report for a case in housekeeper."""
 
         tags = {"fusion"}
@@ -140,11 +139,11 @@ class UploadScoutAPI:
 
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
-    def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> Optional[File]:
+    def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> File | None:
         """Return a splice junctions bed file for a case in Housekeeper."""
 
         tags: set[str] = {"junction", "bed", sample_id}
-        splice_junctions_bed: Optional[File] = None
+        splice_junctions_bed: File | None = None
         try:
             splice_junctions_bed = self.housekeeper.get_file_from_latest_version(
                 bundle_name=case_id, tags=tags
@@ -154,7 +153,7 @@ class UploadScoutAPI:
 
         return splice_junctions_bed
 
-    def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> Optional[File]:
+    def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> File | None:
         """Return an RNA coverage bigwig file for a case in Housekeeper."""
 
         tags: set[str] = {"coverage", "bigwig", sample_id}
@@ -177,7 +176,7 @@ class UploadScoutAPI:
 
         report_type: str = "Research" if research else "Clinical"
 
-        fusion_report: Optional[File] = self.get_fusion_report(case_id, research)
+        fusion_report: File | None = self.get_fusion_report(case_id, research)
         if fusion_report is None:
             raise FileNotFoundError(
                 f"{report_type} fusion report was not found in Housekeeper for {case_id}."
@@ -256,7 +255,7 @@ class UploadScoutAPI:
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
-            rna_coverage_bigwig: Optional[File] = self.get_rna_coverage_bigwig(
+            rna_coverage_bigwig: File | None = self.get_rna_coverage_bigwig(
                 case_id=case_id, sample_id=rna_sample_internal_id
             )
 
@@ -294,7 +293,7 @@ class UploadScoutAPI:
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
-            splice_junctions_bed: Optional[File] = self.get_splice_junctions_bed(
+            splice_junctions_bed: File | None = self.get_splice_junctions_bed(
                 case_id=case_id, sample_id=rna_sample_internal_id
             )
 
@@ -455,9 +454,9 @@ class UploadScoutAPI:
     @staticmethod
     def _get_application_prep_category(
         subject_id_samples: list[Sample],
-    ) -> list[Optional[Sample]]:
+    ) -> list[Sample | None]:
         """Filter a models Sample list, returning DNA samples selected on their preparation category."""
-        subject_id_dna_samples: list[Optional[Sample]] = [
+        subject_id_dna_samples: list[Sample | None] = [
             sample
             for sample in subject_id_samples
             if sample.prep_category

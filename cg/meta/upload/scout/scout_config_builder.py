@@ -1,6 +1,5 @@
 """Functions that handle files in the context of scout uploading"""
 import logging
-from typing import Optional
 
 import requests
 from housekeeper.store.models import File, Version
@@ -160,19 +159,19 @@ class ScoutConfigBuilder:
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
         )
 
-    def get_sample_file(self, hk_tags: set[str], sample_id: str) -> Optional[str]:
+    def get_sample_file(self, hk_tags: set[str], sample_id: str) -> str | None:
         """Return a file that is specific for a individual from housekeeper"""
         tags: set = hk_tags.copy()
         tags.add(sample_id)
         return self.get_file_from_hk(hk_tags=tags)
 
-    def get_file_from_hk(self, hk_tags: set[str], latest: Optional[bool] = False) -> Optional[str]:
+    def get_file_from_hk(self, hk_tags: set[str], latest: bool | None = False) -> str | None:
         """Get a file from housekeeper and return the path as a string."""
         LOG.info(f"Get file with tags {hk_tags}")
         if not hk_tags:
             LOG.debug("No tags provided, skipping")
             return None
-        hk_file: Optional[File] = (
+        hk_file: File | None = (
             HousekeeperAPI.get_latest_file_from_version(version=self.hk_version_obj, tags=hk_tags)
             if latest
             else HousekeeperAPI.get_file_from_version(version=self.hk_version_obj, tags=hk_tags)

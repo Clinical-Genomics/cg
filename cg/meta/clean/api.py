@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Iterator, Optional
+from typing import Iterator
 
 from housekeeper.store.models import File, Version
 
@@ -32,7 +32,7 @@ class CleanAPI:
         ):
             bundle_name = analysis.case.internal_id
 
-            hk_bundle_version: Optional[Version] = self.housekeeper_api.version(
+            hk_bundle_version: Version | None = self.housekeeper_api.version(
                 bundle=bundle_name, date=analysis.started_at
             )
             if not hk_bundle_version:

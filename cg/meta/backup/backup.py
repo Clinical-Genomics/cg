@@ -2,7 +2,6 @@
 import logging
 import subprocess
 from pathlib import Path
-from typing import Optional
 
 from housekeeper.store.models import File
 
@@ -54,14 +53,14 @@ class BackupAPI:
         LOG.debug(f"Processing flow cells: {processing_flow_cells_count}")
         return processing_flow_cells_count < MAX_PROCESSING_FLOW_CELLS
 
-    def get_first_flow_cell(self) -> Optional[Flowcell]:
+    def get_first_flow_cell(self) -> Flowcell | None:
         """Get the first flow cell from the requested queue."""
-        flow_cell: Optional[Flowcell] = self.status.get_flow_cells_by_statuses(
+        flow_cell: Flowcell | None = self.status.get_flow_cells_by_statuses(
             flow_cell_statuses=[FlowCellStatus.REQUESTED]
         )
         return flow_cell[0] if flow_cell else None
 
-    def fetch_flow_cell(self, flow_cell: Optional[Flowcell] = None) -> Optional[float]:
+    def fetch_flow_cell(self, flow_cell: Flowcell | None = None) -> float | None:
         """Start fetching a flow cell from backup if possible.
 
         1. The processing queue is not full.
@@ -72,7 +71,7 @@ class BackupAPI:
             return None
 
         if not flow_cell:
-            flow_cell: Optional[Flowcell] = self.get_first_flow_cell()
+            flow_cell: Flowcell | None = self.get_first_flow_cell()
 
         if not flow_cell:
             LOG.info("No flow cells requested")
@@ -257,7 +256,7 @@ class BackupAPI:
         )
 
     @classmethod
-    def get_archived_flow_cell_path(cls, dsmc_output: list[str]) -> Optional[Path]:
+    def get_archived_flow_cell_path(cls, dsmc_output: list[str]) -> Path | None:
         """Get the path of the archived flow cell from a PDC query."""
         flow_cell_line: str = [
             row
@@ -273,7 +272,7 @@ class BackupAPI:
             return archived_flow_cell
 
     @classmethod
-    def get_archived_encryption_key_path(cls, dsmc_output: list[str]) -> Optional[Path]:
+    def get_archived_encryption_key_path(cls, dsmc_output: list[str]) -> Path | None:
         """Get the encryption key for the archived flow cell from a PDC query."""
         encryption_key_line: str = [
             row
