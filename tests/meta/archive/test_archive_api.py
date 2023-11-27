@@ -251,7 +251,7 @@ def test_get_archival_status(
     ), mock.patch.object(
         GetJobStatusPayload,
         "get_job_status",
-        return_value=GetJobStatusResponse(job_id=archival_job_id, status=job_status),
+        return_value=GetJobStatusResponse(id=archival_job_id, status=job_status),
     ):
         spring_archive_api.update_ongoing_task(
             task_id=archival_job_id,
@@ -297,7 +297,7 @@ def test_get_retrieval_status(
     ), mock.patch.object(
         GetJobStatusPayload,
         "get_job_status",
-        return_value=GetJobStatusResponse(job_id=retrieval_job_id, status=job_status),
+        return_value=GetJobStatusResponse(id=retrieval_job_id, status=job_status),
     ):
         spring_archive_api.update_ongoing_task(
             task_id=retrieval_job_id,

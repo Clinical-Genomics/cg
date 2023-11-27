@@ -51,7 +51,7 @@ def ok_miria_response(ok_response: Response):
 
 @pytest.fixture
 def ok_miria_job_status_response(ok_response: Response):
-    ok_response._content = b'{"jobId": "123", "status": "Completed"}'
+    ok_response._content = b'{"id": "123", "status": "Completed"}'
     return ok_response
 
 
