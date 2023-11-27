@@ -147,7 +147,7 @@ class TransferPayload(BaseModel):
             url=url,
             headers=headers,
             json=self.model_dump(),
-            verify=False,
+            verify=True,
         )
         response.raise_for_status()
         return TransferJob.model_validate(response.json())
@@ -242,7 +242,7 @@ class GetJobStatusPayload(BaseModel):
             url=url,
             headers=headers,
             json=self.model_dump(),
-            verify=False,
+            verify=True,
         )
         response.raise_for_status()
         return GetJobStatusResponse.model_validate(response.json())
