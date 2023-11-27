@@ -15,9 +15,9 @@ from cg.store.models import (
     Application,
     ApplicationLimitations,
     ApplicationVersion,
-    Customer,
     Case,
     CaseSample,
+    Customer,
     Flowcell,
     Invoice,
     Pool,
@@ -286,10 +286,10 @@ def test_are_all_flow_cells_on_disk_when_requested(
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
+    request,
 ):
     """Test check if all flow cells for samples on a case is on disk when requested."""
     caplog.set_level(logging.DEBUG)
-
     # GIVEN a store with two flow cell
     helpers.add_flow_cell(
         store=base_store,

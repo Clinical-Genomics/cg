@@ -86,3 +86,21 @@
   step: multiqc_picard_dups
   value: 0.931044
   condition: null
+- header: null
+  id: ACC0000A0
+  input: ACC0000A0.dedup.hsmetric.txt
+  name: GC_DROPOUT
+  step: multiqc_picard_HsMetrics
+  value: 1.119042
+  condition:
+    norm: lt
+    threshold: 1.0
+- header: null
+  id: ACC0000A1
+  input: ACC0000A1.dedup.hsmetric.txt
+  name: GC_DROPOUT
+  step: multiqc_picard_HsMetrics
+  value: 1.00692
+  condition:
+    norm: lt
+    threshold: 1.0
