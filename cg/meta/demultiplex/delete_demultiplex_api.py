@@ -3,7 +3,7 @@ import logging
 import shutil
 from glob import glob
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Iterable
 
 from housekeeper.store.models import File
 
@@ -66,7 +66,7 @@ class DeleteDemuxAPI:
         flow_cell = self.status_db.get_flow_cell_by_name(flow_cell_name=self.flow_cell_name)
         self.samples_on_flow_cell: list[Sample] = flow_cell.samples
 
-    def active_samples_on_flow_cell(self) -> Optional[list[str]]:
+    def active_samples_on_flow_cell(self) -> list[str] | None:
         """Check if there are any active cases related to samples of a flow cell."""
         active_samples_on_flow_cell: list[str] = [
             sample.internal_id

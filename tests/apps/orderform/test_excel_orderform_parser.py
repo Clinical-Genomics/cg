@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.constants import Pipeline
@@ -8,9 +7,7 @@ from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import Orderform
 
 
-def get_sample_obj(
-    order_form_parser: ExcelOrderformParser, sample_id: str
-) -> Optional[ExcelSample]:
+def get_sample_obj(order_form_parser: ExcelOrderformParser, sample_id: str) -> ExcelSample | None:
     for sample_obj in order_form_parser.samples:
         if sample_obj.name == sample_id:
             return sample_obj

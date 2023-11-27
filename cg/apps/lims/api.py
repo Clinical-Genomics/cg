@@ -1,7 +1,6 @@
 """Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
-from typing import Optional, Union
 
 from dateutil.parser import parse as parse_date
 from genologics.entities import Artifact, Process, Sample
@@ -154,7 +153,7 @@ class LimsAPI(Lims, OrderHandler):
 
         return None
 
-    def get_samples(self, *args, map_ids=False, **kwargs) -> Union[dict[str, str], list[Sample]]:
+    def get_samples(self, *args, map_ids=False, **kwargs) -> dict[str, str] | list[Sample]:
         """Bypass to original method."""
         lims_samples = super(LimsAPI, self).get_samples(*args, **kwargs)
         if map_ids:
@@ -418,7 +417,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def _get_last_used_input_amount(
         self, input_amounts: list[tuple[dt.datetime, float]]
-    ) -> Optional[float]:
+    ) -> float | None:
         """Return the latest used input amount."""
         sorted_input_amounts: list[tuple[dt.datetime, float]] = self._sort_by_date_run(
             input_amounts

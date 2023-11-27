@@ -1,7 +1,6 @@
 """This api should handle everything around demultiplexing."""
 import logging
 from pathlib import Path
-from typing import Optional
 
 from typing_extensions import Literal
 
@@ -28,9 +27,7 @@ class DemultiplexingAPI:
     This includes starting demultiplexing, creating sample sheets, creating base masks,
     """
 
-    def __init__(
-        self, config: dict, housekeeper_api: HousekeeperAPI, out_dir: Optional[Path] = None
-    ):
+    def __init__(self, config: dict, housekeeper_api: HousekeeperAPI, out_dir: Path | None = None):
         self.slurm_api = SlurmAPI()
         self.hk_api = housekeeper_api
         self.slurm_account: str = config["demultiplex"]["slurm"]["account"]

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, Optional
+from typing import Callable
 
 from sqlalchemy.orm import Query
 
@@ -20,7 +20,7 @@ class UserFilter(Enum):
 def apply_user_filter(
     users: Query,
     filter_functions: list[Callable],
-    email: Optional[str] = None,
+    email: str | None = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for filter_function in filter_functions:

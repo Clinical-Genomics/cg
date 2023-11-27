@@ -3,7 +3,6 @@ import logging
 import shutil
 from enum import Enum
 from pathlib import Path
-from typing import Optional
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
@@ -48,9 +47,9 @@ class FluffySample(BaseModel):
     index: str
     index2: str
     sample_name: str
-    control: Optional[str] = "N"
-    recipe: Optional[str] = "R1"
-    operator: Optional[str] = "script"
+    control: str | None = "N"
+    recipe: str | None = "R1"
+    operator: str | None = "script"
     sample_project: str
     exclude: bool
     library_nM: float
@@ -169,7 +168,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """Get sample concentration from LIMS"""
         return self.lims_api.get_sample_attribute(lims_id=sample_id, key="concentration_sample")
 
-    def get_sample_sequenced_date(self, sample_id: str) -> Optional[dt.date]:
+    def get_sample_sequenced_date(self, sample_id: str) -> dt.date | None:
         sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
         last_sequenced_at: dt.datetime = sample_obj.last_sequenced_at
         if last_sequenced_at:

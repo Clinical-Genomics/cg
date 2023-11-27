@@ -2,7 +2,6 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 import requests
 from housekeeper.store.models import File, Version
@@ -83,7 +82,7 @@ class ReportAPI(MetaAPI):
 
     def add_delivery_report_to_hk(
         self, case_id: str, delivery_report_file: Path, version: Version
-    ) -> Optional[File]:
+    ) -> File | None:
         """Add a delivery report file to a case bundle and return its file object."""
         LOG.info(f"Adding a new delivery report to housekeeper for {case_id}")
         file: File = self.housekeeper_api.add_file(
@@ -93,7 +92,7 @@ class ReportAPI(MetaAPI):
         self.housekeeper_api.add_commit(file)
         return file
 
-    def get_delivery_report_from_hk(self, case_id: str, version: Version) -> Optional[str]:
+    def get_delivery_report_from_hk(self, case_id: str, version: Version) -> str | None:
         """Return path of a delivery report stored in HK."""
         delivery_report: File = self.housekeeper_api.get_latest_file(
             bundle=case_id, tags=[HK_DELIVERY_REPORT_TAG], version=version.id
@@ -103,7 +102,7 @@ class ReportAPI(MetaAPI):
             return None
         return delivery_report.full_path
 
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
         """Return the file path of the uploaded to Scout file given its tag."""
         raise NotImplementedError
 
@@ -241,7 +240,7 @@ class ReportAPI(MetaAPI):
         )
         for case_sample in case_samples:
             sample: Sample = case_sample.sample
-            lims_sample: Optional[dict] = self.get_lims_sample(sample_id=sample.internal_id)
+            lims_sample: dict | None = self.get_lims_sample(sample_id=sample.internal_id)
             samples.append(
                 SampleModel(
                     name=sample.name,
@@ -261,7 +260,7 @@ class ReportAPI(MetaAPI):
             )
         return samples
 
-    def get_lims_sample(self, sample_id: str) -> Optional[dict]:
+    def get_lims_sample(self, sample_id: str) -> dict | None:
         """Fetches sample data from LIMS. Returns an empty dictionary if the request was unsuccessful."""
         lims_sample = dict()
         try:
@@ -376,12 +375,12 @@ class ReportAPI(MetaAPI):
         """Return sample metadata to include in the report."""
         raise NotImplementedError
 
-    def get_data_analysis_type(self, case: Case) -> Optional[str]:
+    def get_data_analysis_type(self, case: Case) -> str | None:
         """Return data analysis type carried out."""
         case_sample: Sample = self.status_db.get_case_samples_by_case_id(
             case_internal_id=case.internal_id
         )[0].sample
-        lims_sample: Optional[dict] = self.get_lims_sample(sample_id=case_sample.internal_id)
+        lims_sample: dict | None = self.get_lims_sample(sample_id=case_sample.internal_id)
         application: Application = self.status_db.get_application_by_tag(
             tag=lims_sample.get("application")
         )
@@ -434,7 +433,7 @@ class ReportAPI(MetaAPI):
                 break
         return ReportAPI.get_sample_required_fields(case=case, required_fields=required_fields)
 
-    def get_hk_scout_file_tags(self, scout_tag: str) -> Optional[list]:
+    def get_hk_scout_file_tags(self, scout_tag: str) -> list | None:
         """Return pipeline specific uploaded to Scout Housekeeper file tags given a Scout key."""
         tags = self.get_upload_case_tags().get(scout_tag)
         return list(tags) if tags else None
