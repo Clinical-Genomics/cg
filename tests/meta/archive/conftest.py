@@ -61,7 +61,7 @@ def archive_request_json(
 ) -> dict:
     return {
         "osType": "Unix/MacOS",
-        "createFolder": False,
+        "createFolder": True,
         "pathInfo": [
             {
                 "destination": f"{remote_storage_repository}ADM1",
@@ -80,7 +80,7 @@ def retrieve_request_json(
     """Returns the body for a retrieval http post towards the DDN Miria API."""
     return {
         "osType": "Unix/MacOS",
-        "createFolder": False,
+        "createFolder": True,
         "pathInfo": [
             {
                 "destination": local_storage_repository

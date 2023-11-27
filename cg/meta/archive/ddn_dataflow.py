@@ -219,7 +219,6 @@ class GetJobStatusPayload(BaseModel):
             headers=headers,
             json=self.model_dump(),
             verify=False,
-
         )
         response.raise_for_status()
         return GetJobStatusResponse.model_validate(response.json())

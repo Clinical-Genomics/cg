@@ -4,6 +4,7 @@ from unittest import mock
 import pytest
 from housekeeper.store.models import File
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import APIMethods
 from cg.constants.housekeeper_tags import SequencingFileTag
@@ -183,6 +184,7 @@ def test_archive_all_non_archived_spring_files(
     archive_request_json,
     header_with_test_auth_token,
     test_auth_token: AuthToken,
+    sample_id: str,
 ):
     """Test archiving all non-archived SPRING files for Miria customers."""
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
@@ -193,6 +195,10 @@ def test_archive_all_non_archived_spring_files(
         AuthToken,
         "model_validate",
         return_value=test_auth_token,
+    ), mock.patch.object(
+        HousekeeperAPI,
+        "get_all_non_archived_spring_files",
+        return_value=[spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first()],
     ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
