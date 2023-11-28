@@ -1,7 +1,6 @@
 import logging
 import shutil
 from pathlib import Path
-from typing import Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
@@ -141,7 +140,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         )
         LOG.info("Saved config to %s", config_path)
 
-    def get_additional_naming_metadata(self, sample_obj: Sample) -> Optional[str]:
+    def get_additional_naming_metadata(self, sample_obj: Sample) -> str | None:
         sample_name = sample_obj.name
         region_code = self.lims_api.get_sample_attribute(
             lims_id=sample_obj.internal_id, key="region_code"

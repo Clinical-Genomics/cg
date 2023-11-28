@@ -8,7 +8,7 @@ from copy import deepcopy
 from datetime import MAXYEAR, datetime, timedelta
 from pathlib import Path
 from subprocess import CompletedProcess
-from typing import Any, Generator, Union
+from typing import Any, Generator
 
 import pytest
 from housekeeper.store.models import File, Version
@@ -3252,7 +3252,7 @@ def store_with_sequencing_metrics(
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
-    sample_sequencing_metrics_details: list[Union[str, str, int, int, float, int]] = [
+    sample_sequencing_metrics_details: list[str | int | float] = [
         (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
         (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 2, 2_000_000, 85.5, 30),

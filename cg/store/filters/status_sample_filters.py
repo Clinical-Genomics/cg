@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 from sqlalchemy import or_
 from sqlalchemy.orm import Query
@@ -160,18 +160,18 @@ def filter_samples_by_identifier_name_and_value(
 def apply_sample_filter(
     filter_functions: list[Callable],
     samples: Query,
-    entry_id: Optional[int] = None,
-    internal_id: Optional[str] = None,
-    tissue_type: Optional[SampleType] = None,
-    data_analysis: Optional[str] = None,
-    invoice_id: Optional[int] = None,
-    customer_entry_ids: Optional[list[int]] = None,
-    subject_id: Optional[str] = None,
-    name: Optional[str] = None,
-    customer: Optional[Customer] = None,
-    name_pattern: Optional[str] = None,
-    internal_id_pattern: Optional[str] = None,
-    search_pattern: Optional[str] = None,
+    entry_id: int | None = None,
+    internal_id: str | None = None,
+    tissue_type: SampleType | None = None,
+    data_analysis: str | None = None,
+    invoice_id: int | None = None,
+    customer_entry_ids: list[int] | None = None,
+    subject_id: str | None = None,
+    name: str | None = None,
+    customer: Customer | None = None,
+    name_pattern: str | None = None,
+    internal_id_pattern: str | None = None,
+    search_pattern: str | None = None,
     identifier_name: str = None,
     identifier_value: Any = None,
 ) -> Query:

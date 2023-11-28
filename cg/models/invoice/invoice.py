@@ -1,5 +1,5 @@
 """Module for defining invoice models."""
-from typing import Any, Optional
+from typing import Any
 
 from pydantic.v1 import BaseModel
 
@@ -31,26 +31,26 @@ class InvoiceInfo(BaseModel):
 
     name: str
     id: str
-    lims_id: Optional[str]
+    lims_id: str | None
     application_tag: str
     project: str
-    date: Optional[Any]
+    date: Any | None
     price: int
     priority: PriorityTerms
-    price_kth: Optional[int]
-    total_price: Optional[int]
+    price_kth: int | None
+    total_price: int | None
 
 
 class InvoiceReport(BaseModel):
     """Class that collects information used to create the invoice Excel sheet."""
 
     cost_center: str
-    project_number: Optional[str]
+    project_number: str | None
     customer_id: str
     customer_name: str
-    agreement: Optional[str]
+    agreement: str | None
     invoice_id: int
     contact: dict
     records: list
-    pooled_samples: Optional[Any]
+    pooled_samples: Any | None
     record_type: RecordType

@@ -1,5 +1,4 @@
 import logging
-from typing import Optional, Union
 
 from housekeeper.store.models import File, Version
 
@@ -10,6 +9,7 @@ from cg.constants import (
     REQUIRED_CASE_FIELDS,
     REQUIRED_CUSTOMER_FIELDS,
     REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS,
+    REQUIRED_DATA_ANALYSIS_FIELDS,
     REQUIRED_REPORT_FIELDS,
     REQUIRED_SAMPLE_BALSAMIC_FIELDS,
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS,
@@ -18,7 +18,6 @@ from cg.constants import (
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     Pipeline,
-    REQUIRED_DATA_ANALYSIS_FIELDS,
 )
 from cg.constants.scout_upload import BALSAMIC_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
@@ -52,7 +51,7 @@ class BalsamicReportAPI(ReportAPI):
 
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: BalsamicAnalysis
-    ) -> Union[BalsamicTargetedSampleMetadataModel, BalsamicWGSSampleMetadataModel]:
+    ) -> BalsamicTargetedSampleMetadataModel | BalsamicWGSSampleMetadataModel:
         """Return sample metadata to include in the report."""
         sample_metrics: dict[str, BalsamicQCMetrics] = analysis_metadata.sample_metrics[
             sample.internal_id
@@ -120,7 +119,7 @@ class BalsamicReportAPI(ReportAPI):
             else None
         )
 
-    def get_data_analysis_type(self, case: Case) -> Optional[str]:
+    def get_data_analysis_type(self, case: Case) -> str | None:
         """Return data analysis type carried out."""
         return self.analysis_api.get_bundle_deliverables_type(case_id=case.internal_id)
 
@@ -152,9 +151,7 @@ class BalsamicReportAPI(ReportAPI):
         return analysis_var_callers
 
     @staticmethod
-    def get_variant_caller_version(
-        var_caller_name: str, var_caller_versions: dict
-    ) -> Optional[str]:
+    def get_variant_caller_version(var_caller_name: str, var_caller_versions: dict) -> str | None:
         """Return version of a specific Balsamic tool."""
         for tool_name, versions in var_caller_versions.items():
             if tool_name in var_caller_name:
@@ -230,7 +227,7 @@ class BalsamicReportAPI(ReportAPI):
         """Return Balsamic upload case tags."""
         return BALSAMIC_CASE_TAGS
 
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
         """Return file path of the uploaded to Scout file given its tag."""
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
         tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)

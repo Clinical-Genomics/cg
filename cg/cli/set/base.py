@@ -2,7 +2,7 @@
 import datetime
 import getpass
 import logging
-from typing import Iterable, Optional
+from typing import Iterable
 
 import click
 
@@ -139,7 +139,7 @@ def is_private_attribute(key: str) -> bool:
 
 
 def list_changeable_sample_attributes(
-    sample: Optional[Sample] = None, skip_attributes: list[str] = []
+    sample: Sample | None = None, skip_attributes: list[str] = []
 ) -> None:
     """List changeable attributes on sample and its current value."""
     LOG.info("Below is a set of changeable sample attributes, to combine with -kv flag:\n")
@@ -159,7 +159,7 @@ def list_changeable_sample_attributes(
 @click.pass_obj
 def list_keys(
     context: CGConfig,
-    sample_id: Optional[str],
+    sample_id: str | None,
 ):
     """List all available modifiable keys."""
     status_db: Store = context.status_db
@@ -185,7 +185,7 @@ def list_keys(
 @click.pass_obj
 def sample(
     context: CGConfig,
-    sample_id: Optional[str],
+    sample_id: str | None,
     kwargs: click.Tuple([str, str]),
     skip_lims: bool,
     yes: bool,
@@ -286,7 +286,7 @@ def _update_comment(comment, obj):
 @click.option("-s", "--status", type=click.Choice(FLOWCELL_STATUS))
 @click.argument("flow_cell_name")
 @click.pass_obj
-def flowcell(context: CGConfig, flow_cell_name: str, status: Optional[str]):
+def flowcell(context: CGConfig, flow_cell_name: str, status: str | None):
     """Update information about a flow cell."""
     status_db: Store = context.status_db
     flowcell_obj: Flowcell = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell_name)

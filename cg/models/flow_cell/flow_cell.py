@@ -3,8 +3,7 @@ import datetime
 import logging
 import os
 from pathlib import Path
-from typing import Type, Union
-from cg.models.flow_cell.utils import parse_date
+from typing import Type
 
 from pydantic import ValidationError
 from typing_extensions import Literal
@@ -29,6 +28,7 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
+from cg.models.flow_cell.utils import parse_date
 
 LOG = logging.getLogger(__name__)
 RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
@@ -130,7 +130,7 @@ class FlowCellDirectoryData:
     @property
     def sample_type(
         self,
-    ) -> Union[Type[FlowCellSampleBcl2Fastq], Type[FlowCellSampleBCLConvert]]:
+    ) -> Type[FlowCellSampleBcl2Fastq] | Type[FlowCellSampleBCLConvert]:
         """Return the sample class used in the flow cell."""
         if self.bcl_converter == BclConverter.BCL2FASTQ:
             return FlowCellSampleBcl2Fastq

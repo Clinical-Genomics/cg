@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 import click
 
@@ -50,10 +49,10 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> list[Case]
 @click.pass_context
 def set_cases(
     context: click.Context,
-    action: Optional[str],
-    priority: Optional[Priority],
-    panel_abbreviations: Optional[tuple[str]],
-    customer_id: Optional[str],
+    action: str | None,
+    priority: Priority | None,
+    panel_abbreviations: tuple[str] | None,
+    customer_id: str | None,
     identifiers: click.Tuple([str, str]),
 ):
     """Set values on many families at the same time"""

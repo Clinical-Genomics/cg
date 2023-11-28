@@ -1,7 +1,6 @@
 """Models used by hermes <-> cg interactions"""
 import logging
 from pathlib import Path
-from typing import Optional
 
 from pydantic import BaseModel, field_validator
 
@@ -15,7 +14,7 @@ class CGTag(BaseModel):
 
     path: str
     tags: list[str]
-    mandatory: Optional[bool] = False
+    mandatory: bool | None = False
 
 
 class CGDeliverables(BaseModel):

@@ -3,7 +3,6 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import Optional
 
 from housekeeper.store.models import File, Version
 
@@ -80,7 +79,7 @@ def get_compression_data(fastq_files: list[Path]) -> list[CompressionData]:
     compressions: list[CompressionData] = []
     for fastq_file in fastq_files:
         # file prefix is the run name identifier
-        file_prefix: Optional[Path] = get_fastq_stub(fastq_file)
+        file_prefix: Path | None = get_fastq_stub(fastq_file)
         if file_prefix is None:
             LOG.info(f"Invalid FASTQ name {fastq_file}")
             continue
