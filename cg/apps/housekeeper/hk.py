@@ -132,8 +132,7 @@ class HousekeeperAPI:
         )
 
     def get_file_insensitive_path(self, path: Path) -> File | None:
-        """Returns a file in Housekeeper with a path that matches the given path, insensitive to whether the paths
-        are included or not."""
+        """Returns a file in Housekeeper given any kind of path (absolute or relative)."""
         file: File = self.files(path=path.as_posix()).first()
         if not file:
             if path.is_absolute():
