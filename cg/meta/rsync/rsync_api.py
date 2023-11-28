@@ -39,7 +39,7 @@ class RsyncAPI(MetaAPI):
     @property
     def slurm_quality_of_service(self) -> str:
         """Return the slurm quality of service depending on the slurm account."""
-        return SlurmQos.HIGH if self.account == SlurmAccount.PRODUCTION.value else SlurmQos.LOW
+        return SlurmQos.HIGH if self.account == SlurmAccount.PRODUCTION else SlurmQos.LOW
 
     @property
     def trailblazer_config_path(self) -> Path:
