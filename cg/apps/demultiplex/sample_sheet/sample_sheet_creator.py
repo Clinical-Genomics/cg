@@ -171,7 +171,7 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
         """Return the header and column names of the data section of the sample sheet."""
         return [
             [SampleSheetBcl2FastqSections.Data.HEADER.value],
-            SampleSheetBcl2FastqSections.Data.COLUMN_NAMES.value,
+            SampleSheetBcl2FastqSections.Data.column_names(),
         ]
 
 
@@ -261,5 +261,5 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         """Return the header and column names of the data section of the sample sheet."""
         return [
             [SampleSheetBCLConvertSections.Data.HEADER.value],
-            SampleSheetBCLConvertSections.Data.COLUMN_NAMES.value,
+            SampleSheetBCLConvertSections.Data.column_names(),
         ]

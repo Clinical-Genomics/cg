@@ -76,7 +76,7 @@ class SampleSheetBcl2FastqSections:
         BARCODE_MISMATCH_INDEX1: list[str] = ["BarcodeMismatchesIndex1", "0"]
         BARCODE_MISMATCH_INDEX2: list[str] = ["BarcodeMismatchesIndex2", "0"]
 
-    class Data(Enum):
+    class Data(StrEnum):
         HEADER: str = "[Data]"
         FLOW_CELL_ID: str = "FCID"
         LANE: str = "Lane"
@@ -90,19 +90,21 @@ class SampleSheetBcl2FastqSections:
         OPERATOR: str = "Operator"
         SAMPLE_PROJECT_BCL2FASTQ: str = "Project"
 
-        COLUMN_NAMES: list[str] = [
-            FLOW_CELL_ID,
-            LANE,
-            SAMPLE_INTERNAL_ID_BCL2FASTQ,
-            SAMPLE_REFERENCE,
-            INDEX_1,
-            INDEX_2,
-            SAMPLE_NAME,
-            CONTROL,
-            RECIPE,
-            OPERATOR,
-            SAMPLE_PROJECT_BCL2FASTQ,
-        ]
+        @classmethod
+        def column_names(cls) -> list[str]:
+            return [
+                cls.FLOW_CELL_ID,
+                cls.LANE,
+                cls.SAMPLE_INTERNAL_ID_BCL2FASTQ,
+                cls.SAMPLE_REFERENCE,
+                cls.INDEX_1,
+                cls.INDEX_2,
+                cls.SAMPLE_NAME,
+                cls.CONTROL,
+                cls.RECIPE,
+                cls.OPERATOR,
+                cls.SAMPLE_PROJECT_BCL2FASTQ,
+            ]
 
 
 class SampleSheetBCLConvertSections:
@@ -131,7 +133,7 @@ class SampleSheetBCLConvertSections:
         SOFTWARE_VERSION: list[str] = ["SoftwareVersion", "4.1.7"]
         FASTQ_COMPRESSION_FORMAT: list[str] = ["FastqCompressionFormat", "gzip"]
 
-    class Data(Enum):
+    class Data(StrEnum):
         HEADER: str = "[BCLConvert_Data]"
         LANE: str = "Lane"
         SAMPLE_INTERNAL_ID: str = "Sample_ID"
@@ -143,17 +145,19 @@ class SampleSheetBCLConvertSections:
         BARCODE_MISMATCHES_1: str = "BarcodeMismatchesIndex1"
         BARCODE_MISMATCHES_2: str = "BarcodeMismatchesIndex2"
 
-        COLUMN_NAMES: list[str] = [
-            LANE,
-            SAMPLE_INTERNAL_ID,
-            INDEX_1,
-            INDEX_2,
-            OVERRIDE_CYCLES,
-            ADAPTER_READ_1,
-            ADAPTER_READ_2,
-            BARCODE_MISMATCHES_1,
-            BARCODE_MISMATCHES_2,
-        ]
+        @classmethod
+        def column_names(cls) -> list[str]:
+            return [
+                cls.LANE,
+                cls.SAMPLE_INTERNAL_ID,
+                cls.INDEX_1,
+                cls.INDEX_2,
+                cls.OVERRIDE_CYCLES,
+                cls.ADAPTER_READ_1,
+                cls.ADAPTER_READ_2,
+                cls.BARCODE_MISMATCHES_1,
+                cls.BARCODE_MISMATCHES_2,
+            ]
 
 
 OPTION_BCL_CONVERTER = click.option(

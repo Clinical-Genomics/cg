@@ -22,21 +22,21 @@ SAMPLE_SHEET_HEADER = {
     BclConverter.BCL2FASTQ: ",".join(
         [
             column
-            for column in SampleSheetBcl2FastqSections.Data.COLUMN_NAMES.value
+            for column in SampleSheetBcl2FastqSections.Data.column_names()
             if column != "index2"
         ]
     ),
     BclConverter.BCLCONVERT: ",".join(
         [
             column
-            for column in SampleSheetBCLConvertSections.Data.COLUMN_NAMES.value
+            for column in SampleSheetBCLConvertSections.Data.column_names()
             if column != "index2"
         ]
     ),
     BclConverter.DRAGEN: ",".join(
         [
             column
-            for column in SampleSheetBCLConvertSections.Data.COLUMN_NAMES.value
+            for column in SampleSheetBCLConvertSections.Data.column_names()
             if column != "index2"
         ]
     ),
