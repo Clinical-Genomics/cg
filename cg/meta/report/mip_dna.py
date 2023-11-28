@@ -1,5 +1,5 @@
 import logging
-from typing import Iterable, Optional
+from typing import Iterable
 
 from housekeeper.store.models import File, Version
 
@@ -131,7 +131,7 @@ class MipDNAReportAPI(ReportAPI):
         """Return MIP DNA upload case tags."""
         return MIP_CASE_TAGS
 
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
         """Return file path of the uploaded to Scout file given its tag."""
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
         tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)

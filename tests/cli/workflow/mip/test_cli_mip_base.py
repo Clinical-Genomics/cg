@@ -2,6 +2,7 @@
 
 import logging
 
+import mock
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 from pytest_mock import MockFixture
@@ -83,7 +84,7 @@ def test_spring_decompression_needed_and_start_failed(
     assert result.exit_code == 0
 
     # THEN it should be announced that spring decompression is needed but fail to start
-    assert f"Decompression failed to start for" in caplog.text
+    assert "Decompression failed to start for" in caplog.text
 
 
 def test_spring_decompression_needed_and_cant_start(
@@ -120,7 +121,7 @@ def test_spring_decompression_needed_and_cant_start(
     assert result.exit_code == 0
 
     # THEN it should be announced that spring decompression is needed but fail to start
-    assert f"Decompression can not be started for" in caplog.text
+    assert "Decompression can not be started for" in caplog.text
 
 
 def test_decompression_cant_start_and_is_running(
@@ -157,7 +158,7 @@ def test_decompression_cant_start_and_is_running(
     assert result.exit_code == 0
 
     # THEN it should be announced that spring decompression is needed but fail to start
-    assert f"Decompression is running for" in caplog.text
+    assert "Decompression is running for" in caplog.text
 
 
 def test_case_needs_to_be_stored(
@@ -188,8 +189,14 @@ def test_case_needs_to_be_stored(
         mocker=mocker,
     )
 
-    # WHEN MIP analysis is started
-    result = cli_runner.invoke(start, [case.internal_id, "--dry-run"], obj=mip_dna_context)
+    # GIVEN that a panel is returned
+    with mock.patch.object(
+        mip_dna_context.scout_api,
+        "export_panels",
+        return_value=["OMIM-AUTO"],
+    ):
+        # WHEN MIP analysis is started
+        result = cli_runner.invoke(start, [case.internal_id, "--dry-run"], obj=mip_dna_context)
 
     # THEN command should run without errors
     assert result.exit_code == 0

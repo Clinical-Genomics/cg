@@ -1,10 +1,8 @@
-from typing import Optional
-
 from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
 from cg.models.orders.sample_base import PriorityEnum
 
 
-def parse_panels(panels: str) -> Optional[list[str]]:
+def parse_panels(panels: str) -> list[str] | None:
     if not panels:
         return None
     separator = ";" if ";" in panels else None
@@ -32,7 +30,7 @@ def validate_data_analysis(data_analysis):
     return data_analysis
 
 
-def numeric_value(value: Optional[str]) -> Optional[str]:
+def numeric_value(value: str | None) -> str | None:
     """Validates that the given string can be given as either an integer or a float. Also converts floats of the
     type x.00 to x."""
     if not value:
@@ -50,13 +48,13 @@ def validate_parent(parent: str) -> str:
     return None if parent == "0.0" else parent
 
 
-def validate_source(source: Optional[str]) -> str:
+def validate_source(source: str | None) -> str:
     if source not in SOURCE_TYPES:
         raise ValueError(f"'{source}' is not a valid source")
     return source
 
 
-def convert_sex(sex: str) -> Optional[str]:
+def convert_sex(sex: str) -> str | None:
     if not sex:
         return None
     sex = sex.strip()
@@ -71,10 +69,10 @@ def replace_spaces_with_underscores(value: str) -> str:
     return value.replace(" ", "_")
 
 
-def convert_to_priority(priority: Optional[str]) -> Optional[str]:
+def convert_to_priority(priority: str | None) -> str | None:
     """Translates the Swedish 'förtur' to 'priority' if specified in the order."""
     return PriorityEnum.priority if priority == "förtur" else priority
 
 
-def convert_to_date(date: Optional[str]) -> Optional[str]:
+def convert_to_date(date: str | None) -> str | None:
     return date[:10] if date else None

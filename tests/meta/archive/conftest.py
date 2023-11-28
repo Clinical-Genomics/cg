@@ -44,14 +44,14 @@ def ddn_dataflow_config(
 
 
 @pytest.fixture
-def ok_ddn_response(ok_response: Response):
-    ok_response._content = b'{"job_id": "123"}'
+def ok_miria_response(ok_response: Response):
+    ok_response._content = b'{"jobId": "123"}'
     return ok_response
 
 
 @pytest.fixture
-def ok_ddn_job_status_response(ok_response: Response):
-    ok_response._content = b'{"job_id": "123", "description": "Completed"}'
+def ok_miria_job_status_response(ok_response: Response):
+    ok_response._content = b'{"id": "123", "status": "Completed"}'
     return ok_response
 
 
@@ -69,15 +69,7 @@ def archive_request_json(
             }
         ],
         "metadataList": [],
-    }
-
-
-@pytest.fixture
-def get_job_status_request_json(
-    remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
-) -> dict:
-    return {
-        "job_id": 123,
+        "settings": [],
     }
 
 
@@ -97,6 +89,7 @@ def retrieve_request_json(
             }
         ],
         "metadataList": [],
+        "settings": [],
     }
 
 
@@ -110,7 +103,7 @@ def header_with_test_auth_token() -> dict:
 
 
 @pytest.fixture
-def ddn_auth_token_response(ok_response: Response):
+def miria_auth_token_response(ok_response: Response):
     ok_response._content = b'{"access": "test_auth_token", "expire":15, "test_refresh_token":""}'
     return ok_response
 

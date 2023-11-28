@@ -1,7 +1,6 @@
 """Utility functions for the upload cli commands."""
 
 import logging
-from typing import Optional
 
 import click
 
@@ -13,7 +12,7 @@ from cg.store.models import Analysis
 LOG = logging.getLogger(__name__)
 
 
-def suggest_cases_to_upload(status_db: Store, pipeline: Optional[Pipeline] = None) -> None:
+def suggest_cases_to_upload(status_db: Store, pipeline: Pipeline | None = None) -> None:
     """Print a list of suggested cases to upload."""
     LOG.warning("Provide a case, suggestions:")
     records: list[Analysis] = status_db.get_analyses_to_upload(pipeline=pipeline)[
