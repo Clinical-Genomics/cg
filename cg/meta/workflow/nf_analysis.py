@@ -266,6 +266,21 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return deliverables file template content."""
         raise NotImplementedError
 
+    def _update_template_with_case_information(
+        self, file_deliverable: dict, case_id: str
+    ) -> list[dict]:
+        """Given a file deliverable template, update fields with CASEID and PATHTOCASE
+        keywords and replace with case information."""
+        for deliverable_field, deliverable_value in file_deliverable.items():
+            if deliverable_value is None:
+                continue
+            file_deliverable[deliverable_field] = file_deliverable[deliverable_field].replace(
+                "CASEID", case_id
+            )
+            file_deliverable[deliverable_field] = file_deliverable[deliverable_field].replace(
+                "PATHTOCASE", str(self.get_case_path(case_id=case_id))
+            )
+
     def get_deliverables_for_case(
         self, case_id: str, optional_file_tags: set = {}
     ) -> PipelineDeliverables:
@@ -273,13 +288,7 @@ class NfAnalysisAPI(AnalysisAPI):
         deliverable_template: list[dict] = self.get_deliverables_template_content()
         files: list[FileDeliverable] = []
         for file in deliverable_template:
-            for deliverable_field, deliverable_value in file.items():
-                if deliverable_value is None:
-                    continue
-                file[deliverable_field] = file[deliverable_field].replace("CASEID", case_id)
-                file[deliverable_field] = file[deliverable_field].replace(
-                    "PATHTOCASE", str(self.get_case_path(case_id=case_id))
-                )
+            self._update_template_with_case_information(file_deliverable=file, case_id=case_id)
             if file["tag"] in optional_file_tags and not Path(file["path"]).exists():
                 LOG.warning(f"Optional file not found. Skipping: {file['path']}")
                 continue
