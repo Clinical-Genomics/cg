@@ -439,6 +439,17 @@ class MockHousekeeperAPI:
         """
         return self.files(*args, **kwargs)
 
+    def get_file_insensitive_path(self, path: Path) -> File | None:
+        """Returns a file in Housekeeper with a path that matches the given path, insensitive to whether the paths
+        are included or not."""
+        file: File = self.files(path=path.as_posix()).first()
+        if not file:
+            if path.is_absolute():
+                file = self.files(path=str(path).replace(self.root_path, "")).first()
+            else:
+                file = self.files(path=self.root_path + str(path)).first()
+        return file
+
     def add_file(self, path, version_obj, tags, to_archive=False):
         """Add a file to housekeeper."""
         tags = tags or []
