@@ -7,7 +7,6 @@ from sqlalchemy.orm import Query, Session
 
 from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import PrepCategory, SampleType
-from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError, CgError
 from cg.store.api.base import BaseHandler
 from cg.store.filters.status_analysis_filters import (
@@ -85,7 +84,7 @@ class FindBusinessDataHandler(BaseHandler):
 
         return (
             self.get_case_by_internal_id(internal_id=case_id)
-            .links[ListIndexes.FIRST.value]
+            .links[0]
             .sample.application_version.application
         )
 
