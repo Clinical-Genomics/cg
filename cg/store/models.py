@@ -7,16 +7,15 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.util import deprecated
 
 from cg.constants import (
-    CASE_ACTIONS,
-    FLOWCELL_STATUS,
     PREP_CATEGORIES,
     SEX_OPTIONS,
     STATUS_OPTIONS,
     DataDelivery,
+    FlowCellStatus,
     Pipeline,
     Priority,
 )
-from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
+from cg.constants.constants import CONTROL_OPTIONS, CaseActions, PrepCategory
 
 Model = declarative_base()
 
@@ -379,7 +378,7 @@ class Case(Model, PriorityMixin):
     __tablename__ = "case"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
-    action = Column(types.Enum(*CASE_ACTIONS))
+    action = Column(types.Enum(*CaseActions.actions()))
     _cohorts = Column(types.Text)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -559,7 +558,7 @@ class Flowcell(Model):
     sequencer_type = Column(types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx"))
     sequencer_name = Column(types.String(32))
     sequenced_at = Column(types.DateTime)
-    status = Column(types.Enum(*FLOWCELL_STATUS), default="ondisk")
+    status = Column(types.Enum(*FlowCellStatus.statuses()), default="ondisk")
     archived_at = Column(types.DateTime)
     has_backup = Column(types.Boolean, nullable=False, default=False)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)

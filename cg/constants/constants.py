@@ -38,8 +38,10 @@ class CaseActions(StrEnum):
     HOLD: str = "hold"
     RUNNING: str = "running"
 
+    @classmethod
+    def actions(cls) -> list[str]:
+        return [action for action in cls]
 
-CASE_ACTIONS = [action.value for action in CaseActions]
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
@@ -63,8 +65,9 @@ class FlowCellStatus(StrEnum):
     PROCESSING: str = "processing"
     RETRIEVED: str = "retrieved"
 
-
-FLOWCELL_STATUS = [status.value for status in FlowCellStatus]
+    @classmethod
+    def statuses(cls) -> list[str]:
+        return [status for status in FlowCellStatus]
 
 
 class AnalysisType(StrEnum):

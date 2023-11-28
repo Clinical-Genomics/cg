@@ -9,7 +9,7 @@ import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import AnalysisType, CaseActions, WorkflowManager
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
@@ -233,7 +233,7 @@ class AnalysisAPI(MetaAPI):
         if dry_run:
             LOG.info(f"Dry-run: Action {action} would be set for case {case_id}")
             return
-        if action in [None, *CASE_ACTIONS]:
+        if action in [None, *CaseActions.actions()]:
             case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
             case_obj.action = action
             self.status_db.session.commit()
