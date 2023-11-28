@@ -69,8 +69,8 @@ class RnafusionReportAPI(ReportAPI):
     def get_report_accreditation(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Checks if the report is accredited or not. Rnafusion is not an accredited workflow."""
-        return False
+        """Checks if the report is accredited or not. Rnafusion is an accredited workflow."""
+        return True
 
     def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
         """Return file path of the uploaded to Scout file given its tag."""
