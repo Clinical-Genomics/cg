@@ -24,7 +24,7 @@ from cg.cli.workflow.commands import (
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Pipeline
-from cg.constants.housekeeper_tags import ALIGNMENT_FILE_TAGS, ScoutTag
+from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
 from cg.exc import CleanFlowCellFailedError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
@@ -81,7 +81,7 @@ def hk_alignment_files(
 ) -> None:
     """Clean up alignment files in Housekeeper bundle."""
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    for tag in ALIGNMENT_FILE_TAGS:
+    for tag in AlignmentFileTag.file_tags():
         tag_files = set(housekeeper_api.get_files(bundle=bundle, tags=[tag]))
 
         if not tag_files:
