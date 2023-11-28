@@ -658,7 +658,7 @@ def test_get_file_insensitive_path(bed_file: Path, populated_housekeeper_api: Ho
     """Test that a file is fetched given its path."""
     # GIVEN the path of a file in Housekeeper API
 
-    # WHEN getting the file though the absolute path
+    # WHEN getting the file though the path
     file: File = populated_housekeeper_api.get_file_insensitive_path(path=bed_file)
 
     # THEN the file is fetched correctly
