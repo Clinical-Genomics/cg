@@ -482,12 +482,17 @@ def test_create_manifest_file(tmp_flow_cells_directory_ready_for_demultiplexing_
     # THEN a manifest file should be created
     assert manifest_file.exists()
 
-    # Then all files should be included in the manifest file
+    # Then all files should be included in the manifest_file
+    assert_file_contains_all_file_paths(manifest_file=manifest_file, files_in_file=all_files)
+
+
+def assert_file_contains_all_file_paths(manifest_file: Path, files_in_file: list[Path]):
+    """Asserts that all files in files_in_file are present in the manifest_file."""
     files_in_manifest: list[Path] = [
         Path(file[0].strip()) for file in read_csv(delimiter="\t", file_path=manifest_file)
     ]
-    for file in all_files:
-        assert file in files_in_manifest
+    for manifest_file in files_in_file:
+        assert manifest_file in files_in_manifest
 
 
 def test_add_flow_cell_name_to_fastq_file_path(

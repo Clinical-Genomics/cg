@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cg import resources
 from cg.constants import Pipeline
@@ -103,7 +103,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             return content_per_sample
 
     def get_pipeline_parameters(
-        self, case_id: str, genomes_base: Optional[Path] = None
+        self, case_id: str, genomes_base: Path | None = None
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
         LOG.debug("Getting parameters information")
@@ -115,7 +115,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             priority=self.account,
         )
 
-    def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
+    def get_references_path(self, genomes_base: Path | None = None) -> Path:
         if genomes_base:
             return genomes_base.absolute()
         return Path(self.references).absolute()

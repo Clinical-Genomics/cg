@@ -1,5 +1,3 @@
-from typing import Optional
-
 import coloredlogs
 import requests
 from flask import Flask, redirect, session, url_for
@@ -16,11 +14,11 @@ from cg.store.models import (
     ApplicationVersion,
     Bed,
     BedVersion,
+    Case,
+    CaseSample,
     Collaboration,
     Customer,
     Delivery,
-    Case,
-    CaseSample,
     Flowcell,
     Invoice,
     Organism,
@@ -140,6 +138,6 @@ def _register_teardowns(app: Flask):
         Remove the database session to ensure database resources are
         released when a request has been processed.
         """
-        scoped_session_registry: Optional[scoped_session] = get_scoped_session_registry()
+        scoped_session_registry: scoped_session | None = get_scoped_session_registry()
         if scoped_session_registry:
             scoped_session_registry.remove()

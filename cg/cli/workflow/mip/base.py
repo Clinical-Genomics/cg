@@ -1,6 +1,5 @@
 """Module for common workflow commands."""
 import logging
-from typing import Optional
 
 import click
 
@@ -37,7 +36,7 @@ def config_case(context: CGConfig, case_id: str, panel_bed: str, dry_run: bool):
     analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        panel_bed: Optional[str] = analysis_api.get_panel_bed(panel_bed=panel_bed)
+        panel_bed: str | None = analysis_api.get_panel_bed(panel_bed=panel_bed)
         config_data: dict = analysis_api.pedigree_config(case_id=case_id, panel_bed=panel_bed)
     except CgError as error:
         LOG.error(error)

@@ -1,5 +1,3 @@
-from typing import Optional
-
 from sqlalchemy.orm import Query
 
 from cg.store import Store
@@ -11,7 +9,9 @@ from cg.store.filters.status_metrics_filters import (
     filter_total_read_count_for_sample,
 )
 from cg.store.models import SampleLaneSequencingMetrics
-from tests.meta.demultiplex.conftest import flow_cell_name_demultiplexed_with_bcl_convert
+from tests.meta.demultiplex.conftest import (
+    flow_cell_name_demultiplexed_with_bcl_convert,
+)
 
 
 def test_filter_total_read_count_for_sample(
@@ -29,7 +29,7 @@ def test_filter_total_read_count_for_sample(
     assert isinstance(total_reads_query, Query)
 
     # THEN a total reads count is returned
-    actual_total_reads: Optional[int] = total_reads_query.scalar()
+    actual_total_reads: int | None = total_reads_query.scalar()
     assert actual_total_reads
 
     # THEN assert that the actual total read count is as expected
@@ -114,7 +114,7 @@ def test_filter_metrics_by_sample_internal_id(store_with_sequencing_metrics: Sto
 def test_filter_above_q30_threshold(store_with_sequencing_metrics: Store):
     # GIVEN a Store with sequencing metrics
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
-    metric: Optional[SampleLaneSequencingMetrics] = metrics.first()
+    metric: SampleLaneSequencingMetrics | None = metrics.first()
     assert metric
 
     # GIVEN a Q30 threshold that at least one metric will pass

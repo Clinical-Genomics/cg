@@ -8,7 +8,6 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import Optional
 
 from cg.apps.crunchy import files
 from cg.apps.crunchy.models import CrunchyFile, CrunchyMetadata
@@ -33,7 +32,7 @@ class CrunchyAPI:
     """
 
     def __init__(self, config: dict):
-        self.conda_binary: Optional[str] = config["crunchy"]["conda_binary"] or None
+        self.conda_binary: str | None = config["crunchy"]["conda_binary"] or None
         self.crunchy_env: str = config["crunchy"]["slurm"]["conda_env"]
         self.dry_run: bool = False
         self.reference_path: str = config["crunchy"]["cram_reference"]
@@ -153,7 +152,7 @@ class CrunchyAPI:
         )
 
         # Check if the SPRING archive has been unarchived
-        updated_at: Optional[datetime.date] = files.get_file_updated_at(crunchy_metadata)
+        updated_at: datetime.date | None = files.get_file_updated_at(crunchy_metadata)
         if updated_at is None:
             LOG.info(f"FASTQ compression is done for {compression.run_name}")
             return True

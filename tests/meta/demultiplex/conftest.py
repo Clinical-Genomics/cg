@@ -10,7 +10,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_sample_sheet_path_to_housekeeper,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.api import Store
@@ -315,44 +317,6 @@ def delete_demultiplex_api(
         dry_run=False,
         flow_cell_name=bcl2fastq_flow_cell_id,
     )
-
-
-@pytest.fixture(scope="session")
-def flow_cell_info_map(
-    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: list[str],
-    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: list[str],
-    flow_cell_directory_name_demultiplexed_with_bcl_convert_flat: Path,
-    flow_cell_directory_name_demultiplexed_with_bcl_convert: Path,
-    flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer: Path,
-    flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer: str,
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-    flow_cell_directory_name_demultiplexed_with_bcl2fastq: Path,
-    flow_cell_name_demultiplexed_with_bcl2fastq: str,
-) -> dict[str, FlowCellInfo]:
-    """Returns a dict with the suitable fixtures for different demultiplexing softwares and
-    settings. Keys are string, values are named tuples FlowCellInfo."""
-    return {
-        "BCL2FASTQ_TREE": FlowCellInfo(
-            directory=flow_cell_directory_name_demultiplexed_with_bcl2fastq,
-            name=flow_cell_name_demultiplexed_with_bcl2fastq,
-            sample_internal_ids=bcl2fastq_demultiplexed_flow_cell_sample_internal_ids,
-        ),
-        "BCLCONVERT_FLAT": FlowCellInfo(
-            directory=flow_cell_directory_name_demultiplexed_with_bcl_convert_flat,
-            name=flow_cell_name_demultiplexed_with_bcl_convert,
-            sample_internal_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
-        ),
-        "BCLCONVERT_TREE": FlowCellInfo(
-            directory=flow_cell_directory_name_demultiplexed_with_bcl_convert,
-            name=flow_cell_name_demultiplexed_with_bcl_convert,
-            sample_internal_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
-        ),
-        "BCLCONVERT_ON_SEQUENCER": FlowCellInfo(
-            directory=flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer,
-            name=flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer,
-            sample_internal_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
-        ),
-    }
 
 
 @pytest.fixture(scope="session")
