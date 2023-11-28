@@ -58,7 +58,7 @@ def get_valid_indexes(dual_indexes_only: bool = True) -> list[Index]:
 
 def get_reagent_kit_version(reagent_kit_version: str) -> str:
     """Derives the reagent kit version from the run parameters."""
-    LOG.info(f"Converting reagent kit parameter {reagent_kit_version} to version")
+    LOG.debug(f"Converting reagent kit parameter {reagent_kit_version} to version")
     if reagent_kit_version not in REAGENT_KIT_PARAMETER_TO_VERSION:
         raise SyntaxError(f"Unknown reagent kit version {reagent_kit_version}")
 
@@ -84,7 +84,7 @@ def is_reverse_complement_needed(run_parameters: RunParameters) -> bool:
         return False
     control_software_version: str = run_parameters.control_software_version
     reagent_kit_version: str = run_parameters.reagent_kit_version
-    LOG.info("Check if run is reverse complement")
+    LOG.debug("Check if run is reverse complement")
     if version.parse(version=control_software_version) < version.parse(
         version=NEW_CONTROL_SOFTWARE_VERSION
     ):
@@ -98,7 +98,7 @@ def is_reverse_complement_needed(run_parameters: RunParameters) -> bool:
             f"Reagent kit version {reagent_kit_version} does not does not need reverse complement"
         )
         return False
-    LOG.info("Run is reverse complement")
+    LOG.debug("Run is reverse complement")
     return True
 
 

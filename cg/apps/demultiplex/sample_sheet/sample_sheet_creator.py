@@ -98,7 +98,6 @@ class SampleSheetCreator:
         data_column_names: list[str],
     ) -> list[str]:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
-        LOG.debug(f"Use sample sheet header {data_column_names}")
         sample_dict = sample.model_dump(by_alias=True)
         return [str(sample_dict[column]) for column in data_column_names]
 
@@ -116,6 +115,7 @@ class SampleSheetCreator:
         sample_sheet_content: list[list[str]] = (
             self.get_additional_sections_sample_sheet() + self.get_data_section_header_and_columns()
         )
+        LOG.debug(f"Use sample sheet header {self.get_data_section_header_and_columns()}")
         for sample in self.lims_samples:
             sample_sheet_content.append(
                 self.convert_sample_to_header_dict(
