@@ -282,5 +282,6 @@ class NfAnalysisAPI(AnalysisAPI):
                 )
             if file["tag"] in optional_file_tags and not Path(file["path"]).exists():
                 LOG.warning(f"Optional file not found. Skipping: {file['path']}")
+                continue
             files.append(FileDeliverable(**file))
         return PipelineDeliverables(files=files)
