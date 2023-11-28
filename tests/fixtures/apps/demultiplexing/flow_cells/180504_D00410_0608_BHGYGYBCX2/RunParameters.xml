@@ -12,11 +12,9 @@
     <Read2>101</Read2>
     <OutputFolder>X:\Runs</OutputFolder>
     <CompressBcls>true</CompressBcls>
-    <RemapQScores>v8RRv2bins</RemapQScores>
     <PeriodicSave>Save Tile Thumbnails</PeriodicSave>
     <Flowcell>HiSeq Rapid Flow Cell v2</Flowcell>
     <FirstBaseConfirmation>false</FirstBaseConfirmation>
-    <SampleSheet>C:\Users\sbsuser\Desktop\HGYGYBCX2.csv</SampleSheet>
     <KeepIntensityFiles>false</KeepIntensityFiles>
     <Sbs>HiSeq Rapid SBS Kit v2</Sbs>
     <Pe>HiSeq Rapid PE Cluster Kit v2</Pe>
@@ -37,9 +35,7 @@
     <RunStartDate>180504</RunStartDate>
     <IntegrationMode>BaseSpace</IntegrationMode>
     <BaseSpaceSettings>
-      <Username>clinical.genomics@scilifelab.se</Username>
       <RunId>84966884</RunId>
-      <TempFolder>E:\Illumina\BaseSpaceTemp</TempFolder>
       <SendInstrumentHealthToILMN>true</SendInstrumentHealthToILMN>
       <RunMonitoringOnly>true</RunMonitoringOnly>
       <PlannedRun>false</PlannedRun>
@@ -131,7 +127,6 @@
     <Resume>false</Resume>
     <ResumeCycle>0</ResumeCycle>
     <SupportMultipleSurfacesInUI>true</SupportMultipleSurfacesInUI>
-    <TempFolder>E:\Illumina\HiSeqTemp\180504_D00410_0608_BHGYGYBCX2</TempFolder>
     <RecipeFragmentVersion>1.5.21.0</RecipeFragmentVersion>
     <PromptForPeReagents>false</PromptForPeReagents>
     <MockRun>false</MockRun>

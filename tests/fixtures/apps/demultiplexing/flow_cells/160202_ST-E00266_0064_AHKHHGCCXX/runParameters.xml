@@ -28,7 +28,6 @@
     <BaseSpaceSettings>
       <Username>clinical.genomics@scilifelab.se</Username>
       <RunId>17177178</RunId>
-      <TempFolder>O:\Illumina\HiSeqTemp</TempFolder>
       <UseBaseSpace>true</UseBaseSpace>
       <SendInstrumentHealthToILMN>true</SendInstrumentHealthToILMN>
       <RunMonitoringOnly>true</RunMonitoringOnly>
@@ -116,7 +115,6 @@
     <ReagentBottles>
       <Sbs />
     </ReagentBottles>
-    <TempFolder>O:\Illumina\HiSeqTemp\160202_ST-E00266_0064_AHKHHGCCXX</TempFolder>
     <RecipeFragmentVersion>3.2.4</RecipeFragmentVersion>
     <PromptForPeReagents>false</PromptForPeReagents>
     <MockRun>false</MockRun>
