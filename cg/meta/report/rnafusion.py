@@ -38,11 +38,19 @@ class RnafusionReportAPI(ReportAPI):
     ) -> RnafusionSampleMetadataModel:
         """Return sample metadata to include in the report."""
         sample_metrics: RnafusionQCMetrics = analysis_metadata.sample_metrics[sample.internal_id]
+
+        # Skip LIMS data collection if down sampled
+        input_amount = None
+        rin = None
+        if not sample.downsampled_to:
+            input_amount = self.lims_api.get_latest_rna_input_amount(sample_id=sample.internal_id)
+            rin = self.lims_api.get_sample_rin(sample_id=sample.internal_id)
+
         return RnafusionSampleMetadataModel(
             bias_5_3=sample_metrics.bias_5_3,
             duplicates=sample_metrics.pct_duplication,
             gc_content=sample_metrics.after_filtering_gc_content,
-            input_amount=self.lims_api.get_latest_rna_input_amount(sample_id=sample.internal_id),
+            input_amount=input_amount,
             insert_size=None,
             insert_size_peak=None,
             mapped_reads=sample_metrics.reads_aligned
@@ -58,7 +66,7 @@ class RnafusionReportAPI(ReportAPI):
             q20_rate=sample_metrics.after_filtering_q20_rate,
             q30_rate=sample_metrics.after_filtering_q30_rate,
             ribosomal_bases=sample_metrics.pct_ribosomal_bases,
-            rin=self.lims_api.get_sample_rin(sample_id=sample.internal_id),
+            rin=rin,
             uniquely_mapped_reads=sample_metrics.uniquely_mapped_percent,
         )
 
