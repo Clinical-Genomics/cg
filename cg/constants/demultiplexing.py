@@ -1,5 +1,5 @@
 """Constants related to demultiplexing."""
-from enum import Enum, StrEnum
+from enum import StrEnum
 from pathlib import Path
 
 import click
@@ -143,10 +143,16 @@ class SampleSheetBCLConvertSections:
         INDEX_CYCLES_1: str = "Index1Cycles"
         INDEX_CYCLES_2: str = "Index2Cycles"
 
-    class Settings(Enum):
+    class Settings(StrEnum):
         HEADER: str = "[BCLConvert_Settings]"
-        SOFTWARE_VERSION: list[str] = ["SoftwareVersion", "4.1.7"]
-        FASTQ_COMPRESSION_FORMAT: list[str] = ["FastqCompressionFormat", "gzip"]
+
+        @classmethod
+        def software_version(cls) -> list[str]:
+            return ["SoftwareVersion", "4.1.7"]
+
+        @classmethod
+        def fastq_compression_format(cls) -> list[str]:
+            return ["FastqCompressionFormat", "gzip"]
 
     class Data(StrEnum):
         HEADER: str = "[BCLConvert_Data]"
@@ -185,7 +191,7 @@ OPTION_BCL_CONVERTER = click.option(
 )
 
 
-DEMUX_STATS_PATH = {
+DEMUX_STATS_PATH: dict[str, dict[str, Path | None]] = {
     "bcl2fastq": {
         "demultiplexing_stats": Path("Stats", "DemultiplexingStats.xml"),
         "conversion_stats": Path("Stats", "ConversionStats.xml"),
@@ -200,9 +206,9 @@ DEMUX_STATS_PATH = {
     },
 }
 
-BCL2FASTQ_METRICS_DIRECTORY_NAME = "Stats"
-BCL2FASTQ_METRICS_FILE_NAME = "Stats.json"
-DRAGEN_PASSED_FILTER_PCT = 100.00000
-FASTQ_FILE_SUFFIXES = [".fastq", ".gz"]
-INDEX_CHECK = "indexcheck"
-UNDETERMINED = "Undetermined"
+BCL2FASTQ_METRICS_DIRECTORY_NAME: str = "Stats"
+BCL2FASTQ_METRICS_FILE_NAME: str = "Stats.json"
+DRAGEN_PASSED_FILTER_PCT: float = 100.00000
+FASTQ_FILE_SUFFIXES: list[str] = [".fastq", ".gz"]
+INDEX_CHECK: str = "indexcheck"
+UNDETERMINED: str = "Undetermined"

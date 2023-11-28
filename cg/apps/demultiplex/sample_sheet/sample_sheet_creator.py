@@ -251,9 +251,9 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
             ],
         ]
         settings_section: list[list[str]] = [
-            [SampleSheetBCLConvertSections.Settings.HEADER.value],
-            SampleSheetBCLConvertSections.Settings.SOFTWARE_VERSION.value,
-            SampleSheetBCLConvertSections.Settings.FASTQ_COMPRESSION_FORMAT.value,
+            [SampleSheetBCLConvertSections.Settings.HEADER],
+            SampleSheetBCLConvertSections.Settings.software_version(),
+            SampleSheetBCLConvertSections.Settings.fastq_compression_format(),
         ]
         return header_section + reads_section + settings_section
 
