@@ -71,10 +71,16 @@ class RunParametersXMLNodes(StrEnum):
 class SampleSheetBcl2FastqSections:
     """Class with all necessary constants for building a NovaSeqX sample sheet."""
 
-    class Settings(Enum):
+    class Settings(StrEnum):
         HEADER: str = "[Settings]"
-        BARCODE_MISMATCH_INDEX1: list[str] = ["BarcodeMismatchesIndex1", "0"]
-        BARCODE_MISMATCH_INDEX2: list[str] = ["BarcodeMismatchesIndex2", "0"]
+
+        @classmethod
+        def barcode_mismatch_index_1(cls) -> list[str]:
+            return ["BarcodeMismatchesIndex1", "0"]
+
+        @classmethod
+        def barcode_mismatch_index_2(cls) -> list[str]:
+            return ["BarcodeMismatchesIndex2", "0"]
 
     class Data(StrEnum):
         HEADER: str = "[Data]"
@@ -110,16 +116,25 @@ class SampleSheetBcl2FastqSections:
 class SampleSheetBCLConvertSections:
     """Class with all necessary constants for building a version 2 sample sheet."""
 
-    class Header(Enum):
+    class Header(StrEnum):
         HEADER: str = "[Header]"
-        FILE_FORMAT: list[str] = ["FileFormatVersion", "2"]
         RUN_NAME: str = "RunName"
         INSTRUMENT_PLATFORM_TITLE: str = "InstrumentPlatform"
-        INSTRUMENT_PLATFORM_VALUE: dict[str, str] = {
-            Sequencers.NOVASEQ: "NovaSeq6000",
-            Sequencers.NOVASEQX: "NovaSeqXSeries",
-        }
-        INDEX_ORIENTATION_FORWARD: list[str] = ["IndexOrientation", "Forward"]
+
+        @classmethod
+        def file_format(cls) -> list[str]:
+            return ["FileFormatVersion", "2"]
+
+        @classmethod
+        def instrument_platform_sequencer(cls) -> dict[str, str]:
+            return {
+                Sequencers.NOVASEQ: "NovaSeq6000",
+                Sequencers.NOVASEQX: "NovaSeqXSeries",
+            }
+
+        @classmethod
+        def index_orientation_forward(cls) -> list[str]:
+            return ["IndexOrientation", "Forward"]
 
     class Reads(StrEnum):
         HEADER: str = "[Reads]"
