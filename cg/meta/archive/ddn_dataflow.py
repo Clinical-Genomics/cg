@@ -214,7 +214,7 @@ class GetJobStatusPayload(BaseModel):
         )
 
         response: Response = APIRequest.api_request_from_content(
-            api_method=APIMethods.POST,
+            api_method=APIMethods.GET,
             url=url,
             headers=headers,
             json=self.model_dump(),

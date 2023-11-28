@@ -1,10 +1,9 @@
 import click
 from click.core import ParameterSource
 
+from cg.constants.archiving import DEFAULT_SPRING_ARCHIVE_COUNT
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.models.cg_config import CGConfig
-
-DEFAULT_SPRING_ARCHIVE_COUNT = 200
 
 
 @click.group()

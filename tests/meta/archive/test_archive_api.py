@@ -215,7 +215,7 @@ def test_archive_all_non_archived_spring_files(
         verify=False,
     )
 
-    # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper while no other
+    # THEN all spring files for Karolinska should have an entry in the Archive table in Housekeeper while no other
     # files should have an entry
     files: list[File] = spring_archive_api.housekeeper_api.files()
     for file in files:
