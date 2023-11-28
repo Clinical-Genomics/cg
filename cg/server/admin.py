@@ -1,7 +1,6 @@
 """Module for Flask-Admin views"""
 from datetime import datetime
 from gettext import gettext
-from typing import Union
 
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
@@ -307,7 +306,7 @@ class CaseView(BaseView):
     def action_set_empty(self, ids: list[str]):
         self.set_action_for_cases(action=None, case_entry_ids=ids)
 
-    def set_action_for_cases(self, action: Union[CaseActions, None], case_entry_ids: list[str]):
+    def set_action_for_cases(self, action: CaseActions | None, case_entry_ids: list[str]):
         try:
             for entry_id in case_entry_ids:
                 case = db.get_case_by_entry_id(entry_id=entry_id)

@@ -8,9 +8,6 @@ class Gender(StrEnum):
     OTHER = "other"
     MISSING = ""
 
-    def __repr__(self):
-        return self.value
-
 
 class PhenotypeStatus(StrEnum):
     UNKNOWN = "unknown"

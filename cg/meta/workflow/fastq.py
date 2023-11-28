@@ -12,7 +12,6 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import Optional
 
 LOG = logging.getLogger(__name__)
 
@@ -171,8 +170,8 @@ class FastqHandler:
         read: str,
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
-        undetermined: Optional[str] = None,
-        meta: Optional[str] = None,
+        undetermined: str | None = None,
+        meta: str | None = None,
     ) -> str:
         """Name a FASTQ file with standard conventions and
         no naming constrains from pipeline."""
@@ -190,8 +189,8 @@ class BalsamicFastqHandler(FastqHandler):
         read: str,
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
-        undetermined: Optional[str] = None,
-        meta: Optional[str] = None,
+        undetermined: str | None = None,
+        meta: str | None = None,
     ) -> str:
         """Name a FASTQ file following Balsamic conventions. Naming must be
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
@@ -209,8 +208,8 @@ class MipFastqHandler(FastqHandler):
         read: str,
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
-        undetermined: Optional[str] = None,
-        meta: Optional[str] = None,
+        undetermined: str | None = None,
+        meta: str | None = None,
     ) -> str:
         """Name a FASTQ file following MIP conventions."""
         flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
@@ -227,8 +226,8 @@ class MicrosaltFastqHandler(FastqHandler):
         read: str,
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
-        undetermined: Optional[str] = None,
-        meta: Optional[str] = None,
+        undetermined: str | None = None,
+        meta: str | None = None,
     ) -> str:
         """Name a FASTQ file following usalt conventions. Naming must be
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
@@ -247,8 +246,8 @@ class MutantFastqHandler(FastqHandler):
         read: str,
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
-        undetermined: Optional[str] = None,
-        meta: Optional[str] = None,
+        undetermined: str | None = None,
+        meta: str | None = None,
     ) -> str:
         """Name a FASTQ file following mutant conventions. Naming must be
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
@@ -274,7 +273,7 @@ class MutantFastqHandler(FastqHandler):
         flowcell: str,
         sample: str,
         filenr: str,
-        meta: Optional[str] = None,
+        meta: str | None = None,
     ) -> str:
         return f"{flowcell}_{sample}_{meta}_{filenr}.fastq.gz"
 

@@ -55,6 +55,7 @@ def asymmetric_encryption_command(output_file_path: Path, input_file_path: Path)
     """Return asymmetric encryption command."""
     return [
         "--encrypt",
+        "--yes",
         "--recipient",
         EncryptionUserID.HASTA_USER_ID,
         "-o",
@@ -68,6 +69,7 @@ def asymmetric_decryption_command(output_file_path: Path, input_file_path: Path)
     """Return asymmetric decryption command."""
     return [
         "--decrypt",
+        "--yes",
         "--batch",
         "--cipher-algo",
         CipherAlgorithm.AES256,
@@ -111,6 +113,7 @@ def symmetric_decryption_command(
     """Return symmetric decryption command."""
     return [
         "--decrypt",
+        "--yes",
         "--cipher-algo",
         CipherAlgorithm.AES256,
         "--batch",
@@ -149,6 +152,7 @@ def key_asymmetric_encryption_command(
     """Return asymmetric encryption command."""
     return [
         "--encrypt",
+        "--yes",
         "--recipient",
         EncryptionUserID.HASTA_USER_ID,
         "-o",
@@ -166,6 +170,7 @@ def spring_symmetric_decryption_command(
     """Return symmetric decryption_command."""
     return [
         "--decrypt",
+        "--yes",
         "--cipher-algo",
         CipherAlgorithm.AES256,
         "--batch",
@@ -184,6 +189,7 @@ def key_asymmetric_decryption_command(
     """Return asymmetric encryption command."""
     return [
         "--decrypt",
+        "--yes",
         "--batch",
         "--cipher-algo",
         CipherAlgorithm.AES256,

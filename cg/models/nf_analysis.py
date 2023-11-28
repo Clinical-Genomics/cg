@@ -1,9 +1,8 @@
 from pathlib import Path
-from typing import Optional, Union
 
 from pydantic.v1 import BaseModel, Field, conlist, validator
 
-from cg.exc import SampleSheetError, ValidationError
+from cg.exc import SampleSheetError
 
 
 class PipelineParameters(BaseModel):
@@ -48,12 +47,12 @@ class FileDeliverable(BaseModel):
     id: str
     format: str
     path: str
-    path_index: Optional[str]
+    path_index: str | None
     step: str
     tag: str
 
     @validator("path", "path_index", pre=True)
-    def set_path_as_string(cls, file_path: Union[str, Path]) -> Optional[str]:
+    def set_path_as_string(cls, file_path: str | Path) -> str | None:
         if file_path:
             return str(Path(file_path))
         return None
