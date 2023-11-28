@@ -3,8 +3,8 @@
 
 from enum import StrEnum
 
-GENOME_BUILD_37 = "37"
-GENOME_BUILD_38 = "GRCh38"
+GENOME_BUILD_37: str = "37"
+GENOME_BUILD_38: str = "GRCh38"
 
 
 class GenePanelMasterList(StrEnum):
@@ -44,7 +44,5 @@ class GenePanelMasterList(StrEnum):
     def get_panel_names(cls, panels=None) -> list[str]:
         """Return requested panel names from the Master list, or all panels if none are specified."""
         return (
-            [panel_name.value for panel_name in panels]
-            if panels
-            else list(map(lambda panel: panel.value, cls))
+            [panel_name for panel_name in panels] if panels else list(map(lambda panel: panel, cls))
         )
