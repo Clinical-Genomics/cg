@@ -55,8 +55,6 @@ class FileDeliverable(BaseModel):
     def path_exist(cls, file_path: str | Path) -> str | None:
         if file_path is not None:
             path = Path(file_path)
-            if not path.exists():
-                raise ValidationError(f"Path {file_path} does not exist")
             return str(path)
         return None
 

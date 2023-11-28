@@ -85,21 +85,21 @@ def test_file_deliverables_non_existing_attribute(any_string: str, filled_file: 
     assert "nonexisting" not in file_deliverable.__annotations__.keys()
 
 
-def test_file_deliverables_non_existing_file(
-    any_string: str,
-    non_existing_file_path: Path,
-):
-    """Tests file delivery when a mandatory file does not exist."""
-    # WHEN instantiating a deliverables object
-
-    # THEN assert that an error is raised
-    with pytest.raises(ValidationError) as error:
-        FileDeliverable(
-            format=FileFormat.TSV,
-            id=any_string,
-            path=non_existing_file_path,
-            step=any_string,
-            tag=any_string,
-        )
-    # THEN assert the error message
-    assert f"Path {str(non_existing_file_path)} does not exist" in str(error.value)
+# def test_file_deliverables_non_existing_file(
+#     any_string: str,
+#     non_existing_file_path: Path,
+# ):
+#     """Tests file delivery when a mandatory file does not exist."""
+#     # WHEN instantiating a deliverables object
+#
+#     # THEN assert that an error is raised
+#     with pytest.raises(ValidationError) as error:
+#         FileDeliverable(
+#             format=FileFormat.TSV,
+#             id=any_string,
+#             path=non_existing_file_path,
+#             step=any_string,
+#             tag=any_string,
+#         )
+#     # THEN assert the error message
+#     assert f"Path {str(non_existing_file_path)} does not exist" in str(error.value)
