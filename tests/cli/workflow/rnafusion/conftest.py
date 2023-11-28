@@ -26,4 +26,14 @@ def deliverables_template_content() -> list[dict]:
             "step": "multiqc-json",
             "tag": "multiqc-json",
         },
+        {
+            "format": "tsv",
+            "id": "CASEID",
+            "path": Path("PATHTOCASE", "fusioninspector", "CASEID.FusionInspector.fusions")
+            .with_suffix(FileExtensions.TSV)
+            .as_posix(),
+            "path_index": None,
+            "step": "report",
+            "tag": "fusioninspector",
+        },
     ]

@@ -113,3 +113,12 @@ def test_report_deliver_successful(
         assert field in deliverables_content
     # THEN assess that missing fields are written
     assert "path_index: null" in deliverables_content
+
+    # THEN assert that the optional missing file is not included in file deliverables
+    assert "Optional file not found. Skipping:" in caplog.text
+
+    # THEN assert that the files delivered is 2 (excluding optional missing file)
+    deliverables_files = ReadFile.get_content_from_file(
+        file_format=FileFormat.YAML, file_path=rnafusion_deliverables_file_path
+    ).get("files")
+    assert len(deliverables_files) == 2
