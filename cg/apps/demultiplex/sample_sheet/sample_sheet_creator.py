@@ -87,6 +87,7 @@ class SampleSheetCreator:
             return False
         if parse(self.run_parameters.reagent_kit_version) < parse(NEW_REAGENT_KIT_VERSION):
             return False
+        return True
 
     def update_barcode_mismatch_values_for_samples(self, *args) -> None:
         """Updates barcode mismatch values for samples if applicable."""
