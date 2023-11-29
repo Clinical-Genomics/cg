@@ -278,7 +278,10 @@ class SpringArchiveAPI:
     ) -> set[tuple[int, ArchiveLocations]]:
         return set(
             [
-                (archive.archiving_task_id, self.get_archive_location_from_file(archive.file))
+                (
+                    archive.archiving_task_id,
+                    ArchiveLocations(self.get_archive_location_from_file(archive.file)),
+                )
                 for archive in archive_entries
             ]
         )
@@ -305,12 +308,13 @@ class SpringArchiveAPI:
     ) -> set[tuple[int, ArchiveLocations]]:
         return set(
             [
-                (archive.retrieval_task_id, self.get_archive_location_from_file(archive.file))
+                (
+                    archive.retrieval_task_id,
+                    ArchiveLocations(self.get_archive_location_from_file(archive.file)),
+                )
                 for archive in archive_entries
             ]
         )
 
-    def get_archive_location_from_file(self, file: File) -> ArchiveLocations:
-        return ArchiveLocations(
-            self.status_db.get_sample_by_internal_id(file.version.bundle.name).archive_location
-        )
+    def get_archive_location_from_file(self, file: File) -> str:
+        return self.status_db.get_sample_by_internal_id(file.version.bundle.name).archive_location
