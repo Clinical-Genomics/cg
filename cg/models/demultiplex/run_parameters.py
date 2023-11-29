@@ -43,16 +43,14 @@ class RunParameters:
         if application.text != node_value:
             raise RunParametersError(f"The file parsed does not correspond to {node_value}")
 
-    def is_single_index(self) -> bool:
-        """Return False if the sequencing is not HiSeq. Overriden in HiSeq"""
-        return False
-
     @property
     def index_length(self) -> int:
         """Return the length of the indexes if they are equal, raise an error otherwise."""
         index_one_length: int = self.get_index_1_cycles()
         index_two_length: int = self.get_index_2_cycles()
-        if index_one_length != index_two_length and not self.is_single_index():
+        if self.sequencer in [Sequencers.HISEQX, Sequencers.HISEQGA]:
+            return index_one_length
+        if index_one_length != index_two_length:
             raise RunParametersError("Index lengths are not the same!")
         return index_one_length
 
@@ -124,12 +122,6 @@ class RunParametersHiSeq(RunParameters):
             node_name=RunParametersXMLNodes.APPLICATION_NAME,
             node_value=RunParametersXMLNodes.HISEQ_APPLICATION,
         )
-
-    def is_single_index(self) -> bool:
-        """Return whether the sequencing was done with a single index."""
-        node_name: str = RunParametersXMLNodes.PLANNED_READS_HISEQ
-        reads: ElementTree.Element = get_tree_node(tree=self.tree, node_name=node_name)
-        return self.get_index_2_cycles() == 0 and len(list(reads)) == 3
 
     @property
     def control_software_version(self) -> None:

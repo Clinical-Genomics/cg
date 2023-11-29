@@ -130,6 +130,7 @@ class SampleSheetCreator:
                 samples=samples_in_lane,
                 index_cycles=self.run_parameters.index_length,
                 is_reverse_complement=self.is_reverse_complement,
+                sequencer=self.run_parameters.sequencer,
             )
             self.update_barcode_mismatch_values_for_samples(samples_in_lane)
 
@@ -202,19 +203,22 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
 
     def add_override_cycles_to_samples(self) -> None:
         """Add override cycles attribute to samples."""
-        flow_cell_index_len: int = self.run_parameters.index_length
         read1_cycles: str = f"Y{self.run_parameters.get_read_1_cycles()};"
         read2_cycles: str = f"Y{self.run_parameters.get_read_2_cycles()}"
+        length_index1: int = self.run_parameters.get_index_1_cycles()
+        length_index2: int = self.run_parameters.get_index_2_cycles()
         for sample in self.lims_samples:
-            index1_cycles: str = f"I{self.run_parameters.get_index_1_cycles()};"
-            index2_cycles: str = f"I{self.run_parameters.get_index_2_cycles()};"
-            sample_index_len: int = len(get_index_pair(sample)[0])
-            if sample_index_len < flow_cell_index_len:
-                index1_cycles = f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
+            index1_cycles: str = f"I{length_index1};"
+            index2_cycles: str = f"I{length_index2};"
+            sample_index1_len: int = len(get_index_pair(sample)[0])
+            sample_index2_len: int = len(get_index_pair(sample)[1])
+            if sample_index1_len < length_index1:
+                index1_cycles = f"I{sample_index1_len}N{length_index1 - sample_index1_len};"
+            if sample_index2_len < length_index2:
                 index2_cycles = (
-                    f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
+                    f"I{sample_index2_len}N{length_index2 - sample_index2_len};"
                     if self.is_reverse_complement
-                    else f"N{flow_cell_index_len - sample_index_len}I{sample_index_len};"
+                    else f"N{length_index2 - sample_index2_len}I{sample_index2_len};"
                 )
             sample.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 

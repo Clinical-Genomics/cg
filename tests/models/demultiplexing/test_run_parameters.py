@@ -146,31 +146,6 @@ def test_run_parameters_novaseq_x_file_wrong_instrument(run_parameters_wrong_ins
 
 
 @pytest.mark.parametrize(
-    "run_parameters_fixture, expected_single_index",
-    [
-        ("hiseq_2500_run_parameters_double_index", False),
-        ("hiseq_x_run_parameters_single_index", True),
-        ("novaseq_6000_run_parameters", False),
-        ("novaseq_x_run_parameters", False),
-    ],
-)
-def test_is_single_index(
-    run_parameters_fixture: str, expected_single_index, request: FixtureRequest
-):
-    """Test that the is_single_index is the expected for all the possible run parameters objects.
-    The only RunParameters object that should return True for single index is HiSeqX.
-    """
-    # GIVEN a RunParameters object
-    run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
-
-    # WHEN evaluating if it is single index
-    real_single_index: bool = run_parameters.is_single_index()
-
-    # THEN the expected value should be returned
-    assert real_single_index == expected_single_index
-
-
-@pytest.mark.parametrize(
     "run_parameters_fixture",
     [
         "hiseq_2500_run_parameters_double_index",
@@ -299,7 +274,6 @@ def test_index_length(
 @pytest.mark.parametrize(
     "run_parameters_fixture",
     [
-        "run_parameters_hiseq_different_index",
         "run_parameters_novaseq_6000_different_index",
         "run_parameters_novaseq_x_different_index",
     ],
