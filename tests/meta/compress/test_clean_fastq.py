@@ -85,6 +85,7 @@ def test_update_hk_fastq(
         compression_obj=compression,
         hk_fastq_first=fastq[run]["hk_first"],
         hk_fastq_second=fastq[run]["hk_second"],
+        archive_location="PDC",
     )
 
     # THEN assert that the SPRING files have been added to Housekeeper
@@ -127,7 +128,7 @@ def test_cli_clean_fastqs_removed(
     assert fastq_second.exists()
 
     # WHEN running the clean command
-    populated_compress_fastq_api.clean_fastq(sample)
+    populated_compress_fastq_api.clean_fastq(sample_id=sample, archive_location="PDC")
 
     # THEN assert SPRING files exists
     assert spring_file.exists()
@@ -156,7 +157,7 @@ def test_cli_clean_fastqs_no_spring_metadata(
     assert not spring_metadata_file.exists()
 
     # WHEN running the clean command
-    populated_compress_fastq_api.clean_fastq(sample)
+    populated_compress_fastq_api.clean_fastq(sample_id=sample, archive_location="PDC")
 
     # THEN assert SPRING file exists
     assert spring_file.exists()
@@ -182,7 +183,7 @@ def test_cli_clean_fastqs_pending_compression_metadata(
     assert crunchy_flag_file.exists()
 
     # WHEN running the clean command
-    populated_compress_fastq_api.clean_fastq(sample)
+    populated_compress_fastq_api.clean_fastq(sample_id=sample, archive_location="PDC")
 
     # THEN assert SPRING file exists
     assert spring_file.exists()
