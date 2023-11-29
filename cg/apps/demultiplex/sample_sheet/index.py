@@ -70,7 +70,7 @@ def get_index_pair(sample: FlowCellSample) -> tuple[str, str]:
     if is_dual_index(sample.index):
         index_1, index_2 = sample.index.split("-")
         return index_1.strip(), index_2.strip()
-    return sample.index, sample.index2
+    return sample.index.replace("NNNNNNNNN", ""), sample.index2
 
 
 def is_reverse_complement_needed(run_parameters: RunParameters) -> bool:
