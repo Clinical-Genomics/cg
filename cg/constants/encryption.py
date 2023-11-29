@@ -40,6 +40,7 @@ class GPGParameters(ListEnum):
     ]
     SYMMETRIC_ENCRYPTION: list[str] = [
         "--symmetric",
+        "--yes",
         "--cipher-algo",
         CipherAlgorithm.AES256,
         "--batch",
