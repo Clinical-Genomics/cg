@@ -14,7 +14,7 @@ from cg.constants import (
     Pipeline,
 )
 from cg.constants.constants import GenomeVersion
-from cg.meta.report.field_validators import get_million_read_pairs
+from cg.meta.report.field_validators import get_mapped_reads_fraction, get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import AnalysisModel
@@ -53,9 +53,10 @@ class RnafusionReportAPI(ReportAPI):
             input_amount=input_amount,
             insert_size=None,
             insert_size_peak=None,
-            mapped_reads=sample_metrics.read_pairs_examined
-            * 2
-            / sample_metrics.before_filtering_total_reads,
+            mapped_reads=get_mapped_reads_fraction(
+                mapped_reads=sample_metrics.read_pairs_examined * 2,
+                total_reads=sample_metrics.before_filtering_total_reads,
+            ),
             mean_length_r1=sample_metrics.after_filtering_read1_mean_length,
             million_read_pairs=get_million_read_pairs(
                 reads=sample_metrics.before_filtering_total_reads
