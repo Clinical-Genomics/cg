@@ -91,6 +91,7 @@ def symmetric_encryption_command(
     """Return symmetric encryption command."""
     return [
         "--symmetric",
+        "--yes",
         "--cipher-algo",
         CipherAlgorithm.AES256,
         "--batch",
@@ -132,6 +133,7 @@ def spring_symmetric_encryption_command(
     """Return symmetric encryption command."""
     return [
         "--symmetric",
+        "--yes",
         "--cipher-algo",
         CipherAlgorithm.AES256,
         "--batch",
