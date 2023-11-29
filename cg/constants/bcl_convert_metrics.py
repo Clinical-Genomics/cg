@@ -18,7 +18,7 @@ class BclConvertQualityMetricsColumnNames(StrEnum):
     Q30_BASES_PERCENT: str = "% Q30"
 
 
-SAMPLE_SHEET_HEADER: dict[[str, str]] = {
+SAMPLE_SHEET_HEADER: dict[str, str] = {
     BclConverter.BCL2FASTQ: ",".join(
         [
             column

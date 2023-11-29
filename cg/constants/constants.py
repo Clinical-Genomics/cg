@@ -40,7 +40,7 @@ class CaseActions(StrEnum):
 
     @classmethod
     def actions(cls) -> list[str]:
-        return [action for action in cls]
+        return list(cls)
 
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
@@ -67,7 +67,7 @@ class FlowCellStatus(StrEnum):
 
     @classmethod
     def statuses(cls) -> list[str]:
-        return [status for status in FlowCellStatus]
+        return list(cls)
 
 
 class AnalysisType(StrEnum):

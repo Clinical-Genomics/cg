@@ -18,7 +18,7 @@ class AlignmentFileTag(StrEnum):
 
     @classmethod
     def file_tags(cls) -> list[str]:
-        return [tag for tag in cls]
+        return list(cls)
 
 
 class ArchiveTag(StrEnum):

@@ -233,8 +233,8 @@ class AnalysisAPI(MetaAPI):
             LOG.info(f"Dry-run: Action {action} would be set for case {case_id}")
             return
         if action in [None, *CaseActions.actions()]:
-            case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-            case_obj.action = action
+            case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+            case.action = action
             self.status_db.session.commit()
             LOG.info("Action %s set for case %s", action, case_id)
             return
