@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from pydantic.v1 import BaseModel, EmailStr, Field
 from typing_extensions import Literal
@@ -34,11 +33,11 @@ class Sequencers(BaseModel):
 
 class SlurmConfig(BaseModel):
     account: str
-    hours: Optional[int]
+    hours: int | None
     mail_user: EmailStr
-    memory: Optional[int]
-    number_tasks: Optional[int]
-    conda_env: Optional[str]
+    memory: int | None
+    number_tasks: int | None
+    conda_env: str | None
     qos: SlurmQos = SlurmQos.LOW
 
 
@@ -51,6 +50,10 @@ class PDCArchivingDirectory(BaseModel):
     current: str
     nas: str
     pre_nas: str
+
+
+class DataInput(BaseModel):
+    input_dir_path: str
 
 
 class BackupConfig(BaseModel):
@@ -74,7 +77,7 @@ class TrailblazerConfig(BaseModel):
 
 
 class StatinaConfig(BaseModel):
-    host: Optional[str]
+    host: str | None
     user: str
     key: str
     api_url: str
@@ -84,7 +87,7 @@ class StatinaConfig(BaseModel):
 
 class CommonAppConfig(BaseModel):
     binary_path: str
-    config_path: Optional[str]
+    config_path: str | None
 
 
 class FluffyUploadConfig(BaseModel):
@@ -107,7 +110,7 @@ class LimsConfig(BaseModel):
 
 
 class CrunchyConfig(BaseModel):
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     cram_reference: str
     slurm: SlurmConfig
 
@@ -130,13 +133,13 @@ class BalsamicConfig(CommonAppConfig):
 
 class MutantConfig(BaseModel):
     binary_path: str
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     conda_env: str
     root: str
 
 
 class MipConfig(BaseModel):
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     conda_env: str
     mip_config: str
     pipeline: str
@@ -152,7 +155,7 @@ class RnafusionConfig(CommonAppConfig):
     conda_env: str
     compute_env: str
     profile: str
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     launch_directory: str
     revision: str
     slurm: SlurmConfig
@@ -167,7 +170,7 @@ class TaxprofilerConfig(CommonAppConfig):
     profile: str
     pipeline_path: str
     revision: str
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     hostremoval_reference: str
     databases: str
     slurm: SlurmConfig
@@ -177,7 +180,7 @@ class TaxprofilerConfig(CommonAppConfig):
 
 class MicrosaltConfig(BaseModel):
     binary_path: str
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     conda_env: str
     queries_path: str
     root: str
@@ -241,7 +244,8 @@ class CGConfig(BaseModel):
     environment: Literal["production", "stage"] = "stage"
     flow_cells_dir: str
     madeline_exe: str
-    max_flowcells: Optional[int]
+    max_flowcells: int | None
+    data_input: DataInput | None = None
     # Base APIs that always should exist
     status_db_: Store = None
     housekeeper: HousekeeperConfig
@@ -254,7 +258,7 @@ class CGConfig(BaseModel):
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
-    data_flow_config: Optional[DataFlowConfig] = None
+    data_flow_config: DataFlowConfig | None = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
@@ -275,19 +279,19 @@ class CGConfig(BaseModel):
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
-    pigz: Optional[CommonAppConfig] = None
-    pdc: Optional[CommonAppConfig] = None
-    pdc_api_: Optional[PdcAPI]
+    pigz: CommonAppConfig | None = None
+    pdc: CommonAppConfig | None = None
+    pdc_api_: PdcAPI | None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
-    tar: Optional[CommonAppConfig] = None
+    tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
     statina: StatinaConfig = None
-    fohm: Optional[FOHMConfig] = None
+    fohm: FOHMConfig | None = None
     fluffy: FluffyConfig = None
     microsalt: MicrosaltConfig = None
     gisaid: GisaidConfig = None

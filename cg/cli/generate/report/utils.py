@@ -1,7 +1,6 @@
 """Delivery report helpers."""
 import logging
 from datetime import datetime
-from typing import Optional
 
 import click
 
@@ -101,7 +100,7 @@ def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> Repor
 
 
 def get_report_analysis_started(
-    case: Case, report_api: ReportAPI, analysis_started_at: Optional[str]
+    case: Case, report_api: ReportAPI, analysis_started_at: str | None
 ) -> datetime:
     """Resolves and returns a valid analysis date."""
     if not analysis_started_at:

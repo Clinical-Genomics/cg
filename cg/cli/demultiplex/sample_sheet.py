@@ -1,7 +1,6 @@
 import logging
 import os
 from pathlib import Path
-from typing import Optional
 
 import click
 from pydantic import ValidationError
@@ -152,7 +151,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
         flow_cell_id: str = flow_cell.id
 
         try:
-            sample_sheet_path: Optional[Path] = hk_api.get_sample_sheet_path(flow_cell_id)
+            sample_sheet_path: Path | None = hk_api.get_sample_sheet_path(flow_cell_id)
         except HousekeeperFileMissingError:
             sample_sheet_path = None
 

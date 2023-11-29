@@ -1,7 +1,6 @@
 """CLI for delivering files with CG"""
 import logging
 from pathlib import Path
-from typing import Optional
 
 import click
 
@@ -61,8 +60,8 @@ def deliver():
 @click.pass_obj
 def deliver_analysis(
     context: CGConfig,
-    case_id: Optional[str],
-    ticket: Optional[str],
+    case_id: str | None,
+    ticket: str | None,
     delivery_type: list[str],
     dry_run: bool,
     force_all: bool,

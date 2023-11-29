@@ -1,6 +1,5 @@
 """Module for uploading to Gens via CLI."""
 import logging
-from typing import Optional
 
 import click
 from housekeeper.store.models import File
@@ -22,7 +21,7 @@ LOG = logging.getLogger(__name__)
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_obj
-def upload_to_gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
+def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool):
     """Upload data from an analysis to Gens."""
 
     click.echo(click.style("----------------- GENS -------------------"))

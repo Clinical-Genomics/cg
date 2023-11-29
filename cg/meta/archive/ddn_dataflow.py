@@ -3,11 +3,10 @@ import logging
 from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
-from typing import Optional
 from urllib.parse import urljoin
 
 from housekeeper.store.models import File
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from requests.models import Response
 
 from cg.constants.constants import APIMethods
@@ -38,20 +37,24 @@ class DataflowEndpoints(StrEnum):
     GET_AUTH_TOKEN = "auth/token"
     REFRESH_AUTH_TOKEN = "auth/token/refresh"
     RETRIEVE_FILES = "files/retrieve"
-    GET_JOB_STATUS = "getJobStatus"
+    GET_JOB_STATUS = "activity/jobs/"
 
 
-class JobDescription(StrEnum):
+class JobStatus(StrEnum):
     """Enum for the different job statuses which can be returned via Miria."""
 
     CANCELED = "Canceled"
     COMPLETED = "Completed"
-    CREATION = "Creation"
+    DENIED = "Denied"
+    CREATION_IN_PROGRESS = "Creation in progress"
     IN_QUEUE = "In Queue"
+    INVALID_LICENSE = "Invalid license"
+    ON_VALIDATION = "On validation"
     REFUSED = "Refused"
     RUNNING = "Running"
     SUSPENDED = "Suspended"
-    TERMINATED_ON_ERROR = "Terminated on Error"
+    TERMINATED_ON_ERROR = "Terminated on error"
+    TERMINATED_ON_WARNING = "Terminated on warning"
 
 
 class MiriaObject(FileTransferData):
@@ -101,6 +104,7 @@ class TransferPayload(BaseModel):
     files_to_transfer: list[MiriaObject]
     osType: str = OSTYPE
     createFolder: bool = False
+    settings: list[dict] = []
 
     def trim_paths(self, attribute_to_trim: str):
         """Trims the source path from its root directory for all objects in the transfer."""
@@ -129,7 +133,7 @@ class TransferPayload(BaseModel):
             url: URL to which the POST goes to.
             headers: Headers which are set in the request
         Raises:
-            HTTPError if the response status is not okay.
+            HTTPError if the response status is not successful.
             ValidationError if the response does not conform to the expected response structure.
         Returns:
             The job ID of the launched transfer task.
@@ -165,67 +169,35 @@ class AuthToken(BaseModel):
 
     access: str
     expire: int
-    refresh: Optional[str] = None
+    refresh: str | None = None
 
 
 class TransferJob(BaseModel):
     """Model representing th response fields of an archive or retrieve reqeust to the Dataflow
     API."""
 
-    job_id: int
-
-
-class SubJob(BaseModel):
-    """Model representing the response fields in a subjob returned in a get_job_status post."""
-
-    subjob_id: int
-    subjob_type: str
-    status: int
-    description: str
-    progress: float
-    total_rate: int
-    throughput: int
-    estimated_end: datetime
-    estimated_left: int
+    job_id: int = Field(alias="jobId")
 
 
 class GetJobStatusResponse(BaseModel):
     """Model representing the response fields from a get_job_status post."""
 
-    request_date: Optional[datetime] = None
-    operation: Optional[str] = None
-    job_id: int
-    type: Optional[str] = None
-    status: Optional[int] = None
-    description: str
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-    durationTime: Optional[int] = None
-    priority: Optional[int] = None
-    progress: Optional[float] = None
-    subjobs: Optional[list[SubJob]] = None
+    job_id: int = Field(alias="id")
+    status: str
 
 
 class GetJobStatusPayload(BaseModel):
     """Model representing the payload for a get_job_status request."""
 
-    job_id: int
-    subjob_id: Optional[int] = None
-    related_jobs: Optional[bool] = None
-    main_subjob: Optional[bool] = None
-    debug: Optional[bool] = None
+    id: int
 
-    def post_request(self, url: str, headers: dict) -> GetJobStatusResponse:
-        """Sends a request to the given url with the given headers, and its own content as
-        payload. Returns the job ID of the launched transfer task.
+    def get_job_status(self, url: str, headers: dict) -> GetJobStatusResponse:
+        """Sends a get request to the given URL with the given headers.
+        Returns the parsed status response of the task specified in the URL.
         Raises:
-             HTTPError if the response code is not ok.
-        """
+             HTTPError if the response code is not successful."""
         response: Response = APIRequest.api_request_from_content(
-            api_method=APIMethods.POST,
-            url=url,
-            headers=headers,
-            json=self.model_dump(),
+            api_method=APIMethods.GET, url=url, headers=headers, json={}
         )
         response.raise_for_status()
         return GetJobStatusResponse.model_validate(response.json())
@@ -356,15 +328,15 @@ class DDNDataFlowClient(ArchiveHandler):
         ]
 
     def is_job_done(self, job_id: int) -> bool:
-        get_job_status_payload = GetJobStatusPayload(job_id=job_id)
-        get_job_status_response: GetJobStatusResponse = get_job_status_payload.post_request(
-            url=urljoin(self.url, DataflowEndpoints.GET_JOB_STATUS),
+        get_job_status_payload = GetJobStatusPayload(id=job_id)
+        get_job_status_response: GetJobStatusResponse = get_job_status_payload.get_job_status(
+            url=urljoin(self.url, DataflowEndpoints.GET_JOB_STATUS + str(job_id)),
             headers=dict(self.headers, **self.auth_header),
         )
-        if get_job_status_response.description == JobDescription.COMPLETED:
+        if get_job_status_response.status == JobStatus.COMPLETED:
             return True
         LOG.info(
             f"Job with id {job_id} has not been completed. "
-            f"Current job description is {get_job_status_response.description}"
+            f"Current job description is {get_job_status_response.status}"
         )
         return False

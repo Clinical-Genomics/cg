@@ -1,7 +1,7 @@
 """ Trailblazer API for cg."""
 import datetime
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from google.auth import jwt
 from google.auth.crypt import RSASigner
@@ -66,7 +66,7 @@ class TrailblazerAPI:
         LOG.debug(f"RESPONSE BODY {response.text}")
         return ReadStream.get_content_from_stream(file_format=FileFormat.JSON, stream=response.text)
 
-    def get_latest_analysis(self, case_id: str) -> Optional[TrailblazerAnalysis]:
+    def get_latest_analysis(self, case_id: str) -> TrailblazerAnalysis | None:
         request_body = {
             "case_id": case_id,
         }
@@ -74,7 +74,7 @@ class TrailblazerAPI:
         if response:
             return TrailblazerAnalysis.model_validate(response)
 
-    def get_latest_analysis_status(self, case_id: str) -> Optional[str]:
+    def get_latest_analysis_status(self, case_id: str) -> str | None:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
         if latest_analysis:
             return latest_analysis.status
@@ -91,7 +91,7 @@ class TrailblazerAPI:
     def is_latest_analysis_qc(self, case_id: str) -> bool:
         return self.get_latest_analysis_status(case_id=case_id) == AnalysisStatus.QC
 
-    def mark_analyses_deleted(self, case_id: str) -> Optional[list]:
+    def mark_analyses_deleted(self, case_id: str) -> list | None:
         """Mark all analyses for case deleted without removing analysis files"""
         request_body = {
             "case_id": case_id,

@@ -2,7 +2,6 @@
 import logging
 import sys
 import traceback
-from typing import Optional
 
 import click
 
@@ -54,7 +53,7 @@ LOG = logging.getLogger(__name__)
     help="Force upload of an analysis that has already been uploaded or marked as started",
 )
 @click.pass_context
-def upload(context: click.Context, case_id: Optional[str], restart: bool):
+def upload(context: click.Context, case_id: str | None, restart: bool):
     """Upload results from analyses"""
 
     config_object: CGConfig = context.obj
