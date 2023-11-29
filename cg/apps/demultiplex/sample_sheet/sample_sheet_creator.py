@@ -76,12 +76,6 @@ class SampleSheetCreator:
 
     def remove_unwanted_samples(self) -> None:
         """Filter out samples with single indexes if applicable."""
-        if self.flow_cell.sequencer_type in [Sequencers.HISEQGA, Sequencers.HISEQX]:
-            LOG.debug(
-                "Skipped removal of single-indexed samples for"
-                f"{self.flow_cell.sequencer_type} flow cell"
-            )
-            return
         LOG.info("Removing all samples without dual indexes")
         samples_to_keep = []
         sample: FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
