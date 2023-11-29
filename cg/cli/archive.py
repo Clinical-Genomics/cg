@@ -57,7 +57,7 @@ def archive_spring_files(context: CGConfig, limit: int | None, archive_all: bool
 @archive.command("update-job-statuses")
 @click.pass_obj
 def update_job_statuses(context: CGConfig):
-    """Queries ongoing jobs and updates Housekeeper for the ones that have finished."""
+    """Queries ongoing jobs and updates Housekeeper."""
     spring_archive_api = SpringArchiveAPI(
         status_db=context.status_db,
         housekeeper_api=context.housekeeper_api,
