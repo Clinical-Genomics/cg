@@ -69,7 +69,7 @@ def get_index_pair(sample: FlowCellSample) -> tuple[str, str]:
     """Returns a sample index separated into index 1 and index 2."""
     if is_dual_index(sample.index):
         index_1, index_2 = sample.index.split("-")
-        return index_1.strip(), index_2.strip()
+        return index_1.strip().replace("NNNNNNNNN", ""), index_2.strip()
     return sample.index.replace("NNNNNNNNN", ""), sample.index2
 
 
