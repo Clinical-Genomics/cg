@@ -48,9 +48,10 @@ class RunParameters:
         """Return the length of the indexes if they are equal, raise an error otherwise."""
         index_one_length: int = self.get_index_1_cycles()
         index_two_length: int = self.get_index_2_cycles()
-        if self.sequencer in [Sequencers.HISEQX, Sequencers.HISEQGA]:
-            return index_one_length
-        if index_one_length != index_two_length:
+        if index_one_length != index_two_length and self.sequencer not in [
+            Sequencers.HISEQX,
+            Sequencers.HISEQGA,
+        ]:
             raise RunParametersError("Index lengths are not the same!")
         return index_one_length
 
