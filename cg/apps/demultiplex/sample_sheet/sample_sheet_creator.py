@@ -24,7 +24,6 @@ from cg.constants.demultiplexing import (
     SampleSheetBcl2FastqSections,
     SampleSheetBCLConvertSections,
 )
-from cg.constants.sequencing import Sequencers
 from cg.exc import SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -75,7 +74,7 @@ class SampleSheetCreator:
         raise NotImplementedError("Impossible to add override cycles to samples from parent class")
 
     def remove_unwanted_samples(self) -> None:
-        """Filter out samples with single indexes if applicable."""
+        """Filter out samples with single indexes."""
         LOG.info("Removing all samples without dual indexes")
         samples_to_keep = []
         sample: FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
@@ -106,15 +105,16 @@ class SampleSheetCreator:
     def create_sample_sheet_content(self) -> list[list[str]]:
         """Create sample sheet content with samples."""
         LOG.info("Creating sample sheet content")
+        complete_data_section: list[list[str]] = self.get_data_section_header_and_columns()
         sample_sheet_content: list[list[str]] = (
-            self.get_additional_sections_sample_sheet() + self.get_data_section_header_and_columns()
+            self.get_additional_sections_sample_sheet() + complete_data_section
         )
-        LOG.debug(f"Use sample sheet header {self.get_data_section_header_and_columns()}")
+        LOG.debug(f"Use sample sheet header {complete_data_section[1]}")
         for sample in self.lims_samples:
             sample_sheet_content.append(
                 self.convert_sample_to_header_dict(
                     sample=sample,
-                    data_column_names=self.get_data_section_header_and_columns()[1],
+                    data_column_names=complete_data_section[1],
                 )
             )
         return sample_sheet_content
