@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 from typing import Callable, Type
 
 from housekeeper.store.models import Archive, File
@@ -8,6 +7,7 @@ from pydantic import BaseModel, ConfigDict
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
+from cg.exc import ArchiveJobFailedError
 from cg.meta.archive.ddn_dataflow import DDNDataFlowClient
 from cg.meta.archive.models import ArchiveHandler, FileAndSample, SampleAndDestination
 from cg.models.cg_config import DataFlowConfig
@@ -66,44 +66,45 @@ class SpringArchiveAPI:
         self.status_db: Store = status_db
         self.data_flow_config: DataFlowConfig = data_flow_config
 
-    def archive_files(self, files: list[FileAndSample], archive_location: ArchiveLocations) -> int:
-        archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
-        return archive_handler.archive_files(files_and_samples=files)
+    def get_non_archived_and_non_pdc_spring_files(self):
+        files: list[File] = self.housekeeper_api.get_all_non_archived_spring_files()
+        return [file for file in files if self.get_archive_location_from_file(file) != "PDC"]
 
-    def archive_to_location(
+    def archive_files_to_location(
         self, files_and_samples: list[FileAndSample], archive_location: ArchiveLocations
-    ) -> None:
-        """Filters out the files matching the archive_location,
-        archives them and adds corresponding entries in Housekeeper."""
-        selected_files: [list[FileAndSample]] = filter_files_on_archive_location(
-            files_and_samples=files_and_samples, archive_location=archive_location
-        )
-        if selected_files:
-            LOG.info(f"Will try to archive {len(selected_files)} to {archive_location}")
-            archive_task_id: int = self.archive_files(
-                files=selected_files, archive_location=archive_location
-            )
-            self.housekeeper_api.add_archives(
-                files=[Path(file_and_sample.file.path) for file_and_sample in selected_files],
-                archive_task_id=archive_task_id,
-            )
-        else:
-            LOG.info(f"No files to archive for archive location: {archive_location}")
+    ) -> int:
+        archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
+        return archive_handler.archive_files(files_and_samples=files_and_samples)
 
-    def archive_all_non_archived_spring_files(self, spring_file_count_limit: int | None) -> None:
+    def archive_spring_files_and_add_archives_to_housekeeper(
+        self, spring_file_count_limit: int | None
+    ) -> None:
         """Archives all non archived spring files. If a limit is provided, the amount of files archived are limited
         to that amount."""
 
-        files_to_archive: list[File] = self.housekeeper_api.get_all_non_archived_spring_files()[
+        files_to_archive: list[File] = self.get_non_archived_and_non_pdc_spring_files()
+        files_and_samples: list[FileAndSample] = self.add_samples_to_files(files_to_archive)[
             :spring_file_count_limit
         ]
-        files_and_samples: list[FileAndSample] = self.add_samples_to_files(files_to_archive)
 
         for archive_location in ArchiveLocations:
-            self.archive_to_location(
-                files_and_samples=files_and_samples,
-                archive_location=archive_location,
+            files_and_samples_for_location: list[FileAndSample] = filter_files_on_archive_location(
+                files_and_samples=files_and_samples, archive_location=archive_location
             )
+            if files_and_samples_for_location:
+                job_id = self.archive_files_to_location(
+                    files_and_samples=files_and_samples_for_location,
+                    archive_location=archive_location,
+                )
+                LOG.info(f"Files submitted to {archive_location} with archival task id {job_id}.")
+                self.housekeeper_api.add_archives(
+                    files=[
+                        file_and_sample.file for file_and_sample in files_and_samples_for_location
+                    ],
+                    archive_task_id=job_id,
+                )
+            else:
+                LOG.info(f"No files to archive for location {archive_location}.")
 
     def retrieve_samples(self, sample_internal_ids: list[str]) -> None:
         """Retrieves the archived spring files for a list of samples."""
@@ -181,11 +182,11 @@ class SpringArchiveAPI:
             )
         return sample
 
-    def add_samples_to_files(self, files_to_archive: list[File]) -> list[FileAndSample]:
+    def add_samples_to_files(self, files: list[File]) -> list[FileAndSample]:
         """Fetches the Sample corresponding to each File, instantiates a FileAndSample object and
         adds it to the list which is returned."""
         files_and_samples: list[FileAndSample] = []
-        for file in files_to_archive:
+        for file in files:
             if sample := self.get_sample(file):
                 files_and_samples.append(FileAndSample(file=file, sample=sample))
         return files_and_samples
@@ -238,15 +239,20 @@ class SpringArchiveAPI:
     ) -> None:
         """Fetches info on an ongoing job and updates the Archive entry in Housekeeper."""
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
-        is_job_done: bool = archive_handler.is_job_done(task_id)
-        if is_job_done:
-            LOG.info(f"Job with id {task_id} has finished, updating Archive entries.")
-            if is_archival:
-                self.housekeeper_api.set_archived_at(task_id)
+        try:
+            LOG.info(f"Fetching status for job with id {task_id} from {archive_location}")
+            is_job_done: bool = archive_handler.is_job_done(task_id)
+            if is_job_done:
+                LOG.info(f"Job with id {task_id} has finished, updating Archive entries.")
+                if is_archival:
+                    self.housekeeper_api.set_archived_at(task_id)
+                else:
+                    self.housekeeper_api.set_retrieved_at(task_id)
             else:
-                self.housekeeper_api.set_retrieved_at(task_id)
-        else:
-            LOG.info(f"Job with id {task_id} has not yet finished.")
+                LOG.info(f"Job with id {task_id} has not yet finished.")
+        except ArchiveJobFailedError as error:
+            LOG.error(error)
+            LOG.info(f"Skipping job with id {task_id}")
 
     def sort_archival_ids_on_archive_location(
         self, archive_entries: list[Archive]

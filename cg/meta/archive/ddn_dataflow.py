@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from requests.models import Response
 
 from cg.constants.constants import APIMethods
-from cg.exc import DdnDataflowAuthenticationError
+from cg.exc import ArchiveJobFailedError, DdnDataflowAuthenticationError
 from cg.io.controller import APIRequest
 from cg.meta.archive.models import (
     ArchiveHandler,
@@ -55,6 +55,22 @@ class JobStatus(StrEnum):
     SUSPENDED = "Suspended"
     TERMINATED_ON_ERROR = "Terminated on error"
     TERMINATED_ON_WARNING = "Terminated on warning"
+
+
+FAILED_JOB_STATUSES: list[str] = [
+    JobStatus.CANCELED,
+    JobStatus.DENIED,
+    JobStatus.INVALID_LICENSE,
+    JobStatus.REFUSED,
+    JobStatus.TERMINATED_ON_ERROR,
+    JobStatus.TERMINATED_ON_WARNING,
+]
+ONGOING_JOB_STATUSES: list[str] = [
+    JobStatus.CREATION_IN_PROGRESS,
+    JobStatus.IN_QUEUE,
+    JobStatus.ON_VALIDATION,
+    JobStatus.RUNNING,
+]
 
 
 class MiriaObject(FileTransferData):
@@ -191,7 +207,7 @@ class GetJobStatusResponse(BaseModel):
     """Model representing the response fields from a get_job_status post."""
 
     job_id: int = Field(alias="id")
-    status: str
+    status: JobStatus
 
 
 class GetJobStatusPayload(BaseModel):
@@ -351,15 +367,18 @@ class DDNDataFlowClient(ArchiveHandler):
         ]
 
     def is_job_done(self, job_id: int) -> bool:
+        """Returns True if the specified job is completed, and false if it is still ongoing.
+        Raises:
+            ArchiveJobFailedError if the specified job has a failed status."""
         get_job_status_payload = GetJobStatusPayload(id=job_id)
         get_job_status_response: GetJobStatusResponse = get_job_status_payload.get_job_status(
             url=urljoin(self.url, DataflowEndpoints.GET_JOB_STATUS + str(job_id)),
             headers=dict(self.headers, **self.auth_header),
         )
-        if get_job_status_response.status == JobStatus.COMPLETED:
+        job_status: JobStatus = get_job_status_response.status
+        LOG.info(f"Miria returned status {job_status} for job {job_id}")
+        if job_status == JobStatus.COMPLETED:
             return True
-        LOG.info(
-            f"Job with id {job_id} has not been completed. "
-            f"Current job description is {get_job_status_response.status}"
-        )
+        if job_status in FAILED_JOB_STATUSES:
+            raise ArchiveJobFailedError(f"Job with id {job_id} failed with status {job_status}")
         return False

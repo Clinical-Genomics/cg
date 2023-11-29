@@ -49,7 +49,7 @@ def archive_spring_files(context: CGConfig, limit: int | None, archive_all: bool
         housekeeper_api=context.housekeeper_api,
         data_flow_config=context.data_flow_config,
     )
-    spring_archive_api.archive_all_non_archived_spring_files(
+    spring_archive_api.archive_spring_files_and_add_archives_to_housekeeper(
         spring_file_count_limit=None if archive_all else limit
     )
 
