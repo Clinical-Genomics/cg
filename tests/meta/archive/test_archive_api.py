@@ -19,7 +19,7 @@ from cg.meta.archive.ddn_dataflow import (
     DDNDataFlowClient,
     GetJobStatusPayload,
     GetJobStatusResponse,
-    JobDescription,
+    JobStatus,
     MiriaObject,
 )
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
@@ -179,7 +179,7 @@ def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAP
 def test_archive_all_non_archived_spring_files(
     spring_archive_api: SpringArchiveAPI,
     caplog,
-    ok_ddn_response,
+    ok_miria_response,
     archive_request_json,
     header_with_test_auth_token,
     test_auth_token: AuthToken,
@@ -196,7 +196,7 @@ def test_archive_all_non_archived_spring_files(
     ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_response,
+        return_value=ok_miria_response,
     ) as mock_request_submitter:
         spring_archive_api.archive_all_non_archived_spring_files()
 
@@ -222,17 +222,17 @@ def test_archive_all_non_archived_spring_files(
 
 @pytest.mark.parametrize(
     "job_status, should_date_be_set",
-    [(JobDescription.COMPLETED, True), (JobDescription.RUNNING, False)],
+    [(JobStatus.COMPLETED, True), (JobStatus.RUNNING, False)],
 )
 def test_get_archival_status(
     spring_archive_api: SpringArchiveAPI,
     caplog,
-    ok_ddn_job_status_response,
+    ok_miria_job_status_response,
     archive_request_json,
     header_with_test_auth_token,
     test_auth_token: AuthToken,
     archival_job_id: int,
-    job_status: JobDescription,
+    job_status: JobStatus,
     should_date_be_set: bool,
 ):
     # GIVEN a file with an ongoing archival
@@ -247,11 +247,11 @@ def test_get_archival_status(
     ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_job_status_response,
+        return_value=ok_miria_job_status_response,
     ), mock.patch.object(
         GetJobStatusPayload,
-        "post_request",
-        return_value=GetJobStatusResponse(job_id=archival_job_id, description=job_status),
+        "get_job_status",
+        return_value=GetJobStatusResponse(id=archival_job_id, status=job_status),
     ):
         spring_archive_api.update_ongoing_task(
             task_id=archival_job_id,
@@ -265,12 +265,12 @@ def test_get_archival_status(
 
 @pytest.mark.parametrize(
     "job_status, should_date_be_set",
-    [(JobDescription.COMPLETED, True), (JobDescription.RUNNING, False)],
+    [(JobStatus.COMPLETED, True), (JobStatus.RUNNING, False)],
 )
 def test_get_retrieval_status(
     spring_archive_api: SpringArchiveAPI,
     caplog,
-    ok_ddn_job_status_response,
+    ok_miria_job_status_response,
     archive_request_json,
     header_with_test_auth_token,
     retrieval_job_id: int,
@@ -293,11 +293,11 @@ def test_get_retrieval_status(
     ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_job_status_response,
+        return_value=ok_miria_job_status_response,
     ), mock.patch.object(
         GetJobStatusPayload,
-        "post_request",
-        return_value=GetJobStatusResponse(job_id=retrieval_job_id, description=job_status),
+        "get_job_status",
+        return_value=GetJobStatusResponse(id=retrieval_job_id, status=job_status),
     ):
         spring_archive_api.update_ongoing_task(
             task_id=retrieval_job_id,
@@ -312,7 +312,7 @@ def test_get_retrieval_status(
 def test_retrieve_samples(
     spring_archive_api: SpringArchiveAPI,
     caplog,
-    ok_ddn_response,
+    ok_miria_response,
     trimmed_local_path,
     local_storage_repository,
     retrieve_request_json,
@@ -342,7 +342,7 @@ def test_retrieve_samples(
     ), mock.patch.object(MiriaObject, "trim_path", return_value=True), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_response,
+        return_value=ok_miria_response,
     ) as mock_request_submitter:
         spring_archive_api.retrieve_samples([sample_with_spring_file])
 

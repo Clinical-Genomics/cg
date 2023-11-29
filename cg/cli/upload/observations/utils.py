@@ -1,7 +1,6 @@
 """Helper functions for observations related actions."""
 
 import logging
-from typing import Union
 
 from sqlalchemy.orm import Query
 
@@ -52,7 +51,7 @@ def get_observations_case_to_upload(context: CGConfig, case_id: str) -> Case:
 
 def get_observations_api(
     context: CGConfig, case: Case
-) -> Union[MipDNAObservationsAPI, BalsamicObservationsAPI]:
+) -> MipDNAObservationsAPI | BalsamicObservationsAPI:
     """Return an observations API given a specific case object."""
     observations_apis = {
         Pipeline.MIP_DNA: MipDNAObservationsAPI(context, get_sequencing_method(case)),

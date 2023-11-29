@@ -3,7 +3,6 @@ import logging
 import re
 import tempfile
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
 from housekeeper.store.models import File
@@ -47,7 +46,7 @@ class GisaidAPI:
     def get_completion_file_from_hk(self, case_id: str) -> File:
         """Find completon file in Housekeeper and return it"""
 
-        completion_file: Optional[File] = self.housekeeper_api.get_file_from_latest_version(
+        completion_file: File | None = self.housekeeper_api.get_file_from_latest_version(
             bundle_name=case_id, tags=["komplettering"]
         )
         if not completion_file:

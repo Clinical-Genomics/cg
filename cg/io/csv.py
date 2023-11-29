@@ -2,7 +2,7 @@
 import csv
 import io
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 from cg.constants import FileExtensions
 from cg.io.validate_path import validate_file_suffix
@@ -12,7 +12,7 @@ DELIMITER_TO_SUFFIX = {",": FileExtensions.CSV, "\t": FileExtensions.TSV}
 
 def read_csv(
     file_path: Path, read_to_dict: bool = False, delimiter: str = ","
-) -> Union[list[list[str]], list[dict]]:
+) -> list[list[str]] | list[dict]:
     """
     Read content in a CSV file to a list of list or list of dict.
     The delimiter parameter can be used to read TSV files.

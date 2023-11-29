@@ -3,16 +3,11 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Optional
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
-from housekeeper.store.database import (
-    create_all_tables,
-    drop_all_tables,
-    initialize_database,
-)
+from housekeeper.store.database import create_all_tables, drop_all_tables, initialize_database
 from housekeeper.store.models import Archive, Bundle, File, Version
 from sqlalchemy.orm import Query
 
@@ -77,7 +72,7 @@ class HousekeeperAPI:
             tags = []
         return self._store.new_file(path, checksum, to_archive, tags)
 
-    def get_file(self, file_id: int) -> Optional[File]:
+    def get_file(self, file_id: int) -> File | None:
         """Get a file based on file id."""
         LOG.info(f"Return file: {file_id}")
         file_obj: File = self._store.get_file_by_id(file_id=file_id)
@@ -86,7 +81,7 @@ class HousekeeperAPI:
             return None
         return file_obj
 
-    def delete_file(self, file_id: int) -> Optional[File]:
+    def delete_file(self, file_id: int) -> File | None:
         """Delete a file both from database and disk (if included)."""
         file_obj: File = self.get_file(file_id)
         if not file_obj:
@@ -136,19 +131,18 @@ class HousekeeperAPI:
             bundle_name=bundle, tag_names=tags, version_id=version, file_path=path
         )
 
-    def get_file_insensitive_path(self, path: Path) -> Optional[File]:
-        """Returns a file in Housekeeper with a path that matches the given path, insensitive to whether the paths
-        are included or not."""
-        file: File = self.files(path=path.as_posix())
+    def get_file_insensitive_path(self, path: Path) -> File | None:
+        """Returns a file in Housekeeper given any kind of path (absolute or relative)."""
+        file: File = self.files(path=path.as_posix()).first()
         if not file:
             if path.is_absolute():
-                file = self.files(path=str(path).replace(self.root_dir, ""))
+                file = self.files(path=str(path).replace(f"{self.root_dir}/", "")).first()
             else:
-                file = self.files(path=self.root_dir + str(path))
+                file = self.files(path=f"{self.root_dir}/{path}").first()
         return file
 
     @staticmethod
-    def get_files_from_version(version: Version, tags: set[str]) -> Optional[list[File]]:
+    def get_files_from_version(version: Version, tags: set[str]) -> list[File] | None:
         """Return a list of files associated with the given version and tags."""
         LOG.debug(f"Getting files from version with tags {tags}")
         files: list[File] = []
@@ -162,13 +156,13 @@ class HousekeeperAPI:
         return files
 
     @staticmethod
-    def get_file_from_version(version: Version, tags: set[str]) -> Optional[File]:
+    def get_file_from_version(version: Version, tags: set[str]) -> File | None:
         """Return the first file matching the given tags."""
         files: list[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
         return files[0] if files else None
 
     @staticmethod
-    def get_latest_file_from_version(version: Version, tags: set[str]) -> Optional[File]:
+    def get_latest_file_from_version(version: Version, tags: set[str]) -> File | None:
         """Return the latest file from Housekeeper given its version and tags."""
         files: list[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
         return sorted(files, key=lambda file_obj: file_obj.id)[-1] if files else None
@@ -181,17 +175,15 @@ class HousekeeperAPI:
         """Wrap property in Housekeeper Store."""
         return self._store.session.no_autoflush
 
-    def get_files(
-        self, bundle: str, tags: Optional[list] = None, version: Optional[int] = None
-    ) -> Query:
+    def get_files(self, bundle: str, tags: list | None = None, version: int | None = None) -> Query:
         """Get all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version.
         """
         return self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
 
     def get_latest_file(
-        self, bundle: str, tags: Optional[list] = None, version: Optional[int] = None
-    ) -> Optional[File]:
+        self, bundle: str, tags: list | None = None, version: int | None = None
+    ) -> File | None:
         """Return latest file from Housekeeper, filtered by bundle and/or tags and/or version."""
         files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
         return files.order_by(File.id.desc()).first()
@@ -201,7 +193,7 @@ class HousekeeperAPI:
         bundle_name: str,
         file_paths: list[Path],
         last_version: Version,
-        tags: Optional[list] = None,
+        tags: list | None = None,
     ) -> list[Path]:
         """Checks if any of the files in the provided list are already added to the provided
         bundle. Returns a list of files that have not been added."""
@@ -271,7 +263,7 @@ class HousekeeperAPI:
         """Return all spring files which are not marked as archived in Housekeeper."""
         return self._store.get_all_non_archived_files(tag_names=[SequencingFileTag.SPRING])
 
-    def get_latest_bundle_version(self, bundle_name: str) -> Optional[Version]:
+    def get_latest_bundle_version(self, bundle_name: str) -> Version | None:
         """Get the latest version of a Housekeeper bundle."""
         last_version: Version = self.last_version(bundle_name)
         if not last_version:
@@ -382,7 +374,7 @@ class HousekeeperAPI:
         bundle_version.included_at = dt.datetime.now()
         self.commit()
 
-    def get_file_from_latest_version(self, bundle_name: str, tags: set[str]) -> Optional[File]:
+    def get_file_from_latest_version(self, bundle_name: str, tags: set[str]) -> File | None:
         """Return a file in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
@@ -411,7 +403,7 @@ class HousekeeperAPI:
             sequencing_files_in_hk[bundle_name] = False
             for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
                 sample_file_in_hk: list[bool] = []
-                hk_files: Optional[list[File]] = self.get_files_from_latest_version(
+                hk_files: list[File] | None = self.get_files_from_latest_version(
                     bundle_name=bundle_name, tags=[tag]
                 )
                 sample_file_in_hk += [True for hk_file in hk_files if hk_file.is_included]
@@ -422,18 +414,18 @@ class HousekeeperAPI:
             )
         return all(sequencing_files_in_hk.values())
 
-    def get_non_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> list[File]:
+    def get_non_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
         """Returns all non-archived_files from a given bundle, tagged with the given tags"""
         return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags or [])
 
-    def get_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> list[File]:
+    def get_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
         """Returns all archived_files from a given bundle, tagged with the given tags"""
         return self._store.get_archived_files(bundle_name=bundle_name, tags=tags or [])
 
     def add_archives(self, files: list[Path], archive_task_id: int) -> None:
         """Creates an archive object for the given files, and adds the archive task id to them."""
         for file in files:
-            archived_file: Optional[File] = self._store.get_files(file_path=file.as_posix()).first()
+            archived_file: File | None = self._store.get_files(file_path=file.as_posix()).first()
             if not archived_file:
                 raise HousekeeperFileMissingError(f"No file in housekeeper with the path {file}")
             archive: Archive = self._store.create_archive(
@@ -451,7 +443,7 @@ class HousekeeperAPI:
             sequencing_files_on_disk[bundle_name] = False
             for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
                 sample_file_on_disk: list[bool] = []
-                hk_files: Optional[list[File]] = self.get_files_from_latest_version(
+                hk_files: list[File] | None = self.get_files_from_latest_version(
                     bundle_name=bundle_name, tags=[tag]
                 )
                 sample_file_on_disk += [

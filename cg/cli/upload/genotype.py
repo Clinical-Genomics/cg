@@ -1,6 +1,5 @@
 """Code for uploading genotype data via CLI"""
 import logging
-from typing import Optional
 
 import click
 
@@ -25,7 +24,7 @@ LOG = logging.getLogger(__name__)
 )
 @click.argument("family_id", required=False)
 @click.pass_obj
-def upload_genotypes(context: CGConfig, re_upload: bool, family_id: Optional[str]):
+def upload_genotypes(context: CGConfig, re_upload: bool, family_id: str | None):
     """Upload genotypes from an analysis to Genotype."""
 
     status_db: Store = context.status_db
