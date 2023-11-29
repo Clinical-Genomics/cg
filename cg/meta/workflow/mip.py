@@ -5,14 +5,9 @@ from typing import Any
 from pydantic.v1 import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import (
-    COLLABORATORS,
-    COMBOS,
-    FileExtensions,
-    GenePanelMasterList,
-    Pipeline,
-)
+from cg.constants import FileExtensions, GenePanelMasterList, Pipeline
 from cg.constants.constants import FileFormat
+from cg.constants.gene_panel import GenePanelCombo
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
@@ -167,23 +162,21 @@ class MipAnalysisAPI(AnalysisAPI):
     @staticmethod
     def convert_panels(customer: str, default_panels: list[str]) -> list[str]:
         """Convert between default panels and all panels included in gene list."""
-        # check if all default panels are part of master list
+        # check if all default panels are part of the master list
         master_list: list[str] = GenePanelMasterList.get_panel_names()
-        if customer in COLLABORATORS and set(default_panels).issubset(master_list):
+        if customer in GenePanelMasterList.collaborators() and set(default_panels).issubset(
+            master_list
+        ):
             return master_list
 
-        # the rest are handled the same way
-        all_panels = set(default_panels)
+        all_panels: set[str] = set(default_panels)
 
         # fill in extra panels if selection is part of a combo
         for panel in default_panels:
-            if panel in COMBOS:
-                for extra_panel in COMBOS[panel]:
-                    all_panels.add(extra_panel)
+            if panel in GenePanelCombo.COMBO_1:
+                all_panels |= GenePanelCombo.COMBO_1.get(panel)
 
-        # add OMIM to every panel choice
         all_panels.add(GenePanelMasterList.OMIM_AUTO)
-
         return list(all_panels)
 
     def _get_latest_raw_file(self, family_id: str, tags: list[str]) -> Any:

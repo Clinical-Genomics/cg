@@ -48,3 +48,16 @@ class GenePanelMasterList(StrEnum):
             if panels
             else list(map(lambda panel: panel.value, cls))
         )
+
+    @classmethod
+    def collaborators(cls) -> set[str]:
+        """Return collaborators of the Master list."""
+        return {"cust000", "cust002", "cust003", "cust004", "cust042"}
+
+
+class GenePanelCombo:
+    COMBO_1: dict[str, set[str]] = {
+        "DSD": {"DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"},
+        "CM": {"CNM", "CM"},
+        "Horsel": {"Horsel", "141217", "141201"},
+    }
