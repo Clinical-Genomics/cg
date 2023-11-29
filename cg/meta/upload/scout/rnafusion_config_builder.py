@@ -68,4 +68,7 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
         self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
         config_sample.analysis_type = PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
+
+        # Replace sample_id with internal case id, as rnafusion currently uses case ids instead of sample ids
+        config_sample.sample_id = case_sample.case.internal_id
         return config_sample
