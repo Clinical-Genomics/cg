@@ -39,10 +39,12 @@ class ScoutConfigBuilder:
         self.include_phenotype_terms()
 
     def add_common_sample_info(
-        self, config_sample: ScoutIndividual, case_sample: CaseSample
+        self, config_sample: ScoutIndividual, case_sample: CaseSample, use_case_id: bool = False
     ) -> None:
         """Add the information to a sample that is common for different analysis types"""
-        sample_id: str = case_sample.sample.internal_id
+        sample_id: str = (
+            case_sample.case.internal_id if use_case_id else case_sample.sample.internal_id
+        )
         LOG.info("Building sample %s", sample_id)
         lims_sample = dict()
         try:
