@@ -40,7 +40,7 @@ class MockMipAnalysis(MipAnalysisAPI):
         )
 
     @staticmethod
-    def convert_panels(customer_id, panels):
+    def convert_panels(customer_id, default_panels):
         """Mock convert_panels."""
-        _ = customer_id, panels
+        _ = customer_id, default_panels
         return ""

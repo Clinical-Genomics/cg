@@ -58,7 +58,8 @@ class MipConfigBuilder(ScoutConfigBuilder):
 
         self.load_config.gene_panels = (
             self.mip_analysis_api.convert_panels(
-                self.analysis_obj.case.customer.internal_id, self.analysis_obj.case.panels
+                customer_id=self.analysis_obj.case.customer.internal_id,
+                default_panels=set(self.analysis_obj.case.panels),
             )
             or None
         )

@@ -36,6 +36,14 @@ CLI_OPTIONS = {
 LOG = logging.getLogger(__name__)
 
 
+def _add_gene_panel_combo(default_panels: set[str]) -> set[str]:
+    all_panels = default_panels
+    for panel in default_panels:
+        if panel in GenePanelCombo.COMBO_1:
+            all_panels |= GenePanelCombo.COMBO_1.get(panel)
+    return all_panels
+
+
 class MipAnalysisAPI(AnalysisAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
     hooks into the status database that makes managing analyses simpler"""
@@ -160,22 +168,16 @@ class MipAnalysisAPI(AnalysisAPI):
             out_handle.write("\n".join(content))
 
     @staticmethod
-    def convert_panels(customer: str, default_panels: list[str]) -> list[str]:
-        """Convert between default panels and all panels included in gene list."""
-        # check if all default panels are part of the master list
+    def convert_panels(customer_id: str, default_panels: set[str]) -> list[str]:
+        """Check if custumer should use the gene panel master list
+        and if all default panels are included in the gene panel master list.
+        If not, add gene panel combo and OMIM-AUTO."""
         master_list: list[str] = GenePanelMasterList.get_panel_names()
-        if customer in GenePanelMasterList.collaborators() and set(default_panels).issubset(
+        if customer_id in GenePanelMasterList.collaborators() and default_panels.issubset(
             master_list
         ):
             return master_list
-
-        all_panels: set[str] = set(default_panels)
-
-        # fill in extra panels if selection is part of a combo
-        for panel in default_panels:
-            if panel in GenePanelCombo.COMBO_1:
-                all_panels |= GenePanelCombo.COMBO_1.get(panel)
-
+        all_panels: set[str] = _add_gene_panel_combo(default_panels=default_panels)
         all_panels.add(GenePanelMasterList.OMIM_AUTO)
         return list(all_panels)
 
