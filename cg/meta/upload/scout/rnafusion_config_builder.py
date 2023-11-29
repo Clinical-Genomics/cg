@@ -65,9 +65,7 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
     def build_config_sample(self, case_sample: CaseSample) -> ScoutCancerIndividual:
         """Build a sample with rnafusion specific information."""
         config_sample = ScoutCancerIndividual()
-        self.add_common_sample_info(
-            config_sample=config_sample, case_sample=case_sample, use_case_id=True
-        )
+        self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
         self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
         config_sample.analysis_type = PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
         return config_sample
