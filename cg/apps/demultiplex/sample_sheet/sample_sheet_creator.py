@@ -164,16 +164,16 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
     def get_additional_sections_sample_sheet(self) -> list[list[str]]:
         """Return all sections of the sample sheet that are not the data section."""
         return [
-            [SampleSheetBcl2FastqSections.Settings.HEADER.value],
-            SampleSheetBcl2FastqSections.Settings.BARCODE_MISMATCH_INDEX1.value,
-            SampleSheetBcl2FastqSections.Settings.BARCODE_MISMATCH_INDEX2.value,
+            [SampleSheetBcl2FastqSections.Settings.HEADER],
+            SampleSheetBcl2FastqSections.Settings.barcode_mismatch_index_1(),
+            SampleSheetBcl2FastqSections.Settings.barcode_mismatch_index_2(),
         ]
 
     def get_data_section_header_and_columns(self) -> list[list[str]]:
         """Return the header and column names of the data section of the sample sheet."""
         return [
             [SampleSheetBcl2FastqSections.Data.HEADER.value],
-            SampleSheetBcl2FastqSections.Data.COLUMN_NAMES.value,
+            SampleSheetBcl2FastqSections.Data.column_names(),
         ]
 
 
@@ -226,15 +226,15 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         """Return all sections of the sample sheet that are not the data section."""
         header_section: list[list[str]] = [
             [SampleSheetBCLConvertSections.Header.HEADER.value],
-            SampleSheetBCLConvertSections.Header.FILE_FORMAT.value,
+            SampleSheetBCLConvertSections.Header.file_format(),
             [SampleSheetBCLConvertSections.Header.RUN_NAME.value, self.flow_cell_id],
             [
                 SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM_TITLE.value,
-                SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM_VALUE.value[
+                SampleSheetBCLConvertSections.Header.instrument_platform_sequencer().get(
                     self.flow_cell.sequencer_type
-                ],
+                ),
             ],
-            SampleSheetBCLConvertSections.Header.INDEX_ORIENTATION_FORWARD.value,
+            SampleSheetBCLConvertSections.Header.index_orientation_forward(),
         ]
         reads_section: list[list[str]] = [
             [SampleSheetBCLConvertSections.Reads.HEADER],
@@ -256,9 +256,9 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
             ],
         ]
         settings_section: list[list[str]] = [
-            [SampleSheetBCLConvertSections.Settings.HEADER.value],
-            SampleSheetBCLConvertSections.Settings.SOFTWARE_VERSION.value,
-            SampleSheetBCLConvertSections.Settings.FASTQ_COMPRESSION_FORMAT.value,
+            [SampleSheetBCLConvertSections.Settings.HEADER],
+            SampleSheetBCLConvertSections.Settings.software_version(),
+            SampleSheetBCLConvertSections.Settings.fastq_compression_format(),
         ]
         return header_section + reads_section + settings_section
 
@@ -266,5 +266,5 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         """Return the header and column names of the data section of the sample sheet."""
         return [
             [SampleSheetBCLConvertSections.Data.HEADER.value],
-            SampleSheetBCLConvertSections.Data.COLUMN_NAMES.value,
+            SampleSheetBCLConvertSections.Data.column_names(),
         ]
