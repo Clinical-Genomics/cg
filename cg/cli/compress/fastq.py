@@ -90,8 +90,8 @@ def clean_fastq(context: CGConfig, case_id: str | None, days_back: int, dry_run:
 
     cleaned_inds = 0
     for case in cases:
-        samples: Iterable[str] = store.get_sample_ids_by_case_id(case_id=case.internal_id)
-        for sample_id in samples:
+        sample_ids: Iterable[str] = store.get_sample_ids_by_case_id(case_id=case.internal_id)
+        for sample_id in sample_ids:
             archive_location: str = store.get_sample_by_internal_id(sample_id).archive_location
             was_cleaned: bool = compress_api.clean_fastq(
                 sample_id=sample_id, archive_location=archive_location
