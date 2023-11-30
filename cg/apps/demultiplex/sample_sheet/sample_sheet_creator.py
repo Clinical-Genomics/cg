@@ -91,7 +91,6 @@ class SampleSheetCreator:
         data_column_names: list[str],
     ) -> list[str]:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
-        LOG.debug(f"Use sample sheet header {data_column_names}")
         sample_dict = sample.model_dump(by_alias=True)
         return [str(sample_dict[column]) for column in data_column_names]
 
@@ -106,14 +105,16 @@ class SampleSheetCreator:
     def create_sample_sheet_content(self) -> list[list[str]]:
         """Create sample sheet content with samples."""
         LOG.info("Creating sample sheet content")
+        complete_data_section: list[list[str]] = self.get_data_section_header_and_columns()
         sample_sheet_content: list[list[str]] = (
-            self.get_additional_sections_sample_sheet() + self.get_data_section_header_and_columns()
+            self.get_additional_sections_sample_sheet() + complete_data_section
         )
+        LOG.debug(f"Use sample sheet header {complete_data_section[1]}")
         for sample in self.lims_samples:
             sample_sheet_content.append(
                 self.convert_sample_to_header_dict(
                     sample=sample,
-                    data_column_names=self.get_data_section_header_and_columns()[1],
+                    data_column_names=complete_data_section[1],
                 )
             )
         return sample_sheet_content
@@ -129,6 +130,7 @@ class SampleSheetCreator:
                 samples=samples_in_lane,
                 index_cycles=self.run_parameters.index_length,
                 is_reverse_complement=self.is_reverse_complement,
+                sequencer=self.run_parameters.sequencer,
             )
             self.update_barcode_mismatch_values_for_samples(samples_in_lane)
 
@@ -157,7 +159,7 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
 
     def add_override_cycles_to_samples(self) -> None:
         """Return None for flow cells to be demultiplexed with Bcl2fastq."""
-        LOG.debug("No adding of override cycles for Bcl2fastq flow cell")
+        LOG.debug("Skipping adding of override cycles for Bcl2fastq flow cell")
 
     def get_additional_sections_sample_sheet(self) -> list[list[str]]:
         """Return all sections of the sample sheet that are not the data section."""
@@ -201,19 +203,22 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
 
     def add_override_cycles_to_samples(self) -> None:
         """Add override cycles attribute to samples."""
-        flow_cell_index_len: int = self.run_parameters.index_length
         read1_cycles: str = f"Y{self.run_parameters.get_read_1_cycles()};"
         read2_cycles: str = f"Y{self.run_parameters.get_read_2_cycles()}"
+        length_index1: int = self.run_parameters.get_index_1_cycles()
+        length_index2: int = self.run_parameters.get_index_2_cycles()
         for sample in self.lims_samples:
-            index1_cycles: str = f"I{self.run_parameters.get_index_1_cycles()};"
-            index2_cycles: str = f"I{self.run_parameters.get_index_2_cycles()};"
-            sample_index_len: int = len(get_index_pair(sample)[0])
-            if sample_index_len < flow_cell_index_len:
-                index1_cycles = f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
+            index1_cycles: str = f"I{length_index1};"
+            index2_cycles: str = f"I{length_index2};"
+            sample_index1_len: int = len(get_index_pair(sample)[0])
+            sample_index2_len: int = len(get_index_pair(sample)[1])
+            if sample_index1_len < length_index1:
+                index1_cycles = f"I{sample_index1_len}N{length_index1 - sample_index1_len};"
+            if sample_index2_len < length_index2:
                 index2_cycles = (
-                    f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
+                    f"I{sample_index2_len}N{length_index2 - sample_index2_len};"
                     if self.is_reverse_complement
-                    else f"N{flow_cell_index_len - sample_index_len}I{sample_index_len};"
+                    else f"N{length_index2 - sample_index2_len}I{sample_index2_len};"
                 )
             sample.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
@@ -232,21 +237,21 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
             SampleSheetBCLConvertSections.Header.index_orientation_forward(),
         ]
         reads_section: list[list[str]] = [
-            [SampleSheetBCLConvertSections.Reads.HEADER.value],
+            [SampleSheetBCLConvertSections.Reads.HEADER],
             [
-                SampleSheetBCLConvertSections.Reads.READ_CYCLES_1.value,
+                SampleSheetBCLConvertSections.Reads.READ_CYCLES_1,
                 self.run_parameters.get_read_1_cycles(),
             ],
             [
-                SampleSheetBCLConvertSections.Reads.READ_CYCLES_2.value,
+                SampleSheetBCLConvertSections.Reads.READ_CYCLES_2,
                 self.run_parameters.get_read_2_cycles(),
             ],
             [
-                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_1.value,
+                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_1,
                 self.run_parameters.get_index_1_cycles(),
             ],
             [
-                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2.value,
+                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2,
                 self.run_parameters.get_index_2_cycles(),
             ],
         ]
