@@ -130,8 +130,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
         """Write <case>_metrics_deliverables.yaml file."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_name: str = case.links[0].sample.name
-        LOG.info("Sample name " + sample_name)
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
         LOG.info("Case " + str(case))
         for link in case.links:
