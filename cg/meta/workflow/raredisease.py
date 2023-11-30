@@ -4,20 +4,13 @@ import logging
 from pathlib import Path
 
 from cg.constants import GenePanelMasterList, Pipeline
-from cg.constants.gene_panel import GENOME_BUILD_38, GenePanelCombo
+from cg.constants.gene_panel import GENOME_BUILD_38
+from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
-
-
-def _add_gene_panel_combo(default_panels: set[str]) -> set[str]:
-    all_panels = default_panels
-    for panel in default_panels:
-        if panel in GenePanelCombo.COMBO_1:
-            all_panels |= GenePanelCombo.COMBO_1.get(panel)
-    return all_panels
 
 
 class RarediseaseAnalysisAPI(NfAnalysisAPI):
@@ -50,7 +43,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             master_list
         ):
             return master_list
-        all_panels: set[str] = _add_gene_panel_combo(default_panels=default_panels)
+        all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
         all_panels.add(GenePanelMasterList.OMIM_AUTO)
         return list(all_panels)
 

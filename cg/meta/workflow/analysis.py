@@ -11,6 +11,7 @@ from housekeeper.store.models import Bundle, Version
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import AnalysisType, CaseActions, WorkflowManager
+from cg.constants.gene_panel import GenePanelCombo
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
@@ -20,6 +21,14 @@ from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
+
+
+def add_gene_panel_combo(default_panels: set[str]) -> set[str]:
+    all_panels = default_panels
+    for panel in default_panels:
+        if panel in GenePanelCombo.COMBO_1:
+            all_panels |= GenePanelCombo.COMBO_1.get(panel)
+    return all_panels
 
 
 class AnalysisAPI(MetaAPI):

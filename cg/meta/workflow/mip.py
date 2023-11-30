@@ -7,11 +7,10 @@ from pydantic.v1 import ValidationError
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import FileExtensions, GenePanelMasterList, Pipeline
 from cg.constants.constants import FileFormat
-from cg.constants.gene_panel import GenePanelCombo
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
-from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.analysis import AnalysisAPI, add_gene_panel_combo
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
@@ -34,14 +33,6 @@ CLI_OPTIONS = {
     "use_bwa_mem": {"option": "--bwa_mem 1 --bwa_mem2 0"},
 }
 LOG = logging.getLogger(__name__)
-
-
-def _add_gene_panel_combo(default_panels: set[str]) -> set[str]:
-    all_panels = default_panels
-    for panel in default_panels:
-        if panel in GenePanelCombo.COMBO_1:
-            all_panels |= GenePanelCombo.COMBO_1.get(panel)
-    return all_panels
 
 
 class MipAnalysisAPI(AnalysisAPI):
@@ -178,7 +169,7 @@ class MipAnalysisAPI(AnalysisAPI):
             master_list
         ):
             return master_list
-        all_panels: set[str] = _add_gene_panel_combo(default_panels=default_panels)
+        all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
         all_panels.add(GenePanelMasterList.OMIM_AUTO)
         return list(all_panels)
 
