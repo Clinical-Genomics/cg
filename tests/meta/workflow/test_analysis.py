@@ -351,7 +351,7 @@ def test_prepare_fastq_files_success(
 def test_prepare_fastq_files_request_miria(
     mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, archived_file: File
 ):
-    """Tests that samples' input files are requested via DDN for a Clinical customer, if files are archived."""
+    """Tests that samples' input files are requested via Miria for a Clinical customer, if files are archived."""
 
     # GIVEN a case belonging to a non-PDC customer with at least one archived spring file
     case: Case = analysis_store.get_cases()[0]
