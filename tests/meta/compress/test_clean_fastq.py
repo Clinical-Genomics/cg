@@ -135,7 +135,9 @@ def test_cli_clean_fastqs_removed(
     assert fastq_second.exists()
 
     # WHEN running the clean command
-    populated_compress_fastq_api.clean_fastq(sample_id=sample, archive_location="PDC")
+    populated_compress_fastq_api.clean_fastq(
+        sample_id=sample, archive_location=PDC_ARCHIVE_LOCATION
+    )
 
     # THEN assert SPRING files exists
     assert spring_file.exists()
