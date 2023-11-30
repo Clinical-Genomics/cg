@@ -4,6 +4,7 @@ from datetime import datetime
 import petname
 
 from cg.constants import DataDelivery, FlowCellStatus, Pipeline, Priority
+from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.store.api.base import BaseHandler
 from cg.store.models import (
     Analysis,
@@ -45,7 +46,7 @@ class AddHandler(BaseHandler):
         name: str,
         invoice_address: str,
         invoice_reference: str,
-        data_archive_location: str = "PDC",
+        data_archive_location: str = PDC_ARCHIVE_LOCATION,
         scout_access: bool = False,
         is_clinical: bool = False,
         *args,

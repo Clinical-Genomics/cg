@@ -8,6 +8,7 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
+from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.meta.compress import files
 from cg.models import CompressionData
 from tests.cli.compress.conftest import MockCompressAPI
@@ -85,7 +86,7 @@ def test_update_hk_fastq(
         compression_obj=compression,
         hk_fastq_first=fastq[run]["hk_first"],
         hk_fastq_second=fastq[run]["hk_second"],
-        archive_location="PDC",
+        archive_location=PDC_ARCHIVE_LOCATION,
     )
 
     # THEN assert that the SPRING files have been added to Housekeeper
@@ -103,7 +104,7 @@ def test_update_hk_fastq(
 
     # THEN assert that the spring files have been tagged with the archive location
     for spring_file in hk_spring_files:
-        assert "PDC" in [tag.name for tag in spring_file.tags]
+        assert PDC_ARCHIVE_LOCATION in [tag.name for tag in spring_file.tags]
 
     # THEN assert that the SPRING files have been added to bundles directory
     for spring_file in [hk_spring_files[0].path, hk_spring_metadata_files[0].path]:
@@ -163,7 +164,9 @@ def test_cli_clean_fastqs_no_spring_metadata(
     assert not spring_metadata_file.exists()
 
     # WHEN running the clean command
-    populated_compress_fastq_api.clean_fastq(sample_id=sample, archive_location="PDC")
+    populated_compress_fastq_api.clean_fastq(
+        sample_id=sample, archive_location=PDC_ARCHIVE_LOCATION
+    )
 
     # THEN assert SPRING file exists
     assert spring_file.exists()
@@ -189,7 +192,9 @@ def test_cli_clean_fastqs_pending_compression_metadata(
     assert crunchy_flag_file.exists()
 
     # WHEN running the clean command
-    populated_compress_fastq_api.clean_fastq(sample_id=sample, archive_location="PDC")
+    populated_compress_fastq_api.clean_fastq(
+        sample_id=sample, archive_location=PDC_ARCHIVE_LOCATION
+    )
 
     # THEN assert SPRING file exists
     assert spring_file.exists()
