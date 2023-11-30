@@ -139,6 +139,7 @@ class ApplicationVersionView(BaseView):
     column_formatters = {"application": ApplicationView.view_application_link}
     column_searchable_list = ["application.tag"]
     edit_modal = True
+    create_modal = True
     form_excluded_columns = ["samples", "pools", "microbial_samples"]
 
 
