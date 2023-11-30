@@ -15,6 +15,7 @@ from cg.constants import (
     Pipeline,
     Priority,
 )
+from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import CONTROL_OPTIONS, CaseActions, PrepCategory
 
 Model = declarative_base()
@@ -303,7 +304,7 @@ class Customer(Model):
     return_samples = Column(types.Boolean, nullable=False, default=False)
     scout_access = Column(types.Boolean, nullable=False, default=False)
     uppmax_account = Column(types.String(32))
-    data_archive_location = Column(types.String(32), nullable=False, default="PDC")
+    data_archive_location = Column(types.String(32), nullable=False, default=PDC_ARCHIVE_LOCATION)
     is_clinical = Column(types.Boolean, nullable=False, default=False)
 
     collaborations = orm.relationship(
