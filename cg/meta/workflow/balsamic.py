@@ -1,15 +1,13 @@
 """Module for Balsamic Analysis API."""
 import logging
 from pathlib import Path
-from typing import Optional, Union
 
 from housekeeper.store.models import File, Version
-from pydantic.v1 import ValidationError, EmailStr
+from pydantic.v1 import EmailStr, ValidationError
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
-from cg.constants.indexes import ListIndexes
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import Variants
@@ -176,7 +174,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return SampleType.TUMOR
         return SampleType.NORMAL
 
-    def get_derived_bed(self, panel_bed: str) -> Optional[Path]:
+    def get_derived_bed(self, panel_bed: str) -> Path | None:
         """Returns the verified capture kit path or the derived panel BED path."""
         if not panel_bed:
             return None
@@ -196,7 +194,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             )
         return derived_panel_bed
 
-    def get_verified_bed(self, panel_bed: str, sample_data: dict) -> Optional[str]:
+    def get_verified_bed(self, panel_bed: str, sample_data: dict) -> str | None:
         """Takes a dict with samples and attributes.
         Retrieves unique attributes for application type and target_bed.
         Verifies that those attributes are the same across multiple samples,
@@ -210,7 +208,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         - When bed file required for analysis, but is not set or cannot be retrieved.
         """
 
-        panel_bed: Optional[Path] = self.get_derived_bed(panel_bed)
+        panel_bed: Path | None = self.get_derived_bed(panel_bed)
         application_types = {v["application_type"].lower() for k, v in sample_data.items()}
         target_beds: set = {v["target_bed"] for k, v in sample_data.items()}
 
@@ -232,7 +230,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 )
             return Path(self.bed_path, target_bed).as_posix()
 
-    def get_verified_pon(self, panel_bed: str, pon_cnn: str) -> Optional[str]:
+    def get_verified_pon(self, panel_bed: str, pon_cnn: str) -> str | None:
         """Returns the validated PON or extracts the latest one available if it is not provided
 
         Raises BalsamicStartError:
@@ -254,7 +252,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return latest_pon
 
-    def get_latest_pon_file(self, panel_bed: str) -> Optional[str]:
+    def get_latest_pon_file(self, panel_bed: str) -> str | None:
         """Returns the latest PON cnn file associated to a specific capture bed"""
 
         if not panel_bed:
@@ -263,15 +261,15 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         pon_list = Path(self.pon_path).glob(f"*{Path(panel_bed).stem}_{self.PON_file_suffix}")
         sorted_pon_files = sorted(
             pon_list,
-            key=lambda file: int(file.stem.split("_v")[ListIndexes.LAST.value]),
+            key=lambda file: int(file.stem.split("_v")[-1]),
             reverse=True,
         )
 
         return sorted_pon_files[0].as_posix() if sorted_pon_files else None
 
     @staticmethod
-    def get_verified_gender(sample_data: dict) -> Union[Gender.FEMALE, Gender.MALE]:
-        """Takes a dict with samples and attributes, and returns a verified case gender provided by the customer"""
+    def get_verified_gender(sample_data: dict) -> str:
+        """Takes a dict with samples and attributes, and returns a verified case gender provided by the customer."""
 
         gender = next(iter(sample_data.values()))["gender"]
 
@@ -316,7 +314,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             tumor_sample_id, normal_sample_id = normal_sample_id, None
         return {"tumor_sample_name": tumor_sample_id, "normal_sample_name": normal_sample_id}
 
-    def get_latest_raw_file_data(self, case_id: str, tags: list) -> Union[dict, list]:
+    def get_latest_raw_file_data(self, case_id: str, tags: list) -> dict | list:
         """Retrieves the data of the latest file associated to a specific case ID and a list of tags."""
 
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
@@ -378,7 +376,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     @staticmethod
     def cast_metrics_type(
         sequencing_type: str, metrics: dict
-    ) -> Union[BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics]:
+    ) -> BalsamicTargetedQCMetrics | BalsamicWGSQCMetrics:
         """Cast metrics model type according to the sequencing type"""
 
         if metrics:
@@ -392,7 +390,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return metrics
 
     @staticmethod
-    def get_latest_file_by_pattern(directory: Path, pattern: str) -> Optional[str]:
+    def get_latest_file_by_pattern(directory: Path, pattern: str) -> str | None:
         """Returns the latest file (<file_name>-<date>-.vcf.gz) matching a pattern from a specific directory."""
         available_files: iter = sorted(
             Path(directory).glob(f"*{pattern}*.vcf.gz"),
@@ -418,7 +416,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return verified_observations
 
-    def get_verified_gens_file_paths(self, gender: Gender) -> Optional[dict[str, str]]:
+    def get_verified_gens_file_paths(self, gender: Gender) -> dict[str, str] | None:
         """Return a list of file path arguments for Gens."""
         return {
             "genome_interval": self.genome_interval_path,
@@ -428,7 +426,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             else self.gens_coverage_male_path,
         }
 
-    def get_swegen_verified_path(self, variants: Variants) -> Optional[str]:
+    def get_swegen_verified_path(self, variants: Variants) -> str | None:
         """Return verified SweGen path."""
         swegen_file: str = self.get_latest_file_by_pattern(
             directory=self.swegen_path, pattern=variants
@@ -442,7 +440,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         panel_bed: str,
         pon_cnn: str,
         observations: list[str] = None,
-        gender: Optional[str] = None,
+        gender: str | None = None,
     ) -> dict:
         """Takes a dictionary with per-sample parameters,
         validates them, and transforms into command line arguments
@@ -500,7 +498,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             )
         LOG.info("")
 
-    def get_sample_params(self, case_id: str, panel_bed: Optional[str]) -> dict:
+    def get_sample_params(self, case_id: str, panel_bed: str | None) -> dict:
         """Returns a dictionary of attributes for each sample in given family,
         where SAMPLE ID is used as key"""
 
@@ -526,9 +524,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if application_types:
             return application_types.pop().lower()
 
-    def resolve_target_bed(
-        self, panel_bed: Optional[str], link_object: CaseSample
-    ) -> Optional[str]:
+    def resolve_target_bed(self, panel_bed: str | None, link_object: CaseSample) -> str | None:
         if panel_bed:
             return panel_bed
         if self.get_application_type(link_object.sample) not in self.__BALSAMIC_BED_APPLICATIONS:
@@ -601,7 +597,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self,
         case_id: str,
         run_analysis: bool = True,
-        slurm_quality_of_service: Optional[str] = None,
+        slurm_quality_of_service: str | None = None,
         dry_run: bool = False,
     ) -> None:
         """Execute BALSAMIC run analysis with given options"""

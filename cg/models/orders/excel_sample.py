@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import AfterValidator, BeforeValidator, Field
 from typing_extensions import Annotated
 
@@ -65,7 +63,7 @@ class ExcelSample(OrderSample):
     organism_other: str = Field(None, alias=ExcelSampleAliases.ORGANISM_OTHER)
     original_lab: str = Field(None, alias=ExcelSampleAliases.ORIGINAL_LAB)
     original_lab_address: str = Field(None, alias=ExcelSampleAliases.ORIGINAL_LAB_ADDRESS)
-    panels: Annotated[Optional[list[str]], BeforeValidator(parse_panels)] = Field(
+    panels: Annotated[list[str] | None, BeforeValidator(parse_panels)] = Field(
         None, alias=ExcelSampleAliases.PANELS
     )
     pool: str = Field(None, alias=ExcelSampleAliases.POOL)

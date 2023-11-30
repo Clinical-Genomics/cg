@@ -3,7 +3,6 @@ import logging
 from pathlib import Path
 
 from cg.constants.constants import Pipeline
-from cg.constants.indexes import ListIndexes
 from cg.exc import BalsamicStartError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -65,9 +64,5 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
     def get_next_pon_version(self, panel_bed: str) -> str:
         """Returns the next PON version to be generated."""
         latest_pon_file: str = self.get_latest_pon_file(panel_bed=panel_bed)
-        next_version = (
-            int(Path(latest_pon_file).stem.split("_v")[ListIndexes.LAST.value]) + 1
-            if latest_pon_file
-            else 1
-        )
+        next_version = int(Path(latest_pon_file).stem.split("_v")[-1]) + 1 if latest_pon_file else 1
         return "v" + str(next_version)

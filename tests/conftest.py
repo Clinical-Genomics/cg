@@ -7,7 +7,8 @@ import shutil
 from copy import deepcopy
 from datetime import MAXYEAR, datetime, timedelta
 from pathlib import Path
-from typing import Any, Generator, Union
+from subprocess import CompletedProcess
+from typing import Any, Generator
 
 import pytest
 from housekeeper.store.models import File, Version
@@ -43,6 +44,7 @@ from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.demultiplex.run_parameters import (
+    RunParametersHiSeq,
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
@@ -848,7 +850,7 @@ def fixture_tmp_flow_cell_name_malformed_sample_sheet() -> str:
 
 @pytest.fixture(name="tmp_flow_cell_name_no_sample_sheet")
 def tmp_flow_cell_name_no_sample_sheet() -> str:
-    """This is the name of a flow cell directory with the run parameters and sample sheet missing."""
+    """Return the name of a flow cell directory with the run parameters and sample sheet missing."""
     return "170407_A00689_0209_BHHKVCALXX"
 
 
@@ -858,7 +860,7 @@ def tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq() -> str:
     return "211101_D00483_0615_AHLG5GDRXY"
 
 
-@pytest.fixture(name="tmp_flow_cells_directory_no_run_parameters")
+@pytest.fixture
 def tmp_flow_cells_directory_no_run_parameters(
     tmp_flow_cell_name_no_run_parameters: str, tmp_flow_cells_directory: Path
 ) -> Path:
@@ -955,7 +957,7 @@ def tmp_demultiplexed_runs_not_finished_flow_cells_directory(
     tmp_path: Path, demux_results_not_finished_dir: Path
 ) -> Path:
     """
-    Return the path to a temporary demultiplex-runs-unfinished that contains unfinished flow cells directory.
+    Return a temporary demultiplex-runs-unfinished path with an unfinished flow cell directory.
     Generates a copy of the original demultiplexed-runs-unfinished directory.
     """
     original_dir = demux_results_not_finished_dir
@@ -1209,10 +1211,22 @@ def flow_cells_demux_all_dir(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "flow_cells_demux_all")
 
 
-@pytest.fixture(name="demux_results_not_finished_dir")
+@pytest.fixture(scope="session")
 def demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a dir with demultiplexing results where demux has been done but nothing is cleaned."""
+    """Return the path to a dir with demultiplexing results where nothing has been cleaned."""
     return Path(demultiplex_fixtures, "demultiplexed-runs-unfinished")
+
+
+@pytest.fixture(scope="session")
+def hiseq_x_flow_cell_name() -> str:
+    """Return the full name of a HiSeq2500 flow cell with only one index."""
+    return "160202_ST-E00266_0064_AHKHHGCCXX"
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_flow_cell_name() -> str:
+    """Return the full name of a HiSeq2500 flow cell with double indexes."""
+    return "180504_D00410_0608_BHGYGYBCX2"
 
 
 @pytest.fixture(scope="session")
@@ -1233,10 +1247,22 @@ def novaseq_x_flow_cell_full_name() -> str:
     return "20230508_LH00188_0003_A22522YLT3"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def novaseq_x_manifest_file(novaseq_x_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeqX manifest file."""
     return Path(novaseq_x_flow_cell_dir, "Manifest.tsv")
+
+
+@pytest.fixture(scope="session")
+def hiseq_x_flow_cell_dir(flow_cells_dir: Path, hiseq_x_flow_cell_name: str) -> Path:
+    """Return the path to a HiSeqX flow cell."""
+    return Path(flow_cells_dir, hiseq_x_flow_cell_name)
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_flow_cell_dir(flow_cells_dir: Path, hiseq_2500_flow_cell_name: str) -> Path:
+    """Return the path to a HiSeq2500 flow cell."""
+    return Path(flow_cells_dir, hiseq_2500_flow_cell_name)
 
 
 @pytest.fixture(scope="session")
@@ -1276,27 +1302,60 @@ def run_parameters_missing_versions_path(run_parameters_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
+def run_parameters_wrong_instrument(run_parameters_dir: Path) -> Path:
+    """Return a NovaSeqX run parameters file path with a wrong instrument value."""
+    return Path(run_parameters_dir, "RunParameters_novaseq_X_wrong_instrument.xml")
+
+
+@pytest.fixture(scope="session")
+def hiseq_x_single_index_run_parameters_path(
+    hiseq_x_flow_cell_dir: Path,
+) -> Path:
+    """Return the path to a HiSeqX run parameters file with single index."""
+    return Path(hiseq_x_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE)
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_double_index_run_parameters_path(
+    hiseq_2500_flow_cell_dir: Path,
+) -> Path:
+    """Return the path to a HiSeqX run parameters file with single index."""
+    return Path(hiseq_2500_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
+
+
+@pytest.fixture(scope="session")
 def novaseq_6000_run_parameters_path(bcl2fastq_flow_cell_dir: Path) -> Path:
-    """Return the path to a file with NovaSeq6000 run parameters."""
-    return Path(bcl2fastq_flow_cell_dir, "RunParameters.xml")
+    """Return the path to a NovaSeq6000 run parameters file."""
+    return Path(bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
 
 
 @pytest.fixture(scope="session")
 def novaseq_x_run_parameters_path(novaseq_x_flow_cell_dir: Path) -> Path:
-    """Return the path to a file with NovaSeqX run parameters."""
-    return Path(novaseq_x_flow_cell_dir, "RunParameters.xml")
+    """Return the path to a NovaSeqX run parameters file."""
+    return Path(novaseq_x_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
 
 
-@pytest.fixture(scope="module")
-def run_parameters_novaseq_6000_different_index_path(run_parameters_dir: Path) -> Path:
-    """Return the path to a NovaSeq6000 run parameters file with different index cycles."""
-    return Path(run_parameters_dir, "RunParameters_novaseq_6000_different_index_cycles.xml")
+@pytest.fixture(scope="function")
+def run_parameters_hiseq_different_index(run_parameters_dir: Path) -> RunParametersHiSeq:
+    """Return a HiSeq RunParameters object with different index cycles."""
+    path = Path(run_parameters_dir, "RunParameters_hiseq_2500_different_index_cycles.xml")
+    return RunParametersHiSeq(run_parameters_path=path)
 
 
-@pytest.fixture(scope="module")
-def run_parameters_novaseq_x_different_index_path(run_parameters_dir: Path) -> Path:
-    """Return the path to a NovaSeqX run parameters file with different index cycles."""
-    return Path(run_parameters_dir, "RunParameters_novaseq_X_different_index_cycles.xml")
+@pytest.fixture(scope="function")
+def run_parameters_novaseq_6000_different_index(
+    run_parameters_dir: Path,
+) -> RunParametersNovaSeq6000:
+    """Return a NovaSeq6000 RunParameters object with different index cycles."""
+    path = Path(run_parameters_dir, "RunParameters_novaseq_6000_different_index_cycles.xml")
+    return RunParametersNovaSeq6000(run_parameters_path=path)
+
+
+@pytest.fixture(scope="function")
+def run_parameters_novaseq_x_different_index(run_parameters_dir: Path) -> RunParametersNovaSeqX:
+    """Return a NovaSeqX RunParameters object with different index cycles."""
+    path = Path(run_parameters_dir, "RunParameters_novaseq_X_different_index_cycles.xml")
+    return RunParametersNovaSeqX(run_parameters_path=path)
 
 
 @pytest.fixture(scope="module")
@@ -1305,6 +1364,22 @@ def run_parameters_missing_versions(
 ) -> RunParametersNovaSeq6000:
     """Return a NovaSeq6000 run parameters object without software and reagent kit versions."""
     return RunParametersNovaSeq6000(run_parameters_path=run_parameters_missing_versions_path)
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_run_parameters_double_index(
+    hiseq_2500_double_index_run_parameters_path: Path,
+) -> RunParametersHiSeq:
+    """Return a NovaSeq6000 run parameters object."""
+    return RunParametersHiSeq(run_parameters_path=hiseq_2500_double_index_run_parameters_path)
+
+
+@pytest.fixture(scope="session")
+def hiseq_x_run_parameters_single_index(
+    hiseq_x_single_index_run_parameters_path: Path,
+) -> RunParametersHiSeq:
+    """Return a NovaSeq6000 run parameters object."""
+    return RunParametersHiSeq(run_parameters_path=hiseq_x_single_index_run_parameters_path)
 
 
 @pytest.fixture(scope="session")
@@ -1323,6 +1398,18 @@ def novaseq_x_run_parameters(
     return RunParametersNovaSeqX(run_parameters_path=novaseq_x_run_parameters_path)
 
 
+@pytest.fixture(scope="module")
+def hiseq_2500_flow_cell(hiseq_2500_flow_cell_dir: Path) -> FlowCellDirectoryData:
+    """Return a HiSeq2500 flow cell."""
+    return FlowCellDirectoryData(flow_cell_path=hiseq_2500_flow_cell_dir)
+
+
+@pytest.fixture(scope="module")
+def hiseq_x_flow_cell(hiseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
+    """Return a HiSeq2500 flow cell."""
+    return FlowCellDirectoryData(flow_cell_path=hiseq_x_flow_cell_dir)
+
+
 @pytest.fixture(scope="session")
 def bcl2fastq_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a flow cell object with flow cell that is demultiplexed."""
@@ -1335,18 +1422,24 @@ def bcl2fastq_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
 def novaseq_flow_cell_demultiplexed_with_bcl2fastq(
     bcl_convert_flow_cell_dir: Path,
 ) -> FlowCellDirectoryData:
-    """Create a Novaseq6000 flow cell object with flow cell that is demultiplexed using Bcl2fastq."""
+    """Return a Novaseq6000 flow cell object demultiplexed using Bcl2fastq."""
     return FlowCellDirectoryData(
         flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
     )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a bcl_convert flow cell object with flow cell that is demultiplexed."""
     return FlowCellDirectoryData(
         flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
     )
+
+
+@pytest.fixture(scope="function")
+def novaseq_6000_flow_cell(bcl_convert_flow_cell: FlowCellDirectoryData) -> FlowCellDirectoryData:
+    """Return a NovaSeq6000 flow cell object."""
+    return bcl_convert_flow_cell
 
 
 @pytest.fixture(scope="function")
@@ -1363,7 +1456,7 @@ def bcl2fastq_flow_cell_id(bcl2fastq_flow_cell: FlowCellDirectoryData) -> str:
     return bcl2fastq_flow_cell.id
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def bcl_convert_flow_cell_id(bcl_convert_flow_cell: FlowCellDirectoryData) -> str:
     """Return flow cell id from bcl_convert flow cell object."""
     return bcl_convert_flow_cell.id
@@ -1377,8 +1470,8 @@ def demultiplexing_delivery_file(bcl2fastq_flow_cell: FlowCellDirectoryData) -> 
 
 @pytest.fixture(name="hiseq_x_tile_dir")
 def hiseq_x_tile_dir(bcl2fastq_flow_cell: FlowCellDirectoryData) -> Path:
-    """Return Hiseq X tile dir."""
-    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.Hiseq_X_TILE_DIR)
+    """Return HiSeqX tile dir."""
+    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.HISEQ_X_TILE_DIR)
 
 
 @pytest.fixture(name="lims_novaseq_samples_file")
@@ -1722,8 +1815,8 @@ def analysis_store_trio(analysis_store: Store) -> Generator[Store, None, None]:
     yield analysis_store
 
 
-@pytest.fixture(name="analysis_store_single_case")
-def analysis_store_single(
+@pytest.fixture
+def analysis_store_single_case(
     base_store: Store, analysis_family_single_case: Store, helpers: StoreHelpers
 ):
     """Set up a store instance with a single ind case for testing analysis API."""
@@ -2406,7 +2499,7 @@ def context_config(
             "tower_pipeline": "taxprofiler",
         },
         "scout": {
-            "binary_path": "echo",
+            "binary_path": "bin/scout",
             "config_path": "scout-stage.yaml",
         },
         "statina": {
@@ -3165,7 +3258,7 @@ def store_with_sequencing_metrics(
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
-    sample_sequencing_metrics_details: list[Union[str, str, int, int, float, int]] = [
+    sample_sequencing_metrics_details: list[str | int | float] = [
         (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
         (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 2, 2_000_000, 85.5, 30),
@@ -3287,6 +3380,18 @@ def flow_cell_encryption_api(
     )
     flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=True)
     return flow_cell_encryption_api
+
+
+def create_process_response(
+    return_code: int = 0, args: str = "", std_out: str = "", std_err: str = ""
+) -> CompletedProcess:
+    """Returns a CompletedProcess object with default parameters."""
+    return CompletedProcess(
+        args=args,
+        returncode=return_code,
+        stderr=std_err.encode("utf-8"),
+        stdout=std_out.encode("utf-8"),
+    )
 
 
 # Downsample

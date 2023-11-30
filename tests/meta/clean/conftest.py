@@ -1,7 +1,6 @@
 """Tests for the CleanFlowCellsAPI."""
 from datetime import datetime
 from pathlib import Path
-from typing import Union
 
 import pytest
 
@@ -85,7 +84,7 @@ def store_with_flow_cell_to_clean(
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
-    sample_sequencing_metrics_details: list[Union[str, str, int, int, float, int]] = [
+    sample_sequencing_metrics_details: list[str | int | float] = [
         (sample_id, tmp_flow_cell_to_clean.id, 1, 50_000_0000, 90.5, 32),
         (sample_id, tmp_flow_cell_to_clean.id, 2, 50_000_0000, 90.4, 31),
     ]
@@ -114,7 +113,7 @@ def store_with_flow_cell_not_to_clean(
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
-    sample_sequencing_metrics_details: list[Union[str, str, int, int, float, int]] = [
+    sample_sequencing_metrics_details: list[str | int | float] = [
         (sample_id, tmp_flow_cell_not_to_clean.id, 1, 50_000_0000, 90.5, 32),
         (sample_id, tmp_flow_cell_not_to_clean.id, 2, 50_000_0000, 90.4, 31),
     ]

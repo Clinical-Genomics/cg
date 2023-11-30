@@ -61,16 +61,7 @@
     <BufferStartDate>09/06/2022 10:10:00</BufferStartDate>
     <BufferRssi>4</BufferRssi>
   </RfidsInfo>
-  <RecipeFilePath>C:\Program Files\Illumina\NovaSeq Control Software\Recipe</RecipeFilePath>
   <SamplesheetFile />
-  <UsedLimsSetup>false</UsedLimsSetup>
-  <CeLinuxRunFolder>/ilmn/outputfolder/220906_A00689_0636_AH7CJFDRX2/</CeLinuxRunFolder>
-  <RtaRawRunFolder>/ilmn/outputfolder</RtaRawRunFolder>
-  <CeMountRunFolder>\\fddc-65e5-66fa--1.ipv6-literal.net\ilmn\outputfolder\220906_A00689_0636_AH7CJFDRX2\</CeMountRunFolder>
-  <OutputRunFolder>\\172.16.1.6\clinicaldata\Runs\220906_A00689_0636_AH7CJFDRX2\</OutputRunFolder>
-  <OutputRootFolder>\\172.16.1.6\clinicaldata\Runs</OutputRootFolder>
-  <SbcRunFolder>C:\ProgramData\Illumina\NovaSeq\NovaSeqTemp\220906_A00689_0636_AH7CJFDRX2\</SbcRunFolder>
-  <PreRunFolder>C:\ProgramData\Illumina\NovaSeq\NovaSeqTemp\RunSetupLogs\A00689_2022-09-06__09_36_50_SideA</PreRunFolder>
   <RunStartDate>220906</RunStartDate>
   <RunId>220906_A00689_0636_AH7CJFDRX2</RunId>
   <UseBaseSpace>true</UseBaseSpace>
@@ -132,7 +123,6 @@
     </FirmwareVersion>
   </FirmwareVersions>
   <SendIlluminaHealthData>true</SendIlluminaHealthData>
-  <UcsRunId>196DDD1C160F20EA</UcsRunId>
   <UcsVersion>1.6.3.1575</UcsVersion>
   <RunSetupMode>Manual</RunSetupMode>
   <WorkflowType>NovaSeqStandard</WorkflowType>

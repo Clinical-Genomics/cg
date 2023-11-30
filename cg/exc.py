@@ -228,3 +228,7 @@ class MetricsQCError(CgError):
 
 class MissingMetrics(CgError):
     """Exception raised when mandatory metrics are missing."""
+
+
+class XMLError(CgError):
+    """Exception raised when something is wrong with the content of an XML file."""

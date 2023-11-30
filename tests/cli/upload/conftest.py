@@ -4,7 +4,6 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from tempfile import tempdir
-from typing import Union
 
 import pytest
 
@@ -293,7 +292,7 @@ class MockLims:
         )
         return lims_case["samples"]
 
-    def sample(self, sample_id) -> Union[str, None]:
+    def sample(self, sample_id) -> str | None:
         """Returns a lims sample matching the provided sample_id"""
         for sample in self.lims_samples():
             if sample["id"] == sample_id:

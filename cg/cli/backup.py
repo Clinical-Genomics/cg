@@ -1,7 +1,7 @@
 """Backup related CLI commands."""
 import logging
 from pathlib import Path
-from typing import Iterable, Optional, Union
+from typing import Iterable
 
 import click
 import housekeeper.store.models as hk_models
@@ -55,9 +55,7 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
         flow_cells_dir=Path(context.flow_cells_dir)
     )
     for flow_cell in flow_cells:
-        db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
-            flow_cell_name=flow_cell.id
-        )
+        db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell.id)
         flow_cell_encryption_api = FlowCellEncryptionAPI(
             binary_path=context.encryption.binary_path,
             dry_run=dry_run,
@@ -93,9 +91,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         flow_cells_dir=Path(context.flow_cells_dir)
     )
     for flow_cell in flow_cells:
-        db_flow_cell: Optional[Flowcell] = status_db.get_flow_cell_by_name(
-            flow_cell_name=flow_cell.id
-        )
+        db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell.id)
         if db_flow_cell and db_flow_cell.has_backup:
             LOG.debug(f"Flow cell: {flow_cell.id} is already backed-up")
             continue
@@ -119,7 +115,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
 @click.option("-f", "--flow-cell-id", help="Retrieve a specific flow cell, ex. 'HCK2KDSXX'")
 @DRY_RUN
 @click.pass_obj
-def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str] = None):
+def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: str | None = None):
     """Fetch the first flow cell in the requested queue from backup"""
 
     pdc_api = context.pdc_api
@@ -138,7 +134,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
     backup_api: BackupAPI = context.meta_apis["backup_api"]
 
     status_api: Store = context.status_db
-    flow_cell: Optional[Flowcell] = (
+    flow_cell: Flowcell | None = (
         status_api.get_flow_cell_by_name(flow_cell_name=flow_cell_id) if flow_cell_id else None
     )
 
@@ -149,7 +145,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
     if not flow_cell_id:
         LOG.info("Fetching first flow cell in queue")
 
-    retrieval_time: Optional[float] = backup_api.fetch_flow_cell(flow_cell=flow_cell)
+    retrieval_time: float | None = backup_api.fetch_flow_cell(flow_cell=flow_cell)
 
     if retrieval_time:
         hours = retrieval_time / 60 / 60
@@ -244,7 +240,7 @@ def _get_samples(status_api: Store, object_type: str, identifier: str) -> list[S
         "case": status_api.get_samples_by_case_id,
         "flow_cell": status_api.get_samples_from_flow_cell,
     }
-    samples: Union[Sample, list[Sample]] = get_samples[object_type](identifier)
+    samples: Sample | list[Sample] = get_samples[object_type](identifier)
     return samples if isinstance(samples, list) else [samples]
 
 

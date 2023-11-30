@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import Optional
 
 import openpyxl
 from openpyxl.cell.cell import Cell
@@ -70,7 +69,7 @@ class ExcelOrderformParser(OrderformParser):
     @staticmethod
     def get_sample_row_info(
         row: tuple[Cell], header_row: list[str], empty_row_found: bool
-    ) -> Optional[dict]:
+    ) -> dict | None:
         """Convert an Excel row with sample data into a dict with sample info"""
         values = []
         cell: Cell
@@ -117,7 +116,7 @@ class ExcelOrderformParser(OrderformParser):
                 return raw_samples
 
             if sample_rows:
-                sample_dict: Optional[dict] = ExcelOrderformParser.get_sample_row_info(
+                sample_dict: dict | None = ExcelOrderformParser.get_sample_row_info(
                     row=row, header_row=header_row, empty_row_found=empty_row_found
                 )
                 if sample_dict:

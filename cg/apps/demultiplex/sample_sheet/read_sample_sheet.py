@@ -62,10 +62,10 @@ def get_sample_type(sample_sheet_path: Path) -> Type[FlowCellSample]:
     for row in sample_sheet_content:
         if not row:
             continue
-        if SampleSheetBCLConvertSections.Data.HEADER.value in row[0]:
+        if SampleSheetBCLConvertSections.Data.HEADER in row[0]:
             LOG.info("Sample sheet was generated for BCL Convert")
             return FlowCellSampleBCLConvert
-        if SampleSheetBcl2FastqSections.Data.HEADER.value in row[0]:
+        if SampleSheetBcl2FastqSections.Data.HEADER in row[0]:
             LOG.info("Sample sheet was generated for BCL2FASTQ")
             return FlowCellSampleBcl2Fastq
     raise SampleSheetError("Could not determine sample sheet type")

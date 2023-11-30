@@ -1,6 +1,5 @@
 """Functions that deal with modifications of the indexes."""
 import logging
-from typing import Union
 
 from packaging import version
 from pydantic import BaseModel
@@ -59,7 +58,7 @@ def get_valid_indexes(dual_indexes_only: bool = True) -> list[Index]:
 
 def get_reagent_kit_version(reagent_kit_version: str) -> str:
     """Derives the reagent kit version from the run parameters."""
-    LOG.info(f"Converting reagent kit parameter {reagent_kit_version} to version")
+    LOG.debug(f"Converting reagent kit parameter {reagent_kit_version} to version")
     if reagent_kit_version not in REAGENT_KIT_PARAMETER_TO_VERSION:
         raise SyntaxError(f"Unknown reagent kit version {reagent_kit_version}")
 
@@ -70,8 +69,8 @@ def get_index_pair(sample: FlowCellSample) -> tuple[str, str]:
     """Returns a sample index separated into index 1 and index 2."""
     if is_dual_index(sample.index):
         index_1, index_2 = sample.index.split("-")
-        return index_1.strip(), index_2.strip()
-    return sample.index, sample.index2
+        return index_1.strip().replace("NNNNNNNNN", ""), index_2.strip()
+    return sample.index.replace("NNNNNNNNN", ""), sample.index2
 
 
 def is_reverse_complement_needed(run_parameters: RunParameters) -> bool:
@@ -79,13 +78,13 @@ def is_reverse_complement_needed(run_parameters: RunParameters) -> bool:
 
     If the run used the new NovaSeq control software version (NEW_CONTROL_SOFTWARE_VERSION)
     and the new reagent kit version (NEW_REAGENT_KIT_VERSION), then it requires reverse complement.
-    If the run is NovaSeqX, does not require reverse complement.
+    If the run is NovaSeqX, HiSeqX or HiSeq2500, does not require reverse complement.
     """
-    if run_parameters.sequencer == Sequencers.NOVASEQX:
+    if run_parameters.sequencer != Sequencers.NOVASEQ:
         return False
     control_software_version: str = run_parameters.control_software_version
     reagent_kit_version: str = run_parameters.reagent_kit_version
-    LOG.info("Check if run is reverse complement")
+    LOG.debug("Check if run is reverse complement")
     if version.parse(version=control_software_version) < version.parse(
         version=NEW_CONTROL_SOFTWARE_VERSION
     ):
@@ -99,7 +98,7 @@ def is_reverse_complement_needed(run_parameters: RunParameters) -> bool:
             f"Reagent kit version {reagent_kit_version} does not does not need reverse complement"
         )
         return False
-    LOG.info("Run is reverse complement")
+    LOG.debug("Run is reverse complement")
     return True
 
 
@@ -219,14 +218,20 @@ def pad_and_reverse_complement_sample_indexes(
 
 
 def update_indexes_for_samples(
-    samples: list[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]],
+    samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq],
     index_cycles: int,
     is_reverse_complement: bool,
+    sequencer: str,
 ) -> None:
     """Updates the values to the fields index1 and index 2 of samples."""
     for sample in samples:
-        pad_and_reverse_complement_sample_indexes(
-            sample=sample,
-            index_cycles=index_cycles,
-            is_reverse_complement=is_reverse_complement,
-        )
+        if sequencer != Sequencers.NOVASEQ:
+            index1, index2 = get_index_pair(sample=sample)
+            sample.index = index1
+            sample.index2 = index2
+        else:
+            pad_and_reverse_complement_sample_indexes(
+                sample=sample,
+                index_cycles=index_cycles,
+                is_reverse_complement=is_reverse_complement,
+            )
