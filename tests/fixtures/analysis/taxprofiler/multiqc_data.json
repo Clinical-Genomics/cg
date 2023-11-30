@@ -1,9 +1,9 @@
 {
     "report_data_sources": {},
     "report_general_stats_data": [
-        {"sample_name": {"percent_gc": 42.0, "avg_sequence_length": 151.0, "median_sequence_length": 151}},
+        {"a_sample_name": {"percent_gc": 42.0, "avg_sequence_length": 151.0, "median_sequence_length": 151}},
         {
-            "sample_name": {
+            "a_sample_name": {
                 "filtering_result_passed_filter_reads": 24852660.0,
                 "filtering_result_low_quality_reads": 372156.0,
                 "filtering_result_too_many_N_reads": 154.0,
@@ -27,7 +27,7 @@
             }
         },
         {
-            "sample_name": {
+            "a_sample_name": {
                 "total_reads": 11730624,
                 "paired_total": 11730624,
                 "paired_aligned_none": 1382406,
@@ -44,7 +44,7 @@
             }
         },
         {
-            "sample_name_1": {
+            "a_sample_name_1": {
                 "Input reads": 24810472,
                 "Input bases": 3729762485,
                 "Low entropy discards reads": 10362,
@@ -60,7 +60,7 @@
                 "Result bases": 3728254592,
                 "Result bases percent": 99.96
         },
-            "sample_name_2": {
+            "a_sample_name_2": {
                 "Input reads": 23581080,
                 "Input bases": 3547722769,
                 "Low entropy discards reads": 12282,

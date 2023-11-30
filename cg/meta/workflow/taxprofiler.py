@@ -129,15 +129,15 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
 
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
         """Write <case>_metrics_deliverables.yaml file."""
-        metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        sample_name: str = case.links[0].sample.name
+        LOG.info("Sample name " + sample_name)
+        metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
+        LOG.info("Case " + str(case))
         for link in case.links:
-            LOG.info("Link " + str(link))
-        metrics = self.get_multiqc_json_metrics(
-            case_id=case_id, pipeline_metrics=TAXPROFILER_METRIC_CONDITIONS
-        )
-        LOG.info("Metrics " + str(metrics))
-
+            metrics = self.get_multiqc_json_metrics(
+                case_id=link.sample.name, pipeline_metrics=TAXPROFILER_METRIC_CONDITIONS
+            )
         if dry_run:
             LOG.info(
                 f"Dry-run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"

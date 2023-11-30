@@ -3096,8 +3096,8 @@ def taxprofiler_context(
     total_sequenced_reads_pass: int,
 ) -> CGConfig:
     """Context to use in cli."""
-    cg_context.housekeeper_api_: HousekeeperAPI = nf_analysis_housekeeper
-    cg_context.trailblazer_api_: MockTB = trailblazer_api
+    cg_context.housekeeper_api_ = nf_analysis_housekeeper
+    cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
