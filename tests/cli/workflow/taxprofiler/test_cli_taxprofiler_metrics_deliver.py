@@ -43,3 +43,24 @@ def test_with_missing_case(
     # THEN ERROR log should be printed containing invalid case_id
     assert case_id_does_not_exist in caplog.text
     assert f"{case_id_does_not_exist} could not be found" in caplog.text
+
+
+def test_metrics_deliver(
+    cli_runner: CliRunner,
+    taxprofiler_context: CGConfig,
+    taxprofiler_mock_analysis_finish,
+    caplog: LogCaptureFixture,
+    taxprofiler_case_id: str,
+    sample_name: str,
+):
+    """Test command with case_id and analysis_finish which should execute successfully."""
+    caplog.set_level(logging.INFO)
+    # GIVEN case-id
+
+    result = cli_runner.invoke(metrics_deliver, [taxprofiler_case_id], obj=taxprofiler_context)
+
+    # THEN command should execute successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN taxprofiler and case_id should be found in command string
+    assert "Writing metrics deliverables file to" in caplog.text
