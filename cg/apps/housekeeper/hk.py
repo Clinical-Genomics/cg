@@ -7,11 +7,7 @@ from pathlib import Path
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
-from housekeeper.store.database import (
-    create_all_tables,
-    drop_all_tables,
-    initialize_database,
-)
+from housekeeper.store.database import create_all_tables, drop_all_tables, initialize_database
 from housekeeper.store.models import Archive, Bundle, File, Version
 from sqlalchemy.orm import Query
 
@@ -136,14 +132,13 @@ class HousekeeperAPI:
         )
 
     def get_file_insensitive_path(self, path: Path) -> File | None:
-        """Returns a file in Housekeeper with a path that matches the given path, insensitive to whether the paths
-        are included or not."""
-        file: File = self.files(path=path.as_posix())
+        """Returns a file in Housekeeper given any kind of path (absolute or relative)."""
+        file: File = self.files(path=path.as_posix()).first()
         if not file:
             if path.is_absolute():
-                file = self.files(path=str(path).replace(self.root_dir, ""))
+                file = self.files(path=str(path).replace(f"{self.root_dir}/", "")).first()
             else:
-                file = self.files(path=self.root_dir + str(path))
+                file = self.files(path=f"{self.root_dir}/{path}").first()
         return file
 
     @staticmethod
