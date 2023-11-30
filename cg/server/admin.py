@@ -127,6 +127,7 @@ class ApplicationVersionView(BaseView):
 
     column_default_sort = ("valid_from", True)
     column_editable_list = [
+        "application.tag",
         "valid_from",
         "price_standard",
         "price_priority",
