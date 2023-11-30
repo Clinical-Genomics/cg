@@ -4,7 +4,7 @@
   <Application>control-software</Application>
   <SystemSuiteVersion>1.0.1.7385</SystemSuiteVersion>
   <CloudUploadMode>InstrumentPerformance</CloudUploadMode>
-  <InstrumentType>NovaSeqXPlus</InstrumentType>
+  <InstrumentType>Other</InstrumentType>
   <InstrumentSerialNumber>LH00188</InstrumentSerialNumber>
   <RunId>20230508_LH00188_0003_A22522YLT3</RunId>
   <RunCounter>3</RunCounter>

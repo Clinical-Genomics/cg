@@ -7,7 +7,6 @@ from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus
 from cg.constants.constants import CaseActions, Pipeline
-from cg.constants.indexes import ListIndexes
 from cg.exc import CgError
 from cg.store import Store
 from cg.store.models import (
@@ -358,7 +357,7 @@ def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Sto
     # GIVEN a case with a sample with an application version
     application_version: ApplicationVersion = (
         rml_pool_store.get_case_by_internal_id(internal_id=case_id)
-        .links[ListIndexes.FIRST.value]
+        .links[0]
         .sample.application_version
     )
 
@@ -374,7 +373,7 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
     # GIVEN a case with a sample with an application version
     application_version: ApplicationVersion = (
         rml_pool_store.get_case_by_internal_id(internal_id=case_id)
-        .links[ListIndexes.FIRST.value]
+        .links[0]
         .sample.application_version
     )
 

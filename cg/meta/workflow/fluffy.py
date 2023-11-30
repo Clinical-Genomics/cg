@@ -1,7 +1,7 @@
 import datetime as dt
 import logging
 import shutil
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -22,7 +22,7 @@ from cg.utils import Process
 LOG = logging.getLogger(__name__)
 
 
-class FluffySampleSheetHeaders(Enum):
+class FluffySampleSheetHeaders(StrEnum):
     flow_cell_id: str = "FCID"
     lane: str = "Lane"
     sample_internal_id: str = "Sample_ID"
@@ -37,6 +37,10 @@ class FluffySampleSheetHeaders(Enum):
     exclude: str = "Exclude"
     library_nM: str = "Library_nM"
     sequencing_date: str = "SequencingDate"
+
+    @classmethod
+    def headers(cls) -> list[str]:
+        return list(cls)
 
 
 class FluffySample(BaseModel):
@@ -61,9 +65,8 @@ class FluffySampleSheet(BaseModel):
 
     def write_sample_sheet(self, out_path: Path) -> None:
         LOG.info(f"Writing fluffy sample sheet to {out_path}")
-        headers = [header.value for header in FluffySampleSheetHeaders]
         entries = [entry.model_dump().values() for entry in self.samples]
-        content = [headers] + entries
+        content = [FluffySampleSheetHeaders.headers()] + entries
         WriteFile.write_file_from_content(content, FileFormat.CSV, out_path)
 
 

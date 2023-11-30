@@ -9,7 +9,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
 from cg.constants.constants import FileExtensions, FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.constants.indexes import ListIndexes
 from cg.constants.symbols import NEW_LINE
 from cg.exc import ChecksumFailedError, PdcError, PdcNoFilesMatchingSearchError
 from cg.meta.backup.pdc import PdcAPI
@@ -264,7 +263,7 @@ class BackupAPI:
             if FileExtensions.TAR in row
             and FileExtensions.GZIP in row
             and FileExtensions.GPG in row
-        ][ListIndexes.FIRST.value]
+        ][0]
 
         archived_flow_cell = Path(flow_cell_line.split()[4])
         if archived_flow_cell:
@@ -280,7 +279,7 @@ class BackupAPI:
             if FileExtensions.KEY in row
             and FileExtensions.GPG in row
             and FileExtensions.GZIP not in row
-        ][ListIndexes.FIRST.value]
+        ][0]
 
         archived_encryption_key = Path(encryption_key_line.split()[4])
         if archived_encryption_key:
