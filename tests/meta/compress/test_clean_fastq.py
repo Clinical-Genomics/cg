@@ -93,11 +93,17 @@ def test_update_hk_fastq(
     hk_spring_metadata_files: list[File] = list(
         real_housekeeper_api.files(tags=[SequencingFileTag.SPRING_METADATA])
     )
+
+    # THEN assert that the Spring files and Spring metadata files have had the fastq file tags transferred
     for spring_file in [hk_spring_files, hk_spring_metadata_files]:
         assert spring_file
         for tag_name in [tag.name for tag in fastq[run]["hk_first"].tags]:
             if tag_name != SequencingFileTag.FASTQ:
                 assert tag_name in spring_file.tags
+
+    # THEN assert that the spring files have been tagged with the archive location
+    for spring_file in hk_spring_files:
+        assert "PDC" in [tag.name for tag in spring_file.tags]
 
     # THEN assert that the SPRING files have been added to bundles directory
     for spring_file in [hk_spring_files[0].path, hk_spring_metadata_files[0].path]:
