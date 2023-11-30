@@ -600,14 +600,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def run_analysis(
         self,
         case_id: str,
-        run_analysis: bool = True,
         slurm_quality_of_service: str | None = None,
         dry_run: bool = False,
     ) -> None:
         """Execute BALSAMIC run analysis with given options"""
 
         command = ["run", "analysis"]
-        run_analysis = ["--run-analysis"] if run_analysis else []
+        run_analysis = ["--run-analysis"] if not dry_run else []
         benchmark = ["--benchmark"]
         options = build_command_from_dict(
             {

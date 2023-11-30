@@ -98,11 +98,9 @@ def test_run_analysis(cli_runner: CliRunner, balsamic_context: CGConfig, caplog)
         exist_ok=True
     )
     # WHEN dry running with run analysis option specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run", "--run-analysis"], obj=balsamic_context)
+    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
-    # THEN dry-print should include the option
-    assert "--run-analysis" in caplog.text
 
 
 def test_priority_custom(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):

@@ -103,7 +103,6 @@ def run(
         analysis_api.check_analysis_ongoing(case_id)
         analysis_api.run_analysis(
             case_id=case_id,
-            run_analysis=dry_run,
             slurm_quality_of_service=slurm_quality_of_service,
             dry_run=dry_run,
         )
@@ -208,7 +207,6 @@ def start(
         run,
         case_id=case_id,
         slurm_quality_of_service=slurm_quality_of_service,
-        run_analysis=dry_run,
         dry_run=dry_run,
     )
 
@@ -224,7 +222,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
-            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run, run_analysis=True)
+            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
             LOG.error(error)
         except CgError as error:
