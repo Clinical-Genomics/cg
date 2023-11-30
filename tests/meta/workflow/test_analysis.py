@@ -49,7 +49,7 @@ def test_gene_panels_correctly_added(customer_id):
     master_list: list[str] = GenePanelMasterList.get_panel_names()
 
     # WHEN converting the gene panels between the default and the gene_panel_master_list
-    list_of_gene_panels_used = MipAnalysisAPI.convert_panels(
+    list_of_gene_panels_used: list[str] = MipAnalysisAPI.get_aggregated_panels(
         customer_id=customer_id, default_panels=set(default_panels_included)
     )
 
@@ -63,7 +63,7 @@ def test_gene_panels_not_added(customer_id):
     default_panels_not_included: list[str] = ["PANEL_NOT_IN_GENE_PANEL_MASTER_LIST"]
 
     # WHEN converting the gene panels between the default and the gene_panel_master_list
-    list_of_gene_panels_used = MipAnalysisAPI.convert_panels(
+    list_of_gene_panels_used: list[str] = MipAnalysisAPI.get_aggregated_panels(
         customer_id=customer_id, default_panels=set(default_panels_not_included)
     )
 

@@ -57,7 +57,7 @@ def panel(context: CGConfig, case_id: str, dry_run: bool):
     analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
-    bed_lines: list[str] = analysis_api.panel(case_id=case_id)
+    bed_lines: list[str] = analysis_api.get_gene_panel(case_id=case_id)
     if dry_run:
         for bed_line in bed_lines:
             click.echo(bed_line)

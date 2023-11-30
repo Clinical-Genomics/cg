@@ -19,7 +19,7 @@ def create_mip_metrics_deliverables():
 class MockMipAnalysis(MipAnalysisAPI):
     """Mock MIP analysis object."""
 
-    def panel(self, case_obj) -> [str]:
+    def get_gene_panel(self, case_obj) -> [str]:
         """Create the aggregated panel file."""
         return [""]
 
@@ -40,7 +40,7 @@ class MockMipAnalysis(MipAnalysisAPI):
         )
 
     @staticmethod
-    def convert_panels(customer_id, default_panels):
-        """Mock convert_panels."""
+    def get_aggregated_panels(customer_id, default_panels):
+        """Mock get_aggregated_panels."""
         _ = customer_id, default_panels
         return ""

@@ -64,10 +64,10 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
             sample_data[Pedigree.FATHER.value]: str = link_obj.father.internal_id
         return sample_data
 
-    def panel(self, case_id: str, genome_build: str = GENOME_BUILD_37) -> list[str]:
-        """Create the aggregated gene panel file"""
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        all_panels = self.convert_panels(
-            customer_id=case_obj.customer.internal_id, default_panels=set(case_obj.panels)
+    def get_gene_panel(self, case_id: str, genome_build: str = GENOME_BUILD_37) -> list[str]:
+        """Create and return the aggregated gene panel file"""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        all_panels: list[str] = self.get_aggregated_panels(
+            customer_id=case.customer.internal_id, default_panels=set(case.panels)
         )
         return self.scout_api.export_panels(build=genome_build, panels=all_panels)

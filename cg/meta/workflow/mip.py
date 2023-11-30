@@ -168,10 +168,11 @@ class MipAnalysisAPI(AnalysisAPI):
             out_handle.write("\n".join(content))
 
     @staticmethod
-    def convert_panels(customer_id: str, default_panels: set[str]) -> list[str]:
-        """Check if custumer should use the gene panel master list
+    def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
+        """Check if customer should use the gene panel master list
         and if all default panels are included in the gene panel master list.
-        If not, add gene panel combo and OMIM-AUTO."""
+        If not, add gene panel combo and OMIM-AUTO.
+        Return an aggregated gene panel."""
         master_list: list[str] = GenePanelMasterList.get_panel_names()
         if customer_id in GenePanelMasterList.collaborators() and default_panels.issubset(
             master_list
