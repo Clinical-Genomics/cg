@@ -22,7 +22,7 @@ from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 LOG = logging.getLogger(__name__)
 
 
-class kAnalysisAPI(MetaAPI):
+class AnalysisAPI(MetaAPI):
     """
     Parent class containing all methods that are either shared or overridden by other workflow APIs
     """
