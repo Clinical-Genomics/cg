@@ -13,7 +13,6 @@ from cg.cli.workflow.balsamic.options import (
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
     OPTION_QOS,
-    OPTION_RUN_ANALYSIS,
 )
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -89,11 +88,9 @@ def config_case(
 @ARGUMENT_CASE_ID
 @DRY_RUN
 @OPTION_QOS
-@OPTION_RUN_ANALYSIS
 @click.pass_obj
 def run(
     context: CGConfig,
-    run_analysis: bool,
     slurm_quality_of_service: str,
     case_id: str,
     dry_run: bool,
@@ -106,11 +103,11 @@ def run(
         analysis_api.check_analysis_ongoing(case_id)
         analysis_api.run_analysis(
             case_id=case_id,
-            run_analysis=run_analysis,
+            run_analysis=dry_run,
             slurm_quality_of_service=slurm_quality_of_service,
             dry_run=dry_run,
         )
-        if dry_run or not run_analysis:
+        if dry_run:
             return
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
@@ -182,7 +179,6 @@ def store_housekeeper(context: CGConfig, case_id: str):
 @DRY_RUN
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
-@OPTION_RUN_ANALYSIS
 @click.pass_context
 def start(
     context: click.Context,
@@ -192,7 +188,6 @@ def start(
     panel_bed: str,
     pon_cnn: str,
     slurm_quality_of_service: str,
-    run_analysis: bool,
     dry_run: bool,
 ):
     """Start full workflow for case ID."""
@@ -213,7 +208,7 @@ def start(
         run,
         case_id=case_id,
         slurm_quality_of_service=slurm_quality_of_service,
-        run_analysis=run_analysis,
+        run_analysis=dry_run,
         dry_run=dry_run,
     )
 
