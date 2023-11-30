@@ -12,7 +12,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import DRY_RUN, FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
-from cg.exc import FlowCellError, HousekeeperFileMissingError
+from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
 from cg.models.cg_config import CGConfig
@@ -182,7 +182,14 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
                 flow_cell=flow_cell,
                 lims_samples=lims_samples,
             )
-        except (FileNotFoundError, FileExistsError, ValidationError, FlowCellError):
+        except (
+            FileNotFoundError,
+            FileExistsError,
+            ValidationError,
+            FlowCellError,
+            SampleSheetError,
+        ) as exc:
+            LOG.warning(f"Sample sheet generation failed for flow cell {flow_cell_id} due to {exc}")
             continue
 
         if dry_run:
