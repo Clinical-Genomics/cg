@@ -8,12 +8,9 @@ from cg.apps.demultiplex.sample_sheet.index import (
     INDEX_TWO_PAD_SEQUENCE,
     LONG_INDEX_CYCLE_NR,
     Index,
-    get_hamming_distance_for_indices,
     get_index_pair,
-    get_reagent_kit_version,
     get_reverse_complement_dna_seq,
     get_valid_indexes,
-    is_reverse_complement_needed,
     pad_and_reverse_complement_sample_indexes,
     update_barcode_mismatch_values_for_sample,
 )
