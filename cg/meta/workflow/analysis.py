@@ -521,7 +521,7 @@ class AnalysisAPI(MetaAPI):
         self.ensure_spring_files_are_not_archived(case_id)
         self.resolve_decompression(case_id, dry_run=dry_run)
         if not self.is_case_ready_for_analysis(case_id):
-            raise AnalysisNotReadyError("FASTQ file are not present for the analysis to start")
+            raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
     def ensure_spring_files_are_not_archived(self, case_id: str):
         """Checks if any Spring files are archived and submits a job to retrieve any which are."""
