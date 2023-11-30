@@ -136,6 +136,7 @@ class ApplicationVersionView(BaseView):
     ]
     column_list = (
         "application",
+        "version",
         "valid_from",
         "price_standard",
         "price_priority",
