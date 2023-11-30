@@ -5,8 +5,7 @@ from sqlalchemy.orm import Query, Session
 from typing_extensions import Literal
 
 from cg.constants import CASE_ACTIONS, FlowCellStatus, Pipeline
-from cg.constants.constants import CaseActions
-from cg.constants.invoice import CustomerNames
+from cg.constants.constants import CaseActions, CustomerId
 from cg.store.api.base import BaseHandler
 from cg.store.filters.status_analysis_filters import (
     AnalysisFilter,
@@ -800,7 +799,7 @@ class StatusHandler(BaseHandler):
         customers_to_invoice: list[Customer] = [
             record.customer
             for record in records.all()
-            if record.customer.internal_id != CustomerNames.CG_INTERNAL_CUSTOMER
+            if record.customer.internal_id != CustomerId.CG_INTERNAL_CUSTOMER
         ]
         return list(set(customers_to_invoice))
 

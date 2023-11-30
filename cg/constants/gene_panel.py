@@ -3,6 +3,8 @@
 
 from enum import StrEnum
 
+from cg.constants.constants import CustomerId
+
 GENOME_BUILD_37 = "37"
 GENOME_BUILD_38 = "GRCh38"
 
@@ -52,7 +54,13 @@ class GenePanelMasterList(StrEnum):
     @classmethod
     def collaborators(cls) -> set[str]:
         """Return collaborators of the Master list."""
-        return {"cust000", "cust002", "cust003", "cust004", "cust042"}
+        return {
+            CustomerId.CG_INTERNAL_CUSTOMER,
+            CustomerId.cust002,
+            CustomerId.cust003,
+            CustomerId.cust004,
+            CustomerId.cust042,
+        }
 
 
 class GenePanelCombo:

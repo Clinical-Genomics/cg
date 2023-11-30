@@ -48,6 +48,18 @@ CONTROL_OPTIONS = ("", "negative", "positive")
 DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
 
+class CustomerId(StrEnum):
+    CG_INTERNAL_CUSTOMER: str = "cust000"
+    cust001: str = "cust001"
+    cust002: str = "cust002"
+    cust003: str = "cust003"
+    cust004: str = "cust004"
+    cust032: str = "cust032"
+    cust042: str = "cust042"
+    cust132: str = "cust132"
+    cust999: str = "cust999"
+
+
 class FlowCellStatus(StrEnum):
     ON_DISK: str = "ondisk"
     REMOVED: str = "removed"

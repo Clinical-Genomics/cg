@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 
 from cg.constants import Pipeline
-from cg.constants.invoice import CustomerNames
+from cg.constants.constants import CustomerId
 from cg.store import Store
 from cg.store.models import Analysis, Sample
 from cg.utils.dispatcher import Dispatcher
@@ -137,7 +137,7 @@ def test_call_dictionary_extra_parameters_not_in_functions(
 def test_call_with_status_db_functions(
     store: Store,
     helpers: StoreHelpers,
-    customer_internal_id: str = CustomerNames.cust001,
+    customer_internal_id: str = CustomerId.cust001,
     test_subject: str = "test_subject",
     is_tumour: bool = True,
 ):
