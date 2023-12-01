@@ -531,7 +531,7 @@ def test_store_mip(orders_api, base_store: Store, mip_status_data, ticket_id: st
     assert set(new_link.sample.phenotype_terms) == {"HP:0012747", "HP:0025049"}
     assert new_link.sample.subject_id == "subject1"
 
-    assert math.isclose( new_link.sample.age_at_sampling, 17.18192, rel_tol=1e-9)
+    assert math.isclose(new_link.sample.age_at_sampling, 17.18192, rel_tol=1e-9)
 
     assert base_store._get_query(table=Delivery).count() == len(
         base_store._get_query(table=Sample).all()
