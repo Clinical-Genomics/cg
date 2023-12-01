@@ -27,12 +27,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     ) -> None:
         """Create config files (parameters and sample sheet) for Raredisease analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
-        sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(
-            case_id=case_id, strandedness=strandedness
-        )
-        pipeline_parameters: RarediseaseParameters = self.get_pipeline_parameters(
-            case_id=case_id, genomes_base=genomes_base
-        )
+        sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
+        pipeline_parameters: RarediseaseParameters = self.get_pipeline_parameters(case_id=case_id)
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
