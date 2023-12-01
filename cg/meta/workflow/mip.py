@@ -151,12 +151,14 @@ class MipAnalysisAPI(AnalysisAPI):
             )
 
     def write_panel(self, case_id: str, content: list[str]):
-        """Write the gene panel to case dir"""
+        """Write the gene panel to case dir."""
         out_dir = Path(self.root, case_id)
         out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = Path(out_dir, "gene_panels.bed")
-        with out_path.open("w") as out_handle:
-            out_handle.write("\n".join(content))
+        WriteFile.write_file_from_content(
+            content="\n".join(content),
+            file_format=FileFormat.TXT,
+            file_path=Path(out_dir, "gene_panels.bed"),
+        )
 
     @staticmethod
     def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
