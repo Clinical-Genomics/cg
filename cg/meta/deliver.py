@@ -100,7 +100,8 @@ class DeliverAPI:
 
         link: CaseSample
         for link in links:
-            if link.sample.sequencing_qc or self.deliver_failed_samples or link.sample._is_external:
+            sample_is_external: bool = link.sample.application_version.application.is_external
+            if link.sample.sequencing_qc or self.deliver_failed_samples or sample_is_external:
                 sample_id: str = link.sample.internal_id
                 sample_name: str = link.sample.name
                 LOG.debug(f"Fetch last version for sample bundle {sample_id}")
