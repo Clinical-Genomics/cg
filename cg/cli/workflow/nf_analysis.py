@@ -66,3 +66,11 @@ OPTION_TOWER_RUN_ID = click.option(
     default=None,
     help="NF-Tower ID of run to relaunch. If not provided the latest NF-Tower ID for a case will be used.",
 )
+
+OPTION_FROM_START = click.option(
+    "--from-start",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Start pipeline from start without resuming execution",
+)
