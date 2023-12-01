@@ -66,7 +66,7 @@ def test_without_config(cli_runner: CliRunner, balsamic_context: CGConfig, caplo
     assert NO_CONFIG_FOUND in caplog.text
 
 
-def test_dry_run(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
+def test_dry_run(cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker):
     """Test command with case_id and analysis_finish which should execute successfully"""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
@@ -79,6 +79,14 @@ def test_dry_run(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).touch(
         exist_ok=True
     )
+
+    # GIVEN that the latest analysis is completed
+    mocker.patch.object(
+        balsamic_context.meta_apis["analysis_api"].trailblazer_api,
+        "is_latest_analysis_completed",
+        return_value=True,
+    )
+
     # WHEN dry running with dry specified
     result = cli_runner.invoke(report_deliver, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command should execute successfully

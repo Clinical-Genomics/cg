@@ -10,7 +10,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import ControlEnum
 from cg.store import Store
 from cg.store.models import Case
-from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
 
 
@@ -139,14 +138,14 @@ def test_get_latest_case_path(
 
 
 def test_get_cases_to_store(
-    qc_microsalt_context: CGConfig, helpers: StoreHelpers, trailblazer_api: MockTB
+    qc_microsalt_context: CGConfig, helpers: StoreHelpers, mock_trailblazer_api
 ):
     """Test that the cases fetched are Microsalt and finished successfully."""
     # GIVEN a MicrosaltAPI, a Store and a TrailblazerAPI
     analysis_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
     store: Store = analysis_api.status_db
-    mock.patch.object(trailblazer_api, "is_latest_analysis_completed", return_value=True)
-    analysis_api.trailblazer_api = trailblazer_api
+    mock.patch.object(mock_trailblazer_api, "is_latest_analysis_completed", return_value=True)
+    analysis_api.trailblazer_api = mock_trailblazer_api
 
     # GIVEN a running case in the store
     helpers.ensure_case(store=store, data_analysis=Pipeline.MICROSALT, action=CaseActions.RUNNING)

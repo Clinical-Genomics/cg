@@ -10,7 +10,6 @@ import pytest
 from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat, Pipeline
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.housekeeper_tags import (
@@ -175,13 +174,13 @@ def base_context(
     analysis_store: Store,
     housekeeper_api: HousekeeperAPI,
     upload_scout_api: UploadScoutAPI,
-    trailblazer_api: TrailblazerAPI,
+    mock_trailblazer_api,
     cg_context: CGConfig,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.status_db_ = analysis_store
     cg_context.housekeeper_api_ = housekeeper_api
-    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.trailblazer_api_ = mock_trailblazer_api
     cg_context.scout_api_ = MockScoutApi()
     cg_context.meta_apis["scout_upload_api"] = upload_scout_api
     cg_context.mip_rd_dna.root = tempdir
@@ -195,7 +194,7 @@ def fastq_context(
     analysis_store: Store,
     housekeeper_api: HousekeeperAPI,
     upload_scout_api: UploadScoutAPI,
-    trailblazer_api: TrailblazerAPI,
+    mock_trailblazer_api,
     cg_context: CGConfig,
 ) -> CGConfig:
     """Fastq context to use in cli"""
@@ -209,7 +208,7 @@ def fastq_context(
         project_base_path=Path(base_context.delivery_path),
     )
     base_context.meta_apis["rsync_api"] = RsyncAPI(cg_context)
-    base_context.trailblazer_api_ = trailblazer_api
+    base_context.trailblazer_api_ = mock_trailblazer_api
     return base_context
 
 

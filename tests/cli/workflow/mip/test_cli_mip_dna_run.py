@@ -59,7 +59,7 @@ def test_mip_run(
     case_id,
     email_address,
     mip_dna_context,
-    trailblazer_api,
+    mock_trailblazer_api,
     mip_dna_config_path,
 ):
     """Test print the MIP run"""

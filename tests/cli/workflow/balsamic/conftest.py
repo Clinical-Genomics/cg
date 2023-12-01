@@ -7,14 +7,15 @@ from pathlib import Path
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
-from cg.constants.constants import CaseActions, FileFormat, PrepCategory
+from cg.constants.constants import CaseActions, FileFormat, FlowCellStatus, PrepCategory
+from cg.constants.sequencing import Sequencers
 from cg.io.controller import WriteFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from tests.mocks.limsmock import MockLimsAPI
-from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
 
 
@@ -293,7 +294,7 @@ def balsamic_context(
     helpers: StoreHelpers,
     balsamic_lims: MockLimsAPI,
     balsamic_housekeeper: HousekeeperAPI,
-    trailblazer_api: MockTB,
+    trailblazer_api: TrailblazerAPI,
     cg_dir,
 ) -> CGConfig:
     """context to use in cli"""
@@ -315,6 +316,11 @@ def balsamic_context(
         store=status_db,
         application_tag="WESA",
         prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING,
+    )
+
+    # Create a flow cell
+    flow_cell = helpers.add_flow_cell(
+        store=status_db, sequencer_type=Sequencers.NOVASEQX, status=FlowCellStatus.ON_DISK
     )
 
     # Create textbook case for WGS PAIRED with enough reads
@@ -736,6 +742,31 @@ def balsamic_context(
         bed=bed2, version=1, filename=bed2_filename, shortname=bed2_name
     )
     status_db.session.add(version2)
+    for sample in [
+        sample_case_wgs_paired_tumor_enough_reads,
+        sample_case_wgs_paired_normal_enough_reads,
+        sample_case_wgs_paired_tumor,
+        sample_case_tgs_paired_tumor,
+        sample_case_tgs_paired_normal,
+        sample_case_wgs_single_tumor,
+        sample_case_tgs_single_tumor,
+        sample_case_tgs_single_normal_error,
+        sample_case_tgs_paired_tumor_error,
+        sample_case_tgs_paired_tumor2_error,
+        sample_case_tgs_paired_normal_error,
+        mixed_sample_case_wgs_paired_tumor_error,
+        mixed_sample_case_wgs_mic_paired_tumor_error,
+        mixed_sample_case_mixed_bed_paired_tumor_error,
+        mixed_sample_case_mixed_bed_paired_normal_error,
+        mip_sample_case_wgs_single_tumor,
+        sample_case_wgs_paired_two_normal_tumor_error,
+        sample_case_wgs_paired_two_normal_normal1_error,
+        sample_case_wgs_paired_two_normal_normal2_error,
+        sample_case_wes_panel_error,
+        sample_case_wes_tumor,
+    ]:
+        sample.flowcells.append(flow_cell)
+    status_db.session.add(flow_cell)
     status_db.session.commit()
     return cg_context
 

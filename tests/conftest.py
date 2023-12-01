@@ -26,6 +26,7 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.api import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.constants import FileExtensions, Pipeline, SequencingFileTag
 from cg.constants.constants import CaseActions, FileFormat, Strandedness
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
@@ -1721,6 +1722,20 @@ def real_housekeeper_api(hk_config_dict: dict) -> Generator[HousekeeperAPI, None
     yield _api
 
 
+@pytest.fixture
+def trailblazer_api(context_config: dict, mocker, ok_response) -> TrailblazerAPI:
+    """Set up a real Trailblazer API."""
+    mocker.patch(
+        "cg.apps.tb.api.TrailblazerAPI.auth_header",
+        return_value={"Authorization": "Bearer dummy_token"},
+    )
+    mocker.patch("cg.apps.tb.api.APIRequest.api_request_from_content", return_value=ok_response)
+    mocker.patch("cg.apps.tb.api.TrailblazerAPI.is_latest_analysis_ongoing", return_value=False)
+    mocker.patch("cg.apps.tb.models.TrailblazerAnalysis.model_validate", return_value=None)
+    mocker.patch("cg.apps.tb.api.ReadStream.get_content_from_stream", return_value={})
+    return TrailblazerAPI(context_config)
+
+
 @pytest.fixture(name="populated_housekeeper_api")
 def populated_housekeeper_api(
     real_housekeeper_api: HousekeeperAPI,
@@ -2136,7 +2151,7 @@ def sample_store(base_store: Store) -> Store:
 
 
 @pytest.fixture(scope="session")
-def trailblazer_api() -> MockTB:
+def mock_trailblazer_api() -> MockTB:
     """Return a mock Trailblazer API."""
     return MockTB()
 
@@ -2304,6 +2319,7 @@ def context_config(
     demultiplexed_runs: Path,
     downsample_dir: Path,
     pdc_archiving_directory: PDCArchivingDirectory,
+    trailblazer_config: dict,
 ) -> dict:
     """Return a context config."""
     return {
@@ -2334,7 +2350,7 @@ def context_config(
         "balsamic": {
             "balsamic_cache": "hello",
             "bed_path": str(cg_dir),
-            "binary_path": "echo",
+            "binary_path": "/bin/balsamic",
             "conda_env": "S_Balsamic",
             "loqusdb_path": str(cg_dir),
             "pon_path": str(cg_dir),
@@ -2505,11 +2521,16 @@ def context_config(
             "user": "user",
         },
         "tar": {"binary_path": "/bin/tar"},
-        "trailblazer": {
-            "host": "https://trailblazer.scilifelab.se/",
-            "service_account": "SERVICE",
-            "service_account_auth_file": "trailblazer-auth.json",
-        },
+        "trailblazer": trailblazer_config,
+    }
+
+
+@pytest.fixture
+def trailblazer_config(fixtures_dir) -> dict:
+    return {
+        "host": "https://trailblazer.scilifelab.se/",
+        "service_account": "SERVICE",
+        "service_account_auth_file": Path(fixtures_dir, "apps", "trailblazer-auth.json").as_posix(),
     }
 
 
@@ -2907,7 +2928,7 @@ def rnafusion_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     nf_analysis_housekeeper: HousekeeperAPI,
-    trailblazer_api: MockTB,
+    mock_trailblazer_api,
     hermes_api: HermesApi,
     cg_dir: Path,
     rnafusion_case_id: str,
@@ -2922,7 +2943,7 @@ def rnafusion_context(
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
-    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.trailblazer_api_ = mock_trailblazer_api
     cg_context.meta_apis["analysis_api"] = RnafusionAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
@@ -3170,14 +3191,14 @@ def taxprofiler_context(
     taxprofiler_case_id: str,
     sample_id: str,
     sample_name: str,
-    trailblazer_api: MockTB,
+    mock_trailblazer_api,
     nf_analysis_housekeeper: HousekeeperAPI,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
 ) -> CGConfig:
     """Context to use in cli."""
     cg_context.housekeeper_api_: HousekeeperAPI = nf_analysis_housekeeper
-    cg_context.trailblazer_api_: MockTB = trailblazer_api
+    cg_context.trailblazer_api_: MockTB = mock_trailblazer_api
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
@@ -3512,3 +3533,37 @@ def downsample_api(
     return DownsampleAPI(
         config=downsample_context,
     )
+
+
+@pytest.fixture(name="balsamic_config_path")
+def balsamic_config_path(fixtures_dir) -> Path:
+    """Returns path to BALSAMIC case_config.json"""
+
+    return Path(fixtures_dir, "apps", "balsamic", "case", "config.json")
+
+
+@pytest.fixture(name="balsamic_metrics_path")
+def balsamic_metrics_path(fixtures_dir) -> Path:
+    """Returns path to BALSAMIC case_metrics_deliverables.yaml"""
+
+    return Path(fixtures_dir, "apps", "balsamic", "case", "metrics_deliverables.yaml")
+
+
+@pytest.fixture
+def balsamic_config_raw(balsamic_config_path) -> dict:
+    """Return BALSAMIC config file as a dictionary"""
+
+    config: dict = ReadFile.get_content_from_file(
+        file_format=FileFormat.YAML, file_path=balsamic_config_path
+    )
+    return config
+
+
+@pytest.fixture(name="balsamic_metrics_raw")
+def balsamic_metrics(balsamic_metrics_path) -> dict:
+    """Return BALSAMIC metrics file as a dictionary"""
+
+    metrics: dict = ReadFile.get_content_from_file(
+        file_format=FileFormat.YAML, file_path=balsamic_metrics_path
+    )
+    return metrics
