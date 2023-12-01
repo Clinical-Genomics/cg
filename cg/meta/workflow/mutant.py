@@ -5,6 +5,7 @@ from typing import Optional
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
+from cg.constants.tb import AnalysisStatus
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
@@ -152,55 +153,14 @@ class MutantAnalysisAPI(AnalysisAPI):
 
         return f"{region_code}_{lab_code}_{sample_name}"
 
-    def run_analysis(self, case_id: str, dry_run: bool, config_artic: str = None) -> None:
-        if self.get_case_output_path(case_id=case_id).exists():
-            LOG.info("Found old output files, directory will be cleaned!")
-            shutil.rmtree(self.get_case_output_path(case_id=case_id), ignore_errors=True)
-
-        if config_artic:
-            self.process.run_command(
-                [
-                    "analyse",
-                    "sarscov2",
-                    "--config_case",
-                    self.get_case_config_path(case_id=case_id).as_posix(),
-                    "--config_artic",
-                    config_artic,
-                    "--outdir",
-                    self.get_case_output_path(case_id=case_id).as_posix(),
-                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
-                ],
-                dry_run=dry_run,
-            )
-        else:
-            self.process.run_command(
-                [
-                    "analyse",
-                    "sarscov2",
-                    "--config_case",
-                    self.get_case_config_path(case_id=case_id).as_posix(),
-                    "--outdir",
-                    self.get_case_output_path(case_id=case_id).as_posix(),
-                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
-                ],
-                dry_run=dry_run,
-            )
-
     def get_cases_to_store(self) -> list[Case]:
-        """Return cases where analysis has a deliverables file,
+        """Return running cases where analysis has a deliverables file,
         and is ready to be stored in Housekeeper."""
 
-        # Gather running cases with deliverables
-        cases = case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline) if Path(self.get_deliverables_file_path(case_id=case.internal_id)).exists()
-
-        # send each case to qc check
-        for case in cases:
-            qc_check(case)
-
-        # Then return them to be stored
         return [
             case
-            for case in cases
+            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
+            if Path(self.get_deliverables_file_path(case_id=case.internal_id)).exists()
         ]
 
     def get_metadata_for_nanopore_sample(self, sample_obj: Sample) -> list[dict]:
@@ -256,3 +216,70 @@ class MutantAnalysisAPI(AnalysisAPI):
         LOG.info("Concatenation in progress for sample %s.", sample_obj.internal_id)
         self.fastq_handler.concatenate(read_paths, concatenated_path)
         self.fastq_handler.remove_files(read_paths)
+
+    def qc_check_fails(self, case: Case) -> bool:
+        """TODO: Checks result file and counts False"""
+
+        # Idea for improvement: Fetch the column specifically and not all False in file)
+        with open(self.get_case_output_path(case.internal_id), "r") as file:
+            next(file)  # Exclude the header
+
+            file_lines: list[str] = file.readlines()
+
+            total_samples: int = len(file_lines)
+
+            failed_samples: int = sum([line.count("FALSE") for line in file_lines])
+
+        return self.check_qc(failed_samples=failed_samples, total_samples=total_samples)
+
+    def check_qc(failed_samples: int, total_samples: int) -> bool:
+        return True if failed_samples / total_samples > 0.2 else False
+
+    def run_analysis(self, case_id: str, dry_run: bool, config_artic: str = None) -> None:
+        if self.get_case_output_path(case_id=case_id).exists():
+            LOG.info("Found old output files, directory will be cleaned!")
+            shutil.rmtree(self.get_case_output_path(case_id=case_id), ignore_errors=True)
+
+        if config_artic:
+            self.process.run_command(
+                [
+                    "analyse",
+                    "sarscov2",
+                    "--config_case",
+                    self.get_case_config_path(case_id=case_id).as_posix(),
+                    "--config_artic",
+                    config_artic,
+                    "--outdir",
+                    self.get_case_output_path(case_id=case_id).as_posix(),
+                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
+                ],
+                dry_run=dry_run,
+            )
+        else:
+            self.process.run_command(
+                [
+                    "analyse",
+                    "sarscov2",
+                    "--config_case",
+                    self.get_case_config_path(case_id=case_id).as_posix(),
+                    "--outdir",
+                    self.get_case_output_path(case_id=case_id).as_posix(),
+                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
+                ],
+                dry_run=dry_run,
+            )
+
+    def run_qc_and_fail_cases(self) -> None:
+        """TODO: Fails cases that fail QC."""
+
+        for case in self.get_cases_to_store():
+            if self.qc_check_fails(case):
+                self.fail_case(case)
+
+    def fail_case(self, case: Case) -> None:
+        """TODO:Fails case on TB and set to none on StatusDB"""
+        self.trailblazer_api.set_analysis_status(
+            case_id=case.internal_id, status=AnalysisStatus.FAILED
+        )
+        self.set_statusdb_action(case_id=case.internal_id, action=None)
+        # TODO Will setting action to none start another analysis????!!

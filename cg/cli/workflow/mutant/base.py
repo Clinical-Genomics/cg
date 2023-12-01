@@ -9,7 +9,7 @@ from cg.cli.workflow.commands import (
     link,
     resolve_compression,
     store,
-    store_available,
+    #store_available,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import AnalysisNotReadyError, CgError
@@ -101,3 +101,33 @@ def start_available(context: click.Context, dry_run: bool = False):
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
+    
+@mutant.command("store-available")
+@OPTION_DRY
+@click.pass_context
+def store_available(context: click.Context, dry_run: bool) -> None:
+    """Store bundles for all finished analyses in Housekeeper."""
+
+    analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
+
+    exit_code: int = EXIT_SUCCESS
+
+    analysis_api.run_qc_and_fail_cases()
+
+    for case_obj in analysis_api.get_cases_to_store():
+        LOG.info("Storing deliverables for %s", case_obj.internal_id)
+        try:
+            context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
+        except Exception as exception_object:
+            LOG.error("Error storing %s: %s", case_obj.internal_id, exception_object)
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort
+    
+
+@mutant.command("run-qc")
+#TODO
+def run_qc(self, case: Case) -> None:
+    """"""
+    if self.qc_check_fails(case):
+                self.fail_case(case)
