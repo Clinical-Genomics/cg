@@ -21,6 +21,7 @@ def upgrade():
 
 
 def downgrade():
+    op.execute("UPDATE `case` SET priority = 'research' WHERE priority = 'development'")
     op.execute(
         "ALTER TABLE `case` MODIFY COLUMN priority ENUM('research', 'standard', 'priority', 'express', 'clinical_trials')"
     )
