@@ -134,11 +134,23 @@ class ApplicationVersionView(BaseView):
         "price_clinical_trials",
         "price_research",
     ]
+    column_list = (
+        "application",
+        "version",
+        "valid_from",
+        "price_standard",
+        "price_priority",
+        "price_express",
+        "price_clinical_trials",
+        "price_research",
+        "comment",
+    )
     column_exclude_list = ["created_at", "updated_at"]
     column_filters = ["version", "application.tag"]
     column_formatters = {"application": ApplicationView.view_application_link}
     column_searchable_list = ["application.tag"]
     edit_modal = True
+    create_modal = True
     form_excluded_columns = ["samples", "pools", "microbial_samples"]
 
 
