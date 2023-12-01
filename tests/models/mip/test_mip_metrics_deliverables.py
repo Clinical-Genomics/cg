@@ -158,9 +158,13 @@ def test_instantiate_mip_metrics_set_sample_id_metrics(mip_metrics_deliverables_
 
         # THEN assert that metrics are set for sample_id
         if sample_id_metric.sample_id == "an_id":
-            assert math.isclose(sample_id_metric.duplicate_reads, 0.0748899652117993 * 100, rel_tol=1e-9)
+            assert math.isclose(
+                sample_id_metric.duplicate_reads, 0.0748899652117993 * 100, rel_tol=1e-9
+            )
             assert sample_id_metric.duplicate_reads_step == "markduplicates"
-            assert math.isclose(sample_id_metric.mapped_reads, 0.9975489233589259 * 100, rel_tol=1e-9)
+            assert math.isclose(
+                sample_id_metric.mapped_reads, 0.9975489233589259 * 100, rel_tol=1e-9
+            )
 
             assert sample_id_metric.mapped_reads_step == "bamstats"
             assert math.isclose(sample_id_metric.mean_insert_size, 422.0, rel_tol=1e-9)
