@@ -142,18 +142,25 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
                 metrics_values.update(list(key.values())[0])
                 LOG.info(f"Key: {key}, Values: {list(key.values())[0]}")
 
-        return [
-            MetricsBase(
-                header=None,
-                id=sample_name,
-                input="multiqc_data.json",
-                name=metric_name,
-                step="multiqc",
-                value=metric_value,
-                condition=pipeline_metrics.get(metric_name, None),
+        metrics_list = []
+
+        for sample_name, sample_metrics in metrics_values.items():
+            metrics_list.extend(
+                [
+                    MetricsBase(
+                        header=None,
+                        id=sample_name,
+                        input="multiqc_data.json",
+                        name=metric_name,
+                        step="multiqc",
+                        value=metric_value,
+                        condition=pipeline_metrics.get(metric_name, None),
+                    )
+                    for metric_name, metric_value in metrics_values.items()
+                ]
             )
-            for metric_name, metric_value in metrics_values.items()
-        ]
+
+        return metrics_list
 
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
         """Write <case>_metrics_deliverables.yaml file."""
