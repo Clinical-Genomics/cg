@@ -52,6 +52,7 @@ class ScoutReportFiles(BaseModel):
     sv_research_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
     vcf_str: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
     smn_tsv: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    vcf_fusion: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
 
 
 class DataAnalysisModel(BaseModel):

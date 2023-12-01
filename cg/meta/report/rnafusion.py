@@ -14,6 +14,7 @@ from cg.constants import (
     Pipeline,
 )
 from cg.constants.constants import GenomeVersion
+from cg.constants.scout_upload import RNAFUSION_CASE_TAGS
 from cg.meta.report.field_validators import get_mapped_reads_fraction, get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
@@ -81,10 +82,6 @@ class RnafusionReportAPI(ReportAPI):
         """Checks if the report is accredited or not. Rnafusion is an accredited workflow."""
         return True
 
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
-        """Return file path of the uploaded to Scout file given its tag."""
-        return None
-
     def get_template_name(self) -> str:
         """Return template name to render the delivery report."""
         return Pipeline.RNAFUSION + "_report.html"
@@ -112,3 +109,7 @@ class RnafusionReportAPI(ReportAPI):
                 case=case, required_fields=REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS
             ),
         }
+
+    def get_upload_case_tags(self) -> dict:
+        """Return Balsamic UMI upload case tags."""
+        return RNAFUSION_CASE_TAGS
