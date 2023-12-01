@@ -623,3 +623,21 @@ class HousekeeperAPI:
 
     def get_ongoing_retrievals(self) -> list[Archive]:
         return self._store.get_ongoing_retrievals()
+
+    def delete_archives(self, archival_task_id: int):
+        archives_to_delete: list[Archive] = self.get_archive_entries(
+            archival_task_id=archival_task_id
+        )
+        for archive in archives_to_delete:
+            self._store.session.delete(archive)
+        self._store.session.commit()
+
+    def update_archive_retrieved_at(
+        self, old_retrieval_job_id: int, new_retrieval_job_id: int | None
+    ):
+        archives_to_update: list[Archive] = self.get_archive_entries(
+            retrieval_task_id=old_retrieval_job_id
+        )
+        for archive in archives_to_update:
+            archive.retrieval_task_id = new_retrieval_job_id
+        self._store.session.commit()

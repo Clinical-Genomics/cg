@@ -252,7 +252,14 @@ class SpringArchiveAPI:
                 LOG.info(f"Job with id {task_id} has not yet finished.")
         except ArchiveJobFailedError as error:
             LOG.error(error)
-            LOG.info(f"Skipping job with id {task_id}")
+            if is_archival:
+                LOG.warning(f"Will remove archive entries with archival task ids {task_id}")
+                self.housekeeper_api.delete_archives(task_id)
+            else:
+                LOG.warning("Will set retrieval task id to null.")
+                self.housekeeper_api.update_archive_retrieved_at(
+                    old_retrieval_job_id=task_id, new_retrieval_job_id=None
+                )
 
     def sort_archival_ids_on_archive_location(
         self, archive_entries: list[Archive]
