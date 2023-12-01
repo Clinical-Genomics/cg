@@ -138,7 +138,8 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         metrics_values: dict = {}
         for key in multiqc_json.report_general_stats_data:
             if sample_name + "_" + sample_name in key:
-                metrics_values[sample].update(list(key.values())[0])
+                LOG.info("Sample_name" + sample_name)
+                metrics_values.update(list(key.values())[0])
                 LOG.info(f"Key: {key}, Values: {list(key.values())[0]}")
 
         return [
@@ -158,7 +159,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Write <case>_metrics_deliverables.yaml file."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-        LOG.info("Case " + str(case))
         for link in case.links:
             metrics = self.get_multiqc_per_sample(
                 case_id=case_id, sample=link.sample, pipeline_metrics=TAXPROFILER_METRIC_CONDITIONS
