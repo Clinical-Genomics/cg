@@ -24,6 +24,7 @@ class Priority(IntEnum):
     priority: int = 2
     express: int = 3
     clinical_trials: int = 4
+    development: int = 5
 
     @classmethod
     def priority_to_slurm_qos(cls) -> dict[int, str]:
