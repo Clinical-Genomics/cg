@@ -2884,21 +2884,21 @@ def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> 
     )
 
 
-@pytest.fixture(scope="function")
-def raredisease_parameters_default(
-    raredisease_dir: Path,
-    raredisease_case_id: str,
-    raredisease_sample_sheet_path: Path,
-    existing_directory: Path,
-) -> RarediseaseParameters:
-    """Return Raredisease parameters."""
-    return RarediseaseParameters(
-        cluster_options="--qos=normal",
-        genomes_base=existing_directory,
-        sample_sheet_path=raredisease_sample_sheet_path,
-        outdir=Path(raredisease_dir, raredisease_case_id),
-        priority="development",
-    )
+# @pytest.fixture(scope="function")
+# def raredisease_parameters_default(
+#     raredisease_dir: Path,
+#     raredisease_case_id: str,
+#     raredisease_sample_sheet_path: Path,
+#     existing_directory: Path,
+# ) -> RarediseaseParameters:
+#     """Return Raredisease parameters."""
+#     return RarediseaseParameters(
+#         cluster_options="--qos=normal",
+#         genomes_base=existing_directory,
+#         sample_sheet_path=raredisease_sample_sheet_path,
+#         outdir=Path(raredisease_dir, raredisease_case_id),
+#         priority="development",
+#     )
 
 @pytest.fixture(scope="function")
 def raredisease_context(
