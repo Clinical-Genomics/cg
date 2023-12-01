@@ -51,6 +51,7 @@ from cg.models.demultiplex.run_parameters import (
 )
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+
 # from cg.models.raredisease.raredisease import RarediseaseParameters
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
@@ -653,10 +654,12 @@ def mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
     """Return the path to the directory with mip dna analysis files."""
     return Path(mip_analysis_dir, "dna")
 
+
 @pytest.fixture
 def raredisease_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with raredisease analysis files."""
     return Path(analysis_dir, "raredisease")
+
 
 @pytest.fixture
 def rnafusion_analysis_dir(analysis_dir: Path) -> Path:
@@ -2472,7 +2475,7 @@ def context_config(
             "root": str(raredisease_dir),
             "slurm": {
                 "account": "development",
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": "test.raredisease.email@scilifelab.se",
             },
             "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
             "tower_pipeline": "raredisease",
@@ -2490,7 +2493,7 @@ def context_config(
             "root": str(rnafusion_dir),
             "slurm": {
                 "account": "development",
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": "test.rnafusion.email@scilifelab.se",
             },
             "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
             "tower_pipeline": "rnafusion",
@@ -2803,6 +2806,7 @@ def sequencing_platform() -> str:
     """Return a default sequencing platform."""
     return SequencingPlatform.ILLUMINA
 
+
 # Raredisease fixtures
 @pytest.fixture(scope="function")
 def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
@@ -2863,25 +2867,25 @@ def rnafusion_multiqc_json_metrics(raredisease_analysis_dir) -> dict:
 @pytest.fixture(scope="function")
 def raredisease_sample_sheet_path(raredisease_dir, raredisease_case_id) -> Path:
     """Path to sample sheet."""
-    return Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet").with_suffix(
-        FileExtensions.CSV
-    )
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet"
+    ).with_suffix(FileExtensions.CSV)
 
 
 @pytest.fixture(scope="function")
 def raredisease_params_file_path(raredisease_dir, raredisease_case_id) -> Path:
     """Path to parameters file."""
-    return Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_params_file").with_suffix(
-        FileExtensions.YAML
-    )
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_params_file"
+    ).with_suffix(FileExtensions.YAML)
 
 
 @pytest.fixture(scope="function")
 def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> Path:
     """Path to deliverables file."""
-    return Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_deliverables").with_suffix(
-        FileExtensions.YAML
-    )
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_deliverables"
+    ).with_suffix(FileExtensions.YAML)
 
 
 # @pytest.fixture(scope="function")
@@ -2899,6 +2903,7 @@ def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> 
 #         outdir=Path(raredisease_dir, raredisease_case_id),
 #         priority="development",
 #     )
+
 
 @pytest.fixture(scope="function")
 def raredisease_context(
@@ -2926,7 +2931,6 @@ def raredisease_context(
 
     # Create ERROR case with NO SAMPLES
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
-
 
     # Create textbook case with enough reads
     case_enough_reads: Case = helpers.add_case(
@@ -2989,7 +2993,9 @@ def deliverable_data(raredisease_dir: Path, raredisease_case_id: str, sample_id:
 
 
 @pytest.fixture(scope="function")
-def mock_deliverable(raredisease_dir: Path, deliverable_data: dict, raredisease_case_id: str) -> None:
+def mock_deliverable(
+    raredisease_dir: Path, deliverable_data: dict, raredisease_case_id: str
+) -> None:
     """Create deliverable file with dummy data and files to deliver."""
     Path.mkdir(
         Path(raredisease_dir, raredisease_case_id),
@@ -3006,16 +3012,23 @@ def mock_deliverable(raredisease_dir: Path, deliverable_data: dict, raredisease_
     WriteFile.write_file_from_content(
         content=deliverable_data,
         file_format=FileFormat.JSON,
-        file_path=Path(raredisease_dir, raredisease_case_id, raredisease_case_id + "_deliverables.yaml"),
+        file_path=Path(
+            raredisease_dir, raredisease_case_id, raredisease_case_id + "_deliverables.yaml"
+        ),
     )
 
 
 @pytest.fixture(scope="function")
 def mock_analysis_finish(
-    raredisease_dir: Path, raredisease_case_id: str, raredisease_multiqc_json_metrics: dict, tower_id: int
+    raredisease_dir: Path,
+    raredisease_case_id: str,
+    raredisease_multiqc_json_metrics: dict,
+    tower_id: int,
 ) -> None:
     """Create analysis_finish file for testing."""
-    Path.mkdir(Path(raredisease_dir, raredisease_case_id, "pipeline_info"), parents=True, exist_ok=True)
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id, "pipeline_info"), parents=True, exist_ok=True
+    )
     Path(raredisease_dir, raredisease_case_id, "pipeline_info", "software_versions.yml").touch(
         exist_ok=True
     )

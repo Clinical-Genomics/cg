@@ -45,7 +45,9 @@ def raredisease(context: click.Context) -> None:
         config=context.obj,
     )
 
+
 raredisease.add_command(resolve_compression)
+
 
 @raredisease.command("run")
 @ARGUMENT_CASE_ID
@@ -123,4 +125,3 @@ def run(
         raise click.Abort() from error
     if not dry_run:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-
