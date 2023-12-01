@@ -7,7 +7,7 @@ from cg.constants.constants import APIMethods, FileFormat
 from cg.io.api import delete, get, patch, post, put
 from cg.io.csv import read_csv, read_csv_stream, write_csv, write_csv_stream
 from cg.io.json import read_json, read_json_stream, write_json, write_json_stream
-from cg.io.txt import read_txt
+from cg.io.txt import read_txt, write_txt
 from cg.io.xml import read_xml, write_xml
 from cg.io.yaml import read_yaml, read_yaml_stream, write_yaml, write_yaml_stream
 
@@ -50,6 +50,7 @@ class WriteFile:
     write_file = {
         FileFormat.CSV: write_csv,
         FileFormat.JSON: write_json,
+        FileFormat.TXT: write_txt,
         FileFormat.YAML: write_yaml,
         FileFormat.XML: write_xml,
     }
