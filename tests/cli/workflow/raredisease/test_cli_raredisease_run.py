@@ -5,7 +5,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
-from cg.cli.workflow.rnafusion.base import run
+from cg.cli.workflow.raredisease.base import run
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
