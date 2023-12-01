@@ -52,6 +52,7 @@ def test_metrics_deliver(
     caplog: LogCaptureFixture,
     taxprofiler_case_id: str,
     sample_name: str,
+    another_sample_name: str,
 ):
     """Test command with case_id and analysis_finish which should execute successfully."""
     caplog.set_level(logging.INFO)

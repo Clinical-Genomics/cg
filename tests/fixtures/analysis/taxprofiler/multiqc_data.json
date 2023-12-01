@@ -1,9 +1,8 @@
 {
     "report_data_sources": {},
     "report_general_stats_data": [
-        {"a_sample_name": {"percent_gc": 42.0, "avg_sequence_length": 151.0, "median_sequence_length": 151}},
         {
-            "a_sample_name": {
+            "a_sample_name_a_sample_name": {
                 "filtering_result_passed_filter_reads": 24852660.0,
                 "filtering_result_low_quality_reads": 372156.0,
                 "filtering_result_too_many_N_reads": 154.0,
@@ -24,59 +23,30 @@
                 "adapter_cutting_adapter_trimmed_reads": 249076.0,
                 "adapter_cutting_adapter_trimmed_bases": 16162359.0,
                 "pct_adapter": 0.9870436355745307
+            },
+            "another_sample_name_another_sample_name": {
+                "filtering_result_passed_filter_reads": 24810472.0,
+                "filtering_result_low_quality_reads": 353472.0,
+                "filtering_result_too_many_N_reads": 362.0,
+                "filtering_result_too_short_reads": 9252.0,
+                "filtering_result_too_long_reads": 0.0,
+                "pct_duplication": 9.06289,
+                "after_filtering_total_reads": 24810472.0,
+                "after_filtering_total_bases": 3729762485.0,
+                "after_filtering_q20_bases": 3632227951.0,
+                "after_filtering_q30_bases": 3454772913.0,
+                "after_filtering_q20_rate": 0.97385,
+                "after_filtering_q30_rate": 0.926272,
+                "after_filtering_read1_mean_length": 150.0,
+                "after_filtering_read2_mean_length": 150.0,
+                "after_filtering_gc_content": 0.422141,
+                "before_filtering_total_reads": 25173558.0,
+                "pct_surviving": 98.5576691224975,
+                "adapter_cutting_adapter_trimmed_reads": 245074.0,
+                "adapter_cutting_adapter_trimmed_bases": 15905925.0,
+                "pct_adapter": 0.9735373918935099
             }
-        },
-        {
-            "a_sample_name": {
-                "total_reads": 11730624,
-                "paired_total": 11730624,
-                "paired_aligned_none": 1382406,
-                "paired_aligned_one": 8487306,
-                "paired_aligned_multi": 1860912,
-                "paired_aligned_discord_one": 676525,
-                "paired_aligned_mate_none": 567931,
-                "paired_aligned_mate_one": 359805,
-                "paired_aligned_mate_multi": 484026,
-                "overall_alignment_rate": 97.58,
-                "paired_aligned_mate_multi_halved": 242013.0,
-                "paired_aligned_mate_none_halved": 283965.5,
-                "paired_aligned_mate_one_halved": 179902.5
-            }
-        },
-        {
-            "a_sample_name_1": {
-                "Input reads": 24810472,
-                "Input bases": 3729762485,
-                "Low entropy discards reads": 10362,
-                "Low entropy discards reads percent": 0.04,
-                "Low entropy discards bases": 1507893,
-                "Low entropy discards bases percent": 0.04,
-                "Total Removed reads": 10362,
-                "Total Removed reads percent": 0.04,
-                "Total Removed bases": 1507893,
-                "Total Removed bases percent": 0.04,
-                "Result reads": 24800110,
-                "Result reads percent": 99.96,
-                "Result bases": 3728254592,
-                "Result bases percent": 99.96
-        },
-            "a_sample_name_2": {
-                "Input reads": 23581080,
-                "Input bases": 3547722769,
-                "Low entropy discards reads": 12282,
-                "Low entropy discards reads percent": 0.05,
-                "Low entropy discards bases": 1813848,
-                "Low entropy discards bases percent": 0.05,
-                "Total Removed reads": 12282,
-                "Total Removed reads percent": 0.05,
-                "Total Removed bases": 1813848,
-                "Total Removed bases percent": 0.05,
-                "Result reads": 23568798,
-                "Result reads percent": 99.95,
-                "Result bases": 3545908921,
-                "Result bases percent": 99.95
-            }
-            }
+        }
     ],
     "report_general_stats_headers": []
 }

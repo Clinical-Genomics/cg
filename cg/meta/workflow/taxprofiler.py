@@ -131,44 +131,44 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self, case_id: str, sample: Sample, pipeline_metrics: Optional[dict] = None
     ) -> list[MetricsBase]:
         """Get MultiQC values per sample."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_name: str = sample.name
+        sample_id: str = case.links[0].sample.internal_id
         multiqc_json: MultiqcDataJson = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
         )
         metrics_values: dict = {}
         for key in multiqc_json.report_general_stats_data:
             if sample_name + "_" + sample_name in key:
-                LOG.info("Sample_name" + sample_name)
+                LOG.info("Sample_name " + sample_name)
                 metrics_values.update(list(key.values())[0])
                 LOG.info(f"Key: {key}, Values: {list(key.values())[0]}")
 
-        metrics_list = []
-
-        for sample_name, sample_metrics in metrics_values.items():
-            metrics_list.extend(
-                [
-                    MetricsBase(
-                        header=None,
-                        id=sample_name,
-                        input="multiqc_data.json",
-                        name=metric_name,
-                        step="multiqc",
-                        value=metric_value,
-                        condition=pipeline_metrics.get(metric_name, None),
-                    )
-                    for metric_name, metric_value in metrics_values.items()
-                ]
+        return [
+            MetricsBase(
+                header=None,
+                id=sample_name,
+                input="multiqc_data.json",
+                name=metric_name,
+                step="multiqc",
+                value=metric_value,
+                condition=pipeline_metrics.get(metric_name, None),
             )
-
-        return metrics_list
+            for metric_name, metric_value in metrics_values.items()
+        ]
 
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
         """Write <case>_metrics_deliverables.yaml file."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
+        metrics = []
         for link in case.links:
-            metrics = self.get_multiqc_per_sample(
-                case_id=case_id, sample=link.sample, pipeline_metrics=TAXPROFILER_METRIC_CONDITIONS
+            metrics.extend(
+                self.get_multiqc_per_sample(
+                    case_id=case_id,
+                    sample=link.sample,
+                    pipeline_metrics=TAXPROFILER_METRIC_CONDITIONS,
+                )
             )
         if dry_run:
             LOG.info(

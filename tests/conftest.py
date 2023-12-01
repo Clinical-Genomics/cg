@@ -201,6 +201,12 @@ def sample_name() -> str:
 
 
 @pytest.fixture(scope="session")
+def another_sample_name() -> str:
+    """Returns a sample name."""
+    return "another_sample_name"
+
+
+@pytest.fixture(scope="session")
 def cust_sample_id() -> str:
     """Returns a customer sample id."""
     return "child"
@@ -3089,7 +3095,9 @@ def taxprofiler_context(
     helpers: StoreHelpers,
     taxprofiler_case_id: str,
     sample_id: str,
+    father_sample_id: str,
     sample_name: str,
+    another_sample_name: str,
     trailblazer_api: MockTB,
     nf_analysis_housekeeper: HousekeeperAPI,
     no_sample_case_id: str,
@@ -3116,10 +3124,24 @@ def taxprofiler_context(
         reads=total_sequenced_reads_pass,
     )
 
+    taxprofiler_another_sample: Sample = helpers.add_sample(
+        status_db,
+        internal_id=father_sample_id,
+        last_sequenced_at=datetime.now(),
+        name=another_sample_name,
+        reads=total_sequenced_reads_pass,
+    )
+
     helpers.add_relationship(
         status_db,
         case=taxprofiler_case,
         sample=taxprofiler_sample,
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=taxprofiler_case,
+        sample=taxprofiler_another_sample,
     )
 
     return cg_context
