@@ -14,7 +14,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
-from cg.models.rnafusion.rnafusion import CommandArgs
+from cg.models.nf_analysis import NfCommandArgs
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -199,7 +199,7 @@ class NfAnalysisAPI(AnalysisAPI):
     def run_analysis(
         self,
         case_id: str,
-        command_args: CommandArgs,
+        command_args: NfCommandArgs,
         use_nextflow: bool,
         dry_run: bool = False,
     ) -> None:

@@ -18,9 +18,9 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
+    OPTION_FROM_START,
 )
 from cg.cli.workflow.rnafusion.options import (
-    OPTION_FROM_START,
     OPTION_REFERENCES,
     OPTION_STRANDEDNESS,
 )
@@ -30,7 +30,8 @@ from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.rnafusion import CommandArgs
+from cg.models.nf_analysis import NfCommandArgs
+from cg.constants.nf_analysis import NfTowerStatus
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -104,7 +105,7 @@ def run(
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
-    command_args: CommandArgs = CommandArgs(
+    command_args: NfCommandArgs = NfCommandArgs(
         **{
             "log": analysis_api.get_log_path(
                 case_id=case_id,
@@ -121,7 +122,7 @@ def run(
             "name": case_id,
             "compute_env": compute_env or analysis_api.compute_env,
             "revision": revision or analysis_api.revision,
-            "wait": "SUBMITTED",
+            "wait": NfTowerStatus.SUBMITTED,
             "id": nf_tower_id,
         }
     )

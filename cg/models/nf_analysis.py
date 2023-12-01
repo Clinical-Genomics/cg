@@ -9,6 +9,23 @@ class PipelineParameters(BaseModel):
     clusterOptions: str = Field(..., alias="cluster_options")
     priority: str
 
+class NfCommandArgs(BaseModel):
+    """Model for arguments and options supported."""
+
+    log: str | Path | None
+    resume: bool | None
+    profile: str | None
+    stub: bool | None
+    config: str | Path | None
+    name: str | None
+    revision: str | None
+    wait: str | None
+    id: str | None
+    with_tower: bool | None
+    use_nextflow: bool | None
+    compute_env: str | None
+    work_dir: str | Path | None
+    params_file: str | Path | None
 
 class NextflowSampleSheetEntry(BaseModel):
     """Nextflow samplesheet model.

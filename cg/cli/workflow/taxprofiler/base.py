@@ -16,9 +16,9 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
+    OPTION_FROM_START,
 )
 from cg.cli.workflow.taxprofiler.options import (
-    OPTION_FROM_START,
     OPTION_INSTRUMENT_PLATFORM,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -29,7 +29,7 @@ from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.rnafusion import CommandArgs
+from cg.models.nf_analysis import NfCommandArgs
 
 LOG = logging.getLogger(__name__)
 
@@ -101,7 +101,7 @@ def run(
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
-    command_args: CommandArgs = CommandArgs(
+    command_args: NfCommandArgs = NfCommandArgs(
         **{
             "log": analysis_api.get_log_path(
                 case_id=case_id,

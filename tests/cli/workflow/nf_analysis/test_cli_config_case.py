@@ -15,10 +15,10 @@ LOG = logging.getLogger(__name__)
 
 @pytest.mark.parametrize(
     "context",
-    ["rnafusion_context", "taxprofiler_context"],
+    ["raredisease_context", "rnafusion_context", "taxprofiler_context"],
 )
 def test_config_case_without_options(cli_runner: CliRunner, context: CGConfig, request):
-    """Test config_case for Taxprofiler and Rnafusion without options."""
+    """Test config_case for Raredisease, Rnafusion and Taxprofiler without options."""
     context = request.getfixturevalue(context)
 
     # WHEN dry running without anything specified
@@ -33,7 +33,7 @@ def test_config_case_without_options(cli_runner: CliRunner, context: CGConfig, r
 
 @pytest.mark.parametrize(
     "context",
-    ["rnafusion_context", "taxprofiler_context"],
+    ["raredisease_context", "rnafusion_context", "taxprofiler_context"],
 )
 def test_config_case_with_missing_case(
     cli_runner: CliRunner,
@@ -42,7 +42,7 @@ def test_config_case_with_missing_case(
     context: CGConfig,
     request,
 ):
-    """Test config_case for Taxprofiler and Rnafusion with a missing case."""
+    """Test config_case for Raredisease, Rnafusion and Taxprofiler with a missing case."""
     caplog.set_level(logging.ERROR)
     context = request.getfixturevalue(context)
 
