@@ -263,9 +263,11 @@ class HousekeeperAPI:
             .first()
         )
 
-    def get_all_non_archived_spring_files(self) -> list[File]:
+    def get_all_non_archived_spring_files(self, tags: list[str] | None = None) -> list[File]:
         """Return all spring files which are not marked as archived in Housekeeper."""
-        return self._store.get_all_non_archived_files(tag_names=[SequencingFileTag.SPRING])
+        return self._store.get_all_non_archived_files(
+            tag_names=tags + [SequencingFileTag.SPRING] if tags else [SequencingFileTag.SPRING]
+        )
 
     def get_latest_bundle_version(self, bundle_name: str) -> Version | None:
         """Get the latest version of a Housekeeper bundle."""

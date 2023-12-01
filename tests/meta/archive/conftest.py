@@ -348,7 +348,7 @@ def archive_context(
     real_housekeeper_api.add_file(
         path=path_to_spring_file_to_archive,
         version_obj=bundle.versions[0],
-        tags=[SequencingFileTag.SPRING],
+        tags=[SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET],
     )
     file: File = real_housekeeper_api.add_file(
         path=path_to_spring_file_with_ongoing_archival,
