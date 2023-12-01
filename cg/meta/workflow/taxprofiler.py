@@ -138,9 +138,11 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         metrics_values: dict = {}
         for key in multiqc_json.report_general_stats_data:
             if sample_name + "_" + sample_name in key:
-                LOG.info("Sample_name" + sample_name)
-                metrics_values.update(list(key.values())[0])
-                LOG.info(f"Key: {key}, Values: {list(key.values())[0]}")
+                current_values = list(key.values())[0]
+                if sample_name not in metrics_values:
+                    metrics_values[sample_name] = current_values.copy()
+                else:
+                    metrics_values[sample_name].update(current_values)
 
         return [
             MetricsBase(
