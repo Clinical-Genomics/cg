@@ -105,7 +105,8 @@ def test_get_bcl_converter_by_sequencer(
 
 
 def test_flow_cell_directory_data_with_set_bcl_converter(
-    flow_cell_directory_name_demultiplexed_with_bcl2fastq: str, bcl_converter=BclConverter.DRAGEN
+    flow_cell_directory_name_demultiplexed_with_bcl2fastq: str,
+    bcl_converter=BclConverter.BCLCONVERT,
 ):
     """Test that the bcl converter is set to the specified value."""
     # GIVEN a Bcl2Fastq flow cell directory
@@ -134,7 +135,7 @@ def test_flow_cell_directory_data_with_novaseq_flow_cell_directory(
     )
 
     # THEN the bcl converter is dragen
-    assert flow_cell.bcl_converter == BclConverter.DRAGEN
+    assert flow_cell.bcl_converter == BclConverter.BCLCONVERT
 
 
 @pytest.mark.parametrize(

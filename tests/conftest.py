@@ -948,7 +948,7 @@ def tmp_bcl_convert_flow_cell(
     """Create a flow cell object with flow cell that is demultiplexed."""
     return FlowCellDirectoryData(
         flow_cell_path=tmp_flow_cell_directory_bclconvert,
-        bcl_converter=BclConverter.DRAGEN,
+        bcl_converter=BclConverter.BCLCONVERT,
     )
 
 
@@ -1432,7 +1432,7 @@ def novaseq_flow_cell_demultiplexed_with_bcl2fastq(
 def bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a bcl_convert flow cell object with flow cell that is demultiplexed."""
     return FlowCellDirectoryData(
-        flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
+        flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.BCLCONVERT
     )
 
 
@@ -1446,7 +1446,7 @@ def novaseq_6000_flow_cell(bcl_convert_flow_cell: FlowCellDirectoryData) -> Flow
 def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a NovaSeqX flow cell object with flow cell that is demultiplexed."""
     return FlowCellDirectoryData(
-        flow_cell_path=novaseq_x_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
+        flow_cell_path=novaseq_x_flow_cell_dir, bcl_converter=BclConverter.BCLCONVERT
     )
 
 

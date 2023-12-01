@@ -13,14 +13,12 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBCLConvert,
     SampleSheet,
 )
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-)
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
-from cg.constants.sequencing import Sequencers, SEQUENCER_TYPES
+from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
 from cg.exc import FlowCellError, SampleSheetError
 from cg.models.demultiplex.run_parameters import (
     RunParameters,
@@ -157,8 +155,8 @@ class FlowCellDirectoryData:
     ) -> str:
         """Return the BCL converter based on the sequencer."""
         if self.sequencer_type in [Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
-            LOG.debug(f"Using BCL converter: {BclConverter.DRAGEN}")
-            return BclConverter.DRAGEN
+            LOG.debug(f"Using BCL converter: {BclConverter.BCLCONVERT}")
+            return BclConverter.BCLCONVERT
         LOG.debug(f"Using BCL converter: {BclConverter.BCL2FASTQ}")
         return BclConverter.BCL2FASTQ
 

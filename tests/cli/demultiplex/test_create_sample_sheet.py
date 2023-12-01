@@ -112,7 +112,7 @@ def test_create_dragen_sample_sheet(
     """Test that creating a Dragen sample sheet works."""
     # GIVEN a flow cell directory with some run parameters
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        tmp_flow_cells_directory_no_sample_sheet, bcl_converter=BclConverter.DRAGEN
+        tmp_flow_cells_directory_no_sample_sheet, bcl_converter=BclConverter.BCLCONVERT
     )
     assert flow_cell.run_parameters_path.exists()
 
@@ -134,7 +134,7 @@ def test_create_dragen_sample_sheet(
     # WHEN creating a sample sheet
     result = cli_runner.invoke(
         create_sheet,
-        [str(tmp_flow_cells_directory_no_sample_sheet), "-b", BclConverter.DRAGEN],
+        [str(tmp_flow_cells_directory_no_sample_sheet), "-b", BclConverter.BCLCONVERT],
         obj=sample_sheet_context,
     )
 

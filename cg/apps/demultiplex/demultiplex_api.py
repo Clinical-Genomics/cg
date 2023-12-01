@@ -261,7 +261,7 @@ class DemultiplexingAPI:
                 number_tasks=18,
                 quality_of_service=self.slurm_quality_of_service,
             )
-        if flow_cell.bcl_converter == BclConverter.DRAGEN:
+        if flow_cell.bcl_converter == BclConverter.BCLCONVERT:
             sbatch_parameters: SbatchDragen = SbatchDragen(
                 account=self.slurm_account,
                 commands=commands,
