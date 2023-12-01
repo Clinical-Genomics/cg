@@ -1,7 +1,6 @@
 """Code for uploading to scout via CLI"""
 import logging
 from pathlib import Path
-from typing import Optional
 
 import click
 from housekeeper.store.models import File, Version
@@ -23,7 +22,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -66,10 +65,10 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     status_db: Store = context.status_db
 
     LOG.info("Fetching family object")
-    case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
 
     if not case_obj.analyses:
-        LOG.warning("Could not find analyses for %s", case_id)
+        LOG.warning(f"Could not find analyses for {case_id}")
         raise click.Abort
 
     context.meta_apis["upload_api"]: UploadAPI = get_upload_api(cg_config=context, case=case_obj)
@@ -81,11 +80,11 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     try:
         scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
     except SyntaxError as error:
-        LOG.warning("%s", error)
+        LOG.warning(repr(error))
         raise click.Abort from error
-    LOG.info("Found load config %s", scout_load_config)
+    LOG.info(f"Found load config {scout_load_config}")
     root_dir: str = context.meta_apis["upload_api"].analysis_api.root
-    LOG.info("Set root dir to %s", root_dir)
+    LOG.info(f"Set root dir to {root_dir}")
     file_path: Path = Path(root_dir, case_id, "scout_load.yaml")
 
     if print_console:
@@ -94,11 +93,11 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
                 content=scout_load_config.dict(exclude_none=True), file_format=FileFormat.YAML
             )
         )
-        LOG.info("Would save file to %s", file_path)
+        LOG.info(f"Would save file to {file_path}")
         return
 
     if file_path.exists():
-        LOG.warning("Scout load config %s already exists", file_path)
+        LOG.warning(f"Scout load config {file_path} already exists")
         if re_upload:
             LOG.info("Deleting old load config")
             file_path.unlink()
@@ -140,7 +139,7 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 
     tag_name: str = UploadScoutAPI.get_load_config_tag()
     version: Version = housekeeper_api.last_version(bundle=case_id)
-    scout_config_file: Optional[File] = housekeeper_api.get_latest_file_from_version(
+    scout_config_file: File | None = housekeeper_api.get_latest_file_from_version(
         version=version, tags={tag_name}
     )
 
@@ -214,7 +213,7 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     status_db: Store = context.status_db
-    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     scout_report_type, multiqc_report = scout_upload_api.get_multiqc_html_report(
         case_id=case_id, pipeline=case.data_analysis
     )
@@ -234,7 +233,7 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
         )
 
 
-def get_upload_api(case: Family, cg_config: CGConfig) -> UploadAPI:
+def get_upload_api(case: Case, cg_config: CGConfig) -> UploadAPI:
     """Return the upload API based on the data analysis type"""
 
     analysis_apis: dict[Pipeline, UploadAPI] = {

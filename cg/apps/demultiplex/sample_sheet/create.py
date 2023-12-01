@@ -17,7 +17,7 @@ def get_sample_sheet_creator(
     lims_samples: list[FlowCellSample],
     force: bool,
 ) -> SampleSheetCreator:
-    """Returns an initialised sample sheet creator according to the software used for demultiplexing."""
+    """Returns an initialised sample sheet creator according to the demultiplexing software."""
     if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
         return SampleSheetCreatorBcl2Fastq(
             flow_cell=flow_cell, lims_samples=lims_samples, force=force
@@ -31,7 +31,7 @@ def create_sample_sheet(
     force: bool = False,
 ) -> list[list[str]]:
     """Create a sample sheet for a flow cell."""
-    sample_sheet_creator = get_sample_sheet_creator(
+    sample_sheet_creator: SampleSheetCreator = get_sample_sheet_creator(
         flow_cell=flow_cell,
         lims_samples=lims_samples,
         force=force,

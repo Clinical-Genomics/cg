@@ -4,7 +4,6 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from tempfile import tempdir
-from typing import Union
 
 import pytest
 
@@ -81,7 +80,7 @@ def upload_genotypes_hk_api(
 ) -> HousekeeperAPI:
     """Add and include files from upload genotypes hk bundle"""
     helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle)
-    hk_version = real_housekeeper_api.last_version(analysis_obj.family.internal_id)
+    hk_version = real_housekeeper_api.last_version(analysis_obj.case.internal_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
 
@@ -166,7 +165,7 @@ def upload_report_hk_api(
     """Add and include files from upload reports hk bundle"""
 
     helpers.ensure_hk_bundle(real_housekeeper_api, upload_report_hk_bundle)
-    hk_version = real_housekeeper_api.last_version(analysis_obj.family.internal_id)
+    hk_version = real_housekeeper_api.last_version(analysis_obj.case.internal_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
 
@@ -293,7 +292,7 @@ class MockLims:
         )
         return lims_case["samples"]
 
-    def sample(self, sample_id) -> Union[str, None]:
+    def sample(self, sample_id) -> str | None:
         """Returns a lims sample matching the provided sample_id"""
         for sample in self.lims_samples():
             if sample["id"] == sample_id:

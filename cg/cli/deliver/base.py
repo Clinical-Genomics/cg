@@ -1,7 +1,6 @@
 """CLI for delivering files with CG"""
 import logging
 from pathlib import Path
-from typing import Optional
 
 import click
 
@@ -12,7 +11,7 @@ from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -61,8 +60,8 @@ def deliver():
 @click.pass_obj
 def deliver_analysis(
     context: CGConfig,
-    case_id: Optional[str],
-    ticket: Optional[str],
+    case_id: str | None,
+    ticket: str | None,
     delivery_type: list[str],
     dry_run: bool,
     force_all: bool,
@@ -95,17 +94,17 @@ def deliver_analysis(
             ignore_missing_bundles=ignore_missing_bundles,
         )
         deliver_api.set_dry_run(dry_run)
-        cases: list[Family] = []
+        cases: list[Case] = []
         if case_id:
-            case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+            case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
             if not case_obj:
-                LOG.warning("Could not find case %s", case_id)
+                LOG.warning(f"Could not find case {case_id}")
                 return
             cases.append(case_obj)
         else:
-            cases: list[Family] = status_db.get_cases_by_ticket_id(ticket_id=ticket)
+            cases: list[Case] = status_db.get_cases_by_ticket_id(ticket_id=ticket)
             if not cases:
-                LOG.warning("Could not find cases for ticket %s", ticket)
+                LOG.warning(f"Could not find cases for ticket {ticket}")
                 return
 
         for case_obj in cases:
@@ -123,7 +122,7 @@ def rsync(context: CGConfig, ticket: str, dry_run: bool):
     tb_api: TrailblazerAPI = context.trailblazer_api
     rsync_api: RsyncAPI = RsyncAPI(config=context)
     slurm_id = rsync_api.run_rsync_on_slurm(ticket=ticket, dry_run=dry_run)
-    LOG.info("Rsync to the delivery server running as job %s", slurm_id)
+    LOG.info(f"Rsync to the delivery server running as job {slurm_id}")
     rsync_api.add_to_trailblazer_api(
         tb_api=tb_api, slurm_job_id=slurm_id, ticket=ticket, dry_run=dry_run
     )

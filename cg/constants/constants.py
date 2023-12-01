@@ -1,9 +1,10 @@
 """Constants for cg."""
 
+from enum import StrEnum
+
 import click
 
 from cg.utils.date import get_date
-from cg.utils.enums import StrEnum
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
@@ -37,8 +38,10 @@ class CaseActions(StrEnum):
     HOLD: str = "hold"
     RUNNING: str = "running"
 
+    @classmethod
+    def actions(cls) -> list[str]:
+        return list(cls)
 
-CASE_ACTIONS = [action.value for action in CaseActions]
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
@@ -62,8 +65,9 @@ class FlowCellStatus(StrEnum):
     PROCESSING: str = "processing"
     RETRIEVED: str = "retrieved"
 
-
-FLOWCELL_STATUS = [status.value for status in FlowCellStatus]
+    @classmethod
+    def statuses(cls) -> list[str]:
+        return list(cls)
 
 
 class AnalysisType(StrEnum):

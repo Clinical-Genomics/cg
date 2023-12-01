@@ -1,4 +1,4 @@
-from cg.utils.enums import StrEnum
+from enum import StrEnum
 
 
 class GenomeBuild(StrEnum):

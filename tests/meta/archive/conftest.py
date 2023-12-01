@@ -16,6 +16,7 @@ from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.archive.ddn_dataflow import (
     ROOT_TO_TRIM,
+    AuthToken,
     DDNDataFlowClient,
     MiriaObject,
     TransferPayload,
@@ -42,13 +43,19 @@ def ddn_dataflow_config(
     )
 
 
-@pytest.fixture(name="ok_ddn_response")
-def ok_ddn_response(ok_response: Response):
-    ok_response._content = b'{"job_id": "123"}'
+@pytest.fixture
+def ok_miria_response(ok_response: Response):
+    ok_response._content = b'{"jobId": "123"}'
     return ok_response
 
 
-@pytest.fixture(name="archive_request_json")
+@pytest.fixture
+def ok_miria_job_status_response(ok_response: Response):
+    ok_response._content = b'{"id": "123", "status": "Completed"}'
+    return ok_response
+
+
+@pytest.fixture
 def archive_request_json(
     remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
 ) -> dict:
@@ -62,10 +69,11 @@ def archive_request_json(
             }
         ],
         "metadataList": [],
+        "settings": [],
     }
 
 
-@pytest.fixture(name="retrieve_request_json")
+@pytest.fixture
 def retrieve_request_json(
     remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
 ) -> dict[str, Any]:
@@ -81,10 +89,11 @@ def retrieve_request_json(
             }
         ],
         "metadataList": [],
+        "settings": [],
     }
 
 
-@pytest.fixture(name="header_with_test_auth_token")
+@pytest.fixture
 def header_with_test_auth_token() -> dict:
     return {
         "Content-Type": "application/json",
@@ -93,13 +102,32 @@ def header_with_test_auth_token() -> dict:
     }
 
 
-@pytest.fixture(name="ddn_auth_token_response")
-def ddn_auth_token_response(ok_response: Response):
-    ok_response._content = b'{"access": "test_auth_token", "expire":15, "test_refresh_token"}'
+@pytest.fixture
+def miria_auth_token_response(ok_response: Response):
+    ok_response._content = b'{"access": "test_auth_token", "expire":15, "test_refresh_token":""}'
     return ok_response
 
 
-@pytest.fixture(name="ddn_dataflow_client")
+@pytest.fixture
+def test_auth_token() -> AuthToken:
+    return AuthToken(
+        access="test_auth_token",
+        expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
+        refresh="test_refresh_token",
+    )
+
+
+@pytest.fixture
+def archival_job_id() -> int:
+    return 123
+
+
+@pytest.fixture
+def retrieval_job_id() -> int:
+    return 124
+
+
+@pytest.fixture
 def ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataFlowClient:
     """Returns a DDNApi without tokens being set."""
     mock_ddn_auth_success_response = Response()
@@ -119,13 +147,13 @@ def ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataFlowClien
         return DDNDataFlowClient(ddn_dataflow_config)
 
 
-@pytest.fixture(name="miria_file_archive")
-def miria_file(local_directory: Path, remote_path: Path) -> MiriaObject:
+@pytest.fixture
+def miria_file_archive(local_directory: Path, remote_path: Path) -> MiriaObject:
     """Return a MiriaObject for archiving."""
     return MiriaObject(source=local_directory.as_posix(), destination=remote_path.as_posix())
 
 
-@pytest.fixture(name="file_and_sample")
+@pytest.fixture
 def file_and_sample(spring_archive_api: SpringArchiveAPI, sample_id: str):
     return FileAndSample(
         file=spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first(),
@@ -133,19 +161,19 @@ def file_and_sample(spring_archive_api: SpringArchiveAPI, sample_id: str):
     )
 
 
-@pytest.fixture(name="trimmed_local_path")
+@pytest.fixture
 def trimmed_local_path(spring_archive_api: SpringArchiveAPI, sample_id: str):
     file: File = spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first()
     return file.path[5:]
 
 
-@pytest.fixture(name="miria_file_retrieve")
+@pytest.fixture
 def miria_file_retrieve(local_directory: Path, remote_path: Path) -> MiriaObject:
     """Return a MiriaObject for retrieval."""
     return MiriaObject(source=remote_path.as_posix(), destination=local_directory.as_posix())
 
 
-@pytest.fixture(name="transfer_payload")
+@pytest.fixture
 def transfer_payload(miria_file_archive: MiriaObject) -> TransferPayload:
     """Return a TransferPayload object containing two identical MiriaObject object."""
     return TransferPayload(
@@ -153,43 +181,43 @@ def transfer_payload(miria_file_archive: MiriaObject) -> TransferPayload:
     )
 
 
-@pytest.fixture(name="remote_path")
+@pytest.fixture
 def remote_path() -> Path:
     """Returns a mock path."""
     return Path("/some", "place")
 
 
-@pytest.fixture(name="local_directory")
+@pytest.fixture
 def local_directory() -> Path:
     """Returns a mock path with /home as its root."""
     return Path(ROOT_TO_TRIM, "other", "place")
 
 
-@pytest.fixture(name="trimmed_local_directory")
+@pytest.fixture
 def trimmed_local_directory(local_directory: Path) -> Path:
     """Returns the trimmed local directory."""
     return Path(f"/{local_directory.relative_to(ROOT_TO_TRIM)}")
 
 
-@pytest.fixture(name="local_storage_repository")
+@pytest.fixture
 def local_storage_repository() -> str:
     """Returns a local storage repository."""
     return "local@storage:"
 
 
-@pytest.fixture(name="remote_storage_repository")
+@pytest.fixture
 def remote_storage_repository() -> str:
     """Returns a remote storage repository."""
     return "archive@repository:"
 
 
-@pytest.fixture(name="full_remote_path")
+@pytest.fixture
 def full_remote_path(remote_storage_repository: str, remote_path: Path) -> str:
     """Returns the merged remote repository and path."""
     return remote_storage_repository + remote_path.as_posix()
 
 
-@pytest.fixture(name="archive_store")
+@pytest.fixture
 def archive_store(
     base_store: Store,
     helpers: StoreHelpers,
@@ -247,12 +275,12 @@ def archive_store(
     return base_store
 
 
-@pytest.fixture(name="sample_with_spring_file")
+@pytest.fixture
 def sample_with_spring_file() -> str:
     return "ADM1"
 
 
-@pytest.fixture(name="spring_archive_api")
+@pytest.fixture
 def spring_archive_api(
     populated_housekeeper_api: HousekeeperAPI,
     archive_store: Store,

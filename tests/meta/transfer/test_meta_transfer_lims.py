@@ -70,14 +70,14 @@ def test_transfer_samples_include_unset_received_at(transfer_lims_api: TransferL
     untransfered_sample = samples[0]
     untransfered_sample.received_at = None
     untransfered_sample.preped_at = None
-    untransfered_sample.reads_updated_at = None
+    untransfered_sample.last_sequenced_at = None
     untransfered_sample.delivered_at = None
 
     # GIVEN sample with set received_at
     transfered_sample = samples[1]
     transfered_sample.received_at = dt.datetime.today()
     transfered_sample.preped_at = None
-    transfered_sample.reads_updated_at = None
+    transfered_sample.last_sequenced_at = None
     transfered_sample.delivered_at = None
 
     # GIVEN both samples has received date in lims

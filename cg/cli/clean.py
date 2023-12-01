@@ -2,7 +2,6 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
 import click
 from housekeeper.store.models import File, Version
@@ -25,7 +24,7 @@ from cg.cli.workflow.commands import (
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Pipeline
-from cg.constants.housekeeper_tags import ALIGNMENT_FILE_TAGS, ScoutTag
+from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
 from cg.exc import CleanFlowCellFailedError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
@@ -82,7 +81,7 @@ def hk_alignment_files(
 ) -> None:
     """Clean up alignment files in Housekeeper bundle."""
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    for tag in ALIGNMENT_FILE_TAGS:
+    for tag in AlignmentFileTag.file_tags():
         tag_files = set(housekeeper_api.get_files(bundle=bundle, tags=[tag]))
 
         if not tag_files:
@@ -122,7 +121,7 @@ def scout_finished_cases(
     """Clean up of solved and archived Scout cases."""
     scout_api: ScoutAPI = context.obj.scout_api
     bundles: list[str] = []
-    for status in [ScoutTag.ARCHIVED.value, ScoutTag.SOLVED.value]:
+    for status in [ScoutTag.ARCHIVED, ScoutTag.SOLVED]:
         cases: list[ScoutExportCase] = scout_api.get_cases(status=status, reruns=False)
         cases_added: int = 0
         for case in cases:
@@ -179,10 +178,10 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 @click.pass_obj
 def hk_bundle_files(
     context: CGConfig,
-    case_id: Optional[str],
+    case_id: str | None,
     tags: list,
-    days_old: Optional[int],
-    pipeline: Optional[Pipeline],
+    days_old: int | None,
+    pipeline: Pipeline | None,
     dry_run: bool,
 ):
     """Remove files found in Housekeeper bundles."""
@@ -210,8 +209,8 @@ def hk_bundle_files(
     size_cleaned: int = 0
     for analysis in analyses:
         LOG.info(f"Cleaning analysis {analysis}")
-        bundle_name: str = analysis.family.internal_id
-        hk_bundle_version: Optional[Version] = housekeeper_api.version(
+        bundle_name: str = analysis.case.internal_id
+        hk_bundle_version: Version | None = housekeeper_api.version(
             bundle=bundle_name, date=analysis.started_at
         )
         if not hk_bundle_version:
@@ -230,7 +229,7 @@ def hk_bundle_files(
             f"date {analysis.started_at}"
         )
         version_files: list[File] = housekeeper_api.get_files(
-            bundle=analysis.family.internal_id, tags=tags, version=hk_bundle_version.id
+            bundle=analysis.case.internal_id, tags=tags, version=hk_bundle_version.id
         ).all()
         for version_file in version_files:
             file_path: Path = Path(version_file.full_path)
@@ -258,7 +257,12 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
     """Remove flow cells from the flow cells and demultiplexed runs folder."""
 
     directories_to_check: list[Path] = []
-    for path in [Path(context.flow_cells_dir), Path(context.demultiplexed_flow_cells_dir)]:
+    for path in [
+        Path(context.data_input.input_dir_path),
+        Path(context.flow_cells_dir),
+        Path(context.demultiplexed_flow_cells_dir),
+        Path(context.encryption.encryption_dir),
+    ]:
         directories_to_check.extend(get_directories_in_path(path))
     exit_code = EXIT_SUCCESS
     for flow_cell_directory in directories_to_check:

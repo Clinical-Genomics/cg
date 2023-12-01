@@ -1,7 +1,6 @@
 """Delivery report helpers."""
 import logging
 from datetime import datetime
-from typing import Optional
 
 import click
 
@@ -11,20 +10,22 @@ from cg.constants import (
     Pipeline,
 )
 from cg.meta.report.balsamic import BalsamicReportAPI
+from cg.meta.report.balsamic_qc import BalsamicQCReportAPI
 from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.report.rnafusion import RnafusionReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
 
-def get_report_case(context: click.Context, case_id: str) -> Family:
+def get_report_case(context: click.Context, case_id: str) -> Case:
     """Extracts a case object for delivery report generation."""
     # Default report API (MIP DNA report API)
     report_api: ReportAPI = (
@@ -32,14 +33,14 @@ def get_report_case(context: click.Context, case_id: str) -> Family:
         if context.obj.meta_apis.get("report_api")
         else MipDNAReportAPI(config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj))
     )
-    case: Family = report_api.status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = report_api.status_db.get_case_by_internal_id(internal_id=case_id)
     # Missing or not valid internal case ID
     if not case_id or not case:
         LOG.warning("Invalid case ID. Retrieving available cases.")
         pipeline: Pipeline = (
             report_api.analysis_api.pipeline if context.obj.meta_apis.get("report_api") else None
         )
-        cases_without_delivery_report: list[Family] = (
+        cases_without_delivery_report: list[Case] = (
             report_api.get_cases_without_delivery_report(pipeline=pipeline)
             if not context.obj.meta_apis.get("upload_api")
             else report_api.get_cases_without_uploaded_delivery_report(pipeline=pipeline)
@@ -67,7 +68,7 @@ def get_report_case(context: click.Context, case_id: str) -> Family:
     return case
 
 
-def get_report_api(context: click.Context, case: Family) -> ReportAPI:
+def get_report_api(context: click.Context, case: Case) -> ReportAPI:
     """Returns a report API to be used for the delivery report generation."""
     if context.obj.meta_apis.get("report_api"):
         return context.obj.meta_apis.get("report_api")
@@ -85,6 +86,9 @@ def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> Repor
         Pipeline.BALSAMIC_UMI: BalsamicUmiReportAPI(
             config=context.obj, analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)
         ),
+        Pipeline.BALSAMIC_QC: BalsamicQCReportAPI(
+            config=context.obj, analysis_api=BalsamicQCAnalysisAPI(config=context.obj)
+        ),
         Pipeline.MIP_DNA: MipDNAReportAPI(
             config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
         ),
@@ -96,7 +100,7 @@ def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> Repor
 
 
 def get_report_analysis_started(
-    case: Family, report_api: ReportAPI, analysis_started_at: Optional[str]
+    case: Case, report_api: ReportAPI, analysis_started_at: str | None
 ) -> datetime:
     """Resolves and returns a valid analysis date."""
     if not analysis_started_at:
@@ -111,5 +115,5 @@ def get_report_analysis_started(
     ):
         LOG.error(f"There is no analysis started at {analysis_started_at}")
         raise click.Abort
-    LOG.info("Using analysis started at: %s", analysis_started_at)
+    LOG.info(f"Using analysis started at: {analysis_started_at}")
     return analysis_started_at

@@ -1,7 +1,7 @@
-from datetime import datetime, timedelta
 from pathlib import Path
 from unittest import mock
 
+import pytest
 from housekeeper.store.models import File
 
 from cg.constants.archiving import ArchiveLocations
@@ -14,7 +14,14 @@ from cg.meta.archive.archive import (
     SpringArchiveAPI,
     filter_files_on_archive_location,
 )
-from cg.meta.archive.ddn_dataflow import AuthToken, DDNDataFlowClient, MiriaObject
+from cg.meta.archive.ddn_dataflow import (
+    AuthToken,
+    DDNDataFlowClient,
+    GetJobStatusPayload,
+    GetJobStatusResponse,
+    JobStatus,
+    MiriaObject,
+)
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
@@ -172,9 +179,10 @@ def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAP
 def test_archive_all_non_archived_spring_files(
     spring_archive_api: SpringArchiveAPI,
     caplog,
-    ok_ddn_response,
+    ok_miria_response,
     archive_request_json,
     header_with_test_auth_token,
+    test_auth_token: AuthToken,
 ):
     """Test archiving all non-archived SPRING files for Miria customers."""
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
@@ -184,15 +192,11 @@ def test_archive_all_non_archived_spring_files(
     with mock.patch.object(
         AuthToken,
         "model_validate",
-        return_value=AuthToken(
-            access="test_auth_token",
-            expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
-            refresh="test_refresh_token",
-        ),
+        return_value=test_auth_token,
     ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_response,
+        return_value=ok_miria_response,
     ) as mock_request_submitter:
         spring_archive_api.archive_all_non_archived_spring_files()
 
@@ -214,26 +218,112 @@ def test_archive_all_non_archived_spring_files(
             )
             if sample and sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET:
                 assert file.archive
-            else:
-                assert not file.archive
-        else:
-            assert not file.archive
+
+
+@pytest.mark.parametrize(
+    "job_status, should_date_be_set",
+    [(JobStatus.COMPLETED, True), (JobStatus.RUNNING, False)],
+)
+def test_get_archival_status(
+    spring_archive_api: SpringArchiveAPI,
+    caplog,
+    ok_miria_job_status_response,
+    archive_request_json,
+    header_with_test_auth_token,
+    test_auth_token: AuthToken,
+    archival_job_id: int,
+    job_status: JobStatus,
+    should_date_be_set: bool,
+):
+    # GIVEN a file with an ongoing archival
+    file: File = spring_archive_api.housekeeper_api.files().first()
+    spring_archive_api.housekeeper_api.add_archives(files=[Path(file.path)], archive_task_id=123)
+
+    # WHEN querying the task id and getting a "COMPLETED" response
+    with mock.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=test_auth_token,
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_miria_job_status_response,
+    ), mock.patch.object(
+        GetJobStatusPayload,
+        "get_job_status",
+        return_value=GetJobStatusResponse(id=archival_job_id, status=job_status),
+    ):
+        spring_archive_api.update_ongoing_task(
+            task_id=archival_job_id,
+            archive_location=ArchiveLocations.KAROLINSKA_BUCKET,
+            is_archival=True,
+        )
+
+    # THEN The Archive entry should have been updated
+    assert bool(file.archive.archived_at) == should_date_be_set
+
+
+@pytest.mark.parametrize(
+    "job_status, should_date_be_set",
+    [(JobStatus.COMPLETED, True), (JobStatus.RUNNING, False)],
+)
+def test_get_retrieval_status(
+    spring_archive_api: SpringArchiveAPI,
+    caplog,
+    ok_miria_job_status_response,
+    archive_request_json,
+    header_with_test_auth_token,
+    retrieval_job_id: int,
+    test_auth_token,
+    job_status,
+    should_date_be_set,
+):
+    # GIVEN a file with an ongoing archival
+    file: File = spring_archive_api.housekeeper_api.files().first()
+    spring_archive_api.housekeeper_api.add_archives(files=[Path(file.path)], archive_task_id=123)
+    spring_archive_api.housekeeper_api.set_archive_retrieval_task_id(
+        file_id=file.id, retrieval_task_id=124
+    )
+
+    # WHEN querying the task id and getting a "COMPLETED" response
+    with mock.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=test_auth_token,
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_miria_job_status_response,
+    ), mock.patch.object(
+        GetJobStatusPayload,
+        "get_job_status",
+        return_value=GetJobStatusResponse(id=retrieval_job_id, status=job_status),
+    ):
+        spring_archive_api.update_ongoing_task(
+            task_id=retrieval_job_id,
+            archive_location=ArchiveLocations.KAROLINSKA_BUCKET,
+            is_archival=False,
+        )
+
+    # THEN The Archive entry should have been updated
+    assert bool(file.archive.retrieved_at) == should_date_be_set
 
 
 def test_retrieve_samples(
     spring_archive_api: SpringArchiveAPI,
     caplog,
-    ok_ddn_response,
+    ok_miria_response,
     trimmed_local_path,
     local_storage_repository,
     retrieve_request_json,
     header_with_test_auth_token,
+    test_auth_token,
     sample_with_spring_file: str,
 ):
     """Test retrieving all archived SPRING files tied to a sample for a Miria customer."""
+
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
     # with the DDN customer having two samples, and the non-DDN having one sample.
-
     files: list[File] = spring_archive_api.housekeeper_api.get_files(
         bundle=sample_with_spring_file, tags=[SequencingFileTag.SPRING]
     )
@@ -248,15 +338,11 @@ def test_retrieve_samples(
     with mock.patch.object(
         AuthToken,
         "model_validate",
-        return_value=AuthToken(
-            access="test_auth_token",
-            expire=int((datetime.now() + timedelta(minutes=20)).timestamp()),
-            refresh="test_refresh_token",
-        ),
+        return_value=test_auth_token,
     ), mock.patch.object(MiriaObject, "trim_path", return_value=True), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_response,
+        return_value=ok_miria_response,
     ) as mock_request_submitter:
         spring_archive_api.retrieve_samples([sample_with_spring_file])
 

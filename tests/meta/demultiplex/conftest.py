@@ -1,3 +1,4 @@
+import os
 import shutil
 from collections import namedtuple
 from datetime import datetime
@@ -15,7 +16,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.api import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 from tests.store_helpers import StoreHelpers
 
 FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_internal_ids")
@@ -85,8 +86,8 @@ def flow_cell_project_id() -> int:
 
 @pytest.fixture(name="hiseq_x_copy_complete_file")
 def hiseq_x_copy_complete_file(bcl2fastq_flow_cell: FlowCellDirectoryData) -> Path:
-    """Return Hiseq X flow cell copy complete file."""
-    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE)
+    """Return HiSeqX flow cell copy complete file."""
+    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.HISEQ_X_COPY_COMPLETE)
 
 
 @pytest.fixture(name="populated_flow_cell_store")
@@ -101,7 +102,7 @@ def populated_flow_cell_store(
 
     populated_flow_cell_store: Store = store
     sample: Sample = helpers.add_sample(store=populated_flow_cell_store, internal_id=sample_id)
-    family: Family = helpers.add_case(store=populated_flow_cell_store, internal_id=family_name)
+    family: Case = helpers.add_case(store=populated_flow_cell_store, internal_id=family_name)
     helpers.add_relationship(
         store=populated_flow_cell_store,
         sample=sample,
@@ -127,7 +128,7 @@ def active_flow_cell_store(
     """Populate a store with a Novaseq flow cell, with active samples on it."""
     active_flow_cell_store: Store = base_store
     sample: Sample = helpers.add_sample(store=active_flow_cell_store, internal_id=sample_id)
-    family: Family = helpers.add_case(
+    family: Case = helpers.add_case(
         store=active_flow_cell_store, internal_id=family_name, action="running"
     )
     helpers.add_relationship(
@@ -319,44 +320,6 @@ def delete_demultiplex_api(
 
 
 @pytest.fixture(scope="session")
-def flow_cell_info_map(
-    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: list[str],
-    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: list[str],
-    flow_cell_directory_name_demultiplexed_with_bcl_convert_flat: Path,
-    flow_cell_directory_name_demultiplexed_with_bcl_convert: Path,
-    flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer: Path,
-    flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer: str,
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-    flow_cell_directory_name_demultiplexed_with_bcl2fastq: Path,
-    flow_cell_name_demultiplexed_with_bcl2fastq: str,
-) -> dict[str, FlowCellInfo]:
-    """Returns a dict with the suitable fixtures for different demultiplexing softwares and
-    settings. Keys are string, values are named tuples FlowCellInfo."""
-    return {
-        "BCL2FASTQ_TREE": FlowCellInfo(
-            directory=flow_cell_directory_name_demultiplexed_with_bcl2fastq,
-            name=flow_cell_name_demultiplexed_with_bcl2fastq,
-            sample_internal_ids=bcl2fastq_demultiplexed_flow_cell_sample_internal_ids,
-        ),
-        "BCLCONVERT_FLAT": FlowCellInfo(
-            directory=flow_cell_directory_name_demultiplexed_with_bcl_convert_flat,
-            name=flow_cell_name_demultiplexed_with_bcl_convert,
-            sample_internal_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
-        ),
-        "BCLCONVERT_TREE": FlowCellInfo(
-            directory=flow_cell_directory_name_demultiplexed_with_bcl_convert,
-            name=flow_cell_name_demultiplexed_with_bcl_convert,
-            sample_internal_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
-        ),
-        "BCLCONVERT_ON_SEQUENCER": FlowCellInfo(
-            directory=flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer,
-            name=flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer,
-            sample_internal_ids=bcl_convert_demultiplexed_flow_cell_sample_internal_ids,
-        ),
-    }
-
-
-@pytest.fixture(scope="session")
 def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
     return "HY7FFDRX2"
 
@@ -538,3 +501,12 @@ def bcl_convert_sample_id_with_non_pooled_undetermined_reads() -> str:
 def bcl_convert_non_pooled_sample_read_count() -> int:
     """Based on the data in 230504_A00689_0804_BHY7FFDRX2, the sum of all reads - mapped and undetermined."""
     return 4000000
+
+
+def get_all_files_in_directory_tree(directory: Path) -> list[Path]:
+    """Get the relative paths of all files in a directory and its subdirectories."""
+    files_in_directory: list[Path] = []
+    for subdir, _, files in os.walk(directory):
+        subdir = Path(subdir).relative_to(directory)
+        files_in_directory.extend([Path(subdir, file) for file in files])
+    return files_in_directory

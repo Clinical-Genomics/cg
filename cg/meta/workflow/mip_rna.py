@@ -1,11 +1,9 @@
-from typing import Optional, Union
-
 from cg.constants import Pipeline
 from cg.constants.gene_panel import GENOME_BUILD_38
 from cg.constants.pedigree import Pedigree
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family
+from cg.store.models import Case
 from cg.utils import Process
 
 
@@ -48,10 +46,8 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
             )
         return self._process
 
-    def config_sample(
-        self, link_obj, panel_bed: Optional[str] = None
-    ) -> dict[str, Union[str, int]]:
-        sample_data: dict[str, Union[str, int]] = self.get_sample_data(link_obj)
+    def config_sample(self, link_obj, panel_bed: str | None = None) -> dict[str, str | int]:
+        sample_data: dict[str, str | int] = self.get_sample_data(link_obj)
         if link_obj.mother:
             sample_data[Pedigree.MOTHER.value]: str = link_obj.mother.internal_id
         if link_obj.father:
@@ -60,6 +56,6 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
 
     def panel(self, case_id: str, genome_build: str = GENOME_BUILD_38) -> list[str]:
         """Create the aggregated gene panel file"""
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         all_panels = self.convert_panels(case_obj.customer.internal_id, case_obj.panels)
         return self.scout_api.export_panels(build=genome_build, panels=all_panels)

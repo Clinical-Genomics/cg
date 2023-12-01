@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 from cg.constants.constants import HastaSlurmPartitions
@@ -7,7 +5,7 @@ from cg.constants.priority import SlurmQos
 
 
 class Sbatch(BaseModel):
-    use_login_shell: Optional[str] = ""
+    use_login_shell: str | None = ""
     job_name: str
     account: str
     log_dir: str
@@ -16,10 +14,10 @@ class Sbatch(BaseModel):
     minutes: str = "00"
     quality_of_service: SlurmQos = SlurmQos.LOW
     commands: str
-    error: Optional[str] = None
-    exclude: Optional[str] = ""
-    number_tasks: Optional[int] = None
-    memory: Optional[int] = None
+    error: str | None = None
+    exclude: str | None = ""
+    number_tasks: int | None = None
+    memory: int | None = None
 
 
 class SbatchDragen(Sbatch):

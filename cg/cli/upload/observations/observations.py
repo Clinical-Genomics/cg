@@ -3,7 +3,6 @@
 import contextlib
 import logging
 from datetime import datetime
-from typing import Optional, Union
 
 import click
 from pydantic.v1 import ValidationError
@@ -24,7 +23,7 @@ from cg.meta.observations.balsamic_observations_api import BalsamicObservationsA
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -33,16 +32,16 @@ LOG = logging.getLogger(__name__)
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_obj
-def upload_observations_to_loqusdb(context: CGConfig, case_id: Optional[str], dry_run: bool):
+def upload_observations_to_loqusdb(context: CGConfig, case_id: str | None, dry_run: bool):
     """Upload observations from an analysis to Loqusdb."""
 
     click.echo(click.style("----------------- OBSERVATIONS -----------------"))
 
     with contextlib.suppress(LoqusdbError):
-        case: Family = get_observations_case_to_upload(context, case_id)
-        observations_api: Union[
-            MipDNAObservationsAPI, BalsamicObservationsAPI
-        ] = get_observations_api(context, case)
+        case: Case = get_observations_case_to_upload(context, case_id)
+        observations_api: MipDNAObservationsAPI | BalsamicObservationsAPI = get_observations_api(
+            context, case
+        )
 
         if dry_run:
             LOG.info(f"Dry run. Would upload observations for {case.internal_id}.")
@@ -56,7 +55,7 @@ def upload_observations_to_loqusdb(context: CGConfig, case_id: Optional[str], dr
 @OPTION_DRY
 @click.pass_context
 def upload_available_observations_to_loqusdb(
-    context: click.Context, pipeline: Optional[Pipeline], dry_run: bool
+    context: click.Context, pipeline: Pipeline | None, dry_run: bool
 ):
     """Uploads the available observations to Loqusdb."""
 

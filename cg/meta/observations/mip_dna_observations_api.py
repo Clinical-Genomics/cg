@@ -22,7 +22,7 @@ from cg.exc import (
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
-from cg.store.models import Family
+from cg.store.models import Case
 from cg.utils.dict import get_full_path_dictionary
 
 LOG = logging.getLogger(__name__)
@@ -50,7 +50,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
         }
         return loqusdb_instances[self.sequencing_method]
 
-    def load_observations(self, case: Family, input_files: MipDNAObservationsInputFiles) -> None:
+    def load_observations(self, case: Case, input_files: MipDNAObservationsInputFiles) -> None:
         """Load observation counts to Loqusdb for a MIP-DNA case."""
         if case.tumour_samples:
             LOG.error(f"Case {case.internal_id} has tumour samples. Cancelling upload.")
@@ -103,7 +103,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
         }
         return MipDNAObservationsInputFiles(**get_full_path_dictionary(input_files))
 
-    def delete_case(self, case: Family) -> None:
+    def delete_case(self, case: Case) -> None:
         """Delete rare disease case observations from Loqusdb."""
         if not self.loqusdb_api.get_case(case.internal_id):
             LOG.error(

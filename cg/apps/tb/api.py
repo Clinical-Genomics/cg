@@ -1,8 +1,7 @@
-""" Trailblazer API for cg """ ""
+""" Trailblazer API for cg."""
 import datetime
-import datetime as dt
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from google.auth import jwt
 from google.auth.crypt import RSASigner
@@ -67,38 +66,7 @@ class TrailblazerAPI:
         LOG.debug(f"RESPONSE BODY {response.text}")
         return ReadStream.get_content_from_stream(file_format=FileFormat.JSON, stream=response.text)
 
-    def analyses(
-        self,
-        case_id: str = None,
-        query: str = None,
-        status: str = None,
-        deleted: bool = None,
-        temp: bool = False,
-        before: dt.datetime = None,
-        is_visible: bool = None,
-        family: str = None,
-        data_analysis: Pipeline = None,
-    ) -> list:
-        request_body = {
-            "case_id": case_id,
-            "status": status,
-            "query": query,
-            "deleted": deleted,
-            "temp": temp,
-            "before": str(before) if before else None,
-            "is_visible": is_visible,
-            "family": family,
-            "data_analysis": data_analysis.upper() if data_analysis else None,
-        }
-        response = self.query_trailblazer(command="query-analyses", request_body=request_body)
-        if response:
-            if isinstance(response, list):
-                return [TrailblazerAnalysis.model_validate(analysis) for analysis in response]
-            if isinstance(response, dict):
-                return [TrailblazerAnalysis.model_validate(response)]
-        return response
-
-    def get_latest_analysis(self, case_id: str) -> Optional[TrailblazerAnalysis]:
+    def get_latest_analysis(self, case_id: str) -> TrailblazerAnalysis | None:
         request_body = {
             "case_id": case_id,
         }
@@ -106,7 +74,7 @@ class TrailblazerAPI:
         if response:
             return TrailblazerAnalysis.model_validate(response)
 
-    def get_latest_analysis_status(self, case_id: str) -> Optional[str]:
+    def get_latest_analysis_status(self, case_id: str) -> str | None:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
         if latest_analysis:
             return latest_analysis.status
@@ -123,7 +91,7 @@ class TrailblazerAPI:
     def is_latest_analysis_qc(self, case_id: str) -> bool:
         return self.get_latest_analysis_status(case_id=case_id) == AnalysisStatus.QC
 
-    def mark_analyses_deleted(self, case_id: str) -> Optional[list]:
+    def mark_analyses_deleted(self, case_id: str) -> list | None:
         """Mark all analyses for case deleted without removing analysis files"""
         request_body = {
             "case_id": case_id,
@@ -160,7 +128,7 @@ class TrailblazerAPI:
             "ticket": ticket,
             "workflow_manager": workflow_manager,
         }
-        LOG.debug("Submitting job to Trailblazer: %s", request_body)
+        LOG.debug(f"Submitting job to Trailblazer: {request_body}")
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
         if response:
             return TrailblazerAnalysis.model_validate(response)

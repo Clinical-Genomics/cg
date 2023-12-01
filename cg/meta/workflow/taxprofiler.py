@@ -12,7 +12,7 @@ from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerParameters,
     TaxprofilerSampleSheetEntry,
 )
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         fasta: str = "",
     ) -> list[list[Any]]:
         """Write sample sheet for Taxprofiler analysis in case folder."""
-        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_sheet_content = []
         LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
         LOG.debug("Getting sample sheet information")

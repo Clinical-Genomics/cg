@@ -2,10 +2,12 @@
 from sqlalchemy.orm import Query
 
 from cg.constants.subject import PhenotypeStatus
+from cg.store.api.core import Store
+from cg.store.models import CaseSample
 
 
 def test_get_latest_analyses_for_cases_query(
-    analysis_store, helpers, timestamp_now, timestamp_yesterday
+    analysis_store: Store, helpers, timestamp_now, timestamp_yesterday
 ):
     """Tests that analyses that are not latest are not returned."""
 
@@ -28,9 +30,10 @@ def test_get_latest_analyses_for_cases_query(
         delivery_reported_at=None,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-    analysis_store.relate_sample(
-        family=analysis_oldest.family, sample=sample, status=PhenotypeStatus.UNKNOWN
+    link: CaseSample = analysis_store.relate_sample(
+        case=analysis_oldest.case, sample=sample, status=PhenotypeStatus.UNKNOWN
     )
+    analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_delivery_report
     analyses: Query = analysis_store._get_latest_analyses_for_cases_query()

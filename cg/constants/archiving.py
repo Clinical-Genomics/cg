@@ -1,7 +1,10 @@
-from cg.utils.enums import StrEnum
+from enum import StrEnum
 
 
 class ArchiveLocations(StrEnum):
-    """Demultiplexing related directories and files."""
+    """Archive locations for the different customers' Spring files."""
 
     KAROLINSKA_BUCKET: str = "karolinska_bucket"
+
+
+PDC_ARCHIVE_LOCATION: str = "PDC"

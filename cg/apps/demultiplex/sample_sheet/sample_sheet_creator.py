@@ -1,6 +1,6 @@
 """ Create a sample sheet for NovaSeq flow cells."""
 import logging
-from typing import Optional, Type, Union
+from typing import Type
 
 from cg.apps.demultiplex.sample_sheet.index import (
     Index,
@@ -37,17 +37,15 @@ class SampleSheetCreator:
     def __init__(
         self,
         flow_cell: FlowCellDirectoryData,
-        lims_samples: list[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]],
+        lims_samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq],
         force: bool = False,
     ):
         self.flow_cell: FlowCellDirectoryData = flow_cell
         self.flow_cell_id: str = flow_cell.id
-        self.lims_samples: list[
-            Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]
-        ] = lims_samples
+        self.lims_samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
         self.sample_type: Type[
-            Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]
+            FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
         ] = flow_cell.sample_type
         self.force: bool = force
 
@@ -79,7 +77,7 @@ class SampleSheetCreator:
         """Filter out samples with single indexes."""
         LOG.info("Removing all samples without dual indexes")
         samples_to_keep = []
-        sample: Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]
+        sample: FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
         for sample in self.lims_samples:
             if not is_dual_index(sample.index):
                 LOG.warning(f"Removing sample {sample} since it does not have dual index")
@@ -89,33 +87,34 @@ class SampleSheetCreator:
 
     @staticmethod
     def convert_sample_to_header_dict(
-        sample: Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq],
+        sample: FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq,
         data_column_names: list[str],
     ) -> list[str]:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
-        LOG.debug(f"Use sample sheet header {data_column_names}")
         sample_dict = sample.model_dump(by_alias=True)
         return [str(sample_dict[column]) for column in data_column_names]
 
-    def get_additional_sections_sample_sheet(self) -> Optional[list]:
+    def get_additional_sections_sample_sheet(self) -> list | None:
         """Return all sections of the sample sheet that are not the data section."""
         raise NotImplementedError("Impossible to get sample sheet sections from parent class")
 
-    def get_data_section_header_and_columns(self) -> Optional[list[list[str]]]:
+    def get_data_section_header_and_columns(self) -> list[list[str]] | None:
         """Return the header and column names of the data section of the sample sheet."""
         raise NotImplementedError("Impossible to get sample sheet sections from parent class")
 
     def create_sample_sheet_content(self) -> list[list[str]]:
         """Create sample sheet content with samples."""
         LOG.info("Creating sample sheet content")
+        complete_data_section: list[list[str]] = self.get_data_section_header_and_columns()
         sample_sheet_content: list[list[str]] = (
-            self.get_additional_sections_sample_sheet() + self.get_data_section_header_and_columns()
+            self.get_additional_sections_sample_sheet() + complete_data_section
         )
+        LOG.debug(f"Use sample sheet header {complete_data_section[1]}")
         for sample in self.lims_samples:
             sample_sheet_content.append(
                 self.convert_sample_to_header_dict(
                     sample=sample,
-                    data_column_names=self.get_data_section_header_and_columns()[1],
+                    data_column_names=complete_data_section[1],
                 )
             )
         return sample_sheet_content
@@ -123,7 +122,7 @@ class SampleSheetCreator:
     def process_samples_for_sample_sheet(self) -> None:
         """Remove unwanted samples and adapt remaining samples."""
         self.remove_unwanted_samples()
-        samples_in_lane: list[Union[FlowCellSampleBCLConvert, FlowCellSampleBcl2Fastq]]
+        samples_in_lane: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq]
         self.add_override_cycles_to_samples()
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
             LOG.info(f"Adapting index and barcode mismatch values for samples in lane {lane}")
@@ -131,6 +130,7 @@ class SampleSheetCreator:
                 samples=samples_in_lane,
                 index_cycles=self.run_parameters.index_length,
                 is_reverse_complement=self.is_reverse_complement,
+                sequencer=self.run_parameters.sequencer,
             )
             self.update_barcode_mismatch_values_for_samples(samples_in_lane)
 
@@ -159,21 +159,21 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
 
     def add_override_cycles_to_samples(self) -> None:
         """Return None for flow cells to be demultiplexed with Bcl2fastq."""
-        LOG.debug("No adding of override cycles for Bcl2fastq flow cell")
+        LOG.debug("Skipping adding of override cycles for Bcl2fastq flow cell")
 
     def get_additional_sections_sample_sheet(self) -> list[list[str]]:
         """Return all sections of the sample sheet that are not the data section."""
         return [
-            [SampleSheetBcl2FastqSections.Settings.HEADER.value],
-            SampleSheetBcl2FastqSections.Settings.BARCODE_MISMATCH_INDEX1.value,
-            SampleSheetBcl2FastqSections.Settings.BARCODE_MISMATCH_INDEX2.value,
+            [SampleSheetBcl2FastqSections.Settings.HEADER],
+            SampleSheetBcl2FastqSections.Settings.barcode_mismatch_index_1(),
+            SampleSheetBcl2FastqSections.Settings.barcode_mismatch_index_2(),
         ]
 
     def get_data_section_header_and_columns(self) -> list[list[str]]:
         """Return the header and column names of the data section of the sample sheet."""
         return [
             [SampleSheetBcl2FastqSections.Data.HEADER.value],
-            SampleSheetBcl2FastqSections.Data.COLUMN_NAMES.value,
+            SampleSheetBcl2FastqSections.Data.column_names(),
         ]
 
 
@@ -203,19 +203,22 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
 
     def add_override_cycles_to_samples(self) -> None:
         """Add override cycles attribute to samples."""
-        flow_cell_index_len: int = self.run_parameters.index_length
         read1_cycles: str = f"Y{self.run_parameters.get_read_1_cycles()};"
         read2_cycles: str = f"Y{self.run_parameters.get_read_2_cycles()}"
+        length_index1: int = self.run_parameters.get_index_1_cycles()
+        length_index2: int = self.run_parameters.get_index_2_cycles()
         for sample in self.lims_samples:
-            index1_cycles: str = f"I{self.run_parameters.get_index_1_cycles()};"
-            index2_cycles: str = f"I{self.run_parameters.get_index_2_cycles()};"
-            sample_index_len: int = len(get_index_pair(sample)[0])
-            if sample_index_len < flow_cell_index_len:
-                index1_cycles = f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
+            index1_cycles: str = f"I{length_index1};"
+            index2_cycles: str = f"I{length_index2};"
+            sample_index1_len: int = len(get_index_pair(sample)[0])
+            sample_index2_len: int = len(get_index_pair(sample)[1])
+            if sample_index1_len < length_index1:
+                index1_cycles = f"I{sample_index1_len}N{length_index1 - sample_index1_len};"
+            if sample_index2_len < length_index2:
                 index2_cycles = (
-                    f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
+                    f"I{sample_index2_len}N{length_index2 - sample_index2_len};"
                     if self.is_reverse_complement
-                    else f"N{flow_cell_index_len - sample_index_len}I{sample_index_len};"
+                    else f"N{length_index2 - sample_index2_len}I{sample_index2_len};"
                 )
             sample.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
@@ -223,39 +226,39 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         """Return all sections of the sample sheet that are not the data section."""
         header_section: list[list[str]] = [
             [SampleSheetBCLConvertSections.Header.HEADER.value],
-            SampleSheetBCLConvertSections.Header.FILE_FORMAT.value,
+            SampleSheetBCLConvertSections.Header.file_format(),
             [SampleSheetBCLConvertSections.Header.RUN_NAME.value, self.flow_cell_id],
             [
                 SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM_TITLE.value,
-                SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM_VALUE.value[
+                SampleSheetBCLConvertSections.Header.instrument_platform_sequencer().get(
                     self.flow_cell.sequencer_type
-                ],
+                ),
             ],
-            SampleSheetBCLConvertSections.Header.INDEX_ORIENTATION_FORWARD.value,
+            SampleSheetBCLConvertSections.Header.index_orientation_forward(),
         ]
         reads_section: list[list[str]] = [
-            [SampleSheetBCLConvertSections.Reads.HEADER.value],
+            [SampleSheetBCLConvertSections.Reads.HEADER],
             [
-                SampleSheetBCLConvertSections.Reads.READ_CYCLES_1.value,
+                SampleSheetBCLConvertSections.Reads.READ_CYCLES_1,
                 self.run_parameters.get_read_1_cycles(),
             ],
             [
-                SampleSheetBCLConvertSections.Reads.READ_CYCLES_2.value,
+                SampleSheetBCLConvertSections.Reads.READ_CYCLES_2,
                 self.run_parameters.get_read_2_cycles(),
             ],
             [
-                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_1.value,
+                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_1,
                 self.run_parameters.get_index_1_cycles(),
             ],
             [
-                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2.value,
+                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2,
                 self.run_parameters.get_index_2_cycles(),
             ],
         ]
         settings_section: list[list[str]] = [
-            [SampleSheetBCLConvertSections.Settings.HEADER.value],
-            SampleSheetBCLConvertSections.Settings.SOFTWARE_VERSION.value,
-            SampleSheetBCLConvertSections.Settings.FASTQ_COMPRESSION_FORMAT.value,
+            [SampleSheetBCLConvertSections.Settings.HEADER],
+            SampleSheetBCLConvertSections.Settings.software_version(),
+            SampleSheetBCLConvertSections.Settings.fastq_compression_format(),
         ]
         return header_section + reads_section + settings_section
 
@@ -263,5 +266,5 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         """Return the header and column names of the data section of the sample sheet."""
         return [
             [SampleSheetBCLConvertSections.Data.HEADER.value],
-            SampleSheetBCLConvertSections.Data.COLUMN_NAMES.value,
+            SampleSheetBCLConvertSections.Data.column_names(),
         ]

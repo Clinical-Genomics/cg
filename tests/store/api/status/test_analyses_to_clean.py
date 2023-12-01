@@ -3,6 +3,7 @@ from datetime import datetime
 
 from cg.constants import Pipeline
 from cg.store import Store
+from cg.store.models import CaseSample
 
 
 def test_analysis_included(
@@ -18,7 +19,10 @@ def test_analysis_included(
         cleaned_at=None,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
-    analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
+    link: CaseSample = analysis_store.relate_sample(
+        case=analysis.case, sample=sample, status="unknown"
+    )
+    analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_clean
     analyses_to_clean = analysis_store.get_analyses_to_clean(before=timestamp_now)
@@ -35,7 +39,9 @@ def test_analysis_excluded(analysis_store: Store, helpers, timestamp_now: dateti
         analysis_store, started_at=timestamp_now, uploaded_at=None, cleaned_at=None
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-    link = analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
+    link: CaseSample = analysis_store.relate_sample(
+        case=analysis.case, sample=sample, status="unknown"
+    )
     analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_clean
@@ -60,7 +66,9 @@ def test_pipeline_included(
         cleaned_at=None,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
-    link = analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
+    link: CaseSample = analysis_store.relate_sample(
+        case=analysis.case, sample=sample, status="unknown"
+    )
     analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_clean specifying the used pipeline
@@ -87,7 +95,9 @@ def test_pipeline_excluded(analysis_store: Store, helpers, timestamp_now: dateti
         cleaned_at=None,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-    link = analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
+    link: CaseSample = analysis_store.relate_sample(
+        case=analysis.case, sample=sample, status="unknown"
+    )
     analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_clean specifying another pipeline
@@ -110,7 +120,9 @@ def test_non_cleaned_included(
         cleaned_at=None,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
-    link = analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
+    link: CaseSample = analysis_store.relate_sample(
+        case=analysis.case, sample=sample, status="unknown"
+    )
     analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_clean
@@ -131,7 +143,9 @@ def test_cleaned_excluded(analysis_store: Store, helpers, timestamp_now: datetim
         cleaned_at=timestamp_now,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-    link = analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
+    link: CaseSample = analysis_store.relate_sample(
+        case=analysis.case, sample=sample, status="unknown"
+    )
     analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_clean

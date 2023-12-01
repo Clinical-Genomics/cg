@@ -199,6 +199,6 @@ def test_dispatcher_on_other_functions(
     # THEN the dispatcher should return the correct analyses
     for analysis in analyses:
         assert analysis
-        assert analysis.family.internal_id == case_internal_id
+        assert analysis.case.internal_id == case_internal_id
         assert analysis.pipeline == pipeline
         assert analysis.started_at < timestamp_now

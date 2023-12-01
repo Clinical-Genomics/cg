@@ -1,6 +1,5 @@
 """Module for uploading to Gens via CLI."""
 import logging
-from typing import Optional
 
 import click
 from housekeeper.store.models import File
@@ -13,7 +12,7 @@ from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.housekeeper_tags import GensAnalysisTag
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -22,7 +21,7 @@ LOG = logging.getLogger(__name__)
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_obj
-def upload_to_gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
+def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool):
     """Upload data from an analysis to Gens."""
 
     click.echo(click.style("----------------- GENS -------------------"))
@@ -37,7 +36,7 @@ def upload_to_gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
 
-    family: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    family: Case = status_db.get_case_by_internal_id(internal_id=case_id)
 
     for sample in family.samples:
         hk_coverage: File = housekeeper_api.get_file_from_latest_version(

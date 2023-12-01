@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, Optional
+from typing import Callable
 
 from sqlalchemy.orm import Query
 
@@ -24,7 +24,7 @@ def filter_invoices_not_invoiced(invoices: Query, **kwargs) -> Query:
 def apply_invoice_filter(
     filter_functions: list[str],
     invoices: Query,
-    entry_id: Optional[int] = None,
+    entry_id: int | None = None,
 ) -> Query:
     """Apply filtering functions to the invoice queries and return filtered results."""
 

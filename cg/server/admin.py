@@ -1,7 +1,6 @@
 """Module for Flask-Admin views"""
 from datetime import datetime
 from gettext import gettext
-from typing import Union
 
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
@@ -33,14 +32,14 @@ def view_priority(unused1, unused2, model, unused3):
     return Markup("%s" % model.priority.name) if model else ""
 
 
-def view_family_sample_link(unused1, unused2, model, unused3):
-    """column formatter to open the family-sample view"""
+def view_case_sample_link(unused1, unused2, model, unused3):
+    """column formatter to open the case-sample view"""
 
     del unused1, unused2, unused3
 
     return Markup(
         "<a href='%s'>%s</a>"
-        % (url_for("familysample.index_view", search=model.internal_id), model.internal_id)
+        % (url_for("casesample.index_view", search=model.internal_id), model.internal_id)
     )
 
 
@@ -48,6 +47,26 @@ def is_external_application(unused1, unused2, model, unused3):
     """column formatter to open this view"""
     del unused1, unused2, unused3
     return model.application_version.application.is_external if model.application_version else ""
+
+
+def view_sample_concentration_minimum(unused1, unused2, model, unused3):
+    """Column formatter to append unit"""
+    del unused1, unused2, unused3
+    return (
+        str(model.sample_concentration_minimum) + " ng/uL"
+        if model.sample_concentration_minimum
+        else None
+    )
+
+
+def view_sample_concentration_maximum(unused1, unused2, model, unused3):
+    """Column formatter to append unit"""
+    del unused1, unused2, unused3
+    return (
+        str(model.sample_concentration_maximum) + " ng/uL"
+        if model.sample_concentration_maximum
+        else None
+    )
 
 
 class ApplicationView(BaseView):
@@ -78,6 +97,10 @@ class ApplicationView(BaseView):
         "updated_at",
         "category",
     ]
+    column_formatters = {
+        "sample_concentration_minimum": view_sample_concentration_minimum,
+        "sample_concentration_maximum": view_sample_concentration_maximum,
+    }
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
     form_excluded_columns = ["category", "versions"]
@@ -111,11 +134,23 @@ class ApplicationVersionView(BaseView):
         "price_clinical_trials",
         "price_research",
     ]
+    column_list = (
+        "application",
+        "version",
+        "valid_from",
+        "price_standard",
+        "price_priority",
+        "price_express",
+        "price_clinical_trials",
+        "price_research",
+        "comment",
+    )
     column_exclude_list = ["created_at", "updated_at"]
     column_filters = ["version", "application.tag"]
     column_formatters = {"application": ApplicationView.view_application_link}
     column_searchable_list = ["application.tag"]
     edit_modal = True
+    create_modal = True
     form_excluded_columns = ["samples", "pools", "microbial_samples"]
 
 
@@ -184,6 +219,7 @@ class CustomerView(BaseView):
         "collaborations",
         "comment",
         "delivery_contact",
+        "lab_contact",
         "loqus_upload",
         "primary_contact",
         "priority",
@@ -194,6 +230,7 @@ class CustomerView(BaseView):
         "comment",
         "delivery_contact",
         "internal_id",
+        "lab_contact",
         "name",
         "primary_contact",
         "priority",
@@ -217,8 +254,8 @@ class CollaborationView(BaseView):
     column_searchable_list = ["internal_id", "name"]
 
 
-class FamilyView(BaseView):
-    """Admin view for Model.Family"""
+class CaseView(BaseView):
+    """Admin view for Model.Case"""
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["action", "comment"]
@@ -232,7 +269,7 @@ class FamilyView(BaseView):
         "tickets",
     ]
     column_formatters = {
-        "internal_id": view_family_sample_link,
+        "internal_id": view_case_sample_link,
         "priority": view_priority,
     }
     column_searchable_list = [
@@ -253,14 +290,14 @@ class FamilyView(BaseView):
     }
 
     @staticmethod
-    def view_family_link(unused1, unused2, model, unused3):
+    def view_case_link(unused1, unused2, model, unused3):
         """column formatter to open this view"""
         del unused1, unused2, unused3
         markup = ""
-        if model.family:
+        if model.case:
             markup += Markup(
                 " <a href='%s'>%s</a>"
-                % (url_for("family.index_view", search=model.family.internal_id), model.family)
+                % (url_for("case.index_view", search=model.case.internal_id), model.case)
             )
 
         return markup
@@ -281,12 +318,12 @@ class FamilyView(BaseView):
     def action_set_empty(self, ids: list[str]):
         self.set_action_for_cases(action=None, case_entry_ids=ids)
 
-    def set_action_for_cases(self, action: Union[CaseActions, None], case_entry_ids: list[str]):
+    def set_action_for_cases(self, action: CaseActions | None, case_entry_ids: list[str]):
         try:
             for entry_id in case_entry_ids:
-                family = db.get_case_by_entry_id(entry_id=entry_id)
-                if family:
-                    family.action = action
+                case = db.get_case_by_entry_id(entry_id=entry_id)
+                if case:
+                    case.action = action
 
             db.session.commit()
 
@@ -302,7 +339,7 @@ class FamilyView(BaseView):
             if not self.handle_view_exception(ex):
                 raise
 
-            flash(gettext(f"Failed to set family action. {str(ex)}"))
+            flash(gettext(f"Failed to set case action. {str(ex)}"))
 
 
 class FlowcellView(BaseView):
@@ -366,10 +403,10 @@ class AnalysisView(BaseView):
     column_default_sort = ("created_at", True)
     column_editable_list = ["is_primary"]
     column_filters = ["pipeline", "pipeline_version", "is_primary"]
-    column_formatters = {"family": FamilyView.view_family_link}
+    column_formatters = {"case": CaseView.view_case_link}
     column_searchable_list = [
-        "family.internal_id",
-        "family.name",
+        "case.internal_id",
+        "case.name",
     ]
     form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
 
@@ -416,13 +453,13 @@ class SampleView(BaseView):
         "comment",
         "downsampled_to",
         "is_tumour",
-        "reads_updated_at",
+        "last_sequenced_at",
         "sex",
     ]
     column_filters = ["customer.internal_id", "priority", "sex", "application_version.application"]
     column_formatters = {
         "is_external": is_external_application,
-        "internal_id": view_family_sample_link,
+        "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
         "priority": view_priority,
     }
@@ -478,7 +515,7 @@ class SampleView(BaseView):
             sample: Sample = db.get_sample_by_entry_id(entry_id=int(entry_id))
 
             sample_case_ids: list[str] = [
-                case_sample.family.internal_id for case_sample in sample.links
+                case_sample.case.internal_id for case_sample in sample.links
             ]
             all_associated_case_ids.update(sample_case_ids)
 
@@ -537,17 +574,17 @@ class DeliveryView(BaseView):
     edit_modal = True
 
 
-class FamilySampleView(BaseView):
-    """Admin view for Model.FamilySample"""
+class CaseSampleView(BaseView):
+    """Admin view for Model.caseSample"""
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["status"]
     column_filters = ["status"]
     column_formatters = {
-        "family": FamilyView.view_family_link,
+        "case": CaseView.view_case_link,
         "sample": SampleView.view_sample_link,
     }
-    column_searchable_list = ["family.internal_id", "family.name", "sample.internal_id"]
+    column_searchable_list = ["case.internal_id", "case.name", "sample.internal_id"]
     create_modal = True
     edit_modal = True
 

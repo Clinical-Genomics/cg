@@ -1,26 +1,20 @@
 import fnmatch
-import subprocess
 from pathlib import Path
 from typing import Callable
 
 import pytest
 
 from cg.constants import FileExtensions
-from cg.constants.pdc import PDCExitCodes
-from cg.models.cg_config import EncryptionDirectories
+from cg.models.cg_config import PDCArchivingDirectory
 
 
 @pytest.fixture
 def mock_pdc_query_method(archived_flow_cells: list[str]) -> Callable:
     """Returns a mock method mimicking the pattern search made by the dsmc q archive command."""
 
-    def mock_method(search_pattern: str) -> list[str]:
-        match = fnmatch.filter(archived_flow_cells, search_pattern)
-        if not match:
-            raise subprocess.CalledProcessError(
-                cmd="dummy_method", returncode=PDCExitCodes.NO_FILES_FOUND
-            )
-        return match[0]
+    def mock_method(search_pattern: str) -> list[str] | None:
+        if match := fnmatch.filter(archived_flow_cells, search_pattern):
+            return match
 
     return mock_method
 
@@ -47,12 +41,12 @@ Accessing as node: SLLCLINICAL
 
 
 @pytest.fixture()
-def archived_flow_cells(encryption_directories: EncryptionDirectories) -> list[str]:
+def archived_flow_cells(pdc_archiving_directory: PDCArchivingDirectory) -> list[str]:
     """Returns a list of archived flow cells."""
     return [
-        f"{encryption_directories.current}/new_flow_cell{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}",
-        f"{encryption_directories.nas}/old_flow_cell{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}",
-        f"{encryption_directories.pre_nas}/ancient_flow_cell{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}",
+        f"{pdc_archiving_directory.current}/new_flow_cell{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}",
+        f"{pdc_archiving_directory.nas}/old_flow_cell{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}",
+        f"{pdc_archiving_directory.pre_nas}/ancient_flow_cell{FileExtensions.TAR}{FileExtensions.GZIP}{FileExtensions.GPG}",
     ]
 
 

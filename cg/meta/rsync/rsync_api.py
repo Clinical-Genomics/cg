@@ -18,7 +18,7 @@ from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import COVID_RSYNC, ERROR_RSYNC_FUNCTION, RSYNC_COMMAND
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class RsyncAPI(MetaAPI):
     @property
     def slurm_quality_of_service(self) -> str:
         """Return the slurm quality of service depending on the slurm account."""
-        return SlurmQos.HIGH if self.account == SlurmAccount.PRODUCTION.value else SlurmQos.LOW
+        return SlurmQos.HIGH if self.account == SlurmAccount.PRODUCTION else SlurmQos.LOW
 
     @property
     def trailblazer_config_path(self) -> Path:
@@ -103,7 +103,7 @@ class RsyncAPI(MetaAPI):
             LOG.info(f"Setting log dir to: {self.base_path / folder_name}")
             self.log_dir: Path = self.base_path / folder_name
 
-    def get_all_cases_from_ticket(self, ticket: str) -> list[Family]:
+    def get_all_cases_from_ticket(self, ticket: str) -> list[Case]:
         return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
 
     def get_source_and_destination_paths(
@@ -139,7 +139,7 @@ class RsyncAPI(MetaAPI):
             ticket=ticket,
         )
 
-    def format_covid_report_path(self, case: Family, ticket: str) -> str:
+    def format_covid_report_path(self, case: Case, ticket: str) -> str:
         """Return a formatted of covid report path."""
         covid_report_options: list[str] = glob.glob(
             self.covid_report_path % (case.internal_id, ticket)
@@ -155,11 +155,11 @@ class RsyncAPI(MetaAPI):
     def create_log_dir(self, dry_run: bool) -> None:
         """Create log dir."""
         log_dir: Path = self.log_dir
-        LOG.info("Creating folder: %s", log_dir)
+        LOG.info(f"Creating folder: {log_dir}")
         if log_dir.exists():
-            LOG.warning("Could not create %s, this folder already exist", log_dir)
+            LOG.warning(f"Could not create {log_dir}, this folder already exist")
         elif dry_run:
-            LOG.info("Would have created path %s, but this is a dry run", log_dir)
+            LOG.info(f"Would have created path {log_dir}, but this is a dry run")
         else:
             log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -183,7 +183,7 @@ class RsyncAPI(MetaAPI):
 
     def slurm_rsync_single_case(
         self,
-        case: Family,
+        case: Case,
         dry_run: bool,
         sample_files_present: bool = False,
         case_files_present: bool = False,
@@ -222,7 +222,7 @@ class RsyncAPI(MetaAPI):
         """Runs rsync of a whole ticket folder to the delivery server."""
         self.set_log_dir(folder_prefix=ticket)
         self.create_log_dir(dry_run=dry_run)
-        cases: list[Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: list[Case] = self.get_all_cases_from_ticket(ticket=ticket)
         if not cases:
             LOG.warning(f"Could not find any cases for ticket {ticket}")
             raise CgError()

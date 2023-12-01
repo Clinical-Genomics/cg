@@ -3,21 +3,20 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Optional
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
-from housekeeper.store.database import (
-    create_all_tables,
-    drop_all_tables,
-    initialize_database,
-)
+from housekeeper.store.database import create_all_tables, drop_all_tables, initialize_database
 from housekeeper.store.models import Archive, Bundle, File, Version
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingFileTag
-from cg.exc import HousekeeperBundleVersionMissingError, HousekeeperFileMissingError
+from cg.exc import (
+    HousekeeperArchiveMissingError,
+    HousekeeperBundleVersionMissingError,
+    HousekeeperFileMissingError,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -31,7 +30,7 @@ class HousekeeperAPI:
         self.root_dir: str = config["housekeeper"]["root"]
 
     def __getattr__(self, name):
-        LOG.warning("Called undefined %s on %s, please wrap", name, self.__class__.__name__)
+        LOG.warning(f"Called undefined {name} on {self.__class__.__name__}, please wrap")
         return getattr(self._store, name)
 
     def new_bundle(self, name: str, created_at: dt.datetime = None) -> Bundle:
@@ -73,7 +72,7 @@ class HousekeeperAPI:
             tags = []
         return self._store.new_file(path, checksum, to_archive, tags)
 
-    def get_file(self, file_id: int) -> Optional[File]:
+    def get_file(self, file_id: int) -> File | None:
         """Get a file based on file id."""
         LOG.info(f"Return file: {file_id}")
         file_obj: File = self._store.get_file_by_id(file_id=file_id)
@@ -82,7 +81,7 @@ class HousekeeperAPI:
             return None
         return file_obj
 
-    def delete_file(self, file_id: int) -> Optional[File]:
+    def delete_file(self, file_id: int) -> File | None:
         """Delete a file both from database and disk (if included)."""
         file_obj: File = self.get_file(file_id)
         if not file_obj:
@@ -132,19 +131,18 @@ class HousekeeperAPI:
             bundle_name=bundle, tag_names=tags, version_id=version, file_path=path
         )
 
-    def get_file_insensitive_path(self, path: Path) -> Optional[File]:
-        """Returns a file in Housekeeper with a path that matches the given path, insensitive to whether the paths
-        are included or not."""
-        file: File = self.files(path=path.as_posix())
+    def get_file_insensitive_path(self, path: Path) -> File | None:
+        """Returns a file in Housekeeper given any kind of path (absolute or relative)."""
+        file: File = self.files(path=path.as_posix()).first()
         if not file:
             if path.is_absolute():
-                file = self.files(path=str(path).replace(self.root_dir, ""))
+                file = self.files(path=str(path).replace(f"{self.root_dir}/", "")).first()
             else:
-                file = self.files(path=self.root_dir + str(path))
+                file = self.files(path=f"{self.root_dir}/{path}").first()
         return file
 
     @staticmethod
-    def get_files_from_version(version: Version, tags: set[str]) -> Optional[list[File]]:
+    def get_files_from_version(version: Version, tags: set[str]) -> list[File] | None:
         """Return a list of files associated with the given version and tags."""
         LOG.debug(f"Getting files from version with tags {tags}")
         files: list[File] = []
@@ -158,13 +156,13 @@ class HousekeeperAPI:
         return files
 
     @staticmethod
-    def get_file_from_version(version: Version, tags: set[str]) -> Optional[File]:
+    def get_file_from_version(version: Version, tags: set[str]) -> File | None:
         """Return the first file matching the given tags."""
         files: list[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
         return files[0] if files else None
 
     @staticmethod
-    def get_latest_file_from_version(version: Version, tags: set[str]) -> Optional[File]:
+    def get_latest_file_from_version(version: Version, tags: set[str]) -> File | None:
         """Return the latest file from Housekeeper given its version and tags."""
         files: list[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
         return sorted(files, key=lambda file_obj: file_obj.id)[-1] if files else None
@@ -177,17 +175,15 @@ class HousekeeperAPI:
         """Wrap property in Housekeeper Store."""
         return self._store.session.no_autoflush
 
-    def get_files(
-        self, bundle: str, tags: Optional[list] = None, version: Optional[int] = None
-    ) -> Query:
+    def get_files(self, bundle: str, tags: list | None = None, version: int | None = None) -> Query:
         """Get all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version.
         """
         return self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
 
     def get_latest_file(
-        self, bundle: str, tags: Optional[list] = None, version: Optional[int] = None
-    ) -> Optional[File]:
+        self, bundle: str, tags: list | None = None, version: int | None = None
+    ) -> File | None:
         """Return latest file from Housekeeper, filtered by bundle and/or tags and/or version."""
         files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
         return files.order_by(File.id.desc()).first()
@@ -197,7 +193,7 @@ class HousekeeperAPI:
         bundle_name: str,
         file_paths: list[Path],
         last_version: Version,
-        tags: Optional[list] = None,
+        tags: list | None = None,
     ) -> list[Path]:
         """Checks if any of the files in the provided list are already added to the provided
         bundle. Returns a list of files that have not been added."""
@@ -216,7 +212,7 @@ class HousekeeperAPI:
         """
         version_root_dir: Path = Path(root_dir, version_obj.relative_root_dir)
         version_root_dir.mkdir(parents=True, exist_ok=True)
-        LOG.info("Created new bundle version dir: %s", version_root_dir)
+        LOG.info(f"Created new bundle version dir: {version_root_dir}")
         return Path(version_root_dir, Path(file_obj.path).name)
 
     def include_file(self, file_obj: File, version_obj: Version) -> File:
@@ -267,7 +263,7 @@ class HousekeeperAPI:
         """Return all spring files which are not marked as archived in Housekeeper."""
         return self._store.get_all_non_archived_files(tag_names=[SequencingFileTag.SPRING])
 
-    def get_latest_bundle_version(self, bundle_name: str) -> Optional[Version]:
+    def get_latest_bundle_version(self, bundle_name: str) -> Version | None:
         """Get the latest version of a Housekeeper bundle."""
         last_version: Version = self.last_version(bundle_name)
         if not last_version:
@@ -378,7 +374,7 @@ class HousekeeperAPI:
         bundle_version.included_at = dt.datetime.now()
         self.commit()
 
-    def get_file_from_latest_version(self, bundle_name: str, tags: set[str]) -> Optional[File]:
+    def get_file_from_latest_version(self, bundle_name: str, tags: set[str]) -> File | None:
         """Return a file in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
@@ -407,7 +403,7 @@ class HousekeeperAPI:
             sequencing_files_in_hk[bundle_name] = False
             for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
                 sample_file_in_hk: list[bool] = []
-                hk_files: Optional[list[File]] = self.get_files_from_latest_version(
+                hk_files: list[File] | None = self.get_files_from_latest_version(
                     bundle_name=bundle_name, tags=[tag]
                 )
                 sample_file_in_hk += [True for hk_file in hk_files if hk_file.is_included]
@@ -418,18 +414,18 @@ class HousekeeperAPI:
             )
         return all(sequencing_files_in_hk.values())
 
-    def get_non_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> list[File]:
+    def get_non_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
         """Returns all non-archived_files from a given bundle, tagged with the given tags"""
         return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags or [])
 
-    def get_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> list[File]:
+    def get_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
         """Returns all archived_files from a given bundle, tagged with the given tags"""
         return self._store.get_archived_files(bundle_name=bundle_name, tags=tags or [])
 
     def add_archives(self, files: list[Path], archive_task_id: int) -> None:
         """Creates an archive object for the given files, and adds the archive task id to them."""
         for file in files:
-            archived_file: Optional[File] = self._store.get_files(file_path=file.as_posix()).first()
+            archived_file: File | None = self._store.get_files(file_path=file.as_posix()).first()
             if not archived_file:
                 raise HousekeeperFileMissingError(f"No file in housekeeper with the path {file}")
             archive: Archive = self._store.create_archive(
@@ -447,7 +443,7 @@ class HousekeeperAPI:
             sequencing_files_on_disk[bundle_name] = False
             for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
                 sample_file_on_disk: list[bool] = []
-                hk_files: Optional[list[File]] = self.get_files_from_latest_version(
+                hk_files: list[File] | None = self.get_files_from_latest_version(
                     bundle_name=bundle_name, tags=[tag]
                 )
                 sample_file_on_disk += [
@@ -490,7 +486,6 @@ class HousekeeperAPI:
                 f"while archiving task id in Housekeeper is {archive.archiving_task_id}."
             )
         self._store.update_archiving_time_stamp(archive=archive)
-        self.commit()
 
     def set_archive_retrieval_task_id(self, file_id: int, retrieval_task_id: int) -> None:
         """Sets the retrieval_task_id for an Archive entry. Raises a ValueError if the given retrieval task id
@@ -499,19 +494,13 @@ class HousekeeperAPI:
         if not archive:
             raise ValueError(f"No Archive entry found for file with id {file_id}.")
         self._store.update_retrieval_task_id(archive=archive, retrieval_task_id=retrieval_task_id)
-        self.commit()
 
     def get_sample_sheets_from_latest_version(self, flow_cell_id: str) -> list[File]:
-        """Returns the files tagged with 'samplesheet' or 'archived_sample_sheet' for the given bundle."""
+        """Returns the files tagged with 'samplesheet' for the given bundle."""
         try:
-            sheets_with_normal_tag: list[File] = self.get_files_from_latest_version(
+            sample_sheet_files: list[File] = self.get_files_from_latest_version(
                 bundle_name=flow_cell_id, tags=[flow_cell_id, SequencingFileTag.SAMPLE_SHEET]
             ).all()
-            sheets_with_archive_tag: list[File] = self.get_files_from_latest_version(
-                bundle_name=flow_cell_id,
-                tags=[flow_cell_id, SequencingFileTag.ARCHIVED_SAMPLE_SHEET],
-            ).all()
-            sample_sheet_files: list[File] = sheets_with_normal_tag + sheets_with_archive_tag
         except HousekeeperBundleVersionMissingError:
             sample_sheet_files = []
         return sample_sheet_files
@@ -578,3 +567,54 @@ class HousekeeperAPI:
             bundle_name=sample_internal_id,
             tag_names=[SequencingFileTag.FASTQ, flow_cell_id, sample_internal_id],
         )
+
+    def get_archive_entries(
+        self, archival_task_id: int = None, retrieval_task_id: int = None
+    ) -> list[Archive]:
+        """Returns all archives matching the provided task ids. If no task ids are provided, all archive entries are
+        returned. If only an archival_task_id is provided, filtering is only done on that parameter and vice versa
+        with retrieval_task_id.
+        """
+        return self._store.get_archives(
+            archival_task_id=archival_task_id, retrieval_task_id=retrieval_task_id
+        )
+
+    def set_archived_at(self, archival_task_id: int) -> None:
+        """Sets archived_at to the current time for archive entries with matching archival task id.
+        Raises:
+                HousekeeperArchiveMissingError if no Archive entries match the given retrieval task id.
+        """
+        archive_entries: list[Archive] = self.get_archive_entries(archival_task_id=archival_task_id)
+        if not archive_entries:
+            raise HousekeeperArchiveMissingError(
+                f"Could not find any archives with archival_task_id {archival_task_id}"
+            )
+        for archive in archive_entries:
+            self.set_archive_archived_at(
+                archiving_task_id=archival_task_id, file_id=archive.file_id
+            )
+        self.commit()
+
+    def set_retrieved_at(self, retrieval_task_id: int) -> None:
+        """Sets retrieved_at to the current time for archive entries with matching archival task id.
+        Raises:
+                HousekeeperArchiveMissingError if no Archive entries match the given retrieval task id.
+        """
+        archive_entries: list[Archive] = self.get_archive_entries(
+            retrieval_task_id=retrieval_task_id
+        )
+        if not archive_entries:
+            raise HousekeeperArchiveMissingError(
+                f"Could not find any archives with retrieval_task_id {retrieval_task_id}"
+            )
+        for archive in archive_entries:
+            self.set_archive_retrieved_at(
+                retrieval_task_id=retrieval_task_id, file_id=archive.file_id
+            )
+        self.commit()
+
+    def get_ongoing_archivals(self) -> list[Archive]:
+        return self._store.get_ongoing_archivals()
+
+    def get_ongoing_retrievals(self) -> list[Archive]:
+        return self._store.get_ongoing_retrievals()
