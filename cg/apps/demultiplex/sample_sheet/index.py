@@ -9,6 +9,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBCLConvert,
 )
 from cg.constants.constants import FileFormat
+from cg.constants.sequencing import Sequencers
 from cg.io.controller import ReadFile
 from cg.resources import VALID_INDEXES_PATH
 from cg.utils.utils import get_hamming_distance
@@ -56,8 +57,8 @@ def get_index_pair(sample: FlowCellSample) -> tuple[str, str]:
     """Returns a sample index separated into index 1 and index 2."""
     if is_dual_index(sample.index):
         index_1, index_2 = sample.index.split("-")
-        return index_1.strip(), index_2.strip()
-    return sample.index, sample.index2
+        return index_1.strip().replace("NNNNNNNNN", ""), index_2.strip()
+    return sample.index.replace("NNNNNNNNN", ""), sample.index2
 
 
 def is_padding_needed(index_cycles: int, sample_index_length: int) -> bool:
@@ -161,11 +162,17 @@ def update_indexes_for_samples(
     samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq],
     index_cycles: int,
     perform_reverse_complement: bool,
+    sequencer: str,
 ) -> None:
     """Updates the values to the fields index1 and index 2 of samples."""
     for sample in samples:
-        pad_and_reverse_complement_sample_indexes(
-            sample=sample,
-            index_cycles=index_cycles,
-            perform_reverse_complement=perform_reverse_complement,
-        )
+        if sequencer != Sequencers.NOVASEQ:
+            index1, index2 = get_index_pair(sample=sample)
+            sample.index = index1
+            sample.index2 = index2
+        else:
+            pad_and_reverse_complement_sample_indexes(
+                sample=sample,
+                index_cycles=index_cycles,
+                perform_reverse_complement=perform_reverse_complement,
+            )

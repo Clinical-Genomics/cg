@@ -1,9 +1,9 @@
-from pathlib import Path
 from unittest import mock
 
 import pytest
 from housekeeper.store.models import File
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import APIMethods
 from cg.constants.housekeeper_tags import SequencingFileTag
@@ -19,7 +19,7 @@ from cg.meta.archive.ddn_dataflow import (
     DDNDataFlowClient,
     GetJobStatusPayload,
     GetJobStatusResponse,
-    JobDescription,
+    JobStatus,
     MiriaObject,
 )
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
@@ -168,8 +168,8 @@ def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAP
         return_value=123,
     ) as mock_request_submitter:
         # WHEN calling the corresponding archive method
-        spring_archive_api.archive_files(
-            files=[file_and_sample], archive_location=ArchiveLocations.KAROLINSKA_BUCKET
+        spring_archive_api.archive_files_to_location(
+            files_and_samples=[file_and_sample], archive_location=ArchiveLocations.KAROLINSKA_BUCKET
         )
 
     # THEN the correct archive function should have been called once
@@ -179,10 +179,11 @@ def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAP
 def test_archive_all_non_archived_spring_files(
     spring_archive_api: SpringArchiveAPI,
     caplog,
-    ok_ddn_response,
+    ok_miria_response,
     archive_request_json,
     header_with_test_auth_token,
     test_auth_token: AuthToken,
+    sample_id: str,
 ):
     """Test archiving all non-archived SPRING files for Miria customers."""
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
@@ -194,11 +195,15 @@ def test_archive_all_non_archived_spring_files(
         "model_validate",
         return_value=test_auth_token,
     ), mock.patch.object(
+        HousekeeperAPI,
+        "get_all_non_archived_spring_files",
+        return_value=[spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first()],
+    ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_response,
+        return_value=ok_miria_response,
     ) as mock_request_submitter:
-        spring_archive_api.archive_all_non_archived_spring_files()
+        spring_archive_api.archive_spring_files_and_add_archives_to_housekeeper(200)
 
     # THEN the DDN archiving function should have been called with the correct destination and source.
     mock_request_submitter.assert_called_with(
@@ -206,9 +211,10 @@ def test_archive_all_non_archived_spring_files(
         url="some/api/files/archive",
         headers=header_with_test_auth_token,
         json=archive_request_json,
+        verify=False,
     )
 
-    # THEN all spring files for Karolinska should have an entry in the Archive table in HouseKeeper while no other
+    # THEN all spring files for Karolinska should have an entry in the Archive table in Housekeeper while no other
     # files should have an entry
     files: list[File] = spring_archive_api.housekeeper_api.files()
     for file in files:
@@ -222,22 +228,22 @@ def test_archive_all_non_archived_spring_files(
 
 @pytest.mark.parametrize(
     "job_status, should_date_be_set",
-    [(JobDescription.COMPLETED, True), (JobDescription.RUNNING, False)],
+    [(JobStatus.COMPLETED, True), (JobStatus.RUNNING, False)],
 )
 def test_get_archival_status(
     spring_archive_api: SpringArchiveAPI,
     caplog,
-    ok_ddn_job_status_response,
+    ok_miria_job_status_response,
     archive_request_json,
     header_with_test_auth_token,
     test_auth_token: AuthToken,
     archival_job_id: int,
-    job_status: JobDescription,
+    job_status: JobStatus,
     should_date_be_set: bool,
 ):
     # GIVEN a file with an ongoing archival
     file: File = spring_archive_api.housekeeper_api.files().first()
-    spring_archive_api.housekeeper_api.add_archives(files=[Path(file.path)], archive_task_id=123)
+    spring_archive_api.housekeeper_api.add_archives(files=[file], archive_task_id=archival_job_id)
 
     # WHEN querying the task id and getting a "COMPLETED" response
     with mock.patch.object(
@@ -247,11 +253,11 @@ def test_get_archival_status(
     ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_job_status_response,
+        return_value=ok_miria_job_status_response,
     ), mock.patch.object(
         GetJobStatusPayload,
-        "post_request",
-        return_value=GetJobStatusResponse(job_id=archival_job_id, description=job_status),
+        "get_job_status",
+        return_value=GetJobStatusResponse(id=archival_job_id, status=job_status),
     ):
         spring_archive_api.update_ongoing_task(
             task_id=archival_job_id,
@@ -265,14 +271,15 @@ def test_get_archival_status(
 
 @pytest.mark.parametrize(
     "job_status, should_date_be_set",
-    [(JobDescription.COMPLETED, True), (JobDescription.RUNNING, False)],
+    [(JobStatus.COMPLETED, True), (JobStatus.RUNNING, False)],
 )
 def test_get_retrieval_status(
     spring_archive_api: SpringArchiveAPI,
     caplog,
-    ok_ddn_job_status_response,
+    ok_miria_job_status_response,
     archive_request_json,
     header_with_test_auth_token,
+    archival_job_id: int,
     retrieval_job_id: int,
     test_auth_token,
     job_status,
@@ -280,9 +287,9 @@ def test_get_retrieval_status(
 ):
     # GIVEN a file with an ongoing archival
     file: File = spring_archive_api.housekeeper_api.files().first()
-    spring_archive_api.housekeeper_api.add_archives(files=[Path(file.path)], archive_task_id=123)
+    spring_archive_api.housekeeper_api.add_archives(files=[file], archive_task_id=archival_job_id)
     spring_archive_api.housekeeper_api.set_archive_retrieval_task_id(
-        file_id=file.id, retrieval_task_id=124
+        file_id=file.id, retrieval_task_id=retrieval_job_id
     )
 
     # WHEN querying the task id and getting a "COMPLETED" response
@@ -293,11 +300,11 @@ def test_get_retrieval_status(
     ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_job_status_response,
+        return_value=ok_miria_job_status_response,
     ), mock.patch.object(
         GetJobStatusPayload,
-        "post_request",
-        return_value=GetJobStatusResponse(job_id=retrieval_job_id, description=job_status),
+        "get_job_status",
+        return_value=GetJobStatusResponse(id=retrieval_job_id, status=job_status),
     ):
         spring_archive_api.update_ongoing_task(
             task_id=retrieval_job_id,
@@ -312,12 +319,13 @@ def test_get_retrieval_status(
 def test_retrieve_samples(
     spring_archive_api: SpringArchiveAPI,
     caplog,
-    ok_ddn_response,
+    ok_miria_response,
     trimmed_local_path,
     local_storage_repository,
     retrieve_request_json,
     header_with_test_auth_token,
     test_auth_token,
+    archival_job_id: int,
     sample_with_spring_file: str,
 ):
     """Test retrieving all archived SPRING files tied to a sample for a Miria customer."""
@@ -326,10 +334,10 @@ def test_retrieve_samples(
     # with the DDN customer having two samples, and the non-DDN having one sample.
     files: list[File] = spring_archive_api.housekeeper_api.get_files(
         bundle=sample_with_spring_file, tags=[SequencingFileTag.SPRING]
-    )
+    ).all()
     for file in files:
         spring_archive_api.housekeeper_api.add_archives(
-            files=[Path(file.full_path)], archive_task_id=123
+            files=[file], archive_task_id=archival_job_id
         )
         assert not file.archive.retrieval_task_id
         assert file.archive
@@ -342,7 +350,7 @@ def test_retrieve_samples(
     ), mock.patch.object(MiriaObject, "trim_path", return_value=True), mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_response,
+        return_value=ok_miria_response,
     ) as mock_request_submitter:
         spring_archive_api.retrieve_samples([sample_with_spring_file])
 
@@ -357,6 +365,7 @@ def test_retrieve_samples(
         url="some/api/files/retrieve",
         headers=header_with_test_auth_token,
         json=retrieve_sample_request_json,
+        verify=False,
     )
 
     # THEN the Archive entry should have a retrieval task id set

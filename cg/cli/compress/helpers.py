@@ -10,7 +10,7 @@ from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.compression import CRUNCHY_MIN_GB_PER_PROCESS, MAX_READS_PER_GB
-from cg.constants.slurm import Slurm
+from cg.constants.slurm import SlurmProcessing
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
@@ -51,7 +51,7 @@ def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
 def set_memory_according_to_reads(
     sample_id: str, sample_reads: int | None = None, sample_process_mem: int | None = None
 ) -> int | None:
-    """Set SLURM sample process memory depending on number of sample reads if sample_process_mem is not set."""
+    """Set SLURM sample process memory depending on the number of sample reads if sample_process_mem is not set."""
     if sample_process_mem:
         return sample_process_mem
     if not sample_reads:
@@ -60,9 +60,9 @@ def set_memory_according_to_reads(
     sample_process_mem: int = ceil((sample_reads / MAX_READS_PER_GB))
     if sample_process_mem < CRUNCHY_MIN_GB_PER_PROCESS:
         return CRUNCHY_MIN_GB_PER_PROCESS
-    if CRUNCHY_MIN_GB_PER_PROCESS <= sample_process_mem < Slurm.MAX_NODE_MEMORY.value:
+    if CRUNCHY_MIN_GB_PER_PROCESS <= sample_process_mem < SlurmProcessing.MAX_NODE_MEMORY:
         return sample_process_mem
-    return Slurm.MAX_NODE_MEMORY.value
+    return SlurmProcessing.MAX_NODE_MEMORY
 
 
 def update_compress_api(

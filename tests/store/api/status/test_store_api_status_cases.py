@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
-from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline, Priority
+from cg.constants import DataDelivery, Pipeline, Priority
+from cg.constants.constants import CaseActions
 from cg.store import Store
 from cg.store.models import Analysis, Case, CaseSample
 
@@ -752,10 +753,10 @@ def test_excluded_by_action(base_store: Store, helpers):
     """Test to that cases can be excluded by action"""
 
     # GIVEN a database with a case with an action
-    add_case(helpers, base_store, action=CASE_ACTIONS[0])
+    add_case(helpers, base_store, action=CaseActions.actions()[0])
 
     # WHEN getting active cases by action
-    cases = base_store.cases(case_action=CASE_ACTIONS[1])
+    cases = base_store.cases(case_action=CaseActions.actions()[1])
 
     # THEN cases should not contain this case
     assert not cases
@@ -765,7 +766,7 @@ def test_included_by_action(base_store: Store, helpers):
     """Test to that cases can be included by action"""
 
     # GIVEN a database with a case with an action
-    new_case = add_case(helpers, base_store, action=CASE_ACTIONS[0])
+    new_case = add_case(helpers, base_store, action=CaseActions.actions()[0])
 
     # WHEN getting active cases by action
     cases = base_store.cases(case_action=new_case.action)

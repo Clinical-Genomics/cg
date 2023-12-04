@@ -43,7 +43,7 @@ def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
 
 
 def test_construct_bcl2fastq_sheet(
-    bcl2fastq_sample_sheet_creator: SampleSheetCreator, project_dir: Path
+    bcl2fastq_sample_sheet_creator: SampleSheetCreatorBcl2Fastq, project_dir: Path
 ):
     """Test that a created Bcl2fastq sample sheet has samples."""
     # GIVEN a Bcl2fastq sample sheet creator populated with Bcl2fastq samples
@@ -82,12 +82,12 @@ def test_construct_bcl_convert_sheet(
 
 def test_remove_unwanted_samples_dual_index(
     novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleBcl2Fastq,
-    bcl2fastq_flow_cell: FlowCellDirectoryData,
+    hiseq_x_flow_cell: FlowCellDirectoryData,
 ):
     """Test that a sample with dual index is not removed."""
     # GIVEN a sample sheet creator with a sample with dual index
     sample_sheet_creator: SampleSheetCreatorBcl2Fastq = SampleSheetCreatorBcl2Fastq(
-        flow_cell=bcl2fastq_flow_cell,
+        flow_cell=hiseq_x_flow_cell,
         lims_samples=[novaseq6000_flow_cell_sample_before_adapt_indexes],
     )
 
@@ -100,13 +100,13 @@ def test_remove_unwanted_samples_dual_index(
 
 def test_remove_unwanted_samples_no_dual_index(
     novaseq6000_flow_cell_sample_no_dual_index: FlowCellSampleBcl2Fastq,
-    bcl2fastq_flow_cell: FlowCellDirectoryData,
+    novaseq_6000_flow_cell: FlowCellDirectoryData,
     caplog,
 ):
     """Test that samples with no dual index are removed."""
     # GIVEN a sample sheet creator with a sample without dual indexes
     sample_sheet_creator: SampleSheetCreatorBcl2Fastq = SampleSheetCreatorBcl2Fastq(
-        flow_cell=bcl2fastq_flow_cell,
+        flow_cell=novaseq_6000_flow_cell,
         lims_samples=[novaseq6000_flow_cell_sample_no_dual_index],
     )
 
