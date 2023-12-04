@@ -136,26 +136,25 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
         )
         metrics_values: dict = {}
-        metrics_list: List[MetricsBase] = []
-
         for sample_data in multiqc_json.report_general_stats_data:
             for sample_key, sample_values in sample_data.items():
-                if sample_name + "_" + sample_name in sample_key:
-                    metrics_values[sample_key] = sample_values
+                if sample_key == sample_name + "_" + sample_name:
+                    metrics_values.update(sample_values)
                     LOG.info(f"Sample Key: {sample_key}, Values: {sample_values}")
 
-                    for metric_name, metric_value in sample_values.items():
-                        metrics_list.append(
-                            MetricsBase(
-                                header=None,
-                                id=sample_name,
-                                input="multiqc_data.json",
-                                name=metric_name,
-                                step="multiqc",
-                                value=metric_value,
-                                condition=pipeline_metrics.get(metric_name, None),
-                            )
-                        )
+        metrics_list = [
+            MetricsBase(
+                header=None,
+                id=sample_name,
+                input="multiqc_data.json",
+                name=metric_name,
+                step="multiqc",
+                value=metric_value,
+                condition=pipeline_metrics.get(metric_name, None),
+            )
+            for metric_name, metric_value in metrics_values.items()
+        ]
+
         return metrics_list
 
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
