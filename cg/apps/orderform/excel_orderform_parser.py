@@ -8,6 +8,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 from pydantic import ConfigDict, TypeAdapter
 
 from cg.apps.orderform.orderform_parser import OrderformParser
+from cg.apps.orderform.utils import are_all_samples_metagenome
 from cg.constants import DataDelivery
 from cg.constants.orderforms import ORDERFORM_VERSIONS, Orderform
 from cg.exc import OrderFormError
@@ -141,7 +142,6 @@ class ExcelOrderformParser(OrderformParser):
         """Determine the project type and set it to the class."""
         document_number_to_project_type = {
             Orderform.MICROSALT: str(OrderType.MICROSALT),
-            Orderform.METAGENOME: str(OrderType.METAGENOME),
             Orderform.SARS_COV_2: str(OrderType.SARS_COV_2),
         }
         for document_number, value in document_number_to_project_type.items():
@@ -152,7 +152,14 @@ class ExcelOrderformParser(OrderformParser):
         if Orderform.RML in document_title:
             return str(OrderType.RML) if analysis == self.NO_ANALYSIS else analysis
         if Orderform.MIP_DNA in document_title:
-            return str(OrderType.FASTQ) if analysis == self.NO_ANALYSIS else analysis
+            if analysis == self.NO_ANALYSIS:
+                return (
+                    str(OrderType.METAGENOME)
+                    if are_all_samples_metagenome(self.samples)
+                    else str(OrderType.FASTQ)
+                )
+            else:
+                return analysis
         raise OrderFormError(f"Undetermined project type in: {document_title}")
 
     def parse_data_analysis(self) -> str:

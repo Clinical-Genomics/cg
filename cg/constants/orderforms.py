@@ -20,8 +20,8 @@ class Orderform(StrEnum):
     BALSAMIC_QC: str = "1508"
     BALSAMIC_UMI: str = "1508"
     FASTQ: str = "1508"
+    METAGENOME: str = "1508"
     FLUFFY: str = "1604"
-    METAGENOME: str = "1605"
     MICROSALT: str = "1603"
     MIP_DNA: str = "1508"
     MIP_RNA: str = "1508"
@@ -31,9 +31,8 @@ class Orderform(StrEnum):
 
 
 ORDERFORM_VERSIONS = {
-    Orderform.MIP_DNA: "29",
+    Orderform.MIP_DNA: "30",
     Orderform.RML: "17",
-    Orderform.METAGENOME: "11",
     Orderform.MICROSALT: "11",
     Orderform.SARS_COV_2: "7",
 }
