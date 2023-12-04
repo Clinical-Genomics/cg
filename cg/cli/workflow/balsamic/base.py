@@ -198,7 +198,6 @@ def start(
         genome_version=genome_version,
         panel_bed=panel_bed,
         pon_cnn=pon_cnn,
-        dry_run=dry_run,
     )
     context.invoke(
         run,
