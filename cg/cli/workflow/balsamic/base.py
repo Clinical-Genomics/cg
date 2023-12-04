@@ -71,7 +71,7 @@ def config_case(
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
-            observations=observations
+            observations=observations,
         )
     except CgError as error:
         LOG.error(f"Could not create config: {error}")
