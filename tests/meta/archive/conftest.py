@@ -328,7 +328,7 @@ def archive_context(
     ddn_dataflow_config: DataFlowConfig,
 ) -> CGConfig:
     base_context.housekeeper_api_ = real_housekeeper_api
-    base_context.data_flow_config = ddn_dataflow_config
+    base_context.data_flow = ddn_dataflow_config
 
     customer = helpers.ensure_customer(
         store=base_context.status_db, customer_id="miria_customer", customer_name="Miriam"
