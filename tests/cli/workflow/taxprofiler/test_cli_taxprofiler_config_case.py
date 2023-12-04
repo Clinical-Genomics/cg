@@ -56,6 +56,7 @@ def test_config_case_default_parameters(
     sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.TXT, file_path=taxprofiler_sample_sheet_path, read_to_string=True
     )
+
     assert ",".join(TaxprofilerSampleSheetEntry.headers()) in sample_sheet_content
     assert taxprofiler_sample_sheet_content in sample_sheet_content
 
