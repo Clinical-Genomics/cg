@@ -133,7 +133,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Get MultiQC values per sample."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_name: str = sample.name
-        sample_id: str = case.links[0].sample.internal_id
         multiqc_json: MultiqcDataJson = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
         )
