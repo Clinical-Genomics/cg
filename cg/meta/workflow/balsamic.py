@@ -557,7 +557,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         panel_bed: str,
         pon_cnn: str,
         observations: list[str],
-        dry_run: bool = False,
     ) -> None:
         """Create config file for BALSAMIC analysis"""
         arguments = self.get_verified_config_case_arguments(
@@ -595,7 +594,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             }
         )
         parameters = command + options
-        self.process.run_command(parameters=parameters, dry_run=dry_run)
+        self.process.run_command(parameters=parameters)
 
     def run_analysis(
         self,

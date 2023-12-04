@@ -49,7 +49,6 @@ balsamic.add_command(link)
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
 @OPTION_OBSERVATIONS
-@DRY_RUN
 @click.pass_obj
 def config_case(
     context: CGConfig,
@@ -59,7 +58,6 @@ def config_case(
     panel_bed: str,
     pon_cnn: click.Path,
     observations: list[click.Path],
-    dry_run: bool,
 ):
     """Create config file for BALSAMIC analysis for a given CASE_ID."""
 
@@ -73,8 +71,7 @@ def config_case(
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
-            observations=observations,
-            dry_run=dry_run,
+            observations=observations
         )
     except CgError as error:
         LOG.error(f"Could not create config: {error}")
