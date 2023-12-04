@@ -1,0 +1,687 @@
+---
+metrics:
+  - header: data
+    id: test_sample1
+    input: test_sample1_lanes_12345678_sorted_md_collecthsmetrics
+    name: MEDIAN_TARGET_COVERAGE
+    step: collecthsmetrics
+    value: '31'
+  - header: data
+    id: test_sample3
+    input: test_sample3_lanes_12345678_sorted_md_collecthsmetrics
+    name: MEDIAN_TARGET_COVERAGE
+    step: collecthsmetrics
+    value: '35'
+  - header: data
+    id: test_sample2
+    input: test_sample2_lanes_12345678_sorted_md_collecthsmetrics
+    name: MEDIAN_TARGET_COVERAGE
+    step: collecthsmetrics
+    value: '33'
+  - header: data
+    id: test_sample1
+    input: test_sample1_lanes_12345678_sorted_md_collecthsmetrics
+    name: PCT_TARGET_BASES_20X
+    step: collecthsmetrics
+    value: '0.955756'
+  - header: data
+    id: test_sample3
+    input: test_sample3_lanes_12345678_sorted_md_collecthsmetrics
+    name: PCT_TARGET_BASES_20X
+    step: collecthsmetrics
+    value: '0.947504'
+  - header: data
+    id: test_sample2
+    input: test_sample2_lanes_12345678_sorted_md_collecthsmetrics
+    name: PCT_TARGET_BASES_20X
+    step: collecthsmetrics
+    value: '0.96715'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_lanes_12345678_sorted_md_sex
+    name: gender
+    step: chanjo_sexcheck
+    value: female
+  - header: ~
+    id: test_sample3
+    input: test_sample3_lanes_12345678_sorted_md_sex
+    name: gender
+    step: chanjo_sexcheck
+    value: male
+  - header: ~
+    id: test_sample2
+    input: test_sample2_lanes_12345678_sorted_md_sex
+    name: gender
+    step: chanjo_sexcheck
+    value: female
+  - header: data
+    id: test_sample1
+    input: test_sample1_lanes_12345678_sorted_md_collecthsmetrics
+    name: PCT_TARGET_BASES_10X
+    step: collecthsmetrics
+    value: '0.980779'
+  - header: data
+    id: test_sample3
+    input: test_sample3_lanes_12345678_sorted_md_collecthsmetrics
+    name: PCT_TARGET_BASES_10X
+    step: collecthsmetrics
+    value: '0.981423'
+  - header: data
+    id: test_sample2
+    input: test_sample2_lanes_12345678_sorted_md_collecthsmetrics
+    name: PCT_TARGET_BASES_10X
+    step: collecthsmetrics
+    value: '0.980991'
+  - header: data
+    id: test_sample1
+    input: test_sample1_lanes_12345678_sorted_md_collecthsmetrics
+    name: PCT_OFF_BAIT
+    step: collecthsmetrics
+    value: '0.936637'
+  - header: data
+    id: test_sample3
+    input: test_sample3_lanes_12345678_sorted_md_collecthsmetrics
+    name: PCT_OFF_BAIT
+    step: collecthsmetrics
+    value: '0.936004'
+  - header: data
+    id: test_sample2
+    input: test_sample2_lanes_12345678_sorted_md_collecthsmetrics
+    name: PCT_OFF_BAIT
+    step: collecthsmetrics
+    value: '0.935445'
+  - header: data
+    id: test_sample1
+    input: test_sample1_lanes_12345678_sorted_md_collecthsmetrics
+    name: GC_DROPOUT
+    step: collecthsmetrics
+    value: '1.188474'
+  - header: data
+    id: test_sample3
+    input: test_sample3_lanes_12345678_sorted_md_collecthsmetrics
+    name: GC_DROPOUT
+    step: collecthsmetrics
+    value: '0.711491'
+  - header: data
+    id: test_sample2
+    input: test_sample2_lanes_12345678_sorted_md_collecthsmetrics
+    name: GC_DROPOUT
+    step: collecthsmetrics
+    value: '0.252329'
+  - header: pair
+    id: test_sample1
+    input: test_sample1_lanes_12345678_sorted_md_collectmultiplemetrics
+    name: PCT_PF_READS_IMPROPER_PAIRS
+    step: collectmultiplemetrics
+    value: '0.011754'
+  - header: second_of_pair
+    id: test_sample1
+    input: test_sample1_lanes_12345678_sorted_md_collectmultiplemetrics
+    name: PCT_PF_READS_IMPROPER_PAIRS
+    step: collectmultiplemetrics
+    value: '0.011499'
+  - header: first_of_pair
+    id: test_sample1
+    input: test_sample1_lanes_12345678_sorted_md_collectmultiplemetrics
+    name: PCT_PF_READS_IMPROPER_PAIRS
+    step: collectmultiplemetrics
+    value: '0.01201'
+  - header: pair
+    id: test_sample3
+    input: test_sample3_lanes_12345678_sorted_md_collectmultiplemetrics
+    name: PCT_PF_READS_IMPROPER_PAIRS
+    step: collectmultiplemetrics
+    value: '0.013547'
+  - header: second_of_pair
+    id: test_sample3
+    input: test_sample3_lanes_12345678_sorted_md_collectmultiplemetrics
+    name: PCT_PF_READS_IMPROPER_PAIRS
+    step: collectmultiplemetrics
+    value: '0.013209'
+  - header: first_of_pair
+    id: test_sample3
+    input: test_sample3_lanes_12345678_sorted_md_collectmultiplemetrics
+    name: PCT_PF_READS_IMPROPER_PAIRS
+    step: collectmultiplemetrics
+    value: '0.013886'
+  - header: pair
+    id: test_sample2
+    input: test_sample2_lanes_12345678_sorted_md_collectmultiplemetrics
+    name: PCT_PF_READS_IMPROPER_PAIRS
+    step: collectmultiplemetrics
+    value: '0.014087'
+  - header: second_of_pair
+    id: test_sample2
+    input: test_sample2_lanes_12345678_sorted_md_collectmultiplemetrics
+    name: PCT_PF_READS_IMPROPER_PAIRS
+    step: collectmultiplemetrics
+    value: '0.013827'
+  - header: first_of_pair
+    id: test_sample2
+    input: test_sample2_lanes_12345678_sorted_md_collectmultiplemetrics
+    name: PCT_PF_READS_IMPROPER_PAIRS
+    step: collectmultiplemetrics
+    value: '0.014347'
+  - header: data
+    id: test_sample1
+    input: test_sample1_lanes_12345678_sorted_md_collecthsmetrics
+    name: FOLD_80_BASE_PENALTY
+    step: collecthsmetrics
+    value: '1.194448'
+  - header: data
+    id: test_sample3
+    input: test_sample3_lanes_12345678_sorted_md_collecthsmetrics
+    name: FOLD_80_BASE_PENALTY
+    step: collecthsmetrics
+    value: '1.183034'
+  - header: data
+    id: test_sample2
+    input: test_sample2_lanes_12345678_sorted_md_collecthsmetrics
+    name: FOLD_80_BASE_PENALTY
+    step: collecthsmetrics
+    value: '1.181393'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane1_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '91602342'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane8_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '84538446'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane4_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '106312128'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane5_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '84919904'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane6_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '98514512'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane2_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '93172936'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane7_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '89145534'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane3_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '93716838'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane1_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '100771554'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane2_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '102666524'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane4_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '116399794'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane5_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '94359652'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane7_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '98864840'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane3_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '102830516'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane6_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '107773044'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane8_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '93744200'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane7_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '94638394'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane8_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '98291094'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane5_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '98509740'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane6_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '90408688'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane4_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '97118114'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane2_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '89400208'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane3_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '96589538'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane1_sorted
+    name: raw_total_sequences
+    step: bamstats
+    value: '90625042'
+  - header: data
+    id: test_sample1
+    input: test_sample1_lanes_12345678_sorted_md_collecthsmetrics
+    name: MEAN_TARGET_COVERAGE
+    step: collecthsmetrics
+    value: '31.055645'
+  - header: data
+    id: test_sample3
+    input: test_sample3_lanes_12345678_sorted_md_collecthsmetrics
+    name: MEAN_TARGET_COVERAGE
+    step: collecthsmetrics
+    value: '34.307993'
+  - header: data
+    id: test_sample2
+    input: test_sample2_lanes_12345678_sorted_md_collecthsmetrics
+    name: MEAN_TARGET_COVERAGE
+    step: collecthsmetrics
+    value: '33.078994'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane1_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '91484971'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane8_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '84413951'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane4_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '106179163'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane5_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '84795732'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane6_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '98379721'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane2_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '93048739'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane7_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '89015254'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane3_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '93593661'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane1_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '100594435'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane2_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '102479509'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane4_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '116205322'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane5_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '94168238'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane7_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '98667446'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane3_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '102647319'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane6_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '107575901'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane8_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '93549967'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane7_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '94411703'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane8_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '98057086'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane5_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '98278516'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane6_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '90181471'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane4_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '96886106'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane2_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '89148154'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane3_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '96342393'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane1_sorted
+    name: reads_mapped
+    step: bamstats
+    value: '90387264'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_lanes_12345678_sorted_md
+    name: fraction_duplicates
+    step: markduplicates
+    value: '0.0969514385582324'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_lanes_12345678_sorted_md
+    name: fraction_duplicates
+    step: markduplicates
+    value: '0.104707549578552'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_lanes_12345678_sorted_md
+    name: fraction_duplicates
+    step: markduplicates
+    value: '0.0805449833928159'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane1_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.8718689965372'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane8_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.8527356417221'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane4_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.8749296035162'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane5_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.8537775078031'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane6_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.8631765033765'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane2_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.8667027086063'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane7_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.8538569526097'
+  - header: ~
+    id: test_sample1
+    input: test_sample1_171015_22FMNTLT3_XXXXXX_lane3_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.8685647076569'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane1_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.8242371056419'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane2_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.8178422793393'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane4_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.8329275393735'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane5_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.7971442285523'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane7_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.8003395342571'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane3_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.8218456863525'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane6_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.8170757800995'
+  - header: ~
+    id: test_sample3
+    input: test_sample3_171015_22FMNTLT3_XXXXXX_lane8_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.7928053148888'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane7_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.7604661380877'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane8_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.7619234963444'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane5_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.7652780324057'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane6_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.7486779146712'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane4_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.7611073872378'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane2_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.7180610586499'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane3_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.7441286032448'
+  - header: ~
+    id: test_sample2
+    input: test_sample2_171015_22FJMTLT3_XXXXXX_lane1_sorted
+    name: percentage_mapped_reads
+    step: bamstats
+    value: '99.7376243974596'
+  - header: data
+    id: test_sample1
+    input: test_sample1_lanes_12345678_sorted_md_collecthsmetrics
+    name: AT_DROPOUT
+    step: collecthsmetrics
+    value: '0.06267'
+  - header: data
+    id: test_sample3
+    input: test_sample3_lanes_12345678_sorted_md_collecthsmetrics
+    name: AT_DROPOUT
+    step: collecthsmetrics
+    value: '0.192972'
+  - header: data
+    id: test_sample2
+    input: test_sample2_lanes_12345678_sorted_md_collecthsmetrics
+    name: AT_DROPOUT
+    step: collecthsmetrics
+    value: '1.479106'
+  - header: data
+    id: test_sample1
+    input: test_sample1_lanes_12345678_sorted_md_collectmultiplemetrics
+    name: MEAN_INSERT_SIZE
+    step: collectmultiplemetricsinsertsize
+    value: '381.813526'
+  - header: data
+    id: test_sample3
+    input: test_sample3_lanes_12345678_sorted_md_collectmultiplemetrics
+    name: MEAN_INSERT_SIZE
+    step: collectmultiplemetricsinsertsize
+    value: '381.184247'
+  - header: data
+    id: test_sample2
+    input: test_sample2_lanes_12345678_sorted_md_collectmultiplemetrics
+    name: MEAN_INSERT_SIZE
+    step: collectmultiplemetricsinsertsize
+    value: '375.679942'
+

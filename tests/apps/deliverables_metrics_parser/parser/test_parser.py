@@ -5,6 +5,7 @@ import pytest
 
 from cg.apps.deliverables_metrics_parser.parser.deliverables_parser import (
     get_metrics_deliverables_file_path,
+    read_metrics_deliverables,
 )
 from cg.constants.pipeline import Pipeline
 
@@ -33,3 +34,17 @@ def test_get_metrics_deliverables_file_path(
 
     # THEN the path is as expected
     assert metrics_deliverables_file_path == file_path
+
+
+def test_read_metrics_deliverables_file(mip_dna_metrics_deliverables_file_path):
+    """Test to read the content of a metrics deliverables file."""
+    # GIVEN a file path to a metrics deliverables file
+
+    # WHEN reading the content
+    content: list[dict] = read_metrics_deliverables(
+        file_path=mip_dna_metrics_deliverables_file_path
+    )
+
+    # THEN the content has been read
+    print(content)
+    assert content

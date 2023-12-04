@@ -1,7 +1,11 @@
 """Module to parse the metrics deliverables file."""
 from pathlib import Path
 
-from cg.constants import FileExtensions
+from cg.apps.deliverables_metrics_parser.models.pipeline_metrics_deliverables import (
+    MIPDNAMetricsDeliverables,
+)
+
+from cg.constants.constants import FileFormat
 from cg.constants.pipeline import Pipeline
 from cg.io.controller import ReadFile
 
@@ -22,6 +26,10 @@ def get_metrics_deliverables_file_path(pipeline: str, case_id: str) -> Path:
         raise ValueError(f"Invalid pipeline name: {pipeline}")
 
 
-def read_metrics_deliverables(pipeline: str, case_id: str) -> any:
-    file_path: Path = get_metrics_deliverables_file_path(pipeline=pipeline, case_id=case_id)
-    return ReadFile.get_content_from_file(file_format=FileExtensions.YAML, file_path=file_path)
+def read_metrics_deliverables(file_path: Path) -> list[dict]:
+    """Read the metrics deliverables file."""
+    return ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=file_path)
+
+
+def parse_metrics_deliverables_file(content: list[dict]) -> MIPDNAMetricsDeliverables:
+    pass
