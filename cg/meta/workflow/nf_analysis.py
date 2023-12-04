@@ -297,6 +297,33 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return the path of the multiqc_data.json file."""
         return Path(self.root_dir, case_id, "multiqc", "multiqc_data", "multiqc_data.json")
 
+    def get_multiqc_json_metrics(
+        self, case_id: str, pipeline_metrics: Optional[dict] = None
+    ) -> list[MetricsBase]:
+        """Get a multiqc_data.json file and returns metrics and values formatted."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        sample_id: str = case.links[0].sample.internal_id
+        multiqc_json: MultiqcDataJson = MultiqcDataJson(
+            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
+        )
+        metrics_values: dict = {}
+        for key in multiqc_json.report_general_stats_data:
+            if case_id in key:
+                metrics_values.update(list(key.values())[0])
+                LOG.info(f"Key: {key}, Values: {list(key.values())[0]}")
+        return [
+            MetricsBase(
+                header=None,
+                id=sample_id,
+                input="multiqc_data.json",
+                name=metric_name,
+                step="multiqc",
+                value=metric_value,
+                condition=pipeline_metrics.get(metric_name, None),
+            )
+            for metric_name, metric_value in metrics_values.items()
+        ]
+
     def validate_qc_metrics(self, case_id: str, dry_run: bool = False) -> None:
         """Validate the information from a qc metrics deliverable file."""
 
