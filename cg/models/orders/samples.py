@@ -71,7 +71,7 @@ class Of1508Sample(OrderInSample):
     sex: SexEnum = SexEnum.unknown
     tumour: bool = False
     source: str | None
-    control: str | None
+    control: ControlEnum | None
     volume: str | None
     container: ContainerEnum | None
     # "required if plate for new samples"
@@ -209,30 +209,23 @@ class FluffySample(RmlSample):
     # 1604 Orderform Ready made libraries (RML)
 
 
-class MetagenomeSample(OrderInSample):
+class MetagenomeSample(Of1508Sample):
     _suitable_project = OrderType.METAGENOME
-
-    # 1605 Orderform Microbial Metagenomes- 16S
     # "This information is required"
-    container: ContainerEnum | None
-    elution_buffer: str
     source: str
-    # "Required if Plate"
-    container_name: str | None
-    well_position: str | None
     # "This information is not required"
     concentration_sample: float | None
-    quantity: int | None
-    extraction_method: str | None
-    control: ControlEnum | None
-
-    @validator("quantity", pre=True)
-    def str_to_int(cls, v: str) -> int | None:
-        return OptionalIntValidator.str_to_int(v=v)
+    family_name: None = None
+    subject_id: None = None
 
     @validator("concentration_sample", pre=True)
     def str_to_float(cls, v: str) -> float | None:
         return OptionalFloatValidator.str_to_float(v=v)
+
+    @validator("subject_id", pre=True)
+    def required_for_new_samples(cls, v: str) -> None:
+        """Overrides the parent validator since subject_id is optional for these samples."""
+        return None
 
 
 class MicrobialSample(OrderInSample):
