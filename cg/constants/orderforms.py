@@ -9,9 +9,9 @@ CONTAINER_TYPES = ["Tube", "96 well plate"]
 SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
 
 CASE_PROJECT_TYPES = [
-    str(OrderType.MIP_DNA),
-    str(OrderType.BALSAMIC),
-    str(OrderType.MIP_RNA),
+    OrderType.MIP_DNA,
+    OrderType.BALSAMIC,
+    OrderType.MIP_RNA,
 ]
 
 
@@ -29,10 +29,12 @@ class Orderform(StrEnum):
     RML: str = "1604"
     SARS_COV_2: str = "2184"
 
-
-ORDERFORM_VERSIONS = {
-    Orderform.MIP_DNA: "30",
-    Orderform.RML: "17",
-    Orderform.MICROSALT: "11",
-    Orderform.SARS_COV_2: "7",
-}
+    @staticmethod
+    def get_current_orderform_version(order_form: str) -> str:
+        current_order_form_versions = {
+            Orderform.MIP_DNA: "30",
+            Orderform.RML: "17",
+            Orderform.MICROSALT: "11",
+            Orderform.SARS_COV_2: "7",
+        }
+        return current_order_form_versions[order_form]
