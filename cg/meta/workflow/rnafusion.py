@@ -15,6 +15,8 @@ from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
+    MetricsDeliverablesCondition,
+    MultiqcDataJson,
 )
 from cg.models.nf_analysis import PipelineDeliverables
 from cg.models.rnafusion.rnafusion import (
@@ -153,6 +155,30 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
         )
 
+    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
+        """Get a multiqc_data.json file and returns metrics and values formatted."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        sample_id: str = case.links[0].sample.internal_id
+        multiqc_json: MultiqcDataJson = MultiqcDataJson(
+            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
+        )
+        metrics_values: dict = {}
+        for key in multiqc_json.report_general_stats_data:
+            if case_id in key:
+                metrics_values.update(list(key.values())[0])
+        return [
+            MetricsBase(
+                header=None,
+                id=sample_id,
+                input="multiqc_data.json",
+                name=metric_name,
+                step="multiqc",
+                value=metric_value,
+                condition=RNAFUSION_METRIC_CONDITIONS.get(metric_name, None),
+            )
+            for metric_name, metric_value in metrics_values.items()
+        ]
+
     @staticmethod
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
         """Check that all mandatory metrics are present. Raise error if missing."""
@@ -170,7 +196,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             case_id=case_id, pipeline_metrics=RNAFUSION_METRIC_CONDITIONS
         )
         self.ensure_mandatory_metrics_present(metrics=metrics)
-
         if dry_run:
             LOG.info(
                 f"Dry-run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
