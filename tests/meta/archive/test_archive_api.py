@@ -300,7 +300,7 @@ def test_retrieve_samples(
     archival_job_id: int,
     sample_with_spring_file: str,
 ):
-    """Test retrievng all archived SPRING files tied to a sample for a Miria customer."""
+    """Test retrieving all archived SPRING files tied to a sample for a Miria customer."""
 
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
     # with the DDN customer having two samples, and the non-DDN having one sample.
