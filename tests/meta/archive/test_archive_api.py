@@ -27,7 +27,7 @@ def test_add_samples_to_files(spring_archive_api: SpringArchiveAPI):
     # GIVEN a list of SPRING Files to archive
     files_to_archive: list[
         File
-    ] = spring_archive_api.housekeeper_api.get_all_non_archived_spring_files()
+    ] = spring_archive_api.housekeeper_api.get_non_archived_spring_files()
 
     # WHEN adding the Sample objects
     file_and_samples: list[FileAndSample] = spring_archive_api.add_samples_to_files(
@@ -46,7 +46,7 @@ def test_add_samples_to_files_missing_sample(spring_archive_api: SpringArchiveAP
     # GIVEN a list of SPRING Files to archive
     files_to_archive: list[
         File
-    ] = spring_archive_api.housekeeper_api.get_all_non_archived_spring_files()
+    ] = spring_archive_api.housekeeper_api.get_non_archived_spring_files()
     # GIVEN one of the files does not match the
     files_to_archive[0].version.bundle.name = "does-not-exist"
     # WHEN adding the Sample objects
@@ -168,7 +168,7 @@ def test_archive_all_non_archived_spring_files(
         return_value=test_auth_token,
     ), mock.patch.object(
         HousekeeperAPI,
-        "get_all_non_archived_spring_files",
+        "get_non_archived_spring_files",
         return_value=[spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first()],
     ), mock.patch.object(
         APIRequest,

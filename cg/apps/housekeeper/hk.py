@@ -263,10 +263,13 @@ class HousekeeperAPI:
             .first()
         )
 
-    def get_all_non_archived_spring_files(self, tags: list[str] | None = None) -> list[File]:
+    def get_non_archived_spring_files(
+        self, tags: list[str] | None = None, limit: int = None
+    ) -> list[File]:
         """Return all spring files which are not marked as archived in Housekeeper."""
-        return self._store.get_all_non_archived_files(
-            tag_names=tags + [SequencingFileTag.SPRING] if tags else [SequencingFileTag.SPRING]
+        return self._store.get_non_archived_files(
+            tag_names=tags + [SequencingFileTag.SPRING] if tags else [SequencingFileTag.SPRING],
+            limit=limit,
         )
 
     def get_latest_bundle_version(self, bundle_name: str) -> Version | None:
@@ -420,13 +423,19 @@ class HousekeeperAPI:
             )
         return all(sequencing_files_in_hk.values())
 
-    def get_non_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
+    def get_non_archived_files_for_bundle(
+        self, bundle_name: str, tags: list | None = None
+    ) -> list[File]:
         """Returns all non-archived_files from a given bundle, tagged with the given tags"""
-        return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags or [])
+        return self._store.get_non_archived_files_for_bundle(
+            bundle_name=bundle_name, tags=tags or []
+        )
 
-    def get_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
+    def get_archived_files_for_bundle(
+        self, bundle_name: str, tags: list | None = None
+    ) -> list[File]:
         """Returns all archived_files from a given bundle, tagged with the given tags"""
-        return self._store.get_archived_files(bundle_name=bundle_name, tags=tags or [])
+        return self._store.get_archived_files_for_bundle(bundle_name=bundle_name, tags=tags or [])
 
     def add_archives(self, files: list[File], archive_task_id: int) -> None:
         """Creates an archive object for the given files, and adds the archive task id to them."""
@@ -467,8 +476,7 @@ class HousekeeperAPI:
         """Return a list of bundles with corresponding file paths for all non-archived SPRING
         files."""
         return [
-            (file.version.bundle.name, file.path)
-            for file in self.get_all_non_archived_spring_files()
+            (file.version.bundle.name, file.path) for file in self.get_non_archived_spring_files()
         ]
 
     def set_archive_retrieved_at(self, file_id: int, retrieval_task_id: int):

@@ -64,11 +64,17 @@ class SpringArchiveAPI:
     ) -> None:
         """Archives all non archived spring files. If a limit is provided, the amount of files archived are limited
         to that amount."""
-
+        nr_of_files_handled: int = 0
         for archive_location in ArchiveLocations:
-            files_to_archive: list[File] = self.housekeeper_api.get_all_non_archived_spring_files(
-                tags=[archive_location]
+            if spring_file_count_limit and nr_of_files_handled > spring_file_count_limit:
+                LOG.info(f"{spring_file_count_limit} files sent to archive - exiting.")
+            files_to_archive: list[File] = self.housekeeper_api.get_non_archived_spring_files(
+                tags=[archive_location],
+                limit=spring_file_count_limit - nr_of_files_handled
+                if spring_file_count_limit
+                else None,
             )
+            nr_of_files_handled += len(files_to_archive)
             if files_to_archive:
                 files_and_samples_for_location = self.add_samples_to_files(files_to_archive)
                 job_id = self.archive_files_to_location(
@@ -116,7 +122,7 @@ class SpringArchiveAPI:
         files: list[File] = []
         for sample in samples:
             files.extend(
-                self.housekeeper_api.get_archived_files(
+                self.housekeeper_api.get_archived_files_for_bundle(
                     bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING]
                 )
             )
