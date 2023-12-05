@@ -11,10 +11,10 @@ from cg.models.analysis import AnalysisModel
 class TaxprofilerQCMetrics(BaseModel):
     """Taxprofiler QC metrics."""
 
-    after_filtering_total_reads: Optional[float]
-    reads_mapped: Optional[float]
-    before_filtering_total_reads: Optional[float]
-    paired_aligned_none: Optional[float]
+    after_filtering_total_reads: Optional[float] = None
+    reads_mapped: Optional[float] = None
+    before_filtering_total_reads: Optional[float] = None
+    paired_aligned_none: Optional[float] = None
 
 
 class TaxprofilerParameters(PipelineParameters):
