@@ -3,7 +3,8 @@ import logging
 
 import click
 
-from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline, Priority
+from cg.constants import DataDelivery, Pipeline, Priority
+from cg.constants.constants import CaseActions
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Case, Customer, Panel
@@ -13,7 +14,7 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("case")
-@click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update case action")
+@click.option("-a", "--action", type=click.Choice(CaseActions.actions()), help="update case action")
 @click.option("-c", "--customer-id", type=click.STRING, help="update customer")
 @click.option(
     "-d",

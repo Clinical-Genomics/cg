@@ -9,7 +9,6 @@ from pydantic.v1 import ValidationError
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
-from cg.constants.indexes import ListIndexes
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Gender
@@ -272,7 +271,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         pon_list = Path(self.pon_path).glob(f"*{Path(panel_bed).stem}_{self.PON_file_suffix}")
         sorted_pon_files = sorted(
             pon_list,
-            key=lambda file: int(file.stem.split("_v")[ListIndexes.LAST.value]),
+            key=lambda file: int(file.stem.split("_v")[-1]),
             reverse=True,
         )
 

@@ -88,6 +88,6 @@ class APIRequest:
 
     @classmethod
     def api_request_from_content(
-        cls, api_method: str, url: str, headers: dict, json: dict
+        cls, api_method: str, url: str, headers: dict, json: dict, verify: bool = True
     ) -> Response:
-        return cls.api_request[api_method](url=url, headers=headers, json=json)
+        return cls.api_request[api_method](url=url, headers=headers, json=json, verify=verify)

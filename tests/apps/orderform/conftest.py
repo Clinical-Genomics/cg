@@ -8,7 +8,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.constants.constants import FileFormat
-from cg.constants.orderforms import ORDERFORM_VERSIONS, Orderform
+from cg.constants.orderforms import Orderform
 from cg.io.controller import ReadFile
 from cg.models.orders.constants import OrderType
 
@@ -148,7 +148,7 @@ def microbial_orderform(orderforms: Path) -> str:
     """Orderform fixture for microbial samples."""
     return Path(
         orderforms,
-        f"{Orderform.MICROSALT}.{ORDERFORM_VERSIONS[Orderform.MICROSALT]}.microbial.xlsx",
+        f"{Orderform.MICROSALT}.{Orderform.get_current_orderform_version(Orderform.MICROSALT)}.microbial.xlsx",
     ).as_posix()
 
 
@@ -157,7 +157,7 @@ def sarscov2_orderform(orderforms: Path) -> str:
     """Orderform fixture for sarscov2 samples."""
     return Path(
         orderforms,
-        f"{Orderform.SARS_COV_2}.{ORDERFORM_VERSIONS[Orderform.SARS_COV_2]}.sarscov2.xlsx",
+        f"{Orderform.SARS_COV_2}.{Orderform.get_current_orderform_version(Orderform.SARS_COV_2)}.sarscov2.xlsx",
     ).as_posix()
 
 
@@ -165,7 +165,8 @@ def sarscov2_orderform(orderforms: Path) -> str:
 def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples."""
     return Path(
-        orderforms, f"{Orderform.RML}.{ORDERFORM_VERSIONS[Orderform.RML]}.rml.xlsx"
+        orderforms,
+        f"{Orderform.RML}.{Orderform.get_current_orderform_version(Orderform.RML)}.rml.xlsx",
     ).as_posix()
 
 
@@ -245,7 +246,8 @@ def balsamic_order_to_submit(cgweb_orders_dir: Path) -> dict:
 def balsamic_orderform(orderforms: Path) -> str:
     """Orderform fixture for Balsamic samples."""
     return Path(
-        orderforms, f"{Orderform.BALSAMIC}.{ORDERFORM_VERSIONS[Orderform.BALSAMIC]}.balsamic.xlsx"
+        orderforms,
+        f"{Orderform.BALSAMIC}.{Orderform.get_current_orderform_version(Orderform.BALSAMIC)}.balsamic.xlsx",
     ).as_posix()
 
 
@@ -254,7 +256,7 @@ def balsamic_qc_orderform(orderforms: Path) -> str:
     """Orderform fixture for Balsamic QC samples."""
     return Path(
         orderforms,
-        f"{Orderform.BALSAMIC_QC}.{ORDERFORM_VERSIONS[Orderform.BALSAMIC_QC]}.balsamic_qc.xlsx",
+        f"{Orderform.BALSAMIC_QC}.{Orderform.get_current_orderform_version(Orderform.BALSAMIC_QC)}.balsamic_qc.xlsx",
     ).as_posix()
 
 
@@ -263,7 +265,7 @@ def balsamic_umi_orderform(orderforms: Path) -> str:
     """Orderform fixture for Balsamic UMI samples."""
     return Path(
         orderforms,
-        f"{Orderform.BALSAMIC_UMI}.{ORDERFORM_VERSIONS[Orderform.BALSAMIC_UMI]}.balsamic_umi.xlsx",
+        f"{Orderform.BALSAMIC_UMI}.{Orderform.get_current_orderform_version(Orderform.BALSAMIC_UMI)}.balsamic_umi.xlsx",
     ).as_posix()
 
 
@@ -271,7 +273,8 @@ def balsamic_umi_orderform(orderforms: Path) -> str:
 def fastq_orderform(orderforms: Path):
     """Orderform fixture for FASTQ samples."""
     return Path(
-        orderforms, f"{Orderform.FASTQ}.{ORDERFORM_VERSIONS[Orderform.FASTQ]}.fastq.xlsx"
+        orderforms,
+        f"{Orderform.FASTQ}.{Orderform.get_current_orderform_version(Orderform.FASTQ)}.fastq.xlsx",
     ).as_posix()
 
 
@@ -280,7 +283,7 @@ def metagenome_orderform(orderforms: Path) -> str:
     """Orderform fixture for metagenome samples."""
     return Path(
         orderforms,
-        f"{Orderform.METAGENOME}.{ORDERFORM_VERSIONS[Orderform.METAGENOME]}.metagenome.xlsx",
+        f"{Orderform.METAGENOME}.{Orderform.get_current_orderform_version(Orderform.METAGENOME)}.metagenome.xlsx",
     ).as_posix()
 
 
@@ -288,7 +291,8 @@ def metagenome_orderform(orderforms: Path) -> str:
 def mip_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP samples."""
     return Path(
-        orderforms, f"{Orderform.MIP_DNA}.{ORDERFORM_VERSIONS[Orderform.MIP_DNA]}.mip.xlsx"
+        orderforms,
+        f"{Orderform.MIP_DNA}.{Orderform.get_current_orderform_version(Orderform.MIP_DNA)}.mip.xlsx",
     ).as_posix()
 
 
@@ -296,7 +300,8 @@ def mip_orderform(orderforms: Path) -> str:
 def mip_rna_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP RNA samples."""
     return Path(
-        orderforms, f"{Orderform.MIP_RNA}.{ORDERFORM_VERSIONS[Orderform.MIP_RNA]}.mip_rna.xlsx"
+        orderforms,
+        f"{Orderform.MIP_RNA}.{Orderform.get_current_orderform_version(Orderform.MIP_RNA)}.mip_rna.xlsx",
     ).as_posix()
 
 
@@ -305,7 +310,7 @@ def rnafusion_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP RNA samples."""
     return Path(
         orderforms,
-        f"{Orderform.RNAFUSION}.{ORDERFORM_VERSIONS[Orderform.RNAFUSION]}.rnafusion.xlsx",
+        f"{Orderform.RNAFUSION}.{Orderform.get_current_orderform_version(Orderform.RNAFUSION)}.rnafusion.xlsx",
     ).as_posix()
 
 

@@ -1,0 +1,10 @@
+[Data]
+FCID,Lane,SampleID,SampleRef,index,SampleName,Control,Recipe,Operator,Project
+HKHHGCCXX,1,AA123,hg19,TCCGGAGA,<anonymous_1>,N,R1,NN,1
+HKHHGCCXX,2,AA124,hg19,CGCTCATT,<anonymous_1>,N,R1,NN,1
+HKHHGCCXX,3,AA125,hg19,GAGATTCC,<anonymous_1>,N,R1,NN,1
+HKHHGCCXX,4,AA126,hg19,GAATTCGT,<anonymous_2>,N,R1,NN,2
+HKHHGCCXX,5,AA127,hg19,CGGCTATG,<anonymous_3>,N,R1,NN,3
+HKHHGCCXX,6,AA128,hg19,TCCGCGAA,<anonymous_4>,N,R1,NN,4
+HKHHGCCXX,7,AA129,hg19,TCTCGCGC,<anonymous_5>,N,R1,NN,5
+HKHHGCCXX,8,AA130,hg19,AGCGATAG,<anonymous_6>,N,R1,NN,6

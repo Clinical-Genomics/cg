@@ -3,6 +3,7 @@ import logging
 import click
 
 from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline, Priority
+from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.subject import Gender
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
@@ -58,7 +59,7 @@ def add():
     "--data-archive-location",
     "data_archive_location",
     help="Specifies where to store data for the customer.",
-    default="PDC",
+    default=PDC_ARCHIVE_LOCATION,
     show_default=True,
     required=False,
 )
