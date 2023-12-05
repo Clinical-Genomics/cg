@@ -15,19 +15,19 @@ from cg.apps.demultiplex.sample_sheet.index import (
     update_indexes_for_samples,
 )
 from cg.apps.demultiplex.sample_sheet.models import (
-    NO_REVERSE_COMPLEMENTS,
-    NOVASEQ_6000_POST_1_5_KITS,
-    NOVASEQ_X_INDEX_SETTINGS,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
-    IndexSettings,
 )
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_samples_by_lane,
     get_validated_sample_sheet,
 )
 from cg.constants.demultiplexing import (
+    NO_REVERSE_COMPLEMENTS,
+    NOVASEQ_6000_POST_1_5_KITS,
+    NOVASEQ_X_INDEX_SETTINGS,
     BclConverter,
+    IndexSettings,
     SampleSheetBcl2FastqSections,
     SampleSheetBCLConvertSections,
 )

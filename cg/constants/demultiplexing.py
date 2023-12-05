@@ -3,6 +3,7 @@ from enum import StrEnum
 from pathlib import Path
 
 import click
+from pydantic import BaseModel
 
 from cg.constants.sequencing import Sequencers
 
@@ -221,3 +222,33 @@ DRAGEN_PASSED_FILTER_PCT: float = 100.00000
 FASTQ_FILE_SUFFIXES: list[str] = [".fastq", ".gz"]
 INDEX_CHECK: str = "indexcheck"
 UNDETERMINED: str = "Undetermined"
+
+
+class IndexSettings(BaseModel):
+    """
+    Holds the settings defining how the sample indices should be handled in the sample sheet.
+    These vary between machines and versions.
+
+        Attributes:
+            should_i5_be_reverse_complimented (bool): Whether the i5 index should be reverse complemented.
+            are_i5_override_cycles_reverse_complemented (bool): Whether the ovveride cycles for i5 should be written in reverse.
+
+    """
+
+    should_i5_be_reverse_complimented: bool
+    are_i5_override_cycles_reverse_complemented: bool
+
+
+# The logic for the settings below are acquired empirically, any changes should be well motivated
+# and rigorously tested.
+
+NOVASEQ_X_INDEX_SETTINGS = IndexSettings(
+    should_i5_be_reverse_complimented=False, are_i5_override_cycles_reverse_complemented=True
+)
+NOVASEQ_6000_POST_1_5_KITS = IndexSettings(
+    should_i5_be_reverse_complimented=True, are_i5_override_cycles_reverse_complemented=False
+)
+NO_REVERSE_COMPLEMENTS = IndexSettings(
+    should_i5_be_reverse_complimented=False,
+    are_i5_override_cycles_reverse_complemented=False,
+)
