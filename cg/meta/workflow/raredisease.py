@@ -4,7 +4,9 @@ import logging
 from pathlib import Path
 
 from cg.constants import GenePanelMasterList, Pipeline
+from cg.constants.constants import FileFormat
 from cg.constants.gene_panel import GENOME_BUILD_38
+from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -24,13 +26,19 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, pipeline=pipeline)
 
+    @property
+    def root(self) -> str:
+        return self.config.raredisease.root
+
     def write_panel(self, case_id: str, content: list[str]):
-        """Write the gene panel to case dir"""
+        """Write the gene panel to case dir."""
         out_dir = Path(self.root, case_id)
         out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = Path(out_dir, "gene_panels.bed")
-        with out_path.open("w") as out_handle:
-            out_handle.write("\n".join(content))
+        WriteFile.write_file_from_content(
+            content="\n".join(content),
+            file_format=FileFormat.TXT,
+            file_path=Path(out_dir, "gene_panels.bed"),
+        )
 
     @staticmethod
     def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
