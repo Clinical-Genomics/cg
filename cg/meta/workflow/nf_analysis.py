@@ -337,7 +337,7 @@ class NfAnalysisAPI(AnalysisAPI):
             qc_metrics_raw: dict = ReadFile.get_content_from_file(
                 file_format=FileFormat.YAML, file_path=metrics_deliverables_path
             )
-            MetricsDeliverablesCondition(**qc_metrics_raw)
+            MetricsDeliverablesCondition.model_validate(qc_metrics_raw)
         except MetricsQCError as error:
             LOG.error(f"QC metrics failed for {case_id}")
             self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
