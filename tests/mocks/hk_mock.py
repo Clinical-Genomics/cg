@@ -554,11 +554,15 @@ class MockHousekeeperAPI:
                 return file_obj
         return None
 
-    def get_non_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
+    def get_non_archived_files_for_bundle(
+        self, bundle_name: str, tags: list | None = None
+    ) -> list[File]:
         """Returns all non-archived files from a given bundle, tagged with the given tags."""
         pass
 
-    def get_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
+    def get_archived_files_for_bundle(
+        self, bundle_name: str, tags: list | None = None
+    ) -> list[File]:
         """Returns all archived files from a given bundle, tagged with the given tags."""
         pass
 

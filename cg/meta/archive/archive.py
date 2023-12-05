@@ -66,8 +66,7 @@ class SpringArchiveAPI:
         to that amount."""
         for archive_location in ArchiveLocations:
             files_to_archive: list[File] = self.housekeeper_api.get_non_archived_spring_files(
-                tags=[archive_location],
-                limit=spring_file_count_limit if spring_file_count_limit else None,
+                tags=[archive_location], limit=spring_file_count_limit
             )
             if files_to_archive:
                 files_and_samples_for_location = self.add_samples_to_files(files_to_archive)
@@ -97,7 +96,7 @@ class SpringArchiveAPI:
         return [
             link.sample
             for link in case.links
-            if self.housekeeper_api.get_archived_files(
+            if self.housekeeper_api.get_archived_files_for_bundle(
                 bundle_name=link.sample.internal_id, tags=[SequencingFileTag.SPRING]
             )
         ]

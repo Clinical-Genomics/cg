@@ -519,7 +519,7 @@ class AnalysisAPI(MetaAPI):
             spring_archive_api = SpringArchiveAPI(
                 status_db=self.status_db,
                 housekeeper_api=self.housekeeper_api,
-                data_flow_config=self.config.data_flow_config,
+                data_flow_config=self.config.data_flow,
             )
             spring_archive_api.retrieve_case(case_id)
 
@@ -529,7 +529,7 @@ class AnalysisAPI(MetaAPI):
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         for sample in [link.sample for link in case.links]:
             if (
-                files := self.housekeeper_api.get_archived_files(
+                files := self.housekeeper_api.get_archived_files_for_bundle(
                     bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING]
                 )
             ) and not all(file.archive.retrieved_at for file in files):
