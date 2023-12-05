@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 @click.group(invoke_without_command=True)
 @click.pass_context
 def raredisease(context: click.Context) -> None:
-    """nf-core/raredisease analysis workflow."""
+    """NF-core/raredisease analysis workflow."""
     AnalysisAPI.get_help(context)
     context.obj.meta_apis[MetaApis.ANALYSIS_API] = RarediseaseAnalysisAPI(
         config=context.obj,
@@ -27,7 +27,7 @@ def raredisease(context: click.Context) -> None:
 @OPTION_DRY
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def panel(context: CGConfig, case_id: str, dry_run: bool):
+def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Write aggregated gene panel file exported from Scout."""
 
     analysis_api: RarediseaseAnalysisAPI = context.meta_apis["analysis_api"]
@@ -38,4 +38,4 @@ def panel(context: CGConfig, case_id: str, dry_run: bool):
         for bed_line in bed_lines:
             click.echo(bed_line)
         return
-    analysis_api.write_panel(case_id, bed_lines)
+    analysis_api.write_panel(case_id=case_id, content=bed_lines)
