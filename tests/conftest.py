@@ -1240,7 +1240,9 @@ def novaseq_6000_post_1_5_kits_raw_lims_samples(novaseq_6000_post_1_5_kits_flow_
 
 
 @pytest.fixture
-def novaseq_6000_post_1_5_kits_samples(novaseq_6000_post_1_5_kits_raw_lims_samples: Path):
+def novaseq_6000_post_1_5_kits_samples(
+    novaseq_6000_post_1_5_kits_raw_lims_samples: Path,
+) -> list[FlowCellSampleBCLConvert]:
     return [
         FlowCellSampleBCLConvert(**sample)
         for sample in read_json(novaseq_6000_post_1_5_kits_raw_lims_samples)
@@ -1253,7 +1255,7 @@ def novaseq_6000_pre_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDi
 
 
 @pytest.fixture
-def novaseq_6000_pre_1_5_kits_flow_cell(tmp_flow_cells_directory: Path):
+def novaseq_6000_pre_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path:
     return Path(tmp_flow_cells_directory, "190927_A00689_0069_BHLYWYDSXX")
 
 
@@ -1270,7 +1272,9 @@ def novaseq_6000_pre_1_5_kits_raw_lims_samples(novaseq_6000_pre_1_5_kits_flow_ce
 
 
 @pytest.fixture
-def novaseq_6000_pre_1_5_kits_lims_samples(novaseq_6000_pre_1_5_kits_raw_lims_samples: Path):
+def novaseq_6000_pre_1_5_kits_lims_samples(
+    novaseq_6000_pre_1_5_kits_raw_lims_samples: Path,
+) -> list[FlowCellSampleBCLConvert]:
     return [
         FlowCellSampleBCLConvert(**sample)
         for sample in read_json(novaseq_6000_pre_1_5_kits_raw_lims_samples)
@@ -1278,7 +1282,7 @@ def novaseq_6000_pre_1_5_kits_lims_samples(novaseq_6000_pre_1_5_kits_raw_lims_sa
 
 
 @pytest.fixture
-def novaseq_x_flow_cell_directory(tmp_flow_cells_directory: Path):
+def novaseq_x_flow_cell_directory(tmp_flow_cells_directory: Path) -> Path:
     return Path(tmp_flow_cells_directory, "20231108_LH00188_0028_B22F52TLT3")
 
 
@@ -1298,7 +1302,7 @@ def novaseq_x_raw_lims_samples(novaseq_x_flow_cell_directory: Path) -> Path:
 
 
 @pytest.fixture
-def novaseq_x_lims_samples(novaseq_x_raw_lims_samples: Path):
+def novaseq_x_lims_samples(novaseq_x_raw_lims_samples: Path) -> list[FlowCellSampleBCLConvert]:
     return [FlowCellSampleBCLConvert(**sample) for sample in read_json(novaseq_x_raw_lims_samples)]
 
 

@@ -5,8 +5,6 @@ from typing import Type
 from packaging.version import parse
 
 from cg.apps.demultiplex.sample_sheet.index import (
-    NEW_CONTROL_SOFTWARE_VERSION,
-    NEW_REAGENT_KIT_VERSION,
     Index,
     get_index_pair,
     get_valid_indexes,
@@ -23,6 +21,8 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_validated_sample_sheet,
 )
 from cg.constants.demultiplexing import (
+    NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION,
+    NEW_NOVASEQ_REAGENT_KIT_VERSION,
     NO_REVERSE_COMPLEMENTS,
     NOVASEQ_6000_POST_1_5_KITS,
     NOVASEQ_X_INDEX_SETTINGS,
@@ -61,16 +61,29 @@ class SampleSheetCreator:
     def _get_index_settings(self) -> IndexSettings:
         """Returns the correct index-related settings for the run in question"""
         if self.run_parameters.sequencer == Sequencers.NOVASEQX:
+            LOG.debug("Using NovaSeqX index settings")
             return NOVASEQ_X_INDEX_SETTINGS
-        if self.run_parameters.sequencer in [
-            Sequencers.OTHER,
-            Sequencers.HISEQX,
-            Sequencers.HISEQGA,
-        ]:
-            return NO_REVERSE_COMPLEMENTS
         if self._is_novaseq6000_post_1_5_kit:
+            LOG.debug("Using NovaSeq 6000 post 1.5 kits index settings")
             return NOVASEQ_6000_POST_1_5_KITS
         return NO_REVERSE_COMPLEMENTS
+
+    @property
+    def _is_novaseq6000_post_1_5_kit(self) -> bool:
+        """
+        Returns whether sequencing was performed after the 1.5 consumables kits where introduced.
+        This is indicated by the software version and the reagent kit fields in the run parameters.
+        """
+        if self.run_parameters.sequencer != Sequencers.NOVASEQ:
+            return False
+
+        if parse(self.run_parameters.control_software_version) < parse(
+            NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION
+        ):
+            return False
+        if parse(self.run_parameters.reagent_kit_version) < parse(NEW_NOVASEQ_REAGENT_KIT_VERSION):
+            return False
+        return True
 
     @property
     def bcl_converter(self) -> str:
@@ -80,20 +93,6 @@ class SampleSheetCreator:
     @property
     def valid_indexes(self) -> list[Index]:
         return get_valid_indexes(dual_indexes_only=True)
-
-    @property
-    def _is_novaseq6000_post_1_5_kit(self) -> bool:
-        """
-        Returns whether sequencing was performed after the 1.5 consumables kits where introduced.
-        This is indicated by the software version and the reagent kit fields in the run parameters.
-        """
-        if parse(self.run_parameters.control_software_version) < parse(
-            NEW_CONTROL_SOFTWARE_VERSION
-        ):
-            return False
-        if parse(self.run_parameters.reagent_kit_version) < parse(NEW_REAGENT_KIT_VERSION):
-            return False
-        return True
 
     def update_barcode_mismatch_values_for_samples(self, *args) -> None:
         """Updates barcode mismatch values for samples if applicable."""

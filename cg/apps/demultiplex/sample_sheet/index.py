@@ -20,8 +20,6 @@ INDEX_ONE_PAD_SEQUENCE: str = "AT"
 INDEX_TWO_PAD_SEQUENCE: str = "AC"
 LONG_INDEX_CYCLE_NR: int = 10
 MINIMUM_HAMMING_DISTANCE: int = 3
-NEW_CONTROL_SOFTWARE_VERSION: str = "1.7.0"
-NEW_REAGENT_KIT_VERSION: str = "1.5"
 SHORT_SAMPLE_INDEX_LENGTH: int = 8
 
 
@@ -90,7 +88,7 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
 
 
 def get_hamming_distance_for_indexes(sequence_1: str, sequence_2: str) -> int:
-    """Get the hamming distance between two index 1 sequences.
+    """Get the hamming distance between two index sequences.
     In the case that one sequence is longer than the other, the distance is calculated between
     the shortest sequence and the first segment of equal length of the longest sequence."""
     shortest_index_length: int = min(len(sequence_1), len(sequence_2))

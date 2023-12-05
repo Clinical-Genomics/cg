@@ -223,6 +223,9 @@ FASTQ_FILE_SUFFIXES: list[str] = [".fastq", ".gz"]
 INDEX_CHECK: str = "indexcheck"
 UNDETERMINED: str = "Undetermined"
 
+NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION: str = "1.7.0"
+NEW_NOVASEQ_REAGENT_KIT_VERSION: str = "1.5"
+
 
 class IndexSettings(BaseModel):
     """
@@ -231,7 +234,7 @@ class IndexSettings(BaseModel):
 
         Attributes:
             should_i5_be_reverse_complimented (bool): Whether the i5 index should be reverse complemented.
-            are_i5_override_cycles_reverse_complemented (bool): Whether the ovveride cycles for i5 should be written in reverse.
+            are_i5_override_cycles_reverse_complemented (bool): Whether the ovveride cycles for i5 should be written in as NXIX.
 
     """
 

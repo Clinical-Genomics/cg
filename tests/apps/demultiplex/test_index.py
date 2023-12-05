@@ -99,7 +99,7 @@ def test_update_barcode_mismatch_values_for_sample(
     assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_2 == 0
 
 
-def test_update_barcode_mismatch_values_for_sample_duplicate_samples(
+def test_update_barcode_mismatch_values_for_sample_comparing_to_self(
     novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
 ):
     """Test that a sample does not compare to itself when adapting barcode mismatching values."""
@@ -195,6 +195,7 @@ def test_pad_and_reverse_complement_sample_indexes_no_reverse_complement_no_padd
     )
     # GIVEN a run parameters file that does not need reverse complement of indexes
     assert not bcl_convert_sample_sheet_creator.index_settings.should_i5_be_reverse_complimented
+
     # GIVEN a sample that does not need padding
     sample: FlowCellSampleBCLConvert = novaseq_x_flow_cell_sample_before_adapt_indexes
     assert novaseq_x_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
@@ -213,6 +214,7 @@ def test_pad_and_reverse_complement_sample_indexes_no_reverse_complement_no_padd
     # THEN the first index was correctly adapted
     assert len(sample.index) == LONG_INDEX_CYCLE_NR
     assert sample.index == initial_index1
+
     # THEN the second index was correctly adapted
     assert len(sample.index2) == LONG_INDEX_CYCLE_NR
     assert sample.index2 == initial_index2
