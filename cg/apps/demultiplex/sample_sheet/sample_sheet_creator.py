@@ -1,5 +1,6 @@
 """ Create a sample sheet for NovaSeq flow cells."""
 import logging
+from abc import abstractmethod
 from typing import Type
 
 from cg.apps.demultiplex.sample_sheet.index import (
@@ -63,27 +64,20 @@ class SampleSheetCreator:
         """Return whether the samples require reverse complement."""
         return is_reverse_complement_needed(run_parameters=self.run_parameters)
 
+    @abstractmethod
     def update_barcode_mismatch_values_for_samples(self, *args) -> None:
         """Updates barcode mismatch values for samples if applicable."""
-        raise NotImplementedError(
-            "Impossible to update sample barcode mismatches from parent class"
-        )
+        pass
 
+    @abstractmethod
     def add_override_cycles_to_samples(self) -> None:
         """Add override cycles attribute to samples if sample sheet is v2."""
-        raise NotImplementedError("Impossible to add override cycles to samples from parent class")
+        pass
 
+    @abstractmethod
     def remove_unwanted_samples(self) -> None:
         """Filter out samples with single indexes."""
-        LOG.info("Removing all samples without dual indexes")
-        samples_to_keep = []
-        sample: FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
-        for sample in self.lims_samples:
-            if not is_dual_index(sample.index):
-                LOG.warning(f"Removing sample {sample} since it does not have dual index")
-                continue
-            samples_to_keep.append(sample)
-        self.lims_samples = samples_to_keep
+        pass
 
     @staticmethod
     def convert_sample_to_header_dict(
@@ -131,6 +125,7 @@ class SampleSheetCreator:
                 index_cycles=self.run_parameters.index_length,
                 is_reverse_complement=self.is_reverse_complement,
                 sequencer=self.run_parameters.sequencer,
+                bcl_converter=self.bcl_converter,
             )
             self.update_barcode_mismatch_values_for_samples(samples_in_lane)
 
@@ -152,6 +147,18 @@ class SampleSheetCreator:
 
 class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
     """Create a raw sample sheet for flow cells."""
+
+    def remove_unwanted_samples(self) -> None:
+        """Filter out samples with single indexes."""
+        LOG.info("Removing all samples without dual indexes")
+        samples_to_keep = []
+        sample: FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
+        for sample in self.lims_samples:
+            if not is_dual_index(sample.index):
+                LOG.warning(f"Removing sample {sample} since it does not have dual index")
+                continue
+            samples_to_keep.append(sample)
+        self.lims_samples = samples_to_keep
 
     def update_barcode_mismatch_values_for_samples(self, *args) -> None:
         """Return None for flow cells to be demultiplexed with Bcl2fastq."""
@@ -189,6 +196,10 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         super().__init__(flow_cell, lims_samples, force)
         if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
             raise SampleSheetError(f"Can't use {BclConverter.BCL2FASTQ} with sample sheet v2")
+
+    def remove_unwanted_samples(self) -> None:
+        """Filter out samples with single indexes."""
+        LOG.info("Removing of single index samples is not required for V2 sample sheet")
 
     def update_barcode_mismatch_values_for_samples(
         self, samples: list[FlowCellSampleBCLConvert]

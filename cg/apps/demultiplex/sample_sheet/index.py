@@ -10,6 +10,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBCLConvert,
 )
 from cg.constants.constants import FileFormat
+from cg.constants.demultiplexing import BclConverter
 from cg.constants.sequencing import Sequencers
 from cg.io.controller import ReadFile
 from cg.models.demultiplex.run_parameters import RunParameters
@@ -222,16 +223,17 @@ def update_indexes_for_samples(
     index_cycles: int,
     is_reverse_complement: bool,
     sequencer: str,
+    bcl_converter: str,
 ) -> None:
     """Updates the values to the fields index1 and index 2 of samples."""
     for sample in samples:
-        if sequencer != Sequencers.NOVASEQ:
-            index1, index2 = get_index_pair(sample=sample)
-            sample.index = index1
-            sample.index2 = index2
-        else:
+        if sequencer == Sequencers.NOVASEQ and bcl_converter == BclConverter.BCLCONVERT:
             pad_and_reverse_complement_sample_indexes(
                 sample=sample,
                 index_cycles=index_cycles,
                 is_reverse_complement=is_reverse_complement,
             )
+        else:
+            index1, index2 = get_index_pair(sample=sample)
+            sample.index = index1
+            sample.index2 = index2
