@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic.v1 import Field, BaseModel
+from pydantic import Field, BaseModel
 from typing import Optional
 
 from cg.constants.sequencing import SequencingPlatform
