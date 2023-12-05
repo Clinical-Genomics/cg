@@ -9,10 +9,9 @@ import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import AnalysisType, CaseActions, WorkflowManager
 from cg.constants.gene_panel import GenePanelCombo
-from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
@@ -88,13 +87,13 @@ class AnalysisAPI(MetaAPI):
 
     def get_priority_for_case(self, case_id: str) -> int:
         """Get priority from the status db case priority"""
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        return case_obj.priority.value or Priority.research
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        return case.priority or Priority.research
 
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
         priority: int = self.get_priority_for_case(case_id=case_id)
-        return PRIORITY_TO_SLURM_QOS[priority]
+        return Priority.priority_to_slurm_qos().get(priority)
 
     def get_workflow_manager(self) -> str:
         """Get workflow manager for a given pipeline."""
@@ -242,9 +241,9 @@ class AnalysisAPI(MetaAPI):
         if dry_run:
             LOG.info(f"Dry-run: Action {action} would be set for case {case_id}")
             return
-        if action in [None, *CASE_ACTIONS]:
-            case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-            case_obj.action = action
+        if action in [None, *CaseActions.actions()]:
+            case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+            case.action = action
             self.status_db.session.commit()
             LOG.info("Action %s set for case %s", action, case_id)
             return

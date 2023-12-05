@@ -91,12 +91,12 @@ class MipConfigBuilder(ScoutConfigBuilder):
         config_sample.father = (
             case_sample.father.internal_id
             if case_sample.father
-            else RelationshipStatus.HAS_NO_PARENT.value
+            else RelationshipStatus.HAS_NO_PARENT
         )
         config_sample.mother = (
             case_sample.mother.internal_id
             if case_sample.mother
-            else RelationshipStatus.HAS_NO_PARENT.value
+            else RelationshipStatus.HAS_NO_PARENT
         )
 
         return config_sample

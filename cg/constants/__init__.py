@@ -8,10 +8,8 @@ from cg.constants.compression import (
 from cg.constants.constants import (
     CAPTUREKIT_CANCER_OPTIONS,
     CAPTUREKIT_OPTIONS,
-    CASE_ACTIONS,
     CONTAINER_OPTIONS,
     DEFAULT_CAPTURE_KIT,
-    FLOWCELL_STATUS,
     PREP_CATEGORIES,
     SEX_OPTIONS,
     STATUS_OPTIONS,
