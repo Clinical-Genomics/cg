@@ -51,7 +51,7 @@ def config_case(context: CGConfig, case_id: str, panel_bed: str, dry_run: bool):
 @OPTION_DRY
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def panel(context: CGConfig, case_id: str, dry_run: bool):
+def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Write aggregated gene panel file exported from Scout."""
 
     analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]

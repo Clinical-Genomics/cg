@@ -150,14 +150,14 @@ class MipAnalysisAPI(AnalysisAPI):
                 sample_obj=link.sample,
             )
 
-    def write_panel(self, case_id: str, content: list[str]):
+    def write_panel(self, case_id: str, content: list[str]) -> None:
         """Write the gene panel to case dir."""
         out_dir = Path(self.root, case_id)
         out_dir.mkdir(parents=True, exist_ok=True)
         WriteFile.write_file_from_content(
             content="\n".join(content),
             file_format=FileFormat.TXT,
-            file_path=Path(out_dir, "gene_panels.bed"),
+            file_path=Path(out_dir, f"gene_panels{FileExtensions.BED}"),
         )
 
     @staticmethod

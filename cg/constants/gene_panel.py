@@ -47,8 +47,8 @@ class GenePanelMasterList(StrEnum):
         """Return requested panel names from the Master list, or all panels if none are specified."""
         return list(panels) if panels else list(cls)
 
-    @classmethod
-    def collaborators(cls) -> set[str]:
+    @staticmethod
+    def collaborators() -> set[str]:
         """Return collaborators of the Master list."""
         return {
             CustomerId.CG_INTERNAL_CUSTOMER,
