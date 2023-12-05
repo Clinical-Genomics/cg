@@ -28,19 +28,6 @@ class ArchiveModels(BaseModel):
     handler: ArchiveHandler
 
 
-def filter_files_on_archive_location(
-    files_and_samples: list[FileAndSample], archive_location: ArchiveLocations
-) -> list[FileAndSample]:
-    """
-    Returns a list of FileAndSample where the associated sample has a specific archive location.
-    """
-    return [
-        file_and_sample
-        for file_and_sample in files_and_samples
-        if file_and_sample.sample.archive_location == archive_location
-    ]
-
-
 def filter_samples_on_archive_location(
     samples_and_destinations: list[SampleAndDestination],
     archive_location: ArchiveLocations,
@@ -66,10 +53,6 @@ class SpringArchiveAPI:
         self.status_db: Store = status_db
         self.data_flow_config: DataFlowConfig = data_flow_config
 
-    def get_non_archived_and_non_pdc_spring_files(self):
-        files: list[File] = self.housekeeper_api.get_all_non_archived_spring_files()
-        return [file for file in files if self.get_archive_location_from_file(file) != "PDC"]
-
     def archive_files_to_location(
         self, files_and_samples: list[FileAndSample], archive_location: ArchiveLocations
     ) -> int:
@@ -81,17 +64,13 @@ class SpringArchiveAPI:
     ) -> None:
         """Archives all non archived spring files. If a limit is provided, the amount of files archived are limited
         to that amount."""
-
-        files_to_archive: list[File] = self.get_non_archived_and_non_pdc_spring_files()
-        files_and_samples: list[FileAndSample] = self.add_samples_to_files(files_to_archive)[
-            :spring_file_count_limit
-        ]
-
         for archive_location in ArchiveLocations:
-            files_and_samples_for_location: list[FileAndSample] = filter_files_on_archive_location(
-                files_and_samples=files_and_samples, archive_location=archive_location
+            files_to_archive: list[File] = self.housekeeper_api.get_non_archived_spring_files(
+                tags=[archive_location],
+                limit=spring_file_count_limit if spring_file_count_limit else None,
             )
-            if files_and_samples_for_location:
+            if files_to_archive:
+                files_and_samples_for_location = self.add_samples_to_files(files_to_archive)
                 job_id = self.archive_files_to_location(
                     files_and_samples=files_and_samples_for_location,
                     archive_location=archive_location,
@@ -150,7 +129,7 @@ class SpringArchiveAPI:
         files: list[File] = []
         for sample in samples:
             files.extend(
-                self.housekeeper_api.get_archived_files(
+                self.housekeeper_api.get_archived_files_for_bundle(
                     bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING]
                 )
             )
