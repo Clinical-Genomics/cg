@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Callable, Optional
+from typing import Callable
 
 from sqlalchemy import and_, not_, or_
 from sqlalchemy.orm import Query
@@ -12,7 +12,7 @@ from cg.constants.observations import (
     LOQUSDB_MIP_SEQUENCING_METHODS,
     LOQUSDB_SUPPORTED_PIPELINES,
 )
-from cg.store.models import Analysis, Application, Customer, Case, Sample
+from cg.store.models import Analysis, Application, Case, Customer, Sample
 
 
 def filter_cases_by_action(cases: Query, action: str, **kwargs) -> Query:
@@ -203,21 +203,21 @@ def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
 def apply_case_filter(
     cases: Query,
     filter_functions: list[Callable],
-    action: Optional[str] = None,
-    case_search: Optional[str] = None,
-    creation_date: Optional[datetime] = None,
-    customer_entry_id: Optional[int] = None,
-    customer_entry_ids: Optional[list[int]] = None,
-    entry_id: Optional[int] = None,
-    internal_id: Optional[str] = None,
-    internal_id_search: Optional[str] = None,
-    name: Optional[str] = None,
-    name_search: Optional[str] = None,
-    order_date: Optional[datetime] = None,
-    pipeline: Optional[Pipeline] = None,
-    pipeline_search: Optional[str] = None,
-    priority: Optional[str] = None,
-    ticket_id: Optional[str] = None,
+    action: str | None = None,
+    case_search: str | None = None,
+    creation_date: datetime | None = None,
+    customer_entry_id: int | None = None,
+    customer_entry_ids: list[int] | None = None,
+    entry_id: int | None = None,
+    internal_id: str | None = None,
+    internal_id_search: str | None = None,
+    name: str | None = None,
+    name_search: str | None = None,
+    order_date: datetime | None = None,
+    pipeline: Pipeline | None = None,
+    pipeline_search: str | None = None,
+    priority: str | None = None,
+    ticket_id: str | None = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:

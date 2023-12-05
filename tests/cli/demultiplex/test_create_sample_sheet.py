@@ -28,7 +28,6 @@ def test_create_sample_sheet_no_run_parameters_fails(
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=tmp_flow_cells_directory_no_run_parameters
     )
-    assert not flow_cell.run_parameters_path.exists()
 
     # GIVEN flow cell samples
     mocker.patch(
@@ -50,7 +49,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
     assert result.exit_code != EXIT_SUCCESS
 
     # THEN the correct information is communicated
-    assert "Could not find run parameters file" in caplog.text
+    assert "No run parameters file found in flow cell" in caplog.text
 
 
 def test_create_bcl2fastq_sample_sheet(

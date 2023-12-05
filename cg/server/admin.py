@@ -1,7 +1,6 @@
 """Module for Flask-Admin views"""
 from datetime import datetime
 from gettext import gettext
-from typing import Union
 
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
@@ -135,11 +134,23 @@ class ApplicationVersionView(BaseView):
         "price_clinical_trials",
         "price_research",
     ]
+    column_list = (
+        "application",
+        "version",
+        "valid_from",
+        "price_standard",
+        "price_priority",
+        "price_express",
+        "price_clinical_trials",
+        "price_research",
+        "comment",
+    )
     column_exclude_list = ["created_at", "updated_at"]
     column_filters = ["version", "application.tag"]
     column_formatters = {"application": ApplicationView.view_application_link}
     column_searchable_list = ["application.tag"]
     edit_modal = True
+    create_modal = True
     form_excluded_columns = ["samples", "pools", "microbial_samples"]
 
 
@@ -307,7 +318,7 @@ class CaseView(BaseView):
     def action_set_empty(self, ids: list[str]):
         self.set_action_for_cases(action=None, case_entry_ids=ids)
 
-    def set_action_for_cases(self, action: Union[CaseActions, None], case_entry_ids: list[str]):
+    def set_action_for_cases(self, action: CaseActions | None, case_entry_ids: list[str]):
         try:
             for entry_id in case_entry_ids:
                 case = db.get_case_by_entry_id(entry_id=entry_id)
