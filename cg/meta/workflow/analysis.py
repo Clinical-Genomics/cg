@@ -508,7 +508,7 @@ class AnalysisAPI(MetaAPI):
         """Retrieves or decompresses Spring files if needed. If so, an AnalysisNotReady error
         is raised."""
         self.ensure_spring_files_are_not_archived(case_id)
-        self.resolve_decompression(case_id, dry_run=dry_run)
+        self.resolve_decompression(case_id=case_id, dry_run=dry_run)
         if not self.is_case_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
