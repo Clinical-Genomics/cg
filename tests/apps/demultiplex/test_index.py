@@ -8,7 +8,7 @@ from cg.apps.demultiplex.sample_sheet.index import (
     INDEX_TWO_PAD_SEQUENCE,
     LONG_INDEX_CYCLE_NR,
     Index,
-    get_hamming_distance_for_indices,
+    get_hamming_distance_for_indexes,
     get_index_pair,
     get_reverse_complement_dna_seq,
     get_valid_indexes,
@@ -227,14 +227,14 @@ def test_get_hamming_distance_index_1_different_lengths():
     # WHEN getting the hamming distance between them in any order
 
     # THEN the distance is zero
-    assert get_hamming_distance_for_indices(sequence_1=sequence_1, sequence_2=sequence_2) == 0
-    assert get_hamming_distance_for_indices(sequence_1=sequence_2, sequence_2=sequence_1) == 0
+    assert get_hamming_distance_for_indexes(sequence_1=sequence_1, sequence_2=sequence_2) == 0
+    assert get_hamming_distance_for_indexes(sequence_1=sequence_2, sequence_2=sequence_1) == 0
 
     # WHEN getting the hamming distance between themselves
 
     # THEN the distance is zero
-    assert get_hamming_distance_for_indices(sequence_1=sequence_1, sequence_2=sequence_1) == 0
-    assert get_hamming_distance_for_indices(sequence_1=sequence_2, sequence_2=sequence_2) == 0
+    assert get_hamming_distance_for_indexes(sequence_1=sequence_1, sequence_2=sequence_1) == 0
+    assert get_hamming_distance_for_indexes(sequence_1=sequence_2, sequence_2=sequence_2) == 0
 
 
 def test_get_hamming_distance_index_1_different_prefixes():
@@ -247,5 +247,5 @@ def test_get_hamming_distance_index_1_different_prefixes():
     # WHEN getting the hamming distance between them in any order
 
     # THEN the distance is equal to the number of different characters
-    assert get_hamming_distance_for_indices(sequence_1=sequence_1, sequence_2=sequence_2) == 2
-    assert get_hamming_distance_for_indices(sequence_1=sequence_2, sequence_2=sequence_1) == 2
+    assert get_hamming_distance_for_indexes(sequence_1=sequence_1, sequence_2=sequence_2) == 2
+    assert get_hamming_distance_for_indexes(sequence_1=sequence_2, sequence_2=sequence_1) == 2

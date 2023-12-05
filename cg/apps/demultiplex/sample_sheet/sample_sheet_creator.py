@@ -84,7 +84,7 @@ class SampleSheetCreator:
     @property
     def _is_novaseq6000_post_1_5_kit(self) -> bool:
         """
-        Returns whether sequencing was performed before the 1.5 consumables kits.
+        Returns whether sequencing was performed after the 1.5 consumables kits where introduced.
         This is indicated by the software version and the reagent kit fields in the run parameters.
         """
         if parse(self.run_parameters.control_software_version) < parse(

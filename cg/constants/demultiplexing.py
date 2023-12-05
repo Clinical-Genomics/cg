@@ -226,7 +226,7 @@ UNDETERMINED: str = "Undetermined"
 
 class IndexSettings(BaseModel):
     """
-    Holds the settings defining how the sample indices should be handled in the sample sheet.
+    Holds the settings defining how the sample indexes should be handled in the sample sheet.
     These vary between machines and versions.
 
         Attributes:

@@ -89,7 +89,7 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
     return index_string + INDEX_TWO_PAD_SEQUENCE
 
 
-def get_hamming_distance_for_indices(sequence_1: str, sequence_2: str) -> int:
+def get_hamming_distance_for_indexes(sequence_1: str, sequence_2: str) -> int:
     """Get the hamming distance between two index 1 sequences.
     In the case that one sequence is longer than the other, the distance is calculated between
     the shortest sequence and the first segment of equal length of the longest sequence."""
@@ -112,7 +112,7 @@ def update_barcode_mismatch_values_for_sample(
             continue
         index_1, index_2 = get_index_pair(sample=sample_to_compare_to)
         if (
-            get_hamming_distance_for_indices(
+            get_hamming_distance_for_indexes(
                 sequence_1=index_1_sample_to_update, sequence_2=index_1
             )
             < MINIMUM_HAMMING_DISTANCE
@@ -122,7 +122,7 @@ def update_barcode_mismatch_values_for_sample(
             )
             sample_to_update.barcode_mismatches_1 = 0
         if (
-            get_hamming_distance_for_indices(
+            get_hamming_distance_for_indexes(
                 sequence_1=index_2_sample_to_update,
                 sequence_2=index_2,
             )

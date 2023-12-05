@@ -1222,6 +1222,11 @@ def novaseq_6000_post_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path
     return Path(tmp_flow_cells_directory, "230912_A00187_1009_AHK33MDRX3")
 
 
+@pytest.fixture()
+def novaseq_6000_post_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    return FlowCellDirectoryData(Path(flow_cells_dir, "230912_A00187_1009_AHK33MDRX3"))
+
+
 @pytest.fixture
 def novaseq_6000_post_1_5_kits_correct_sample_sheet(
     novaseq_6000_post_1_5_kits_flow_cell: Path,
@@ -1240,6 +1245,11 @@ def novaseq_6000_post_1_5_kits_samples(novaseq_6000_post_1_5_kits_raw_lims_sampl
         FlowCellSampleBCLConvert(**sample)
         for sample in read_json(novaseq_6000_post_1_5_kits_raw_lims_samples)
     ]
+
+
+@pytest.fixture()
+def novaseq_6000_pre_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    return FlowCellDirectoryData(Path(flow_cells_dir, "190927_A00689_0069_BHLYWYDSXX"))
 
 
 @pytest.fixture
@@ -1270,6 +1280,11 @@ def novaseq_6000_pre_1_5_kits_lims_samples(novaseq_6000_pre_1_5_kits_raw_lims_sa
 @pytest.fixture
 def novaseq_x_flow_cell_directory(tmp_flow_cells_directory: Path):
     return Path(tmp_flow_cells_directory, "20231108_LH00188_0028_B22F52TLT3")
+
+
+@pytest.fixture()
+def novaseq_x_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    return FlowCellDirectoryData(Path(flow_cells_dir, "20231108_LH00188_0028_B22F52TLT3"))
 
 
 @pytest.fixture
