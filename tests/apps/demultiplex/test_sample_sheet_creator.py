@@ -124,7 +124,7 @@ def test_remove_unwanted_samples_no_dual_index(
 def test_add_override_cycles_to_novaseqx_samples(
     novaseq_x_flow_cell: FlowCellDirectoryData,
     bcl_convert_samples_with_updated_indexes: list[FlowCellSampleBCLConvert],
-    override_cycles_for_samples_with_updated_indexes: list[str],
+    override_cycles_for_samples_with_updated_indexes_reverse_complement: list[str],
 ):
     """Test that OverrideCycles values are generated correctly for NovaSeqX samples."""
     # GIVEN a SampleSheetCreator with samples without Override Cycles added
@@ -140,7 +140,8 @@ def test_add_override_cycles_to_novaseqx_samples(
     assert all(
         sample.override_cycles == override_cycles_value
         for sample, override_cycles_value in zip(
-            sample_sheet_creator.lims_samples, override_cycles_for_samples_with_updated_indexes
+            sample_sheet_creator.lims_samples,
+            override_cycles_for_samples_with_updated_indexes_reverse_complement,
         )
     )
 

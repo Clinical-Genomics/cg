@@ -102,7 +102,6 @@ def get_hamming_distance_for_indices(sequence_1: str, sequence_2: str) -> int:
 def update_barcode_mismatch_values_for_sample(
     sample_to_update: FlowCellSampleBCLConvert,
     samples_to_compare_to: list[FlowCellSampleBCLConvert],
-    is_reverse_complement: bool,
 ) -> None:
     """Updates the sample's barcode mismatch values.
     If a sample index has a hamming distance to any other sample lower than the threshold

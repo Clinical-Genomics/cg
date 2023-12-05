@@ -62,6 +62,12 @@ class SampleSheetCreator:
         """Returns the correct index-related settings for the run in question"""
         if self.run_parameters.sequencer == Sequencers.NOVASEQX:
             return NOVASEQ_X_INDEX_SETTINGS
+        if self.run_parameters.sequencer in [
+            Sequencers.OTHER,
+            Sequencers.HISEQX,
+            Sequencers.HISEQGA,
+        ]:
+            return NO_REVERSE_COMPLEMENTS
         if self._is_novaseq6000_post_1_5_kit:
             return NOVASEQ_6000_POST_1_5_KITS
         return NO_REVERSE_COMPLEMENTS
@@ -222,9 +228,7 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         """Update barcode mismatch values for both indexes of given samples."""
         for sample in samples:
             update_barcode_mismatch_values_for_sample(
-                sample_to_update=sample,
-                samples_to_compare_to=samples,
-                is_reverse_complement=self.index_settings.should_i5_be_reverse_complimented,
+                sample_to_update=sample, samples_to_compare_to=samples
             )
 
     def add_override_cycles_to_samples(self) -> None:
@@ -242,7 +246,7 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
                 index1_cycles = f"I{sample_index1_len}N{length_index1 - sample_index1_len};"
             if sample_index2_len < length_index2:
                 index2_cycles = (
-                    f"N{sample_index2_len - length_index2}I{sample_index2_len};"
+                    f"N{length_index2-sample_index2_len}I{sample_index2_len};"
                     if self.index_settings.are_i5_override_cycles_reverse_complemented
                     else f"I{sample_index2_len}N{length_index2 - sample_index2_len};"
                 )
