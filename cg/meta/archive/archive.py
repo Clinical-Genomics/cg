@@ -123,7 +123,6 @@ class SpringArchiveAPI:
             )
         ]
 
-
     def retrieve_samples(self, samples: list[Sample]) -> None:
         """Retrieves the archived spring files for a list of samples."""
         samples_and_destinations: list[SampleAndDestination] = self.join_destinations_and_samples(

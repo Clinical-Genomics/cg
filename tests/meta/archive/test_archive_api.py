@@ -260,7 +260,7 @@ def test_get_archival_status(
         return_value=GetJobStatusResponse(id=archival_job_id, status=job_status),
     ):
         spring_archive_api.update_ongoing_task(
-            task_id=archival_job_id_miria,
+            task_id=archival_job_id,
             archive_location=ArchiveLocations.KAROLINSKA_BUCKET,
             is_archival=True,
         )
@@ -307,7 +307,7 @@ def test_get_retrieval_status(
         return_value=GetJobStatusResponse(id=retrieval_job_id, status=job_status),
     ):
         spring_archive_api.update_ongoing_task(
-            task_id=retrieval_job_id_miria,
+            task_id=retrieval_job_id,
             archive_location=ArchiveLocations.KAROLINSKA_BUCKET,
             is_archival=False,
         )

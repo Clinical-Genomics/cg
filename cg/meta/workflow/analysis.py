@@ -9,14 +9,7 @@ import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.constants import (
-    CASE_ACTIONS,
-    EXIT_FAIL,
-    EXIT_SUCCESS,
-    Pipeline,
-    Priority,
-    SequencingFileTag,
-)
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority, SequencingFileTag
 from cg.constants.constants import AnalysisType, CaseActions, WorkflowManager
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.archive.archive import SpringArchiveAPI

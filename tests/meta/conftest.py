@@ -227,9 +227,8 @@ def archived_file(
         version_obj=bundle.versions[0],
         tags=[SequencingFileTag.SPRING],
     )
-    real_housekeeper_api.add_archives(
-        files=[Path(file.path)], archive_task_id=archival_job_id_miria
-    )
+    file.id = 1234
+    real_housekeeper_api.add_archives(files=[file], archive_task_id=archival_job_id_miria)
     return file
 
 

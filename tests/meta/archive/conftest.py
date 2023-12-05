@@ -119,6 +119,16 @@ def test_auth_token() -> AuthToken:
 
 
 @pytest.fixture
+def archival_job_id() -> int:
+    return 123
+
+
+@pytest.fixture
+def retrieval_job_id() -> int:
+    return 124
+
+
+@pytest.fixture
 def ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataFlowClient:
     """Returns a DDNApi without tokens being set."""
     mock_ddn_auth_success_response = Response()

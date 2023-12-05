@@ -265,7 +265,7 @@ class HousekeeperAPI:
 
     def get_all_non_archived_spring_files(self) -> list[File]:
         """Return all spring files which are not marked as archived in Housekeeper."""
-        return self._store.get_all_non_archived_files(tag_names=[SequencingFileTag.SPRING])
+        return self._store.get_non_archived_files(tag_names=[SequencingFileTag.SPRING])
 
     def get_latest_bundle_version(self, bundle_name: str) -> Version | None:
         """Get the latest version of a Housekeeper bundle."""
@@ -420,11 +420,13 @@ class HousekeeperAPI:
 
     def get_non_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
         """Returns all non-archived files from a given bundle, tagged with the given tags."""
-        return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags or [])
+        return self._store.get_non_archived_files_for_bundle(
+            bundle_name=bundle_name, tags=tags or []
+        )
 
     def get_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
         """Returns all archived files from a given bundle, tagged with the given tags."""
-        return self._store.get_archived_files(bundle_name=bundle_name, tags=tags or [])
+        return self._store.get_archived_files_for_bundle(bundle_name=bundle_name, tags=tags or [])
 
     def add_archives(self, files: list[File], archive_task_id: int) -> None:
         """Creates an archive object for the given files, and adds the archive task id to them."""
