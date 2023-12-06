@@ -209,9 +209,7 @@ def test_write_file_from_content_when_csv(csv_file_path: Path, csv_temp_path: Pa
 
 
 def test_write_file_from_content_when_txt(txt_file_path: Path, txt_temp_path: Path):
-    """
-    Tests write file from content when TXT.
-    """
+    """Tests write file from content when TXT."""
     # GIVEN a text file
 
     # GIVEN a file path to write to
