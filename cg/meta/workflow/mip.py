@@ -183,7 +183,7 @@ class MipAnalysisAPI(AnalysisAPI):
 
         # add OMIM to every panel choice
         all_panels.add(GenePanelMasterList.OMIM_AUTO)
-        all_panels.add(GenePanelMasterList.PANELAPP-GREEN)
+        all_panels.add(GenePanelMasterList.PANELAPP_GREEN)
 
         return list(all_panels)
 
