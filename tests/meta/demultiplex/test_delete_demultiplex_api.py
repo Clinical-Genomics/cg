@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import Optional
 
 import pytest
 
@@ -114,9 +113,9 @@ def test_no_active_samples_on_flow_cell(
 
     # WHEN checking for active samples on flowcell
     populated_delete_demultiplex_api._set_samples_on_flow_cell()
-    active_samples_on_flow_cell: Optional[
-        list[str]
-    ] = populated_delete_demultiplex_api.active_samples_on_flow_cell()
+    active_samples_on_flow_cell: list[
+        str
+    ] | None = populated_delete_demultiplex_api.active_samples_on_flow_cell()
 
     # THEN the no samples on the flowcell should be found active
     assert not active_samples_on_flow_cell
@@ -140,9 +139,9 @@ def test_active_samples_on_flow_cell(
 
     # WHEN checking for active samples on flowcell
     active_delete_demultiplex_api._set_samples_on_flow_cell()
-    active_samples_on_flow_cell: Optional[
-        list[str]
-    ] = active_delete_demultiplex_api.active_samples_on_flow_cell()
+    active_samples_on_flow_cell: list[
+        str
+    ] | None = active_delete_demultiplex_api.active_samples_on_flow_cell()
 
     # THEN there should be active samples found
     assert any(sample.internal_id in active_samples_on_flow_cell for sample in samples_on_flow_cell)

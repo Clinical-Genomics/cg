@@ -2,7 +2,6 @@
 import logging
 import sys
 import traceback
-from typing import Optional
 
 import click
 
@@ -39,7 +38,7 @@ from cg.meta.upload.rnafusion.rnafusion import RnafusionUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)
@@ -54,7 +53,7 @@ LOG = logging.getLogger(__name__)
     help="Force upload of an analysis that has already been uploaded or marked as started",
 )
 @click.pass_context
-def upload(context: click.Context, case_id: Optional[str], restart: bool):
+def upload(context: click.Context, case_id: str | None, restart: bool):
     """Upload results from analyses"""
 
     config_object: CGConfig = context.obj
@@ -67,7 +66,7 @@ def upload(context: click.Context, case_id: Optional[str], restart: bool):
     elif case_id:  # Provided case ID without a subcommand: upload everything
         try:
             upload_api.analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-            case: Family = upload_api.status_db.get_case_by_internal_id(internal_id=case_id)
+            case: Case = upload_api.status_db.get_case_by_internal_id(internal_id=case_id)
             upload_api.verify_analysis_upload(case_obj=case, restart=restart)
         except AnalysisAlreadyUploadedError:
             # Analysis being uploaded or it has been already uploaded
@@ -102,15 +101,15 @@ def upload_all_completed_analyses(context: click.Context, pipeline: Pipeline = N
 
     exit_code = 0
     for analysis_obj in status_db.get_analyses_to_upload(pipeline=pipeline):
-        if analysis_obj.family.analyses[0].uploaded_at is not None:
+        if analysis_obj.case.analyses[0].uploaded_at is not None:
             LOG.warning(
-                f"Skipping upload for case {analysis_obj.family.internal_id}. "
-                f"It has been already uploaded at {analysis_obj.family.analyses[0].uploaded_at}."
+                f"Skipping upload for case {analysis_obj.case.internal_id}. "
+                f"It has been already uploaded at {analysis_obj.case.analyses[0].uploaded_at}."
             )
             continue
 
-        case_id = analysis_obj.family.internal_id
-        LOG.info("Uploading analysis for case: %s", case_id)
+        case_id = analysis_obj.case.internal_id
+        LOG.info(f"Uploading analysis for case: {case_id}")
         try:
             context.invoke(upload, case_id=case_id)
         except Exception:

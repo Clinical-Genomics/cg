@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import Optional
 
 from sqlalchemy.orm import Query, Session
 from typing_extensions import Literal
 
-from cg.constants import CASE_ACTIONS, FlowCellStatus, Pipeline
+from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import CaseActions
 from cg.constants.invoice import CustomerNames
 from cg.store.api.base import BaseHandler
@@ -24,7 +23,7 @@ from cg.store.filters.status_flow_cell_filters import (
 )
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
-from cg.store.models import Analysis, Customer, Family, Flowcell, Pool, Sample
+from cg.store.models import Analysis, Case, Customer, Flowcell, Pool, Sample
 
 
 class StatusHandler(BaseHandler):
@@ -98,7 +97,7 @@ class StatusHandler(BaseHandler):
 
     def cases_to_analyze(
         self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
-    ) -> list[Family]:
+    ) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.FILTER_HAS_SEQUENCE,
@@ -111,7 +110,7 @@ class StatusHandler(BaseHandler):
             pipeline=pipeline,
         )
 
-        families: list[Query] = list(cases.order_by(Family.ordered_at))
+        families: list[Query] = list(cases.order_by(Case.ordered_at))
         families = [
             case_obj
             for case_obj in families
@@ -132,7 +131,7 @@ class StatusHandler(BaseHandler):
         internal_id: str = None,
         name: str = None,
         days: int = 0,
-        case_action: Optional[str] = None,
+        case_action: str | None = None,
         priority: str = None,
         customer_id: str = None,
         exclude_customer_id: str = None,
@@ -154,7 +153,7 @@ class StatusHandler(BaseHandler):
         exclude_delivered: bool = False,
         exclude_delivery_reported: bool = False,
         exclude_invoiced: bool = False,
-    ) -> list[Family]:
+    ) -> list[Case]:
         """Fetch cases with and w/o analyses."""
         case_q = self._get_filtered_case_query(
             case_action,
@@ -202,9 +201,11 @@ class StatusHandler(BaseHandler):
 
         return sorted(cases, key=lambda k: k["tat"], reverse=True)
 
-    def set_case_action(self, action: Literal[CASE_ACTIONS], case_internal_id: str) -> None:
+    def set_case_action(
+        self, action: Literal[CaseActions.actions()], case_internal_id: str
+    ) -> None:
         """Sets the action of provided cases to None or the given action."""
-        case: Family = self.get_case_by_internal_id(internal_id=case_internal_id)
+        case: Case = self.get_case_by_internal_id(internal_id=case_internal_id)
         case.action = action
         self.session.commit()
 
@@ -216,7 +217,7 @@ class StatusHandler(BaseHandler):
             sample.comment = comment
         self.session.commit()
 
-    def get_flow_cells_by_case(self, case: Family) -> list[Flowcell]:
+    def get_flow_cells_by_case(self, case: Case) -> list[Flowcell]:
         """Return flow cells for case."""
         return apply_flow_cell_filter(
             flow_cells=self._get_join_flow_cell_sample_links_query(),
@@ -224,15 +225,16 @@ class StatusHandler(BaseHandler):
             case=case,
         ).all()
 
-    def get_cases_to_compress(self, date_threshold: datetime) -> list[Family]:
+    def get_cases_to_compress(self, date_threshold: datetime) -> list[Case]:
         """Return all cases that are ready to be compressed by SPRING."""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.FILTER_HAS_INACTIVE_ANALYSIS,
             CaseFilter.FILTER_OLD_BY_CREATION_DATE,
+            CaseFilter.FILTER_IS_COMPRESSIBLE,
         ]
         return apply_case_filter(
             filter_functions=case_filter_functions,
-            cases=self._get_query(table=Family),
+            cases=self._get_query(table=Case),
             creation_date=date_threshold,
         ).all()
 
@@ -244,7 +246,7 @@ class StatusHandler(BaseHandler):
             entry_id=entry_id,
         ).first()
 
-    def get_sample_by_internal_id(self, internal_id: str) -> Optional[Sample]:
+    def get_sample_by_internal_id(self, internal_id: str) -> Sample | None:
         """Return a sample by lims id."""
         return apply_sample_filter(
             filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID],
@@ -362,7 +364,7 @@ class StatusHandler(BaseHandler):
             skip_case = True
         return skip_case
 
-    def _calculate_case_data(self, case_obj: Family) -> SimpleNamespace:
+    def _calculate_case_data(self, case_obj: Case) -> SimpleNamespace:
         case_data = self._get_empty_case_data()
 
         case_data.data_analysis = case_obj.data_analysis
@@ -393,9 +395,9 @@ class StatusHandler(BaseHandler):
             )
             case_data.samples_sequenced = len(
                 [
-                    link.sample.reads_updated_at
+                    link.sample.last_sequenced_at
                     for link in case_obj.links
-                    if link.sample.reads_updated_at
+                    if link.sample.last_sequenced_at
                 ]
             )
             case_data.samples_delivered = len(
@@ -449,9 +451,9 @@ class StatusHandler(BaseHandler):
 
             if case_data.samples_to_sequence > 0 and case_data.samples_sequenced_bool:
                 case_data.samples_sequenced_at = max(
-                    link.sample.reads_updated_at
+                    link.sample.last_sequenced_at
                     for link in case_obj.links
-                    if link.sample.reads_updated_at is not None
+                    if link.sample.last_sequenced_at is not None
                 )
 
             if case_data.samples_to_deliver > 0 and case_data.samples_delivered_bool:
@@ -527,7 +529,7 @@ class StatusHandler(BaseHandler):
 
     @staticmethod
     def _is_rerun(
-        case_obj: Family,
+        case_obj: Case,
         samples_received_at: datetime,
         samples_prepared_at: datetime,
         samples_sequenced_at: datetime,

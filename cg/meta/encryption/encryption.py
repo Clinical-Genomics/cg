@@ -4,7 +4,6 @@ import subprocess
 from io import TextIOWrapper
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Optional, Union
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import SPACE, FileExtensions
@@ -87,6 +86,7 @@ class EncryptionAPI:
             [
                 self.binary_path,
                 "--encrypt",
+                "--yes",
                 "--recipient",
                 EncryptionUserID.HASTA_USER_ID,
                 "--output",
@@ -148,7 +148,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         encryption_dir: Path,
         flow_cell: FlowCellDirectoryData,
         pigz_binary_path: str,
-        sbatch_parameter: dict[str, Union[str, int]],
+        sbatch_parameter: dict[str, str | int],
         slurm_api: SlurmAPI,
         tar_api: TarAPI,
         dry_run: bool = False,
@@ -240,7 +240,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         )
         return SPACE.join(decryption_parameters)
 
-    def is_encryption_possible(self) -> Optional[bool]:
+    def is_encryption_possible(self) -> bool | None:
         """Check if requirements for encryption are meet.
         Raises:
             FlowCellError if sequencing is not ready, encryption is pending or complete.
@@ -332,8 +332,8 @@ class SpringEncryptionAPI(EncryptionAPI):
         """Symmetrically encrypts a spring file"""
         output_file = self.encrypted_spring_file_path(spring_file_path)
         LOG.debug("*** ENCRYPTING SPRING FILE ***")
-        LOG.info("Encrypt spring file: %s", spring_file_path)
-        LOG.info("to output file     : %s", output_file)
+        LOG.info(f"Encrypt spring file: {spring_file_path}")
+        LOG.info(f"to output file     : {output_file}")
         encryption_command: list = self.get_symmetric_encryption_command(
             input_file=spring_file_path, output_file=output_file
         )
@@ -343,8 +343,8 @@ class SpringEncryptionAPI(EncryptionAPI):
         """Asymmetrically encrypts the key used for spring file encryption"""
         output_file = self.encrypted_key_path(spring_file_path)
         LOG.debug("*** ENCRYPTING KEY FILE ***")
-        LOG.info("Encrypt key file: %s", self.temporary_passphrase)
-        LOG.info("to target file  : %s", output_file)
+        LOG.info(f"Encrypt key file: {self.temporary_passphrase}")
+        LOG.info(f"to target file  : {output_file}")
         encryption_command: list = self.get_asymmetric_encryption_command(
             input_file=self.temporary_passphrase, output_file=output_file
         )
@@ -354,8 +354,8 @@ class SpringEncryptionAPI(EncryptionAPI):
         """decrypt a spring file"""
         input_file = self.encrypted_spring_file_path(spring_file_path)
         LOG.debug("*** DECRYPTING SPRING FILE ***")
-        LOG.info("Decrypt spring file: %s", input_file)
-        LOG.info("to target file     : %s", output_file)
+        LOG.info(f"Decrypt spring file: {input_file}")
+        LOG.info(f"to target file     : {output_file}")
         decryption_command: list = self.get_symmetric_decryption_command(
             input_file=input_file,
             output_file=output_file,
@@ -368,8 +368,8 @@ class SpringEncryptionAPI(EncryptionAPI):
         input_file = self.encrypted_key_path(spring_file_path)
         output_file = self.encryption_key(spring_file_path)
         LOG.debug("*** DECRYPTING KEY FILE ***")
-        LOG.info("Decrypt key file: %s", input_file)
-        LOG.info("to target file  : %s", output_file)
+        LOG.info(f"Decrypt key file: {input_file}")
+        LOG.info(f"to target file  : {output_file}")
         decryption_command: list = self.get_asymmetric_decryption_command(
             input_file=input_file, output_file=output_file
         )

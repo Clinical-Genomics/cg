@@ -1,6 +1,5 @@
 """Delivery report upload to scout commands."""
 import logging
-from typing import Optional
 
 import click
 from housekeeper.store.models import Version
@@ -8,7 +7,7 @@ from housekeeper.store.models import Version
 from cg.cli.generate.report.options import ARGUMENT_CASE_ID
 from cg.cli.generate.report.utils import get_report_api, get_report_case
 from cg.meta.report.report_api import ReportAPI
-from cg.store.models import Family
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -27,10 +26,10 @@ def upload_delivery_report_to_scout(
 ) -> None:
     """Fetches a delivery report from Housekeeper and uploads it to Scout."""
     click.echo(click.style("--------------- DELIVERY REPORT UPLOAD ---------------"))
-    case: Family = get_report_case(context, case_id)
+    case: Case = get_report_case(context, case_id)
     report_api: ReportAPI = get_report_api(context, case)
     version: Version = report_api.housekeeper_api.last_version(case_id)
-    delivery_report: Optional[str] = report_api.get_delivery_report_from_hk(
+    delivery_report: str | None = report_api.get_delivery_report_from_hk(
         case_id=case_id, version=version
     )
     if delivery_report and not dry_run:

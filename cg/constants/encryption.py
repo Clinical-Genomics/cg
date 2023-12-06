@@ -1,10 +1,10 @@
 """Constants specific for encryption"""
-from enum import Enum
+from enum import StrEnum
 
 from cg.utils.enums import ListEnum
 
 
-class CipherAlgorithm(str, Enum):
+class CipherAlgorithm(StrEnum):
     TRIPLE_DES: str = "3DES"
     AES: str = "AES"
     AES192: str = "AES192"
@@ -18,18 +18,20 @@ class CipherAlgorithm(str, Enum):
     TWOFISH: str = "TWOFISH"
 
 
-class EncryptionUserID(str, Enum):
+class EncryptionUserID(StrEnum):
     HASTA_USER_ID: str = '"Clinical Genomics"'
 
 
 class GPGParameters(ListEnum):
     ASYMMETRIC_ENCRYPTION: list[str] = [
         "--encrypt",
+        "--yes",
         "--recipient",
         EncryptionUserID.HASTA_USER_ID,
     ]
     ASYMMETRIC_DECRYPTION: list = [
         "--decrypt",
+        "--yes",
         "--batch",
         "--cipher-algo",
         CipherAlgorithm.AES256,
@@ -38,6 +40,7 @@ class GPGParameters(ListEnum):
     ]
     SYMMETRIC_ENCRYPTION: list[str] = [
         "--symmetric",
+        "--yes",
         "--cipher-algo",
         CipherAlgorithm.AES256,
         "--batch",
@@ -47,6 +50,7 @@ class GPGParameters(ListEnum):
     ]
     SYMMETRIC_DECRYPTION: list[str] = [
         "--decrypt",
+        "--yes",
         "--cipher-algo",
         CipherAlgorithm.AES256,
         "--batch",

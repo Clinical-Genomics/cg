@@ -12,7 +12,7 @@ import re
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 import click
 
@@ -24,7 +24,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import ControlEnum
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_case_path(self, case_id: str) -> list[Path]:
         """Returns all paths associated with the case or single sample analysis."""
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
         lims_project_dir_path: Path = Path(self.root_dir, "results", lims_project)
 
@@ -72,7 +72,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         return sorted(case_directories, key=os.path.getctime, reverse=True)
 
-    def get_latest_case_path(self, case_id: str) -> Union[Path, None]:
+    def get_latest_case_path(self, case_id: str) -> Path | None:
         """Return latest run dir for a microbial case, if no path found it returns None."""
         lims_project: str = self.get_project(
             self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample.internal_id
@@ -87,7 +87,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             None,
         )
 
-    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[list[Path], Path]) -> int:
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
         """Remove workflow run directories for a MicroSALT case."""
 
         if not case_path:
@@ -122,7 +122,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         """Get trailblazer config path."""
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_obj: Sample = case_obj.links[0].sample
         project_id: str = self.get_project(sample_obj.internal_id)
         return Path(
@@ -132,7 +132,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
         located"""
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         order_id: str = case_obj.name
         deliverables_file_path = Path(
             self.root_dir,
@@ -145,25 +145,23 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             LOG.info("Found deliverables file %s", deliverables_file_path)
         return deliverables_file_path
 
-    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample) -> Path:
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
         return Path(self.get_case_fastq_path(case_id=case.internal_id), sample.internal_id)
 
-    def link_fastq_files(
-        self, case_id: str, sample_id: Optional[str], dry_run: bool = False
-    ) -> None:
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+    def link_fastq_files(self, case_id: str, sample_id: str | None, dry_run: bool = False) -> None:
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         samples: list[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
         for sample_obj in samples:
             self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
 
-    def get_samples(self, case_id: str, sample_id: Optional[str] = None) -> list[Sample]:
+    def get_samples(self, case_id: str, sample_id: str | None = None) -> list[Sample]:
         """Returns a list of samples to configure
         If sample_id is specified, will return a list with only this sample_id.
         Otherwise, returns all samples in given case"""
         if sample_id:
             return [self.status_db.get_sample_by_internal_id(internal_id=sample_id)]
 
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         return [link.sample for link in case_obj.links]
 
     def get_lims_comment(self, sample_id: str) -> str:
@@ -223,7 +221,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             "Customer_ID": sample_obj.customer.internal_id,
             "application_tag": sample_obj.application_version.application.tag,
             "date_arrival": str(sample_obj.received_at or datetime.min),
-            "date_sequencing": str(sample_obj.reads_updated_at or datetime.min),
+            "date_sequencing": str(sample_obj.last_sequenced_at or datetime.min),
             "date_libprep": str(sample_obj.prepared_at or datetime.min),
             "method_libprep": method_library_prep or "Not in LIMS",
             "method_sequencing": method_sequencing or "Not in LIMS",
@@ -236,7 +234,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def resolve_case_sample_id(
         self, sample: bool, ticket: bool, unique_id: Any
-    ) -> tuple[str, Optional[str]]:
+    ) -> tuple[str, str | None]:
         """Resolve case_id and sample_id w based on input arguments."""
         if ticket and sample:
             LOG.error("Flags -t and -s are mutually exclusive!")
@@ -256,7 +254,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_case_id_from_ticket(self, unique_id: str) -> tuple[str, None]:
         """If ticked is provided as argument, finds the corresponding case_id and returns it.
         Since sample_id is not specified, nothing is returned as sample_id"""
-        case: Family = self.status_db.get_case_by_name(name=unique_id)
+        case: Case = self.status_db.get_case_by_name(name=unique_id)
         if not case:
             LOG.error("No case found for ticket number:  %s", unique_id)
             raise click.Abort
@@ -271,13 +269,13 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         if not sample:
             LOG.error("No sample found with id: %s", unique_id)
             raise click.Abort
-        case_id = sample.links[0].family.internal_id
+        case_id = sample.links[0].case.internal_id
         sample_id = sample.internal_id
         return case_id, sample_id
 
     def get_case_id_from_case(self, unique_id: str) -> tuple[str, None]:
         """If case_id is specified, validates the presence of case_id in database and returns it"""
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=unique_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=unique_id)
         if not case_obj:
             LOG.error("No case found with the id:  %s", unique_id)
             raise click.Abort
@@ -291,7 +289,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         for sample_id in case_qc:
             sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
-            sample_check: Union[dict, None] = self.qc_sample_check(
+            sample_check: dict | None = self.qc_sample_check(
                 sample=sample,
                 sample_qc=case_qc[sample_id],
             )
@@ -339,7 +337,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Creates a QC_done when a QC check is performed."""
         write_json(file_path=run_dir_path.joinpath("QC_done.json"), content=failed_samples)
 
-    def qc_sample_check(self, sample: Sample, sample_qc: dict) -> Union[dict, None]:
+    def qc_sample_check(self, sample: Sample, sample_qc: dict) -> dict | None:
         """Perform a QC on a sample."""
         if sample.control == ControlEnum.negative:
             reads_pass: bool = self.check_external_negative_control_sample(sample)

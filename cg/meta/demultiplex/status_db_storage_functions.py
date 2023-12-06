@@ -1,7 +1,6 @@
 """Functions interacting with statusdb in the DemuxPostProcessingAPI."""
 import datetime
 import logging
-from typing import Optional
 
 from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
@@ -27,7 +26,7 @@ def store_flow_cell_data_in_status_db(
     Create flow cell from the parsed and validated flow cell data.
     And add the samples on the flow cell to the model.
     """
-    flow_cell: Optional[Flowcell] = store.get_flow_cell_by_name(flow_cell_name=parsed_flow_cell.id)
+    flow_cell: Flowcell | None = store.get_flow_cell_by_name(flow_cell_name=parsed_flow_cell.id)
     if not flow_cell:
         flow_cell: Flowcell = Flowcell(
             name=parsed_flow_cell.id,
@@ -111,12 +110,12 @@ def metric_has_sample_in_statusdb(sample_internal_id: str, store: Store) -> bool
 
 
 def metric_exists_in_status_db(metric: SampleLaneSequencingMetrics, store: Store) -> bool:
-    existing_metrics_entry: Optional[
-        SampleLaneSequencingMetrics
-    ] = store.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-        flow_cell_name=metric.flow_cell_name,
-        sample_internal_id=metric.sample_internal_id,
-        lane=metric.flow_cell_lane_number,
+    existing_metrics_entry: SampleLaneSequencingMetrics | None = (
+        store.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+            flow_cell_name=metric.flow_cell_name,
+            sample_internal_id=metric.sample_internal_id,
+            lane=metric.flow_cell_lane_number,
+        )
     )
     if existing_metrics_entry:
         LOG.warning(
@@ -125,32 +124,40 @@ def metric_exists_in_status_db(metric: SampleLaneSequencingMetrics, store: Store
     return bool(existing_metrics_entry)
 
 
-def update_sample_read_counts_in_status_db(
-    flow_cell_data: FlowCellDirectoryData, store: Store
-) -> None:
-    """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
-    q30_threshold: int = get_q30_threshold(flow_cell_data.sequencer_type)
-    sample_internal_ids: list[str] = flow_cell_data.sample_sheet.get_sample_ids()
+def store_sample_data_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
+    """Update samples on the flow cell with read counts and sequencing date."""
+    q30_threshold: int = get_q30_threshold(flow_cell.sequencer_type)
+    sample_internal_ids: list[str] = flow_cell.sample_sheet.get_sample_ids()
+    sequenced_at: datetime = flow_cell.sequenced_at
+
     for sample_id in sample_internal_ids:
-        update_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold, store=store)
+        sample: Sample | None = store.get_sample_by_internal_id(sample_id)
+
+        if not sample:
+            LOG.warning(f"Cannot find {sample_id}. Skipping.")
+            continue
+
+        update_sample_read_count(sample=sample, q30_threshold=q30_threshold, store=store)
+        update_sample_sequencing_date(sample=sample, sequenced_at=sequenced_at)
+
     store.session.commit()
 
 
-def update_sample_read_count(sample_id: str, q30_threshold: int, store: Store) -> None:
-    """Update the read count for a sample in status db with all reads exceeding the q30 threshold from the sequencing metrics table."""
-    sample: Optional[Sample] = store.get_sample_by_internal_id(sample_id)
-    if sample:
-        sample_read_count: int = store.get_number_of_reads_for_sample_passing_q30_threshold(
-            sample_internal_id=sample_id,
-            q30_threshold=q30_threshold,
-        )
-        LOG.debug(
-            f"Updating sample {sample_id} with read count {sample_read_count} and setting sequenced at."
-        )
-        sample.reads = sample_read_count
-        sample.reads_updated_at = datetime.datetime.now()
-    else:
-        LOG.warning(f"Cannot find {sample_id} in status_db when adding read counts. Skipping.")
+def update_sample_read_count(sample: Sample, q30_threshold: int, store: Store) -> None:
+    """Update the read count with reads passing the q30 threshold."""
+    sample_read_count: int = store.get_number_of_reads_for_sample_passing_q30_threshold(
+        sample_internal_id=sample.internal_id,
+        q30_threshold=q30_threshold,
+    )
+    LOG.debug(f"Updating sample {sample.internal_id} with read count {sample_read_count}")
+    sample.reads = sample_read_count
+
+
+def update_sample_sequencing_date(sample: Sample, sequenced_at: datetime) -> None:
+    """Update the last sequenced at date for a sample in status db."""
+    if not sample.last_sequenced_at or sample.last_sequenced_at < sequenced_at:
+        LOG.debug(f"Updating sample {sample.internal_id} with new sequencing date .")
+        sample.last_sequenced_at = sequenced_at
 
 
 def delete_sequencing_metrics_from_statusdb(flow_cell: str, store: Store) -> None:

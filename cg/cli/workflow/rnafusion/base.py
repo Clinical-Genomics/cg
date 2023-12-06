@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from typing import Optional
 
 import click
 from pydantic.v1 import ValidationError
@@ -98,7 +97,7 @@ def run(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
-    nf_tower_id: Optional[str],
+    nf_tower_id: str | None,
     dry_run: bool,
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""
@@ -325,7 +324,7 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
         is_latest_analysis_qc
         or not analysis_api.get_metrics_deliverables_path(case_id=case_id).exists()
     ):
-        LOG.info("Generating metrics file and performing QC checks for %s", case_id)
+        LOG.info(f"Generating metrics file and performing QC checks for {case_id}")
         context.invoke(metrics_deliver, case_id=case_id, dry_run=dry_run)
     LOG.info(f"Storing analysis for {case_id}")
     context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
@@ -343,7 +342,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
     exit_code: int = EXIT_SUCCESS
 
     for case_obj in set([*analysis_api.get_cases_to_qc(), *analysis_api.get_cases_to_store()]):
-        LOG.info("Storing RNAFUSION deliverables for %s", case_obj.internal_id)
+        LOG.info(f"Storing RNAFUSION deliverables for {case_obj.internal_id}")
         try:
             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
         except Exception as error:

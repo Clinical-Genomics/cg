@@ -1,9 +1,9 @@
 import logging
-from typing import Optional
 
 import click
 
 from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline, Priority
+from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.subject import Gender
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
@@ -11,10 +11,10 @@ from cg.store import Store
 from cg.store.models import (
     Application,
     ApplicationVersion,
+    Case,
+    CaseSample,
     Collaboration,
     Customer,
-    Family,
-    FamilySample,
     Panel,
     Sample,
     User,
@@ -59,7 +59,7 @@ def add():
     "--data-archive-location",
     "data_archive_location",
     help="Specifies where to store data for the customer.",
-    default="PDC",
+    default=PDC_ARCHIVE_LOCATION,
     show_default=True,
     required=False,
 )
@@ -79,7 +79,7 @@ def add_customer(
     context: CGConfig,
     internal_id: str,
     name: str,
-    collaboration_internal_ids: Optional[list[str]],
+    collaboration_internal_ids: list[str] | None,
     invoice_address: str,
     invoice_reference: str,
     data_archive_location: str,
@@ -173,10 +173,10 @@ def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name:
 @click.pass_obj
 def add_sample(
     context: CGConfig,
-    lims_id: Optional[str],
-    down_sampled: Optional[int],
+    lims_id: str | None,
+    down_sampled: int | None,
     sex: Gender,
-    order: Optional[str],
+    order: str | None,
     application_tag: str,
     priority: Priority,
     customer_id: str,
@@ -264,7 +264,7 @@ def add_case(
             LOG.error(f"{panel_abbreviation}: panel not found")
             raise click.Abort
 
-    new_case: Family = status_db.add_case(
+    new_case: Case = status_db.add_case(
         data_analysis=data_analysis,
         data_delivery=data_delivery,
         name=name,
@@ -288,44 +288,44 @@ def add_case(
 @click.pass_obj
 def link_sample_to_case(
     context: CGConfig,
-    mother_id: Optional[str],
-    father_id: Optional[str],
+    mother_id: str | None,
+    father_id: str | None,
     status: str,
     case_id: str,
     sample_id: str,
 ):
     """Create a link between a case id and a sample id."""
     status_db: Store = context.status_db
-    mother: Optional[Sample] = None
-    father: Optional[Sample] = None
-    case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    mother: Sample | None = None
+    father: Sample | None = None
+    case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     if case_obj is None:
-        LOG.error("%s: family not found", case_id)
+        LOG.error(f"{case_id}: family not found")
         raise click.Abort
 
     sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
     if sample is None:
-        LOG.error("%s: sample not found", sample_id)
+        LOG.error(f"{sample_id}: sample not found")
         raise click.Abort
 
     if mother_id:
         mother: Sample = status_db.get_sample_by_internal_id(internal_id=mother_id)
         if mother is None:
-            LOG.error("%s: mother not found", mother_id)
+            LOG.error(f"{mother_id}: mother not found")
             raise click.Abort
 
     if father_id:
         father: Sample = status_db.get_sample_by_internal_id(internal_id=father_id)
         if father is None:
-            LOG.error("%s: father not found", father_id)
+            LOG.error(f"{father_id}: father not found")
             raise click.Abort
 
-    new_record: FamilySample = status_db.relate_sample(
-        family=case_obj, sample=sample, status=status, mother=mother, father=father
+    new_record: CaseSample = status_db.relate_sample(
+        case=case_obj, sample=sample, status=status, mother=mother, father=father
     )
     status_db.session.add(new_record)
     status_db.session.commit()
-    LOG.info("related %s to %s", case_obj.internal_id, sample.internal_id)
+    LOG.info(f"related {case_id} to {sample_id}")
 
 
 @add.command("external")

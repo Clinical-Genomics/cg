@@ -6,22 +6,29 @@ from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.exc import FlowCellError
+from cg.io.csv import read_csv
 from cg.meta.demultiplex.utils import (
     add_flow_cell_name_to_fastq_file_path,
+    are_all_files_synced,
     create_delivery_file_in_flow_cell_directory,
+    create_manifest_file,
+    get_existing_manifest_file,
     get_lane_from_sample_fastq,
     get_q30_threshold,
     get_sample_sheet_path_from_flow_cell_dir,
     get_undetermined_fastqs,
     is_file_path_compressed_fastq,
     is_file_relevant_for_demultiplexing,
+    is_flow_cell_sync_confirmed,
     is_lane_in_fastq_file_name,
+    is_manifest_file_required,
     is_sample_id_in_directory_name,
     is_syncing_complete,
     is_valid_sample_fastq_file,
     parse_manifest_file,
 )
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from tests.meta.demultiplex.conftest import get_all_files_in_directory_tree
 
 
 def test_validate_sample_fastq_with_valid_file():
@@ -299,6 +306,44 @@ def test_is_file_relevant_for_demultiplexing(file: Path, expected_result: bool):
     assert result == expected_result
 
 
+def test_get_existing_manifest_file_illumina(lsyncd_source_directory: Path):
+    # GIVEN a directory with an Illumina manifest file
+
+    # WHEN getting the manifest file
+    manifest_file: Path = get_existing_manifest_file(lsyncd_source_directory)
+
+    # THEN the manifest file should be returned
+    assert manifest_file == Path(
+        lsyncd_source_directory, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST
+    )
+
+
+def test_get_existing_manifest_file(lsyncd_source_directory: Path):
+    # GIVEN a directory with a custom manifest file
+    Path(lsyncd_source_directory, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST).rename(
+        Path(lsyncd_source_directory, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)
+    )
+
+    # WHEN getting the manifest file
+    manifest_file: Path = get_existing_manifest_file(lsyncd_source_directory)
+
+    # THEN the manifest file should be returned
+    assert manifest_file == Path(
+        lsyncd_source_directory, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST
+    )
+
+
+def test_get_existing_manifest_file_missing(lsyncd_source_directory: Path):
+    # GIVEN a directory with a missing manifest file
+    Path(lsyncd_source_directory, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST).unlink()
+
+    # WHEN getting the manifest file
+    manifest_file: Path = get_existing_manifest_file(lsyncd_source_directory)
+
+    # THEN the manifest file should be returned
+    assert manifest_file is None
+
+
 def test_is_syncing_complete_true(lsyncd_source_directory: Path, lsyncd_target_directory: Path):
     # GIVEN a source directory with a manifest file
 
@@ -307,6 +352,41 @@ def test_is_syncing_complete_true(lsyncd_source_directory: Path, lsyncd_target_d
     # WHEN checking if the syncing is complete
     is_directory_synced: bool = is_syncing_complete(
         source_directory=lsyncd_source_directory, target_directory=lsyncd_target_directory
+    )
+
+    # THEN the syncing should be deemed complete
+    assert is_directory_synced
+
+
+def test_are_all_files_synced_false(
+    novaseq_x_manifest_file: Path, lsyncd_source_directory: Path, lsyncd_target_directory: Path
+):
+    # GIVEN a source directory with a manifest file
+    files_at_source: list[Path] = parse_manifest_file(novaseq_x_manifest_file)
+
+    # GIVEN a target directory with one file missing
+    Path(lsyncd_target_directory, files_at_source[0]).unlink()
+
+    # WHEN checking if the syncing is complete
+    is_directory_synced: bool = are_all_files_synced(
+        files_at_source=files_at_source, target_directory=lsyncd_target_directory
+    )
+
+    # THEN the syncing should not be deemed complete
+    assert not is_directory_synced
+
+
+def test_are_all_files_synced(
+    novaseq_x_manifest_file: Path, lsyncd_source_directory: Path, lsyncd_target_directory: Path
+):
+    # GIVEN a source directory with a manifest file
+    files_at_source: list[Path] = parse_manifest_file(novaseq_x_manifest_file)
+
+    # GIVEN a target directory with all relevant files
+
+    # WHEN checking if the syncing is complete
+    is_directory_synced: bool = are_all_files_synced(
+        files_at_source=files_at_source, target_directory=lsyncd_target_directory
     )
 
     # THEN the syncing should be deemed complete
@@ -329,6 +409,90 @@ def test_is_syncing_complete_false(
 
     # THEN the syncing should not be deemed complete
     assert not is_directory_synced
+
+
+@pytest.mark.parametrize(
+    "source_files, expected_result",
+    [
+        ([DemultiplexingDirsAndFiles.COPY_COMPLETE], True),
+        ([DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST], False),
+        (
+            [
+                DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST,
+                DemultiplexingDirsAndFiles.COPY_COMPLETE,
+            ],
+            False,
+        ),
+        ([DemultiplexingDirsAndFiles.CG_FILE_MANIFEST], False),
+        (
+            [
+                DemultiplexingDirsAndFiles.CG_FILE_MANIFEST,
+                DemultiplexingDirsAndFiles.COPY_COMPLETE,
+            ],
+            False,
+        ),
+    ],
+)
+def test_is_manifest_file_required(source_files: list[str], expected_result: bool, tmp_path: Path):
+    """Tests if a manifest file is needed given the files present."""
+    # GIVEN a source directory
+    source_directory = Path(tmp_path, "source")
+    Path(tmp_path, "source").mkdir()
+
+    # GIVEN the files present
+    for file in source_files:
+        Path(source_directory, file).touch()
+
+    # WHEN checking if a manifest file is needed
+    is_required = is_manifest_file_required(source_directory)
+
+    # THEN the result should as expected
+    assert is_required == expected_result
+
+
+@pytest.mark.parametrize(
+    "source_files, expected_result",
+    [([DemultiplexingDirsAndFiles.COPY_COMPLETE], True), ([], False)],
+)
+def test_is_flow_cell_sync_confirmed(
+    source_files: list[str], expected_result: bool, tmp_path: Path
+):
+    """Tests that a flow cell sync has been confirmed."""
+    # GIVEN a flow cell directory with the given file present
+    for file in source_files:
+        Path(tmp_path, file).touch()
+
+    # WHEN checking if the flow cell sync has been confirmed
+    is_synced = is_flow_cell_sync_confirmed(tmp_path)
+
+    # THEN the result should match what we expect
+    assert is_synced == expected_result
+
+
+def test_create_manifest_file(tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert: Path):
+    # GIVEN a flow cell directory with files
+    all_files: list[Path] = get_all_files_in_directory_tree(
+        tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert
+    )
+    # WHEN creating a manifest file
+    manifest_file: Path = create_manifest_file(
+        tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert
+    )
+
+    # THEN a manifest file should be created
+    assert manifest_file.exists()
+
+    # Then all files should be included in the manifest_file
+    assert_file_contains_all_file_paths(manifest_file=manifest_file, files_in_file=all_files)
+
+
+def assert_file_contains_all_file_paths(manifest_file: Path, files_in_file: list[Path]):
+    """Asserts that all files in files_in_file are present in the manifest_file."""
+    files_in_manifest: list[Path] = [
+        Path(file[0].strip()) for file in read_csv(delimiter="\t", file_path=manifest_file)
+    ]
+    for manifest_file in files_in_file:
+        assert manifest_file in files_in_manifest
 
 
 def test_add_flow_cell_name_to_fastq_file_path(
@@ -371,7 +535,7 @@ def test_get_undetermined_fastqs_no_matching_files(tmp_path):
     # GIVEN a lane and a flow cell with no undetermined fastq files
 
     # WHEN reetrieving undetermined fastqs for the lane
-    result = get_undetermined_fastqs(lane=1, undetermined_dir_path=tmp_path)
+    result = get_undetermined_fastqs(lane=1, flow_cell_path=tmp_path)
 
     # THEN no undetermined fastq files should be returned
     assert not result
@@ -383,7 +547,7 @@ def test_get_undetermined_fastqs_single_matching_file(tmp_path):
     expected_file.touch()
 
     # WHEN retrieving undetermined fastqs for the lane
-    result = get_undetermined_fastqs(lane=1, undetermined_dir_path=tmp_path)
+    result = get_undetermined_fastqs(lane=1, flow_cell_path=tmp_path)
 
     # THEN the undetermined fastq file for the lane should be returned
     assert result == [expected_file]
@@ -399,7 +563,7 @@ def test_get_undetermined_fastqs_multiple_matching_files(tmp_path):
         file.touch()
 
     # WHEN retrieving the undetermined fastqs for the lane
-    result = get_undetermined_fastqs(lane=1, undetermined_dir_path=tmp_path)
+    result = get_undetermined_fastqs(lane=1, flow_cell_path=tmp_path)
 
     # THEN the undetermined fastq files for the lane should be returned
     assert set(result) == set(expected_files)

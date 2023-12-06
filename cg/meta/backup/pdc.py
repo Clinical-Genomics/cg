@@ -2,10 +2,12 @@
 
 import logging
 from pathlib import Path
+from subprocess import CalledProcessError
 
 import psutil
 
 from cg.constants.pdc import DSMCParameters
+from cg.constants.process import EXIT_WARNING
 from cg.exc import (
     DsmcAlreadyRunningError,
     FlowCellAlreadyBackedUpError,
@@ -20,6 +22,8 @@ from cg.utils import Process
 LOG = logging.getLogger(__name__)
 
 SERVER = "hasta"
+NO_FILE_FOUND_ANSWER = "ANS1092W"
+MAX_NR_OF_DSMC_PROCESSES: int = 3
 
 
 class PdcAPI:
@@ -36,14 +40,16 @@ class PdcAPI:
             Exception: for all non-exit exceptions.
         """
         is_dsmc_running: bool = False
+        dsmc_process_count: int = 0
         try:
             for process in psutil.process_iter():
-                if "dsmc" in process.name():
-                    is_dsmc_running = True
+                if "dsmc" == process.name():
+                    dsmc_process_count += 1
         except Exception as error:
             LOG.debug(f"{error}")
-        if is_dsmc_running:
-            LOG.debug("A Dsmc process is already running")
+        if dsmc_process_count >= MAX_NR_OF_DSMC_PROCESSES:
+            is_dsmc_running = True
+            LOG.debug("Too many Dsmc processes are already running")
         return is_dsmc_running
 
     def archive_file_to_pdc(self, file_path: str) -> None:
@@ -55,9 +61,7 @@ class PdcAPI:
         """Query PDC based on a given search pattern."""
         command: list = DSMCParameters.QUERY_COMMAND.copy()
         command.append(search_pattern)
-        LOG.debug("Starting DSMC command:")
-        LOG.debug(f"{self.process.binary} {' '.join(command)}")
-        self.process.run_command(parameters=command)
+        self.run_dsmc_command(command=command)
 
     def retrieve_file_from_pdc(self, file_path: str, target_path: str = None) -> None:
         """Retrieve a file from PDC"""
@@ -76,8 +80,11 @@ class PdcAPI:
         LOG.debug(f"{self.process.binary} {' '.join(command)}")
         try:
             self.process.run_command(parameters=command, dry_run=self.dry_run)
-        except Exception as error:
-            raise PdcError(f"{error}") from error
+        except CalledProcessError as error:
+            if error.returncode == EXIT_WARNING:
+                LOG.warning(f"{error}")
+                return
+            raise PdcError(message=f"{error}") from error
 
     def validate_is_flow_cell_backup_possible(
         self, db_flow_cell: Flowcell, flow_cell_encryption_api: FlowCellEncryptionAPI
@@ -89,7 +96,7 @@ class PdcAPI:
             FlowCellEncryptionError if encryption is not complete.
         """
         if self.validate_is_dsmc_running():
-            raise DsmcAlreadyRunningError("A Dsmc process is already running")
+            raise DsmcAlreadyRunningError("Too many Dsmc processes are already running")
         if db_flow_cell and db_flow_cell.has_backup:
             raise FlowCellAlreadyBackedUpError(
                 f"Flow cell: {db_flow_cell.name} is already backed-up"
@@ -104,16 +111,12 @@ class PdcAPI:
         self, files_to_archive: list[Path], store: Store, db_flow_cell: Flowcell
     ) -> None:
         """Back-up flow cell files."""
-        archived_file_count: int = 0
         for encrypted_file in files_to_archive:
-            try:
+            if not self.dry_run:
                 self.archive_file_to_pdc(file_path=encrypted_file.as_posix())
-                archived_file_count += 1
-            except PdcError:
-                LOG.warning(f"{encrypted_file.as_posix()} cannot be archived")
-            if archived_file_count == len(files_to_archive) and not self.dry_run:
-                store.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
-                LOG.info(f"Flow cell: {db_flow_cell.name} has been backed up")
+        if not self.dry_run:
+            store.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
+            LOG.info(f"Flow cell: {db_flow_cell.name} has been backed up")
 
     def start_flow_cell_backup(
         self,
@@ -133,3 +136,8 @@ class PdcAPI:
             store=status_db,
             db_flow_cell=db_flow_cell,
         )
+
+    @staticmethod
+    def was_file_found(dsmc_output: str) -> bool:
+        """Check if file was found in PDC."""
+        return NO_FILE_FOUND_ANSWER not in dsmc_output

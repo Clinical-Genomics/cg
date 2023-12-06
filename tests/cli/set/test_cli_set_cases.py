@@ -8,7 +8,7 @@ from click.testing import CliRunner
 from cg.cli.set.cases import set_cases
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -26,7 +26,7 @@ def test_set_cases_by_sample_identifiers(
     new_sample: Sample = helpers.add_sample(base_store)
     new_sample.original_ticket: str = ticket_id
     new_sample.order: str = "An order"
-    case: Family = helpers.add_case(base_store)
+    case: Case = helpers.add_case(base_store)
     helpers.add_relationship(base_store, sample=new_sample, case=case)
     identifier_value = getattr(new_sample, identifier_key)
 

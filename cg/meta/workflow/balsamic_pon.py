@@ -4,11 +4,10 @@ import logging
 from pathlib import Path
 
 from cg.constants.constants import Pipeline
-from cg.constants.indexes import ListIndexes
 from cg.exc import BalsamicStartError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family
+from cg.store.models import Case
 from cg.utils.utils import build_command_from_dict
 
 LOG = logging.getLogger(__name__)
@@ -32,10 +31,9 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
         panel_bed: str,
         pon_cnn: str,
         observations: list[str],
-        dry_run: bool = False,
     ) -> None:
         """Creates a config file for BALSAMIC PON analysis."""
-        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_parameters: dict = self.get_sample_params(case_id=case_id, panel_bed=panel_bed)
         if not sample_parameters:
             LOG.error(f"{case_id} has no samples tagged for Balsamic PON analysis")
@@ -55,7 +53,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
             }
         )
         parameters: list[str] = ["config", "pon"] + options
-        self.process.run_command(parameters=parameters, dry_run=dry_run)
+        self.process.run_command(parameters=parameters)
 
     def get_case_config_path(self, case_id: str) -> Path:
         """Returns the BALSAMIC PON config path."""
@@ -64,9 +62,5 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
     def get_next_pon_version(self, panel_bed: str) -> str:
         """Returns the next PON version to be generated."""
         latest_pon_file: str = self.get_latest_pon_file(panel_bed=panel_bed)
-        next_version = (
-            int(Path(latest_pon_file).stem.split("_v")[ListIndexes.LAST.value]) + 1
-            if latest_pon_file
-            else 1
-        )
+        next_version = int(Path(latest_pon_file).stem.split("_v")[-1]) + 1 if latest_pon_file else 1
         return "v" + str(next_version)

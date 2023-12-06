@@ -1,7 +1,5 @@
 """Priority specific constants"""
-from enum import IntEnum
-
-from cg.utils.enums import StrEnum
+from enum import IntEnum, StrEnum
 
 
 class SlurmQos(StrEnum):
@@ -27,14 +25,15 @@ class Priority(IntEnum):
     express: int = 3
     clinical_trials: int = 4
 
-
-PRIORITY_TO_SLURM_QOS = {
-    Priority.research: SlurmQos.LOW,
-    Priority.standard: SlurmQos.NORMAL,
-    Priority.priority: SlurmQos.HIGH,
-    Priority.express: SlurmQos.EXPRESS,
-    Priority.clinical_trials: SlurmQos.NORMAL,
-}
+    @classmethod
+    def priority_to_slurm_qos(cls) -> dict[int, str]:
+        return {
+            Priority.research: SlurmQos.LOW,
+            Priority.standard: SlurmQos.NORMAL,
+            Priority.priority: SlurmQos.HIGH,
+            Priority.express: SlurmQos.EXPRESS,
+            Priority.clinical_trials: SlurmQos.NORMAL,
+        }
 
 
 class SlurmAccount(StrEnum):

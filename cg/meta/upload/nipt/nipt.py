@@ -2,7 +2,6 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import Optional
 
 import paramiko
 import requests
@@ -16,7 +15,7 @@ from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
 from cg.meta.upload.nipt.models import FlowCellQ30AndReads, StatinaUploadFiles
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Analysis, Family, Flowcell
+from cg.store.models import Analysis, Case, Flowcell
 
 LOG = logging.getLogger(__name__)
 
@@ -76,7 +75,7 @@ class NiptUploadAPI:
         LOG.debug(f"Flow cell {flow_cell.name} passed QC for case {case_id}.")
         return True
 
-    def get_housekeeper_results_file(self, case_id: str, tags: Optional[list] = None) -> str:
+    def get_housekeeper_results_file(self, case_id: str, tags: list | None = None) -> str:
         """Get the result file for a NIPT analysis from Housekeeper"""
 
         if not tags:
@@ -131,7 +130,7 @@ class NiptUploadAPI:
     def update_analysis_uploaded_at_date(self, case_id: str) -> Analysis:
         """Updates analysis_uploaded_at for the uploaded analysis"""
 
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_obj: Analysis = case_obj.analyses[0]
 
         if not self.dry_run:
@@ -146,7 +145,7 @@ class NiptUploadAPI:
     def update_analysis_upload_started_date(self, case_id: str) -> Analysis:
         """Updates analysis_upload_started_at for the uploaded analysis"""
 
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_obj: Analysis = case_obj.analyses[0]
 
         if not self.dry_run:

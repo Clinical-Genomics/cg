@@ -12,7 +12,7 @@ from cg.constants.scout_upload import (
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.models.scout.scout_load_config import RnafusionLoadConfig, ScoutCancerIndividual
-from cg.store.models import Analysis, FamilySample
+from cg.store.models import Analysis, CaseSample
 
 LOG = logging.getLogger(__name__)
 
@@ -36,9 +36,9 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         self.include_case_files()
 
         LOG.info("Building samples")
-        db_sample: FamilySample
+        db_sample: CaseSample
 
-        for db_sample in self.analysis_obj.family.links:
+        for db_sample in self.analysis_obj.case.links:
             self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
 
     def include_case_files(self) -> None:
@@ -56,7 +56,7 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
             self.get_file_from_hk(getattr(self.case_tags, scout_key)),
         )
 
-    def build_config_sample(self, case_sample: FamilySample) -> ScoutCancerIndividual:
+    def build_config_sample(self, case_sample: CaseSample) -> ScoutCancerIndividual:
         """Build a sample with rnafusion specific information."""
         config_sample = ScoutCancerIndividual()
 

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, Optional
+from typing import Callable
 
 from sqlalchemy.orm import Query
 
@@ -30,8 +30,8 @@ class CustomerFilter(Enum):
 def apply_customer_filter(
     customers: Query,
     filter_functions: list[Callable],
-    customer_internal_id: Optional[str] = None,
-    exclude_customer_internal_id: Optional[str] = None,
+    customer_internal_id: str | None = None,
+    exclude_customer_internal_id: str | None = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for filter_function in filter_functions:

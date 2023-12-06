@@ -1,9 +1,8 @@
 import datetime as dt
 import logging
 import shutil
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
-from typing import Optional
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
@@ -17,13 +16,13 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family, Flowcell, Sample
+from cg.store.models import Case, Flowcell, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
 
-class FluffySampleSheetHeaders(Enum):
+class FluffySampleSheetHeaders(StrEnum):
     flow_cell_id: str = "FCID"
     lane: str = "Lane"
     sample_internal_id: str = "Sample_ID"
@@ -39,6 +38,10 @@ class FluffySampleSheetHeaders(Enum):
     library_nM: str = "Library_nM"
     sequencing_date: str = "SequencingDate"
 
+    @classmethod
+    def headers(cls) -> list[str]:
+        return list(cls)
+
 
 class FluffySample(BaseModel):
     flow_cell_id: str
@@ -48,9 +51,9 @@ class FluffySample(BaseModel):
     index: str
     index2: str
     sample_name: str
-    control: Optional[str] = "N"
-    recipe: Optional[str] = "R1"
-    operator: Optional[str] = "script"
+    control: str | None = "N"
+    recipe: str | None = "R1"
+    operator: str | None = "script"
     sample_project: str
     exclude: bool
     library_nM: float
@@ -62,9 +65,8 @@ class FluffySampleSheet(BaseModel):
 
     def write_sample_sheet(self, out_path: Path) -> None:
         LOG.info(f"Writing fluffy sample sheet to {out_path}")
-        headers = [header.value for header in FluffySampleSheetHeaders]
         entries = [entry.model_dump().values() for entry in self.samples]
-        content = [headers] + entries
+        content = [FluffySampleSheetHeaders.headers()] + entries
         WriteFile.write_file_from_content(content, FileFormat.CSV, out_path)
 
 
@@ -145,7 +147,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         Links fastq files from Housekeeper to case working directory
         """
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         latest_flow_cell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
         workdir_path = self.get_workdir_path(case_id=case_id)
         if workdir_path.exists() and not dry_run:
@@ -169,11 +171,11 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """Get sample concentration from LIMS"""
         return self.lims_api.get_sample_attribute(lims_id=sample_id, key="concentration_sample")
 
-    def get_sample_sequenced_date(self, sample_id: str) -> Optional[dt.date]:
+    def get_sample_sequenced_date(self, sample_id: str) -> dt.date | None:
         sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
-        reads_updated_at: dt.datetime = sample_obj.reads_updated_at
-        if reads_updated_at:
-            return reads_updated_at.date()
+        last_sequenced_at: dt.datetime = sample_obj.last_sequenced_at
+        if last_sequenced_at:
+            return last_sequenced_at.date()
 
     def get_sample_control_status(self, sample_id: str) -> bool:
         sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
@@ -257,7 +259,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         ]
         self.process.run_command(command_args, dry_run=dry_run)
 
-    def get_cases_to_store(self) -> list[Family]:
+    def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,
         and is ready to be stored in Housekeeper."""
         return [

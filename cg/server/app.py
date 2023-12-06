@@ -1,5 +1,3 @@
-from typing import Optional
-
 import coloredlogs
 import requests
 from flask import Flask, redirect, session, url_for
@@ -16,11 +14,11 @@ from cg.store.models import (
     ApplicationVersion,
     Bed,
     BedVersion,
+    Case,
+    CaseSample,
     Collaboration,
     Customer,
     Delivery,
-    Family,
-    FamilySample,
     Flowcell,
     Invoice,
     Organism,
@@ -121,8 +119,8 @@ def _register_admin_views():
     )
 
     # Business data views
-    ext.admin.add_view(admin.FamilyView(Family, ext.db.session))
-    ext.admin.add_view(admin.FamilySampleView(FamilySample, ext.db.session))
+    ext.admin.add_view(admin.CaseView(Case, ext.db.session))
+    ext.admin.add_view(admin.CaseSampleView(CaseSample, ext.db.session))
     ext.admin.add_view(admin.SampleView(Sample, ext.db.session))
     ext.admin.add_view(admin.PoolView(Pool, ext.db.session))
     ext.admin.add_view(admin.FlowcellView(Flowcell, ext.db.session))
@@ -140,6 +138,6 @@ def _register_teardowns(app: Flask):
         Remove the database session to ensure database resources are
         released when a request has been processed.
         """
-        scoped_session_registry: Optional[scoped_session] = get_scoped_session_registry()
+        scoped_session_registry: scoped_session | None = get_scoped_session_registry()
         if scoped_session_registry:
             scoped_session_registry.remove()

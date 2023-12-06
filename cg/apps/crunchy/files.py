@@ -1,9 +1,8 @@
 import logging
 import tempfile
-from datetime import datetime
+from datetime import date, datetime
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Optional
 
 from cg.apps.crunchy.models import CrunchyFile, CrunchyMetadata
 from cg.constants.constants import FileFormat
@@ -37,7 +36,7 @@ def get_tmp_dir(prefix: str, suffix: str, base: str = None) -> str:
     with tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix, dir=base) as dir_name:
         tmp_dir_path = dir_name
 
-    LOG.info("Created temporary dir %s", tmp_dir_path)
+    LOG.info(f"Created temporary dir {tmp_dir_path}")
     return tmp_dir_path
 
 
@@ -64,7 +63,7 @@ def get_crunchy_metadata(metadata_path: Path) -> CrunchyMetadata:
     return metadata
 
 
-def get_file_updated_at(crunchy_metadata: CrunchyMetadata) -> Optional[datetime.date]:
+def get_file_updated_at(crunchy_metadata: CrunchyMetadata) -> date | None:
     """Check if a SPRING metadata file has been updated and return the date when updated"""
     return crunchy_metadata.files[0].updated
 

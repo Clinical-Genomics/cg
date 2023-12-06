@@ -1,8 +1,9 @@
 """File tags for files in Housekeeper."""
 
 
+from enum import StrEnum
+
 from cg.constants.constants import Pipeline
-from cg.utils.enums import StrEnum
 
 
 class AlignmentFileTag(StrEnum):
@@ -15,8 +16,9 @@ class AlignmentFileTag(StrEnum):
     CRAM_CRAI: str = "crai"
     CRAM_INDEX: str = "cram-index"
 
-
-ALIGNMENT_FILE_TAGS: list[str] = [tag.value for tag in AlignmentFileTag]
+    @classmethod
+    def file_tags(cls) -> list[str]:
+        return list(cls)
 
 
 class ArchiveTag(StrEnum):

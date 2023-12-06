@@ -1,35 +1,49 @@
 """Handler to find business data objects."""
 import datetime as dt
 import logging
-from typing import Callable, Iterator, Optional, Union
+from typing import Callable, Iterator
 
 from sqlalchemy.orm import Query, Session
 
 from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import PrepCategory, SampleType
-from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError, CgError
 from cg.store.api.base import BaseHandler
-from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
+from cg.store.filters.status_analysis_filters import (
+    AnalysisFilter,
+    apply_analysis_filter,
+)
 from cg.store.filters.status_application_limitations_filters import (
     ApplicationLimitationsFilter,
     apply_application_limitations_filter,
 )
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_case_sample_filters import CaseSampleFilter, apply_case_sample_filter
-from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
-from cg.store.filters.status_flow_cell_filters import FlowCellFilter, apply_flow_cell_filter
+from cg.store.filters.status_case_sample_filters import (
+    CaseSampleFilter,
+    apply_case_sample_filter,
+)
+from cg.store.filters.status_customer_filters import (
+    CustomerFilter,
+    apply_customer_filter,
+)
+from cg.store.filters.status_flow_cell_filters import (
+    FlowCellFilter,
+    apply_flow_cell_filter,
+)
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
-from cg.store.filters.status_metrics_filters import SequencingMetricsFilter, apply_metrics_filter
+from cg.store.filters.status_metrics_filters import (
+    SequencingMetricsFilter,
+    apply_metrics_filter,
+)
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
 from cg.store.models import (
     Analysis,
     Application,
     ApplicationLimitations,
+    Case,
+    CaseSample,
     Customer,
-    Family,
-    FamilySample,
     Flowcell,
     Invoice,
     Pool,
@@ -46,9 +60,9 @@ class FindBusinessDataHandler(BaseHandler):
     def __init__(self, session: Session):
         super().__init__(session=session)
 
-    def get_case_by_entry_id(self, entry_id: str) -> Family:
+    def get_case_by_entry_id(self, entry_id: str) -> Case:
         """Return a case by entry id."""
-        cases_query: Query = self._get_query(table=Family)
+        cases_query: Query = self._get_query(table=Case)
         return apply_case_filter(
             cases=cases_query, filter_functions=[CaseFilter.FILTER_BY_ENTRY_ID], entry_id=entry_id
         ).first()
@@ -59,7 +73,7 @@ class FindBusinessDataHandler(BaseHandler):
         active_actions = ["analyze", "running"]
 
         for family_sample in sample.links:
-            case: Family = self.get_case_by_entry_id(entry_id=family_sample.family_id)
+            case: Case = self.get_case_by_entry_id(entry_id=family_sample.case_id)
             if case.action in active_actions:
                 return True
 
@@ -70,7 +84,7 @@ class FindBusinessDataHandler(BaseHandler):
 
         return (
             self.get_case_by_internal_id(internal_id=case_id)
-            .links[ListIndexes.FIRST.value]
+            .links[0]
             .sample.application_version.application
         )
 
@@ -127,7 +141,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_cases_by_customer_and_case_name_search(
         self, customer: Customer, case_name_search: str
-    ) -> list[Family]:
+    ) -> list[Case]:
         """
         Retrieve a list of cases filtered by a customer and matching names.
 
@@ -136,7 +150,7 @@ class FindBusinessDataHandler(BaseHandler):
             case_name_search (str): The case name search string to filter cases by.
 
         Returns:
-            list[Family]: A list of filtered cases sorted by creation time.
+            list[Case]: A list of filtered cases sorted by creation time.
         """
         filter_functions: list[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
@@ -145,7 +159,7 @@ class FindBusinessDataHandler(BaseHandler):
         ]
 
         return apply_case_filter(
-            cases=self._get_query(table=Family),
+            cases=self._get_query(table=Case),
             filter_functions=filter_functions,
             customer_entry_id=customer.id,
             name_search=case_name_search,
@@ -153,22 +167,22 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_cases_by_customers_action_and_case_search(
         self,
-        customers: Optional[list[Customer]],
-        action: Optional[str],
-        case_search: Optional[str],
-        limit: Optional[int] = 30,
-    ) -> list[Family]:
+        customers: list[Customer] | None,
+        action: str | None,
+        case_search: str | None,
+        limit: int | None = 30,
+    ) -> list[Case]:
         """
         Retrieve a list of cases filtered by customers, action, and matching names or internal ids.
 
         Args:
-            customers (Optional[list[Customer]]): A list of customer objects to filter cases by.
-            action (Optional[str]): The action string to filter cases by.
-            case_search (Optional[str]): The case search string to filter cases by.
-            limit (Optional[int], default=30): The maximum number of cases to return.
+            customers (list[Customer] | None): A list of customer objects to filter cases by.
+            action (str | None): The action string to filter cases by.
+            case_search (str | None): The case search string to filter cases by.
+            limit (int | None, default=30): The maximum number of cases to return.
 
         Returns:
-            list[Family]: A list of filtered cases sorted by creation time and limited by the specified number.
+            list[Case]: A list of filtered cases sorted by creation time and limited by the specified number.
         """
         filter_functions: list[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
@@ -182,7 +196,7 @@ class FindBusinessDataHandler(BaseHandler):
         )
 
         filtered_cases: Query = apply_case_filter(
-            cases=self._get_query(table=Family),
+            cases=self._get_query(table=Case),
             filter_functions=filter_functions,
             customer_entry_ids=customer_entry_ids,
             action=action,
@@ -192,22 +206,22 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_cases_by_customer_pipeline_and_case_search(
         self,
-        customer: Optional[Customer],
-        pipeline: Optional[str],
-        case_search: Optional[str],
-        limit: Optional[int] = 30,
-    ) -> list[Family]:
+        customer: Customer | None,
+        pipeline: str | None,
+        case_search: str | None,
+        limit: int | None = 30,
+    ) -> list[Case]:
         """
         Retrieve a list of cases filtered by customer, pipeline, and matching names or internal ids.
 
         Args:
-            customer (Optional[Customer]): A customer object to filter cases by.
-            pipeline (Optional[str]): The pipeline string to filter cases by.
-            case_search (Optional[str]): The case search string to filter cases by.
-            limit (Optional[int], default=30): The maximum number of cases to return.
+            customer (Customer | None): A customer object to filter cases by.
+            pipeline (str | None): The pipeline string to filter cases by.
+            case_search (str | None): The case search string to filter cases by.
+            limit (int | None, default=30): The maximum number of cases to return.
 
         Returns:
-            list[Family]: A list of filtered cases sorted by creation time and limited by the specified number.
+            list[Case]: A list of filtered cases sorted by creation time and limited by the specified number.
         """
         filter_functions: list[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
@@ -219,7 +233,7 @@ class FindBusinessDataHandler(BaseHandler):
         customer_entry_id: int = customer.id if customer else None
 
         filtered_cases: Query = apply_case_filter(
-            cases=self._get_query(table=Family),
+            cases=self._get_query(table=Case),
             filter_functions=filter_functions,
             customer_entry_id=customer_entry_id,
             case_search=case_search,
@@ -227,11 +241,11 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return filtered_cases.limit(limit=limit).all()
 
-    def get_cases(self) -> list[Family]:
+    def get_cases(self) -> list[Case]:
         """Return all cases."""
-        return self._get_query(table=Family).all()
+        return self._get_query(table=Case).all()
 
-    def get_case_samples_by_case_id(self, case_internal_id: str) -> list[FamilySample]:
+    def get_case_samples_by_case_id(self, case_internal_id: str) -> list[CaseSample]:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
             filter_functions=[CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID],
@@ -243,22 +257,22 @@ class FindBusinessDataHandler(BaseHandler):
         """Return case id:s associated with samples."""
         cases_with_samples = set()
         for case_id in case_ids:
-            case: Family = self.get_case_by_internal_id(internal_id=case_id)
+            case: Case = self.get_case_by_internal_id(internal_id=case_id)
             if case and case.links:
                 cases_with_samples.add(case_id)
         return list(cases_with_samples)
 
-    def get_cases_by_ticket_id(self, ticket_id: str) -> list[Family]:
+    def get_cases_by_ticket_id(self, ticket_id: str) -> list[Case]:
         """Return cases associated with a given ticket id."""
         return apply_case_filter(
             filter_functions=[CaseFilter.FILTER_BY_TICKET],
             ticket_id=ticket_id,
-            cases=self._get_query(table=Family),
+            cases=self._get_query(table=Case),
         ).all()
 
     def get_customer_id_from_ticket(self, ticket: str) -> str:
         """Returns the customer related to given ticket."""
-        cases: list[Family] = self.get_cases_by_ticket_id(ticket_id=ticket)
+        cases: list[Case] = self.get_cases_by_ticket_id(ticket_id=ticket)
         if not cases:
             raise ValueError(f"No case found for ticket {ticket}")
         return cases[0].customer.internal_id
@@ -283,7 +297,7 @@ class FindBusinessDataHandler(BaseHandler):
         flow_cells_on_case.sort(key=lambda flow_cell: flow_cell.sequenced_at)
         return flow_cells_on_case[-1] if flow_cells_on_case else None
 
-    def _is_case_found(self, case: Family, case_id: str) -> None:
+    def _is_case_found(self, case: Case, case_id: str) -> None:
         """Raise error if case is false."""
         if not case:
             LOG.error(f"Could not find case {case_id}")
@@ -292,30 +306,30 @@ class FindBusinessDataHandler(BaseHandler):
     def get_samples_by_case_id(self, case_id: str) -> list[Sample]:
         """Get samples on a given case id."""
 
-        case: Family = self.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.get_case_by_internal_id(internal_id=case_id)
         self._is_case_found(case=case, case_id=case_id)
         return case.samples if case else []
 
     def get_sample_ids_by_case_id(self, case_id: str = None) -> Iterator[str]:
         """Return sample ids from case id."""
-        case: Family = self.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.get_case_by_internal_id(internal_id=case_id)
         self._is_case_found(case=case, case_id=case_id)
         for link in case.links:
             yield link.sample.internal_id
 
-    def get_case_by_name_and_customer(self, customer: Customer, case_name: str) -> Family:
+    def get_case_by_name_and_customer(self, customer: Customer, case_name: str) -> Case:
         """Find a case by case name within a customer."""
         return apply_case_filter(
-            cases=self._get_query(table=Family),
+            cases=self._get_query(table=Case),
             filter_functions=[CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID, CaseFilter.FILTER_BY_NAME],
             customer_entry_id=customer.id,
             name=case_name,
         ).first()
 
-    def get_case_by_name(self, name: str) -> Family:
+    def get_case_by_name(self, name: str) -> Case:
         """Get a case by name."""
         return apply_case_filter(
-            cases=self._get_query(table=Family),
+            cases=self._get_query(table=Case),
             filter_functions=[CaseFilter.FILTER_BY_NAME],
             name=name,
         ).first()
@@ -349,7 +363,7 @@ class FindBusinessDataHandler(BaseHandler):
             sample_internal_id=sample_internal_id,
             q30_threshold=q30_threshold,
         )
-        reads_count: Optional[int] = total_reads_query.scalar()
+        reads_count: int | None = total_reads_query.scalar()
         return reads_count if reads_count else 0
 
     def get_average_q30_for_sample_on_flow_cell(
@@ -425,7 +439,7 @@ class FindBusinessDataHandler(BaseHandler):
             lane=lane,
         ).first()
 
-    def get_flow_cell_by_name(self, flow_cell_name: str) -> Optional[Flowcell]:
+    def get_flow_cell_by_name(self, flow_cell_name: str) -> Flowcell | None:
         """Return flow cell by flow cell name."""
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
@@ -433,7 +447,7 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[FlowCellFilter.FILTER_BY_NAME],
         ).first()
 
-    def get_flow_cells_by_statuses(self, flow_cell_statuses: list[str]) -> Optional[list[Flowcell]]:
+    def get_flow_cells_by_statuses(self, flow_cell_statuses: list[str]) -> list[Flowcell] | None:
         """Return flow cells with supplied statuses."""
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
@@ -456,7 +470,7 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=filter_functions,
         ).all()
 
-    def get_flow_cells_by_case(self, case: Family) -> Optional[list[Flowcell]]:
+    def get_flow_cells_by_case(self, case: Case) -> list[Flowcell] | None:
         """Return flow cells for case."""
         return apply_flow_cell_filter(
             flow_cells=self._get_join_flow_cell_sample_links_query(),
@@ -464,7 +478,7 @@ class FindBusinessDataHandler(BaseHandler):
             case=case,
         ).all()
 
-    def get_samples_from_flow_cell(self, flow_cell_id: str) -> Optional[list[Sample]]:
+    def get_samples_from_flow_cell(self, flow_cell_id: str) -> list[Sample] | None:
         """Return samples present on flow cell."""
         flow_cell: Flowcell = self.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
         if flow_cell:
@@ -472,7 +486,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def are_all_flow_cells_on_disk(self, case_id: str) -> bool:
         """Check if flow cells are on disk for sample before starting the analysis."""
-        flow_cells: Optional[list[Flowcell]] = self.get_flow_cells_by_case(
+        flow_cells: list[Flowcell] | None = self.get_flow_cells_by_case(
             case=self.get_case_by_internal_id(internal_id=case_id)
         )
         if not flow_cells:
@@ -482,7 +496,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def request_flow_cells_for_case(self, case_id) -> None:
         """Set the status of removed flow cells to REQUESTED for the given case."""
-        flow_cells: Optional[list[Flowcell]] = self.get_flow_cells_by_case(
+        flow_cells: list[Flowcell] | None = self.get_flow_cells_by_case(
             case=self.get_case_by_internal_id(internal_id=case_id)
         )
         for flow_cell in flow_cells:
@@ -514,7 +528,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_pools_and_samples_for_invoice_by_invoice_id(
         self, *, invoice_id: int = None
-    ) -> list[Union[Pool, Sample]]:
+    ) -> list[Pool | Sample]:
         """Return all pools and samples for an invoice."""
         pools: list[Pool] = apply_pool_filter(
             pools=self._get_query(table=Pool),
@@ -528,7 +542,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
         return pools + samples
 
-    def get_case_sample_link(self, case_internal_id: str, sample_internal_id: str) -> FamilySample:
+    def get_case_sample_link(self, case_internal_id: str, sample_internal_id: str) -> CaseSample:
         """Return a case-sample link between a family and a sample."""
         filter_functions: list[CaseSampleFilter] = [
             CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID,
@@ -547,7 +561,7 @@ class FindBusinessDataHandler(BaseHandler):
         ids = [inv.id for inv in query]
         return max(ids) + 1 if ids else 0
 
-    def get_pools_by_customer_id(self, *, customers: Optional[list[Customer]] = None) -> list[Pool]:
+    def get_pools_by_customer_id(self, *, customers: list[Customer] | None = None) -> list[Pool]:
         """Return all the pools for a customer."""
         customer_ids = [customer.id for customer in customers]
         return apply_pool_filter(
@@ -584,7 +598,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).first()
 
     def get_pools_to_render(
-        self, customers: Optional[list[Customer]] = None, enquiry: str = None
+        self, customers: list[Customer] | None = None, enquiry: str = None
     ) -> list[Pool]:
         pools: list[Pool] = (
             self.get_pools_by_customer_id(customers=customers) if customers else self.get_pools()
@@ -611,7 +625,7 @@ class FindBusinessDataHandler(BaseHandler):
         return application.expected_reads
 
     def get_samples_by_customer_id_and_pattern(
-        self, *, customers: Optional[list[Customer]] = None, pattern: str = None
+        self, *, customers: list[Customer] | None = None, pattern: str = None
     ) -> list[Sample]:
         """Get samples by customer and sample internal id  or sample name pattern."""
         samples: Query = self._get_query(table=Sample)
@@ -693,7 +707,7 @@ class FindBusinessDataHandler(BaseHandler):
             samples=samples, filter_functions=[SampleFilter.FILTER_BY_SAMPLE_NAME], name=name
         ).first()
 
-    def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> Optional[list[Sample]]:
+    def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> list[Sample] | None:
         """Get samples given a tissue type."""
         samples: Query = apply_case_sample_filter(
             filter_functions=[CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID],
@@ -709,26 +723,26 @@ class FindBusinessDataHandler(BaseHandler):
 
     def is_case_down_sampled(self, case_id: str) -> bool:
         """Returns True if all samples in a case are down sampled from another sample."""
-        case: Family = self.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.get_case_by_internal_id(internal_id=case_id)
         return all(sample.from_sample is not None for sample in case.samples)
 
     def is_case_external(self, case_id: str) -> bool:
         """Returns True if all samples in a case have been sequenced externally."""
-        case: Family = self.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.get_case_by_internal_id(internal_id=case_id)
         return all(sample.application_version.application.is_external for sample in case.samples)
 
-    def get_case_by_internal_id(self, internal_id: str) -> Family:
+    def get_case_by_internal_id(self, internal_id: str) -> Case:
         """Get case by internal id."""
         return apply_case_filter(
             filter_functions=[CaseFilter.FILTER_BY_INTERNAL_ID],
-            cases=self._get_query(table=Family),
+            cases=self._get_query(table=Case),
             internal_id=internal_id,
         ).first()
 
     def verify_case_exists(self, case_internal_id: str) -> None:
         """Passes silently if case exists in Status DB, raises error if no case or case samples."""
 
-        case: Family = self.get_case_by_internal_id(internal_id=case_internal_id)
+        case: Case = self.get_case_by_internal_id(internal_id=case_internal_id)
         if not case:
             LOG.error(f"Case {case_internal_id} could not be found in Status DB!")
             raise CgError
@@ -737,18 +751,18 @@ class FindBusinessDataHandler(BaseHandler):
             raise CgError
         LOG.info(f"Case {case_internal_id} exists in Status DB")
 
-    def get_running_cases_in_pipeline(self, pipeline: Pipeline) -> list[Family]:
+    def get_running_cases_in_pipeline(self, pipeline: Pipeline) -> list[Case]:
         """Return all running cases in a pipeline."""
         return apply_case_filter(
             filter_functions=[CaseFilter.FILTER_WITH_PIPELINE, CaseFilter.FILTER_IS_RUNNING],
-            cases=self._get_query(table=Family),
+            cases=self._get_query(table=Case),
             pipeline=pipeline,
         ).all()
 
     def get_not_analysed_cases_by_sample_internal_id(
         self,
         sample_internal_id: str,
-    ) -> list[Family]:
+    ) -> list[Case]:
         """Get not analysed cases by sample internal id."""
 
         query: Query = self._get_join_case_and_sample_query()
@@ -765,3 +779,11 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID],
             internal_id=sample_internal_id,
         ).all()
+
+    def case_with_name_exists(self, case_name: str) -> bool:
+        """Check if a case exists in StatusDB."""
+        return bool(self.get_case_by_name(case_name))
+
+    def sample_with_id_exists(self, sample_id: str) -> bool:
+        """Check if a sample exists in StatusDB."""
+        return bool(self.get_sample_by_internal_id(sample_id))

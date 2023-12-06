@@ -3,7 +3,6 @@
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Optional
 
 from cg.apps.scout.scout_export import ScoutExportCase, Variant
 from cg.constants.constants import FileFormat
@@ -33,7 +32,7 @@ class ScoutAPI:
             file_format=FileFormat.YAML, file_path=scout_load_config
         )
         scout_load_config_object: ScoutLoadConfig = ScoutLoadConfig(**scout_config)
-        existing_case: Optional[ScoutExportCase] = self.get_case(
+        existing_case: ScoutExportCase | None = self.get_case(
             case_id=scout_load_config_object.family
         )
         load_command = ["load", "case", str(scout_load_config)]
@@ -116,17 +115,17 @@ class ScoutAPI:
 
         return variants
 
-    def get_case(self, case_id: str) -> Optional[ScoutExportCase]:
+    def get_case(self, case_id: str) -> ScoutExportCase | None:
         """Fetch a case from Scout"""
         cases: list[ScoutExportCase] = self.get_cases(case_id=case_id)
         return cases[0] if cases else None
 
     def get_cases(
         self,
-        case_id: Optional[str] = None,
+        case_id: str | None = None,
         reruns: bool = False,
         finished: bool = False,
-        status: Optional[str] = None,
+        status: str | None = None,
         days_ago: int = None,
     ) -> list[ScoutExportCase]:
         """Interact with cases existing in the database."""

@@ -23,7 +23,7 @@ depends_on = None
 Base = declarative_base()
 
 
-class Family(Base):
+class Case(Base):
     __tablename__ = "family"
 
     id = sa.Column(sa.types.Integer, primary_key=True)
@@ -37,7 +37,7 @@ class FamilySample(Base):
     family_id = sa.Column(sa.ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
     sample_id = sa.Column(sa.ForeignKey("sample.id", ondelete="CASCADE"), nullable=False)
 
-    family = sa.orm.relationship("Family", backref="links")
+    family = sa.orm.relationship("Case", backref="links")
     sample = sa.orm.relationship("Sample", foreign_keys=[sample_id], backref="links")
 
 
@@ -60,7 +60,7 @@ def upgrade():
     op.add_column("family", sa.Column("tickets", type_=mysql.VARCHAR(128), nullable=True))
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
-    for family in session.query(Family):
+    for family in session.query(Case):
         if len(family.links) == 0:
             continue
         family.tickets = sorted(

@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cg import resources
 from cg.constants import Pipeline
@@ -25,7 +25,7 @@ from cg.models.rnafusion.rnafusion import (
     RnafusionParameters,
     RnafusionSampleSheetEntry,
 )
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -90,7 +90,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_sample_sheet_content(self, case_id: str, strandedness: Strandedness) -> list[list[Any]]:
         """Returns content for sample sheet."""
-        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         if len(case.links) != 1:
             raise NotImplementedError(
                 "Case objects are assumed to be related to a single sample (one link)"
@@ -103,7 +103,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             return content_per_sample
 
     def get_pipeline_parameters(
-        self, case_id: str, genomes_base: Optional[Path] = None
+        self, case_id: str, genomes_base: Path | None = None
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
         LOG.debug("Getting parameters information")
@@ -115,7 +115,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             priority=self.account,
         )
 
-    def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
+    def get_references_path(self, genomes_base: Path | None = None) -> Path:
         if genomes_base:
             return genomes_base.absolute()
         return Path(self.references).absolute()
@@ -162,7 +162,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Get a multiqc_data.json file and returns metrics and values formatted."""
-        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_id: str = case.links[0].sample.internal_id
         multiqc_json: MultiqcDataJson = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))

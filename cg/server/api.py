@@ -4,7 +4,7 @@ import logging
 import tempfile
 from functools import wraps
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import cachecontrol
 import requests
@@ -30,14 +30,14 @@ from cg.server.ext import db, lims, osticket
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
+    Case,
     Customer,
-    Family,
     Flowcell,
     Pool,
     Sample,
     SampleLaneSequencingMetrics,
     User,
-    ApplicationLimitations,
 )
 
 LOG = logging.getLogger(__name__)
@@ -169,21 +169,21 @@ def get_cases():
     action: str = request.args.get("action")
 
     customers: list[Customer] = _get_current_customers()
-    cases: list[Family] = _get_cases(enquiry=enquiry, action=action, customers=customers)
+    cases: list[Case] = _get_cases(enquiry=enquiry, action=action, customers=customers)
 
     nr_cases: int = len(cases)
     cases_with_links: list[dict] = [case.to_dict(links=True) for case in cases]
     return jsonify(families=cases_with_links, total=nr_cases)
 
 
-def _get_current_customers() -> Optional[list[Customer]]:
+def _get_current_customers() -> list[Customer] | None:
     """Return customers if the current user is not an admin."""
     return g.current_user.customers if not g.current_user.is_admin else None
 
 
 def _get_cases(
-    enquiry: Optional[str], action: Optional[str], customers: Optional[list[Customer]]
-) -> list[Family]:
+    enquiry: str | None, action: str | None, customers: list[Customer] | None
+) -> list[Case]:
     """Get cases based on the provided filters."""
     return db.get_cases_by_customers_action_and_case_search(
         case_search=enquiry,
@@ -195,7 +195,7 @@ def _get_cases(
 @BLUEPRINT.route("/cases/<case_id>")
 def parse_case(case_id):
     """Return a case with links."""
-    case: Family = db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = db.get_case_by_internal_id(internal_id=case_id)
     if case is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
@@ -226,7 +226,7 @@ def parse_families_in_collaboration():
 @BLUEPRINT.route("/families_in_collaboration/<family_id>")
 def parse_family_in_collaboration(family_id):
     """Return a family with links."""
-    case: Family = db.get_case_by_internal_id(internal_id=family_id)
+    case: Case = db.get_case_by_internal_id(internal_id=family_id)
     customer: Customer = db.get_customer_by_internal_id(
         customer_internal_id=request.args.get("customer")
     )
@@ -247,7 +247,7 @@ def parse_samples():
     elif request.args.get("status") == "sequencing":
         samples: list[Sample] = db.get_samples_to_sequence()
     else:
-        customers: Optional[list[Customer]] = (
+        customers: list[Customer] | None = (
             None if g.current_user.is_admin else g.current_user.customers
         )
         samples: list[Sample] = db.get_samples_by_customer_id_and_pattern(
@@ -298,7 +298,7 @@ def parse_sample_in_collaboration(sample_id):
 @BLUEPRINT.route("/pools")
 def parse_pools():
     """Return pools."""
-    customers: Optional[list[Customer]] = (
+    customers: list[Customer] | None = (
         g.current_user.customers if not g.current_user.is_admin else None
     )
     pools: list[Pool] = db.get_pools_to_render(
@@ -375,7 +375,7 @@ def parse_analyses():
 @BLUEPRINT.route("/options")
 def parse_options():
     """Return various options."""
-    customers: list[Optional[Customer]] = (
+    customers: list[Customer | None] = (
         db.get_customers() if g.current_user.is_admin else g.current_user.customers
     )
 

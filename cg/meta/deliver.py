@@ -13,7 +13,7 @@ from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
 from cg.exc import MissingFilesError
 from cg.store import Store
-from cg.store.models import Family, FamilySample, Sample
+from cg.store.models import Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ class DeliverAPI:
         LOG.info(f"Set dry run to {dry_run}")
         self.dry_run = dry_run
 
-    def deliver_files(self, case_obj: Family):
+    def deliver_files(self, case_obj: Case):
         """Deliver all files for a case.
 
         If there are sample tags deliver all files for the samples as well.
@@ -77,7 +77,7 @@ class DeliverAPI:
                 LOG.info(f"Could not find any version for {case_id}")
             elif not self.skip_missing_bundle:
                 raise SyntaxError(f"Could not find any version for {case_id}")
-        links: list[FamilySample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
+        links: list[CaseSample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
         if not links:
             LOG.warning(f"Could not find any samples linked to case {case_id}")
             return
@@ -98,9 +98,9 @@ class DeliverAPI:
         if not self.sample_tags:
             return
 
-        link: FamilySample
+        link: CaseSample
         for link in links:
-            if link.sample.sequencing_qc or self.deliver_failed_samples:
+            if self.sample_is_deliverable(link):
                 sample_id: str = link.sample.internal_id
                 sample_name: str = link.sample.name
                 LOG.debug(f"Fetch last version for sample bundle {sample_id}")
@@ -122,6 +122,12 @@ class DeliverAPI:
             LOG.warning(
                 f"Sample {link.sample.internal_id} did not receive enough reads and will not be delivered"
             )
+
+    def sample_is_deliverable(self, link: CaseSample) -> bool:
+        sample_is_external: bool = link.sample.application_version.application.is_external
+        deliver_failed_samples: bool = self.deliver_failed_samples
+        sample_passes_qc: bool = link.sample.sequencing_qc
+        return sample_passes_qc or deliver_failed_samples or sample_is_external
 
     def deliver_case_files(
         self, case_id: str, case_name: str, version: Version, sample_ids: set[str]
@@ -283,7 +289,7 @@ class DeliverAPI:
         LOG.info(f"Setting customer_id to {customer_id}")
         self.customer_id = customer_id
 
-    def set_customer_id(self, case_obj: Family) -> None:
+    def set_customer_id(self, case_obj: Case) -> None:
         """Set the customer_id for this upload"""
         self._set_customer_id(case_obj.customer.internal_id)
 

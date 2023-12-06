@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from pydantic import BaseModel, BeforeValidator, model_validator
 from typing_extensions import Annotated
@@ -31,7 +30,7 @@ class CustomerModel(BaseModel):
     name: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     id: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     invoice_address: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    scout_access: Optional[bool] = None
+    scout_access: bool | None = None
 
 
 class ScoutReportFiles(BaseModel):
@@ -131,4 +130,4 @@ class ReportModel(BaseModel):
     version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     date: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
     case: CaseModel
-    accredited: Optional[bool] = None
+    accredited: bool | None = None
