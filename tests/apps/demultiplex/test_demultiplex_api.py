@@ -52,47 +52,52 @@ def test_is_sample_sheet_in_housekeeper_not_in_hk(
 
 
 def test_create_demultiplexing_output_dir_for_bcl2fastq(
-    tmp_bcl2fastq_flow_cell, tmp_path, demultiplexing_context_for_demux: CGConfig
+    tmp_bcl2fastq_flow_cell: FlowCellDirectoryData,
+    tmp_path: Path,
+    demultiplexing_api: DemultiplexingAPI,
 ):
     """Test that the correct demultiplexing output directory is created."""
     # GIVEN a Bcl2Fastq FlowCellDirectoryData object
 
     # GIVEN that the demultiplexing output directory does not exist
-    demux_dir = Path(tmp_path, DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME)
-    unaligned_dir = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
-    assert not demux_dir.exists()
+    demultiplexing_api.demultiplexed_runs_dir = tmp_path
+    output_directory: Path = demultiplexing_api.flow_cell_out_dir_path(tmp_bcl2fastq_flow_cell)
+    unaligned_dir: Path = demultiplexing_api.get_flow_cell_unaligned_dir(tmp_bcl2fastq_flow_cell)
+
+    assert not output_directory.exists()
     assert not unaligned_dir.exists()
 
     # WHEN creating the demultiplexing output directory for a bcl2fastq flow cell
-    demultiplexing_context_for_demux.demultiplex_api.create_demultiplexing_output_dir(
-        flow_cell=tmp_bcl2fastq_flow_cell, demux_dir=demux_dir, unaligned_dir=unaligned_dir
-    )
+    demultiplexing_api.create_demultiplexing_output_dir(tmp_bcl2fastq_flow_cell)
 
     # THEN the demultiplexing output directory should exist
-    assert demux_dir.exists()
+    assert output_directory.exists()
     assert unaligned_dir.exists()
 
 
 def test_create_demultiplexing_output_dir_for_bcl_convert(
-    tmp_bcl_convert_flow_cell, tmp_path, demultiplexing_context_for_demux: CGConfig
+    tmp_bcl_convert_flow_cell: FlowCellDirectoryData,
+    tmp_path: Path,
+    demultiplexing_api: DemultiplexingAPI,
 ):
     """Test that the correct demultiplexing output directory is created."""
     # GIVEN BCL Convert FlowCellDirectoryData object
 
     # GIVEN that the demultiplexing output directory does not exist
-    demux_dir = Path(tmp_path, DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME)
-    unaligned_dir = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
-    assert not demux_dir.exists()
-    assert not unaligned_dir.exists()
+    demultiplexing_api.demultiplexed_runs_dir = tmp_path
+    output_directory: Path = demultiplexing_api.flow_cell_out_dir_path(tmp_bcl_convert_flow_cell)
+    unaligned_directory: Path = demultiplexing_api.get_flow_cell_unaligned_dir(
+        tmp_bcl_convert_flow_cell
+    )
+    assert not output_directory.exists()
+    assert not unaligned_directory.exists()
 
     # WHEN creating the demultiplexing output directory for a BCL Convert flow cell
-    demultiplexing_context_for_demux.demultiplex_api.create_demultiplexing_output_dir(
-        flow_cell=tmp_bcl_convert_flow_cell, demux_dir=demux_dir, unaligned_dir=unaligned_dir
-    )
+    demultiplexing_api.create_demultiplexing_output_dir(tmp_bcl_convert_flow_cell)
 
     # THEN the demultiplexing output directory should exist
-    assert demux_dir.exists()
-    assert not unaligned_dir.exists()
+    assert output_directory.exists()
+    assert not unaligned_directory.exists()
 
 
 def test_is_demultiplexing_possible_true(
@@ -122,7 +127,7 @@ def test_is_demultiplexing_possible_missing_files(
     tmp_bcl_convert_flow_cell: FlowCellDirectoryData,
 ):
     """Test demultiplexing pre-check when files are missing in flow cell directory."""
-    # GIVEN a flow cell with a samplesheet in Housekeeper
+    # GIVEN a flow cell with a sample sheet in Housekeeper
     add_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_bcl_convert_flow_cell.path,
         flow_cell_name=tmp_bcl_convert_flow_cell.id,
@@ -149,7 +154,7 @@ def is_demultiplexing_possible_no_sample_sheet_in_hk(
     demultiplexing_api: DemultiplexingAPI,
     tmp_bcl_convert_flow_cell: FlowCellDirectoryData,
 ):
-    """Test demultiplexing pre-check when no samplesheet exists in housekeeper."""
+    """Test demultiplexing pre-check when no sample sheet exists in Housekeeper."""
     # GIVEN a flow cell with no sample sheet in Housekeeper
     assert (
         demultiplexing_api.is_sample_sheet_in_housekeeper(flow_cell_id=tmp_bcl_convert_flow_cell.id)
@@ -199,11 +204,7 @@ def test_remove_demultiplexing_output_directory(
     """Test that the demultiplexing output directory is removed."""
     # GIVEN a flow cell with a demultiplexing output directory
     demultiplexing_api.demultiplexed_runs_dir = tmp_path
-    demultiplexing_api.create_demultiplexing_output_dir(
-        flow_cell=bcl_convert_flow_cell,
-        demux_dir=Path(tmp_path, bcl_convert_flow_cell.full_name),
-        unaligned_dir=None,
-    )
+    demultiplexing_api.create_demultiplexing_output_dir(bcl_convert_flow_cell)
     assert demultiplexing_api.flow_cell_out_dir_path(bcl_convert_flow_cell).exists()
 
     # WHEN removing the demultiplexing output directory

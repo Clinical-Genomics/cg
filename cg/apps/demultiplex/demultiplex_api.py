@@ -1,4 +1,4 @@
-"""This api should handle everything around demultiplexing."""
+"""This API should handle everything around demultiplexing."""
 import logging
 import shutil
 from pathlib import Path
@@ -215,22 +215,13 @@ class DemultiplexingAPI:
 
     def start_demultiplexing(self, flow_cell: FlowCellDirectoryData):
         """Start demultiplexing for a flow cell."""
-        self.create_demultiplexing_started_file(flow_cell.demultiplexing_started_path)
-        demux_dir: Path = self.flow_cell_out_dir_path(flow_cell=flow_cell)
-        unaligned_dir: Path = self.get_flow_cell_unaligned_dir(flow_cell=flow_cell)
-        LOG.info(f"Demultiplexing to {unaligned_dir}")
-        if not self.dry_run:
-            self.create_demultiplexing_output_dir(
-                flow_cell=flow_cell, demux_dir=demux_dir, unaligned_dir=unaligned_dir
-            )
-
         log_path: Path = self.get_stderr_logfile(flow_cell=flow_cell)
         error_function: str = self.get_sbatch_error(
-            flow_cell=flow_cell, email=self.mail, demux_dir=demux_dir
+            flow_cell=flow_cell, email=self.mail, demux_dir=self.flow_cell_out_dir_path(flow_cell)
         )
         commands: str = self.get_sbatch_command(
             run_dir=flow_cell.path,
-            demux_dir=demux_dir,
+            demux_dir=self.flow_cell_out_dir_path(flow_cell=flow_cell),
             sample_sheet=flow_cell.sample_sheet_path,
             demux_completed=self.demultiplexing_completed_path(flow_cell=flow_cell),
             flow_cell=flow_cell,
@@ -272,11 +263,15 @@ class DemultiplexingAPI:
         LOG.info(f"Demultiplexing running as job {sbatch_number}")
         return sbatch_number
 
-    @staticmethod
-    def create_demultiplexing_output_dir(
-        flow_cell: FlowCellDirectoryData, demux_dir: Path, unaligned_dir: Path
-    ) -> None:
-        LOG.debug(f"Creating demux dir {unaligned_dir}")
-        demux_dir.mkdir(exist_ok=False, parents=True)
+    def prepare_output_directory(self, flow_cell: FlowCellDirectoryData) -> None:
+        """Makes sure the output directory is ready for demultiplexing."""
+        self.remove_demultiplexing_output_directory(flow_cell)
+        self.create_demultiplexing_output_dir(flow_cell)
+
+    def create_demultiplexing_output_dir(self, flow_cell: FlowCellDirectoryData) -> None:
+        """Creates the demultiplexing output directory and, if necessary, the unaligned directory."""
+        output_directory: Path = self.flow_cell_out_dir_path(flow_cell)
+        LOG.debug(f"Creating demultiplexing output directory: {output_directory}")
+        output_directory.mkdir(exist_ok=False, parents=True)
         if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
-            unaligned_dir.mkdir(exist_ok=False, parents=False)
+            self.get_flow_cell_unaligned_dir(flow_cell).mkdir(exist_ok=False, parents=False)
