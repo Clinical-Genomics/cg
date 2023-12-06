@@ -122,6 +122,7 @@ class DeliverAPI:
             LOG.warning(
                 f"Sample {link.sample.internal_id} did not receive enough reads and will not be delivered"
             )
+
     def sample_is_deliverable(self, link: CaseSample) -> bool:
         sample_is_external: bool = link.sample.application_version.application.is_external
         deliver_failed_samples: bool = self.deliver_failed_samples
