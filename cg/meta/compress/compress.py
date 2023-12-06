@@ -137,7 +137,7 @@ class CompressAPI:
             update_metadata_date(spring_metadata_path=compression.spring_metadata_path)
         return True
 
-    def clean_fastq(self, sample_id: str) -> bool:
+    def clean_fastq(self, sample_id: str, archive_location: str) -> bool:
         """Check that FASTQ compression is completed for a case and clean.
 
         This means removing compressed FASTQ files and update housekeeper to point to the new SPRING
@@ -170,6 +170,7 @@ class CompressAPI:
                 compression_obj=compression,
                 hk_fastq_first=sample_fastq[run_name]["hk_first"],
                 hk_fastq_second=sample_fastq[run_name]["hk_second"],
+                archive_location=archive_location,
             )
 
             self.remove_fastq(
@@ -232,10 +233,12 @@ class CompressAPI:
         compression_obj: CompressionData,
         hk_fastq_first: File,
         hk_fastq_second: File,
+        archive_location: str,
     ) -> None:
         """Update Housekeeper with compressed FASTQ files and SPRING metadata file."""
         version: Version = self.hk_api.last_version(sample_id)
         spring_tags: list[str] = self.get_spring_tags_from_fastq(hk_fastq_first)
+        spring_tags.append(archive_location)
         spring_metadata_tags: list[str] = self.get_spring_metadata_tags_from_fastq(hk_fastq_first)
         LOG.info(f"Updating FASTQ files in Housekeeper for {sample_id}")
         LOG.info(

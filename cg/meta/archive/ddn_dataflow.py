@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from requests.models import Response
 
 from cg.constants.constants import APIMethods
-from cg.exc import DdnDataflowAuthenticationError
+from cg.exc import ArchiveJobFailedError, DdnDataflowAuthenticationError
 from cg.io.controller import APIRequest
 from cg.meta.archive.models import (
     ArchiveHandler,
@@ -55,6 +55,22 @@ class JobStatus(StrEnum):
     SUSPENDED = "Suspended"
     TERMINATED_ON_ERROR = "Terminated on error"
     TERMINATED_ON_WARNING = "Terminated on warning"
+
+
+FAILED_JOB_STATUSES: list[str] = [
+    JobStatus.CANCELED,
+    JobStatus.DENIED,
+    JobStatus.INVALID_LICENSE,
+    JobStatus.REFUSED,
+    JobStatus.TERMINATED_ON_ERROR,
+    JobStatus.TERMINATED_ON_WARNING,
+]
+ONGOING_JOB_STATUSES: list[str] = [
+    JobStatus.CREATION_IN_PROGRESS,
+    JobStatus.IN_QUEUE,
+    JobStatus.ON_VALIDATION,
+    JobStatus.RUNNING,
+]
 
 
 class MiriaObject(FileTransferData):
@@ -103,7 +119,7 @@ class TransferPayload(BaseModel):
 
     files_to_transfer: list[MiriaObject]
     osType: str = OSTYPE
-    createFolder: bool = False
+    createFolder: bool = True
     settings: list[dict] = []
 
     def trim_paths(self, attribute_to_trim: str):
@@ -139,11 +155,19 @@ class TransferPayload(BaseModel):
             The job ID of the launched transfer task.
         """
 
+        LOG.info(
+            "Sending request with headers: \n"
+            + f"{headers} \n"
+            + "and body: \n"
+            + f"{self.model_dump()}"
+        )
+
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=url,
             headers=headers,
             json=self.model_dump(),
+            verify=False,
         )
         response.raise_for_status()
         return TransferJob.model_validate(response.json())
@@ -183,7 +207,7 @@ class GetJobStatusResponse(BaseModel):
     """Model representing the response fields from a get_job_status post."""
 
     job_id: int = Field(alias="id")
-    status: str
+    status: JobStatus
 
 
 class GetJobStatusPayload(BaseModel):
@@ -195,9 +219,22 @@ class GetJobStatusPayload(BaseModel):
         """Sends a get request to the given URL with the given headers.
         Returns the parsed status response of the task specified in the URL.
         Raises:
-             HTTPError if the response code is not successful."""
+             HTTPError if the response code is not ok.
+        """
+
+        LOG.info(
+            "Sending request with headers: \n"
+            + f"{headers} \n"
+            + "and body: \n"
+            + f"{self.model_dump()}"
+        )
+
         response: Response = APIRequest.api_request_from_content(
-            api_method=APIMethods.GET, url=url, headers=headers, json={}
+            api_method=APIMethods.GET,
+            url=url,
+            headers=headers,
+            json=self.model_dump(),
+            verify=False,
         )
         response.raise_for_status()
         return GetJobStatusResponse.model_validate(response.json())
@@ -233,6 +270,7 @@ class DDNDataFlowClient(ArchiveHandler):
                 name=self.user,
                 password=self.password,
             ).model_dump(),
+            verify=False,
         )
         if not response.ok:
             raise DdnDataflowAuthenticationError(message=response.text)
@@ -248,6 +286,7 @@ class DDNDataFlowClient(ArchiveHandler):
             url=urljoin(base=self.url, url=DataflowEndpoints.REFRESH_AUTH_TOKEN),
             headers=self.headers,
             json=RefreshPayload(refresh=self.refresh_token).model_dump(),
+            verify=False,
         )
         response_content: AuthToken = AuthToken.model_validate(response.json())
         self.auth_token: str = response_content.access
@@ -328,15 +367,18 @@ class DDNDataFlowClient(ArchiveHandler):
         ]
 
     def is_job_done(self, job_id: int) -> bool:
+        """Returns True if the specified job is completed, and false if it is still ongoing.
+        Raises:
+            ArchiveJobFailedError if the specified job has a failed status."""
         get_job_status_payload = GetJobStatusPayload(id=job_id)
         get_job_status_response: GetJobStatusResponse = get_job_status_payload.get_job_status(
             url=urljoin(self.url, DataflowEndpoints.GET_JOB_STATUS + str(job_id)),
             headers=dict(self.headers, **self.auth_header),
         )
-        if get_job_status_response.status == JobStatus.COMPLETED:
+        job_status: JobStatus = get_job_status_response.status
+        LOG.info(f"Miria returned status {job_status} for job {job_id}")
+        if job_status == JobStatus.COMPLETED:
             return True
-        LOG.info(
-            f"Job with id {job_id} has not been completed. "
-            f"Current job description is {get_job_status_response.status}"
-        )
+        if job_status in FAILED_JOB_STATUSES:
+            raise ArchiveJobFailedError(f"Job with id {job_id} failed with status {job_status}")
         return False

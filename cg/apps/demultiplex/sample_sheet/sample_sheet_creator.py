@@ -3,12 +3,13 @@ import logging
 from abc import abstractmethod
 from typing import Type
 
+from packaging.version import parse
+
 from cg.apps.demultiplex.sample_sheet.index import (
     Index,
     get_index_pair,
     get_valid_indexes,
     is_dual_index,
-    is_reverse_complement_needed,
     update_barcode_mismatch_values_for_sample,
     update_indexes_for_samples,
 )
@@ -21,10 +22,17 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_validated_sample_sheet,
 )
 from cg.constants.demultiplexing import (
+    NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION,
+    NEW_NOVASEQ_REAGENT_KIT_VERSION,
+    NO_REVERSE_COMPLEMENTS,
+    NOVASEQ_6000_POST_1_5_KITS,
+    NOVASEQ_X_INDEX_SETTINGS,
     BclConverter,
+    IndexSettings,
     SampleSheetBcl2FastqSections,
     SampleSheetBCLConvertSections,
 )
+from cg.constants.sequencing import Sequencers
 from cg.exc import SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -49,6 +57,34 @@ class SampleSheetCreator:
             FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
         ] = flow_cell.sample_type
         self.force: bool = force
+        self.index_settings: IndexSettings = self._get_index_settings()
+
+    def _get_index_settings(self) -> IndexSettings:
+        """Returns the correct index-related settings for the run in question"""
+        if self.run_parameters.sequencer == Sequencers.NOVASEQX:
+            LOG.debug("Using NovaSeqX index settings")
+            return NOVASEQ_X_INDEX_SETTINGS
+        if self._is_novaseq6000_post_1_5_kit:
+            LOG.debug("Using NovaSeq 6000 post 1.5 kits index settings")
+            return NOVASEQ_6000_POST_1_5_KITS
+        return NO_REVERSE_COMPLEMENTS
+
+    @property
+    def _is_novaseq6000_post_1_5_kit(self) -> bool:
+        """
+        Returns whether sequencing was performed after the 1.5 consumables kits where introduced.
+        This is indicated by the software version and the reagent kit fields in the run parameters.
+        """
+        if self.run_parameters.sequencer != Sequencers.NOVASEQ:
+            return False
+
+        if parse(self.run_parameters.control_software_version) < parse(
+            NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION
+        ):
+            return False
+        if parse(self.run_parameters.reagent_kit_version) < parse(NEW_NOVASEQ_REAGENT_KIT_VERSION):
+            return False
+        return True
 
     @property
     def bcl_converter(self) -> str:
@@ -59,12 +95,6 @@ class SampleSheetCreator:
     def valid_indexes(self) -> list[Index]:
         return get_valid_indexes(dual_indexes_only=True)
 
-    @property
-    def is_reverse_complement(self) -> bool:
-        """Return whether the samples require reverse complement."""
-        return is_reverse_complement_needed(run_parameters=self.run_parameters)
-
-    @abstractmethod
     def update_barcode_mismatch_values_for_samples(self, *args) -> None:
         """Updates barcode mismatch values for samples if applicable."""
         pass
@@ -123,7 +153,7 @@ class SampleSheetCreator:
             update_indexes_for_samples(
                 samples=samples_in_lane,
                 index_cycles=self.run_parameters.index_length,
-                is_reverse_complement=self.is_reverse_complement,
+                perform_reverse_complement=self.index_settings.should_i5_be_reverse_complimented,
                 sequencer=self.run_parameters.sequencer,
                 bcl_converter=self.bcl_converter,
             )
@@ -207,9 +237,7 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         """Update barcode mismatch values for both indexes of given samples."""
         for sample in samples:
             update_barcode_mismatch_values_for_sample(
-                sample_to_update=sample,
-                samples_to_compare_to=samples,
-                is_reverse_complement=self.is_reverse_complement,
+                sample_to_update=sample, samples_to_compare_to=samples
             )
 
     def add_override_cycles_to_samples(self) -> None:
@@ -227,9 +255,9 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
                 index1_cycles = f"I{sample_index1_len}N{length_index1 - sample_index1_len};"
             if sample_index2_len < length_index2:
                 index2_cycles = (
-                    f"I{sample_index2_len}N{length_index2 - sample_index2_len};"
-                    if self.is_reverse_complement
-                    else f"N{length_index2 - sample_index2_len}I{sample_index2_len};"
+                    f"N{length_index2-sample_index2_len}I{sample_index2_len};"
+                    if self.index_settings.are_i5_override_cycles_reverse_complemented
+                    else f"I{sample_index2_len}N{length_index2 - sample_index2_len};"
                 )
             sample.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
