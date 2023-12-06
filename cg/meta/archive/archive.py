@@ -62,7 +62,7 @@ class SpringArchiveAPI:
     def archive_spring_files_and_add_archives_to_housekeeper(
         self, spring_file_count_limit: int | None
     ) -> None:
-        """Archives all non archived spring files. If a limit is provided, the amount of files archived are limited
+        """Archives all non-archived spring files. If a limit is provided, the amount of files archived is limited
         to that amount."""
         if isinstance(spring_file_count_limit, int) and spring_file_count_limit <= 0:
             LOG.warning("Please do not provide a non-positive integer as limit - exiting.")
