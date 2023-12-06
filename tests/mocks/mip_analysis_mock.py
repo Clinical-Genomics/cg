@@ -19,10 +19,6 @@ def create_mip_metrics_deliverables():
 class MockMipAnalysis(MipAnalysisAPI):
     """Mock MIP analysis object."""
 
-    def get_gene_panel(self, case_obj) -> [str]:
-        """Create the aggregated panel file."""
-        return [""]
-
     @staticmethod
     def get_latest_metadata(family_id=None):
         """Mock get_latest_metadata."""

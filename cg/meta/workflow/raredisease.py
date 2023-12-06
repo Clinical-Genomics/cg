@@ -10,7 +10,6 @@ from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -55,10 +54,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         all_panels.add(GenePanelMasterList.OMIM_AUTO)
         return list(all_panels)
 
-    def get_gene_panel(self, case_id: str, genome_build: str = GENOME_BUILD_37) -> list[str]:
+    def get_gene_panel(self, case_id: str) -> list[str]:
         """Create and return the aggregated gene panel file."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        all_panels: list[str] = self.get_aggregated_panels(
-            customer_id=case.customer.internal_id, default_panels=set(case.panels)
-        )
-        return self.scout_api.export_panels(build=genome_build, panels=all_panels)
+        return self._get_gene_panel(case_id=case_id, genome_build=GENOME_BUILD_37)

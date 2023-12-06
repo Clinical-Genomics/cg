@@ -508,3 +508,11 @@ class AnalysisAPI(MetaAPI):
         self.resolve_decompression(case_id, dry_run=dry_run)
         if not self.is_case_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ file are not present for the analysis to start")
+
+    def _get_gene_panel(self, case_id: str, genome_build: str) -> list[str]:
+        """Create and return the aggregated gene panel file."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        all_panels: list[str] = self.get_aggregated_panels(
+            customer_id=case.customer.internal_id, default_panels=set(case.panels)
+        )
+        return self.scout_api.export_panels(build=genome_build, panels=all_panels)
