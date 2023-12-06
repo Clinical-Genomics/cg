@@ -1218,6 +1218,95 @@ def demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "demultiplexed-runs-unfinished")
 
 
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path:
+    return Path(tmp_flow_cells_directory, "230912_A00187_1009_AHK33MDRX3")
+
+
+@pytest.fixture()
+def novaseq_6000_post_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    return FlowCellDirectoryData(Path(flow_cells_dir, "230912_A00187_1009_AHK33MDRX3"))
+
+
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_correct_sample_sheet(
+    novaseq_6000_post_1_5_kits_flow_cell: Path,
+) -> Path:
+    return Path(novaseq_6000_post_1_5_kits_flow_cell, "CorrectSampleSheet.csv")
+
+
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_raw_lims_samples(novaseq_6000_post_1_5_kits_flow_cell: Path) -> Path:
+    return Path(novaseq_6000_post_1_5_kits_flow_cell, "HK33MDRX3_raw.json")
+
+
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_samples(
+    novaseq_6000_post_1_5_kits_raw_lims_samples: Path,
+) -> list[FlowCellSampleBCLConvert]:
+    return [
+        FlowCellSampleBCLConvert(**sample)
+        for sample in read_json(novaseq_6000_post_1_5_kits_raw_lims_samples)
+    ]
+
+
+@pytest.fixture()
+def novaseq_6000_pre_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    return FlowCellDirectoryData(Path(flow_cells_dir, "190927_A00689_0069_BHLYWYDSXX"))
+
+
+@pytest.fixture
+def novaseq_6000_pre_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path:
+    return Path(tmp_flow_cells_directory, "190927_A00689_0069_BHLYWYDSXX")
+
+
+@pytest.fixture
+def novaseq_6000_pre_1_5_kits_correct_sample_sheet(
+    novaseq_6000_pre_1_5_kits_flow_cell: Path,
+) -> Path:
+    return Path(novaseq_6000_pre_1_5_kits_flow_cell, "CorrectSampleSheet.csv")
+
+
+@pytest.fixture
+def novaseq_6000_pre_1_5_kits_raw_lims_samples(novaseq_6000_pre_1_5_kits_flow_cell: Path) -> Path:
+    return Path(novaseq_6000_pre_1_5_kits_flow_cell, "HLYWYDSXX_raw.json")
+
+
+@pytest.fixture
+def novaseq_6000_pre_1_5_kits_lims_samples(
+    novaseq_6000_pre_1_5_kits_raw_lims_samples: Path,
+) -> list[FlowCellSampleBCLConvert]:
+    return [
+        FlowCellSampleBCLConvert(**sample)
+        for sample in read_json(novaseq_6000_pre_1_5_kits_raw_lims_samples)
+    ]
+
+
+@pytest.fixture
+def novaseq_x_flow_cell_directory(tmp_flow_cells_directory: Path) -> Path:
+    return Path(tmp_flow_cells_directory, "20231108_LH00188_0028_B22F52TLT3")
+
+
+@pytest.fixture()
+def novaseq_x_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    return FlowCellDirectoryData(Path(flow_cells_dir, "20231108_LH00188_0028_B22F52TLT3"))
+
+
+@pytest.fixture
+def novaseq_x_correct_sample_sheet(novaseq_x_flow_cell_directory: Path) -> Path:
+    return Path(novaseq_x_flow_cell_directory, "CorrectSampleSheet.csv")
+
+
+@pytest.fixture
+def novaseq_x_raw_lims_samples(novaseq_x_flow_cell_directory: Path) -> Path:
+    return Path(novaseq_x_flow_cell_directory, "22F52TLT3_raw.json")
+
+
+@pytest.fixture
+def novaseq_x_lims_samples(novaseq_x_raw_lims_samples: Path) -> list[FlowCellSampleBCLConvert]:
+    return [FlowCellSampleBCLConvert(**sample) for sample in read_json(novaseq_x_raw_lims_samples)]
+
+
 @pytest.fixture(scope="session")
 def hiseq_x_flow_cell_name() -> str:
     """Return the full name of a HiSeq2500 flow cell with only one index."""
