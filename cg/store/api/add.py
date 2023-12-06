@@ -4,6 +4,7 @@ from datetime import datetime
 import petname
 
 from cg.constants import DataDelivery, FlowCellStatus, Pipeline, Priority
+from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.store.api.base import BaseHandler
 from cg.store.models import (
     Analysis,
@@ -33,10 +34,17 @@ LOG = logging.getLogger(__name__)
 class AddHandler(BaseHandler):
     """Methods related to adding new data to the store."""
 
-    def generate_unique_petname(self) -> str:
+    def generate_readable_sample_id(self) -> str:
+        """Generates a petname as sample internal id for development purposes. Not used in normal production flow."""
         while True:
-            random_id = petname.Generate(3, separator="")
-            if not self.get_sample_by_internal_id(internal_id=random_id):
+            random_id: str = petname.Generate(3, separator="")
+            if not self.get_sample_by_internal_id(random_id):
+                return random_id
+
+    def generate_readable_case_id(self) -> str:
+        while True:
+            random_id: str = petname.Generate(2, separator="", letters=10)
+            if not self.get_case_by_internal_id(random_id):
                 return random_id
 
     def add_customer(
@@ -45,7 +53,7 @@ class AddHandler(BaseHandler):
         name: str,
         invoice_address: str,
         invoice_reference: str,
-        data_archive_location: str = "PDC",
+        data_archive_location: str = PDC_ARCHIVE_LOCATION,
         scout_access: bool = False,
         is_clinical: bool = False,
         *args,
@@ -172,7 +180,7 @@ class AddHandler(BaseHandler):
     ) -> Sample:
         """Build a new Sample record."""
 
-        internal_id = internal_id or self.generate_unique_petname()
+        internal_id = internal_id or self.generate_readable_sample_id()
         priority = priority or (Priority.research if downsampled_to else Priority.standard)
         return Sample(
             comment=comment,
@@ -203,14 +211,7 @@ class AddHandler(BaseHandler):
     ) -> Case:
         """Build a new Case record."""
 
-        # generate a unique case id
-        while True:
-            internal_id = petname.Generate(2, separator="")
-            if self.get_case_by_internal_id(internal_id) is None:
-                break
-            else:
-                LOG.debug(f"{internal_id} already used - trying another id")
-
+        internal_id: str = self.generate_readable_case_id()
         return Case(
             cohorts=cohorts,
             data_analysis=str(data_analysis),

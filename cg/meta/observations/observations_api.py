@@ -101,7 +101,7 @@ class ObservationsAPI:
 
     def check_customer_loqusdb_permissions(self, customer: Customer) -> None:
         """Verifies that the customer is whitelisted for Loqusdb uploads."""
-        if customer.internal_id not in [cust_id.value for cust_id in self.get_loqusdb_customers()]:
+        if customer.internal_id not in [cust_id for cust_id in self.get_loqusdb_customers()]:
             LOG.error(
                 f"Customer {customer.internal_id} is not whitelisted for Loqusdb uploads. Cancelling upload."
             )

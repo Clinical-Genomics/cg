@@ -33,13 +33,13 @@ def bcl_convert_samples_with_updated_indexes() -> list[FlowCellSampleBCLConvert]
 @pytest.fixture
 def override_cycles_for_samples_with_updated_indexes() -> list[str]:
     """Return the correspondent Override Cycles values for three samples."""
-    return ["Y151;I8N2;N2I8;Y151", "Y151;I8N2;N2I8;Y151", "Y151;I10;I10;Y151"]
+    return ["Y151;I8N2;I8N2;Y151", "Y151;I8N2;I8N2;Y151", "Y151;I10;I10;Y151"]
 
 
 @pytest.fixture
-def override_cycles_for_samples_with_updated_indexes_reverse_complement() -> list[str]:
+def override_cycles_for_novaseq_x_samples() -> list[str]:
     """Return the correspondent Override Cycles values for three samples."""
-    return ["Y151;I8N2;I8N2;Y151", "Y151;I8N2;I8N2;Y151", "Y151;I10;I10;Y151"]
+    return ["Y151;I8N2;N2I8;Y151", "Y151;I8N2;N2I8;Y151", "Y151;I10;I10;Y151"]
 
 
 @pytest.fixture
@@ -56,12 +56,12 @@ def valid_index() -> Index:
 
 @pytest.fixture
 def bcl2fastq_sample_sheet_creator(
-    bcl2fastq_flow_cell: FlowCellDirectoryData,
+    hiseq_x_flow_cell: FlowCellDirectoryData,
     lims_novaseq_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
 ) -> SampleSheetCreatorBcl2Fastq:
     """Returns a sample sheet creator for version 1 sample sheets with bcl2fastq format."""
     return SampleSheetCreatorBcl2Fastq(
-        flow_cell=bcl2fastq_flow_cell,
+        flow_cell=hiseq_x_flow_cell,
         lims_samples=lims_novaseq_bcl2fastq_samples,
     )
 

@@ -6,10 +6,9 @@ from pathlib import Path
 import click
 
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
@@ -70,7 +69,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             analysis_type=AnalysisTypes.OTHER,
             config_path=rsync_api.trailblazer_config_path.as_posix(),
             out_dir=rsync_api.log_dir.as_posix(),
-            slurm_quality_of_service=PRIORITY_TO_SLURM_QOS[case.priority],
+            slurm_quality_of_service=Priority.priority_to_slurm_qos().get(case.priority),
             data_analysis=Pipeline.RSYNC,
             ticket=case.latest_ticket,
         )

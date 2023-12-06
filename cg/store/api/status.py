@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from sqlalchemy.orm import Query, Session
 from typing_extensions import Literal
 
-from cg.constants import CASE_ACTIONS, FlowCellStatus, Pipeline
+from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import CaseActions
 from cg.constants.invoice import CustomerNames
 from cg.store.api.base import BaseHandler
@@ -201,7 +201,9 @@ class StatusHandler(BaseHandler):
 
         return sorted(cases, key=lambda k: k["tat"], reverse=True)
 
-    def set_case_action(self, action: Literal[CASE_ACTIONS], case_internal_id: str) -> None:
+    def set_case_action(
+        self, action: Literal[CaseActions.actions()], case_internal_id: str
+    ) -> None:
         """Sets the action of provided cases to None or the given action."""
         case: Case = self.get_case_by_internal_id(internal_id=case_internal_id)
         case.action = action

@@ -2,12 +2,13 @@
 import logging
 from typing import Type
 
+from packaging.version import parse
+
 from cg.apps.demultiplex.sample_sheet.index import (
     Index,
     get_index_pair,
     get_valid_indexes,
     is_dual_index,
-    is_reverse_complement_needed,
     update_barcode_mismatch_values_for_sample,
     update_indexes_for_samples,
 )
@@ -20,10 +21,17 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_validated_sample_sheet,
 )
 from cg.constants.demultiplexing import (
+    NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION,
+    NEW_NOVASEQ_REAGENT_KIT_VERSION,
+    NO_REVERSE_COMPLEMENTS,
+    NOVASEQ_6000_POST_1_5_KITS,
+    NOVASEQ_X_INDEX_SETTINGS,
     BclConverter,
+    IndexSettings,
     SampleSheetBcl2FastqSections,
     SampleSheetBCLConvertSections,
 )
+from cg.constants.sequencing import Sequencers
 from cg.exc import SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -48,6 +56,34 @@ class SampleSheetCreator:
             FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
         ] = flow_cell.sample_type
         self.force: bool = force
+        self.index_settings: IndexSettings = self._get_index_settings()
+
+    def _get_index_settings(self) -> IndexSettings:
+        """Returns the correct index-related settings for the run in question"""
+        if self.run_parameters.sequencer == Sequencers.NOVASEQX:
+            LOG.debug("Using NovaSeqX index settings")
+            return NOVASEQ_X_INDEX_SETTINGS
+        if self._is_novaseq6000_post_1_5_kit:
+            LOG.debug("Using NovaSeq 6000 post 1.5 kits index settings")
+            return NOVASEQ_6000_POST_1_5_KITS
+        return NO_REVERSE_COMPLEMENTS
+
+    @property
+    def _is_novaseq6000_post_1_5_kit(self) -> bool:
+        """
+        Returns whether sequencing was performed after the 1.5 consumables kits where introduced.
+        This is indicated by the software version and the reagent kit fields in the run parameters.
+        """
+        if self.run_parameters.sequencer != Sequencers.NOVASEQ:
+            return False
+
+        if parse(self.run_parameters.control_software_version) < parse(
+            NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION
+        ):
+            return False
+        if parse(self.run_parameters.reagent_kit_version) < parse(NEW_NOVASEQ_REAGENT_KIT_VERSION):
+            return False
+        return True
 
     @property
     def bcl_converter(self) -> str:
@@ -57,11 +93,6 @@ class SampleSheetCreator:
     @property
     def valid_indexes(self) -> list[Index]:
         return get_valid_indexes(dual_indexes_only=True)
-
-    @property
-    def is_reverse_complement(self) -> bool:
-        """Return whether the samples require reverse complement."""
-        return is_reverse_complement_needed(run_parameters=self.run_parameters)
 
     def update_barcode_mismatch_values_for_samples(self, *args) -> None:
         """Updates barcode mismatch values for samples if applicable."""
@@ -91,7 +122,6 @@ class SampleSheetCreator:
         data_column_names: list[str],
     ) -> list[str]:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
-        LOG.debug(f"Use sample sheet header {data_column_names}")
         sample_dict = sample.model_dump(by_alias=True)
         return [str(sample_dict[column]) for column in data_column_names]
 
@@ -106,14 +136,16 @@ class SampleSheetCreator:
     def create_sample_sheet_content(self) -> list[list[str]]:
         """Create sample sheet content with samples."""
         LOG.info("Creating sample sheet content")
+        complete_data_section: list[list[str]] = self.get_data_section_header_and_columns()
         sample_sheet_content: list[list[str]] = (
-            self.get_additional_sections_sample_sheet() + self.get_data_section_header_and_columns()
+            self.get_additional_sections_sample_sheet() + complete_data_section
         )
+        LOG.debug(f"Use sample sheet header {complete_data_section[1]}")
         for sample in self.lims_samples:
             sample_sheet_content.append(
                 self.convert_sample_to_header_dict(
                     sample=sample,
-                    data_column_names=self.get_data_section_header_and_columns()[1],
+                    data_column_names=complete_data_section[1],
                 )
             )
         return sample_sheet_content
@@ -128,7 +160,8 @@ class SampleSheetCreator:
             update_indexes_for_samples(
                 samples=samples_in_lane,
                 index_cycles=self.run_parameters.index_length,
-                is_reverse_complement=self.is_reverse_complement,
+                perform_reverse_complement=self.index_settings.should_i5_be_reverse_complimented,
+                sequencer=self.run_parameters.sequencer,
             )
             self.update_barcode_mismatch_values_for_samples(samples_in_lane)
 
@@ -157,21 +190,21 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
 
     def add_override_cycles_to_samples(self) -> None:
         """Return None for flow cells to be demultiplexed with Bcl2fastq."""
-        LOG.debug("No adding of override cycles for Bcl2fastq flow cell")
+        LOG.debug("Skipping adding of override cycles for Bcl2fastq flow cell")
 
     def get_additional_sections_sample_sheet(self) -> list[list[str]]:
         """Return all sections of the sample sheet that are not the data section."""
         return [
-            [SampleSheetBcl2FastqSections.Settings.HEADER.value],
-            SampleSheetBcl2FastqSections.Settings.BARCODE_MISMATCH_INDEX1.value,
-            SampleSheetBcl2FastqSections.Settings.BARCODE_MISMATCH_INDEX2.value,
+            [SampleSheetBcl2FastqSections.Settings.HEADER],
+            SampleSheetBcl2FastqSections.Settings.barcode_mismatch_index_1(),
+            SampleSheetBcl2FastqSections.Settings.barcode_mismatch_index_2(),
         ]
 
     def get_data_section_header_and_columns(self) -> list[list[str]]:
         """Return the header and column names of the data section of the sample sheet."""
         return [
             [SampleSheetBcl2FastqSections.Data.HEADER.value],
-            SampleSheetBcl2FastqSections.Data.COLUMN_NAMES.value,
+            SampleSheetBcl2FastqSections.Data.column_names(),
         ]
 
 
@@ -194,26 +227,27 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         """Update barcode mismatch values for both indexes of given samples."""
         for sample in samples:
             update_barcode_mismatch_values_for_sample(
-                sample_to_update=sample,
-                samples_to_compare_to=samples,
-                is_reverse_complement=self.is_reverse_complement,
+                sample_to_update=sample, samples_to_compare_to=samples
             )
 
     def add_override_cycles_to_samples(self) -> None:
         """Add override cycles attribute to samples."""
-        flow_cell_index_len: int = self.run_parameters.index_length
         read1_cycles: str = f"Y{self.run_parameters.get_read_1_cycles()};"
         read2_cycles: str = f"Y{self.run_parameters.get_read_2_cycles()}"
+        length_index1: int = self.run_parameters.get_index_1_cycles()
+        length_index2: int = self.run_parameters.get_index_2_cycles()
         for sample in self.lims_samples:
-            index1_cycles: str = f"I{self.run_parameters.get_index_1_cycles()};"
-            index2_cycles: str = f"I{self.run_parameters.get_index_2_cycles()};"
-            sample_index_len: int = len(get_index_pair(sample)[0])
-            if sample_index_len < flow_cell_index_len:
-                index1_cycles = f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
+            index1_cycles: str = f"I{length_index1};"
+            index2_cycles: str = f"I{length_index2};"
+            sample_index1_len: int = len(get_index_pair(sample)[0])
+            sample_index2_len: int = len(get_index_pair(sample)[1])
+            if sample_index1_len < length_index1:
+                index1_cycles = f"I{sample_index1_len}N{length_index1 - sample_index1_len};"
+            if sample_index2_len < length_index2:
                 index2_cycles = (
-                    f"I{sample_index_len}N{flow_cell_index_len - sample_index_len};"
-                    if self.is_reverse_complement
-                    else f"N{flow_cell_index_len - sample_index_len}I{sample_index_len};"
+                    f"N{length_index2-sample_index2_len}I{sample_index2_len};"
+                    if self.index_settings.are_i5_override_cycles_reverse_complemented
+                    else f"I{sample_index2_len}N{length_index2 - sample_index2_len};"
                 )
             sample.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
@@ -221,39 +255,39 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         """Return all sections of the sample sheet that are not the data section."""
         header_section: list[list[str]] = [
             [SampleSheetBCLConvertSections.Header.HEADER.value],
-            SampleSheetBCLConvertSections.Header.FILE_FORMAT.value,
+            SampleSheetBCLConvertSections.Header.file_format(),
             [SampleSheetBCLConvertSections.Header.RUN_NAME.value, self.flow_cell_id],
             [
                 SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM_TITLE.value,
-                SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM_VALUE.value[
+                SampleSheetBCLConvertSections.Header.instrument_platform_sequencer().get(
                     self.flow_cell.sequencer_type
-                ],
+                ),
             ],
-            SampleSheetBCLConvertSections.Header.INDEX_ORIENTATION_FORWARD.value,
+            SampleSheetBCLConvertSections.Header.index_orientation_forward(),
         ]
         reads_section: list[list[str]] = [
-            [SampleSheetBCLConvertSections.Reads.HEADER.value],
+            [SampleSheetBCLConvertSections.Reads.HEADER],
             [
-                SampleSheetBCLConvertSections.Reads.READ_CYCLES_1.value,
+                SampleSheetBCLConvertSections.Reads.READ_CYCLES_1,
                 self.run_parameters.get_read_1_cycles(),
             ],
             [
-                SampleSheetBCLConvertSections.Reads.READ_CYCLES_2.value,
+                SampleSheetBCLConvertSections.Reads.READ_CYCLES_2,
                 self.run_parameters.get_read_2_cycles(),
             ],
             [
-                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_1.value,
+                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_1,
                 self.run_parameters.get_index_1_cycles(),
             ],
             [
-                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2.value,
+                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2,
                 self.run_parameters.get_index_2_cycles(),
             ],
         ]
         settings_section: list[list[str]] = [
-            [SampleSheetBCLConvertSections.Settings.HEADER.value],
-            SampleSheetBCLConvertSections.Settings.SOFTWARE_VERSION.value,
-            SampleSheetBCLConvertSections.Settings.FASTQ_COMPRESSION_FORMAT.value,
+            [SampleSheetBCLConvertSections.Settings.HEADER],
+            SampleSheetBCLConvertSections.Settings.software_version(),
+            SampleSheetBCLConvertSections.Settings.fastq_compression_format(),
         ]
         return header_section + reads_section + settings_section
 
@@ -261,5 +295,5 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         """Return the header and column names of the data section of the sample sheet."""
         return [
             [SampleSheetBCLConvertSections.Data.HEADER.value],
-            SampleSheetBCLConvertSections.Data.COLUMN_NAMES.value,
+            SampleSheetBCLConvertSections.Data.column_names(),
         ]

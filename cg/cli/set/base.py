@@ -8,7 +8,7 @@ import click
 
 from cg.cli.set.case import set_case
 from cg.cli.set.cases import set_cases
-from cg.constants import FLOWCELL_STATUS
+from cg.constants import FlowCellStatus
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -283,7 +283,7 @@ def _update_comment(comment, obj):
 
 
 @set_cmd.command()
-@click.option("-s", "--status", type=click.Choice(FLOWCELL_STATUS))
+@click.option("-s", "--status", type=click.Choice(FlowCellStatus.statuses()))
 @click.argument("flow_cell_name")
 @click.pass_obj
 def flowcell(context: CGConfig, flow_cell_name: str, status: str | None):

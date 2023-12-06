@@ -62,16 +62,8 @@
     <BufferStartDate>02/06/2021 12:40:00</BufferStartDate>
     <BufferRssi>3</BufferRssi>
   </RfidsInfo>
-  <RecipeFilePath>C:\Program Files\Illumina\NovaSeq Control Software\Recipe</RecipeFilePath>
   <SamplesheetFile />
   <UsedLimsSetup>false</UsedLimsSetup>
-  <CeLinuxRunFolder>/ilmn/outputfolder/210206_A00689_0226_AHMYJ7DSXY/</CeLinuxRunFolder>
-  <RtaRawRunFolder>/ilmn/outputfolder</RtaRawRunFolder>
-  <CeMountRunFolder>Z:\outputfolder\210206_A00689_0226_AHMYJ7DSXY\</CeMountRunFolder>
-  <OutputRunFolder>\\172.16.1.6\clinicaldata\Runs\210206_A00689_0226_AHMYJ7DSXY\</OutputRunFolder>
-  <OutputRootFolder>\\172.16.1.6\clinicaldata\Runs</OutputRootFolder>
-  <SbcRunFolder>C:\ProgramData\Illumina\NovaSeq\NovaSeqTemp\210206_A00689_0226_AHMYJ7DSXY\</SbcRunFolder>
-  <PreRunFolder>C:\ProgramData\Illumina\NovaSeq\NovaSeqTemp\RunSetupLogs\A00689_2021-02-06__11_58_48_SideA</PreRunFolder>
   <RunStartDate>210206</RunStartDate>
   <RunId>210206_A00689_0226_AHMYJ7DSXY</RunId>
   <UseBaseSpace>true</UseBaseSpace>
