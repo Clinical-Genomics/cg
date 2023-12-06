@@ -3,7 +3,7 @@
   <Side>B</Side>
   <Application>control-software</Application>
   <SystemSuiteVersion>1.1.0.18335</SystemSuiteVersion>
-  <OutputFolder>//cg-nas.scilifelab.se/cg_data/seqdata/20231108_LH00188_0028_B22F52TLT3</OutputFolder>
+  <OutputFolder>//0.0.0.0/cg_data/seqdata/20231108_LH00188_0028_B22F52TLT3</OutputFolder>
   <CloudUploadMode>InstrumentPerformance</CloudUploadMode>
   <RunSetupMode>Manual</RunSetupMode>
   <SecondaryAnalysisMode>None</SecondaryAnalysisMode>

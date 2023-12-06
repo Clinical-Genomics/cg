@@ -68,8 +68,8 @@
   <CeLinuxRunFolder>/ilmn/outputfolder/230912_A00187_1009_AHK33MDRX3/</CeLinuxRunFolder>
   <RtaRawRunFolder>/ilmn/outputfolder</RtaRawRunFolder>
   <CeMountRunFolder>Z:\outputfolder\230912_A00187_1009_AHK33MDRX3\</CeMountRunFolder>
-  <OutputRunFolder>\\172.16.1.6\clinicaldata\Runs\230912_A00187_1009_AHK33MDRX3\</OutputRunFolder>
-  <OutputRootFolder>\\172.16.1.6\clinicaldata\Runs</OutputRootFolder>
+  <OutputRunFolder>\\0.0.0.0\clinicaldata\Runs\230912_A00187_1009_AHK33MDRX3\</OutputRunFolder>
+  <OutputRootFolder>\\0.0.0.0\clinicaldata\Runs</OutputRootFolder>
   <SbcRunFolder>C:\ProgramData\Illumina\NovaSeq\NovaSeqTemp\230912_A00187_1009_AHK33MDRX3\</SbcRunFolder>
   <PreRunFolder>C:\ProgramData\Illumina\NovaSeq\NovaSeqTemp\RunSetupLogs\A00187_2023-09-12__15_04_50_SideA</PreRunFolder>
   <RunStartDate>230912</RunStartDate>
