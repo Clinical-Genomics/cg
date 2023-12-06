@@ -211,6 +211,7 @@ class DemultiplexingAPI:
 
     def start_demultiplexing(self, flow_cell: FlowCellDirectoryData):
         """Start demultiplexing for a flow cell."""
+        self.create_demultiplexing_started_file(flow_cell.demultiplexing_started_path)
         log_path: Path = self.get_stderr_logfile(flow_cell=flow_cell)
         error_function: str = self.get_sbatch_error(
             flow_cell=flow_cell, email=self.mail, demux_dir=self.flow_cell_out_dir_path(flow_cell)
