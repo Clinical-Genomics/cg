@@ -13,7 +13,7 @@ OPTION_FROM_START = click.option(
 OPTION_STRANDEDNESS = click.option(
     "--strandedness",
     type=str,
-    default=Strandedness.REVERSE.value,
+    default=Strandedness.REVERSE,
     show_default=True,
     help="Strandedness: forward, unstranded or reverse (default)",
 )

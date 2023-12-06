@@ -1,8 +1,9 @@
 """Constants related to demultiplexing."""
-from enum import Enum, StrEnum
+from enum import StrEnum
 from pathlib import Path
 
 import click
+from pydantic import BaseModel
 
 from cg.constants.sequencing import Sequencers
 
@@ -22,10 +23,11 @@ class DemultiplexingDirsAndFiles(StrEnum):
     DELIVERY: str = "delivery.txt"
     DEMUX_STARTED: str = "demuxstarted.txt"
     DEMUX_COMPLETE: str = "demuxcomplete.txt"
-    Hiseq_X_COPY_COMPLETE: str = "copycomplete.txt"
-    Hiseq_X_TILE_DIR: str = "l1t11"
+    HISEQ_X_COPY_COMPLETE: str = "copycomplete.txt"
+    HISEQ_X_TILE_DIR: str = "l1t11"
     RTACOMPLETE: str = "RTAComplete.txt"
-    RUN_PARAMETERS: str = "RunParameters.xml"
+    RUN_PARAMETERS_PASCAL_CASE: str = "RunParameters.xml"
+    RUN_PARAMETERS_CAMEL_CASE: str = "runParameters.xml"
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
     BCL2FASTQ_TILE_DIR_PATTERN: str = r"l\dt\d{2}"
@@ -46,23 +48,31 @@ class RunParametersXMLNodes(StrEnum):
 
     # Node names
     APPLICATION: str = ".Application"
+    APPLICATION_NAME: str = ".//ApplicationName"
     APPLICATION_VERSION: str = ".ApplicationVersion"
     CYCLES: str = "Cycles"
+    INDEX_1_HISEQ: str = ".//IndexRead1"
+    INDEX_2_HISEQ: str = ".//IndexRead2"
     INDEX_1_NOVASEQ_6000: str = "./IndexRead1NumberOfCycles"
     INDEX_2_NOVASEQ_6000: str = "./IndexRead2NumberOfCycles"
     INDEX_1_NOVASEQ_X: str = "Index1"
     INDEX_2_NOVASEQ_X: str = "Index2"
     INNER_READ: str = ".//Read"
     INSTRUMENT_TYPE: str = ".InstrumentType"
-    PLANNED_READS: str = "./PlannedReads"
+    PLANNED_READS_HISEQ: str = ".//Reads"
+    PLANNED_READS_NOVASEQ_X: str = "./PlannedReads"
+    READ_1_HISEQ: str = ".//Read1"
+    READ_2_HISEQ: str = ".//Read2"
     READ_1_NOVASEQ_6000: str = "./Read1NumberOfCycles"
     READ_2_NOVASEQ_6000: str = "./Read2NumberOfCycles"
     READ_1_NOVASEQ_X: str = "Read1"
     READ_2_NOVASEQ_X: str = "Read2"
     READ_NAME: str = "ReadName"
     REAGENT_KIT_VERSION: str = "./RfidsInfo/SbsConsumableVersion"
+    SEQUENCER_ID: str = ".//ScannerID"
 
     # Node Values
+    HISEQ_APPLICATION: str = "HiSeq Control Software"
     NOVASEQ_6000_APPLICATION: str = "NovaSeq Control Software"
     NOVASEQ_X_INSTRUMENT: str = "NovaSeqXPlus"
     UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
@@ -71,12 +81,18 @@ class RunParametersXMLNodes(StrEnum):
 class SampleSheetBcl2FastqSections:
     """Class with all necessary constants for building a NovaSeqX sample sheet."""
 
-    class Settings(Enum):
+    class Settings(StrEnum):
         HEADER: str = "[Settings]"
-        BARCODE_MISMATCH_INDEX1: list[str] = ["BarcodeMismatchesIndex1", "0"]
-        BARCODE_MISMATCH_INDEX2: list[str] = ["BarcodeMismatchesIndex2", "0"]
 
-    class Data(Enum):
+        @classmethod
+        def barcode_mismatch_index_1(cls) -> list[str]:
+            return ["BarcodeMismatchesIndex1", "0"]
+
+        @classmethod
+        def barcode_mismatch_index_2(cls) -> list[str]:
+            return ["BarcodeMismatchesIndex2", "0"]
+
+    class Data(StrEnum):
         HEADER: str = "[Data]"
         FLOW_CELL_ID: str = "FCID"
         LANE: str = "Lane"
@@ -90,34 +106,45 @@ class SampleSheetBcl2FastqSections:
         OPERATOR: str = "Operator"
         SAMPLE_PROJECT_BCL2FASTQ: str = "Project"
 
-        COLUMN_NAMES: list[str] = [
-            FLOW_CELL_ID,
-            LANE,
-            SAMPLE_INTERNAL_ID_BCL2FASTQ,
-            SAMPLE_REFERENCE,
-            INDEX_1,
-            INDEX_2,
-            SAMPLE_NAME,
-            CONTROL,
-            RECIPE,
-            OPERATOR,
-            SAMPLE_PROJECT_BCL2FASTQ,
-        ]
+        @classmethod
+        def column_names(cls) -> list[str]:
+            return [
+                cls.FLOW_CELL_ID,
+                cls.LANE,
+                cls.SAMPLE_INTERNAL_ID_BCL2FASTQ,
+                cls.SAMPLE_REFERENCE,
+                cls.INDEX_1,
+                cls.INDEX_2,
+                cls.SAMPLE_NAME,
+                cls.CONTROL,
+                cls.RECIPE,
+                cls.OPERATOR,
+                cls.SAMPLE_PROJECT_BCL2FASTQ,
+            ]
 
 
 class SampleSheetBCLConvertSections:
     """Class with all necessary constants for building a version 2 sample sheet."""
 
-    class Header(Enum):
+    class Header(StrEnum):
         HEADER: str = "[Header]"
-        FILE_FORMAT: list[str] = ["FileFormatVersion", "2"]
         RUN_NAME: str = "RunName"
         INSTRUMENT_PLATFORM_TITLE: str = "InstrumentPlatform"
-        INSTRUMENT_PLATFORM_VALUE: dict[str, str] = {
-            Sequencers.NOVASEQ: "NovaSeq6000",
-            Sequencers.NOVASEQX: "NovaSeqXSeries",
-        }
-        INDEX_ORIENTATION_FORWARD: list[str] = ["IndexOrientation", "Forward"]
+
+        @classmethod
+        def file_format(cls) -> list[str]:
+            return ["FileFormatVersion", "2"]
+
+        @classmethod
+        def instrument_platform_sequencer(cls) -> dict[str, str]:
+            return {
+                Sequencers.NOVASEQ: "NovaSeq6000",
+                Sequencers.NOVASEQX: "NovaSeqXSeries",
+            }
+
+        @classmethod
+        def index_orientation_forward(cls) -> list[str]:
+            return ["IndexOrientation", "Forward"]
 
     class Reads(StrEnum):
         HEADER: str = "[Reads]"
@@ -126,12 +153,18 @@ class SampleSheetBCLConvertSections:
         INDEX_CYCLES_1: str = "Index1Cycles"
         INDEX_CYCLES_2: str = "Index2Cycles"
 
-    class Settings(Enum):
+    class Settings(StrEnum):
         HEADER: str = "[BCLConvert_Settings]"
-        SOFTWARE_VERSION: list[str] = ["SoftwareVersion", "4.1.7"]
-        FASTQ_COMPRESSION_FORMAT: list[str] = ["FastqCompressionFormat", "gzip"]
 
-    class Data(Enum):
+        @classmethod
+        def software_version(cls) -> list[str]:
+            return ["SoftwareVersion", "4.1.7"]
+
+        @classmethod
+        def fastq_compression_format(cls) -> list[str]:
+            return ["FastqCompressionFormat", "gzip"]
+
+    class Data(StrEnum):
         HEADER: str = "[BCLConvert_Data]"
         LANE: str = "Lane"
         SAMPLE_INTERNAL_ID: str = "Sample_ID"
@@ -143,17 +176,19 @@ class SampleSheetBCLConvertSections:
         BARCODE_MISMATCHES_1: str = "BarcodeMismatchesIndex1"
         BARCODE_MISMATCHES_2: str = "BarcodeMismatchesIndex2"
 
-        COLUMN_NAMES: list[str] = [
-            LANE,
-            SAMPLE_INTERNAL_ID,
-            INDEX_1,
-            INDEX_2,
-            OVERRIDE_CYCLES,
-            ADAPTER_READ_1,
-            ADAPTER_READ_2,
-            BARCODE_MISMATCHES_1,
-            BARCODE_MISMATCHES_2,
-        ]
+        @classmethod
+        def column_names(cls) -> list[str]:
+            return [
+                cls.LANE,
+                cls.SAMPLE_INTERNAL_ID,
+                cls.INDEX_1,
+                cls.INDEX_2,
+                cls.OVERRIDE_CYCLES,
+                cls.ADAPTER_READ_1,
+                cls.ADAPTER_READ_2,
+                cls.BARCODE_MISMATCHES_1,
+                cls.BARCODE_MISMATCHES_2,
+            ]
 
 
 OPTION_BCL_CONVERTER = click.option(
@@ -166,7 +201,7 @@ OPTION_BCL_CONVERTER = click.option(
 )
 
 
-DEMUX_STATS_PATH = {
+DEMUX_STATS_PATH: dict[str, dict[str, Path | None]] = {
     "bcl2fastq": {
         "demultiplexing_stats": Path("Stats", "DemultiplexingStats.xml"),
         "conversion_stats": Path("Stats", "ConversionStats.xml"),
@@ -181,9 +216,42 @@ DEMUX_STATS_PATH = {
     },
 }
 
-BCL2FASTQ_METRICS_DIRECTORY_NAME = "Stats"
-BCL2FASTQ_METRICS_FILE_NAME = "Stats.json"
-DRAGEN_PASSED_FILTER_PCT = 100.00000
-FASTQ_FILE_SUFFIXES = [".fastq", ".gz"]
-INDEX_CHECK = "indexcheck"
-UNDETERMINED = "Undetermined"
+BCL2FASTQ_METRICS_DIRECTORY_NAME: str = "Stats"
+BCL2FASTQ_METRICS_FILE_NAME: str = "Stats.json"
+DRAGEN_PASSED_FILTER_PCT: float = 100.00000
+FASTQ_FILE_SUFFIXES: list[str] = [".fastq", ".gz"]
+INDEX_CHECK: str = "indexcheck"
+UNDETERMINED: str = "Undetermined"
+
+NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION: str = "1.7.0"
+NEW_NOVASEQ_REAGENT_KIT_VERSION: str = "1.5"
+
+
+class IndexSettings(BaseModel):
+    """
+    Holds the settings defining how the sample indexes should be handled in the sample sheet.
+    These vary between machines and versions.
+
+        Attributes:
+            should_i5_be_reverse_complimented (bool): Whether the i5 index should be reverse complemented.
+            are_i5_override_cycles_reverse_complemented (bool): Whether the override cycles for i5 should be written in as NXIX.
+
+    """
+
+    should_i5_be_reverse_complimented: bool
+    are_i5_override_cycles_reverse_complemented: bool
+
+
+# The logic for the settings below are acquired empirically, any changes should be well motivated
+# and rigorously tested.
+
+NOVASEQ_X_INDEX_SETTINGS = IndexSettings(
+    should_i5_be_reverse_complimented=False, are_i5_override_cycles_reverse_complemented=True
+)
+NOVASEQ_6000_POST_1_5_KITS = IndexSettings(
+    should_i5_be_reverse_complimented=True, are_i5_override_cycles_reverse_complemented=False
+)
+NO_REVERSE_COMPLEMENTS = IndexSettings(
+    should_i5_be_reverse_complimented=False,
+    are_i5_override_cycles_reverse_complemented=False,
+)

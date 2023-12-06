@@ -20,7 +20,7 @@ from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store import Store
-from cg.store.models import Application, Delivery, Case, Pool, Sample
+from cg.store.models import Application, Case, Delivery, Pool, Sample
 
 
 def test_pools_to_status(rml_order_to_submit):
@@ -83,7 +83,7 @@ def test_metagenome_to_status(metagenome_order_to_submit):
     assert first_sample["name"] == "Bristol"
     assert first_sample["application"] == "METLIFR020"
     assert first_sample["priority"] == "standard"
-    assert first_sample["volume"] == "1"
+    assert first_sample["volume"] == "1.0"
 
 
 def test_microbial_samples_to_status(microbial_order_to_submit):

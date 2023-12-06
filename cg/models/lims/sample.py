@@ -19,7 +19,7 @@ class Udf(BaseModel):
     data_delivery: str | None
     elution_buffer: str | None
     extraction_method: str | None
-    family_name: str = "NA"
+    family_name: str | None = "NA"
     formalin_fixation_time: str | None
     index: str | None
     index_number: str | None

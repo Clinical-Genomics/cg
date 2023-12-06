@@ -8,6 +8,7 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
+from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.meta.compress import files
 from cg.models import CompressionData
 from tests.cli.compress.conftest import MockCompressAPI
@@ -85,6 +86,7 @@ def test_update_hk_fastq(
         compression_obj=compression,
         hk_fastq_first=fastq[run]["hk_first"],
         hk_fastq_second=fastq[run]["hk_second"],
+        archive_location=PDC_ARCHIVE_LOCATION,
     )
 
     # THEN assert that the SPRING files have been added to Housekeeper
@@ -92,11 +94,17 @@ def test_update_hk_fastq(
     hk_spring_metadata_files: list[File] = list(
         real_housekeeper_api.files(tags=[SequencingFileTag.SPRING_METADATA])
     )
+
+    # THEN assert that the Spring files and Spring metadata files have had the fastq file tags transferred
     for spring_file in [hk_spring_files, hk_spring_metadata_files]:
         assert spring_file
         for tag_name in [tag.name for tag in fastq[run]["hk_first"].tags]:
             if tag_name != SequencingFileTag.FASTQ:
                 assert tag_name in spring_file.tags
+
+    # THEN assert that the spring files have been tagged with the archive location
+    for spring_file in hk_spring_files:
+        assert PDC_ARCHIVE_LOCATION in [tag.name for tag in spring_file.tags]
 
     # THEN assert that the SPRING files have been added to bundles directory
     for spring_file in [hk_spring_files[0].path, hk_spring_metadata_files[0].path]:
@@ -127,7 +135,9 @@ def test_cli_clean_fastqs_removed(
     assert fastq_second.exists()
 
     # WHEN running the clean command
-    populated_compress_fastq_api.clean_fastq(sample)
+    populated_compress_fastq_api.clean_fastq(
+        sample_id=sample, archive_location=PDC_ARCHIVE_LOCATION
+    )
 
     # THEN assert SPRING files exists
     assert spring_file.exists()
@@ -156,7 +166,9 @@ def test_cli_clean_fastqs_no_spring_metadata(
     assert not spring_metadata_file.exists()
 
     # WHEN running the clean command
-    populated_compress_fastq_api.clean_fastq(sample)
+    populated_compress_fastq_api.clean_fastq(
+        sample_id=sample, archive_location=PDC_ARCHIVE_LOCATION
+    )
 
     # THEN assert SPRING file exists
     assert spring_file.exists()
@@ -182,7 +194,9 @@ def test_cli_clean_fastqs_pending_compression_metadata(
     assert crunchy_flag_file.exists()
 
     # WHEN running the clean command
-    populated_compress_fastq_api.clean_fastq(sample)
+    populated_compress_fastq_api.clean_fastq(
+        sample_id=sample, archive_location=PDC_ARCHIVE_LOCATION
+    )
 
     # THEN assert SPRING file exists
     assert spring_file.exists()

@@ -9,7 +9,6 @@ from pydantic.v1 import ValidationError
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
-from cg.constants.indexes import ListIndexes
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Gender
@@ -272,7 +271,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         pon_list = Path(self.pon_path).glob(f"*{Path(panel_bed).stem}_{self.PON_file_suffix}")
         sorted_pon_files = sorted(
             pon_list,
-            key=lambda file: int(file.stem.split("_v")[ListIndexes.LAST.value]),
+            key=lambda file: int(file.stem.split("_v")[-1]),
             reverse=True,
         )
 
@@ -558,7 +557,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         panel_bed: str,
         pon_cnn: str,
         observations: list[str],
-        dry_run: bool = False,
     ) -> None:
         """Create config file for BALSAMIC analysis"""
         arguments = self.get_verified_config_case_arguments(
@@ -596,19 +594,18 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             }
         )
         parameters = command + options
-        self.process.run_command(parameters=parameters, dry_run=dry_run)
+        self.process.run_command(parameters=parameters)
 
     def run_analysis(
         self,
         case_id: str,
-        run_analysis: bool = True,
         slurm_quality_of_service: str | None = None,
         dry_run: bool = False,
     ) -> None:
         """Execute BALSAMIC run analysis with given options"""
 
         command = ["run", "analysis"]
-        run_analysis = ["--run-analysis"] if run_analysis else []
+        run_analysis = ["--run-analysis"] if not dry_run else []
         benchmark = ["--benchmark"]
         options = build_command_from_dict(
             {
