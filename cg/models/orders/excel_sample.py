@@ -29,7 +29,7 @@ class ExcelSample(OrderSample):
     concentration: Annotated[str, AfterValidator(numeric_value)] = Field(
         None, alias=ExcelSampleAliases.CONCENTRATION
     )
-    concentration_ng_ul: Field(alias=ExcelSampleAliases.CONCENTRATION_NG_UL)
+    concentration_ng_ul: Field(None, alias=ExcelSampleAliases.CONCENTRATION_NG_UL)
     concentration_sample: Annotated[str, AfterValidator(numeric_value)] = Field(
         None, alias=ExcelSampleAliases.CONCENTRATION_SAMPLE
     )
