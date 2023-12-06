@@ -52,10 +52,10 @@ class GenePanelMasterList(StrEnum):
         """Return collaborators of the Master list."""
         return {
             CustomerId.CG_INTERNAL_CUSTOMER,
-            CustomerId.cust002,
-            CustomerId.cust003,
-            CustomerId.cust004,
-            CustomerId.cust042,
+            CustomerId.CUST002,
+            CustomerId.CUST003,
+            CustomerId.CUST004,
+            CustomerId.CUST042,
         }
 
 

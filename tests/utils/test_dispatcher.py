@@ -137,7 +137,7 @@ def test_call_dictionary_extra_parameters_not_in_functions(
 def test_call_with_status_db_functions(
     store: Store,
     helpers: StoreHelpers,
-    customer_internal_id: str = CustomerId.cust001,
+    customer_internal_id: str = CustomerId.CUST001,
     test_subject: str = "test_subject",
     is_tumour: bool = True,
 ):

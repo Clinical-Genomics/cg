@@ -359,7 +359,7 @@ def pool_order_1() -> str:
 def store_with_multiple_pools_for_customer(
     store: Store,
     helpers: StoreHelpers,
-    customer_id: str = CustomerId.cust132,
+    customer_id: str = CustomerId.CUST132,
 ) -> Store:
     """Return a store with two pools with different names for the same customer."""
     for number in range(2):

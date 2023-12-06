@@ -23,6 +23,7 @@ LOG = logging.getLogger(__name__)
 
 
 def add_gene_panel_combo(default_panels: set[str]) -> set[str]:
+    """Add gene panels combinations for gene panels being part of gene panel combination and return updated gene panels."""
     all_panels = default_panels
     for panel in default_panels:
         if panel in GenePanelCombo.COMBO_1:
