@@ -67,8 +67,8 @@ def test_add_fastq_housekeeper_when_no_fastq_in_hk(
     # GIVEN real Housekeeper API populated with a bundle with SPRING metadata
     hk_bundle: dict = decompress_hk_spring_bundle
     sample_id: str = hk_bundle["name"]
-    helpers.ensure_hk_bundle(real_housekeeper_api, hk_bundle)
-    sample: Sample = helpers.add_sample(store, internal_id=sample_id)
+    helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=hk_bundle)
+    sample: Sample = helpers.add_sample(store=store, internal_id=sample_id)
     compress_api.hk_api = real_housekeeper_api
 
     # GIVEN that there are no FASTQ files in HK
@@ -84,6 +84,7 @@ def test_add_fastq_housekeeper_when_no_fastq_in_hk(
         sample_internal_id=sample.internal_id,
         fastq_first=compression_files.fastq_first_file,
         fastq_second=compression_files.fastq_second_file,
+        fastq_tags=compress_api.get_fastq_tag_names(compression_files.spring_path),
     )
 
     # THEN assert that the FASTQ files where added to HK
@@ -139,12 +140,14 @@ def test_add_decompressed_fastq(
     )
 
 
-def test_get_fastq_tag_names(compress_api: MockCompressAPI, helpers, hk_sample_bundle, sample_id):
-    """Tests that we get the correct fastq tags when providing the path to an existing spring file."""
+def test_get_fastq_tag_names(
+    compress_api: MockCompressAPI, helpers: StoreHelpers, hk_sample_bundle: dict
+):
+    """Test that the correct tags for a fastq file are returned given a spring file."""
 
     # GIVEN a spring file
     helpers.ensure_hk_bundle(store=compress_api.hk_api, bundle_data=hk_sample_bundle)
-    spring_file: File = compress_api.hk_api.files(tags=[SequencingFileTag.SPRING]).first()
+    spring_file: File = compress_api.hk_api.files(tags={SequencingFileTag.SPRING}).first()
     assert spring_file
 
     # GIVEN that the spring_file is tagged with more than 'spring'
@@ -153,7 +156,7 @@ def test_get_fastq_tag_names(compress_api: MockCompressAPI, helpers, hk_sample_b
     ]
 
     # WHEN getting fastq tags from its path
-    fastq_tags: list[str] = compress_api.get_fastq_tag_names(sample_id)
+    fastq_tags: list[str] = compress_api.get_fastq_tag_names(Path(spring_file.path))
 
     # THEN the fastq tags should contain all non-spring tags of the spring file
     for tag_name in [tag.name for tag in spring_file.tags]:

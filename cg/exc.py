@@ -228,3 +228,11 @@ class MetricsQCError(CgError):
 
 class MissingMetrics(CgError):
     """Exception raised when mandatory metrics are missing."""
+
+
+class ArchiveJobFailedError(CgError):
+    """Exception raised when an archival or retrieval job has failed."""
+
+
+class XMLError(CgError):
+    """Exception raised when something is wrong with the content of an XML file."""

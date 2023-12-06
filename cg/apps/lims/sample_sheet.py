@@ -1,7 +1,7 @@
 """Functions to get sample sheet information from Lims."""
 import logging
 import re
-from typing import Iterable, Optional, Type
+from typing import Iterable, Type
 
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
@@ -30,7 +30,7 @@ def get_non_pooled_artifacts(artifact: Artifact) -> list[Artifact]:
     return artifacts
 
 
-def get_reagent_label(artifact) -> Optional[str]:
+def get_reagent_label(artifact) -> str | None:
     """Get the first and only reagent label from an artifact."""
     labels: list[str] = artifact.reagent_labels
     if len(labels) > 1:
@@ -38,7 +38,7 @@ def get_reagent_label(artifact) -> Optional[str]:
     return labels[0] if labels else None
 
 
-def extract_sequence_in_parentheses(label: str) -> Optional[str]:
+def extract_sequence_in_parentheses(label: str) -> str | None:
     """Return the sequence in parentheses from the reagent label or None if not found."""
     match = re.match(r"^[^(]+ \(([^)]+)\)$", label)
     return match.group(1) if match else None
@@ -83,7 +83,7 @@ def get_flow_cell_samples(
         non_pooled_artifacts: list[Artifact] = get_non_pooled_artifacts(placement_artifact)
         for artifact in non_pooled_artifacts:
             sample: Sample = artifact.samples[0]  # we are assured it only has one sample
-            label: Optional[str] = get_reagent_label(artifact)
+            label: str | None = get_reagent_label(artifact)
             index = get_index(lims=lims, label=label)
             yield flow_cell_sample_type(
                 flowcell_id=flow_cell_id,

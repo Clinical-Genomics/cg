@@ -1,7 +1,6 @@
 """Post-processing Demultiplex API."""
 import logging
 from pathlib import Path
-from typing import Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import FlowCellError, MissingFilesError
@@ -10,8 +9,8 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
 )
 from cg.meta.demultiplex.status_db_storage_functions import (
     store_flow_cell_data_in_status_db,
-    store_sequencing_metrics_in_status_db,
     store_sample_data_in_status_db,
+    store_sequencing_metrics_in_status_db,
 )
 from cg.meta.demultiplex.utils import create_delivery_file_in_flow_cell_directory
 from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
@@ -40,7 +39,7 @@ class DemuxPostProcessingAPI:
     def finish_flow_cell(
         self,
         flow_cell_directory_name: str,
-        bcl_converter: Optional[str] = None,
+        bcl_converter: str | None = None,
         force: bool = False,
     ) -> None:
         """Store data for the demultiplexed flow cell and mark it as ready for delivery.

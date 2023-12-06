@@ -1,10 +1,10 @@
 import logging
-from typing import Optional
 
 import click
 
 from cg.cli.set.case import set_case
-from cg.constants import CASE_ACTIONS, Priority
+from cg.constants import Priority
+from cg.constants.constants import CaseActions
 from cg.store import Store
 from cg.store.models import Case, Sample
 from cg.utils.click.EnumChoice import EnumChoice
@@ -41,7 +41,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> list[Case]
     help="Give an identifier on sample and the value to use it with, e.g. --sample-identifier "
     "name Prov52",
 )
-@click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update case action")
+@click.option("-a", "--action", type=click.Choice(CaseActions.actions()), help="update case action")
 @click.option("-c", "--customer-id", type=click.STRING, help="update customer")
 @click.option("-g", "--panel", "panel_abbreviations", multiple=True, help="update gene panels")
 @click.option(
@@ -50,10 +50,10 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> list[Case]
 @click.pass_context
 def set_cases(
     context: click.Context,
-    action: Optional[str],
-    priority: Optional[Priority],
-    panel_abbreviations: Optional[tuple[str]],
-    customer_id: Optional[str],
+    action: str | None,
+    priority: Priority | None,
+    panel_abbreviations: tuple[str] | None,
+    customer_id: str | None,
     identifiers: click.Tuple([str, str]),
 ):
     """Set values on many families at the same time"""

@@ -2,7 +2,6 @@
 import logging
 import sys
 from pathlib import Path
-from typing import List, Optional
 
 import click
 import coloredlogs
@@ -10,6 +9,7 @@ from sqlalchemy.orm import scoped_session
 
 import cg
 from cg.cli.add import add as add_cmd
+from cg.cli.archive import archive
 from cg.cli.backup import backup
 from cg.cli.clean import clean
 from cg.cli.compress.base import compress, decompress
@@ -57,7 +57,7 @@ def teardown_session():
 def base(
     context: click.Context,
     config: click.Path,
-    database: Optional[str],
+    database: str | None,
     log_level: str,
     verbose: bool,
 ):
@@ -83,7 +83,7 @@ def base(
 @click.pass_obj
 def init(context: CGConfig, reset: bool, force: bool):
     """Setup the database."""
-    existing_tables: List[str] = get_tables()
+    existing_tables: list[str] = get_tables()
     if force or reset:
         if existing_tables and not force:
             message = f"Delete existing tables? [{', '.join(existing_tables)}]"
@@ -98,6 +98,7 @@ def init(context: CGConfig, reset: bool, force: bool):
 
 
 base.add_command(add_cmd)
+base.add_command(archive)
 base.add_command(backup)
 base.add_command(clean)
 base.add_command(compress)

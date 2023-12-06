@@ -4,7 +4,8 @@ from typing import Any
 from unittest import mock
 
 import pytest
-from housekeeper.store.models import File
+from click.testing import CliRunner
+from housekeeper.store.models import Bundle, File
 from requests import Response
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -22,7 +23,7 @@ from cg.meta.archive.ddn_dataflow import (
     TransferPayload,
 )
 from cg.meta.archive.models import FileAndSample
-from cg.models.cg_config import DataFlowConfig
+from cg.models.cg_config import CGConfig, DataFlowConfig
 from cg.store import Store
 from cg.store.models import Customer, Sample
 from tests.store_helpers import StoreHelpers
@@ -44,14 +45,14 @@ def ddn_dataflow_config(
 
 
 @pytest.fixture
-def ok_ddn_response(ok_response: Response):
-    ok_response._content = b'{"job_id": "123"}'
+def ok_miria_response(ok_response: Response):
+    ok_response._content = b'{"jobId": "123"}'
     return ok_response
 
 
 @pytest.fixture
-def ok_ddn_job_status_response(ok_response: Response):
-    ok_response._content = b'{"job_id": "123", "description": "Completed"}'
+def ok_miria_job_status_response(ok_response: Response):
+    ok_response._content = b'{"id": "123", "status": "Completed"}'
     return ok_response
 
 
@@ -61,7 +62,7 @@ def archive_request_json(
 ) -> dict:
     return {
         "osType": "Unix/MacOS",
-        "createFolder": False,
+        "createFolder": True,
         "pathInfo": [
             {
                 "destination": f"{remote_storage_repository}ADM1",
@@ -69,15 +70,7 @@ def archive_request_json(
             }
         ],
         "metadataList": [],
-    }
-
-
-@pytest.fixture
-def get_job_status_request_json(
-    remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
-) -> dict:
-    return {
-        "job_id": 123,
+        "settings": [],
     }
 
 
@@ -88,7 +81,7 @@ def retrieve_request_json(
     """Returns the body for a retrieval http post towards the DDN Miria API."""
     return {
         "osType": "Unix/MacOS",
-        "createFolder": False,
+        "createFolder": True,
         "pathInfo": [
             {
                 "destination": local_storage_repository
@@ -97,6 +90,7 @@ def retrieve_request_json(
             }
         ],
         "metadataList": [],
+        "settings": [],
     }
 
 
@@ -110,7 +104,7 @@ def header_with_test_auth_token() -> dict:
 
 
 @pytest.fixture
-def ddn_auth_token_response(ok_response: Response):
+def miria_auth_token_response(ok_response: Response):
     ok_response._content = b'{"access": "test_auth_token", "expire":15, "test_refresh_token":""}'
     return ok_response
 
@@ -305,3 +299,73 @@ def spring_archive_api(
         status_db=archive_store,
         data_flow_config=ddn_dataflow_config,
     )
+
+
+@pytest.fixture
+def cli_runner() -> CliRunner:
+    """Create a CliRunner"""
+    return CliRunner()
+
+
+@pytest.fixture
+def base_context(
+    base_store: Store, housekeeper_api: HousekeeperAPI, cg_config_object: CGConfig
+) -> CGConfig:
+    """context to use in CLI."""
+    cg_config_object.status_db_ = base_store
+    cg_config_object.housekeeper_api_ = housekeeper_api
+    return cg_config_object
+
+
+@pytest.fixture
+def archive_context(
+    base_context: CGConfig,
+    real_housekeeper_api: HousekeeperAPI,
+    path_to_spring_file_to_archive: str,
+    path_to_spring_file_with_ongoing_archival: str,
+    archival_job_id: int,
+    helpers: StoreHelpers,
+    ddn_dataflow_config: DataFlowConfig,
+) -> CGConfig:
+    base_context.housekeeper_api_ = real_housekeeper_api
+    base_context.data_flow = ddn_dataflow_config
+
+    customer = helpers.ensure_customer(
+        store=base_context.status_db, customer_id="miria_customer", customer_name="Miriam"
+    )
+    customer.data_archive_location = ArchiveLocations.KAROLINSKA_BUCKET
+
+    base_context.status_db.add_sample(
+        name="sample_with_spring_files",
+        sex="male",
+        internal_id="sample_with_spring_files",
+        **{"customer": "MiriaCustomer"},
+    )
+    helpers.add_sample(
+        store=base_context.status_db, customer_id="miria_customer", internal_id="miria_sample"
+    )
+    bundle: Bundle = real_housekeeper_api.create_new_bundle_and_version(name="miria_sample")
+    real_housekeeper_api.add_file(
+        path=path_to_spring_file_to_archive,
+        version_obj=bundle.versions[0],
+        tags=[SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET],
+    )
+    file: File = real_housekeeper_api.add_file(
+        path=path_to_spring_file_with_ongoing_archival,
+        version_obj=bundle.versions[0],
+        tags=[SequencingFileTag.SPRING],
+    )
+    file.id = 1234
+    real_housekeeper_api.add_archives(files=[file], archive_task_id=archival_job_id)
+
+    return base_context
+
+
+@pytest.fixture
+def path_to_spring_file_to_archive() -> str:
+    return "/home/path/to/spring/file.spring"
+
+
+@pytest.fixture
+def path_to_spring_file_with_ongoing_archival() -> str:
+    return "/home/path/to/ongoing/spring/file.spring"

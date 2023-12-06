@@ -1,7 +1,6 @@
 """Utility functions to simply add test data in a cg store."""
 import logging
 from datetime import datetime
-from typing import Optional
 
 from housekeeper.store.models import Bundle, Version
 
@@ -19,10 +18,10 @@ from cg.store.models import (
     ApplicationVersion,
     Bed,
     BedVersion,
-    Collaboration,
-    Customer,
     Case,
     CaseSample,
+    Collaboration,
+    Customer,
     Flowcell,
     Invoice,
     Organism,
@@ -227,7 +226,7 @@ class StoreHelpers:
     @staticmethod
     def ensure_bed_version(store: Store, bed_name: str = "dummy_bed") -> BedVersion:
         """Return existing or create and return bed version for tests."""
-        bed: Optional[Bed] = store.get_bed_by_name(bed_name)
+        bed: Bed | None = store.get_bed_by_name(bed_name)
         if not bed:
             bed: Bed = store.add_bed(name=bed_name)
             store.session.add(bed)
@@ -426,7 +425,7 @@ class StoreHelpers:
             )
 
         if not case_obj:
-            case_obj: Optional[Case] = store.get_case_by_internal_id(internal_id=name)
+            case_obj: Case | None = store.get_case_by_internal_id(internal_id=name)
         if not case_obj:
             case_obj = store.add_case(
                 data_analysis=data_analysis,
@@ -620,10 +619,10 @@ class StoreHelpers:
         samples: list[Sample] = None,
         status: str = None,
         date: datetime = datetime.now(),
-        has_backup: Optional[bool] = False,
+        has_backup: bool | None = False,
     ) -> Flowcell:
         """Utility function to add a flow cell to the store and return an object."""
-        flow_cell: Optional[Flowcell] = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
+        flow_cell: Flowcell | None = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
         if flow_cell:
             return flow_cell
         flow_cell: Flowcell = store.add_flow_cell(
@@ -663,7 +662,7 @@ class StoreHelpers:
     @staticmethod
     def add_synopsis_to_case(
         store: Store, case_id: str, synopsis: str = "a synopsis"
-    ) -> Optional[Case]:
+    ) -> Case | None:
         """Function for adding a synopsis to a case in the database."""
         case_obj: Case = store.get_case_by_internal_id(internal_id=case_id)
         if not case_obj:
@@ -676,7 +675,7 @@ class StoreHelpers:
     @staticmethod
     def add_phenotype_groups_to_sample(
         store: Store, sample_id: str, phenotype_groups: [str] = None
-    ) -> Optional[Sample]:
+    ) -> Sample | None:
         """Function for adding a phenotype group to a sample in the database."""
         if phenotype_groups is None:
             phenotype_groups = ["a phenotype group"]
@@ -691,7 +690,7 @@ class StoreHelpers:
     @staticmethod
     def add_phenotype_terms_to_sample(
         store: Store, sample_id: str, phenotype_terms: list[str] = []
-    ) -> Optional[Sample]:
+    ) -> Sample | None:
         """Function for adding a phenotype term to a sample in the database."""
         if not phenotype_terms:
             phenotype_terms: list[str] = ["a phenotype term"]
@@ -706,7 +705,7 @@ class StoreHelpers:
     @staticmethod
     def add_subject_id_to_sample(
         store: Store, sample_id: str, subject_id: str = "a subject_id"
-    ) -> Optional[Sample]:
+    ) -> Sample | None:
         """Function for adding a subject_id to a sample in the database."""
         sample_obj: Sample = store.get_sample_by_internal_id(internal_id=sample_id)
         if not sample_obj:
@@ -827,9 +826,9 @@ class StoreHelpers:
         invoice_id: int = 0,
         customer_id: str = "cust000",
         discount: int = 0,
-        pools: Optional[list[Pool]] = None,
-        samples: Optional[list[Sample]] = None,
-        invoiced_at: Optional[datetime] = None,
+        pools: list[Pool] | None = None,
+        samples: list[Sample] | None = None,
+        invoiced_at: datetime | None = None,
     ) -> Invoice:
         """Utility function to create an invoice with a costumer and samples or pools."""
         invoice = store.get_invoice_by_entry_id(entry_id=invoice_id)

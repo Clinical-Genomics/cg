@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Union
 
 from sqlalchemy.orm import Query
 
@@ -367,7 +366,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
     test_analysis: Analysis = helpers.add_analysis(base_store, pipeline=Pipeline.MIP_DNA)
 
     # Given an action set to None
-    test_analysis.case.action: Union[None, str] = None
+    test_analysis.case.action = None
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
     link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)
@@ -403,7 +402,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
     test_analysis: Analysis = helpers.add_analysis(base_store, pipeline=Pipeline.MIP_DNA)
 
     # Given an action set to None
-    test_analysis.case.action: Union[None, str] = None
+    test_analysis.case.action: str | None = None
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
     link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)

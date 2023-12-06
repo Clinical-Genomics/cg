@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 from pydantic import BaseModel, BeforeValidator
 from typing_extensions import Annotated
 
@@ -40,8 +38,8 @@ class ApplicationModel(BaseModel):
     details: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     limitations: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     pipeline_limitations: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    accredited: Optional[bool] = None
-    external: Optional[bool] = None
+    accredited: bool | None = None
+    external: bool | None = None
 
 
 class MethodsModel(BaseModel):
@@ -101,10 +99,5 @@ class SampleModel(BaseModel):
     tumour: Annotated[str, BeforeValidator(get_boolean_as_string)] = NA_FIELD
     application: ApplicationModel
     methods: MethodsModel
-    metadata: Union[
-        MipDNASampleMetadataModel,
-        BalsamicTargetedSampleMetadataModel,
-        BalsamicWGSSampleMetadataModel,
-        RnafusionSampleMetadataModel,
-    ]
+    metadata: MipDNASampleMetadataModel | BalsamicTargetedSampleMetadataModel | BalsamicWGSSampleMetadataModel | RnafusionSampleMetadataModel
     timestamps: TimestampModel
