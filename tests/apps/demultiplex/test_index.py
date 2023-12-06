@@ -8,19 +8,19 @@ from cg.apps.demultiplex.sample_sheet.index import (
     INDEX_TWO_PAD_SEQUENCE,
     LONG_INDEX_CYCLE_NR,
     Index,
-    get_hamming_distance_index_1,
-    get_hamming_distance_index_2,
+    get_hamming_distance_for_indexes,
     get_index_pair,
-    get_reagent_kit_version,
     get_reverse_complement_dna_seq,
     get_valid_indexes,
-    is_reverse_complement_needed,
     pad_and_reverse_complement_sample_indexes,
     update_barcode_mismatch_values_for_sample,
 )
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
+)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
+    SampleSheetCreatorBCLConvert,
 )
 from cg.models.demultiplex.run_parameters import RunParameters
 
@@ -35,32 +35,6 @@ def test_get_valid_indexes():
     # THEN assert that the indexes are correct
     assert indexes
     assert isinstance(indexes[0], Index)
-
-
-def test_get_reagent_kit_version_non_existent_reagent(caplog):
-    """Test that getting a non-existent reagent kit version fails."""
-    # GIVEN a non-existent reagent kit version
-    non_existent_reagent: str = "reagent_does_not_exist"
-
-    # WHEN getting the reagent kit version
-    with pytest.raises(SyntaxError):
-        get_reagent_kit_version(reagent_kit_version=non_existent_reagent)
-        # THEN an error is raised
-        assert caplog.text == f"Unknown reagent kit version {non_existent_reagent}"
-
-
-def test_get_reagent_kit_version_all_possible_versions():
-    """Test that get_reagent_kit_version works with the valid versions."""
-    # GIVEN the valid reagent kit versions
-    valid_versions: list[str] = ["1", "3"]
-    valid_outputs = []
-
-    # WHEN getting the reagent kit versions of the inputs
-    for version in valid_versions:
-        valid_outputs.append(get_reagent_kit_version(reagent_kit_version=version))
-
-    # THEN the output versions are valid
-    assert valid_outputs == ["1.0", "1.5"]
 
 
 def test_get_index_pair_valid_cases(
@@ -118,7 +92,6 @@ def test_update_barcode_mismatch_values_for_sample(
     update_barcode_mismatch_values_for_sample(
         sample_to_update=novaseq_x_flow_cell_sample_before_adapt_indexes,
         samples_to_compare_to=lims_novaseq_bcl_convert_samples,
-        is_reverse_complement=False,
     )
 
     # THEN the barcode mismatch values have been updated
@@ -126,7 +99,7 @@ def test_update_barcode_mismatch_values_for_sample(
     assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_2 == 0
 
 
-def test_update_barcode_mismatch_values_for_sample(
+def test_update_barcode_mismatch_values_for_sample_comparing_to_self(
     novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
 ):
     """Test that a sample does not compare to itself when adapting barcode mismatching values."""
@@ -141,7 +114,6 @@ def test_update_barcode_mismatch_values_for_sample(
     update_barcode_mismatch_values_for_sample(
         sample_to_update=novaseq_x_flow_cell_sample_before_adapt_indexes,
         samples_to_compare_to=samples,
-        is_reverse_complement=False,
     )
 
     # THEN the barcode mismatch values remains being 1 for all samples
@@ -151,12 +123,14 @@ def test_update_barcode_mismatch_values_for_sample(
 
 
 def test_pad_and_reverse_complement_sample_indexes_reverse_complement_padding(
+    bcl_convert_sample_sheet_creator: SampleSheetCreatorBCLConvert,
     novaseq_6000_run_parameters: RunParameters,
     novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleBcl2Fastq,
 ):
     """Test that adapting indexes for a sample that needs padding and reverse complement works."""
     # GIVEN a run parameters file that needs reverse complement of indexes
-    assert is_reverse_complement_needed(run_parameters=novaseq_6000_run_parameters)
+    bcl_convert_sample_sheet_creator.run_parameters = novaseq_6000_run_parameters
+    assert bcl_convert_sample_sheet_creator.index_settings.should_i5_be_reverse_complimented
     # GIVEN a sample that needs padding
     sample: FlowCellSampleBcl2Fastq = novaseq6000_flow_cell_sample_before_adapt_indexes
     assert novaseq_6000_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
@@ -166,11 +140,8 @@ def test_pad_and_reverse_complement_sample_indexes_reverse_complement_padding(
     pad_and_reverse_complement_sample_indexes(
         sample=sample,
         index_cycles=novaseq_6000_run_parameters.index_length,
-        is_reverse_complement=is_reverse_complement_needed(
-            run_parameters=novaseq_6000_run_parameters
-        ),
+        perform_reverse_complement=bcl_convert_sample_sheet_creator.index_settings.should_i5_be_reverse_complimented,
     )
-
     # THEN the first index was correctly adapted
     assert len(sample.index) == LONG_INDEX_CYCLE_NR
     assert sample.index[-2:] == INDEX_ONE_PAD_SEQUENCE
@@ -180,12 +151,14 @@ def test_pad_and_reverse_complement_sample_indexes_reverse_complement_padding(
 
 
 def test_pad_and_reverse_complement_sample_indexes_reverse_complement_no_padding(
+    bcl_convert_sample_sheet_creator: SampleSheetCreatorBCLConvert,
     novaseq_6000_run_parameters: RunParameters,
     novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleBcl2Fastq,
 ):
     """Test that adapting indexes of a sample that needs reverse complement but no padding works."""
     # GIVEN a run parameters file that needs reverse complement of indexes
-    assert is_reverse_complement_needed(run_parameters=novaseq_6000_run_parameters)
+    bcl_convert_sample_sheet_creator.run_parameters = novaseq_6000_run_parameters
+    assert bcl_convert_sample_sheet_creator.index_settings.should_i5_be_reverse_complimented
     # GIVEN a sample that does not need padding
     sample: FlowCellSampleBcl2Fastq = novaseq6000_flow_cell_sample_before_adapt_indexes
     assert novaseq_6000_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
@@ -198,9 +171,7 @@ def test_pad_and_reverse_complement_sample_indexes_reverse_complement_no_padding
     pad_and_reverse_complement_sample_indexes(
         sample=sample,
         index_cycles=novaseq_6000_run_parameters.index_length,
-        is_reverse_complement=is_reverse_complement_needed(
-            run_parameters=novaseq_6000_run_parameters
-        ),
+        perform_reverse_complement=bcl_convert_sample_sheet_creator.index_settings.should_i5_be_reverse_complimented,
     )
 
     # THEN the first index was correctly adapted
@@ -212,12 +183,19 @@ def test_pad_and_reverse_complement_sample_indexes_reverse_complement_no_padding
 
 
 def test_pad_and_reverse_complement_sample_indexes_no_reverse_complement_no_padding(
+    bcl_convert_sample_sheet_creator: SampleSheetCreatorBCLConvert,
     novaseq_x_run_parameters: RunParameters,
     novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
 ):
     """Test adapting indexes of a sample that does not need reverse complement nor padding works."""
+    # GIVEN that the sample sheet creator is for NovaSeqX
+    bcl_convert_sample_sheet_creator.run_parameters = novaseq_x_run_parameters
+    bcl_convert_sample_sheet_creator.index_settings = (
+        bcl_convert_sample_sheet_creator._get_index_settings()
+    )
     # GIVEN a run parameters file that does not need reverse complement of indexes
-    assert not is_reverse_complement_needed(run_parameters=novaseq_x_run_parameters)
+    assert not bcl_convert_sample_sheet_creator.index_settings.should_i5_be_reverse_complimented
+
     # GIVEN a sample that does not need padding
     sample: FlowCellSampleBCLConvert = novaseq_x_flow_cell_sample_before_adapt_indexes
     assert novaseq_x_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
@@ -230,12 +208,13 @@ def test_pad_and_reverse_complement_sample_indexes_no_reverse_complement_no_padd
     pad_and_reverse_complement_sample_indexes(
         sample=sample,
         index_cycles=novaseq_x_run_parameters.index_length,
-        is_reverse_complement=is_reverse_complement_needed(run_parameters=novaseq_x_run_parameters),
+        perform_reverse_complement=bcl_convert_sample_sheet_creator.index_settings.should_i5_be_reverse_complimented,
     )
 
     # THEN the first index was correctly adapted
     assert len(sample.index) == LONG_INDEX_CYCLE_NR
     assert sample.index == initial_index1
+
     # THEN the second index was correctly adapted
     assert len(sample.index2) == LONG_INDEX_CYCLE_NR
     assert sample.index2 == initial_index2
@@ -250,14 +229,14 @@ def test_get_hamming_distance_index_1_different_lengths():
     # WHEN getting the hamming distance between them in any order
 
     # THEN the distance is zero
-    assert get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_2) == 0
-    assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_1) == 0
+    assert get_hamming_distance_for_indexes(sequence_1=sequence_1, sequence_2=sequence_2) == 0
+    assert get_hamming_distance_for_indexes(sequence_1=sequence_2, sequence_2=sequence_1) == 0
 
     # WHEN getting the hamming distance between themselves
 
     # THEN the distance is zero
-    assert get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_1) == 0
-    assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_2) == 0
+    assert get_hamming_distance_for_indexes(sequence_1=sequence_1, sequence_2=sequence_1) == 0
+    assert get_hamming_distance_for_indexes(sequence_1=sequence_2, sequence_2=sequence_2) == 0
 
 
 def test_get_hamming_distance_index_1_different_prefixes():
@@ -270,107 +249,5 @@ def test_get_hamming_distance_index_1_different_prefixes():
     # WHEN getting the hamming distance between them in any order
 
     # THEN the distance is equal to the number of different characters
-    assert get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_2) == 2
-    assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_1) == 2
-
-
-def test_get_hamming_distance_index_2_different_lengths_no_reverse_complement():
-    """Test that hamming distance between indexes with same suffix but different lengths is zero."""
-    # GIVEN two index_2 sequences with the same suffixes but different lengths
-    sequence_1: str = "GATTACA"
-    sequence_2: str = "XXGATTACA"
-
-    # WHEN getting the hamming distance between them in any order
-
-    # THEN the distance is zero
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=False
-        )
-        == 0
-    )
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=False
-        )
-        == 0
-    )
-
-    # WHEN getting the hamming distance between themselves
-
-    # THEN the distance is zero
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_1, sequence_2=sequence_1, is_reverse_complement=False
-        )
-        == 0
-    )
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_2, sequence_2=sequence_2, is_reverse_complement=False
-        )
-        == 0
-    )
-
-
-def test_get_hamming_distance_index_2_different_lengths_reverse_complement():
-    """Test that hamming distance between indexes with same prefix is zero if reverse complement."""
-    # GIVEN two index_2 sequences with the same prefixes but different lengths
-    sequence_1: str = "GATTACA"
-    sequence_2: str = "GATTACAXX"
-
-    # WHEN getting the hamming distance between them in any order with reverse complement
-
-    # THEN the distance is zero
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=True
-        )
-        == 0
-    )
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=True
-        )
-        == 0
-    )
-
-    # WHEN getting the hamming distance between themselves
-
-    # THEN the distance is zero
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_1, sequence_2=sequence_1, is_reverse_complement=False
-        )
-        == 0
-    )
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_2, sequence_2=sequence_2, is_reverse_complement=False
-        )
-        == 0
-    )
-
-
-def test_get_hamming_distance_index_2_different_prefixes_no_reverse_complement():
-    """Test that hamming distance for index 2 counts different characters from the right."""
-    # GIVEN two index_2 sequences different lengths differing by two characters
-    # when aligned to the right
-    sequence_1: str = "XXACA"
-    sequence_2: str = "GATTACA"
-
-    # WHEN getting the hamming distance between them in any order
-
-    # THEN the distance is equal to the number of different characters
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=False
-        )
-        == 2
-    )
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=False
-        )
-        == 2
-    )
+    assert get_hamming_distance_for_indexes(sequence_1=sequence_1, sequence_2=sequence_2) == 2
+    assert get_hamming_distance_for_indexes(sequence_1=sequence_2, sequence_2=sequence_1) == 2

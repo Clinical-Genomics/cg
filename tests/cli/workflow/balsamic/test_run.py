@@ -85,7 +85,7 @@ def test_with_config(tmpdir_factory, cli_runner: CliRunner, balsamic_context: CG
 
 
 def test_run_analysis(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
-    """Test command with run-analysis option"""
+    """Test command with dry run option"""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
     case_id = "balsamic_case_wgs_single"
@@ -97,12 +97,10 @@ def test_run_analysis(cli_runner: CliRunner, balsamic_context: CGConfig, caplog)
     Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).touch(
         exist_ok=True
     )
-    # WHEN dry running with run analysis option specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run", "--run-analysis"], obj=balsamic_context)
+    # WHEN dry running
+    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
-    # THEN dry-print should include the option
-    assert "--run-analysis" in caplog.text
 
 
 def test_priority_custom(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):

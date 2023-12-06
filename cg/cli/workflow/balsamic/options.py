@@ -23,13 +23,6 @@ OPTION_PANEL_BED = click.option(
     help="Panel BED is determined based on capture kit \
     used for library prep. Set this option to override the default",
 )
-OPTION_RUN_ANALYSIS = click.option(
-    "-r",
-    "--run-analysis",
-    is_flag=True,
-    default=False,
-    help="Execute BALSAMIC in non-dry mode",
-)
 OPTION_QOS = click.option(
     "-qos",
     "--slurm-quality-of-service",
