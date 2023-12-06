@@ -234,7 +234,7 @@ class IndexSettings(BaseModel):
 
         Attributes:
             should_i5_be_reverse_complimented (bool): Whether the i5 index should be reverse complemented.
-            are_i5_override_cycles_reverse_complemented (bool): Whether the ovveride cycles for i5 should be written in as NXIX.
+            are_i5_override_cycles_reverse_complemented (bool): Whether the override cycles for i5 should be written in as NXIX.
 
     """
 
