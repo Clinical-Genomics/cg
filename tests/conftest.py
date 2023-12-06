@@ -2892,7 +2892,7 @@ def sequencing_platform() -> str:
 @pytest.fixture(scope="function")
 def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the raredisease apps dir."""
-    raredisease_dir = tmpdir_factory.mktemp("rnafusion")
+    raredisease_dir = tmpdir_factory.mktemp("raredisease")
     return Path(raredisease_dir).absolute().as_posix()
 
 

@@ -34,9 +34,3 @@ class MockMipAnalysis(MipAnalysisAPI):
             sample_ids=["2018-20203", "2018-20204"],
             sv_rank_model_version="1.08",
         )
-
-    @staticmethod
-    def get_aggregated_panels(customer_id, default_panels):
-        """Mock get_aggregated_panels."""
-        _ = customer_id, default_panels
-        return ""
