@@ -1,6 +1,8 @@
 """Tests for functions of DemultiplexAPI."""
 from pathlib import Path
 
+import pytest
+
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.housekeeper_storage_functions import (
@@ -91,3 +93,120 @@ def test_create_demultiplexing_output_dir_for_bcl_convert(
     # THEN the demultiplexing output directory should exist
     assert demux_dir.exists()
     assert not unaligned_dir.exists()
+
+
+def test_is_demultiplexing_possible_true(
+    demultiplexing_api: DemultiplexingAPI,
+    tmp_bcl_convert_flow_cell: FlowCellDirectoryData,
+):
+    """Test demultiplexing pre-check when all criteria are fulfilled."""
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=tmp_bcl_convert_flow_cell.path,
+        flow_cell_name=tmp_bcl_convert_flow_cell.id,
+        hk_api=demultiplexing_api.hk_api,
+    )
+    # GIVEN a flow cell with no missing file
+
+    # WHEN checking if demultiplexing is possible
+    result: bool = demultiplexing_api.is_demultiplexing_possible(
+        flow_cell=tmp_bcl_convert_flow_cell
+    )
+    # THEN the flow cell is ready for demultiplexing
+    assert result is True
+
+
+@pytest.mark.parametrize("missing_file", ["RTAComplete.txt", "CopyComplete.txt", "SampleSheet.csv"])
+def test_is_demultiplexing_possible_missing_files(
+    demultiplexing_api: DemultiplexingAPI,
+    missing_file: str,
+    tmp_bcl_convert_flow_cell: FlowCellDirectoryData,
+):
+    """Test demultiplexing pre-check when files are missing in flow cell directory."""
+    # GIVEN a flow cell with a samplesheet in Housekeeper
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=tmp_bcl_convert_flow_cell.path,
+        flow_cell_name=tmp_bcl_convert_flow_cell.id,
+        hk_api=demultiplexing_api.hk_api,
+    )
+
+    # GIVEN that all other demultiplexing criteria are fulfilled
+    assert (
+        demultiplexing_api.is_demultiplexing_possible(flow_cell=tmp_bcl_convert_flow_cell) is True
+    )
+
+    # GIVEN a flow cell with a missing file
+    Path(tmp_bcl_convert_flow_cell.path, missing_file).unlink()
+
+    # WHEN checking if demultiplexing is possible
+    result: bool = demultiplexing_api.is_demultiplexing_possible(
+        flow_cell=tmp_bcl_convert_flow_cell
+    )
+    # THEN the flow cell should not be deemed ready for demultiplexing
+    assert result is False
+
+
+def is_demultiplexing_possible_no_sample_sheet_in_hk(
+    demultiplexing_api: DemultiplexingAPI,
+    tmp_bcl_convert_flow_cell: FlowCellDirectoryData,
+):
+    """Test demultiplexing pre-check when no samplesheet exists in housekeeper."""
+    # GIVEN a flow cell with no sample sheet in Housekeeper
+    assert (
+        demultiplexing_api.is_sample_sheet_in_housekeeper(flow_cell_id=tmp_bcl_convert_flow_cell.id)
+        is False
+    )
+
+    # WHEN checking if demultiplexing is possible
+    result: bool = demultiplexing_api.is_demultiplexing_possible(
+        flow_cell=tmp_bcl_convert_flow_cell
+    )
+    # THEN the flow cell should not be deemed ready for demultiplexing
+    assert result is False
+
+
+def test_is_demultiplexing_possible_already_started(
+    demultiplexing_api: DemultiplexingAPI,
+    tmp_bcl_convert_flow_cell: FlowCellDirectoryData,
+):
+    """Test demultiplexing pre-check demultiplexing has already started."""
+    # GIVEN a flow cell with a sample sheet in Housekeeper
+    add_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=tmp_bcl_convert_flow_cell.path,
+        flow_cell_name=tmp_bcl_convert_flow_cell.id,
+        hk_api=demultiplexing_api.hk_api,
+    )
+    # GIVEN that all other demultiplexing criteria are fulfilled
+    assert (
+        demultiplexing_api.is_demultiplexing_possible(flow_cell=tmp_bcl_convert_flow_cell) is True
+    )
+
+    # GIVEN a flow cell where demultiplexing has already started
+    Path(tmp_bcl_convert_flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).touch()
+
+    # WHEN checking if demultiplexing is possible
+    result: bool = demultiplexing_api.is_demultiplexing_possible(
+        flow_cell=tmp_bcl_convert_flow_cell
+    )
+    # THEN the flow cell should not be deemed ready for demultiplexing
+    assert result is False
+
+
+def test_remove_demultiplexing_output_directory(
+    demultiplexing_api: DemultiplexingAPI,
+    tmp_path: Path,
+    bcl_convert_flow_cell: FlowCellDirectoryData,
+):
+    """Test that the demultiplexing output directory is removed."""
+    # GIVEN a flow cell with a demultiplexing output directory
+    demultiplexing_api.demultiplexed_runs_dir = tmp_path
+    demultiplexing_api.create_demultiplexing_output_dir(
+        flow_cell=bcl_convert_flow_cell,
+        demux_dir=Path(tmp_path, bcl_convert_flow_cell.full_name),
+        unaligned_dir=None,
+    )
+    assert demultiplexing_api.flow_cell_out_dir_path(bcl_convert_flow_cell).exists()
+
+    # WHEN removing the demultiplexing output directory
+    demultiplexing_api.remove_demultiplexing_output_directory(flow_cell=bcl_convert_flow_cell)
+
+    assert not demultiplexing_api.flow_cell_out_dir_path(bcl_convert_flow_cell).exists()
