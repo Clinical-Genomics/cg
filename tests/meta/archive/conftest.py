@@ -328,7 +328,7 @@ def archive_context(
     ddn_dataflow_config: DataFlowConfig,
 ) -> CGConfig:
     base_context.housekeeper_api_ = real_housekeeper_api
-    base_context.data_flow_config = ddn_dataflow_config
+    base_context.data_flow = ddn_dataflow_config
 
     customer = helpers.ensure_customer(
         store=base_context.status_db, customer_id="miria_customer", customer_name="Miriam"
@@ -348,7 +348,7 @@ def archive_context(
     real_housekeeper_api.add_file(
         path=path_to_spring_file_to_archive,
         version_obj=bundle.versions[0],
-        tags=[SequencingFileTag.SPRING],
+        tags=[SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET],
     )
     file: File = real_housekeeper_api.add_file(
         path=path_to_spring_file_with_ongoing_archival,
