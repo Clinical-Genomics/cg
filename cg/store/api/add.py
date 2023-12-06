@@ -35,6 +35,7 @@ class AddHandler(BaseHandler):
     """Methods related to adding new data to the store."""
 
     def generate_readable_sample_id(self) -> str:
+        """Generates a petname as sample internal id for development purposes. Not used in normal production flow."""
         while True:
             random_id: str = petname.Generate(3, separator="")
             if not self.get_sample_by_internal_id(random_id):
