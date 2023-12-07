@@ -23,7 +23,7 @@ def raredisease(context: click.Context) -> None:
     )
 
 
-@click.command()
+@raredisease.command("panel")
 @OPTION_DRY
 @ARGUMENT_CASE_ID
 @click.pass_obj
