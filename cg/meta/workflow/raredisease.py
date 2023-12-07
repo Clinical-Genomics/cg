@@ -22,6 +22,17 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         pipeline: Pipeline = Pipeline.RAREDISEASE,
     ):
         super().__init__(config=config, pipeline=pipeline)
+        self.root_dir: str = config.rnafusion.root
+        self.nfcore_pipeline_path: str = config.rnafusion.pipeline_path
+        self.references: str = config.rnafusion.references
+        self.profile: str = config.rnafusion.profile
+        self.conda_env: str = config.rnafusion.conda_env
+        self.conda_binary: str = config.rnafusion.conda_binary
+        self.tower_binary_path: str = config.rnafusion.tower_binary_path
+        self.tower_pipeline: str = config.rnafusion.tower_pipeline
+        self.account: str = config.rnafusion.slurm.account
+        self.compute_env: str = config.rnafusion.compute_env
+        self.revision: str = config.rnafusion.revision
 
     def config_case(
         self,
@@ -46,7 +57,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self, sample: Sample, case: Case = ""
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
-        sample_name: str = sample.name
         sample_metadata: list[str] = self.gather_file_metadata_for_sample(sample)
         lane: str = "get lane info from somewhere"
         fastq_forward_read_paths: list[str] = self.extract_read_files(
@@ -55,19 +65,15 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         fastq_reverse_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, reverse_read=True
         )
-        sex: str = sample.sex
-        phenotype: str = "get from sample/case links: status"
-        paternal_id: str = "get from relationships"
-        maternal_id: str = "get from relationships"
         sample_sheet_entry = RarediseaseSampleSheetEntry(
-            name=sample_name,
-            lane=lane,
+            name=sample.id,
+            lane="1",
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
-            sex=sex,
-            phenotype=phenotype,
-            paternal_id=paternal_id,
-            maternal_id=maternal_id,
+            sex=sample.sex,
+            phenotype=sample.status,
+            paternal_id=sample.father,
+            maternal_id=sample.mother,
             case_id=case,
         )
         return sample_sheet_entry.reformat_sample_content()
@@ -79,8 +85,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Write sample sheet for Raredisease analysis in case folder."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_sheet_content = []
-        LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
         LOG.debug("Getting sample sheet information")
+        LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
         for link in case.links:
             sample_sheet_content.extend(
                 self.get_sample_sheet_content_per_sample(sample=link.sample, case=case)
