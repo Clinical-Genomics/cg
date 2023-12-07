@@ -8,8 +8,6 @@ from cg.constants.compression import (
 from cg.constants.constants import (
     CAPTUREKIT_CANCER_OPTIONS,
     CAPTUREKIT_OPTIONS,
-    COLLABORATORS,
-    COMBOS,
     CONTAINER_OPTIONS,
     DEFAULT_CAPTURE_KIT,
     PREP_CATEGORIES,
