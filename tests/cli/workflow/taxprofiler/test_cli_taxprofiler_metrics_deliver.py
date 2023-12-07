@@ -1,4 +1,4 @@
-"""Tests for the metrics-deliver cli command."""
+"""Tests for the metrics-deliver CLI command."""
 
 import logging
 
