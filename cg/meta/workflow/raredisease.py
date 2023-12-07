@@ -7,7 +7,7 @@ from cg.constants import Pipeline
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.raredisease.raredisease import RarediseaseSampleSheetEntry, RarediseaseParameters
-from cg.store.models import Case, Sample
+from cg.store.models import Case, Sample, CaseSample
 
 LOG = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
     def get_sample_sheet_content_per_sample(
-        self, sample: Sample, case: Case = ""
+        self, sample: Sample, case: Case = "", case_sample: CaseSample = ""
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
         sample_metadata: list[str] = self.gather_file_metadata_for_sample(sample)
@@ -71,9 +71,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
             sex=sample.sex,
-            phenotype=sample.status,
-            paternal_id=sample.father,
-            maternal_id=sample.mother,
+            phenotype=case_sample.status,
+            paternal_id=case_sample.father,
+            maternal_id=case_sample.mother,
             case_id=case,
         )
         return sample_sheet_entry.reformat_sample_content()
