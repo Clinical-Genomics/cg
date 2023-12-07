@@ -8,6 +8,15 @@ from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
     """Raredisease sample model is used when building the sample sheet."""
 
+    name: str
+    fastq_forward_read_paths: list[str]
+    fastq_reverse_read_paths: list[str]
+    sex: str
+    phenotype: int
+    sex: int
+    paternal_id: str
+    maternal_id: str
+    case_id: str
 
     @staticmethod
     def headers() -> list[str]:
@@ -30,18 +39,19 @@ class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
             [
                 self.name,
                 lane,
-                fastq_forward_read_path,
-                fastq_reverse_read_path,
+                self.fastq_forward_read_paths,
+                self.fastq_reverse_read_paths,
                 self.sex,
                 self.phenotype,
                 self.paternal_id,
                 self.maternal_id,
                 self.case_id,
             ]
-            for lane, (fastq_forward_read_path, fastq_reverse_read_path) in enumerate(zip(
+            for lane, (self.fastq_forward_read_paths, self.fastq_reverse_read_paths) in enumerate(zip(
                 self.fastq_forward_read_paths, self.fastq_reverse_read_paths
             ))
         ]
+
 
 class RarediseaseParameters(PipelineParameters):
     """Model for Raredisease parameters."""
