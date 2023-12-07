@@ -130,7 +130,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def get_multiqc_per_sample(
         self, case_id: str, sample: Sample, pipeline_metrics: Optional[dict] = None
     ) -> list[MetricsBase]:
-        """Get MultiQC values per sample."""
+        """Return MultiQC values per sample."""
         sample_name: str = sample.name
         multiqc_json: MultiqcDataJson = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
