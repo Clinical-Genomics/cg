@@ -72,17 +72,20 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         print(case_sample.status)
         print(case_sample.father)
         print(case_sample.mother)
-        print(case)
+        print(case.internal_id)
+
+        # get_phenotype
+
         sample_sheet_entry = RarediseaseSampleSheetEntry(
             name=case_sample.sample.internal_id,
             lane="1",
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
-            sex=case_sample.sample.sex,
-            phenotype=case_sample.status,
-            paternal_id=case_sample.father,
-            maternal_id=case_sample.mother,
-            case_id=case.id,
+            sex=self.get_sex_code(case_sample.sample.sex),
+            phenotype=self.get_phenotype_code(case_sample.status),
+            paternal_id=self.get_parental_code(case_sample.father),
+            maternal_id=self.get_parental_code(case_sample.mother),
+            case_id=case.internal_id,
         )
         return sample_sheet_entry.reformat_sample_content()
 
@@ -125,3 +128,33 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             outdir=self.get_case_path(case_id=case_id),
             priority=self.account,
         )
+
+    def get_phenotype_code(self, phenotype: str) -> int:
+        """Return Raredisease phenotype code."""
+        LOG.debug("Translate phenotype to int")
+        if phenotype == "unaffected":
+            return 1
+        elif phenotype == "affected":
+            return 2
+        else:
+            return 0
+
+    def get_sex_code(self, sex: str) -> int:
+        """Return Raredisease phenotype code."""
+        LOG.debug("Translate phenotype to int")
+        if sex == "male":
+            return 1
+        elif sex == "female":
+            return 2
+        else:
+            return 0
+
+    def get_parental_code(self, parent: str) -> int:
+        """Return Raredisease phenotype code."""
+        LOG.debug("Translate phenotype to int")
+        if parent:
+            return parent
+        else:
+            return ""
+
+
