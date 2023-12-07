@@ -69,6 +69,20 @@ class ScoutAPI:
 
         return list(self.process.stdout_lines())
 
+    def export_managed_variants(self, genome_build: str = GENOME_BUILD_37) -> list[str]:
+        """Export a list of managed variants."""
+        export_command = ["export", "managed"]
+        if genome_build:
+            export_command.extend(["--build", genome_build])
+        try:
+            self.process.run_command(export_command)
+            if not self.process.stdout:
+                return []
+        except CalledProcessError:
+            LOG.info("Could not export managed variants")
+            return []
+        return list(self.process.stdout_lines())
+
     def get_genes(self, panel_id: str, build: str = None) -> list[dict]:
         """Return panel genes."""
         export_panel_command = ["export", "panel", panel_id]

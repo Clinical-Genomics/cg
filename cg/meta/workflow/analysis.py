@@ -516,3 +516,7 @@ class AnalysisAPI(MetaAPI):
             customer_id=case.customer.internal_id, default_panels=set(case.panels)
         )
         return self.scout_api.export_panels(build=genome_build, panels=all_panels)
+
+    def _get_managed_variants(self, genome_build: str) -> list[str]:
+        """Create and return the managed variants."""
+        return self.scout_api.export_managed_variants(genome_build=genome_build)

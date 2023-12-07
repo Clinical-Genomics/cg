@@ -39,3 +39,21 @@ def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
             click.echo(bed_line)
         return
     analysis_api.write_panel(case_id=case_id, content=bed_lines)
+
+
+@raredisease.command("managed-variants")
+@OPTION_DRY
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def managed_variants(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Write managed variants file exported from Scout."""
+
+    analysis_api: RarediseaseAnalysisAPI = context.meta_apis["analysis_api"]
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
+
+    vcf_lines: list[str] = analysis_api.get_managed_variants()
+    if dry_run:
+        for vcf_line in vcf_lines:
+            click.echo(vcf_line)
+        return
+    analysis_api.write_managed_variants(case_id=case_id, content=vcf_lines)
