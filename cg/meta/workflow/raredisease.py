@@ -70,8 +70,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         print(case_sample.sample.internal_id)
         print(sample.sex)
         print(case_sample.status)
-        print(sample.father_links.internal_id)
-        print(sample.mother_links.internal_id)
+        print(sample.father_links)
+        print(sample.mother_links)
         print(case.internal_id)
 
         # get_phenotype
@@ -83,8 +83,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             fastq_reverse_read_paths=fastq_reverse_read_paths,
             sex=self.get_sex_code(sample.sex),
             phenotype=self.get_phenotype_code(case_sample.status),
-            paternal_id=self.get_parental_code(sample.father_links.internal_id),
-            maternal_id=self.get_parental_code(sample.mother_links.internal_id),
+            paternal_id=self.get_parental_code(sample.father_links),
+            maternal_id=self.get_parental_code(sample.mother_links),
             case_id=case.internal_id,
         )
         return sample_sheet_entry.reformat_sample_content()
