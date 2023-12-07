@@ -86,7 +86,7 @@ class DemuxPostProcessingAPI:
             LOG.warning(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
             return
 
-        self.delete_flow_cell_data(flow_cell)
+        self.delete_flow_cell_data(flow_cell.id)
 
         try:
             self.store_flow_cell_data(flow_cell)
@@ -132,8 +132,8 @@ class DemuxPostProcessingAPI:
                 demultiplex_flow_cells.append(flow_cell_dir)
         return demultiplex_flow_cells
 
-    def delete_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
+    def delete_flow_cell_data(self, flow_cell_id: str) -> None:
         """Delete flow cell data from status db and housekeeper."""
-        delete_sequencing_metrics_from_statusdb(parsed_flow_cell.id, self.status_db)
-        delete_sequencing_data_from_housekeeper(parsed_flow_cell.id, self.hk_api)
-        delete_sequencing_logs_from_housekeeper(parsed_flow_cell.id, self.hk_api)
+        delete_sequencing_metrics_from_statusdb(flow_cell_id=flow_cell_id, store=self.status_db)
+        delete_sequencing_data_from_housekeeper(flow_cell_id=flow_cell_id, hk_api=self.hk_api)
+        delete_sequencing_logs_from_housekeeper(flow_cell_id=flow_cell_id, hk_api=self.hk_api)

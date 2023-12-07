@@ -111,7 +111,7 @@ def test_delete_sequencing_metrics_from_statusdb_existing_metrics(
     assert metrics
 
     # WHEN deleting sequencing metrics from statusdb
-    delete_sequencing_metrics_from_statusdb(flow_cell=flow_cell_name, store=store)
+    delete_sequencing_metrics_from_statusdb(flow_cell_id=flow_cell_name, store=store)
 
     # THEN the sequencing metrics should be deleted from statusdb
     assert not store.get_sample_lane_sequencing_metrics_by_flow_cell_name(
@@ -134,7 +134,7 @@ def test_delete_sequencing_metrics_from_statusdb_no_metrics(
     assert not metrics
 
     # WHEN deleting sequencing metrics from statusdb
-    delete_sequencing_metrics_from_statusdb(flow_cell=flow_cell.name, store=store)
+    delete_sequencing_metrics_from_statusdb(flow_cell_id=flow_cell.name, store=store)
 
     # THEN no errors should be raised
 

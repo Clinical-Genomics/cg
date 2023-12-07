@@ -257,7 +257,7 @@ def test_delete_sequencing_data_from_housekeeper(
 
     # WHEN deleting the sequencing data from housekeeper
     delete_sequencing_data_from_housekeeper(
-        flow_cell=flow_cell_name, hk_api=populated_housekeeper_api
+        flow_cell_id=flow_cell_name, hk_api=populated_housekeeper_api
     )
 
     # THEN the sequencing data is deleted from housekeeper
@@ -291,7 +291,9 @@ def test_delete_sequencing_data_from_housekeeper_two_flow_cells(
     )
 
     # WHEN deleting the sequencing data of one flow cell from housekeeper
-    delete_sequencing_data_from_housekeeper(flow_cell=flow_cell_name, hk_api=real_housekeeper_api)
+    delete_sequencing_data_from_housekeeper(
+        flow_cell_id=flow_cell_name, hk_api=real_housekeeper_api
+    )
 
     # THEN the sequencing data the first flow cell is deleted from housekeeper
     assert not real_housekeeper_api.files(bundle=sample_id, tags={flow_cell_name}).all()
@@ -315,7 +317,9 @@ def test_delete_sequencing_logs_from_housekeeper(
     ),
 
     # WHEN deleting the sequencing logs from housekeeper
-    delete_sequencing_logs_from_housekeeper(flow_cell=flow_cell_name, hk_api=real_housekeeper_api)
+    delete_sequencing_logs_from_housekeeper(
+        flow_cell_id=flow_cell_name, hk_api=real_housekeeper_api
+    )
 
     # THEN the sequencing logs are deleted from housekeeper
     assert not real_housekeeper_api.files(

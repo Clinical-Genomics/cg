@@ -160,7 +160,9 @@ def update_sample_sequencing_date(sample: Sample, sequenced_at: datetime) -> Non
         sample.last_sequenced_at = sequenced_at
 
 
-def delete_sequencing_metrics_from_statusdb(flow_cell: str, store: Store) -> None:
-    sequencing_metrics = store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell)
+def delete_sequencing_metrics_from_statusdb(flow_cell_id: str, store: Store) -> None:
+    sequencing_metrics: list[
+        SampleLaneSequencingMetrics
+    ] = store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_id)
     for metric in sequencing_metrics:
         store.session.delete(metric)

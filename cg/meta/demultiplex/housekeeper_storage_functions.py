@@ -175,11 +175,12 @@ def add_sample_sheet_path_to_housekeeper(
         )
 
 
-def delete_sequencing_data_from_housekeeper(flow_cell: str, hk_api: HousekeeperAPI) -> None:
+def delete_sequencing_data_from_housekeeper(flow_cell_id: str, hk_api: HousekeeperAPI) -> None:
+    """Delete FASTQ, SPRING and metadata files associated with a flow cell from Housekeeper."""
     tag_combinations: list[set[str]] = [
-        {SequencingFileTag.FASTQ, flow_cell},
-        {SequencingFileTag.SPRING, flow_cell},
-        {SequencingFileTag.SPRING_METADATA, flow_cell},
+        {SequencingFileTag.FASTQ, flow_cell_id},
+        {SequencingFileTag.SPRING, flow_cell_id},
+        {SequencingFileTag.SPRING_METADATA, flow_cell_id},
     ]
     for tags in tag_combinations:
         housekeeper_files: Iterable[File] = hk_api.files(tags=tags)
@@ -187,9 +188,9 @@ def delete_sequencing_data_from_housekeeper(flow_cell: str, hk_api: HousekeeperA
             hk_api.delete_file(file_id=housekeeper_file.id)
 
 
-def delete_sequencing_logs_from_housekeeper(flow_cell: str, hk_api: HousekeeperAPI) -> None:
+def delete_sequencing_logs_from_housekeeper(flow_cell_id: str, hk_api: HousekeeperAPI) -> None:
     housekeeper_files: Iterable[File] = hk_api.files(
-        bundle=flow_cell, tags={SequencingFileTag.DEMUX_LOG, flow_cell}
+        bundle=flow_cell_id, tags={SequencingFileTag.DEMUX_LOG, flow_cell_id}
     )
     for housekeeper_file in housekeeper_files:
         hk_api.delete_file(file_id=housekeeper_file.id)

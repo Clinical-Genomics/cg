@@ -62,7 +62,9 @@ class StoreHelpers:
         return _bundle
 
     @staticmethod
-    def format_hk_bundle_dict(bundle_name, files: list[Path], all_tags: list[list[str]]) -> dict:
+    def format_hk_bundle_dict(
+        bundle_name: str, files: list[Path], all_tags: list[list[str]]
+    ) -> dict:
         """Creates the dict representation for a housekeeper bundle with necessary values set."""
         return {
             "name": bundle_name,
@@ -80,9 +82,17 @@ class StoreHelpers:
 
     @staticmethod
     def quick_hk_bundle(
-        bundle_name, files: list[Path], store: HousekeeperAPI, tags: list[list[str]]
+        bundle_name: str, files: list[Path], store: HousekeeperAPI, tags: list[list[str]]
     ):
-        """Adds a bundle to housekeeper with the given files and tags."""
+        """Adds a bundle to housekeeper with the given files and tags. Returns the new bundle.
+
+        Arguments:
+            bundle_name = The name of the bundle to be created.
+            files = A list of files to be added to the bundle.
+            store = The database instance where the bundle should be added.
+            tags = A list where each entry is the set of tags for the corresponding file.
+                   The length of this list should be the same as the length of the files list.
+        """
         bundle_data: dict = StoreHelpers.format_hk_bundle_dict(
             bundle_name=bundle_name, files=files, all_tags=tags
         )
