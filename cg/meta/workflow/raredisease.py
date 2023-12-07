@@ -68,7 +68,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         )
         print(fastq_forward_read_paths)
         sample_sheet_entry = RarediseaseSampleSheetEntry(
-            name=sample.id,
+            name=case_sample.sample.id,
             lane="1",
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
@@ -101,7 +101,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_sheet_content = []
         LOG.debug("Getting sample sheet information")
-        LOG.info(f"Samples linked to case {case_id}: {len(case_id.links)}")
+        LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
                 # links: list[CaseSample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
 
         for link in case.links:
