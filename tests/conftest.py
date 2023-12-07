@@ -3361,7 +3361,7 @@ def taxprofiler_mock_analysis_finish(
     taxprofiler_multiqc_json_metrics: dict,
     tower_id: int,
 ) -> None:
-    """Create analysis_finish file for testing."""
+    """Create analysis finish file for testing."""
     Path.mkdir(
         Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info"), parents=True, exist_ok=True
     )
