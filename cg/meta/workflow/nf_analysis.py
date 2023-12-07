@@ -2,13 +2,11 @@ import logging
 import operator
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Union
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
 from cg.constants.nextflow import NFX_WORK_DIR
-from cg.exc import CgError
-from cg.io.controller import WriteFile
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
@@ -298,7 +296,7 @@ class NfAnalysisAPI(AnalysisAPI):
         return Path(self.root_dir, case_id, "multiqc", "multiqc_data", "multiqc_data.json")
 
     def get_multiqc_json_metrics(
-        self, case_id: str, pipeline_metrics: Optional[dict] = None
+        self, case_id: str, pipeline_metrics: Union[dict,None] = None
     ) -> list[MetricsBase]:
         """Get a multiqc_data.json file and returns metrics and values formatted."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
