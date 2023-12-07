@@ -154,7 +154,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             )
             for metric_name, metric_value in metrics_values.items()
         ]
-
         return metrics_list
 
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
