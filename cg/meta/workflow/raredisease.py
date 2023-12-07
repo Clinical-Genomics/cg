@@ -74,8 +74,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         print(sample.mother_links)
         print(case.internal_id)
 
-        # get_phenotype
-
         sample_sheet_entry = RarediseaseSampleSheetEntry(
             name=case_sample.sample.internal_id,
             lane="1",
@@ -83,24 +81,11 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             fastq_reverse_read_paths=fastq_reverse_read_paths,
             sex=self.get_sex_code(sample.sex),
             phenotype=self.get_phenotype_code(case_sample.status),
-            paternal_id=self.get_parental_code(sample.father_links),
-            maternal_id=self.get_parental_code(sample.mother_links),
+            paternal_id=self.get_parental_code(case_sample.father.internal_id),
+            maternal_id=self.get_parental_code(case_sample.mother.internal_id),
             case_id=case.internal_id,
         )
         return sample_sheet_entry.reformat_sample_content()
-
-    # @staticmethod
-    # def get_sample_data(link_obj: CaseSample) -> dict[str, str | int]:
-    #     """Return sample specific data."""
-    #     return {
-    #         "sample_id": link_obj.sample.internal_id,
-    #         "sample_display_name": link_obj.sample.name,
-    #         "analysis_type": link_obj.sample.application_version.application.analysis_type,
-    #         "sex": link_obj.sample.sex,
-    #         "phenotype": link_obj.status,
-    #         "expected_coverage": link_obj.sample.application_version.application.min_sequencing_depth,
-    #     }
-
 
     def get_sample_sheet_content(
         self,
@@ -111,8 +96,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         sample_sheet_content = []
         LOG.debug("Getting sample sheet information")
         LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
-                # links: list[CaseSample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
-
         for link in case.links:
             sample_sheet_content.extend(
                 self.get_sample_sheet_content_per_sample(sample=link.sample, case=case, case_sample=link)
