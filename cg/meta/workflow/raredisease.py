@@ -72,7 +72,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         print(case_sample.status)
         print(case_sample.father)
         print(case_sample.mother)
-        print(case_sample.mother_id)
+        # print(case_sample.mother_id)
         # print(sample.mother)
 
         # print(case.internal_id)
@@ -140,8 +140,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return Raredisease phenotype code."""
         LOG.debug("Translate phenotype to int")
         if parent:
-            parent_sample: Sample = self.status_db.get_sample_by_name(name=parent)
-            return(parent_sample.internal_id)
+            # parent_sample: Sample = self.status_db.get_case_by_internal_id(name=parent)
+            return(parent.split(" ")[0])
         else:
             return ""
 
