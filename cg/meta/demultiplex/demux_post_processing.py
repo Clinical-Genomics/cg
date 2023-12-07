@@ -133,6 +133,7 @@ class DemuxPostProcessingAPI:
         return demultiplex_flow_cells
 
     def delete_flow_cell_data(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
+        """Delete flow cell data from status db and housekeeper."""
         delete_sequencing_metrics_from_statusdb(parsed_flow_cell.id, self.status_db)
         delete_sequencing_data_from_housekeeper(parsed_flow_cell.id, self.hk_api)
         delete_sequencing_logs_from_housekeeper(parsed_flow_cell.id, self.hk_api)
