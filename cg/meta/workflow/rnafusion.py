@@ -187,7 +187,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Parse Rnafusion output analysis files and return analysis model."""
         sample_metrics: dict[str, dict] = {}
         for metric in qc_metrics_raw:
-            metric.name = metric.name.replace("5_3_bias", "bias_5_3")
             try:
                 sample_metrics[metric.id].update({metric.name.lower(): metric.value})
             except KeyError:

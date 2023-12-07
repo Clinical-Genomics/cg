@@ -153,20 +153,21 @@ RNAFUSION_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"fusion", "arriba"},
     {"fusion", "star-fusion"},
     {"fusion", "fusioncatcher"},
-    {"cram"},
     {"fusioncatcher-summary"},
     {"fusioninspector"},
     {"fusionreport", "research"},
     {"fusioninspector-html", "research"},
     {"arriba-visualisation", "research"},
     {"multiqc-html", "rna"},
-    {"software-versions"},
-    {"qc-metrics"},
-    {"multiqc-json"},
     {"delivery-report"},
+    {"vcf-fusion"},
+    {"gene-counts"},
 ]
 
-RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
+RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
+    {"cram"},
+    {"cram-index"},
+]
 
 
 PIPELINE_ANALYSIS_TAG_MAP: dict[Pipeline, dict] = {
