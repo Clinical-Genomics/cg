@@ -43,8 +43,6 @@ class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
             ))
         ]
 
-    def get_lane_number(self, fastq_forward_read_path):
-
 class RarediseaseParameters(PipelineParameters):
     """Model for Raredisease parameters."""
 
