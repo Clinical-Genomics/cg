@@ -98,14 +98,15 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         case_id: str,
     ) -> list[list[Any]]:
         """Write sample sheet for Raredisease analysis in case folder."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_sheet_content = []
         LOG.debug("Getting sample sheet information")
-        LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
+        LOG.info(f"Samples linked to case {case_id}: {len(case_id.links)}")
                 # links: list[CaseSample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
 
         for link in case.links:
             sample_sheet_content.extend(
-                self.get_sample_sheet_content_per_sample(case=case_id, case_sample=link)
+                self.get_sample_sheet_content_per_sample(case=case, case_sample=link)
             )
         return sample_sheet_content
 
