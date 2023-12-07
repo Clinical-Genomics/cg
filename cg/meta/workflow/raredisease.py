@@ -136,12 +136,11 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         else:
             return 0
 
-    def get_parental_id(self, parent: str) -> int:
+    def get_parental_id(self, parent: CaseSample) -> str:
         """Return Raredisease phenotype code."""
         LOG.debug("Translate phenotype to int")
         if parent:
-            # parent_sample: Sample = self.status_db.get_case_by_internal_id(name=parent)
-            return(parent.split(" ")[0])
+            return(parent.internal_id)
         else:
             return ""
 
