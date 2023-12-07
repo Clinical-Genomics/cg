@@ -67,14 +67,14 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             metadata=sample_metadata, reverse_read=True
         )
         print(fastq_forward_read_paths)
-        print(case_sample.sample.id)
+        print(case_sample.sample.internal_id)
         print(case_sample.sample.sex)
         print(case_sample.status)
         print(case_sample.father)
         print(case_sample.mother)
         print(case)
         sample_sheet_entry = RarediseaseSampleSheetEntry(
-            name=case_sample.sample.id,
+            name=case_sample.sample.internal_id,
             lane="1",
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
@@ -82,7 +82,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             phenotype=case_sample.status,
             paternal_id=case_sample.father,
             maternal_id=case_sample.mother,
-            case_id=case,
+            case_id=case.id,
         )
         return sample_sheet_entry.reformat_sample_content()
 
