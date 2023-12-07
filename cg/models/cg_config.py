@@ -147,6 +147,21 @@ class MipConfig(BaseModel):
     script: str
 
 
+class RarediseaseConfig(CommonAppConfig):
+    compute_env: str
+    conda_binary: str | None = None
+    conda_env: str
+    launch_directory: str
+    pipeline_path: str
+    profile: str
+    references: str
+    revision: str
+    root: str
+    slurm: SlurmConfig
+    tower_binary_path: str
+    tower_pipeline: str
+
+
 class RnafusionConfig(CommonAppConfig):
     root: str
     references: str
@@ -298,6 +313,7 @@ class CGConfig(BaseModel):
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig = None
+    raredisease: RarediseaseConfig = Field(None, alias="raredisease")
     rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
     taxprofiler: TaxprofilerConfig = Field(None, alias="taxprofiler")
 

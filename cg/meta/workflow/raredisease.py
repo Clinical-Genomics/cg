@@ -22,17 +22,17 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         pipeline: Pipeline = Pipeline.RAREDISEASE,
     ):
         super().__init__(config=config, pipeline=pipeline)
-        self.root_dir: str = config.rnafusion.root
-        self.nfcore_pipeline_path: str = config.rnafusion.pipeline_path
-        self.references: str = config.rnafusion.references
-        self.profile: str = config.rnafusion.profile
-        self.conda_env: str = config.rnafusion.conda_env
-        self.conda_binary: str = config.rnafusion.conda_binary
-        self.tower_binary_path: str = config.rnafusion.tower_binary_path
-        self.tower_pipeline: str = config.rnafusion.tower_pipeline
-        self.account: str = config.rnafusion.slurm.account
-        self.compute_env: str = config.rnafusion.compute_env
-        self.revision: str = config.rnafusion.revision
+        self.root_dir: str = config.raredisease.root
+        self.nfcore_pipeline_path: str = config.raredisease.pipeline_path
+        self.references: str = config.raredisease.references
+        self.profile: str = config.raredisease.profile
+        self.conda_env: str = config.raredisease.conda_env
+        self.conda_binary: str = config.raredisease.conda_binary
+        self.tower_binary_path: str = config.raredisease.tower_binary_path
+        self.tower_pipeline: str = config.raredisease.tower_pipeline
+        self.account: str = config.raredisease.slurm.account
+        self.compute_env: str = config.raredisease.compute_env
+        self.revision: str = config.raredisease.revision
 
     def config_case(
         self,
@@ -41,9 +41,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     ) -> None:
         """Create config files (parameters and sample sheet) for Raredisease analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
-            # sample_data: dict[str, str | int] = self.get_sample_data(link_obj=link_obj)
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
-        # pipeline_parameters: RarediseaseParameters = self.get_pipeline_parameters(case_id=case_id)
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
@@ -53,6 +51,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             file_path=self.get_sample_sheet_path(case_id=case_id),
             header=RarediseaseSampleSheetEntry.headers(),
         )
+        # pipeline_parameters: RarediseaseParameters = self.get_pipeline_parameters(case_id=case_id)
         # self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
     def get_sample_sheet_content_per_sample(
