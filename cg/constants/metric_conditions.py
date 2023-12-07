@@ -1,4 +1,4 @@
-"""nf-core pipelines related constants."""
+"""NF-core pipelines related constants."""
 
 RNAFUSION_METRIC_CONDITIONS: dict = {
     "uniquely_mapped_percent": {"norm": "gt", "threshold": 60},
