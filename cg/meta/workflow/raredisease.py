@@ -47,12 +47,13 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
+        print(self.get_sample_sheet_path(case_id=case_id))
         self.write_sample_sheet(
             content=sample_sheet_content,
             file_path=self.get_sample_sheet_path(case_id=case_id),
             header=RarediseaseSampleSheetEntry.headers(),
         )
-        self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
+        # self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, case: Case = "", case_sample: CaseSample = ""
