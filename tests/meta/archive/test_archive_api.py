@@ -3,17 +3,11 @@ from unittest import mock
 import pytest
 from housekeeper.store.models import File
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import APIMethods
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.io.controller import APIRequest
-from cg.meta.archive.archive import (
-    ARCHIVE_HANDLERS,
-    FileAndSample,
-    SpringArchiveAPI,
-    filter_files_on_archive_location,
-)
+from cg.meta.archive.archive import ARCHIVE_HANDLERS, FileAndSample, SpringArchiveAPI
 from cg.meta.archive.ddn_dataflow import (
     AuthToken,
     DDNDataFlowClient,
@@ -27,35 +21,12 @@ from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
 
 
-def test_get_files_by_archive_location(
-    spring_archive_api: SpringArchiveAPI, sample_id, father_sample_id
-):
-    """Tests filtering out files and samples with the correct Archive location from a list."""
-    files_and_samples: list[FileAndSample] = [
-        FileAndSample(
-            file=spring_archive_api.housekeeper_api.get_files(bundle=sample).first(),
-            sample=spring_archive_api.status_db.get_sample_by_internal_id(sample),
-        )
-        for sample in [sample_id, father_sample_id]
-    ]
-
-    # WHEN fetching the files by archive location
-    selected_files: list[FileAndSample] = filter_files_on_archive_location(
-        files_and_samples, ArchiveLocations.KAROLINSKA_BUCKET
-    )
-
-    # THEN every file returned should have that archive location
-    assert selected_files
-    for selected_file in selected_files:
-        assert selected_file.sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET
-
-
 def test_add_samples_to_files(spring_archive_api: SpringArchiveAPI):
     """Tests matching Files to Samples when both files have a matching sample."""
     # GIVEN a list of SPRING Files to archive
     files_to_archive: list[
         File
-    ] = spring_archive_api.housekeeper_api.get_all_non_archived_spring_files()
+    ] = spring_archive_api.housekeeper_api.get_non_archived_spring_files()
 
     # WHEN adding the Sample objects
     file_and_samples: list[FileAndSample] = spring_archive_api.add_samples_to_files(
@@ -74,7 +45,7 @@ def test_add_samples_to_files_missing_sample(spring_archive_api: SpringArchiveAP
     # GIVEN a list of SPRING Files to archive
     files_to_archive: list[
         File
-    ] = spring_archive_api.housekeeper_api.get_all_non_archived_spring_files()
+    ] = spring_archive_api.housekeeper_api.get_non_archived_spring_files()
     # GIVEN one of the files does not match the
     files_to_archive[0].version.bundle.name = "does-not-exist"
     # WHEN adding the Sample objects
@@ -176,6 +147,7 @@ def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAP
     mock_request_submitter.assert_called_once_with(files_and_samples=[file_and_sample])
 
 
+@pytest.mark.parametrize("limit", [None, -1, 0, 1])
 def test_archive_all_non_archived_spring_files(
     spring_archive_api: SpringArchiveAPI,
     caplog,
@@ -184,6 +156,7 @@ def test_archive_all_non_archived_spring_files(
     header_with_test_auth_token,
     test_auth_token: AuthToken,
     sample_id: str,
+    limit: int | None,
 ):
     """Test archiving all non-archived SPRING files for Miria customers."""
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
@@ -195,35 +168,36 @@ def test_archive_all_non_archived_spring_files(
         "model_validate",
         return_value=test_auth_token,
     ), mock.patch.object(
-        HousekeeperAPI,
-        "get_all_non_archived_spring_files",
-        return_value=[spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first()],
-    ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
         return_value=ok_miria_response,
     ) as mock_request_submitter:
-        spring_archive_api.archive_spring_files_and_add_archives_to_housekeeper(200)
+        spring_archive_api.archive_spring_files_and_add_archives_to_housekeeper(
+            spring_file_count_limit=limit
+        )
 
-    # THEN the DDN archiving function should have been called with the correct destination and source.
-    mock_request_submitter.assert_called_with(
-        api_method=APIMethods.POST,
-        url="some/api/files/archive",
-        headers=header_with_test_auth_token,
-        json=archive_request_json,
-        verify=False,
-    )
+    # THEN the DDN archiving function should have been called with the correct destination and source if limit > 0
+    if limit not in [0, -1]:
+        mock_request_submitter.assert_called_with(
+            api_method=APIMethods.POST,
+            url="some/api/files/archive",
+            headers=header_with_test_auth_token,
+            json=archive_request_json,
+            verify=False,
+        )
 
-    # THEN all spring files for Karolinska should have an entry in the Archive table in Housekeeper while no other
-    # files should have an entry
-    files: list[File] = spring_archive_api.housekeeper_api.files()
-    for file in files:
-        if SequencingFileTag.SPRING in [tag.name for tag in file.tags]:
-            sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(
-                file.version.bundle.name
-            )
-            if sample and sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET:
-                assert file.archive
+        # THEN all spring files for Karolinska should have an entry in the Archive table in Housekeeper while no other
+        # files should have an entry
+        files: list[File] = spring_archive_api.housekeeper_api.files()
+        for file in files:
+            if SequencingFileTag.SPRING in [tag.name for tag in file.tags]:
+                sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(
+                    file.version.bundle.name
+                )
+                if sample and sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET:
+                    assert file.archive
+    else:
+        mock_request_submitter.assert_not_called()
 
 
 @pytest.mark.parametrize(

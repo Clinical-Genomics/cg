@@ -287,12 +287,21 @@ def spring_archive_api(
     archive_store: Store,
     ddn_dataflow_config: DataFlowConfig,
     father_sample_id: str,
+    sample_id: str,
     helpers,
 ) -> SpringArchiveAPI:
     """Returns an ArchiveAPI with a populated housekeeper store and a DDNDataFlowClient.
     Also adds /home/ as a prefix for each SPRING file for the DDNDataFlowClient to accept them."""
+    populated_housekeeper_api.add_tags_if_non_existent(
+        tag_names=[ArchiveLocations.KAROLINSKA_BUCKET]
+    )
     for spring_file in populated_housekeeper_api.files(tags=[SequencingFileTag.SPRING]):
         spring_file.path = f"/home/{spring_file.path}"
+        if spring_file.version.bundle.name == sample_id:
+            spring_file.tags.append(
+                populated_housekeeper_api.get_tag(name=ArchiveLocations.KAROLINSKA_BUCKET)
+            )
+
     populated_housekeeper_api.commit()
     return SpringArchiveAPI(
         housekeeper_api=populated_housekeeper_api,
@@ -328,7 +337,7 @@ def archive_context(
     ddn_dataflow_config: DataFlowConfig,
 ) -> CGConfig:
     base_context.housekeeper_api_ = real_housekeeper_api
-    base_context.data_flow_config = ddn_dataflow_config
+    base_context.data_flow = ddn_dataflow_config
 
     customer = helpers.ensure_customer(
         store=base_context.status_db, customer_id="miria_customer", customer_name="Miriam"
@@ -348,7 +357,7 @@ def archive_context(
     real_housekeeper_api.add_file(
         path=path_to_spring_file_to_archive,
         version_obj=bundle.versions[0],
-        tags=[SequencingFileTag.SPRING],
+        tags=[SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET],
     )
     file: File = real_housekeeper_api.add_file(
         path=path_to_spring_file_with_ongoing_archival,
