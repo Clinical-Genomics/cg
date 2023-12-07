@@ -43,7 +43,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
             # sample_data: dict[str, str | int] = self.get_sample_data(link_obj=link_obj)
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
-        pipeline_parameters: RarediseaseParameters = self.get_pipeline_parameters(case_id=case_id)
+        # pipeline_parameters: RarediseaseParameters = self.get_pipeline_parameters(case_id=case_id)
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
@@ -68,10 +68,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         )
         print(fastq_forward_read_paths)
         print(case_sample.sample.internal_id)
-        print(case_sample.sample.sex)
+        print(sample.sex)
         print(case_sample.status)
-        print(case_sample.father_id)
-        print(case_sample.mother_id)
+        print(sample.father)
+        print(sample.father)
         print(case.internal_id)
 
         # get_phenotype
@@ -81,10 +81,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             lane="1",
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
-            sex=self.get_sex_code(case_sample.sample.sex),
+            sex=self.get_sex_code(sample.sex),
             phenotype=self.get_phenotype_code(case_sample.status),
-            paternal_id=self.get_parental_code(case_sample.father.internal_id),
-            maternal_id=self.get_parental_code(case_sample.mother.internal_id),
+            paternal_id=self.get_parental_code(sample.father),
+            maternal_id=self.get_parental_code(sample.father),
             case_id=case.internal_id,
         )
         return sample_sheet_entry.reformat_sample_content()
