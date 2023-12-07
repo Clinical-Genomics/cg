@@ -5,18 +5,12 @@ from typing import Any
 from pydantic.v1 import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import (
-    COLLABORATORS,
-    COMBOS,
-    FileExtensions,
-    GenePanelMasterList,
-    Pipeline,
-)
+from cg.constants import FileExtensions, GenePanelMasterList, Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
-from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.analysis import AnalysisAPI, add_gene_panel_combo
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
@@ -156,36 +150,29 @@ class MipAnalysisAPI(AnalysisAPI):
                 sample_obj=link.sample,
             )
 
-    def write_panel(self, case_id: str, content: list[str]):
-        """Write the gene panel to case dir"""
+    def write_panel(self, case_id: str, content: list[str]) -> None:
+        """Write the gene panel to case dir."""
         out_dir = Path(self.root, case_id)
         out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = Path(out_dir, "gene_panels.bed")
-        with out_path.open("w") as out_handle:
-            out_handle.write("\n".join(content))
+        WriteFile.write_file_from_content(
+            content="\n".join(content),
+            file_format=FileFormat.TXT,
+            file_path=Path(out_dir, f"gene_panels{FileExtensions.BED}"),
+        )
 
     @staticmethod
-    def convert_panels(customer: str, default_panels: list[str]) -> list[str]:
-        """Convert between default panels and all panels included in gene list."""
-        # check if all default panels are part of master list
+    def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
+        """Check if customer should use the gene panel master list
+        and if all default panels are included in the gene panel master list.
+        If not, add gene panel combo and OMIM-AUTO.
+        Return an aggregated gene panel."""
         master_list: list[str] = GenePanelMasterList.get_panel_names()
-        if customer in COLLABORATORS and set(default_panels).issubset(master_list):
+        if customer_id in GenePanelMasterList.collaborators() and default_panels.issubset(
+            master_list
+        ):
             return master_list
-
-        # the rest are handled the same way
-        all_panels = set(default_panels)
-
-        # fill in extra panels if selection is part of a combo
-        for panel in default_panels:
-            if panel in COMBOS:
-                for extra_panel in COMBOS[panel]:
-                    all_panels.add(extra_panel)
-
-        # add OMIM to every panel choice
-        all_panels.add(GenePanelMasterList.OMIM_AUTO)
-        # add PANELAPP-GREEN to every panel choice
-        all_panels.add(GenePanelMasterList.PANELAPP_GREEN)
-
+        all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
+        all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
         return list(all_panels)
 
     def _get_latest_raw_file(self, family_id: str, tags: list[str]) -> Any:

@@ -39,6 +39,7 @@ from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
@@ -2387,6 +2388,7 @@ def context_config(
     cg_dir: Path,
     balsamic_dir: Path,
     microsalt_dir: Path,
+    raredisease_dir: Path,
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
     flow_cells_dir: Path,
@@ -2541,6 +2543,23 @@ def context_config(
             "conda_binary": "a_conda_binary",
             "conda_env": "S_mutant",
             "root": str(mip_dir),
+        },
+        "raredisease": {
+            "compute_env": "nf_tower_compute_env",
+            "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
+            "conda_env": "S_raredisease",
+            "launch_directory": Path("path", "to", "launchdir").as_posix(),
+            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "profile": "myprofile",
+            "references": Path("path", "to", "references").as_posix(),
+            "revision": "2.2.0",
+            "root": str(raredisease_dir),
+            "slurm": {
+                "account": "development",
+                "mail_user": "test.email@scilifelab.se",
+            },
+            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
+            "tower_pipeline": "raredisease",
         },
         "rnafusion": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
@@ -2867,6 +2886,13 @@ def mock_fastq_files(fastq_forward_read_path: Path, fastq_reverse_read_path: Pat
 def sequencing_platform() -> str:
     """Return a default sequencing platform."""
     return SequencingPlatform.ILLUMINA
+
+
+@pytest.fixture(scope="function")
+def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
+    """Return the path to the raredisease apps dir."""
+    raredisease_dir = tmpdir_factory.mktemp("raredisease")
+    return Path(raredisease_dir).absolute().as_posix()
 
 
 # Rnafusion fixtures
@@ -3601,3 +3627,74 @@ def downsample_api(
     return DownsampleAPI(
         config=downsample_context,
     )
+
+
+@pytest.fixture(scope="session")
+def raredisease_case_id() -> str:
+    """Returns a raredisease case id."""
+    return "raredisease_case_enough_reads"
+
+
+@pytest.fixture(scope="function")
+def raredisease_context(
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    nf_analysis_housekeeper: HousekeeperAPI,
+    raredisease_case_id: str,
+    sample_id: str,
+    no_sample_case_id: str,
+    total_sequenced_reads_pass: int,
+    apptag_rna: str,
+    case_id_not_enough_reads: str,
+    sample_id_not_enough_reads: str,
+    total_sequenced_reads_not_pass: int,
+) -> CGConfig:
+    """Raredisease context to use in CLI."""
+    cg_context.housekeeper_api_ = nf_analysis_housekeeper
+    cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
+    status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+
+    # Create a textbook case with enough reads
+    case_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=raredisease_case_id,
+        name=raredisease_case_id,
+        data_analysis=Pipeline.RAREDISEASE,
+    )
+
+    sample_raredisease_case_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=sample_id,
+        last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_pass,
+        application_tag=apptag_rna,
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_enough_reads,
+        sample=sample_raredisease_case_enough_reads,
+    )
+
+    # Create a case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Pipeline.RAREDISEASE,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=sample_id_not_enough_reads,
+        last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_not_pass,
+        application_tag=apptag_rna,
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
+    return cg_context
