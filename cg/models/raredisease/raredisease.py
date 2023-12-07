@@ -35,7 +35,7 @@ class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
         return [
             [
                 self.name,
-                lane,
+                lane+1,
                 self.fastq_forward_read_paths,
                 self.fastq_reverse_read_paths,
                 self.sex,

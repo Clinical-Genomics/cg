@@ -45,7 +45,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
-        print(self.get_sample_sheet_path(case_id=case_id))
         self.write_sample_sheet(
             content=sample_sheet_content,
             file_path=self.get_sample_sheet_path(case_id=case_id),
@@ -59,26 +58,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
         sample_metadata: list[str] = self.gather_file_metadata_for_sample(sample)
-        # lane: str = "get lane info from somewhere"
         fastq_forward_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
         )
         fastq_reverse_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, reverse_read=True
         )
-        print(fastq_forward_read_paths)
-        print(case_sample.sample.internal_id)
-        print(sample.sex)
-        print(case_sample.status)
-        print(case_sample.father)
-        print(case_sample.mother)
-        # print(case_sample.mother_id)
-        # print(sample.mother)
-
-        # print(case.internal_id)
-
-
-
         sample_sheet_entry = RarediseaseSampleSheetEntry(
             name=case_sample.sample.internal_id,
             fastq_forward_read_paths=fastq_forward_read_paths,
