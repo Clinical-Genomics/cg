@@ -5,15 +5,9 @@ from pathlib import Path
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.cli.demultiplex.demux import (
-    delete_flow_cell,
-    demultiplex_all,
-    demultiplex_flow_cell,
-)
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_sample_sheet_path_to_housekeeper,
-)
+from cg.cli.demultiplex.demux import delete_flow_cell, demultiplex_all, demultiplex_flow_cell
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from tests.meta.demultiplex.conftest import (
@@ -74,7 +68,8 @@ def test_demultiplex_bcl2fastq_flow_cell(
 
     # GIVEN that all files are present for bcl2fastq demultiplexing
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq
+        tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
+        bcl_converter=BclConverter.BCL2FASTQ,
     )
     add_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
@@ -93,7 +88,7 @@ def test_demultiplex_bcl2fastq_flow_cell(
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
-        [str(tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq)],
+        [str(tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq), "-b", "bcl2fastq"],
         obj=demultiplexing_context_for_demux,
     )
 
