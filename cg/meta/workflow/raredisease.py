@@ -70,9 +70,17 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         print(case_sample.sample.internal_id)
         print(sample.sex)
         print(case_sample.status)
-        print(sample.father_links)
-        print(sample.mother_links)
-        print(case.internal_id)
+        # print(case_sample.father_id)
+        # print(case_sample.mother_id)
+        # print(case_sample.mother)
+        # print(sample.mother)
+
+        # print(case.internal_id)
+        father_sample: Sample = self.status_db.get_sample_by_name(name=case_sample.father)
+        print(father_sample.internal_id)
+
+        mother_sample: Sample = self.status_db.get_sample_by_name(name=case_sample.mother)
+        print(mother_sample.internal_id)
 
         sample_sheet_entry = RarediseaseSampleSheetEntry(
             name=case_sample.sample.internal_id,
@@ -81,8 +89,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             fastq_reverse_read_paths=fastq_reverse_read_paths,
             sex=self.get_sex_code(sample.sex),
             phenotype=self.get_phenotype_code(case_sample.status),
-            paternal_id=self.get_parental_code(case_sample.father.internal_id),
-            maternal_id=self.get_parental_code(case_sample.mother.internal_id),
+            paternal_id=self.get_parental_code(father_sample.internal_id),
+            maternal_id=self.get_parental_code(mother_sample.internal_id),
             case_id=case.internal_id,
         )
         return sample_sheet_entry.reformat_sample_content()
