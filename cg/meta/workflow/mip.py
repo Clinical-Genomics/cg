@@ -172,10 +172,7 @@ class MipAnalysisAPI(AnalysisAPI):
         ):
             return master_list
         all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
-        all_panels.add(GenePanelMasterList.OMIM_AUTO)
-        # add PANELAPP-GREEN to every panel choice
-        all_panels.add(GenePanelMasterList.PANELAPP_GREEN)
-
+        all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
         return list(all_panels)
 
     def _get_latest_raw_file(self, family_id: str, tags: list[str]) -> Any:
