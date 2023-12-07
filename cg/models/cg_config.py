@@ -148,6 +148,7 @@ class MipConfig(BaseModel):
 
 
 class RarediseaseConfig(CommonAppConfig):
+    binary_path: str | None = None
     compute_env: str
     conda_binary: str | None = None
     conda_env: str
