@@ -55,7 +55,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
     def get_sample_sheet_content_per_sample(
-        self, case: Case = "", case_sample: CaseSample = ""
+        self, sample: Sample, case: Case = "", case_sample: CaseSample = ""
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
         sample_metadata: list[str] = self.gather_file_metadata_for_sample(sample)
@@ -106,7 +106,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
         for link in case.links:
             sample_sheet_content.extend(
-                self.get_sample_sheet_content_per_sample(case=case, case_sample=link)
+                self.get_sample_sheet_content_per_sample(sample=link.sample, case=case, case_sample=link)
             )
         return sample_sheet_content
 
