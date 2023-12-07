@@ -76,11 +76,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         # print(sample.mother)
 
         # print(case.internal_id)
-        father_sample: Sample = self.status_db.get_sample_by_name(name=case_sample.father)
-        print(father_sample.internal_id)
 
-        mother_sample: Sample = self.status_db.get_sample_by_name(name=case_sample.mother)
-        print(mother_sample.internal_id)
+
 
         sample_sheet_entry = RarediseaseSampleSheetEntry(
             name=case_sample.sample.internal_id,
@@ -89,8 +86,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             fastq_reverse_read_paths=fastq_reverse_read_paths,
             sex=self.get_sex_code(sample.sex),
             phenotype=self.get_phenotype_code(case_sample.status),
-            paternal_id=self.get_parental_code(father_sample.internal_id),
-            maternal_id=self.get_parental_code(mother_sample.internal_id),
+            paternal_id=self.get_parental_code(case_sample.father),
+            maternal_id=self.get_parental_code(case_sample.mother),
             case_id=case.internal_id,
         )
         return sample_sheet_entry.reformat_sample_content()
@@ -144,7 +141,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return Raredisease phenotype code."""
         LOG.debug("Translate phenotype to int")
         if parent:
-            return parent
+            parent_sample: Sample = self.status_db.get_sample_by_name(name=parent)
+            return(parent_sample.internal_id)
         else:
             return ""
 
