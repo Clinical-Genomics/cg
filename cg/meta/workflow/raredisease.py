@@ -41,6 +41,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     ) -> None:
         """Create config files (parameters and sample sheet) for Raredisease analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
+            # sample_data: dict[str, str | int] = self.get_sample_data(link_obj=link_obj)
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
         pipeline_parameters: RarediseaseParameters = self.get_pipeline_parameters(case_id=case_id)
         if dry_run:
@@ -54,7 +55,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
     def get_sample_sheet_content_per_sample(
-        self, sample: Sample, case: Case = "", case_sample: CaseSample = ""
+        self, case: Case = "", case_sample: CaseSample = ""
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
         sample_metadata: list[str] = self.gather_file_metadata_for_sample(sample)
@@ -65,12 +66,13 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         fastq_reverse_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, reverse_read=True
         )
+        print(fastq_forward_read_paths)
         sample_sheet_entry = RarediseaseSampleSheetEntry(
             name=sample.id,
             lane="1",
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
-            sex=sample.sex,
+            sex=case_sample.sample.sex,
             phenotype=case_sample.status,
             paternal_id=case_sample.father,
             maternal_id=case_sample.mother,
@@ -78,18 +80,32 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content()
 
+    # @staticmethod
+    # def get_sample_data(link_obj: CaseSample) -> dict[str, str | int]:
+    #     """Return sample specific data."""
+    #     return {
+    #         "sample_id": link_obj.sample.internal_id,
+    #         "sample_display_name": link_obj.sample.name,
+    #         "analysis_type": link_obj.sample.application_version.application.analysis_type,
+    #         "sex": link_obj.sample.sex,
+    #         "phenotype": link_obj.status,
+    #         "expected_coverage": link_obj.sample.application_version.application.min_sequencing_depth,
+    #     }
+
+
     def get_sample_sheet_content(
         self,
         case_id: str,
     ) -> list[list[Any]]:
         """Write sample sheet for Raredisease analysis in case folder."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_sheet_content = []
         LOG.debug("Getting sample sheet information")
         LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
+                # links: list[CaseSample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
+
         for link in case.links:
             sample_sheet_content.extend(
-                self.get_sample_sheet_content_per_sample(sample=link.sample, case=case, case_sample=link.case_sample)
+                self.get_sample_sheet_content_per_sample(case=case_id, case_sample=link)
             )
         return sample_sheet_content
 
