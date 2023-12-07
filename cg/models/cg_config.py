@@ -86,7 +86,7 @@ class StatinaConfig(BaseModel):
 
 
 class CommonAppConfig(BaseModel):
-    binary_path: str
+    binary_path: str | None
     config_path: str | None
 
 
@@ -148,16 +148,15 @@ class MipConfig(BaseModel):
 
 
 class RareDiseaseConfig(CommonAppConfig):
-    root: str
-    references: str
-    binary_path: str
-    pipeline_path: str
-    conda_env: str
     compute_env: str
-    profile: str
     conda_binary: str | None = None
+    conda_env: str
     launch_directory: str
+    pipeline_path: str
+    profile: str
+    references: str
     revision: str
+    root: str
     slurm: SlurmConfig
     tower_binary_path: str
     tower_pipeline: str
