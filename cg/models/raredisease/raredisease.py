@@ -8,9 +8,6 @@ from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
     """Raredisease sample model is used when building the sample sheet."""
 
-    name: str
-    fastq_forward_read_paths: list[str]
-    fastq_reverse_read_paths: list[str]
     sex: str
     phenotype: int
     sex: int

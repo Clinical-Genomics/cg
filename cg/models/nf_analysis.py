@@ -14,7 +14,7 @@ class NextflowSampleSheetEntry(BaseModel):
     """Nextflow samplesheet model.
 
     Attributes:
-        name: sample name, corresponds to case_id
+        name: sample name, or case id
         fastq_forward_read_paths: list of all fastq read1 file paths corresponding to sample
         fastq_reverse_read_paths: list of all fastq read2 file paths corresponding to sample
     """
