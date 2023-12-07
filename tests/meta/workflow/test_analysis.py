@@ -69,7 +69,8 @@ def test_gene_panels_not_added(customer_id):
 
     # THEN the list_of_gene_panels_used should return the custom panel and OMIM-AUTO
     assert set(list_of_gene_panels_used) == set(
-        default_panels_not_included + [GenePanelMasterList.OMIM_AUTO]
+        default_panels_not_included
+        + [GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN]
     )
 
 
