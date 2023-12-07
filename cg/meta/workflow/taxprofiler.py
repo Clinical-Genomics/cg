@@ -150,7 +150,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
                 name=metric_name,
                 step="multiqc",
                 value=metric_value,
-                condition=pipeline_metrics.get(metric_name, None),
+                condition=pipeline_metrics.get(metric_name),
             )
             for metric_name, metric_value in metrics_values.items()
         ]
