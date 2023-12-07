@@ -49,6 +49,16 @@ COMBOS = {
     "DSD": ("DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"),
     "CM": ("CNM", "CM"),
     "Horsel": ("Horsel", "141217", "141201"),
+    "OPHTHALMO": (
+        "OPHTHALMO",
+        "ANTE-ED",
+        "CATARACT",
+        "CORNEA",
+        "GLAUCOMA",
+        "RETINA",
+        "SED",
+        "ALBINISM",
+    ),
 }
 
 CONTAINER_OPTIONS = ("Tube", "96 well plate", "No container")
