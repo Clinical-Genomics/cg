@@ -51,7 +51,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         ):
             return master_list
         all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
-        all_panels.add(GenePanelMasterList.OMIM_AUTO)
+        all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
         return list(all_panels)
 
     def get_gene_panel(self, case_id: str) -> list[str]:
