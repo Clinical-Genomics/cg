@@ -18,6 +18,7 @@ import click
 
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
+from cg.constants.tb import AnalysisStatus
 from cg.exc import CgDataError
 from cg.io.json import read_json, write_json
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -288,7 +289,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_qc: dict = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
 
         for sample_id in case_qc:
-            sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
+            sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
             sample_check: dict | None = self.qc_sample_check(
                 sample=sample,
                 sample_qc=case_qc[sample_id],
@@ -373,3 +374,49 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             sample.application_version.application.target_reads
             * MicrosaltQC.NEGATIVE_CONTROL_READS_THRESHOLD
         )
+
+    def get_cases_to_store(self) -> list[Case]:
+        cases_qc_ready: list[Case] = self.get_completed_cases()
+        cases_to_store: list[Case] = []
+        LOG.info(f"Found {len(cases_qc_ready)} cases to perform QC on!")
+
+        for case in cases_qc_ready:
+            case_run_dir: Path | None = self.get_latest_case_path(case.internal_id)
+            if self.is_qc_required(case_run_dir=case_run_dir, case_id=case.internal_id):
+                if self.microsalt_qc(
+                    case_id=case.internal_id,
+                    run_dir_path=case_run_dir,
+                    lims_project=self.get_project(case.samples[0].internal_id),
+                ):
+                    self.trailblazer_api.add_comment(case_id=case.internal_id, comment="QC passed")
+                    cases_to_store.append(case)
+                else:
+                    self.trailblazer_api.set_analysis_status(
+                        case_id=case.internal_id, status=AnalysisStatus.FAILED
+                    )
+                    self.trailblazer_api.add_comment(case_id=case.internal_id, comment="QC failed")
+            else:
+                cases_to_store.append(case)
+
+        return cases_to_store
+
+    def is_qc_required(self, case_run_dir: Path | None, case_id: str) -> bool:
+        """Checks if a qc is required for a microbial case."""
+        if case_run_dir is None:
+            LOG.info(f"There are no running directories for case {case_id}.")
+            return False
+
+        if case_run_dir.joinpath("QC_done.json").exists():
+            LOG.info(f"QC already performed for case {case_id}, storing case.")
+            return False
+
+        LOG.info(f"Performing QC on case {case_id}")
+        return True
+
+    def get_completed_cases(self) -> list[Case]:
+        """Return cases that are completed in trailblazer."""
+        return [
+            case
+            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
+            if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
+        ]

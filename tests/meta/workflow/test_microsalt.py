@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 
 import mock
+from cg.apps.tb.api import TrailblazerAPI
 
 from cg.constants.constants import CaseActions, Pipeline
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
@@ -159,3 +160,85 @@ def test_get_cases_to_store(
     assert len(cases_to_store) == 1
     assert case.data_analysis == Pipeline.MICROSALT
     assert case.action == CaseActions.RUNNING
+
+
+def test_get_cases_to_store_pass(
+    qc_microsalt_context: CGConfig,
+    caplog,
+    mocker,
+    microsalt_qc_pass_lims_project: str,
+    microsalt_case_qc_pass: str,
+    microsalt_qc_pass_run_dir_path: Path,
+):
+    """Test get cases to store for a microsalt case that passes QC."""
+
+    caplog.set_level(logging.INFO)
+    store = qc_microsalt_context.status_db
+    microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
+    mocker.patch.object(MicrosaltAnalysisAPI, "create_qc_done_file")
+    mocker.patch.object(TrailblazerAPI, "set_analysis_status")
+    mocker.patch.object(TrailblazerAPI, "add_comment")
+
+    # GIVEN a store with a QC ready microsalt case that will pass QC
+    microsalt_pass_case: Case = store.get_case_by_internal_id(internal_id=microsalt_case_qc_pass)
+    microsalt_pass_case.samples[1].control = "negative"
+    microsalt_pass_case.samples[1].reads = 1100000
+
+    mocker.patch.object(
+        MicrosaltAnalysisAPI,
+        "get_completed_cases",
+        return_value=[microsalt_pass_case],
+    )
+    mocker.patch.object(
+        MicrosaltAnalysisAPI, "get_project", return_value=microsalt_qc_pass_lims_project
+    )
+
+    mocker.patch.object(
+        MicrosaltAnalysisAPI, "get_latest_case_path", return_value=microsalt_qc_pass_run_dir_path
+    )
+
+    # WHEN get cases to store
+    cases_to_store: list[Case] = microsalt_api.get_cases_to_store()
+
+    # THEN it should be stored
+    assert microsalt_pass_case in cases_to_store
+
+
+def test_get_cases_to_store_fail(
+    qc_microsalt_context: CGConfig,
+    caplog,
+    mocker,
+    microsalt_qc_fail_lims_project: str,
+    microsalt_case_qc_fail: str,
+    microsalt_qc_fail_run_dir_path: Path,
+):
+    """Test get cases to store for a microsalt case that fails QC."""
+
+    caplog.set_level(logging.INFO)
+    store = qc_microsalt_context.status_db
+    microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
+    mocker.patch.object(MicrosaltAnalysisAPI, "create_qc_done_file")
+    mocker.patch.object(TrailblazerAPI, "set_analysis_status")
+    mocker.patch.object(TrailblazerAPI, "add_comment")
+
+    # GIVEN a store with a QC ready microsalt case that will fail QC
+    microsalt_fail_case: Case = store.get_case_by_internal_id(internal_id=microsalt_case_qc_fail)
+
+    mocker.patch.object(
+        MicrosaltAnalysisAPI,
+        "get_completed_cases",
+        return_value=[microsalt_fail_case],
+    )
+    mocker.patch.object(
+        MicrosaltAnalysisAPI, "get_project", return_value=microsalt_qc_fail_lims_project
+    )
+
+    mocker.patch.object(
+        MicrosaltAnalysisAPI, "get_latest_case_path", return_value=microsalt_qc_fail_run_dir_path
+    )
+
+    # WHEN get case to store
+    cases_to_store: list[Case] = microsalt_api.get_cases_to_store()
+
+    # Then it should not be stored
+    assert microsalt_fail_case not in cases_to_store
