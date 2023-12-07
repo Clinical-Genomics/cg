@@ -222,7 +222,17 @@
           <div class="card-block">
             <h4 class="card-title">Scout</h4>
             <div class="card-text">
-              <p>Gene fusioner finns uppladdade i Scout: <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a></p>
+              <p>Analysfiler finns uppladdade i Scout: <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a></p>
+              <ul>
+                <li>
+                  <strong>Kliniska Fusionsvarianter</strong>:
+                    {% if case.data_analysis.scout_files.vcf_fusion != 'N/A' %}
+                      <em>{{ case.data_analysis.scout_files.vcf_fusion.replace(case.id, case.name) }}</em>
+                    {% else %}
+                      <em>Inga fusionsvarianter upptäcktes</em>
+                    {% endif %}
+                </li>
+              </ul>
             </div>
           </div>
         {% endif %}

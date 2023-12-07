@@ -129,7 +129,7 @@ def rnafusion_validated_metrics() -> dict[str, str]:
         "insert_size_peak": "N/A",
         "mean_length_r1": "99.0",
         "million_read_pairs": "75.0",
-        "bias_5_3": "1.07",
+        "bias_5_3": "1.12",
         "pct_adapter": "12.01",
         "duplicates": "14.86",
         "mrna_bases": "85.97",
