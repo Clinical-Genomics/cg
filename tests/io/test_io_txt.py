@@ -51,9 +51,7 @@ def test_non_existent_file(non_existing_file_path: Path):
 
 
 def test_write_txt(txt_temp_path: Path, txt_file_path: Path):
-    """
-    Test writing content to a TXT file.
-    """
+    """Test writing content to a TXT file."""
     # GIVEN a txt file path to write to
 
     # GIVEN text content
