@@ -70,10 +70,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         print(case_sample.sample.internal_id)
         print(sample.sex)
         print(case_sample.status)
-        # print(case_sample.father_id)
-        # print(case_sample.mother_id)
-        # print(case_sample.mother)
-        # print(sample.mother)
+        print(case_sample.father)
+        print(case_sample.mother)
+        print(case_sample.mother_id)
+        print(sample.mother)
 
         # print(case.internal_id)
 
