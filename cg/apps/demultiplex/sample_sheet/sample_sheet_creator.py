@@ -155,7 +155,6 @@ class SampleSheetCreator:
                 index_cycles=self.run_parameters.index_length,
                 perform_reverse_complement=self.index_settings.should_i5_be_reverse_complimented,
                 sequencer=self.run_parameters.sequencer,
-                bcl_converter=self.bcl_converter,
             )
             self.update_barcode_mismatch_values_for_samples(samples_in_lane)
 

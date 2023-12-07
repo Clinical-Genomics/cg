@@ -161,17 +161,16 @@ def update_indexes_for_samples(
     index_cycles: int,
     perform_reverse_complement: bool,
     sequencer: str,
-    bcl_converter: str,
 ) -> None:
     """Updates the values to the fields index1 and index 2 of samples."""
     for sample in samples:
-        if sequencer == Sequencers.NOVASEQ and bcl_converter == BclConverter.BCLCONVERT:
+        if sequencer != Sequencers.NOVASEQ:
+            index1, index2 = get_index_pair(sample=sample)
+            sample.index = index1
+            sample.index2 = index2
+        else:
             pad_and_reverse_complement_sample_indexes(
                 sample=sample,
                 index_cycles=index_cycles,
                 perform_reverse_complement=perform_reverse_complement,
             )
-        else:
-            index1, index2 = get_index_pair(sample=sample)
-            sample.index = index1
-            sample.index2 = index2
