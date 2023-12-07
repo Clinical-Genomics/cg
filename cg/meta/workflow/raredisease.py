@@ -70,8 +70,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         print(case_sample.sample.internal_id)
         print(sample.sex)
         print(case_sample.status)
-        print(sample.father)
-        print(sample.father)
+        print(sample.father_links.internal_id)
+        print(sample.mother_links.internal_id)
         print(case.internal_id)
 
         # get_phenotype
