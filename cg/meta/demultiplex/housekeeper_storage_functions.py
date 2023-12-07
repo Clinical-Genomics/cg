@@ -176,10 +176,10 @@ def add_sample_sheet_path_to_housekeeper(
 
 
 def delete_sequencing_data_from_housekeeper(flow_cell: str, hk_api: HousekeeperAPI) -> None:
-    tag_combinations: list[list[str]] = [
-        [SequencingFileTag.FASTQ.value, flow_cell],
-        [SequencingFileTag.SPRING.value, flow_cell],
-        [SequencingFileTag.SPRING_METADATA.value, flow_cell],
+    tag_combinations: list[set[str]] = [
+        {SequencingFileTag.FASTQ, flow_cell},
+        {SequencingFileTag.SPRING, flow_cell},
+        {SequencingFileTag.SPRING_METADATA, flow_cell},
     ]
     for tags in tag_combinations:
         housekeeper_files: Iterable[File] = hk_api.files(tags=tags)
@@ -189,7 +189,7 @@ def delete_sequencing_data_from_housekeeper(flow_cell: str, hk_api: HousekeeperA
 
 def delete_sequencing_logs_from_housekeeper(flow_cell: str, hk_api: HousekeeperAPI) -> None:
     housekeeper_files: Iterable[File] = hk_api.files(
-        bundle=flow_cell, tags=[SequencingFileTag.DEMUX_LOG.value, flow_cell]
+        bundle=flow_cell, tags={SequencingFileTag.DEMUX_LOG, flow_cell}
     )
     for housekeeper_file in housekeeper_files:
         hk_api.delete_file(file_id=housekeeper_file.id)

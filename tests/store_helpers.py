@@ -1,6 +1,7 @@
 """Utility functions to simply add test data in a cg store."""
 import logging
 from datetime import datetime
+from pathlib import Path
 
 from housekeeper.store.models import Bundle, Version
 
@@ -59,6 +60,33 @@ class StoreHelpers:
             store.include(_version)
 
         return _bundle
+
+    @staticmethod
+    def format_hk_bundle_dict(bundle_name, files: list[Path], all_tags: list[list[str]]) -> dict:
+        """Creates the dict representation for a housekeeper bundle with necessary values set."""
+        return {
+            "name": bundle_name,
+            "created_at": datetime.now(),
+            "expires_at": datetime.now(),
+            "files": [
+                {
+                    "path": file.as_posix(),
+                    "tags": tags,
+                    "archive": False,
+                }
+                for file, tags in zip(files, all_tags)
+            ],
+        }
+
+    @staticmethod
+    def quick_hk_bundle(
+        bundle_name, files: list[Path], store: HousekeeperAPI, tags: list[list[str]]
+    ):
+        """Adds a bundle to housekeeper with the given files and tags."""
+        bundle_data: dict = StoreHelpers.format_hk_bundle_dict(
+            bundle_name=bundle_name, files=files, all_tags=tags
+        )
+        return StoreHelpers.ensure_hk_bundle(store=store, bundle_data=bundle_data)
 
     @staticmethod
     def ensure_hk_version(store: HousekeeperAPI, bundle_data: dict) -> Version:

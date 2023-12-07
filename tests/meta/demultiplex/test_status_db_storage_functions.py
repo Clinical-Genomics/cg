@@ -6,12 +6,14 @@ from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.status_db_storage_functions import (
     add_samples_to_flow_cell_in_status_db,
     add_sequencing_metrics_to_statusdb,
+    delete_sequencing_metrics_from_statusdb,
     metric_has_sample_in_statusdb,
     update_sample_read_count,
 )
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Sample
+from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
+from tests.store_helpers import StoreHelpers
 
 
 def test_add_single_sequencing_metrics_entry_to_statusdb(
@@ -94,3 +96,49 @@ def test_add_samples_to_flow_cell_in_status_db(
     flow_cell = store_with_sequencing_metrics.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
     assert flow_cell.samples
     assert flow_cell.samples[0].internal_id == sample_id
+
+
+def test_delete_sequencing_metrics_from_statusdb_existing_metrics(
+    store_with_sequencing_metrics: Store, flow_cell_name: str
+):
+    # GIVEN a store with sequencing metrics
+    store = store_with_sequencing_metrics
+
+    # GIVEN that the flow cell has sequencing metrics
+    metrics: list[
+        SampleLaneSequencingMetrics
+    ] = store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
+    assert metrics
+
+    # WHEN deleting sequencing metrics from statusdb
+    delete_sequencing_metrics_from_statusdb(flow_cell=flow_cell_name, store=store)
+
+    # THEN the sequencing metrics should be deleted from statusdb
+    assert not store.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=flow_cell_name
+    )
+
+
+def test_delete_sequencing_metrics_from_statusdb_no_metrics(
+    store_with_sequencing_metrics: Store,
+    helpers: StoreHelpers,
+):
+    # GIVEN a store with sequencing metrics
+    store = store_with_sequencing_metrics
+
+    # GIVEN a new flow cell with no sequencing metrics
+    flow_cell: Flowcell = helpers.add_flow_cell(store=store)
+    metrics: list[
+        SampleLaneSequencingMetrics
+    ] = store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell.name)
+    assert not metrics
+
+    # WHEN deleting sequencing metrics from statusdb
+    delete_sequencing_metrics_from_statusdb(flow_cell=flow_cell.name, store=store)
+
+    # THEN no errors should be raised
+
+    # THEN the sequencing metrics are still not in statusdb
+    assert not store.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=flow_cell.name
+    )

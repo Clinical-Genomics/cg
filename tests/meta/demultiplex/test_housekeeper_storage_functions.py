@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import pytest
 from housekeeper.store.models import File
 from mock import MagicMock, call
 
@@ -12,9 +13,12 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_demux_logs_to_housekeeper,
     add_sample_fastq_files_to_housekeeper,
     add_sample_sheet_path_to_housekeeper,
+    delete_sequencing_data_from_housekeeper,
+    delete_sequencing_logs_from_housekeeper,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from tests.store_helpers import StoreHelpers
 
 
 def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
@@ -227,3 +231,93 @@ def test_store_fastq_path_in_housekeeper_correct_tags(
     file: File = populated_housekeeper_api.get_files(bundle=sample_id).first()
     expected_tags: set[str] = {SequencingFileTag.FASTQ.value, novaseq6000_flow_cell.id, sample_id}
     assert {tag.name for tag in file.tags} == expected_tags
+
+
+@pytest.mark.parametrize(
+    "file_tag",
+    [SequencingFileTag.FASTQ, SequencingFileTag.SPRING, SequencingFileTag.SPRING_METADATA],
+)
+def test_delete_sequencing_data_from_housekeeper(
+    file_tag: str,
+    populated_housekeeper_api,
+    flow_cell_name: str,
+    tmp_path: Path,
+    helpers: StoreHelpers,
+):
+    """Tests that each type of sequencing file is removed when deleting them from Housekeeper."""
+    # GIVEN a sample with sequencing files from a flow cell
+    sample_id: str = "new_sample"
+    helpers.quick_hk_bundle(
+        store=populated_housekeeper_api,
+        bundle_name=sample_id,
+        files=[tmp_path],
+        tags=[[file_tag, flow_cell_name, sample_id]],
+    )
+    assert populated_housekeeper_api.files(bundle=sample_id, tags={file_tag}).all()
+
+    # WHEN deleting the sequencing data from housekeeper
+    delete_sequencing_data_from_housekeeper(
+        flow_cell=flow_cell_name, hk_api=populated_housekeeper_api
+    )
+
+    # THEN the sequencing data is deleted from housekeeper
+    assert not populated_housekeeper_api.files(bundle=sample_id, tags={file_tag}).all()
+
+
+def test_delete_sequencing_data_from_housekeeper_two_flow_cells(
+    real_housekeeper_api: HousekeeperAPI,
+    flow_cell_name: str,
+    tmp_path: Path,
+    helpers: StoreHelpers,
+):
+    """Tests that the delete_sequencing_data_from_housekeeper function deletes the correct files
+    from housekeeper when there are files from two flow cells."""
+    # GIVEN a sample with sequencing files from two flow cells
+    sample_id: str = "new_sample"
+    second_file: Path = tmp_path.with_suffix(".2.fastq.gz")
+    second_file.touch()
+    second_flow_cell_name: str = "second-flow-cell"
+    helpers.quick_hk_bundle(
+        store=real_housekeeper_api,
+        bundle_name=sample_id,
+        files=[tmp_path, second_file],
+        tags=[
+            [SequencingFileTag.FASTQ, flow_cell_name, sample_id],
+            [SequencingFileTag.FASTQ, second_flow_cell_name, sample_id],
+        ],
+    )
+    assert (
+        len(real_housekeeper_api.files(bundle=sample_id, tags={SequencingFileTag.FASTQ}).all()) == 2
+    )
+
+    # WHEN deleting the sequencing data of one flow cell from housekeeper
+    delete_sequencing_data_from_housekeeper(flow_cell=flow_cell_name, hk_api=real_housekeeper_api)
+
+    # THEN the sequencing data the first flow cell is deleted from housekeeper
+    assert not real_housekeeper_api.files(bundle=sample_id, tags={flow_cell_name}).all()
+
+    # THEN the sequencing data from the second flow cell should remain
+    remaining_file: File = real_housekeeper_api.files(bundle=sample_id).one()
+    assert remaining_file
+    assert remaining_file.path.endswith(second_file.name)
+
+
+def test_delete_sequencing_logs_from_housekeeper(
+    real_housekeeper_api: HousekeeperAPI, flow_cell_name, helpers: StoreHelpers, tmp_path: Path
+):
+    """Tests the deletion of sequencing logs from housekeeper for a flow cell."""
+    # GIVEN a flow cell with demux logs in housekeeper
+    helpers.quick_hk_bundle(
+        store=real_housekeeper_api,
+        bundle_name=flow_cell_name,
+        files=[tmp_path],
+        tags=[[SequencingFileTag.DEMUX_LOG, flow_cell_name]],
+    ),
+
+    # WHEN deleting the sequencing logs from housekeeper
+    delete_sequencing_logs_from_housekeeper(flow_cell=flow_cell_name, hk_api=real_housekeeper_api)
+
+    # THEN the sequencing logs are deleted from housekeeper
+    assert not real_housekeeper_api.files(
+        bundle=flow_cell_name, tags={SequencingFileTag.DEMUX_LOG, flow_cell_name}
+    ).all()
