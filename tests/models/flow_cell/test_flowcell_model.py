@@ -56,70 +56,59 @@ def test_rta_exists(bcl2fastq_flow_cell: FlowCellDirectoryData):
     assert rta_file.exists()
 
 
-def test_get_sample_model_bcl2fastq(bcl2fastq_flow_cell: FlowCellDirectoryData):
-    """Test that the sample model of a bcl2fastq flow cell is FlowCellSampleNovaSeq6000Bcl2Fastq."""
-    # GIVEN a Bcl2Fastq flow cell
-
-    # WHEN getting the sample model
-    sample_model: Type[FlowCellSampleBcl2Fastq] = bcl2fastq_flow_cell.sample_type
-
-    # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
-    assert sample_model == FlowCellSampleBcl2Fastq
-
-
-def test_get_sample_model_dragen(bcl_convert_flow_cell: FlowCellDirectoryData):
-    """Test that the sample model of a dragen flow cell is FlowCellSampleBCLConvert."""
-    # GIVEN a dragen flow cell
-
-    # WHEN getting the sample model
-    sample_model: Type[FlowCellSampleBCLConvert] = bcl_convert_flow_cell.sample_type
-
-    # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
-    assert sample_model == FlowCellSampleBCLConvert
-
-
-def test_get_sample_model_novaseq_x(novaseq_x_flow_cell: FlowCellDirectoryData):
-    """Test that the sample model of a NovaSeqX flow cell is FlowCellSampleNovaSeqX."""
-    # GIVEN a NovaSeqX flow cell
-
-    # WHEN getting the sample model
-    sample_model: Type[FlowCellSampleBCLConvert] = novaseq_x_flow_cell.sample_type
-
-    # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
-    assert sample_model == FlowCellSampleBCLConvert
-
-
-def test_get_bcl_converter_by_sequencer(
-    flow_cell_directory_name_demultiplexed_with_bcl2fastq: str,
+@pytest.mark.parametrize(
+    "flow_cell_fixture_name, model",
+    [
+        ("bcl2fastq_flow_cell", FlowCellSampleBcl2Fastq),
+        ("bcl_convert_flow_cell", FlowCellSampleBCLConvert),
+        ("novaseq_x_flow_cell", FlowCellSampleBCLConvert),
+    ],
+)
+def test_get_sample_model(
+    flow_cell_fixture_name: str,
+    model: Type[FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert],
+    request: FixtureRequest,
 ):
-    """Test that the bcl converter of a bcl2fastq flow cell is bcl2fastq."""
-    # GIVEN a Bcl2Fastq flow cell directory
+    """Test getting the sample model of a flow cell returns the correct value."""
+    # GIVEN a flow cell
+    flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture_name)
+
+    # WHEN getting the sample model
+    sample_model: Type[FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert] = flow_cell.sample_type
+
+    # THEN it is the expected model
+    assert sample_model == model
+
+
+def test_get_bcl_converter_default(
+    flow_cell_directory_name_demultiplexed_with_bcl_convert: str,
+):
+    """Test that BCLConvert is the bcl converter set as default when instantiating a flow cell."""
+    # GIVEN a flow cell directory
 
     # WHEN instantiating a flow cell object
     flow_cell = FlowCellDirectoryData(
-        flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl2fastq)
+        flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl_convert)
     )
 
-    # THEN it sets the converter to blc2fastq
-    assert flow_cell.bcl_converter == BclConverter.BCL2FASTQ
+    # THEN it sets the converter to BCLConverter
+    assert flow_cell.bcl_converter == BclConverter.DRAGEN
 
 
 def test_flow_cell_directory_data_with_set_bcl_converter(
-    flow_cell_directory_name_demultiplexed_with_bcl2fastq: str, bcl_converter=BclConverter.DRAGEN
+    flow_cell_directory_name_demultiplexed_with_bcl2fastq: str,
 ):
-    """Test that the bcl converter is set to the specified value."""
-    # GIVEN a Bcl2Fastq flow cell directory
+    """Test that the flow cell bcl converter is set to Bcl2fastq if specified."""
+    # GIVEN a flow cell directory
 
-    # GIVEN the bcl converter is set to dragen
-
-    # WHEN instantiating a flow cell object
+    # WHEN instantiating a flow cell object specifying the converter as bcl2fastq
     flow_cell = FlowCellDirectoryData(
         flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl2fastq),
-        bcl_converter=bcl_converter,
+        bcl_converter=BclConverter.BCL2FASTQ,
     )
 
     # THEN the bcl converter is dragen
-    assert flow_cell.bcl_converter == bcl_converter
+    assert flow_cell.bcl_converter == BclConverter.BCL2FASTQ
 
 
 def test_flow_cell_directory_data_with_novaseq_flow_cell_directory(
