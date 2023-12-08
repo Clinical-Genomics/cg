@@ -1,7 +1,6 @@
 {
     "report_data_sources": {},
     "report_general_stats_data": [
-        {"rnafusion_case_enough_reads": {"5_3_bias": 1.07, "reads_aligned": 72391566.0}},
         {
             "rnafusion_case_enough_reads": {
                 "PF_BASES": 14818118467.0,
