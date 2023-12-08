@@ -323,7 +323,7 @@ class NfAnalysisAPI(AnalysisAPI):
             MetricsBase(
                 header=None,
                 id=sample_id,
-                input=MultiQC.MULTIQC_DATA+FileExtensions.JSON,
+                input=MultiQC.MULTIQC_DATA + FileExtensions.JSON,
                 name=metric_name,
                 step=MultiQC.MULTIQC,
                 value=metric_value,

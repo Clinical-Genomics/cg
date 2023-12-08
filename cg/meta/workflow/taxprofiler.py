@@ -146,7 +146,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             MetricsBase(
                 header=None,
                 id=sample_name,
-                input=MultiQC.MULTIQC_DATA+FileExtensions.JSON,
+                input=MultiQC.MULTIQC_DATA + FileExtensions.JSON,
                 name=metric_name,
                 step=MultiQC.MULTIQC,
                 value=metric_value,
