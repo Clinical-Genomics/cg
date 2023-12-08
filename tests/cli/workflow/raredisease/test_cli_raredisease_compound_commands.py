@@ -11,6 +11,8 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 from tests.conftest import create_process_response
 
+SUBPROCESS_RUN_FUNCTION_NAME: str = "cg.utils.commands.subprocess.run"
+
 
 def test_raredisease_no_args(cli_runner: CliRunner, raredisease_context: CGConfig):
     """Test to see that running RAREDISEASE without options prints help and doesn't result in an error."""
@@ -36,7 +38,7 @@ def test_panel_dry_run(
 
     # GIVEN that, the Scout command writes the panel to stdout
     with mock.patch(
-        "cg.utils.commands.subprocess.run",
+        SUBPROCESS_RUN_FUNCTION_NAME,
         return_value=create_process_response(std_out=scout_panel_output),
     ):
         # WHEN creating a panel file using dry-run
@@ -61,7 +63,7 @@ def test_panel_file_is_written(
 
     # GIVEN that, the Scout command writes the panel to stdout
     with mock.patch(
-        "cg.utils.commands.subprocess.run",
+        SUBPROCESS_RUN_FUNCTION_NAME,
         return_value=create_process_response(std_out=scout_panel_output),
     ):
         # WHEN creating a panel file
@@ -90,7 +92,7 @@ def test_managed_variants_is_written(
 
     # GIVEN that, the Scout command writes the managed variants to stdout
     with mock.patch(
-        "cg.utils.commands.subprocess.run",
+        SUBPROCESS_RUN_FUNCTION_NAME,
         return_value=create_process_response(std_out=scout_export_manged_variants_output),
     ):
         # WHEN creating a managed_variants file
@@ -118,7 +120,7 @@ def test_managed_variants_dry_run(
 
     # GIVEN that, the Scout command writes the managed variants to stdout
     with mock.patch(
-        "cg.utils.commands.subprocess.run",
+        SUBPROCESS_RUN_FUNCTION_NAME,
         return_value=create_process_response(std_out=scout_export_manged_variants_output),
     ):
         # WHEN creating a managed_variants file using dry run
