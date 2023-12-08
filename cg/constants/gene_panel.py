@@ -45,7 +45,7 @@ class GenePanelMasterList(StrEnum):
     @classmethod
     def get_panel_names(cls, panels=None) -> list[str]:
         """Return requested panel names from the Master list, or all panels if none are specified."""
-        return list(panels) if panels else list(cls)
+        return list(panels) if panels else list(map(lambda panel: panel.value, cls))
 
     @staticmethod
     def collaborators() -> set[str]:
