@@ -24,6 +24,7 @@ class Reviewer(BaseModel):
 
 class ScoutIndividual(BaseModel):
     alignment_path: str | None = None
+    rna_alignment_path: str | None = None
     analysis_type: Annotated[
         Literal[
             "external",
@@ -141,3 +142,4 @@ class RnafusionLoadConfig(ScoutLoadConfig):
     RNAfusion_report: str | None = None
     RNAfusion_report_research: str | None = None
     samples: list[ScoutCancerIndividual] = []
+    vcf_fusion: str | None = None

@@ -44,6 +44,7 @@ class ScoutReportFiles(BaseModel):
         sv_research_vcf: SV research VCF file uploaded to Scout; source: HK
         vcf_str: Short Tandem Repeat variants file (MIP-DNA specific); source: HK
         smn_tsv: SMN gene variants file (MIP-DNA specific); source: HK
+        vcf_fusion: Converted RNA fusion file to SV VCF (RNAfusion specific); source: HK
     """
 
     snv_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
@@ -52,6 +53,7 @@ class ScoutReportFiles(BaseModel):
     sv_research_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
     vcf_str: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
     smn_tsv: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    vcf_fusion: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
 
 
 class DataAnalysisModel(BaseModel):
