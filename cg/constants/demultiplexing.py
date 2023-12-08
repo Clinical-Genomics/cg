@@ -140,6 +140,8 @@ class SampleSheetBCLConvertSections:
             return {
                 Sequencers.NOVASEQ: "NovaSeq6000",
                 Sequencers.NOVASEQX: "NovaSeqXSeries",
+                Sequencers.HISEQX: "HiSeqXSeries",
+                Sequencers.HISEQGA: "HiSeq2500",
             }
 
         @classmethod
