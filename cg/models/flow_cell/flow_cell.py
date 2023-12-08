@@ -257,11 +257,11 @@ class FlowCellDirectoryData:
         """
         LOG.info("Check if flow cell is ready for downstream processing")
         if not self.is_sequencing_done():
-            LOG.info(f"Sequencing is not completed for flow cell {self.id}")
+            LOG.warning(f"Sequencing is not completed for flow cell {self.id}")
             return False
         LOG.debug(f"Sequence is done for flow cell {self.id}")
         if not self.is_copy_completed():
-            LOG.info(f"Copy of sequence data is not ready for flow cell {self.id}")
+            LOG.warning(f"Copy of sequence data is not ready for flow cell {self.id}")
             return False
         LOG.debug(f"All data has been transferred for flow cell {self.id}")
         LOG.info(f"Flow cell {self.id} is ready for downstream processing")
