@@ -1,7 +1,10 @@
-from cg.constants import DEFAULT_CAPTURE_KIT, Pipeline
-from cg.constants.constants import AnalysisType
+from pathlib import Path
+
+from cg.constants import DEFAULT_CAPTURE_KIT, FileExtensions, Pipeline
+from cg.constants.constants import AnalysisType, FileFormat
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.pedigree import Pedigree
+from cg.io.controller import WriteFile
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import CaseSample
@@ -67,3 +70,17 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
     def get_gene_panel(self, case_id: str) -> list[str]:
         """Create and return the aggregated gene panel file."""
         return self._get_gene_panel(case_id=case_id, genome_build=GENOME_BUILD_37)
+
+    def get_managed_variants(self) -> list[str]:
+        """Create and return the managed variants."""
+        return self._get_managed_variants(genome_build=GENOME_BUILD_37)
+
+    def write_managed_variants(self, case_id: str, content: list[str]) -> None:
+        """Write the managed variants to case dir."""
+        out_dir = Path(self.root, case_id)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        WriteFile.write_file_from_content(
+            content="\n".join(content),
+            file_format=FileFormat.TXT,
+            file_path=Path(out_dir, f"managed_variants{FileExtensions.VCF}"),
+        )

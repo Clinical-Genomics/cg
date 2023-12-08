@@ -173,12 +173,12 @@ def test_case_needs_to_be_stored(
 
     # GIVEN a case is available for analysis
     # GIVEN all samples in the case has dna application type
-    # GIVEN the latest analysis has not starte
+    # GIVEN the latest analysis has not started
     # GIVEN spring decompression is not needed
     # GIVEN fastqs linked in housekeeper are checked successfully
     # GIVEN spring decompression is not running
     # GIVEN a panel file is created
-    # GIVEN there is flow cells for the case
+    # GIVEN there are flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=False,
         case_to_analyze=case,
@@ -189,7 +189,7 @@ def test_case_needs_to_be_stored(
         mocker=mocker,
     )
 
-    # GIVEN that a panel is returned
+    # GIVEN that, a panel is returned
     with mock.patch.object(
         mip_dna_context.scout_api,
         "export_panels",
@@ -197,6 +197,8 @@ def test_case_needs_to_be_stored(
     ):
         # WHEN MIP analysis is started
         result = cli_runner.invoke(start, [case.internal_id, "--dry-run"], obj=mip_dna_context)
+
+        print(result.output)
 
     # THEN command should run without errors
     assert result.exit_code == 0

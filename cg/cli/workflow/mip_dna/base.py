@@ -11,7 +11,14 @@ from cg.cli.workflow.commands import (
     store,
     store_available,
 )
-from cg.cli.workflow.mip.base import config_case, panel, run, start, start_available
+from cg.cli.workflow.mip.base import (
+    config_case,
+    managed_variants,
+    panel,
+    run,
+    start,
+    start_available,
+)
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
@@ -34,6 +41,7 @@ for sub_cmd in [
     ensure_flow_cells_on_disk,
     link,
     panel,
+    managed_variants,
     resolve_compression,
     run,
     start,
