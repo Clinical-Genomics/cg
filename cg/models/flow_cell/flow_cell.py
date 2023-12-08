@@ -20,7 +20,7 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysi
 from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
-from cg.constants.sequencing import Sequencers, SEQUENCER_TYPES
+from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
 from cg.exc import FlowCellError, SampleSheetError
 from cg.models.demultiplex.run_parameters import (
     RunParameters,
@@ -278,11 +278,11 @@ class FlowCellDirectoryData:
         """
         LOG.info("Check if flow cell is ready for downstream processing")
         if not self.is_sequencing_done():
-            LOG.info(f"Sequencing is not completed for flow cell {self.id}")
+            LOG.warning(f"Sequencing is not completed for flow cell {self.id}")
             return False
         LOG.debug(f"Sequence is done for flow cell {self.id}")
         if not self.is_copy_completed():
-            LOG.info(f"Copy of sequence data is not ready for flow cell {self.id}")
+            LOG.warning(f"Copy of sequence data is not ready for flow cell {self.id}")
             return False
         LOG.debug(f"All data has been transferred for flow cell {self.id}")
         LOG.info(f"Flow cell {self.id} is ready for downstream processing")
