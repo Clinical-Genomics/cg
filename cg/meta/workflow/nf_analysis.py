@@ -7,7 +7,7 @@ from typing import Any, Union
 from cg.store.models import Sample
 
 from cg.constants import Pipeline
-from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
+from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager, MultiQC
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -297,7 +297,13 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_multiqc_json_path(self, case_id: str) -> Path:
         """Return the path of the multiqc_data.json file."""
-        return Path(self.root_dir, case_id, "multiqc", "multiqc_data", "multiqc_data.json")
+        return Path(
+            self.root_dir,
+            case_id,
+            MultiQC.MULTIQC,
+            MultiQC.MULTIQC_DATA,
+            MultiQC.MULTIQC_DATA + FileExtensions.JSON,
+        )
 
     def get_multiqc_json_metrics(
         self, case_id: str, pipeline_metrics: Union[dict, None] = None
