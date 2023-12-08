@@ -5,11 +5,7 @@ from pathlib import Path
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.cli.demultiplex.demux import (
-    delete_flow_cell,
-    demultiplex_all,
-    demultiplex_flow_cell,
-)
+from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_sample_sheet_path_to_housekeeper,
@@ -216,61 +212,3 @@ def test_is_demultiplexing_complete(tmp_flow_cell_directory_bcl2fastq: Path):
 
     # THEN the property should return true
     assert flow_cell.is_demultiplexing_complete
-
-
-def test_delete_flow_cell_dry_run_status_db(
-    cli_runner: testing.CliRunner,
-    tmp_flow_cell_directory_bcl2fastq: Path,
-    demultiplex_context: CGConfig,
-    tmp_flow_cell_demux_base_path: Path,
-    tmp_flow_cell_run_base_path: Path,
-    bcl2fastq_flow_cell_id: str,
-    caplog,
-):
-    """Test if logic work - call all true if status_db passed."""
-    caplog.set_level(logging.DEBUG)
-
-    demultiplex_context.demultiplex_api.flow_cells_dir = tmp_flow_cell_run_base_path
-    demultiplex_context.demultiplex_api.demultiplexed_runs_dir = tmp_flow_cell_demux_base_path
-    Path(tmp_flow_cell_run_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
-        parents=True, exist_ok=True
-    )
-    Path(tmp_flow_cell_demux_base_path, f"some_prefix_1100_{bcl2fastq_flow_cell_id}").mkdir(
-        parents=True, exist_ok=True
-    )
-    # GIVEN a flow cell to be deleted
-    assert bcl2fastq_flow_cell_id in tmp_flow_cell_directory_bcl2fastq.name
-
-    # WHEN deleting a flowcell from status db in dry run mode
-    result: testing.Result = cli_runner.invoke(
-        delete_flow_cell,
-        [
-            "-f",
-            bcl2fastq_flow_cell_id,
-            "--status-db",
-            "--dry-run",
-            "--yes",
-        ],
-        obj=demultiplex_context,
-    )
-
-    # THEN the code should be executed successfully
-    assert result.exit_code == 0
-
-    # THEN it should be notified that it was going to remove all but init-files
-    assert (
-        f"DeleteDemuxAPI-Housekeeper: Would delete sample sheet files with tag {bcl2fastq_flow_cell_id}"
-        in caplog.text
-    )
-    assert (
-        f"DeleteDemuxAPI-Housekeeper: Would delete fastq and spring files related to flow cell {bcl2fastq_flow_cell_id}"
-        in caplog.text
-    )
-    assert f"DeleteDemuxAPI-StatusDB: Would remove {bcl2fastq_flow_cell_id}" in caplog.text
-
-    assert (
-        "DeleteDemuxAPI-Hasta: Would have removed the following directory: "
-        f"{demultiplex_context.demultiplex_api.demultiplexed_runs_dir / Path(f'some_prefix_1100_{bcl2fastq_flow_cell_id}')}\n"
-        f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_context.demultiplex_api.flow_cells_dir / Path(f'some_prefix_1100_{bcl2fastq_flow_cell_id}')}"
-    ) in caplog.text
-    assert "DeleteDemuxAPI-Init-files: Would have removed" not in caplog.text

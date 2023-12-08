@@ -7,7 +7,6 @@ from cg.cli.demultiplex.demux import (
     confirm_flow_cell_sync,
     copy_novaseqx_flow_cells,
     create_manifest_files,
-    delete_flow_cell,
     demultiplex_all,
     demultiplex_flow_cell,
 )
@@ -27,7 +26,6 @@ demultiplex_cmd_group: click.Group
 for sub_cmd in [
     create_manifest_files,
     confirm_flow_cell_sync,
-    delete_flow_cell,
     demultiplex_flow_cell,
     demultiplex_all,
     finish_group,
