@@ -44,7 +44,7 @@ def test_panel_dry_run(
             panel, [raredisease_case_id, "--dry-run"], obj=raredisease_context
         )
 
-    # THEN the file should contain the output from Scout
+    # THEN the output should contain the output from Scout
     assert result.stdout.strip() == scout_panel_output
 
 
