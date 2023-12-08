@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 from housekeeper.store.models import File
+from requests import HTTPError, Response
 
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import APIMethods
@@ -345,3 +346,25 @@ def test_retrieve_samples(
     # THEN the Archive entry should have a retrieval task id set
     for file in files:
         assert file.archive.retrieval_task_id
+
+
+def test_delete_file_success(
+    spring_archive_api: SpringArchiveAPI,
+    failed_delete_file_response: Response,
+    test_auth_token: AuthToken,
+):
+    spring_file: File = spring_archive_api.housekeeper_api.files(
+        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
+    ).first()
+    with mock.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=test_auth_token,
+    ), mock.patch.object(MiriaObject, "trim_path", return_value=True), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=failed_delete_file_response,
+    ), pytest.raises(
+        HTTPError
+    ):
+        spring_archive_api.delete_file(spring_file.path)

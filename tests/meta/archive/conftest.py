@@ -1,3 +1,4 @@
+import http
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -378,3 +379,16 @@ def path_to_spring_file_to_archive() -> str:
 @pytest.fixture
 def path_to_spring_file_with_ongoing_archival() -> str:
     return "/home/path/to/ongoing/spring/file.spring"
+
+
+@pytest.fixture
+def failed_response() -> Response:
+    response = Response()
+    response.status_code = http.HTTPStatus.FORBIDDEN
+    return response
+
+
+@pytest.fixture
+def failed_delete_file_response(failed_response) -> Response:
+    failed_response._content = b'{"detail":"Given token not valid for any token type","code":"token_not_valid","messages":[{"tokenClass":"AccessToken","tokenType":"access","message":"Token is invalid or expired"}]}'
+    return failed_response
