@@ -9,7 +9,6 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBCLConvert,
 )
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import BclConverter
 from cg.constants.sequencing import Sequencers
 from cg.io.controller import ReadFile
 from cg.resources import VALID_INDEXES_PATH

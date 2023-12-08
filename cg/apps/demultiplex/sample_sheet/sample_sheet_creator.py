@@ -181,7 +181,7 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
         """Filter out samples with single indexes."""
         LOG.info("Removing all samples without dual indexes")
         samples_to_keep = []
-        sample: FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
+        sample: FlowCellSampleBcl2Fastq
         for sample in self.lims_samples:
             if not is_dual_index(sample.index):
                 LOG.warning(f"Removing sample {sample} since it does not have dual index")
