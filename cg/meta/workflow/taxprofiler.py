@@ -14,7 +14,7 @@ from cg.models.taxprofiler.taxprofiler import (
 )
 from cg.store.models import Case, Sample
 from cg.io.controller import ReadFile, WriteFile
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, MultiQC, FileExtensions
 from cg.constants.metric_conditions import TAXPROFILER_METRIC_CONDITIONS
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
@@ -146,9 +146,9 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             MetricsBase(
                 header=None,
                 id=sample_name,
-                input="multiqc_data.json",
+                input=MultiQC.MULTIQC_DATA+FileExtensions.JSON,
                 name=metric_name,
-                step="multiqc",
+                step=MultiQC.MULTIQC,
                 value=metric_value,
                 condition=pipeline_metrics.get(metric_name),
             )
