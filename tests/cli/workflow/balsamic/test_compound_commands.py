@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from click.testing import CliRunner
+from mock import mock
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
@@ -39,6 +40,7 @@ def test_start(
     caplog,
     helpers,
     mock_analysis_flow_cell,
+    mocker,
 ):
     """Test to ensure all parts of start command will run successfully given ideal conditions"""
     caplog.set_level(logging.INFO)
@@ -46,7 +48,8 @@ def test_start(
     # GIVEN case id for which we created a config file
     case_id = "balsamic_case_wgs_single"
 
-    # WHEN dry running
+    # WHEN dry running and config case already exists
+    mocker.patch("cg.meta.workflow.balsamic.BalsamicAnalysisAPI.config_case", return_value=None)
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=balsamic_context)
 
     # THEN command should execute successfully
@@ -119,9 +122,11 @@ def test_start_available(
         exist_ok=True
     )
 
-    # GIVEN decompression is not needed
-    mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression")
-    BalsamicAnalysisAPI.resolve_decompression.return_value = None
+    # GIVEN decompression is not needed and config case performed
+    mocker.patch(
+        "cg.meta.workflow.balsamic.BalsamicAnalysisAPI.resolve_decompression", return_value=None
+    )
+    mocker.patch("cg.meta.workflow.balsamic.BalsamicAnalysisAPI.config_case", return_value=None)
 
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
@@ -166,10 +171,13 @@ def test_store_available(
         exist_ok=True
     )
 
-    # GIVEN that HermesAPI returns a deliverables output
+    # GIVEN that HermesAPI returns a deliverables output and config case performed
     hermes_deliverables["bundle_id"] = case_id_success
-    mocker.patch.object(HermesApi, "convert_deliverables")
-    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+    mocker.patch(
+        "cg.apps.hermes.hermes_api.HermesApi.convert_deliverables",
+        return_value=CGDeliverables(**hermes_deliverables),
+    )
+    mocker.patch("cg.meta.workflow.balsamic.BalsamicAnalysisAPI.config_case", return_value=None)
 
     # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
