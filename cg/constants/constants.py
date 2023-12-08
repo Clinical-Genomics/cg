@@ -40,7 +40,7 @@ class CaseActions(StrEnum):
 
     @classmethod
     def actions(cls) -> list[str]:
-        return list(cls)
+        return list(map(lambda action: action.value, cls))
 
 
 CONTAINER_OPTIONS = ("Tube", "96 well plate", "No container")
@@ -71,7 +71,7 @@ class FlowCellStatus(StrEnum):
 
     @classmethod
     def statuses(cls) -> list[str]:
-        return list(cls)
+        return list(map(lambda status: status.value, cls))
 
 
 class AnalysisType(StrEnum):
