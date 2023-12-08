@@ -13,7 +13,6 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
 )
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
-from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.meta.demultiplex.utils import (
     create_manifest_file,
     is_flow_cell_sync_confirmed,
@@ -118,66 +117,6 @@ def demultiplex_flow_cell(
         tb_api: TrailblazerAPI = context.trailblazer_api
         demultiplex_api.add_to_trailblazer(
             tb_api=tb_api, slurm_job_id=slurm_job_id, flow_cell=flow_cell
-        )
-
-
-@click.command(name="delete-flow-cell")
-@click.option(
-    "-f",
-    "--flow-cell-name",
-    required=True,
-    help="The name of the flow cell you want to delete, e.g. HVKJCDRXX",
-)
-@click.option(
-    "--demultiplexing-dir", is_flag=True, help="Delete flow cell demultiplexed dir on file system"
-)
-@click.option("--housekeeper", is_flag=True, help="Delete flow cell in housekeeper")
-@click.option("--init-files", is_flag=True, help="Delete flow cell init-files")
-@click.option("--run-dir", is_flag=True, help="Delete flow cell run on file system")
-@click.option(
-    "--sample-lane-sequencing-metrics",
-    is_flag=True,
-    help="Delete flow cell in sample lane sequencing metrics",
-)
-@click.option(
-    "--status-db",
-    is_flag=True,
-    help="Delete flow cell in status-db, if passed all other entries are also deleted",
-)
-@click.option("--yes", is_flag=True, help="Pass yes to click confirm")
-@DRY_RUN
-@click.pass_obj
-def delete_flow_cell(
-    context: CGConfig,
-    dry_run: bool,
-    demultiplexing_dir: bool,
-    housekeeper: bool,
-    init_files: bool,
-    run_dir: bool,
-    sample_lane_sequencing_metrics: bool,
-    status_db: bool,
-    yes: bool,
-    flow_cell_name: str,
-):
-    """Delete a flow cell. If --status-db is passed then all other options will be treated as True."""
-
-    delete_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
-        config=context, dry_run=dry_run, flow_cell_name=flow_cell_name
-    )
-
-    if yes or click.confirm(
-        f"Are you sure you want to delete the flow cell from the following databases:\n"
-        f"Housekeeper={True if status_db else housekeeper}\nInit_files={True if status_db else init_files}\n"
-        f"Run-dir={True if status_db else run_dir}\nStatusdb={status_db}\n"
-        f"\nSample-lane-sequencing-metrics={True if sample_lane_sequencing_metrics else sample_lane_sequencing_metrics}"
-    ):
-        delete_demux_api.delete_flow_cell(
-            demultiplexing_dir=demultiplexing_dir,
-            housekeeper=housekeeper,
-            init_files=init_files,
-            sample_lane_sequencing_metrics=sample_lane_sequencing_metrics,
-            run_dir=run_dir,
-            status_db=status_db,
         )
 
 

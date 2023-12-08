@@ -3,8 +3,7 @@ import datetime as dt
 import pytest
 
 from cg.constants import Pipeline
-from cg.constants.constants import PrepCategory
-from cg.constants.invoice import CustomerNames
+from cg.constants.constants import CustomerId, PrepCategory
 from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus
 from cg.meta.orders.pool_submitter import PoolSubmitter
@@ -360,7 +359,7 @@ def pool_order_1() -> str:
 def store_with_multiple_pools_for_customer(
     store: Store,
     helpers: StoreHelpers,
-    customer_id: str = CustomerNames.cust132,
+    customer_id: str = CustomerId.CUST132,
 ) -> Store:
     """Return a store with two pools with different names for the same customer."""
     for number in range(2):
