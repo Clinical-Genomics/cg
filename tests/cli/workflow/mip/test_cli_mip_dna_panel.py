@@ -28,7 +28,7 @@ def test_panel_file_is_written(
         # WHEN creating a panel file
         cli_runner.invoke(panel, [case_id], obj=mip_dna_context)
 
-    panel_file = Path(analysis_api.root, case_id, ScoutExportFileName.PANEL)
+    panel_file = Path(analysis_api.root, case_id, ScoutExportFileName.PANELS)
 
     # THEN the file should exist
     assert panel_file.exists()

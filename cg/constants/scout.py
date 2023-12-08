@@ -11,7 +11,7 @@ class GenomeBuild(StrEnum):
 
 class ScoutExportFileName(StrEnum):
     MANAGED_VARIANTS: str = f"managed_variants{FileExtensions.VCF}"
-    PANEL: str = f"gene_panels{FileExtensions.BED}"
+    PANELS: str = f"gene_panels{FileExtensions.BED}"
 
 
 class ScoutCustomCaseReportTags(StrEnum):

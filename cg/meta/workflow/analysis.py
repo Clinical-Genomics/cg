@@ -533,7 +533,7 @@ class AnalysisAPI(MetaAPI):
         WriteFile.write_file_from_content(
             content="\n".join(content),
             file_format=FileFormat.TXT,
-            file_path=Path(out_dir, ScoutExportFileName.PANEL),
+            file_path=Path(out_dir, ScoutExportFileName.PANELS),
         )
 
     def _get_gene_panel(self, case_id: str, genome_build: str) -> list[str]:
