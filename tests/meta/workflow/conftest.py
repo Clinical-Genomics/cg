@@ -236,7 +236,7 @@ def fixture_mip_analysis_api(
     return analysis_api
 
 
-@pytest.fixture(name="taxprofiler_metrics")
+@pytest.fixture
 def taxprofiler_metrics() -> dict[str, float]:
     """Return Taxprofiler raw analysis metrics dictionary."""
     return {
