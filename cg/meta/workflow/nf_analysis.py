@@ -323,9 +323,9 @@ class NfAnalysisAPI(AnalysisAPI):
             MetricsBase(
                 header=None,
                 id=sample_id,
-                input="multiqc_data.json",
+                input=MultiQC.MULTIQC_DATA+FileExtensions.JSON,
                 name=metric_name,
-                step="multiqc",
+                step=MultiQC.MULTIQC,
                 value=metric_value,
                 condition=pipeline_metrics.get(metric_name, None),
             )
