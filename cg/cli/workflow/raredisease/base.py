@@ -4,6 +4,7 @@ import logging
 
 import click
 
+from cg.cli.utils import echo_lines
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
 from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -53,7 +54,6 @@ def managed_variants(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
     vcf_lines: list[str] = analysis_api.get_managed_variants()
     if dry_run:
-        for vcf_line in vcf_lines:
-            click.echo(vcf_line)
+        echo_lines(lines=vcf_lines)
         return
     analysis_api.write_managed_variants(case_id=case_id, content=vcf_lines)

@@ -83,3 +83,25 @@ def test_managed_variants_is_written(
     # THEN the file should contain the output from Scout
     file_content: str = read_txt(file_path=managed_variants_file, read_to_string=True)
     assert file_content == scout_export_manged_variants_output
+
+
+def test_managed_variants_dry_run(
+    raredisease_case_id: str,
+    cli_runner: CliRunner,
+    raredisease_context: CGConfig,
+    scout_export_manged_variants_output: str,
+):
+    # GIVEN a case
+
+    # GIVEN that, the Scout command writes the managed variants to stdout
+    with mock.patch(
+        "cg.utils.commands.subprocess.run",
+        return_value=create_process_response(std_out=scout_export_manged_variants_output),
+    ):
+        # WHEN creating a managed_variants file using dry run
+        result = cli_runner.invoke(
+            managed_variants, [raredisease_case_id, "--dry-run"], obj=raredisease_context
+        )
+
+    # THEN the result should contain the output from Scout
+    assert result.stdout.strip() == scout_export_manged_variants_output
