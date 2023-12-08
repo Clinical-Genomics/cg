@@ -56,13 +56,13 @@ def valid_index() -> Index:
 
 @pytest.fixture
 def bcl2fastq_sample_sheet_creator(
-    hiseq_x_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
+    novaseq_flow_cell_demultiplexed_with_bcl2fastq: FlowCellDirectoryData,
+    lims_novaseq_6000_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
 ) -> SampleSheetCreatorBcl2Fastq:
     """Returns a sample sheet creator for version 1 sample sheets with bcl2fastq format."""
     return SampleSheetCreatorBcl2Fastq(
-        flow_cell=hiseq_x_flow_cell,
-        lims_samples=lims_novaseq_bcl2fastq_samples,
+        flow_cell=novaseq_flow_cell_demultiplexed_with_bcl2fastq,
+        lims_samples=lims_novaseq_6000_bcl2fastq_samples,
     )
 
 

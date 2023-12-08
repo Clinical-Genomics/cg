@@ -788,6 +788,14 @@ def lims_novaseq_bcl2fastq_samples(
     return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
 
 
+@pytest.fixture
+def lims_novaseq_6000_bcl2fastq_samples(
+    lims_novaseq_6000_sample_raw: list[dict],
+) -> list[FlowCellSampleBcl2Fastq]:
+    """Return a list of parsed Bcl2fastq flow cell samples"""
+    return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_6000_sample_raw]
+
+
 @pytest.fixture(name="tmp_flow_cells_directory")
 def tmp_flow_cells_directory(tmp_path: Path, flow_cells_dir: Path) -> Path:
     """
@@ -1570,10 +1578,24 @@ def lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
 
 
 @pytest.fixture
+def lims_novaseq_6000_samples_file(bcl2fastq_flow_cell_dir: Path) -> Path:
+    """Return the path to the file with the raw samples of HVKJCDRXX flow cell in lims format."""
+    return Path(bcl2fastq_flow_cell_dir, "HVKJCDRXX_raw.json")
+
+
+@pytest.fixture
 def lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> list[dict]:
     """Return a list of raw flow cell samples."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=lims_novaseq_samples_file
+    )
+
+
+@pytest.fixture
+def lims_novaseq_6000_sample_raw(lims_novaseq_6000_samples_file: Path) -> list[dict]:
+    """Return the list of raw samples from flow cell HVKJCDRXX."""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=lims_novaseq_6000_samples_file
     )
 
 
