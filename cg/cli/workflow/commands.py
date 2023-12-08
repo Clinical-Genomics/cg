@@ -9,7 +9,7 @@ from dateutil.parser import parse as parse_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
-from cg.exc import FlowCellsNeededError
+from cg.exc import FlowCellsNeededError, CgError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -22,6 +22,8 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
@@ -87,6 +89,29 @@ def link(context: CGConfig, case_id: str, dry_run: bool):
     if dry_run:
         return
     analysis_api.link_fastq_files(case_id=case_id)
+
+
+@click.command("metrics-deliver")
+@ARGUMENT_CASE_ID
+@OPTION_DRY
+@click.pass_obj
+def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Create and validate a metrics deliverables file for given case id.
+    If QC metrics are met it sets the status in Trailblazer to complete.
+    If failed, it sets it as failed and adds a comment with information of the failed metrics."""
+
+    analysis_api: RnafusionAnalysisAPI | TaxprofilerAnalysisAPI = context.meta_apis["analysis_api"]
+
+    try:
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
+    except CgError as error:
+        raise click.Abort() from error
+
+    analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
+    try:
+        analysis_api.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
+    except CgError as error:
+        raise click.Abort() from error
 
 
 @click.command("store")
