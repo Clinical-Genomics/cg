@@ -5,6 +5,7 @@ from mock import mock
 
 from cg.cli.workflow.raredisease.base import managed_variants, panel, raredisease
 from cg.constants import EXIT_SUCCESS, FileExtensions
+from cg.constants.scout import ScoutExportFileName
 from cg.io.txt import read_txt
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -74,7 +75,7 @@ def test_managed_variants_is_written(
         cli_runner.invoke(managed_variants, [raredisease_case_id], obj=raredisease_context)
 
     managed_variants_file = Path(
-        analysis_api.root, raredisease_case_id, f"managed_variants{FileExtensions.VCF}"
+        analysis_api.root, raredisease_case_id, ScoutExportFileName.MANAGED_VARIANTS
     )
 
     # THEN the file should exist

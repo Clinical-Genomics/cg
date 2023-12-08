@@ -30,14 +30,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         return self.config.raredisease.root
 
     def write_managed_variants(self, case_id: str, content: list[str]) -> None:
-        """Write the managed variants to case dir."""
-        out_dir = Path(self.root, case_id)
-        out_dir.mkdir(parents=True, exist_ok=True)
-        WriteFile.write_file_from_content(
-            content="\n".join(content),
-            file_format=FileFormat.TXT,
-            file_path=Path(out_dir, f"managed_variants{FileExtensions.VCF}"),
-        )
+        self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)
 
     def write_panel(self, case_id: str, content: list[str]) -> None:
         """Write the gene panel to case dir."""

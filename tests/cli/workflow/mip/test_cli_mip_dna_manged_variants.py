@@ -4,7 +4,7 @@ from click.testing import CliRunner
 from mock import mock
 
 from cg.cli.workflow.mip.base import managed_variants
-from cg.constants import FileExtensions
+from cg.constants.scout import ScoutExportFileName
 from cg.io.txt import read_txt
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -30,9 +30,7 @@ def test_managed_variants_is_written(
         # WHEN creating a managed_variants file
         cli_runner.invoke(managed_variants, [case_id], obj=mip_dna_context)
 
-    managed_variants_file = Path(
-        analysis_api.root, case_id, f"managed_variants{FileExtensions.VCF}"
-    )
+    managed_variants_file = Path(analysis_api.root, case_id, ScoutExportFileName.MANAGED_VARIANTS)
 
     # THEN the file should exist
     assert managed_variants_file.exists()

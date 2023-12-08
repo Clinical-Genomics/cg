@@ -1,11 +1,16 @@
 from enum import StrEnum
 
+from cg.constants import FileExtensions
 from cg.constants.housekeeper_tags import AlignmentFileTag
 
 
 class GenomeBuild(StrEnum):
     hg19: str = "37"
     hg38: str = "38"
+
+
+class ScoutExportFileName(StrEnum):
+    MANAGED_VARIANTS: str = f"managed_variants{FileExtensions.VCF}"
 
 
 class ScoutCustomCaseReportTags(StrEnum):
