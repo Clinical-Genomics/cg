@@ -244,3 +244,10 @@ class Strandedness(StrEnum):
 
 
 PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.SARS_COV_2]
+
+
+class MultiQC(StrEnum):
+    """MultiQC constants"""
+
+    MULTIQC: str = "multiqc"
+    MULTIQC_DATA: str = "multiqc_data"
