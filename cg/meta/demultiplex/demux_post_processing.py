@@ -6,7 +6,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import FlowCellError, MissingFilesError
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     delete_sequencing_data_from_housekeeper,
-    delete_sequencing_logs_from_housekeeper,
     store_flow_cell_data_in_housekeeper,
 )
 from cg.meta.demultiplex.status_db_storage_functions import (
@@ -136,4 +135,3 @@ class DemuxPostProcessingAPI:
         """Delete flow cell data from status db and housekeeper."""
         delete_sequencing_metrics_from_statusdb(flow_cell_id=flow_cell_id, store=self.status_db)
         delete_sequencing_data_from_housekeeper(flow_cell_id=flow_cell_id, hk_api=self.hk_api)
-        delete_sequencing_logs_from_housekeeper(flow_cell_id=flow_cell_id, hk_api=self.hk_api)

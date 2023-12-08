@@ -186,11 +186,3 @@ def delete_sequencing_data_from_housekeeper(flow_cell_id: str, hk_api: Housekeep
         housekeeper_files: Iterable[File] = hk_api.files(tags=tags)
         for housekeeper_file in housekeeper_files:
             hk_api.delete_file(file_id=housekeeper_file.id)
-
-
-def delete_sequencing_logs_from_housekeeper(flow_cell_id: str, hk_api: HousekeeperAPI) -> None:
-    housekeeper_files: Iterable[File] = hk_api.files(
-        bundle=flow_cell_id, tags={SequencingFileTag.DEMUX_LOG, flow_cell_id}
-    )
-    for housekeeper_file in housekeeper_files:
-        hk_api.delete_file(file_id=housekeeper_file.id)

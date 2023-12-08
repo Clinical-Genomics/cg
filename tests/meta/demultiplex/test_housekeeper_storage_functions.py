@@ -14,7 +14,6 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_sample_fastq_files_to_housekeeper,
     add_sample_sheet_path_to_housekeeper,
     delete_sequencing_data_from_housekeeper,
-    delete_sequencing_logs_from_housekeeper,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -302,26 +301,3 @@ def test_delete_sequencing_data_from_housekeeper_two_flow_cells(
     remaining_file: File = real_housekeeper_api.files(bundle=sample_id).one()
     assert remaining_file
     assert remaining_file.path.endswith(second_file.name)
-
-
-def test_delete_sequencing_logs_from_housekeeper(
-    real_housekeeper_api: HousekeeperAPI, flow_cell_name, helpers: StoreHelpers, tmp_path: Path
-):
-    """Tests the deletion of sequencing logs from housekeeper for a flow cell."""
-    # GIVEN a flow cell with demux logs in housekeeper
-    helpers.quick_hk_bundle(
-        store=real_housekeeper_api,
-        bundle_name=flow_cell_name,
-        files=[tmp_path],
-        tags=[[SequencingFileTag.DEMUX_LOG, flow_cell_name]],
-    ),
-
-    # WHEN deleting the sequencing logs from housekeeper
-    delete_sequencing_logs_from_housekeeper(
-        flow_cell_id=flow_cell_name, hk_api=real_housekeeper_api
-    )
-
-    # THEN the sequencing logs are deleted from housekeeper
-    assert not real_housekeeper_api.files(
-        bundle=flow_cell_name, tags={SequencingFileTag.DEMUX_LOG, flow_cell_name}
-    ).all()
