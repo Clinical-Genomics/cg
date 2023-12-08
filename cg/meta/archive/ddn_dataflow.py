@@ -34,6 +34,7 @@ class DataflowEndpoints(StrEnum):
     """Enum containing all DDN dataflow endpoints used."""
 
     ARCHIVE_FILES = "files/archive"
+    DELETE_FILE = "files/delete"
     GET_AUTH_TOKEN = "auth/token"
     REFRESH_AUTH_TOKEN = "auth/token/refresh"
     RETRIEVE_FILES = "files/retrieve"
@@ -240,6 +241,37 @@ class GetJobStatusPayload(BaseModel):
         return GetJobStatusResponse.model_validate(response.json())
 
 
+class DeleteFileResponse(BaseModel):
+    message: str = Field(alias="Message")
+
+
+class DeleteFilePayload(BaseModel):
+    global_path: str
+
+    def delete_file(self, url: str, headers: dict) -> DeleteFileResponse:
+        """Posts to the given URL with the given headers to delete the file or directory at the specified global path.
+        Returns the parsed response.
+        Raises:
+             HTTPError if the response code is not ok.
+        """
+        LOG.info(
+            "Sending request with headers: \n"
+            + f"{headers} \n"
+            + "and body: \n"
+            + f"{self.model_dump()}"
+        )
+
+        response: Response = APIRequest.api_request_from_content(
+            api_method=APIMethods.POST,
+            url=url,
+            headers=headers,
+            json=self.model_dump(),
+            verify=False,
+        )
+        response.raise_for_status()
+        return DeleteFileResponse.model_validate(response.json())
+
+
 class DDNDataFlowClient(ArchiveHandler):
     """Class for archiving and retrieving folders via DDN Dataflow."""
 
@@ -382,3 +414,16 @@ class DDNDataFlowClient(ArchiveHandler):
         if job_status in FAILED_JOB_STATUSES:
             raise ArchiveJobFailedError(f"Job with id {job_id} failed with status {job_status}")
         return False
+
+    @staticmethod
+    def get_file_name(file: File) -> str:
+        return Path(file.path).name
+
+    def delete_file(self, file_and_sample: FileAndSample) -> None:
+        """Deletes the given file via Miria."""
+        file_name: str = self.get_file_name(file_and_sample.file)
+        sample_id: str = file_and_sample.sample.internal_id
+        delete_file_payload = DeleteFilePayload(global_path=f"{sample_id}/{file_name}")
+        delete_file_payload.delete_file(
+            url=urljoin(self.url, DataflowEndpoints.DELETE_FILE), headers=self.headers
+        )

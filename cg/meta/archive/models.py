@@ -64,3 +64,7 @@ class ArchiveHandler:
     def is_job_done(self, job_id: int) -> bool:
         """Returns true if job has been completed, false otherwise."""
         pass
+
+    @abstractmethod
+    def delete_file(self, file_and_sample: FileAndSample) -> None:
+        """Deletes a file at the archive location."""

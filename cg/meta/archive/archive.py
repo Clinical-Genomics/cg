@@ -305,5 +305,36 @@ class SpringArchiveAPI:
             ]
         )
 
-    def get_archive_location_from_file(self, file: File) -> str:
-        return self.status_db.get_sample_by_internal_id(file.version.bundle.name).archive_location
+    @staticmethod
+    def is_file_not_archived(file: File):
+        return not file.archive or not file.archive.archived_at
+
+    @staticmethod
+    def get_archive_location_from_file(file: File) -> ArchiveLocations | None:
+        for tag_name in [tag.name for tag in file.tags]:
+            if tag_name in iter(ArchiveLocations):
+                LOG.info(f"Found archive location {tag_name}")
+                return tag_name
+        LOG.warning("No configured archive location in the file tags")
+        return None
+
+    def delete_file_from_archive_location(
+        self, file_and_sample: FileAndSample, archive_location: ArchiveLocations
+    ) -> None:
+        archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
+        archive_handler.delete_file(file_and_sample)
+
+    def delete_file(self, file_path: str) -> None:
+        """Deletes the specified file where it is archived and deletes the Housekeeper record."""
+        file: File = self.housekeeper_api.files(path=file_path).first()
+        if self.is_file_not_archived(file):
+            LOG.warning(f"No archived file found for file {file_path} - exiting")
+            return
+        archive_location: ArchiveLocations | None = self.get_archive_location_from_file(file)
+        if not archive_location:
+            LOG.warning("No archive location could be determined - exiting")
+            return
+        file_and_sample: FileAndSample = self.add_samples_to_files([file])[0]
+        self.delete_file_from_archive_location(
+            file_and_sample=file_and_sample, archive_location=archive_location
+        )
