@@ -2,17 +2,10 @@ import logging
 from pathlib import Path
 
 from click.testing import CliRunner
-from mock import mock
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
-from cg.cli.workflow.balsamic.base import (
-    balsamic,
-    start,
-    start_available,
-    store,
-    store_available,
-)
+from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 
