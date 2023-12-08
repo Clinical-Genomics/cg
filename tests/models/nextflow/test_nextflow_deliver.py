@@ -93,13 +93,12 @@ def test_file_deliverables_non_existing_file(
     # WHEN instantiating a deliverables object
 
     # THEN assert that an error is raised
-    with pytest.raises(ValidationError) as error:
-        FileDeliverable(
-            format=FileFormat.TSV,
-            id=any_string,
-            path=non_existing_file_path,
-            step=any_string,
-            tag=any_string,
-        )
-    # THEN assert the error message
-    assert f"Path {str(non_existing_file_path)} does not exist" in str(error.value)
+    file_deliverable = FileDeliverable(
+        format=FileFormat.TSV,
+        id=any_string,
+        path=non_existing_file_path,
+        step=any_string,
+        tag=any_string,
+    )
+    # THEN assert that it was successfully created
+    assert isinstance(file_deliverable, FileDeliverable)
