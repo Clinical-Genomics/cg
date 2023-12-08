@@ -15,13 +15,13 @@ class RnafusionQCMetrics(BaseModel):
     after_filtering_q30_rate: float | None
     after_filtering_read1_mean_length: float | None
     before_filtering_total_reads: float | None
-    bias_5_3: float | None
+    median_5prime_to_3prime_bias: float | None
     pct_adapter: float | None
     pct_mrna_bases: float | None
     pct_ribosomal_bases: float | None
     pct_surviving: float | None
     pct_duplication: float | None
-    reads_aligned: float | None
+    read_pairs_examined: float | None
     uniquely_mapped_percent: float | None
 
 
@@ -36,12 +36,7 @@ class RnafusionParameters(PipelineParameters):
     cram: str = "arriba,starfusion"
     fastp_trim: bool = True
     fusioncatcher: bool = True
-    fusioninspector_filter: bool = False
-    fusionreport_filter: bool = False
-    pizzly: bool = False
-    squid: bool = False
     starfusion: bool = True
-    trim: bool = False
     trim_tail: int = 50
 
 

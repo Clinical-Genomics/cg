@@ -56,9 +56,10 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.load_config.rank_model_version = mip_analysis_data.rank_model_version
         self.load_config.sv_rank_model_version = mip_analysis_data.sv_rank_model_version
 
-        self.load_config.gene_panels = (
-            self.mip_analysis_api.convert_panels(
-                self.analysis_obj.case.customer.internal_id, self.analysis_obj.case.panels
+        self.load_config.gene_panels: list[str] | None = (
+            self.mip_analysis_api.get_aggregated_panels(
+                customer_id=self.analysis_obj.case.customer.internal_id,
+                default_panels=set(self.analysis_obj.case.panels),
             )
             or None
         )

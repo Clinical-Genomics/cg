@@ -11,6 +11,7 @@ from housekeeper.store.models import Bundle, Version
 from cg.apps.environ import environ_email
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import AnalysisType, CaseActions, WorkflowManager
+from cg.constants.gene_panel import GenePanelCombo
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
@@ -19,6 +20,15 @@ from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
+
+
+def add_gene_panel_combo(default_panels: set[str]) -> set[str]:
+    """Add gene panels combinations for gene panels being part of gene panel combination and return updated gene panels."""
+    all_panels = default_panels
+    for panel in default_panels:
+        if panel in GenePanelCombo.COMBO_1:
+            all_panels |= GenePanelCombo.COMBO_1.get(panel)
+    return all_panels
 
 
 class AnalysisAPI(MetaAPI):
@@ -499,3 +509,11 @@ class AnalysisAPI(MetaAPI):
         self.resolve_decompression(case_id, dry_run=dry_run)
         if not self.is_case_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ file are not present for the analysis to start")
+
+    def _get_gene_panel(self, case_id: str, genome_build: str) -> list[str]:
+        """Create and return the aggregated gene panel file."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        all_panels: list[str] = self.get_aggregated_panels(
+            customer_id=case.customer.internal_id, default_panels=set(case.panels)
+        )
+        return self.scout_api.export_panels(build=genome_build, panels=all_panels)

@@ -82,13 +82,12 @@ def test_demultiplex_bcl2fastq_flow_cell(
         hk_api=demultiplexing_context_for_demux.housekeeper_api,
     )
 
-    # GIVEN an out dir that does not exist
+    # GIVEN a flow cell that is ready for demultiplexing
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     unaligned_dir: Path = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
-    assert demux_dir.exists() is False
-    assert unaligned_dir.exists() is False
+
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
 
     # WHEN starting demultiplexing from the CLI with dry run flag
@@ -98,7 +97,7 @@ def test_demultiplex_bcl2fastq_flow_cell(
         obj=demultiplexing_context_for_demux,
     )
 
-    # THEN assert the command exits sucessfully
+    # THEN assert the command exits successfully
 
     assert result.exit_code == 0
 
@@ -131,14 +130,19 @@ def test_demultiplex_dragen_flowcell(
         hk_api=demultiplexing_context_for_demux.housekeeper_api,
     )
 
-    # GIVEN an out dir that does not exist
+    # GIVEN a flow cell that is ready for demultiplexing
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
-    assert demux_dir.exists() is False
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
 
-    # WHEN starting demultiplexing from the CLI with dry run flag
+    # GIVEN an already existing output directory
+    demux_dir.mkdir(parents=True)
+    marker_file = Path(demux_dir, "dummy_file_present_in_old_dir")
+    marker_file.touch()
+    assert marker_file.exists()
+
+    # WHEN starting demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
         [str(tmp_flow_cell_directory_bclconvert), "-b", "dragen"],
@@ -150,6 +154,9 @@ def test_demultiplex_dragen_flowcell(
 
     # THEN assert the results folder was created
     assert demux_dir.exists()
+
+    # THEN assert that the old directory was removed
+    assert not marker_file.exists()
 
     # THEN assert that the sbatch script was created
     assert demux_api.demultiplex_sbatch_path(flow_cell).exists()
