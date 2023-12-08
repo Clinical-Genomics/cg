@@ -36,8 +36,7 @@ def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
     bed_lines: list[str] = analysis_api.get_gene_panel(case_id=case_id)
     if dry_run:
-        for bed_line in bed_lines:
-            click.echo(bed_line)
+        echo_lines(lines=bed_lines)
         return
     analysis_api.write_panel(case_id=case_id, content=bed_lines)
 

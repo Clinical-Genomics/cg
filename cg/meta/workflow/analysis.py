@@ -526,6 +526,16 @@ class AnalysisAPI(MetaAPI):
             file_path=Path(out_dir, ScoutExportFileName.MANAGED_VARIANTS),
         )
 
+    @staticmethod
+    def _write_panel(out_dir: Path, content: list[str]) -> None:
+        """Write the managed variants to case dir."""
+        out_dir.mkdir(parents=True, exist_ok=True)
+        WriteFile.write_file_from_content(
+            content="\n".join(content),
+            file_format=FileFormat.TXT,
+            file_path=Path(out_dir, ScoutExportFileName.PANEL),
+        )
+
     def _get_gene_panel(self, case_id: str, genome_build: str) -> list[str]:
         """Create and return the aggregated gene panel file."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)

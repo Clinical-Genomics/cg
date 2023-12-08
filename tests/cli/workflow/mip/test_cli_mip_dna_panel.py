@@ -5,7 +5,7 @@ import mock
 from click.testing import CliRunner
 
 from cg.cli.workflow.mip_dna.base import panel
-from cg.constants import FileExtensions
+from cg.constants.scout import ScoutExportFileName
 from cg.io.txt import read_txt
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -28,7 +28,7 @@ def test_panel_file_is_written(
         # WHEN creating a panel file
         cli_runner.invoke(panel, [case_id], obj=mip_dna_context)
 
-    panel_file = Path(analysis_api.root, case_id, f"gene_panels{FileExtensions.BED}")
+    panel_file = Path(analysis_api.root, case_id, ScoutExportFileName.PANEL)
 
     # THEN the file should exist
     assert panel_file.exists()
