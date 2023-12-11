@@ -52,6 +52,25 @@ HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]
 HK_DELIVERY_REPORT_TAG = "delivery-report"
 
 
+class AnalysisTag(StrEnum):
+    """Tags for analysis files."""
+
+    MULTIQC_HTML: str = "multiqc-html"
+    FUSION: str = "fusion"
+    ARRIBA: str = "arriba"
+    STARFUSION: str = "star-fusion"
+    FUSIONCATCHER: str = "fusioncatcher"
+    FUSIONCATCHER_SUMMARY: str = "fusioncatcher-summary"
+    FUSIONINSPECTOR: str = "fusioninspector"
+    FUSIONREPORT: str = "fusionreport"
+    RESEARCH: str = "research"
+    FUSIONINSPECTOR_HTML: str = "fusioninspector-html"
+    ARRIBA_VISUALIZATION: str = "arriba-visualisation"
+    RNA: str = "rna"
+    VCF_FUSION: str = "vcf-fusion"
+    GENE_COUNTS: str = "gene-counts"
+
+
 class HkMipAnalysisTag:
     CONFIG: list[str] = ["mip-config"]
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
