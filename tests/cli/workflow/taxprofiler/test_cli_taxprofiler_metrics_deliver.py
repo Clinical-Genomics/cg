@@ -46,7 +46,7 @@ def test_with_missing_case(
     # THEN command should NOT successfully call the command it creates
 
     assert result.exit_code != EXIT_SUCCESS
-    # THEN ERROR log should be printed containing invalid case_id
+    # THEN ERROR log should be printed containing invalid case id
     assert case_id_does_not_exist in caplog.text
     assert f"{case_id_does_not_exist} could not be found" in caplog.text
 
@@ -64,7 +64,7 @@ def test_metrics_deliver(
     """Test command with a case id and a finished analysis which should execute successfully."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN case-id
+    # GIVEN case id
 
     metrics_content: str = "name: filtering_result_passed_filter_reads\n"
 
