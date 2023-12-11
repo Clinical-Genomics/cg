@@ -1,30 +1,44 @@
-import pytest
-
 from cg.constants.constants import MicrosaltQC
 from cg.meta.workflow.microsalt.utils import is_total_reads_above_failure_threshold
 
-TARGET_READS_FAIL_THRESHOLD = MicrosaltQC.TARGET_READS_FAIL_THRESHOLD
 
-test_cases = [
-    (TARGET_READS_FAIL_THRESHOLD * 100, 100, False, "sufficient_reads"),
-    (TARGET_READS_FAIL_THRESHOLD * 100 - 1, 100, True, "just_below_threshold"),
-    (0, 100, True, "edge_case_no_reads"),
-    (TARGET_READS_FAIL_THRESHOLD * 100, 0, False, "edge_case_no_target_reads"),
-]
-
-
-@pytest.mark.parametrize(
-    "sample_reads, target_reads, expected_result, test_id", test_cases, ids=lambda x: x[-1]
-)
-def test_is_total_reads_above_failure_threshold(
-    sample_reads, target_reads, expected_result, test_id
-):
-    # GIVEN a sample with a number of reads and a target number of reads
+def test_sample_total_reads_passing():
+    # GIVEN a sample with sufficient reads
+    sample_reads = 100
+    target_reads = 100
 
     # WHEN checking if the sample has sufficient reads
-    result = is_total_reads_above_failure_threshold(
+    passes_reads_threshold = is_total_reads_above_failure_threshold(
         sample_reads=sample_reads, target_reads=target_reads
     )
 
-    # THEN the result should be as expected
-    assert result == expected_result, f"Test failed for {test_id}"
+    # THEN it passes
+    assert passes_reads_threshold
+
+
+def test_sample_total_reads_failing():
+    # GIVEN a sample with insufficient reads
+    sample_reads = 50
+    target_reads = 100
+
+    # WHEN checking if the sample has sufficient reads
+    passes_reads_threshold = is_total_reads_above_failure_threshold(
+        sample_reads=sample_reads, target_reads=target_reads
+    )
+
+    # THEN it fails
+    assert not passes_reads_threshold
+
+
+def test_sample_total_reads_failing_without_reads():
+    # GIVEN a sample without reads
+    sample_reads = 0
+    target_reads = 100
+
+    # WHEN checking if the sample has sufficient reads
+    passes_reads_threshold = is_total_reads_above_failure_threshold(
+        sample_reads=sample_reads, target_reads=target_reads
+    )
+
+    # THEN it fails
+    assert not passes_reads_threshold

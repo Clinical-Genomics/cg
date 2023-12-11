@@ -120,5 +120,5 @@ class QualityChecker:
         LOG.info(f"Performing QC on case {case_id}")
         return True
 
-    def sample_total_reads_qc(self, sample: Sample) -> bool:
+    def sample_total_reads_qc(self, sample_id: str) -> bool:
         pass
