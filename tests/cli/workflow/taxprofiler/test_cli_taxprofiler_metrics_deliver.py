@@ -64,7 +64,7 @@ def test_metrics_deliver(
     """Test command with a case id and a finished analysis which should execute successfully."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN case-id
+    # GIVEN case id
 
     metrics_content: str = "name: filtering_result_passed_filter_reads\n"
 
