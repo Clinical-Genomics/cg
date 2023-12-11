@@ -8,9 +8,8 @@ import pytest
 from housekeeper.store.models import Bundle, File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.housekeeper_tags import HkMipAnalysisTag, SequencingFileTag
-from cg.constants.invoice import CustomerNames
 from cg.constants.constants import CustomerId
+from cg.constants.housekeeper_tags import HkMipAnalysisTag, SequencingFileTag
 from cg.constants.sequencing import Sequencers
 from cg.meta.invoice import InvoiceAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
