@@ -1,5 +1,4 @@
-from cg.constants.constants import MicrosaltQC
-from cg.meta.workflow.microsalt.utils import is_total_reads_above_failure_threshold
+from cg.meta.workflow.microsalt.utils import is_valid_total_reads
 
 
 def test_sample_total_reads_passing():
@@ -8,7 +7,7 @@ def test_sample_total_reads_passing():
     target_reads = 100
 
     # WHEN checking if the sample has sufficient reads
-    passes_reads_threshold = is_total_reads_above_failure_threshold(
+    passes_reads_threshold = is_valid_total_reads(
         sample_reads=sample_reads, target_reads=target_reads
     )
 
@@ -22,7 +21,7 @@ def test_sample_total_reads_failing():
     target_reads = 100
 
     # WHEN checking if the sample has sufficient reads
-    passes_reads_threshold = is_total_reads_above_failure_threshold(
+    passes_reads_threshold = is_valid_total_reads(
         sample_reads=sample_reads, target_reads=target_reads
     )
 
@@ -36,7 +35,7 @@ def test_sample_total_reads_failing_without_reads():
     target_reads = 100
 
     # WHEN checking if the sample has sufficient reads
-    passes_reads_threshold = is_total_reads_above_failure_threshold(
+    passes_reads_threshold = is_valid_total_reads(
         sample_reads=sample_reads, target_reads=target_reads
     )
 
