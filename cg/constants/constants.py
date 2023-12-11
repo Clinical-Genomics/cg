@@ -215,6 +215,7 @@ class MicrosaltQC:
     COVERAGE_10X_THRESHOLD: float = 0.75
     NEGATIVE_CONTROL_READS_THRESHOLD: float = 0.2
     TARGET_READS: int = 6000000
+    TARGET_READS_FAIL_THRESHOLD: float = 0.7
 
 
 class MicrosaltAppTags(StrEnum):
