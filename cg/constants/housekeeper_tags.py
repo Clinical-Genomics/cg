@@ -55,20 +55,20 @@ HK_DELIVERY_REPORT_TAG = "delivery-report"
 class AnalysisTag(StrEnum):
     """Tags for analysis files."""
 
-    MULTIQC_HTML: str = "multiqc-html"
-    FUSION: str = "fusion"
     ARRIBA: str = "arriba"
-    STARFUSION: str = "star-fusion"
+    ARRIBA_VISUALIZATION: str = "arriba-visualisation"
+    FUSION: str = "fusion"
     FUSIONCATCHER: str = "fusioncatcher"
     FUSIONCATCHER_SUMMARY: str = "fusioncatcher-summary"
     FUSIONINSPECTOR: str = "fusioninspector"
-    FUSIONREPORT: str = "fusionreport"
-    RESEARCH: str = "research"
     FUSIONINSPECTOR_HTML: str = "fusioninspector-html"
-    ARRIBA_VISUALIZATION: str = "arriba-visualisation"
-    RNA: str = "rna"
-    VCF_FUSION: str = "vcf-fusion"
+    FUSIONREPORT: str = "fusionreport"
     GENE_COUNTS: str = "gene-counts"
+    MULTIQC_HTML: str = "multiqc-html"
+    RESEARCH: str = "research"
+    RNA: str = "rna"
+    STARFUSION: str = "star-fusion"
+    VCF_FUSION: str = "vcf-fusion"
 
 
 class HkMipAnalysisTag:
