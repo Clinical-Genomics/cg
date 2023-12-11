@@ -3,10 +3,8 @@
 import logging
 from pathlib import Path
 
-from cg.constants import FileExtensions, GenePanelMasterList, Pipeline
-from cg.constants.constants import FileFormat
+from cg.constants import GenePanelMasterList, Pipeline
 from cg.constants.gene_panel import GENOME_BUILD_37
-from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -29,15 +27,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def root(self) -> str:
         return self.config.raredisease.root
 
+    def write_managed_variants(self, case_id: str, content: list[str]) -> None:
+        self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)
+
     def write_panel(self, case_id: str, content: list[str]) -> None:
         """Write the gene panel to case dir."""
-        out_dir = Path(self.root, case_id)
-        out_dir.mkdir(parents=True, exist_ok=True)
-        WriteFile.write_file_from_content(
-            content="\n".join(content),
-            file_format=FileFormat.TXT,
-            file_path=Path(out_dir, f"gene_panels{FileExtensions.BED}"),
-        )
+        self._write_panel(out_dir=Path(self.root, case_id), content=content)
 
     @staticmethod
     def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
@@ -57,3 +52,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_gene_panel(self, case_id: str) -> list[str]:
         """Create and return the aggregated gene panel file."""
         return self._get_gene_panel(case_id=case_id, genome_build=GENOME_BUILD_37)
+
+    def get_managed_variants(self) -> list[str]:
+        """Create and return the managed variants."""
+        return self._get_managed_variants(genome_build=GENOME_BUILD_37)

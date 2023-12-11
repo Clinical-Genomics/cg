@@ -10,7 +10,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.constants.scout_upload import ScoutCustomCaseReportTags
+from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.io.controller import WriteStream
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.upload.upload_api import UploadAPI

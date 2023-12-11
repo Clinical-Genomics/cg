@@ -10,9 +10,16 @@ from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
-from cg.constants.constants import AnalysisType, CaseActions, WorkflowManager
+from cg.constants.constants import (
+    AnalysisType,
+    CaseActions,
+    FileFormat,
+    WorkflowManager,
+)
 from cg.constants.gene_panel import GenePanelCombo
+from cg.constants.scout import ScoutExportFileName
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
+from cg.io.controller import WriteFile
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
@@ -509,6 +516,26 @@ class AnalysisAPI(MetaAPI):
         if not self.is_case_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ file are not present for the analysis to start")
 
+    @staticmethod
+    def _write_managed_variants(out_dir: Path, content: list[str]) -> None:
+        """Write the managed variants to case dir."""
+        out_dir.mkdir(parents=True, exist_ok=True)
+        WriteFile.write_file_from_content(
+            content="\n".join(content),
+            file_format=FileFormat.TXT,
+            file_path=Path(out_dir, ScoutExportFileName.MANAGED_VARIANTS),
+        )
+
+    @staticmethod
+    def _write_panel(out_dir: Path, content: list[str]) -> None:
+        """Write the managed variants to case dir."""
+        out_dir.mkdir(parents=True, exist_ok=True)
+        WriteFile.write_file_from_content(
+            content="\n".join(content),
+            file_format=FileFormat.TXT,
+            file_path=Path(out_dir, ScoutExportFileName.PANELS),
+        )
+
     def _get_gene_panel(self, case_id: str, genome_build: str) -> list[str]:
         """Create and return the aggregated gene panel file."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -516,3 +543,7 @@ class AnalysisAPI(MetaAPI):
             customer_id=case.customer.internal_id, default_panels=set(case.panels)
         )
         return self.scout_api.export_panels(build=genome_build, panels=all_panels)
+
+    def _get_managed_variants(self, genome_build: str) -> list[str]:
+        """Create and return the managed variants."""
+        return self.scout_api.export_managed_variants(genome_build=genome_build)
