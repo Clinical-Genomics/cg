@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from cg.constants import DEFAULT_CAPTURE_KIT, Pipeline
 from cg.constants.constants import AnalysisType
 from cg.constants.gene_panel import GENOME_BUILD_37
@@ -67,3 +69,10 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
     def get_gene_panel(self, case_id: str) -> list[str]:
         """Create and return the aggregated gene panel file."""
         return self._get_gene_panel(case_id=case_id, genome_build=GENOME_BUILD_37)
+
+    def get_managed_variants(self) -> list[str]:
+        """Create and return the managed variants."""
+        return self._get_managed_variants(genome_build=GENOME_BUILD_37)
+
+    def write_managed_variants(self, case_id: str, content: list[str]) -> None:
+        self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)

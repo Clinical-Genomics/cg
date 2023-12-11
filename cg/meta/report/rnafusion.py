@@ -14,8 +14,11 @@ from cg.constants import (
     Pipeline,
 )
 from cg.constants.constants import GenomeVersion
-from cg.constants.scout_upload import RNAFUSION_CASE_TAGS
-from cg.meta.report.field_validators import get_mapped_reads_fraction, get_million_read_pairs
+from cg.constants.scout import RNAFUSION_CASE_TAGS
+from cg.meta.report.field_validators import (
+    get_mapped_reads_fraction,
+    get_million_read_pairs,
+)
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import AnalysisModel
