@@ -14,6 +14,7 @@ import shutil
 from pathlib import Path
 
 from cg.io.gzip import read_gzip_first_line
+from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
 
 LOG = logging.getLogger(__name__)
 
@@ -96,69 +97,23 @@ class FastqHandler:
         return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
 
     @staticmethod
-    def parse_fastq_header(line: str) -> dict:
-        """Generates a dict with parsed lanes, flowc ells and read numbers
+    def parse_fastq_header(line: str) -> FastqFileMeta:
+        """Parse and return fastq header metadata.
         Handle Illumina's two different header formats
         @see https://en.wikipedia.org/wiki/FASTQ_format
-
-        @HWUSI-EAS100R:6:73:941:1973#0/1
-
-            HWUSI-EAS100R   the unique instrument name
-            6   flow_cell lane
-            73  tile number within the flow cell lane
-            941     'x'-coordinate of the cluster within the tile
-            1973    'y'-coordinate of the cluster within the tile
-            #0  index number for a multiplexed sample (0 for no indexing)
-            /1  the member of a pair, /1 or /2 (paired-end or mate-pair reads only)
-
-        Versions of the Illumina pipeline since 1.4 appear to use #NNNNNN
-        instead of #0 for the multiplex ID, where NNNNNN is the sequence of the
-        multiplex tag.
-
-        With Casava 1.8 the format of the '@' line has changed:
-
-        @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
-
-            EAS139  the unique instrument name
-            136     the run id
-            FC706VJ     the flow cell id
-            2   flow cell lane
-            2104    tile number within the flow cell lane
-            15343   'x'-coordinate of the cluster within the tile
-            197393  'y'-coordinate of the cluster within the tile
-            1   the member of a pair, 1 or 2 (paired-end or mate-pair reads only)
-            Y   Y if the read is filtered, N otherwise
-            18  0 when none of the control bits are on, otherwise it is an even number
-            ATCACG  index sequence
         """
-
-        fastq_meta: dict[str, str | int] = {"lane": None, "flow_cell": None, "read_number": None}
-
         parts = line.split(":")
-        if len(parts) == 5:  # @HWUSI-EAS100R:6:73:941:1973#0/1
-            fastq_meta["lane"] = int(parts[1])
-            fastq_meta["flow_cell"] = "XXXXXX"
-            fastq_meta["read_number"] = int(parts[-1].split("/")[-1])
-        if len(parts) == 10:  # @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
-            fastq_meta["lane"] = int(parts[3])
-            fastq_meta["flow_cell"] = parts[2]
-            fastq_meta["read_number"] = int(parts[6].split(" ")[-1])
-        if len(parts) == 7:  # @ST-E00201:173:HCLCGALXX:1:2106:22516:34834/1
-            fastq_meta["lane"] = int(parts[3])
-            fastq_meta["flow_cell"] = parts[2]
-            fastq_meta["read_number"] = int(parts[-1].split("/")[-1])
-        return fastq_meta
+        return GetFastqFileMeta.header_format.get(len(parts))(parts=parts)
 
     @staticmethod
     def parse_file_data(fastq_path: Path) -> dict:
         header_line: str = read_gzip_first_line(file_path=fastq_path)
         header_info = FastqHandler.parse_fastq_header(header_line)
-
         data = {
             "path": fastq_path,
-            "lane": header_info["lane"],
-            "flowcell": header_info["flow_cell"],
-            "read": header_info["read_number"],
+            "lane": header_info.lane,
+            "flowcell": header_info.flow_cell_id,
+            "read": header_info.read_number,
             "undetermined": _is_undetermined_in_path(fastq_path),
         }
         matches = re.findall(r"-l[1-9]t([1-9]{2})_", str(fastq_path))

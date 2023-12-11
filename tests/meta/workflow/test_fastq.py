@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from cg.meta.workflow.fastq import FastqHandler
+from cg.models.fastq import FastqFileMeta
 
 
 @pytest.mark.parametrize(
@@ -10,15 +11,15 @@ from cg.meta.workflow.fastq import FastqHandler
     [
         (
             "@HWUSI-EAS100R:6:73:941:1973#0/1",
-            {"lane": 6, "flow_cell": "XXXXXX", "read_number": 1},
+            FastqFileMeta(lane=6, flow_cell_id="XXXXXX", read_number=1),
         ),
         (
             "@EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG",
-            {"lane": 2, "flow_cell": "FC706VJ", "read_number": 1},
+            FastqFileMeta(lane=2, flow_cell_id="FC706VJ", read_number=1),
         ),
         (
             "@ST-E00201:173:HCLCGALXX:1:2106:22516:34834/1",
-            {"lane": 1, "flow_cell": "HCLCGALXX", "read_number": 1},
+            FastqFileMeta(lane=1, flow_cell_id="HCLCGALXX", read_number=1),
         ),
     ],
 )
@@ -26,7 +27,7 @@ def test_parse_fastq_header(fastq_header: str, expected_header_meta: dict, fixtu
     # GIVEN a FASTQ header
 
     # WHEN parsing header
-    header_meta = FastqHandler.parse_fastq_header(line=fastq_header)
+    header_meta: FastqFileMeta = FastqHandler.parse_fastq_header(line=fastq_header)
 
     # THEN
     assert header_meta == expected_header_meta
