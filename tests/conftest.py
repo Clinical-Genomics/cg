@@ -3270,6 +3270,14 @@ def taxprofiler_multiqc_json_metrics(taxprofiler_analysis_dir) -> dict:
 
 
 @pytest.fixture(scope="function")
+def taxprofiler_metrics_deliverables(taxprofiler_dir, taxprofiler_case_id) -> Path:
+    """Path to deliverables file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_metrics_deliverables"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
 def nf_analysis_housekeeper(
     housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
