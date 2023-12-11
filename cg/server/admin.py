@@ -86,6 +86,7 @@ class ApplicationView(BaseView):
         "sample_concentration",
         "priority_processing",
         "is_archived",
+        "is_eligible_for_skip_qc",
     ]
     column_exclude_list = [
         "minimum_order",
