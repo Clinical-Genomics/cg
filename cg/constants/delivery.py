@@ -1,7 +1,7 @@
 """Constants for delivery."""
 
 from cg.constants.constants import Pipeline
-from cg.constants.housekeeper_tags import AlignmentFileTag
+from cg.constants.housekeeper_tags import AlignmentFileTag, AnalysisTag, HK_DELIVERY_REPORT_TAG
 
 ONLY_ONE_CASE_PER_TICKET: list[Pipeline] = [
     Pipeline.FASTQ,
