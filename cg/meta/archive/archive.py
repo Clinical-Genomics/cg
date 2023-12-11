@@ -265,15 +265,11 @@ class SpringArchiveAPI:
     def get_unique_archival_ids_and_their_archive_location(
         self, archive_entries: list[Archive]
     ) -> set[tuple[int, ArchiveLocations]]:
-        return set(
-            [
-                (
-                    archive.archiving_task_id,
-                    ArchiveLocations(self.get_archive_location_from_file(archive.file)),
-                )
-                for archive in archive_entries
-            ]
-        )
+        ids_and_locations: set[tuple[int, ArchiveLocations]] = set()
+        for archive in archive_entries:
+            if location := self.get_archive_location_from_file(archive.file):
+                ids_and_locations.add((archive.archiving_task_id, location))
+        return ids_and_locations
 
     def sort_retrieval_ids_on_archive_location(
         self, archive_entries: list[Archive]
@@ -295,19 +291,15 @@ class SpringArchiveAPI:
     def get_unique_retrieval_ids_and_their_archive_location(
         self, archive_entries: list[Archive]
     ) -> set[tuple[int, ArchiveLocations]]:
-        return set(
-            [
-                (
-                    archive.retrieval_task_id,
-                    ArchiveLocations(self.get_archive_location_from_file(archive.file)),
-                )
-                for archive in archive_entries
-            ]
-        )
+        ids_and_locations: set[tuple[int, ArchiveLocations]] = set()
+        for archive in archive_entries:
+            if location := self.get_archive_location_from_file(archive.file):
+                ids_and_locations.add((archive.retrieval_task_id, location))
+        return ids_and_locations
 
     @staticmethod
-    def is_file_not_archived(file: File):
-        return not file.archive or not file.archive.archived_at
+    def is_file_archived(file: File):
+        return file.archive and file.archive.archived_at
 
     @staticmethod
     def get_archive_location_from_file(file: File) -> ArchiveLocations | None:
@@ -327,7 +319,7 @@ class SpringArchiveAPI:
     def delete_file(self, file_path: str) -> None:
         """Deletes the specified file where it is archived and deletes the Housekeeper record."""
         file: File = self.housekeeper_api.files(path=file_path).first()
-        if self.is_file_not_archived(file):
+        if not self.is_file_archived(file):
             LOG.warning(f"No archived file found for file {file_path} - exiting")
             return
         archive_location: ArchiveLocations | None = self.get_archive_location_from_file(file)
@@ -338,3 +330,4 @@ class SpringArchiveAPI:
         self.delete_file_from_archive_location(
             file_and_sample=file_and_sample, archive_location=archive_location
         )
+        self.housekeeper_api.delete_file(file.id)

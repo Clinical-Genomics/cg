@@ -293,6 +293,13 @@ class DDNDataFlowClient(ArchiveHandler):
 
     def _set_auth_tokens(self) -> None:
         """Retrieves and sets auth and refresh token from the REST-API."""
+        auth_token: AuthToken = self._get_auth_token()
+        self.refresh_token: str = auth_token.refresh
+        self.auth_token: str = auth_token.access
+        self.token_expiration: datetime = datetime.fromtimestamp(auth_token.expire)
+
+    def _get_auth_token(self) -> AuthToken:
+        """Retrieves auth and refresh token from the REST-API."""
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url=DataflowEndpoints.GET_AUTH_TOKEN),
@@ -306,13 +313,15 @@ class DDNDataFlowClient(ArchiveHandler):
         )
         if not response.ok:
             raise DdnDataflowAuthenticationError(message=response.text)
-        response_content: AuthToken = AuthToken.model_validate(response.json())
-        self.refresh_token: str = response_content.refresh
-        self.auth_token: str = response_content.access
-        self.token_expiration: datetime = datetime.fromtimestamp(response_content.expire)
+        return AuthToken.model_validate(response.json())
 
     def _refresh_auth_token(self) -> None:
         """Updates the auth token by providing the refresh token to the REST-API."""
+        auth_token: AuthToken = self._get_refreshed_auth_token()
+        self.auth_token: str = auth_token.access
+        self.token_expiration: datetime = datetime.fromtimestamp(auth_token.expire)
+
+    def _get_refreshed_auth_token(self) -> AuthToken:
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url=DataflowEndpoints.REFRESH_AUTH_TOKEN),
@@ -320,9 +329,7 @@ class DDNDataFlowClient(ArchiveHandler):
             json=RefreshPayload(refresh=self.refresh_token).model_dump(),
             verify=False,
         )
-        response_content: AuthToken = AuthToken.model_validate(response.json())
-        self.auth_token: str = response_content.access
-        self.token_expiration: datetime = datetime.fromtimestamp(response_content.expire)
+        return AuthToken.model_validate(response.json())
 
     @property
     def auth_header(self) -> dict[str, str]:
@@ -379,7 +386,9 @@ class DDNDataFlowClient(ArchiveHandler):
             else (self.archive_repository, self.local_storage, DESTINATION_ATTRIBUTE)
         )
 
-        transfer_request: TransferPayload = TransferPayload(files_to_transfer=miria_file_data)
+        transfer_request: TransferPayload = TransferPayload(
+            files_to_transfer=miria_file_data, createFolder=is_archiving_request
+        )
         transfer_request.trim_paths(attribute_to_trim=attribute)
         transfer_request.add_repositories(
             source_prefix=source_prefix, destination_prefix=destination_prefix

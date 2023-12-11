@@ -348,17 +348,25 @@ def test_retrieve_samples(
         assert file.archive.retrieval_task_id
 
 
-def test_delete_file_success(
+def test_delete_file_raises_http_error(
     spring_archive_api: SpringArchiveAPI,
     failed_delete_file_response: Response,
     test_auth_token: AuthToken,
+    archival_job_id: int,
 ):
     spring_file: File = spring_archive_api.housekeeper_api.files(
         tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
     ).first()
+    if not spring_file.archive:
+        spring_archive_api.housekeeper_api.add_archives(
+            files=[spring_file], archive_task_id=archival_job_id
+        )
+    spring_archive_api.housekeeper_api.set_archive_archived_at(
+        file_id=spring_file.id, archiving_task_id=archival_job_id
+    )
     with mock.patch.object(
-        AuthToken,
-        "model_validate",
+        DDNDataFlowClient,
+        "_get_auth_token",
         return_value=test_auth_token,
     ), mock.patch.object(MiriaObject, "trim_path", return_value=True), mock.patch.object(
         APIRequest,
@@ -368,3 +376,35 @@ def test_delete_file_success(
         HTTPError
     ):
         spring_archive_api.delete_file(spring_file.path)
+
+
+def test_delete_file_success(
+    spring_archive_api: SpringArchiveAPI,
+    ok_delete_file_response: Response,
+    test_auth_token: AuthToken,
+    archival_job_id: int,
+):
+    spring_file: File = spring_archive_api.housekeeper_api.files(
+        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
+    ).first()
+    spring_file_id: int = spring_file.id
+    if not spring_file.archive:
+        spring_archive_api.housekeeper_api.add_archives(
+            files=[spring_file], archive_task_id=archival_job_id
+        )
+    spring_archive_api.housekeeper_api.set_archive_archived_at(
+        file_id=spring_file.id, archiving_task_id=archival_job_id
+    )
+
+    with mock.patch.object(
+        DDNDataFlowClient,
+        "_get_auth_token",
+        return_value=test_auth_token,
+    ), mock.patch.object(MiriaObject, "trim_path", return_value=True), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_delete_file_response,
+    ):
+        spring_archive_api.delete_file(spring_file.path)
+
+    assert not spring_archive_api.housekeeper_api.get_file(spring_file_id)

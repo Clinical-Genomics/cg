@@ -82,7 +82,7 @@ def retrieve_request_json(
     """Returns the body for a retrieval http post towards the DDN Miria API."""
     return {
         "osType": "Unix/MacOS",
-        "createFolder": True,
+        "createFolder": False,
         "pathInfo": [
             {
                 "destination": local_storage_repository
@@ -363,7 +363,7 @@ def archive_context(
     file: File = real_housekeeper_api.add_file(
         path=path_to_spring_file_with_ongoing_archival,
         version_obj=bundle.versions[0],
-        tags=[SequencingFileTag.SPRING],
+        tags=[SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET],
     )
     file.id = 1234
     real_housekeeper_api.add_archives(files=[file], archive_task_id=archival_job_id)
@@ -389,6 +389,12 @@ def failed_response() -> Response:
 
 
 @pytest.fixture
-def failed_delete_file_response(failed_response) -> Response:
+def failed_delete_file_response(failed_response: Response) -> Response:
     failed_response._content = b'{"detail":"Given token not valid for any token type","code":"token_not_valid","messages":[{"tokenClass":"AccessToken","tokenType":"access","message":"Token is invalid or expired"}]}'
     return failed_response
+
+
+@pytest.fixture
+def ok_delete_file_response(ok_response: Response) -> Response:
+    ok_response._content = b'{"Message":"Object has been deleted"}'
+    return ok_response

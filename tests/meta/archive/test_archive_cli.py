@@ -104,6 +104,7 @@ def test_get_archival_job_status(
 
     # GIVEN an archive entry with an ongoing archival
     assert len(archive_context.housekeeper_api.get_archive_entries()) == 1
+    assert not archive_context.housekeeper_api.get_archive_entries()[0].archived_at
 
     # WHEN invoking update_job_statuses
     with mock.patch.object(
