@@ -6,7 +6,8 @@ from typing import Any
 from cg.constants import Pipeline
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.raredisease.raredisease import RarediseaseSampleSheetEntry, RarediseaseParameters
+from cg.models.raredisease.raredisease import RarediseaseSampleSheetEntry
+from cg.models.nf_analysis import PipelineParameters
 from cg.store.models import Case, Sample, CaseSample
 
 LOG = logging.getLogger(__name__)
@@ -50,8 +51,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             file_path=self.get_sample_sheet_path(case_id=case_id),
             header=RarediseaseSampleSheetEntry.headers(),
         )
-        # pipeline_parameters: RarediseaseParameters = self.get_pipeline_parameters(case_id=case_id)
-        # self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
+        pipeline_parameters: PipelineParameters = self.get_pipeline_parameters(case_id=case_id)
+        self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, case: Case = "", case_sample: CaseSample = ""
@@ -91,14 +92,14 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             )
         return sample_sheet_content
 
-    def get_pipeline_parameters(self, case_id: str) -> RarediseaseParameters:
-        """Return Raredisease parameters."""
-        LOG.debug("Getting parameters information")
-        return RarediseaseParameters(
+    def get_pipeline_parameters(self, case_id: str) -> PipelineParameters:
+        """Return parameters."""
+        LOG.info("Getting parameters information")
+        return PipelineParameters(
             cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
+            priority=self.account,
             sample_sheet_path=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
-            priority=self.account,
         )
 
     def get_phenotype_code(self, phenotype: str) -> int:

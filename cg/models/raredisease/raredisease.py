@@ -2,7 +2,7 @@ from pathlib import Path
 
 from pydantic.v1 import Field
 
-from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters
+from cg.models.nf_analysis import NextflowSampleSheetEntry
 
 
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
@@ -50,9 +50,3 @@ class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
         ]
 
 
-class RarediseaseParameters(PipelineParameters):
-    """Model for Raredisease parameters."""
-
-    input: Path = Field(..., alias="sample_sheet_path")
-    outdir: Path
-    databases: Path
