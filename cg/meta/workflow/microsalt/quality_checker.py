@@ -5,13 +5,14 @@ from cg.io.json import read_json, write_json
 
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.models.orders.sample_base import ControlEnum
+from cg.store.api.core import Store
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
 
 class QualityChecker:
-    def __init__(self, status_db):
+    def __init__(self, status_db: Store):
         self.status_db = status_db
 
     def microsalt_qc(self, case_id: str, run_dir_path: Path, lims_project: str) -> bool:
@@ -105,7 +106,6 @@ class QualityChecker:
             sample.application_version.application.target_reads
             * MicrosaltQC.NEGATIVE_CONTROL_READS_THRESHOLD
         )
-
 
     def is_qc_required(self, case_run_dir: Path | None, case_id: str) -> bool:
         """Checks if a qc is required for a microbial case."""
