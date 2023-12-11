@@ -36,7 +36,7 @@ def test_with_missing_case(
 ):
     """Test metrics-deliver command with invalid case."""
     caplog.set_level(logging.ERROR)
-    # GIVEN case_id not in database
+    # GIVEN case id not in database
     assert not taxprofiler_context.status_db.get_case_by_internal_id(
         internal_id=case_id_does_not_exist
     )
