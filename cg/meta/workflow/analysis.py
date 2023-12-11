@@ -292,24 +292,22 @@ class AnalysisAPI(MetaAPI):
         """Return the path to the FASTQ destination directory."""
         raise NotImplementedError
 
-    def gather_file_metadata_for_sample(self, sample_obj: Sample) -> list[dict]:
+    def gather_file_metadata_for_sample(self, sample: Sample) -> list[dict]:
         return [
-            self.fastq_handler.parse_file_data(file_obj.full_path)
-            for file_obj in self.housekeeper_api.files(
-                bundle=sample_obj.internal_id, tags=["fastq"]
-            )
+            self.fastq_handler.parse_file_data(hk_file.full_path)
+            for hk_file in self.housekeeper_api.files(bundle=sample.internal_id, tags=["fastq"])
         ]
 
     def link_fastq_files_for_sample(
         self, case_obj: Case, sample_obj: Sample, concatenate: bool = False
     ) -> None:
         """
-        Link FASTQ files for a sample to working directory.
+        Link FASTQ files for a sample to the work directory.
         If pipeline input requires concatenated fastq, files can also be concatenated
         """
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: "", 2: ""}
-        files: list[dict] = self.gather_file_metadata_for_sample(sample_obj=sample_obj)
+        files: list[dict] = self.gather_file_metadata_for_sample(sample=sample_obj)
         sorted_files = sorted(files, key=lambda k: k["path"])
         fastq_dir = self.get_sample_fastq_destination_dir(case=case_obj, sample=sample_obj)
         fastq_dir.mkdir(parents=True, exist_ok=True)

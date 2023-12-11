@@ -90,9 +90,9 @@ class FastqHandler:
         return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
 
     @staticmethod
-    def parse_header(line: str) -> dict:
-        """Generates a dict with parsed lanes, flowcells and read numbers
-        Handle illumina's two different header formats
+    def parse_fastq_header(line: str) -> dict:
+        """Generates a dict with parsed lanes, flowc ells and read numbers
+        Handle Illumina's two different header formats
         @see https://en.wikipedia.org/wiki/FASTQ_format
 
         @HWUSI-EAS100R:6:73:941:1973#0/1
@@ -126,7 +126,7 @@ class FastqHandler:
             ATCACG  index sequence
         """
 
-        fastq_meta = {"lane": None, "flowcell": None, "readnumber": None}
+        fastq_meta: dict[str, str] = {"lane": None, "flowcell": None, "readnumber": None}
 
         parts = line.split(":")
         if len(parts) == 5:  # @HWUSI-EAS100R:6:73:941:1973#0/1
@@ -141,14 +141,13 @@ class FastqHandler:
             fastq_meta["lane"] = parts[3]
             fastq_meta["flowcell"] = parts[2]
             fastq_meta["readnumber"] = parts[-1].split("/")[-1]
-
         return fastq_meta
 
     @staticmethod
     def parse_file_data(fastq_path: Path) -> dict:
         with gzip.open(fastq_path) as handle:
             header_line = handle.readline().decode()
-            header_info = FastqHandler.parse_header(header_line)
+            header_info = FastqHandler.parse_fastq_header(header_line)
 
             data = {
                 "path": fastq_path,
