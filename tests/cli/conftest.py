@@ -178,6 +178,19 @@ def real_populated_compress_context(
 
 
 @pytest.fixture
+def scout_export_manged_variants_output() -> str:
+    return """##fileformat=VCFv4.2
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+##fileDate=2023-12-07 16:35:38.814086
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=TYPE,Number=1,Type=String,Description="Type of variant">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	48696925	.	G	C	.		END=48696925;TYPE=SNV
+14	76548781	.	CTGGACC	G	.		END=76548781;TYPE=INDEL"""
+
+
+@pytest.fixture
 def scout_panel_output() -> str:
     return """##genome_build=37
 ##gene_panel=OMIM-AUTO,version=22.0,updated_at=2023-10-17,display_name=OMIM-AUTO

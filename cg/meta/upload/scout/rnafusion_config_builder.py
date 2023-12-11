@@ -4,7 +4,7 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import PrepCategory
-from cg.constants.scout_upload import RNAFUSION_CASE_TAGS, RNAFUSION_SAMPLE_TAGS, GenomeBuild
+from cg.constants.scout import RNAFUSION_CASE_TAGS, RNAFUSION_SAMPLE_TAGS, GenomeBuild
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.models.scout.scout_load_config import (
