@@ -116,6 +116,8 @@ class Application(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
+    is_eligible_for_skip_qc = Column(types.Boolean, default=False, nullable=False)
+
     versions = orm.relationship(
         "ApplicationVersion", order_by="ApplicationVersion.version", back_populates="application"
     )
