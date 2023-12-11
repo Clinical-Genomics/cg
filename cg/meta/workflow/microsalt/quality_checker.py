@@ -4,7 +4,13 @@ from pathlib import Path
 from cg.io.json import read_json, write_json
 
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
-from cg.meta.workflow.microsalt.utils import is_valid_total_reads, is_valid_total_reads_for_control
+from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult, SampleMetrics
+from cg.meta.workflow.microsalt.utils import (
+    is_valid_mapped_rate,
+    is_valid_total_reads,
+    is_valid_total_reads_for_control,
+    parse_quality_metrics,
+)
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.api.core import Store
 from cg.store.models import Sample
@@ -15,6 +21,27 @@ LOG = logging.getLogger(__name__)
 class QualityChecker:
     def __init__(self, status_db: Store):
         self.status_db = status_db
+
+    def quality_control(self, run_dir_path: Path, lims_project: str):
+        metrics_file_path: Path = Path(run_dir_path, f"{lims_project}.json")
+        quality_metrics: QualityMetrics = parse_quality_metrics(metrics_file_path)
+
+        sample_results: list[QualityResult] = []
+
+        for sample_metrics in quality_metrics:
+            result = self.quality_control_sample(sample_metrics)
+            sample_results.append(result)
+
+        self.quality_control_case(sample_results)
+
+    def quality_control_sample(
+        self, sample_id: str, sample_metrics: SampleMetrics
+    ) -> QualityResult:
+        reads_passes_qc: bool = self.is_valid_total_reads(sample_id)
+        mapped_rate_passes_qc: bool = self.is_valid_mapped_rate(sample_metrics)
+
+    def quality_control_case(self, sample_results: list[QualityResult]) -> bool:
+        pass
 
     def microsalt_qc(self, case_id: str, run_dir_path: Path, lims_project: str) -> bool:
         """Check if given microSALT case passes QC check."""
@@ -131,3 +158,7 @@ class QualityChecker:
                 sample_reads=sample_reads, target_reads=target_reads
             )
         return is_valid_total_reads(sample_reads=sample_reads, target_reads=target_reads)
+
+    def is_valid_mapped_rate(self, metrics: SampleMetrics) -> bool:
+        mapped_rate: float = metrics.microsalt_samtools_stats.mapped_rate
+        return is_valid_mapped_rate(mapped_rate)

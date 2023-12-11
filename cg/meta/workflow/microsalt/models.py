@@ -29,7 +29,7 @@ class MicrosaltSamtoolsStats(BaseModel):
     coverage_100x: float
 
 
-class Sample(BaseModel):
+class SampleMetrics(BaseModel):
     blast_pubmlst: BlastPubmlst
     quast_assembly: QuastAssembly
     blast_resfinder_resistence: List[str]
@@ -38,4 +38,10 @@ class Sample(BaseModel):
 
 
 class QualityMetrics(BaseModel):
-    samples: Dict[str, Sample]
+    samples: Dict[str, SampleMetrics]
+
+
+class QualityResult(BaseModel):
+    sample_id: str
+    passed: bool
+    fail_message: str | None = None
