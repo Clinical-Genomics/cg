@@ -9,7 +9,7 @@ from housekeeper.store.models import File
 import cg.store as Store
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
-from cg.constants.scout_upload import ScoutCustomCaseReportTags
+from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import RNADNACollection, UploadScoutAPI
