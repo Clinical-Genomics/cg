@@ -40,8 +40,8 @@ def test_with_missing_case(
     assert not taxprofiler_context.status_db.get_case_by_internal_id(
         internal_id=case_id_does_not_exist
     )
-    
-    # WHEN running
+
+    # WHEN running command with non-existing case-id
     result = cli_runner.invoke(metrics_deliver, [case_id_does_not_exist], obj=taxprofiler_context)
     # THEN command should NOT successfully call the command it creates
 
