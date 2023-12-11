@@ -74,9 +74,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_latest_case_path(self, case_id: str) -> Path | None:
         """Return latest run dir for a microbial case, if no path found it returns None."""
-        lims_project: str = self.get_project(
-            self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample.internal_id
-        )
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        sample_id: str = case.links[0].sample.internal_id
+        lims_project: str = self.get_project(sample_id)
 
         return next(
             (

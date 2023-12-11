@@ -139,29 +139,6 @@ def test_get_latest_case_path(
     assert Path(microsalt_analysis_dir, "ACC12345_2022") == path
 
 
-def test_get_cases_to_store(
-    qc_microsalt_context: CGConfig, helpers: StoreHelpers, trailblazer_api: MockTB
-):
-    """Test that the cases fetched are Microsalt and finished successfully."""
-    # GIVEN a MicrosaltAPI, a Store and a TrailblazerAPI
-    analysis_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
-    store: Store = analysis_api.status_db
-    mock.patch.object(trailblazer_api, "is_latest_analysis_completed", return_value=True)
-    analysis_api.trailblazer_api = trailblazer_api
-
-    # GIVEN a running case in the store
-    helpers.ensure_case(store=store, data_analysis=Pipeline.MICROSALT, action=CaseActions.RUNNING)
-
-    # WHEN getting the cases to store in Housekeeper
-    cases_to_store: list[Case] = analysis_api.get_cases_to_store()
-    case: Case = cases_to_store[0]
-
-    # THEN a list with one microsalt case is returned
-    assert len(cases_to_store) == 1
-    assert case.data_analysis == Pipeline.MICROSALT
-    assert case.action == CaseActions.RUNNING
-
-
 def test_get_cases_to_store_pass(
     qc_microsalt_context: CGConfig,
     caplog,
