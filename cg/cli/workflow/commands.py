@@ -26,6 +26,7 @@ from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
+from cg.constants.constants import MetaApis
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", help="Simulate process without executing", is_flag=True
@@ -100,7 +101,7 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     If QC metrics are met it sets the status in Trailblazer to complete.
     If failed, it sets it as failed and adds a comment with information of the failed metrics."""
 
-    analysis_api: RnafusionAnalysisAPI | TaxprofilerAnalysisAPI = context.meta_apis["analysis_api"]
+    analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
