@@ -13,6 +13,8 @@ import re
 import shutil
 from pathlib import Path
 
+from cg.io.gzip import read_gzip_first_line
+
 LOG = logging.getLogger(__name__)
 
 DEFAULT_DATE_STR = (
@@ -21,6 +23,10 @@ DEFAULT_DATE_STR = (
 DEFAULT_INDEX = (
     "XXXXXX"  # Stand in value to use if flowcell index is to be masked when renaming file
 )
+
+
+def _is_undetermined_in_path(file_path: Path) -> bool:
+    return "Undetermined" in file_path
 
 
 class FastqHandler:
@@ -98,8 +104,8 @@ class FastqHandler:
         @HWUSI-EAS100R:6:73:941:1973#0/1
 
             HWUSI-EAS100R   the unique instrument name
-            6   flowcell lane
-            73  tile number within the flowcell lane
+            6   flow_cell lane
+            73  tile number within the flow cell lane
             941     'x'-coordinate of the cluster within the tile
             1973    'y'-coordinate of the cluster within the tile
             #0  index number for a multiplexed sample (0 for no indexing)
@@ -115,9 +121,9 @@ class FastqHandler:
 
             EAS139  the unique instrument name
             136     the run id
-            FC706VJ     the flowcell id
-            2   flowcell lane
-            2104    tile number within the flowcell lane
+            FC706VJ     the flow cell id
+            2   flow cell lane
+            2104    tile number within the flow cell lane
             15343   'x'-coordinate of the cluster within the tile
             197393  'y'-coordinate of the cluster within the tile
             1   the member of a pair, 1 or 2 (paired-end or mate-pair reads only)
@@ -126,40 +132,39 @@ class FastqHandler:
             ATCACG  index sequence
         """
 
-        fastq_meta: dict[str, str] = {"lane": None, "flowcell": None, "readnumber": None}
+        fastq_meta: dict[str, str | int] = {"lane": None, "flow_cell": None, "read_number": None}
 
         parts = line.split(":")
         if len(parts) == 5:  # @HWUSI-EAS100R:6:73:941:1973#0/1
-            fastq_meta["lane"] = parts[1]
-            fastq_meta["flowcell"] = "XXXXXX"
-            fastq_meta["readnumber"] = parts[-1].split("/")[-1]
+            fastq_meta["lane"] = int(parts[1])
+            fastq_meta["flow_cell"] = "XXXXXX"
+            fastq_meta["read_number"] = int(parts[-1].split("/")[-1])
         if len(parts) == 10:  # @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
-            fastq_meta["lane"] = parts[3]
-            fastq_meta["flowcell"] = parts[2]
-            fastq_meta["readnumber"] = parts[6].split(" ")[-1]
+            fastq_meta["lane"] = int(parts[3])
+            fastq_meta["flow_cell"] = parts[2]
+            fastq_meta["read_number"] = int(parts[6].split(" ")[-1])
         if len(parts) == 7:  # @ST-E00201:173:HCLCGALXX:1:2106:22516:34834/1
-            fastq_meta["lane"] = parts[3]
-            fastq_meta["flowcell"] = parts[2]
-            fastq_meta["readnumber"] = parts[-1].split("/")[-1]
+            fastq_meta["lane"] = int(parts[3])
+            fastq_meta["flow_cell"] = parts[2]
+            fastq_meta["read_number"] = int(parts[-1].split("/")[-1])
         return fastq_meta
 
     @staticmethod
     def parse_file_data(fastq_path: Path) -> dict:
-        with gzip.open(fastq_path) as handle:
-            header_line = handle.readline().decode()
-            header_info = FastqHandler.parse_fastq_header(header_line)
+        header_line: str = read_gzip_first_line(file_path=fastq_path)
+        header_info = FastqHandler.parse_fastq_header(header_line)
 
-            data = {
-                "path": fastq_path,
-                "lane": int(header_info["lane"]),
-                "flowcell": header_info["flowcell"],
-                "read": int(header_info["readnumber"]),
-                "undetermined": ("Undetermined" in fastq_path),
-            }
-            matches = re.findall(r"-l[1-9]t([1-9]{2})_", str(fastq_path))
-            if len(matches) > 0:
-                data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
-            return data
+        data = {
+            "path": fastq_path,
+            "lane": header_info["lane"],
+            "flowcell": header_info["flow_cell"],
+            "read": header_info["read_number"],
+            "undetermined": _is_undetermined_in_path(fastq_path),
+        }
+        matches = re.findall(r"-l[1-9]t([1-9]{2})_", str(fastq_path))
+        if len(matches) > 0:
+            data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
+        return data
 
     @staticmethod
     def create_fastq_name(
