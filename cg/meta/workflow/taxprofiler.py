@@ -160,7 +160,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Write <case>_metrics_deliverables.yaml file."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-        metrics = []
+        metrics: list[MetricsBase] = []
         for link in case.links:
             metrics.extend(
                 self.get_multiqc_per_sample(
