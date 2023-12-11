@@ -337,7 +337,7 @@ class NfAnalysisAPI(AnalysisAPI):
         ]
 
     def validate_qc_metrics(self, case_id: str, dry_run: bool = False) -> None:
-        """Validate the information from a qc metrics deliverable file."""
+        """Validate the information from a QC metrics deliverable file."""
 
         if dry_run:
             LOG.info("Dry-run: QC metrics validation would be performed")
