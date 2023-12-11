@@ -329,3 +329,6 @@ class MipAnalysisAPI(AnalysisAPI):
         )
         sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
         return sample_info.mip_version
+
+    def write_managed_variants(self, case_id: str, content: list[str]) -> None:
+        self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)
