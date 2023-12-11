@@ -4,6 +4,7 @@ from pathlib import Path
 from cg.io.json import read_json, write_json
 
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
+from cg.meta.workflow.microsalt.utils import is_total_reads_above_failure_threshold
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.api.core import Store
 from cg.store.models import Sample
@@ -121,4 +122,13 @@ class QualityChecker:
         return True
 
     def sample_total_reads_qc(self, sample_id: str) -> bool:
-        pass
+        sample: Sample  = self.status_db.get_sample_by_internal_id(sample_id)
+        target_reads: int = sample.application_version.application.target_reads
+        sample_reads: int = sample.reads
+
+        passes_total_reads_qc: bool = is_total_reads_above_failure_threshold(
+            sample_reads=sample_reads, target_reads=target_reads
+        )
+        if not passes_total_reads_qc:
+            LOG.warning(f"Sample {sample_id} failed total reads QC.")
+        return passes_total_reads_qc
