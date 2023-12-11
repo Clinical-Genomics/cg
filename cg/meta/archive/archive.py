@@ -62,11 +62,15 @@ class SpringArchiveAPI:
     def archive_spring_files_and_add_archives_to_housekeeper(
         self, spring_file_count_limit: int | None
     ) -> None:
-        """Archives all non archived spring files. If a limit is provided, the amount of files archived are limited
+        """Archives all non-archived spring files. If a limit is provided, the amount of files archived is limited
         to that amount."""
+        if isinstance(spring_file_count_limit, int) and spring_file_count_limit <= 0:
+            LOG.warning("Please do not provide a non-positive integer as limit - exiting.")
+            return
         for archive_location in ArchiveLocations:
             files_to_archive: list[File] = self.housekeeper_api.get_non_archived_spring_files(
-                tags=[archive_location], limit=spring_file_count_limit
+                tags=[archive_location],
+                limit=spring_file_count_limit,
             )
             if files_to_archive:
                 files_and_samples_for_location = self.add_samples_to_files(files_to_archive)

@@ -14,7 +14,11 @@ from cg.constants import (
     Pipeline,
 )
 from cg.constants.constants import GenomeVersion
-from cg.meta.report.field_validators import get_million_read_pairs
+from cg.constants.scout import RNAFUSION_CASE_TAGS
+from cg.meta.report.field_validators import (
+    get_mapped_reads_fraction,
+    get_million_read_pairs,
+)
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import AnalysisModel
@@ -47,15 +51,16 @@ class RnafusionReportAPI(ReportAPI):
             rin = self.lims_api.get_sample_rin(sample_id=sample.internal_id)
 
         return RnafusionSampleMetadataModel(
-            bias_5_3=sample_metrics.bias_5_3,
+            bias_5_3=sample_metrics.median_5prime_to_3prime_bias,
             duplicates=sample_metrics.pct_duplication,
             gc_content=sample_metrics.after_filtering_gc_content,
             input_amount=input_amount,
             insert_size=None,
             insert_size_peak=None,
-            mapped_reads=sample_metrics.reads_aligned
-            * 2
-            / sample_metrics.before_filtering_total_reads,
+            mapped_reads=get_mapped_reads_fraction(
+                mapped_reads=sample_metrics.read_pairs_examined * 2,
+                total_reads=sample_metrics.before_filtering_total_reads,
+            ),
             mean_length_r1=sample_metrics.after_filtering_read1_mean_length,
             million_read_pairs=get_million_read_pairs(
                 reads=sample_metrics.before_filtering_total_reads
@@ -77,12 +82,8 @@ class RnafusionReportAPI(ReportAPI):
     def get_report_accreditation(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Checks if the report is accredited or not. Rnafusion is not an accredited workflow."""
-        return False
-
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
-        """Return file path of the uploaded to Scout file given its tag."""
-        return None
+        """Checks if the report is accredited or not. Rnafusion is an accredited workflow."""
+        return True
 
     def get_template_name(self) -> str:
         """Return template name to render the delivery report."""
@@ -111,3 +112,7 @@ class RnafusionReportAPI(ReportAPI):
                 case=case, required_fields=REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS
             ),
         }
+
+    def get_upload_case_tags(self) -> dict:
+        """Return Balsamic UMI upload case tags."""
+        return RNAFUSION_CASE_TAGS

@@ -1,9 +1,17 @@
 from enum import StrEnum
 
+from cg.constants import FileExtensions
+from cg.constants.housekeeper_tags import AlignmentFileTag
+
 
 class GenomeBuild(StrEnum):
     hg19: str = "37"
     hg38: str = "38"
+
+
+class ScoutExportFileName(StrEnum):
+    MANAGED_VARIANTS: str = f"managed_variants{FileExtensions.VCF}"
+    PANELS: str = f"gene_panels{FileExtensions.BED}"
 
 
 class ScoutCustomCaseReportTags(StrEnum):
@@ -57,6 +65,7 @@ RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
     RNAfusion_inspector={"fusioninspector-html", "clinical"},
     RNAfusion_inspector_research={"fusioninspector-html", "research"},
     delivery_report={"delivery-report"},
+    vcf_fusion={"vcf-fusion"},
 )
 
 MIP_SAMPLE_TAGS = dict(
@@ -86,4 +95,6 @@ BALSAMIC_UMI_SAMPLE_TAGS = dict(
 )
 
 
-RNAFUSION_SAMPLE_TAGS = {}
+RNAFUSION_SAMPLE_TAGS = dict(
+    alignment_file={AlignmentFileTag.CRAM},
+)
