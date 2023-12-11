@@ -46,7 +46,7 @@ def test_with_missing_case(
     # THEN command should NOT successfully call the command it creates
 
     assert result.exit_code != EXIT_SUCCESS
-    # THEN ERROR log should be printed containing invalid case_id
+    # THEN ERROR log should be printed containing invalid case id
     assert case_id_does_not_exist in caplog.text
     assert f"{case_id_does_not_exist} could not be found" in caplog.text
 
