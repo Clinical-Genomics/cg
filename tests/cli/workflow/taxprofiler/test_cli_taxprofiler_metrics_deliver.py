@@ -63,7 +63,6 @@ def test_metrics_deliver(
     """Test command with a case id and a finished analysis which should execute successfully."""
     caplog.set_level(logging.INFO)
 
-    analysis_api: TaxprofilerAnalysisAPI = taxprofiler_context.meta_apis["analysis_api"]
     # GIVEN case-id
 
     metrics_content: str = "name: filtering_result_passed_filter_reads\n"
