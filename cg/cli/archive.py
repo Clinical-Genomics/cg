@@ -70,6 +70,7 @@ def update_job_statuses(context: CGConfig):
 @click.pass_obj
 @click.argument("file_path", required=True)
 def delete_file(context: CGConfig, file_path: str):
+    """Delete an archived file and remove it from Housekeeper."""
     spring_archive_api = SpringArchiveAPI(
         status_db=context.status_db,
         housekeeper_api=context.housekeeper_api,

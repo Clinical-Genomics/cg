@@ -30,6 +30,10 @@ DESTINATION_ATTRIBUTE: str = "destination"
 SOURCE_ATTRIBUTE: str = "source"
 
 
+def get_request_log(headers: dict, body: dict):
+    return "Sending request with headers: \n" + f"{headers} \n" + "and body: \n" + f"{body}"
+
+
 class DataflowEndpoints(StrEnum):
     """Enum containing all DDN dataflow endpoints used."""
 
@@ -156,12 +160,7 @@ class TransferPayload(BaseModel):
             The job ID of the launched transfer task.
         """
 
-        LOG.info(
-            "Sending request with headers: \n"
-            + f"{headers} \n"
-            + "and body: \n"
-            + f"{self.model_dump()}"
-        )
+        LOG.info(get_request_log(headers=headers, body=self.model_dump()))
 
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
@@ -223,12 +222,7 @@ class GetJobStatusPayload(BaseModel):
              HTTPError if the response code is not ok.
         """
 
-        LOG.info(
-            "Sending request with headers: \n"
-            + f"{headers} \n"
-            + "and body: \n"
-            + f"{self.model_dump()}"
-        )
+        LOG.info(get_request_log(headers=headers, body=self.model_dump()))
 
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.GET,
@@ -254,12 +248,7 @@ class DeleteFilePayload(BaseModel):
         Raises:
              HTTPError if the response code is not ok.
         """
-        LOG.info(
-            "Sending request with headers: \n"
-            + f"{headers} \n"
-            + "and body: \n"
-            + f"{self.model_dump()}"
-        )
+        LOG.info(get_request_log(headers=headers, body=self.model_dump()))
 
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
