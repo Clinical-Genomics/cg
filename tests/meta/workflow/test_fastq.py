@@ -11,15 +11,15 @@ from cg.models.fastq import FastqFileMeta
     [
         (
             "@HWUSI-EAS100R:6:73:941:1973#0/1",
-            FastqFileMeta(lane=6, flow_cell_id="XXXXXX", read_number=1),
+            FastqFileMeta(lane=6, flow_cell_id="XXXXXX", read_direction=1),
         ),
         (
             "@EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG",
-            FastqFileMeta(lane=2, flow_cell_id="FC706VJ", read_number=1),
+            FastqFileMeta(lane=2, flow_cell_id="FC706VJ", read_direction=1),
         ),
         (
             "@ST-E00201:173:HCLCGALXX:1:2106:22516:34834/1",
-            FastqFileMeta(lane=1, flow_cell_id="HCLCGALXX", read_number=1),
+            FastqFileMeta(lane=1, flow_cell_id="HCLCGALXX", read_direction=1),
         ),
     ],
 )
@@ -38,33 +38,33 @@ def test_parse_fastq_header(fastq_header: str, expected_header_meta: dict, fixtu
     [
         (
             Path("tests", "fixtures", "io", "casava_five_parts.fastq.gz"),
-            {
-                "path": Path("tests", "fixtures", "io", "casava_five_parts.fastq.gz"),
-                "lane": 6,
-                "flowcell": "XXXXXX",
-                "read": 1,
-                "undetermined": None,
-            },
+            FastqFileMeta(
+                path=Path("tests", "fixtures", "io", "casava_five_parts.fastq.gz"),
+                lane=6,
+                flow_cell_id="XXXXXX",
+                read_direction=1,
+                undetermined=None,
+            ),
         ),
         (
             Path("tests", "fixtures", "io", "casava_ten_parts.fastq.gz"),
-            {
-                "path": Path("tests", "fixtures", "io", "casava_ten_parts.fastq.gz"),
-                "lane": 2,
-                "flowcell": "FC706VJ",
-                "read": 1,
-                "undetermined": None,
-            },
+            FastqFileMeta(
+                path=Path("tests", "fixtures", "io", "casava_ten_parts.fastq.gz"),
+                lane=2,
+                flow_cell_id="FC706VJ",
+                read_direction=1,
+                undetermined=None,
+            ),
         ),
         (
             Path("tests", "fixtures", "io", "casava_seven_parts.fastq.gz"),
-            {
-                "path": Path("tests", "fixtures", "io", "casava_seven_parts.fastq.gz"),
-                "lane": 1,
-                "flowcell": "HCLCGALXX",
-                "read": 1,
-                "undetermined": None,
-            },
+            FastqFileMeta(
+                path=Path("tests", "fixtures", "io", "casava_seven_parts.fastq.gz"),
+                lane=1,
+                flow_cell_id="HCLCGALXX",
+                read_direction=1,
+                undetermined=None,
+            ),
         ),
     ],
 )
@@ -72,6 +72,7 @@ def test_parse_file_data(fastq_path: Path, expected_fastq_meta: dict, mocker):
     # GIVEN a FASTQ file
 
     mocker.patch("cg.meta.workflow.fastq._is_undetermined_in_path", return_value=None)
+
     # WHEN parsing header
     header_meta = FastqHandler.parse_file_data(fastq_path=fastq_path)
 

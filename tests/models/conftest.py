@@ -36,7 +36,7 @@ def fast_file_meta_raw(flow_cell_name: str) -> dict:
     return {
         "path": Path("a", "file.fastq.gz"),
         "lane": str(1),
-        "read_number": str(2),
+        "read_direction": str(2),
         "flow_cell_id": flow_cell_name,
         "undetermined": None,
     }

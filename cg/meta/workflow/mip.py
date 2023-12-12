@@ -145,10 +145,7 @@ class MipAnalysisAPI(AnalysisAPI):
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case.links:
-            self.link_fastq_files_for_sample(
-                case_obj=case,
-                sample_obj=link.sample,
-            )
+            self.link_fastq_files_for_sample(case=case, sample=link.sample)
 
     def write_panel(self, case_id: str, content: list[str]) -> None:
         """Write the gene panel to case dir."""

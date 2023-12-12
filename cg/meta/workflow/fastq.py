@@ -106,20 +106,15 @@ class FastqHandler:
         return GetFastqFileMeta.header_format.get(len(parts))(parts=parts)
 
     @staticmethod
-    def parse_file_data(fastq_path: Path) -> dict:
+    def parse_file_data(fastq_path: Path) -> FastqFileMeta:
         header_line: str = read_gzip_first_line(file_path=fastq_path)
-        header_info = FastqHandler.parse_fastq_header(header_line)
-        data = {
-            "path": fastq_path,
-            "lane": header_info.lane,
-            "flowcell": header_info.flow_cell_id,
-            "read": header_info.read_number,
-            "undetermined": _is_undetermined_in_path(fastq_path),
-        }
+        header_info: FastqFileMeta = FastqHandler.parse_fastq_header(header_line)
+        header_info.path = fastq_path
+        header_info.undetermined = _is_undetermined_in_path(fastq_path)
         matches = re.findall(r"-l[1-9]t([1-9]{2})_", str(fastq_path))
         if len(matches) > 0:
-            data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
-        return data
+            header_info.flow_cell_id = f"{header_info.flow_cell_id}-{matches[0]}"
+        return header_info
 
     @staticmethod
     def create_fastq_name(

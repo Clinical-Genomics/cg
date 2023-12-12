@@ -23,6 +23,7 @@ from cg.models.balsamic.metrics import (
     BalsamicWGSQCMetrics,
 )
 from cg.models.cg_config import CGConfig
+from cg.models.fastq import FastqFileMeta
 from cg.store.models import Case, CaseSample, Sample
 from cg.utils import Process
 from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
@@ -146,22 +147,22 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return Path(self.get_case_path(case.internal_id), FileFormat.FASTQ)
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        for link in case_obj.links:
-            self.link_fastq_files_for_sample(
-                case_obj=case_obj, sample_obj=link.sample, concatenate=True
-            )
+        case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        for link in case.links:
+            self.link_fastq_files_for_sample(case=case, sample=link.sample, concatenate=True)
 
     def get_concatenated_fastq_path(self, link_object: CaseSample) -> Path:
         """Returns path to the concatenated FASTQ file of a sample"""
-        file_collection: list[dict] = self.gather_file_metadata_for_sample(link_object.sample)
+        file_collection: list[FastqFileMeta] = self.gather_file_metadata_for_sample(
+            link_object.sample
+        )
         fastq_data = file_collection[0]
         linked_fastq_name = self.fastq_handler.create_fastq_name(
-            lane=fastq_data["lane"],
-            flowcell=fastq_data["flowcell"],
+            lane=fastq_data.lane,
+            flowcell=fastq_data.flow_cell_id,
             sample=link_object.sample.internal_id,
-            read=fastq_data["read"],
-            undetermined=fastq_data["undetermined"],
+            read=fastq_data.read_direction,
+            undetermined=fastq_data.undetermined,
         )
         concatenated_fastq_name: str = self.fastq_handler.get_concatenated_name(linked_fastq_name)
         return Path(

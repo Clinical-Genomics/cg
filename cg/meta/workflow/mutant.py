@@ -88,9 +88,7 @@ class MutantAnalysisAPI(AnalysisAPI):
                 LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
                 continue
             else:
-                self.link_fastq_files_for_sample(
-                    case_obj=case_obj, sample_obj=sample_obj, concatenate=True
-                )
+                self.link_fastq_files_for_sample(case=case_obj, sample=sample_obj, concatenate=True)
 
     def get_sample_parameters(self, sample_obj: Sample) -> MutantSampleConfig:
         return MutantSampleConfig(

@@ -24,6 +24,7 @@ from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
+from cg.models.fastq import FastqFileMeta
 from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
@@ -292,14 +293,14 @@ class AnalysisAPI(MetaAPI):
         """Return the path to the FASTQ destination directory."""
         raise NotImplementedError
 
-    def gather_file_metadata_for_sample(self, sample: Sample) -> list[dict]:
+    def gather_file_metadata_for_sample(self, sample: Sample) -> list[FastqFileMeta]:
         return [
             self.fastq_handler.parse_file_data(hk_file.full_path)
-            for hk_file in self.housekeeper_api.files(bundle=sample.internal_id, tags=["fastq"])
+            for hk_file in self.housekeeper_api.files(bundle=sample.internal_id, tags={"fastq"})
         ]
 
     def link_fastq_files_for_sample(
-        self, case_obj: Case, sample_obj: Sample, concatenate: bool = False
+        self, case: Case, sample: Sample, concatenate: bool = False
     ) -> None:
         """
         Link FASTQ files for a sample to the work directory.
@@ -307,37 +308,36 @@ class AnalysisAPI(MetaAPI):
         """
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: "", 2: ""}
-        files: list[dict] = self.gather_file_metadata_for_sample(sample=sample_obj)
-        sorted_files = sorted(files, key=lambda k: k["path"])
-        fastq_dir = self.get_sample_fastq_destination_dir(case=case_obj, sample=sample_obj)
+        files: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
+        sorted_files = sorted(files, key=lambda k: k.path)
+        fastq_dir = self.get_sample_fastq_destination_dir(case=case, sample=sample)
         fastq_dir.mkdir(parents=True, exist_ok=True)
 
         for fastq_data in sorted_files:
-            fastq_path = Path(fastq_data["path"])
             fastq_name = self.fastq_handler.create_fastq_name(
-                lane=fastq_data["lane"],
-                flowcell=fastq_data["flowcell"],
-                sample=sample_obj.internal_id,
-                read=fastq_data["read"],
-                undetermined=fastq_data["undetermined"],
-                meta=self.get_additional_naming_metadata(sample_obj),
+                lane=fastq_data.lane,
+                flowcell=fastq_data.flow_cell_id,
+                sample=sample.internal_id,
+                read=fastq_data.read_direction,
+                undetermined=fastq_data.undetermined,
+                meta=self.get_additional_naming_metadata(sample),
             )
             destination_path: Path = fastq_dir / fastq_name
-            linked_reads_paths[fastq_data["read"]].append(destination_path)
+            linked_reads_paths[fastq_data.read_direction].append(destination_path)
             concatenated_paths[
-                fastq_data["read"]
+                fastq_data.read_direction
             ] = f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_name)}"
 
             if not destination_path.exists():
-                LOG.info(f"Linking: {fastq_path} -> {destination_path}")
-                destination_path.symlink_to(fastq_path)
+                LOG.info(f"Linking: {fastq_data.path} -> {destination_path}")
+                destination_path.symlink_to(fastq_data.path)
             else:
                 LOG.warning(f"Destination path already exists: {destination_path}")
 
         if not concatenate:
             return
 
-        LOG.info("Concatenation in progress for sample %s.", sample_obj.internal_id)
+        LOG.info("Concatenation in progress for sample %s.", sample.internal_id)
         for read, value in linked_reads_paths.items():
             self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
             self.fastq_handler.remove_files(value)

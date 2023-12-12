@@ -20,4 +20,4 @@ def test_fastq_file_mets_convert_to_int(fast_file_meta_raw: dict):
     # THEN assert that str is converted to int
     assert isinstance(fast_file_meta.lane, int)
 
-    assert isinstance(fast_file_meta.read_number, int)
+    assert isinstance(fast_file_meta.read_direction, int)
