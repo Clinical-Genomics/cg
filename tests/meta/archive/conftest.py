@@ -396,5 +396,5 @@ def failed_delete_file_response(failed_response: Response) -> Response:
 
 @pytest.fixture
 def ok_delete_file_response(ok_response: Response) -> Response:
-    ok_response._content = b'{"Message":"Object has been deleted"}'
+    ok_response._content = b'{"message":"Object has been deleted"}'
     return ok_response
