@@ -6,9 +6,10 @@ from cg.io.json import read_json, write_json
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult, SampleMetrics
 from cg.meta.workflow.microsalt.utils import (
+    is_valid_10x_coverage,
     is_valid_average_coverage,
     is_valid_duplication_rate,
-    is_valid_mapped_rate,
+    is_valid_mapping_rate,
     is_valid_median_insert_size,
     is_valid_total_reads,
     is_valid_total_reads_for_control,
@@ -39,10 +40,11 @@ class QualityChecker:
 
     def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> QualityResult:
         valid_reads: bool = self.is_valid_total_reads(sample_id)
-        valid_mapped_rate: bool = self.is_valid_mapped_rate(metrics)
-        valid_duplication_rate: bool = self.is_valid_duplication_rate(metrics)
-        valid_median_insert_size: bool = self.is_valid_median_insert_size(metrics)
-        valid_average_coverage: bool = self.is_valid_average_coverage(metrics)
+        valid_mapping: bool = self.is_valid_mapped_rate(metrics)
+        valid_duplication: bool = self.is_valid_duplication_rate(metrics)
+        valid_inserts: bool = self.is_valid_median_insert_size(metrics)
+        valid_coverage: bool = self.is_valid_average_coverage(metrics)
+        valid_10x_coverage: bool = self.is_valid_10x_coverage(metrics)
 
     def quality_control_case(self, sample_results: list[QualityResult]) -> bool:
         pass
@@ -158,14 +160,12 @@ class QualityChecker:
         sample_reads: int = sample.reads
 
         if sample.control == ControlEnum.negative:
-            return is_valid_total_reads_for_control(
-                sample_reads=sample_reads, target_reads=target_reads
-            )
-        return is_valid_total_reads(sample_reads=sample_reads, target_reads=target_reads)
+            return is_valid_total_reads_for_control(reads=sample_reads, target_reads=target_reads)
+        return is_valid_total_reads(reads=sample_reads, target_reads=target_reads)
 
     def is_valid_mapped_rate(self, metrics: SampleMetrics) -> bool:
         mapped_rate: float = metrics.microsalt_samtools_stats.mapped_rate
-        return is_valid_mapped_rate(mapped_rate)
+        return is_valid_mapping_rate(mapped_rate)
 
     def is_valid_duplication_rate(self, metrics: SampleMetrics) -> bool:
         duplication_rate: float = metrics.picard_markduplicate.duplication_rate
@@ -178,3 +178,7 @@ class QualityChecker:
     def is_valid_average_coverage(self, metrics: SampleMetrics) -> bool:
         average_coverage: float = metrics.microsalt_samtools_stats.average_coverage
         return is_valid_average_coverage(average_coverage)
+
+    def is_valid_10x_coverage(self, metrics: SampleMetrics) -> bool:
+        coverage_10x: float = metrics.microsalt_samtools_stats.coverage_10x
+        return is_valid_10x_coverage(coverage_10x)

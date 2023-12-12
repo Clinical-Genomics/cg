@@ -8,7 +8,7 @@ def test_sample_total_reads_passing():
 
     # WHEN checking if the sample has sufficient reads
     passes_reads_threshold = is_valid_total_reads(
-        sample_reads=sample_reads, target_reads=target_reads
+        reads=sample_reads, target_reads=target_reads
     )
 
     # THEN it passes
@@ -22,7 +22,7 @@ def test_sample_total_reads_failing():
 
     # WHEN checking if the sample has sufficient reads
     passes_reads_threshold = is_valid_total_reads(
-        sample_reads=sample_reads, target_reads=target_reads
+        reads=sample_reads, target_reads=target_reads
     )
 
     # THEN it fails
@@ -36,7 +36,7 @@ def test_sample_total_reads_failing_without_reads():
 
     # WHEN checking if the sample has sufficient reads
     passes_reads_threshold = is_valid_total_reads(
-        sample_reads=sample_reads, target_reads=target_reads
+        reads=sample_reads, target_reads=target_reads
     )
 
     # THEN it fails
