@@ -8,6 +8,8 @@ from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult, Sam
 from cg.meta.workflow.microsalt.utils import (
     get_application_tag,
     get_negative_control_result,
+    get_non_urgent_results,
+    get_results_passing_qc,
     get_urgent_results,
     is_sample_negative_control,
     is_valid_10x_coverage,
@@ -73,6 +75,7 @@ class QualityChecker:
     def quality_control_case(self, sample_results: list[QualityResult]) -> bool:
         control_passes_qc: bool = self.is_valid_negative_control(sample_results)
         urgent_pass_qc: bool = self.all_urgent_samples_pass_qc(sample_results)
+        non_urgent_pass_qc: bool = self.non_urgent_samples_pass_qc(sample_results)
 
     def microsalt_qc(self, case_id: str, run_dir_path: Path, lims_project: str) -> bool:
         """Check if given microSALT case passes QC check."""
@@ -215,3 +218,10 @@ class QualityChecker:
     def all_urgent_samples_pass_qc(self, results: list[QualityResult]) -> bool:
         urgent_samples: list[QualityResult] = get_urgent_results(results)
         return all(sample.passes_qc for sample in urgent_samples)
+
+    def non_urgent_samples_pass_qc(self, results: list[QualityResult]) -> bool:
+        urgent_samples: list[QualityResult] = get_non_urgent_results(results)
+        passing_qc: list[QualityResult] = get_results_passing_qc(urgent_samples)
+        
+        fraction_passing_qc: float = len(passing_qc) / len(urgent_samples)
+        return fraction_passing_qc >= MicrosaltQC.QC_PERCENT_THRESHOLD_MWX

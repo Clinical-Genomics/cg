@@ -2,7 +2,7 @@ from pathlib import Path
 
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.io.json import read_json
-from cg.meta.workflow.microsalt.models import QualityMetrics, SampleQualityControl
+from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Sample
 
@@ -48,11 +48,19 @@ def get_application_tag(sample: Sample) -> str:
     return sample.application_version.application.tag
 
 
-def get_urgent_results(results: list[SampleQualityControl]) -> list[SampleQualityControl]:
+def get_urgent_results(results: list[QualityResult]) -> list[QualityResult]:
     return [result for result in results if result.application_tag == MicrosaltAppTags.MWRNXTR003]
 
 
-def get_negative_control_result(results: list[SampleQualityControl]) -> SampleQualityControl:
+def get_non_urgent_results(results: list[QualityResult]) -> list[QualityResult]:
+    return [result for result in results if result.application_tag != MicrosaltAppTags.MWRNXTR003]
+
+
+def get_results_passing_qc(results: list[QualityResult]) -> list[QualityResult]:
+    return [result for result in results if result.passes_qc]
+
+
+def get_negative_control_result(results: list[QualityResult]) -> QualityResult:
     for result in results:
         if result.is_negative_control:
             return result
