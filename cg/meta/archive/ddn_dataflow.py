@@ -421,7 +421,9 @@ class DDNDataFlowClient(ArchiveHandler):
         """Deletes the given file via Miria."""
         file_name: str = self.get_file_name(file_and_sample.file)
         sample_id: str = file_and_sample.sample.internal_id
-        delete_file_payload = DeleteFilePayload(global_path=f"{sample_id}/{file_name}")
+        delete_file_payload = DeleteFilePayload(
+            global_path=f"{self.archive_repository}{sample_id}/{file_name}"
+        )
         delete_file_payload.delete_file(
             url=urljoin(self.url, DataflowEndpoints.DELETE_FILE),
             headers=dict(self.headers, **self.auth_header),
