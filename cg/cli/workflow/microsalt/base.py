@@ -14,7 +14,7 @@ from cg.io.controller import WriteFile, WriteStream
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -224,15 +224,12 @@ def start_available(context: click.Context, dry_run: bool = False):
 def qc_microsalt(context: click.Context, unique_id: str) -> None:
     """Perform QC on a microsalt case."""
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
+    run_dir_path: Path = analysis_api.get_latest_case_path(unique_id)
+    case: Case = analysis_api.status_db.get_case_by_internal_id(unique_id)
+    sample_id: str = case.samples[0].internal_id
+    lims_project: str = analysis_api.get_project(sample_id)
+    metrics_file_path: Path = Path(run_dir_path, f"{lims_project}.json")
     try:
-        analysis_api.quality_checker.microsalt_qc(
-            case_id=unique_id,
-            run_dir_path=analysis_api.get_latest_case_path(case_id=unique_id),
-            lims_project=analysis_api.get_project(
-                analysis_api.status_db.get_case_by_internal_id(internal_id=unique_id)
-                .samples[0]
-                .internal_id
-            ),
-        )
+        analysis_api.quality_checker.microsalt_qc(metrics_file_path)
     except IndexError:
         LOG.error(f"No existing analysis directories found for case {unique_id}.")

@@ -31,8 +31,7 @@ class QualityChecker:
     def __init__(self, status_db: Store):
         self.status_db = status_db
 
-    def microsalt_qc(self, case_id: str, run_dir_path: Path, lims_project: str) -> bool:
-        metrics_file_path: Path = Path(run_dir_path, f"{lims_project}.json")
+    def microsalt_qc(self, metrics_file_path: Path) -> bool:
         quality_metrics: QualityMetrics = parse_quality_metrics(metrics_file_path)
 
         sample_results: list[QualityResult] = []

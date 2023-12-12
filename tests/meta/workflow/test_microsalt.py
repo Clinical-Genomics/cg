@@ -31,12 +31,12 @@ def test_qc_check_fail(
 
     mocker.patch.object(QualityChecker, "create_qc_done_file")
 
-    # WHEN performing QC check
-    qc_pass: bool = microsalt_api.quality_checker.microsalt_qc(
-        case_id=microsalt_case_qc_fail,
-        run_dir_path=microsalt_qc_fail_run_dir_path,
-        lims_project=microsalt_qc_fail_lims_project,
+    # GIVEN the path to the metrics file
+    metrics_file_path = Path(
+        microsalt_qc_fail_run_dir_path, f"{microsalt_qc_fail_lims_project}.json"
     )
+    # WHEN performing QC check
+    qc_pass: bool = microsalt_api.quality_checker.microsalt_qc(metrics_file_path)
 
     # THEN the QC should fail
     assert not qc_pass
@@ -63,12 +63,12 @@ def test_qc_check_pass(
 
     mocker.patch.object(QualityChecker, "create_qc_done_file")
 
-    # WHEN performing QC check
-    qc_pass: bool = microsalt_api.quality_checker.microsalt_qc(
-        case_id=microsalt_case_qc_pass,
-        run_dir_path=microsalt_qc_pass_run_dir_path,
-        lims_project=microsalt_qc_pass_lims_project,
+    # GIVEN the path to the metrics file
+    metrics_file_path = Path(
+        microsalt_qc_pass_run_dir_path, f"{microsalt_qc_pass_lims_project}.json"
     )
+    # WHEN performing QC check
+    qc_pass: bool = microsalt_api.quality_checker.microsalt_qc(metrics_file_path)
 
     # THEN the QC should pass
     assert qc_pass
@@ -95,12 +95,12 @@ def test_qc_check_negative_control_fail(
 
     mocker.patch.object(QualityChecker, "create_qc_done_file")
 
-    # WHEN performing QC check
-    qc_pass: bool = microsalt_api.quality_checker.microsalt_qc(
-        case_id=microsalt_case_qc_fail,
-        run_dir_path=microsalt_qc_fail_run_dir_path,
-        lims_project=microsalt_qc_fail_lims_project,
+    # GIVEN the metrics file path
+    metrics_file_path = Path(
+        microsalt_qc_fail_run_dir_path, f"{microsalt_qc_fail_lims_project}.json"
     )
+    # WHEN performing QC check
+    qc_pass: bool = microsalt_api.quality_checker.microsalt_qc(metrics_file_path)
 
     # THEN the QC should fail
     assert not qc_pass

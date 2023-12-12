@@ -289,14 +289,12 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         for case in cases_qc_ready:
             case_run_dir: Path | None = self.get_latest_case_path(case.internal_id)
+            lims_project: str = self.get_project(case.samples[0].internal_id)
+            metrics_file_path: Path = Path(case_run_dir, f"{lims_project}.json")
             if self.quality_checker.is_qc_required(
                 case_run_dir=case_run_dir, case_id=case.internal_id
             ):
-                if self.quality_checker.microsalt_qc(
-                    case_id=case.internal_id,
-                    run_dir_path=case_run_dir,
-                    lims_project=self.get_project(case.samples[0].internal_id),
-                ):
+                if self.quality_checker.microsalt_qc(metrics_file_path):
                     self.trailblazer_api.add_comment(case_id=case.internal_id, comment="QC passed")
                     cases_to_store.append(case)
                 else:
