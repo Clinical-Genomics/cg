@@ -159,7 +159,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         fastq_data = file_collection[0]
         linked_fastq_name = self.fastq_handler.create_fastq_name(
             lane=fastq_data.lane,
-            flowcell=fastq_data.flow_cell_id,
+            flow_cell=fastq_data.flow_cell_id,
             sample=link_object.sample.internal_id,
             read=fastq_data.read_direction,
             undetermined=fastq_data.undetermined,

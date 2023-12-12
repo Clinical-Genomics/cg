@@ -316,13 +316,13 @@ class AnalysisAPI(MetaAPI):
         for fastq_data in sorted_files:
             fastq_name = self.fastq_handler.create_fastq_name(
                 lane=fastq_data.lane,
-                flowcell=fastq_data.flow_cell_id,
+                flow_cell=fastq_data.flow_cell_id,
                 sample=sample.internal_id,
                 read=fastq_data.read_direction,
                 undetermined=fastq_data.undetermined,
                 meta=self.get_additional_naming_metadata(sample),
             )
-            destination_path: Path = fastq_dir / fastq_name
+            destination_path = Path(fastq_dir, fastq_name)
             linked_reads_paths[fastq_data.read_direction].append(destination_path)
             concatenated_paths[
                 fastq_data.read_direction
