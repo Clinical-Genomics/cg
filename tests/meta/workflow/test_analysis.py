@@ -417,4 +417,4 @@ def test_link_fastq_files_for_sample(
     mip_analysis_api.link_fastq_files_for_sample(case=case, sample=sample)
 
     # THEN
-    assert "Linking: }" in caplog.text
+    assert "Linking: " in caplog.text
