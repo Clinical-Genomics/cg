@@ -225,7 +225,7 @@ def qc_microsalt(context: click.Context, unique_id: str) -> None:
     """Perform QC on a microsalt case."""
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
     try:
-        analysis_api.microsalt_qc(
+        analysis_api.quality_checker.microsalt_qc(
             case_id=unique_id,
             run_dir_path=analysis_api.get_latest_case_path(case_id=unique_id),
             lims_project=analysis_api.get_project(
