@@ -121,7 +121,7 @@ class FastqHandler:
         lane: int,
         flow_cell: str,
         sample: str,
-        read: int,
+        read_direction: int,
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
         undetermined: str | None = None,
@@ -131,7 +131,7 @@ class FastqHandler:
         no naming constrains from the pipeline."""
         flow_cell: str = f"{flow_cell}-undetermined" if undetermined else flow_cell
         date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
-        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read}.fastq.gz"
+        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read_direction}.fastq.gz"
 
 
 class BalsamicFastqHandler(FastqHandler):
@@ -140,7 +140,7 @@ class BalsamicFastqHandler(FastqHandler):
         lane: int,
         flow_cell: str,
         sample: str,
-        read: int,
+        read_direction: int,
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
         undetermined: str | None = None,
@@ -150,7 +150,7 @@ class BalsamicFastqHandler(FastqHandler):
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
         flow_cell = f"{flow_cell}-undetermined" if undetermined else flow_cell
         date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
-        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_R_{read}.fastq.gz"
+        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_R_{read_direction}.fastq.gz"
 
 
 class MipFastqHandler(FastqHandler):
@@ -159,7 +159,7 @@ class MipFastqHandler(FastqHandler):
         lane: int,
         flow_cell: str,
         sample: str,
-        read: int,
+        read_direction: int,
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
         undetermined: str | None = None,
@@ -168,7 +168,7 @@ class MipFastqHandler(FastqHandler):
         """Name a FASTQ file following MIP conventions."""
         flow_cell = f"{flow_cell}-undetermined" if undetermined else flow_cell
         date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
-        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read}.fastq.gz"
+        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read_direction}.fastq.gz"
 
 
 class MicrosaltFastqHandler(FastqHandler):
@@ -177,7 +177,7 @@ class MicrosaltFastqHandler(FastqHandler):
         lane: int,
         flow_cell: str,
         sample: str,
-        read: int,
+        read_direction: int,
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
         undetermined: str | None = None,
@@ -186,7 +186,7 @@ class MicrosaltFastqHandler(FastqHandler):
         """Name a FASTQ file following usalt conventions. Naming must be
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
         flow_cell = f"{flow_cell}-undetermined" if undetermined else flow_cell
-        return f"{sample}_{flow_cell}_L{lane}_{read}.fastq.gz"
+        return f"{sample}_{flow_cell}_L{lane}_{read_direction}.fastq.gz"
 
 
 class MutantFastqHandler(FastqHandler):
@@ -195,7 +195,7 @@ class MutantFastqHandler(FastqHandler):
         lane: int,
         flow_cell: str,
         sample: str,
-        read: int,
+        read_direction: int,
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
         undetermined: str | None = None,
@@ -203,7 +203,7 @@ class MutantFastqHandler(FastqHandler):
     ) -> str:
         """Name a FASTQ file following mutant conventions. Naming must be
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
-        return f"{flow_cell}_L{lane}_{meta}_{read}.fastq.gz"
+        return f"{flow_cell}_L{lane}_{meta}_{read_direction}.fastq.gz"
 
     @staticmethod
     def get_concatenated_name(linked_fastq_name: str) -> str:

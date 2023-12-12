@@ -161,7 +161,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             lane=fastq_data.lane,
             flow_cell=fastq_data.flow_cell_id,
             sample=link_object.sample.internal_id,
-            read=fastq_data.read_direction,
+            read_direction=fastq_data.read_direction,
             undetermined=fastq_data.undetermined,
         )
         concatenated_fastq_name: str = self.fastq_handler.get_concatenated_name(linked_fastq_name)

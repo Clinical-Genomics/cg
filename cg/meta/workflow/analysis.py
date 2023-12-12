@@ -289,7 +289,7 @@ class AnalysisAPI(MetaAPI):
             if self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
 
-    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample):
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
         """Return the path to the FASTQ destination directory."""
         raise NotImplementedError
 
@@ -306,31 +306,31 @@ class AnalysisAPI(MetaAPI):
         Link FASTQ files for a sample to the work directory.
         If pipeline input requires concatenated fastq, files can also be concatenated
         """
-        linked_reads_paths = {1: [], 2: []}
-        concatenated_paths = {1: "", 2: ""}
+        linked_reads_paths: dict[int, list[Path]] = {1: [], 2: []}
+        concatenated_paths: dict[int, str] = {1: "", 2: ""}
         files: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
-        sorted_files = sorted(files, key=lambda k: k.path)
-        fastq_dir = self.get_sample_fastq_destination_dir(case=case, sample=sample)
+        sorted_files: list[FastqFileMeta] = sorted(files, key=lambda k: k.path)
+        fastq_dir: Path = self.get_sample_fastq_destination_dir(case=case, sample=sample)
         fastq_dir.mkdir(parents=True, exist_ok=True)
 
-        for fastq_data in sorted_files:
-            fastq_name = self.fastq_handler.create_fastq_name(
-                lane=fastq_data.lane,
-                flow_cell=fastq_data.flow_cell_id,
+        for fastq_file in sorted_files:
+            fastq_file_name: str = self.fastq_handler.create_fastq_name(
+                lane=fastq_file.lane,
+                flow_cell=fastq_file.flow_cell_id,
                 sample=sample.internal_id,
-                read=fastq_data.read_direction,
-                undetermined=fastq_data.undetermined,
+                read_direction=fastq_file.read_direction,
+                undetermined=fastq_file.undetermined,
                 meta=self.get_additional_naming_metadata(sample),
             )
-            destination_path = Path(fastq_dir, fastq_name)
-            linked_reads_paths[fastq_data.read_direction].append(destination_path)
+            destination_path = Path(fastq_dir, fastq_file_name)
+            linked_reads_paths[fastq_file.read_direction].append(destination_path)
             concatenated_paths[
-                fastq_data.read_direction
-            ] = f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_name)}"
+                fastq_file.read_direction
+            ] = f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_file_name)}"
 
             if not destination_path.exists():
-                LOG.info(f"Linking: {fastq_data.path} -> {destination_path}")
-                destination_path.symlink_to(fastq_data.path)
+                LOG.info(f"Linking: {fastq_file.path} -> {destination_path}")
+                destination_path.symlink_to(fastq_file.path)
             else:
                 LOG.warning(f"Destination path already exists: {destination_path}")
 
