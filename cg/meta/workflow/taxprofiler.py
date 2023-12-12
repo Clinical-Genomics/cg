@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 from cg.constants import Pipeline
 from cg.constants.sequencing import SequencingPlatform
@@ -128,7 +128,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
     def get_multiqc_per_sample(
-        self, case_id: str, sample: Sample, pipeline_metrics: Union[dict, None]
+        self, case_id: str, sample: Sample, pipeline_metrics: dict | None = None
     ) -> list[MetricsBase]:
         """Return MultiQC values per sample."""
         sample_name: str = sample.name
