@@ -33,7 +33,6 @@ class QualityChecker:
 
     def microsalt_qc(self, metrics_file_path: Path) -> bool:
         quality_metrics: QualityMetrics = parse_quality_metrics(metrics_file_path)
-
         sample_results: list[QualityResult] = []
 
         for sample_id, metrics in quality_metrics:
@@ -103,24 +102,24 @@ class QualityChecker:
         return is_valid_total_reads(reads=sample_reads, target_reads=target_reads)
 
     def is_valid_mapped_rate(self, metrics: SampleMetrics) -> bool:
-        mapped_rate: float = metrics.microsalt_samtools_stats.mapped_rate
-        return is_valid_mapping_rate(mapped_rate)
+        mapped_rate: float | None = metrics.microsalt_samtools_stats.mapped_rate
+        return is_valid_mapping_rate(mapped_rate) if mapped_rate else False
 
     def is_valid_duplication_rate(self, metrics: SampleMetrics) -> bool:
-        duplication_rate: float = metrics.picard_markduplicate.duplication_rate
-        return is_valid_duplication_rate(duplication_rate)
+        duplication_rate: float | None = metrics.picard_markduplicate.duplication_rate
+        return is_valid_duplication_rate(duplication_rate) if duplication_rate else False
 
     def is_valid_median_insert_size(self, metrics: SampleMetrics) -> bool:
-        insert_size: int = metrics.picard_markduplicate.insert_size
-        return is_valid_median_insert_size(insert_size)
+        insert_size: int | None = metrics.picard_markduplicate.insert_size
+        return is_valid_median_insert_size(insert_size) if insert_size else False
 
     def is_valid_average_coverage(self, metrics: SampleMetrics) -> bool:
-        average_coverage: float = metrics.microsalt_samtools_stats.average_coverage
-        return is_valid_average_coverage(average_coverage)
+        coverage: float | None = metrics.microsalt_samtools_stats.average_coverage
+        return is_valid_average_coverage(coverage) if coverage else False
 
     def is_valid_10x_coverage(self, metrics: SampleMetrics) -> bool:
-        coverage_10x: float = metrics.microsalt_samtools_stats.coverage_10x
-        return is_valid_10x_coverage(coverage_10x)
+        coverage_10x: float | None = metrics.microsalt_samtools_stats.coverage_10x
+        return is_valid_10x_coverage(coverage_10x) if coverage_10x else False
 
     def is_valid_negative_control(self, results: list[QualityResult]) -> bool:
         negative_control_result: QualityResult = get_negative_control_result(results)
