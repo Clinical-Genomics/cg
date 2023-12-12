@@ -236,7 +236,7 @@ class GetJobStatusPayload(BaseModel):
 
 
 class DeleteFileResponse(BaseModel):
-    message: str = Field(alias="Message")
+    message: str
 
 
 class DeleteFilePayload(BaseModel):
