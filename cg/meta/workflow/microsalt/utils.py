@@ -2,7 +2,8 @@ from pathlib import Path
 
 from cg.constants.constants import MicrosaltQC
 from cg.io.json import read_json
-from cg.meta.workflow.microsalt.models import QualityMetrics
+from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult
+from cg.models.orders.sample_base import ControlEnum
 
 
 def is_valid_total_reads(reads: int, target_reads: int) -> bool:
@@ -36,3 +37,9 @@ def is_valid_10x_coverage(coverage_10x: float) -> bool:
 def parse_quality_metrics(file_path: Path) -> QualityMetrics:
     data = read_json(file_path)
     return QualityMetrics.model_validate_json(data)
+
+
+def get_negative_control_result(results: list[QualityResult]) -> QualityResult:
+    for result in results:
+        if result.sample.control == ControlEnum.negative:
+            return result

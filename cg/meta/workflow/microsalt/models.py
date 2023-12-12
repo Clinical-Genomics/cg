@@ -1,6 +1,8 @@
 from typing import List, Dict
 from pydantic import BaseModel
 
+from cg.store.models import Sample
+
 
 class BlastPubmlst(BaseModel):
     sequence_type: str
@@ -42,5 +44,5 @@ class QualityMetrics(BaseModel):
 
 
 class QualityResult(BaseModel):
-    sample_id: str
-    passed: bool
+    sample: Sample
+    passes_qc: bool

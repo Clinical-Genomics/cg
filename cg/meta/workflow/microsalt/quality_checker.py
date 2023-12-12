@@ -6,6 +6,7 @@ from cg.io.json import read_json, write_json
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult, SampleMetrics
 from cg.meta.workflow.microsalt.utils import (
+    get_negative_control_result,
     is_valid_10x_coverage,
     is_valid_average_coverage,
     is_valid_duplication_rate,
@@ -39,6 +40,7 @@ class QualityChecker:
         self.quality_control_case(sample_results)
 
     def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> QualityResult:
+        sample = self.status_db.get_sample_by_internal_id(sample_id)
         valid_reads: bool = self.is_valid_total_reads(sample_id)
         valid_mapping: bool = self.is_valid_mapped_rate(metrics)
         valid_duplication: bool = self.is_valid_duplication_rate(metrics)
@@ -56,12 +58,12 @@ class QualityChecker:
         )
 
         return QualityResult(
-            sample_id=sample_id,
+            sample=sample,
             passed=sample_passes_qc,
         )
 
     def quality_control_case(self, sample_results: list[QualityResult]) -> bool:
-        negative_control_passes: bool = True
+        control_passes_qc: bool = self.is_valid_negative_control(sample_results)
 
     def microsalt_qc(self, case_id: str, run_dir_path: Path, lims_project: str) -> bool:
         """Check if given microSALT case passes QC check."""
@@ -196,3 +198,7 @@ class QualityChecker:
     def is_valid_10x_coverage(self, metrics: SampleMetrics) -> bool:
         coverage_10x: float = metrics.microsalt_samtools_stats.coverage_10x
         return is_valid_10x_coverage(coverage_10x)
+
+    def is_valid_negative_control(self, results: list[QualityResult]) -> bool:
+        negative_control_result: QualityResult = get_negative_control_result(results)
+        return negative_control_result.passes_qc
