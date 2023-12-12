@@ -23,8 +23,8 @@ from cg.models.cg_config import CGConfig
 
 
 def test_limit_and_archive_all_fails(cli_runner: CliRunner, cg_context: CGConfig):
-    """Tests that when invoking archive-spring-files in the Archive CLI module, the command is aborted
-    if both a limit and the --archive-all flag is provided."""
+    """Tests that when invoking archive-spring-files in the Archive CLI module, the command is
+    aborted if both a limit and the --archive-all flag is provided."""
 
     # GIVEN a CLI runner and a context
 
@@ -50,8 +50,8 @@ def test_archive_spring_files_success(
     test_auth_token: AuthToken,
     ok_miria_response: Response,
 ):
-    """Tests that the CLI command 'cg archive archive-spring-files' adds an archive with the correct job_id when
-    an archiving job is launched via Miria."""
+    """Tests that the CLI command 'cg archive archive-spring-files' adds an archive with the correct
+    job_id when an archiving job is launched via Miria."""
 
     # GIVEN a CLI runner and a context
 

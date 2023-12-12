@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 
 def get_sample_sheet_creator(
     flow_cell: FlowCellDirectoryData,
-    lims_samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq],
+    lims_samples: list[FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert],
     force: bool,
 ) -> SampleSheetCreatorBcl2Fastq | SampleSheetCreatorBCLConvert:
     """Returns an initialised sample sheet creator according to the demultiplexing software."""
@@ -29,7 +29,7 @@ def get_sample_sheet_creator(
 
 def create_sample_sheet(
     flow_cell: FlowCellDirectoryData,
-    lims_samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq],
+    lims_samples: list[FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert],
     force: bool = False,
 ) -> list[list[str]]:
     """Create a sample sheet for a flow cell."""

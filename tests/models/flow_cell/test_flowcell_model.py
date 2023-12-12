@@ -1,5 +1,3 @@
-import os
-import sys
 from pathlib import Path
 from typing import Type
 
@@ -35,10 +33,10 @@ def test_flow_cell_position(bcl2fastq_flow_cell_dir: Path):
     """Test getting flow cell position."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
-    flowcell_obj = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    flow_cell = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
 
     # WHEN fetching the flow cell position
-    position = flowcell_obj.position
+    position = flow_cell.position
 
     # THEN assert it is A or B
     assert position in ["A", "B"]
@@ -87,43 +85,26 @@ def test_get_bcl_converter_default(
     # GIVEN a flow cell directory
 
     # WHEN instantiating a flow cell object
-    flow_cell = FlowCellDirectoryData(
-        flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl_convert)
-    )
+    flow_cell = FlowCellDirectoryData(Path(flow_cell_directory_name_demultiplexed_with_bcl_convert))
 
     # THEN it sets the converter to BCLConverter
     assert flow_cell.bcl_converter == BclConverter.DRAGEN
 
 
-def test_flow_cell_directory_data_with_set_bcl_converter(
+def test_get_bcl_converter_bcl2fastq_flow_cell(
     flow_cell_directory_name_demultiplexed_with_bcl2fastq: str,
 ):
-    """Test that the flow cell bcl converter is set to Bcl2fastq if specified."""
-    # GIVEN a flow cell directory
+    """Test instantiating a flow cell with bcl2fastq as bcl converter."""
+    # GIVEN a Bcl2Fastq flow cell directory
 
-    # WHEN instantiating a flow cell object specifying the converter as bcl2fastq
+    # WHEN instantiating a flow cell object
     flow_cell = FlowCellDirectoryData(
         flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl2fastq),
         bcl_converter=BclConverter.BCL2FASTQ,
     )
 
-    # THEN the bcl converter is dragen
+    # THEN it sets the converter to BCLConverter
     assert flow_cell.bcl_converter == BclConverter.BCL2FASTQ
-
-
-def test_flow_cell_directory_data_with_novaseq_flow_cell_directory(
-    flow_cell_directory_name_demultiplexed_with_bcl_convert: str,
-):
-    """Test that the bcl converter is set to dragen when prodiving a novaseq flow cell directory."""
-    # GIVEN a Bcl2Fastq flow cell directory
-
-    # WHEN instantiating a flow cell object
-    flow_cell = FlowCellDirectoryData(
-        flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl_convert),
-    )
-
-    # THEN the bcl converter is dragen
-    assert flow_cell.bcl_converter == BclConverter.DRAGEN
 
 
 @pytest.mark.parametrize(
@@ -136,7 +117,7 @@ def test_flow_cell_directory_data_with_novaseq_flow_cell_directory(
 def test_run_parameters_path(
     flow_cell_fixture: str, expected_run_parameters_file_name: str, request: FixtureRequest
 ):
-    """."""
+    """Test that the run parameters file is being fetched correctly for the HiSeq flow cells."""
     # GIVEN a flow cell with a run parameters
     flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture)
 
