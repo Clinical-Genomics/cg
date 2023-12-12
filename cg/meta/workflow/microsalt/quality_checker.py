@@ -1,9 +1,8 @@
 import logging
 from pathlib import Path
 
-from cg.io.json import read_json, write_json
-
-from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
+from cg.io.json import write_json
+from cg.constants.constants import MicrosaltQC
 from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult, SampleMetrics
 from cg.meta.workflow.microsalt.utils import (
     get_application_tag,
@@ -90,6 +89,10 @@ class QualityChecker:
 
         LOG.info(f"Performing QC on case {case_id}")
         return True
+
+    def create_qc_done_file(self, run_dir_path: Path, failed_samples: dict) -> None:
+        """Creates a QC_done when a QC check is performed."""
+        write_json(file_path=run_dir_path.joinpath("QC_done.json"), content=failed_samples)
 
     def is_valid_total_reads(self, sample_id: str) -> bool:
         sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)

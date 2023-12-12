@@ -113,6 +113,13 @@ def microsalt_qc_fail_lims_project() -> str:
     return "ACC11111_qc_fail"
 
 
+@pytest.fixture
+def valid_microsalt_metrics_file(
+    microsalt_qc_fail_run_dir_path: Path, microsalt_qc_fail_lims_project: str
+) -> Path:
+    return Path(microsalt_qc_fail_run_dir_path, f"{microsalt_qc_fail_lims_project}.json")
+
+
 @pytest.fixture(name="microsalt_case_qc_pass")
 def microsalt_case_qc_pass() -> str:
     """Return a microsalt case to pass QC."""

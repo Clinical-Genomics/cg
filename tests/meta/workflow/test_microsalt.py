@@ -2,17 +2,13 @@
 import logging
 from pathlib import Path
 
-import mock
 from cg.apps.tb.api import TrailblazerAPI
 
-from cg.constants.constants import CaseActions, Pipeline
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI, QualityChecker
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import ControlEnum
 from cg.store import Store
 from cg.store.models import Case
-from tests.mocks.tb_mock import MockTB
-from tests.store_helpers import StoreHelpers
 
 
 def test_qc_check_fail(

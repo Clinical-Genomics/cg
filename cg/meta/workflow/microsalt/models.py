@@ -1,41 +1,25 @@
-from typing import List, Dict
-from pydantic import BaseModel
+from typing import Annotated, Any, Dict
+from pydantic import BaseModel, BeforeValidator
 from cg.constants.constants import MicrosaltAppTags
 
-from cg.store.models import Sample
 
-
-class BlastPubmlst(BaseModel):
-    sequence_type: MicrosaltAppTags
-    thresholds: str
-
-
-class QuastAssembly(BaseModel):
-    estimated_genome_length: int
-    gc_percentage: str
-    n50: int
-    necessary_contigs: int
+def empty_str_to_none(v: str) -> Any:
+    return v or None
 
 
 class PicardMarkduplicate(BaseModel):
-    insert_size: int
-    duplication_rate: float
+    insert_size: Annotated[int, BeforeValidator(empty_str_to_none)]
+    duplication_rate: Annotated[float | None, BeforeValidator(empty_str_to_none)]
 
 
 class MicrosaltSamtoolsStats(BaseModel):
-    total_reads: int
-    mapped_rate: float
-    average_coverage: float
-    coverage_10x: float
-    coverage_30x: float
-    coverage_50x: float
-    coverage_100x: float
+    total_reads: Annotated[int | None, BeforeValidator(empty_str_to_none)]
+    mapped_rate: Annotated[float | None, BeforeValidator(empty_str_to_none)]
+    average_coverage: Annotated[float | None, BeforeValidator(empty_str_to_none)]
+    coverage_10x: Annotated[float | None, BeforeValidator(empty_str_to_none)]
 
 
 class SampleMetrics(BaseModel):
-    blast_pubmlst: BlastPubmlst
-    quast_assembly: QuastAssembly
-    blast_resfinder_resistence: List[str]
     picard_markduplicate: PicardMarkduplicate
     microsalt_samtools_stats: MicrosaltSamtoolsStats
 

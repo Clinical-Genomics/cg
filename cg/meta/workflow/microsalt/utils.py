@@ -37,7 +37,8 @@ def is_valid_10x_coverage(coverage_10x: float) -> bool:
 
 def parse_quality_metrics(file_path: Path) -> QualityMetrics:
     data = read_json(file_path)
-    return QualityMetrics.model_validate_json(data)
+    formatted_data = {"samples": data}
+    return QualityMetrics(**formatted_data)
 
 
 def is_sample_negative_control(sample: Sample) -> bool:
