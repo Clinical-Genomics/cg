@@ -6,6 +6,7 @@ from cg.io.json import read_json, write_json
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult, SampleMetrics
 from cg.meta.workflow.microsalt.utils import (
+    is_valid_duplication_rate,
     is_valid_mapped_rate,
     is_valid_total_reads,
     is_valid_total_reads_for_control,
@@ -28,17 +29,16 @@ class QualityChecker:
 
         sample_results: list[QualityResult] = []
 
-        for sample_metrics in quality_metrics:
-            result = self.quality_control_sample(sample_metrics)
+        for sample_id, metrics in quality_metrics:
+            result = self.quality_control_sample(sample_id=sample_id, metrics=metrics)
             sample_results.append(result)
 
         self.quality_control_case(sample_results)
 
-    def quality_control_sample(
-        self, sample_id: str, sample_metrics: SampleMetrics
-    ) -> QualityResult:
-        reads_passes_qc: bool = self.is_valid_total_reads(sample_id)
-        mapped_rate_passes_qc: bool = self.is_valid_mapped_rate(sample_metrics)
+    def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> QualityResult:
+        valid_reads: bool = self.is_valid_total_reads(sample_id)
+        valid_mapped_rate: bool = self.is_valid_mapped_rate(metrics)
+        valid_duplication_rate: bool = self.is_valid_duplication_rate(metrics)
 
     def quality_control_case(self, sample_results: list[QualityResult]) -> bool:
         pass
@@ -162,3 +162,7 @@ class QualityChecker:
     def is_valid_mapped_rate(self, metrics: SampleMetrics) -> bool:
         mapped_rate: float = metrics.microsalt_samtools_stats.mapped_rate
         return is_valid_mapped_rate(mapped_rate)
+
+    def is_valid_duplication_rate(self, metrics: SampleMetrics) -> bool:
+        duplication_rate: float = metrics.picard_markduplicate.duplication_rate
+        return is_valid_duplication_rate(duplication_rate)
