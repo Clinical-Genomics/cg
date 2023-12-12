@@ -2,23 +2,21 @@ import logging
 from pathlib import Path
 
 from cg.io.json import write_json
-from cg.constants.constants import MicrosaltQC
 from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult, SampleMetrics
 from cg.meta.workflow.microsalt.utils import (
     get_application_tag,
-    get_negative_control_result,
-    get_non_urgent_results,
-    get_results_passing_qc,
-    get_urgent_results,
     is_sample_negative_control,
     is_valid_10x_coverage,
     is_valid_average_coverage,
     is_valid_duplication_rate,
-    is_valid_mapping_rate,
+    is_valid_mapped_rate,
     is_valid_median_insert_size,
+    is_valid_negative_control,
     is_valid_total_reads,
     is_valid_total_reads_for_control,
+    non_urgent_samples_pass_qc,
     parse_quality_metrics,
+    urgent_samples_pass_qc,
 )
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.api.core import Store
@@ -43,11 +41,11 @@ class QualityChecker:
 
     def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> QualityResult:
         valid_reads: bool = self.is_valid_total_reads(sample_id)
-        valid_mapping: bool = self.is_valid_mapped_rate(metrics)
-        valid_duplication: bool = self.is_valid_duplication_rate(metrics)
-        valid_inserts: bool = self.is_valid_median_insert_size(metrics)
-        valid_coverage: bool = self.is_valid_average_coverage(metrics)
-        valid_10x_coverage: bool = self.is_valid_10x_coverage(metrics)
+        valid_mapping: bool = is_valid_mapped_rate(metrics)
+        valid_duplication: bool = is_valid_duplication_rate(metrics)
+        valid_inserts: bool = is_valid_median_insert_size(metrics)
+        valid_coverage: bool = is_valid_average_coverage(metrics)
+        valid_10x_coverage: bool = is_valid_10x_coverage(metrics)
 
         sample_passes_qc: bool = (
             valid_reads
@@ -70,9 +68,9 @@ class QualityChecker:
         )
 
     def quality_control_case(self, sample_results: list[QualityResult]) -> bool:
-        control_passes_qc: bool = self.is_valid_negative_control(sample_results)
-        urgent_pass_qc: bool = self.all_urgent_samples_pass_qc(sample_results)
-        non_urgent_pass_qc: bool = self.non_urgent_samples_pass_qc(sample_results)
+        control_passes_qc: bool = is_valid_negative_control(sample_results)
+        urgent_pass_qc: bool = urgent_samples_pass_qc(sample_results)
+        non_urgent_pass_qc: bool = non_urgent_samples_pass_qc(sample_results)
         return control_passes_qc and urgent_pass_qc and non_urgent_pass_qc
 
     def is_qc_required(self, case_run_dir: Path | None, case_id: str) -> bool:
@@ -100,41 +98,3 @@ class QualityChecker:
         if sample.control == ControlEnum.negative:
             return is_valid_total_reads_for_control(reads=sample_reads, target_reads=target_reads)
         return is_valid_total_reads(reads=sample_reads, target_reads=target_reads)
-
-    def is_valid_mapped_rate(self, metrics: SampleMetrics) -> bool:
-        mapped_rate: float | None = metrics.microsalt_samtools_stats.mapped_rate
-        return is_valid_mapping_rate(mapped_rate) if mapped_rate else False
-
-    def is_valid_duplication_rate(self, metrics: SampleMetrics) -> bool:
-        duplication_rate: float | None = metrics.picard_markduplicate.duplication_rate
-        return is_valid_duplication_rate(duplication_rate) if duplication_rate else False
-
-    def is_valid_median_insert_size(self, metrics: SampleMetrics) -> bool:
-        insert_size: int | None = metrics.picard_markduplicate.insert_size
-        return is_valid_median_insert_size(insert_size) if insert_size else False
-
-    def is_valid_average_coverage(self, metrics: SampleMetrics) -> bool:
-        coverage: float | None = metrics.microsalt_samtools_stats.average_coverage
-        return is_valid_average_coverage(coverage) if coverage else False
-
-    def is_valid_10x_coverage(self, metrics: SampleMetrics) -> bool:
-        coverage_10x: float | None = metrics.microsalt_samtools_stats.coverage_10x
-        return is_valid_10x_coverage(coverage_10x) if coverage_10x else False
-
-    def is_valid_negative_control(self, results: list[QualityResult]) -> bool:
-        negative_control_result: QualityResult = get_negative_control_result(results)
-        return negative_control_result.passes_qc
-
-    def all_urgent_samples_pass_qc(self, results: list[QualityResult]) -> bool:
-        urgent_samples: list[QualityResult] = get_urgent_results(results)
-        return all(sample.passes_qc for sample in urgent_samples)
-
-    def non_urgent_samples_pass_qc(self, results: list[QualityResult]) -> bool:
-        urgent_samples: list[QualityResult] = get_non_urgent_results(results)
-        passing_qc: list[QualityResult] = get_results_passing_qc(urgent_samples)
-
-        if not urgent_samples:
-            return True
-
-        fraction_passing_qc: float = len(passing_qc) / len(urgent_samples)
-        return fraction_passing_qc >= MicrosaltQC.QC_PERCENT_THRESHOLD_MWX
