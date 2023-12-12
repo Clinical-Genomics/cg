@@ -310,7 +310,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
 
     def get_multiqc_json_metrics(
-        self, case_id: str, pipeline_metrics: Union[dict, None] = None
+        self, case_id: str, pipeline_metrics: dict | None = None
     ) -> list[MetricsBase]:
         """Get a multiqc_data.json file and returns metrics and values formatted."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
