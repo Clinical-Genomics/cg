@@ -1,5 +1,5 @@
 """Test for analysis"""
-
+import logging
 from datetime import datetime
 
 import mock
@@ -13,8 +13,9 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.models.fastq import FastqFileMeta
 from cg.store import Store
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 
 
 @pytest.mark.parametrize(
@@ -390,3 +391,30 @@ def test_prepare_fastq_files_decompression_running(
             # WHEN running prepare_fastq_files
             # THEN an AnalysisNotReadyError should be thrown
             mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
+
+
+def test_link_fastq_files_for_sample(
+    analysis_store: Store,
+    caplog,
+    mip_analysis_api: MipDNAAnalysisAPI,
+    fastq_file_meta_raw: dict,
+    mocker,
+):
+    caplog.set_level(logging.INFO)
+    # GIVEN a case
+    case: Case = analysis_store.get_cases()[0]
+
+    # GIVEN a sample
+    sample: Sample = case.links[0].sample
+
+    mocker.patch.object(
+        AnalysisAPI,
+        "gather_file_metadata_for_sample",
+        return_value=[FastqFileMeta(**fastq_file_meta_raw)],
+    )
+
+    # WHEN parsing header
+    mip_analysis_api.link_fastq_files_for_sample(case=case, sample=sample)
+
+    # THEN
+    assert "Linking: }" in caplog.text

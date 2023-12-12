@@ -29,14 +29,3 @@ def gzipped_empty_file(fastq_dir: Path) -> Path:
     """
 
     return fastq_dir / "dummy_run_R1_001.fastq.gz"
-
-
-@pytest.fixture
-def fast_file_meta_raw(flow_cell_name: str) -> dict:
-    return {
-        "path": Path("a", "file.fastq.gz"),
-        "lane": str(1),
-        "read_direction": str(2),
-        "flow_cell_id": flow_cell_name,
-        "undetermined": None,
-    }
