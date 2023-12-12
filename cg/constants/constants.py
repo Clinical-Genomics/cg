@@ -211,6 +211,7 @@ SKIP_CONFIRMATION = click.option(
 
 
 class MicrosaltQC:
+    AVERAGE_COVERAGE_THRESHOLD: int = 10
     QC_PERCENT_THRESHOLD_MWX: float = 0.1
     COVERAGE_10X_THRESHOLD: float = 0.75
     DUPLICATION_RATE_THRESHOLD: float = 0.8

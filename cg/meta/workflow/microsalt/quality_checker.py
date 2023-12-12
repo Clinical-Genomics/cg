@@ -6,6 +6,7 @@ from cg.io.json import read_json, write_json
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult, SampleMetrics
 from cg.meta.workflow.microsalt.utils import (
+    is_valid_average_coverage,
     is_valid_duplication_rate,
     is_valid_mapped_rate,
     is_valid_median_insert_size,
@@ -40,6 +41,8 @@ class QualityChecker:
         valid_reads: bool = self.is_valid_total_reads(sample_id)
         valid_mapped_rate: bool = self.is_valid_mapped_rate(metrics)
         valid_duplication_rate: bool = self.is_valid_duplication_rate(metrics)
+        valid_median_insert_size: bool = self.is_valid_median_insert_size(metrics)
+        valid_average_coverage: bool = self.is_valid_average_coverage(metrics)
 
     def quality_control_case(self, sample_results: list[QualityResult]) -> bool:
         pass
@@ -171,3 +174,7 @@ class QualityChecker:
     def is_valid_median_insert_size(self, metrics: SampleMetrics) -> bool:
         insert_size: int = metrics.picard_markduplicate.insert_size
         return is_valid_median_insert_size(insert_size)
+
+    def is_valid_average_coverage(self, metrics: SampleMetrics) -> bool:
+        average_coverage: float = metrics.microsalt_samtools_stats.average_coverage
+        return is_valid_average_coverage(average_coverage)
