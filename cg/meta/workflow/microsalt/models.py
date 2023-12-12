@@ -1,11 +1,12 @@
 from typing import List, Dict
 from pydantic import BaseModel
+from cg.constants.constants import MicrosaltAppTags
 
 from cg.store.models import Sample
 
 
 class BlastPubmlst(BaseModel):
-    sequence_type: str
+    sequence_type: MicrosaltAppTags
     thresholds: str
 
 
@@ -45,5 +46,6 @@ class QualityMetrics(BaseModel):
 
 class QualityResult(BaseModel):
     sample_id: str
-    is_negative_control: bool
     passes_qc: bool
+    is_negative_control: bool
+    application_tag: MicrosaltAppTags

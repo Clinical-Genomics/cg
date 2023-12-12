@@ -6,7 +6,10 @@ from cg.io.json import read_json, write_json
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult, SampleMetrics
 from cg.meta.workflow.microsalt.utils import (
+    get_application_tag,
     get_negative_control_result,
+    get_urgent_results,
+    is_sample_negative_control,
     is_valid_10x_coverage,
     is_valid_average_coverage,
     is_valid_duplication_rate,
@@ -56,17 +59,20 @@ class QualityChecker:
             and valid_10x_coverage
         )
 
-        sample = self.status_db.get_sample_by_internal_id(sample_id)
-        is_negative_control: bool = sample.control == ControlEnum.negative
+        sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
+        is_control: bool = is_sample_negative_control(sample)
+        application_tag: str = get_application_tag(sample)
 
         return QualityResult(
             sample_id=sample_id,
-            is_negative_control=is_negative_control,
             passed=sample_passes_qc,
+            is_negative_control=is_control,
+            application_tag=application_tag,
         )
 
     def quality_control_case(self, sample_results: list[QualityResult]) -> bool:
         control_passes_qc: bool = self.is_valid_negative_control(sample_results)
+        urgent_pass_qc: bool = self.all_urgent_samples_pass_qc(sample_results)
 
     def microsalt_qc(self, case_id: str, run_dir_path: Path, lims_project: str) -> bool:
         """Check if given microSALT case passes QC check."""
@@ -205,3 +211,7 @@ class QualityChecker:
     def is_valid_negative_control(self, results: list[QualityResult]) -> bool:
         negative_control_result: QualityResult = get_negative_control_result(results)
         return negative_control_result.passes_qc
+
+    def all_urgent_samples_pass_qc(self, results: list[QualityResult]) -> bool:
+        urgent_samples: list[QualityResult] = get_urgent_results(results)
+        return all(sample.passes_qc for sample in urgent_samples)

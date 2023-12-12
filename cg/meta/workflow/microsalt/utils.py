@@ -1,9 +1,10 @@
 from pathlib import Path
 
-from cg.constants.constants import MicrosaltQC
+from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.io.json import read_json
-from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult
+from cg.meta.workflow.microsalt.models import QualityMetrics, SampleQualityControl
 from cg.models.orders.sample_base import ControlEnum
+from cg.store.models import Sample
 
 
 def is_valid_total_reads(reads: int, target_reads: int) -> bool:
@@ -39,7 +40,19 @@ def parse_quality_metrics(file_path: Path) -> QualityMetrics:
     return QualityMetrics.model_validate_json(data)
 
 
-def get_negative_control_result(results: list[QualityResult]) -> QualityResult:
+def is_sample_negative_control(sample: Sample) -> bool:
+    return sample.control == ControlEnum.negative
+
+
+def get_application_tag(sample: Sample) -> str:
+    return sample.application_version.application.tag
+
+
+def get_urgent_results(results: list[SampleQualityControl]) -> list[SampleQualityControl]:
+    return [result for result in results if result.application_tag == MicrosaltAppTags.MWRNXTR003]
+
+
+def get_negative_control_result(results: list[SampleQualityControl]) -> SampleQualityControl:
     for result in results:
         if result.is_negative_control:
             return result
