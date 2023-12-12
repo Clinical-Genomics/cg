@@ -44,4 +44,3 @@ class QualityMetrics(BaseModel):
 class QualityResult(BaseModel):
     sample_id: str
     passed: bool
-    fail_message: str | None = None

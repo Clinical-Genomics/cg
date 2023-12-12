@@ -7,9 +7,7 @@ def test_sample_total_reads_passing():
     target_reads = 100
 
     # WHEN checking if the sample has sufficient reads
-    passes_reads_threshold = is_valid_total_reads(
-        reads=sample_reads, target_reads=target_reads
-    )
+    passes_reads_threshold = is_valid_total_reads(reads=sample_reads, target_reads=target_reads)
 
     # THEN it passes
     assert passes_reads_threshold
@@ -21,9 +19,7 @@ def test_sample_total_reads_failing():
     target_reads = 100
 
     # WHEN checking if the sample has sufficient reads
-    passes_reads_threshold = is_valid_total_reads(
-        reads=sample_reads, target_reads=target_reads
-    )
+    passes_reads_threshold = is_valid_total_reads(reads=sample_reads, target_reads=target_reads)
 
     # THEN it fails
     assert not passes_reads_threshold
@@ -35,9 +31,7 @@ def test_sample_total_reads_failing_without_reads():
     target_reads = 100
 
     # WHEN checking if the sample has sufficient reads
-    passes_reads_threshold = is_valid_total_reads(
-        reads=sample_reads, target_reads=target_reads
-    )
+    passes_reads_threshold = is_valid_total_reads(reads=sample_reads, target_reads=target_reads)
 
     # THEN it fails
     assert not passes_reads_threshold

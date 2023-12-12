@@ -46,8 +46,22 @@ class QualityChecker:
         valid_coverage: bool = self.is_valid_average_coverage(metrics)
         valid_10x_coverage: bool = self.is_valid_10x_coverage(metrics)
 
+        sample_passes_qc: bool = (
+            valid_reads
+            and valid_mapping
+            and valid_duplication
+            and valid_inserts
+            and valid_coverage
+            and valid_10x_coverage
+        )
+
+        return QualityResult(
+            sample_id=sample_id,
+            passed=sample_passes_qc,
+        )
+
     def quality_control_case(self, sample_results: list[QualityResult]) -> bool:
-        pass
+        negative_control_passes: bool = True
 
     def microsalt_qc(self, case_id: str, run_dir_path: Path, lims_project: str) -> bool:
         """Check if given microSALT case passes QC check."""
