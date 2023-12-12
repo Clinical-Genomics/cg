@@ -8,6 +8,7 @@ from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult, Sam
 from cg.meta.workflow.microsalt.utils import (
     is_valid_duplication_rate,
     is_valid_mapped_rate,
+    is_valid_median_insert_size,
     is_valid_total_reads,
     is_valid_total_reads_for_control,
     parse_quality_metrics,
@@ -166,3 +167,7 @@ class QualityChecker:
     def is_valid_duplication_rate(self, metrics: SampleMetrics) -> bool:
         duplication_rate: float = metrics.picard_markduplicate.duplication_rate
         return is_valid_duplication_rate(duplication_rate)
+
+    def is_valid_median_insert_size(self, metrics: SampleMetrics) -> bool:
+        insert_size: int = metrics.picard_markduplicate.insert_size
+        return is_valid_median_insert_size(insert_size)

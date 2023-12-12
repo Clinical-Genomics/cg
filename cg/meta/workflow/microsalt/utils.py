@@ -21,6 +21,10 @@ def is_valid_duplication_rate(sample_duplication_rate: float) -> bool:
     return sample_duplication_rate < MicrosaltQC.DUPLICATION_RATE_THRESHOLD
 
 
+def is_valid_median_insert_size(sample_insert_size: int) -> bool:
+    return sample_insert_size > MicrosaltQC.INSERT_SIZE_THRESHOLD
+
+
 def parse_quality_metrics(file_path: Path) -> QualityMetrics:
     data = read_json(file_path)
     return QualityMetrics.model_validate_json(data)
