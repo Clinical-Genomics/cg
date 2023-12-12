@@ -222,6 +222,9 @@ class QualityChecker:
     def non_urgent_samples_pass_qc(self, results: list[QualityResult]) -> bool:
         urgent_samples: list[QualityResult] = get_non_urgent_results(results)
         passing_qc: list[QualityResult] = get_results_passing_qc(urgent_samples)
-        
+
+        if not urgent_samples:
+            return True
+
         fraction_passing_qc: float = len(passing_qc) / len(urgent_samples)
         return fraction_passing_qc >= MicrosaltQC.QC_PERCENT_THRESHOLD_MWX
