@@ -40,7 +40,6 @@ class QualityChecker:
         self.quality_control_case(sample_results)
 
     def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> QualityResult:
-        sample = self.status_db.get_sample_by_internal_id(sample_id)
         valid_reads: bool = self.is_valid_total_reads(sample_id)
         valid_mapping: bool = self.is_valid_mapped_rate(metrics)
         valid_duplication: bool = self.is_valid_duplication_rate(metrics)
@@ -57,8 +56,12 @@ class QualityChecker:
             and valid_10x_coverage
         )
 
+        sample = self.status_db.get_sample_by_internal_id(sample_id)
+        is_negative_control: bool = sample.control == ControlEnum.negative
+
         return QualityResult(
-            sample=sample,
+            sample_id=sample_id,
+            is_negative_control=is_negative_control,
             passed=sample_passes_qc,
         )
 

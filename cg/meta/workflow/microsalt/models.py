@@ -44,5 +44,6 @@ class QualityMetrics(BaseModel):
 
 
 class QualityResult(BaseModel):
-    sample: Sample
+    sample_id: str
+    is_negative_control: bool
     passes_qc: bool

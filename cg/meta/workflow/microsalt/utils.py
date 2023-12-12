@@ -41,5 +41,5 @@ def parse_quality_metrics(file_path: Path) -> QualityMetrics:
 
 def get_negative_control_result(results: list[QualityResult]) -> QualityResult:
     for result in results:
-        if result.sample.control == ControlEnum.negative:
+        if result.is_negative_control:
             return result
