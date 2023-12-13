@@ -1,4 +1,14 @@
+from cg.meta.workflow.microsalt.metrics_parser.models import (
+    MicrosaltSamtoolsStats,
+    PicardMarkduplicate,
+    SampleMetrics,
+)
 from cg.meta.workflow.microsalt.quality_controller.utils import (
+    has_valid_10x_coverage,
+    has_valid_average_coverage,
+    has_valid_duplication_rate,
+    has_valid_mapping_rate,
+    has_valid_median_insert_size,
     is_valid_10x_coverage,
     is_valid_average_coverage,
     is_valid_duplication_rate,
@@ -7,6 +17,7 @@ from cg.meta.workflow.microsalt.quality_controller.utils import (
     is_valid_total_reads,
     is_valid_total_reads_for_control,
 )
+from tests.meta.workflow.microsalt.conftest import create_sample_metrics
 
 
 def test_sample_total_reads_passing():
@@ -195,3 +206,113 @@ def test_is_valid_10x_coverage_failing():
 
     # THEN it fails
     assert not passes_coverage_10x_qc
+
+def test_has_valid_mapping_rate_passing():
+    # GIVEN metrics with a high mapping rate
+    metrics = create_sample_metrics(mapped_rate=0.8)
+
+    # WHEN checking if the mapping rate is valid
+    passes_mapping_rate_qc = has_valid_mapping_rate(metrics)
+
+    # THEN it passes the quality control
+    assert passes_mapping_rate_qc
+
+
+def test_has_valid_mapping_rate_missing():
+    # GIVEN metrics without a mapping rate
+    metrics = create_sample_metrics(mapped_rate=None)
+
+    # WHEN checking if the mapping rate is valid
+    passes_mapping_rate_qc = has_valid_mapping_rate(metrics)
+
+    # THEN it fails the quality control
+    assert not passes_mapping_rate_qc
+
+
+def test_has_valid_duplication_rate_passing():
+    # GIVEN metrics with a low duplication rate
+    metrics = create_sample_metrics(duplication_rate=0.1)
+
+    # WHEN checking if the duplication rate is valid
+    passes_duplication_rate_qc = has_valid_duplication_rate(metrics)
+
+    # THEN it passes the quality control
+    assert passes_duplication_rate_qc
+
+
+def test_has_valid_duplication_rate_missing():
+    # GIVEN metrics without a duplication rate
+    metrics = create_sample_metrics(duplication_rate=None)
+
+    # WHEN checking if the duplication rate is valid
+    passes_duplication_rate_qc = has_valid_duplication_rate(metrics)
+
+    # THEN it fails the quality control
+    assert not passes_duplication_rate_qc
+
+
+def test_has_valid_median_insert_size_passing():
+    # GIVEN metrics with a high median insert size
+    metrics = create_sample_metrics(insert_size=200)
+
+    # WHEN checking if the median insert size is valid
+    passes_insert_size_qc = has_valid_median_insert_size(metrics)
+
+    # THEN it passes the quality control
+    assert passes_insert_size_qc
+
+
+def test_has_valid_median_insert_size_missing():
+    # GIVEN metrics without a median insert size
+    metrics = create_sample_metrics(insert_size=None)
+
+    # WHEN checking if the median insert size is valid
+    passes_insert_size_qc = has_valid_median_insert_size(metrics)
+
+    # THEN it fails the quality control
+    assert not passes_insert_size_qc
+
+
+def test_has_valid_average_coverage_passes():
+    # GIVEN metrics with a high average coverage
+    metrics = create_sample_metrics(average_coverage=30.0)
+
+    # WHEN checking if the average coverage is valid
+    passes_average_coverage_qc = has_valid_average_coverage(metrics)
+
+    # THEN it passes the quality control
+    assert passes_average_coverage_qc
+
+
+def test_has_valid_average_coverage_missing():
+    # GIVEN metrics without an average coverage
+    metrics = create_sample_metrics(average_coverage=None)
+
+    # WHEN checking if the average coverage is valid
+    passes_average_coverage_qc = has_valid_average_coverage(metrics)
+
+    # THEN it fails the quality control
+    assert not passes_average_coverage_qc
+
+
+def test_has_valid_10x_coverage_passing():
+    # GIVEN metrics with a high percent of bases covered at 10x
+    metrics = create_sample_metrics(coverage_10x=95.0)
+
+    # WHEN checking if the coverage is valid
+    passes_coverage_10x_qc = has_valid_10x_coverage(metrics)
+
+    # THEN it passes the quality control
+    assert passes_coverage_10x_qc
+
+
+def test_has_valid_10x_coverage_missing():
+    # GIVEN metrics without a percent of bases covered at 10x
+    metrics = create_sample_metrics(coverage_10x=None)
+
+    # WHEN checking if the coverage is valid
+    passes_coverage_10x_qc = has_valid_10x_coverage(metrics)
+
+    # THEN it fails the quality control
+    assert not passes_coverage_10x_qc
+
