@@ -18,7 +18,7 @@ class AlignmentFileTag(StrEnum):
 
     @classmethod
     def file_tags(cls) -> list[str]:
-        return list(cls)
+        return list(map(lambda tag: tag.value, cls))
 
 
 class ArchiveTag(StrEnum):
@@ -50,6 +50,25 @@ HK_MULTIQC_HTML_TAG = ["multiqc-html"]
 HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]
 
 HK_DELIVERY_REPORT_TAG = "delivery-report"
+
+
+class AnalysisTag(StrEnum):
+    """Tags for analysis files."""
+
+    ARRIBA: str = "arriba"
+    ARRIBA_VISUALIZATION: str = "arriba-visualisation"
+    FUSION: str = "fusion"
+    FUSIONCATCHER: str = "fusioncatcher"
+    FUSIONCATCHER_SUMMARY: str = "fusioncatcher-summary"
+    FUSIONINSPECTOR: str = "fusioninspector"
+    FUSIONINSPECTOR_HTML: str = "fusioninspector-html"
+    FUSIONREPORT: str = "fusionreport"
+    GENE_COUNTS: str = "gene-counts"
+    MULTIQC_HTML: str = "multiqc-html"
+    RESEARCH: str = "research"
+    RNA: str = "rna"
+    STARFUSION: str = "star-fusion"
+    VCF_FUSION: str = "vcf-fusion"
 
 
 class HkMipAnalysisTag:
