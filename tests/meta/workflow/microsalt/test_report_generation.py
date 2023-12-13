@@ -1,0 +1,21 @@
+from pathlib import Path
+
+from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
+from cg.meta.workflow.microsalt.quality_controller.report_generator import ReportGenerator
+
+
+def test_generate_report_without_results():
+    pass
+
+
+def test_generate_report_with_results(quality_results: list[QualityResult], tmp_path: Path):
+    # GIVEN quality results
+
+    # GIVEN a file path to write the report to
+    out_file = Path(tmp_path, "QC_done.json")
+
+    # WHEN generating a report
+    ReportGenerator.report(out_file=out_file, results=quality_results)
+
+    # THEN the report is written to the directory
+    assert out_file.exists()

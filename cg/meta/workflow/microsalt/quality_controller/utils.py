@@ -33,31 +33,6 @@ def is_valid_10x_coverage(coverage_10x: float) -> bool:
     return coverage_10x > MicrosaltQC.COVERAGE_10X_THRESHOLD
 
 
-def is_sample_negative_control(sample: Sample) -> bool:
-    return sample.control == ControlEnum.negative
-
-
-def get_application_tag(sample: Sample) -> str:
-    return sample.application_version.application.tag
-
-
-def get_results_passing_qc(results: list[QualityResult]) -> list[QualityResult]:
-    return [result for result in results if result.passes_qc]
-
-
-def get_non_urgent_results(results: list[QualityResult]) -> list[QualityResult]:
-    return [result for result in results if result.application_tag != MicrosaltAppTags.MWRNXTR003]
-
-
-def get_urgent_results(results: list[QualityResult]) -> list[QualityResult]:
-    return [result for result in results if result.application_tag == MicrosaltAppTags.MWRNXTR003]
-
-
-def urgent_samples_pass_qc(results: list[QualityResult]) -> bool:
-    urgent_results: list[QualityResult] = get_urgent_results(results)
-    return all(result.passes_qc for result in urgent_results)
-
-
 def is_valid_mapping_rate(metrics: SampleMetrics) -> bool:
     mapped_rate: float | None = metrics.microsalt_samtools_stats.mapped_rate
     return is_valid_mapping_rate(mapped_rate) if mapped_rate else False
@@ -88,6 +63,23 @@ def negative_control_pass_qc(results: list[QualityResult]) -> bool:
     return negative_control_result.passes_qc
 
 
+def get_results_passing_qc(results: list[QualityResult]) -> list[QualityResult]:
+    return [result for result in results if result.passes_qc]
+
+
+def get_non_urgent_results(results: list[QualityResult]) -> list[QualityResult]:
+    return [result for result in results if result.application_tag != MicrosaltAppTags.MWRNXTR003]
+
+
+def get_urgent_results(results: list[QualityResult]) -> list[QualityResult]:
+    return [result for result in results if result.application_tag == MicrosaltAppTags.MWRNXTR003]
+
+
+def urgent_samples_pass_qc(results: list[QualityResult]) -> bool:
+    urgent_results: list[QualityResult] = get_urgent_results(results)
+    return all(result.passes_qc for result in urgent_results)
+
+
 def non_urgent_samples_pass_qc(results: list[QualityResult]) -> bool:
     non_urgent_samples: list[QualityResult] = get_non_urgent_results(results)
     passing_qc: list[QualityResult] = get_results_passing_qc(non_urgent_samples)
@@ -104,3 +96,11 @@ def get_negative_control_result(results: list[QualityResult]) -> QualityResult:
         if result.is_control:
             return result
     raise ValueError("No negative control result found")
+
+
+def is_sample_negative_control(sample: Sample) -> bool:
+    return sample.control == ControlEnum.negative
+
+
+def get_application_tag(sample: Sample) -> str:
+    return sample.application_version.application.tag

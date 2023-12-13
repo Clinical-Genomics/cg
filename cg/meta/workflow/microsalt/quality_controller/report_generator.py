@@ -6,7 +6,7 @@ from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 
 class ReportGenerator:
     @staticmethod
-    def report(out_dir: Path, results: list[QualityResult]):
+    def report(out_file: Path, results: list[QualityResult]):
         formatted_results: list[dict] = []
 
         for result in results:
@@ -23,5 +23,4 @@ class ReportGenerator:
             }
             formatted_results.append(formatted_result)
 
-        out_file: Path = Path(out_dir, "QC_report.json")
-        write_json(out_file, formatted_results)
+        write_json(file_path=out_file, content=formatted_results)

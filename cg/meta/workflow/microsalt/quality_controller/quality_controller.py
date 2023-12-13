@@ -32,7 +32,8 @@ class QualityController:
     def quality_control(self, metrics_file_path: Path) -> bool:
         quality_metrics: QualityMetrics = MetricsParser.parse(metrics_file_path)
         sample_results: list[QualityResult] = self.quality_control_samples(quality_metrics)
-        ReportGenerator.report(out_dir=metrics_file_path.parent, results=sample_results)
+        report_file: Path = metrics_file_path.parent.joinpath("QC_done.json")
+        ReportGenerator.report(out_file=report_file, results=sample_results)
         return self.quality_control_case(sample_results)
 
     def quality_control_samples(self, quality_metrics: QualityMetrics) -> list[QualityResult]:
