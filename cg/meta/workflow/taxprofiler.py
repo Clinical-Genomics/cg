@@ -42,7 +42,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.nextflow_binary_path: str = config.taxprofiler.binary_path
         self.compute_env_base: str = config.taxprofiler.compute_env
 
-
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, instrument_platform: SequencingPlatform.ILLUMINA, fasta: str = ""
     ) -> list[list[str]]:
