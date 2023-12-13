@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.io.json import write_json
-from cg.meta.workflow.microsalt.quality_checker.models import QualityResult
+from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 
 
 class ReportGenerator:

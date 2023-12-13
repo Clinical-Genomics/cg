@@ -4,9 +4,9 @@ from pathlib import Path
 from cg.io.json import write_json
 from cg.meta.workflow.microsalt.metrics_parser import MetricsParser
 from cg.meta.workflow.microsalt.metrics_parser.models import QualityMetrics, SampleMetrics
-from cg.meta.workflow.microsalt.quality_checker.models import QualityResult
-from cg.meta.workflow.microsalt.quality_checker.report_generatory import ReportGenerator
-from cg.meta.workflow.microsalt.quality_checker.utils import (
+from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
+from cg.meta.workflow.microsalt.quality_controller.report_generatory import ReportGenerator
+from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_application_tag,
     is_sample_negative_control,
     is_valid_10x_coverage,
@@ -27,7 +27,7 @@ from cg.store.models import Sample
 LOG = logging.getLogger(__name__)
 
 
-class QualityChecker:
+class QualityController:
     def __init__(self, status_db: Store):
         self.status_db = status_db
 

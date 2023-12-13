@@ -14,7 +14,7 @@ from cg.constants.tb import AnalysisStatus
 from cg.exc import CgDataError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
-from cg.meta.workflow.microsalt.quality_checker import QualityChecker
+from cg.meta.workflow.microsalt.quality_controller import QualityController
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Sample
 from cg.utils import Process
@@ -29,7 +29,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         super().__init__(pipeline, config)
         self.root_dir = config.microsalt.root
         self.queries_path = config.microsalt.queries_path
-        self.quality_checker = QualityChecker(config.status_db)
+        self.quality_checker = QualityController(config.status_db)
 
     @property
     def use_read_count_threshold(self) -> bool:

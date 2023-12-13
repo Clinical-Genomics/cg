@@ -1,6 +1,6 @@
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.meta.workflow.microsalt.metrics_parser.models import SampleMetrics
-from cg.meta.workflow.microsalt.quality_checker.models import QualityResult
+from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Sample
 

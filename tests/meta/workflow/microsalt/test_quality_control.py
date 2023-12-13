@@ -1,4 +1,4 @@
-from cg.meta.workflow.microsalt.quality_checker.utils import is_valid_total_reads
+from cg.meta.workflow.microsalt.quality_controller.utils import is_valid_total_reads
 
 
 def test_sample_total_reads_passing():
