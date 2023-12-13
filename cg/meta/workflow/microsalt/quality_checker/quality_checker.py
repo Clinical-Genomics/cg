@@ -2,20 +2,21 @@ import logging
 from pathlib import Path
 
 from cg.io.json import write_json
-from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult, SampleMetrics
-from cg.meta.workflow.microsalt.utils import (
+from cg.meta.workflow.microsalt.metrics_parser import MetricsParser
+from cg.meta.workflow.microsalt.metrics_parser.models import QualityMetrics, SampleMetrics
+from cg.meta.workflow.microsalt.quality_checker.models import QualityResult
+from cg.meta.workflow.microsalt.quality_checker.utils import (
     get_application_tag,
     is_sample_negative_control,
     is_valid_10x_coverage,
     is_valid_average_coverage,
     is_valid_duplication_rate,
-    is_valid_mapped_rate,
+    is_valid_mapping_rate,
     is_valid_median_insert_size,
     is_valid_negative_control,
     is_valid_total_reads,
     is_valid_total_reads_for_control,
     non_urgent_samples_pass_qc,
-    parse_quality_metrics,
     urgent_samples_pass_qc,
 )
 from cg.models.orders.sample_base import ControlEnum
@@ -30,7 +31,7 @@ class QualityChecker:
         self.status_db = status_db
 
     def microsalt_qc(self, metrics_file_path: Path) -> bool:
-        quality_metrics: QualityMetrics = parse_quality_metrics(metrics_file_path)
+        quality_metrics: QualityMetrics = MetricsParser.parse(metrics_file_path)
         sample_results: list[QualityResult] = []
 
         for sample_id, metrics in quality_metrics:
@@ -41,7 +42,7 @@ class QualityChecker:
 
     def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> QualityResult:
         valid_reads: bool = self.is_valid_total_reads(sample_id)
-        valid_mapping: bool = is_valid_mapped_rate(metrics)
+        valid_mapping: bool = is_valid_mapping_rate(metrics)
         valid_duplication: bool = is_valid_duplication_rate(metrics)
         valid_inserts: bool = is_valid_median_insert_size(metrics)
         valid_coverage: bool = is_valid_average_coverage(metrics)
@@ -73,21 +74,13 @@ class QualityChecker:
         non_urgent_pass_qc: bool = non_urgent_samples_pass_qc(sample_results)
         return control_passes_qc and urgent_pass_qc and non_urgent_pass_qc
 
-    def is_qc_required(self, case_run_dir: Path | None, case_id: str) -> bool:
-        """Checks if a qc is required for a microbial case."""
+    def is_qc_required(self, case_run_dir: Path) -> bool:
         if case_run_dir is None:
-            LOG.info(f"There are no running directories for case {case_id}.")
             return False
-
-        if case_run_dir.joinpath("QC_done.json").exists():
-            LOG.info(f"QC already performed for case {case_id}, storing case.")
-            return False
-
-        LOG.info(f"Performing QC on case {case_id}")
-        return True
+        qc_done_path: Path = case_run_dir.joinpath("QC_done.json")
+        return not qc_done_path.exists()
 
     def create_qc_done_file(self, run_dir_path: Path, failed_samples: dict) -> None:
-        """Creates a QC_done when a QC check is performed."""
         write_json(file_path=run_dir_path.joinpath("QC_done.json"), content=failed_samples)
 
     def is_valid_total_reads(self, sample_id: str) -> bool:

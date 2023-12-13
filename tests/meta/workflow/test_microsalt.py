@@ -4,7 +4,8 @@ from pathlib import Path
 
 from cg.apps.tb.api import TrailblazerAPI
 
-from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI, QualityChecker
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from cg.meta.workflow.microsalt.quality_checker import QualityChecker
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import ControlEnum
 from cg.store import Store

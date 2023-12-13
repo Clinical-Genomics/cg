@@ -1,8 +1,6 @@
-from pathlib import Path
-
 from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
-from cg.io.json import read_json
-from cg.meta.workflow.microsalt.models import QualityMetrics, QualityResult, SampleMetrics
+from cg.meta.workflow.microsalt.metrics_parser.models import SampleMetrics
+from cg.meta.workflow.microsalt.quality_checker.models import QualityResult
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Sample
 
@@ -35,12 +33,6 @@ def is_valid_10x_coverage(coverage_10x: float) -> bool:
     return coverage_10x > MicrosaltQC.COVERAGE_10X_THRESHOLD
 
 
-def parse_quality_metrics(file_path: Path) -> QualityMetrics:
-    data = read_json(file_path)
-    formatted_data = {"samples": data}
-    return QualityMetrics(**formatted_data)
-
-
 def is_sample_negative_control(sample: Sample) -> bool:
     return sample.control == ControlEnum.negative
 
@@ -66,7 +58,7 @@ def urgent_samples_pass_qc(results: list[QualityResult]) -> bool:
     return all(result.passes_qc for result in urgent_results)
 
 
-def is_valid_mapped_rate(metrics: SampleMetrics) -> bool:
+def is_valid_mapping_rate(metrics: SampleMetrics) -> bool:
     mapped_rate: float | None = metrics.microsalt_samtools_stats.mapped_rate
     return is_valid_mapping_rate(mapped_rate) if mapped_rate else False
 
@@ -97,13 +89,13 @@ def is_valid_negative_control(results: list[QualityResult]) -> bool:
 
 
 def non_urgent_samples_pass_qc(results: list[QualityResult]) -> bool:
-    urgent_samples: list[QualityResult] = get_non_urgent_results(results)
-    passing_qc: list[QualityResult] = get_results_passing_qc(urgent_samples)
+    non_urgent_samples: list[QualityResult] = get_non_urgent_results(results)
+    passing_qc: list[QualityResult] = get_results_passing_qc(non_urgent_samples)
 
-    if not urgent_samples:
+    if not non_urgent_samples:
         return True
 
-    fraction_passing_qc: float = len(passing_qc) / len(urgent_samples)
+    fraction_passing_qc: float = len(passing_qc) / len(non_urgent_samples)
     return fraction_passing_qc >= MicrosaltQC.QC_PERCENT_THRESHOLD_MWX
 
 
@@ -111,3 +103,4 @@ def get_negative_control_result(results: list[QualityResult]) -> QualityResult:
     for result in results:
         if result.is_negative_control:
             return result
+    raise ValueError("No negative control result found")

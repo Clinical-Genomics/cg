@@ -1,14 +1,13 @@
-from typing import Annotated, Any, Dict
+from typing import Annotated
 from pydantic import BaseModel, BeforeValidator
-from cg.constants.constants import MicrosaltAppTags
 
 
-def empty_str_to_none(v: str) -> Any:
+def empty_str_to_none(v: str) -> str | None:
     return v or None
 
 
 class PicardMarkduplicate(BaseModel):
-    insert_size: Annotated[int, BeforeValidator(empty_str_to_none)]
+    insert_size: Annotated[int | None, BeforeValidator(empty_str_to_none)]
     duplication_rate: Annotated[float | None, BeforeValidator(empty_str_to_none)]
 
 
@@ -25,11 +24,4 @@ class SampleMetrics(BaseModel):
 
 
 class QualityMetrics(BaseModel):
-    samples: Dict[str, SampleMetrics]
-
-
-class QualityResult(BaseModel):
-    sample_id: str
-    passes_qc: bool
-    is_negative_control: bool
-    application_tag: MicrosaltAppTags
+    samples: dict[str, SampleMetrics]
