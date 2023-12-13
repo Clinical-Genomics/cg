@@ -9,22 +9,21 @@ from requests import Response
 from cg.constants.constants import APIMethods, FileFormat
 from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import APIRequest, WriteStream
-from cg.meta.archive.ddn_dataflow import (
+from cg.meta.archive.ddn.constants import (
     DESTINATION_ATTRIBUTE,
     OSTYPE,
     ROOT_TO_TRIM,
     SOURCE_ATTRIBUTE,
     DataflowEndpoints,
-    DDNDataFlowClient,
-    MiriaObject,
-    TransferPayload,
 )
+from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
+from cg.meta.archive.ddn.models import MiriaObject, TransferPayload
 from cg.meta.archive.models import FileAndSample, SampleAndDestination
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
 from cg.store.models import Sample
 
-FUNCTION_TO_MOCK = "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content"
+FUNCTION_TO_MOCK = "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content"
 
 
 def test_correct_source_root(
@@ -168,7 +167,7 @@ def test_ddn_dataflow_client_initialization_invalid_credentials(
 
     # WHEN initializing the DDNDataFlowClient class with the invalid credentials
     with mock.patch(
-        "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content",
+        "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content",
         return_value=unauthorized_response,
     ):
         # THEN an exception should be raised
