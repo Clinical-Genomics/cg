@@ -375,7 +375,7 @@ class DDNDataFlowClient(ArchiveHandler):
             else (self.archive_repository, self.local_storage, DESTINATION_ATTRIBUTE)
         )
 
-        transfer_request: TransferPayload = TransferPayload(
+        transfer_request = TransferPayload(
             files_to_transfer=miria_file_data, createFolder=is_archiving_request
         )
         transfer_request.trim_paths(attribute_to_trim=attribute)
