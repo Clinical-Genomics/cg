@@ -1,11 +1,9 @@
 import logging
 from pathlib import Path
 
-from cg.io.json import write_json
-from cg.meta.workflow.microsalt.metrics_parser import MetricsParser
-from cg.meta.workflow.microsalt.metrics_parser.models import QualityMetrics, SampleMetrics
+from cg.meta.workflow.microsalt.metrics_parser import MetricsParser, QualityMetrics, SampleMetrics
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
-from cg.meta.workflow.microsalt.quality_controller.report_generatory import ReportGenerator
+from cg.meta.workflow.microsalt.quality_controller.report_generator import ReportGenerator
 from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_application_tag,
     is_sample_negative_control,
@@ -14,7 +12,7 @@ from cg.meta.workflow.microsalt.quality_controller.utils import (
     is_valid_duplication_rate,
     is_valid_mapping_rate,
     is_valid_median_insert_size,
-    is_valid_negative_control,
+    negative_control_pass_qc,
     is_valid_total_reads,
     is_valid_total_reads_for_control,
     non_urgent_samples_pass_qc,
@@ -33,14 +31,16 @@ class QualityController:
 
     def quality_control(self, metrics_file_path: Path) -> bool:
         quality_metrics: QualityMetrics = MetricsParser.parse(metrics_file_path)
-        sample_results: list[QualityResult] = []
+        sample_results: list[QualityResult] = self.quality_control_samples(quality_metrics)
+        ReportGenerator.report(out_dir=metrics_file_path.parent, results=sample_results)
+        return self.quality_control_case(sample_results)
 
+    def quality_control_samples(self, quality_metrics: QualityMetrics) -> list[QualityResult]:
+        sample_results: list[QualityResult] = []
         for sample_id, metrics in quality_metrics:
             result = self.quality_control_sample(sample_id=sample_id, metrics=metrics)
             sample_results.append(result)
-
-        ReportGenerator.report(out_dir=metrics_file_path.parent, results=sample_results)
-        return self.quality_control_case(sample_results)
+        return sample_results
 
     def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> QualityResult:
         valid_reads: bool = self.is_valid_total_reads(sample_id)
@@ -77,7 +77,7 @@ class QualityController:
         )
 
     def quality_control_case(self, sample_results: list[QualityResult]) -> bool:
-        control_passes_qc: bool = is_valid_negative_control(sample_results)
+        control_passes_qc: bool = negative_control_pass_qc(sample_results)
         urgent_pass_qc: bool = urgent_samples_pass_qc(sample_results)
         non_urgent_pass_qc: bool = non_urgent_samples_pass_qc(sample_results)
         return control_passes_qc and urgent_pass_qc and non_urgent_pass_qc

@@ -83,7 +83,7 @@ def is_valid_10x_coverage(metrics: SampleMetrics) -> bool:
     return is_valid_10x_coverage(coverage_10x) if coverage_10x else False
 
 
-def is_valid_negative_control(results: list[QualityResult]) -> bool:
+def negative_control_pass_qc(results: list[QualityResult]) -> bool:
     negative_control_result: QualityResult = get_negative_control_result(results)
     return negative_control_result.passes_qc
 
