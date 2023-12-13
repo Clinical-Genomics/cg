@@ -101,6 +101,7 @@ def update_barcode_mismatch_values_for_sample(
     sample_to_update: FlowCellSampleBCLConvert,
     samples_to_compare_to: list[FlowCellSampleBCLConvert],
 ) -> None:
+    # TODO: Remove and update tests
     """Updates the sample's barcode mismatch values.
     If a sample index has a hamming distance to any other sample lower than the threshold
     (3 nucleotides), the barcode mismatch value for that index is set to zero."""

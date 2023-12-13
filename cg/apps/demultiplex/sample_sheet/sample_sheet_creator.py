@@ -11,7 +11,6 @@ from cg.apps.demultiplex.sample_sheet.index import (
     get_valid_indexes,
     is_dual_index,
     update_barcode_mismatch_values_for_sample,
-    update_indexes_for_samples,
 )
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
@@ -57,9 +56,10 @@ class SampleSheetCreator:
             FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
         ] = flow_cell.sample_type
         self.force: bool = force
-        self.index_settings: IndexSettings = self._get_index_settings()
+        self.index_settings: IndexSettings = self.run_parameters.index_settings()
 
     def _get_index_settings(self) -> IndexSettings:
+        # TODO: Remove and move testst to tun parameters
         """Returns the correct index-related settings for the run in question"""
         if self.run_parameters.sequencer == Sequencers.NOVASEQX:
             LOG.debug("Using NovaSeqX index settings")
@@ -71,6 +71,7 @@ class SampleSheetCreator:
 
     @property
     def _is_novaseq6000_post_1_5_kit(self) -> bool:
+        # TODO: Remove and move testst to tun parameters
         """
         Returns whether sequencing was performed after the 1.5 consumables kits where introduced.
         This is indicated by the software version and the reagent kit fields in the run parameters.
@@ -109,14 +110,20 @@ class SampleSheetCreator:
         """Filter out samples with single indexes."""
         pass
 
-    @staticmethod
     def convert_sample_to_header_dict(
+        self,
         sample: FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq,
         data_column_names: list[str],
     ) -> list[str]:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
-        sample_dict = sample.model_dump(by_alias=True)
-        return [str(sample_dict[column]) for column in data_column_names]
+        if self.run_parameters.is_single_index:
+            sample_serialisation: dict = sample.model_dump(
+                by_alias=True, exclude={"barcode_mismatches_2"}
+            )
+        else:
+            sample_serialisation: dict = sample.model_dump(by_alias=True)
+
+        return [str(sample_serialisation[column]) for column in data_column_names]
 
     def get_additional_sections_sample_sheet(self) -> list | None:
         """Return all sections of the sample sheet that are not the data section."""
@@ -147,16 +154,15 @@ class SampleSheetCreator:
         """Remove unwanted samples and adapt remaining samples."""
         self.remove_unwanted_samples()
         samples_in_lane: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq]
-        self.add_override_cycles_to_samples()
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
-            LOG.info(f"Adapting index and barcode mismatch values for samples in lane {lane}")
-            update_indexes_for_samples(
-                samples=samples_in_lane,
-                index_cycles=self.run_parameters.index_length,
-                perform_reverse_complement=self.index_settings.should_i5_be_reverse_complimented,
-                sequencer=self.run_parameters.sequencer,
+            LOG.info(
+                "Adapting index, override cycles and barcode mismatch values "
+                f"for samples in lane {lane}"
             )
-            self.update_barcode_mismatch_values_for_samples(samples_in_lane)
+            for sample in samples_in_lane:
+                sample.process_sample_for_sample_sheet(
+                    run_parameters=self.run_parameters, samples_to_compare=samples_in_lane
+                )
 
     def construct_sample_sheet(self) -> list[list[str]]:
         """Construct and validate the sample sheet."""
@@ -302,7 +308,10 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
 
     def get_data_section_header_and_columns(self) -> list[list[str]]:
         """Return the header and column names of the data section of the sample sheet."""
+        column_names: list[str] = SampleSheetBCLConvertSections.Data.column_names()
+        if self.run_parameters.is_single_index:
+            column_names.remove(SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_2)
         return [
             [SampleSheetBCLConvertSections.Data.HEADER.value],
-            SampleSheetBCLConvertSections.Data.column_names(),
+            column_names,
         ]
