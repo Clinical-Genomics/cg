@@ -98,13 +98,19 @@ class FastqHandler:
         return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
 
     @staticmethod
-    def parse_fastq_header(line: str) -> FastqFileMeta:
+    def parse_fastq_header(line: str) -> FastqFileMeta | None:
         """Parse and return fastq header metadata.
         Handle Illumina's two different header formats
         @see https://en.wikipedia.org/wiki/FASTQ_format
+        Raise:
+            TYpeError if unable to split line into expected parts.
         """
         parts = line.split(":")
-        return GetFastqFileMeta.header_format.get(len(parts))(parts=parts)
+        try:
+            return GetFastqFileMeta.header_format.get(len(parts))(parts=parts)
+        except TypeError as exception:
+            LOG.error(f"Could not parse header format for header: {line}")
+            raise exception
 
     @staticmethod
     def parse_file_data(fastq_path: Path) -> FastqFileMeta:

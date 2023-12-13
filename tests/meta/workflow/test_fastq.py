@@ -23,14 +23,31 @@ from cg.models.fastq import FastqFileMeta
         ),
     ],
 )
-def test_parse_fastq_header(fastq_header: str, expected_header_meta: dict, fixtures_dir):
+def test_parse_fastq_header(fastq_header: str, expected_header_meta: dict):
     # GIVEN a FASTQ header
 
     # WHEN parsing header
     header_meta: FastqFileMeta = FastqHandler.parse_fastq_header(line=fastq_header)
 
-    # THEN
+    # THEN header neta should be returned
     assert header_meta == expected_header_meta
+
+
+@pytest.mark.parametrize(
+    "fastq_header, expected_error",
+    [
+        ("no match", TypeError),
+        ("no:match", TypeError),
+        ("", TypeError),
+    ],
+)
+def test_parse_fastq_header_when_no_match(fastq_header: str, expected_error):
+    # GIVEN no FASTQ header
+
+    with pytest.raises(expected_error):
+        # WHEN parsing header
+        # THEN raise error
+        FastqHandler.parse_fastq_header(line=fastq_header)
 
 
 @pytest.mark.parametrize(
