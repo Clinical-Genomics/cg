@@ -5,6 +5,7 @@ from cg.io.json import write_json
 from cg.meta.workflow.microsalt.metrics_parser import MetricsParser
 from cg.meta.workflow.microsalt.metrics_parser.models import QualityMetrics, SampleMetrics
 from cg.meta.workflow.microsalt.quality_checker.models import QualityResult
+from cg.meta.workflow.microsalt.quality_checker.report_generatory import ReportGenerator
 from cg.meta.workflow.microsalt.quality_checker.utils import (
     get_application_tag,
     is_sample_negative_control,
@@ -30,7 +31,7 @@ class QualityChecker:
     def __init__(self, status_db: Store):
         self.status_db = status_db
 
-    def microsalt_qc(self, metrics_file_path: Path) -> bool:
+    def quality_control(self, metrics_file_path: Path) -> bool:
         quality_metrics: QualityMetrics = MetricsParser.parse(metrics_file_path)
         sample_results: list[QualityResult] = []
 
@@ -38,6 +39,7 @@ class QualityChecker:
             result = self.quality_control_sample(sample_id=sample_id, metrics=metrics)
             sample_results.append(result)
 
+        ReportGenerator.report(out_dir=metrics_file_path.parent, results=sample_results)
         return self.quality_control_case(sample_results)
 
     def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> QualityResult:
@@ -64,8 +66,14 @@ class QualityChecker:
         return QualityResult(
             sample_id=sample_id,
             passed=sample_passes_qc,
-            is_negative_control=is_control,
+            is_control=is_control,
             application_tag=application_tag,
+            passes_reads_qc=valid_reads,
+            passes_mapping_qc=valid_mapping,
+            passes_duplication_qc=valid_duplication,
+            passes_inserts_qc=valid_inserts,
+            passes_coverage_qc=valid_coverage,
+            passes_10x_coverage_qc=valid_10x_coverage,
         )
 
     def quality_control_case(self, sample_results: list[QualityResult]) -> bool:
@@ -79,9 +87,6 @@ class QualityChecker:
             return False
         qc_done_path: Path = case_run_dir.joinpath("QC_done.json")
         return not qc_done_path.exists()
-
-    def create_qc_done_file(self, run_dir_path: Path, failed_samples: dict) -> None:
-        write_json(file_path=run_dir_path.joinpath("QC_done.json"), content=failed_samples)
 
     def is_valid_total_reads(self, sample_id: str) -> bool:
         sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)

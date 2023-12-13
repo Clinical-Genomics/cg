@@ -101,6 +101,6 @@ def non_urgent_samples_pass_qc(results: list[QualityResult]) -> bool:
 
 def get_negative_control_result(results: list[QualityResult]) -> QualityResult:
     for result in results:
-        if result.is_negative_control:
+        if result.is_control:
             return result
     raise ValueError("No negative control result found")

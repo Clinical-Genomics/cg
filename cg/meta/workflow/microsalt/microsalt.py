@@ -1,10 +1,3 @@
-""" API to manage Microsalt Analyses
-    Organism - Fallback based on reference, ‘Other species’ and ‘Comment’. Default to “Unset”.
-    Priority = Default to empty string. Weird response. Typically “standard” or “research”.
-    Reference = Defaults to “None”
-    Method: Outputted as “1273:23”. Defaults to “Not in LIMS”
-    Date: Returns latest == most recent date. Outputted as DT object “YYYY MM DD”. Defaults to
-    datetime.min"""
 import glob
 import logging
 import os
@@ -289,7 +282,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             lims_project: str = self.get_project(case.samples[0].internal_id)
             metrics_file_path: Path = Path(case_run_dir, f"{lims_project}.json")
             if self.quality_checker.is_qc_required(case_run_dir):
-                if self.quality_checker.microsalt_qc(metrics_file_path):
+                if self.quality_checker.quality_control(metrics_file_path):
                     self.trailblazer_api.add_comment(case_id=case.internal_id, comment="QC passed")
                     cases_to_store.append(case)
                 else:
