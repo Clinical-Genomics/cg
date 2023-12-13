@@ -7,11 +7,11 @@ from cg.meta.workflow.microsalt.quality_controller.report_generator import Repor
 from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_application_tag,
     is_sample_negative_control,
-    is_valid_10x_coverage,
-    is_valid_average_coverage,
-    is_valid_duplication_rate,
-    is_valid_mapping_rate,
-    is_valid_median_insert_size,
+    has_valid_10x_coverage,
+    has_valid_average_coverage,
+    has_valid_duplication_rate,
+    has_valid_mapping_rate,
+    has_valid_median_insert_size,
     negative_control_pass_qc,
     is_valid_total_reads,
     is_valid_total_reads_for_control,
@@ -45,11 +45,11 @@ class QualityController:
 
     def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> QualityResult:
         valid_reads: bool = self.is_valid_total_reads(sample_id)
-        valid_mapping: bool = is_valid_mapping_rate(metrics)
-        valid_duplication: bool = is_valid_duplication_rate(metrics)
-        valid_inserts: bool = is_valid_median_insert_size(metrics)
-        valid_coverage: bool = is_valid_average_coverage(metrics)
-        valid_10x_coverage: bool = is_valid_10x_coverage(metrics)
+        valid_mapping: bool = has_valid_mapping_rate(metrics)
+        valid_duplication: bool = has_valid_duplication_rate(metrics)
+        valid_inserts: bool = has_valid_median_insert_size(metrics)
+        valid_coverage: bool = has_valid_average_coverage(metrics)
+        valid_10x_coverage: bool = has_valid_10x_coverage(metrics)
 
         sample_passes_qc: bool = (
             valid_reads

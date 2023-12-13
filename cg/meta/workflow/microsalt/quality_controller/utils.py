@@ -33,27 +33,27 @@ def is_valid_10x_coverage(coverage_10x: float) -> bool:
     return coverage_10x > MicrosaltQC.COVERAGE_10X_THRESHOLD
 
 
-def is_valid_mapping_rate(metrics: SampleMetrics) -> bool:
+def has_valid_mapping_rate(metrics: SampleMetrics) -> bool:
     mapped_rate: float | None = metrics.microsalt_samtools_stats.mapped_rate
     return is_valid_mapping_rate(mapped_rate) if mapped_rate else False
 
 
-def is_valid_duplication_rate(metrics: SampleMetrics) -> bool:
+def has_valid_duplication_rate(metrics: SampleMetrics) -> bool:
     duplication_rate: float | None = metrics.picard_markduplicate.duplication_rate
     return is_valid_duplication_rate(duplication_rate) if duplication_rate else False
 
 
-def is_valid_median_insert_size(metrics: SampleMetrics) -> bool:
+def has_valid_median_insert_size(metrics: SampleMetrics) -> bool:
     insert_size: int | None = metrics.picard_markduplicate.insert_size
     return is_valid_median_insert_size(insert_size) if insert_size else False
 
 
-def is_valid_average_coverage(metrics: SampleMetrics) -> bool:
+def has_valid_average_coverage(metrics: SampleMetrics) -> bool:
     coverage: float | None = metrics.microsalt_samtools_stats.average_coverage
     return is_valid_average_coverage(coverage) if coverage else False
 
 
-def is_valid_10x_coverage(metrics: SampleMetrics) -> bool:
+def has_valid_10x_coverage(metrics: SampleMetrics) -> bool:
     coverage_10x: float | None = metrics.microsalt_samtools_stats.coverage_10x
     return is_valid_10x_coverage(coverage_10x) if coverage_10x else False
 
