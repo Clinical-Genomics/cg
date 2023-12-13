@@ -38,7 +38,7 @@ class NfAnalysisAPI(AnalysisAPI):
         self.tower_pipeline: str | None = None
         self.account: str | None = None
         self.email: str | None = None
-        self.compute_env: str | None = None
+        self.compute_env_base: str | None = None
         self.revision: str | None = None
         self.nextflow_binary_path: str | None = None
 
@@ -80,6 +80,10 @@ class NfAnalysisAPI(AnalysisAPI):
             FileExtensions.CSV
         )
 
+    def get_compute_env(self, case_id: str) -> str:
+        """Get the compute environment for the head job based on the case priority."""
+        return f"{self.compute_env_base}_{self.get_slurm_qos_for_case(case_id=case_id)}"
+    
     @staticmethod
     def get_nextflow_config_path(nextflow_config: str | None = None) -> Path | None:
         """Path to Nextflow config file."""

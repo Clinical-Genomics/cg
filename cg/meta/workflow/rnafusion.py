@@ -50,7 +50,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.tower_pipeline: str = config.rnafusion.tower_pipeline
         self.account: str = config.rnafusion.slurm.account
         self.email: str = config.rnafusion.slurm.mail_user
-        self.compute_env: str = config.rnafusion.compute_env
+        self.compute_env_base: str = config.rnafusion.compute_env
         self.revision: str = config.rnafusion.revision
         self.nextflow_binary_path: str = config.rnafusion.binary_path
 
@@ -59,6 +59,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Defines whether the threshold for adequate read count should be passed for all samples
         when determining if the analysis for a case should be automatically started."""
         return True
+
 
     @staticmethod
     def get_deliverables_template_content() -> list[dict]:
