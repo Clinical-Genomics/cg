@@ -318,7 +318,9 @@ class SpringArchiveAPI:
         archive_handler.delete_file(file_and_sample)
 
     def delete_file(self, file_path: str, yes: bool = False) -> None:
-        """Deletes the specified file where it is archived and deletes the Housekeeper record."""
+        """Deletes the specified file where it is archived and deletes the Housekeeper record.
+        Raises:
+            Click.Abort if yes is not specified or the user does not confirm the deletion."""
         file: File = self.housekeeper_api.files(path=file_path).first()
         if not self.is_file_archived(file):
             LOG.warning(f"No archived file found for file {file_path} - exiting")
@@ -327,9 +329,12 @@ class SpringArchiveAPI:
         if not archive_location:
             LOG.warning("No archive location could be determined - exiting")
             return
-        if yes or click.confirm(f"Will delete {file_path} from {archive_location}, continue?"):
-            file_and_sample: FileAndSample = self.add_samples_to_files([file])[0]
-            self.delete_file_from_archive_location(
-                file_and_sample=file_and_sample, archive_location=archive_location
-            )
-            self.housekeeper_api.delete_file(file.id)
+        if not yes or not click.confirm(
+            f"Will delete {file_path} from {archive_location}, continue?"
+        ):
+            raise click.Abort
+        file_and_sample: FileAndSample = self.add_samples_to_files([file])[0]
+        self.delete_file_from_archive_location(
+            file_and_sample=file_and_sample, archive_location=archive_location
+        )
+        self.housekeeper_api.delete_file(file.id)
