@@ -83,7 +83,7 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_compute_env(self, case_id: str) -> str:
         """Get the compute environment for the head job based on the case priority."""
         return f"{self.compute_env_base}_{self.get_slurm_qos_for_case(case_id=case_id)}"
-    
+
     @staticmethod
     def get_nextflow_config_path(nextflow_config: str | None = None) -> Path | None:
         """Path to Nextflow config file."""

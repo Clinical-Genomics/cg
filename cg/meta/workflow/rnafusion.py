@@ -60,7 +60,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         when determining if the analysis for a case should be automatically started."""
         return True
 
-
     @staticmethod
     def get_deliverables_template_content() -> list[dict]:
         """Return deliverables file template content."""
