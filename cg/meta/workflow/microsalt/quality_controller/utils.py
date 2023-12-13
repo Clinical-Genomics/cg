@@ -58,6 +58,13 @@ def has_valid_10x_coverage(metrics: SampleMetrics) -> bool:
     return is_valid_10x_coverage(coverage_10x) if coverage_10x else False
 
 
+def get_negative_control_result(results: list[QualityResult]) -> QualityResult:
+    for result in results:
+        if result.is_control:
+            return result
+    raise ValueError("No negative control found")
+
+
 def negative_control_pass_qc(results: list[QualityResult]) -> bool:
     negative_control_result: QualityResult = get_negative_control_result(results)
     return negative_control_result.passes_qc
@@ -89,13 +96,6 @@ def non_urgent_samples_pass_qc(results: list[QualityResult]) -> bool:
 
     fraction_passing_qc: float = len(passing_qc) / len(non_urgent_samples)
     return fraction_passing_qc >= MicrosaltQC.QC_PERCENT_THRESHOLD_MWX
-
-
-def get_negative_control_result(results: list[QualityResult]) -> QualityResult:
-    for result in results:
-        if result.is_control:
-            return result
-    raise ValueError("No negative control result found")
 
 
 def is_sample_negative_control(sample: Sample) -> bool:

@@ -1,8 +1,5 @@
-from cg.meta.workflow.microsalt.metrics_parser.models import (
-    MicrosaltSamtoolsStats,
-    PicardMarkduplicate,
-    SampleMetrics,
-)
+from cg.meta.workflow.microsalt.metrics_parser.models import SampleMetrics
+from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.meta.workflow.microsalt.quality_controller.utils import (
     has_valid_10x_coverage,
     has_valid_average_coverage,
@@ -16,8 +13,9 @@ from cg.meta.workflow.microsalt.quality_controller.utils import (
     is_valid_median_insert_size,
     is_valid_total_reads,
     is_valid_total_reads_for_control,
+    negative_control_pass_qc,
 )
-from tests.meta.workflow.microsalt.conftest import create_sample_metrics
+from tests.meta.workflow.microsalt.conftest import create_quality_result, create_sample_metrics
 
 
 def test_sample_total_reads_passing():
@@ -26,7 +24,9 @@ def test_sample_total_reads_passing():
     target_reads = 100
 
     # WHEN checking if the sample has sufficient reads
-    passes_reads_threshold = is_valid_total_reads(reads=sample_reads, target_reads=target_reads)
+    passes_reads_threshold: bool = is_valid_total_reads(
+        reads=sample_reads, target_reads=target_reads
+    )
 
     # THEN it passes
     assert passes_reads_threshold
@@ -38,7 +38,9 @@ def test_sample_total_reads_failing():
     target_reads = 100
 
     # WHEN checking if the sample has sufficient reads
-    passes_reads_threshold = is_valid_total_reads(reads=sample_reads, target_reads=target_reads)
+    passes_reads_threshold: bool = is_valid_total_reads(
+        reads=sample_reads, target_reads=target_reads
+    )
 
     # THEN it fails
     assert not passes_reads_threshold
@@ -50,7 +52,9 @@ def test_sample_total_reads_failing_without_reads():
     target_reads = 100
 
     # WHEN checking if the sample has sufficient reads
-    passes_reads_threshold = is_valid_total_reads(reads=sample_reads, target_reads=target_reads)
+    passes_reads_threshold: bool = is_valid_total_reads(
+        reads=sample_reads, target_reads=target_reads
+    )
 
     # THEN it fails
     assert not passes_reads_threshold
@@ -62,7 +66,7 @@ def test_control_total_reads_passing():
     target_reads = 100
 
     # WHEN checking if the control read count is valid
-    passes_reads_threshold = is_valid_total_reads_for_control(
+    passes_reads_threshold: bool = is_valid_total_reads_for_control(
         reads=sample_reads, target_reads=target_reads
     )
 
@@ -76,7 +80,7 @@ def test_control_total_reads_failing():
     target_reads = 100
 
     # WHEN checking if the control read count is valid
-    passes_reads_threshold = is_valid_total_reads_for_control(
+    passes_reads_threshold: bool = is_valid_total_reads_for_control(
         reads=sample_reads, target_reads=target_reads
     )
 
@@ -90,7 +94,7 @@ def test_control_total_reads_passing_without_reads():
     target_reads = 100
 
     # WHEN checking if the control read count is valid
-    passes_reads_threshold = is_valid_total_reads_for_control(
+    passes_reads_threshold: bool = is_valid_total_reads_for_control(
         reads=sample_reads, target_reads=target_reads
     )
 
@@ -103,7 +107,7 @@ def test_is_valid_mapping_rate_passing():
     mapping_rate = 0.99
 
     # WHEN checking if the mapping rate is valid
-    passes_mapping_rate_threshold = is_valid_mapping_rate(mapping_rate)
+    passes_mapping_rate_threshold: bool = is_valid_mapping_rate(mapping_rate)
 
     # THEN it passes
     assert passes_mapping_rate_threshold
@@ -114,7 +118,7 @@ def test_is_valid_mapping_rate_failing():
     mapping_rate = 0.1
 
     # WHEN checking if the mapping rate is valid
-    passes_mapping_rate_threshold = is_valid_mapping_rate(mapping_rate)
+    passes_mapping_rate_threshold: bool = is_valid_mapping_rate(mapping_rate)
 
     # THEN it fails
     assert not passes_mapping_rate_threshold
@@ -125,7 +129,7 @@ def test_is_valid_duplication_rate_passing():
     duplication_rate = 0.1
 
     # WHEN checking if the duplication rate is valid
-    passes_duplication_qc = is_valid_duplication_rate(duplication_rate)
+    passes_duplication_qc: bool = is_valid_duplication_rate(duplication_rate)
 
     # THEN it passes
     assert passes_duplication_qc
@@ -136,7 +140,7 @@ def test_is_valid_duplication_rate_failing():
     duplication_rate = 0.9
 
     # WHEN checking if the duplication rate is valid
-    passes_duplication_qc = is_valid_duplication_rate(duplication_rate)
+    passes_duplication_qc: bool = is_valid_duplication_rate(duplication_rate)
 
     # THEN it fails
     assert not passes_duplication_qc
@@ -147,7 +151,7 @@ def test_is_valid_median_insert_size_passing():
     insert_size = 1000
 
     # WHEN checking if the median insert size is valid
-    passes_insert_size_qc = is_valid_median_insert_size(insert_size)
+    passes_insert_size_qc: bool = is_valid_median_insert_size(insert_size)
 
     # THEN it passes
     assert passes_insert_size_qc
@@ -169,7 +173,7 @@ def test_is_valid_average_coverage_passing():
     average_coverage = 50
 
     # WHEN checking if the average coverage is valid
-    passes_average_coverage_qc = is_valid_average_coverage(average_coverage)
+    passes_average_coverage_qc: bool = is_valid_average_coverage(average_coverage)
 
     # THEN it passes
     assert passes_average_coverage_qc
@@ -180,7 +184,7 @@ def test_is_valid_average_coverage_failing():
     average_coverage = 1
 
     # WHEN checking if the average coverage is valid
-    passes_average_coverage_qc = is_valid_average_coverage(average_coverage)
+    passes_average_coverage_qc: bool = is_valid_average_coverage(average_coverage)
 
     # THEN it fails
     assert not passes_average_coverage_qc
@@ -191,7 +195,7 @@ def test_is_valid_10x_coverage_passing():
     coverage_10x = 0.95
 
     # WHEN checking if the coverage is valid
-    passes_coverage_10x_qc = is_valid_10x_coverage(coverage_10x)
+    passes_coverage_10x_qc: bool = is_valid_10x_coverage(coverage_10x)
 
     # THEN it passes
     assert passes_coverage_10x_qc
@@ -202,17 +206,18 @@ def test_is_valid_10x_coverage_failing():
     coverage_10x = 0.1
 
     # WHEN checking if the coverage is valid
-    passes_coverage_10x_qc = is_valid_10x_coverage(coverage_10x)
+    passes_coverage_10x_qc: bool = is_valid_10x_coverage(coverage_10x)
 
     # THEN it fails
     assert not passes_coverage_10x_qc
 
+
 def test_has_valid_mapping_rate_passing():
     # GIVEN metrics with a high mapping rate
-    metrics = create_sample_metrics(mapped_rate=0.8)
+    metrics: SampleMetrics = create_sample_metrics(mapped_rate=0.8)
 
     # WHEN checking if the mapping rate is valid
-    passes_mapping_rate_qc = has_valid_mapping_rate(metrics)
+    passes_mapping_rate_qc: bool = has_valid_mapping_rate(metrics)
 
     # THEN it passes the quality control
     assert passes_mapping_rate_qc
@@ -220,10 +225,10 @@ def test_has_valid_mapping_rate_passing():
 
 def test_has_valid_mapping_rate_missing():
     # GIVEN metrics without a mapping rate
-    metrics = create_sample_metrics(mapped_rate=None)
+    metrics: SampleMetrics = create_sample_metrics(mapped_rate=None)
 
     # WHEN checking if the mapping rate is valid
-    passes_mapping_rate_qc = has_valid_mapping_rate(metrics)
+    passes_mapping_rate_qc: bool = has_valid_mapping_rate(metrics)
 
     # THEN it fails the quality control
     assert not passes_mapping_rate_qc
@@ -231,10 +236,10 @@ def test_has_valid_mapping_rate_missing():
 
 def test_has_valid_duplication_rate_passing():
     # GIVEN metrics with a low duplication rate
-    metrics = create_sample_metrics(duplication_rate=0.1)
+    metrics: SampleMetrics = create_sample_metrics(duplication_rate=0.1)
 
     # WHEN checking if the duplication rate is valid
-    passes_duplication_rate_qc = has_valid_duplication_rate(metrics)
+    passes_duplication_rate_qc: bool = has_valid_duplication_rate(metrics)
 
     # THEN it passes the quality control
     assert passes_duplication_rate_qc
@@ -242,10 +247,10 @@ def test_has_valid_duplication_rate_passing():
 
 def test_has_valid_duplication_rate_missing():
     # GIVEN metrics without a duplication rate
-    metrics = create_sample_metrics(duplication_rate=None)
+    metrics: SampleMetrics = create_sample_metrics(duplication_rate=None)
 
     # WHEN checking if the duplication rate is valid
-    passes_duplication_rate_qc = has_valid_duplication_rate(metrics)
+    passes_duplication_rate_qc: bool = has_valid_duplication_rate(metrics)
 
     # THEN it fails the quality control
     assert not passes_duplication_rate_qc
@@ -253,10 +258,10 @@ def test_has_valid_duplication_rate_missing():
 
 def test_has_valid_median_insert_size_passing():
     # GIVEN metrics with a high median insert size
-    metrics = create_sample_metrics(insert_size=200)
+    metrics: SampleMetrics = create_sample_metrics(insert_size=200)
 
     # WHEN checking if the median insert size is valid
-    passes_insert_size_qc = has_valid_median_insert_size(metrics)
+    passes_insert_size_qc: bool = has_valid_median_insert_size(metrics)
 
     # THEN it passes the quality control
     assert passes_insert_size_qc
@@ -264,10 +269,10 @@ def test_has_valid_median_insert_size_passing():
 
 def test_has_valid_median_insert_size_missing():
     # GIVEN metrics without a median insert size
-    metrics = create_sample_metrics(insert_size=None)
+    metrics: SampleMetrics = create_sample_metrics(insert_size=None)
 
     # WHEN checking if the median insert size is valid
-    passes_insert_size_qc = has_valid_median_insert_size(metrics)
+    passes_insert_size_qc: bool = has_valid_median_insert_size(metrics)
 
     # THEN it fails the quality control
     assert not passes_insert_size_qc
@@ -275,10 +280,10 @@ def test_has_valid_median_insert_size_missing():
 
 def test_has_valid_average_coverage_passes():
     # GIVEN metrics with a high average coverage
-    metrics = create_sample_metrics(average_coverage=30.0)
+    metrics: SampleMetrics = create_sample_metrics(average_coverage=30.0)
 
     # WHEN checking if the average coverage is valid
-    passes_average_coverage_qc = has_valid_average_coverage(metrics)
+    passes_average_coverage_qc: bool = has_valid_average_coverage(metrics)
 
     # THEN it passes the quality control
     assert passes_average_coverage_qc
@@ -286,10 +291,10 @@ def test_has_valid_average_coverage_passes():
 
 def test_has_valid_average_coverage_missing():
     # GIVEN metrics without an average coverage
-    metrics = create_sample_metrics(average_coverage=None)
+    metrics: SampleMetrics = create_sample_metrics(average_coverage=None)
 
     # WHEN checking if the average coverage is valid
-    passes_average_coverage_qc = has_valid_average_coverage(metrics)
+    passes_average_coverage_qc: bool = has_valid_average_coverage(metrics)
 
     # THEN it fails the quality control
     assert not passes_average_coverage_qc
@@ -297,10 +302,10 @@ def test_has_valid_average_coverage_missing():
 
 def test_has_valid_10x_coverage_passing():
     # GIVEN metrics with a high percent of bases covered at 10x
-    metrics = create_sample_metrics(coverage_10x=95.0)
+    metrics: SampleMetrics = create_sample_metrics(coverage_10x=95.0)
 
     # WHEN checking if the coverage is valid
-    passes_coverage_10x_qc = has_valid_10x_coverage(metrics)
+    passes_coverage_10x_qc: bool = has_valid_10x_coverage(metrics)
 
     # THEN it passes the quality control
     assert passes_coverage_10x_qc
@@ -308,11 +313,34 @@ def test_has_valid_10x_coverage_passing():
 
 def test_has_valid_10x_coverage_missing():
     # GIVEN metrics without a percent of bases covered at 10x
-    metrics = create_sample_metrics(coverage_10x=None)
+    metrics: SampleMetrics = create_sample_metrics(coverage_10x=None)
 
     # WHEN checking if the coverage is valid
-    passes_coverage_10x_qc = has_valid_10x_coverage(metrics)
+    passes_coverage_10x_qc: bool = has_valid_10x_coverage(metrics)
 
     # THEN it fails the quality control
     assert not passes_coverage_10x_qc
 
+
+def test_negative_control_passes_qc():
+    # GIVEN a negative control sample that passes quality control
+    control_result: QualityResult = create_quality_result(is_control=True)
+    other_result: QualityResult = create_quality_result(passes_qc=False)
+
+    # WHEN checking if the negative control passes quality control
+    control_passes_qc: bool = negative_control_pass_qc([other_result, control_result])
+
+    # THEN it passes quality control
+    assert control_passes_qc
+
+
+def test_negative_control_fails_qc():
+    # GIVEN a negative control sample that fails quality control
+    control_result: QualityResult = create_quality_result(is_control=True, passes_qc=False)
+    other_result: QualityResult = create_quality_result(passes_qc=True)
+
+    # WHEN checking if the negative control passes quality control
+    control_passes_qc: bool = negative_control_pass_qc([other_result, control_result])
+
+    # THEN it fails quality control
+    assert not control_passes_qc

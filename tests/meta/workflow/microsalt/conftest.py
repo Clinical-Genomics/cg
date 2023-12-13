@@ -30,6 +30,32 @@ def create_sample_metrics(
     )
 
 
+def create_quality_result(
+    sample_id: str = "sample1",
+    passes_qc: bool = True,
+    is_control: bool = False,
+    application_tag: str = MicrosaltAppTags.MWRNXTR003,
+    passes_reads_qc: bool = True,
+    passes_mapping_qc: bool = True,
+    passes_duplication_qc: bool = True,
+    passes_inserts_qc: bool = True,
+    passes_coverage_qc: bool = True,
+    passes_10x_coverage_qc: bool = True,
+) -> QualityResult:
+    return QualityResult(
+        sample_id=sample_id,
+        passes_qc=passes_qc,
+        is_control=is_control,
+        application_tag=application_tag,
+        passes_reads_qc=passes_reads_qc,
+        passes_mapping_qc=passes_mapping_qc,
+        passes_duplication_qc=passes_duplication_qc,
+        passes_inserts_qc=passes_inserts_qc,
+        passes_coverage_qc=passes_coverage_qc,
+        passes_10x_coverage_qc=passes_10x_coverage_qc,
+    )
+
+
 @pytest.fixture
 def quality_results() -> list[QualityResult]:
     return [
