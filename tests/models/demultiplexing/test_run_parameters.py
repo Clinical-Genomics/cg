@@ -319,3 +319,18 @@ def test_get_cycles(run_parameters_fixture: str, request: FixtureRequest):
     for cycles in read_cycles:
         assert isinstance(cycles, int)
         assert cycles >= 0
+
+
+@pytest.mark.parametrize(
+    "run_parameters_fixture, expected_result", [("fixture_1", False), ("fixture_2", True)]
+)
+def test_is_novaseq6000_post_1_5_kit(
+    run_parameters_fixture: str, expected_result: bool, request: FixtureRequest
+):
+    """."""
+    # GIVEN run parameters for a flow cell
+    run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
+    # WHEN getting checking if the flow cell was sequenced after the NovaSeq 6000 1.5 kits
+    result: bool = run_parameters._is_novaseq6000_post_1_5_kit()
+    # THEN the correct index settings are returned
+    assert result == expected_result

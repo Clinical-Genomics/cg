@@ -118,7 +118,7 @@ class SampleSheetCreator:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
         if self.run_parameters.is_single_index:
             sample_serialisation: dict = sample.model_dump(
-                by_alias=True, exclude={"barcode_mismatches_2"}
+                by_alias=True, exclude={"index2", "barcode_mismatches_2"}
             )
         else:
             sample_serialisation: dict = sample.model_dump(by_alias=True)
@@ -311,6 +311,7 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         column_names: list[str] = SampleSheetBCLConvertSections.Data.column_names()
         if self.run_parameters.is_single_index:
             column_names.remove(SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_2)
+            column_names.remove(SampleSheetBCLConvertSections.Data.INDEX_2)
         return [
             [SampleSheetBCLConvertSections.Data.HEADER.value],
             column_names,
