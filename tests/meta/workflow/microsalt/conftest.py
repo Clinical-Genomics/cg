@@ -12,12 +12,12 @@ from cg.store.api.core import Store
 
 
 def create_sample_metrics(
-    total_reads: int = 100,
-    mapped_rate: float = 0.8,
-    duplication_rate: float = 0.1,
-    insert_size: int = 200,
-    average_coverage: float = 30.0,
-    coverage_10x: float = 95.0,
+    total_reads: int | None = 100,
+    mapped_rate: float | None = 0.8,
+    duplication_rate: float | None = 0.1,
+    insert_size: int | None = 200,
+    average_coverage: float | None = 30.0,
+    coverage_10x: float | None = 95.0,
 ) -> SampleMetrics:
     return SampleMetrics(
         microsalt_samtools_stats=MicrosaltSamtoolsStats(
