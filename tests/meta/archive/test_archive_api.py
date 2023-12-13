@@ -373,7 +373,7 @@ def test_delete_file_raises_http_error(
     test_auth_token: AuthToken,
     archival_job_id: int,
 ):
-    """Tests that an HTTP error is raised when the Miria response is not okay for a delete file request,
+    """Tests that an HTTP error is raised when the Miria response is unsuccessful for a delete file request,
     and that the file is not removed from Housekeeper."""
 
     # GIVEN a spring file which is archived via Miria
@@ -394,7 +394,7 @@ def test_delete_file_raises_http_error(
         DDNDataFlowClient,
         "_get_auth_token",
         return_value=test_auth_token,
-    ), mock.patch.object(MiriaObject, "trim_path", return_value=True), mock.patch.object(
+    ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
         return_value=failed_delete_file_response,
@@ -436,7 +436,7 @@ def test_delete_file_success(
         DDNDataFlowClient,
         "_get_auth_token",
         return_value=test_auth_token,
-    ), mock.patch.object(MiriaObject, "trim_path", return_value=True), mock.patch.object(
+    ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
         return_value=ok_delete_file_response,

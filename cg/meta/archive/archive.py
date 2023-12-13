@@ -252,7 +252,7 @@ class SpringArchiveAPI:
         jobs_per_location: dict[ArchiveLocations, list[int]] = {}
         jobs_and_locations: set[
             tuple[int, ArchiveLocations]
-        ] = self.get_unique_archival_ids_and_their_archive_location(archive_entries)
+        ] = self.get_unique_archival_ids_and_archive_locations(archive_entries)
 
         for archive_location in ArchiveLocations:
             jobs_per_location[ArchiveLocations(archive_location)] = [
@@ -262,7 +262,7 @@ class SpringArchiveAPI:
             ]
         return jobs_per_location
 
-    def get_unique_archival_ids_and_their_archive_location(
+    def get_unique_archival_ids_and_archive_locations(
         self, archive_entries: list[Archive]
     ) -> set[tuple[int, ArchiveLocations]]:
         ids_and_locations: set[tuple[int, ArchiveLocations]] = set()
@@ -279,7 +279,7 @@ class SpringArchiveAPI:
         jobs_per_location: dict[ArchiveLocations, list[int]] = {}
         jobs_and_locations: set[
             tuple[int, ArchiveLocations]
-        ] = self.get_unique_retrieval_ids_and_their_archive_location(archive_entries)
+        ] = self.get_unique_retrieval_ids_and_archive_locations(archive_entries)
         for archive_location in ArchiveLocations:
             jobs_per_location[ArchiveLocations(archive_location)] = [
                 job_and_location[0]
@@ -288,7 +288,7 @@ class SpringArchiveAPI:
             ]
         return jobs_per_location
 
-    def get_unique_retrieval_ids_and_their_archive_location(
+    def get_unique_retrieval_ids_and_archive_locations(
         self, archive_entries: list[Archive]
     ) -> set[tuple[int, ArchiveLocations]]:
         ids_and_locations: set[tuple[int, ArchiveLocations]] = set()
@@ -298,7 +298,7 @@ class SpringArchiveAPI:
         return ids_and_locations
 
     @staticmethod
-    def is_file_archived(file: File):
+    def is_file_archived(file: File) -> bool:
         return file.archive and file.archive.archived_at
 
     @staticmethod
@@ -307,7 +307,7 @@ class SpringArchiveAPI:
             if tag_name in iter(ArchiveLocations):
                 LOG.info(f"Found archive location {tag_name}")
                 return tag_name
-        LOG.warning("No configured archive location in the file tags")
+        LOG.warning("No archive location in the file tags")
         return None
 
     def delete_file_from_archive_location(
