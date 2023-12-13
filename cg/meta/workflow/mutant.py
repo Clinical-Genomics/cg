@@ -269,17 +269,17 @@ class MutantAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
 
-    def run_qc_and_fail_cases(self) -> None:
+    def run_qc_and_fail_cases(self, dry_run: bool) -> None:
         """TODO: Fails cases that fail QC."""
 
         for case in self.get_cases_to_store():
             if self.qc_check_fails(case):
-                self.fail_case(case)
+                if not dry_run:
+                    self.fail_case(case)
 
     def fail_case(self, case: Case) -> None:
         """TODO:Fails case on TB and set to none on StatusDB"""
         self.trailblazer_api.set_analysis_status(
             case_id=case.internal_id, status=AnalysisStatus.FAILED
         )
-        self.set_statusdb_action(case_id=case.internal_id, action=None)
-        # TODO Will setting action to none start another analysis????!!
+        self.set_statusdb_action(case_id=case.internal_id, action="hold")

@@ -9,13 +9,13 @@ from cg.cli.workflow.commands import (
     link,
     resolve_compression,
     store,
-    #store_available,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -33,8 +33,6 @@ def mutant(context: click.Context) -> None:
 mutant.add_command(resolve_compression)
 mutant.add_command(link)
 mutant.add_command(store)
-mutant.add_command(store_available)
-
 
 @mutant.command("config-case")
 @OPTION_DRY
@@ -112,7 +110,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
     exit_code: int = EXIT_SUCCESS
 
-    analysis_api.run_qc_and_fail_cases()
+    analysis_api.run_qc_and_fail_cases(dry_run=dry_run)
 
     for case_obj in analysis_api.get_cases_to_store():
         LOG.info("Storing deliverables for %s", case_obj.internal_id)
@@ -126,8 +124,16 @@ def store_available(context: click.Context, dry_run: bool) -> None:
     
 
 @mutant.command("run-qc")
-#TODO
-def run_qc(self, case: Case) -> None:
-    """"""
-    if self.qc_check_fails(case):
-                self.fail_case(case)
+@OPTION_DRY
+@click.pass_context
+def run_qc(context: click.Context, dry_run: bool, case_id: str) -> None:
+    """
+    TODO
+    """
+    analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
+
+    case: Case = analysis_api.status_db.get_case_by_internal_id(case_id)
+
+    if analysis_api.qc_check_fails(case):
+        if not dry_run:
+            analysis_api.fail_case(case)
