@@ -3703,7 +3703,7 @@ def raredisease_context(
 @pytest.fixture
 def fastq_file_meta_raw(flow_cell_name: str) -> dict:
     return {
-        "path": Path("a", "file.fastq.gz"),
+        "path": Path("a", f"file{FileExtensions.FASTQ}{FileExtensions.GZIP}"),
         "lane": str(1),
         "read_direction": str(2),
         "flow_cell_id": flow_cell_name,

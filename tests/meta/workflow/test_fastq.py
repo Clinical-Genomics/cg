@@ -29,7 +29,7 @@ def test_parse_fastq_header(fastq_header: str, expected_header_meta: dict):
     # WHEN parsing header
     header_meta: FastqFileMeta = FastqHandler.parse_fastq_header(line=fastq_header)
 
-    # THEN header neta should be returned
+    # THEN header meta should match the expected header information
     assert header_meta == expected_header_meta
 
 
@@ -42,7 +42,7 @@ def test_parse_fastq_header(fastq_header: str, expected_header_meta: dict):
     ],
 )
 def test_parse_fastq_header_when_no_match(fastq_header: str, expected_error):
-    # GIVEN no FASTQ header
+    # GIVEN no matching FASTQ header
 
     with pytest.raises(expected_error):
         # WHEN parsing header
@@ -92,5 +92,5 @@ def test_parse_file_data(fastq_path: Path, expected_fastq_meta: dict, mocker):
         # WHEN parsing header
         header_meta = FastqHandler.parse_file_data(fastq_path=fastq_path)
 
-        # THEN
+        # THEN header meta should match the expected header information
         assert header_meta == expected_fastq_meta
