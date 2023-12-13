@@ -349,7 +349,7 @@ def test_retrieve_samples(
                 }
             ],
             "osType": OSTYPE,
-            "createFolder": True,
+            "createFolder": False,
             "metadataList": [],
             "settings": [],
         },
