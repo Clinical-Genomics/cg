@@ -7,6 +7,8 @@ from cg.meta.workflow.microsalt.metrics_parser.models import (
 )
 
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
+from cg.meta.workflow.microsalt.quality_controller.quality_controller import QualityController
+from cg.store.api.core import Store
 
 
 def create_sample_metrics(
@@ -96,3 +98,8 @@ def quality_results() -> list[QualityResult]:
             passes_10x_coverage_qc=False,
         ),
     ]
+
+
+@pytest.fixture
+def quality_controller(store: Store) -> QualityController:
+    return QualityController(store)
