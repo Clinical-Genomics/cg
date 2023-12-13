@@ -329,8 +329,12 @@ class SpringArchiveAPI:
         if not archive_location:
             LOG.warning("No archive location could be determined - exiting")
             return
-        if yes or click.confirm(
-            f"Will delete {file_path} from {archive_location}, continue?", abort=True
+        if (
+            yes
+            or click.confirm(
+                f"Will delete {file_path} from {archive_location}, continue?", abort=True
+            )
+            is True
         ):
             file_and_sample: FileAndSample = self.add_samples_to_files([file])[0]
             self.delete_file_from_archive_location(
