@@ -179,15 +179,16 @@ class RnafusionConfig(CommonAppConfig):
 
 
 class TaxprofilerConfig(CommonAppConfig):
-    root: str
     binary_path: str
-    conda_env: str
-    profile: str
-    pipeline_path: str
-    revision: str
     conda_binary: str | None = None
-    hostremoval_reference: str
+    conda_env: str
+    compute_env: str
     databases: str
+    hostremoval_reference: str
+    pipeline_path: str
+    profile: str
+    revision: str
+    root: str
     slurm: SlurmConfig
     tower_binary_path: str
     tower_pipeline: str
