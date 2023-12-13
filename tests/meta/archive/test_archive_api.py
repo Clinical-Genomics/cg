@@ -404,7 +404,7 @@ def test_delete_file_raises_http_error(
         # WHEN trying to delete the file via Miria and in Housekeeper
 
         # THEN an HTTPError should be raised
-        spring_archive_api.delete_file(spring_file.path)
+        spring_archive_api.delete_file(file_path=spring_file.path, yes=True)
 
     # THEN the file should still be in Housekeeper
     assert spring_archive_api.housekeeper_api.files(path=spring_file_path)
@@ -444,7 +444,7 @@ def test_delete_file_success(
         # WHEN trying to delete the file via Miria and in Housekeeper
 
         # THEN no error is raised
-        spring_archive_api.delete_file(spring_file.path)
+        spring_archive_api.delete_file(file_path=spring_file.path, yes=True)
 
     # THEN the file is removed from Housekeeper
     assert not spring_archive_api.housekeeper_api.get_file(spring_file_id)
