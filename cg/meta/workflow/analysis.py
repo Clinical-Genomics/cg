@@ -9,7 +9,7 @@ import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority, SequencingFileTag
 from cg.constants.constants import (
     AnalysisType,
     CaseActions,
@@ -296,7 +296,9 @@ class AnalysisAPI(MetaAPI):
     def gather_file_metadata_for_sample(self, sample: Sample) -> list[FastqFileMeta]:
         return [
             self.fastq_handler.parse_file_data(hk_file.full_path)
-            for hk_file in self.housekeeper_api.files(bundle=sample.internal_id, tags={"fastq"})
+            for hk_file in self.housekeeper_api.files(
+                bundle=sample.internal_id, tags={SequencingFileTag.FASTQ}
+            )
         ]
 
     def link_fastq_files_for_sample(
@@ -339,7 +341,7 @@ class AnalysisAPI(MetaAPI):
         if not concatenate:
             return
 
-        LOG.info("Concatenation in progress for sample %s.", sample.internal_id)
+        LOG.info(f"Concatenation in progress for sample: {sample.internal_id}")
         for read, value in linked_reads_paths.items():
             self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
             self.fastq_handler.remove_files(value)

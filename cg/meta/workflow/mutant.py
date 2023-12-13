@@ -2,7 +2,7 @@ import logging
 import shutil
 from pathlib import Path
 
-from cg.constants import Pipeline
+from cg.constants import Pipeline, SequencingFileTag
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -194,7 +194,9 @@ class MutantAnalysisAPI(AnalysisAPI):
     def get_metadata_for_nanopore_sample(self, sample: Sample) -> list[dict]:
         return [
             self.fastq_handler.parse_nanopore_file_data(file_obj.full_path)
-            for file_obj in self.housekeeper_api.files(bundle=sample.internal_id, tags={"fastq"})
+            for file_obj in self.housekeeper_api.files(
+                bundle=sample.internal_id, tags={SequencingFileTag.FASTQ}
+            )
         ]
 
     def link_nanopore_fastq_for_sample(

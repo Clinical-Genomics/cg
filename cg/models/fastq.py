@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Callable
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 
 
 class FastqFileMeta(BaseModel):
@@ -10,14 +10,6 @@ class FastqFileMeta(BaseModel):
     read_direction: int
     undetermined: bool | None = None
     flow_cell_id: str
-
-    @field_validator("lane", "read_direction", mode="before")
-    @classmethod
-    def convert_to_int(cls, value: str) -> int:
-        """Validate input as an int and return it."""
-        if isinstance(value, str):
-            return int(value)
-        return value
 
 
 def _get_header_meta_casava_five_parts(parts: list[str]) -> FastqFileMeta:
