@@ -407,14 +407,13 @@ def test_link_fastq_files_for_sample(
     # GIVEN a sample
     sample: Sample = case.links[0].sample
 
-    mocker.patch.object(
+    with mocker.patch.object(
         AnalysisAPI,
         "gather_file_metadata_for_sample",
         return_value=[FastqFileMeta(**fastq_file_meta_raw)],
-    )
+    ):
+        # WHEN parsing header
+        mip_analysis_api.link_fastq_files_for_sample(case=case, sample=sample)
 
-    # WHEN parsing header
-    mip_analysis_api.link_fastq_files_for_sample(case=case, sample=sample)
-
-    # THEN
-    assert "Linking: " in caplog.text
+        # THEN broadcast linking of files
+        assert "Linking: " in caplog.text

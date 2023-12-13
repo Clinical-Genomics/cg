@@ -13,6 +13,7 @@ import re
 import shutil
 from pathlib import Path
 
+from cg.constants import FileExtensions
 from cg.io.gzip import read_gzip_first_line
 from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
 
@@ -108,13 +109,13 @@ class FastqHandler:
     @staticmethod
     def parse_file_data(fastq_path: Path) -> FastqFileMeta:
         header_line: str = read_gzip_first_line(file_path=fastq_path)
-        header_info: FastqFileMeta = FastqHandler.parse_fastq_header(header_line)
-        header_info.path = fastq_path
-        header_info.undetermined = _is_undetermined_in_path(fastq_path)
+        fastq_file_meta: FastqFileMeta = FastqHandler.parse_fastq_header(header_line)
+        fastq_file_meta.path = fastq_path
+        fastq_file_meta.undetermined = _is_undetermined_in_path(fastq_path)
         matches = re.findall(r"-l[1-9]t([1-9]{2})_", str(fastq_path))
         if len(matches) > 0:
-            header_info.flow_cell_id = f"{header_info.flow_cell_id}-{matches[0]}"
-        return header_info
+            fastq_file_meta.flow_cell_id = f"{fastq_file_meta.flow_cell_id}-{matches[0]}"
+        return fastq_file_meta
 
     @staticmethod
     def create_fastq_name(
@@ -131,7 +132,7 @@ class FastqHandler:
         no naming constrains from the pipeline."""
         flow_cell: str = f"{flow_cell}-undetermined" if undetermined else flow_cell
         date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
-        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read_direction}.fastq.gz"
+        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read_direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
 
 class BalsamicFastqHandler(FastqHandler):
@@ -150,7 +151,7 @@ class BalsamicFastqHandler(FastqHandler):
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
         flow_cell = f"{flow_cell}-undetermined" if undetermined else flow_cell
         date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
-        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_R_{read_direction}.fastq.gz"
+        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_R_{read_direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
 
 class MipFastqHandler(FastqHandler):
@@ -168,7 +169,7 @@ class MipFastqHandler(FastqHandler):
         """Name a FASTQ file following MIP conventions."""
         flow_cell = f"{flow_cell}-undetermined" if undetermined else flow_cell
         date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
-        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read_direction}.fastq.gz"
+        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read_direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
 
 class MicrosaltFastqHandler(FastqHandler):
@@ -186,7 +187,7 @@ class MicrosaltFastqHandler(FastqHandler):
         """Name a FASTQ file following usalt conventions. Naming must be
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
         flow_cell = f"{flow_cell}-undetermined" if undetermined else flow_cell
-        return f"{sample}_{flow_cell}_L{lane}_{read_direction}.fastq.gz"
+        return f"{sample}_{flow_cell}_L{lane}_{read_direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
 
 class MutantFastqHandler(FastqHandler):
@@ -203,7 +204,7 @@ class MutantFastqHandler(FastqHandler):
     ) -> str:
         """Name a FASTQ file following mutant conventions. Naming must be
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
-        return f"{flow_cell}_L{lane}_{meta}_{read_direction}.fastq.gz"
+        return f"{flow_cell}_L{lane}_{meta}_{read_direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
     @staticmethod
     def get_concatenated_name(linked_fastq_name: str) -> str:
@@ -225,7 +226,7 @@ class MutantFastqHandler(FastqHandler):
         filenr: str,
         meta: str | None = None,
     ) -> str:
-        return f"{flowcell}_{sample}_{meta}_{filenr}.fastq.gz"
+        return f"{flowcell}_{sample}_{meta}_{filenr}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
     @staticmethod
     def parse_nanopore_file_data(fastq_path: Path) -> dict:
