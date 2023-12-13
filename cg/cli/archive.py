@@ -2,6 +2,7 @@ import click
 from click.core import ParameterSource
 
 from cg.constants.archiving import DEFAULT_SPRING_ARCHIVE_COUNT
+from cg.constants.constants import DRY_RUN
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.models.cg_config import CGConfig
 
@@ -67,16 +68,10 @@ def update_job_statuses(context: CGConfig):
 
 
 @archive.command("delete-file")
-@click.option(
-    "-y",
-    "--yes",
-    is_flag=True,
-    help="Set to answer yes to any confirmation checks automatically.",
-    default=False,
-)
+@DRY_RUN
 @click.pass_obj
 @click.argument("file_path", required=True)
-def delete_file(context: CGConfig, file_path: str, yes: bool):
+def delete_file(context: CGConfig, dry_run: bool, file_path: str):
     """Delete an archived file and remove it from Housekeeper.
     The file will not be deleted if it is not confirmed archived.
     The file will not be deleted if its archive location can not be determined from the file tags.
@@ -86,4 +81,4 @@ def delete_file(context: CGConfig, file_path: str, yes: bool):
         housekeeper_api=context.housekeeper_api,
         data_flow_config=context.data_flow,
     )
-    spring_archive_api.delete_file(file_path=file_path, yes=yes)
+    spring_archive_api.delete_file(file_path=file_path, dry_run=dry_run)

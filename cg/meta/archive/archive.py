@@ -1,6 +1,7 @@
 import logging
 from typing import Callable, Type
 
+import click
 from housekeeper.store.models import Archive, File
 from pydantic import BaseModel, ConfigDict
 
@@ -316,7 +317,7 @@ class SpringArchiveAPI:
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
         archive_handler.delete_file(file_and_sample)
 
-    def delete_file(self, file_path: str, yes: bool = False) -> None:
+    def delete_file(self, file_path: str, dry_run: bool = False) -> None:
         """Deletes the specified file where it is archived and deletes the Housekeeper record.
         Raises:
             Click.Abort if yes is not specified or the user does not confirm the deletion."""
@@ -328,9 +329,11 @@ class SpringArchiveAPI:
         if not archive_location:
             LOG.warning("No archive location could be determined - exiting")
             return
-        if yes:
-            file_and_sample: FileAndSample = self.add_samples_to_files([file])[0]
-            self.delete_file_from_archive_location(
-                file_and_sample=file_and_sample, archive_location=archive_location
-            )
-            self.housekeeper_api.delete_file(file.id)
+        if dry_run:
+            click.echo(f"Would have deleted file {file_path} from {archive_location}.")
+            return
+        file_and_sample: FileAndSample = self.add_samples_to_files([file])[0]
+        self.delete_file_from_archive_location(
+            file_and_sample=file_and_sample, archive_location=archive_location
+        )
+        self.housekeeper_api.delete_file(file.id)

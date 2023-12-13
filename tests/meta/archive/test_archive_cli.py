@@ -239,7 +239,7 @@ def test_delete_file_raises_http_error(
 
         # THEN an HTTPError should be raised
         cli_runner.invoke(
-            delete_file, [spring_file.path, "-y"], obj=archive_context, catch_exceptions=False
+            delete_file, [spring_file.path], obj=archive_context, catch_exceptions=False
         )
 
     # THEN the file should still be in Housekeeper
@@ -282,7 +282,7 @@ def test_delete_file_success(
 
         # THEN no error is raised
         cli_runner.invoke(
-            delete_file, [spring_file.path, "-y"], obj=archive_context, catch_exceptions=False
+            delete_file, [spring_file.path], obj=archive_context, catch_exceptions=False
         )
 
     # THEN the file is removed from Housekeeper
