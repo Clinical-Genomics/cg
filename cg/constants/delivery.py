@@ -115,12 +115,12 @@ MIP_RNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
 ]
 
 MIP_RNA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"fusion", "star-fusion"},
-    {"fusion", "arriba"},
+    {AnalysisTag.FUSION, AnalysisTag.STARFUSION},
+    {AnalysisTag.FUSION, AnalysisTag.ARRIBA},
     {AlignmentFileTag.CRAM},
     {AlignmentFileTag.CRAM_INDEX},
-    {"fusion", "vcf"},
-    {"fusion", "vcf-index"},
+    {AnalysisTag.FUSION, "vcf"},
+    {AnalysisTag.FUSION, "vcf-index"},
     {"salmon-quant"},
 ]
 
