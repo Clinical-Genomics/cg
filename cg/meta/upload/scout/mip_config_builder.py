@@ -6,7 +6,7 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.constants.scout_upload import MIP_CASE_TAGS, MIP_SAMPLE_TAGS
+from cg.constants.scout import MIP_CASE_TAGS, MIP_SAMPLE_TAGS
 from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder

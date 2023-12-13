@@ -40,7 +40,7 @@ class FluffySampleSheetHeaders(StrEnum):
 
     @classmethod
     def headers(cls) -> list[str]:
-        return list(cls)
+        return list(map(lambda header: header.value, cls))
 
 
 class FluffySample(BaseModel):

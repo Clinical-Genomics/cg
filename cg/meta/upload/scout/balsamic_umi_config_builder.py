@@ -3,7 +3,7 @@ import logging
 from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
-from cg.constants.scout_upload import BALSAMIC_UMI_CASE_TAGS, BALSAMIC_UMI_SAMPLE_TAGS
+from cg.constants.scout import BALSAMIC_UMI_CASE_TAGS, BALSAMIC_UMI_SAMPLE_TAGS
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.models.scout.scout_load_config import (

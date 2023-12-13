@@ -1,7 +1,5 @@
 import logging
 
-from housekeeper.store.models import File, Version
-
 from cg.constants import (
     BALSAMIC_ANALYSIS_TYPE,
     BALSAMIC_REPORT_ACCREDITED_PANELS,
@@ -19,7 +17,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     Pipeline,
 )
-from cg.constants.scout_upload import BALSAMIC_CASE_TAGS
+from cg.constants.scout import BALSAMIC_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI

@@ -152,13 +152,7 @@ class MipAnalysisAPI(AnalysisAPI):
 
     def write_panel(self, case_id: str, content: list[str]) -> None:
         """Write the gene panel to case dir."""
-        out_dir = Path(self.root, case_id)
-        out_dir.mkdir(parents=True, exist_ok=True)
-        WriteFile.write_file_from_content(
-            content="\n".join(content),
-            file_format=FileFormat.TXT,
-            file_path=Path(out_dir, f"gene_panels{FileExtensions.BED}"),
-        )
+        self._write_panel(out_dir=Path(self.root, case_id), content=content)
 
     @staticmethod
     def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
@@ -335,3 +329,6 @@ class MipAnalysisAPI(AnalysisAPI):
         )
         sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
         return sample_info.mip_version
+
+    def write_managed_variants(self, case_id: str, content: list[str]) -> None:
+        self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)
