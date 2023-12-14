@@ -202,7 +202,7 @@ def qc_microsalt_context(
             internal_id=sample,
             application_tag=MicrosaltAppTags.MWRNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
-            reads=MicrosaltQC.TARGET_READS * 2,
+            reads=MicrosaltQC.TARGET_READS,
             last_sequenced_at=datetime.datetime.now(),
         )
 

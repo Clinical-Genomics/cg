@@ -9,4 +9,4 @@ class MetricsParser:
     def parse(file_path: Path) -> QualityMetrics:
         data = read_json(file_path)
         formatted_data = {"samples": data}
-        return QualityMetrics(**formatted_data)
+        return QualityMetrics.model_validate(formatted_data)
