@@ -3,11 +3,13 @@
 
 import pytest
 
+from cg.constants import FileExtensions
+
 
 def create_file(tmpdir, flowcell, lane, read, file_content):
     """actual file on disk"""
 
-    file_name = f"S1_FC000{flowcell}_L00{lane}_R_{read}.fastq.gz"
+    file_name = f"S1_FC000{flowcell}_L00{lane}_R_{read}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     file_path = tmpdir / file_name
     file_path.write(file_content)
     return file_path
