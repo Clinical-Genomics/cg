@@ -225,7 +225,7 @@ class NfAnalysisAPI(AnalysisAPI):
         self.process.export_variables(
             export=NextflowHandler.get_variables_to_export(),
         )
-        command = self.process.get_command(parameters=parameters)
+        command: str = self.process.get_command(parameters=parameters)
         LOG.info(f"{command}")
         sbatch_number: int = NextflowHandler.execute_head_job(
             case_id=case_id,
