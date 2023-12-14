@@ -23,6 +23,7 @@ from cg.models.balsamic.metrics import (
     BalsamicWGSQCMetrics,
 )
 from cg.models.cg_config import CGConfig
+from cg.models.fastq import FastqFileMeta
 from cg.store.models import Case, CaseSample, Sample
 from cg.utils import Process
 from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
@@ -159,7 +160,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Link fastq files from Housekeeper to Balsamic case working directory."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case.links:
-            self.link_fastq_files_for_sample(case_obj=case, sample_obj=link.sample)
+            self.link_fastq_files_for_sample(case=case, sample=link.sample)
 
     @staticmethod
     def get_gender(sample_obj: Sample) -> str:

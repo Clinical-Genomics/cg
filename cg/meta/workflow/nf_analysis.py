@@ -1,10 +1,7 @@
 import logging
-import operator
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-
-from cg.store.models import Sample
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
@@ -15,8 +12,10 @@ from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
+from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
+from cg.store.models import Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -38,7 +37,7 @@ class NfAnalysisAPI(AnalysisAPI):
         self.tower_pipeline: str | None = None
         self.account: str | None = None
         self.email: str | None = None
-        self.compute_env: str | None = None
+        self.compute_env_base: str | None = None
         self.revision: str | None = None
         self.nextflow_binary_path: str | None = None
 
@@ -79,6 +78,10 @@ class NfAnalysisAPI(AnalysisAPI):
         return Path(self.get_case_path(case_id), f"{case_id}_samplesheet").with_suffix(
             FileExtensions.CSV
         )
+
+    def get_compute_env(self, case_id: str) -> str:
+        """Get the compute environment for the head job based on the case priority."""
+        return f"{self.compute_env_base}-{self.get_slurm_qos_for_case(case_id=case_id)}"
 
     @staticmethod
     def get_nextflow_config_path(nextflow_config: str | None = None) -> Path | None:
@@ -133,7 +136,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def extract_read_files(
-        metadata: list, forward_read: bool = False, reverse_read: bool = False
+        metadata: list[FastqFileMeta], forward_read: bool = False, reverse_read: bool = False
     ) -> list[str]:
         """Extract a list of fastq file paths for either forward or reverse reads."""
         if forward_read and not reverse_read:
@@ -142,8 +145,12 @@ class NfAnalysisAPI(AnalysisAPI):
             read_direction = 2
         else:
             raise ValueError("Either forward or reverse needs to be specified")
-        sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
-        return [d["path"] for d in sorted_metadata if d["read"] == read_direction]
+        sorted_metadata: list = sorted(metadata, key=lambda k: k.path)
+        return [
+            fastq_file.path
+            for fastq_file in sorted_metadata
+            if fastq_file.read_direction == read_direction
+        ]
 
     def verify_sample_sheet_exists(self, case_id: str, dry_run: bool = False) -> None:
         """Raise an error if sample sheet file is not found."""
