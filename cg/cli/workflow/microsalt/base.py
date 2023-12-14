@@ -228,8 +228,9 @@ def qc_microsalt(context: click.Context, unique_id: str) -> None:
     case: Case = analysis_api.status_db.get_case_by_internal_id(unique_id)
     sample_id: str = case.samples[0].internal_id
     lims_project: str = analysis_api.get_project(sample_id)
-    metrics_file_path: Path = Path(run_dir_path, f"{lims_project}.json")
+    metrics_file_path = Path(run_dir_path, f"{lims_project}.json")
     try:
+        LOG.info(f"Performing QC on case {unique_id}")
         analysis_api.quality_checker.quality_control(metrics_file_path)
     except IndexError:
         LOG.error(f"No existing analysis directories found for case {unique_id}.")

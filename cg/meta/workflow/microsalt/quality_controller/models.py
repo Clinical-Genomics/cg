@@ -14,3 +14,10 @@ class QualityResult(BaseModel):
     passes_inserts_qc: bool
     passes_coverage_qc: bool
     passes_10x_coverage_qc: bool
+
+
+class CaseQualityResult(BaseModel):
+    passes_qc: bool
+    control_passes_qc: bool
+    urgent_passes_qc: bool
+    non_urgent_passes_qc: bool

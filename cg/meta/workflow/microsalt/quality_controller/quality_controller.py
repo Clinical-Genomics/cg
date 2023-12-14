@@ -2,8 +2,9 @@ import logging
 from pathlib import Path
 
 from cg.meta.workflow.microsalt.metrics_parser import MetricsParser, QualityMetrics, SampleMetrics
-from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
+from cg.meta.workflow.microsalt.quality_controller.models import CaseQualityResult, QualityResult
 from cg.meta.workflow.microsalt.quality_controller.report_generator import ReportGenerator
+from cg.meta.workflow.microsalt.quality_controller.result_logger import ResultLogger
 from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_application_tag,
     get_sample_target_reads,
@@ -32,9 +33,11 @@ class QualityController:
     def quality_control(self, metrics_file_path: Path) -> bool:
         quality_metrics: QualityMetrics = MetricsParser.parse(metrics_file_path)
         sample_results: list[QualityResult] = self.quality_control_samples(quality_metrics)
+        case_result: CaseQualityResult = self.quality_control_case(sample_results)
         report_file: Path = metrics_file_path.parent.joinpath("QC_done.json")
-        ReportGenerator.report(out_file=report_file, results=sample_results)
-        return self.quality_control_case(sample_results)
+        ReportGenerator.report(out_file=report_file, sample_results=sample_results)
+        ResultLogger.log_results(sample_results=sample_results, case_result=case_result)
+        return case_result.passes_qc
 
     def quality_control_samples(self, quality_metrics: QualityMetrics) -> list[QualityResult]:
         sample_results: list[QualityResult] = []
@@ -77,11 +80,19 @@ class QualityController:
             passes_10x_coverage_qc=valid_10x_coverage,
         )
 
-    def quality_control_case(self, sample_results: list[QualityResult]) -> bool:
-        control_passes_qc: bool = negative_control_pass_qc(sample_results)
+    def quality_control_case(self, sample_results: list[QualityResult]) -> CaseQualityResult:
+        control_pass_qc: bool = negative_control_pass_qc(sample_results)
         urgent_pass_qc: bool = urgent_samples_pass_qc(sample_results)
         non_urgent_pass_qc: bool = non_urgent_samples_pass_qc(sample_results)
-        return control_passes_qc and urgent_pass_qc and non_urgent_pass_qc
+
+        case_passes_qc: bool = control_pass_qc and urgent_pass_qc and non_urgent_pass_qc
+
+        return CaseQualityResult(
+            passes_qc=case_passes_qc,
+            control_passes_qc=control_pass_qc,
+            urgent_passes_qc=urgent_pass_qc,
+            non_urgent_passes_qc=non_urgent_pass_qc,
+        )
 
     def is_qc_required(self, case_run_dir: Path) -> bool:
         if case_run_dir is None:

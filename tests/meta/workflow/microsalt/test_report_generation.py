@@ -11,7 +11,7 @@ def test_generate_report_with_results(quality_results: list[QualityResult], tmp_
     out_file = Path(tmp_path, "QC_done.json")
 
     # WHEN generating a report
-    ReportGenerator.report(out_file=out_file, results=quality_results)
+    ReportGenerator.report(out_file=out_file, sample_results=quality_results)
 
     # THEN the report is created
     assert out_file.exists()
