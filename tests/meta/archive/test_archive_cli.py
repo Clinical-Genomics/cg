@@ -4,20 +4,24 @@ from unittest import mock
 import pytest
 from click.testing import CliRunner
 from housekeeper.store.models import Archive, File
-from requests import Response
+from requests import HTTPError, Response
 
-from cg.cli.archive import archive_spring_files, update_job_statuses
-from cg.constants import EXIT_SUCCESS
+from cg.cli.archive import archive_spring_files, delete_file, update_job_statuses
+from cg.constants import EXIT_SUCCESS, SequencingFileTag
+from cg.constants.archiving import ArchiveLocations
 from cg.io.controller import APIRequest
-from cg.meta.archive.ddn_dataflow import (
+from cg.meta.archive.ddn.constants import (
     FAILED_JOB_STATUSES,
     ONGOING_JOB_STATUSES,
+    JobStatus,
+)
+from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
+from cg.meta.archive.ddn.models import (
     AuthToken,
     GetJobStatusPayload,
     GetJobStatusResponse,
-    JobStatus,
-    TransferJob,
     TransferPayload,
+    TransferResponse,
 )
 from cg.models.cg_config import CGConfig
 
@@ -72,7 +76,7 @@ def test_archive_spring_files_success(
         "api_request_from_content",
         return_value=ok_miria_response,
     ), mock.patch.object(
-        TransferPayload, "post_request", return_value=TransferJob(jobId=archival_job_id)
+        TransferPayload, "post_request", return_value=TransferResponse(jobId=archival_job_id)
     ):
         result = cli_runner.invoke(
             archive_spring_files,
@@ -104,6 +108,7 @@ def test_get_archival_job_status(
 
     # GIVEN an archive entry with an ongoing archival
     assert len(archive_context.housekeeper_api.get_archive_entries()) == 1
+    assert not archive_context.housekeeper_api.get_archive_entries()[0].archived_at
 
     # WHEN invoking update_job_statuses
     with mock.patch.object(
@@ -195,3 +200,92 @@ def test_get_retrieval_job_status(
         assert not archive_context.housekeeper_api.get_archive_entries(
             retrieval_task_id=retrieval_job_id
         )[0].retrieved_at
+
+
+def test_delete_file_raises_http_error(
+    cli_runner: CliRunner,
+    archive_context: CGConfig,
+    failed_delete_file_response: Response,
+    test_auth_token: AuthToken,
+    archival_job_id: int,
+):
+    """Tests that an HTTP error is raised when the Miria response is unsuccessful for a delete file request,
+    and that the file is not removed from Housekeeper."""
+
+    # GIVEN a spring file which is archived via Miria
+    spring_file: File = archive_context.housekeeper_api.files(
+        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
+    ).first()
+    spring_file_path: str = spring_file.path
+    if not spring_file.archive:
+        archive_context.housekeeper_api.add_archives(
+            files=[spring_file], archive_task_id=archival_job_id
+        )
+    archive_context.housekeeper_api.set_archive_archived_at(
+        file_id=spring_file.id, archiving_task_id=archival_job_id
+    )
+
+    # GIVEN that the request returns a failed response
+    with mock.patch.object(
+        DDNDataFlowClient,
+        "_get_auth_token",
+        return_value=test_auth_token,
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=failed_delete_file_response,
+    ), pytest.raises(
+        HTTPError
+    ):
+        # WHEN trying to delete the file via Miria and in Housekeeper
+
+        # THEN an HTTPError should be raised
+        cli_runner.invoke(
+            delete_file, [spring_file.path], obj=archive_context, catch_exceptions=False
+        )
+
+    # THEN the file should still be in Housekeeper
+    assert archive_context.housekeeper_api.files(path=spring_file_path)
+
+
+def test_delete_file_success(
+    cli_runner: CliRunner,
+    archive_context: CGConfig,
+    ok_delete_file_response: Response,
+    test_auth_token: AuthToken,
+    archival_job_id: int,
+):
+    """Tests that given a successful response from Miria, the file is deleted and removed from Housekeeper."""
+
+    # GIVEN a spring file which is archived via Miria
+    spring_file: File = archive_context.housekeeper_api.files(
+        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
+    ).first()
+    spring_file_id: int = spring_file.id
+    if not spring_file.archive:
+        archive_context.housekeeper_api.add_archives(
+            files=[spring_file], archive_task_id=archival_job_id
+        )
+    archive_context.housekeeper_api.set_archive_archived_at(
+        file_id=spring_file.id, archiving_task_id=archival_job_id
+    )
+
+    # GIVEN that the delete request returns a successful response
+    with mock.patch.object(
+        DDNDataFlowClient,
+        "_get_auth_token",
+        return_value=test_auth_token,
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_delete_file_response,
+    ):
+        # WHEN trying to delete the file via Miria and in Housekeeper
+
+        # THEN no error is raised
+        cli_runner.invoke(
+            delete_file, [spring_file.path], obj=archive_context, catch_exceptions=False
+        )
+
+    # THEN the file is removed from Housekeeper
+    assert not archive_context.housekeeper_api.get_file(spring_file_id)

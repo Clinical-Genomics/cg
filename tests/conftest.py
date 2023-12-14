@@ -312,6 +312,7 @@ def base_config_dict() -> dict:
     return {
         "database": "sqlite:///",
         "madeline_exe": "path/to/madeline",
+        "tower_binary_path": "path/to/tower",
         "delivery_path": "path/to/delivery",
         "flow_cells_dir": "path/to/flow_cells",
         "demultiplexed_flow_cells_dir": "path/to/demultiplexed_flow_cells_dir",
@@ -2446,6 +2447,7 @@ def context_config(
             "sender_password": "",
         },
         "madeline_exe": "echo",
+        "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
         "pon_path": str(cg_dir),
         "backup": {
             "pdc_archiving_directory": pdc_archiving_directory.dict(),
@@ -2593,7 +2595,6 @@ def context_config(
                 "account": "development",
                 "mail_user": "test.email@scilifelab.se",
             },
-            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
             "tower_pipeline": "raredisease",
         },
         "rnafusion": {
@@ -2611,7 +2612,6 @@ def context_config(
                 "account": "development",
                 "mail_user": "test.email@scilifelab.se",
             },
-            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
             "tower_pipeline": "rnafusion",
         },
         "pigz": {"binary_path": "/bin/pigz"},
@@ -2632,7 +2632,6 @@ def context_config(
                 "account": "development",
                 "mail_user": "taxprofiler.email@scilifelab.se",
             },
-            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
             "tower_pipeline": "taxprofiler",
         },
         "scout": {
@@ -3733,3 +3732,14 @@ def raredisease_context(
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     return cg_context
+
+
+@pytest.fixture
+def fastq_file_meta_raw(flow_cell_name: str) -> dict:
+    return {
+        "path": Path("a", f"file{FileExtensions.FASTQ}{FileExtensions.GZIP}"),
+        "lane": str(1),
+        "read_direction": str(2),
+        "flow_cell_id": flow_cell_name,
+        "undetermined": None,
+    }

@@ -143,12 +143,9 @@ class MipAnalysisAPI(AnalysisAPI):
         )
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        for link in case_obj.links:
-            self.link_fastq_files_for_sample(
-                case_obj=case_obj,
-                sample_obj=link.sample,
-            )
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        for link in case.links:
+            self.link_fastq_files_for_sample(case=case, sample=link.sample)
 
     def write_panel(self, case_id: str, content: list[str]) -> None:
         """Write the gene panel to case dir."""
@@ -329,3 +326,6 @@ class MipAnalysisAPI(AnalysisAPI):
         )
         sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
         return sample_info.mip_version
+
+    def write_managed_variants(self, case_id: str, content: list[str]) -> None:
+        self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)
