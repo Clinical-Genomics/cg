@@ -57,10 +57,7 @@ def test_is_valid_total_reads_fails(quality_controller: QualityController):
     assert not has_valid_reads
 
 
-def test_quality_control_fails(
-    qc_microsalt_context: CGConfig,
-    metrics_file_failing_qc: Path,
-):
+def test_quality_control_fails(qc_microsalt_context: CGConfig, metrics_file_failing_qc: Path):
     # GIVEN a metrics file with samples that should fail the quality control
 
     # GIVEN a store containing the corresponding samples
