@@ -104,3 +104,7 @@ def is_sample_negative_control(sample: Sample) -> bool:
 
 def get_application_tag(sample: Sample) -> str:
     return sample.application_version.application.tag
+
+
+def get_sample_target_reads(sample: Sample) -> int:
+    return sample.application_version.application.target_reads

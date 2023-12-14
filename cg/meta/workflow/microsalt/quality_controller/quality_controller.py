@@ -6,6 +6,7 @@ from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.meta.workflow.microsalt.quality_controller.report_generator import ReportGenerator
 from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_application_tag,
+    get_sample_target_reads,
     is_sample_negative_control,
     has_valid_10x_coverage,
     has_valid_average_coverage,
@@ -18,7 +19,6 @@ from cg.meta.workflow.microsalt.quality_controller.utils import (
     non_urgent_samples_pass_qc,
     urgent_samples_pass_qc,
 )
-from cg.models.orders.sample_base import ControlEnum
 from cg.store.api.core import Store
 from cg.store.models import Sample
 
@@ -38,13 +38,13 @@ class QualityController:
 
     def quality_control_samples(self, quality_metrics: QualityMetrics) -> list[QualityResult]:
         sample_results: list[QualityResult] = []
-        for sample_id, metrics in quality_metrics:
+        for sample_id, metrics in quality_metrics.samples.items():
             result = self.quality_control_sample(sample_id=sample_id, metrics=metrics)
             sample_results.append(result)
         return sample_results
 
     def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> QualityResult:
-        valid_reads: bool = self.is_valid_total_reads(sample_id)
+        valid_read_count: bool = self.has_valid_total_reads(sample_id)
         valid_mapping: bool = has_valid_mapping_rate(metrics)
         valid_duplication: bool = has_valid_duplication_rate(metrics)
         valid_inserts: bool = has_valid_median_insert_size(metrics)
@@ -52,7 +52,7 @@ class QualityController:
         valid_10x_coverage: bool = has_valid_10x_coverage(metrics)
 
         sample_passes_qc: bool = (
-            valid_reads
+            valid_read_count
             and valid_mapping
             and valid_duplication
             and valid_inserts
@@ -66,10 +66,10 @@ class QualityController:
 
         return QualityResult(
             sample_id=sample_id,
-            passed=sample_passes_qc,
+            passes_qc=sample_passes_qc,
             is_control=is_control,
             application_tag=application_tag,
-            passes_reads_qc=valid_reads,
+            passes_reads_qc=valid_read_count,
             passes_mapping_qc=valid_mapping,
             passes_duplication_qc=valid_duplication,
             passes_inserts_qc=valid_inserts,
@@ -89,11 +89,11 @@ class QualityController:
         qc_done_path: Path = case_run_dir.joinpath("QC_done.json")
         return not qc_done_path.exists()
 
-    def is_valid_total_reads(self, sample_id: str) -> bool:
+    def has_valid_total_reads(self, sample_id: str) -> bool:
         sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
-        target_reads: int = sample.application_version.application.target_reads
+        target_reads: int = get_sample_target_reads(sample)
         sample_reads: int = sample.reads
 
-        if sample.control == ControlEnum.negative:
+        if is_sample_negative_control(sample):
             return is_valid_total_reads_for_control(reads=sample_reads, target_reads=target_reads)
         return is_valid_total_reads(reads=sample_reads, target_reads=target_reads)

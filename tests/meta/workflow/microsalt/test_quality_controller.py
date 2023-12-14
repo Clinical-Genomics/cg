@@ -1,4 +1,8 @@
+from pathlib import Path
+
 from cg.meta.workflow.microsalt.quality_controller import QualityController
+from cg.models.cg_config import CGConfig
+from cg.store.api.core import Store
 from cg.store.models import Application, Sample
 from tests.store_helpers import StoreHelpers
 
@@ -22,7 +26,7 @@ def test_is_valid_total_reads_passes(quality_controller: QualityController):
     sample.application_version = version
 
     # WHEN controlling the quality of the sample reads
-    has_valid_reads: bool = quality_controller.is_valid_total_reads(sample.internal_id)
+    has_valid_reads: bool = quality_controller.has_valid_total_reads(sample.internal_id)
 
     # THEN the sample passes the quality control
     assert has_valid_reads
@@ -47,7 +51,48 @@ def test_is_valid_total_reads_fails(quality_controller: QualityController):
     sample.application_version = version
 
     # WHEN controlling the quality of the sample reads
-    has_valid_reads: bool = quality_controller.is_valid_total_reads(sample.internal_id)
+    has_valid_reads: bool = quality_controller.has_valid_total_reads(sample.internal_id)
 
     # THEN the sample fails the quality control
     assert not has_valid_reads
+
+
+def test_quality_control_fails(
+    qc_microsalt_context: CGConfig,
+    metrics_file_failing_qc: Path,
+):
+    # GIVEN a metrics file with samples that should fail the quality control
+
+    # GIVEN a store containing the corresponding samples
+    store: Store = qc_microsalt_context.status_db
+
+    # GIVEN a quality controller
+    quality_controller = QualityController(store)
+
+    # WHEN performing the quality control
+    passes_qc: bool = quality_controller.quality_control(metrics_file_failing_qc)
+
+    # THEN the case should fail the quality control
+    assert not passes_qc
+
+    # THEN a report should be generated
+    assert metrics_file_failing_qc.parent.joinpath("QC_done.json").exists()
+
+
+def test_quality_control_passes(qc_microsalt_context: CGConfig, metrics_file_passing_qc: Path):
+    # GIVEN a metrics file with samples that should pass the quality control
+
+    # GIVEN a store containing the corresponding samples
+    store: Store = qc_microsalt_context.status_db
+
+    # GIVEN a quality controller
+    quality_controller = QualityController(store)
+
+    # WHEN performing the quality control
+    passes_qc: bool = quality_controller.quality_control(metrics_file_passing_qc)
+
+    # THEN the case should pass the quality control
+    assert passes_qc
+
+    # THEN a report should be generated
+    assert metrics_file_passing_qc.parent.joinpath("QC_done.json").exists()

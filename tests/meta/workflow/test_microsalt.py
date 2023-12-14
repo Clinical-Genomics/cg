@@ -10,18 +10,6 @@ from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 
 
-def test_test_quality_control_fails():
-    pass
-
-
-def test_quality_control_passes():
-    pass
-
-
-def test_quality_control_fails_due_to_negative_control():
-    pass
-
-
 def test_get_latest_case_path(
     mocker,
     qc_microsalt_context: CGConfig,
