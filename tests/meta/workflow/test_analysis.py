@@ -1,5 +1,5 @@
 """Test for analysis"""
-
+import logging
 from datetime import datetime
 
 import mock
@@ -16,10 +16,10 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.models.fastq import FastqFileMeta
 from cg.store import Store
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 from tests.store_helpers import StoreHelpers
-
 
 @pytest.mark.parametrize(
     "priority,expected_slurm_qos",
@@ -467,7 +467,6 @@ def test_does_any_spring_file_need_to_be_retrieved_flow_cell_status(
         status=flow_cell_status,
         date=datetime.now(),
     )
-
     # WHEN checking if any files need to be retrieved
 
     # THEN the outcome should be False if the flow cell status is on disk but not otherwise
@@ -500,3 +499,28 @@ def test_does_any_spring_file_need_to_be_retrieved_files_present(
     files need to be retrieved via Miria."""
 
     assert mip_analysis_api.does_any_file_need_to_be_retrieved(case_id)
+
+def test_link_fastq_files_for_sample(
+    analysis_store: Store,
+    caplog,
+    mip_analysis_api: MipDNAAnalysisAPI,
+    fastq_file_meta_raw: dict,
+    mocker,
+):
+    caplog.set_level(logging.INFO)
+    # GIVEN a case
+    case: Case = analysis_store.get_cases()[0]
+
+    # GIVEN a sample
+    sample: Sample = case.links[0].sample
+
+    with mocker.patch.object(
+        AnalysisAPI,
+        "gather_file_metadata_for_sample",
+        return_value=[FastqFileMeta.model_validate(fastq_file_meta_raw)],
+    ):
+        # WHEN parsing header
+        mip_analysis_api.link_fastq_files_for_sample(case=case, sample=sample)
+
+        # THEN broadcast linking of files
+        assert "Linking: " in caplog.text

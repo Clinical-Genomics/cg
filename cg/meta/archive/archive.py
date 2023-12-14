@@ -9,7 +9,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
 from cg.exc import ArchiveJobFailedError
-from cg.meta.archive.ddn_dataflow import DDNDataFlowClient
+from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.models import ArchiveHandler, FileAndSample, SampleAndDestination
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store

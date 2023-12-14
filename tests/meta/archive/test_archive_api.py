@@ -9,14 +9,16 @@ from cg.constants.constants import APIMethods
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.io.controller import APIRequest
 from cg.meta.archive.archive import ARCHIVE_HANDLERS, FileAndSample, SpringArchiveAPI
-from cg.meta.archive.ddn_dataflow import (
+from cg.meta.archive.ddn.constants import (
     FAILED_JOB_STATUSES,
     ONGOING_JOB_STATUSES,
+    JobStatus,
+)
+from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
+from cg.meta.archive.ddn.models import (
     AuthToken,
-    DDNDataFlowClient,
     GetJobStatusPayload,
     GetJobStatusResponse,
-    JobStatus,
     MiriaObject,
 )
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
