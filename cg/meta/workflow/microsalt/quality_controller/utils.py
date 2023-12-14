@@ -75,11 +75,15 @@ def get_results_passing_qc(results: list[QualityResult]) -> list[QualityResult]:
 
 
 def get_non_urgent_results(results: list[QualityResult]) -> list[QualityResult]:
-    return [result for result in results if result.application_tag != MicrosaltAppTags.MWRNXTR003]
+    return [result for result in results if not is_urgent_result(result)]
 
 
 def get_urgent_results(results: list[QualityResult]) -> list[QualityResult]:
-    return [result for result in results if result.application_tag == MicrosaltAppTags.MWRNXTR003]
+    return [result for result in results if is_urgent_result(result)]
+
+
+def is_urgent_result(result: QualityResult) -> bool:
+    return result.application_tag == MicrosaltAppTags.MWRNXTR003
 
 
 def urgent_samples_pass_qc(results: list[QualityResult]) -> bool:
