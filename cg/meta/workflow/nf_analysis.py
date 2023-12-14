@@ -248,7 +248,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 case_id=case_id,
                 trailblazer_config=self.get_trailblazer_config_path(case_id=case_id),
             )
-            LOG.info(f"Pipeline will be resumed from run {from_tower_id}.")
+            LOG.info(f"Pipeline will be resumed from run with Tower id: {from_tower_id}.")
             parameters: list[str] = NfTowerHandler.get_tower_relaunch_parameters(
                 from_tower_id=from_tower_id, command_args=command_args.dict()
             )
