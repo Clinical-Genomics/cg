@@ -280,7 +280,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         for case in cases_qc_ready:
             case_run_dir: Path | None = self.get_latest_case_path(case.internal_id)
             lims_project: str = self.get_project(case.samples[0].internal_id)
-            metrics_file_path: Path = Path(case_run_dir, f"{lims_project}.json")
+            metrics_file_path = Path(case_run_dir, f"{lims_project}.json")
             if self.quality_checker.is_qc_required(case_run_dir):
                 if self.quality_checker.quality_control(metrics_file_path):
                     self.trailblazer_api.add_comment(case_id=case.internal_id, comment="QC passed")
@@ -299,6 +299,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Return cases that are completed in trailblazer."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
-            if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
+            for case in self.status_db.get_running_cases_in_pipeline(self.pipeline)
+            if self.trailblazer_api.is_latest_analysis_completed(case.internal_id)
         ]

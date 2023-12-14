@@ -5,7 +5,7 @@ import shutil
 
 import pytest
 
-from cg.constants.constants import MicrosaltAppTags, MicrosaltQC, Pipeline
+from cg.constants.constants import CaseActions, MicrosaltAppTags, MicrosaltQC, Pipeline
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -21,6 +21,7 @@ from tests.cli.workflow.balsamic.conftest import (
 )
 from tests.meta.compress.conftest import compress_api, real_crunchy_api
 from tests.meta.upload.scout.conftest import another_sample_id
+from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
 
 
@@ -182,6 +183,7 @@ def qc_microsalt_context(
     qc_fail_microsalt_samples: list[str],
 ) -> CGConfig:
     """Return a Microsalt CG context."""
+    cg_context.trailblazer_api_ = MockTB()
     analysis_api = MicrosaltAnalysisAPI(cg_context)
     store = analysis_api.status_db
 
@@ -191,6 +193,7 @@ def qc_microsalt_context(
         internal_id=microsalt_case_qc_pass,
         name=microsalt_case_qc_pass,
         data_analysis=Pipeline.MICROSALT,
+        action=CaseActions.RUNNING,
     )
 
     for sample in qc_pass_microsalt_samples[1:]:
