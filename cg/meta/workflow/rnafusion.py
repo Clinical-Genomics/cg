@@ -51,7 +51,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.tower_pipeline: str = config.rnafusion.tower_pipeline
         self.account: str = config.rnafusion.slurm.account
         self.email: str = config.rnafusion.slurm.mail_user
-        self.compute_env: str = config.rnafusion.compute_env
+        self.compute_env_base: str = config.rnafusion.compute_env
         self.revision: str = config.rnafusion.revision
         self.nextflow_binary_path: str = config.rnafusion.binary_path
 
