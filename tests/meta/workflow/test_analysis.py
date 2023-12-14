@@ -21,6 +21,7 @@ from cg.store import Store
 from cg.store.models import Case, Sample
 from tests.store_helpers import StoreHelpers
 
+
 @pytest.mark.parametrize(
     "priority,expected_slurm_qos",
     [
@@ -499,6 +500,7 @@ def test_does_any_spring_file_need_to_be_retrieved_files_present(
     files need to be retrieved via Miria."""
 
     assert mip_analysis_api.does_any_file_need_to_be_retrieved(case_id)
+
 
 def test_link_fastq_files_for_sample(
     analysis_store: Store,
