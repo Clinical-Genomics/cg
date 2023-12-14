@@ -215,7 +215,7 @@ class NfAnalysisAPI(AnalysisAPI):
             conda_binary=self.conda_binary,
             launch_directory=self.get_case_path(case_id=case_id),
         )
-        LOG.info("Pipeline will be executed using nextflow")
+        LOG.info("Pipeline will be executed using Nextflow")
         parameters: list[str] = NextflowHandler.get_nextflow_run_parameters(
             case_id=case_id,
             pipeline_path=self.nfcore_pipeline_path,
