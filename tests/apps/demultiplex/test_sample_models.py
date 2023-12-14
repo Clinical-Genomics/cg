@@ -1,3 +1,4 @@
+from typing import Type
 from unittest.mock import Mock
 
 import pytest
@@ -197,26 +198,50 @@ def test_update_override_cycles():
     # THEN the override cycles are updated with the expected value
 
 
-def test_update_barcode_mismatches_1():
-    # TODO: Parametrise this test with different sets of samples and expected outputs:
-    #  One that is and one that is 1
-    """."""
+@pytest.mark.parametrize(
+    "sample_list_fixture, expected_barcode_mismatch",
+    [("bcl_convert_samples_similar_index1", 0), ("bcl_convert_samples_similar_index2", 1)],
+    ids=["barcode1_0", "barcode1_1"],
+)
+def test_update_barcode_mismatches_1(
+    sample_list_fixture: str, expected_barcode_mismatch: int, request: pytest.FixtureRequest
+):
+    """Test that index 1 barcode mismatch values are as expected for different sets of samples."""
+    # GIVEN a list of FlowCellSampleBCLConvert
+    sample_list: list[FlowCellSampleBCLConvert] = request.getfixturevalue(sample_list_fixture)
+
     # GIVEN a FlowCellSampleBCLConvert
+    sample_to_update: FlowCellSampleBCLConvert = sample_list[0]
 
     # WHEN updating the barcode mismatches 1
+    sample_to_update.update_barcode_mismatches_1(samples_to_compare=sample_list)
 
     # THEN the barcode mismatches 1 are updated with the expected value
+    assert sample_to_update.barcode_mismatches_1 == expected_barcode_mismatch
 
 
-def test_update_barcode_mismatches_2():
+@pytest.mark.parametrize(
+    "sample_list_fixture, expected_barcode_mismatch",
+    [("bcl_convert_samples_similar_index1", 1), ("bcl_convert_samples_similar_index2", 0)],
+    ids=["barcode2_0", "barcode2_1"],
+)
+def test_update_barcode_mismatches_2(
+    sample_list_fixture: str, expected_barcode_mismatch: int, request: pytest.FixtureRequest
+):
     # TODO: Parametrise this test with different sets of samples and expected outputs:
     #  One that is, one that is 1 and one that is 'na'
-    """."""
+    """Test that index 2 barcode mismatch values are as expected for different sets of samples."""
+    # GIVEN a list of FlowCellSampleBCLConvert
+    sample_list: list[FlowCellSampleBCLConvert] = request.getfixturevalue(sample_list_fixture)
+
     # GIVEN a FlowCellSampleBCLConvert
+    sample_to_update: FlowCellSampleBCLConvert = sample_list[0]
 
     # WHEN updating the barcode mismatches 2
+    sample_to_update.update_barcode_mismatches_2(samples_to_compare=sample_list)
 
-    # THEN the barcode mismatches 2 are updated with the expected value
+    # THEN the barcode mismatches 1 are updated with the expected value
+    assert sample_to_update.barcode_mismatches_2 == expected_barcode_mismatch
 
 
 @pytest.mark.parametrize(
@@ -224,12 +249,12 @@ def test_update_barcode_mismatches_2():
     [
         ("novaseq_x_run_parameters", "novaseq_x_lims_samples", FlowCellSampleBCLConvert),
         (
-            "novaseq_6000_pre_1_5_kits_run_parameters",
+            "novaseq_6000_run_parameters_pre_1_5_kits",
             "novaseq_6000_pre_1_5_kits_lims_samples",
             FlowCellSampleBCLConvert,
         ),
         (
-            "novaseq_6000_post_1_5_kits_run_parameters",
+            "novaseq_6000_run_parameters_post_1_5_kits",
             "novaseq_6000_post_1_5_kits_lims_samples",
             FlowCellSampleBCLConvert,
         ),
@@ -256,10 +281,12 @@ def test_update_barcode_mismatches_2():
         "HiSeq2500 Bcl2Fastq",
     ],
 )
-def test_process_sample_for_sample_sheet():
+def test_process_sample_for_sample_sheet(
+    run_parameters_fixture: str, raw_lims_samples_fixture: str, sample_model: Type[FlowCellSample]
+):
     # TODO: We need a raw FlowCellSampleBcl2Fastq and a raw FlowCellSampleBCLConvert
     """."""
-    # GIVEN a FlowCellSample
+    # GIVEN a run parameters object and a list of samples from a flow cell
 
     # WHEN processing the sample for a sample sheet
 

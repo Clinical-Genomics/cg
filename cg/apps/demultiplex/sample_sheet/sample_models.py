@@ -98,6 +98,8 @@ class FlowCellSampleBCLConvert(FlowCellSample):
     index: str = Field(..., alias=SampleSheetBCLConvertSections.Data.INDEX_1)
     index2: str = Field("", alias=SampleSheetBCLConvertSections.Data.INDEX_2)
     override_cycles: str = Field("", alias=SampleSheetBCLConvertSections.Data.OVERRIDE_CYCLES)
+    adapter_read_1: str = Field("", alias=SampleSheetBCLConvertSections.Data.ADAPTER_READ_1)
+    adapter_read_2: str = Field("", alias=SampleSheetBCLConvertSections.Data.ADAPTER_READ_2)
     barcode_mismatches_1: int = Field(
         1, alias=SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_1
     )

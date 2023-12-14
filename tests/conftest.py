@@ -1228,7 +1228,7 @@ def demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
 
 
 @pytest.fixture
-def novaseq_6000_post_1_5_kits_flow_cell_dir(tmp_flow_cells_directory: Path) -> Path:
+def novaseq_6000_post_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path:
     return Path(tmp_flow_cells_directory, "230912_A00187_1009_AHK33MDRX3")
 
 
@@ -1239,16 +1239,16 @@ def novaseq_6000_post_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellD
 
 @pytest.fixture
 def novaseq_6000_post_1_5_kits_correct_sample_sheet(
-    novaseq_6000_post_1_5_kits_flow_cell_dir: Path,
+    novaseq_6000_post_1_5_kits_flow_cell: Path,
 ) -> Path:
-    return Path(novaseq_6000_post_1_5_kits_flow_cell_dir, "CorrectSampleSheet.csv")
+    return Path(novaseq_6000_post_1_5_kits_flow_cell, "CorrectSampleSheet.csv")
 
 
 @pytest.fixture
 def novaseq_6000_post_1_5_kits_raw_lims_samples(
-    novaseq_6000_post_1_5_kits_flow_cell_dir: Path,
+    novaseq_6000_post_1_5_kits_flow_cell: Path,
 ) -> Path:
-    return Path(novaseq_6000_post_1_5_kits_flow_cell_dir, "HK33MDRX3_raw.json")
+    return Path(novaseq_6000_post_1_5_kits_flow_cell, "HK33MDRX3_raw.json")
 
 
 @pytest.fixture
@@ -1267,7 +1267,7 @@ def novaseq_6000_pre_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDi
 
 
 @pytest.fixture
-def novaseq_6000_pre_1_5_kits_flow_cell_dir(tmp_flow_cells_directory: Path) -> Path:
+def novaseq_6000_pre_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path:
     return Path(tmp_flow_cells_directory, "190927_A00689_0069_BHLYWYDSXX")
 
 
@@ -1432,11 +1432,22 @@ def novaseq_6000_run_parameters_path(bcl2fastq_flow_cell_dir: Path) -> Path:
 
 @pytest.fixture
 def novaseq_6000_run_parameters_pre_1_5_kits_path(
-    novaseq_6000_pre_1_5_kits_flow_cell_dir: Path,
+    novaseq_6000_pre_1_5_kits_flow_cell: Path,
 ) -> Path:
-    """Return the path to a NovaSeq6000 run parameters file."""
+    """Return the path to a NovaSeq6000 pre 1.5 kit run parameters file."""
     return Path(
-        novaseq_6000_pre_1_5_kits_flow_cell_dir,
+        novaseq_6000_pre_1_5_kits_flow_cell,
+        DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE,
+    )
+
+
+@pytest.fixture
+def novaseq_6000_run_parameters_post_1_5_kits_path(
+    novaseq_6000_post_1_5_kits_flow_cell: Path,
+) -> Path:
+    """Return the path to a NovaSeq6000 post 1.5 kit run parameters file."""
+    return Path(
+        novaseq_6000_post_1_5_kits_flow_cell,
         DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE,
     )
 
@@ -1500,6 +1511,24 @@ def novaseq_6000_run_parameters(
 ) -> RunParametersNovaSeq6000:
     """Return a NovaSeq6000 run parameters object."""
     return RunParametersNovaSeq6000(run_parameters_path=novaseq_6000_run_parameters_path)
+
+
+@pytest.fixture
+def novaseq_6000_run_parameters_pre_1_5_kits(
+    novaseq_6000_run_parameters_pre_1_5_kits_path: Path,
+) -> RunParametersNovaSeq6000:
+    """Return a NovaSeq6000 run parameters pre 1.5 kit object."""
+    return RunParametersNovaSeq6000(
+        run_parameters_path=novaseq_6000_run_parameters_pre_1_5_kits_path
+    )
+
+
+@pytest.fixture
+def novaseq_6000_run_parameters_post_1_5_kits(novaseq_6000_run_parameters_post_1_5_kits_path: Path):
+    """Return a NovaSeq6000 run parameters post 1.5 kit object."""
+    return RunParametersNovaSeq6000(
+        run_parameters_path=novaseq_6000_run_parameters_post_1_5_kits_path
+    )
 
 
 @pytest.fixture(scope="session")

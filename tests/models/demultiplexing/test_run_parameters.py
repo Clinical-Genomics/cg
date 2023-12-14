@@ -5,7 +5,14 @@ from typing import Type
 import pytest
 from _pytest.fixtures import FixtureRequest
 
-from cg.constants.demultiplexing import RunParametersXMLNodes
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreatorBCLConvert
+from cg.constants.demultiplexing import (
+    NO_REVERSE_COMPLEMENTS,
+    NOVASEQ_6000_POST_1_5_KITS,
+    NOVASEQ_X_INDEX_SETTINGS,
+    IndexSettings,
+    RunParametersXMLNodes,
+)
 from cg.constants.sequencing import Sequencers
 from cg.exc import RunParametersError, XMLError
 from cg.models.demultiplex.run_parameters import (

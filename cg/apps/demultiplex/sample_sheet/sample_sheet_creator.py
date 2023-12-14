@@ -50,7 +50,7 @@ class SampleSheetCreator:
             FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
         ] = flow_cell.sample_type
         self.force: bool = force
-        self.index_settings: IndexSettings = self.run_parameters.index_settings()
+        self.index_settings: IndexSettings = self.run_parameters.index_settings
 
     def _get_index_settings(self) -> IndexSettings:
         # TODO: Remove and move testst to tun parameters

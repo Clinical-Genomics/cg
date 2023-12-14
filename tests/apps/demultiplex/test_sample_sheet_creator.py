@@ -2,7 +2,6 @@
 from pathlib import Path
 
 import pytest
-from _pytest.fixtures import FixtureRequest
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_validated_sample_sheet
 from cg.apps.demultiplex.sample_sheet.sample_models import (
@@ -15,13 +14,7 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreatorBCLConvert,
 )
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
-from cg.constants.demultiplexing import (
-    NO_REVERSE_COMPLEMENTS,
-    NOVASEQ_6000_POST_1_5_KITS,
-    NOVASEQ_X_INDEX_SETTINGS,
-    BclConverter,
-    IndexSettings,
-)
+from cg.constants.demultiplexing import BclConverter
 from cg.exc import SampleSheetError
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
@@ -124,55 +117,3 @@ def test_remove_unwanted_samples_no_dual_index(
         f"Removing sample {novaseq6000_flow_cell_sample_no_dual_index} since it does not have dual index"
         in caplog.text
     )
-
-
-def test_add_override_cycles_to_novaseqx_samples(
-    novaseq_x_flow_cell: FlowCellDirectoryData,
-    bcl_convert_samples_with_updated_indexes: list[FlowCellSampleBCLConvert],
-    override_cycles_for_novaseq_x_samples: list[str],
-):
-    """Test that OverrideCycles values are generated correctly for NovaSeqX samples."""
-    # GIVEN a SampleSheetCreator with samples without Override Cycles added
-    sample_sheet_creator = SampleSheetCreatorBCLConvert(
-        flow_cell=novaseq_x_flow_cell, lims_samples=bcl_convert_samples_with_updated_indexes
-    )
-    assert all(sample.override_cycles == "" for sample in sample_sheet_creator.lims_samples)
-
-    # WHEN adding the correct values of override samples
-    sample_sheet_creator.add_override_cycles_to_samples()
-
-    # THEN the Override Cycles attribute is added to all samples
-    assert all(
-        sample.override_cycles == override_cycles_value
-        for sample, override_cycles_value in zip(
-            sample_sheet_creator.lims_samples,
-            override_cycles_for_novaseq_x_samples,
-        )
-    )
-
-
-def test_update_barcode_mismatch_values_for_samples(
-    novaseq_x_flow_cell: FlowCellDirectoryData,
-    bcl_convert_samples_with_updated_indexes: list[FlowCellSampleBCLConvert],
-    barcode_mismatch_values_for_samples_with_updated_indexes: list[tuple[int, int]],
-):
-    """Tests that the barcode mismatch values are updated correctly for NovaSeqX samples."""
-    # GIVEN a sample sheet creator with samples with barcode mismatch values equal to 1
-    sample_sheet_creator = SampleSheetCreatorBCLConvert(
-        flow_cell=novaseq_x_flow_cell, lims_samples=bcl_convert_samples_with_updated_indexes
-    )
-    assert all(
-        sample.barcode_mismatches_1 == 1 and sample.barcode_mismatches_2 == 1
-        for sample in sample_sheet_creator.lims_samples
-    )
-
-    # WHEN updating the barcode mismatch values
-    sample_sheet_creator.update_barcode_mismatch_values_for_samples(
-        sample_sheet_creator.lims_samples
-    )
-
-    # THEN exactly two samples have barcode mismatches equal to zero
-    for sample, barcode_mismatch_tuple in zip(
-        sample_sheet_creator.lims_samples, barcode_mismatch_values_for_samples_with_updated_indexes
-    ):
-        assert (sample.barcode_mismatches_1, sample.barcode_mismatches_2) == barcode_mismatch_tuple

@@ -16,36 +16,33 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 @pytest.fixture
-def bcl_convert_samples_with_updated_indexes() -> list[FlowCellSampleBCLConvert]:
+def bcl_convert_samples_similar_index1() -> list[FlowCellSampleBCLConvert]:
     """Return a list of three FlowCellSampleBCLConvert with updated indexes."""
     sample_1 = FlowCellSampleBCLConvert(
-        lane=1, sample_id="ACC123", index="CAGAAGAT", index2="CAATGTAC"
+        lane=1, sample_id="ACC123", index="CAGAAGAT", index2="GCGCAAGC"
     )
     sample_2 = FlowCellSampleBCLConvert(
         lane=1, sample_id="ACC456", index="CAGAAGAG", index2="CAATGTAT"
     )
     sample_3 = FlowCellSampleBCLConvert(
-        lane=2, sample_id="ACC789", index="AAGCGATAGA", index2="AACCGCAACA"
+        lane=2, sample_id="ACC789", index="AAGCGATA", index2="AACCGCAA"
     )
     return [sample_1, sample_2, sample_3]
 
 
 @pytest.fixture
-def override_cycles_for_samples_with_updated_indexes() -> list[str]:
-    """Return the correspondent Override Cycles values for three samples."""
-    return ["Y151;I8N2;I8N2;Y151", "Y151;I8N2;I8N2;Y151", "Y151;I10;I10;Y151"]
-
-
-@pytest.fixture
-def override_cycles_for_novaseq_x_samples() -> list[str]:
-    """Return the correspondent Override Cycles values for three samples."""
-    return ["Y151;I8N2;N2I8;Y151", "Y151;I8N2;N2I8;Y151", "Y151;I10;I10;Y151"]
-
-
-@pytest.fixture
-def barcode_mismatch_values_for_samples_with_updated_indexes() -> list[tuple[int, int]]:
-    """Return the pairs of barcode mismatch values corresponding to three samples."""
-    return [(0, 0), (0, 0), (1, 1)]
+def bcl_convert_samples_similar_index2() -> list[FlowCellSampleBCLConvert]:
+    """Return a list of three FlowCellSampleBCLConvert with updated indexes."""
+    sample_1 = FlowCellSampleBCLConvert(
+        lane=1, sample_id="ACC123", index="GCGCAAGC", index2="CAATGTAC"
+    )
+    sample_2 = FlowCellSampleBCLConvert(
+        lane=1, sample_id="ACC456", index="CAATGTAT", index2="CAATGTAT"
+    )
+    sample_3 = FlowCellSampleBCLConvert(
+        lane=2, sample_id="ACC789", index="AAGCGATA", index2="AACCGCAA"
+    )
+    return [sample_1, sample_2, sample_3]
 
 
 @pytest.fixture
