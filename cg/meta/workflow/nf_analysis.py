@@ -242,7 +242,7 @@ class NfAnalysisAPI(AnalysisAPI):
         self, case_id: str, command_args: CommandArgs, dry_run: bool
     ) -> None:
         """Run analysis with given options using NF-Tower."""
-        LOG.info("Pipeline will be executed using tower")
+        LOG.info("Pipeline will be executed using Tower")
         if command_args.resume:
             from_tower_id: int = command_args.id or NfTowerHandler.get_last_tower_id(
                 case_id=case_id,
