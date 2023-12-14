@@ -2,7 +2,7 @@
 
 
 from cg.apps.demultiplex.sample_sheet.create import get_sample_sheet_creator
-from cg.apps.demultiplex.sample_sheet.models import (
+from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
@@ -53,3 +53,4 @@ def test_sample_sheet_creator_factory_BCL_convert(
 
     # THEN the sample sheet creator is a BCL Convert sample sheet creator
     assert isinstance(sample_sheet_creator, SampleSheetCreatorBCLConvert)
+nvert)

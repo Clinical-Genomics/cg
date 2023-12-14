@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import Index
-from cg.apps.demultiplex.sample_sheet.models import (
+from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )

@@ -5,7 +5,7 @@ from _pytest.fixtures import FixtureRequest
 from click import testing
 from pydantic import BaseModel
 
-from cg.apps.demultiplex.sample_sheet.models import (
+from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )

@@ -4,7 +4,7 @@ from typing import Type
 import pytest
 from _pytest.fixtures import FixtureRequest
 
-from cg.apps.demultiplex.sample_sheet.models import (
+from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )

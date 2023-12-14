@@ -1,6 +1,6 @@
 import logging
 
-from cg.apps.demultiplex.sample_sheet.models import (
+from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )

@@ -15,7 +15,7 @@ from housekeeper.store.models import File, Version
 from requests import Response
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.models import (
+from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
@@ -1227,7 +1227,7 @@ def demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
 
 
 @pytest.fixture
-def novaseq_6000_post_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path:
+def novaseq_6000_post_1_5_kits_flow_cell_dir(tmp_flow_cells_directory: Path) -> Path:
     return Path(tmp_flow_cells_directory, "230912_A00187_1009_AHK33MDRX3")
 
 
@@ -1238,18 +1238,20 @@ def novaseq_6000_post_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellD
 
 @pytest.fixture
 def novaseq_6000_post_1_5_kits_correct_sample_sheet(
-    novaseq_6000_post_1_5_kits_flow_cell: Path,
+    novaseq_6000_post_1_5_kits_flow_cell_dir: Path,
 ) -> Path:
-    return Path(novaseq_6000_post_1_5_kits_flow_cell, "CorrectSampleSheet.csv")
+    return Path(novaseq_6000_post_1_5_kits_flow_cell_dir, "CorrectSampleSheet.csv")
 
 
 @pytest.fixture
-def novaseq_6000_post_1_5_kits_raw_lims_samples(novaseq_6000_post_1_5_kits_flow_cell: Path) -> Path:
-    return Path(novaseq_6000_post_1_5_kits_flow_cell, "HK33MDRX3_raw.json")
+def novaseq_6000_post_1_5_kits_raw_lims_samples(
+    novaseq_6000_post_1_5_kits_flow_cell_dir: Path,
+) -> Path:
+    return Path(novaseq_6000_post_1_5_kits_flow_cell_dir, "HK33MDRX3_raw.json")
 
 
 @pytest.fixture
-def novaseq_6000_post_1_5_kits_samples(
+def novaseq_6000_post_1_5_kits_lims_samples(
     novaseq_6000_post_1_5_kits_raw_lims_samples: Path,
 ) -> list[FlowCellSampleBCLConvert]:
     return [
@@ -1264,7 +1266,7 @@ def novaseq_6000_pre_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDi
 
 
 @pytest.fixture
-def novaseq_6000_pre_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path:
+def novaseq_6000_pre_1_5_kits_flow_cell_dir(tmp_flow_cells_directory: Path) -> Path:
     return Path(tmp_flow_cells_directory, "190927_A00689_0069_BHLYWYDSXX")
 
 
@@ -1425,6 +1427,17 @@ def hiseq_2500_double_index_run_parameters_path(
 def novaseq_6000_run_parameters_path(bcl2fastq_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeq6000 run parameters file."""
     return Path(bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
+
+
+@pytest.fixture
+def novaseq_6000_run_parameters_pre_1_5_kits_path(
+    novaseq_6000_pre_1_5_kits_flow_cell_dir: Path,
+) -> Path:
+    """Return the path to a NovaSeq6000 run parameters file."""
+    return Path(
+        novaseq_6000_pre_1_5_kits_flow_cell_dir,
+        DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE,
+    )
 
 
 @pytest.fixture(scope="session")

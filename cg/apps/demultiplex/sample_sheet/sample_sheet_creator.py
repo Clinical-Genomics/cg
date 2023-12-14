@@ -5,20 +5,14 @@ from typing import Type
 
 from packaging.version import parse
 
-from cg.apps.demultiplex.sample_sheet.index import (
-    Index,
-    get_index_pair,
-    get_valid_indexes,
-    is_dual_index,
-    update_barcode_mismatch_values_for_sample,
-)
-from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
+from cg.apps.demultiplex.sample_sheet.index import Index, get_valid_indexes, is_dual_index
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_samples_by_lane,
     get_validated_sample_sheet,
+)
+from cg.apps.demultiplex.sample_sheet.sample_models import (
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
 )
 from cg.constants.demultiplexing import (
     NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION,
@@ -95,15 +89,6 @@ class SampleSheetCreator:
     @property
     def valid_indexes(self) -> list[Index]:
         return get_valid_indexes(dual_indexes_only=True)
-
-    def update_barcode_mismatch_values_for_samples(self, *args) -> None:
-        """Updates barcode mismatch values for samples if applicable."""
-        pass
-
-    @abstractmethod
-    def add_override_cycles_to_samples(self) -> None:
-        """Add override cycles attribute to samples if sample sheet is v2."""
-        pass
 
     @abstractmethod
     def remove_unwanted_samples(self) -> None:
@@ -195,14 +180,6 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
             samples_to_keep.append(sample)
         self.lims_samples = samples_to_keep
 
-    def update_barcode_mismatch_values_for_samples(self, *args) -> None:
-        """Return None for flow cells to be demultiplexed with Bcl2fastq."""
-        LOG.debug("No barcode mismatch updating for Bcl2fastq flow cell")
-
-    def add_override_cycles_to_samples(self) -> None:
-        """Return None for flow cells to be demultiplexed with Bcl2fastq."""
-        LOG.debug("Skipping adding of override cycles for Bcl2fastq flow cell")
-
     def get_additional_sections_sample_sheet(self) -> list[list[str]]:
         """Return all sections of the sample sheet that are not the data section."""
         return [
@@ -235,36 +212,6 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
     def remove_unwanted_samples(self) -> None:
         """Filter out samples with single indexes."""
         LOG.info("Removing of single index samples is not required for V2 sample sheet")
-
-    def update_barcode_mismatch_values_for_samples(
-        self, samples: list[FlowCellSampleBCLConvert]
-    ) -> None:
-        """Update barcode mismatch values for both indexes of given samples."""
-        for sample in samples:
-            update_barcode_mismatch_values_for_sample(
-                sample_to_update=sample, samples_to_compare_to=samples
-            )
-
-    def add_override_cycles_to_samples(self) -> None:
-        """Add override cycles attribute to samples."""
-        read1_cycles: str = f"Y{self.run_parameters.get_read_1_cycles()};"
-        read2_cycles: str = f"Y{self.run_parameters.get_read_2_cycles()}"
-        length_index1: int = self.run_parameters.get_index_1_cycles()
-        length_index2: int = self.run_parameters.get_index_2_cycles()
-        for sample in self.lims_samples:
-            index1_cycles: str = f"I{length_index1};"
-            index2_cycles: str = f"I{length_index2};"
-            sample_index1_len: int = len(get_index_pair(sample)[0])
-            sample_index2_len: int = len(get_index_pair(sample)[1])
-            if sample_index1_len < length_index1:
-                index1_cycles = f"I{sample_index1_len}N{length_index1 - sample_index1_len};"
-            if sample_index2_len < length_index2:
-                index2_cycles = (
-                    f"N{length_index2-sample_index2_len}I{sample_index2_len};"
-                    if self.index_settings.are_i5_override_cycles_reverse_complemented
-                    else f"I{sample_index2_len}N{length_index2 - sample_index2_len};"
-                )
-            sample.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
     def get_additional_sections_sample_sheet(self) -> list[list[str]]:
         """Return all sections of the sample sheet that are not the data section."""

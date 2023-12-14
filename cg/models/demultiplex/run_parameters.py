@@ -104,15 +104,6 @@ class RunParameters:
         """Returns true if the sequencing run is single-index."""
         return self.get_index_2_cycles() == 0
 
-    @property
-    def index_length(self) -> int:
-        """Return the length of the indexes if they are equal, raise an error otherwise."""
-        index_one_length: int = self.get_index_1_cycles()
-        index_two_length: int = self.get_index_2_cycles()
-        if index_one_length != index_two_length and not self.is_single_index:
-            raise RunParametersError("Index lengths are not the same!")
-        return index_one_length
-
     def _is_novaseq6000_post_1_5_kit(self) -> bool:
         """
         Returns whether sequencing was performed after the 1.5 consumables kits where introduced.
@@ -144,8 +135,8 @@ class RunParameters:
         return (
             f"RunParameters(path={self.path},"
             f"reagent_kit_version={self.reagent_kit_version},"
-            "control_software_version={self.control_software_version},"
-            f"index_length={self.index_length},"
+            f"control_software_version={self.control_software_version},"
+            f"index_lengths={self.get_index_1_cycles()}-{self.get_index_2_cycles()},"
             f"sequencer={self.sequencer})"
         )
 
