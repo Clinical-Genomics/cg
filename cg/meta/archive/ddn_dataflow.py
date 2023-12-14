@@ -30,10 +30,15 @@ DESTINATION_ATTRIBUTE: str = "destination"
 SOURCE_ATTRIBUTE: str = "source"
 
 
+def get_request_log(headers: dict, body: dict):
+    return "Sending request with headers: \n" + f"{headers} \n" + "and body: \n" + f"{body}"
+
+
 class DataflowEndpoints(StrEnum):
     """Enum containing all DDN dataflow endpoints used."""
 
     ARCHIVE_FILES = "files/archive"
+    DELETE_FILE = "files/delete"
     GET_AUTH_TOKEN = "auth/token"
     REFRESH_AUTH_TOKEN = "auth/token/refresh"
     RETRIEVE_FILES = "files/retrieve"
@@ -155,12 +160,7 @@ class TransferPayload(BaseModel):
             The job ID of the launched transfer task.
         """
 
-        LOG.info(
-            "Sending request with headers: \n"
-            + f"{headers} \n"
-            + "and body: \n"
-            + f"{self.model_dump()}"
-        )
+        LOG.info(get_request_log(headers=headers, body=self.model_dump()))
 
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
@@ -222,12 +222,7 @@ class GetJobStatusPayload(BaseModel):
              HTTPError if the response code is not ok.
         """
 
-        LOG.info(
-            "Sending request with headers: \n"
-            + f"{headers} \n"
-            + "and body: \n"
-            + f"{self.model_dump()}"
-        )
+        LOG.info(get_request_log(headers=headers, body=self.model_dump()))
 
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.GET,
@@ -238,6 +233,32 @@ class GetJobStatusPayload(BaseModel):
         )
         response.raise_for_status()
         return GetJobStatusResponse.model_validate(response.json())
+
+
+class DeleteFileResponse(BaseModel):
+    message: str
+
+
+class DeleteFilePayload(BaseModel):
+    global_path: str
+
+    def delete_file(self, url: str, headers: dict) -> DeleteFileResponse:
+        """Posts to the given URL with the given headers to delete the file or directory at the specified global path.
+        Returns the parsed response.
+        Raises:
+             HTTPError if the response code is not ok.
+        """
+        LOG.info(get_request_log(headers=headers, body=self.model_dump()))
+
+        response: Response = APIRequest.api_request_from_content(
+            api_method=APIMethods.POST,
+            url=url,
+            headers=headers,
+            json=self.model_dump(),
+            verify=False,
+        )
+        response.raise_for_status()
+        return DeleteFileResponse.model_validate(response.json())
 
 
 class DDNDataFlowClient(ArchiveHandler):
@@ -261,6 +282,13 @@ class DDNDataFlowClient(ArchiveHandler):
 
     def _set_auth_tokens(self) -> None:
         """Retrieves and sets auth and refresh token from the REST-API."""
+        auth_token: AuthToken = self._get_auth_token()
+        self.refresh_token: str = auth_token.refresh
+        self.auth_token: str = auth_token.access
+        self.token_expiration: datetime = datetime.fromtimestamp(auth_token.expire)
+
+    def _get_auth_token(self) -> AuthToken:
+        """Retrieves auth and refresh token from the REST-API."""
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url=DataflowEndpoints.GET_AUTH_TOKEN),
@@ -274,13 +302,15 @@ class DDNDataFlowClient(ArchiveHandler):
         )
         if not response.ok:
             raise DdnDataflowAuthenticationError(message=response.text)
-        response_content: AuthToken = AuthToken.model_validate(response.json())
-        self.refresh_token: str = response_content.refresh
-        self.auth_token: str = response_content.access
-        self.token_expiration: datetime = datetime.fromtimestamp(response_content.expire)
+        return AuthToken.model_validate(response.json())
 
     def _refresh_auth_token(self) -> None:
         """Updates the auth token by providing the refresh token to the REST-API."""
+        auth_token: AuthToken = self._get_refreshed_auth_token()
+        self.auth_token: str = auth_token.access
+        self.token_expiration: datetime = datetime.fromtimestamp(auth_token.expire)
+
+    def _get_refreshed_auth_token(self) -> AuthToken:
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url=DataflowEndpoints.REFRESH_AUTH_TOKEN),
@@ -288,9 +318,7 @@ class DDNDataFlowClient(ArchiveHandler):
             json=RefreshPayload(refresh=self.refresh_token).model_dump(),
             verify=False,
         )
-        response_content: AuthToken = AuthToken.model_validate(response.json())
-        self.auth_token: str = response_content.access
-        self.token_expiration: datetime = datetime.fromtimestamp(response_content.expire)
+        return AuthToken.model_validate(response.json())
 
     @property
     def auth_header(self) -> dict[str, str]:
@@ -347,7 +375,9 @@ class DDNDataFlowClient(ArchiveHandler):
             else (self.archive_repository, self.local_storage, DESTINATION_ATTRIBUTE)
         )
 
-        transfer_request: TransferPayload = TransferPayload(files_to_transfer=miria_file_data)
+        transfer_request = TransferPayload(
+            files_to_transfer=miria_file_data, createFolder=is_archiving_request
+        )
         transfer_request.trim_paths(attribute_to_trim=attribute)
         transfer_request.add_repositories(
             source_prefix=source_prefix, destination_prefix=destination_prefix
@@ -382,3 +412,19 @@ class DDNDataFlowClient(ArchiveHandler):
         if job_status in FAILED_JOB_STATUSES:
             raise ArchiveJobFailedError(f"Job with id {job_id} failed with status {job_status}")
         return False
+
+    @staticmethod
+    def get_file_name(file: File) -> str:
+        return Path(file.path).name
+
+    def delete_file(self, file_and_sample: FileAndSample) -> None:
+        """Deletes the given file via Miria."""
+        file_name: str = self.get_file_name(file_and_sample.file)
+        sample_id: str = file_and_sample.sample.internal_id
+        delete_file_payload = DeleteFilePayload(
+            global_path=f"{self.archive_repository}{sample_id}/{file_name}"
+        )
+        delete_file_payload.delete_file(
+            url=urljoin(self.url, DataflowEndpoints.DELETE_FILE),
+            headers=dict(self.headers, **self.auth_header),
+        )
