@@ -2411,6 +2411,7 @@ def context_config(
             "sender_password": "",
         },
         "madeline_exe": "echo",
+        "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
         "pon_path": str(cg_dir),
         "backup": {
             "pdc_archiving_directory": pdc_archiving_directory.dict(),
@@ -2558,7 +2559,6 @@ def context_config(
                 "account": "development",
                 "mail_user": "test.email@scilifelab.se",
             },
-            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
             "tower_pipeline": "raredisease",
         },
         "rnafusion": {
@@ -2576,7 +2576,6 @@ def context_config(
                 "account": "development",
                 "mail_user": "test.email@scilifelab.se",
             },
-            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
             "tower_pipeline": "rnafusion",
         },
         "pigz": {"binary_path": "/bin/pigz"},
@@ -2597,7 +2596,6 @@ def context_config(
                 "account": "development",
                 "mail_user": "taxprofiler.email@scilifelab.se",
             },
-            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
             "tower_pipeline": "taxprofiler",
         },
         "scout": {
