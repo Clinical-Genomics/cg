@@ -10,16 +10,18 @@ from cg.cli.archive import archive_spring_files, delete_file, update_job_statuse
 from cg.constants import EXIT_SUCCESS, SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
 from cg.io.controller import APIRequest
-from cg.meta.archive.ddn_dataflow import (
+from cg.meta.archive.ddn.constants import (
     FAILED_JOB_STATUSES,
     ONGOING_JOB_STATUSES,
+    JobStatus,
+)
+from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
+from cg.meta.archive.ddn.models import (
     AuthToken,
-    DDNDataFlowClient,
     GetJobStatusPayload,
     GetJobStatusResponse,
-    JobStatus,
-    TransferJob,
     TransferPayload,
+    TransferResponse,
 )
 from cg.models.cg_config import CGConfig
 
@@ -74,7 +76,7 @@ def test_archive_spring_files_success(
         "api_request_from_content",
         return_value=ok_miria_response,
     ), mock.patch.object(
-        TransferPayload, "post_request", return_value=TransferJob(jobId=archival_job_id)
+        TransferPayload, "post_request", return_value=TransferResponse(jobId=archival_job_id)
     ):
         result = cli_runner.invoke(
             archive_spring_files,

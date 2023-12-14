@@ -16,13 +16,9 @@ from cg.constants.constants import FileFormat
 from cg.constants.subject import Gender
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
-from cg.meta.archive.ddn_dataflow import (
-    ROOT_TO_TRIM,
-    AuthToken,
-    DDNDataFlowClient,
-    MiriaObject,
-    TransferPayload,
-)
+from cg.meta.archive.ddn.constants import ROOT_TO_TRIM
+from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
+from cg.meta.archive.ddn.models import AuthToken, MiriaObject, TransferPayload
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import CGConfig, DataFlowConfig
 from cg.store import Store
@@ -143,7 +139,7 @@ def ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataFlowClien
         },
     ).encode()
     with mock.patch(
-        "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content",
+        "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content",
         return_value=mock_ddn_auth_success_response,
     ):
         return DDNDataFlowClient(ddn_dataflow_config)

@@ -158,7 +158,6 @@ class RareDiseaseConfig(CommonAppConfig):
     revision: str
     root: str
     slurm: SlurmConfig
-    tower_binary_path: str
     tower_pipeline: str
 
 
@@ -174,7 +173,6 @@ class RnafusionConfig(CommonAppConfig):
     launch_directory: str
     revision: str
     slurm: SlurmConfig
-    tower_binary_path: str
     tower_pipeline: str
 
 
@@ -190,7 +188,6 @@ class TaxprofilerConfig(CommonAppConfig):
     revision: str
     root: str
     slurm: SlurmConfig
-    tower_binary_path: str
     tower_pipeline: str
 
 
@@ -260,6 +257,7 @@ class CGConfig(BaseModel):
     environment: Literal["production", "stage"] = "stage"
     flow_cells_dir: str
     madeline_exe: str
+    tower_binary_path: str
     max_flowcells: int | None
     data_input: DataInput | None = None
     # Base APIs that always should exist

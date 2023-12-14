@@ -8,6 +8,7 @@ from cg.constants import Pipeline
 from cg.constants.sequencing import SequencingPlatform
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.fastq import FastqFileMeta
 from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerParameters,
     TaxprofilerSampleSheetEntry,
@@ -35,7 +36,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.revision: str = config.taxprofiler.revision
         self.hostremoval_reference: Path = Path(config.taxprofiler.hostremoval_reference)
         self.databases: Path = Path(config.taxprofiler.databases)
-        self.tower_binary_path: str = config.taxprofiler.tower_binary_path
+        self.tower_binary_path: str = config.tower_binary_path
         self.tower_pipeline: str = config.taxprofiler.tower_pipeline
         self.account: str = config.taxprofiler.slurm.account
         self.email: str = config.taxprofiler.slurm.mail_user
@@ -47,7 +48,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
         sample_name: str = sample.name
-        sample_metadata: list[str] = self.gather_file_metadata_for_sample(sample)
+        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample)
         fastq_forward_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
         )

@@ -1,5 +1,4 @@
 import logging
-import operator
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -13,6 +12,7 @@ from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
+from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.store.models import Sample
@@ -136,7 +136,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def extract_read_files(
-        metadata: list, forward_read: bool = False, reverse_read: bool = False
+        metadata: list[FastqFileMeta], forward_read: bool = False, reverse_read: bool = False
     ) -> list[str]:
         """Extract a list of fastq file paths for either forward or reverse reads."""
         if forward_read and not reverse_read:
@@ -145,8 +145,12 @@ class NfAnalysisAPI(AnalysisAPI):
             read_direction = 2
         else:
             raise ValueError("Either forward or reverse needs to be specified")
-        sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
-        return [d["path"] for d in sorted_metadata if d["read"] == read_direction]
+        sorted_metadata: list = sorted(metadata, key=lambda k: k.path)
+        return [
+            fastq_file.path
+            for fastq_file in sorted_metadata
+            if fastq_file.read_direction == read_direction
+        ]
 
     def verify_sample_sheet_exists(self, case_id: str, dry_run: bool = False) -> None:
         """Raise an error if sample sheet file is not found."""
