@@ -236,7 +236,7 @@ class NfAnalysisAPI(AnalysisAPI):
             commands=command,
             dry_run=dry_run,
         )
-        LOG.info(f"Nextflow head job running as job {sbatch_number}")
+        LOG.info(f"Nextflow head job running as job: {sbatch_number}")
 
     def _run_analysis_with_tower(
         self, case_id: str, command_args: CommandArgs, dry_run: bool
