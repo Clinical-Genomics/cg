@@ -32,11 +32,12 @@ LOG = logging.getLogger(__name__)
 
 def add_gene_panel_combo(default_panels: set[str]) -> set[str]:
     """Add gene panels combinations for gene panels being part of gene panel combination and return updated gene panels."""
-    all_panels = default_panels
+    additional_panels = set()
     for panel in default_panels:
         if panel in GenePanelCombo.COMBO_1:
-            all_panels |= GenePanelCombo.COMBO_1.get(panel)
-    return all_panels
+            additional_panels |= GenePanelCombo.COMBO_1.get(panel)
+    default_panels |= additional_panels
+    return default_panels
 
 
 class AnalysisAPI(MetaAPI):
