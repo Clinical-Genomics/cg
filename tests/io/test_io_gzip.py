@@ -3,9 +3,9 @@ from pathlib import Path
 from cg.io.gzip import read_gzip_first_line
 
 
-def test_read_gzip_fisrt_line(gzip_file_path: Path):
+def test_read_gzip_first_line(gzip_file_path: Path):
     """
-    Test reading content from a gzip file into a list.
+    Test reading first line from a gzip file into a string.
     """
     # GIVEN a gzip file
 

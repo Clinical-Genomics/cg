@@ -241,6 +241,6 @@ class MutantAnalysisAPI(AnalysisAPI):
         concatenated_path = (
             f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(concatenated_fastq_name)}"
         )
-        LOG.info("Concatenation in progress for sample %s.", sample.internal_id)
+        LOG.info(f"Concatenation in progress for sample {sample.internal_id}.")
         self.fastq_handler.concatenate(read_paths, concatenated_path)
         self.fastq_handler.remove_files(read_paths)

@@ -410,7 +410,7 @@ def test_link_fastq_files_for_sample(
     with mocker.patch.object(
         AnalysisAPI,
         "gather_file_metadata_for_sample",
-        return_value=[FastqFileMeta(**fastq_file_meta_raw)],
+        return_value=[FastqFileMeta.model_validate(fastq_file_meta_raw)],
     ):
         # WHEN parsing header
         mip_analysis_api.link_fastq_files_for_sample(case=case, sample=sample)

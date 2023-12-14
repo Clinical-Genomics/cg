@@ -103,7 +103,7 @@ class FastqHandler:
         Handle Illumina's two different header formats
         @see https://en.wikipedia.org/wiki/FASTQ_format
         Raise:
-            TYpeError if unable to split line into expected parts.
+            TypeError if unable to split line into expected parts.
         """
         parts = line.split(":")
         try:

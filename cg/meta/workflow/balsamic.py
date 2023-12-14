@@ -152,7 +152,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             self.link_fastq_files_for_sample(case=case, sample=link.sample, concatenate=True)
 
     def get_concatenated_fastq_path(self, link_object: CaseSample) -> Path:
-        """Returns path to the concatenated FASTQ file of a sample"""
+        """Returns the path to the concatenated FASTQ file of a sample"""
         file_collection: list[FastqFileMeta] = self.gather_file_metadata_for_sample(
             link_object.sample
         )
