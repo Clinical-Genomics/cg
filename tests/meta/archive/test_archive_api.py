@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 from housekeeper.store.models import File
+from requests import HTTPError, Response
 
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import APIMethods
@@ -9,6 +10,8 @@ from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.io.controller import APIRequest
 from cg.meta.archive.archive import ARCHIVE_HANDLERS, FileAndSample, SpringArchiveAPI
 from cg.meta.archive.ddn_dataflow import (
+    FAILED_JOB_STATUSES,
+    ONGOING_JOB_STATUSES,
     AuthToken,
     DDNDataFlowClient,
     GetJobStatusPayload,
@@ -202,7 +205,11 @@ def test_archive_all_non_archived_spring_files(
 
 @pytest.mark.parametrize(
     "job_status, should_date_be_set",
-    [(JobStatus.COMPLETED, True), (JobStatus.RUNNING, False)],
+    [
+        (JobStatus.COMPLETED, True),
+        (ONGOING_JOB_STATUSES[0], False),
+        (FAILED_JOB_STATUSES[0], False),
+    ],
 )
 def test_get_archival_status(
     spring_archive_api: SpringArchiveAPI,
@@ -240,12 +247,19 @@ def test_get_archival_status(
         )
 
     # THEN The Archive entry should have been updated
-    assert bool(file.archive.archived_at) == should_date_be_set
+    if job_status == FAILED_JOB_STATUSES[0]:
+        assert not file.archive
+    else:
+        assert bool(file.archive.archived_at) == should_date_be_set
 
 
 @pytest.mark.parametrize(
     "job_status, should_date_be_set",
-    [(JobStatus.COMPLETED, True), (JobStatus.RUNNING, False)],
+    [
+        (JobStatus.COMPLETED, True),
+        (ONGOING_JOB_STATUSES[0], False),
+        (FAILED_JOB_STATUSES[0], False),
+    ],
 )
 def test_get_retrieval_status(
     spring_archive_api: SpringArchiveAPI,
@@ -259,6 +273,9 @@ def test_get_retrieval_status(
     job_status,
     should_date_be_set,
 ):
+    """Tests that the three different categories of retrieval statuses we have identified,
+    i.e. failed, ongoing and successful, are handled correctly."""
+
     # GIVEN a file with an ongoing archival
     file: File = spring_archive_api.housekeeper_api.files().first()
     spring_archive_api.housekeeper_api.add_archives(files=[file], archive_task_id=archival_job_id)
@@ -266,7 +283,7 @@ def test_get_retrieval_status(
         file_id=file.id, retrieval_task_id=retrieval_job_id
     )
 
-    # WHEN querying the task id and getting a "COMPLETED" response
+    # WHEN querying the task id
     with mock.patch.object(
         AuthToken,
         "model_validate",
@@ -287,7 +304,10 @@ def test_get_retrieval_status(
         )
 
     # THEN The Archive entry should have been updated
-    assert bool(file.archive.retrieved_at) == should_date_be_set
+    if job_status == FAILED_JOB_STATUSES[0]:
+        assert not file.archive.retrieval_task_id
+    else:
+        assert bool(file.archive.retrieved_at) == should_date_be_set
 
 
 def test_retrieve_samples(
@@ -345,3 +365,86 @@ def test_retrieve_samples(
     # THEN the Archive entry should have a retrieval task id set
     for file in files:
         assert file.archive.retrieval_task_id
+
+
+def test_delete_file_raises_http_error(
+    spring_archive_api: SpringArchiveAPI,
+    failed_delete_file_response: Response,
+    test_auth_token: AuthToken,
+    archival_job_id: int,
+):
+    """Tests that an HTTP error is raised when the Miria response is unsuccessful for a delete file request,
+    and that the file is not removed from Housekeeper."""
+
+    # GIVEN a spring file which is archived via Miria
+    spring_file: File = spring_archive_api.housekeeper_api.files(
+        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
+    ).first()
+    spring_file_path: str = spring_file.path
+    if not spring_file.archive:
+        spring_archive_api.housekeeper_api.add_archives(
+            files=[spring_file], archive_task_id=archival_job_id
+        )
+    spring_archive_api.housekeeper_api.set_archive_archived_at(
+        file_id=spring_file.id, archiving_task_id=archival_job_id
+    )
+
+    # GIVEN that the request returns a failed response
+    with mock.patch.object(
+        DDNDataFlowClient,
+        "_get_auth_token",
+        return_value=test_auth_token,
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=failed_delete_file_response,
+    ), pytest.raises(
+        HTTPError
+    ):
+        # WHEN trying to delete the file via Miria and in Housekeeper
+
+        # THEN an HTTPError should be raised
+        spring_archive_api.delete_file(file_path=spring_file.path)
+
+    # THEN the file should still be in Housekeeper
+    assert spring_archive_api.housekeeper_api.files(path=spring_file_path)
+
+
+def test_delete_file_success(
+    spring_archive_api: SpringArchiveAPI,
+    ok_delete_file_response: Response,
+    test_auth_token: AuthToken,
+    archival_job_id: int,
+):
+    """Tests that given a successful response from Miria, the file is deleted and removed from Housekeeper."""
+
+    # GIVEN a spring file which is archived via Miria
+    spring_file: File = spring_archive_api.housekeeper_api.files(
+        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
+    ).first()
+    spring_file_id: int = spring_file.id
+    if not spring_file.archive:
+        spring_archive_api.housekeeper_api.add_archives(
+            files=[spring_file], archive_task_id=archival_job_id
+        )
+    spring_archive_api.housekeeper_api.set_archive_archived_at(
+        file_id=spring_file.id, archiving_task_id=archival_job_id
+    )
+
+    # GIVEN that the delete request returns a successful response
+    with mock.patch.object(
+        DDNDataFlowClient,
+        "_get_auth_token",
+        return_value=test_auth_token,
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_delete_file_response,
+    ):
+        # WHEN trying to delete the file via Miria and in Housekeeper
+
+        # THEN no error is raised
+        spring_archive_api.delete_file(file_path=spring_file.path)
+
+    # THEN the file is removed from Housekeeper
+    assert not spring_archive_api.housekeeper_api.get_file(spring_file_id)

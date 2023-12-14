@@ -73,6 +73,3 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
     def get_managed_variants(self) -> list[str]:
         """Create and return the managed variants."""
         return self._get_managed_variants(genome_build=GENOME_BUILD_37)
-
-    def write_managed_variants(self, case_id: str, content: list[str]) -> None:
-        self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)
