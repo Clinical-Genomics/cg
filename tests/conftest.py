@@ -312,6 +312,7 @@ def base_config_dict() -> dict:
     return {
         "database": "sqlite:///",
         "madeline_exe": "path/to/madeline",
+        "tower_binary_path": "path/to/tower",
         "delivery_path": "path/to/delivery",
         "flow_cells_dir": "path/to/flow_cells",
         "demultiplexed_flow_cells_dir": "path/to/demultiplexed_flow_cells_dir",
