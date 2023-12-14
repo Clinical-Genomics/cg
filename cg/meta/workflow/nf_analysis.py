@@ -15,6 +15,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
+from cg.store.models import Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -36,7 +37,7 @@ class NfAnalysisAPI(AnalysisAPI):
         self.tower_pipeline: str | None = None
         self.account: str | None = None
         self.email: str | None = None
-        self.compute_env: str | None = None
+        self.compute_env_base: str | None = None
         self.revision: str | None = None
         self.nextflow_binary_path: str | None = None
 
@@ -77,6 +78,10 @@ class NfAnalysisAPI(AnalysisAPI):
         return Path(self.get_case_path(case_id), f"{case_id}_samplesheet").with_suffix(
             FileExtensions.CSV
         )
+
+    def get_compute_env(self, case_id: str) -> str:
+        """Get the compute environment for the head job based on the case priority."""
+        return f"{self.compute_env_base}-{self.get_slurm_qos_for_case(case_id=case_id)}"
 
     @staticmethod
     def get_nextflow_config_path(nextflow_config: str | None = None) -> Path | None:
