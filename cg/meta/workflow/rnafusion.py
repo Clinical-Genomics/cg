@@ -19,6 +19,7 @@ from cg.models.deliverables.metric_deliverables import (
     MetricsDeliverablesCondition,
     MultiqcDataJson,
 )
+from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import PipelineDeliverables
 from cg.models.rnafusion.rnafusion import (
     RnafusionAnalysis,
@@ -72,7 +73,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self, sample: Sample, case_id: str, strandedness: Strandedness
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
-        sample_metadata: list[dict] = self.gather_file_metadata_for_sample(sample_obj=sample)
+        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
         fastq_forward_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
         )

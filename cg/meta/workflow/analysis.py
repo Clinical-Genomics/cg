@@ -9,7 +9,7 @@ import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority, SequencingFileTag
 from cg.constants.constants import (
     AnalysisType,
     CaseActions,
@@ -24,6 +24,7 @@ from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
+from cg.models.fastq import FastqFileMeta
 from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
@@ -288,58 +289,59 @@ class AnalysisAPI(MetaAPI):
             if self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
 
-    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample):
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
         """Return the path to the FASTQ destination directory."""
         raise NotImplementedError
 
-    def gather_file_metadata_for_sample(self, sample_obj: Sample) -> list[dict]:
+    def gather_file_metadata_for_sample(self, sample: Sample) -> list[FastqFileMeta]:
         return [
-            self.fastq_handler.parse_file_data(file_obj.full_path)
-            for file_obj in self.housekeeper_api.files(
-                bundle=sample_obj.internal_id, tags=["fastq"]
+            self.fastq_handler.parse_file_data(hk_file.full_path)
+            for hk_file in self.housekeeper_api.files(
+                bundle=sample.internal_id, tags={SequencingFileTag.FASTQ}
             )
         ]
 
     def link_fastq_files_for_sample(
-        self, case_obj: Case, sample_obj: Sample, concatenate: bool = False
+        self, case: Case, sample: Sample, concatenate: bool = False
     ) -> None:
         """
-        Link FASTQ files for a sample to working directory.
+        Link FASTQ files for a sample to the work directory.
         If pipeline input requires concatenated fastq, files can also be concatenated
         """
-        linked_reads_paths = {1: [], 2: []}
-        concatenated_paths = {1: "", 2: ""}
-        files: list[dict] = self.gather_file_metadata_for_sample(sample_obj=sample_obj)
-        sorted_files = sorted(files, key=lambda k: k["path"])
-        fastq_dir = self.get_sample_fastq_destination_dir(case=case_obj, sample=sample_obj)
+        linked_reads_paths: dict[int, list[Path]] = {1: [], 2: []}
+        concatenated_paths: dict[int, str] = {1: "", 2: ""}
+        fastq_files_meta: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
+        sorted_fastq_files_meta: list[FastqFileMeta] = sorted(
+            fastq_files_meta, key=lambda k: k.path
+        )
+        fastq_dir: Path = self.get_sample_fastq_destination_dir(case=case, sample=sample)
         fastq_dir.mkdir(parents=True, exist_ok=True)
 
-        for fastq_data in sorted_files:
-            fastq_path = Path(fastq_data["path"])
-            fastq_name = self.fastq_handler.create_fastq_name(
-                lane=fastq_data["lane"],
-                flowcell=fastq_data["flowcell"],
-                sample=sample_obj.internal_id,
-                read=fastq_data["read"],
-                undetermined=fastq_data["undetermined"],
-                meta=self.get_additional_naming_metadata(sample_obj),
+        for fastq_file in sorted_fastq_files_meta:
+            fastq_file_name: str = self.fastq_handler.create_fastq_name(
+                lane=fastq_file.lane,
+                flow_cell=fastq_file.flow_cell_id,
+                sample=sample.internal_id,
+                read_direction=fastq_file.read_direction,
+                undetermined=fastq_file.undetermined,
+                meta=self.get_lims_naming_metadata(sample),
             )
-            destination_path: Path = fastq_dir / fastq_name
-            linked_reads_paths[fastq_data["read"]].append(destination_path)
+            destination_path = Path(fastq_dir, fastq_file_name)
+            linked_reads_paths[fastq_file.read_direction].append(destination_path)
             concatenated_paths[
-                fastq_data["read"]
-            ] = f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_name)}"
+                fastq_file.read_direction
+            ] = f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_file_name)}"
 
             if not destination_path.exists():
-                LOG.info(f"Linking: {fastq_path} -> {destination_path}")
-                destination_path.symlink_to(fastq_path)
+                LOG.info(f"Linking: {fastq_file.path} -> {destination_path}")
+                destination_path.symlink_to(fastq_file.path)
             else:
                 LOG.warning(f"Destination path already exists: {destination_path}")
 
         if not concatenate:
             return
 
-        LOG.info("Concatenation in progress for sample %s.", sample_obj.internal_id)
+        LOG.info(f"Concatenation in progress for sample: {sample.internal_id}")
         for read, value in linked_reads_paths.items():
             self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
             self.fastq_handler.remove_files(value)
@@ -435,7 +437,7 @@ class AnalysisAPI(MetaAPI):
         """
         return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
 
-    def get_additional_naming_metadata(self, sample_obj: Sample) -> str | None:
+    def get_lims_naming_metadata(self, sample: Sample) -> str | None:
         return None
 
     def get_latest_metadata(self, case_id: str) -> AnalysisModel:
