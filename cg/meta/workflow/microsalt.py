@@ -152,7 +152,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         samples: list[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
         for sample_obj in samples:
-            self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
+            self.link_fastq_files_for_sample(case=case_obj, sample=sample_obj)
 
     def get_samples(self, case_id: str, sample_id: str | None = None) -> list[Sample]:
         """Returns a list of samples to configure
