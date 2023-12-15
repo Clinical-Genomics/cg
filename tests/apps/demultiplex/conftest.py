@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
@@ -43,12 +42,6 @@ def bcl_convert_samples_similar_index2() -> list[FlowCellSampleBCLConvert]:
         lane=2, sample_id="ACC789", index="AAGCGATA", index2="AACCGCAA"
     )
     return [sample_1, sample_2, sample_3]
-
-
-@pytest.fixture
-def valid_index() -> Index:
-    """Return a valid index."""
-    return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
 
 
 @pytest.fixture

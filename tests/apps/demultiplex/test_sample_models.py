@@ -174,7 +174,7 @@ def test_get_index1_override_cycles(
 def test_get_index2_override_cycles(
     raw_index: str, index2_cycles: int, reverse_cycle: bool, expected_parsed_cycles: str
 ):
-    """Test that the returned index 2 cycles is teh expected for different index configurations."""
+    """Test that the returned index 2 cycles is the expected for different index configurations."""
     # GIVEN a FlowCellSampleBCLConvert with separated indexes
     sample = FlowCellSampleBCLConvert(lane=1, index=raw_index, sample_id="ACC123")
     sample.separate_indexes()
@@ -191,6 +191,8 @@ def test_get_index2_override_cycles(
 def test_update_override_cycles():
     # TODO: Parametrise this test with different run parameter files and samples
     """."""
+    # GIVEN a run parameters object
+
     # GIVEN a FlowCellSampleBCLConvert
 
     # WHEN updating the override cycles
@@ -245,49 +247,40 @@ def test_update_barcode_mismatches_2(
 
 
 @pytest.mark.parametrize(
-    "run_parameters_fixture, raw_lims_samples_fixture, sample_model",
+    "run_parameters_fixture, raw_lims_samples_fixture",
     [
-        ("novaseq_x_run_parameters", "novaseq_x_lims_samples", FlowCellSampleBCLConvert),
-        (
-            "novaseq_6000_run_parameters_pre_1_5_kits",
-            "novaseq_6000_pre_1_5_kits_lims_samples",
-            FlowCellSampleBCLConvert,
-        ),
-        (
-            "novaseq_6000_run_parameters_post_1_5_kits",
-            "novaseq_6000_post_1_5_kits_lims_samples",
-            FlowCellSampleBCLConvert,
-        ),
-        ("hiseq_x_run_parameters_single_index", "hiseq_x_lims_samples", FlowCellSampleBCLConvert),
-        ("hiseq_x_run_parameters_single_index", "hiseq_x_lims_samples", FlowCellSampleBcl2Fastq),
-        (
-            "hiseq_2500_run_parameters_double_index",
-            "hiseq_2500_lims_samples",
-            FlowCellSampleBCLConvert,
-        ),
-        (
-            "hiseq_2500_run_parameters_double_index",
-            "hiseq_2500_lims_samples",
-            FlowCellSampleBcl2Fastq,
-        ),
+        ("novaseq_x_run_parameters", "novaseq_x_lims_samples"),
+        ("novaseq_6000_run_parameters_pre_1_5_kits", "novaseq_6000_pre_1_5_kits_lims_samples"),
+        ("novaseq_6000_run_parameters_post_1_5_kits", "novaseq_6000_post_1_5_kits_lims_samples"),
+        ("hiseq_x_run_parameters_single_index", "hiseq_x_lims_samples"),
+        ("hiseq_2500_run_parameters_double_index", "hiseq_2500_lims_samples"),
     ],
     ids=[
         "NovaSeqX",
         "NovaSeq6000 pre1.5",
         "NovaSeq6000 post1.5",
-        "HiSeqX BclConvert",
-        "HiSeqX Bcl2Fastq",
-        "HiSeq2500 BCLConvert",
-        "HiSeq2500 Bcl2Fastq",
+        "HiSeqX",
+        "HiSeq2500",
     ],
 )
-def test_process_sample_for_sample_sheet(
-    run_parameters_fixture: str, raw_lims_samples_fixture: str, sample_model: Type[FlowCellSample]
+def test_process_sample_for_sample_sheet_bcl_convert(
+    run_parameters_fixture: str, raw_lims_samples_fixture: str, request: pytest.FixtureRequest
 ):
-    # TODO: We need a raw FlowCellSampleBcl2Fastq and a raw FlowCellSampleBCLConvert
+    # TODO: We need a raw FlowCellSampleBCLConvert
     """."""
-    # GIVEN a run parameters object and a list of samples from a flow cell
+    # GIVEN a run parameters object and a list of BCLConvert samples from a flow cell
+    run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
+    raw_lims_samples: list[FlowCellSampleBCLConvert] = request.getfixturevalue(
+        raw_lims_samples_fixture
+    )
+
+    # GIVEN a FlowCellSampleBCLConvert
+    sample: FlowCellSampleBCLConvert = raw_lims_samples[0]
 
     # WHEN processing the sample for a sample sheet
+    sample.process_sample_for_sample_sheet(run_parameters=run_parameters)
 
     # THEN the sample is processed
+    assert sample.barcode_mismatches_1
+    assert sample.barcode_mismatches_2
+    assert sample.override_cycles

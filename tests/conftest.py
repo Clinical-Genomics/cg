@@ -1397,12 +1397,6 @@ def novaseq_bcl_convert_sample_sheet_path(bcl_convert_flow_cell_dir: Path) -> Pa
 
 
 @pytest.fixture(scope="session")
-def run_parameters_missing_versions_path(run_parameters_dir: Path) -> Path:
-    """Return a NovaSeq6000 run parameters file path without software and reagent kit versions."""
-    return Path(run_parameters_dir, "RunParameters_novaseq_no_software_nor_reagent_version.xml")
-
-
-@pytest.fixture(scope="session")
 def run_parameters_wrong_instrument(run_parameters_dir: Path) -> Path:
     """Return a NovaSeqX run parameters file path with a wrong instrument value."""
     return Path(run_parameters_dir, "RunParameters_novaseq_X_wrong_instrument.xml")
@@ -1483,10 +1477,11 @@ def run_parameters_novaseq_x_different_index(run_parameters_dir: Path) -> RunPar
 
 @pytest.fixture(scope="module")
 def run_parameters_missing_versions(
-    run_parameters_missing_versions_path: Path,
+    run_parameters_dir: Path,
 ) -> RunParametersNovaSeq6000:
     """Return a NovaSeq6000 run parameters object without software and reagent kit versions."""
-    return RunParametersNovaSeq6000(run_parameters_path=run_parameters_missing_versions_path)
+    path = Path(run_parameters_dir, "RunParameters_novaseq_no_software_nor_reagent_version.xml")
+    return RunParametersNovaSeq6000(run_parameters_path=path)
 
 
 @pytest.fixture(scope="session")

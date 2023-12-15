@@ -4,6 +4,7 @@ from typing import Type
 
 import pytest
 from _pytest.fixtures import FixtureRequest
+from pydantic import BaseModel
 
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreatorBCLConvert
 from cg.constants.demultiplexing import (
@@ -75,41 +76,67 @@ def test_run_parameters_init(
     assert run_parameters.sequencer == sequencer
 
 
+class RunParametersScenario(BaseModel):
+    wrong_run_parameters_path_fixture: str
+    constructor: Type[RunParameters]
+    error_msg: str
+
+
 @pytest.mark.parametrize(
-    "wrong_run_parameters_path_fixture, constructor, node_name",
+    "scenario",
     [
-        (
-            "novaseq_6000_run_parameters_path",
-            RunParametersHiSeq,
-            RunParametersXMLNodes.APPLICATION_NAME,
+        RunParametersScenario(
+            wrong_run_parameters_path_fixture="novaseq_6000_run_parameters_path",
+            constructor=RunParametersHiSeq,
+            error_msg=f"Could not find node {RunParametersXMLNodes.APPLICATION_NAME} in the run parameters file.",
         ),
-        (
-            "novaseq_x_run_parameters_path",
-            RunParametersNovaSeq6000,
-            RunParametersXMLNodes.APPLICATION,
+        RunParametersScenario(
+            wrong_run_parameters_path_fixture="novaseq_x_run_parameters_path",
+            constructor=RunParametersHiSeq,
+            error_msg=f"Could not find node {RunParametersXMLNodes.APPLICATION_NAME} in the run parameters file.",
         ),
-        (
-            "hiseq_x_single_index_run_parameters_path",
-            RunParametersNovaSeqX,
-            RunParametersXMLNodes.INSTRUMENT_TYPE,
+        RunParametersScenario(
+            wrong_run_parameters_path_fixture="novaseq_x_run_parameters_path",
+            constructor=RunParametersNovaSeq6000,
+            error_msg=f"The file parsed does not correspond to {RunParametersXMLNodes.NOVASEQ_6000_APPLICATION}",
+        ),
+        RunParametersScenario(
+            wrong_run_parameters_path_fixture="hiseq_x_single_index_run_parameters_path",
+            constructor=RunParametersNovaSeq6000,
+            error_msg=f"Could not find node {RunParametersXMLNodes.APPLICATION} in the run parameters file.",
+        ),
+        RunParametersScenario(
+            wrong_run_parameters_path_fixture="hiseq_x_single_index_run_parameters_path",
+            constructor=RunParametersNovaSeqX,
+            error_msg=f"Could not find node {RunParametersXMLNodes.INSTRUMENT_TYPE} in the run parameters file.",
+        ),
+        RunParametersScenario(
+            wrong_run_parameters_path_fixture="novaseq_6000_run_parameters_path",
+            constructor=RunParametersNovaSeqX,
+            error_msg=f"Could not find node {RunParametersXMLNodes.INSTRUMENT_TYPE} in the run parameters file.",
         ),
     ],
+    ids=[
+        "NovaSeq 6000 file, HiSeq constructor",
+        "NovaSeq X file, HiSeq constructor",
+        "NovaSeq X file, NovaSeq6000 constructor",
+        "HiSeq X file, NovaSeq600 constructor",
+        "HiSeq X file, NovaSeqX constructor",
+        "NovaSeq6000 constructor, NovaSeqX constructor",
+    ],
 )
-def test_run_parameters_wrong_file(
-    wrong_run_parameters_path_fixture: str,
-    constructor: Type[RunParameters],
-    node_name: str,
-    request: FixtureRequest,
-):
+def test_run_parameters_wrong_file(scenario: RunParametersScenario, request: FixtureRequest):
     """Test that creating a RunParameters object with a wrong file fails."""
     # GIVEN a run parameters path from an instrument different from the expected
-    wrong_run_parameters_path: Path = request.getfixturevalue(wrong_run_parameters_path_fixture)
+    wrong_run_parameters_path: Path = request.getfixturevalue(
+        scenario.wrong_run_parameters_path_fixture
+    )
 
     # WHEN trying to create a RunParameters object with the file
     with pytest.raises(RunParametersError) as exc_info:
         # THEN a RunParametersError is raised
-        constructor(run_parameters_path=wrong_run_parameters_path)
-    assert f"Could not find node {node_name} in the run parameters file" in str(exc_info.value)
+        scenario.constructor(run_parameters_path=wrong_run_parameters_path)
+    assert scenario.error_msg in str(exc_info.value)
 
 
 def test_run_parameters_hiseq_wrong_file(novaseq_6000_run_parameters_path: Path):
