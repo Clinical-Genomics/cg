@@ -138,16 +138,12 @@ class SampleSheetCreator:
     def process_samples_for_sample_sheet(self) -> None:
         """Remove unwanted samples and adapt remaining samples."""
         self.remove_unwanted_samples()
-        samples_in_lane: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq]
+        for sample in self.lims_samples:
+            sample.process_indexes(run_parameters=self.run_parameters)
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
-            LOG.info(
-                "Adapting index, override cycles and barcode mismatch values "
-                f"for samples in lane {lane}"
-            )
+            LOG.info(f"Updating barcode mismatch values for samples in lane {lane}")
             for sample in samples_in_lane:
-                sample.process_sample_for_sample_sheet(
-                    run_parameters=self.run_parameters, samples_to_compare=samples_in_lane
-                )
+                sample.update_barcode_mismatches(samples_to_compare=samples_in_lane)
 
     def construct_sample_sheet(self) -> list[list[str]]:
         """Construct and validate the sample sheet."""

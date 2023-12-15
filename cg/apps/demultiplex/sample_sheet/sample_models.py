@@ -38,10 +38,13 @@ class FlowCellSample(BaseModel):
             self.index2 = index2.strip()
 
     @abstractmethod
-    def process_sample_for_sample_sheet(
-        self, run_parameters: RunParameters, samples_to_compare: list | None = None
-    ):
+    def process_indexes(self, run_parameters: RunParameters):
         """Update the required attributes to be exported to a sample sheet."""
+        pass
+
+    @abstractmethod
+    def update_barcode_mismatches(self, samples_to_compare: list) -> None:
+        """Update the barcode_mismatches_1 and barcode_mismatches_2 attributes."""
         pass
 
 
@@ -81,13 +84,17 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
             return
         LOG.debug(f"Padding not necessary for sample {self.sample_id}")
 
-    def process_sample_for_sample_sheet(self, run_parameters: RunParameters, **kwargs):
+    def process_indexes(self, run_parameters: RunParameters):
         """Update the required attributes to be exported to a sample sheet."""
         reverse_index2: bool = run_parameters.index_settings.should_i5_be_reverse_complimented
         self.separate_indexes()
         self._pad_indexes_if_necessary(run_parameters=run_parameters)
         if reverse_index2:
             self.index2 = get_reverse_complement_dna_seq(self.index2)
+
+    def update_barcode_mismatches(self, samples_to_compare: list) -> None:
+        """No updating of barcode mismatch  values for Bcl2Fastq sample."""
+        LOG.debug(f"No updating of barcode mismatch values for Bcl2Fastq sample {self.sample_id}")
 
 
 class FlowCellSampleBCLConvert(FlowCellSample):
@@ -145,7 +152,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
         )
         self.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
-    def update_barcode_mismatches_1(self, samples_to_compare: list) -> None:
+    def _update_barcode_mismatches_1(self, samples_to_compare: list) -> None:
         """Assign zero to barcode_mismatches_1 if the hamming distance between self.index
         and the index1 of any sample in the lane is below the minimum threshold."""
         for sample in samples_to_compare:
@@ -159,7 +166,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
                 self.barcode_mismatches_1 = 0
                 break
 
-    def update_barcode_mismatches_2(self, samples_to_compare: list) -> None:
+    def _update_barcode_mismatches_2(self, samples_to_compare: list) -> None:
         """Assign zero to barcode_mismatches_2 if the hamming distance between self.index2
         and the index2 of any sample in the lane is below the minimum threshold.
         If the sample is single-indexed, assign 'na'."""
@@ -178,15 +185,16 @@ class FlowCellSampleBCLConvert(FlowCellSample):
                 self.barcode_mismatches_2 = 0
                 break
 
-    def process_sample_for_sample_sheet(
-        self, run_parameters: RunParameters, samples_to_compare: list | None = None
-    ):
+    def process_indexes(self, run_parameters: RunParameters):
         """Update the required attributes to be exported to a sample sheet."""
-        if not samples_to_compare:
-            raise SampleSheetError("No samples to compare with to update barcode mismatch values")
         self.separate_indexes()
         if run_parameters.index_settings.should_i5_be_reverse_complimented:
             self.index2 = get_reverse_complement_dna_seq(self.index2)
-        self.update_override_cycles(run_parameters)
-        self.update_barcode_mismatches_1(samples_to_compare=samples_to_compare)
-        self.update_barcode_mismatches_2(samples_to_compare=samples_to_compare)
+        self.update_override_cycles(run_parameters=run_parameters)
+
+    def update_barcode_mismatches(self, samples_to_compare: list) -> None:
+        """Update the barcode_mismatches_1 and barcode_mismatches_2 attributes."""
+        if not samples_to_compare:
+            raise SampleSheetError("No samples to compare with to update barcode mismatch values")
+        self._update_barcode_mismatches_1(samples_to_compare=samples_to_compare)
+        self._update_barcode_mismatches_2(samples_to_compare=samples_to_compare)

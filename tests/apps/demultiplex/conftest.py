@@ -56,18 +56,6 @@ def bcl2fastq_sample_sheet_creator(
     )
 
 
-@pytest.fixture
-def bcl_convert_sample_sheet_creator(
-    bcl_convert_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_bcl_convert_samples: list[FlowCellSampleBCLConvert],
-) -> SampleSheetCreatorBCLConvert:
-    """Returns a sample sheet creator for version 2 sample sheets with dragen format."""
-    return SampleSheetCreatorBCLConvert(
-        flow_cell=bcl_convert_flow_cell,
-        lims_samples=lims_novaseq_bcl_convert_samples,
-    )
-
-
 # Sample sheet validation
 
 

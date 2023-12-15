@@ -216,7 +216,7 @@ def test_update_barcode_mismatches_1(
     sample_to_update: FlowCellSampleBCLConvert = sample_list[0]
 
     # WHEN updating the barcode mismatches 1
-    sample_to_update.update_barcode_mismatches_1(samples_to_compare=sample_list)
+    sample_to_update._update_barcode_mismatches_1(samples_to_compare=sample_list)
 
     # THEN the barcode mismatches 1 are updated with the expected value
     assert sample_to_update.barcode_mismatches_1 == expected_barcode_mismatch
@@ -240,7 +240,7 @@ def test_update_barcode_mismatches_2(
     sample_to_update: FlowCellSampleBCLConvert = sample_list[0]
 
     # WHEN updating the barcode mismatches 2
-    sample_to_update.update_barcode_mismatches_2(samples_to_compare=sample_list)
+    sample_to_update._update_barcode_mismatches_2(samples_to_compare=sample_list)
 
     # THEN the barcode mismatches 1 are updated with the expected value
     assert sample_to_update.barcode_mismatches_2 == expected_barcode_mismatch
@@ -278,7 +278,7 @@ def test_process_sample_for_sample_sheet_bcl_convert(
     sample: FlowCellSampleBCLConvert = raw_lims_samples[0]
 
     # WHEN processing the sample for a sample sheet
-    sample.process_sample_for_sample_sheet(run_parameters=run_parameters)
+    sample.process_indexes(run_parameters=run_parameters)
 
     # THEN the sample is processed
     assert sample.barcode_mismatches_1

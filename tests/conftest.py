@@ -19,6 +19,7 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreatorBCLConvert
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
@@ -1004,6 +1005,18 @@ def sample_sheet_context(
     cg_context.lims_api_ = lims_api
     cg_context.housekeeper_api_ = populated_housekeeper_api
     return cg_context
+
+
+@pytest.fixture
+def bcl_convert_sample_sheet_creator(
+    bcl_convert_flow_cell: FlowCellDirectoryData,
+    lims_novaseq_bcl_convert_samples: list[FlowCellSampleBCLConvert],
+) -> SampleSheetCreatorBCLConvert:
+    """Returns a sample sheet creator for version 2 sample sheets with dragen format."""
+    return SampleSheetCreatorBCLConvert(
+        flow_cell=bcl_convert_flow_cell,
+        lims_samples=lims_novaseq_bcl_convert_samples,
+    )
 
 
 @pytest.fixture(scope="session")

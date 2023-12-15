@@ -122,7 +122,7 @@ class SampleSheetScenario(BaseModel):
         ),
         SampleSheetScenario(
             flow_cell_directory="novaseq_6000_post_1_5_kits_flow_cell",
-            lims_samples="novaseq_6000_post_1_5_kits_samples",
+            lims_samples="novaseq_6000_post_1_5_kits_lims_samples",
             correct_sample_sheet="novaseq_6000_post_1_5_kits_correct_sample_sheet",
         ),
         SampleSheetScenario(
