@@ -224,11 +224,7 @@ def start_available(context: click.Context, dry_run: bool = False):
 def qc_microsalt(context: click.Context, unique_id: str) -> None:
     """Perform QC on a microsalt case."""
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
-    run_dir_path: Path = analysis_api.get_latest_case_path(unique_id)
-    case: Case = analysis_api.status_db.get_case_by_internal_id(unique_id)
-    sample_id: str = case.samples[0].internal_id
-    lims_project: str = analysis_api.get_project(sample_id)
-    metrics_file_path = Path(run_dir_path, f"{lims_project}.json")
+    metrics_file_path: Path = analysis_api.get_metrics_file_path(unique_id)
     try:
         LOG.info(f"Performing QC on case {unique_id}")
         analysis_api.quality_checker.quality_control(metrics_file_path)

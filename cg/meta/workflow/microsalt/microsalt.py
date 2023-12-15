@@ -72,11 +72,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         lims_project: str = self.get_project(sample_id)
 
         return next(
-            (
-                path
-                for path in self.get_case_path(case_id)
-                if f"{lims_project}_" in path.as_posix()
-            ),
+            (path for path in self.get_case_path(case_id) if f"{lims_project}_" in path.as_posix()),
             None,
         )
 
@@ -279,9 +275,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         for case in cases_qc_ready:
             case_run_dir: Path | None = self.get_latest_case_path(case.internal_id)
-            lims_project: str = self.get_project(case.samples[0].internal_id)
-            metrics_file_path = Path(case_run_dir, f"{lims_project}.json")
             if self.quality_checker.is_qc_required(case_run_dir):
+                metrics_file_path = self.get_metrics_file_path(case.internal_id)
                 if self.quality_checker.quality_control(metrics_file_path):
                     self.trailblazer_api.add_comment(case_id=case.internal_id, comment="QC passed")
                     cases_to_store.append(case)
@@ -302,3 +297,11 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             for case in self.status_db.get_running_cases_in_pipeline(self.pipeline)
             if self.trailblazer_api.is_latest_analysis_completed(case.internal_id)
         ]
+
+    def get_metrics_file_path(self, case_id: str) -> Path:
+        """Return path to metrics file for a case."""
+        case_obj: Case = self.status_db.get_case_by_internal_id(case_id)
+        sample_id: str = case_obj.links[0].sample.internal_id
+        lims_project: str = self.get_project(sample_id)
+        case_run_dir: Path = self.get_latest_case_path(case_id)
+        return Path(case_run_dir, f"{lims_project}.json")

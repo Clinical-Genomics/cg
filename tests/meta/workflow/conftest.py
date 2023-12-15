@@ -143,7 +143,7 @@ def metrics_file_passing_qc(
 
 
 @pytest.fixture
-def valid_microsalt_metrics_file(
+def microsalt_metrics_file(
     microsalt_qc_fail_run_dir_path: Path, microsalt_qc_fail_lims_project: str
 ) -> Path:
     return Path(microsalt_qc_fail_run_dir_path, f"{microsalt_qc_fail_lims_project}.json")
