@@ -39,7 +39,7 @@ class FlowCellSample(BaseModel):
 
     @abstractmethod
     def process_indexes(self, run_parameters: RunParameters):
-        """Update the required attributes to be exported to a sample sheet."""
+        """Update index attributes with the final values for the sample sheet."""
         pass
 
     @abstractmethod
@@ -85,7 +85,7 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
         LOG.debug(f"Padding not necessary for sample {self.sample_id}")
 
     def process_indexes(self, run_parameters: RunParameters):
-        """Update the required attributes to be exported to a sample sheet."""
+        """Parses, pads and reverse complement the indexes if necessary."""
         reverse_index2: bool = run_parameters.index_settings.should_i5_be_reverse_complimented
         self.separate_indexes()
         self._pad_indexes_if_necessary(run_parameters=run_parameters)
@@ -186,14 +186,14 @@ class FlowCellSampleBCLConvert(FlowCellSample):
                 break
 
     def process_indexes(self, run_parameters: RunParameters):
-        """Update the required attributes to be exported to a sample sheet."""
+        """Parse and reverse complement the indexes and updates override cycles."""
         self.separate_indexes()
         if run_parameters.index_settings.should_i5_be_reverse_complimented:
             self.index2 = get_reverse_complement_dna_seq(self.index2)
         self.update_override_cycles(run_parameters=run_parameters)
 
     def update_barcode_mismatches(self, samples_to_compare: list) -> None:
-        """Update the barcode_mismatches_1 and barcode_mismatches_2 attributes."""
+        """Update barcode mismatch attributes comparing to the rest of the samples in the lane."""
         if not samples_to_compare:
             raise SampleSheetError("No samples to compare with to update barcode mismatch values")
         self._update_barcode_mismatches_1(samples_to_compare=samples_to_compare)

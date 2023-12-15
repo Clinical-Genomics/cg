@@ -1332,15 +1332,27 @@ def novaseq_x_lims_samples(novaseq_x_raw_lims_samples: Path) -> list[FlowCellSam
 
 
 @pytest.fixture(scope="session")
-def hiseq_x_flow_cell_name() -> str:
-    """Return the full name of a HiSeq2500 flow cell with only one index."""
-    return "160202_ST-E00266_0064_AHKHHGCCXX"
+def hiseq_x_single_index_flow_cell_name() -> str:
+    """Return the full name of a HiSeqX flow cell with only one index."""
+    return "170517_ST-E00266_0210_BHJCFFALXX"
+
+
+@pytest.fixture(scope="session")
+def hiseq_x_dual_index_flow_cell_name() -> str:
+    """Return the full name of a HiSeqX flow cell with two indexes."""
+    return "180508_ST-E00269_0269_AHL32LCCXY"
 
 
 @pytest.fixture(scope="session")
 def hiseq_2500_flow_cell_name() -> str:
     """Return the full name of a HiSeq2500 flow cell with double indexes."""
-    return "180504_D00410_0608_BHGYGYBCX2"
+    return "181005_D00410_0735_BHM2LNBCX2"
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_custom_index_flow_cell_name() -> str:
+    """Return the full name of a HiSeq2500 flow cell with double indexes."""
+    return "180509_D00450_0598_BHGYFNBCX2"
 
 
 @pytest.fixture(scope="session")
@@ -1368,9 +1380,9 @@ def novaseq_x_manifest_file(novaseq_x_flow_cell_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
-def hiseq_x_flow_cell_dir(flow_cells_dir: Path, hiseq_x_flow_cell_name: str) -> Path:
+def hiseq_x_flow_cell_dir(flow_cells_dir: Path, hiseq_x_single_index_flow_cell_name: str) -> Path:
     """Return the path to a HiSeqX flow cell."""
-    return Path(flow_cells_dir, hiseq_x_flow_cell_name)
+    return Path(flow_cells_dir, hiseq_x_single_index_flow_cell_name)
 
 
 @pytest.fixture(scope="session")

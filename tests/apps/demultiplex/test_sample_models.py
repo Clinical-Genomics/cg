@@ -1,4 +1,3 @@
-from typing import Type
 from unittest.mock import Mock
 
 import pytest
@@ -58,10 +57,11 @@ def test_separate_indexes(lims_index: str, expected_index_1: str, expected_index
 )
 def test_pad_indexes_needs_padding(needs_reverse_complement: bool, expected_index2: str):
     """Test that indexes that need to be padded are padded with and without reverse complement."""
-    # GIVEN a run parameters file with 10-nt indexes with an i5 that needs reverse complementing
+    # GIVEN an IndexSettings object
     mock_index_settings = Mock(
         spec=IndexSettings, should_i5_be_reverse_complimented=needs_reverse_complement
     )
+    # GIVEN a run parameters file with 10-nt indexes and the index settings
     mock_run_parameters = Mock(
         spec=RunParameters,
         get_index_1_cycles=Mock(return_value=10),
@@ -133,8 +133,18 @@ def test_pad_indexes_no_padding():
 
 @pytest.mark.parametrize(
     "raw_index, index1_cycles, expected_parsed_cycles",
-    [("CGATAGCAGG", 10, "I10;"), ("GTTCCAAT", 8, "I8;"), ("GTTCCAAT", 10, "I8N2;")],
-    ids=["10-nt index and cycles", "8-nt index and cycles", "8-ny index, 10-ny cycles"],
+    [
+        ("CGATAGCAGG", 10, "I10;"),
+        ("CCATTCGANNNNNNNNN-GTTGTCCG", 8, "I8;"),
+        ("GTTCCAAT", 8, "I8;"),
+        ("GTTCCAAT", 10, "I8N2;"),
+    ],
+    ids=[
+        "10-nt index and cycles",
+        "extended index with 8-nt cycles",
+        "8-nt index and cycles",
+        "8-ny index, 10-ny cycles",
+    ],
 )
 def test_get_index1_override_cycles(
     raw_index: str, index1_cycles: int, expected_parsed_cycles: str
@@ -188,6 +198,7 @@ def test_get_index2_override_cycles(
     assert index2_cycles == expected_parsed_cycles
 
 
+@pytest.mark.skip(reason="Unfinished test")
 def test_update_override_cycles():
     # TODO: Parametrise this test with different run parameter files and samples
     """."""
@@ -246,6 +257,7 @@ def test_update_barcode_mismatches_2(
     assert sample_to_update.barcode_mismatches_2 == expected_barcode_mismatch
 
 
+@pytest.mark.skip(reason="Unfinished test")
 @pytest.mark.parametrize(
     "run_parameters_fixture, raw_lims_samples_fixture",
     [

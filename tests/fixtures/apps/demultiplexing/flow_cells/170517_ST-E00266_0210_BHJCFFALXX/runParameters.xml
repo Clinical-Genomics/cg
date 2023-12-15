@@ -3,9 +3,9 @@
   <Setup>
     <LimsIntegrationMode>false</LimsIntegrationMode>
     <NumberOfRehybAttemptsRemaining>2</NumberOfRehybAttemptsRemaining>
-    <ExperimentName>HKHHGCCXX</ExperimentName>
+    <ExperimentName>HJCFFALXX</ExperimentName>
     <ScanID>-999</ScanID>
-    <FCPosition>A</FCPosition>
+    <FCPosition>B</FCPosition>
     <WorkFlowType>SINGLEINDEX</WorkFlowType>
     <Read1>151</Read1>
     <IndexRead1>8</IndexRead1>
@@ -22,30 +22,33 @@
     <Rehyb>None</Rehyb>
     <PerformPreRunFluidicsCheck>false</PerformPreRunFluidicsCheck>
     <ApplicationName>HiSeq Control Software</ApplicationName>
-    <ApplicationVersion>3.3.39</ApplicationVersion>
-    <RunID>160202_ST-E00266_0064_AHKHHGCCXX</RunID>
-    <RunStartDate>160202</RunStartDate>
+    <ApplicationVersion>HD 3.4.0.38</ApplicationVersion>
+    <RunID>170517_ST-E00266_0210_BHJCFFALXX</RunID>
+    <RunStartDate>170517</RunStartDate>
+    <IntegrationMode>BaseSpace</IntegrationMode>
     <BaseSpaceSettings>
       <Username>clinical.genomics@scilifelab.se</Username>
-      <RunId>17177178</RunId>
+      <RunId>26601581</RunId>
+      <InstrumentHealthRunId>26601581</InstrumentHealthRunId>
+      <TempFolder>O:\Illumina\HiSeqTemp</TempFolder>
       <UseBaseSpace>true</UseBaseSpace>
       <SendInstrumentHealthToILMN>true</SendInstrumentHealthToILMN>
       <RunMonitoringOnly>true</RunMonitoringOnly>
     </BaseSpaceSettings>
     <ScannerID>ST-E00266</ScannerID>
-    <ScanNumber>64</ScanNumber>
+    <ScanNumber>210</ScanNumber>
     <ComputerName>HWI-E00266</ComputerName>
     <FPGAVersion>10.37.13</FPGAVersion>
     <CPLDVersion>3.0.0</CPLDVersion>
-    <RTAVersion>2.7.1</RTAVersion>
-    <BaseSpaceBrokerVersion>2.5.2.28</BaseSpaceBrokerVersion>
+    <RTAVersion>2.7.7</RTAVersion>
+    <BaseSpaceBrokerVersion>2.9.2.15</BaseSpaceBrokerVersion>
     <ChemistryVersion>Illumina,Bruno Fluidics Controller,0,v2.0420</ChemistryVersion>
     <CameraFirmware>2.21-C00-R03</CameraFirmware>
     <CameraDriver>7.5.180.4395</CameraDriver>
     <FtdiDriver>2.12.0.0</FtdiDriver>
     <FocusCameraFirmware />
-    <Barcode>HKHHGCCXX</Barcode>
-    <WashBarcode>H1234CCXX</WashBarcode>
+    <Barcode>HJCFFALXX</Barcode>
+    <WashBarcode>H1234ALXX</WashBarcode>
     <Username>sbsuser</Username>
     <SelectedSections>
       <Section Name="A_1" />
@@ -59,6 +62,7 @@
     </SelectedSections>
     <FocusMethod>DynamicITF</FocusMethod>
     <SelectedSurface>BothLaneSurfaces</SelectedSurface>
+    <DoDualSurfaceAutoCenter>true</DoDualSurfaceAutoCenter>
     <SwathScanMode>AutoSwath</SwathScanMode>
     <EnableLft>true</EnableLft>
     <AutoTiltOnce>true</AutoTiltOnce>
@@ -98,7 +102,7 @@
     <ReagentKits>
       <Sbs>
         <SbsReagentKit>
-          <ID>x</ID>
+          <ID />
           <Prime>false</Prime>
           <NumberCyclesRemaining>310</NumberCyclesRemaining>
           <IsNew50Cycle>false</IsNew50Cycle>
@@ -108,14 +112,50 @@
       </Sbs>
       <Pe>
         <ReagentKit>
-          <ID>x</ID>
+          <ID />
         </ReagentKit>
       </Pe>
     </ReagentKits>
     <ReagentBottles>
-      <Sbs />
+      <Sbs>
+        <SbsReagents>
+          <BarcodedBottle>
+            <Type>CMR</Type>
+            <Barcode />
+          </BarcodedBottle>
+          <BarcodedBottle>
+            <Type>SRE</Type>
+            <Barcode />
+          </BarcodedBottle>
+          <BarcodedBottle>
+            <Type>EDP</Type>
+            <Barcode />
+          </BarcodedBottle>
+          <BarcodedBottle>
+            <Type>LFN</Type>
+            <Barcode />
+          </BarcodedBottle>
+          <BarcodedBottle>
+            <Type>ICB</Type>
+            <Barcode />
+          </BarcodedBottle>
+          <BarcodedBottle>
+            <Type>SB1</Type>
+            <Barcode />
+          </BarcodedBottle>
+          <BarcodedBottle>
+            <Type>SB2</Type>
+            <Barcode />
+          </BarcodedBottle>
+          <BarcodedBottle>
+            <Type>SB3</Type>
+            <Barcode />
+          </BarcodedBottle>
+        </SbsReagents>
+      </Sbs>
     </ReagentBottles>
-    <RecipeFragmentVersion>3.2.4</RecipeFragmentVersion>
+    <TempFolder>O:\Illumina\HiSeqTemp\170517_ST-E00266_0210_BHJCFFALXX</TempFolder>
+    <RecipeFragmentVersion>HD 3.5.0.4</RecipeFragmentVersion>
     <PromptForPeReagents>false</PromptForPeReagents>
     <MockRun>false</MockRun>
     <ScannedBarcode />
