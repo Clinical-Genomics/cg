@@ -249,3 +249,5 @@ class Strandedness(StrEnum):
 
 
 PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.SARS_COV_2]
+
+NG_UL_SUFFIX: str = " ng/uL"

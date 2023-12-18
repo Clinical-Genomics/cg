@@ -41,6 +41,7 @@ class GenePanelMasterList(StrEnum):
     SOVM: str = "SOVM"
     STROKE: str = "STROKE"
     AID: str = "AID"
+    INHERITED_CANCER: str = "Inherited cancer"
 
     @classmethod
     def get_panel_names(cls, panels=None) -> list[str]:
@@ -64,7 +65,7 @@ class GenePanelCombo:
         "DSD": {"DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"},
         "CM": {"CNM", "CM"},
         "Horsel": {"Horsel", "141217", "141201"},
-        "OPHTHALMO": (
+        "OPHTHALMO": {
             "OPHTHALMO",
             "ANTE-ED",
             "CATARACT",
@@ -73,5 +74,5 @@ class GenePanelCombo:
             "RETINA",
             "SED",
             "ALBINISM",
-        ),
+        },
     }

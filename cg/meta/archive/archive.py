@@ -1,6 +1,7 @@
 import logging
 from typing import Callable, Type
 
+import click
 from housekeeper.store.models import Archive, File
 from pydantic import BaseModel, ConfigDict
 
@@ -8,7 +9,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
 from cg.exc import ArchiveJobFailedError
-from cg.meta.archive.ddn_dataflow import DDNDataFlowClient
+from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.models import ArchiveHandler, FileAndSample, SampleAndDestination
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
@@ -252,7 +253,7 @@ class SpringArchiveAPI:
         jobs_per_location: dict[ArchiveLocations, list[int]] = {}
         jobs_and_locations: set[
             tuple[int, ArchiveLocations]
-        ] = self.get_unique_archival_ids_and_their_archive_location(archive_entries)
+        ] = self.get_unique_archival_ids_and_archive_locations(archive_entries)
 
         for archive_location in ArchiveLocations:
             jobs_per_location[ArchiveLocations(archive_location)] = [
@@ -262,18 +263,14 @@ class SpringArchiveAPI:
             ]
         return jobs_per_location
 
-    def get_unique_archival_ids_and_their_archive_location(
+    def get_unique_archival_ids_and_archive_locations(
         self, archive_entries: list[Archive]
     ) -> set[tuple[int, ArchiveLocations]]:
-        return set(
-            [
-                (
-                    archive.archiving_task_id,
-                    ArchiveLocations(self.get_archive_location_from_file(archive.file)),
-                )
-                for archive in archive_entries
-            ]
-        )
+        ids_and_locations: set[tuple[int, ArchiveLocations]] = set()
+        for archive in archive_entries:
+            if location := self.get_archive_location_from_file(archive.file):
+                ids_and_locations.add((archive.archiving_task_id, location))
+        return ids_and_locations
 
     def sort_retrieval_ids_on_archive_location(
         self, archive_entries: list[Archive]
@@ -283,7 +280,7 @@ class SpringArchiveAPI:
         jobs_per_location: dict[ArchiveLocations, list[int]] = {}
         jobs_and_locations: set[
             tuple[int, ArchiveLocations]
-        ] = self.get_unique_retrieval_ids_and_their_archive_location(archive_entries)
+        ] = self.get_unique_retrieval_ids_and_archive_locations(archive_entries)
         for archive_location in ArchiveLocations:
             jobs_per_location[ArchiveLocations(archive_location)] = [
                 job_and_location[0]
@@ -292,18 +289,51 @@ class SpringArchiveAPI:
             ]
         return jobs_per_location
 
-    def get_unique_retrieval_ids_and_their_archive_location(
+    def get_unique_retrieval_ids_and_archive_locations(
         self, archive_entries: list[Archive]
     ) -> set[tuple[int, ArchiveLocations]]:
-        return set(
-            [
-                (
-                    archive.retrieval_task_id,
-                    ArchiveLocations(self.get_archive_location_from_file(archive.file)),
-                )
-                for archive in archive_entries
-            ]
-        )
+        ids_and_locations: set[tuple[int, ArchiveLocations]] = set()
+        for archive in archive_entries:
+            if location := self.get_archive_location_from_file(archive.file):
+                ids_and_locations.add((archive.retrieval_task_id, location))
+        return ids_and_locations
 
-    def get_archive_location_from_file(self, file: File) -> str:
-        return self.status_db.get_sample_by_internal_id(file.version.bundle.name).archive_location
+    @staticmethod
+    def is_file_archived(file: File) -> bool:
+        return file.archive and file.archive.archived_at
+
+    @staticmethod
+    def get_archive_location_from_file(file: File) -> ArchiveLocations | None:
+        for tag_name in [tag.name for tag in file.tags]:
+            if tag_name in iter(ArchiveLocations):
+                LOG.info(f"Found archive location {tag_name}")
+                return tag_name
+        LOG.warning("No archive location in the file tags")
+        return None
+
+    def delete_file_from_archive_location(
+        self, file_and_sample: FileAndSample, archive_location: ArchiveLocations
+    ) -> None:
+        archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
+        archive_handler.delete_file(file_and_sample)
+
+    def delete_file(self, file_path: str, dry_run: bool = False) -> None:
+        """Deletes the specified file where it is archived and deletes the Housekeeper record.
+        Raises:
+            Click.Abort if yes is not specified or the user does not confirm the deletion."""
+        file: File = self.housekeeper_api.files(path=file_path).first()
+        if not self.is_file_archived(file):
+            LOG.warning(f"No archived file found for file {file_path} - exiting")
+            return
+        archive_location: ArchiveLocations | None = self.get_archive_location_from_file(file)
+        if not archive_location:
+            LOG.warning("No archive location could be determined - exiting")
+            return
+        if dry_run:
+            click.echo(f"Would have deleted file {file_path} from {archive_location}.")
+            return
+        file_and_sample: FileAndSample = self.add_samples_to_files([file])[0]
+        self.delete_file_from_archive_location(
+            file_and_sample=file_and_sample, archive_location=archive_location
+        )
+        self.housekeeper_api.delete_file(file.id)

@@ -1,3 +1,4 @@
+import http
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -15,13 +16,9 @@ from cg.constants.constants import FileFormat
 from cg.constants.subject import Gender
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
-from cg.meta.archive.ddn_dataflow import (
-    ROOT_TO_TRIM,
-    AuthToken,
-    DDNDataFlowClient,
-    MiriaObject,
-    TransferPayload,
-)
+from cg.meta.archive.ddn.constants import ROOT_TO_TRIM
+from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
+from cg.meta.archive.ddn.models import AuthToken, MiriaObject, TransferPayload
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import CGConfig, DataFlowConfig
 from cg.store import Store
@@ -81,7 +78,7 @@ def retrieve_request_json(
     """Returns the body for a retrieval http post towards the DDN Miria API."""
     return {
         "osType": "Unix/MacOS",
-        "createFolder": True,
+        "createFolder": False,
         "pathInfo": [
             {
                 "destination": local_storage_repository
@@ -142,7 +139,7 @@ def ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataFlowClien
         },
     ).encode()
     with mock.patch(
-        "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content",
+        "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content",
         return_value=mock_ddn_auth_success_response,
     ):
         return DDNDataFlowClient(ddn_dataflow_config)
@@ -362,7 +359,7 @@ def archive_context(
     file: File = real_housekeeper_api.add_file(
         path=path_to_spring_file_with_ongoing_archival,
         version_obj=bundle.versions[0],
-        tags=[SequencingFileTag.SPRING],
+        tags=[SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET],
     )
     file.id = 1234
     real_housekeeper_api.add_archives(files=[file], archive_task_id=archival_job_id)
@@ -378,3 +375,22 @@ def path_to_spring_file_to_archive() -> str:
 @pytest.fixture
 def path_to_spring_file_with_ongoing_archival() -> str:
     return "/home/path/to/ongoing/spring/file.spring"
+
+
+@pytest.fixture
+def failed_response() -> Response:
+    response = Response()
+    response.status_code = http.HTTPStatus.FORBIDDEN
+    return response
+
+
+@pytest.fixture
+def failed_delete_file_response(failed_response: Response) -> Response:
+    failed_response._content = b'{"detail":"Given token not valid for any token type","code":"token_not_valid","messages":[{"tokenClass":"AccessToken","tokenType":"access","message":"Token is invalid or expired"}]}'
+    return failed_response
+
+
+@pytest.fixture
+def ok_delete_file_response(ok_response: Response) -> Response:
+    ok_response._content = b'{"message":"Object has been deleted"}'
+    return ok_response
