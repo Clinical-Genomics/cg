@@ -1,6 +1,6 @@
 from cg.constants.constants import MicrosaltAppTags
 from cg.meta.workflow.microsalt.metrics_parser.models import SampleMetrics
-from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
+from cg.meta.workflow.microsalt.quality_controller.models import SampleQualityResult
 from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_non_urgent_results,
     get_urgent_results,
@@ -329,8 +329,8 @@ def test_has_valid_10x_coverage_missing():
 
 def test_negative_control_passes_qc():
     # GIVEN a negative control sample that passes quality control
-    control_result: QualityResult = create_quality_result(is_control=True)
-    other_result: QualityResult = create_quality_result(passes_qc=False)
+    control_result: SampleQualityResult = create_quality_result(is_control=True)
+    other_result: SampleQualityResult = create_quality_result(passes_qc=False)
 
     # WHEN checking if the negative control passes quality control
     control_passes_qc: bool = negative_control_pass_qc([other_result, control_result])
@@ -341,8 +341,8 @@ def test_negative_control_passes_qc():
 
 def test_negative_control_fails_qc():
     # GIVEN a negative control sample that fails quality control
-    control_result: QualityResult = create_quality_result(is_control=True, passes_qc=False)
-    other_result: QualityResult = create_quality_result()
+    control_result: SampleQualityResult = create_quality_result(is_control=True, passes_qc=False)
+    other_result: SampleQualityResult = create_quality_result()
 
     # WHEN checking if the negative control passes quality control
     control_passes_qc: bool = negative_control_pass_qc([other_result, control_result])
@@ -353,16 +353,16 @@ def test_negative_control_fails_qc():
 
 def test_get_urgent_results():
     # GIVEN quality results with urgent and non-urgent samples
-    urgent_result: QualityResult = create_quality_result(
+    urgent_result: SampleQualityResult = create_quality_result(
         application_tag=MicrosaltAppTags.MWRNXTR003, passes_qc=True
     )
-    non_urgent_result: QualityResult = create_quality_result(
+    non_urgent_result: SampleQualityResult = create_quality_result(
         application_tag=MicrosaltAppTags.MWXNXTR003, passes_qc=True
     )
-    quality_results: list[QualityResult] = [urgent_result, non_urgent_result]
+    quality_results: list[SampleQualityResult] = [urgent_result, non_urgent_result]
 
     # WHEN getting the urgent results
-    urgent_results: list[QualityResult] = get_urgent_results(quality_results)
+    urgent_results: list[SampleQualityResult] = get_urgent_results(quality_results)
 
     # THEN the urgent results are returned
     assert urgent_results == [urgent_result]
@@ -370,13 +370,13 @@ def test_get_urgent_results():
 
 def test_urgent_samples_pass_qc():
     # GIVEN quality results with urgent samples that pass quality control
-    urgent_result: QualityResult = create_quality_result(
+    urgent_result: SampleQualityResult = create_quality_result(
         application_tag=MicrosaltAppTags.MWRNXTR003, passes_qc=True
     )
-    urgent_result_control: QualityResult = create_quality_result(
+    urgent_result_control: SampleQualityResult = create_quality_result(
         application_tag=MicrosaltAppTags.MWRNXTR003, passes_qc=True, is_control=True
     )
-    urgent_results: list[QualityResult] = [urgent_result, urgent_result_control]
+    urgent_results: list[SampleQualityResult] = [urgent_result, urgent_result_control]
 
     # WHEN checking if the urgent samples pass quality control
     urgent_pass_qc: bool = urgent_samples_pass_qc(urgent_results)
@@ -387,13 +387,13 @@ def test_urgent_samples_pass_qc():
 
 def test_urgent_samples_fail_qc():
     # GIVEN quality results with urgent samples that fail quality control
-    urgent_result: QualityResult = create_quality_result(
+    urgent_result: SampleQualityResult = create_quality_result(
         application_tag=MicrosaltAppTags.MWRNXTR003, passes_qc=False
     )
-    urgent_result_control: QualityResult = create_quality_result(
+    urgent_result_control: SampleQualityResult = create_quality_result(
         application_tag=MicrosaltAppTags.MWRNXTR003, passes_qc=True, is_control=True
     )
-    urgent_results: list[QualityResult] = [urgent_result, urgent_result_control]
+    urgent_results: list[SampleQualityResult] = [urgent_result, urgent_result_control]
 
     # WHEN checking if the urgent samples pass quality control
     urgent_pass_qc: bool = urgent_samples_pass_qc(urgent_results)
@@ -404,16 +404,16 @@ def test_urgent_samples_fail_qc():
 
 def test_get_non_urgent_results():
     # GIVEN quality results with urgent and non-urgent samples
-    urgent_result: QualityResult = create_quality_result(
+    urgent_result: SampleQualityResult = create_quality_result(
         application_tag=MicrosaltAppTags.MWRNXTR003, passes_qc=True
     )
-    non_urgent_result: QualityResult = create_quality_result(
+    non_urgent_result: SampleQualityResult = create_quality_result(
         application_tag=MicrosaltAppTags.MWXNXTR003, passes_qc=True
     )
-    quality_results: list[QualityResult] = [urgent_result, non_urgent_result]
+    quality_results: list[SampleQualityResult] = [urgent_result, non_urgent_result]
 
     # WHEN getting the non-urgent results
-    non_urgent_results: list[QualityResult] = get_non_urgent_results(quality_results)
+    non_urgent_results: list[SampleQualityResult] = get_non_urgent_results(quality_results)
 
     # THEN the non-urgent results are returned
     assert non_urgent_results == [non_urgent_result]
@@ -421,13 +421,13 @@ def test_get_non_urgent_results():
 
 def test_non_urgent_samples_pass_qc():
     # GIVEN quality results with non-urgent samples that pass quality control
-    non_urgent_result: QualityResult = create_quality_result(
+    non_urgent_result: SampleQualityResult = create_quality_result(
         application_tag=MicrosaltAppTags.MWXNXTR003, passes_qc=True
     )
-    non_urgent_result_control: QualityResult = create_quality_result(
+    non_urgent_result_control: SampleQualityResult = create_quality_result(
         application_tag=MicrosaltAppTags.MWXNXTR003, passes_qc=True, is_control=True
     )
-    non_urgent_results: list[QualityResult] = [non_urgent_result, non_urgent_result_control]
+    non_urgent_results: list[SampleQualityResult] = [non_urgent_result, non_urgent_result_control]
 
     # WHEN checking if the non-urgent samples pass quality control
     non_urgent_pass_qc: bool = non_urgent_samples_pass_qc(non_urgent_results)

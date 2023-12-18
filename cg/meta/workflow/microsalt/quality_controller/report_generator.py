@@ -1,24 +1,18 @@
 from pathlib import Path
+from typing import List
 
 from cg.io.json import write_json
-from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
+from cg.meta.workflow.microsalt.quality_controller.models import (
+    CaseQualityResult,
+    SampleQualityResult,
+)
 
 
 class ReportGenerator:
     @staticmethod
-    def report(out_file: Path, sample_results: list[QualityResult]) -> None:
-        formatted_results: list[dict] = []
-        for result in sample_results:
-            formatted_result = {
-                result.sample_id: {
-                    "Passed QC": result.passes_qc,
-                    "Passed QC Reads": result.passes_reads_qc,
-                    "Passed QC Mapping": result.passes_mapping_qc,
-                    "Passed QC Duplication": result.passes_duplication_qc,
-                    "Passed QC Insert Size": result.passes_inserts_qc,
-                    "Passed QC Coverage": result.passes_coverage_qc,
-                    "Passed QC 10x Coverage": result.passes_10x_coverage_qc,
-                }
-            }
-            formatted_results.append(formatted_result)
-        write_json(file_path=out_file, content=formatted_results)
+    def report(out_file: Path, case: CaseQualityResult, samples: List[SampleQualityResult]) -> None:
+        report_content = {
+            "case": case.model_dump(),
+            "samples": [sample.model_dump() for sample in samples],
+        }
+        write_json(file_path=out_file, content=report_content)

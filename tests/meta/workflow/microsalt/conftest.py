@@ -6,7 +6,7 @@ from cg.meta.workflow.microsalt.metrics_parser.models import (
     SampleMetrics,
 )
 
-from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
+from cg.meta.workflow.microsalt.quality_controller.models import CaseQualityResult, SampleQualityResult
 from cg.meta.workflow.microsalt.quality_controller.quality_controller import QualityController
 from cg.store.api.core import Store
 
@@ -43,8 +43,8 @@ def create_quality_result(
     passes_inserts_qc: bool = True,
     passes_coverage_qc: bool = True,
     passes_10x_coverage_qc: bool = True,
-) -> QualityResult:
-    return QualityResult(
+) -> SampleQualityResult:
+    return SampleQualityResult(
         sample_id=sample_id,
         passes_qc=passes_qc,
         is_control=is_control,
@@ -59,9 +59,9 @@ def create_quality_result(
 
 
 @pytest.fixture
-def quality_results() -> list[QualityResult]:
+def quality_results() -> list[SampleQualityResult]:
     return [
-        QualityResult(
+        SampleQualityResult(
             sample_id="sample_1",
             passes_qc=False,
             is_control=True,
@@ -73,7 +73,7 @@ def quality_results() -> list[QualityResult]:
             passes_coverage_qc=True,
             passes_10x_coverage_qc=True,
         ),
-        QualityResult(
+        SampleQualityResult(
             sample_id="sample_2",
             passes_qc=True,
             is_control=False,
@@ -85,7 +85,7 @@ def quality_results() -> list[QualityResult]:
             passes_coverage_qc=True,
             passes_10x_coverage_qc=True,
         ),
-        QualityResult(
+        SampleQualityResult(
             sample_id="sample_3",
             passes_qc=False,
             is_control=False,
@@ -98,6 +98,16 @@ def quality_results() -> list[QualityResult]:
             passes_10x_coverage_qc=False,
         ),
     ]
+
+
+@pytest.fixture
+def case_result():
+    return CaseQualityResult(
+        passes_qc=False,
+        control_passes_qc=True,
+        urgent_passes_qc=True,
+        non_urgent_passes_qc=True,
+    )
 
 
 @pytest.fixture

@@ -305,4 +305,4 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         sample_id: str = case_obj.links[0].sample.internal_id
         lims_project: str = self.get_project(sample_id)
         case_run_dir: Path = self.get_latest_case_path(case_id)
-        return Path(case_run_dir, f"{lims_project}.{FileExtensions.JSON}")
+        return Path(case_run_dir, f"{lims_project}{FileExtensions.JSON}")
