@@ -1,6 +1,6 @@
 """Tests for the Scout serialisation models"""
 from cg.apps.scout.scout_export import DiagnosisPhenotypes, ScoutExportCase
-from cg.apps.scout.validators import set_gender_if_other, set_parent_if_missing
+from cg.apps.scout.validators import set_parent_if_missing, set_sex_if_other
 from cg.constants.constants import FileFormat
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.pedigree import Pedigree
@@ -180,7 +180,7 @@ def test_set_gender_if_provided():
     gender: PlinkSex = PlinkSex.FEMALE
 
     # WHEN running "set_gender_if_other"
-    validated_gender: str = set_gender_if_other(gender)
+    validated_gender: str = set_sex_if_other(gender)
 
     # THEN the returned string should not have been altered
     assert validated_gender == gender
@@ -193,7 +193,7 @@ def test_set_gender_if_other():
     gender: Sex = Sex.OTHER
 
     # WHEN running "set_gender_if_other"
-    validated_gender: str = set_gender_if_other(gender)
+    validated_gender: str = set_sex_if_other(gender)
 
     # THEN the returned gender should be PlinkSex.UNKNOWN
     assert validated_gender == PlinkSex.UNKNOWN
