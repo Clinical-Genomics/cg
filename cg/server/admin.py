@@ -124,6 +124,8 @@ class ApplicationView(BaseView):
     column_formatters = {
         "sample_concentration_minimum": view_sample_concentration_minimum,
         "sample_concentration_maximum": view_sample_concentration_maximum,
+        "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
+        "sample_concentration_maximum_cfdna": view_sample_concentration_maximum_cfdna,
     }
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
