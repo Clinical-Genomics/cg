@@ -35,7 +35,7 @@ def test_get_valid_indexes():
 def test_is_padding_needed(
     index1_cycles: int, index2_cycles: int, sample_index_length: int, expected: bool
 ):
-    """."""
+    """Test that evaluating if a situation needs padding returns the expected value."""
     # GIVEN a sample index length and the number of index cycles reads stated in the run parameters
 
     # WHEN checking if padding is needed

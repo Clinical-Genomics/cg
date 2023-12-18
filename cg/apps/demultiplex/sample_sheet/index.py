@@ -46,7 +46,6 @@ def get_valid_indexes(dual_indexes_only: bool = True) -> list[Index]:
 
 
 def is_padding_needed(index1_cycles: int, index2_cycles: int, sample_index_length: int) -> bool:
-    # TODO: create a test for this function using different run parameters files
     """Returns whether a sample needs padding or not given the sample index length.
     A sample needs padding if its adapted index lengths are shorter than the number of index cycles
     reads stated in the run parameters file of the sequencing for both indexes. This happens when
