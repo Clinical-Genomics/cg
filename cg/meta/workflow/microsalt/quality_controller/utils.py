@@ -7,6 +7,7 @@ from cg.meta.workflow.microsalt.quality_controller.models import (
     CaseQualityResult,
     SampleQualityResult,
 )
+from cg.meta.workflow.microsalt.quality_controller.result_logger import ResultLogger
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Sample
 
@@ -131,9 +132,11 @@ def quality_control_case(sample_results: list[SampleQualityResult]) -> CaseQuali
 
     case_passes_qc: bool = control_pass_qc and urgent_pass_qc and non_urgent_pass_qc
 
-    return CaseQualityResult(
+    result = CaseQualityResult(
         passes_qc=case_passes_qc,
         control_passes_qc=control_pass_qc,
         urgent_passes_qc=urgent_pass_qc,
         non_urgent_passes_qc=non_urgent_pass_qc,
     )
+    ResultLogger.log_case_result(result)
+    return result

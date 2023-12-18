@@ -33,11 +33,11 @@ class QualityController:
     def __init__(self, status_db: Store):
         self.status_db = status_db
 
-    def quality_control(self, metrics_file_path: Path) -> bool:
-        quality_metrics: QualityMetrics = MetricsParser.parse(metrics_file_path)
+    def quality_control(self, case_metrics_file_path: Path) -> bool:
+        quality_metrics: QualityMetrics = MetricsParser.parse(case_metrics_file_path)
         sample_results: list[SampleQualityResult] = self.quality_control_samples(quality_metrics)
         case_result: CaseQualityResult = quality_control_case(sample_results)
-        report_file: Path = get_report_path(metrics_file_path)
+        report_file: Path = get_report_path(case_metrics_file_path)
         ReportGenerator.report(out_file=report_file, samples=sample_results, case=case_result)
         ResultLogger.log_results(case=case_result, samples=sample_results)
         return case_result.passes_qc
@@ -57,6 +57,20 @@ class QualityController:
         valid_coverage: bool = has_valid_average_coverage(metrics)
         valid_10x_coverage: bool = has_valid_10x_coverage(metrics)
 
+        sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
+        application_tag: str = get_application_tag(sample)
+
+        if is_control := is_sample_negative_control(sample):
+            result = SampleQualityResult(
+                sample_id=sample_id,
+                passes_qc=valid_read_count,
+                is_control=is_control,
+                passes_reads_qc=valid_read_count,
+                application_tag=application_tag,
+            )
+            ResultLogger.log_sample_result(result)
+            return result
+
         sample_passes_qc: bool = (
             valid_read_count
             and valid_mapping
@@ -66,18 +80,7 @@ class QualityController:
             and valid_10x_coverage
         )
 
-        sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
-        application_tag: str = get_application_tag(sample)
-        if is_control := is_sample_negative_control(sample):
-            return SampleQualityResult(
-                sample_id=sample_id,
-                passes_qc=sample_passes_qc,
-                is_control=is_control,
-                passes_reads_qc=valid_read_count,
-                application_tag=application_tag,
-            )
-
-        return SampleQualityResult(
+        result = SampleQualityResult(
             sample_id=sample_id,
             passes_qc=sample_passes_qc,
             is_control=is_control,
@@ -89,6 +92,8 @@ class QualityController:
             passes_coverage_qc=valid_coverage,
             passes_10x_coverage_qc=valid_10x_coverage,
         )
+        ResultLogger.log_sample_result(result)
+        return result
 
     def is_qc_required(self, case_run_dir: Path) -> bool:
         if not case_run_dir:

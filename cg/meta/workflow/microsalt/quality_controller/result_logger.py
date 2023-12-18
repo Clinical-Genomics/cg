@@ -11,7 +11,7 @@ class ResultLogger:
     @staticmethod
     def log_results(samples: list[SampleQualityResult], case: CaseQualityResult) -> None:
         if case.passes_qc:
-            LOG.info("Quality control passed.")
+            LOG.info("QC passed.")
         else:
             message = get_case_fail_message(case)
             LOG.warning(message)
@@ -19,19 +19,29 @@ class ResultLogger:
         message = sample_result_message(samples)
         LOG.info(message)
 
+    @staticmethod
+    def log_sample_result(result: SampleQualityResult) -> None:
+        if not result.passes_qc:
+            control_message = "Control sample " if result.is_control else ""
+            message = f"{control_message}{result.sample_id} failed QC."
+            LOG.warning(message)
+
+    @staticmethod
+    def log_case_result(result: CaseQualityResult) -> None:
+        if not result.passes_qc:
+            LOG.warning("Case failed QC.")
+
 
 def get_case_fail_message(case: CaseQualityResult) -> str:
     fail_reasons = []
 
     if not case.control_passes_qc:
-        fail_reasons.append("The negative control sample failed quality control.\n")
+        fail_reasons.append("The negative control sample failed QC.\n")
     if not case.urgent_passes_qc:
-        fail_reasons.append("The urgent samples failed quality control.\n")
+        fail_reasons.append("The urgent samples failed QC.\n")
     if not case.non_urgent_passes_qc:
-        fail_reasons.append("The non-urgent samples failed quality control.\n")
-
-    fail_message = "Quality control failed.\n"
-
+        fail_reasons.append("The non-urgent samples failed QC.\n")
+    fail_message = "QC failed.\n"
     return fail_message + " ".join(fail_reasons)
 
 
