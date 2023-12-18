@@ -2,7 +2,7 @@ from typing import Any
 
 from pydantic.v1 import validator
 
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.models.deliverables.metric_deliverables import (
     MeanInsertSize,
     MedianTargetCoverage,
@@ -57,7 +57,7 @@ class MIPParsedMetrics(ParsedMetrics):
     duplicate_reads_step: str
     mapped_reads: float
     mapped_reads_step: str
-    predicted_sex: str = Gender.UNKNOWN
+    predicted_sex: str = Sex.UNKNOWN
     predicted_sex_step: str
 
 

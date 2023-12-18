@@ -11,12 +11,7 @@ from cg.apps.scout.validators import (
     set_parent_if_missing,
 )
 from cg.constants.gene_panel import GENOME_BUILD_37
-from cg.constants.subject import (
-    Gender,
-    PlinkGender,
-    PlinkPhenotypeStatus,
-    RelationshipStatus,
-)
+from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex, RelationshipStatus, Sex
 
 
 class Individual(BaseModel):
@@ -24,7 +19,7 @@ class Individual(BaseModel):
     bam_file: str | None = None
     individual_id: str
     sex: Annotated[
-        Literal[PlinkGender.UNKNOWN, PlinkGender.MALE, PlinkGender.FEMALE, Gender.OTHER],
+        Literal[PlinkSex.UNKNOWN, PlinkSex.MALE, PlinkSex.FEMALE, Sex.OTHER],
         BeforeValidator(set_gender_if_other),
     ]
     father: Annotated[

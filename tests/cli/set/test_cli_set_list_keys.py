@@ -5,7 +5,7 @@ from click.testing import CliRunner
 
 from cg.cli.set.base import list_keys
 from cg.constants import EXIT_SUCCESS
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
@@ -34,7 +34,7 @@ def test_list_keys_with_sample(
 ):
     # GIVEN a database with a sample
 
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    sample_obj = helpers.add_sample(base_store, gender=Sex.FEMALE)
 
     # WHEN setting sample but skipping lims
     with caplog.at_level(logging.INFO):

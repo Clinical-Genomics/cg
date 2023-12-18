@@ -6,9 +6,17 @@ from typing import Generator
 import pytest
 
 from cg.constants import Pipeline
-from cg.constants.subject import Gender, PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.store import Store
-from cg.store.models import Analysis, Application, Customer, Case, CaseSample, Organism, Sample
+from cg.store.models import (
+    Analysis,
+    Application,
+    Case,
+    CaseSample,
+    Customer,
+    Organism,
+    Sample,
+)
 from tests.store_helpers import StoreHelpers
 
 
@@ -143,7 +151,7 @@ def microbial_store(
         base_store.session.add(organism)
         sample = base_store.add_sample(
             name=sample_data["name"],
-            sex=Gender.UNKNOWN,
+            sex=Sex.UNKNOWN,
             comment=sample_data["comment"],
             priority=sample_data["priority"],
             reads=sample_data["reads"],

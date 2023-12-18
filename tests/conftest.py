@@ -31,7 +31,7 @@ from cg.constants.constants import CaseActions, FileFormat, Strandedness
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SequencingPlatform
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import write_yaml
@@ -248,7 +248,7 @@ def analysis_family_single_case(
         "samples": [
             {
                 "name": "proband",
-                "sex": Gender.MALE,
+                "sex": Sex.MALE,
                 "internal_id": sample_id,
                 "status": "affected",
                 "original_ticket": ticket_id,
@@ -272,7 +272,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
         "samples": [
             {
                 "name": "child",
-                "sex": Gender.MALE,
+                "sex": Sex.MALE,
                 "internal_id": sample_id,
                 "father": "ADM2",
                 "mother": "ADM3",
@@ -283,7 +283,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
             },
             {
                 "name": "father",
-                "sex": Gender.MALE,
+                "sex": Sex.MALE,
                 "internal_id": "ADM2",
                 "status": "unaffected",
                 "original_ticket": ticket_id,
@@ -292,7 +292,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
             },
             {
                 "name": "mother",
-                "sex": Gender.FEMALE,
+                "sex": Sex.FEMALE,
                 "internal_id": "ADM3",
                 "status": "unaffected",
                 "original_ticket": ticket_id,
@@ -2177,19 +2177,19 @@ def base_store(
 def sample_store(base_store: Store) -> Store:
     """Populate store with samples."""
     new_samples = [
-        base_store.add_sample(name="ordered", sex=Gender.MALE, internal_id="test_internal_id"),
-        base_store.add_sample(name="received", sex=Gender.UNKNOWN, received=datetime.now()),
+        base_store.add_sample(name="ordered", sex=Sex.MALE, internal_id="test_internal_id"),
+        base_store.add_sample(name="received", sex=Sex.UNKNOWN, received=datetime.now()),
         base_store.add_sample(
             name="received-prepared",
-            sex=Gender.UNKNOWN,
+            sex=Sex.UNKNOWN,
             received=datetime.now(),
             prepared_at=datetime.now(),
         ),
-        base_store.add_sample(name="external", sex=Gender.FEMALE),
-        base_store.add_sample(name="external-received", sex=Gender.FEMALE, received=datetime.now()),
+        base_store.add_sample(name="external", sex=Sex.FEMALE),
+        base_store.add_sample(name="external-received", sex=Sex.FEMALE, received=datetime.now()),
         base_store.add_sample(
             name="sequenced",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             received=datetime.now(),
             prepared_at=datetime.now(),
             last_sequenced_at=datetime.now(),
@@ -2197,19 +2197,19 @@ def sample_store(base_store: Store) -> Store:
         ),
         base_store.add_sample(
             name="sequenced-partly",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             received=datetime.now(),
             prepared_at=datetime.now(),
             reads=(250 * 1000000),
         ),
         base_store.add_sample(
             name="to-deliver",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             last_sequenced_at=datetime.now(),
         ),
         base_store.add_sample(
             name="delivered",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             last_sequenced_at=datetime.now(),
             delivered_at=datetime.now(),
             no_invoice=False,

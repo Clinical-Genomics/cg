@@ -13,7 +13,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import FileFormat
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.archive.ddn.constants import ROOT_TO_TRIM
@@ -245,17 +245,17 @@ def archive_store(
     new_samples: list[Sample] = [
         base_store.add_sample(
             name=sample_name,
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             internal_id=sample_id,
         ),
         base_store.add_sample(
             name="sample_2_with_ddn_customer",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             internal_id=mother_sample_id,
         ),
         base_store.add_sample(
             name="sample_without_ddn_customer",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             internal_id=father_sample_id,
         ),
     ]

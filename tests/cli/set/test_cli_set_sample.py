@@ -5,7 +5,7 @@ from click.testing import CliRunner
 
 from cg.cli.set.base import sample
 from cg.constants import EXIT_SUCCESS, Priority
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Sample
@@ -25,7 +25,7 @@ def test_invalid_sample(cli_runner: CliRunner, base_context: CGConfig):
 def test_skip_lims(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample
 
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    sample_obj = helpers.add_sample(base_store, gender=Sex.FEMALE)
     key = "name"
     new_value = "new_value"
 
@@ -46,7 +46,7 @@ def test_skip_lims(cli_runner: CliRunner, base_context: CGConfig, base_store: St
 def test_set_sample(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, key, helpers):
     # GIVEN a database with a sample
 
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    sample_obj = helpers.add_sample(base_store, gender=Sex.FEMALE)
     new_value = "new_value"
     assert getattr(sample_obj, key) != new_value
 
@@ -70,7 +70,7 @@ def test_set_boolean_sample(
 ):
     # GIVEN a database with a sample
 
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    sample_obj = helpers.add_sample(base_store, gender=Sex.FEMALE)
     value: bool = new_value.lower() == "true"
 
     # WHEN setting key on sample to new_value
@@ -88,7 +88,7 @@ def test_set_boolean_sample(
 def test_sex(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample
 
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    sample_obj = helpers.add_sample(base_store, gender=Sex.FEMALE)
     key = "sex"
     new_value = "male"
     assert getattr(sample_obj, key) != new_value
@@ -107,7 +107,7 @@ def test_sex(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, h
 
 def test_priority_text(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    sample_obj = helpers.add_sample(base_store, gender=Sex.FEMALE)
     key = "priority"
     new_value = Priority.express.name
     assert sample_obj.priority_human != new_value
@@ -126,7 +126,7 @@ def test_priority_text(cli_runner: CliRunner, base_context: CGConfig, base_store
 
 def test_priority_number(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    sample_obj = helpers.add_sample(base_store, gender=Sex.FEMALE)
     key = "priority"
     new_value = Priority.express
     assert sample_obj.priority != new_value
@@ -147,7 +147,7 @@ def test_priority_number(cli_runner: CliRunner, base_context: CGConfig, base_sto
 
 def test_sample_comment(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample without comment
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    sample_obj = helpers.add_sample(base_store, gender=Sex.FEMALE)
     key = "comment"
 
     # WHEN setting key on sample to new_value
@@ -169,7 +169,7 @@ def test_sample_comment_append(
     # GIVEN a database with a sample with a comment
     old_value = "test comment"
     sample_obj = helpers.add_sample(
-        base_store, gender=Gender.FEMALE, comment=f"2022-06-13 10:16-test.user: {old_value}"
+        base_store, gender=Sex.FEMALE, comment=f"2022-06-13 10:16-test.user: {old_value}"
     )
     key = "comment"
 

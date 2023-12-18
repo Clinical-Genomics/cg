@@ -10,7 +10,7 @@ from cg.constants import DataDelivery, Pipeline
 from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
-from cg.constants.subject import Gender, PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.store import Store
 from cg.store.models import (
     Analysis,
@@ -362,7 +362,7 @@ class StoreHelpers:
         application_type: str = "tgs",
         control: str = "",
         customer_id: str = None,
-        gender: str = Gender.FEMALE,
+        gender: str = Sex.FEMALE,
         is_external: bool = False,
         is_rna: bool = False,
         is_tumour: bool = False,
@@ -627,7 +627,7 @@ class StoreHelpers:
             application_version=application_version,
             organism=organism,
             reads=6000000,
-            sex=Gender.UNKNOWN,
+            sex=Sex.UNKNOWN,
         )
         sample.customer = customer
         case = StoreHelpers.ensure_case(
