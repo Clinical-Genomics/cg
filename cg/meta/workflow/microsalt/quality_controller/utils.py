@@ -9,7 +9,7 @@ def is_valid_total_reads(reads: int, target_reads: int) -> bool:
     return reads > target_reads * MicrosaltQC.TARGET_READS_FAIL_THRESHOLD
 
 
-def is_valid_total_reads_for_control(reads: int, target_reads: int) -> bool:
+def is_valid_total_reads_for_negative_control(reads: int, target_reads: int) -> bool:
     return reads < target_reads * MicrosaltQC.NEGATIVE_CONTROL_READS_THRESHOLD
 
 

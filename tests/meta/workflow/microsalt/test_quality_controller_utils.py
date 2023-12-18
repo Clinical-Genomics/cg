@@ -15,7 +15,7 @@ from cg.meta.workflow.microsalt.quality_controller.utils import (
     is_valid_mapping_rate,
     is_valid_median_insert_size,
     is_valid_total_reads,
-    is_valid_total_reads_for_control,
+    is_valid_total_reads_for_negative_control,
     negative_control_pass_qc,
     non_urgent_samples_pass_qc,
     urgent_samples_pass_qc,
@@ -71,7 +71,7 @@ def test_control_total_reads_passing():
     target_reads = 100
 
     # WHEN checking if the control read count is valid
-    passes_reads_threshold: bool = is_valid_total_reads_for_control(
+    passes_reads_threshold: bool = is_valid_total_reads_for_negative_control(
         reads=sample_reads, target_reads=target_reads
     )
 
@@ -85,7 +85,7 @@ def test_control_total_reads_failing():
     target_reads = 100
 
     # WHEN checking if the control read count is valid
-    passes_reads_threshold: bool = is_valid_total_reads_for_control(
+    passes_reads_threshold: bool = is_valid_total_reads_for_negative_control(
         reads=sample_reads, target_reads=target_reads
     )
 
@@ -99,7 +99,7 @@ def test_control_total_reads_passing_without_reads():
     target_reads = 100
 
     # WHEN checking if the control read count is valid
-    passes_reads_threshold: bool = is_valid_total_reads_for_control(
+    passes_reads_threshold: bool = is_valid_total_reads_for_negative_control(
         reads=sample_reads, target_reads=target_reads
     )
 

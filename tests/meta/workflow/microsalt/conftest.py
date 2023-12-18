@@ -33,7 +33,7 @@ def create_sample_metrics(
 
 
 def create_quality_result(
-    sample_id: str = "sample1",
+    sample_id: str = "sample_1",
     passes_qc: bool = True,
     is_control: bool = False,
     application_tag: str = MicrosaltAppTags.MWRNXTR003,
@@ -62,7 +62,7 @@ def create_quality_result(
 def quality_results() -> list[QualityResult]:
     return [
         QualityResult(
-            sample_id="sample1",
+            sample_id="sample_1",
             passes_qc=False,
             is_control=True,
             application_tag=MicrosaltAppTags.MWRNXTR003,
@@ -74,7 +74,7 @@ def quality_results() -> list[QualityResult]:
             passes_10x_coverage_qc=True,
         ),
         QualityResult(
-            sample_id="sample2",
+            sample_id="sample_2",
             passes_qc=True,
             is_control=False,
             application_tag=MicrosaltAppTags.MWRNXTR003,
@@ -86,7 +86,7 @@ def quality_results() -> list[QualityResult]:
             passes_10x_coverage_qc=True,
         ),
         QualityResult(
-            sample_id="sample3",
+            sample_id="sample_3",
             passes_qc=False,
             is_control=False,
             application_tag=MicrosaltAppTags.MWRNXTR003,

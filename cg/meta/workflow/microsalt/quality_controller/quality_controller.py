@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
 
 from cg.meta.workflow.microsalt.metrics_parser import MetricsParser, QualityMetrics, SampleMetrics
 from cg.meta.workflow.microsalt.quality_controller.models import CaseQualityResult, QualityResult
@@ -16,7 +17,7 @@ from cg.meta.workflow.microsalt.quality_controller.utils import (
     has_valid_median_insert_size,
     negative_control_pass_qc,
     is_valid_total_reads,
-    is_valid_total_reads_for_control,
+    is_valid_total_reads_for_negative_control,
     non_urgent_samples_pass_qc,
     urgent_samples_pass_qc,
 )
@@ -34,7 +35,7 @@ class QualityController:
         quality_metrics: QualityMetrics = MetricsParser.parse(metrics_file_path)
         sample_results: list[QualityResult] = self.quality_control_samples(quality_metrics)
         case_result: CaseQualityResult = self.quality_control_case(sample_results)
-        report_file: Path = metrics_file_path.parent.joinpath("QC_done.json")
+        report_file: Path = metrics_file_path.parent.joinpath(QUALITY_REPORT_FILE_NAME)
         ReportGenerator.report(out_file=report_file, sample_results=sample_results)
         ResultLogger.log_results(sample_results=sample_results, case_result=case_result)
         return case_result.passes_qc
@@ -95,9 +96,9 @@ class QualityController:
         )
 
     def is_qc_required(self, case_run_dir: Path) -> bool:
-        if case_run_dir is None:
+        if not case_run_dir:
             return False
-        qc_done_path: Path = case_run_dir.joinpath("QC_done.json")
+        qc_done_path: Path = case_run_dir.joinpath(QUALITY_REPORT_FILE_NAME)
         return not qc_done_path.exists()
 
     def has_valid_total_reads(self, sample_id: str) -> bool:
@@ -106,5 +107,5 @@ class QualityController:
         sample_reads: int = sample.reads
 
         if is_sample_negative_control(sample):
-            return is_valid_total_reads_for_control(reads=sample_reads, target_reads=target_reads)
+            return is_valid_total_reads_for_negative_control(reads=sample_reads, target_reads=target_reads)
         return is_valid_total_reads(reads=sample_reads, target_reads=target_reads)

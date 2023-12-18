@@ -6,7 +6,7 @@ LOG = logging.getLogger(__name__)
 
 class ResultLogger:
     @staticmethod
-    def log_results(sample_results: list[QualityResult], case_result: CaseQualityResult):
+    def log_results(sample_results: list[QualityResult], case_result: CaseQualityResult) -> None:
         if case_result.passes_qc:
             LOG.info("Quality control passed.\n")
         else:
@@ -38,7 +38,7 @@ def sample_result_message(sample_results: list[QualityResult]) -> str:
 
     failed_count: int = len(failed_samples)
     passed_count: int = len(passed_samples)
-    total_count = len(sample_results)
+    total_count: int = len(sample_results)
 
     return f"Sample results: {failed_count} failed, {passed_count} passed, {total_count} total.\n"
 

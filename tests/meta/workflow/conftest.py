@@ -135,7 +135,7 @@ def metrics_file_passing_qc(
     microsalt_qc_pass_lims_project: str,
     tmp_path: Path,
 ) -> Path:
-    """Return a metrics file that fails QC with corresponding samples in the database."""
+    """Return a metrics file that pass QC with corresponding samples in the database."""
     metrics_path = Path(microsalt_qc_pass_run_dir_path, f"{microsalt_qc_pass_lims_project}.json")
     temp_metrics_path = Path(tmp_path, metrics_path.name)
     shutil.copy(metrics_path, temp_metrics_path)

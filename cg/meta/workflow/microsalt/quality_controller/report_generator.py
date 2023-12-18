@@ -6,7 +6,7 @@ from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 
 class ReportGenerator:
     @staticmethod
-    def report(out_file: Path, sample_results: list[QualityResult]):
+    def report(out_file: Path, sample_results: list[QualityResult]) -> None:
         formatted_results: list[dict] = []
         for result in sample_results:
             formatted_result = {
