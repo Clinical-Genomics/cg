@@ -54,29 +54,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
-    def get_case_path(self, case_id: str) -> list[Path]:
-        """Returns all paths associated with the case or single sample analysis."""
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
-        lims_project_dir_path: Path = Path(self.root_dir, "results", lims_project)
-
-        case_directories: list[Path] = [
-            Path(path) for path in glob.glob(f"{lims_project_dir_path}*", recursive=True)
-        ]
-
-        return sorted(case_directories, key=os.path.getctime, reverse=True)
-
-    def get_latest_case_path(self, case_id: str) -> Path | None:
-        """Return latest run dir for a microbial case, if no path found it returns None."""
-        case: Case = self.status_db.get_case_by_internal_id(case_id)
-        sample_id: str = case.links[0].sample.internal_id
-        lims_project: str = self.get_project(sample_id)
-
-        return next(
-            (path for path in self.get_case_path(case_id) if f"{lims_project}_" in path.as_posix()),
-            None,
-        )
-
     def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
         """Remove workflow run directories for a MicroSALT case."""
 
@@ -275,7 +252,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         LOG.info(f"Found {len(cases_qc_ready)} cases to perform QC on!")
 
         for case in cases_qc_ready:
-            case_run_dir: Path | None = self.get_latest_case_path(case.internal_id)
+            case_run_dir: Path | None = self.get_case_path(case.internal_id)
             if self.quality_checker.is_qc_required(case_run_dir):
                 metrics_file_path = self.get_metrics_file_path(case.internal_id)
                 if self.quality_checker.quality_control(metrics_file_path):
@@ -301,8 +278,29 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_metrics_file_path(self, case_id: str) -> Path:
         """Return path to metrics file for a case."""
-        case_obj: Case = self.status_db.get_case_by_internal_id(case_id)
-        sample_id: str = case_obj.links[0].sample.internal_id
-        lims_project: str = self.get_project(sample_id)
-        case_run_dir: Path = self.get_latest_case_path(case_id)
-        return Path(case_run_dir, f"{lims_project}{FileExtensions.JSON}")
+        project_id: str = self.get_project_id(case_id)
+        case_run_dir: Path = self.get_case_path(case_id)
+        return Path(case_run_dir, f"{project_id}{FileExtensions.JSON}")
+
+    def extract_project_id(self, sample_id: str) -> str:
+        return sample_id.rsplit("A", maxsplit=1)[0]
+
+    def get_project_id(self, case_id: str) -> str:
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        sample_id: str = case.links[0].sample.internal_id
+        return self.extract_project_id(sample_id)
+
+    def get_results_dir(self) -> Path:
+        return Path(self.root_dir, "results")
+
+    def get_matching_cases(self, case_id: str) -> list[str]:
+        project_id: str = self.get_project_id(case_id)
+        results_dir: Path = self.get_results_dir()
+        return [d for d in os.listdir(results_dir) if d.startswith(project_id)]
+
+    def get_case_path(self, case_id: str) -> Path:
+        project_id: str = self.get_project_id(case_id)
+        results_dir: Path = self.get_results_dir()
+        matching_cases = [d for d in os.listdir(results_dir) if d.startswith(project_id)]
+        case_dir: str = max(matching_cases, default=None)
+        return Path(results_dir, case_dir)
