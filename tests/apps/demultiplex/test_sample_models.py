@@ -7,9 +7,10 @@ from cg.apps.demultiplex.sample_sheet.index import (
     INDEX_TWO_PAD_SEQUENCE,
     LONG_INDEX_CYCLE_NR,
     SHORT_SAMPLE_INDEX_LENGTH,
+    get_reverse_complement_dna_seq,
+    is_dual_index,
 )
 from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSample,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
@@ -34,17 +35,30 @@ from cg.models.demultiplex.run_parameters import RunParameters
         "index with newline",
     ],
 )
-def test_separate_indexes(lims_index: str, expected_index_1: str, expected_index2: str):
-    """Test that the different kind of lims indexes are parsed correctly as index and index2."""
+def test_separate_indexes_dual_run(lims_index: str, expected_index_1: str, expected_index2: str):
+    """Test that parsing different kinds of dual-run raw indexes as index and index2 works."""
     # GIVEN a sample sheet with a single sample on one lane
     sample = FlowCellSampleBCLConvert(lane=1, index=lims_index, sample_id="ACC123")
 
     # WHEN separating the index
-    sample.separate_indexes()
+    sample.separate_indexes(is_run_single_index=False)
 
     # THEN the index should be separated
     assert sample.index == expected_index_1
     assert sample.index2 == expected_index2
+
+
+def test_separate_indexes_single_run():
+    """Test index2 is ignored when parsing a double index in a single index run."""
+    # GIVEN a sample with a double index
+    sample = FlowCellSampleBCLConvert(lane=1, index="GTCTACAC-GCCAAGGT", sample_id="ACC123")
+
+    # WHEN separating the index
+    sample.separate_indexes(is_run_single_index=True)
+
+    # THEN the index should be separated
+    assert sample.index == "GTCTACAC"
+    assert sample.index2 == ""
 
 
 @pytest.mark.parametrize(
@@ -73,7 +87,7 @@ def test_pad_indexes_needs_padding(needs_reverse_complement: bool, expected_inde
     sample = FlowCellSampleBcl2Fastq(
         lane=1, index="GTCTACAC-GCCAAGGT", sample_id="ACC123", project="project", sample_name="name"
     )
-    sample.separate_indexes()
+    sample.separate_indexes(is_run_single_index=False)
 
     # WHEN padding the indexes
     sample._pad_indexes_if_necessary(run_parameters=mock_run_parameters)
@@ -117,7 +131,7 @@ def test_pad_indexes_no_padding():
         project="project",
         sample_name="name",
     )
-    sample.separate_indexes()
+    sample.separate_indexes(is_run_single_index=False)
 
     # WHEN trying to pad the indexes
     sample._pad_indexes_if_necessary(run_parameters=mock_run_parameters)
@@ -187,7 +201,8 @@ def test_get_index2_override_cycles(
     """Test that the returned index 2 cycles is the expected for different index configurations."""
     # GIVEN a FlowCellSampleBCLConvert with separated indexes
     sample = FlowCellSampleBCLConvert(lane=1, index=raw_index, sample_id="ACC123")
-    sample.separate_indexes()
+    is_run_single_index: bool = not bool(index2_cycles)
+    sample.separate_indexes(is_run_single_index=is_run_single_index)
 
     # WHEN getting the index2 override cycles
     index2_cycles: str = sample._get_index2_override_cycles(
@@ -198,17 +213,39 @@ def test_get_index2_override_cycles(
     assert index2_cycles == expected_parsed_cycles
 
 
-@pytest.mark.skip(reason="Unfinished test")
-def test_update_override_cycles():
-    # TODO: Parametrise this test with different run parameter files and samples
-    """."""
+@pytest.mark.parametrize(
+    "run_parameters_fixture",
+    [
+        "hiseq_x_single_index_run_parameters",
+        "hiseq_x_dual_index_run_parameters",
+        "hiseq_2500_dual_index_run_parameters",
+        "hiseq_2500_custom_index_run_parameters",
+        "novaseq_6000_run_parameters_pre_1_5_kits",
+        "novaseq_6000_run_parameters_post_1_5_kits",
+        "novaseq_x_run_parameters",
+    ],
+)
+def test_update_override_cycles(
+    bcl_convert_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
+    run_parameters_fixture: str,
+    request: pytest.FixtureRequest,
+):
+    """Test that updating a sample's override cycles works for different run parameters objects."""
     # GIVEN a run parameters object
+    run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
 
-    # GIVEN a FlowCellSampleBCLConvert
+    # GIVEN a FlowCellSampleBCLConvert without override cycles
+    assert bcl_convert_sample_before_adapt_indexes.override_cycles == ""
 
     # WHEN updating the override cycles
+    bcl_convert_sample_before_adapt_indexes.update_override_cycles(run_parameters=run_parameters)
 
     # THEN the override cycles are updated with the expected value
+    cycles: list[str] = bcl_convert_sample_before_adapt_indexes.override_cycles.split(";")
+    assert len(cycles) >= 3
+    assert cycles[0] == f"Y{run_parameters.get_read_1_cycles()}"
+    assert cycles[-1] == f"Y{run_parameters.get_read_2_cycles()}"
+    assert "I" in cycles[1]
 
 
 @pytest.mark.parametrize(
@@ -241,8 +278,6 @@ def test_update_barcode_mismatches_1(
 def test_update_barcode_mismatches_2(
     sample_list_fixture: str, expected_barcode_mismatch: int, request: pytest.FixtureRequest
 ):
-    # TODO: Parametrise this test with different sets of samples and expected outputs:
-    #  One that is, one that is 1 and one that is 'na'
     """Test that index 2 barcode mismatch values are as expected for different sets of samples."""
     # GIVEN a list of FlowCellSampleBCLConvert
     sample_list: list[FlowCellSampleBCLConvert] = request.getfixturevalue(sample_list_fixture)
@@ -257,28 +292,33 @@ def test_update_barcode_mismatches_2(
     assert sample_to_update.barcode_mismatches_2 == expected_barcode_mismatch
 
 
-@pytest.mark.skip(reason="Unfinished test")
 @pytest.mark.parametrize(
     "run_parameters_fixture, raw_lims_samples_fixture",
     [
         ("novaseq_x_run_parameters", "novaseq_x_lims_samples"),
         ("novaseq_6000_run_parameters_pre_1_5_kits", "novaseq_6000_pre_1_5_kits_lims_samples"),
         ("novaseq_6000_run_parameters_post_1_5_kits", "novaseq_6000_post_1_5_kits_lims_samples"),
-        ("hiseq_x_run_parameters_single_index", "hiseq_x_lims_samples"),
-        ("hiseq_2500_run_parameters_double_index", "hiseq_2500_lims_samples"),
+        ("hiseq_x_single_index_run_parameters", "hiseq_x_single_index_bcl_convert_lims_samples"),
+        ("hiseq_x_dual_index_run_parameters", "hiseq_x_dual_index_bcl_convert_lims_samples"),
+        ("hiseq_2500_dual_index_run_parameters", "hiseq_2500_dual_index_bcl_convert_lims_samples"),
+        (
+            "hiseq_2500_custom_index_run_parameters",
+            "hiseq_2500_custom_index_bcl_convert_lims_samples",
+        ),
     ],
     ids=[
         "NovaSeqX",
         "NovaSeq6000 pre1.5",
         "NovaSeq6000 post1.5",
-        "HiSeqX",
-        "HiSeq2500",
+        "HiSeqX single index",
+        "HiSeqX dual index",
+        "HiSeq2500 dual index",
+        "HiSeq2500 custom index",
     ],
 )
 def test_process_sample_for_sample_sheet_bcl_convert(
     run_parameters_fixture: str, raw_lims_samples_fixture: str, request: pytest.FixtureRequest
 ):
-    # TODO: We need a raw FlowCellSampleBCLConvert
     """."""
     # GIVEN a run parameters object and a list of BCLConvert samples from a flow cell
     run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
@@ -295,4 +335,45 @@ def test_process_sample_for_sample_sheet_bcl_convert(
     # THEN the sample is processed
     assert sample.barcode_mismatches_1
     assert sample.barcode_mismatches_2
-    assert sample.override_cycles
+    assert sample.override_cycles != ""
+
+
+@pytest.mark.parametrize(
+    "run_parameters_fixture, expected_index2",
+    [
+        ("hiseq_x_single_index_run_parameters", ""),
+        ("hiseq_x_dual_index_run_parameters", "GCCAAGGT"),
+        ("hiseq_2500_dual_index_run_parameters", "GCCAAGGT"),
+        ("hiseq_2500_custom_index_run_parameters", "GCCAAGGT"),
+        ("novaseq_6000_run_parameters_pre_1_5_kits", "GCCAAGGT"),
+        ("novaseq_6000_run_parameters_post_1_5_kits", get_reverse_complement_dna_seq("GCCAAGGT")),
+        ("novaseq_x_run_parameters", "GCCAAGGT"),
+    ],
+    ids=[
+        "HiSeqX single index",
+        "HiSeqX dual index",
+        "HiSeq2500 dual index",
+        "HiSeq2500 custom index",
+        "NovaSeq6000 pre1.5",
+        "NovaSeq6000 post1.5",
+        "NovaSeqX",
+    ],
+)
+def test_process_indexes_bcl_convert(
+    run_parameters_fixture: str, expected_index2: str, request: pytest.FixtureRequest
+):
+    """Test that processing indexes of a BCLConvert sample from different sequencers work."""
+    # GIVEN a run parameters object
+    run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
+
+    # GIVEN a FlowCellSampleBcl2Fastq with 8-nt indexes
+    sample = FlowCellSampleBCLConvert(
+        lane=1, index="GTCTACAC-GCCAAGGT", sample_id="ACC123", sample_name="name"
+    )
+
+    # WHEN processing the sample for a sample sheet
+    sample.process_indexes(run_parameters=run_parameters)
+
+    # THEN the sample indexes and override cycles are processed
+    assert sample.index2 == expected_index2
+    assert sample.override_cycles != ""

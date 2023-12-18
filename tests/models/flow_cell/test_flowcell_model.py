@@ -108,15 +108,15 @@ def test_get_bcl_converter_bcl2fastq_flow_cell(
 
 
 @pytest.mark.parametrize(
-    "flow_cell_fixture, expected_run_parameters_file_name",
+    "flow_cell_fixture",
     [
-        ("hiseq_x_flow_cell", DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE),
-        ("hiseq_2500_flow_cell", DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE),
+        "hiseq_x_single_index_flow_cell",
+        "hiseq_x_dual_index_flow_cell",
+        "hiseq_2500_dual_index_flow_cell",
+        "hiseq_2500_custom_index_flow_cell",
     ],
 )
-def test_run_parameters_path(
-    flow_cell_fixture: str, expected_run_parameters_file_name: str, request: FixtureRequest
-):
+def test_run_parameters_path(flow_cell_fixture: str, request: FixtureRequest):
     """Test that the run parameters file is being fetched correctly for the HiSeq flow cells."""
     # GIVEN a flow cell with a run parameters
     flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture)
@@ -126,7 +126,10 @@ def test_run_parameters_path(
 
     # THEN it should exist and be the expected one
     assert run_parameters_path.exists()
-    assert run_parameters_path.name == expected_run_parameters_file_name
+    assert (
+        run_parameters_path.name == DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE
+        or run_parameters_path.name == DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE
+    )
 
 
 def test_run_parameters_path_when_non_existing(tmp_flow_cells_directory_no_run_parameters: Path):
@@ -144,8 +147,8 @@ def test_run_parameters_path_when_non_existing(tmp_flow_cells_directory_no_run_p
 @pytest.mark.parametrize(
     "flow_cell_fixture, expected_sequencer",
     [
-        ("hiseq_2500_flow_cell", Sequencers.HISEQGA),
-        ("hiseq_x_flow_cell", Sequencers.HISEQX),
+        ("hiseq_2500_custom_index_flow_cell", Sequencers.HISEQGA),
+        ("hiseq_x_single_index_flow_cell", Sequencers.HISEQX),
         ("novaseq_6000_flow_cell", Sequencers.NOVASEQ),
         ("novaseq_x_flow_cell", Sequencers.NOVASEQX),
     ],

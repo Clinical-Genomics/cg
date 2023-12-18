@@ -80,12 +80,12 @@ def test_construct_bcl_convert_sheet(
 
 def test_remove_unwanted_samples_dual_index(
     novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleBcl2Fastq,
-    hiseq_x_flow_cell: FlowCellDirectoryData,
+    hiseq_x_single_index_flow_cell: FlowCellDirectoryData,
 ):
     """Test that a sample with dual index is not removed."""
     # GIVEN a sample sheet creator with a sample with dual index
     sample_sheet_creator: SampleSheetCreatorBcl2Fastq = SampleSheetCreatorBcl2Fastq(
-        flow_cell=hiseq_x_flow_cell,
+        flow_cell=hiseq_x_single_index_flow_cell,
         lims_samples=[novaseq6000_flow_cell_sample_before_adapt_indexes],
     )
 

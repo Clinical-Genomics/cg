@@ -248,7 +248,7 @@ def novaseq6000_flow_cell_sample_1() -> FlowCellSampleBcl2Fastq:
     )
 
 
-@pytest.fixture(name="novaseq6000_flow_cell_sample_2")
+@pytest.fixture
 def novaseq6000_flow_cell_sample_2() -> FlowCellSampleBcl2Fastq:
     """Return a NovaSeq sample."""
     return FlowCellSampleBcl2Fastq(
@@ -266,17 +266,7 @@ def novaseq6000_flow_cell_sample_2() -> FlowCellSampleBcl2Fastq:
     )
 
 
-@pytest.fixture(name="novaseq_x_flow_cell_sample_before_adapt_indexes")
-def novaseq_x_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBCLConvert:
-    """Return a NovaSeqX sample."""
-    return FlowCellSampleBCLConvert(
-        Lane=2,
-        Sample_ID="ACC7628A1",
-        index="ATTCCACACT-TGGTCTTGTT",
-    )
-
-
-@pytest.fixture(name="novaseq6000_flow_cell_sample_no_dual_index")
+@pytest.fixture
 def novaseq6000_flow_cell_sample_no_dual_index() -> FlowCellSampleBcl2Fastq:
     """Return a NovaSeq sample without dual indexes."""
     return FlowCellSampleBcl2Fastq(
@@ -289,7 +279,7 @@ def novaseq6000_flow_cell_sample_no_dual_index() -> FlowCellSampleBcl2Fastq:
     )
 
 
-@pytest.fixture(name="novaseq6000_flow_cell_sample_before_adapt_indexes")
+@pytest.fixture
 def novaseq6000_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBcl2Fastq:
     """Return a NovaSeq sample without dual indexes."""
     return FlowCellSampleBcl2Fastq(

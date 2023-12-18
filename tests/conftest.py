@@ -903,7 +903,7 @@ def tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert(
     return Path(tmp_flow_cells_directory, bcl_convert_flow_cell_full_name)
 
 
-@pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq")
+@pytest.fixture
 def tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq(
     tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq: str, tmp_flow_cells_directory: Path
 ) -> Path:
@@ -1064,7 +1064,7 @@ def flow_cell_directory_name_demultiplexed_with_bcl_convert(
 
 
 # Fixtures for test demultiplex flow cell
-@pytest.fixture(name="tmp_empty_demultiplexed_runs_directory")
+@pytest.fixture
 def tmp_empty_demultiplexed_runs_directory(tmp_demultiplexed_runs_directory) -> Path:
     return Path(tmp_demultiplexed_runs_directory, "empty")
 
@@ -1103,7 +1103,7 @@ def store_with_demultiplexed_samples(
     return store
 
 
-@pytest.fixture(name="demultiplexing_context_for_demux")
+@pytest.fixture
 def demultiplexing_context_for_demux(
     demultiplexing_api_for_demux: DemultiplexingAPI,
     cg_context: CGConfig,
@@ -1171,7 +1171,7 @@ def demultiplexing_api_for_demux(
     return demux_api
 
 
-@pytest.fixture(name="demultiplexing_api")
+@pytest.fixture
 def demultiplexing_api(
     demultiplex_configs: dict, sbatch_process: Process, populated_housekeeper_api: HousekeeperAPI
 ) -> DemultiplexingAPI:
@@ -1344,7 +1344,7 @@ def hiseq_x_dual_index_flow_cell_name() -> str:
 
 
 @pytest.fixture(scope="session")
-def hiseq_2500_flow_cell_name() -> str:
+def hiseq_2500_dual_index_flow_cell_name() -> str:
     """Return the full name of a HiSeq2500 flow cell with double indexes."""
     return "181005_D00410_0735_BHM2LNBCX2"
 
@@ -1380,15 +1380,35 @@ def novaseq_x_manifest_file(novaseq_x_flow_cell_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
-def hiseq_x_flow_cell_dir(flow_cells_dir: Path, hiseq_x_single_index_flow_cell_name: str) -> Path:
+def hiseq_x_single_index_flow_cell_dir(
+    flow_cells_dir: Path, hiseq_x_single_index_flow_cell_name: str
+) -> Path:
     """Return the path to a HiSeqX flow cell."""
     return Path(flow_cells_dir, hiseq_x_single_index_flow_cell_name)
 
 
 @pytest.fixture(scope="session")
-def hiseq_2500_flow_cell_dir(flow_cells_dir: Path, hiseq_2500_flow_cell_name: str) -> Path:
+def hiseq_x_dual_index_flow_cell_dir(
+    flow_cells_dir: Path, hiseq_x_dual_index_flow_cell_name: str
+) -> Path:
+    """Return the path to a HiSeqX flow cell."""
+    return Path(flow_cells_dir, hiseq_x_dual_index_flow_cell_name)
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_dual_index_flow_cell_dir(
+    flow_cells_dir: Path, hiseq_2500_dual_index_flow_cell_name: str
+) -> Path:
     """Return the path to a HiSeq2500 flow cell."""
-    return Path(flow_cells_dir, hiseq_2500_flow_cell_name)
+    return Path(flow_cells_dir, hiseq_2500_dual_index_flow_cell_name)
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_custom_index_flow_cell_dir(
+    flow_cells_dir: Path, hiseq_2500_custom_index_flow_cell_name: str
+) -> Path:
+    """Return the path to a HiSeq2500 flow cell."""
+    return Path(flow_cells_dir, hiseq_2500_custom_index_flow_cell_name)
 
 
 @pytest.fixture(scope="session")
@@ -1407,6 +1427,42 @@ def bcl_convert_flow_cell_dir(flow_cells_dir: Path, bcl_convert_flow_cell_full_n
 def novaseq_x_flow_cell_dir(flow_cells_dir: Path, novaseq_x_flow_cell_full_name: str) -> Path:
     """Return the path to the NovaSeqX flow cell demultiplex fixture directory."""
     return Path(flow_cells_dir, novaseq_x_flow_cell_full_name)
+
+
+@pytest.fixture
+def hiseq_x_single_index_bcl_convert_lims_samples(
+    hiseq_x_single_index_flow_cell_dir: Path,
+) -> list[FlowCellSampleBCLConvert]:
+    """Return a list of BCLConvert samples from a HiSeqX single index flow cell."""
+    path = Path(hiseq_x_single_index_flow_cell_dir, "HJCFFALXX_bcl_convert_raw.json")
+    return [FlowCellSampleBCLConvert(**sample) for sample in read_json(path)]
+
+
+@pytest.fixture
+def hiseq_x_dual_index_bcl_convert_lims_samples(
+    hiseq_x_dual_index_flow_cell_dir: Path,
+) -> list[FlowCellSampleBCLConvert]:
+    """Return a list of BCLConvert samples from a HiSeqX dual index flow cell."""
+    path = Path(hiseq_x_dual_index_flow_cell_dir, "HL32LCCXY_bcl_convert_raw.json")
+    return [FlowCellSampleBCLConvert(**sample) for sample in read_json(path)]
+
+
+@pytest.fixture
+def hiseq_2500_dual_index_bcl_convert_lims_samples(
+    hiseq_2500_dual_index_flow_cell_dir: Path,
+) -> list[FlowCellSampleBCLConvert]:
+    """Return a list of BCLConvert samples from a HiSeq2500 dual index flow cell."""
+    path = Path(hiseq_2500_dual_index_flow_cell_dir, "HM2LNBCX2_bcl_convert_raw.json")
+    return [FlowCellSampleBCLConvert(**sample) for sample in read_json(path)]
+
+
+@pytest.fixture
+def hiseq_2500_custom_index_bcl_convert_lims_samples(
+    hiseq_2500_custom_index_flow_cell_dir: Path,
+) -> list[FlowCellSampleBCLConvert]:
+    """Return a list of BCLConvert samples from a HiSeq2500 custom index flow cell."""
+    path = Path(hiseq_2500_custom_index_flow_cell_dir, "HGYFNBCX2_bcl_convert_raw.json")
+    return [FlowCellSampleBCLConvert(**sample) for sample in read_json(path)]
 
 
 @pytest.fixture(scope="session")
@@ -1429,18 +1485,42 @@ def run_parameters_wrong_instrument(run_parameters_dir: Path) -> Path:
 
 @pytest.fixture(scope="session")
 def hiseq_x_single_index_run_parameters_path(
-    hiseq_x_flow_cell_dir: Path,
+    hiseq_x_single_index_flow_cell_dir: Path,
 ) -> Path:
     """Return the path to a HiSeqX run parameters file with single index."""
-    return Path(hiseq_x_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE)
+    return Path(
+        hiseq_x_single_index_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE
+    )
 
 
 @pytest.fixture(scope="session")
-def hiseq_2500_double_index_run_parameters_path(
-    hiseq_2500_flow_cell_dir: Path,
+def hiseq_x_dual_index_run_parameters_path(
+    hiseq_x_dual_index_flow_cell_dir: Path,
 ) -> Path:
-    """Return the path to a HiSeqX run parameters file with single index."""
-    return Path(hiseq_2500_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
+    """Return the path to a HiSeqX run parameters file with dual index."""
+    return Path(
+        hiseq_x_dual_index_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE
+    )
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_dual_index_run_parameters_path(
+    hiseq_2500_dual_index_flow_cell_dir: Path,
+) -> Path:
+    """Return the path to a HiSeq2500 run parameters file with dual index."""
+    return Path(
+        hiseq_2500_dual_index_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE
+    )
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_custom_index_run_parameters_path(
+    hiseq_2500_custom_index_flow_cell_dir: Path,
+) -> Path:
+    """Return the path to a HiSeq2500 run parameters file with custom index."""
+    return Path(
+        hiseq_2500_custom_index_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE
+    )
 
 
 @pytest.fixture(scope="session")
@@ -1510,19 +1590,35 @@ def run_parameters_missing_versions(
 
 
 @pytest.fixture(scope="session")
-def hiseq_2500_run_parameters_double_index(
-    hiseq_2500_double_index_run_parameters_path: Path,
+def hiseq_x_single_index_run_parameters(
+    hiseq_x_single_index_run_parameters_path: Path,
 ) -> RunParametersHiSeq:
-    """Return a NovaSeq6000 run parameters object."""
-    return RunParametersHiSeq(run_parameters_path=hiseq_2500_double_index_run_parameters_path)
+    """Return a HiSeqX run parameters object with single index."""
+    return RunParametersHiSeq(run_parameters_path=hiseq_x_single_index_run_parameters_path)
 
 
 @pytest.fixture(scope="session")
-def hiseq_x_run_parameters_single_index(
-    hiseq_x_single_index_run_parameters_path: Path,
+def hiseq_x_dual_index_run_parameters(
+    hiseq_x_dual_index_run_parameters_path: Path,
 ) -> RunParametersHiSeq:
-    """Return a NovaSeq6000 run parameters object."""
-    return RunParametersHiSeq(run_parameters_path=hiseq_x_single_index_run_parameters_path)
+    """Return a HiSeqX run parameters object with dual index."""
+    return RunParametersHiSeq(run_parameters_path=hiseq_x_dual_index_run_parameters_path)
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_dual_index_run_parameters(
+    hiseq_2500_dual_index_run_parameters_path: Path,
+) -> RunParametersHiSeq:
+    """Return a HiSeq2500 run parameters object with dual index."""
+    return RunParametersHiSeq(run_parameters_path=hiseq_2500_dual_index_run_parameters_path)
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_custom_index_run_parameters(
+    hiseq_2500_custom_index_run_parameters_path: Path,
+) -> RunParametersHiSeq:
+    """Return a HiSeq2500 run parameters object with custom index."""
+    return RunParametersHiSeq(run_parameters_path=hiseq_2500_custom_index_run_parameters_path)
 
 
 @pytest.fixture(scope="session")
@@ -1559,16 +1655,46 @@ def novaseq_x_run_parameters(
     return RunParametersNovaSeqX(run_parameters_path=novaseq_x_run_parameters_path)
 
 
-@pytest.fixture(scope="module")
-def hiseq_2500_flow_cell(hiseq_2500_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Return a HiSeq2500 flow cell."""
-    return FlowCellDirectoryData(flow_cell_path=hiseq_2500_flow_cell_dir)
+@pytest.fixture
+def bcl_convert_sample_before_adapt_indexes() -> FlowCellSampleBCLConvert:
+    """Return a NovaSeqX sample."""
+    return FlowCellSampleBCLConvert(
+        Lane=2,
+        Sample_ID="ACC7628A1",
+        index="ATTCCACACT-TGGTCTTGTT",
+    )
 
 
 @pytest.fixture(scope="module")
-def hiseq_x_flow_cell(hiseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Return a HiSeq2500 flow cell."""
-    return FlowCellDirectoryData(flow_cell_path=hiseq_x_flow_cell_dir)
+def hiseq_x_single_index_flow_cell(
+    hiseq_x_single_index_flow_cell_dir: Path,
+) -> FlowCellDirectoryData:
+    """Return a single-index HiSeqX flow cell."""
+    return FlowCellDirectoryData(flow_cell_path=hiseq_x_single_index_flow_cell_dir)
+
+
+@pytest.fixture(scope="module")
+def hiseq_x_dual_index_flow_cell(
+    hiseq_x_dual_index_flow_cell_dir: Path,
+) -> FlowCellDirectoryData:
+    """Return a dual-index HiSeqX flow cell."""
+    return FlowCellDirectoryData(flow_cell_path=hiseq_x_dual_index_flow_cell_dir)
+
+
+@pytest.fixture(scope="module")
+def hiseq_2500_dual_index_flow_cell(
+    hiseq_2500_dual_index_flow_cell_dir: Path,
+) -> FlowCellDirectoryData:
+    """Return a dual-index HiSeq2500 flow cell."""
+    return FlowCellDirectoryData(flow_cell_path=hiseq_2500_dual_index_flow_cell_dir)
+
+
+@pytest.fixture(scope="module")
+def hiseq_2500_custom_index_flow_cell(
+    hiseq_2500_custom_index_flow_cell_dir: Path,
+) -> FlowCellDirectoryData:
+    """Return a custom-index HiSeq2500 flow cell."""
+    return FlowCellDirectoryData(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
 
 
 @pytest.fixture(scope="session")

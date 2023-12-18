@@ -30,12 +30,12 @@ class FlowCellSample(BaseModel):
     index2: str = ""
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
-    def separate_indexes(self) -> None:
+    def separate_indexes(self, is_run_single_index: bool) -> None:
         """Update values for index and index2 splitting the original LIMS dual index."""
         if is_dual_index(self.index):
             index1, index2 = self.index.split("-")
             self.index = index1.strip().replace("NNNNNNNNN", "")
-            self.index2 = index2.strip()
+            self.index2 = index2.strip() if not is_run_single_index else ""
 
     @abstractmethod
     def process_indexes(self, run_parameters: RunParameters):
@@ -87,7 +87,7 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
     def process_indexes(self, run_parameters: RunParameters):
         """Parses, pads and reverse complement the indexes if necessary."""
         reverse_index2: bool = run_parameters.index_settings.should_i5_be_reverse_complimented
-        self.separate_indexes()
+        self.separate_indexes(is_run_single_index=run_parameters.is_single_index)
         self._pad_indexes_if_necessary(run_parameters=run_parameters)
         if reverse_index2:
             self.index2 = get_reverse_complement_dna_seq(self.index2)
@@ -187,7 +187,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
 
     def process_indexes(self, run_parameters: RunParameters):
         """Parse and reverse complement the indexes and updates override cycles."""
-        self.separate_indexes()
+        self.separate_indexes(is_run_single_index=run_parameters.is_single_index)
         if run_parameters.index_settings.should_i5_be_reverse_complimented:
             self.index2 = get_reverse_complement_dna_seq(self.index2)
         self.update_override_cycles(run_parameters=run_parameters)

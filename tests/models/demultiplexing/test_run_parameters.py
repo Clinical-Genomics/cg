@@ -29,7 +29,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
     "run_parameters_path_fixture",
     [
         "hiseq_x_single_index_run_parameters_path",
-        "hiseq_2500_double_index_run_parameters_path",
+        "hiseq_2500_dual_index_run_parameters_path",
         "novaseq_6000_run_parameters_path",
         "novaseq_x_run_parameters_path",
     ],
@@ -52,7 +52,7 @@ def test_run_parameters_parent_class_fails(
     "run_parameters_path, constructor, sequencer",
     [
         ("hiseq_x_single_index_run_parameters_path", RunParametersHiSeq, Sequencers.HISEQX),
-        ("hiseq_2500_double_index_run_parameters_path", RunParametersHiSeq, Sequencers.HISEQGA),
+        ("hiseq_2500_dual_index_run_parameters_path", RunParametersHiSeq, Sequencers.HISEQGA),
         ("novaseq_6000_run_parameters_path", RunParametersNovaSeq6000, Sequencers.NOVASEQ),
         ("novaseq_x_run_parameters_path", RunParametersNovaSeqX, Sequencers.NOVASEQX),
     ],
@@ -63,7 +63,7 @@ def test_run_parameters_init(
     sequencer: str,
     request: FixtureRequest,
 ):
-    """Test that the RunParameters class is initialised correctly."""
+    """Test that the RunParameters class is instantiated correctly."""
     # GIVEN a valid path for a run parameters file
     run_parameters_path: Path = request.getfixturevalue(run_parameters_path)
 
@@ -156,8 +156,8 @@ def test_run_parameters_hiseq_wrong_file(novaseq_6000_run_parameters_path: Path)
 @pytest.mark.parametrize(
     "run_parameters_fixture",
     [
-        "hiseq_2500_run_parameters_double_index",
-        "hiseq_x_run_parameters_single_index",
+        "hiseq_2500_dual_index_run_parameters",
+        "hiseq_x_single_index_run_parameters",
         "novaseq_x_run_parameters",
     ],
 )
@@ -204,8 +204,8 @@ def test_reagent_kit_version_novaseq_6000_missing_version(
 @pytest.mark.parametrize(
     "run_parameters_fixture",
     [
-        "hiseq_2500_run_parameters_double_index",
-        "hiseq_x_run_parameters_single_index",
+        "hiseq_2500_dual_index_run_parameters",
+        "hiseq_x_single_index_run_parameters",
         "novaseq_x_run_parameters",
     ],
 )
@@ -257,8 +257,8 @@ def test_control_software_version_novaseq_6000_no_version(
 @pytest.mark.parametrize(
     "run_parameters_fixture",
     [
-        "hiseq_2500_run_parameters_double_index",
-        "hiseq_x_run_parameters_single_index",
+        "hiseq_2500_dual_index_run_parameters",
+        "hiseq_x_single_index_run_parameters",
         "novaseq_6000_run_parameters",
         "novaseq_x_run_parameters",
     ],

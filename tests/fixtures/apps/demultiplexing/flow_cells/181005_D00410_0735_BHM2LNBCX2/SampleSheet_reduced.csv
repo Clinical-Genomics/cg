@@ -1,0 +1,4 @@
+[Data]
+FCID,Lane,SampleID,SampleRef,index,SampleName,Control,Recipe,Operator,Project
+HM2LNBCX2,1,ACC4837A5,hg19,TGGCTATC,ACC4837A5,N,R1,script,198931
+HM2LNBCX2,2,ACC4837A5,hg19,TGGCTATC,ACC4837A5,N,R1,script,198931
