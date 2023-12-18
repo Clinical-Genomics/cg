@@ -69,6 +69,26 @@ def view_sample_concentration_maximum(unused1, unused2, model, unused3):
     )
 
 
+def view_sample_concentration_minimum_cfdna(unused1, unused2, model, unused3):
+    """Column formatter to append unit"""
+    del unused1, unused2, unused3
+    return (
+        str(model.sample_concentration_minimum_cfdna) + " ng/uL"
+        if model.sample_concentration_minimum_cfdna
+        else None
+    )
+
+
+def view_sample_concentration_maximum_cfdna(unused1, unused2, model, unused3):
+    """Column formatter to append unit"""
+    del unused1, unused2, unused3
+    return (
+        str(model.sample_concentration_maximum_cfdna) + " ng/uL"
+        if model.sample_concentration_maximum_cfdna
+        else None
+    )
+
+
 class ApplicationView(BaseView):
     """Admin view for Model.Application"""
 
