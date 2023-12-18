@@ -310,7 +310,6 @@ def test_is_novaseq6000_post_1_5_kit(
     ],
 )
 def test_get_index_settings(
-    bcl_convert_sample_sheet_creator: SampleSheetCreatorBCLConvert,
     correct_settings: IndexSettings,
     flow_cell: str,
     request: FixtureRequest,
@@ -318,8 +317,7 @@ def test_get_index_settings(
     """Test that the correct index settings are returned for each NovaSeq flow cell type."""
     # GIVEN run parameters for a flow cell
     flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell)
-    bcl_convert_sample_sheet_creator.run_parameters = flow_cell.run_parameters
     # WHEN getting the index settings
-    settings: IndexSettings = bcl_convert_sample_sheet_creator._get_index_settings()
+    settings: IndexSettings = flow_cell.run_parameters.index_settings
     # THEN the correct index settings are returned
     assert settings == correct_settings

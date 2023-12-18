@@ -52,35 +52,6 @@ class SampleSheetCreator:
         self.force: bool = force
         self.index_settings: IndexSettings = self.run_parameters.index_settings
 
-    def _get_index_settings(self) -> IndexSettings:
-        # TODO: Remove and move testst to tun parameters
-        """Returns the correct index-related settings for the run in question"""
-        if self.run_parameters.sequencer == Sequencers.NOVASEQX:
-            LOG.debug("Using NovaSeqX index settings")
-            return NOVASEQ_X_INDEX_SETTINGS
-        if self._is_novaseq6000_post_1_5_kit:
-            LOG.debug("Using NovaSeq 6000 post 1.5 kits index settings")
-            return NOVASEQ_6000_POST_1_5_KITS
-        return NO_REVERSE_COMPLEMENTS
-
-    @property
-    def _is_novaseq6000_post_1_5_kit(self) -> bool:
-        # TODO: Remove and move testst to tun parameters
-        """
-        Returns whether sequencing was performed after the 1.5 consumables kits where introduced.
-        This is indicated by the software version and the reagent kit fields in the run parameters.
-        """
-        if self.run_parameters.sequencer != Sequencers.NOVASEQ:
-            return False
-
-        if parse(self.run_parameters.control_software_version) < parse(
-            NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION
-        ):
-            return False
-        if parse(self.run_parameters.reagent_kit_version) < parse(NEW_NOVASEQ_REAGENT_KIT_VERSION):
-            return False
-        return True
-
     @property
     def bcl_converter(self) -> str:
         """Return the bcl converter used for demultiplexing."""
