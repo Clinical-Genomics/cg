@@ -17,9 +17,7 @@ def test_generate_report_with_results(
     out_file = Path(tmp_path, QUALITY_REPORT_FILE_NAME)
 
     # WHEN generating a report
-    ReportGenerator.report(
-        out_file=out_file, samples=quality_results, case=case_result
-    )
+    ReportGenerator.report(out_file=out_file, samples=quality_results, case=case_result)
 
     # THEN the report is created
     assert out_file.exists()
