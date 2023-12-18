@@ -66,10 +66,7 @@ def test_prepared_at_affects_tat(base_store: Store, helpers):
     new_case = add_case(helpers, base_store, ordered_days_ago=7)
     one_week_ago = datetime.now() - timedelta(days=7)
     one_week_old_sample = helpers.add_sample(
-        base_store,
-        ordered_at=one_week_ago,
-        received_at=one_week_ago,
-        prepared_at=one_week_ago,
+        base_store, ordered_at=one_week_ago, received_at=one_week_ago, prepared_at=one_week_ago
     )
     link = base_store.relate_sample(new_case, one_week_old_sample, "unknown")
     base_store.session.add(link)
@@ -90,9 +87,7 @@ def test_received_at_affects_tat(base_store: Store, helpers):
     new_case = add_case(helpers, base_store, ordered_days_ago=7)
     one_week_ago = datetime.now() - timedelta(days=7)
     one_week_old_sample = helpers.add_sample(
-        base_store,
-        ordered_at=one_week_ago,
-        received_at=one_week_ago,
+        base_store, ordered_at=one_week_ago, received_at=one_week_ago
     )
     link = base_store.relate_sample(new_case, one_week_old_sample, "unknown")
     base_store.session.add(link)

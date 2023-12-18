@@ -189,11 +189,11 @@ def test_set_gender_if_provided():
 def test_set_gender_if_other():
     """Test to validate that the gender is altered when set to Gender.OTHER."""
 
-    # GIVEN Gender.OTHER as input
-    gender: Sex = Sex.OTHER
+    # GIVEN sex "other" as input
+    sex: Sex = Sex.OTHER
 
-    # WHEN running "set_gender_if_other"
-    validated_gender: str = set_sex_if_other(gender)
+    # WHEN setting sex
+    validated_sex: str = set_sex_if_other(sex)
 
-    # THEN the returned gender should be PlinkSex.UNKNOWN
-    assert validated_gender == PlinkSex.UNKNOWN
+    # THEN the returned sex should be "unknown"
+    assert validated_sex == PlinkSex.UNKNOWN

@@ -164,9 +164,9 @@ def fluffy_context(
     )
     example_fluffy_sample = helpers.add_sample(
         fluffy_analysis_api.status_db,
-        internal_id=fluffy_sample_lims_id,
-        is_tumour=False,
         application_type="tgs",
+        is_tumour=False,
+        internal_id=fluffy_sample_lims_id,
         reads=100,
         last_sequenced_at=dt.datetime.now(),
     )

@@ -94,7 +94,7 @@ def store_with_flow_cell_to_clean(
         has_backup=True,
     )
     sample: Sample = helpers.add_sample(
-        name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
+        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex="male"
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
@@ -123,7 +123,7 @@ def store_with_flow_cell_not_to_clean(
         has_backup=True,
     )
     sample: Sample = helpers.add_sample(
-        name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
+        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex="male"
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store

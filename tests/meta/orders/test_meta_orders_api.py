@@ -11,7 +11,7 @@ from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.samples import MipDnaSample
 from cg.store import Store
-from cg.store.models import Customer, Case, Pool, Sample
+from cg.store.models import Case, Customer, Pool, Sample
 from tests.store_helpers import StoreHelpers
 
 SUBMITTERS = [
@@ -348,10 +348,10 @@ def test_validate_sex_inconsistent_sex(
     for sample in order_data.samples:
         sample_obj: Sample = helpers.add_sample(
             store=store,
-            subject_id=sample.subject_id,
-            name=sample.name,
-            gender="male" if sample.sex == "female" else "female",
             customer_id=customer.internal_id,
+            sex="male" if sample.sex == "female" else "female",
+            name=sample.name,
+            subject_id=sample.subject_id,
         )
         store.session.add(sample_obj)
         store.session.commit()
@@ -378,10 +378,10 @@ def test_validate_sex_consistent_sex(
     for sample in order_data.samples:
         sample_obj: Sample = helpers.add_sample(
             store=store,
-            subject_id=sample.subject_id,
-            name=sample.name,
-            gender=sample.sex,
             customer_id=customer.internal_id,
+            sex=sample.sex,
+            name=sample.name,
+            subject_id=sample.subject_id,
         )
         store.session.add(sample_obj)
         store.session.commit()
@@ -409,10 +409,10 @@ def test_validate_sex_unknown_existing_sex(
     for sample in order_data.samples:
         sample_obj: Sample = helpers.add_sample(
             store=store,
-            subject_id=sample.subject_id,
-            name=sample.name,
-            gender="unknown",
             customer_id=customer.internal_id,
+            sex="unknown",
+            name=sample.name,
+            subject_id=sample.subject_id,
         )
         store.session.add(sample_obj)
         store.session.commit()
@@ -439,10 +439,10 @@ def test_validate_sex_unknown_new_sex(
     for sample in order_data.samples:
         sample_obj: Sample = helpers.add_sample(
             store=store,
-            subject_id=sample.subject_id,
-            name=sample.name,
-            gender=sample.sex,
             customer_id=customer.internal_id,
+            sex=sample.sex,
+            name=sample.name,
+            subject_id=sample.subject_id,
         )
         sample.sex = "unknown"
         store.session.add(sample_obj)
@@ -535,7 +535,7 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
             customer_entry_id=[customer.id], sample_name=sample_name
         ):
             sample_obj = helpers.add_sample(
-                store=store, name=sample_name, customer_id=customer.internal_id
+                store=store, customer_id=customer.internal_id, name=sample_name
             )
             store.session.add(sample_obj)
             store.session.commit()

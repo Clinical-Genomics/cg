@@ -34,13 +34,11 @@ def test_list_keys_with_sample(
 ):
     # GIVEN a database with a sample
 
-    sample_obj = helpers.add_sample(base_store, gender=Sex.FEMALE)
+    sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
 
     # WHEN setting sample but skipping lims
     with caplog.at_level(logging.INFO):
-        result = cli_runner.invoke(
-            list_keys, ["--sample_id", sample_obj.internal_id], obj=base_context
-        )
+        result = cli_runner.invoke(list_keys, ["--sample_id", sample.internal_id], obj=base_context)
 
     # THEN it should not fail on having a sample as argument
     assert result.exit_code == EXIT_SUCCESS
@@ -52,4 +50,4 @@ def test_list_keys_with_sample(
     assert "name" in caplog.text
 
     # THEN the name value should have been mentioned
-    assert sample_obj.name in caplog.text
+    assert sample.name in caplog.text

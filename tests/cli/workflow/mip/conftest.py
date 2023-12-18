@@ -144,10 +144,10 @@ def mip_dna_context(
             )
             sample = helpers.add_sample(
                 store=_store,
-                customer_id="cust000",
                 application_tag="WGSA",
                 application_type="wgs",
-                gender="unknown",
+                customer_id="cust000",
+                sex="unknown",
             )
             helpers.add_relationship(store=_store, sample=sample, case=case_obj, status="affected")
     cg_context.meta_apis["analysis_api"] = mip_analysis_api

@@ -3053,10 +3053,10 @@ def rnafusion_context(
 
     sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
         status_db,
-        internal_id=sample_id,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_pass,
         application_tag=apptag_rna,
+        internal_id=sample_id,
+        reads=total_sequenced_reads_pass,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(
@@ -3075,10 +3075,10 @@ def rnafusion_context(
 
     sample_not_enough_reads: Sample = helpers.add_sample(
         status_db,
-        internal_id=sample_id_not_enough_reads,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_not_pass,
         application_tag=apptag_rna,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
@@ -3305,9 +3305,9 @@ def taxprofiler_context(
     taxprofiler_sample: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        last_sequenced_at=datetime.now(),
-        name=sample_name,
         reads=total_sequenced_reads_pass,
+        name=sample_name,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(
@@ -3378,7 +3378,7 @@ def store_with_sequencing_metrics(
     ]
     helpers.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
     helpers.add_sample(
-        name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
+        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex="male"
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
@@ -3519,8 +3519,8 @@ def store_with_case_and_sample_with_reads(
     for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
         helpers.add_sample(
             store=store,
-            internal_id=sample_internal_id,
             customer_id=case.customer_id,
+            internal_id=sample_internal_id,
             reads=100_000_000,
         )
         sample: Sample = store.get_sample_by_internal_id(internal_id=sample_internal_id)
@@ -3666,10 +3666,10 @@ def raredisease_context(
 
     sample_raredisease_case_enough_reads: Sample = helpers.add_sample(
         status_db,
-        internal_id=sample_id,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_pass,
         application_tag=apptag_rna,
+        internal_id=sample_id,
+        reads=total_sequenced_reads_pass,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(
@@ -3688,10 +3688,10 @@ def raredisease_context(
 
     sample_not_enough_reads: Sample = helpers.add_sample(
         status_db,
-        internal_id=sample_id_not_enough_reads,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_not_pass,
         application_tag=apptag_rna,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
