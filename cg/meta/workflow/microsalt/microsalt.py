@@ -299,8 +299,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return [d for d in os.listdir(results_dir) if d.startswith(project_id)]
 
     def get_case_path(self, case_id: str) -> Path:
-        project_id: str = self.get_project_id(case_id)
         results_dir: Path = self.get_results_dir()
-        matching_cases = [d for d in os.listdir(results_dir) if d.startswith(project_id)]
+        matching_cases: list[str] = self.get_matching_cases(case_id)
         case_dir: str = max(matching_cases, default=None)
         return Path(results_dir, case_dir)
