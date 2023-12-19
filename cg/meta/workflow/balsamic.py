@@ -288,10 +288,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             value for value in Sex
         ):
             if gender not in [Sex.FEMALE, Sex.MALE]:
-                LOG.warning(
-                    f"The provided gender is unknown, setting {Sex.FEMALE.value} as the default"
-                )
-                gender = Sex.FEMALE.value
+                LOG.warning(f"The provided sex is unknown, setting {Sex.FEMALE} as the default")
+                gender = Sex.FEMALE
 
             return gender
         else:

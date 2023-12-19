@@ -174,16 +174,16 @@ def test_set_parent_when_not_provided():
 
 
 def test_set_gender_if_provided():
-    """Test to validate that the gender is not altered when set and not Gender.OTHER."""
+    """Test to validate that the sex is not altered when set and not 'other'."""
 
-    # GIVEN a gender which is not Gender.OTHER as input
-    gender: PlinkSex = PlinkSex.FEMALE
+    # GIVEN a sex which is not "other" as input
+    sex: PlinkSex = PlinkSex.FEMALE
 
-    # WHEN running "set_gender_if_other"
-    validated_gender: str = set_sex_if_other(gender)
+    # WHEN running setting sex
+    validated_sex: str = set_sex_if_other(sex)
 
     # THEN the returned string should not have been altered
-    assert validated_gender == gender
+    assert validated_sex == sex
 
 
 def test_set_gender_if_other():

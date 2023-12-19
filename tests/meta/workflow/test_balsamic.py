@@ -55,9 +55,7 @@ def test_get_verified_gender_unknown(caplog):
 
     # THEN gender must match the expected one
     assert retrieved_gender == Sex.FEMALE
-    assert (
-        f"The provided gender is unknown, setting {Sex.FEMALE.value} as the default" in caplog.text
-    )
+    assert f"The provided sex is unknown, setting {Sex.FEMALE} as the default" in caplog.text
 
 
 def test_get_verified_pon():
