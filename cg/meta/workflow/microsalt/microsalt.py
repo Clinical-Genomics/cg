@@ -253,7 +253,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         for case in cases_qc_ready:
             case_run_dir: Path | None = self.get_case_path(case.internal_id)
+            LOG.info(f"Checking QC for case {case.internal_id} in {case_run_dir}")
             if self.quality_checker.is_qc_required(case_run_dir):
+                LOG.info(f"QC required for case {case.internal_id}")
                 metrics_file_path = self.get_metrics_file_path(case.internal_id)
                 if self.quality_checker.quality_control(metrics_file_path):
                     self.trailblazer_api.add_comment(case_id=case.internal_id, comment="QC passed")
@@ -279,7 +281,10 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_metrics_file_path(self, case_id: str) -> Path:
         """Return path to metrics file for a case."""
         project_id: str = self.get_project_id(case_id)
+        LOG.info(case_id)
+        LOG.info(f"Looking for metrics file for project {project_id}")
         case_run_dir: Path = self.get_case_path(case_id)
+        LOG.info(f"Looking for metrics file in {case_run_dir}")
         return Path(case_run_dir, f"{project_id}{FileExtensions.JSON}")
 
     def extract_project_id(self, sample_id: str) -> str:
