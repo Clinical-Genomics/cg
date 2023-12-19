@@ -119,7 +119,7 @@ class RunParameters:
 
     @property
     def index_settings(self) -> IndexSettings:
-        """Returns the correct index-related settings for the run in question"""
+        """Returns the correct index-related settings for the run in question."""
         if self.sequencer == Sequencers.NOVASEQX:
             LOG.debug("Using NovaSeqX index settings")
             return NOVASEQ_X_INDEX_SETTINGS

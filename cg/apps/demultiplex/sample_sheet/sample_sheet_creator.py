@@ -141,8 +141,7 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
     def remove_unwanted_samples(self) -> None:
         """Filter out samples with single indexes."""
         LOG.info("Removing all samples without dual indexes")
-        samples_to_keep = []
-        sample: FlowCellSampleBcl2Fastq
+        samples_to_keep : list[FlowCellSampleBcl2Fastq] = []
         for sample in self.lims_samples:
             if not is_dual_index(sample.index):
                 LOG.warning(f"Removing sample {sample} since it does not have dual index")

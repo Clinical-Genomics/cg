@@ -51,7 +51,7 @@ def is_padding_needed(index1_cycles: int, index2_cycles: int, sample_index_lengt
     reads stated in the run parameters file of the sequencing for both indexes. This happens when
     the sample index is 8 nucleotides long and the number of index cycles read is 10 nucleotides.
     """
-    index_cycles = index1_cycles if index1_cycles == index2_cycles else None
+    index_cycles: int | None = index1_cycles if index1_cycles == index2_cycles else None
     return index_cycles == LONG_INDEX_CYCLE_NR and sample_index_length == SHORT_SAMPLE_INDEX_LENGTH
 
 

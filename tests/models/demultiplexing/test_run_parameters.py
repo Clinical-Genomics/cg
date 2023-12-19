@@ -292,7 +292,7 @@ def test_get_cycles(run_parameters_fixture: str, request: FixtureRequest):
 def test_is_novaseq6000_post_1_5_kit(
     flow_cell_fixture: str, expected_result: bool, request: FixtureRequest
 ):
-    """Test that the correct index settings are returned for each NovaSeq flow cell type.."""
+    """Test that the correct index settings are returned for each NovaSeq flow cell type."""
     # GIVEN run parameters from a flow cell
     flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture)
     # WHEN checking if the flow cell was sequenced after the NovaSeq 6000 1.5 kits

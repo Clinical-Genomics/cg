@@ -71,7 +71,7 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
     project: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_PROJECT_BCL2FASTQ)
 
     def _pad_indexes_if_necessary(self, run_parameters: RunParameters) -> None:
-        index_length = len(self.index)
+        index_length: int = len(self.index)
         if is_padding_needed(
             index1_cycles=run_parameters.get_index_1_cycles(),
             index2_cycles=run_parameters.get_index_2_cycles(),
@@ -97,7 +97,7 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
     def update_barcode_mismatches(
         self, samples_to_compare: list, is_run_single_index: bool
     ) -> None:
-        """No updating of barcode mismatch  values for Bcl2Fastq sample."""
+        """No updating of barcode mismatch values for Bcl2Fastq sample."""
         LOG.debug(f"No updating of barcode mismatch values for Bcl2Fastq sample {self.sample_id}")
 
 
@@ -143,7 +143,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
         return cycles_format
 
     def update_override_cycles(self, run_parameters: RunParameters) -> None:
-        """Updates the override_cycles attribute."""
+        """Updates the override cycles attribute."""
         reverse_index2_cycles: bool = (
             run_parameters.index_settings.are_i5_override_cycles_reverse_complemented
         )
