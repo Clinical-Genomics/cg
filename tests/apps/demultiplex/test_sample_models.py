@@ -8,13 +8,13 @@ from cg.apps.demultiplex.sample_sheet.index import (
     LONG_INDEX_CYCLE_NR,
     SHORT_SAMPLE_INDEX_LENGTH,
     get_reverse_complement_dna_seq,
-    is_dual_index,
 )
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.constants.demultiplexing import IndexSettings
+from cg.constants.demultiplexing import IndexOverrideCycles, IndexSettings
+from cg.constants.symbols import DASH, EMPTY_STRING
 from cg.models.demultiplex.run_parameters import RunParameters
 
 
@@ -48,17 +48,16 @@ def test_separate_indexes_dual_run(lims_index: str, expected_index_1: str, expec
     assert sample.index2 == expected_index2
 
 
-def test_separate_indexes_single_run():
+def test_separate_indexes_single_run(bcl_convert_flow_cell_sample: FlowCellSampleBCLConvert):
     """Test index2 is ignored when parsing a double index in a single index run."""
     # GIVEN a sample with a double index
-    sample = FlowCellSampleBCLConvert(lane=1, index="GTCTACAC-GCCAAGGT", sample_id="ACC123")
 
     # WHEN separating the index
-    sample.separate_indexes(is_run_single_index=True)
+    bcl_convert_flow_cell_sample.separate_indexes(is_run_single_index=True)
 
     # THEN the index should be separated
-    assert sample.index == "GTCTACAC"
-    assert sample.index2 == ""
+    assert bcl_convert_flow_cell_sample.index == "GTCTACAC"
+    assert bcl_convert_flow_cell_sample.index2 == ""
 
 
 @pytest.mark.parametrize(
@@ -146,12 +145,12 @@ def test_pad_indexes_no_padding():
 
 
 @pytest.mark.parametrize(
-    "raw_index, index1_cycles, expected_parsed_cycles",
+    "lims_index, index1_cycles, expected_parsed_cycles",
     [
-        ("CGATAGCAGG", 10, "I10;"),
-        ("CCATTCGANNNNNNNNN-GTTGTCCG", 8, "I8;"),
-        ("GTTCCAAT", 8, "I8;"),
-        ("GTTCCAAT", 10, "I8N2;"),
+        ("CGATAGCAGG", 10, IndexOverrideCycles.FULL_10_INDEX),
+        ("CCATTCGANNNNNNNNN-GTTGTCCG", 8, IndexOverrideCycles.FULL_8_INDEX),
+        ("GTTCCAAT", 8, IndexOverrideCycles.FULL_8_INDEX),
+        ("GTTCCAAT", 10, IndexOverrideCycles.INDEX_8_IGNORED_2),
     ],
     ids=[
         "10-nt index and cycles",
@@ -161,11 +160,11 @@ def test_pad_indexes_no_padding():
     ],
 )
 def test_get_index1_override_cycles(
-    raw_index: str, index1_cycles: int, expected_parsed_cycles: str
+    lims_index: str, index1_cycles: int, expected_parsed_cycles: str
 ):
     """Test that the returned index 1 cycles is teh expected for different index configurations."""
     # GIVEN a FlowCellSampleBCLConvert with an index
-    sample = FlowCellSampleBCLConvert(lane=1, index=raw_index, sample_id="ACC123")
+    sample = FlowCellSampleBCLConvert(lane=1, index=lims_index, sample_id="ACC123")
 
     # WHEN getting the index1 override cycles
     index1_cycles: str = sample._get_index1_override_cycles(len_index1_cycles=index1_cycles)
@@ -175,15 +174,15 @@ def test_get_index1_override_cycles(
 
 
 @pytest.mark.parametrize(
-    "raw_index, index2_cycles, reverse_cycle, expected_parsed_cycles",
+    "lims_index, index2_cycles, reverse_cycle, expected_parsed_cycles",
     [
-        ("CGATAGCAGG-AATGCTACGA", 10, None, "I10;"),
-        ("GTTCCAAT-AATTCTGC", 8, None, "I8;"),
-        ("CGATAGCAGG", 10, None, "N10;"),
-        ("GTTCCAAT", 8, None, "N8;"),
-        ("GTTCCAAT-AATTCTGC", 10, True, "N2I8;"),
-        ("GTTCCAAT-AATTCTGC", 10, False, "I8N2;"),
-        ("GTTCCAAT-AATTCTGC", 0, None, ""),
+        ("CGATAGCAGG-AATGCTACGA", 10, None, IndexOverrideCycles.FULL_10_INDEX),
+        ("GTTCCAAT-AATTCTGC", 8, None, IndexOverrideCycles.FULL_8_INDEX),
+        ("CGATAGCAGG", 10, None, IndexOverrideCycles.IGNORED_10_INDEX),
+        ("GTTCCAAT", 8, None, IndexOverrideCycles.IGNORED_8_INDEX),
+        ("GTTCCAAT-AATTCTGC", 10, True, IndexOverrideCycles.INDEX_8_IGNORED_2_REVERSED),
+        ("GTTCCAAT-AATTCTGC", 10, False, IndexOverrideCycles.INDEX_8_IGNORED_2),
+        ("GTTCCAAT-AATTCTGC", 0, None, EMPTY_STRING),
     ],
     ids=[
         "10-nt index and cycles",
@@ -196,11 +195,11 @@ def test_get_index1_override_cycles(
     ],
 )
 def test_get_index2_override_cycles(
-    raw_index: str, index2_cycles: int, reverse_cycle: bool, expected_parsed_cycles: str
+    lims_index: str, index2_cycles: int, reverse_cycle: bool, expected_parsed_cycles: str
 ):
     """Test that the returned index 2 cycles is the expected for different index configurations."""
     # GIVEN a FlowCellSampleBCLConvert with separated indexes
-    sample = FlowCellSampleBCLConvert(lane=1, index=raw_index, sample_id="ACC123")
+    sample = FlowCellSampleBCLConvert(lane=1, index=lims_index, sample_id="ACC123")
     is_run_single_index: bool = not bool(index2_cycles)
     sample.separate_indexes(is_run_single_index=is_run_single_index)
 
@@ -226,7 +225,7 @@ def test_get_index2_override_cycles(
     ],
 )
 def test_update_override_cycles(
-    bcl_convert_sample_before_adapt_indexes: FlowCellSampleBCLConvert,
+    bcl_convert_flow_cell_sample: FlowCellSampleBCLConvert,
     run_parameters_fixture: str,
     request: pytest.FixtureRequest,
 ):
@@ -235,13 +234,13 @@ def test_update_override_cycles(
     run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
 
     # GIVEN a FlowCellSampleBCLConvert without override cycles
-    assert bcl_convert_sample_before_adapt_indexes.override_cycles == ""
+    assert bcl_convert_flow_cell_sample.override_cycles == EMPTY_STRING
 
     # WHEN updating the override cycles
-    bcl_convert_sample_before_adapt_indexes.update_override_cycles(run_parameters=run_parameters)
+    bcl_convert_flow_cell_sample.update_override_cycles(run_parameters=run_parameters)
 
     # THEN the override cycles are updated with the expected value
-    cycles: list[str] = bcl_convert_sample_before_adapt_indexes.override_cycles.split(";")
+    cycles: list[str] = bcl_convert_flow_cell_sample.override_cycles.split(";")
     assert len(cycles) >= 3
     assert cycles[0] == f"Y{run_parameters.get_read_1_cycles()}"
     assert cycles[-1] == f"Y{run_parameters.get_read_2_cycles()}"
@@ -333,8 +332,8 @@ def test_process_indexes_for_sample_sheet_bcl_convert(
     sample.process_indexes(run_parameters=run_parameters)
 
     # THEN the sample is processed correctly
-    assert "-" not in sample.index
-    assert sample.override_cycles != ""
+    assert DASH not in sample.index
+    assert sample.override_cycles != EMPTY_STRING
 
 
 @pytest.mark.parametrize(
@@ -359,22 +358,20 @@ def test_process_indexes_for_sample_sheet_bcl_convert(
     ],
 )
 def test_process_indexes_bcl_convert(
-    run_parameters_fixture: str, expected_index2: str, request: pytest.FixtureRequest
+    bcl_convert_flow_cell_sample: FlowCellSampleBCLConvert,
+    run_parameters_fixture: str,
+    expected_index2: str,
+    request: pytest.FixtureRequest,
 ):
     """Test that processing indexes of a BCLConvert sample from different sequencers work."""
     # GIVEN a run parameters object
     run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
 
     # GIVEN a FlowCellSampleBcl2Fastq with 8-nt indexes
-    sample = FlowCellSampleBCLConvert(
-        lane=1,
-        index="GTCTACAC-GCCAAGGT",
-        sample_id="ACC123",
-    )
 
     # WHEN processing the sample for a sample sheet
-    sample.process_indexes(run_parameters=run_parameters)
+    bcl_convert_flow_cell_sample.process_indexes(run_parameters=run_parameters)
 
     # THEN the sample indexes and override cycles are processed
-    assert sample.index2 == expected_index2
-    assert sample.override_cycles != ""
+    assert bcl_convert_flow_cell_sample.index2 == expected_index2
+    assert bcl_convert_flow_cell_sample.override_cycles != EMPTY_STRING

@@ -90,7 +90,7 @@ def test_remove_unwanted_samples_dual_index(
     )
 
     # WHEN removing unwanted samples
-    sample_sheet_creator.remove_unwanted_samples()
+    sample_sheet_creator.remove_samples_with_simple_index()
 
     # THEN the sample is not removed
     assert len(sample_sheet_creator.lims_samples) == 1
@@ -109,7 +109,7 @@ def test_remove_unwanted_samples_no_dual_index(
     )
 
     # WHEN removing unwanted samples
-    sample_sheet_creator.remove_unwanted_samples()
+    sample_sheet_creator.remove_samples_with_simple_index()
 
     # THEN the only sample is removed
     assert len(sample_sheet_creator.lims_samples) == 0

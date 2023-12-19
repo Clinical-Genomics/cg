@@ -293,6 +293,12 @@ def novaseq6000_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBcl2Fas
 
 
 @pytest.fixture
+def bcl_convert_flow_cell_sample() -> FlowCellSampleBCLConvert:
+    """Return a BCL Convert sample."""
+    return FlowCellSampleBCLConvert(lane=1, index="GTCTACAC-GCCAAGGT", sample_id="ACC123")
+
+
+@pytest.fixture
 def bcl_convert_sample_sheet_path(demultiplexed_runs: Path):
     return Path(
         demultiplexed_runs,

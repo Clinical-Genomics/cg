@@ -19,6 +19,7 @@ from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
+from cg.constants.symbols import EMPTY_STRING
 from cg.exc import FlowCellError, SampleSheetError
 from cg.models.demultiplex.run_parameters import (
     RunParameters,
@@ -43,12 +44,12 @@ class FlowCellDirectoryData:
     def __init__(self, flow_cell_path: Path, bcl_converter: str | None = None):
         LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
         self.path: Path = flow_cell_path
-        self.machine_name: str = ""
+        self.machine_name: str = EMPTY_STRING
         self._run_parameters: RunParameters | None = None
         self.run_date: datetime.datetime = datetime.datetime.now()
         self.machine_number: int = 0
-        self.base_name: str = ""  # Base name is flow cell-id + flow cell position
-        self.id: str = ""
+        self.base_name: str = EMPTY_STRING  # Base name is flow cell-id + flow cell position
+        self.id: str = EMPTY_STRING
         self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_dir_name()
         self.bcl_converter: str = bcl_converter or BclConverter.DRAGEN

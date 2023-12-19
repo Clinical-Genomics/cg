@@ -3,8 +3,6 @@ import logging
 from abc import abstractmethod
 from typing import Type
 
-from packaging.version import parse
-
 from cg.apps.demultiplex.sample_sheet.index import Index, get_valid_indexes, is_dual_index
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_samples_by_lane,
@@ -15,17 +13,11 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBCLConvert,
 )
 from cg.constants.demultiplexing import (
-    NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION,
-    NEW_NOVASEQ_REAGENT_KIT_VERSION,
-    NO_REVERSE_COMPLEMENTS,
-    NOVASEQ_6000_POST_1_5_KITS,
-    NOVASEQ_X_INDEX_SETTINGS,
     BclConverter,
     IndexSettings,
     SampleSheetBcl2FastqSections,
     SampleSheetBCLConvertSections,
 )
-from cg.constants.sequencing import Sequencers
 from cg.exc import SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -62,7 +54,7 @@ class SampleSheetCreator:
         return get_valid_indexes(dual_indexes_only=True)
 
     @abstractmethod
-    def remove_unwanted_samples(self) -> None:
+    def remove_samples_with_simple_index(self) -> None:
         """Filter out samples with single indexes."""
         pass
 
@@ -79,7 +71,7 @@ class SampleSheetCreator:
         else:
             sample_serialisation: dict = sample.model_dump(by_alias=True)
 
-        return [str(sample_serialisation[column]) for column in data_column_names]
+        return [str(sample_serialisation[column_name]) for column_name in data_column_names]
 
     def get_additional_sections_sample_sheet(self) -> list | None:
         """Return all sections of the sample sheet that are not the data section."""
@@ -108,13 +100,13 @@ class SampleSheetCreator:
 
     def process_samples_for_sample_sheet(self) -> None:
         """Remove unwanted samples and adapt remaining samples."""
-        self.remove_unwanted_samples()
-        for sample in self.lims_samples:
-            sample.process_indexes(run_parameters=self.run_parameters)
+        self.remove_samples_with_simple_index()
+        for lims_sample in self.lims_samples:
+            lims_sample.process_indexes(run_parameters=self.run_parameters)
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
             LOG.info(f"Updating barcode mismatch values for samples in lane {lane}")
-            for sample in samples_in_lane:
-                sample.update_barcode_mismatches(
+            for lims_sample in samples_in_lane:
+                lims_sample.update_barcode_mismatches(
                     samples_to_compare=samples_in_lane,
                     is_run_single_index=self.run_parameters.is_single_index,
                 )
@@ -138,10 +130,10 @@ class SampleSheetCreator:
 class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
     """Create a raw sample sheet for flow cells."""
 
-    def remove_unwanted_samples(self) -> None:
+    def remove_samples_with_simple_index(self) -> None:
         """Filter out samples with single indexes."""
         LOG.info("Removing all samples without dual indexes")
-        samples_to_keep : list[FlowCellSampleBcl2Fastq] = []
+        samples_to_keep: list[FlowCellSampleBcl2Fastq] = []
         for sample in self.lims_samples:
             if not is_dual_index(sample.index):
                 LOG.warning(f"Removing sample {sample} since it does not have dual index")
@@ -181,7 +173,7 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
             raise SampleSheetError(f"Can't use {BclConverter.BCL2FASTQ} with sample sheet v2")
 
-    def remove_unwanted_samples(self) -> None:
+    def remove_samples_with_simple_index(self) -> None:
         """Filter out samples with single indexes."""
         LOG.info("Removing of single index samples is not required for V2 sample sheet")
 

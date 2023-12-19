@@ -1655,16 +1655,6 @@ def novaseq_x_run_parameters(
     return RunParametersNovaSeqX(run_parameters_path=novaseq_x_run_parameters_path)
 
 
-@pytest.fixture
-def bcl_convert_sample_before_adapt_indexes() -> FlowCellSampleBCLConvert:
-    """Return a NovaSeqX sample."""
-    return FlowCellSampleBCLConvert(
-        Lane=2,
-        Sample_ID="ACC7628A1",
-        index="ATTCCACACT-TGGTCTTGTT",
-    )
-
-
 @pytest.fixture(scope="module")
 def hiseq_x_single_index_flow_cell(
     hiseq_x_single_index_flow_cell_dir: Path,

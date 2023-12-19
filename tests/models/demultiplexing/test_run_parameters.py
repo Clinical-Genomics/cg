@@ -6,7 +6,6 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from pydantic import BaseModel
 
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreatorBCLConvert
 from cg.constants.demultiplexing import (
     NO_REVERSE_COMPLEMENTS,
     NOVASEQ_6000_POST_1_5_KITS,

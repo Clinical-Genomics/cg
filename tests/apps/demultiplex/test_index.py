@@ -23,7 +23,7 @@ def test_get_valid_indexes():
 
 
 @pytest.mark.parametrize(
-    "index1_cycles, index2_cycles, sample_index_length, expected",
+    "index1_cycles, index2_cycles, sample_index_length, expected_is_padding_needed",
     [
         (10, 10, 8, True),
         (10, 10, 10, False),
@@ -33,7 +33,10 @@ def test_get_valid_indexes():
     ],
 )
 def test_is_padding_needed(
-    index1_cycles: int, index2_cycles: int, sample_index_length: int, expected: bool
+    index1_cycles: int,
+    index2_cycles: int,
+    sample_index_length: int,
+    expected_is_padding_needed: bool,
 ):
     """Test that evaluating if a situation needs padding returns the expected value."""
     # GIVEN a sample index length and the number of index cycles reads stated in the run parameters
@@ -46,7 +49,7 @@ def test_is_padding_needed(
     )
 
     # THEN assert that the result is the expected
-    assert padding_needed == expected
+    assert padding_needed == expected_is_padding_needed
 
 
 def test_get_reverse_complement():
