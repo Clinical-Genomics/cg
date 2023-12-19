@@ -208,11 +208,14 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
                 SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_1,
                 self.run_parameters.get_index_1_cycles(),
             ],
-            [
-                SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2,
-                self.run_parameters.get_index_2_cycles(),
-            ],
         ]
+        if not self.run_parameters.is_single_index:
+            reads_section.append(
+                [
+                    SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2,
+                    self.run_parameters.get_index_2_cycles(),
+                ]
+            )
         settings_section: list[list[str]] = [
             [SampleSheetBCLConvertSections.Settings.HEADER],
             SampleSheetBCLConvertSections.Settings.software_version(),
