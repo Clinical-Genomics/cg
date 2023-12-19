@@ -106,6 +106,8 @@ class Application(Model):
     sample_concentration = Column(types.Text)
     sample_concentration_minimum = Column(types.DECIMAL)
     sample_concentration_maximum = Column(types.DECIMAL)
+    sample_concentration_minimum_cfdna = Column(types.DECIMAL)
+    sample_concentration_maximum_cfdna = Column(types.DECIMAL)
     priority_processing = Column(types.Boolean, default=False)
     details = Column(types.Text)
     limitations = Column(types.Text)
