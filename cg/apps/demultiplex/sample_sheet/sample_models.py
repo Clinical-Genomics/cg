@@ -43,7 +43,9 @@ class FlowCellSample(BaseModel):
         pass
 
     @abstractmethod
-    def update_barcode_mismatches(self, samples_to_compare: list) -> None:
+    def update_barcode_mismatches(
+        self, samples_to_compare: list, is_run_single_index: bool
+    ) -> None:
         """Update the barcode_mismatches_1 and barcode_mismatches_2 attributes."""
         pass
 
@@ -92,7 +94,9 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
         if reverse_index2:
             self.index2 = get_reverse_complement_dna_seq(self.index2)
 
-    def update_barcode_mismatches(self, samples_to_compare: list) -> None:
+    def update_barcode_mismatches(
+        self, samples_to_compare: list, is_run_single_index: bool
+    ) -> None:
         """No updating of barcode mismatch  values for Bcl2Fastq sample."""
         LOG.debug(f"No updating of barcode mismatch values for Bcl2Fastq sample {self.sample_id}")
 
@@ -192,9 +196,14 @@ class FlowCellSampleBCLConvert(FlowCellSample):
             self.index2 = get_reverse_complement_dna_seq(self.index2)
         self.update_override_cycles(run_parameters=run_parameters)
 
-    def update_barcode_mismatches(self, samples_to_compare: list) -> None:
+    def update_barcode_mismatches(
+        self, samples_to_compare: list, is_run_single_index: bool
+    ) -> None:
         """Update barcode mismatch attributes comparing to the rest of the samples in the lane."""
         if not samples_to_compare:
             raise SampleSheetError("No samples to compare with to update barcode mismatch values")
         self._update_barcode_mismatches_1(samples_to_compare=samples_to_compare)
+        if is_run_single_index:
+            LOG.debug("Run is single-indexed, skipping barcode mismatch update for index 2")
+            return
         self._update_barcode_mismatches_2(samples_to_compare=samples_to_compare)

@@ -316,10 +316,10 @@ def test_update_barcode_mismatches_2(
         "HiSeq2500 custom index",
     ],
 )
-def test_process_sample_for_sample_sheet_bcl_convert(
+def test_process_indexes_for_sample_sheet_bcl_convert(
     run_parameters_fixture: str, raw_lims_samples_fixture: str, request: pytest.FixtureRequest
 ):
-    """."""
+    """Test that indexes are processed correctly for a BCLConvert sample."""
     # GIVEN a run parameters object and a list of BCLConvert samples from a flow cell
     run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
     raw_lims_samples: list[FlowCellSampleBCLConvert] = request.getfixturevalue(
@@ -332,9 +332,8 @@ def test_process_sample_for_sample_sheet_bcl_convert(
     # WHEN processing the sample for a sample sheet
     sample.process_indexes(run_parameters=run_parameters)
 
-    # THEN the sample is processed
-    assert sample.barcode_mismatches_1
-    assert sample.barcode_mismatches_2
+    # THEN the sample is processed correctly
+    assert "-" not in sample.index
     assert sample.override_cycles != ""
 
 
@@ -368,7 +367,9 @@ def test_process_indexes_bcl_convert(
 
     # GIVEN a FlowCellSampleBcl2Fastq with 8-nt indexes
     sample = FlowCellSampleBCLConvert(
-        lane=1, index="GTCTACAC-GCCAAGGT", sample_id="ACC123", sample_name="name"
+        lane=1,
+        index="GTCTACAC-GCCAAGGT",
+        sample_id="ACC123",
     )
 
     # WHEN processing the sample for a sample sheet
