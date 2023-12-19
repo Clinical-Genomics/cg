@@ -137,10 +137,12 @@ class MicrosaltError(CgError):
     Error related to Microsalt analysis.
     """
 
+
 class MissingAnalysisDir(CgError):
     """
     Error related to missing analysis.
     """
+
 
 class OrderError(CgError):
     """
