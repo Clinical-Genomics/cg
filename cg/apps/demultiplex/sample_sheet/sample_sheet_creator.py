@@ -160,9 +160,12 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
 
     def get_data_section_header_and_columns(self) -> list[list[str]]:
         """Return the header and column names of the data section of the sample sheet."""
+        column_names: list[str] = SampleSheetBcl2FastqSections.Data.column_names()
+        if self.run_parameters.is_single_index:
+            column_names.remove(SampleSheetBcl2FastqSections.Data.INDEX_2)
         return [
             [SampleSheetBcl2FastqSections.Data.HEADER.value],
-            SampleSheetBcl2FastqSections.Data.column_names(),
+            column_names,
         ]
 
 
@@ -233,6 +236,6 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
             column_names.remove(SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_2)
             column_names.remove(SampleSheetBCLConvertSections.Data.INDEX_2)
         return [
-            [SampleSheetBCLConvertSections.Data.HEADER.value],
+            [SampleSheetBCLConvertSections.Data.HEADER],
             column_names,
         ]
