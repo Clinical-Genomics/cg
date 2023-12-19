@@ -26,25 +26,43 @@ from tests.conftest import StoreHelpers
 
 
 class PreAnalysisQCScenario:
+    """
+    A class representing a pre-analysis quality control scenario.
+
+    This class encapsulates the logic for creating different types of analysis APIs
+    based on the pipeline type, and for creating cases with different priorities and samples.
+
+    Attributes:
+        analysis_apis (dict[Pipeline, AnalysisAPI]): A mapping from pipeline types to their corresponding analysis API classes.
+        pipeline (Pipeline): The pipeline type for this scenario.
+
+    Methods:
+        analysis_api: Returns the analysis API class for the current pipeline type.
+        get_analysis_api: Returns an instance of the analysis API class for the current pipeline type, initialized with the given config.
+        case_standard_priority: Creates and returns a case with standard priority and the given samples.
+        case_express_priority: Creates and returns a case with express priority and the given samples.
+        samples: Creates and returns a list of samples.
+    """
+
+    analysis_apis: dict[Pipeline, AnalysisAPI] = {
+        Pipeline.BALSAMIC: BalsamicAnalysisAPI,
+        Pipeline.MICROSALT: MicrosaltAnalysisAPI,
+        Pipeline.MIP_DNA: MipAnalysisAPI,
+        Pipeline.MIP_RNA: MipAnalysisAPI,
+        Pipeline.TAXPROFILER: TaxprofilerAnalysisAPI,
+        Pipeline.RNAFUSION: RnafusionAnalysisAPI,
+        Pipeline.RAREDISEASE: RarediseaseAnalysisAPI,
+    }
+
     def __init__(self, pipeline: Pipeline):
         self.pipeline = pipeline
 
-    def get_analysis_api(self) -> AnalysisAPI:
-        analysis_apis: dict[Pipeline, AnalysisAPI] = {
-            Pipeline.BALSAMIC: BalsamicAnalysisAPI,
-            Pipeline.MICROSALT: MicrosaltAnalysisAPI,
-            Pipeline.MIP_DNA: MipAnalysisAPI,
-            Pipeline.MIP_RNA: MipAnalysisAPI,
-            Pipeline.TAXPROFILER: TaxprofilerAnalysisAPI,
-            Pipeline.RNAFUSION: RnafusionAnalysisAPI,
-            Pipeline.RAREDISEASE: RarediseaseAnalysisAPI,
-        }
+    @property
+    def analysis_api(self) -> AnalysisAPI:
+        return self.analysis_apis[self.pipeline]
 
-        return analysis_apis[self.pipeline]
-
-    def analysis_api(self, cg_config: CGConfig) -> AnalysisAPI:
-        analysis_api: AnalysisAPI = self.get_analysis_api()
-        return analysis_api(config=cg_config, pipeline=self.pipeline)
+    def get_analysis_api(self, cg_config: CGConfig) -> AnalysisAPI:
+        return self.analysis_api(config=cg_config, pipeline=self.pipeline)
 
     @staticmethod
     def case_standard_priority(
@@ -139,7 +157,7 @@ def test_sequencing_qc(
     helpers: StoreHelpers,
 ):
     # GIVEN a pre analysis qc scenario with an analysis api
-    analysis_api = pre_analysis_qc_scenario.analysis_api(cg_config=cg_context)
+    analysis_api = pre_analysis_qc_scenario.get_analysis_api(cg_config=cg_context)
     # GIVEN a pre analysis quality checker
     pre_analysis_quality_checker = get_pre_analysis_quality_check_for_workflow(
         analysis_api=analysis_api
@@ -160,7 +178,7 @@ def test_sequencing_qc(
 
 
 @pytest.mark.parametrize(
-    "pre_analysis_qc_scenario,expected_result",
+    "pre_analysis_qc,expected_result",
     [
         (PreAnalysisQCScenario(pipeline=Pipeline.BALSAMIC), True),
         (PreAnalysisQCScenario(pipeline=Pipeline.MIP_DNA), True),
@@ -182,7 +200,7 @@ def test_sequencing_qc_express_priority(
     helpers: StoreHelpers,
 ):
     # GIVEN a pre analysis qc scenario with an analysis api
-    analysis_api = pre_analysis_qc_scenario.analysis_api(cg_config=cg_context)
+    analysis_api = pre_analysis_qc_scenario.get_analysis_api(cg_config=cg_context)
     # GIVEN a pre analysis quality checker
     pre_analysis_quality_checker = get_pre_analysis_quality_check_for_workflow(
         analysis_api=analysis_api
