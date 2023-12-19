@@ -718,18 +718,6 @@ class Sample(Model, PriorityMixin):
         return self._is_external
 
     @property
-    def sequencing_qc(self) -> bool:
-        """Return sequencing qc passed or failed."""
-        application = self.application_version.application
-        # Express priority needs to be analyzed at a lower threshold for primary analysis
-        if self.priority == Priority.express:
-            one_half_of_target_reads = application.target_reads / 2
-            return self.reads >= one_half_of_target_reads
-        if self.application_version.application.prep_category == PrepCategory.READY_MADE_LIBRARY:
-            return bool(self.reads)
-        return self.reads > application.expected_reads
-
-    @property
     def phenotype_groups(self) -> list[str]:
         """Return a list of phenotype_groups."""
         return self._phenotype_groups.split(",") if self._phenotype_groups else []
@@ -751,6 +739,10 @@ class Sample(Model, PriorityMixin):
     def prep_category(self) -> str:
         """Return the preparation category of the sample."""
         return self.application_version.application.prep_category
+
+    @property
+    def expected_reads(self):
+        return self.application_version.application.expected_reads
 
     @property
     def state(self) -> str:
