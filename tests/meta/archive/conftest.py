@@ -343,7 +343,7 @@ def archive_context(
 
     base_context.status_db.add_sample(
         name="sample_with_spring_files",
-        sex="male",
+        sex=Sex.MALE,
         internal_id="sample_with_spring_files",
         **{"customer": "MiriaCustomer"},
     )

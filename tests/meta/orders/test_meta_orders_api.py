@@ -5,6 +5,7 @@ import pytest
 
 from cg.constants import DataDelivery
 from cg.constants.constants import Pipeline
+from cg.constants.subject import Sex
 from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
@@ -349,7 +350,7 @@ def test_validate_sex_inconsistent_sex(
         sample_obj: Sample = helpers.add_sample(
             store=store,
             customer_id=customer.internal_id,
-            sex="male" if sample.sex == "female" else "female",
+            sex=Sex.MALE if sample.sex == Sex.FEMALE else Sex.FEMALE,
             name=sample.name,
             subject_id=sample.subject_id,
         )
@@ -410,7 +411,7 @@ def test_validate_sex_unknown_existing_sex(
         sample_obj: Sample = helpers.add_sample(
             store=store,
             customer_id=customer.internal_id,
-            sex="unknown",
+            sex=Sex.UNKNOWN,
             name=sample.name,
             subject_id=sample.subject_id,
         )
