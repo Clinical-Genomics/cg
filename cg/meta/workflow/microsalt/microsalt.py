@@ -300,11 +300,17 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_matching_cases(self, case_id: str) -> list[str]:
         project_id: str = self.get_project_id(case_id)
+        LOG.info(project_id)
         results_dir: Path = self.get_results_dir()
+        LOG.info(results_dir)
         return [d for d in os.listdir(results_dir) if d.startswith(project_id)]
 
     def get_case_path(self, case_id: str) -> Path:
         results_dir: Path = self.get_results_dir()
+        LOG.info(f"Looking for case path in results dir {results_dir}")
         matching_cases: list[str] = self.get_matching_cases(case_id)
+        LOG.info(f"Found {len(matching_cases)} matching cases")
+        LOG.info(matching_cases)
         case_dir: str = max(matching_cases, default=None)
+        LOG.info(case_dir)
         return Path(results_dir, case_dir)
