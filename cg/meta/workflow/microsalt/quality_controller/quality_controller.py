@@ -39,7 +39,7 @@ class QualityController:
         case_result: CaseQualityResult = quality_control_case(sample_results)
         report_file: Path = get_report_path(case_metrics_file_path)
         ReportGenerator.report(out_file=report_file, samples=sample_results, case=case_result)
-        ResultLogger.log_results(case=case_result, samples=sample_results)
+        ResultLogger.log_results(case=case_result, samples=sample_results, report=report_file)
         return case_result.passes_qc
 
     def quality_control_samples(self, quality_metrics: QualityMetrics) -> list[SampleQualityResult]:

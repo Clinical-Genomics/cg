@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from cg.meta.workflow.microsalt.quality_controller.models import (
     CaseQualityResult,
     SampleQualityResult,
@@ -9,9 +10,11 @@ LOG = logging.getLogger(__name__)
 
 class ResultLogger:
     @staticmethod
-    def log_results(samples: list[SampleQualityResult], case: CaseQualityResult) -> None:
+    def log_results(
+        samples: list[SampleQualityResult], case: CaseQualityResult, report: Path
+    ) -> None:
         if case.passes_qc:
-            LOG.info("QC passed.")
+            LOG.info(f"QC passed, see {report} for details.")
         else:
             message = get_case_fail_message(case)
             LOG.warning(message)
@@ -21,8 +24,11 @@ class ResultLogger:
 
     @staticmethod
     def log_sample_result(result: SampleQualityResult) -> None:
-        if not result.passes_qc:
-            control_message = "Control sample " if result.is_control else ""
+        control_message = "Control sample " if result.is_control else ""
+        if result.passes_qc:
+            message = f"{control_message}{result.sample_id} passed QC."
+            LOG.info(message)
+        else:
             message = f"{control_message}{result.sample_id} failed QC."
             LOG.warning(message)
 
@@ -42,7 +48,7 @@ def get_case_fail_message(case: CaseQualityResult) -> str:
     if not case.non_urgent_passes_qc:
         fail_reasons.append("The non-urgent samples failed QC.\n")
     fail_message = "QC failed.\n"
-    return fail_message + " ".join(fail_reasons)
+    return fail_message + "".join(fail_reasons)
 
 
 def sample_result_message(samples: list[SampleQualityResult]) -> str:

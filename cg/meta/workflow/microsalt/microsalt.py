@@ -12,7 +12,7 @@ import click
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import FileExtensions
 from cg.constants.tb import AnalysisStatus
-from cg.exc import CgDataError
+from cg.exc import CgDataError, MissingAnalysisDir
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.meta.workflow.microsalt.quality_controller import QualityController
@@ -281,10 +281,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_metrics_file_path(self, case_id: str) -> Path:
         """Return path to metrics file for a case."""
         project_id: str = self.get_project_id(case_id)
-        LOG.info(case_id)
-        LOG.info(f"Looking for metrics file for project {project_id}")
         case_run_dir: Path = self.get_case_path(case_id)
-        LOG.info(f"Looking for metrics file in {case_run_dir}")
         return Path(case_run_dir, f"{project_id}{FileExtensions.JSON}")
 
     def extract_project_id(self, sample_id: str) -> str:
@@ -298,19 +295,17 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_results_dir(self) -> Path:
         return Path(self.root_dir, "results")
 
-    def get_matching_cases(self, case_id: str) -> list[str]:
+    def get_analyses_result_dirs(self, case_id: str) -> list[str]:
         project_id: str = self.get_project_id(case_id)
-        LOG.info(project_id)
         results_dir: Path = self.get_results_dir()
-        LOG.info(results_dir)
-        return [d for d in os.listdir(results_dir) if d.startswith(project_id)]
+        matches: list[str] = [d for d in os.listdir(results_dir) if d.startswith(project_id)]
+        if not matches:
+            LOG.error(f"No result directory found for {case_id} with project id {project_id}")
+            raise MissingAnalysisDir
+        return matches
 
     def get_case_path(self, case_id: str) -> Path:
         results_dir: Path = self.get_results_dir()
-        LOG.info(f"Looking for case path in results dir {results_dir}")
-        matching_cases: list[str] = self.get_matching_cases(case_id)
-        LOG.info(f"Found {len(matching_cases)} matching cases")
-        LOG.info(matching_cases)
+        matching_cases: list[str] = self.get_analyses_result_dirs(case_id)
         case_dir: str = max(matching_cases, default=None)
-        LOG.info(case_dir)
         return Path(results_dir, case_dir)
