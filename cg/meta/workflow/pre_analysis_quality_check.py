@@ -2,8 +2,11 @@ from cg.constants import Priority
 from cg.constants.constants import PrepCategory
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
+from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
-from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
@@ -258,8 +261,11 @@ def get_pre_analysis_quality_check_for_workflow(
 ) -> PreAnalysisQualityCheck:
     pre_analysis_quality_checks: dict[AnalysisAPI, PreAnalysisQualityCheck] = {
         BalsamicAnalysisAPI: BalsamicPreAnalysisQc,
+        BalsamicQCAnalysisAPI: BalsamicPreAnalysisQc,
+        BalsamicUmiAnalysisAPI: BalsamicPreAnalysisQc,
         MicrosaltAnalysisAPI: MicrobialPreAnalysisQc,
-        MipAnalysisAPI: MIPPreAnalysisQc,
+        MipDNAAnalysisAPI: MIPPreAnalysisQc,
+        MipRNAAnalysisAPI: MIPPreAnalysisQc,
         TaxprofilerAnalysisAPI: TaxProfilerPreAnalysisQc,
         RnafusionAnalysisAPI: RnafusionPreAnalysisQc,
         RarediseaseAnalysisAPI: RareDiseasePreAnalysisQc,

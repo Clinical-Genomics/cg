@@ -1,13 +1,17 @@
 import pytest
 
 from cg.constants import Priority
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Pipeline, PrepCategory
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
+from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
-from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.pre_analysis_quality_check import (
     BalsamicPreAnalysisQc,
+    FastqPreAnalysisQc,
     MicrobialPreAnalysisQc,
     MIPPreAnalysisQc,
     PreAnalysisQualityCheck,
@@ -25,7 +29,7 @@ from cg.store.models import Case, Sample
 from tests.conftest import StoreHelpers
 
 
-class PreAnalysisQCScenario:
+class WorkflowPreAnalysisQCScenario:
     """
     A class representing a pre-analysis quality control scenario.
 
@@ -46,9 +50,11 @@ class PreAnalysisQCScenario:
 
     analysis_apis: dict[Pipeline, AnalysisAPI] = {
         Pipeline.BALSAMIC: BalsamicAnalysisAPI,
+        Pipeline.BALSAMIC_QC: BalsamicQCAnalysisAPI,
+        Pipeline.BALSAMIC_UMI: BalsamicUmiAnalysisAPI,
         Pipeline.MICROSALT: MicrosaltAnalysisAPI,
-        Pipeline.MIP_DNA: MipAnalysisAPI,
-        Pipeline.MIP_RNA: MipAnalysisAPI,
+        Pipeline.MIP_DNA: MipDNAAnalysisAPI,
+        Pipeline.MIP_RNA: MipRNAAnalysisAPI,
         Pipeline.TAXPROFILER: TaxprofilerAnalysisAPI,
         Pipeline.RNAFUSION: RnafusionAnalysisAPI,
         Pipeline.RAREDISEASE: RarediseaseAnalysisAPI,
@@ -91,15 +97,15 @@ class PreAnalysisQCScenario:
 @pytest.mark.parametrize(
     "pre_analysis_qc_scenario,expected_qc",
     [
-        (PreAnalysisQCScenario(pipeline=Pipeline.BALSAMIC), BalsamicPreAnalysisQc),
-        (PreAnalysisQCScenario(pipeline=Pipeline.BALSAMIC_QC), BalsamicPreAnalysisQc),
-        (PreAnalysisQCScenario(pipeline=Pipeline.BALSAMIC_UMI), BalsamicPreAnalysisQc),
-        (PreAnalysisQCScenario(pipeline=Pipeline.MICROSALT), MicrobialPreAnalysisQc),
-        (PreAnalysisQCScenario(pipeline=Pipeline.MIP_DNA), MIPPreAnalysisQc),
-        (PreAnalysisQCScenario(pipeline=Pipeline.MIP_RNA), MIPPreAnalysisQc),
-        (PreAnalysisQCScenario(pipeline=Pipeline.TAXPROFILER), TaxProfilerPreAnalysisQc),
-        (PreAnalysisQCScenario(pipeline=Pipeline.RNAFUSION), RnafusionPreAnalysisQc),
-        (PreAnalysisQCScenario(pipeline=Pipeline.RAREDISEASE), RareDiseasePreAnalysisQc),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.BALSAMIC), BalsamicPreAnalysisQc),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.BALSAMIC_QC), BalsamicPreAnalysisQc),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.BALSAMIC_UMI), BalsamicPreAnalysisQc),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.MICROSALT), MicrobialPreAnalysisQc),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.MIP_DNA), MIPPreAnalysisQc),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.MIP_RNA), MIPPreAnalysisQc),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.TAXPROFILER), TaxProfilerPreAnalysisQc),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.RNAFUSION), RnafusionPreAnalysisQc),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.RAREDISEASE), RareDiseasePreAnalysisQc),
     ],
     ids=[
         "BALSAMIC",
@@ -114,12 +120,12 @@ class PreAnalysisQCScenario:
     ],
 )
 def test_get_pre_analysis_quality_check_for_workflow(
-    pre_analysis_qc_scenario: PreAnalysisQCScenario,
+    pre_analysis_qc_scenario: WorkflowPreAnalysisQCScenario,
     expected_qc: PreAnalysisQualityCheck,
     cg_context: CGConfig,
 ):
     # GIVEN a pre analysis qc scenario with an analysis api
-    analysis_api: AnalysisAPI = pre_analysis_qc_scenario.analysis_api(cg_config=cg_context)
+    analysis_api: AnalysisAPI = pre_analysis_qc_scenario.get_analysis_api(cg_config=cg_context)
 
     # WHEN getting the pre analysis qc for the workflow
     pre_analysis_qc: PreAnalysisQualityCheck = get_pre_analysis_quality_check_for_workflow(
@@ -133,12 +139,12 @@ def test_get_pre_analysis_quality_check_for_workflow(
 @pytest.mark.parametrize(
     "pre_analysis_qc_scenario,expected_result",
     [
-        (PreAnalysisQCScenario(pipeline=Pipeline.BALSAMIC), True),
-        (PreAnalysisQCScenario(pipeline=Pipeline.MICROSALT), True),
-        (PreAnalysisQCScenario(pipeline=Pipeline.MIP_DNA), True),
-        (PreAnalysisQCScenario(pipeline=Pipeline.TAXPROFILER), True),
-        (PreAnalysisQCScenario(pipeline=Pipeline.RNAFUSION), True),
-        (PreAnalysisQCScenario(pipeline=Pipeline.RAREDISEASE), True),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.BALSAMIC), True),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.MICROSALT), True),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.MIP_DNA), True),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.TAXPROFILER), True),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.RNAFUSION), True),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.RAREDISEASE), True),
     ],
     ids=[
         "BalsamicPreAnalysisQc_standard_priority",
@@ -150,7 +156,7 @@ def test_get_pre_analysis_quality_check_for_workflow(
     ],
 )
 def test_sequencing_qc(
-    pre_analysis_qc_scenario: PreAnalysisQCScenario,
+    pre_analysis_qc_scenario: WorkflowPreAnalysisQCScenario,
     expected_result: bool,
     case_id: str,
     cg_context: CGConfig,
@@ -178,12 +184,12 @@ def test_sequencing_qc(
 
 
 @pytest.mark.parametrize(
-    "pre_analysis_qc,expected_result",
+    "pre_analysis_qc_scenario,expected_result",
     [
-        (PreAnalysisQCScenario(pipeline=Pipeline.BALSAMIC), True),
-        (PreAnalysisQCScenario(pipeline=Pipeline.MIP_DNA), True),
-        (PreAnalysisQCScenario(pipeline=Pipeline.RNAFUSION), True),
-        (PreAnalysisQCScenario(pipeline=Pipeline.RAREDISEASE), True),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.BALSAMIC), True),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.MIP_DNA), True),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.RNAFUSION), True),
+        (WorkflowPreAnalysisQCScenario(pipeline=Pipeline.RAREDISEASE), True),
     ],
     ids=[
         "BalsamicPreAnalysisQc_express_priority",
@@ -193,7 +199,7 @@ def test_sequencing_qc(
     ],
 )
 def test_sequencing_qc_express_priority(
-    pre_analysis_qc_scenario: PreAnalysisQCScenario,
+    pre_analysis_qc_scenario: WorkflowPreAnalysisQCScenario,
     expected_result: bool,
     case_id: str,
     cg_context: CGConfig,
@@ -217,3 +223,40 @@ def test_sequencing_qc_express_priority(
 
     # THEN assert that the correct pre analysis qc is returned
     assert sequencing_qc == expected_result
+
+
+@pytest.fixture
+def case_with_ready_made_libraries():
+    samples = [Sample(prep_category=PrepCategory.ready_made_library, reads=100) for _ in range(3)]
+    return Case(samples=samples)
+
+
+@pytest.fixture
+def case_with_not_ready_made_libraries():
+    samples = [
+        Sample(prep_category=PrepCategory.not_ready_made_library, reads=100) for _ in range(3)
+    ]
+    return Case(samples=samples)
+
+
+def test_all_samples_are_ready_made_libraries(
+    case_with_ready_made_libraries, case_with_not_ready_made_libraries
+):
+    qc = FastqPreAnalysisQc(case_with_ready_made_libraries)
+    assert qc.all_samples_are_ready_made_libraries() is True
+
+    qc = FastqPreAnalysisQc(case_with_not_ready_made_libraries)
+    assert qc.all_samples_are_ready_made_libraries() is False
+
+
+def test_ready_made_library_qc(case_with_ready_made_libraries):
+    qc = FastqPreAnalysisQc(case_with_ready_made_libraries)
+    assert qc.ready_made_library_qc() is True
+
+
+def test_fastq_sequencing_qc(case_with_ready_made_libraries, case_with_not_ready_made_libraries):
+    qc = FastqPreAnalysisQc(case_with_ready_made_libraries)
+    assert qc.sequencing_qc() is True
+
+    qc = FastqPreAnalysisQc(case_with_not_ready_made_libraries)
+    assert qc.sequencing_qc() is False
