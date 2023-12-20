@@ -780,7 +780,7 @@ def lims_novaseq_bcl_convert_samples(
     lims_novaseq_samples_raw: list[dict],
 ) -> list[FlowCellSampleBCLConvert]:
     """Return a list of parsed flow cell samples demultiplexed with BCL convert."""
-    return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
+    return [FlowCellSampleBCLConvert.model_validate(sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture
@@ -788,7 +788,7 @@ def lims_novaseq_bcl2fastq_samples(
     lims_novaseq_samples_raw: list[dict],
 ) -> list[FlowCellSampleBcl2Fastq]:
     """Return a list of parsed Bcl2fastq flow cell samples"""
-    return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
+    return [FlowCellSampleBcl2Fastq.model_validate(sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture
@@ -796,7 +796,9 @@ def lims_novaseq_6000_bcl2fastq_samples(
     lims_novaseq_6000_sample_raw: list[dict],
 ) -> list[FlowCellSampleBcl2Fastq]:
     """Return a list of parsed Bcl2fastq flow cell samples"""
-    return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_6000_sample_raw]
+    return [
+        FlowCellSampleBcl2Fastq.model_validate(sample) for sample in lims_novaseq_6000_sample_raw
+    ]
 
 
 @pytest.fixture(name="tmp_flow_cells_directory")
@@ -1269,7 +1271,7 @@ def novaseq_6000_post_1_5_kits_lims_samples(
     novaseq_6000_post_1_5_kits_raw_lims_samples: Path,
 ) -> list[FlowCellSampleBCLConvert]:
     return [
-        FlowCellSampleBCLConvert(**sample)
+        FlowCellSampleBCLConvert.model_validate(sample)
         for sample in read_json(novaseq_6000_post_1_5_kits_raw_lims_samples)
     ]
 
@@ -1301,7 +1303,7 @@ def novaseq_6000_pre_1_5_kits_lims_samples(
     novaseq_6000_pre_1_5_kits_raw_lims_samples: Path,
 ) -> list[FlowCellSampleBCLConvert]:
     return [
-        FlowCellSampleBCLConvert(**sample)
+        FlowCellSampleBCLConvert.model_validate(sample)
         for sample in read_json(novaseq_6000_pre_1_5_kits_raw_lims_samples)
     ]
 
@@ -1328,7 +1330,10 @@ def novaseq_x_raw_lims_samples(novaseq_x_flow_cell_directory: Path) -> Path:
 
 @pytest.fixture
 def novaseq_x_lims_samples(novaseq_x_raw_lims_samples: Path) -> list[FlowCellSampleBCLConvert]:
-    return [FlowCellSampleBCLConvert(**sample) for sample in read_json(novaseq_x_raw_lims_samples)]
+    return [
+        FlowCellSampleBCLConvert.model_validate(sample)
+        for sample in read_json(novaseq_x_raw_lims_samples)
+    ]
 
 
 @pytest.fixture(scope="session")
@@ -1434,8 +1439,10 @@ def hiseq_x_single_index_bcl_convert_lims_samples(
     hiseq_x_single_index_flow_cell_dir: Path,
 ) -> list[FlowCellSampleBCLConvert]:
     """Return a list of BCLConvert samples from a HiSeqX single index flow cell."""
-    path = Path(hiseq_x_single_index_flow_cell_dir, "HJCFFALXX_bcl_convert_raw.json")
-    return [FlowCellSampleBCLConvert(**sample) for sample in read_json(path)]
+    path = Path(
+        hiseq_x_single_index_flow_cell_dir, f"HJCFFALXX_bcl_convert_raw{FileExtensions.JSON}"
+    )
+    return [FlowCellSampleBCLConvert.model_validate(sample) for sample in read_json(path)]
 
 
 @pytest.fixture
@@ -1443,8 +1450,8 @@ def hiseq_x_dual_index_bcl_convert_lims_samples(
     hiseq_x_dual_index_flow_cell_dir: Path,
 ) -> list[FlowCellSampleBCLConvert]:
     """Return a list of BCLConvert samples from a HiSeqX dual index flow cell."""
-    path = Path(hiseq_x_dual_index_flow_cell_dir, "HL32LCCXY_bcl_convert_raw.json")
-    return [FlowCellSampleBCLConvert(**sample) for sample in read_json(path)]
+    path = Path(hiseq_x_dual_index_flow_cell_dir, f"HL32LCCXY_bcl_convert_raw{FileExtensions.JSON}")
+    return [FlowCellSampleBCLConvert.model_validate(sample) for sample in read_json(path)]
 
 
 @pytest.fixture
@@ -1453,7 +1460,7 @@ def hiseq_2500_dual_index_bcl_convert_lims_samples(
 ) -> list[FlowCellSampleBCLConvert]:
     """Return a list of BCLConvert samples from a HiSeq2500 dual index flow cell."""
     path = Path(hiseq_2500_dual_index_flow_cell_dir, "HM2LNBCX2_bcl_convert_raw.json")
-    return [FlowCellSampleBCLConvert(**sample) for sample in read_json(path)]
+    return [FlowCellSampleBCLConvert.model_validate(sample) for sample in read_json(path)]
 
 
 @pytest.fixture
@@ -1462,7 +1469,7 @@ def hiseq_2500_custom_index_bcl_convert_lims_samples(
 ) -> list[FlowCellSampleBCLConvert]:
     """Return a list of BCLConvert samples from a HiSeq2500 custom index flow cell."""
     path = Path(hiseq_2500_custom_index_flow_cell_dir, "HGYFNBCX2_bcl_convert_raw.json")
-    return [FlowCellSampleBCLConvert(**sample) for sample in read_json(path)]
+    return [FlowCellSampleBCLConvert.model_validate(sample) for sample in read_json(path)]
 
 
 @pytest.fixture(scope="session")
