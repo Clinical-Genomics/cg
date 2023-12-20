@@ -53,6 +53,7 @@ class OrderSample(BaseModel):
     collection_date: str | None = None
     comment: constr(max_length=Sample.comment.property.columns[0].type.length) | None = None
     concentration: float | None = None
+    concentration_ng_ul: float | None = None
     concentration_sample: float | None = None
     container: ContainerEnum | None = None
     container_name: str | None = None

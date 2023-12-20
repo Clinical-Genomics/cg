@@ -65,7 +65,7 @@ def test_with_config_use_nextflow(
     assert result.exit_code == EXIT_SUCCESS
 
     for message in [
-        "using nextflow",
+        "using Nextflow",
         "path/to/bin/nextflow",
         "-work-dir",
         "-params-file",
@@ -97,7 +97,7 @@ def test_with_config_use_tower(
     # THEN command should use tower
 
     for message in [
-        "using tower",
+        "using Tower",
         "path/to/bin/tw launch",
     ]:
         assert message in caplog.text
