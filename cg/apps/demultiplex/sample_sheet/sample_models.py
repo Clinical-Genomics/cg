@@ -33,7 +33,7 @@ class FlowCellSample(BaseModel):
     sample_id: SampleId
     index: str
     index2: str = EMPTY_STRING
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(populate_by_name=True)
 
     def separate_indexes(self, is_run_single_index: bool) -> None:
         """Update values for index and index2 splitting the original LIMS dual index."""
@@ -102,7 +102,7 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
     def update_barcode_mismatches(
         self, samples_to_compare: list, is_run_single_index: bool
     ) -> None:
-        """No updating of barcode mismatch values for Bcl2Fastq sample."""
+        """No updating of barcode mismatch values for Bcl2Fastq samples."""
         LOG.debug(f"No updating of barcode mismatch values for Bcl2Fastq sample {self.sample_id}")
 
 

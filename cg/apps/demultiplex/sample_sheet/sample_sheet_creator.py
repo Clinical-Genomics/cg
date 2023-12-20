@@ -136,7 +136,7 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
         samples_to_keep: list[FlowCellSampleBcl2Fastq] = []
         for sample in self.lims_samples:
             if not is_dual_index(sample.index):
-                LOG.warning(f"Removing sample {sample} since it does not have dual index")
+                LOG.warning(f"Removing sample {sample.sample_id} since it does not have dual index")
                 continue
             samples_to_keep.append(sample)
         self.lims_samples = samples_to_keep
