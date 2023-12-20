@@ -26,6 +26,7 @@ class ExcelSampleAliases(StrEnum):
     COLLECTION_DATE = "UDF/Collection Date"
     COMMENT = "UDF/Comment"
     CONCENTRATION = "UDF/Concentration (nM)"
+    CONCENTRATION_NG_UL = "UDF/Concentration (ng/ul)"
     CONCENTRATION_SAMPLE = "UDF/Sample Conc."
     CONTAINER = "Container/Type"
     CONTAINER_NAME = "Container/Name"
