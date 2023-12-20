@@ -19,6 +19,27 @@ from cg.models.demultiplex.run_parameters import RunParameters
 
 
 @pytest.mark.parametrize(
+    "lims_sample",
+    [
+        {"index": "GTCTACAC-GCCAAGGT", "sample_id": "ACC123"},
+        {"lane": 1, "sample_id": "ACC123"},
+        {"lane": 1, "index": "GTCTACAC-GCCAAGGT"},
+    ],
+    ids=["no sample id", "no index", "no lane"],
+)
+def test_validate_inputs_bcl_convert_sample_missing_attribute(lims_sample: dict):
+    """Test that validating a BCLConvert sample with a missing attribute fails."""
+    # GIVEN a raw LIMS sample without a mandatory attribute
+
+    # WHEN validating the sample
+    with pytest.raises(AttributeError) as exc_info:
+        FlowCellSampleBCLConvert.validate_inputs(lims_sample=lims_sample)
+
+    # THEN a pydantic validation error is raised
+    assert "validate_inputs" in str(exc_info.value)
+
+
+@pytest.mark.parametrize(
     "lims_index, expected_index_1, expected_index2",
     [
         ("CCATTCGANNNNNNNNN-GTTGTCCG", "CCATTCGA", "GTTGTCCG"),
