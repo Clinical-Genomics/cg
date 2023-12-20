@@ -114,6 +114,6 @@ def test_remove_unwanted_samples_no_dual_index(
     # THEN the only sample is removed
     assert len(sample_sheet_creator.lims_samples) == 0
     assert (
-        f"Removing sample {novaseq6000_flow_cell_sample_no_dual_index} since it does not have dual index"
+        f"Removing sample {novaseq6000_flow_cell_sample_no_dual_index.sample_id} since it does not have dual index"
         in caplog.text
     )
