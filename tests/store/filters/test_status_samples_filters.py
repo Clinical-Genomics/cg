@@ -3,7 +3,7 @@ from typing import Any
 from sqlalchemy.orm import Query
 
 from cg.constants.constants import SampleType
-from cg.constants.subject import Gender, PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.store import Store
 from cg.store.filters.status_sample_filters import (
     filter_samples_by_entry_customer_ids,
@@ -672,7 +672,7 @@ def test_filter_samples_by_identifier_name_and_value_two_samples(sample_store: S
     filtered_query: Query = filter_samples_by_identifier_name_and_value(
         samples=sample_query,
         identifier_name="sex",
-        identifier_value=Gender.FEMALE,
+        identifier_value=Sex.FEMALE,
     )
 
     # THEN the filtered query has at least two elements
@@ -680,4 +680,4 @@ def test_filter_samples_by_identifier_name_and_value_two_samples(sample_store: S
 
     # THEN all the elements of the filtered query are females
     for sample in filtered_query:
-        assert sample.sex == Gender.FEMALE
+        assert sample.sex == Sex.FEMALE

@@ -11,6 +11,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import CustomerId
 from cg.constants.housekeeper_tags import HkMipAnalysisTag, SequencingFileTag
 from cg.constants.sequencing import Sequencers
+from cg.constants.subject import Sex
 from cg.meta.invoice import InvoiceAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
@@ -145,7 +146,7 @@ def flowcell_store(base_store: Store, stats_sample_data: dict) -> Generator[Stor
             "WGSPCFC030"
         ).versions[0]
         sample: Sample = base_store.add_sample(
-            name="NA", sex="male", internal_id=sample_data["name"]
+            name="NA", sex=Sex.MALE, internal_id=sample_data["name"]
         )
         sample.customer = customer
         sample.application_version = application_version

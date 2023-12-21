@@ -3,6 +3,7 @@
 from click.testing import CliRunner
 
 from cg.cli.add import add
+from cg.constants.subject import Sex
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import CaseSample
@@ -193,7 +194,7 @@ def test_add_relationship_father(
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
 
-    father = helpers.add_sample(disk_store, name="father", gender="male")
+    father = helpers.add_sample(disk_store, sex=Sex.MALE, name="father")
     father_id = father.internal_id
 
     case = helpers.add_case(disk_store)
