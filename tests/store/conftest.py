@@ -6,9 +6,17 @@ from typing import Generator
 import pytest
 
 from cg.constants import Pipeline
-from cg.constants.subject import Gender, PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.store import Store
-from cg.store.models import Analysis, Application, Customer, Case, CaseSample, Organism, Sample
+from cg.store.models import (
+    Analysis,
+    Application,
+    Case,
+    CaseSample,
+    Customer,
+    Organism,
+    Sample,
+)
 from tests.store_helpers import StoreHelpers
 
 
@@ -143,7 +151,7 @@ def microbial_store(
         base_store.session.add(organism)
         sample = base_store.add_sample(
             name=sample_data["name"],
-            sex=Gender.UNKNOWN,
+            sex=Sex.UNKNOWN,
             comment=sample_data["comment"],
             priority=sample_data["priority"],
             reads=sample_data["reads"],
@@ -197,10 +205,14 @@ def store_with_a_sample_that_has_many_attributes_and_one_without(
     """Return a store with a sample that has many attributes and one without."""
     helpers.add_sample(
         store=store,
-        internal_id=StoreConstants.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        name=StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+        control=StoreConstants.CONTROL_SAMPLE_WITH_ATTRIBUTES.value,
+        customer_id=StoreConstants.CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES.value,
         is_external=True,
         is_tumour=True,
+        internal_id=StoreConstants.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        reads=StoreConstants.READS_SAMPLE_WITH_ATTRIBUTES.value,
+        name=StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+        original_ticket=StoreConstants.ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES.value,
         ordered_at=timestamp_now,
         created_at=timestamp_now,
         sequence_start=timestamp_now,
@@ -210,19 +222,15 @@ def store_with_a_sample_that_has_many_attributes_and_one_without(
         prepared_at=timestamp_now,
         invoiced_at=timestamp_now,
         application_version_id=StoreConstants.APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        customer_id=StoreConstants.CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES.value,
         subject_id=StoreConstants.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
         invoice_id=StoreConstants.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
         organism_id=StoreConstants.ORGANISM_ID_SAMPLE_WITH_ATTRIBUTES.value,
         loqusdb_id=StoreConstants.LOCUSDB_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        reads=StoreConstants.READS_SAMPLE_WITH_ATTRIBUTES.value,
         downsampled_to=StoreConstants.DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES.value,
         no_invoice=False,
-        original_ticket=StoreConstants.ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES.value,
         age_at_sampling=StoreConstants.AGE_AT_SAMPLING_SAMPLE_WITH_ATTRIBUTES.value,
         capture_kit=StoreConstants.CAPTURE_KIT_SAMPLE_WITH_ATTRIBUTES.value,
         comment=StoreConstants.COMMENT_SAMPLE_WITH_ATTRIBUTES.value,
-        control=StoreConstants.CONTROL_SAMPLE_WITH_ATTRIBUTES.value,
         from_sample=StoreConstants.FROM_SAMPLE_SAMPLE_WITH_ATTRIBUTES.value,
         order=StoreConstants.ORDER_SAMPLE_WITH_ATTRIBUTES.value,
         priority=StoreConstants.PRIORITY_SAMPLE_WITH_ATTRIBUTES.value,
@@ -232,10 +240,10 @@ def store_with_a_sample_that_has_many_attributes_and_one_without(
 
     helpers.add_sample(
         store=store,
-        internal_id=StoreConstants.INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES.value,
-        name=StoreConstants.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
         is_external=False,
         is_tumour=False,
+        internal_id=StoreConstants.INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES.value,
+        name=StoreConstants.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
         delivered_at=None,
         received_at=None,
         last_sequenced_at=None,

@@ -2,15 +2,16 @@ import datetime as dt
 
 from cg.constants import DataDelivery
 from cg.constants.constants import Pipeline
+from cg.constants.subject import Sex
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import MicrobialSample
 from cg.store.models import (
     ApplicationVersion,
-    Customer,
     Case,
     CaseSample,
+    Customer,
     Organism,
     Sample,
 )
@@ -128,7 +129,7 @@ class MicrobialSubmitter(Submitter):
 
                 new_sample = self.status.add_sample(
                     name=sample_data["name"],
-                    sex="unknown",
+                    sex=Sex.UNKNOWN,
                     comment=sample_data["comment"],
                     control=sample_data["control"],
                     internal_id=sample_data.get("internal_id"),

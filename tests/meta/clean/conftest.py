@@ -6,6 +6,7 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
+from cg.constants.subject import Sex
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store import Store
@@ -94,7 +95,7 @@ def store_with_flow_cell_to_clean(
         has_backup=True,
     )
     sample: Sample = helpers.add_sample(
-        name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
+        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
@@ -123,7 +124,7 @@ def store_with_flow_cell_not_to_clean(
         has_backup=True,
     )
     sample: Sample = helpers.add_sample(
-        name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
+        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store

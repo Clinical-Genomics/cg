@@ -9,7 +9,7 @@ from pydantic import ValidationInfo
 
 from cg.constants import NA_FIELD, NO_FIELD, REPORT_GENDER, YES_FIELD, Pipeline
 from cg.constants.constants import AnalysisType
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.models.orders.constants import OrderType
 from cg.models.report.validators import (
     get_analysis_type_as_string,
@@ -153,7 +153,7 @@ def test_get_gender_as_string():
     """Test report gender parsing."""
 
     # GIVEN an invalid gender category
-    gender: Gender = Gender.FEMALE
+    gender: Sex = Sex.FEMALE
     invalid_gender: str = "not_a_gender"
 
     # WHEN performing the validation
