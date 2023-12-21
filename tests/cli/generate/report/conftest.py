@@ -31,10 +31,7 @@ def mip_dna_context(cg_context, helpers, case_id, real_housekeeper_api) -> CGCon
         internal_id=case_id,
     )
     sample = helpers.add_sample(
-        store=store,
-        customer_id="cust000",
-        application_tag="WGSA",
-        application_type="wgs",
+        store=store, application_tag="WGSA", application_type="wgs", customer_id="cust000"
     )
     helpers.add_analysis(
         store=store,

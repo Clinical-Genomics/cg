@@ -10,7 +10,7 @@ from cg.constants import DataDelivery, Pipeline
 from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
-from cg.constants.subject import Gender, PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.store import Store
 from cg.store.models import (
     Analysis,
@@ -362,7 +362,7 @@ class StoreHelpers:
         application_type: str = "tgs",
         control: str = "",
         customer_id: str = None,
-        gender: str = Gender.FEMALE,
+        sex: str = Sex.FEMALE,
         is_external: bool = False,
         is_rna: bool = False,
         is_tumour: bool = False,
@@ -391,7 +391,7 @@ class StoreHelpers:
 
         sample = store.add_sample(
             name=name,
-            sex=gender,
+            sex=sex,
             control=control,
             original_ticket=original_ticket,
             tumour=is_tumour,
@@ -547,13 +547,13 @@ class StoreHelpers:
             sample_id = sample_data["internal_id"]
             sample_obj = StoreHelpers.add_sample(
                 store,
-                gender=sample_data["sex"],
-                name=sample_data.get("name"),
-                internal_id=sample_id,
-                application_type=app_type,
                 application_tag=app_tag,
-                original_ticket=sample_data["original_ticket"],
+                application_type=app_type,
+                sex=sample_data["sex"],
+                internal_id=sample_id,
                 reads=sample_data["reads"],
+                name=sample_data.get("name"),
+                original_ticket=sample_data["original_ticket"],
                 capture_kit=sample_data["capture_kit"],
             )
             sample_objs[sample_id] = sample_obj
@@ -629,7 +629,7 @@ class StoreHelpers:
             application_version=application_version,
             organism=organism,
             reads=6000000,
-            sex=Gender.UNKNOWN,
+            sex=Sex.UNKNOWN,
         )
         sample.customer = customer
         case = StoreHelpers.ensure_case(
@@ -920,7 +920,7 @@ class StoreHelpers:
 
         if not sample:
             sample = cls.add_sample(
-                store=store, internal_id=sample_internal_id, customer_id=customer_id
+                store=store, customer_id=customer_id, internal_id=sample_internal_id
             )
         if not flow_cell:
             flow_cell = cls.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
