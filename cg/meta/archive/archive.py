@@ -121,6 +121,7 @@ class SpringArchiveAPI:
                     samples_and_destinations=filtered_samples,
                     archive_location=archive_location,
                 )
+                LOG.info(f"Retrieval job launched with ID {job_id}")
                 self.set_archive_retrieval_task_ids(
                     retrieval_task_id=job_id,
                     files=self.get_archived_files_from_samples(

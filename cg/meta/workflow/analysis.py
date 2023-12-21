@@ -537,6 +537,7 @@ class AnalysisAPI(MetaAPI):
         Also checks if any spring files are archived and submits a job to retrieve any which are."""
         self.ensure_flow_cells_on_disk(case_id)
         if not self.are_all_spring_files_present(case_id):
+            LOG.warning(f"Files are archived for case {case_id}")
             spring_archive_api = SpringArchiveAPI(
                 status_db=self.status_db,
                 housekeeper_api=self.housekeeper_api,

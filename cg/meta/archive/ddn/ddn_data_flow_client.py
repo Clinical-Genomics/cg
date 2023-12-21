@@ -119,6 +119,9 @@ class DDNDataFlowClient(ArchiveHandler):
         Housekeeper."""
         miria_file_data: list[MiriaObject] = []
         for sample_and_housekeeper_destination in samples_and_destinations:
+            LOG.info(
+                f"Will retrieve files for sample {sample_and_housekeeper_destination.sample.internal_id} via Miria."
+            )
             miria_object: MiriaObject = MiriaObject.create_from_sample_and_destination(
                 sample_and_housekeeper_destination
             )
