@@ -14,7 +14,7 @@ from cg.constants import (
     YES_FIELD,
 )
 from cg.constants.constants import Pipeline, PrepCategory
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.models.orders.constants import OrderType
 
 LOG = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ def get_path_as_string(file_path: str | None) -> str:
     return Path(file_path).name if file_path and Path(file_path).is_file() else NA_FIELD
 
 
-def get_gender_as_string(gender: Gender | None) -> str:
+def get_gender_as_string(gender: Sex | None) -> str:
     """Return a report adapted gender."""
     return get_report_string(REPORT_GENDER.get(gender))
 
