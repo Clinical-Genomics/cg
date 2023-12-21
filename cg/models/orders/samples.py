@@ -42,6 +42,7 @@ class OrderInSample(BaseModel):
     )
     priority: PriorityEnum = PriorityEnum.standard
     require_qc_ok: bool = False
+    volume: str
     concentration_ng_ul: str | None
 
     @classmethod

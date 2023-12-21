@@ -48,6 +48,7 @@ class FastqSubmitter(Submitter):
                     "sex": sample.sex,
                     "tumour": sample.tumour,
                     "volume": sample.volume,
+                    "concentration_ng_ul": sample.concentration_ng_ul,
                 }
                 for sample in order.samples
             ],
