@@ -12,7 +12,7 @@ from requests import Response
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
-from cg.constants.constants import DataDelivery, FileFormat, Pipeline
+from cg.constants.constants import FileFormat
 from cg.constants.subject import Sex
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
