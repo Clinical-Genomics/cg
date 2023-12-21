@@ -533,7 +533,8 @@ class AnalysisAPI(MetaAPI):
             raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
     def ensure_spring_files_are_not_archived(self, case_id: str):
-        """Checks if any Spring files are archived and submits a job to retrieve any which are."""
+        """Checks if any flow cells need to be retrieved and submits a job if that is the case.
+        Also checks if any spring files are archived and submits a job to retrieve any which are."""
         self.ensure_flow_cells_on_disk(case_id)
         if not self.are_all_spring_files_present(case_id):
             spring_archive_api = SpringArchiveAPI(

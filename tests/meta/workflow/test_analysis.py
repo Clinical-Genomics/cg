@@ -437,7 +437,7 @@ def test_are_all_spring_files_present_false_when_none_present(
     case_id: str,
     sample_id: str,
 ):
-    """Tests that are_all_spring_files_present returns False when all files for a case are archived."""
+    """Tests that are_all_spring_files_present returns False when all files for a case are archived and not retrieved."""
 
     # GIVEN that the only Spring file belonging to a case has an Archive entry which has retrieved_at not set
 
@@ -454,7 +454,7 @@ def test_does_any_spring_file_need_to_be_retrieved_flow_cell_status(
     helpers: StoreHelpers,
     flow_cell_status: str,
 ):
-    """Tests that does_any_spring_file_need_to_be_retrieved returns True if one of the false if one of
+    """Tests that does_any_spring_file_need_to_be_retrieved returns True if one of
     the flow cells has status 'removed' and False if the status is instead 'ondisk'."""
 
     # GIVEN a case with a flow cell with 'removed' status
