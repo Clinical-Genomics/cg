@@ -37,7 +37,6 @@
     <IntegrationMode>BaseSpace</IntegrationMode>
     <BaseSpaceSettings>
       <RunMonitoringOnly>true</RunMonitoringOnly>
-      <Username>clinical.genomics@scilifelab.se</Username>
       <PlannedRun>false</PlannedRun>
       <RunId>129810692</RunId>
       <SendInstrumentHealthToILMN>true</SendInstrumentHealthToILMN>

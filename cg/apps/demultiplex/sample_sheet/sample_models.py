@@ -56,7 +56,7 @@ class FlowCellSample(BaseModel):
 
 
 class FlowCellSampleBcl2Fastq(FlowCellSample):
-    """Base class for NovaSeq6000 flow cell samples."""
+    """Class that represents a Bcl2Fastq sample."""
 
     flowcell_id: str = Field("", alias=SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID)
     lane: int = Field(..., alias=SampleSheetBcl2FastqSections.Data.LANE)
@@ -107,7 +107,7 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
 
 
 class FlowCellSampleBCLConvert(FlowCellSample):
-    """Class that represents a NovaSeqX flow cell sample."""
+    """Class that represents a BCLConvert sample."""
 
     lane: int = Field(..., alias=SampleSheetBCLConvertSections.Data.LANE)
     sample_id: SampleId = Field(..., alias=SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID)
@@ -177,7 +177,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
                 get_hamming_distance_for_indexes(sequence_1=self.index, sequence_2=sample.index)
                 < MINIMUM_HAMMING_DISTANCE
             ):
-                LOG.debug(f"Turning barcode mismatch for index 1 to 0 for sample {self.sample_id}")
+                LOG.info(f"Turning barcode mismatch for index 1 to 0 for sample {self.sample_id}")
                 self.barcode_mismatches_1 = 0
                 break
 
@@ -196,7 +196,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
                 get_hamming_distance_for_indexes(sequence_1=self.index2, sequence_2=sample.index2)
                 < MINIMUM_HAMMING_DISTANCE
             ):
-                LOG.debug(f"Turning barcode mismatch for index 2 to 0 for sample {self.sample_id}")
+                LOG.info(f"Turning barcode mismatch for index 2 to 0 for sample {self.sample_id}")
                 self.barcode_mismatches_2 = 0
                 break
 

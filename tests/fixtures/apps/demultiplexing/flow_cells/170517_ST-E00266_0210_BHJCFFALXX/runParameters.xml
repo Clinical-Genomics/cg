@@ -11,7 +11,6 @@
     <IndexRead1>8</IndexRead1>
     <IndexRead2>0</IndexRead2>
     <Read2>151</Read2>
-    <OutputFolder>X:\Runs</OutputFolder>
     <PeriodicSave>Save All Thumbnails</PeriodicSave>
     <Flowcell>HiSeq X</Flowcell>
     <FirstBaseConfirmation>true</FirstBaseConfirmation>
@@ -27,10 +26,8 @@
     <RunStartDate>170517</RunStartDate>
     <IntegrationMode>BaseSpace</IntegrationMode>
     <BaseSpaceSettings>
-      <Username>clinical.genomics@scilifelab.se</Username>
       <RunId>26601581</RunId>
       <InstrumentHealthRunId>26601581</InstrumentHealthRunId>
-      <TempFolder>O:\Illumina\HiSeqTemp</TempFolder>
       <UseBaseSpace>true</UseBaseSpace>
       <SendInstrumentHealthToILMN>true</SendInstrumentHealthToILMN>
       <RunMonitoringOnly>true</RunMonitoringOnly>
@@ -154,7 +151,6 @@
         </SbsReagents>
       </Sbs>
     </ReagentBottles>
-    <TempFolder>O:\Illumina\HiSeqTemp\170517_ST-E00266_0210_BHJCFFALXX</TempFolder>
     <RecipeFragmentVersion>HD 3.5.0.4</RecipeFragmentVersion>
     <PromptForPeReagents>false</PromptForPeReagents>
     <MockRun>false</MockRun>

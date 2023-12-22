@@ -6,13 +6,11 @@
     <DataManager>DataManagerAllOnDisk</DataManager>
     <InterOpManager>InterOpManagerBase</InterOpManager>
     <ThumbnailManager>ThumbnailManager</ThumbnailManager>
-    <TileCacheFolder>S:\Illumina\HiSeqTemp</TileCacheFolder>
     <WorkProviderTypes>
       <string>WorkProviderMultiImageService</string>
     </WorkProviderTypes>
     <TileMatch>.*</TileMatch>
     <CifQValTileMatch>1_1102|1_2202|1_1215|1_2115|4_1106|4_2206|4_1219|4_2119|8_1110|8_2210|8_1223|8_2123</CifQValTileMatch>
-    <PostProcessEventFile>C:\gls\gls_event_hcsx_rta.bat</PostProcessEventFile>
     <MaxExceptionsCopying>3</MaxExceptionsCopying>
     <ServiceBasedTimeoutMinutes>5</ServiceBasedTimeoutMinutes>
     <AggregateOutput>false</AggregateOutput>
@@ -22,9 +20,7 @@
     <InterOpOutCopyMaxRetries>2</InterOpOutCopyMaxRetries>
     <SubTileMetricsGridSizeRow>200</SubTileMetricsGridSizeRow>
     <SubTileMetricsGridSizeColumn>256</SubTileMetricsGridSizeColumn>
-    <WorkSourceUrl>http://localhost:8080/</WorkSourceUrl>
     <WorkProviderServicePort>8081</WorkProviderServicePort>
-    <FileCopyEndpoint>http://localhost:8090/</FileCopyEndpoint>
     <MaxMinsForRequeueOnError>4320</MaxMinsForRequeueOnError>
   </Processing>
   <Logging>
