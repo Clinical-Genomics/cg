@@ -97,12 +97,12 @@ class QualityController:
 
     def is_qc_required(self, case_run_dir: Path) -> bool:
         if not case_run_dir:
-            LOG.info(f"Skipping QC, run directory {case_run_dir} does not exist.")
+            LOG.warning(f"Skipping QC, run directory {case_run_dir} does not exist.")
             return False
         qc_done_path: Path = case_run_dir.joinpath(QUALITY_REPORT_FILE_NAME)
         qc_already_done: bool = qc_done_path.exists()
         if qc_already_done:
-            LOG.info(f"Skipping QC, report {qc_done_path} already exists.")
+            LOG.warning(f"Skipping QC, report {qc_done_path} already exists.")
         return not qc_done_path.exists()
 
     def has_valid_total_reads(self, sample_id: str) -> bool:

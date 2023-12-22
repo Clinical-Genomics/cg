@@ -106,7 +106,7 @@ def non_urgent_samples_pass_qc(results: list[SampleQualityResult]) -> bool:
         return True
 
     fraction_passing_qc: float = len(passing_qc) / len(non_urgent_samples)
-    return fraction_passing_qc >= MicrosaltQC.QC_PERCENT_THRESHOLD_MWX
+    return fraction_passing_qc >= MicrosaltQC.MWX_THRESHOLD_SAMPLES_PASSING
 
 
 def is_sample_negative_control(sample: Sample) -> bool:
