@@ -65,16 +65,16 @@ def has_valid_10x_coverage(metrics: SampleMetrics) -> bool:
     return is_valid_10x_coverage(coverage_10x) if coverage_10x else False
 
 
-def get_negative_control_result(results: list[SampleQualityResult]) -> SampleQualityResult:
+def get_negative_control_result(results: list[SampleQualityResult]) -> SampleQualityResult | None:
     for result in results:
         if result.is_control:
             return result
-    raise ValueError("No negative control found")
 
 
 def negative_control_pass_qc(results: list[SampleQualityResult]) -> bool:
-    negative_control_result: SampleQualityResult = get_negative_control_result(results)
-    return negative_control_result.passes_qc
+    if negative_control_result := get_negative_control_result(results):
+        return negative_control_result.passes_qc
+    return True
 
 
 def get_results_passing_qc(results: list[SampleQualityResult]) -> list[SampleQualityResult]:
