@@ -254,9 +254,14 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         for case in cases_qc_ready:
             case_run_dir: Path | None = self.get_case_path(case.internal_id)
             LOG.info(f"Checking QC for case {case.internal_id} in {case_run_dir}")
+
             if self.quality_checker.is_qc_required(case_run_dir):
                 LOG.info(f"QC required for case {case.internal_id}")
                 metrics_file_path = self.get_metrics_file_path(case.internal_id)
+
+                if not metrics_file_path.exists():
+                    continue
+
                 if self.quality_checker.quality_control(metrics_file_path):
                     self.trailblazer_api.add_comment(case_id=case.internal_id, comment="QC passed")
                     cases_to_store.append(case)
