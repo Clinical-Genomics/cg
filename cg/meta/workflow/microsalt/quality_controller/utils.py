@@ -12,8 +12,8 @@ from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Sample
 
 
-def is_valid_total_reads(reads: int, target_reads: int) -> bool:
-    return reads > target_reads * MicrosaltQC.TARGET_READS_FAIL_THRESHOLD
+def is_valid_total_reads(reads: int, target_reads: int, threshold_percentage: int) -> bool:
+    return reads > target_reads * threshold_percentage / 100
 
 
 def is_valid_total_reads_for_negative_control(reads: int, target_reads: int) -> bool:
@@ -119,6 +119,10 @@ def get_application_tag(sample: Sample) -> str:
 
 def get_sample_target_reads(sample: Sample) -> int:
     return sample.application_version.application.target_reads
+
+
+def get_percent_reads_guaranteed(sample: Sample) -> int:
+    return sample.application_version.application.percent_reads_guaranteed
 
 
 def get_report_path(metrics_file_path: Path) -> Path:

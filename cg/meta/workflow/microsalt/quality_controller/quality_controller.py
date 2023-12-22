@@ -11,6 +11,7 @@ from cg.meta.workflow.microsalt.quality_controller.report_generator import Repor
 from cg.meta.workflow.microsalt.quality_controller.result_logger import ResultLogger
 from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_application_tag,
+    get_percent_reads_guaranteed,
     get_report_path,
     get_sample_target_reads,
     is_sample_negative_control,
@@ -108,10 +109,16 @@ class QualityController:
     def has_valid_total_reads(self, sample_id: str) -> bool:
         sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
         target_reads: int = get_sample_target_reads(sample)
+        percent_reads_guaranteed: int = get_percent_reads_guaranteed(sample)
         sample_reads: int = sample.reads
 
         if is_sample_negative_control(sample):
             return is_valid_total_reads_for_negative_control(
                 reads=sample_reads, target_reads=target_reads
             )
-        return is_valid_total_reads(reads=sample_reads, target_reads=target_reads)
+
+        return is_valid_total_reads(
+            reads=sample_reads,
+            target_reads=target_reads,
+            threshold_percentage=percent_reads_guaranteed,
+        )
