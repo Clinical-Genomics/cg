@@ -218,7 +218,7 @@ def start_available(context: click.Context, dry_run: bool = False):
         raise click.Abort
 
 
-@microsalt.command("qc-microsalt")
+@microsalt.command("qc")
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
 def qc_microsalt(context: click.Context, unique_id: str) -> None:
