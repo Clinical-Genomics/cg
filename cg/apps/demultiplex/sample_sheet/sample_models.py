@@ -186,7 +186,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
         and the index2 of any sample in the lane is below the minimum threshold.
         If the sample is single-indexed, assign 'na'."""
         if self.index2 == EMPTY_STRING and DASH not in self.index:
-            LOG.debug(f"Turning barcode mismatch for index 2 to 'na' for sample {self.sample_id}")
+            LOG.info(f"Turning barcode mismatch for index 2 to 'na' for sample {self.sample_id}")
             self.barcode_mismatches_2 = LOWER_CASE_NA
             return
         for sample in samples_to_compare:
