@@ -195,7 +195,6 @@ class CaseSubmitter(Submitter):
                         "application": sample.application,
                         "capture_kit": sample.capture_kit,
                         "comment": sample.comment,
-                        "concentration_ng_ul": sample.concentration_ng_ul,
                         "control": sample.control,
                         "father": sample.father,
                         "internal_id": sample.internal_id,
