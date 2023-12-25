@@ -471,7 +471,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         config_case.update(self.get_verified_samples(case_id=case_id))
         config_case.update(self.get_parsed_observation_file_paths(observations))
         config_case.update(
-            self.get_verified_gens_file_paths(gender=verified_gender)
+            self.get_verified_gens_file_paths(sex=verified_gender)
         ) if not verified_panel_bed else None
 
         return config_case
