@@ -415,13 +415,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return verified_observations
 
-    def get_verified_gens_file_paths(self, gender: Gender) -> dict[str, str] | None:
+    def get_verified_gens_file_paths(self, gender: Sex) -> dict[str, str] | None:
         """Return a list of file path arguments for Gens."""
         return {
             "genome_interval": self.genome_interval_path,
             "gnomad_min_af5": self.gnomad_af5_path,
             "gens_coverage_pon": self.gens_coverage_female_path
-            if gender == Gender.FEMALE
+            if gender == Sex.FEMALE
             else self.gens_coverage_male_path,
         }
 
@@ -456,7 +456,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             if verified_panel_bed
             else None
         )
-        verified_gender: Gender = gender or self.get_verified_gender(sample_data=sample_data)
+        verified_gender: Sex = gender or self.get_verified_gender(sample_data=sample_data)
 
         config_case: dict[str, str] = {
             "case_id": case_id,
