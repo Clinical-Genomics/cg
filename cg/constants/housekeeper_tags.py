@@ -195,4 +195,17 @@ WORKFLOW_PROTECTED_TAGS = {
         ["gisaid-log"],
         ["gisaid-csv"],
     ],
+    str(Pipeline.RNAFUSION): [
+        [AnalysisTag.FUSION, AnalysisTag.ARRIBA],
+        [AnalysisTag.FUSION, AnalysisTag.STARFUSION],
+        [AnalysisTag.FUSION, AnalysisTag.FUSIONCATCHER],
+        [AnalysisTag.FUSIONINSPECTOR],
+        [AnalysisTag.FUSIONREPORT, AnalysisTag.RESEARCH],
+        [AnalysisTag.FUSIONINSPECTOR_HTML, AnalysisTag.RESEARCH],
+        [AnalysisTag.ARRIBA_VISUALIZATION, AnalysisTag.RESEARCH],
+        [AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA],
+        [HK_DELIVERY_REPORT_TAG],
+        [AnalysisTag.VCF_FUSION],
+        [AnalysisTag.GENE_COUNTS],
+    ],
 }

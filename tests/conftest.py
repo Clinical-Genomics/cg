@@ -31,7 +31,7 @@ from cg.constants.constants import CaseActions, FileFormat, Strandedness
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SequencingPlatform
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import write_yaml
@@ -248,7 +248,7 @@ def analysis_family_single_case(
         "samples": [
             {
                 "name": "proband",
-                "sex": Gender.MALE,
+                "sex": Sex.MALE,
                 "internal_id": sample_id,
                 "status": "affected",
                 "original_ticket": ticket_id,
@@ -272,7 +272,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
         "samples": [
             {
                 "name": "child",
-                "sex": Gender.MALE,
+                "sex": Sex.MALE,
                 "internal_id": sample_id,
                 "father": "ADM2",
                 "mother": "ADM3",
@@ -283,7 +283,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
             },
             {
                 "name": "father",
-                "sex": Gender.MALE,
+                "sex": Sex.MALE,
                 "internal_id": "ADM2",
                 "status": "unaffected",
                 "original_ticket": ticket_id,
@@ -292,7 +292,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
             },
             {
                 "name": "mother",
-                "sex": Gender.FEMALE,
+                "sex": Sex.FEMALE,
                 "internal_id": "ADM3",
                 "status": "unaffected",
                 "original_ticket": ticket_id,
@@ -2177,19 +2177,19 @@ def base_store(
 def sample_store(base_store: Store) -> Store:
     """Populate store with samples."""
     new_samples = [
-        base_store.add_sample(name="ordered", sex=Gender.MALE, internal_id="test_internal_id"),
-        base_store.add_sample(name="received", sex=Gender.UNKNOWN, received=datetime.now()),
+        base_store.add_sample(name="ordered", sex=Sex.MALE, internal_id="test_internal_id"),
+        base_store.add_sample(name="received", sex=Sex.UNKNOWN, received=datetime.now()),
         base_store.add_sample(
             name="received-prepared",
-            sex=Gender.UNKNOWN,
+            sex=Sex.UNKNOWN,
             received=datetime.now(),
             prepared_at=datetime.now(),
         ),
-        base_store.add_sample(name="external", sex=Gender.FEMALE),
-        base_store.add_sample(name="external-received", sex=Gender.FEMALE, received=datetime.now()),
+        base_store.add_sample(name="external", sex=Sex.FEMALE),
+        base_store.add_sample(name="external-received", sex=Sex.FEMALE, received=datetime.now()),
         base_store.add_sample(
             name="sequenced",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             received=datetime.now(),
             prepared_at=datetime.now(),
             last_sequenced_at=datetime.now(),
@@ -2197,19 +2197,19 @@ def sample_store(base_store: Store) -> Store:
         ),
         base_store.add_sample(
             name="sequenced-partly",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             received=datetime.now(),
             prepared_at=datetime.now(),
             reads=(250 * 1000000),
         ),
         base_store.add_sample(
             name="to-deliver",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             last_sequenced_at=datetime.now(),
         ),
         base_store.add_sample(
             name="delivered",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             last_sequenced_at=datetime.now(),
             delivered_at=datetime.now(),
             no_invoice=False,
@@ -3059,10 +3059,10 @@ def rnafusion_context(
 
     sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
         status_db,
-        internal_id=sample_id,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_pass,
         application_tag=apptag_rna,
+        internal_id=sample_id,
+        reads=total_sequenced_reads_pass,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(
@@ -3081,10 +3081,10 @@ def rnafusion_context(
 
     sample_not_enough_reads: Sample = helpers.add_sample(
         status_db,
-        internal_id=sample_id_not_enough_reads,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_not_pass,
         application_tag=apptag_rna,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
@@ -3311,9 +3311,9 @@ def taxprofiler_context(
     taxprofiler_sample: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        last_sequenced_at=datetime.now(),
-        name=sample_name,
         reads=total_sequenced_reads_pass,
+        name=sample_name,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(
@@ -3384,7 +3384,7 @@ def store_with_sequencing_metrics(
     ]
     helpers.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
     helpers.add_sample(
-        name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
+        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
@@ -3525,8 +3525,8 @@ def store_with_case_and_sample_with_reads(
     for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
         helpers.add_sample(
             store=store,
-            internal_id=sample_internal_id,
             customer_id=case.customer_id,
+            internal_id=sample_internal_id,
             reads=100_000_000,
         )
         sample: Sample = store.get_sample_by_internal_id(internal_id=sample_internal_id)
@@ -3672,10 +3672,10 @@ def raredisease_context(
 
     sample_raredisease_case_enough_reads: Sample = helpers.add_sample(
         status_db,
-        internal_id=sample_id,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_pass,
         application_tag=apptag_rna,
+        internal_id=sample_id,
+        reads=total_sequenced_reads_pass,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(
@@ -3694,10 +3694,10 @@ def raredisease_context(
 
     sample_not_enough_reads: Sample = helpers.add_sample(
         status_db,
-        internal_id=sample_id_not_enough_reads,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_not_pass,
         application_tag=apptag_rna,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)

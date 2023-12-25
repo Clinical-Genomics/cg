@@ -163,9 +163,9 @@ def qc_microsalt_context(
     for sample in qc_pass_microsalt_samples:
         sample_to_add: Sample = helpers.add_sample(
             store=store,
-            internal_id=sample,
             application_tag=MicrosaltAppTags.MWRNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
+            internal_id=sample,
             reads=MicrosaltQC.TARGET_READS,
             last_sequenced_at=datetime.datetime.now(),
         )
@@ -183,9 +183,9 @@ def qc_microsalt_context(
     for sample in qc_fail_microsalt_samples:
         sample_to_add: Sample = helpers.add_sample(
             store=store,
-            internal_id=sample,
             application_tag=MicrosaltAppTags.MWXNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
+            internal_id=sample,
             reads=MicrosaltQC.TARGET_READS,
             last_sequenced_at=datetime.datetime.now(),
         )

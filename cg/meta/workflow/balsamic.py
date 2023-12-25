@@ -11,7 +11,7 @@ from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import Variants
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -275,13 +275,11 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         gender = next(iter(sample_data.values()))["gender"]
 
         if all(val["gender"] == gender for val in sample_data.values()) and gender in set(
-            value for value in Gender
+            value for value in Sex
         ):
-            if gender not in [Gender.FEMALE, Gender.MALE]:
-                LOG.warning(
-                    f"The provided gender is unknown, setting {Gender.FEMALE.value} as the default"
-                )
-                gender = Gender.FEMALE.value
+            if gender not in [Sex.FEMALE, Sex.MALE]:
+                LOG.warning(f"The provided sex is unknown, setting {Sex.FEMALE} as the default")
+                gender = Sex.FEMALE
 
             return gender
         else:

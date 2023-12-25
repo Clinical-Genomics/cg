@@ -8,7 +8,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 
-from cg.constants.constants import CaseActions, DataDelivery, Pipeline
+from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Pipeline
 from cg.server.ext import db
 from cg.store.models import Sample
 from cg.utils.flask.enum import SelectEnumField
@@ -53,7 +53,7 @@ def view_sample_concentration_minimum(unused1, unused2, model, unused3):
     """Column formatter to append unit"""
     del unused1, unused2, unused3
     return (
-        str(model.sample_concentration_minimum) + " ng/uL"
+        str(model.sample_concentration_minimum) + NG_UL_SUFFIX
         if model.sample_concentration_minimum
         else None
     )
@@ -63,8 +63,28 @@ def view_sample_concentration_maximum(unused1, unused2, model, unused3):
     """Column formatter to append unit"""
     del unused1, unused2, unused3
     return (
-        str(model.sample_concentration_maximum) + " ng/uL"
+        str(model.sample_concentration_maximum) + NG_UL_SUFFIX
         if model.sample_concentration_maximum
+        else None
+    )
+
+
+def view_sample_concentration_minimum_cfdna(unused1, unused2, model, unused3):
+    """Column formatter to append unit"""
+    del unused1, unused2, unused3
+    return (
+        str(model.sample_concentration_minimum_cfdna) + NG_UL_SUFFIX
+        if model.sample_concentration_minimum_cfdna
+        else None
+    )
+
+
+def view_sample_concentration_maximum_cfdna(unused1, unused2, model, unused3):
+    """Column formatter to append unit"""
+    del unused1, unused2, unused3
+    return (
+        str(model.sample_concentration_maximum_cfdna) + NG_UL_SUFFIX
+        if model.sample_concentration_maximum_cfdna
         else None
     )
 
@@ -84,6 +104,10 @@ class ApplicationView(BaseView):
         "is_external",
         "turnaround_time",
         "sample_concentration",
+        "sample_concentration_minimum",
+        "sample_concentration_maximum",
+        "sample_concentration_minimum_cfdna",
+        "sample_concentration_maximum_cfdna",
         "priority_processing",
         "is_archived",
     ]
@@ -100,6 +124,8 @@ class ApplicationView(BaseView):
     column_formatters = {
         "sample_concentration_minimum": view_sample_concentration_minimum,
         "sample_concentration_maximum": view_sample_concentration_maximum,
+        "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
+        "sample_concentration_maximum_cfdna": view_sample_concentration_maximum_cfdna,
     }
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
