@@ -4,6 +4,7 @@ import pytest
 
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.nanopore_files import NanoporeDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.exc import FlowCellError
 from cg.io.csv import read_csv
@@ -431,6 +432,7 @@ def test_is_syncing_complete_false(
             ],
             False,
         ),
+        ([NanoporeDirsAndFiles.sequencing_summary_pattern.replace("*", "FlowCell_ID1_ID2")], True),
     ],
 )
 def test_is_manifest_file_required(source_files: list[str], expected_result: bool, tmp_path: Path):
@@ -448,6 +450,19 @@ def test_is_manifest_file_required(source_files: list[str], expected_result: boo
 
     # THEN the result should as expected
     assert is_required == expected_result
+
+
+def test_is_manifest_file_required_nanopore_data(tmp_path: Path):
+    """Tests if a manifest file is needed given the files present."""
+    # GIVEN a source directory
+    source_directory = Path(tmp_path, "source")
+    Path(tmp_path, "source").mkdir()
+
+    # WHEN checking if a manifest file is needed
+    is_required = is_manifest_file_required(source_directory)
+
+    # THEN the result should as expected
+    assert is_required is False
 
 
 @pytest.mark.parametrize(
