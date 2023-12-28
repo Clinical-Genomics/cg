@@ -207,18 +207,11 @@ def parse_manifest_file(manifest_file: Path) -> list[Path]:
 
 def is_file_relevant_for_demultiplexing(file: Path) -> bool:
     """Returns whether a file is relevant for demultiplexing."""
-    irrelevant_directories = [
-        "Thumbnail_Images",
-        ".tmp.cbcl",
-        ".cbcl.tmp",
-        "MyRun",
-        "tmp.filter",
-        "CopyComplete.txt",
-    ]
-    return all(
-        irrelevant_directory not in file.as_posix()
-        for irrelevant_directory in irrelevant_directories
-    )
+    relevant_directories = [DemultiplexingDirsAndFiles.INTER_OP, DemultiplexingDirsAndFiles.DATA]
+    for relevant_directory in relevant_directories:
+        if relevant_directory in file.parts:
+            return True
+    return False
 
 
 def get_existing_manifest_file(source_directory: Path) -> Path | None:
