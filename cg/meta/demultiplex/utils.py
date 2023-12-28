@@ -9,6 +9,7 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
 )
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.nanopore_files import NanoporeDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.io.csv import read_csv, write_csv
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -206,11 +207,18 @@ def parse_manifest_file(manifest_file: Path) -> list[Path]:
 
 def is_file_relevant_for_demultiplexing(file: Path) -> bool:
     """Returns whether a file is relevant for demultiplexing."""
-    relevant_directories = [DemultiplexingDirsAndFiles.INTER_OP, DemultiplexingDirsAndFiles.DATA]
-    for relevant_directory in relevant_directories:
-        if relevant_directory in file.parts:
-            return True
-    return False
+    irrelevant_directories = [
+        "Thumbnail_Images",
+        ".tmp.cbcl",
+        ".cbcl.tmp",
+        "MyRun",
+        "tmp.filter",
+        "CopyComplete.txt",
+    ]
+    return all(
+        irrelevant_directory not in file.as_posix()
+        for irrelevant_directory in irrelevant_directories
+    )
 
 
 def get_existing_manifest_file(source_directory: Path) -> Path | None:
@@ -258,9 +266,12 @@ def is_manifest_file_required(flow_cell_dir: Path) -> bool:
     illumina_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST)
     custom_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)
     copy_complete_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE)
+    sequencing_finished: bool = (
+        copy_complete_file.exists() or NanoporeDirsAndFiles.sequencing_complete(flow_cell_dir)
+    )
     return (
         not any((illumina_manifest_file.exists(), custom_manifest_file.exists()))
-        and copy_complete_file.exists()
+        and sequencing_finished
     )
 
 

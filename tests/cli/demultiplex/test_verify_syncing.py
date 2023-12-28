@@ -33,15 +33,10 @@ def test_create_manifest_files_true(
         # THEN the manifest file should exist
         assert manifest_file.exists()
 
-        all_files_in_directory: list[Path] = get_all_files_in_directory_tree(flow_cell)
-        all_files_in_directory.remove(Path(manifest_file.name))
-        files_in_manifest: list[Path] = [
-            Path(file[0].strip()) for file in read_csv(delimiter="\t", file_path=manifest_file)
-        ]
-
         # THEN the manifest file should contain all files in the flowcell directory
-        for file in all_files_in_directory:
-            assert file in files_in_manifest
+        assert_manifest_file_contains_all_files(
+            manifest_file=manifest_file, directory_of_interest=flow_cell
+        )
 
 
 def test_create_manifest_files_false(
@@ -70,3 +65,38 @@ def test_create_manifest_files_false(
 
         # THEN the manifest file should not exist
         assert not manifest_file.exists()
+
+
+def test_create_manifest_files_true_nanopore_data(cli_runner, nanopore_flow_cells_dir: Path):
+    # GIVEN a Nanopore run with two samples
+    sample_directories: list[Path] = list(Path(nanopore_flow_cells_dir).glob("*/*/*"))
+    assert len(sample_directories) == 2
+
+    # WHEN creating manifest files
+    cli_runner.invoke(
+        cli=create_manifest_files,
+        args=["--source-directory", f"{nanopore_flow_cells_dir}/*/*"],
+    )
+
+    for sample_directory in sample_directories:
+        manifest_file = Path(sample_directory, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)
+
+        # THEN the manifest file should exist
+        assert manifest_file.exists()
+
+        # THEN the manifest file should contain all files in the flowcell directory
+        assert_manifest_file_contains_all_files(
+            manifest_file=manifest_file, directory_of_interest=sample_directory
+        )
+
+
+def assert_manifest_file_contains_all_files(
+    manifest_file: Path, directory_of_interest: Path
+) -> None:
+    """Assert that the manifest file contains all files in the directory of interest."""
+    all_files_in_directory: list[Path] = get_all_files_in_directory_tree(directory_of_interest)
+    all_files_in_directory.remove(Path(manifest_file.name))
+    files_in_manifest: list[Path] = [
+        Path(file[0].strip()) for file in read_csv(delimiter="\t", file_path=manifest_file)
+    ]
+    assert all(file in files_in_manifest for file in all_files_in_directory)

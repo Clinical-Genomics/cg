@@ -29,6 +29,7 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, Pipeline, SequencingFileTag
 from cg.constants.constants import CaseActions, FileFormat, Strandedness
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.nanopore_files import NanoporeDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
@@ -815,6 +816,11 @@ def tmp_flow_cells_demux_all_directory(tmp_path: Path, flow_cells_demux_all_dir:
     return Path(shutil.copytree(original_dir, tmp_dir))
 
 
+@pytest.fixture
+def nanopore_experiment_directory(nanopore_flow_cells_dir: Path):
+    pass
+
+
 @pytest.fixture(name="tmp_flow_cell_directory_bcl2fastq")
 def flow_cell_working_directory_bcl2fastq(
     bcl2fastq_flow_cell_dir: Path, tmp_flow_cells_directory: Path
@@ -1205,6 +1211,12 @@ def demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
 def flow_cells_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the sequenced flow cells fixture directory."""
     return Path(demultiplex_fixtures, DemultiplexingDirsAndFiles.FLOW_CELLS_DIRECTORY_NAME)
+
+
+@pytest.fixture(scope="session")
+def nanopore_flow_cells_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to the sequenced flow cells fixture directory."""
+    return Path(demultiplex_fixtures, NanoporeDirsAndFiles.data_directory)
 
 
 @pytest.fixture(scope="session")
