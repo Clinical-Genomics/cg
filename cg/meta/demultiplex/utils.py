@@ -279,9 +279,7 @@ def confirm_nanopore_flow_cell_sync(source_directory: Path, target_directory: Pa
             continue
         if is_syncing_complete(
             source_directory=source_flow_cell,
-            target_directory=Path(
-                target_directory, source_flow_cell.parent.name, source_flow_cell.name
-            ),
+            target_directory=target_flow_cell,
         ):
             create_copy_complete_file(target_flow_cell)
             create_nanopore_trigger_file(target_flow_cell)
@@ -332,10 +330,10 @@ def create_copy_complete_file(flow_cell_directory: Path) -> None:
 
 
 def create_nanopore_trigger_file(flow_cell_directory: Path) -> None:
-    sample_name: str = flow_cell_directory.parent.name
+    flow_cell_id: str = flow_cell_directory.name
     nanopore_data_directory: Path = flow_cell_directory.parent.parent
     Path(
-        nanopore_data_directory, NanoporeDirsAndFiles.systemd_trigger_directory, sample_name
+        nanopore_data_directory, NanoporeDirsAndFiles.systemd_trigger_directory, flow_cell_id
     ).touch()
 
 

@@ -96,11 +96,15 @@ def test_confirm_flow_cell_sync_cli_all_files_present(
         create_manifest_file(Path(source_directory, flow_cell.name))
 
     # WHEN checking if all files are present
-    cli_runner.invoke(
+    result = cli_runner.invoke(
         cli=confirm_flow_cell_sync_cli,
         args=["--source-directory", source_directory.as_posix()],
         obj=cg_config_object,
     )
+
+    # THEN the command should exit successfully
+    assert result.exit_code == 0
+
     # THEN a copy complete file should be created
     assert all(
         Path(flow_cell, DemultiplexingDirsAndFiles.COPY_COMPLETE).exists()
@@ -136,11 +140,14 @@ def test_confirm_flow_cell_sync_cli_missing_files(
         create_manifest_file(Path(source_directory, flow_cell.name))
 
     # WHEN checking if all files are present
-    cli_runner.invoke(
+    result = cli_runner.invoke(
         cli=confirm_flow_cell_sync_cli,
         args=["--source-directory", source_directory.as_posix()],
         obj=cg_config_object,
     )
+
+    # THEN the command should exit successfully
+    assert result.exit_code == 0
 
     # THEN a copy complete file should be created
     assert all(
@@ -157,27 +164,29 @@ def test_confirm_flow_cell_sync_nanopore_cli_all_files_present(
 ):
     # GIVEN a Nanopore run with two samples
     flow_cell_directories: list[Path] = list(Path(nanopore_flow_cells_dir).glob("*/*/*"))
+    sample_directories: list[Path] = [
+        flowcell_directory.parent for flowcell_directory in flow_cell_directories
+    ]
     source_directory, target_directory = set_up_source_and_target_directories(
-        folders_to_include=[
-            flowcell_directory.parent for flowcell_directory in flow_cell_directories
-        ],
+        folders_to_include=sample_directories,
         temporary_path=tmp_path,
     )
     cg_config_object.nanopore_data_directory = target_directory.as_posix()
     Path(target_directory, NanoporeDirsAndFiles.systemd_trigger_directory).mkdir()
-    for flow_cell_directory in target_directory.glob("*/*"):
+    for flow_cell_directory in source_directory.glob("*/*"):
         # GIVEN that no file is missing
         # GIVEN that they each have manifest files
-        create_manifest_file(
-            Path(source_directory, flow_cell_directory.parent, flow_cell_directory.name)
-        )
+        create_manifest_file(flow_cell_directory)
 
     # WHEN checking if all files are present
-    cli_runner.invoke(
+    result = cli_runner.invoke(
         cli=confirm_flow_cell_sync_nanopore_cli,
         args=["--source-directory", source_directory.as_posix()],
         obj=cg_config_object,
     )
+    # THEN the command should exit successfully
+    assert result.exit_code == 0
+
     # THEN a copy complete file should be created
     assert all(
         Path(
@@ -194,7 +203,7 @@ def test_confirm_flow_cell_sync_nanopore_cli_all_files_present(
         Path(
             target_directory,
             NanoporeDirsAndFiles.systemd_trigger_directory,
-            flow_cell_directory.parent.name,
+            flow_cell_directory.name,
         ).exists()
         for flow_cell_directory in flow_cell_directories
     )
@@ -212,20 +221,23 @@ def test_confirm_flow_cell_sync_nanopore_cli_missing_files(
         temporary_path=tmp_path,
     )
     cg_config_object.nanopore_data_directory = target_directory.as_posix()
-    for flow_cell_directory in target_directory.glob("*/*"):
+    Path(target_directory, NanoporeDirsAndFiles.systemd_trigger_directory).mkdir()
+    for flow_cell_directory in source_directory.glob("*/*"):
         # GIVEN that a file is missing
-        list(flow_cell_directory.glob("*txt"))[0].unlink()
+        list(Path(target_directory).glob(f"*/{flow_cell_directory.name}/*txt"))[0].unlink()
         # GIVEN that they each have manifest files
-        create_manifest_file(
-            Path(source_directory, flow_cell_directory.parent, flow_cell_directory.name)
-        )
+        create_manifest_file(flow_cell_directory)
 
     # WHEN checking if all files are present
-    cli_runner.invoke(
+    result = cli_runner.invoke(
         cli=confirm_flow_cell_sync_nanopore_cli,
         args=["--source-directory", source_directory.as_posix()],
         obj=cg_config_object,
     )
+
+    # THEN the command should exit successfully
+    assert result.exit_code == 0
+
     # THEN no copy complete file should be created
     assert all(
         not Path(
