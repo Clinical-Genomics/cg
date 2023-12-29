@@ -10,6 +10,7 @@ from tests.meta.demultiplex.conftest import get_all_files_in_directory_tree
 def test_create_manifest_files_true(
     cli_runner, tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert: Path
 ):
+    """Test that manifest files are created for flow cells where the sequencing is complete."""
     # GIVEN two flowcell directories
     first_flowcell_directory: Path = tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert
     second_flowcell_directory = Path(
@@ -42,6 +43,7 @@ def test_create_manifest_files_true(
 def test_create_manifest_files_false(
     cli_runner, tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert: Path
 ):
+    """Test that manifest files are not created for flow cells where the sequencing is not complete."""
     # GIVEN two flowcell directories with missing CopyComplete.txt
     first_flowcell_directory = tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert
     Path(first_flowcell_directory, DemultiplexingDirsAndFiles.COPY_COMPLETE).unlink()
@@ -68,6 +70,7 @@ def test_create_manifest_files_false(
 
 
 def test_create_manifest_files_true_nanopore_data(cli_runner, nanopore_flow_cells_dir: Path):
+    """Test that manifest files are created for flow cells where the sequencing is complete."""
     # GIVEN a Nanopore run with two samples
     sample_directories: list[Path] = list(Path(nanopore_flow_cells_dir).glob("*/*/*"))
     assert len(sample_directories) == 2

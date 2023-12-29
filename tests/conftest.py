@@ -816,11 +816,6 @@ def tmp_flow_cells_demux_all_directory(tmp_path: Path, flow_cells_demux_all_dir:
     return Path(shutil.copytree(original_dir, tmp_dir))
 
 
-@pytest.fixture
-def nanopore_experiment_directory(nanopore_flow_cells_dir: Path):
-    pass
-
-
 @pytest.fixture(name="tmp_flow_cell_directory_bcl2fastq")
 def flow_cell_working_directory_bcl2fastq(
     bcl2fastq_flow_cell_dir: Path, tmp_flow_cells_directory: Path

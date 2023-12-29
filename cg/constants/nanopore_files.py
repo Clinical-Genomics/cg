@@ -1,8 +1,11 @@
+"""Constants related to Oxford Nanopore sequencing."""
 from enum import StrEnum
 from pathlib import Path
 
 
 class NanoporeDirsAndFiles(StrEnum):
+    """Holds file and directory names for nanopore sequencing output."""
+
     data_directory: str = "nanopore"
     sequencing_summary_pattern: str = r"final_summary_*.txt"
 
