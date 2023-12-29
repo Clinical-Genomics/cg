@@ -12,13 +12,13 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     mark_as_demultiplexed,
     mark_flow_cell_as_queued_for_post_processing,
 )
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.utils import (
+    confirm_flow_cell_sync,
+    confirm_nanopore_flow_cell_sync,
     create_manifest_file,
-    is_flow_cell_sync_confirmed,
     is_manifest_file_required,
-    is_syncing_complete,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -152,24 +152,28 @@ def copy_novaseqx_flow_cells(context: CGConfig):
     help="The path from where the syncing is done.",
 )
 @click.pass_obj
-def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
+def confirm_flow_cell_sync_cli(context: CGConfig, source_directory: str):
     """Checks if all relevant files for the demultiplexing have been synced.
     If so it creates a CopyComplete.txt file to show that that is the case."""
-    target_flow_cells_directory = Path(context.flow_cells_dir)
-    for source_flow_cell in Path(source_directory).iterdir():
-        target_flow_cell = Path(target_flow_cells_directory, source_flow_cell.name)
-        if is_flow_cell_sync_confirmed(target_flow_cell):
-            LOG.debug(f"Flow cell {source_flow_cell} has already been confirmed, skipping.")
-            continue
-        if is_syncing_complete(
-            source_directory=source_flow_cell,
-            target_directory=Path(target_flow_cells_directory, source_flow_cell.name),
-        ):
-            Path(
-                target_flow_cells_directory,
-                source_flow_cell.name,
-                DemultiplexingDirsAndFiles.COPY_COMPLETE,
-            ).touch()
+    confirm_flow_cell_sync(
+        source_directory=Path(source_directory), target_directory=Path(context.flow_cells_dir)
+    )
+
+
+@click.command(name="confirm--nanopore-flow-cell-sync")
+@click.option(
+    "--source-directory",
+    required=True,
+    help="The path from where the syncing is done.",
+)
+@click.pass_obj
+def confirm_flow_cell_sync_nanopore_cli(context: CGConfig, source_directory: str):
+    """Checks if all relevant files for the demultiplexing have been synced.
+    If so it creates a CopyComplete.txt file to show that that is the case."""
+    confirm_nanopore_flow_cell_sync(
+        source_directory=Path(source_directory),
+        target_directory=Path(context.nanopore_data_directory),
+    )
 
 
 @click.command(name="create-manifest-files")

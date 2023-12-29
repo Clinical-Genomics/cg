@@ -254,6 +254,39 @@ def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
     return are_all_files_synced(files_at_source=files_at_source, target_directory=target_directory)
 
 
+def confirm_flow_cell_sync(source_directory: Path, target_directory: Path) -> None:
+    """Checks if all relevant files for the demultiplexing have been synced."""
+    for source_flow_cell in Path(source_directory).iterdir():
+        target_flow_cell = Path(target_directory, source_flow_cell.name)
+        if is_flow_cell_sync_confirmed(target_flow_cell):
+            LOG.debug(f"Flow cell {source_flow_cell} has already been confirmed, skipping.")
+            continue
+        if is_syncing_complete(
+            source_directory=source_flow_cell,
+            target_directory=Path(target_directory, source_flow_cell.name),
+        ):
+            create_copy_complete_file(target_flow_cell)
+
+
+def confirm_nanopore_flow_cell_sync(source_directory: Path, target_directory: Path) -> None:
+    """Checks if all relevant Nanopore files have been synced."""
+    for source_flow_cell in Path(source_directory).glob("*/*"):
+        target_flow_cell = Path(
+            target_directory, source_flow_cell.parent.name, source_flow_cell.name
+        )
+        if is_flow_cell_sync_confirmed(target_flow_cell):
+            LOG.debug(f"Flow cell {source_flow_cell} has already been confirmed, skipping.")
+            continue
+        if is_syncing_complete(
+            source_directory=source_flow_cell,
+            target_directory=Path(
+                target_directory, source_flow_cell.parent.name, source_flow_cell.name
+            ),
+        ):
+            create_copy_complete_file(target_flow_cell)
+            create_nanopore_trigger_file(target_flow_cell)
+
+
 def get_flow_cell_id(flow_cell_dir_name: str) -> str:
     """Return the flow cell id from the flow cell directory name.
     Example: 230802_A00689_0857_BHGTMFDSX7 -> HGTMFDSX7
@@ -292,6 +325,18 @@ def create_manifest_file(flow_cell_dir_name: Path) -> Path:
         delimiter="\t",
     )
     return output_path
+
+
+def create_copy_complete_file(flow_cell_directory: Path) -> None:
+    Path(flow_cell_directory, DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
+
+
+def create_nanopore_trigger_file(flow_cell_directory: Path) -> None:
+    sample_name: str = flow_cell_directory.parent.name
+    nanopore_data_directory: Path = flow_cell_directory.parent.parent
+    Path(
+        nanopore_data_directory, NanoporeDirsAndFiles.systemd_trigger_directory, sample_name
+    ).touch()
 
 
 def is_flow_cell_sync_confirmed(target_flow_cell_dir: Path) -> bool:

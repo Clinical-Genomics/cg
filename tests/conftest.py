@@ -316,6 +316,7 @@ def base_config_dict() -> dict:
         "tower_binary_path": "path/to/tower",
         "delivery_path": "path/to/delivery",
         "flow_cells_dir": "path/to/flow_cells",
+        "nanopore_data_directory": "path/to/nanopore_data_directory",
         "demultiplexed_flow_cells_dir": "path/to/demultiplexed_flow_cells_dir",
         "downsample_dir": "path/to/downsample_dir",
         "downsample_script": "downsample.sh",

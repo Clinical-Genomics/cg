@@ -5,6 +5,7 @@ from pathlib import Path
 class NanoporeDirsAndFiles(StrEnum):
     data_directory: str = "nanopore"
     sequencing_summary_pattern: str = r"final_summary_*.txt"
+    systemd_trigger_directory: str = "new_transferred_data"
 
     @classmethod
     def sequencing_summary_file(cls, flow_cell_directory: Path) -> Path | None:
