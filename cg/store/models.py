@@ -705,6 +705,7 @@ class Sample(Model, PriorityMixin):
     )
     flowcells = orm.relationship(Flowcell, secondary=flowcell_sample, back_populates="samples")
     sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
+    nanopore_acquisitions = orm.relationship("NanoporeAcquisition", back_populates="sample")
     invoice = orm.relationship("Invoice", back_populates="samples")
 
     def __str__(self) -> str:
@@ -864,6 +865,26 @@ class SampleLaneSequencingMetrics(Model):
             name="uix_flowcell_sample_lane",
         ),
     )
+
+    def to_dict(self):
+        return to_dict(model_instance=self)
+
+
+class NanoporeAcquisition(Model):
+    """Model for storing nanopore acquisition metrics per sample."""
+
+    __tablename__ = "nanopore_acquisition"
+    sample_internal_id = Column(
+        types.String(32), ForeignKey("sample.internal_id"), primary_key=True
+    )
+    flow_cell_id = Column(types.String(32), primary_key=True)
+    reads = Column(types.BigInteger)
+    total_yield = Column(types.BigInteger)
+    n50 = Column(types.BigInteger)
+
+    created_at = Column(types.DateTime)
+
+    sample = orm.relationship(Sample, back_populates="nanopore_acquisitions")
 
     def to_dict(self):
         return to_dict(model_instance=self)
