@@ -254,8 +254,8 @@ def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
     return are_all_files_synced(files_at_source=files_at_source, target_directory=target_directory)
 
 
-def confirm_flow_cell_sync(source_directory: Path, target_directory: Path) -> None:
-    """Checks if all relevant files for the demultiplexing have been synced."""
+def confirm_illumina_flow_cell_sync(source_directory: Path, target_directory: Path) -> None:
+    """Checks if all relevant files from an Illumina sequencing run have been transferred."""
     for source_flow_cell in Path(source_directory).iterdir():
         target_flow_cell = Path(target_directory, source_flow_cell.name)
         if is_flow_cell_sync_confirmed(target_flow_cell):
@@ -269,7 +269,7 @@ def confirm_flow_cell_sync(source_directory: Path, target_directory: Path) -> No
 
 
 def confirm_nanopore_flow_cell_sync(source_directory: Path, target_directory: Path) -> None:
-    """Checks if all relevant Nanopore files have been synced."""
+    """Checks if all relevant files from a Nanopore sequencing run have been transferred."""
     for source_flow_cell in Path(source_directory).glob("*/*"):
         target_flow_cell = Path(
             target_directory, source_flow_cell.parent.name, source_flow_cell.name
@@ -330,6 +330,7 @@ def create_copy_complete_file(flow_cell_directory: Path) -> None:
 
 
 def create_nanopore_trigger_file(flow_cell_directory: Path) -> None:
+    """Create a file named as the flow cell id in the systemd trigger directory."""
     flow_cell_id: str = flow_cell_directory.name
     nanopore_data_directory: Path = flow_cell_directory.parent.parent
     Path(

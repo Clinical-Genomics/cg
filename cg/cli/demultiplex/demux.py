@@ -15,7 +15,7 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.utils import (
-    confirm_flow_cell_sync,
+    confirm_illumina_flow_cell_sync,
     confirm_nanopore_flow_cell_sync,
     create_manifest_file,
     is_manifest_file_required,
@@ -152,23 +152,23 @@ def copy_novaseqx_flow_cells(context: CGConfig):
     help="The path from where the syncing is done.",
 )
 @click.pass_obj
-def confirm_flow_cell_sync_cli(context: CGConfig, source_directory: str):
-    """Checks if all relevant files for the demultiplexing have been synced.
+def confirm_transfer_of_illumina_flow_cell(context: CGConfig, source_directory: str):
+    """Checks if all relevant files from an Illumina sequencing run have been transferred.
     If so it creates a CopyComplete.txt file to show that that is the case."""
-    confirm_flow_cell_sync(
+    confirm_illumina_flow_cell_sync(
         source_directory=Path(source_directory), target_directory=Path(context.flow_cells_dir)
     )
 
 
-@click.command(name="confirm--nanopore-flow-cell-sync")
+@click.command(name="confirm-nanopore-flow-cell-sync")
 @click.option(
     "--source-directory",
     required=True,
     help="The path from where the syncing is done.",
 )
 @click.pass_obj
-def confirm_flow_cell_sync_nanopore_cli(context: CGConfig, source_directory: str):
-    """Checks if all relevant files for the demultiplexing have been synced.
+def confirm_transfer_of_nanopore_flow_cell(context: CGConfig, source_directory: str):
+    """Checks if all relevant files from a Nanopore sequencing run have been transferred.
     If so it creates a CopyComplete.txt file to show that that is the case."""
     confirm_nanopore_flow_cell_sync(
         source_directory=Path(source_directory),

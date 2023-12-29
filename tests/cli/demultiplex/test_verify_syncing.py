@@ -2,8 +2,8 @@ import shutil
 from pathlib import Path
 
 from cg.cli.demultiplex.demux import (
-    confirm_flow_cell_sync_cli,
-    confirm_flow_cell_sync_nanopore_cli,
+    confirm_transfer_of_illumina_flow_cell,
+    confirm_transfer_of_nanopore_flow_cell,
     create_manifest_files,
 )
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
@@ -12,6 +12,8 @@ from cg.io.csv import read_csv
 from cg.meta.demultiplex.utils import create_manifest_file
 from cg.models.cg_config import CGConfig
 from tests.meta.demultiplex.conftest import get_all_files_in_directory_tree
+
+THREE_LEVELS_DOWN = "*/*/*"
 
 
 def test_create_manifest_files_true(
@@ -74,7 +76,7 @@ def test_create_manifest_files_false(
         assert not manifest_file.exists()
 
 
-def test_confirm_flow_cell_sync_cli_all_files_present(
+def test_confirm_transfer_of_illumina_flow_cell_all_files_present(
     cg_config_object: CGConfig,
     cli_runner,
     bcl_convert_flow_cell_dir: Path,
@@ -97,7 +99,7 @@ def test_confirm_flow_cell_sync_cli_all_files_present(
 
     # WHEN checking if all files are present
     result = cli_runner.invoke(
-        cli=confirm_flow_cell_sync_cli,
+        cli=confirm_transfer_of_illumina_flow_cell,
         args=["--source-directory", source_directory.as_posix()],
         obj=cg_config_object,
     )
@@ -115,7 +117,7 @@ def test_confirm_flow_cell_sync_cli_all_files_present(
     )
 
 
-def test_confirm_flow_cell_sync_cli_missing_files(
+def test_confirm_transfer_of_illumina_flow_cell_missing_files(
     cg_config_object: CGConfig,
     cli_runner,
     bcl_convert_flow_cell_dir: Path,
@@ -141,7 +143,7 @@ def test_confirm_flow_cell_sync_cli_missing_files(
 
     # WHEN checking if all files are present
     result = cli_runner.invoke(
-        cli=confirm_flow_cell_sync_cli,
+        cli=confirm_transfer_of_illumina_flow_cell,
         args=["--source-directory", source_directory.as_posix()],
         obj=cg_config_object,
     )
@@ -159,11 +161,11 @@ def test_confirm_flow_cell_sync_cli_missing_files(
     )
 
 
-def test_confirm_flow_cell_sync_nanopore_cli_all_files_present(
+def test_confirm_transfer_of_nanopore_flow_cell_all_files_present(
     cg_config_object, cli_runner, nanopore_flow_cells_dir: Path, tmp_path: Path
 ):
     # GIVEN a Nanopore run with two samples
-    flow_cell_directories: list[Path] = list(Path(nanopore_flow_cells_dir).glob("*/*/*"))
+    flow_cell_directories: list[Path] = list(Path(nanopore_flow_cells_dir).glob(THREE_LEVELS_DOWN))
     sample_directories: list[Path] = [
         flowcell_directory.parent for flowcell_directory in flow_cell_directories
     ]
@@ -180,7 +182,7 @@ def test_confirm_flow_cell_sync_nanopore_cli_all_files_present(
 
     # WHEN checking if all files are present
     result = cli_runner.invoke(
-        cli=confirm_flow_cell_sync_nanopore_cli,
+        cli=confirm_transfer_of_nanopore_flow_cell,
         args=["--source-directory", source_directory.as_posix()],
         obj=cg_config_object,
     )
@@ -209,11 +211,11 @@ def test_confirm_flow_cell_sync_nanopore_cli_all_files_present(
     )
 
 
-def test_confirm_flow_cell_sync_nanopore_cli_missing_files(
+def test_confirm_transfer_of_nanopore_flow_cell_missing_files(
     cg_config_object, cli_runner, nanopore_flow_cells_dir: Path, tmp_path: Path
 ):
     # GIVEN a Nanopore run with two samples
-    flow_cell_directories: list[Path] = list(Path(nanopore_flow_cells_dir).glob("*/*/*"))
+    flow_cell_directories: list[Path] = list(Path(nanopore_flow_cells_dir).glob(THREE_LEVELS_DOWN))
     source_directory, target_directory = set_up_source_and_target_directories(
         folders_to_include=[
             flowcell_directory.parent for flowcell_directory in flow_cell_directories
@@ -230,7 +232,7 @@ def test_confirm_flow_cell_sync_nanopore_cli_missing_files(
 
     # WHEN checking if all files are present
     result = cli_runner.invoke(
-        cli=confirm_flow_cell_sync_nanopore_cli,
+        cli=confirm_transfer_of_nanopore_flow_cell,
         args=["--source-directory", source_directory.as_posix()],
         obj=cg_config_object,
     )
@@ -275,7 +277,7 @@ def set_up_source_and_target_directories(
 
 def test_create_manifest_files_true_nanopore_data(cli_runner, nanopore_flow_cells_dir: Path):
     # GIVEN a Nanopore run with two samples
-    sample_directories: list[Path] = list(Path(nanopore_flow_cells_dir).glob("*/*/*"))
+    sample_directories: list[Path] = list(Path(nanopore_flow_cells_dir).glob(THREE_LEVELS_DOWN))
     assert len(sample_directories) == 2
 
     # WHEN creating manifest files
