@@ -2415,6 +2415,7 @@ def context_config(
         "database": cg_uri,
         "delivery_path": str(cg_dir),
         "flow_cells_dir": str(flow_cells_dir),
+        "nanopore_data_directory": "path/to/nanopore_data_directory",
         "demultiplexed_flow_cells_dir": str(demultiplexed_runs),
         "downsample_dir": str(downsample_dir),
         "downsample_script": "downsample.sh",
