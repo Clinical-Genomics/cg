@@ -18,10 +18,9 @@ from cg.meta.archive.ddn.constants import (
 )
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import MiriaObject, TransferPayload
-from cg.meta.archive.models import FileAndSample, SampleAndDestination
+from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
-from cg.store.models import Sample
 
 FUNCTION_TO_MOCK = "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content"
 
@@ -308,29 +307,24 @@ def test_archive_folders(
     )
 
 
-def test_retrieve_samples(
+def test_retrieve_files(
     ddn_dataflow_client: DDNDataFlowClient,
     remote_storage_repository: str,
     local_storage_repository: str,
     archive_store: Store,
     trimmed_local_path: str,
-    sample_id: str,
+    file_and_sample: FileAndSample,
     ok_miria_response,
 ):
     """Tests that the retrieve function correctly formats the input and sends API request."""
 
-    # GIVEN a local path and a sample
-    full_path: str = f"/home{trimmed_local_path}"
-    sample: Sample = archive_store.get_sample_by_internal_id(sample_id)
-    sample_and_destination: SampleAndDestination = SampleAndDestination(
-        sample=sample, destination=full_path
-    )
+    # GIVEN a file and sample which is archived
 
     # WHEN running the retrieve method and providing a SampleAndDestination object
     with mock.patch.object(
         APIRequest, "api_request_from_content", return_value=ok_miria_response
     ) as mock_request_submitter:
-        job_id: int = ddn_dataflow_client.retrieve_samples([sample_and_destination])
+        job_id: int = ddn_dataflow_client.retrieve_files(files_and_samples=[file_and_sample])
 
         # THEN an integer should be returned
     assert isinstance(job_id, int)
@@ -343,7 +337,7 @@ def test_retrieve_samples(
         json={
             "pathInfo": [
                 {
-                    "source": remote_storage_repository + sample_and_destination.sample.internal_id,
+                    "source": remote_storage_repository + file_and_sample.sample.internal_id,
                     "destination": local_storage_repository + trimmed_local_path,
                 }
             ],

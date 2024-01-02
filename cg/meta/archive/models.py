@@ -49,7 +49,7 @@ class ArchiveHandler:
         pass
 
     @abstractmethod
-    def retrieve_samples(self, samples_and_destinations: list[SampleAndDestination]):
+    def retrieve_files(self, files_and_samples: list[FileAndSample]):
         """Retrieves all files for all samples for the given flowcell."""
         pass
 

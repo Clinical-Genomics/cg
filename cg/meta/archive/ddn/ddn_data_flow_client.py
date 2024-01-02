@@ -27,7 +27,7 @@ from cg.meta.archive.ddn.models import (
     RefreshPayload,
     TransferPayload,
 )
-from cg.meta.archive.models import ArchiveHandler, FileAndSample, SampleAndDestination
+from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
 
 LOG = logging.getLogger(__name__)
@@ -114,16 +114,16 @@ class DDNDataFlowClient(ArchiveHandler):
             url=urljoin(base=self.url, url=DataflowEndpoints.ARCHIVE_FILES),
         ).job_id
 
-    def retrieve_samples(self, samples_and_destinations: list[SampleAndDestination]) -> int:
+    def retrieve_files(self, files_and_samples: list[FileAndSample]) -> int:
         """Retrieves all archived files for the provided samples and stores them in the specified location in
         Housekeeper."""
         miria_file_data: list[MiriaObject] = []
-        for sample_and_housekeeper_destination in samples_and_destinations:
+        for file_and_sample in files_and_samples:
             LOG.info(
-                f"Will retrieve files for sample {sample_and_housekeeper_destination.sample.internal_id} via Miria."
+                f"Will retrieve file {file_and_sample.file} for sample {file_and_sample.sample.internal_id} via Miria."
             )
-            miria_object: MiriaObject = MiriaObject.create_from_sample_and_destination(
-                sample_and_housekeeper_destination
+            miria_object: MiriaObject = MiriaObject.create_from_file_and_sample(
+                file=file_and_sample.file, sample=file_and_sample.sample, is_archiving=False
             )
             miria_file_data.append(miria_object)
         retrieval_request: TransferPayload = self.create_transfer_request(
