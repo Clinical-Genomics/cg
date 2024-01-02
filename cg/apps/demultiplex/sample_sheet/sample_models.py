@@ -167,7 +167,9 @@ class FlowCellSampleBCLConvert(FlowCellSample):
         )
         self.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
-    def _update_barcode_mismatches_1(self, samples_to_compare: list) -> None:
+    def _update_barcode_mismatches_1(
+        self, samples_to_compare: list["FlowCellSampleBCLConvert"]
+    ) -> None:
         """Assign zero to barcode_mismatches_1 if the hamming distance between self.index
         and the index1 of any sample in the lane is below the minimum threshold."""
         for sample in samples_to_compare:
@@ -181,7 +183,9 @@ class FlowCellSampleBCLConvert(FlowCellSample):
                 self.barcode_mismatches_1 = 0
                 break
 
-    def _update_barcode_mismatches_2(self, samples_to_compare: list) -> None:
+    def _update_barcode_mismatches_2(
+        self, samples_to_compare: list["FlowCellSampleBCLConvert"]
+    ) -> None:
         """Assign zero to barcode_mismatches_2 if the hamming distance between self.index2
         and the index2 of any sample in the lane is below the minimum threshold.
         If the sample is single-indexed, assign 'na'."""
@@ -208,7 +212,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
         self.update_override_cycles(run_parameters=run_parameters)
 
     def update_barcode_mismatches(
-        self, samples_to_compare: list, is_run_single_index: bool
+        self, samples_to_compare: list["FlowCellSampleBCLConvert"], is_run_single_index: bool
     ) -> None:
         """Update barcode mismatch attributes comparing to the rest of the samples in the lane."""
         if not samples_to_compare:

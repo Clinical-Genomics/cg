@@ -9,8 +9,8 @@ from packaging.version import parse
 from cg.constants.demultiplexing import (
     NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION,
     NEW_NOVASEQ_REAGENT_KIT_VERSION,
-    NO_REVERSE_COMPLEMENTS,
-    NOVASEQ_6000_POST_1_5_KITS,
+    NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS,
+    NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS,
     NOVASEQ_X_INDEX_SETTINGS,
     IndexSettings,
     RunParametersXMLNodes,
@@ -125,8 +125,8 @@ class RunParameters:
             return NOVASEQ_X_INDEX_SETTINGS
         if self._is_novaseq6000_post_1_5_kit():
             LOG.debug("Using NovaSeq 6000 post 1.5 kits index settings")
-            return NOVASEQ_6000_POST_1_5_KITS
-        return NO_REVERSE_COMPLEMENTS
+            return NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS
+        return NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS
 
     def __str__(self):
         return f"RunParameters(path={self.path}, sequencer={self.sequencer})"

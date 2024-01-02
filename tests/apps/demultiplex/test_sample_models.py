@@ -25,7 +25,7 @@ from cg.models.demultiplex.run_parameters import RunParameters
         {"lane": 1, "sample_id": "ACC123"},
         {"lane": 1, "index": "GTCTACAC-GCCAAGGT"},
     ],
-    ids=["no sample id", "no index", "no lane"],
+    ids=["no lane", "no index", "no sample id"],
 )
 def test_validate_inputs_bcl_convert_sample_missing_attribute(lims_sample: dict):
     """Test that validating a BCLConvert sample with a missing attribute fails."""

@@ -262,10 +262,10 @@ class IndexSettings(BaseModel):
 NOVASEQ_X_INDEX_SETTINGS = IndexSettings(
     should_i5_be_reverse_complimented=False, are_i5_override_cycles_reverse_complemented=True
 )
-NOVASEQ_6000_POST_1_5_KITS = IndexSettings(
+NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS = IndexSettings(
     should_i5_be_reverse_complimented=True, are_i5_override_cycles_reverse_complemented=False
 )
-NO_REVERSE_COMPLEMENTS = IndexSettings(
+NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS = IndexSettings(
     should_i5_be_reverse_complimented=False,
     are_i5_override_cycles_reverse_complemented=False,
 )

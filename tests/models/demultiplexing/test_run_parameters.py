@@ -7,8 +7,8 @@ from _pytest.fixtures import FixtureRequest
 from pydantic import BaseModel
 
 from cg.constants.demultiplexing import (
-    NO_REVERSE_COMPLEMENTS,
-    NOVASEQ_6000_POST_1_5_KITS,
+    NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS,
+    NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS,
     NOVASEQ_X_INDEX_SETTINGS,
     IndexSettings,
     RunParametersXMLNodes,
@@ -303,8 +303,8 @@ def test_is_novaseq6000_post_1_5_kit(
 @pytest.mark.parametrize(
     "flow_cell, correct_settings",
     [
-        ("novaseq_6000_pre_1_5_kits_flow_cell_data", NO_REVERSE_COMPLEMENTS),
-        ("novaseq_6000_post_1_5_kits_flow_cell_data", NOVASEQ_6000_POST_1_5_KITS),
+        ("novaseq_6000_pre_1_5_kits_flow_cell_data", NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS),
+        ("novaseq_6000_post_1_5_kits_flow_cell_data", NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS),
         ("novaseq_x_flow_cell_data", NOVASEQ_X_INDEX_SETTINGS),
     ],
 )
