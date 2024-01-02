@@ -293,9 +293,27 @@ def novaseq6000_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBcl2Fas
 
 
 @pytest.fixture
-def bcl_convert_flow_cell_sample() -> FlowCellSampleBCLConvert:
+def index1_sequence_from_lims() -> str:
+    """Return an index 1 sequence."""
+    return "GTCTACAC"
+
+
+@pytest.fixture
+def index2_sequence_from_lims() -> str:
+    """Return an index 2 sequence."""
+    return "GCCAAGGT"
+
+
+@pytest.fixture
+def raw_index_sequence(index1_sequence_from_lims: str, index2_sequence_from_lims: str) -> str:
+    """Return a raw index."""
+    return f"{index1_sequence_from_lims}-{index2_sequence_from_lims}"
+
+
+@pytest.fixture
+def bcl_convert_flow_cell_sample(raw_index_sequence: str) -> FlowCellSampleBCLConvert:
     """Return a BCL Convert sample."""
-    return FlowCellSampleBCLConvert(lane=1, index="GTCTACAC-GCCAAGGT", sample_id="ACC123")
+    return FlowCellSampleBCLConvert(lane=1, index=raw_index_sequence, sample_id="ACC123")
 
 
 @pytest.fixture

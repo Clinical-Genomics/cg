@@ -13,7 +13,12 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.constants.demultiplexing import IndexOverrideCycles, IndexSettings
+from cg.constants.demultiplexing import (
+    NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS,
+    NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS,
+    IndexOverrideCycles,
+    IndexSettings,
+)
 from cg.constants.symbols import DASH, EMPTY_STRING
 from cg.models.demultiplex.run_parameters import RunParameters
 
@@ -69,7 +74,9 @@ def test_separate_indexes_dual_run(lims_index: str, expected_index_1: str, expec
     assert sample.index2 == expected_index2
 
 
-def test_separate_indexes_single_run(bcl_convert_flow_cell_sample: FlowCellSampleBCLConvert):
+def test_separate_indexes_single_run(
+    index1_sequence_from_lims: str, bcl_convert_flow_cell_sample: FlowCellSampleBCLConvert
+):
     """Test index2 is ignored when parsing a double index in a single index run."""
     # GIVEN a sample with a double index
 
@@ -77,30 +84,28 @@ def test_separate_indexes_single_run(bcl_convert_flow_cell_sample: FlowCellSampl
     bcl_convert_flow_cell_sample.separate_indexes(is_run_single_index=True)
 
     # THEN the index should be separated
-    assert bcl_convert_flow_cell_sample.index == "GTCTACAC"
-    assert bcl_convert_flow_cell_sample.index2 == ""
+    assert bcl_convert_flow_cell_sample.index == index1_sequence_from_lims
+    assert bcl_convert_flow_cell_sample.index2 == EMPTY_STRING
 
 
 @pytest.mark.parametrize(
-    "needs_reverse_complement, expected_index2",
+    "index_settings, expected_index2",
     [
-        (True, f"{INDEX_TWO_PAD_SEQUENCE}GCCAAGGT"),
-        (False, f"GCCAAGGT{INDEX_TWO_PAD_SEQUENCE}"),
+        (NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS, f"{INDEX_TWO_PAD_SEQUENCE}GCCAAGGT"),
+        (NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS, f"GCCAAGGT{INDEX_TWO_PAD_SEQUENCE}"),
     ],
     ids=["reverse complement", "no reverse complement"],
 )
-def test_pad_indexes_needs_padding(needs_reverse_complement: bool, expected_index2: str):
+def test_pad_indexes_needs_padding(index_settings: IndexSettings, expected_index2: str):
     """Test that indexes that need to be padded are padded with and without reverse complement."""
     # GIVEN an IndexSettings object
-    mock_index_settings = Mock(
-        spec=IndexSettings, should_i5_be_reverse_complimented=needs_reverse_complement
-    )
+
     # GIVEN a run parameters file with 10-nt indexes and the index settings
     mock_run_parameters = Mock(
         spec=RunParameters,
         get_index_1_cycles=Mock(return_value=10),
         get_index_2_cycles=Mock(return_value=10),
-        index_settings=mock_index_settings,
+        index_settings=index_settings,
     )
 
     # GIVEN a FlowCellSampleBcl2Fastq with 8-nt indexes
@@ -183,7 +188,7 @@ def test_pad_indexes_no_padding():
 def test_get_index1_override_cycles(
     lims_index: str, index1_cycles: int, expected_parsed_cycles: str
 ):
-    """Test that the returned index 1 cycles is teh expected for different index configurations."""
+    """Test that the returned index 1 cycles is the expected for different index configurations."""
     # GIVEN a FlowCellSampleBCLConvert with an index
     sample = FlowCellSampleBCLConvert(lane=1, index=lims_index, sample_id="ACC123")
 
@@ -276,17 +281,17 @@ def test_update_override_cycles(
 def test_update_barcode_mismatches_1(
     sample_list_fixture: str, expected_barcode_mismatch: int, request: pytest.FixtureRequest
 ):
-    """Test that index 1 barcode mismatch values are as expected for different sets of samples."""
+    """Test that index 1 barcode mismatches values are as expected for different sets of samples."""
     # GIVEN a list of FlowCellSampleBCLConvert
     sample_list: list[FlowCellSampleBCLConvert] = request.getfixturevalue(sample_list_fixture)
 
     # GIVEN a FlowCellSampleBCLConvert
     sample_to_update: FlowCellSampleBCLConvert = sample_list[0]
 
-    # WHEN updating the barcode mismatches 1
+    # WHEN updating the value for index 1 barcode mismatches
     sample_to_update._update_barcode_mismatches_1(samples_to_compare=sample_list)
 
-    # THEN the barcode mismatches 1 are updated with the expected value
+    # THEN the value for index 1 barcode mismatches is updated with the expected value
     assert sample_to_update.barcode_mismatches_1 == expected_barcode_mismatch
 
 
@@ -298,17 +303,17 @@ def test_update_barcode_mismatches_1(
 def test_update_barcode_mismatches_2(
     sample_list_fixture: str, expected_barcode_mismatch: int, request: pytest.FixtureRequest
 ):
-    """Test that index 2 barcode mismatch values are as expected for different sets of samples."""
+    """Test that index 2 barcode mismatches values are as expected for different sets of samples."""
     # GIVEN a list of FlowCellSampleBCLConvert
     sample_list: list[FlowCellSampleBCLConvert] = request.getfixturevalue(sample_list_fixture)
 
     # GIVEN a FlowCellSampleBCLConvert
     sample_to_update: FlowCellSampleBCLConvert = sample_list[0]
 
-    # WHEN updating the barcode mismatches 2
+    # WHEN updating the value for index 2 barcode mismatches
     sample_to_update._update_barcode_mismatches_2(samples_to_compare=sample_list)
 
-    # THEN the barcode mismatches 1 are updated with the expected value
+    # THEN the value for index 2 barcode mismatches is updated with the expected value
     assert sample_to_update.barcode_mismatches_2 == expected_barcode_mismatch
 
 
