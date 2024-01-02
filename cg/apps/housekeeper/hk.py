@@ -435,6 +435,7 @@ class HousekeeperAPI:
         self, bundle_name: str, tags: list | None = None
     ) -> list[File]:
         """Returns all archived_files from a given bundle, tagged with the given tags"""
+        LOG.debug(f"Getting archived files for bundle {bundle_name}")
         return self._store.get_archived_files_for_bundle(bundle_name=bundle_name, tags=tags or [])
 
     def add_archives(self, files: list[File], archive_task_id: int) -> None:
