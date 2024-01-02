@@ -4,7 +4,7 @@ import click
 
 from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline, Priority
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -156,7 +156,7 @@ def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name:
 @click.option(
     "-s",
     "--sex",
-    type=EnumChoice(Gender, use_value=False),
+    type=EnumChoice(Sex, use_value=False),
     required=True,
     help="Sample pedigree sex",
 )
@@ -175,7 +175,7 @@ def add_sample(
     context: CGConfig,
     lims_id: str | None,
     down_sampled: int | None,
-    sex: Gender,
+    sex: Sex,
     order: str | None,
     application_tag: str,
     priority: Priority,

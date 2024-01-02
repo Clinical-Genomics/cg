@@ -9,6 +9,7 @@ from cg.models.orders.validators.json_sample_validators import convert_well, joi
 class JsonSample(OrderSample):
     cohorts: list[str] | None = None
     concentration: str | None = None
+    concentration_ng_ul: str | None = None
     concentration_sample: str | None = None
     control: str | None = None
     data_analysis: Pipeline = Pipeline.MIP_DNA

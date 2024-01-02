@@ -2,12 +2,12 @@
 
 from cg.models.mip.mip_metrics_deliverables import (
     DuplicateReads,
-    GenderCheck,
     MeanInsertSize,
     MedianTargetCoverage,
     MIPMappedReads,
     MIPMetricsDeliverables,
     MIPParsedMetrics,
+    SexCheck,
     get_sample_id_metric,
 )
 
@@ -132,10 +132,10 @@ def test_mip_metrics_set_predicted_sex(mip_metrics_deliverables_raw: dict):
     # THEN assert that predicted sex was set
     assert metrics_object.predicted_sex
 
-    predicted_sex: GenderCheck = metrics_object.predicted_sex.pop()
+    predicted_sex: SexCheck = metrics_object.predicted_sex.pop()
 
     # THEN assert that it was successfully created
-    assert isinstance(predicted_sex, GenderCheck)
+    assert isinstance(predicted_sex, SexCheck)
 
 
 def test_instantiate_mip_metrics_set_sample_id_metrics(mip_metrics_deliverables_raw: dict):

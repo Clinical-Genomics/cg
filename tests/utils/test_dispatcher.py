@@ -145,7 +145,7 @@ def test_call_with_status_db_functions(
 
     # GIVEN a database with a customer, a subject and two samples
     helpers.add_sample(store, subject_id=test_subject)
-    helpers.add_sample(store, subject_id=test_subject, is_tumour=False)
+    helpers.add_sample(store, is_tumour=False, subject_id=test_subject)
 
     # WHEN calling the dispatcher with the customer and subject id
     dispatcher = Dispatcher(

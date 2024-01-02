@@ -7,6 +7,7 @@ from cg.apps.housekeeper.models import InputBundle
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
+from cg.constants.subject import Sex
 from cg.meta.compress import CompressAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
@@ -144,10 +145,10 @@ def mip_dna_context(
             )
             sample = helpers.add_sample(
                 store=_store,
-                customer_id="cust000",
                 application_tag="WGSA",
                 application_type="wgs",
-                gender="unknown",
+                customer_id="cust000",
+                sex=Sex.UNKNOWN,
             )
             helpers.add_relationship(store=_store, sample=sample, case=case_obj, status="affected")
     cg_context.meta_apis["analysis_api"] = mip_analysis_api
