@@ -106,7 +106,7 @@ class RunParameters:
 
     def _is_novaseq6000_post_1_5_kit(self) -> bool:
         """
-        Returns whether sequencing was performed after the 1.5 consumables kits where introduced.
+        Returns whether sequencing was performed after the 1.5 consumables kits were introduced.
         This is indicated by the software version and the reagent kit fields in the run parameters.
         """
         if self.sequencer != Sequencers.NOVASEQ:
