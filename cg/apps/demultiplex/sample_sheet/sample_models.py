@@ -86,14 +86,14 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
             self.index = pad_index_one(index_string=self.index)
             self.index2 = pad_index_two(
                 index_string=self.index2,
-                reverse_complement=run_parameters.index_settings.should_i5_be_reverse_complimented,
+                reverse_complement=run_parameters.index_settings.should_i5_be_reverse_complemented,
             )
             return
         LOG.debug(f"Padding not necessary for sample {self.sample_id}")
 
     def process_indexes(self, run_parameters: RunParameters):
         """Parses, pads and reverse complement the indexes if necessary."""
-        reverse_index2: bool = run_parameters.index_settings.should_i5_be_reverse_complimented
+        reverse_index2: bool = run_parameters.index_settings.should_i5_be_reverse_complemented
         self.separate_indexes(is_run_single_index=run_parameters.is_single_index)
         self._pad_indexes_if_necessary(run_parameters=run_parameters)
         if reverse_index2:
@@ -207,7 +207,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
     def process_indexes(self, run_parameters: RunParameters):
         """Parse and reverse complement the indexes and updates override cycles."""
         self.separate_indexes(is_run_single_index=run_parameters.is_single_index)
-        if run_parameters.index_settings.should_i5_be_reverse_complimented:
+        if run_parameters.index_settings.should_i5_be_reverse_complemented:
             self.index2 = get_reverse_complement_dna_seq(self.index2)
         self.update_override_cycles(run_parameters=run_parameters)
 

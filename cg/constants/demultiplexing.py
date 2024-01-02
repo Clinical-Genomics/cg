@@ -247,12 +247,12 @@ class IndexSettings(BaseModel):
     These vary between machines and versions.
 
         Attributes:
-            should_i5_be_reverse_complimented (bool): Whether the i5 index should be reverse complemented.
+            should_i5_be_reverse_complemented (bool): Whether the i5 index should be reverse complemented.
             are_i5_override_cycles_reverse_complemented (bool): Whether the override cycles for i5 should be written in as NXIX.
 
     """
 
-    should_i5_be_reverse_complimented: bool
+    should_i5_be_reverse_complemented: bool
     are_i5_override_cycles_reverse_complemented: bool
 
 
@@ -260,12 +260,12 @@ class IndexSettings(BaseModel):
 # and rigorously tested.
 
 NOVASEQ_X_INDEX_SETTINGS = IndexSettings(
-    should_i5_be_reverse_complimented=False, are_i5_override_cycles_reverse_complemented=True
+    should_i5_be_reverse_complemented=False, are_i5_override_cycles_reverse_complemented=True
 )
 NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS = IndexSettings(
-    should_i5_be_reverse_complimented=True, are_i5_override_cycles_reverse_complemented=False
+    should_i5_be_reverse_complemented=True, are_i5_override_cycles_reverse_complemented=False
 )
 NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS = IndexSettings(
-    should_i5_be_reverse_complimented=False,
+    should_i5_be_reverse_complemented=False,
     are_i5_override_cycles_reverse_complemented=False,
 )
