@@ -1,10 +1,3 @@
-""" API to manage Microsalt Analyses
-    Organism - Fallback based on reference, ‘Other species’ and ‘Comment’. Default to “Unset”.
-    Priority = Default to empty string. Weird response. Typically “standard” or “research”.
-    Reference = Defaults to “None”
-    Method: Outputted as “1273:23”. Defaults to “Not in LIMS”
-    Date: Returns latest == most recent date. Outputted as DT object “YYYY MM DD”. Defaults to
-    datetime.min"""
 import glob
 import logging
 import os
@@ -17,13 +10,14 @@ from typing import Any
 import click
 
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
-from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
-from cg.exc import CgDataError
-from cg.io.json import read_json, write_json
+from cg.constants.constants import FileExtensions
+from cg.constants.tb import AnalysisStatus
+from cg.exc import CgDataError, MissingAnalysisDir
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
+from cg.meta.workflow.microsalt.quality_controller import QualityController
+from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.models.cg_config import CGConfig
-from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Case, Sample
 from cg.utils import Process
 
@@ -37,6 +31,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         super().__init__(pipeline, config)
         self.root_dir = config.microsalt.root
         self.queries_path = config.microsalt.queries_path
+        self.quality_checker = QualityController(config.status_db)
 
     @property
     def use_read_count_threshold(self) -> bool:
@@ -59,33 +54,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 environment=self.config.microsalt.conda_env,
             )
         return self._process
-
-    def get_case_path(self, case_id: str) -> list[Path]:
-        """Returns all paths associated with the case or single sample analysis."""
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
-        lims_project_dir_path: Path = Path(self.root_dir, "results", lims_project)
-
-        case_directories: list[Path] = [
-            Path(path) for path in glob.glob(f"{lims_project_dir_path}*", recursive=True)
-        ]
-
-        return sorted(case_directories, key=os.path.getctime, reverse=True)
-
-    def get_latest_case_path(self, case_id: str) -> Path | None:
-        """Return latest run dir for a microbial case, if no path found it returns None."""
-        lims_project: str = self.get_project(
-            self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample.internal_id
-        )
-
-        return next(
-            (
-                path
-                for path in self.get_case_path(case_id=case_id)
-                if lims_project + "_" in str(path)
-            ),
-            None,
-        )
 
     def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
         """Remove workflow run directories for a MicroSALT case."""
@@ -167,10 +135,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_lims_comment(self, sample_id: str) -> str:
         """Returns the comment associated with a sample stored in lims"""
         comment: str = self.lims_api.get_sample_comment(sample_id) or ""
-        if re.match(r"\w{4}\d{2,3}", comment):
-            return comment
-
-        return ""
+        return comment if re.match(r"\w{4}\d{2,3}", comment) else ""
 
     def get_organism(self, sample_obj: Sample) -> str:
         """Organism
@@ -282,94 +247,71 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_id = case_obj.internal_id
         return case_id, None
 
-    def microsalt_qc(self, case_id: str, run_dir_path: Path, lims_project: str) -> bool:
-        """Check if given microSALT case passes QC check."""
-        failed_samples: dict = {}
-        case_qc: dict = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
+    def get_cases_to_store(self) -> list[Case]:
+        cases_qc_ready: list[Case] = self.get_completed_cases()
+        cases_to_store: list[Case] = []
+        LOG.info(f"Found {len(cases_qc_ready)} cases to perform QC on!")
 
-        for sample_id in case_qc:
-            sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
-            sample_check: dict | None = self.qc_sample_check(
-                sample=sample,
-                sample_qc=case_qc[sample_id],
-            )
-            if sample_check is not None:
-                failed_samples[sample_id] = sample_check
+        for case in cases_qc_ready:
+            case_run_dir: Path | None = self.get_case_path(case.internal_id)
+            LOG.info(f"Checking QC for case {case.internal_id} in {case_run_dir}")
 
-        return self.qc_case_check(
-            case_id=case_id,
-            failed_samples=failed_samples,
-            number_of_samples=len(case_qc),
-            run_dir_path=run_dir_path,
-        )
+            if self.quality_checker.is_qc_required(case_run_dir):
+                LOG.info(f"QC required for case {case.internal_id}")
+                metrics_file_path = self.get_metrics_file_path(case.internal_id)
 
-    def qc_case_check(
-        self, case_id: str, failed_samples: dict, number_of_samples: int, run_dir_path: Path
-    ) -> bool:
-        """Perform the final QC check for a microbial case based on failed samples."""
-        qc_pass: bool = True
+                if not metrics_file_path.exists():
+                    continue
 
-        for sample_id in failed_samples:
-            sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
-            if sample.control == ControlEnum.negative:
-                qc_pass = False
-            if sample.application_version.application.tag == MicrosaltAppTags.MWRNXTR003:
-                qc_pass = False
+                result: QualityResult = self.quality_checker.quality_control(metrics_file_path)
+                self.trailblazer_api.add_comment(case_id=case.internal_id, comment=result.summary)
+                if result.passes_qc:
+                    cases_to_store.append(case)
+                else:
+                    self.trailblazer_api.set_analysis_status(
+                        case_id=case.internal_id, status=AnalysisStatus.FAILED
+                    )
+            else:
+                cases_to_store.append(case)
 
-        # Check if more than 10% of MWX samples failed
-        if len(failed_samples) / number_of_samples > MicrosaltQC.QC_PERCENT_THRESHOLD_MWX:
-            qc_pass = False
+        return cases_to_store
 
-        if not qc_pass:
-            LOG.warning(
-                f"Case {case_id} failed QC, see {run_dir_path}/QC_done.json for more information."
-            )
-        else:
-            LOG.info(f"Case {case_id} passed QC.")
+    def get_completed_cases(self) -> list[Case]:
+        """Return cases that are completed in trailblazer."""
+        return [
+            case
+            for case in self.status_db.get_running_cases_in_pipeline(self.pipeline)
+            if self.trailblazer_api.is_latest_analysis_completed(case.internal_id)
+        ]
 
-        self.create_qc_done_file(
-            run_dir_path=run_dir_path,
-            failed_samples=failed_samples,
-        )
-        return qc_pass
+    def get_metrics_file_path(self, case_id: str) -> Path:
+        """Return path to metrics file for a case."""
+        project_id: str = self.get_project_id(case_id)
+        case_run_dir: Path = self.get_case_path(case_id)
+        return Path(case_run_dir, f"{project_id}{FileExtensions.JSON}")
 
-    def create_qc_done_file(self, run_dir_path: Path, failed_samples: dict) -> None:
-        """Creates a QC_done when a QC check is performed."""
-        write_json(file_path=run_dir_path.joinpath("QC_done.json"), content=failed_samples)
+    def extract_project_id(self, sample_id: str) -> str:
+        return sample_id.rsplit("A", maxsplit=1)[0]
 
-    def qc_sample_check(self, sample: Sample, sample_qc: dict) -> dict | None:
-        """Perform a QC on a sample."""
-        if sample.control == ControlEnum.negative:
-            reads_pass: bool = self.check_external_negative_control_sample(sample)
-            if not reads_pass:
-                LOG.warning(f"Negative control sample {sample.internal_id} failed QC.")
-                return {"Passed QC Reads": reads_pass}
-        else:
-            reads_pass: bool = sample.sequencing_qc
-            coverage_10x_pass: bool = self.check_coverage_10x(
-                sample_name=sample.internal_id, sample_qc=sample_qc
-            )
-            if not reads_pass or not coverage_10x_pass:
-                LOG.warning(f"Sample {sample.internal_id} failed QC.")
-                return {"Passed QC Reads": reads_pass, "Passed Coverage 10X": coverage_10x_pass}
+    def get_project_id(self, case_id: str) -> str:
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        sample_id: str = case.links[0].sample.internal_id
+        return self.extract_project_id(sample_id)
 
-    def check_coverage_10x(self, sample_name: str, sample_qc: dict) -> bool:
-        """Check if a sample passed the coverage_10x criteria."""
-        try:
-            return (
-                sample_qc["microsalt_samtools_stats"]["coverage_10x"]
-                >= MicrosaltQC.COVERAGE_10X_THRESHOLD
-            )
-        except TypeError as e:
-            LOG.error(
-                f"There is no 10X coverage value for sample {sample_name}, setting qc to fail for this sample"
-            )
-            LOG.error(f"See error: {e}")
-            return False
+    def get_results_dir(self) -> Path:
+        return Path(self.root_dir, "results")
 
-    def check_external_negative_control_sample(self, sample: Sample) -> bool:
-        """Check if external negative control passed read check"""
-        return sample.reads < (
-            sample.application_version.application.target_reads
-            * MicrosaltQC.NEGATIVE_CONTROL_READS_THRESHOLD
-        )
+    def get_analyses_result_dirs(self, case_id: str) -> list[str]:
+        project_id: str = self.get_project_id(case_id)
+        results_dir: Path = self.get_results_dir()
+        matches: list[str] = [d for d in os.listdir(results_dir) if d.startswith(project_id)]
+        if not matches:
+            LOG.error(f"No result directory found for {case_id} with project id {project_id}")
+            raise MissingAnalysisDir
+        return matches
+
+    def get_case_path(self, case_id: str) -> Path:
+        results_dir: Path = self.get_results_dir()
+        matching_cases: list[str] = self.get_analyses_result_dirs(case_id)
+        case_dir: str = max(matching_cases, default=None)
+        return Path(results_dir, case_dir)
