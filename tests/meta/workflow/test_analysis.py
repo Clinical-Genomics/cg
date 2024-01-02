@@ -446,21 +446,27 @@ def test_are_all_spring_files_present_false_when_none_present(
     assert not mip_analysis_api.are_all_spring_files_present(case_id)
 
 
-def test_ensure_(
+def test_ensure_files_are_present(
     mip_analysis_api: MipDNAAnalysisAPI,
     analysis_store: Store,
     archived_spring_file,
     case_id: str,
     sample_id: str,
 ):
-    """Tests that are_all_spring_files_present returns False when all files for a case are archived and not retrieved."""
+    """Tests that archived files are requested via Miria after the flow cell check has been performed."""
 
     # GIVEN that the only Spring file belonging to a case has an Archive entry which has retrieved_at not set
 
-    # WHEN checking if all spring files are present
+    # WHEN ensuring that all files are present
 
-    # THEN the result should be False
-    assert not mip_analysis_api.are_all_spring_files_present(case_id)
+    with mock.patch.object(AnalysisAPI, "ensure_flow_cells_on_disk"), mock.patch.object(
+        SpringArchiveAPI,
+        "retrieve_case",
+    ) as request_submitter:
+        mip_analysis_api.ensure_files_are_present(case_id)
+
+    # THEN the files should have been requested
+    request_submitter.assert_called()
 
 
 @pytest.mark.parametrize("flow_cell_status", [FlowCellStatus.REMOVED, FlowCellStatus.ON_DISK])
