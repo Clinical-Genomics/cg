@@ -4,7 +4,6 @@ from pathlib import Path
 from cg.apps.deliverables_metrics_parser.models.pipeline_metrics_deliverables import (
     MIPDNAMetricsDeliverables,
 )
-
 from cg.constants.constants import FileFormat
 from cg.constants.pipeline import Pipeline
 from cg.io.controller import ReadFile
