@@ -1,6 +1,5 @@
 """Functions that handle files in the context of scout uploading"""
 import logging
-from typing import Optional
 
 import requests
 from housekeeper.store.models import File, Version
@@ -67,10 +66,9 @@ class ScoutConfigBuilder:
         case_sample: CaseSample,
     ) -> None:
         """Add common sample files for different analysis types."""
-        sample_id: str = case_sample.sample.internal_id
-        LOG.info(f"Adding common files for sample {sample_id}")
-        self.include_sample_alignment_file(config_sample=config_sample)
-        self.include_sample_files(config_sample=config_sample)
+        LOG.info(f"Adding common files for sample {case_sample.sample.internal_id}")
+        self.include_sample_alignment_file(config_sample)
+        self.include_sample_files(config_sample)
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutIndividual:
         """Build a sample for the scout load config"""
@@ -80,9 +78,9 @@ class ScoutConfigBuilder:
         """Build a load config for uploading a case to scout"""
         raise NotImplementedError
 
-    def include_sample_files(self, config_sample: ScoutIndividual) -> None:
+    def include_sample_files(self, _config_sample: ScoutIndividual) -> None:
         """Include all files that are used on sample level in Scout"""
-        raise NotImplementedError
+        return None
 
     def include_case_files(self) -> None:
         """Include all files that are used on case level in scout"""
@@ -160,19 +158,19 @@ class ScoutConfigBuilder:
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
         )
 
-    def get_sample_file(self, hk_tags: set[str], sample_id: str) -> Optional[str]:
+    def get_sample_file(self, hk_tags: set[str], sample_id: str) -> str | None:
         """Return a file that is specific for a individual from housekeeper"""
         tags: set = hk_tags.copy()
         tags.add(sample_id)
         return self.get_file_from_hk(hk_tags=tags)
 
-    def get_file_from_hk(self, hk_tags: set[str], latest: Optional[bool] = False) -> Optional[str]:
+    def get_file_from_hk(self, hk_tags: set[str], latest: bool | None = False) -> str | None:
         """Get a file from housekeeper and return the path as a string."""
         LOG.info(f"Get file with tags {hk_tags}")
         if not hk_tags:
             LOG.debug("No tags provided, skipping")
             return None
-        hk_file: Optional[File] = (
+        hk_file: File | None = (
             HousekeeperAPI.get_latest_file_from_version(version=self.hk_version_obj, tags=hk_tags)
             if latest
             else HousekeeperAPI.get_file_from_version(version=self.hk_version_obj, tags=hk_tags)

@@ -2,23 +2,20 @@
 import logging
 import subprocess
 from pathlib import Path
-from typing import Optional
 
 from housekeeper.store.models import File
-from sqlalchemy.exc import OperationalError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
 from cg.constants.constants import FileExtensions, FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.constants.indexes import ListIndexes
 from cg.constants.symbols import NEW_LINE
 from cg.exc import ChecksumFailedError, PdcError, PdcNoFilesMatchingSearchError
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models import CompressionData
-from cg.models.cg_config import EncryptionDirectories
+from cg.models.cg_config import PDCArchivingDirectory
 from cg.store import Store
 from cg.store.models import Flowcell
 from cg.utils.time import get_elapsed_time, get_start_time
@@ -32,7 +29,7 @@ class BackupAPI:
     def __init__(
         self,
         encryption_api: EncryptionAPI,
-        encryption_directories: EncryptionDirectories,
+        pdc_archiving_directory: PDCArchivingDirectory,
         status: Store,
         tar_api: TarAPI,
         pdc_api: PdcAPI,
@@ -40,7 +37,7 @@ class BackupAPI:
         dry_run: bool = False,
     ):
         self.encryption_api = encryption_api
-        self.encryption_directories: EncryptionDirectories = encryption_directories
+        self.pdc_archiving_directory: PDCArchivingDirectory = pdc_archiving_directory
         self.status: Store = status
         self.tar_api: TarAPI = tar_api
         self.pdc: PdcAPI = pdc_api
@@ -55,14 +52,14 @@ class BackupAPI:
         LOG.debug(f"Processing flow cells: {processing_flow_cells_count}")
         return processing_flow_cells_count < MAX_PROCESSING_FLOW_CELLS
 
-    def get_first_flow_cell(self) -> Optional[Flowcell]:
+    def get_first_flow_cell(self) -> Flowcell | None:
         """Get the first flow cell from the requested queue."""
-        flow_cell: Optional[Flowcell] = self.status.get_flow_cells_by_statuses(
+        flow_cell: Flowcell | None = self.status.get_flow_cells_by_statuses(
             flow_cell_statuses=[FlowCellStatus.REQUESTED]
         )
         return flow_cell[0] if flow_cell else None
 
-    def fetch_flow_cell(self, flow_cell: Optional[Flowcell] = None) -> Optional[float]:
+    def fetch_flow_cell(self, flow_cell: Flowcell | None = None) -> float | None:
         """Start fetching a flow cell from backup if possible.
 
         1. The processing queue is not full.
@@ -73,7 +70,7 @@ class BackupAPI:
             return None
 
         if not flow_cell:
-            flow_cell: Optional[Flowcell] = self.get_first_flow_cell()
+            flow_cell: Flowcell | None = self.get_first_flow_cell()
 
         if not flow_cell:
             LOG.info("No flow cells requested")
@@ -237,7 +234,7 @@ class BackupAPI:
         Raise:
             PdcNoFilesMatchingSearchError if no files are found.
         """
-        for _, encryption_directory in self.encryption_directories:
+        for _, encryption_directory in self.pdc_archiving_directory:
             search_pattern = f"{encryption_directory}*{flow_cell_id}*{FileExtensions.GPG}"
             self.pdc.query_pdc(search_pattern)
             if self.pdc.was_file_found(self.pdc.process.stderr):
@@ -258,7 +255,7 @@ class BackupAPI:
         )
 
     @classmethod
-    def get_archived_flow_cell_path(cls, dsmc_output: list[str]) -> Optional[Path]:
+    def get_archived_flow_cell_path(cls, dsmc_output: list[str]) -> Path | None:
         """Get the path of the archived flow cell from a PDC query."""
         flow_cell_line: str = [
             row
@@ -266,7 +263,7 @@ class BackupAPI:
             if FileExtensions.TAR in row
             and FileExtensions.GZIP in row
             and FileExtensions.GPG in row
-        ][ListIndexes.FIRST.value]
+        ][0]
 
         archived_flow_cell = Path(flow_cell_line.split()[4])
         if archived_flow_cell:
@@ -274,7 +271,7 @@ class BackupAPI:
             return archived_flow_cell
 
     @classmethod
-    def get_archived_encryption_key_path(cls, dsmc_output: list[str]) -> Optional[Path]:
+    def get_archived_encryption_key_path(cls, dsmc_output: list[str]) -> Path | None:
         """Get the encryption key for the archived flow cell from a PDC query."""
         encryption_key_line: str = [
             row
@@ -282,7 +279,7 @@ class BackupAPI:
             if FileExtensions.KEY in row
             and FileExtensions.GPG in row
             and FileExtensions.GZIP not in row
-        ][ListIndexes.FIRST.value]
+        ][0]
 
         archived_encryption_key = Path(encryption_key_line.split()[4])
         if archived_encryption_key:

@@ -6,7 +6,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.hk import models as housekeeper_models
 from cg.constants.constants import FileFormat, Pipeline, PrepCategory
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.io.controller import ReadFile
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.store.models import Analysis, Case, Sample
@@ -75,7 +75,7 @@ class UploadGenotypesAPI(object):
             sample_id = link_obj.sample.internal_id
             samples_sex[sample_id] = {
                 "pedigree": link_obj.sample.sex,
-                "analysis": Gender.UNKNOWN,
+                "analysis": Sex.UNKNOWN,
             }
         return samples_sex
 

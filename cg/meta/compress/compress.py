@@ -137,7 +137,7 @@ class CompressAPI:
             update_metadata_date(spring_metadata_path=compression.spring_metadata_path)
         return True
 
-    def clean_fastq(self, sample_id: str) -> bool:
+    def clean_fastq(self, sample_id: str, archive_location: str) -> bool:
         """Check that FASTQ compression is completed for a case and clean.
 
         This means removing compressed FASTQ files and update housekeeper to point to the new SPRING
@@ -170,6 +170,7 @@ class CompressAPI:
                 compression_obj=compression,
                 hk_fastq_first=sample_fastq[run_name]["hk_first"],
                 hk_fastq_second=sample_fastq[run_name]["hk_second"],
+                archive_location=archive_location,
             )
 
             self.remove_fastq(
@@ -209,11 +210,12 @@ class CompressAPI:
             LOG.info(
                 f"Adding decompressed FASTQ files to Housekeeper for sample {sample.internal_id}"
             )
-
+            fastq_tags: list[str] = self.get_fastq_tag_names(compression.spring_path)
             self.add_fastq_hk(
                 fastq_first=fastq_first,
                 fastq_second=fastq_second,
                 sample_internal_id=sample.internal_id,
+                fastq_tags=fastq_tags,
             )
         return True
 
@@ -231,10 +233,12 @@ class CompressAPI:
         compression_obj: CompressionData,
         hk_fastq_first: File,
         hk_fastq_second: File,
+        archive_location: str,
     ) -> None:
         """Update Housekeeper with compressed FASTQ files and SPRING metadata file."""
         version: Version = self.hk_api.last_version(sample_id)
         spring_tags: list[str] = self.get_spring_tags_from_fastq(hk_fastq_first)
+        spring_tags.append(archive_location)
         spring_metadata_tags: list[str] = self.get_spring_metadata_tags_from_fastq(hk_fastq_first)
         LOG.info(f"Updating FASTQ files in Housekeeper for {sample_id}")
         LOG.info(
@@ -290,10 +294,9 @@ class CompressAPI:
         sample_internal_id: str,
         fastq_first: Path,
         fastq_second: Path,
+        fastq_tags: list[str],
     ) -> None:
         """Add decompressed FASTQ files to Housekeeper."""
-        fastq_tags: list[str] = self.get_fastq_tag_names(sample_internal_id)
-
         LOG.info(
             f"Adds {fastq_first}, {fastq_second} to bundle {sample_internal_id} with tags {fastq_tags}"
         )
@@ -307,13 +310,10 @@ class CompressAPI:
             )
         self.hk_api.commit()
 
-    def get_fastq_tag_names(self, sample_internal_id: str) -> list[str]:
+    def get_fastq_tag_names(self, spring_path: Path) -> list[str]:
         """Returns a list containing all non-spring tag names of the specified file,
         together with the fastq tag name."""
-
-        spring_file: File = self.hk_api.get_files(
-            bundle=sample_internal_id, tags=[SequencingFileTag.SPRING]
-        ).first()
+        spring_file: File = self.hk_api.get_file_insensitive_path(path=spring_path)
         spring_file_tags: list[str] = self.hk_api.get_tag_names_from_file(spring_file)
         spring_file_tags.remove(SequencingFileTag.SPRING)
         return spring_file_tags + [SequencingFileTag.FASTQ]

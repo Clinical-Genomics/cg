@@ -1,7 +1,6 @@
 """Module for Flask-Admin views"""
 from datetime import datetime
 from gettext import gettext
-from typing import Union
 
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
@@ -9,7 +8,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 
-from cg.constants.constants import CaseActions, DataDelivery, Pipeline
+from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Pipeline
 from cg.server.ext import db
 from cg.store.models import Sample
 from cg.utils.flask.enum import SelectEnumField
@@ -33,8 +32,8 @@ def view_priority(unused1, unused2, model, unused3):
     return Markup("%s" % model.priority.name) if model else ""
 
 
-def view_family_sample_link(unused1, unused2, model, unused3):
-    """column formatter to open the family-sample view"""
+def view_case_sample_link(unused1, unused2, model, unused3):
+    """column formatter to open the case-sample view"""
 
     del unused1, unused2, unused3
 
@@ -54,7 +53,7 @@ def view_sample_concentration_minimum(unused1, unused2, model, unused3):
     """Column formatter to append unit"""
     del unused1, unused2, unused3
     return (
-        str(model.sample_concentration_minimum) + " ng/uL"
+        str(model.sample_concentration_minimum) + NG_UL_SUFFIX
         if model.sample_concentration_minimum
         else None
     )
@@ -64,8 +63,28 @@ def view_sample_concentration_maximum(unused1, unused2, model, unused3):
     """Column formatter to append unit"""
     del unused1, unused2, unused3
     return (
-        str(model.sample_concentration_maximum) + " ng/uL"
+        str(model.sample_concentration_maximum) + NG_UL_SUFFIX
         if model.sample_concentration_maximum
+        else None
+    )
+
+
+def view_sample_concentration_minimum_cfdna(unused1, unused2, model, unused3):
+    """Column formatter to append unit"""
+    del unused1, unused2, unused3
+    return (
+        str(model.sample_concentration_minimum_cfdna) + NG_UL_SUFFIX
+        if model.sample_concentration_minimum_cfdna
+        else None
+    )
+
+
+def view_sample_concentration_maximum_cfdna(unused1, unused2, model, unused3):
+    """Column formatter to append unit"""
+    del unused1, unused2, unused3
+    return (
+        str(model.sample_concentration_maximum_cfdna) + NG_UL_SUFFIX
+        if model.sample_concentration_maximum_cfdna
         else None
     )
 
@@ -85,6 +104,10 @@ class ApplicationView(BaseView):
         "is_external",
         "turnaround_time",
         "sample_concentration",
+        "sample_concentration_minimum",
+        "sample_concentration_maximum",
+        "sample_concentration_minimum_cfdna",
+        "sample_concentration_maximum_cfdna",
         "priority_processing",
         "is_archived",
     ]
@@ -101,6 +124,8 @@ class ApplicationView(BaseView):
     column_formatters = {
         "sample_concentration_minimum": view_sample_concentration_minimum,
         "sample_concentration_maximum": view_sample_concentration_maximum,
+        "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
+        "sample_concentration_maximum_cfdna": view_sample_concentration_maximum_cfdna,
     }
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
@@ -135,11 +160,23 @@ class ApplicationVersionView(BaseView):
         "price_clinical_trials",
         "price_research",
     ]
+    column_list = (
+        "application",
+        "version",
+        "valid_from",
+        "price_standard",
+        "price_priority",
+        "price_express",
+        "price_clinical_trials",
+        "price_research",
+        "comment",
+    )
     column_exclude_list = ["created_at", "updated_at"]
     column_filters = ["version", "application.tag"]
     column_formatters = {"application": ApplicationView.view_application_link}
     column_searchable_list = ["application.tag"]
     edit_modal = True
+    create_modal = True
     form_excluded_columns = ["samples", "pools", "microbial_samples"]
 
 
@@ -258,7 +295,7 @@ class CaseView(BaseView):
         "tickets",
     ]
     column_formatters = {
-        "internal_id": view_family_sample_link,
+        "internal_id": view_case_sample_link,
         "priority": view_priority,
     }
     column_searchable_list = [
@@ -279,7 +316,7 @@ class CaseView(BaseView):
     }
 
     @staticmethod
-    def view_family_link(unused1, unused2, model, unused3):
+    def view_case_link(unused1, unused2, model, unused3):
         """column formatter to open this view"""
         del unused1, unused2, unused3
         markup = ""
@@ -307,12 +344,12 @@ class CaseView(BaseView):
     def action_set_empty(self, ids: list[str]):
         self.set_action_for_cases(action=None, case_entry_ids=ids)
 
-    def set_action_for_cases(self, action: Union[CaseActions, None], case_entry_ids: list[str]):
+    def set_action_for_cases(self, action: CaseActions | None, case_entry_ids: list[str]):
         try:
             for entry_id in case_entry_ids:
-                family = db.get_case_by_entry_id(entry_id=entry_id)
-                if family:
-                    family.action = action
+                case = db.get_case_by_entry_id(entry_id=entry_id)
+                if case:
+                    case.action = action
 
             db.session.commit()
 
@@ -328,7 +365,7 @@ class CaseView(BaseView):
             if not self.handle_view_exception(ex):
                 raise
 
-            flash(gettext(f"Failed to set family action. {str(ex)}"))
+            flash(gettext(f"Failed to set case action. {str(ex)}"))
 
 
 class FlowcellView(BaseView):
@@ -392,7 +429,7 @@ class AnalysisView(BaseView):
     column_default_sort = ("created_at", True)
     column_editable_list = ["is_primary"]
     column_filters = ["pipeline", "pipeline_version", "is_primary"]
-    column_formatters = {"case": CaseView.view_family_link}
+    column_formatters = {"case": CaseView.view_case_link}
     column_searchable_list = [
         "case.internal_id",
         "case.name",
@@ -448,7 +485,7 @@ class SampleView(BaseView):
     column_filters = ["customer.internal_id", "priority", "sex", "application_version.application"]
     column_formatters = {
         "is_external": is_external_application,
-        "internal_id": view_family_sample_link,
+        "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
         "priority": view_priority,
     }
@@ -570,7 +607,7 @@ class CaseSampleView(BaseView):
     column_editable_list = ["status"]
     column_filters = ["status"]
     column_formatters = {
-        "case": CaseView.view_family_link,
+        "case": CaseView.view_case_link,
         "sample": SampleView.view_sample_link,
     }
     column_searchable_list = ["case.internal_id", "case.name", "sample.internal_id"]

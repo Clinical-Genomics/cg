@@ -7,9 +7,10 @@ from typing import Generator
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.constants import CustomerId
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
-from cg.constants.invoice import CustomerNames
 from cg.constants.sequencing import Sequencers
+from cg.constants.subject import Sex
 from cg.meta.invoice import InvoiceAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
@@ -144,7 +145,7 @@ def flowcell_store(base_store: Store, stats_sample_data: dict) -> Generator[Stor
             "WGSPCFC030"
         ).versions[0]
         sample: Sample = base_store.add_sample(
-            name="NA", sex="male", internal_id=sample_data["name"]
+            name="NA", sex=Sex.MALE, internal_id=sample_data["name"]
         )
         sample.customer = customer
         sample.application_version = application_version
@@ -161,7 +162,7 @@ def get_invoice_api_sample(
     lims_api: MockLimsAPI,
     helpers: StoreHelpers,
     invoice_id: int = 0,
-    customer_id: str = CustomerNames.cust132,
+    customer_id: str = CustomerId.CUST132,
 ) -> InvoiceAPI:
     """Return an InvoiceAPI with samples."""
     sample = helpers.add_sample(store, customer_id=customer_id)
@@ -180,7 +181,7 @@ def invoice_api_nipt_customer(
     lims_api: MockLimsAPI,
     helpers: StoreHelpers,
     invoice_id: int = 0,
-    customer_id: str = CustomerNames.cust032,
+    customer_id: str = CustomerId.CUST032,
 ) -> InvoiceAPI:
     """Return an InvoiceAPI with a pool for NIPT customer."""
     pool = helpers.ensure_pool(store=store, customer_id=customer_id)
@@ -199,7 +200,7 @@ def invoice_api_pool_generic_customer(
     lims_api: MockLimsAPI,
     helpers: StoreHelpers,
     invoice_id: int = 0,
-    customer_id: str = CustomerNames.cust132,
+    customer_id: str = CustomerId.CUST132,
 ) -> InvoiceAPI:
     """Return an InvoiceAPI with a pool."""
     pool = helpers.ensure_pool(store=store, customer_id=customer_id)

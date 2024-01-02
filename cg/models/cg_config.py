@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from pydantic.v1 import BaseModel, EmailStr, Field
 from typing_extensions import Literal
@@ -34,22 +33,31 @@ class Sequencers(BaseModel):
 
 class SlurmConfig(BaseModel):
     account: str
-    hours: Optional[int]
+    hours: int | None
     mail_user: EmailStr
-    memory: Optional[int]
-    number_tasks: Optional[int]
-    conda_env: Optional[str]
+    memory: int | None
+    number_tasks: int | None
+    conda_env: str | None
     qos: SlurmQos = SlurmQos.LOW
 
 
-class EncryptionDirectories(BaseModel):
+class Encryption(BaseModel):
+    encryption_dir: str
+    binary_path: str
+
+
+class PDCArchivingDirectory(BaseModel):
     current: str
     nas: str
     pre_nas: str
 
 
+class DataInput(BaseModel):
+    input_dir_path: str
+
+
 class BackupConfig(BaseModel):
-    encryption_directories: EncryptionDirectories
+    pdc_archiving_directory: PDCArchivingDirectory
     slurm_flow_cell_encryption: SlurmConfig
 
 
@@ -69,7 +77,7 @@ class TrailblazerConfig(BaseModel):
 
 
 class StatinaConfig(BaseModel):
-    host: Optional[str]
+    host: str | None
     user: str
     key: str
     api_url: str
@@ -78,8 +86,8 @@ class StatinaConfig(BaseModel):
 
 
 class CommonAppConfig(BaseModel):
-    binary_path: str
-    config_path: Optional[str]
+    binary_path: str | None
+    config_path: str | None
 
 
 class FluffyUploadConfig(BaseModel):
@@ -102,7 +110,7 @@ class LimsConfig(BaseModel):
 
 
 class CrunchyConfig(BaseModel):
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     cram_reference: str
     slurm: SlurmConfig
 
@@ -125,18 +133,32 @@ class BalsamicConfig(CommonAppConfig):
 
 class MutantConfig(BaseModel):
     binary_path: str
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     conda_env: str
     root: str
 
 
 class MipConfig(BaseModel):
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     conda_env: str
     mip_config: str
     pipeline: str
     root: str
     script: str
+
+
+class RareDiseaseConfig(CommonAppConfig):
+    compute_env: str
+    conda_binary: str | None = None
+    conda_env: str
+    launch_directory: str
+    pipeline_path: str
+    profile: str
+    references: str
+    revision: str
+    root: str
+    slurm: SlurmConfig
+    tower_pipeline: str
 
 
 class RnafusionConfig(CommonAppConfig):
@@ -147,32 +169,31 @@ class RnafusionConfig(CommonAppConfig):
     conda_env: str
     compute_env: str
     profile: str
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     launch_directory: str
     revision: str
     slurm: SlurmConfig
-    tower_binary_path: str
     tower_pipeline: str
 
 
 class TaxprofilerConfig(CommonAppConfig):
-    root: str
     binary_path: str
+    conda_binary: str | None = None
     conda_env: str
-    profile: str
-    pipeline_path: str
-    revision: str
-    conda_binary: Optional[str] = None
-    hostremoval_reference: str
+    compute_env: str
     databases: str
+    hostremoval_reference: str
+    pipeline_path: str
+    profile: str
+    revision: str
+    root: str
     slurm: SlurmConfig
-    tower_binary_path: str
     tower_pipeline: str
 
 
 class MicrosaltConfig(BaseModel):
     binary_path: str
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     conda_env: str
     queries_path: str
     root: str
@@ -228,15 +249,17 @@ class DataFlowConfig(BaseModel):
 
 class CGConfig(BaseModel):
     database: str
-    environment: Literal["production", "stage"] = "stage"
-    madeline_exe: str
     delivery_path: str
-    max_flowcells: Optional[int]
-    email_base_settings: EmailBaseSettings
-    flow_cells_dir: str
     demultiplexed_flow_cells_dir: str
     downsample_dir: str
     downsample_script: str
+    email_base_settings: EmailBaseSettings
+    environment: Literal["production", "stage"] = "stage"
+    flow_cells_dir: str
+    madeline_exe: str
+    tower_binary_path: str
+    max_flowcells: int | None
+    data_input: DataInput | None = None
     # Base APIs that always should exist
     status_db_: Store = None
     housekeeper: HousekeeperConfig
@@ -249,10 +272,10 @@ class CGConfig(BaseModel):
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
-    data_flow_config: Optional[DataFlowConfig] = None
+    data_flow: DataFlowConfig | None = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
-    encryption: Optional[CommonAppConfig] = None
+    encryption: Encryption | None = None
     external: ExternalConfig = None
     genotype: CommonAppConfig = None
     genotype_api_: GenotypeAPI = None
@@ -270,25 +293,26 @@ class CGConfig(BaseModel):
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
-    pigz: Optional[CommonAppConfig] = None
-    pdc: Optional[CommonAppConfig] = None
-    pdc_api_: Optional[PdcAPI]
+    pigz: CommonAppConfig | None = None
+    pdc: CommonAppConfig | None = None
+    pdc_api_: PdcAPI | None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
-    tar: Optional[CommonAppConfig] = None
+    tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
     statina: StatinaConfig = None
-    fohm: Optional[FOHMConfig] = None
+    fohm: FOHMConfig | None = None
     fluffy: FluffyConfig = None
     microsalt: MicrosaltConfig = None
     gisaid: GisaidConfig = None
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig = None
+    raredisease: RareDiseaseConfig = Field(None, alias="raredisease")
     rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
     taxprofiler: TaxprofilerConfig = Field(None, alias="taxprofiler")
 

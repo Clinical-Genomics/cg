@@ -1,12 +1,12 @@
 """Tests for the CleanFlowCellsAPI."""
 from datetime import datetime
 from pathlib import Path
-from typing import Union
 
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
+from cg.constants.subject import Sex
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store import Store
@@ -85,7 +85,7 @@ def store_with_flow_cell_to_clean(
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
-    sample_sequencing_metrics_details: list[Union[str, str, int, int, float, int]] = [
+    sample_sequencing_metrics_details: list[str | int | float] = [
         (sample_id, tmp_flow_cell_to_clean.id, 1, 50_000_0000, 90.5, 32),
         (sample_id, tmp_flow_cell_to_clean.id, 2, 50_000_0000, 90.4, 31),
     ]
@@ -95,7 +95,7 @@ def store_with_flow_cell_to_clean(
         has_backup=True,
     )
     sample: Sample = helpers.add_sample(
-        name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
+        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
@@ -114,7 +114,7 @@ def store_with_flow_cell_not_to_clean(
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
-    sample_sequencing_metrics_details: list[Union[str, str, int, int, float, int]] = [
+    sample_sequencing_metrics_details: list[str | int | float] = [
         (sample_id, tmp_flow_cell_not_to_clean.id, 1, 50_000_0000, 90.5, 32),
         (sample_id, tmp_flow_cell_not_to_clean.id, 2, 50_000_0000, 90.4, 31),
     ]
@@ -124,7 +124,7 @@ def store_with_flow_cell_not_to_clean(
         has_backup=True,
     )
     sample: Sample = helpers.add_sample(
-        name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
+        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store

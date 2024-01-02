@@ -1,8 +1,7 @@
 import logging
-import operator
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
@@ -13,8 +12,10 @@ from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
+from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
+from cg.store.models import Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -26,19 +27,19 @@ class NfAnalysisAPI(AnalysisAPI):
     def __init__(self, config: CGConfig, pipeline: Pipeline):
         super().__init__(config=config, pipeline=pipeline)
         self.pipeline: Pipeline = pipeline
-        self.root_dir: Optional[str] = None
-        self.nfcore_pipeline_path: Optional[str] = None
-        self.references: Optional[str] = None
-        self.profile: Optional[str] = None
-        self.conda_env: Optional[str] = None
-        self.conda_binary: Optional[str] = None
-        self.tower_binary_path: Optional[str] = None
-        self.tower_pipeline: Optional[str] = None
-        self.account: Optional[str] = None
-        self.email: Optional[str] = None
-        self.compute_env: Optional[str] = None
-        self.revision: Optional[str] = None
-        self.nextflow_binary_path: Optional[str] = None
+        self.root_dir: str | None = None
+        self.nfcore_pipeline_path: str | None = None
+        self.references: str | None = None
+        self.profile: str | None = None
+        self.conda_env: str | None = None
+        self.conda_binary: str | None = None
+        self.tower_binary_path: str | None = None
+        self.tower_pipeline: str | None = None
+        self.account: str | None = None
+        self.email: str | None = None
+        self.compute_env_base: str | None = None
+        self.revision: str | None = None
+        self.nextflow_binary_path: str | None = None
 
     @property
     def root(self) -> str:
@@ -56,7 +57,7 @@ class NfAnalysisAPI(AnalysisAPI):
     def process(self, process: Process):
         self._process = process
 
-    def get_profile(self, profile: Optional[str] = None) -> str:
+    def get_profile(self, profile: str | None = None) -> str:
         """Get NF profiles."""
         return profile or self.profile
 
@@ -78,8 +79,12 @@ class NfAnalysisAPI(AnalysisAPI):
             FileExtensions.CSV
         )
 
+    def get_compute_env(self, case_id: str) -> str:
+        """Get the compute environment for the head job based on the case priority."""
+        return f"{self.compute_env_base}-{self.get_slurm_qos_for_case(case_id=case_id)}"
+
     @staticmethod
-    def get_nextflow_config_path(nextflow_config: Optional[str] = None) -> Optional[Path]:
+    def get_nextflow_config_path(nextflow_config: str | None = None) -> Path | None:
         """Path to Nextflow config file."""
         if nextflow_config:
             return Path(nextflow_config).absolute()
@@ -100,7 +105,7 @@ class NfAnalysisAPI(AnalysisAPI):
             FileExtensions.YAML
         )
 
-    def get_params_file_path(self, case_id: str, params_file: Optional[Path] = None) -> Path:
+    def get_params_file_path(self, case_id: str, params_file: Path | None = None) -> Path:
         """Return parameters file or a path where the default parameters file for a case id should be located."""
         if params_file:
             return Path(params_file).absolute()
@@ -123,7 +128,7 @@ class NfAnalysisAPI(AnalysisAPI):
             f"{case_id}_{pipeline}_nextflow_{launch_time}",
         ).with_suffix(FileExtensions.LOG)
 
-    def get_workdir_path(self, case_id: str, work_dir: Optional[Path] = None) -> Path:
+    def get_workdir_path(self, case_id: str, work_dir: Path | None = None) -> Path:
         """Path to NF work directory."""
         if work_dir:
             return work_dir.absolute()
@@ -131,7 +136,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def extract_read_files(
-        metadata: list, forward_read: bool = False, reverse_read: bool = False
+        metadata: list[FastqFileMeta], forward_read: bool = False, reverse_read: bool = False
     ) -> list[str]:
         """Extract a list of fastq file paths for either forward or reverse reads."""
         if forward_read and not reverse_read:
@@ -140,8 +145,12 @@ class NfAnalysisAPI(AnalysisAPI):
             read_direction = 2
         else:
             raise ValueError("Either forward or reverse needs to be specified")
-        sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
-        return [d["path"] for d in sorted_metadata if d["read"] == read_direction]
+        sorted_metadata: list = sorted(metadata, key=lambda k: k.path)
+        return [
+            fastq_file.path
+            for fastq_file in sorted_metadata
+            if fastq_file.read_direction == read_direction
+        ]
 
     def verify_sample_sheet_exists(self, case_id: str, dry_run: bool = False) -> None:
         """Raise an error if sample sheet file is not found."""
@@ -196,6 +205,66 @@ class NfAnalysisAPI(AnalysisAPI):
             file_path=config_path,
         )
 
+    def _run_analysis_with_nextflow(
+        self, case_id: str, command_args: CommandArgs, dry_run: bool
+    ) -> None:
+        """Run analysis with given options using Nextflow."""
+        self.process = Process(
+            binary=self.nextflow_binary_path,
+            environment=self.conda_env,
+            conda_binary=self.conda_binary,
+            launch_directory=self.get_case_path(case_id=case_id),
+        )
+        LOG.info("Pipeline will be executed using Nextflow")
+        parameters: list[str] = NextflowHandler.get_nextflow_run_parameters(
+            case_id=case_id,
+            pipeline_path=self.nfcore_pipeline_path,
+            root_dir=self.root_dir,
+            command_args=command_args.dict(),
+        )
+        self.process.export_variables(
+            export=NextflowHandler.get_variables_to_export(),
+        )
+        command: str = self.process.get_command(parameters=parameters)
+        LOG.info(f"{command}")
+        sbatch_number: int = NextflowHandler.execute_head_job(
+            case_id=case_id,
+            case_directory=self.get_case_path(case_id=case_id),
+            slurm_account=self.account,
+            email=self.email,
+            qos=self.get_slurm_qos_for_case(case_id=case_id),
+            commands=command,
+            dry_run=dry_run,
+        )
+        LOG.info(f"Nextflow head job running as job: {sbatch_number}")
+
+    def _run_analysis_with_tower(
+        self, case_id: str, command_args: CommandArgs, dry_run: bool
+    ) -> None:
+        """Run analysis with given options using NF-Tower."""
+        LOG.info("Pipeline will be executed using Tower")
+        if command_args.resume:
+            from_tower_id: int = command_args.id or NfTowerHandler.get_last_tower_id(
+                case_id=case_id,
+                trailblazer_config=self.get_trailblazer_config_path(case_id=case_id),
+            )
+            LOG.info(f"Pipeline will be resumed from run with Tower id: {from_tower_id}.")
+            parameters: list[str] = NfTowerHandler.get_tower_relaunch_parameters(
+                from_tower_id=from_tower_id, command_args=command_args.dict()
+            )
+        else:
+            parameters: list[str] = NfTowerHandler.get_tower_launch_parameters(
+                tower_pipeline=self.tower_pipeline,
+                command_args=command_args.dict(),
+            )
+        self.process.run_command(parameters=parameters, dry_run=dry_run)
+        if self.process.stderr:
+            LOG.error(self.process.stderr)
+        if not dry_run:
+            tower_id = NfTowerHandler.get_tower_id(stdout_lines=self.process.stdout_lines())
+            self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
+        LOG.info(self.process.stdout)
+
     def run_analysis(
         self,
         case_id: str,
@@ -205,61 +274,17 @@ class NfAnalysisAPI(AnalysisAPI):
     ) -> None:
         """Execute run analysis with given options."""
         if use_nextflow:
-            self.process = Process(
-                binary=self.nextflow_binary_path,
-                environment=self.conda_env,
-                conda_binary=self.conda_binary,
-                launch_directory=self.get_case_path(case_id=case_id),
-            )
-            LOG.info("Pipeline will be executed using nextflow")
-            parameters: list[str] = NextflowHandler.get_nextflow_run_parameters(
+            self._run_analysis_with_nextflow(
                 case_id=case_id,
-                pipeline_path=self.nfcore_pipeline_path,
-                root_dir=self.root_dir,
-                command_args=command_args.dict(),
-            )
-            self.process.export_variables(
-                export=NextflowHandler.get_variables_to_export(),
-            )
-
-            command = self.process.get_command(parameters=parameters)
-            LOG.info(f"{command}")
-            sbatch_number: int = NextflowHandler.execute_head_job(
-                case_id=case_id,
-                case_directory=self.get_case_path(case_id=case_id),
-                slurm_account=self.account,
-                email=self.email,
-                qos=self.get_slurm_qos_for_case(case_id=case_id),
-                commands=command,
+                command_args=command_args,
                 dry_run=dry_run,
             )
-            LOG.info(f"Nextflow head job running as job {sbatch_number}")
-
         else:
-            LOG.info("Pipeline will be executed using tower")
-            if command_args.resume:
-                from_tower_id: int = command_args.id
-                if not from_tower_id:
-                    from_tower_id: int = NfTowerHandler.get_last_tower_id(
-                        case_id=case_id,
-                        trailblazer_config=self.get_trailblazer_config_path(case_id=case_id),
-                    )
-                LOG.info(f"Pipeline will be resumed from run {from_tower_id}.")
-                parameters: list[str] = NfTowerHandler.get_tower_relaunch_parameters(
-                    from_tower_id=from_tower_id, command_args=command_args.dict()
-                )
-            else:
-                parameters: list[str] = NfTowerHandler.get_tower_launch_parameters(
-                    tower_pipeline=self.tower_pipeline,
-                    command_args=command_args.dict(),
-                )
-            self.process.run_command(parameters=parameters, dry_run=dry_run)
-            if self.process.stderr:
-                LOG.error(self.process.stderr)
-            if not dry_run:
-                tower_id = NfTowerHandler.get_tower_id(stdout_lines=self.process.stdout_lines())
-                self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
-            LOG.info(self.process.stdout)
+            self._run_analysis_with_tower(
+                case_id=case_id,
+                command_args=command_args,
+                dry_run=dry_run,
+            )
 
     @staticmethod
     def get_deliverables_template_content() -> list[dict]:
@@ -269,12 +294,14 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_deliverables_for_case(self, case_id: str) -> PipelineDeliverables:
         """Return PipelineDeliverables for a given case."""
         deliverable_template: list[dict] = self.get_deliverables_template_content()
+        sample_id: str = self.status_db.get_samples_by_case_id(case_id).pop().internal_id
         files: list[FileDeliverable] = []
         for file in deliverable_template:
             for deliverable_field, deliverable_value in file.items():
                 if deliverable_value is None:
                     continue
                 file[deliverable_field] = file[deliverable_field].replace("CASEID", case_id)
+                file[deliverable_field] = file[deliverable_field].replace("SAMPLEID", sample_id)
                 file[deliverable_field] = file[deliverable_field].replace(
                     "PATHTOCASE", str(self.get_case_path(case_id=case_id))
                 )

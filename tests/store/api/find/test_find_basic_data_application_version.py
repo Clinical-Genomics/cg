@@ -1,5 +1,3 @@
-from typing import Optional
-
 from cg.store import Store
 from cg.store.models import Application, ApplicationVersion
 
@@ -31,9 +29,9 @@ def test_get_current_application_version_by_tag_invalid_tag(
     assert invalid_application_tag not in tags
 
     # WHEN getting the current application version by tag
-    application_version: Optional[
-        ApplicationVersion
-    ] = base_store.get_current_application_version_by_tag(tag=invalid_application_tag)
+    application_version: ApplicationVersion | None = (
+        base_store.get_current_application_version_by_tag(tag=invalid_application_tag)
+    )
 
     # THEN the application version is None
     assert application_version is None

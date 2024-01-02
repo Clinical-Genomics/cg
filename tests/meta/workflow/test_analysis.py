@@ -1,5 +1,5 @@
 """Test for analysis"""
-
+import logging
 from datetime import datetime
 
 import mock
@@ -13,8 +13,9 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.models.fastq import FastqFileMeta
 from cg.store import Store
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 
 
 @pytest.mark.parametrize(
@@ -42,15 +43,15 @@ def test_get_slurm_qos_for_case(mocker, case_id: str, priority, expected_slurm_q
 
 
 def test_gene_panels_correctly_added(customer_id):
-    """Test get correct gene panel list."""
+    """Test get a correct gene panel list."""
 
     # GIVEN a case that has a gene panel included in the gene panel master list
     default_panels_included: list[str] = [GenePanelMasterList.get_panel_names()[0]]
     master_list: list[str] = GenePanelMasterList.get_panel_names()
 
     # WHEN converting the gene panels between the default and the gene_panel_master_list
-    list_of_gene_panels_used = MipAnalysisAPI.convert_panels(
-        customer=customer_id, default_panels=default_panels_included
+    list_of_gene_panels_used: list[str] = MipAnalysisAPI.get_aggregated_panels(
+        customer_id=customer_id, default_panels=set(default_panels_included)
     )
 
     # THEN the list_of_gene_panels_used should return all gene panels
@@ -63,13 +64,14 @@ def test_gene_panels_not_added(customer_id):
     default_panels_not_included: list[str] = ["PANEL_NOT_IN_GENE_PANEL_MASTER_LIST"]
 
     # WHEN converting the gene panels between the default and the gene_panel_master_list
-    list_of_gene_panels_used = MipAnalysisAPI.convert_panels(
-        customer=customer_id, default_panels=default_panels_not_included
+    list_of_gene_panels_used: list[str] = MipAnalysisAPI.get_aggregated_panels(
+        customer_id=customer_id, default_panels=set(default_panels_not_included)
     )
 
     # THEN the list_of_gene_panels_used should return the custom panel and OMIM-AUTO
     assert set(list_of_gene_panels_used) == set(
-        default_panels_not_included + [GenePanelMasterList.OMIM_AUTO]
+        default_panels_not_included
+        + [GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN]
     )
 
 
@@ -389,3 +391,29 @@ def test_prepare_fastq_files_decompression_running(
             # WHEN running prepare_fastq_files
             # THEN an AnalysisNotReadyError should be thrown
             mip_analysis_api.prepare_fastq_files(case_id=case.internal_id, dry_run=False)
+
+
+def test_link_fastq_files_for_sample(
+    analysis_store: Store,
+    caplog,
+    mip_analysis_api: MipDNAAnalysisAPI,
+    fastq_file_meta_raw: dict,
+    mocker,
+):
+    caplog.set_level(logging.INFO)
+    # GIVEN a case
+    case: Case = analysis_store.get_cases()[0]
+
+    # GIVEN a sample
+    sample: Sample = case.links[0].sample
+
+    with mocker.patch.object(
+        AnalysisAPI,
+        "gather_file_metadata_for_sample",
+        return_value=[FastqFileMeta.model_validate(fastq_file_meta_raw)],
+    ):
+        # WHEN parsing header
+        mip_analysis_api.link_fastq_files_for_sample(case=case, sample=sample)
+
+        # THEN broadcast linking of files
+        assert "Linking: " in caplog.text

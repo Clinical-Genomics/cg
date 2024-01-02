@@ -163,9 +163,9 @@ def qc_microsalt_context(
     for sample in qc_pass_microsalt_samples:
         sample_to_add: Sample = helpers.add_sample(
             store=store,
-            internal_id=sample,
             application_tag=MicrosaltAppTags.MWRNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
+            internal_id=sample,
             reads=MicrosaltQC.TARGET_READS,
             last_sequenced_at=datetime.datetime.now(),
         )
@@ -183,9 +183,9 @@ def qc_microsalt_context(
     for sample in qc_fail_microsalt_samples:
         sample_to_add: Sample = helpers.add_sample(
             store=store,
-            internal_id=sample,
             application_tag=MicrosaltAppTags.MWXNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
+            internal_id=sample,
             reads=MicrosaltQC.TARGET_READS,
             last_sequenced_at=datetime.datetime.now(),
         )
@@ -214,13 +214,13 @@ def rnafusion_metrics() -> dict[str, float]:
         "after_filtering_q30_rate": 0.929476,
         "after_filtering_read1_mean_length": 99.0,
         "before_filtering_total_reads": 149984042.0,
-        "bias_5_3": 1.07,
+        "median_5prime_to_3prime_bias": 1.1211,
         "pct_adapter": 12.005654574904709,
         "pct_mrna_bases": 85.9731,
         "pct_ribosomal_bases": 0.6581,
         "pct_surviving": 99.42004630065911,
         "pct_duplication": 14.8643,
-        "reads_aligned": 72391566.0,
+        "read_pairs_examined": 72391566.0,
         "uniquely_mapped_percent": 91.02,
     }
 

@@ -1,15 +1,14 @@
 import datetime as dt
 
 from cg.constants import DataDelivery, GenePanelMasterList
-from cg.constants.constants import Pipeline, PrepCategory
-from cg.constants.invoice import CustomerNames
+from cg.constants.constants import CustomerId, Pipeline, PrepCategory
 from cg.constants.priority import Priority
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
-from cg.store.models import ApplicationVersion, Customer, Case, CaseSample, Sample
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
 
 
 class FastqSubmitter(Submitter):
@@ -66,7 +65,7 @@ class FastqSubmitter(Submitter):
             ticket=sample_obj.original_ticket,
         )
         case.customer = self.status.get_customer_by_internal_id(
-            customer_internal_id=CustomerNames.CG_INTERNAL_CUSTOMER
+            customer_internal_id=CustomerId.CG_INTERNAL_CUSTOMER
         )
         relationship: CaseSample = self.status.relate_sample(
             case=case, sample=sample_obj, status=StatusEnum.unknown

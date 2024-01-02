@@ -1,6 +1,5 @@
 import datetime as dt
 import re
-from typing import Optional
 
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 from sqlalchemy.orm import declarative_base
@@ -8,16 +7,16 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.util import deprecated
 
 from cg.constants import (
-    CASE_ACTIONS,
-    FLOWCELL_STATUS,
     PREP_CATEGORIES,
     SEX_OPTIONS,
     STATUS_OPTIONS,
     DataDelivery,
+    FlowCellStatus,
     Pipeline,
     Priority,
 )
-from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
+from cg.constants.archiving import PDC_ARCHIVE_LOCATION
+from cg.constants.constants import CONTROL_OPTIONS, CaseActions, PrepCategory
 
 Model = declarative_base()
 
@@ -107,6 +106,8 @@ class Application(Model):
     sample_concentration = Column(types.Text)
     sample_concentration_minimum = Column(types.DECIMAL)
     sample_concentration_maximum = Column(types.DECIMAL)
+    sample_concentration_minimum_cfdna = Column(types.DECIMAL)
+    sample_concentration_maximum_cfdna = Column(types.DECIMAL)
     priority_processing = Column(types.Boolean, default=False)
     details = Column(types.Text)
     limitations = Column(types.Text)
@@ -216,7 +217,7 @@ class Analysis(Model):
     is_primary = Column(types.Boolean, default=False)
 
     created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
-    family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
+    case_id = Column(ForeignKey("case.id", ondelete="CASCADE"), nullable=False)
     uploaded_to_vogue_at = Column(types.DateTime, nullable=True)
 
     case = orm.relationship("Case", back_populates="analyses")
@@ -305,7 +306,7 @@ class Customer(Model):
     return_samples = Column(types.Boolean, nullable=False, default=False)
     scout_access = Column(types.Boolean, nullable=False, default=False)
     uppmax_account = Column(types.String(32))
-    data_archive_location = Column(types.String(32), nullable=False, default="PDC")
+    data_archive_location = Column(types.String(32), nullable=False, default=PDC_ARCHIVE_LOCATION)
     is_clinical = Column(types.Boolean, nullable=False, default=False)
 
     collaborations = orm.relationship(
@@ -377,10 +378,10 @@ class Delivery(Model):
 
 
 class Case(Model, PriorityMixin):
-    __tablename__ = "family"
+    __tablename__ = "case"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
-    action = Column(types.Enum(*CASE_ACTIONS))
+    action = Column(types.Enum(*CaseActions.actions()))
     _cohorts = Column(types.Text)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -421,16 +422,16 @@ class Case(Model, PriorityMixin):
         self._panels = ",".join(panel_list) if panel_list else None
 
     @property
-    def latest_ticket(self) -> Optional[str]:
+    def latest_ticket(self) -> str | None:
         """Returns the last ticket the family was ordered in"""
         return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
-    def latest_analyzed(self) -> Optional[dt.datetime]:
+    def latest_analyzed(self) -> dt.datetime | None:
         return self.analyses[0].completed_at if self.analyses else None
 
     @property
-    def latest_sequenced(self) -> Optional[dt.datetime]:
+    def latest_sequenced(self) -> dt.datetime | None:
         sequenced_dates = []
         for link in self.links:
             if link.sample.application_version.application.is_external:
@@ -516,11 +517,11 @@ class Case(Model, PriorityMixin):
 
 
 class CaseSample(Model):
-    __tablename__ = "family_sample"
-    __table_args__ = (UniqueConstraint("family_id", "sample_id", name="_family_sample_uc"),)
+    __tablename__ = "case_sample"
+    __table_args__ = (UniqueConstraint("case_id", "sample_id", name="_case_sample_uc"),)
 
     id = Column(types.Integer, primary_key=True)
-    family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
+    case_id = Column(ForeignKey("case.id", ondelete="CASCADE"), nullable=False)
     sample_id = Column(ForeignKey("sample.id", ondelete="CASCADE"), nullable=False)
     status = Column(types.Enum(*STATUS_OPTIONS), default="unknown", nullable=False)
 
@@ -560,7 +561,7 @@ class Flowcell(Model):
     sequencer_type = Column(types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx"))
     sequencer_name = Column(types.String(32))
     sequenced_at = Column(types.DateTime)
-    status = Column(types.Enum(*FLOWCELL_STATUS), default="ondisk")
+    status = Column(types.Enum(*FlowCellStatus.statuses()), default="ondisk")
     archived_at = Column(types.DateTime)
     has_backup = Column(types.Boolean, nullable=False, default=False)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)

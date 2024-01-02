@@ -1,5 +1,5 @@
 import logging
-from typing import Iterable, Optional
+from typing import Iterable
 
 from housekeeper.store.models import File, Version
 
@@ -16,7 +16,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     Pipeline,
 )
-from cg.constants.scout_upload import MIP_CASE_TAGS
+from cg.constants.scout import MIP_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -41,7 +41,7 @@ class MipDNAReportAPI(ReportAPI):
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: MipAnalysis
     ) -> MipDNASampleMetadataModel:
-        """Fetches the MIP DNA sample metadata to include in the report."""
+        """Return MIP DNA sample metadata to include in the report."""
         parsed_metrics = get_sample_id_metric(
             sample_id=sample.internal_id, sample_id_metrics=analysis_metadata.sample_id_metrics
         )
@@ -57,7 +57,7 @@ class MipDNAReportAPI(ReportAPI):
         )
 
     def get_sample_coverage(self, sample: Sample, case: Case) -> dict:
-        """Calculates coverage values for a specific sample."""
+        """Return coverage values for a specific sample."""
         genes = self.get_genes_from_scout(panels=case.panels)
         sample_coverage = self.chanjo_api.sample_coverage(
             sample_id=sample.internal_id, panel_genes=genes
@@ -68,7 +68,7 @@ class MipDNAReportAPI(ReportAPI):
         return dict()
 
     def get_genes_from_scout(self, panels: list) -> list:
-        """Extracts panel gene IDs information from Scout."""
+        """Return panel gene IDs information from Scout."""
         panel_genes = list()
         for panel in panels:
             panel_genes.extend(self.scout_api.get_genes(panel))
@@ -76,7 +76,7 @@ class MipDNAReportAPI(ReportAPI):
         return panel_gene_ids
 
     def get_genome_build(self, analysis_metadata: MipAnalysis) -> str:
-        """Returns the build version of the genome reference of a specific case."""
+        """Return build version of the genome reference of a specific case."""
         return analysis_metadata.genome_build
 
     def get_report_accreditation(
@@ -89,7 +89,7 @@ class MipDNAReportAPI(ReportAPI):
         return True
 
     def get_required_fields(self, case: CaseModel) -> dict:
-        """Retrieves a dictionary with the delivery report required fields for MIP DNA."""
+        """Return dictionary with the delivery report required fields for MIP DNA."""
         return {
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,
@@ -112,7 +112,7 @@ class MipDNAReportAPI(ReportAPI):
 
     @staticmethod
     def get_sample_metadata_required_fields(case: CaseModel) -> dict:
-        """Retrieves sample metadata required fields associated to a specific sample ID."""
+        """Return sample metadata required fields associated to a specific sample ID."""
         required_sample_metadata_fields = dict()
         for sample in case.samples:
             required_fields = (
@@ -124,15 +124,15 @@ class MipDNAReportAPI(ReportAPI):
         return required_sample_metadata_fields
 
     def get_template_name(self) -> str:
-        """Retrieves the template name to render the delivery report."""
+        """Return template name to render the delivery report."""
         return Pipeline.MIP_DNA + "_report.html"
 
     def get_upload_case_tags(self) -> dict:
-        """Retrieves MIP DNA upload case tags."""
+        """Return MIP DNA upload case tags."""
         return MIP_CASE_TAGS
 
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
-        """Returns the file path of the uploaded to Scout file given its tag."""
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
+        """Return file path of the uploaded to Scout file given its tag."""
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
         tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
         uploaded_files: Iterable[File] = self.housekeeper_api.get_files(

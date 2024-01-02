@@ -1,10 +1,10 @@
 """Set case attributes in the status database."""
 import logging
-from typing import Optional
 
 import click
 
-from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline, Priority
+from cg.constants import DataDelivery, Pipeline, Priority
+from cg.constants.constants import CaseActions
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Case, Customer, Panel
@@ -14,7 +14,7 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("case")
-@click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update case action")
+@click.option("-a", "--action", type=click.Choice(CaseActions.actions()), help="update case action")
 @click.option("-c", "--customer-id", type=click.STRING, help="update customer")
 @click.option(
     "-d",
@@ -38,13 +38,13 @@ LOG = logging.getLogger(__name__)
 @click.pass_obj
 def set_case(
     context: CGConfig,
-    action: Optional[str],
-    data_analysis: Optional[Pipeline],
-    data_delivery: Optional[DataDelivery],
-    priority: Optional[Priority],
-    panel_abbreviations: Optional[tuple[str]],
+    action: str | None,
+    data_analysis: Pipeline | None,
+    data_delivery: DataDelivery | None,
+    priority: Priority | None,
+    panel_abbreviations: tuple[str] | None,
     case_id: str,
-    customer_id: Optional[str],
+    customer_id: str | None,
 ):
     """Update information about a case."""
 

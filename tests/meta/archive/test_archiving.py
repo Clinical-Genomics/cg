@@ -9,22 +9,21 @@ from requests import Response
 from cg.constants.constants import APIMethods, FileFormat
 from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import APIRequest, WriteStream
-from cg.meta.archive.ddn_dataflow import (
+from cg.meta.archive.ddn.constants import (
     DESTINATION_ATTRIBUTE,
     OSTYPE,
     ROOT_TO_TRIM,
     SOURCE_ATTRIBUTE,
     DataflowEndpoints,
-    DDNDataFlowClient,
-    MiriaObject,
-    TransferPayload,
 )
+from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
+from cg.meta.archive.ddn.models import MiriaObject, TransferPayload
 from cg.meta.archive.models import FileAndSample, SampleAndDestination
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
 from cg.store.models import Sample
 
-FUNCTION_TO_MOCK = "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content"
+FUNCTION_TO_MOCK = "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content"
 
 
 def test_correct_source_root(
@@ -168,7 +167,7 @@ def test_ddn_dataflow_client_initialization_invalid_credentials(
 
     # WHEN initializing the DDNDataFlowClient class with the invalid credentials
     with mock.patch(
-        "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content",
+        "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content",
         return_value=unauthorized_response,
     ):
         # THEN an exception should be raised
@@ -272,7 +271,7 @@ def test_archive_folders(
     local_storage_repository: str,
     file_and_sample: FileAndSample,
     trimmed_local_path: str,
-    ok_ddn_response: Response,
+    ok_miria_response,
 ):
     """Tests that the archiving function correctly formats the input and sends API request."""
 
@@ -281,7 +280,7 @@ def test_archive_folders(
     with mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_response,
+        return_value=ok_miria_response,
     ) as mock_request_submitter:
         job_id: int = ddn_dataflow_client.archive_files([file_and_sample])
 
@@ -301,9 +300,11 @@ def test_archive_folders(
                 }
             ],
             "osType": OSTYPE,
-            "createFolder": False,
+            "createFolder": True,
             "metadataList": [],
+            "settings": [],
         },
+        verify=False,
     )
 
 
@@ -314,7 +315,7 @@ def test_retrieve_samples(
     archive_store: Store,
     trimmed_local_path: str,
     sample_id: str,
-    ok_ddn_response: Response,
+    ok_miria_response,
 ):
     """Tests that the retrieve function correctly formats the input and sends API request."""
 
@@ -327,7 +328,7 @@ def test_retrieve_samples(
 
     # WHEN running the retrieve method and providing a SampleAndDestination object
     with mock.patch.object(
-        APIRequest, "api_request_from_content", return_value=ok_ddn_response
+        APIRequest, "api_request_from_content", return_value=ok_miria_response
     ) as mock_request_submitter:
         job_id: int = ddn_dataflow_client.retrieve_samples([sample_and_destination])
 
@@ -349,7 +350,9 @@ def test_retrieve_samples(
             "osType": OSTYPE,
             "createFolder": False,
             "metadataList": [],
+            "settings": [],
         },
+        verify=False,
     )
 
 

@@ -38,22 +38,28 @@ class CaseActions(StrEnum):
     HOLD: str = "hold"
     RUNNING: str = "running"
 
+    @classmethod
+    def actions(cls) -> list[str]:
+        return list(map(lambda action: action.value, cls))
 
-CASE_ACTIONS = [action.value for action in CaseActions]
-
-COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
-
-COMBOS = {
-    "DSD": ("DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"),
-    "CM": ("CNM", "CM"),
-    "Horsel": ("Horsel", "141217", "141201"),
-}
 
 CONTAINER_OPTIONS = ("Tube", "96 well plate", "No container")
 
 CONTROL_OPTIONS = ("", "negative", "positive")
 
 DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
+
+
+class CustomerId(StrEnum):
+    CG_INTERNAL_CUSTOMER: str = "cust000"
+    CUST001: str = "cust001"
+    CUST002: str = "cust002"
+    CUST003: str = "cust003"
+    CUST004: str = "cust004"
+    CUST032: str = "cust032"
+    CUST042: str = "cust042"
+    CUST132: str = "cust132"
+    CUST999: str = "cust999"
 
 
 class FlowCellStatus(StrEnum):
@@ -63,8 +69,9 @@ class FlowCellStatus(StrEnum):
     PROCESSING: str = "processing"
     RETRIEVED: str = "retrieved"
 
-
-FLOWCELL_STATUS = [status.value for status in FlowCellStatus]
+    @classmethod
+    def statuses(cls) -> list[str]:
+        return list(map(lambda status: status.value, cls))
 
 
 class AnalysisType(StrEnum):
@@ -237,3 +244,5 @@ class Strandedness(StrEnum):
 
 
 PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.SARS_COV_2]
+
+NG_UL_SUFFIX: str = " ng/uL"

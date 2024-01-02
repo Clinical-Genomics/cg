@@ -4,14 +4,14 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import PrepCategory
-from cg.constants.scout_upload import (
-    RNAFUSION_CASE_TAGS,
-    RNAFUSION_SAMPLE_TAGS,
-    GenomeBuild,
-)
+from cg.constants.scout import RNAFUSION_CASE_TAGS, RNAFUSION_SAMPLE_TAGS, GenomeBuild
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
-from cg.models.scout.scout_load_config import RnafusionLoadConfig, ScoutCancerIndividual
+from cg.models.scout.scout_load_config import (
+    RnafusionLoadConfig,
+    ScoutCancerIndividual,
+    ScoutIndividual,
+)
 from cg.store.models import Analysis, CaseSample
 
 LOG = logging.getLogger(__name__)
@@ -56,12 +56,19 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
             self.get_file_from_hk(getattr(self.case_tags, scout_key)),
         )
 
+    def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
+        """Include the RNA sample alignment file."""
+        config_sample.rna_alignment_path = self.get_sample_file(
+            hk_tags=self.sample_tags.alignment_file, sample_id=config_sample.sample_id
+        )
+
     def build_config_sample(self, case_sample: CaseSample) -> ScoutCancerIndividual:
         """Build a sample with rnafusion specific information."""
         config_sample = ScoutCancerIndividual()
-
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
-
+        self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
         config_sample.analysis_type = PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
 
+        # Replace sample_id with internal case id, as rnafusion currently uses case ids instead of sample ids
+        config_sample.sample_id = case_sample.case.internal_id
         return config_sample

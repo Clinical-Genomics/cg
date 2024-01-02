@@ -116,7 +116,7 @@ def test_with_config_use_nextflow(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN command should use nextflow
-    assert "using nextflow" in caplog.text
+    assert "using Nextflow" in caplog.text
     assert "path/to/bin/nextflow" in caplog.text
     assert "-work-dir" in caplog.text
 
@@ -145,7 +145,7 @@ def test_with_config(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN command should use tower
-    assert "using tower" in caplog.text
+    assert "using Tower" in caplog.text
     assert "path/to/bin/tw launch" in caplog.text
     assert "--work-dir" in caplog.text
 

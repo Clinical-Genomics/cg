@@ -3,12 +3,11 @@
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Optional
 
 from cg.apps.scout.scout_export import ScoutExportCase, Variant
 from cg.constants.constants import FileFormat
 from cg.constants.gene_panel import GENOME_BUILD_37
-from cg.constants.scout_upload import ScoutCustomCaseReportTags
+from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.exc import ScoutUploadError
 from cg.io.controller import ReadFile, ReadStream
 from cg.models.scout.scout_load_config import ScoutLoadConfig
@@ -33,7 +32,7 @@ class ScoutAPI:
             file_format=FileFormat.YAML, file_path=scout_load_config
         )
         scout_load_config_object: ScoutLoadConfig = ScoutLoadConfig(**scout_config)
-        existing_case: Optional[ScoutExportCase] = self.get_case(
+        existing_case: ScoutExportCase | None = self.get_case(
             case_id=scout_load_config_object.family
         )
         load_command = ["load", "case", str(scout_load_config)]
@@ -68,6 +67,20 @@ class ScoutAPI:
             LOG.info("Could not find panels")
             return []
 
+        return list(self.process.stdout_lines())
+
+    def export_managed_variants(self, genome_build: str = GENOME_BUILD_37) -> list[str]:
+        """Export a list of managed variants."""
+        export_command = ["export", "managed"]
+        if genome_build:
+            export_command.extend(["--build", genome_build])
+        try:
+            self.process.run_command(export_command)
+            if not self.process.stdout:
+                return []
+        except CalledProcessError:
+            LOG.info("Could not export managed variants")
+            return []
         return list(self.process.stdout_lines())
 
     def get_genes(self, panel_id: str, build: str = None) -> list[dict]:
@@ -116,17 +129,17 @@ class ScoutAPI:
 
         return variants
 
-    def get_case(self, case_id: str) -> Optional[ScoutExportCase]:
+    def get_case(self, case_id: str) -> ScoutExportCase | None:
         """Fetch a case from Scout"""
         cases: list[ScoutExportCase] = self.get_cases(case_id=case_id)
         return cases[0] if cases else None
 
     def get_cases(
         self,
-        case_id: Optional[str] = None,
+        case_id: str | None = None,
         reruns: bool = False,
         finished: bool = False,
-        status: Optional[str] = None,
+        status: str | None = None,
         days_ago: int = None,
     ) -> list[ScoutExportCase]:
         """Interact with cases existing in the database."""

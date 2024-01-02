@@ -1,10 +1,10 @@
 """Module for common workflow commands."""
 import logging
-from typing import Optional
 
 import click
 
 from cg.apps.environ import environ_email
+from cg.cli.utils import echo_lines
 from cg.cli.workflow.commands import link
 from cg.cli.workflow.mip.options import (
     ARGUMENT_CASE_ID,
@@ -37,7 +37,7 @@ def config_case(context: CGConfig, case_id: str, panel_bed: str, dry_run: bool):
     analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        panel_bed: Optional[str] = analysis_api.get_panel_bed(panel_bed=panel_bed)
+        panel_bed: str | None = analysis_api.get_panel_bed(panel_bed=panel_bed)
         config_data: dict = analysis_api.pedigree_config(case_id=case_id, panel_bed=panel_bed)
     except CgError as error:
         LOG.error(error)
@@ -52,18 +52,33 @@ def config_case(context: CGConfig, case_id: str, panel_bed: str, dry_run: bool):
 @OPTION_DRY
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def panel(context: CGConfig, case_id: str, dry_run: bool):
+def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Write aggregated gene panel file exported from Scout."""
 
     analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
-    bed_lines: list[str] = analysis_api.panel(case_id=case_id)
+    bed_lines: list[str] = analysis_api.get_gene_panel(case_id=case_id)
     if dry_run:
-        for bed_line in bed_lines:
-            click.echo(bed_line)
+        echo_lines(lines=bed_lines)
         return
     analysis_api.write_panel(case_id, bed_lines)
+
+
+@click.command()
+@OPTION_DRY
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def managed_variants(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Write managed variants file exported from Scout."""
+
+    analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
+    vcf_lines: list[str] = analysis_api.get_managed_variants()
+    if dry_run:
+        echo_lines(lines=vcf_lines)
+        return
+    analysis_api.write_managed_variants(case_id=case_id, content=vcf_lines)
 
 
 @click.command()
@@ -165,6 +180,7 @@ def start(
     analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
     context.invoke(link, case_id=case_id, dry_run=dry_run)
     context.invoke(panel, case_id=case_id, dry_run=dry_run)
+    context.invoke(managed_variants, case_id=case_id, dry_run=dry_run)
     context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
     context.invoke(
         run,

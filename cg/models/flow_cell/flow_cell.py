@@ -1,9 +1,9 @@
 """Module for modeling flow cells."""
 import datetime
 import logging
+import os
 from pathlib import Path
-from typing import Optional, Type, Union
-from cg.models.flow_cell.utils import parse_date
+from typing import Type
 
 from pydantic import ValidationError
 from typing_extensions import Literal
@@ -20,33 +20,41 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysi
 from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
-from cg.constants.sequencing import Sequencers, sequencer_types
+from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
 from cg.exc import FlowCellError, SampleSheetError
 from cg.models.demultiplex.run_parameters import (
     RunParameters,
+    RunParametersHiSeq,
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
+from cg.models.flow_cell.utils import parse_date
 
 LOG = logging.getLogger(__name__)
+RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
+    Sequencers.HISEQGA: RunParametersHiSeq,
+    Sequencers.HISEQX: RunParametersHiSeq,
+    Sequencers.NOVASEQ: RunParametersNovaSeq6000,
+    Sequencers.NOVASEQX: RunParametersNovaSeqX,
+}
 
 
 class FlowCellDirectoryData:
     """Class to collect information about flow cell directories and their particular files."""
 
-    def __init__(self, flow_cell_path: Path, bcl_converter: Optional[str] = None):
+    def __init__(self, flow_cell_path: Path, bcl_converter: str | None = None):
         LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
         self.path: Path = flow_cell_path
         self.machine_name: str = ""
-        self._run_parameters: Optional[RunParameters] = None
+        self._run_parameters: RunParameters | None = None
         self.run_date: datetime.datetime = datetime.datetime.now()
         self.machine_number: int = 0
         self.base_name: str = ""  # Base name is flow cell-id + flow cell position
         self.id: str = ""
         self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_dir_name()
-        self.bcl_converter: Optional[str] = self.get_bcl_converter(bcl_converter)
-        self._sample_sheet_path_hk: Optional[Path] = None
+        self.bcl_converter: str = self.get_bcl_converter(bcl_converter)
+        self._sample_sheet_path_hk: Path | None = None
 
     def parse_flow_cell_dir_name(self):
         """Parse relevant information from flow cell name.
@@ -86,7 +94,7 @@ class FlowCellDirectoryData:
         """
         Return sample sheet path.
         """
-        return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME.value)
+        return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
 
     def set_sample_sheet_path_hk(self, hk_path: Path):
         self._sample_sheet_path_hk = hk_path
@@ -98,28 +106,31 @@ class FlowCellDirectoryData:
 
     @property
     def run_parameters_path(self) -> Path:
-        """Return path to run parameters file."""
-        return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS)
+        """Return path to run parameters file if it exists.
+        Raises:
+            FlowCellError if the flow cell has no run parameters file."""
+        if DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE in os.listdir(self.path):
+            return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
+        elif DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE in os.listdir(self.path):
+            return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE)
+        else:
+            message: str = f"No run parameters file found in flow cell {self.path}"
+            LOG.error(message)
+            raise FlowCellError(message)
 
     @property
     def run_parameters(self) -> RunParameters:
         """Return run parameters object."""
-        if not self.run_parameters_path.exists():
-            message = f"Could not find run parameters file {self.run_parameters_path}"
-            LOG.warning(message)
-            raise FileNotFoundError(message)
         if not self._run_parameters:
-            self._run_parameters = (
-                RunParametersNovaSeqX(run_parameters_path=self.run_parameters_path)
-                if self.sequencer_type == Sequencers.NOVASEQX
-                else RunParametersNovaSeq6000(run_parameters_path=self.run_parameters_path)
+            self._run_parameters = RUN_PARAMETERS_CONSTRUCTOR[self.sequencer_type](
+                run_parameters_path=self.run_parameters_path
             )
         return self._run_parameters
 
     @property
     def sample_type(
         self,
-    ) -> Union[Type[FlowCellSampleBcl2Fastq], Type[FlowCellSampleBCLConvert]]:
+    ) -> Type[FlowCellSampleBcl2Fastq] | Type[FlowCellSampleBCLConvert]:
         """Return the sample class used in the flow cell."""
         if self.bcl_converter == BclConverter.BCL2FASTQ:
             return FlowCellSampleBcl2Fastq
@@ -130,14 +141,14 @@ class FlowCellDirectoryData:
         self,
     ) -> Literal[Sequencers.HISEQX, Sequencers.HISEQGA, Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
         """Return the sequencer type."""
-        return sequencer_types[self.machine_name]
+        return SEQUENCER_TYPES[self.machine_name]
 
     def get_bcl_converter(self, bcl_converter: str) -> str:
         """
         Return the BCL converter to use.
         Tries to get the BCL converter from the sequencer type if not provided.
         Note: bcl_converter can be used to override automatic selection.
-        Reason: Data reproducability.
+        Reason: Data reproducibility.
         """
         return bcl_converter or self.get_bcl_converter_by_sequencer()
 
@@ -163,12 +174,12 @@ class FlowCellDirectoryData:
 
     @property
     def hiseq_x_copy_complete_path(self) -> Path:
-        """Return copy complete path for Hiseq X."""
-        return Path(self.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE)
+        """Return copy complete path for HiSeqX."""
+        return Path(self.path, DemultiplexingDirsAndFiles.HISEQ_X_COPY_COMPLETE)
 
     @property
     def hiseq_x_delivery_started_path(self) -> Path:
-        """Return delivery started path for Hiseq X."""
+        """Return delivery started path for HiSeqX."""
         return Path(self.path, DemultiplexingDirsAndFiles.DELIVERY)
 
     @property
@@ -267,11 +278,11 @@ class FlowCellDirectoryData:
         """
         LOG.info("Check if flow cell is ready for downstream processing")
         if not self.is_sequencing_done():
-            LOG.info(f"Sequencing is not completed for flow cell {self.id}")
+            LOG.warning(f"Sequencing is not completed for flow cell {self.id}")
             return False
         LOG.debug(f"Sequence is done for flow cell {self.id}")
         if not self.is_copy_completed():
-            LOG.info(f"Copy of sequence data is not ready for flow cell {self.id}")
+            LOG.warning(f"Copy of sequence data is not ready for flow cell {self.id}")
             return False
         LOG.debug(f"All data has been transferred for flow cell {self.id}")
         LOG.info(f"Flow cell {self.id} is ready for downstream processing")

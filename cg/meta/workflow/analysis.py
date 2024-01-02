@@ -4,23 +4,40 @@ import os
 import shutil
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Optional, Union
 
 import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
-from cg.constants.constants import AnalysisType, CaseActions, WorkflowManager
-from cg.constants.priority import PRIORITY_TO_SLURM_QOS
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority, SequencingFileTag
+from cg.constants.constants import (
+    AnalysisType,
+    CaseActions,
+    FileFormat,
+    WorkflowManager,
+)
+from cg.constants.gene_panel import GenePanelCombo
+from cg.constants.scout import ScoutExportFileName
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
+from cg.io.controller import WriteFile
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
+from cg.models.fastq import FastqFileMeta
 from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
+
+
+def add_gene_panel_combo(default_panels: set[str]) -> set[str]:
+    """Add gene panels combinations for gene panels being part of gene panel combination and return updated gene panels."""
+    additional_panels = set()
+    for panel in default_panels:
+        if panel in GenePanelCombo.COMBO_1:
+            additional_panels |= GenePanelCombo.COMBO_1.get(panel)
+    default_panels |= additional_panels
+    return default_panels
 
 
 class AnalysisAPI(MetaAPI):
@@ -80,19 +97,19 @@ class AnalysisAPI(MetaAPI):
 
     def get_priority_for_case(self, case_id: str) -> int:
         """Get priority from the status db case priority"""
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        return case_obj.priority.value or Priority.research
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        return case.priority or Priority.research
 
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
         priority: int = self.get_priority_for_case(case_id=case_id)
-        return PRIORITY_TO_SLURM_QOS[priority]
+        return Priority.priority_to_slurm_qos().get(priority)
 
     def get_workflow_manager(self) -> str:
         """Get workflow manager for a given pipeline."""
         return WorkflowManager.Slurm.value
 
-    def get_case_path(self, case_id: str) -> Union[list[Path], Path]:
+    def get_case_path(self, case_id: str) -> list[Path] | Path:
         """Path to case working directory."""
         raise NotImplementedError
 
@@ -115,7 +132,7 @@ class AnalysisAPI(MetaAPI):
         """
         raise NotImplementedError
 
-    def get_bundle_deliverables_type(self, case_id: str) -> Optional[str]:
+    def get_bundle_deliverables_type(self, case_id: str) -> str | None:
         return None
 
     @staticmethod
@@ -227,18 +244,16 @@ class AnalysisAPI(MetaAPI):
             LOG.warning("Could not retrieve %s workflow version!", self.pipeline)
             return "0.0.0"
 
-    def set_statusdb_action(
-        self, case_id: str, action: Optional[str], dry_run: bool = False
-    ) -> None:
+    def set_statusdb_action(self, case_id: str, action: str | None, dry_run: bool = False) -> None:
         """
         Set one of the allowed actions on a case in StatusDB.
         """
         if dry_run:
             LOG.info(f"Dry-run: Action {action} would be set for case {case_id}")
             return
-        if action in [None, *CASE_ACTIONS]:
-            case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-            case_obj.action = action
+        if action in [None, *CaseActions.actions()]:
+            case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+            case.action = action
             self.status_db.session.commit()
             LOG.info("Action %s set for case %s", action, case_id)
             return
@@ -275,63 +290,64 @@ class AnalysisAPI(MetaAPI):
             if self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
 
-    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample):
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
         """Return the path to the FASTQ destination directory."""
         raise NotImplementedError
 
-    def gather_file_metadata_for_sample(self, sample_obj: Sample) -> list[dict]:
+    def gather_file_metadata_for_sample(self, sample: Sample) -> list[FastqFileMeta]:
         return [
-            self.fastq_handler.parse_file_data(file_obj.full_path)
-            for file_obj in self.housekeeper_api.files(
-                bundle=sample_obj.internal_id, tags=["fastq"]
+            self.fastq_handler.parse_file_data(hk_file.full_path)
+            for hk_file in self.housekeeper_api.files(
+                bundle=sample.internal_id, tags={SequencingFileTag.FASTQ}
             )
         ]
 
     def link_fastq_files_for_sample(
-        self, case_obj: Case, sample_obj: Sample, concatenate: bool = False
+        self, case: Case, sample: Sample, concatenate: bool = False
     ) -> None:
         """
-        Link FASTQ files for a sample to working directory.
+        Link FASTQ files for a sample to the work directory.
         If pipeline input requires concatenated fastq, files can also be concatenated
         """
-        linked_reads_paths = {1: [], 2: []}
-        concatenated_paths = {1: "", 2: ""}
-        files: list[dict] = self.gather_file_metadata_for_sample(sample_obj=sample_obj)
-        sorted_files = sorted(files, key=lambda k: k["path"])
-        fastq_dir = self.get_sample_fastq_destination_dir(case=case_obj, sample=sample_obj)
+        linked_reads_paths: dict[int, list[Path]] = {1: [], 2: []}
+        concatenated_paths: dict[int, str] = {1: "", 2: ""}
+        fastq_files_meta: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
+        sorted_fastq_files_meta: list[FastqFileMeta] = sorted(
+            fastq_files_meta, key=lambda k: k.path
+        )
+        fastq_dir: Path = self.get_sample_fastq_destination_dir(case=case, sample=sample)
         fastq_dir.mkdir(parents=True, exist_ok=True)
 
-        for fastq_data in sorted_files:
-            fastq_path = Path(fastq_data["path"])
-            fastq_name = self.fastq_handler.create_fastq_name(
-                lane=fastq_data["lane"],
-                flowcell=fastq_data["flowcell"],
-                sample=sample_obj.internal_id,
-                read=fastq_data["read"],
-                undetermined=fastq_data["undetermined"],
-                meta=self.get_additional_naming_metadata(sample_obj),
+        for fastq_file in sorted_fastq_files_meta:
+            fastq_file_name: str = self.fastq_handler.create_fastq_name(
+                lane=fastq_file.lane,
+                flow_cell=fastq_file.flow_cell_id,
+                sample=sample.internal_id,
+                read_direction=fastq_file.read_direction,
+                undetermined=fastq_file.undetermined,
+                meta=self.get_lims_naming_metadata(sample),
             )
-            destination_path: Path = fastq_dir / fastq_name
-            linked_reads_paths[fastq_data["read"]].append(destination_path)
+            destination_path = Path(fastq_dir, fastq_file_name)
+            linked_reads_paths[fastq_file.read_direction].append(destination_path)
             concatenated_paths[
-                fastq_data["read"]
-            ] = f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_name)}"
+                fastq_file.read_direction
+            ] = f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_file_name)}"
 
             if not destination_path.exists():
-                LOG.info(f"Linking: {fastq_path} -> {destination_path}")
-                destination_path.symlink_to(fastq_path)
+                LOG.info(f"Linking: {fastq_file.path} -> {destination_path}")
+                destination_path.symlink_to(fastq_file.path)
             else:
                 LOG.warning(f"Destination path already exists: {destination_path}")
 
         if not concatenate:
             return
 
-        LOG.info("Concatenation in progress for sample %s.", sample_obj.internal_id)
+        LOG.info(f"Concatenation in progress for sample: {sample.internal_id}")
         for read, value in linked_reads_paths.items():
             self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
             self.fastq_handler.remove_files(value)
 
-    def get_target_bed_from_lims(self, case_id: str) -> Optional[str]:
+    def get_target_bed_from_lims(self, case_id: str) -> str | None:
         """Get target bed filename from LIMS."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample: Sample = case.links[0].sample
@@ -342,7 +358,7 @@ class AnalysisAPI(MetaAPI):
         target_bed_shortname: str = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if not target_bed_shortname:
             return None
-        bed_version: Optional[BedVersion] = self.status_db.get_bed_version_by_short_name(
+        bed_version: BedVersion | None = self.status_db.get_bed_version_by_short_name(
             bed_version_short_name=target_bed_shortname
         )
         if not bed_version:
@@ -422,7 +438,7 @@ class AnalysisAPI(MetaAPI):
         """
         return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
 
-    def get_additional_naming_metadata(self, sample_obj: Sample) -> Optional[str]:
+    def get_lims_naming_metadata(self, sample: Sample) -> str | None:
         return None
 
     def get_latest_metadata(self, case_id: str) -> AnalysisModel:
@@ -445,7 +461,7 @@ class AnalysisAPI(MetaAPI):
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
             self.status_db.session.commit()
 
-    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[list[Path], Path]) -> int:
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
         """Remove workflow run directory."""
 
         try:
@@ -502,3 +518,35 @@ class AnalysisAPI(MetaAPI):
         self.resolve_decompression(case_id, dry_run=dry_run)
         if not self.is_case_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ file are not present for the analysis to start")
+
+    @staticmethod
+    def _write_managed_variants(out_dir: Path, content: list[str]) -> None:
+        """Write the managed variants to case dir."""
+        out_dir.mkdir(parents=True, exist_ok=True)
+        WriteFile.write_file_from_content(
+            content="\n".join(content),
+            file_format=FileFormat.TXT,
+            file_path=Path(out_dir, ScoutExportFileName.MANAGED_VARIANTS),
+        )
+
+    @staticmethod
+    def _write_panel(out_dir: Path, content: list[str]) -> None:
+        """Write the managed variants to case dir."""
+        out_dir.mkdir(parents=True, exist_ok=True)
+        WriteFile.write_file_from_content(
+            content="\n".join(content),
+            file_format=FileFormat.TXT,
+            file_path=Path(out_dir, ScoutExportFileName.PANELS),
+        )
+
+    def _get_gene_panel(self, case_id: str, genome_build: str) -> list[str]:
+        """Create and return the aggregated gene panel file."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        all_panels: list[str] = self.get_aggregated_panels(
+            customer_id=case.customer.internal_id, default_panels=set(case.panels)
+        )
+        return self.scout_api.export_panels(build=genome_build, panels=all_panels)
+
+    def _get_managed_variants(self, genome_build: str) -> list[str]:
+        """Create and return the managed variants."""
+        return self.scout_api.export_managed_variants(genome_build=genome_build)

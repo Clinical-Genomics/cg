@@ -5,7 +5,7 @@ from click.testing import CliRunner
 
 from cg.cli.set.base import sample
 from cg.constants import EXIT_SUCCESS, Priority
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Sample
@@ -25,14 +25,14 @@ def test_invalid_sample(cli_runner: CliRunner, base_context: CGConfig):
 def test_skip_lims(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample
 
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    db_sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
     key = "name"
     new_value = "new_value"
 
     # WHEN setting sample but skipping lims
     result = cli_runner.invoke(
         sample,
-        [sample_obj.internal_id, "-kv", "name", "dummy_value", "-y", "--skip-lims"],
+        [db_sample.internal_id, "-kv", "name", "dummy_value", "-y", "--skip-lims"],
         obj=base_context,
     )
 
@@ -46,20 +46,20 @@ def test_skip_lims(cli_runner: CliRunner, base_context: CGConfig, base_store: St
 def test_set_sample(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, key, helpers):
     # GIVEN a database with a sample
 
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    db_sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
     new_value = "new_value"
-    assert getattr(sample_obj, key) != new_value
+    assert getattr(db_sample, key) != new_value
 
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
         sample,
-        [sample_obj.internal_id, "-kv", key, new_value, "-y"],
+        [db_sample.internal_id, "-kv", key, new_value, "-y"],
         obj=base_context,
     )
 
     # THEN it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == EXIT_SUCCESS
-    assert getattr(sample_obj, key) == new_value
+    assert getattr(db_sample, key) == new_value
     assert base_context.lims_api.get_updated_sample_key() == key
     assert base_context.lims_api.get_updated_sample_value() == new_value
 
@@ -70,95 +70,95 @@ def test_set_boolean_sample(
 ):
     # GIVEN a database with a sample
 
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    db_sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
     value: bool = new_value.lower() == "true"
 
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
         sample,
-        [sample_obj.internal_id, "-kv", "no_invoice", new_value, "-y", "--skip-lims"],
+        [db_sample.internal_id, "-kv", "no_invoice", new_value, "-y", "--skip-lims"],
         obj=base_context,
     )
 
     # THEN it should have new_value as attribute key on the sample
     assert result.exit_code == EXIT_SUCCESS
-    assert getattr(sample_obj, "no_invoice") == value
+    assert getattr(db_sample, "no_invoice") == value
 
 
 def test_sex(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample
 
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    db_sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
     key = "sex"
     new_value = "male"
-    assert getattr(sample_obj, key) != new_value
+    assert getattr(db_sample, key) != new_value
 
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
-        sample, [sample_obj.internal_id, "-kv", key, new_value, "-y"], obj=base_context
+        sample, [db_sample.internal_id, "-kv", key, new_value, "-y"], obj=base_context
     )
 
     # THEN it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == EXIT_SUCCESS
-    assert getattr(sample_obj, key) == new_value
+    assert getattr(db_sample, key) == new_value
     assert base_context.lims_api.get_updated_sample_key() == key
     assert base_context.lims_api.get_updated_sample_value() == new_value
 
 
 def test_priority_text(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    db_sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
     key = "priority"
     new_value = Priority.express.name
-    assert sample_obj.priority_human != new_value
+    assert db_sample.priority_human != new_value
 
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
-        sample, [sample_obj.internal_id, "-kv", key, new_value, "-y"], obj=base_context
+        sample, [db_sample.internal_id, "-kv", key, new_value, "-y"], obj=base_context
     )
 
     # THEN it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == EXIT_SUCCESS
-    assert sample_obj.priority_human == new_value
+    assert db_sample.priority_human == new_value
     assert base_context.lims_api.get_updated_sample_key() == key
-    assert base_context.lims_api.get_updated_sample_value() == sample_obj.priority_human
+    assert base_context.lims_api.get_updated_sample_value() == db_sample.priority_human
 
 
 def test_priority_number(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    db_sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
     key = "priority"
     new_value = Priority.express
-    assert sample_obj.priority != new_value
+    assert db_sample.priority != new_value
 
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
         sample,
-        [sample_obj.internal_id, "-kv", key, new_value.name, "-y"],
+        [db_sample.internal_id, "-kv", key, new_value.name, "-y"],
         obj=base_context,
     )
 
     # THEN it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == EXIT_SUCCESS
-    assert sample_obj.priority == new_value
+    assert db_sample.priority == new_value
     assert base_context.lims_api.get_updated_sample_key() == key
-    assert base_context.lims_api.get_updated_sample_value() == sample_obj.priority_human
+    assert base_context.lims_api.get_updated_sample_value() == db_sample.priority_human
 
 
 def test_sample_comment(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample without comment
-    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
+    db_sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
     key = "comment"
 
     # WHEN setting key on sample to new_value
     new_value = "test comment"
     result = cli_runner.invoke(
-        sample, [sample_obj.internal_id, "-kv", key, new_value, "-y"], obj=base_context
+        sample, [db_sample.internal_id, "-kv", key, new_value, "-y"], obj=base_context
     )
 
     # THEN it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == EXIT_SUCCESS
-    assert getattr(sample_obj, key).endswith(new_value)
+    assert getattr(db_sample, key).endswith(new_value)
     assert base_context.lims_api.get_updated_sample_key() == key
     assert base_context.lims_api.get_updated_sample_value() == new_value
 
@@ -169,7 +169,7 @@ def test_sample_comment_append(
     # GIVEN a database with a sample with a comment
     old_value = "test comment"
     sample_obj = helpers.add_sample(
-        base_store, gender=Gender.FEMALE, comment=f"2022-06-13 10:16-test.user: {old_value}"
+        base_store, sex=Sex.FEMALE, comment=f"2022-06-13 10:16-test.user: {old_value}"
     )
     key = "comment"
 

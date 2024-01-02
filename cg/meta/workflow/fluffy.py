@@ -1,9 +1,8 @@
 import datetime as dt
 import logging
 import shutil
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
-from typing import Optional
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
@@ -23,7 +22,7 @@ from cg.utils import Process
 LOG = logging.getLogger(__name__)
 
 
-class FluffySampleSheetHeaders(Enum):
+class FluffySampleSheetHeaders(StrEnum):
     flow_cell_id: str = "FCID"
     lane: str = "Lane"
     sample_internal_id: str = "Sample_ID"
@@ -39,6 +38,10 @@ class FluffySampleSheetHeaders(Enum):
     library_nM: str = "Library_nM"
     sequencing_date: str = "SequencingDate"
 
+    @classmethod
+    def headers(cls) -> list[str]:
+        return list(map(lambda header: header.value, cls))
+
 
 class FluffySample(BaseModel):
     flow_cell_id: str
@@ -48,9 +51,9 @@ class FluffySample(BaseModel):
     index: str
     index2: str
     sample_name: str
-    control: Optional[str] = "N"
-    recipe: Optional[str] = "R1"
-    operator: Optional[str] = "script"
+    control: str | None = "N"
+    recipe: str | None = "R1"
+    operator: str | None = "script"
     sample_project: str
     exclude: bool
     library_nM: float
@@ -62,9 +65,8 @@ class FluffySampleSheet(BaseModel):
 
     def write_sample_sheet(self, out_path: Path) -> None:
         LOG.info(f"Writing fluffy sample sheet to {out_path}")
-        headers = [header.value for header in FluffySampleSheetHeaders]
         entries = [entry.model_dump().values() for entry in self.samples]
-        content = [headers] + entries
+        content = [FluffySampleSheetHeaders.headers()] + entries
         WriteFile.write_file_from_content(content, FileFormat.CSV, out_path)
 
 
@@ -169,7 +171,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """Get sample concentration from LIMS"""
         return self.lims_api.get_sample_attribute(lims_id=sample_id, key="concentration_sample")
 
-    def get_sample_sequenced_date(self, sample_id: str) -> Optional[dt.date]:
+    def get_sample_sequenced_date(self, sample_id: str) -> dt.date | None:
         sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
         last_sequenced_at: dt.datetime = sample_obj.last_sequenced_at
         if last_sequenced_at:

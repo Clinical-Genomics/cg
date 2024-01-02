@@ -1,10 +1,10 @@
 import logging
-from typing import Optional
 
 import click
 
 from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline, Priority
-from cg.constants.subject import Gender
+from cg.constants.archiving import PDC_ARCHIVE_LOCATION
+from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -59,7 +59,7 @@ def add():
     "--data-archive-location",
     "data_archive_location",
     help="Specifies where to store data for the customer.",
-    default="PDC",
+    default=PDC_ARCHIVE_LOCATION,
     show_default=True,
     required=False,
 )
@@ -79,7 +79,7 @@ def add_customer(
     context: CGConfig,
     internal_id: str,
     name: str,
-    collaboration_internal_ids: Optional[list[str]],
+    collaboration_internal_ids: list[str] | None,
     invoice_address: str,
     invoice_reference: str,
     data_archive_location: str,
@@ -156,7 +156,7 @@ def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name:
 @click.option(
     "-s",
     "--sex",
-    type=EnumChoice(Gender, use_value=False),
+    type=EnumChoice(Sex, use_value=False),
     required=True,
     help="Sample pedigree sex",
 )
@@ -173,10 +173,10 @@ def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name:
 @click.pass_obj
 def add_sample(
     context: CGConfig,
-    lims_id: Optional[str],
-    down_sampled: Optional[int],
-    sex: Gender,
-    order: Optional[str],
+    lims_id: str | None,
+    down_sampled: int | None,
+    sex: Sex,
+    order: str | None,
     application_tag: str,
     priority: Priority,
     customer_id: str,
@@ -288,16 +288,16 @@ def add_case(
 @click.pass_obj
 def link_sample_to_case(
     context: CGConfig,
-    mother_id: Optional[str],
-    father_id: Optional[str],
+    mother_id: str | None,
+    father_id: str | None,
     status: str,
     case_id: str,
     sample_id: str,
 ):
     """Create a link between a case id and a sample id."""
     status_db: Store = context.status_db
-    mother: Optional[Sample] = None
-    father: Optional[Sample] = None
+    mother: Sample | None = None
+    father: Sample | None = None
     case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     if case_obj is None:
         LOG.error(f"{case_id}: family not found")

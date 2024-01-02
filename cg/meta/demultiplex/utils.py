@@ -2,10 +2,11 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import Optional
 
 from cg.apps.demultiplex.sample_sheet.models import SampleSheet
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
@@ -90,7 +91,7 @@ def get_valid_sample_fastqs(fastq_paths: list[Path], sample_internal_id: str) ->
 
 def get_sample_fastqs_from_flow_cell(
     flow_cell_directory: Path, sample_internal_id: str
-) -> Optional[list[Path]]:
+) -> list[Path] | None:
     """Retrieve all fastq files for a specific sample in a flow cell directory."""
 
     # The flat output structure for NovaseqX flow cells demultiplexed with BCLConvert on hasta
