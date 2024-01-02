@@ -2,6 +2,7 @@ from pathlib import Path
 from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
 
 from cg.meta.workflow.microsalt.quality_controller import QualityController
+from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.models.cg_config import CGConfig
 from cg.store.api.core import Store
 from cg.store.models import Application, Sample
@@ -70,10 +71,10 @@ def test_quality_control_fails(qc_microsalt_context: CGConfig, metrics_file_fail
     quality_controller = QualityController(store)
 
     # WHEN performing the quality control
-    passes_qc: bool = quality_controller.quality_control(metrics_file_failing_qc)
+    result: QualityResult = quality_controller.quality_control(metrics_file_failing_qc)
 
     # THEN the case should fail the quality control
-    assert not passes_qc
+    assert not result.passes_qc
 
     # THEN a report should be generated
     assert metrics_file_failing_qc.parent.joinpath(QUALITY_REPORT_FILE_NAME).exists()
@@ -89,10 +90,10 @@ def test_quality_control_passes(qc_microsalt_context: CGConfig, metrics_file_pas
     quality_controller = QualityController(store)
 
     # WHEN performing the quality control
-    passes_qc: bool = quality_controller.quality_control(metrics_file_passing_qc)
+    result: QualityResult = quality_controller.quality_control(metrics_file_passing_qc)
 
     # THEN the case should pass the quality control
-    assert passes_qc
+    assert result.passes_qc
 
     # THEN a report should be generated
     assert metrics_file_passing_qc.parent.joinpath(QUALITY_REPORT_FILE_NAME).exists()

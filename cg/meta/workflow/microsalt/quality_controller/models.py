@@ -21,3 +21,13 @@ class CaseQualityResult(BaseModel):
     control_passes_qc: bool
     urgent_passes_qc: bool
     non_urgent_passes_qc: bool
+
+
+class QualityResult(BaseModel):
+    case: CaseQualityResult
+    samples: list[SampleQualityResult]
+    summary: str
+
+    @property
+    def passes_qc(self) -> bool:
+        return self.case.passes_qc

@@ -16,6 +16,7 @@ from cg.exc import CgDataError, MissingAnalysisDir
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.meta.workflow.microsalt.quality_controller import QualityController
+from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Sample
 from cg.utils import Process
@@ -262,14 +263,14 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 if not metrics_file_path.exists():
                     continue
 
-                if self.quality_checker.quality_control(metrics_file_path):
-                    self.trailblazer_api.add_comment(case_id=case.internal_id, comment="QC passed")
+                result: QualityResult = self.quality_checker.quality_control(metrics_file_path)
+                self.trailblazer_api.add_comment(case_id=case.internal_id, comment=result.summary)
+                if result.passes_qc:
                     cases_to_store.append(case)
                 else:
                     self.trailblazer_api.set_analysis_status(
                         case_id=case.internal_id, status=AnalysisStatus.FAILED
                     )
-                    self.trailblazer_api.add_comment(case_id=case.internal_id, comment="QC failed")
             else:
                 cases_to_store.append(case)
 

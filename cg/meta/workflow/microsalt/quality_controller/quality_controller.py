@@ -5,6 +5,7 @@ from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
 from cg.meta.workflow.microsalt.metrics_parser import MetricsParser, QualityMetrics, SampleMetrics
 from cg.meta.workflow.microsalt.quality_controller.models import (
     CaseQualityResult,
+    QualityResult,
     SampleQualityResult,
 )
 from cg.meta.workflow.microsalt.quality_controller.report_generator import ReportGenerator
@@ -34,14 +35,15 @@ class QualityController:
     def __init__(self, status_db: Store):
         self.status_db = status_db
 
-    def quality_control(self, case_metrics_file_path: Path) -> bool:
+    def quality_control(self, case_metrics_file_path: Path) -> QualityResult:
         quality_metrics: QualityMetrics = MetricsParser.parse(case_metrics_file_path)
         sample_results: list[SampleQualityResult] = self.quality_control_samples(quality_metrics)
         case_result: CaseQualityResult = quality_control_case(sample_results)
         report_file: Path = get_report_path(case_metrics_file_path)
         ReportGenerator.report(out_file=report_file, samples=sample_results, case=case_result)
         ResultLogger.log_results(case=case_result, samples=sample_results, report=report_file)
-        return case_result.passes_qc
+        summary: str = ReportGenerator.get_summary(case=case_result, samples=sample_results)
+        return QualityResult(case=case_result, samples=sample_results, summary=summary)
 
     def quality_control_samples(self, quality_metrics: QualityMetrics) -> list[SampleQualityResult]:
         sample_results: list[SampleQualityResult] = []
