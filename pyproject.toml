@@ -86,6 +86,10 @@ cg = "cg.cli.base:base"
 
 
 # Configurations
+
+[tool.poetry.group.dev.dependencies]
+pytest-xdist = "^3.5.0"
+
 [tool.black]
 line-length = 100
 
