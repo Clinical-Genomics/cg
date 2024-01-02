@@ -4,7 +4,6 @@ from datetime import datetime
 
 import mock
 import pytest
-from housekeeper.store.models import File
 
 from cg.constants import FlowCellStatus, GenePanelMasterList, Priority
 from cg.constants.archiving import ArchiveLocations
@@ -351,7 +350,7 @@ def test_prepare_fastq_files_success(
 
 
 def test_prepare_fastq_files_request_miria(
-    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, archived_file: File
+    mip_analysis_api: MipDNAAnalysisAPI, analysis_store: Store, archived_spring_file
 ):
     """Tests that samples' input files are requested via Miria for a Clinical customer, if files are archived."""
 
@@ -415,7 +414,7 @@ def test_prepare_fastq_files_does_not_request_miria(
 def test_are_all_spring_files_present_true_when_all_present(
     mip_analysis_api: MipDNAAnalysisAPI,
     analysis_store: Store,
-    non_archived_file: File,
+    non_archived_spring_file,
     case_id: str,
     father_sample_id: str,
     helpers: StoreHelpers,
@@ -433,7 +432,7 @@ def test_are_all_spring_files_present_true_when_all_present(
 def test_are_all_spring_files_present_false_when_none_present(
     mip_analysis_api: MipDNAAnalysisAPI,
     analysis_store: Store,
-    archived_file: File,
+    archived_spring_file,
     case_id: str,
     sample_id: str,
 ):
@@ -481,8 +480,8 @@ def test_does_any_spring_file_need_to_be_retrieved_archived_file(
     mip_analysis_api: MipDNAAnalysisAPI,
     analysis_store: Store,
     case_id: str,
-    archived_file: File,
-    non_archived_file: File,
+    archived_spring_file,
+    non_archived_spring_file,
 ):
     """Tests that does_any_spring_file_need_to_be_retrieved returns true if no flow cell is removed but some
     files need to be retrieved via Miria."""
@@ -494,7 +493,7 @@ def test_does_any_spring_file_need_to_be_retrieved_files_present(
     mip_analysis_api: MipDNAAnalysisAPI,
     analysis_store: Store,
     case_id: str,
-    non_archived_file: File,
+    non_archived_spring_file,
 ):
     """Tests that does_any_spring_file_need_to_be_retrieved returns true if no flow cell is removed and no
     files need to be retrieved via Miria."""

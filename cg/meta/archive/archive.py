@@ -92,7 +92,7 @@ class SpringArchiveAPI:
     def retrieve_case(self, case_id: str) -> None:
         """Submits jobs to retrieve any archived files belonging to the given case, and updates the Archive entries
         with the retrieval job id."""
-        case = self.status_db.get_case_by_internal_id(case_id)
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
         self.retrieve_samples(self.get_samples_with_archived_spring_files(case))
 
     def get_samples_with_archived_spring_files(self, case: Case) -> list[Sample]:
@@ -128,6 +128,8 @@ class SpringArchiveAPI:
                         [sample.sample for sample in filtered_samples]
                     ),
                 )
+            else:
+                LOG.info(f"No samples to retrieve from {archive_location}")
 
     def get_archived_files_from_samples(self, samples: list[Sample]) -> list[File]:
         """Gets archived spring files from the bundles corresponding to the given list of samples."""

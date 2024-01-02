@@ -215,7 +215,7 @@ def invoice_api_pool_generic_customer(
 
 
 @pytest.fixture
-def archived_file(
+def archived_spring_file(
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
     archival_job_id_miria,
@@ -234,12 +234,12 @@ def archived_file(
 
 
 @pytest.fixture
-def non_archived_file(
+def non_archived_spring_file(
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
     father_sample_id: str,
 ) -> File:
-    """A file in the father_sample_id bundle with no archive entry."""
+    """A spring file in the father_sample_id bundle with no archive entry."""
     bundle: Bundle = real_housekeeper_api.create_new_bundle_and_version(father_sample_id)
     file: File = real_housekeeper_api.add_file(
         path="sample/version/file_name.spring",
