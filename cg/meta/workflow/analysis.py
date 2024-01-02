@@ -527,12 +527,12 @@ class AnalysisAPI(MetaAPI):
     def prepare_fastq_files(self, case_id: str, dry_run: bool) -> None:
         """Retrieves or decompresses Spring files if needed. If so, an AnalysisNotReady error
         is raised."""
-        self.ensure_spring_files_are_not_archived(case_id)
+        self.ensure_files_are_present(case_id)
         self.resolve_decompression(case_id=case_id, dry_run=dry_run)
         if not self.is_case_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
-    def ensure_spring_files_are_not_archived(self, case_id: str):
+    def ensure_files_are_present(self, case_id: str):
         """Checks if any flow cells need to be retrieved and submits a job if that is the case.
         Also checks if any spring files are archived and submits a job to retrieve any which are."""
         self.ensure_flow_cells_on_disk(case_id)
