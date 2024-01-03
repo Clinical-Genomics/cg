@@ -33,7 +33,7 @@ class MiriaObject(FileTransferData):
         if is_archiving:
             return cls(destination=sample.internal_id, source=file.full_path)
         return cls(
-            destination=file.version.full_path,
+            destination=file.full_path.replace(Path(file.path).name, ""),
             source=Path(sample.internal_id, Path(file.path).name).as_posix(),
         )
 

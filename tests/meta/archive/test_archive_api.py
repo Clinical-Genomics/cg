@@ -352,7 +352,7 @@ def test_retrieve_case(
     ) as mock_request_submitter:
         spring_archive_api.retrieve_case(sample.links[0].case.internal_id)
 
-    retrieve_request_json["pathInfo"][0]["destination"] += "/" + Path(files[0].path).name
+    retrieve_request_json["pathInfo"][0]["source"] += "/" + Path(files[0].path).name
 
     # THEN the DDN archiving function should have been called with the correct destination and source.
     mock_request_submitter.assert_called_with(

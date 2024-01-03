@@ -315,6 +315,7 @@ def test_retrieve_files(
     trimmed_local_path: str,
     file_and_sample: FileAndSample,
     ok_miria_response,
+    retrieve_request_json,
 ):
     """Tests that the retrieve function correctly formats the input and sends API request."""
 
@@ -330,22 +331,12 @@ def test_retrieve_files(
     assert isinstance(job_id, int)
 
     # THEN the mocked submit function should have been called exactly once with correct arguments
+    retrieve_request_json["pathInfo"][0]["source"] += "/" + Path(file_and_sample.file.path).name
     mock_request_submitter.assert_called_once_with(
         api_method=APIMethods.POST,
         url=urljoin(base=ddn_dataflow_client.url, url=DataflowEndpoints.RETRIEVE_FILES),
         headers=dict(ddn_dataflow_client.headers, **ddn_dataflow_client.auth_header),
-        json={
-            "pathInfo": [
-                {
-                    "source": remote_storage_repository + file_and_sample.sample.internal_id,
-                    "destination": local_storage_repository + trimmed_local_path,
-                }
-            ],
-            "osType": OSTYPE,
-            "createFolder": False,
-            "metadataList": [],
-            "settings": [],
-        },
+        json=retrieve_request_json,
         verify=False,
     )
 
