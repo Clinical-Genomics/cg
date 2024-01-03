@@ -47,7 +47,6 @@ class DeliverAPI:
         self.case_tags: list[set[str]] = case_tags
         self.all_case_tags: set[str] = {tag for tags in case_tags for tag in tags}
         self.sample_tags: list[set[str]] = sample_tags
-        self.ticket: str = ""
         self.dry_run = False
         self.delivery_type: str = delivery_type
         self.skip_missing_bundle: bool = (
@@ -68,6 +67,7 @@ class DeliverAPI:
         case_id: str = case.internal_id
         case_name: str = case.name
         customer_id: str = case.customer.internal_id
+        ticket: str = case.latest_ticket
         LOG.debug(f"Fetch latest version for case {case_id}")
         last_version: Version = self.hk_api.last_version(case_id)
         if not last_version:
@@ -80,10 +80,7 @@ class DeliverAPI:
             LOG.warning(f"Could not find any samples linked to case {case_id}")
             return
         samples: list[Sample] = [link.sample for link in links]
-        self.set_ticket(case.latest_ticket)
-
         sample_ids: set[str] = {sample.internal_id for sample in samples}
-
         if self.case_tags:
             self.deliver_case_files(
                 case_id=case_id,
@@ -91,6 +88,7 @@ class DeliverAPI:
                 version=last_version,
                 sample_ids=sample_ids,
                 customer_id=customer_id,
+                ticket=ticket,
             )
 
         if not self.sample_tags:
@@ -116,6 +114,7 @@ class DeliverAPI:
                     sample_name=sample_name,
                     version_obj=last_version,
                     customer_id=customer_id,
+                    ticket=ticket,
                 )
                 continue
             LOG.warning(f"Sample {link.sample.internal_id} is not deliverable.")
@@ -127,13 +126,19 @@ class DeliverAPI:
         return sample_passes_qc or deliver_failed_samples or sample_is_external
 
     def deliver_case_files(
-        self, case_id: str, case_name: str, version: Version, sample_ids: set[str], customer_id: str
+        self,
+        case_id: str,
+        case_name: str,
+        version: Version,
+        sample_ids: set[str],
+        customer_id: str,
+        ticket: str,
     ) -> None:
         """Deliver files on case level."""
         LOG.debug(f"Deliver case files for {case_id}")
         # Make sure that the directory exists
         delivery_base: Path = self.create_delivery_dir_path(
-            case_name=case_name, customer_id=customer_id
+            case_name=case_name, customer_id=customer_id, ticket=ticket
         )
         LOG.debug(f"Creating project path {delivery_base}")
         if not self.dry_run:
@@ -168,13 +173,14 @@ class DeliverAPI:
         sample_name: str,
         version_obj: Version,
         customer_id: str,
+        ticket: str,
     ) -> None:
         """Deliver files on sample level."""
         # Make sure that the directory exists
         if self.delivery_type in constants.ONLY_ONE_CASE_PER_TICKET:
             case_name = None
         delivery_base: Path = self.create_delivery_dir_path(
-            case_name=case_name, sample_name=sample_name, customer_id=customer_id
+            case_name=case_name, sample_name=sample_name, customer_id=customer_id, ticket=ticket
         )
         LOG.debug(f"Creating project path {delivery_base}")
         if not self.dry_run:
@@ -284,22 +290,16 @@ class DeliverAPI:
                 return True
         return False
 
-    def set_ticket(self, ticket: str) -> None:
-        """Set the ticket for this upload"""
-        LOG.info(f"Setting ticket to {ticket}")
-        self.ticket = ticket
-
     def create_delivery_dir_path(
-        self, customer_id: str, case_name: str = None, sample_name: str = None
+        self, customer_id: str, ticket: str, case_name: str = None, sample_name: str = None
     ) -> Path:
         """Create a path for delivering files.
 
         Note that case name and sample name needs to be the identifiers sent from customer.
         """
-        delivery_path = Path(self.project_base_path, customer_id, constants.INBOX_NAME, self.ticket)
+        delivery_path = Path(self.project_base_path, customer_id, constants.INBOX_NAME, ticket)
         if case_name:
             delivery_path = delivery_path / case_name
         if sample_name:
             delivery_path = delivery_path / sample_name
-
         return delivery_path
