@@ -76,33 +76,14 @@ def deliver_analysis(
         LOG.info("Please provide a case-id or ticket-id")
         return
 
-    inbox: str = context.delivery_path
-    if not inbox:
-        LOG.info("Please specify the root path for where files should be delivered")
-        return
-
-    status_db: Store = context.status_db
     delivery_api: DeliveryAPI = context.delivery_api
+
     delivery_api.set_dry_run(dry_run)
     delivery_api.set_force_all(force_all)
     delivery_api.set_ignore_missing_bundles(ignore_missing_bundles)
 
     for delivery in delivery_type:
-        cases: list[Case] = []
-        if case_id:
-            case: Case = status_db.get_case_by_internal_id(case_id)
-            if not case:
-                LOG.warning(f"Could not find case {case_id}")
-                return
-            cases.append(case)
-        else:
-            cases: list[Case] = status_db.get_cases_by_ticket_id(ticket)
-            if not cases:
-                LOG.warning(f"Could not find cases for ticket {ticket}")
-                return
-
-        for case in cases:
-            delivery_api.deliver_files(case=case, pipeline=delivery)
+        delivery_api.deliver(case_id=case_id, ticket=ticket, pipeline=delivery)
 
 
 @deliver.command(name="rsync")

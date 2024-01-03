@@ -51,6 +51,27 @@ class DeliveryAPI:
         self.deliver_failed_samples: bool = force_all
         self.dry_run: bool = dry_run
 
+    def deliver(self, ticket: str | None, case_id: str | None, pipeline: str) -> None:
+        if ticket:
+            self._deliver_files_by_ticket(ticket=ticket, pipeline=pipeline)
+        elif case_id:
+            self._deliver_files_by_case_id(case_id=case_id, pipeline=pipeline)
+
+    def _deliver_files_by_ticket(self, ticket: str, pipeline: str) -> None:
+        cases: list[Case] = self.store.get_cases_by_ticket_id(ticket)
+        if not cases:
+            LOG.warning(f"Could not find cases for ticket {ticket}")
+            return
+        for case in cases:
+            self.deliver_files(case=case, pipeline=pipeline)
+
+    def _deliver_files_by_case_id(self, case_id: str, pipeline: str) -> None:
+        case: Case = self.store.get_case_by_internal_id(case_id)
+        if not case:
+            LOG.warning(f"Could not find case {case_id}")
+            return
+        self.deliver_files(case=case, pipeline=pipeline)
+
     def deliver_files(self, case: Case, pipeline: str):
         """Deliver all files for a case.
 
