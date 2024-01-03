@@ -32,7 +32,10 @@ class MiriaObject(FileTransferData):
         """Instantiates the class from a File and Sample object."""
         if is_archiving:
             return cls(destination=sample.internal_id, source=file.full_path)
-        return cls(destination=file.full_path, source=sample.internal_id)
+        return cls(
+            destination=file.version.full_path,
+            source=Path(sample.internal_id, Path(file.path).name).as_posix(),
+        )
 
     @classmethod
     def create_from_sample_and_destination(
