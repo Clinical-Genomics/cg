@@ -210,7 +210,7 @@ def test_deliver_files_enough_reads(
     helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
 
     # WHEN delivering files for the case
-    deliver_api.deliver_files(case_obj=case)
+    deliver_api.deliver_files(case=case)
 
     # THEN the sample folder should be created
     assert Path(deliver_api.project_base_path, deliver_api_destination_path, sample.name).exists()
@@ -235,7 +235,7 @@ def test_deliver_files_not_enough_reads(
     helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
 
     # WHEN delivering files for the case
-    deliver_api.deliver_files(case_obj=case)
+    deliver_api.deliver_files(case=case)
 
     # THEN the sample folder should not be created
     assert not Path(
@@ -266,7 +266,7 @@ def test_deliver_files_not_enough_reads_force(
 
     # WHEN delivering files for the case
     deliver_api.deliver_files(
-        case_obj=case,
+        case=case,
     )
 
     # THEN the sample folder should be created

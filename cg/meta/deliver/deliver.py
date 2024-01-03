@@ -61,15 +61,15 @@ class DeliverAPI:
         LOG.info(f"Set dry run to {dry_run}")
         self.dry_run = dry_run
 
-    def deliver_files(self, case_obj: Case):
+    def deliver_files(self, case: Case):
         """Deliver all files for a case.
 
         If there are sample tags deliver all files for the samples as well.
         """
-        case_id: str = case_obj.internal_id
-        case_name: str = case_obj.name
+        case_id: str = case.internal_id
+        case_name: str = case.name
         LOG.debug(f"Fetch latest version for case {case_id}")
-        last_version: Version = self.hk_api.last_version(bundle=case_id)
+        last_version: Version = self.hk_api.last_version(case_id)
         if not last_version:
             if not self.case_tags:
                 LOG.info(f"Could not find any version for {case_id}")
@@ -80,8 +80,8 @@ class DeliverAPI:
             LOG.warning(f"Could not find any samples linked to case {case_id}")
             return
         samples: list[Sample] = [link.sample for link in links]
-        self.set_ticket(case_obj.latest_ticket)
-        self.set_customer_id(case_obj)
+        self.set_ticket(case.latest_ticket)
+        self.set_customer_id(case)
 
         sample_ids: set[str] = {sample.internal_id for sample in samples}
 
@@ -229,7 +229,7 @@ class DeliverAPI:
         tags."""
         file_obj: File
         for file_obj in version_obj.files:
-            if not self.include_file_sample(file_obj, sample_id=sample_id):
+            if not self.include_file_sample(file=file_obj, sample_id=sample_id):
                 continue
             yield Path(file_obj.full_path)
 
@@ -261,7 +261,7 @@ class DeliverAPI:
 
         return False
 
-    def include_file_sample(self, file_obj: File, sample_id: str) -> bool:
+    def include_file_sample(self, file: File, sample_id: str) -> bool:
         """Check if file should be included in sample bundle.
 
         At least one tag should match between file and tags.
@@ -269,7 +269,7 @@ class DeliverAPI:
 
         For fastq delivery we know that we want to deliver all files of bundle.
         """
-        file_tags = {tag.name for tag in file_obj.tags}
+        file_tags = {tag.name for tag in file.tags}
         tags: set[str]
         # Check if any of the file tags matches the sample tags
         for tags in self.sample_tags:
@@ -278,7 +278,6 @@ class DeliverAPI:
                 working_copy.add(sample_id)
             if working_copy.issubset(file_tags):
                 return True
-
         return False
 
     def _set_customer_id(self, customer_id: str) -> None:
