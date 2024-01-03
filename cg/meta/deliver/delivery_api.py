@@ -33,6 +33,7 @@ class DeliveryAPI:
         project_base_path: Path,
         force_all: bool = False,
         ignore_missing_bundles: bool = False,
+        dry_run: bool = False,
     ):
         """Initialize a delivery api
 
@@ -49,10 +50,6 @@ class DeliveryAPI:
         self.dry_run = False
         self.ignore_missing_bundles: bool = ignore_missing_bundles
         self.deliver_failed_samples = force_all
-
-    def set_dry_run(self, dry_run: bool) -> None:
-        """Update dry run."""
-        LOG.info(f"Set dry run to {dry_run}")
         self.dry_run = dry_run
 
     def deliver_files(self, case: Case, pipeline: str):
@@ -317,3 +314,15 @@ class DeliveryAPI:
             if working_copy.issubset(file_tags):
                 return True
         return False
+
+    def set_dry_run(self, dry_run: bool):
+        """Set the dry run flag."""
+        self.dry_run = dry_run
+
+    def set_force_all(self, force_all: bool):
+        """Set the force all flag."""
+        self.deliver_failed_samples = force_all
+
+    def set_ignore_missing_bundles(self, ignore_missing_bundles: bool):
+        """Set the ignore missing bundles flag."""
+        self.ignore_missing_bundles = ignore_missing_bundles

@@ -19,6 +19,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
+from cg.meta.deliver.delivery_api import DeliveryAPI
 from cg.store import Store
 from cg.store.database import initialize_database
 
@@ -301,6 +302,7 @@ class CGConfig(BaseModel):
     tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
+    delivery_api_: DeliveryAPI = None
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
@@ -478,4 +480,17 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating trailblazer api")
             api = TrailblazerAPI(config=self.dict())
             self.trailblazer_api_ = api
+        return api
+
+    @property
+    def delivery_api(self) -> DeliveryAPI:
+        api = self.__dict__.get("delivery_api_")
+        if api is None:
+            LOG.debug("Instantiating delivery api")
+            api = DeliveryAPI(
+                store=self.status_db,
+                hk_api=self.housekeeper_api,
+                project_base_path=self.delivery_path,
+            )
+            self.delivery_api_ = api
         return api

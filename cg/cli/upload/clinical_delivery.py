@@ -8,9 +8,7 @@ import click
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import DRY_RUN
-from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.tb import AnalysisTypes
-from cg.meta.deliver.delivery_api import DeliveryAPI
 from cg.meta.deliver.utils import get_delivery_scope
 from cg.meta.rsync import RsyncAPI
 from cg.store import Store
@@ -42,11 +40,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
 
     LOG.debug(f"Delivery types are: {delivery_types}")
     for delivery_type in delivery_types:
-        DeliveryAPI(
-            store=context.obj.status_db,
-            hk_api=context.obj.housekeeper_api,
-            project_base_path=Path(context.obj.delivery_path),
-        ).deliver_files(case=case, pipeline=delivery_type)
+        context.obj.delivery_api.deliver_files(case=case, pipeline=delivery_type)
 
     rsync_api = RsyncAPI(context.obj)
     is_complete_delivery, job_id = rsync_api.slurm_rsync_single_case(

@@ -200,7 +200,7 @@ def fastq_context(
 ) -> CGConfig:
     """Fastq context to use in cli"""
 
-    base_context.meta_apis["delivery_api"] = DeliveryAPI(
+    base_context.delivery_api = DeliveryAPI(
         store=base_context.status_db,
         hk_api=base_context.housekeeper_api,
         pipeline="fastq",

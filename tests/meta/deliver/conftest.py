@@ -5,7 +5,6 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
-from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliveryAPI
 from cg.store import Store
 from cg.store.models import Case

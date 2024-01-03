@@ -82,15 +82,12 @@ def deliver_analysis(
         return
 
     status_db: Store = context.status_db
+    delivery_api: DeliveryAPI = context.delivery_api 
+    delivery_api.set_dry_run(dry_run)
+    delivery_api.set_force_all(force_all)
+    delivery_api.set_ignore_missing_bundles(ignore_missing_bundles)
+
     for delivery in delivery_type:
-        delivery_api = DeliveryAPI(
-            store=status_db,
-            hk_api=context.housekeeper_api,
-            project_base_path=Path(inbox),
-            force_all=force_all,
-            ignore_missing_bundles=ignore_missing_bundles,
-        )
-        delivery_api.set_dry_run(dry_run)
         cases: list[Case] = []
         if case_id:
             case: Case = status_db.get_case_by_internal_id(case_id)
