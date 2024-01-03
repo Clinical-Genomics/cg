@@ -510,6 +510,7 @@ class HousekeeperAPI:
         if not archive:
             raise ValueError(f"No Archive entry found for file with id {file_id}.")
         self._store.update_retrieval_task_id(archive=archive, retrieval_task_id=retrieval_task_id)
+        self.commit()
 
     def get_sample_sheets_from_latest_version(self, flow_cell_id: str) -> list[File]:
         """Returns the files tagged with 'samplesheet' for the given bundle."""

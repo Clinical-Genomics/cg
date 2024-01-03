@@ -120,7 +120,7 @@ class DDNDataFlowClient(ArchiveHandler):
         miria_file_data: list[MiriaObject] = []
         for file_and_sample in files_and_samples:
             LOG.info(
-                f"Will retrieve file {file_and_sample.file} for sample {file_and_sample.sample.internal_id} via Miria."
+                f"Will retrieve file {file_and_sample.file.path} for sample {file_and_sample.sample.internal_id} via Miria."
             )
             miria_object: MiriaObject = MiriaObject.create_from_file_and_sample(
                 file=file_and_sample.file, sample=file_and_sample.sample, is_archiving=False
