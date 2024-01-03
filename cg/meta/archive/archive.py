@@ -99,7 +99,7 @@ class SpringArchiveAPI:
             archive_location=case.customer.data_archive_location,
         )
 
-    def get_files_to_retrieve(self, case: Case):
+    def get_files_to_retrieve(self, case: Case) -> list[File]:
         return [
             file
             for file in self.get_archived_spring_files_for_case(case)
