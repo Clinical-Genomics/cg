@@ -35,15 +35,6 @@ class DeliveryAPI:
         ignore_missing_bundles: bool = False,
         dry_run: bool = False,
     ):
-        """Initialize a delivery api
-
-        A delivery is made in the context of a ticket id that can be associated to one or many cases.
-        Each case can have one or multiple samples linked to them.
-
-        Each delivery is built around case tags and sample tags. All files tagged will the case_tags will be hard linked
-        to the inbox of a customer under <ticket>/<case_id>. All files tagged with sample_tags will be linked to
-        <ticket>/<case_id>/<sample_id>.
-        """
         self.store = store
         self.hk_api = hk_api
         self.project_base_path = project_base_path
@@ -74,15 +65,12 @@ class DeliveryAPI:
 
     def deliver_files(self, case: Case, pipeline: str):
         """Deliver all files for a case."""
-        case_tags: list[set[str]] = get_case_tags_for_pipeline(pipeline)
-        sample_tags: list[set[str]] = get_sample_tags_for_pipeline(pipeline)
-
         last_version: Version = self.hk_api.last_version(case.internal_id)
-
         skip_missing_bundle: bool = (
             pipeline in constants.SKIP_MISSING or self.ignore_missing_bundles
         )
 
+        case_tags: list[set[str]] = get_case_tags_for_pipeline(pipeline)
         if not last_version:
             if not case_tags:
                 LOG.info(f"Could not find any version for {case.internal_id}")
@@ -101,6 +89,7 @@ class DeliveryAPI:
                 pipeline=pipeline,
             )
 
+        sample_tags: list[set[str]] = get_sample_tags_for_pipeline(pipeline)
         if not sample_tags:
             return
 
@@ -121,7 +110,6 @@ class DeliveryAPI:
                     case=case,
                     sample_id=sample_id,
                     sample_name=sample_name,
-                    version_obj=last_version,
                     pipeline=pipeline,
                 )
                 continue
@@ -180,7 +168,6 @@ class DeliveryAPI:
         case: Case,
         sample_id: str,
         sample_name: str,
-        version_obj: Version,
         pipeline: str,
     ) -> None:
         """Deliver files on sample level."""
@@ -189,6 +176,11 @@ class DeliveryAPI:
             case_name = None
         else:
             case_name = case.name
+
+        if pipeline == DataDelivery.FASTQ:
+            version: Version = self.hk_api.last_version(sample_id)
+        else:
+            version: Version = self.hk_api.last_version(case.internal_id)
         delivery_base: Path = get_delivery_dir_path(
             case_name=case_name,
             sample_name=sample_name,
@@ -203,7 +195,7 @@ class DeliveryAPI:
         number_linked_files_now: int = 0
         number_previously_linked_files: int = 0
         for file_path in self._get_sample_files_from_version(
-            version_obj=version_obj, sample_id=sample_id, pipeline=pipeline
+            version=version, sample_id=sample_id, pipeline=pipeline
         ):
             # Out path should include customer names
             file_name: str = file_path.name.replace(sample_id, sample_name)
@@ -257,14 +249,14 @@ class DeliveryAPI:
 
     def _get_sample_files_from_version(
         self,
-        version_obj: Version,
+        version: Version,
         sample_id: str,
         pipeline: str,
     ) -> Iterable[Path]:
         """Fetch all files for a sample from a version that are tagged with any of the sample
         tags."""
         file_obj: File
-        for file_obj in version_obj.files:
+        for file_obj in version.files:
             if not self._include_file_sample(file=file_obj, sample_id=sample_id, pipeline=pipeline):
                 continue
             yield Path(file_obj.full_path)
