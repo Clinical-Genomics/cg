@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -312,7 +313,7 @@ def test_get_retrieval_status(
         assert bool(file.archive.retrieved_at) == should_date_be_set
 
 
-def test_retrieve_samples(
+def test_retrieve_case(
     spring_archive_api: SpringArchiveAPI,
     caplog,
     ok_miria_response,
@@ -325,7 +326,6 @@ def test_retrieve_samples(
     sample_with_spring_file: str,
 ):
     """Test retrieving all archived SPRING files tied to a sample for a Miria customer."""
-
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
     # with the DDN customer having two samples, and the non-DDN having one sample.
     files: list[File] = spring_archive_api.housekeeper_api.get_files(
@@ -338,29 +338,28 @@ def test_retrieve_samples(
         assert not file.archive.retrieval_task_id
         assert file.archive
 
+    sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(sample_with_spring_file)
+
     # WHEN archiving all available files
     with mock.patch.object(
         AuthToken,
         "model_validate",
         return_value=test_auth_token,
-    ), mock.patch.object(MiriaObject, "trim_path", return_value=True), mock.patch.object(
+    ), mock.patch.object(
         APIRequest,
         "api_request_from_content",
         return_value=ok_miria_response,
     ) as mock_request_submitter:
-        spring_archive_api.retrieve_samples([sample_with_spring_file])
+        spring_archive_api.retrieve_case(sample.links[0].case.internal_id)
 
-    retrieve_sample_request_json = retrieve_request_json.copy()
-    retrieve_sample_request_json["pathInfo"][0]["destination"] = (
-        local_storage_repository + files[0].version.full_path.as_posix()
-    )
+    retrieve_request_json["pathInfo"][0]["source"] += "/" + Path(files[0].path).name
 
     # THEN the DDN archiving function should have been called with the correct destination and source.
     mock_request_submitter.assert_called_with(
         api_method=APIMethods.POST,
         url="some/api/files/retrieve",
         headers=header_with_test_auth_token,
-        json=retrieve_sample_request_json,
+        json=retrieve_request_json,
         verify=False,
     )
 
