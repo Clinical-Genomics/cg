@@ -321,7 +321,7 @@ def test_retrieve_files(
 
     # GIVEN a file and sample which is archived
 
-    # WHEN running the retrieve method and providing a SampleAndDestination object
+    # WHEN running retrieve_files and providing a FileAndSample object
     with mock.patch.object(
         APIRequest, "api_request_from_content", return_value=ok_miria_response
     ) as mock_request_submitter:
