@@ -546,8 +546,7 @@ class AnalysisAPI(MetaAPI):
             spring_archive_api.retrieve_case(case_id)
 
     def are_all_spring_files_present(self, case_id: str) -> bool:
-        """Return True if no Spring files are archived in the data location used by the customer tied to the given
-        case, and false otherwise."""
+        """Return True if no Spring files for the case are archived in the data location used by the customer."""
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         for sample in [link.sample for link in case.links]:
             if (

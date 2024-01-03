@@ -469,17 +469,20 @@ def test_ensure_files_are_present(
     request_submitter.assert_called()
 
 
-@pytest.mark.parametrize("flow_cell_status", [FlowCellStatus.REMOVED, FlowCellStatus.ON_DISK])
+@pytest.mark.parametrize(
+    "flow_cell_status, result", [(FlowCellStatus.REMOVED, True), (FlowCellStatus.ON_DISK, False)]
+)
 def test_does_any_spring_file_need_to_be_retrieved_flow_cell_status(
     mip_analysis_api: MipDNAAnalysisAPI,
     analysis_store: Store,
     helpers: StoreHelpers,
     flow_cell_status: str,
+    result: bool,
 ):
     """Tests that does_any_spring_file_need_to_be_retrieved returns True if one of
     the flow cells has status 'removed' and False if the status is instead 'ondisk'."""
 
-    # GIVEN a case with a flow cell with 'removed' status
+    # GIVEN a case with a flow cell with provided status
     case: Case = analysis_store.get_cases()[0]
     helpers.add_flow_cell(
         analysis_store,
@@ -493,10 +496,7 @@ def test_does_any_spring_file_need_to_be_retrieved_flow_cell_status(
     # WHEN checking if any files need to be retrieved
 
     # THEN the outcome should be False if the flow cell status is on disk but not otherwise
-    if flow_cell_status == FlowCellStatus.ON_DISK:
-        assert not mip_analysis_api.does_any_file_need_to_be_retrieved(case.internal_id)
-    else:
-        assert mip_analysis_api.does_any_file_need_to_be_retrieved(case.internal_id)
+    assert mip_analysis_api.does_any_file_need_to_be_retrieved(case.internal_id) == result
 
 
 def test_does_any_spring_file_need_to_be_retrieved_archived_file(
