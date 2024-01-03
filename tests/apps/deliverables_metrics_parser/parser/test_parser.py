@@ -6,6 +6,7 @@ import pytest
 from cg.apps.deliverables_metrics_parser.parser.deliverables_parser import (
     get_metrics_deliverables_file_path,
     read_metrics_deliverables,
+    parse_metrics_deliverables_file,
 )
 from cg.constants.pipeline import Pipeline
 
@@ -46,5 +47,8 @@ def test_read_metrics_deliverables_file(mip_dna_metrics_deliverables_file_path):
     )
 
     # THEN the content has been read
-    print(content)
     assert content
+
+    model = parse_metrics_deliverables_file(content)
+    print(model)
+    assert model
