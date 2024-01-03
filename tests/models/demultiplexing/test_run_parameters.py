@@ -215,7 +215,7 @@ def test_novaseq_6000_no_version(run_parameters_missing_versions_path: Path, cap
     # WHEN instantiating the object
     with pytest.raises(XMLError):
         # THEN assert that an exception was raised since the control software version was not found
-        run_parameters = RunParametersNovaSeq6000(run_parameters_missing_versions_path)
+        RunParametersNovaSeq6000(run_parameters_missing_versions_path)
 
     assert (
         f"Could not find node with name {RunParametersXMLNodes.APPLICATION_VERSION} in XML tree"
