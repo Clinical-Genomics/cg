@@ -67,57 +67,55 @@ class DeliveryAPI:
         """Deliver all files for a case."""
         if not self._case_is_deliverable(case=case, pipeline=pipeline):
             return
-        links: list[CaseSample] = self.store.get_case_samples_by_case_id(case.internal_id)
-        if not links:
-            LOG.warning(f"Could not find any samples linked to case {case.internal_id}")
+
+        if not self._samples_are_deliverable(case):
             return
-        samples: list[Sample] = [link.sample for link in links]
-        sample_ids: set[str] = {sample.internal_id for sample in samples}
+
         if get_case_tags_for_pipeline(pipeline):
             self._deliver_case_files(
                 case=case,
-                sample_ids=sample_ids,
                 pipeline=pipeline,
             )
 
-        sample_tags: list[set[str]] = get_sample_tags_for_pipeline(pipeline)
-        if not sample_tags:
+        if not get_sample_tags_for_pipeline(pipeline):
             return
 
         link: CaseSample
+        links = self.store.get_case_samples_by_case_id(case.internal_id)
         for link in links:
-            if self._sample_is_deliverable(link):
-                sample_id: str = link.sample.internal_id
-                sample_name: str = link.sample.name
-                LOG.debug(f"Fetch last version for sample bundle {sample_id}")
-                last_version = self.hk_api.last_version(case.internal_id)
-                if pipeline == DataDelivery.FASTQ:
-                    last_version: Version = self.hk_api.last_version(sample_id)
-                if not last_version:
-                    skip_missing = pipeline in constants.SKIP_MISSING or self.ignore_missing_bundles
-                    if skip_missing:
-                        LOG.info(f"Could not find any version for {sample_id}")
-                        continue
-                    raise SyntaxError(f"Could not find any version for {sample_id}")
+            if self._sample_is_deliverable(link=link, case=case, pipeline=pipeline):
                 self._deliver_sample_files(
                     case=case,
-                    sample_id=sample_id,
-                    sample_name=sample_name,
+                    sample_id=link.sample.internal_id,
+                    sample_name=link.sample.name,
                     pipeline=pipeline,
                 )
                 continue
             LOG.warning(f"Sample {link.sample.internal_id} is not deliverable.")
 
-    def _sample_is_deliverable(self, link: CaseSample) -> bool:
+    def _sample_is_deliverable(self, link: CaseSample, case: Case, pipeline: str) -> bool:
         sample_is_external: bool = link.sample.application_version.application.is_external
         deliver_failed_samples: bool = self.deliver_failed_samples
         sample_passes_qc: bool = link.sample.sequencing_qc
-        return sample_passes_qc or deliver_failed_samples or sample_is_external
+        sample_is_deliverable: bool = (
+            sample_passes_qc or deliver_failed_samples or sample_is_external
+        )
+
+        last_version: Version = self.hk_api.last_version(case.internal_id)
+        if pipeline == DataDelivery.FASTQ:
+            last_version = self.hk_api.last_version(link.sample.internal_id)
+        if not last_version:
+            skip_missing = pipeline in constants.SKIP_MISSING or self.ignore_missing_bundles
+            if skip_missing:
+                LOG.info(f"Could not find any version for {link.sample.internal_id}")
+                return False
+            raise SyntaxError(f"Could not find any version for {link.sample.internal_id}")
+
+        return sample_is_deliverable
 
     def _deliver_case_files(
         self,
         case: Case,
-        sample_ids: set[str],
         pipeline: str,
     ) -> None:
         """Deliver files on case level."""
@@ -134,9 +132,13 @@ class DeliveryAPI:
             delivery_base.mkdir(parents=True, exist_ok=True)
         file_path: Path
         number_linked_files: int = 0
-        for file_path in self._get_case_files_from_version(
+        links = self.store.get_case_samples_by_case_id(case.internal_id)
+        samples: list[Sample] = [link.sample for link in links]
+        sample_ids: set[str] = {sample.internal_id for sample in samples}
+        files: list[Path] = self._get_case_files_from_version(
             version=version, sample_ids=sample_ids, pipeline=pipeline
-        ):
+        )
+        for file_path in files:
             # Out path should include customer names
             out_path: Path = delivery_base / file_path.name.replace(case.internal_id, case.name)
             if out_path.exists():
@@ -328,3 +330,9 @@ class DeliveryAPI:
                 raise SyntaxError(f"Could not find any version for {case.internal_id}")
             return False
         return True
+
+    def _samples_are_deliverable(self, case: Case) -> bool:
+        if self.store.get_case_samples_by_case_id(case.internal_id):
+            return True
+        LOG.warning(f"Could not find any samples linked to case {case.internal_id}")
+        return False
