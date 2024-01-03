@@ -163,12 +163,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             self.link_fastq_files_for_sample(case=case, sample=link.sample)
 
     @staticmethod
-    def get_gender(sample_obj: Sample) -> str:
-        """Returns the gender associated to a specific sample"""
-
-        return sample_obj.sex
-
-    @staticmethod
     def get_sample_type(sample_obj: Sample) -> SampleType:
         """Return the tissue type of the sample."""
         if sample_obj.is_tumour:
@@ -269,21 +263,19 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return sorted_pon_files[0].as_posix() if sorted_pon_files else None
 
     @staticmethod
-    def get_verified_gender(sample_data: dict) -> str:
-        """Takes a dict with samples and attributes, and returns a verified case gender provided by the customer."""
-
-        gender = next(iter(sample_data.values()))["gender"]
-
-        if all(val["gender"] == gender for val in sample_data.values()) and gender in set(
+    def get_verified_sex(sample_data: dict) -> Sex:
+        """Takes a dict with samples and attributes, and returns a verified case sex provided by the customer."""
+        sex: Sex = next(iter(sample_data.values()))["sex"]
+        if all(val["sex"] == sex for val in sample_data.values()) and sex in set(
             value for value in Sex
         ):
-            if gender not in [Sex.FEMALE, Sex.MALE]:
+            if sex not in [Sex.FEMALE, Sex.MALE]:
                 LOG.warning(f"The provided sex is unknown, setting {Sex.FEMALE} as the default")
-                gender = Sex.FEMALE
+                sex = Sex.FEMALE
 
-            return gender
+            return sex
         else:
-            LOG.error(f"Unable to retrieve a valid gender from samples: {sample_data.keys()}")
+            LOG.error(f"Unable to retrieve a valid sex from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
     def get_verified_samples(self, case_id: str) -> dict[str, str]:
@@ -439,7 +431,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         panel_bed: str,
         pon_cnn: str,
         observations: list[str] = None,
-        gender: str | None = None,
+        sex: str | None = None,
     ) -> dict:
         """Takes a dictionary with per-sample parameters,
         validates them, and transforms into command line arguments
@@ -456,13 +448,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             if verified_panel_bed
             else None
         )
-        verified_gender: Sex = gender or self.get_verified_gender(sample_data=sample_data)
+        verified_sex: Sex = sex or self.get_verified_sex(sample_data=sample_data)
 
         config_case: dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.pipeline,
             "genome_version": genome_version,
-            "gender": verified_gender,
+            "sex": verified_sex,
             "panel_bed": verified_panel_bed,
             "pon_cnn": verified_pon,
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
@@ -471,7 +463,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         config_case.update(self.get_verified_samples(case_id=case_id))
         config_case.update(self.get_parsed_observation_file_paths(observations))
         config_case.update(
-            self.get_verified_gens_file_paths(sex=verified_gender)
+            self.get_verified_gens_file_paths(sex=verified_sex)
         ) if not verified_panel_bed else None
 
         return config_case
@@ -503,7 +495,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         sample_data = {
             link_object.sample.internal_id: {
-                "gender": self.get_gender(link_object.sample),
+                "sex": link_object.sample.sex,
                 "tissue_type": self.get_sample_type(link_object.sample).value,
                 "application_type": self.get_application_type(link_object.sample),
                 "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
@@ -551,7 +543,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Create config file for BALSAMIC analysis"""
         arguments = self.get_verified_config_case_arguments(
             case_id=case_id,
-            gender=gender,
+            sex=gender,
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
@@ -575,7 +567,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--fastq-path": self.get_sample_fastq_destination_dir(
                     self.status_db.get_case_by_internal_id(case_id)
                 ),
-                "--gender": arguments.get("gender"),
+                "--gender": arguments.get("sex"),
                 "--genome-interval": arguments.get("genome_interval"),
                 "--genome-version": arguments.get("genome_version"),
                 "--gens-coverage-pon": arguments.get("gens_coverage_pon"),
