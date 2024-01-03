@@ -115,7 +115,7 @@ class DDNDataFlowClient(ArchiveHandler):
         ).job_id
 
     def retrieve_files(self, files_and_samples: list[FileAndSample]) -> int:
-        """Retrieves all archived files for the provided samples and stores them in the specified location in
+        """Retrieves the provided files and stores them in the corresponding sample bundle in
         Housekeeper."""
         miria_file_data: list[MiriaObject] = []
         for file_and_sample in files_and_samples:
