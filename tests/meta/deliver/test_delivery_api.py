@@ -9,6 +9,7 @@ from cg.constants.constants import Pipeline
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
+from cg.meta.deliver.utils import get_delivery_scope
 from cg.store import Store
 from cg.store.models import Case, CaseSample, Sample
 from tests.cli.deliver.conftest import fastq_delivery_bundle, mip_delivery_bundle
@@ -158,7 +159,7 @@ def test_get_delivery_scope_case_only():
     delivery_type: set[str] = {Pipeline.MIP_DNA}
 
     # WHEN getting the delivery scope
-    sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
+    sample_delivery, case_delivery = get_delivery_scope(delivery_type)
 
     # THEN a case_delivery should be True while sample_delivery False
     assert case_delivery
@@ -171,7 +172,7 @@ def test_get_delivery_scope_sample_only():
     delivery_type = {Pipeline.FASTQ}
 
     # WHEN getting the delivery scope
-    sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
+    sample_delivery, case_delivery = get_delivery_scope(delivery_type)
 
     # THEN a sample_delivery should be True while case_delivery False
     assert not case_delivery
@@ -184,7 +185,7 @@ def test_get_delivery_scope_case_and_sample():
     delivery_type = {Pipeline.SARS_COV_2}
 
     # WHEN getting the delivery scope
-    sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
+    sample_delivery, case_delivery = get_delivery_scope(delivery_type)
 
     # THEN both case_delivery and sample_delivery should be True
     assert case_delivery

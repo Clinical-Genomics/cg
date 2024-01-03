@@ -96,19 +96,19 @@ def deliver_analysis(
         deliver_api.set_dry_run(dry_run)
         cases: list[Case] = []
         if case_id:
-            case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
+            case_obj: Case = status_db.get_case_by_internal_id(case_id)
             if not case_obj:
                 LOG.warning(f"Could not find case {case_id}")
                 return
             cases.append(case_obj)
         else:
-            cases: list[Case] = status_db.get_cases_by_ticket_id(ticket_id=ticket)
+            cases: list[Case] = status_db.get_cases_by_ticket_id(ticket)
             if not cases:
                 LOG.warning(f"Could not find cases for ticket {ticket}")
                 return
 
         for case_obj in cases:
-            deliver_api.deliver_files(case_obj=case_obj)
+            deliver_api.deliver_files(case_obj)
 
 
 @deliver.command(name="rsync")

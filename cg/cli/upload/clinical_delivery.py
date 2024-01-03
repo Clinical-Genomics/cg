@@ -11,6 +11,7 @@ from cg.constants.constants import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver.deliver import DeliverAPI
+from cg.meta.deliver.utils import get_delivery_scope
 from cg.meta.rsync import RsyncAPI
 from cg.store import Store
 from cg.store.models import Case
@@ -28,15 +29,13 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
 
     click.echo(click.style("----------------- Clinical-delivery -----------------"))
 
-    case: Case = context.obj.status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = context.obj.status_db.get_case_by_internal_id(case_id)
     delivery_types: set[str] = case.get_delivery_arguments()
     is_sample_delivery: bool
     is_case_delivery: bool
     is_complete_delivery: bool
     job_id: int
-    is_sample_delivery, is_case_delivery = DeliverAPI.get_delivery_scope(
-        delivery_arguments=delivery_types
-    )
+    is_sample_delivery, is_case_delivery = get_delivery_scope(delivery_types)
     if not delivery_types:
         LOG.info(f"No delivery of files requested for case {case_id}")
         return
@@ -50,7 +49,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
             delivery_type=delivery_type,
             project_base_path=Path(context.obj.delivery_path),
-        ).deliver_files(case_obj=case)
+        ).deliver_files(case)
 
     rsync_api = RsyncAPI(context.obj)
     is_complete_delivery, job_id = rsync_api.slurm_rsync_single_case(

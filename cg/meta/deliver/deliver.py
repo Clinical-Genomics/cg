@@ -68,22 +68,20 @@ class DeliverAPI:
         """
         case_id: str = case_obj.internal_id
         case_name: str = case_obj.name
-        LOG.debug(
-            f"Fetch latest version for case {case_id}",
-        )
+        LOG.debug(f"Fetch latest version for case {case_id}")
         last_version: Version = self.hk_api.last_version(bundle=case_id)
         if not last_version:
             if not self.case_tags:
                 LOG.info(f"Could not find any version for {case_id}")
             elif not self.skip_missing_bundle:
                 raise SyntaxError(f"Could not find any version for {case_id}")
-        links: list[CaseSample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
+        links: list[CaseSample] = self.store.get_case_samples_by_case_id(case_id)
         if not links:
             LOG.warning(f"Could not find any samples linked to case {case_id}")
             return
         samples: list[Sample] = [link.sample for link in links]
         self.set_ticket(case_obj.latest_ticket)
-        self.set_customer_id(case_obj=case_obj)
+        self.set_customer_id(case_obj)
 
         sample_ids: set[str] = {sample.internal_id for sample in samples}
 
@@ -105,7 +103,7 @@ class DeliverAPI:
                 sample_name: str = link.sample.name
                 LOG.debug(f"Fetch last version for sample bundle {sample_id}")
                 if self.delivery_type == DataDelivery.FASTQ:
-                    last_version: Version = self.hk_api.last_version(bundle=sample_id)
+                    last_version: Version = self.hk_api.last_version(sample_id)
                 if not last_version:
                     if self.skip_missing_bundle:
                         LOG.info(f"Could not find any version for {sample_id}")
@@ -119,9 +117,7 @@ class DeliverAPI:
                     version_obj=last_version,
                 )
                 continue
-            LOG.warning(
-                f"Sample {link.sample.internal_id} did not receive enough reads and will not be delivered"
-            )
+            LOG.warning(f"Sample {link.sample.internal_id} is not deliverable.")
 
     def sample_is_deliverable(self, link: CaseSample) -> bool:
         sample_is_external: bool = link.sample.application_version.application.is_external
@@ -312,18 +308,3 @@ class DeliverAPI:
             delivery_path = delivery_path / sample_name
 
         return delivery_path
-
-    @staticmethod
-    def get_delivery_scope(delivery_arguments: set[str]) -> tuple[bool, bool]:
-        """Returns the scope of the delivery, ie whether sample and/or case files were delivered."""
-        case_delivery: bool = False
-        sample_delivery: bool = False
-        for delivery in delivery_arguments:
-            if (
-                constants.PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"]
-                and delivery in constants.ONLY_ONE_CASE_PER_TICKET
-            ):
-                sample_delivery = True
-            if constants.PIPELINE_ANALYSIS_TAG_MAP[delivery]["case_tags"]:
-                case_delivery = True
-        return sample_delivery, case_delivery
