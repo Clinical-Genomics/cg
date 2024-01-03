@@ -9,7 +9,7 @@ from cg.constants.constants import Pipeline
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliveryAPI
-from cg.meta.deliver.utils import get_delivery_scope
+from cg.meta.deliver.utils import create_delivery_dir_path, get_delivery_scope
 from cg.store import Store
 from cg.store.models import Case, CaseSample, Sample
 from tests.cli.deliver.conftest import fastq_delivery_bundle, mip_delivery_bundle
@@ -34,8 +34,8 @@ def test_get_delivery_path(
     ticket = "1234"
 
     # WHEN fetching the deliver path
-    deliver_path = deliver_api.create_delivery_dir_path(
-        case_name=case_id, customer_id=customer_id, ticket=ticket
+    deliver_path = create_delivery_dir_path(
+        case_name=case_id, customer_id=customer_id, ticket=ticket, base_path=project_dir
     )
 
     # THEN assert that the path looks like expected

@@ -12,6 +12,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
 from cg.exc import MissingFilesError
+from cg.meta.deliver.utils import create_delivery_dir_path
 from cg.store import Store
 from cg.store.models import Case, CaseSample, Sample
 
@@ -137,8 +138,11 @@ class DeliveryAPI:
         """Deliver files on case level."""
         LOG.debug(f"Deliver case files for {case_id}")
         # Make sure that the directory exists
-        delivery_base: Path = self.create_delivery_dir_path(
-            case_name=case_name, customer_id=customer_id, ticket=ticket
+        delivery_base: Path = create_delivery_dir_path(
+            case_name=case_name,
+            customer_id=customer_id,
+            ticket=ticket,
+            base_path=self.project_base_path,
         )
         LOG.debug(f"Creating project path {delivery_base}")
         if not self.dry_run:
@@ -179,8 +183,12 @@ class DeliveryAPI:
         # Make sure that the directory exists
         if self.delivery_type in constants.ONLY_ONE_CASE_PER_TICKET:
             case_name = None
-        delivery_base: Path = self.create_delivery_dir_path(
-            case_name=case_name, sample_name=sample_name, customer_id=customer_id, ticket=ticket
+        delivery_base: Path = create_delivery_dir_path(
+            case_name=case_name,
+            sample_name=sample_name,
+            customer_id=customer_id,
+            ticket=ticket,
+            base_path=self.project_base_path,
         )
         LOG.debug(f"Creating project path {delivery_base}")
         if not self.dry_run:
@@ -289,17 +297,3 @@ class DeliveryAPI:
             if working_copy.issubset(file_tags):
                 return True
         return False
-
-    def create_delivery_dir_path(
-        self, customer_id: str, ticket: str, case_name: str = None, sample_name: str = None
-    ) -> Path:
-        """Create a path for delivering files.
-
-        Note that case name and sample name needs to be the identifiers sent from customer.
-        """
-        delivery_path = Path(self.project_base_path, customer_id, constants.INBOX_NAME, ticket)
-        if case_name:
-            delivery_path = delivery_path / case_name
-        if sample_name:
-            delivery_path = delivery_path / sample_name
-        return delivery_path
