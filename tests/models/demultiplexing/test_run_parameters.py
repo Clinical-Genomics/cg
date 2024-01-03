@@ -138,20 +138,6 @@ def test_run_parameters_wrong_file(scenario: RunParametersScenario, request: Fix
     assert scenario.error_msg in str(exc_info.value)
 
 
-def test_run_parameters_hiseq_wrong_file(novaseq_6000_run_parameters_path: Path):
-    """Tests that creating a RunParameters HiSeq object with the wrong file fails."""
-    # GIVEN a file path with a run parameters file from an instrument different from HiSeq
-
-    # WHEN trying to create a HiSeq RunParameters object with the file
-    with pytest.raises(RunParametersError) as exc_info:
-        # THEN a RunParametersError is raised
-        RunParametersHiSeq(run_parameters_path=novaseq_6000_run_parameters_path)
-    assert (
-        f"Could not find node {RunParametersXMLNodes.APPLICATION_NAME} in the run parameters file"
-        in str(exc_info.value)
-    )
-
-
 @pytest.mark.parametrize(
     "run_parameters_fixture",
     [
@@ -159,6 +145,7 @@ def test_run_parameters_hiseq_wrong_file(novaseq_6000_run_parameters_path: Path)
         "hiseq_x_single_index_run_parameters",
         "novaseq_x_run_parameters",
     ],
+    ids=["HiSeq 2500 dual index", "HiSeq X single index", "NovaSeq X"],
 )
 def test_reagent_kit_version_hiseq_and_novaseq_x(
     run_parameters_fixture: str, request: FixtureRequest
@@ -183,21 +170,6 @@ def test_reagent_kit_version_novaseq_6000(novaseq_6000_run_parameters: RunParame
     # THEN the reagent kit version exists and is not "unknown"
     assert reagent_kit_version
     assert reagent_kit_version != RunParametersXMLNodes.UNKNOWN_REAGENT_KIT_VERSION
-
-
-def test_reagent_kit_version_novaseq_6000_missing_version(
-    run_parameters_missing_versions: RunParametersNovaSeq6000, caplog
-):
-    """Test that 'unknown' will be returned if the run parameters file has no reagent kit method."""
-    caplog.set_level(logging.INFO)
-    # GIVEN a RunParameters object for NovaSeq6000 created from a file without reagent kit version
-
-    # WHEN fetching the reagent kit version
-    reagent_kit: str = run_parameters_missing_versions.reagent_kit_version
-
-    # THEN the reagent kit version is unknown
-    assert reagent_kit == RunParametersXMLNodes.UNKNOWN_REAGENT_KIT_VERSION
-    assert "Could not determine reagent kit version" in caplog.text
 
 
 @pytest.mark.parametrize(
@@ -235,17 +207,15 @@ def test_control_software_version_novaseq_6000(
     assert control_software_version != ""
 
 
-def test_control_software_version_novaseq_6000_no_version(
-    run_parameters_missing_versions: Path, caplog
-):
-    """Test that fetching the control software version from a file without that field fails."""
+def test_novaseq_6000_no_version(run_parameters_missing_versions_path: Path, caplog):
+    """Test that creating a Run Parameters object from a file without version fails."""
     caplog.set_level(logging.INFO)
-    # GIVEN a RunParameters object created from a file without control software version
+    # GIVEN the path of a RunParameters file without control software version
 
-    # WHEN fetching the control software version
+    # WHEN instantiating the object
     with pytest.raises(XMLError):
         # THEN assert that an exception was raised since the control software version was not found
-        run_parameters_missing_versions.control_software_version
+        run_parameters = RunParametersNovaSeq6000(run_parameters_missing_versions_path)
 
     assert (
         f"Could not find node with name {RunParametersXMLNodes.APPLICATION_VERSION} in XML tree"

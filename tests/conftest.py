@@ -1588,12 +1588,11 @@ def run_parameters_novaseq_x_different_index(run_parameters_dir: Path) -> RunPar
 
 
 @pytest.fixture(scope="module")
-def run_parameters_missing_versions(
+def run_parameters_missing_versions_path(
     run_parameters_dir: Path,
-) -> RunParametersNovaSeq6000:
-    """Return a NovaSeq6000 run parameters object without software and reagent kit versions."""
-    path = Path(run_parameters_dir, "RunParameters_novaseq_no_software_nor_reagent_version.xml")
-    return RunParametersNovaSeq6000(run_parameters_path=path)
+) -> Path:
+    """Return a NovaSeq6000 run parameters path without software and reagent kit versions."""
+    return Path(run_parameters_dir, "RunParameters_novaseq_no_software_nor_reagent_version.xml")
 
 
 @pytest.fixture(scope="session")

@@ -29,6 +29,7 @@ class RunParameters:
         self.path: Path = run_parameters_path
         self.tree: ElementTree = read_xml(file_path=run_parameters_path)
         self.validate_instrument()
+        self._index_settings: IndexSettings = self._get_index_settings()
 
     def validate_instrument(self) -> None:
         """Raise an error if the parent class was instantiated."""
@@ -117,8 +118,7 @@ class RunParameters:
             return False
         return True
 
-    @property
-    def index_settings(self) -> IndexSettings:
+    def _get_index_settings(self) -> IndexSettings:
         """Returns the correct index-related settings for the run in question."""
         if self.sequencer == Sequencers.NOVASEQX:
             LOG.debug("Using NovaSeqX index settings")
@@ -127,6 +127,11 @@ class RunParameters:
             LOG.debug("Using NovaSeq 6000 post 1.5 kits index settings")
             return NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS
         return NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS
+
+    @property
+    def index_settings(self) -> IndexSettings:
+        """Returns the correct index-related settings for the run in question."""
+        return self._index_settings
 
     def __str__(self):
         return f"RunParameters(path={self.path}, sequencer={self.sequencer})"
