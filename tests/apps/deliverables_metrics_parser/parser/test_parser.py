@@ -5,8 +5,8 @@ import pytest
 
 from cg.apps.deliverables_metrics_parser.parser.deliverables_parser import (
     get_metrics_deliverables_file_path,
-    read_metrics_deliverables,
     parse_metrics_deliverables_file,
+    read_metrics_deliverables,
 )
 from cg.constants.pipeline import Pipeline
 
