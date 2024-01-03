@@ -5,7 +5,7 @@ from pathlib import Path
 import click
 
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
+from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS
 from cg.meta.deliver import DeliveryAPI
 from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI
@@ -82,7 +82,7 @@ def deliver_analysis(
         return
 
     status_db: Store = context.status_db
-    delivery_api: DeliveryAPI = context.delivery_api 
+    delivery_api: DeliveryAPI = context.delivery_api
     delivery_api.set_dry_run(dry_run)
     delivery_api.set_force_all(force_all)
     delivery_api.set_ignore_missing_bundles(ignore_missing_bundles)

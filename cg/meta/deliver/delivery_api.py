@@ -44,13 +44,12 @@ class DeliveryAPI:
         to the inbox of a customer under <ticket>/<case_id>. All files tagged with sample_tags will be linked to
         <ticket>/<case_id>/<sample_id>.
         """
-        self.store = store
-        self.hk_api = hk_api
+        self.store: Store = store
+        self.hk_api: HousekeeperAPI = hk_api
         self.project_base_path: Path = project_base_path
-        self.dry_run = False
         self.ignore_missing_bundles: bool = ignore_missing_bundles
-        self.deliver_failed_samples = force_all
-        self.dry_run = dry_run
+        self.deliver_failed_samples: bool = force_all
+        self.dry_run: bool = dry_run
 
     def deliver_files(self, case: Case, pipeline: str):
         """Deliver all files for a case.

@@ -302,7 +302,7 @@ class CGConfig(BaseModel):
     tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
-    delivery_api_: DeliveryAPI = None
+    delivery_api_: DeliveryAPI | None = None
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
