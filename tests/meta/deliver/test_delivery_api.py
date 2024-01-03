@@ -48,7 +48,7 @@ def test_get_case_analysis_files(populated_deliver_api: DeliveryAPI, case_id: st
 
     # WHEN fetching all case files from the delivery api
     bundle_latest_files = deliver_api._get_case_files_from_version(
-        version=version, sample_ids=sample_ids
+        version=version, sample_ids=sample_ids, pipeline=Pipeline.MIP_DNA
     )
 
     # THEN housekeeper files should be returned
@@ -72,7 +72,6 @@ def test_get_case_files_from_version(
         store=analysis_store,
         hk_api=real_housekeeper_api,
         project_base_path=project_dir,
-        pipeline="balsamic",
     )
 
     # GIVEN a housekeeper db populated with a bundle including a case specific file and a sample specific file
@@ -92,7 +91,9 @@ def test_get_case_files_from_version(
     sample_ids: set[str] = {sample.internal_id for sample in samples}
 
     # WHEN fetching the case files
-    case_files = deliver_api._get_case_files_from_version(version=version, sample_ids=sample_ids)
+    case_files = deliver_api._get_case_files_from_version(
+        version=version, sample_ids=sample_ids, pipeline=Pipeline.MIP_DNA
+    )
 
     # THEN we should only get the case specific files back
     nr_files: int = 0
@@ -129,7 +130,9 @@ def test_get_sample_files_from_version(
     assert len(version.files) == 2
 
     # WHEN fetching the sample specific files
-    sample_files = deliver_api._get_sample_files_from_version(version_obj=version, sample_id="ADM1")
+    sample_files = deliver_api._get_sample_files_from_version(
+        version_obj=version, sample_id="ADM1", pipeline=Pipeline.MIP_DNA
+    )
 
     # THEN assert that only the sample specific file was returned
     nr_files: int = 0
@@ -196,7 +199,7 @@ def test_deliver_files_enough_reads(
     helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
 
     # WHEN delivering files for the case
-    deliver_api.deliver_files(case=case)
+    deliver_api.deliver_files(case=case, pipeline=Pipeline.MIP_DNA)
 
     # THEN the sample folder should be created
     assert Path(deliver_api.project_base_path, deliver_api_destination_path, sample.name).exists()
@@ -220,7 +223,7 @@ def test_deliver_files_not_enough_reads(
     helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
 
     # WHEN delivering files for the case
-    deliver_api.deliver_files(case=case)
+    deliver_api.deliver_files(case=case, pipeline=Pipeline.MIP_DNA)
 
     # THEN the sample folder should not be created
     assert not Path(
@@ -249,9 +252,7 @@ def test_deliver_files_not_enough_reads_force(
     deliver_api.deliver_failed_samples = True
 
     # WHEN delivering files for the case
-    deliver_api.deliver_files(
-        case=case,
-    )
+    deliver_api.deliver_files(case=case, pipeline=Pipeline.MIP_DNA)
 
     # THEN the sample folder should be created
     assert Path(deliver_api.project_base_path, deliver_api_destination_path, sample.name).exists()

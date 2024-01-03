@@ -25,7 +25,6 @@ def deliver_api(
         store=analysis_store,
         hk_api=real_housekeeper_api,
         project_base_path=project_dir,
-        pipeline="balsamic",
     )
 
 
@@ -50,7 +49,6 @@ def populated_deliver_api(
         store=analysis_store,
         hk_api=delivery_hk_api,
         project_base_path=project_dir,
-        pipeline="balsamic",
     )
 
 

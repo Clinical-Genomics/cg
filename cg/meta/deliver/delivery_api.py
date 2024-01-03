@@ -31,7 +31,6 @@ class DeliveryAPI:
         store: Store,
         hk_api: HousekeeperAPI,
         project_base_path: Path,
-        pipeline: str,
         force_all: bool = False,
         ignore_missing_bundles: bool = False,
     ):
@@ -47,13 +46,8 @@ class DeliveryAPI:
         self.store = store
         self.hk_api = hk_api
         self.project_base_path: Path = project_base_path
-        self.case_tags: list[set[str]] = get_case_tags_for_pipeline(pipeline)
-        self.sample_tags: list[set[str]] = get_sample_tags_for_pipeline(pipeline)
         self.dry_run = False
-        self.pipeline: str = pipeline
-        self.skip_missing_bundle: bool = (
-            self.pipeline in constants.SKIP_MISSING or ignore_missing_bundles
-        )
+        self.ignore_missing_bundles: bool = ignore_missing_bundles
         self.deliver_failed_samples = force_all
 
     def set_dry_run(self, dry_run: bool) -> None:
@@ -61,11 +55,16 @@ class DeliveryAPI:
         LOG.info(f"Set dry run to {dry_run}")
         self.dry_run = dry_run
 
-    def deliver_files(self, case: Case):
+    def deliver_files(self, case: Case, pipeline: str):
         """Deliver all files for a case.
 
         If there are sample tags deliver all files for the samples as well.
         """
+        case_tags: list[set[str]] = get_case_tags_for_pipeline(pipeline)
+        sample_tags: list[set[str]] = get_sample_tags_for_pipeline(pipeline)
+        self.skip_missing_bundle: bool = (
+            pipeline in constants.SKIP_MISSING or self.ignore_missing_bundles
+        )
         case_id: str = case.internal_id
         case_name: str = case.name
         customer_id: str = case.customer.internal_id
@@ -73,7 +72,7 @@ class DeliveryAPI:
         last_version: Version = self.hk_api.last_version(case_id)
 
         if not last_version:
-            if not self.case_tags:
+            if not case_tags:
                 LOG.info(f"Could not find any version for {case_id}")
             elif not self.skip_missing_bundle:
                 raise SyntaxError(f"Could not find any version for {case_id}")
@@ -83,7 +82,7 @@ class DeliveryAPI:
             return
         samples: list[Sample] = [link.sample for link in links]
         sample_ids: set[str] = {sample.internal_id for sample in samples}
-        if self.case_tags:
+        if case_tags:
             self._deliver_case_files(
                 case_id=case_id,
                 case_name=case_name,
@@ -91,9 +90,10 @@ class DeliveryAPI:
                 sample_ids=sample_ids,
                 customer_id=customer_id,
                 ticket=ticket,
+                pipeline=pipeline,
             )
 
-        if not self.sample_tags:
+        if not sample_tags:
             return
 
         link: CaseSample
@@ -102,7 +102,7 @@ class DeliveryAPI:
                 sample_id: str = link.sample.internal_id
                 sample_name: str = link.sample.name
                 LOG.debug(f"Fetch last version for sample bundle {sample_id}")
-                if self.pipeline == DataDelivery.FASTQ:
+                if pipeline == DataDelivery.FASTQ:
                     last_version: Version = self.hk_api.last_version(sample_id)
                 if not last_version:
                     if self.skip_missing_bundle:
@@ -117,6 +117,7 @@ class DeliveryAPI:
                     version_obj=last_version,
                     customer_id=customer_id,
                     ticket=ticket,
+                    pipeline=pipeline,
                 )
                 continue
             LOG.warning(f"Sample {link.sample.internal_id} is not deliverable.")
@@ -135,6 +136,7 @@ class DeliveryAPI:
         sample_ids: set[str],
         customer_id: str,
         ticket: str,
+        pipeline: str,
     ) -> None:
         """Deliver files on case level."""
         LOG.debug(f"Deliver case files for {case_id}")
@@ -149,7 +151,9 @@ class DeliveryAPI:
             delivery_base.mkdir(parents=True, exist_ok=True)
         file_path: Path
         number_linked_files: int = 0
-        for file_path in self._get_case_files_from_version(version=version, sample_ids=sample_ids):
+        for file_path in self._get_case_files_from_version(
+            version=version, sample_ids=sample_ids, pipeline=pipeline
+        ):
             # Out path should include customer names
             out_path: Path = delivery_base / file_path.name.replace(case_id, case_name)
             if out_path.exists():
@@ -178,10 +182,11 @@ class DeliveryAPI:
         version_obj: Version,
         customer_id: str,
         ticket: str,
+        pipeline: str,
     ) -> None:
         """Deliver files on sample level."""
         # Make sure that the directory exists
-        if self.pipeline in constants.ONLY_ONE_CASE_PER_TICKET:
+        if pipeline in constants.ONLY_ONE_CASE_PER_TICKET:
             case_name = None
         delivery_base: Path = get_delivery_dir_path(
             case_name=case_name,
@@ -197,7 +202,7 @@ class DeliveryAPI:
         number_linked_files_now: int = 0
         number_previously_linked_files: int = 0
         for file_path in self._get_sample_files_from_version(
-            version_obj=version_obj, sample_id=sample_id
+            version_obj=version_obj, sample_id=sample_id, pipeline=pipeline
         ):
             # Out path should include customer names
             file_name: str = file_path.name.replace(sample_id, sample_name)
@@ -224,7 +229,12 @@ class DeliveryAPI:
             f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case_id}"
         )
 
-    def _get_case_files_from_version(self, version: Version, sample_ids: set[str]) -> Iterable[Path]:
+    def _get_case_files_from_version(
+        self,
+        version: Version,
+        sample_ids: set[str],
+        pipeline: str,
+    ) -> Iterable[Path]:
         """Fetch all case files from a version that are tagged with any of the case tags."""
 
         if not version:
@@ -237,28 +247,36 @@ class DeliveryAPI:
 
         version_file: File
         for version_file in version.files:
-            if not self._include_file_case(file=version_file, sample_ids=sample_ids):
+            if not self._include_file_case(
+                file=version_file, sample_ids=sample_ids, pipeline=pipeline
+            ):
                 LOG.debug(f"Skipping file {version_file.path}")
                 continue
             yield Path(version_file.full_path)
 
-    def _get_sample_files_from_version(self, version_obj: Version, sample_id: str) -> Iterable[Path]:
+    def _get_sample_files_from_version(
+        self,
+        version_obj: Version,
+        sample_id: str,
+        pipeline: str,
+    ) -> Iterable[Path]:
         """Fetch all files for a sample from a version that are tagged with any of the sample
         tags."""
         file_obj: File
         for file_obj in version_obj.files:
-            if not self._include_file_sample(file=file_obj, sample_id=sample_id):
+            if not self._include_file_sample(file=file_obj, sample_id=sample_id, pipeline=pipeline):
                 continue
             yield Path(file_obj.full_path)
 
-    def _include_file_case(self, file: File, sample_ids: set[str]) -> bool:
+    def _include_file_case(self, file: File, sample_ids: set[str], pipeline: str) -> bool:
         """Check if file should be included in case bundle.
 
         At least one tag should match between file and tags.
         Do not include files with sample tags.
         """
         file_tags = {tag.name for tag in file.tags}
-        all_case_tags: set[str] = {tag for tags in self.case_tags for tag in tags}
+        case_tags = get_case_tags_for_pipeline(pipeline)
+        all_case_tags: set[str] = {tag for tags in case_tags for tag in tags}
         if all_case_tags.isdisjoint(file_tags):
             LOG.debug("No tags are matching")
             return False
@@ -272,7 +290,7 @@ class DeliveryAPI:
 
         # Check if any of the file tags matches the case tags
         tags: set[str]
-        for tags in self.case_tags:
+        for tags in case_tags:
             LOG.debug(f"check if {tags} is a subset of {file_tags}")
             if tags.issubset(file_tags):
                 return True
@@ -280,7 +298,7 @@ class DeliveryAPI:
 
         return False
 
-    def _include_file_sample(self, file: File, sample_id: str) -> bool:
+    def _include_file_sample(self, file: File, sample_id: str, pipeline: str) -> bool:
         """Check if file should be included in sample bundle.
 
         At least one tag should match between file and tags.
@@ -291,9 +309,10 @@ class DeliveryAPI:
         file_tags = {tag.name for tag in file.tags}
         tags: set[str]
         # Check if any of the file tags matches the sample tags
-        for tags in self.sample_tags:
+        sample_tags = get_sample_tags_for_pipeline(pipeline)
+        for tags in sample_tags:
             working_copy = deepcopy(tags)
-            if self.pipeline != "fastq":
+            if pipeline != "fastq":
                 working_copy.add(sample_id)
             if working_copy.issubset(file_tags):
                 return True

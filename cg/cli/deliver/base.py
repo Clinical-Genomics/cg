@@ -87,7 +87,6 @@ def deliver_analysis(
             store=status_db,
             hk_api=context.housekeeper_api,
             project_base_path=Path(inbox),
-            pipeline=delivery,
             force_all=force_all,
             ignore_missing_bundles=ignore_missing_bundles,
         )
@@ -106,7 +105,7 @@ def deliver_analysis(
                 return
 
         for case in cases:
-            delivery_api.deliver_files(case)
+            delivery_api.deliver_files(case=case, pipeline=delivery)
 
 
 @deliver.command(name="rsync")
