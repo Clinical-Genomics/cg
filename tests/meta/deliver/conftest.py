@@ -6,7 +6,7 @@ import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
-from cg.meta.deliver import DeliverAPI
+from cg.meta.deliver import DeliveryAPI
 from cg.store import Store
 from cg.store.models import Case
 from tests.store_helpers import StoreHelpers
@@ -15,13 +15,13 @@ from tests.store_helpers import StoreHelpers
 @pytest.fixture(scope="function")
 def deliver_api(
     analysis_store: Store, real_housekeeper_api: HousekeeperAPI, project_dir: Path
-) -> DeliverAPI:
+) -> DeliveryAPI:
     """Fixture for deliver_api
 
     The fixture will return a delivery api where the store is populated with a case with three individuals.
     The housekeeper database is empty
     """
-    _deliver_api = DeliverAPI(
+    _deliver_api = DeliveryAPI(
         store=analysis_store,
         hk_api=real_housekeeper_api,
         case_tags=[{"case-tag"}],
@@ -47,9 +47,9 @@ def delivery_hk_api(
 @pytest.fixture(name="populated_deliver_api")
 def populated_deliver_api(
     analysis_store: Store, delivery_hk_api: HousekeeperAPI, project_dir: Path
-) -> DeliverAPI:
+) -> DeliveryAPI:
     """Return a delivery api where housekeeper is populated with some files"""
-    _deliver_api = DeliverAPI(
+    _deliver_api = DeliveryAPI(
         store=analysis_store,
         hk_api=delivery_hk_api,
         case_tags=[{"case-tag"}],

@@ -10,7 +10,7 @@ from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.tb import AnalysisTypes
-from cg.meta.deliver.deliver import DeliverAPI
+from cg.meta.deliver.delivery_api import DeliveryAPI
 from cg.meta.deliver.utils import get_delivery_scope
 from cg.meta.rsync import RsyncAPI
 from cg.store import Store
@@ -42,7 +42,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
 
     LOG.debug(f"Delivery types are: {delivery_types}")
     for delivery_type in delivery_types:
-        DeliverAPI(
+        DeliveryAPI(
             store=context.obj.status_db,
             hk_api=context.obj.housekeeper_api,
             case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],

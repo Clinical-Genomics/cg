@@ -18,7 +18,7 @@ from cg.store.models import Case, CaseSample, Sample
 LOG = logging.getLogger(__name__)
 
 
-class DeliverAPI:
+class DeliveryAPI:
     """Deliver API for workflows files."""
 
     def __init__(

@@ -19,7 +19,7 @@ from cg.constants.housekeeper_tags import (
     HkMipAnalysisTag,
 )
 from cg.io.controller import ReadFile
-from cg.meta.deliver import DeliverAPI
+from cg.meta.deliver import DeliveryAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -200,7 +200,7 @@ def fastq_context(
 ) -> CGConfig:
     """Fastq context to use in cli"""
 
-    base_context.meta_apis["delivery_api"] = DeliverAPI(
+    base_context.meta_apis["delivery_api"] = DeliveryAPI(
         store=base_context.status_db,
         hk_api=base_context.housekeeper_api,
         case_tags=PIPELINE_ANALYSIS_TAG_MAP[Pipeline.FASTQ]["case_tags"],

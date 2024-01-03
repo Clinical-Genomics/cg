@@ -6,7 +6,7 @@ import click
 
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
-from cg.meta.deliver import DeliverAPI
+from cg.meta.deliver import DeliveryAPI
 from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
@@ -83,7 +83,7 @@ def deliver_analysis(
 
     status_db: Store = context.status_db
     for delivery in delivery_type:
-        deliver_api = DeliverAPI(
+        deliver_api = DeliveryAPI(
             store=status_db,
             hk_api=context.housekeeper_api,
             case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["case_tags"],

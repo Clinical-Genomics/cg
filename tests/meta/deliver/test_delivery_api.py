@@ -8,7 +8,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import Pipeline
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
-from cg.meta.deliver import DeliverAPI
+from cg.meta.deliver import DeliveryAPI
 from cg.meta.deliver.utils import get_delivery_scope
 from cg.store import Store
 from cg.store.models import Case, CaseSample, Sample
@@ -22,7 +22,7 @@ def test_get_delivery_path(
 ):
     """Test to create the delivery path."""
     # GIVEN a deliver api
-    deliver_api = DeliverAPI(
+    deliver_api = DeliveryAPI(
         store=base_store,
         hk_api=real_housekeeper_api,
         case_tags=["case-tag"],
@@ -42,9 +42,9 @@ def test_get_delivery_path(
     assert deliver_path == Path(project_dir, customer_id, INBOX_NAME, ticket, case_id)
 
 
-def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str):
+def test_get_case_analysis_files(populated_deliver_api: DeliveryAPI, case_id: str):
     """Test to fetch case specific files for a case that exists in housekeeper."""
-    deliver_api: DeliverAPI = populated_deliver_api
+    deliver_api: DeliveryAPI = populated_deliver_api
     # GIVEN a case which exist as bundle in hk with a version
     version: Version = deliver_api.hk_api.last_version(case_id)
     assert version
@@ -79,7 +79,7 @@ def test_get_case_files_from_version(
     case_obj = analysis_store.get_case_by_internal_id(internal_id=case_id)
     assert case_obj.internal_id == case_id
     # GIVEN a delivery api
-    deliver_api = DeliverAPI(
+    deliver_api = DeliveryAPI(
         store=analysis_store,
         hk_api=real_housekeeper_api,
         case_tags=[{"case-tag"}],
@@ -117,7 +117,7 @@ def test_get_case_files_from_version(
 
 
 def test_get_sample_files_from_version(
-    deliver_api: DeliverAPI,
+    deliver_api: DeliveryAPI,
     case_hk_bundle_no_files: dict,
     bed_file: Path,
     vcf_file: Path,
@@ -195,7 +195,7 @@ def test_get_delivery_scope_case_and_sample():
 def test_deliver_files_enough_reads(
     caplog,
     case_id: str,
-    deliver_api: DeliverAPI,
+    deliver_api: DeliveryAPI,
     deliver_api_destination_path: Path,
     fastq_delivery_bundle: dict,
     helpers: StoreHelpers,
@@ -219,7 +219,7 @@ def test_deliver_files_enough_reads(
 def test_deliver_files_not_enough_reads(
     caplog,
     case_id: str,
-    deliver_api: DeliverAPI,
+    deliver_api: DeliveryAPI,
     deliver_api_destination_path: Path,
     fastq_delivery_bundle: dict,
     helpers: StoreHelpers,
@@ -246,7 +246,7 @@ def test_deliver_files_not_enough_reads(
 def test_deliver_files_not_enough_reads_force(
     caplog,
     case_id: str,
-    deliver_api: DeliverAPI,
+    deliver_api: DeliveryAPI,
     deliver_api_destination_path: Path,
     fastq_delivery_bundle: dict,
     helpers: StoreHelpers,
