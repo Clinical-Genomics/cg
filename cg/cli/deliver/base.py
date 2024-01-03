@@ -67,10 +67,8 @@ def deliver_analysis(
     force_all: bool,
     ignore_missing_bundles: bool,
 ):
-    """Deliver analysis files to customer inbox
-
+    """ Deliver analysis files to customer inbox.
     Files can be delivered either on case level or for all cases connected to a ticket.
-    Any of those needs to be specified.
     """
     if not (case_id or ticket):
         LOG.info("Please provide a case-id or ticket-id")

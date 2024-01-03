@@ -44,12 +44,12 @@ class DeliveryAPI:
         to the inbox of a customer under <ticket>/<case_id>. All files tagged with sample_tags will be linked to
         <ticket>/<case_id>/<sample_id>.
         """
-        self.store: Store = store
-        self.hk_api: HousekeeperAPI = hk_api
-        self.project_base_path: Path = project_base_path
-        self.ignore_missing_bundles: bool = ignore_missing_bundles
-        self.deliver_failed_samples: bool = force_all
-        self.dry_run: bool = dry_run
+        self.store = store
+        self.hk_api = hk_api
+        self.project_base_path = project_base_path
+        self.ignore_missing_bundles = ignore_missing_bundles
+        self.deliver_failed_samples = force_all
+        self.dry_run = dry_run
 
     def deliver(self, ticket: str | None, case_id: str | None, pipeline: str) -> None:
         if ticket:
@@ -73,40 +73,31 @@ class DeliveryAPI:
         self.deliver_files(case=case, pipeline=pipeline)
 
     def deliver_files(self, case: Case, pipeline: str):
-        """Deliver all files for a case.
-
-        If there are sample tags deliver all files for the samples as well.
-        """
+        """Deliver all files for a case."""
         case_tags: list[set[str]] = get_case_tags_for_pipeline(pipeline)
         sample_tags: list[set[str]] = get_sample_tags_for_pipeline(pipeline)
-        self.skip_missing_bundle: bool = (
+
+        last_version: Version = self.hk_api.last_version(case.internal_id)
+
+        skip_missing_bundle: bool = (
             pipeline in constants.SKIP_MISSING or self.ignore_missing_bundles
         )
-        case_id: str = case.internal_id
-        case_name: str = case.name
-        customer_id: str = case.customer.internal_id
-        ticket: str = case.latest_ticket
-        last_version: Version = self.hk_api.last_version(case_id)
 
         if not last_version:
             if not case_tags:
-                LOG.info(f"Could not find any version for {case_id}")
-            elif not self.skip_missing_bundle:
-                raise SyntaxError(f"Could not find any version for {case_id}")
-        links: list[CaseSample] = self.store.get_case_samples_by_case_id(case_id)
+                LOG.info(f"Could not find any version for {case.internal_id}")
+            elif not skip_missing_bundle:
+                raise SyntaxError(f"Could not find any version for {case.internal_id}")
+        links: list[CaseSample] = self.store.get_case_samples_by_case_id(case.internal_id)
         if not links:
-            LOG.warning(f"Could not find any samples linked to case {case_id}")
+            LOG.warning(f"Could not find any samples linked to case {case.internal_id}")
             return
         samples: list[Sample] = [link.sample for link in links]
         sample_ids: set[str] = {sample.internal_id for sample in samples}
         if case_tags:
             self._deliver_case_files(
-                case_id=case_id,
-                case_name=case_name,
-                version=last_version,
+                case=case,
                 sample_ids=sample_ids,
-                customer_id=customer_id,
-                ticket=ticket,
                 pipeline=pipeline,
             )
 
@@ -122,18 +113,15 @@ class DeliveryAPI:
                 if pipeline == DataDelivery.FASTQ:
                     last_version: Version = self.hk_api.last_version(sample_id)
                 if not last_version:
-                    if self.skip_missing_bundle:
+                    if skip_missing_bundle:
                         LOG.info(f"Could not find any version for {sample_id}")
                         continue
                     raise SyntaxError(f"Could not find any version for {sample_id}")
                 self._deliver_sample_files(
-                    case_id=case_id,
-                    case_name=case_name,
+                    case=case,
                     sample_id=sample_id,
                     sample_name=sample_name,
                     version_obj=last_version,
-                    customer_id=customer_id,
-                    ticket=ticket,
                     pipeline=pipeline,
                 )
                 continue
@@ -147,20 +135,17 @@ class DeliveryAPI:
 
     def _deliver_case_files(
         self,
-        case_id: str,
-        case_name: str,
-        version: Version,
+        case: Case,
         sample_ids: set[str],
-        customer_id: str,
-        ticket: str,
         pipeline: str,
     ) -> None:
         """Deliver files on case level."""
-        LOG.debug(f"Deliver case files for {case_id}")
+        LOG.debug(f"Deliver case files for {case.internal_id}")
+        version: Version = self.hk_api.last_version(case.internal_id)
         delivery_base: Path = get_delivery_dir_path(
-            case_name=case_name,
-            customer_id=customer_id,
-            ticket=ticket,
+            case_name=case.name,
+            customer_id=case.customer.internal_id,
+            ticket=case.latest_ticket,
             base_path=self.project_base_path,
         )
         if not self.dry_run:
@@ -172,7 +157,7 @@ class DeliveryAPI:
             version=version, sample_ids=sample_ids, pipeline=pipeline
         ):
             # Out path should include customer names
-            out_path: Path = delivery_base / file_path.name.replace(case_id, case_name)
+            out_path: Path = delivery_base / file_path.name.replace(case.internal_id, case.name)
             if out_path.exists():
                 LOG.warning(f"File {out_path} already exists!")
                 continue
@@ -188,28 +173,27 @@ class DeliveryAPI:
             except FileExistsError:
                 LOG.info(f"Path {out_path} exists, skipping")
 
-        LOG.info(f"Linked {number_linked_files} files for case {case_id}")
+        LOG.info(f"Linked {number_linked_files} files for case {case.internal_id}")
 
     def _deliver_sample_files(
         self,
-        case_id: str,
-        case_name: str,
+        case: Case,
         sample_id: str,
         sample_name: str,
         version_obj: Version,
-        customer_id: str,
-        ticket: str,
         pipeline: str,
     ) -> None:
         """Deliver files on sample level."""
         # Make sure that the directory exists
         if pipeline in constants.ONLY_ONE_CASE_PER_TICKET:
             case_name = None
+        else:
+            case_name = case.name
         delivery_base: Path = get_delivery_dir_path(
             case_name=case_name,
             sample_name=sample_name,
-            customer_id=customer_id,
-            ticket=ticket,
+            customer_id=case.customer.internal_id,
+            ticket=case.latest_ticket,
             base_path=self.project_base_path,
         )
         if not self.dry_run:
@@ -224,7 +208,7 @@ class DeliveryAPI:
             # Out path should include customer names
             file_name: str = file_path.name.replace(sample_id, sample_name)
             if case_name:
-                file_name: str = file_name.replace(case_id, case_name)
+                file_name: str = file_name.replace(case.internal_id, case.name)
             out_path: Path = delivery_base / file_name
             if self.dry_run:
                 LOG.info(f"Would hard link file {file_path} to {out_path}")
@@ -243,7 +227,7 @@ class DeliveryAPI:
             raise MissingFilesError(f"No files were linked for sample {sample_name}")
 
         LOG.info(
-            f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case_id}"
+            f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case.internal_id}"
         )
 
     def _get_case_files_from_version(
