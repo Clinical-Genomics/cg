@@ -79,7 +79,7 @@ def test_create_manifest_files_true_nanopore_data(
             nanopore_flow_cells_dir, Path(tmp_path, nanopore_flow_cells_dir.name).as_posix()
         )
     )
-    sample_directories: list[Path] = list(Path(nanopore_flow_cells_dir).glob("*/*/*"))
+    sample_directories: list[Path] = list(Path(tmp_nanopore_directory).glob("*/*/*"))
     assert len(sample_directories) == 2
 
     # WHEN creating manifest files
