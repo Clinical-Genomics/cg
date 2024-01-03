@@ -106,7 +106,7 @@ class SpringArchiveAPI:
     def retrieve_files_from_archive_location(
         self, files_and_samples: list[FileAndSample], archive_location: str
     ) -> None:
-        """Retrieves the archived spring files for a list of samples."""
+        """Retrieves the archived spring files for a list of samples and sets retrieval ids in Housekeeper."""
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
         job_id: int = archive_handler.retrieve_files(files_and_samples)
         LOG.info(f"Retrieval job launched with ID {job_id}")
