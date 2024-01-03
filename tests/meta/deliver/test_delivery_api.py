@@ -32,11 +32,10 @@ def test_get_delivery_path(
     )
     customer_id = "cust000"
     ticket = "1234"
-    deliver_api._set_customer_id(customer_id)
     deliver_api.set_ticket(ticket)
 
     # WHEN fetching the deliver path
-    deliver_path = deliver_api.create_delivery_dir_path(case_name=case_id)
+    deliver_path = deliver_api.create_delivery_dir_path(case_name=case_id, customer_id=customer_id)
 
     # THEN assert that the path looks like expected
     assert deliver_path == Path(project_dir, customer_id, INBOX_NAME, ticket, case_id)

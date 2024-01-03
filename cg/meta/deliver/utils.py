@@ -1,5 +1,6 @@
 from cg.constants import delivery as constants
 
+
 def get_delivery_scope(delivery_arguments: set[str]) -> tuple[bool, bool]:
     """Returns the scope of the delivery, ie whether sample and/or case files were delivered."""
     case_delivery: bool = False
