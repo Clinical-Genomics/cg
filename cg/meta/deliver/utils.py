@@ -18,14 +18,14 @@ def get_delivery_scope(delivery_arguments: set[str]) -> tuple[bool, bool]:
     return sample_delivery, case_delivery
 
 
-def create_delivery_dir_path(
+def get_delivery_dir_path(
     base_path: Path,
     customer_id: str,
     ticket: str,
     case_name: str = None,
     sample_name: str = None,
 ) -> Path:
-    """Create a path for delivering files.
+    """Get a path for delivering files.
 
     Note that case name and sample name needs to be the identifiers sent from customer.
     """

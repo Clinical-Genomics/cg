@@ -9,7 +9,7 @@ from cg.constants.constants import Pipeline
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliveryAPI
-from cg.meta.deliver.utils import create_delivery_dir_path, get_delivery_scope
+from cg.meta.deliver.utils import get_delivery_dir_path, get_delivery_scope
 from cg.store import Store
 from cg.store.models import Case, CaseSample, Sample
 from tests.cli.deliver.conftest import fastq_delivery_bundle, mip_delivery_bundle
@@ -24,7 +24,7 @@ def test_get_delivery_path(project_dir: Path, case_id: str):
     ticket = "1234"
 
     # WHEN fetching the deliver path
-    deliver_path = create_delivery_dir_path(
+    deliver_path = get_delivery_dir_path(
         case_name=case_id, customer_id=customer_id, ticket=ticket, base_path=project_dir
     )
 
@@ -47,7 +47,7 @@ def test_get_case_analysis_files(populated_deliver_api: DeliveryAPI, case_id: st
     sample_ids: set[str] = {sample.internal_id for sample in samples}
 
     # WHEN fetching all case files from the delivery api
-    bundle_latest_files = deliver_api.get_case_files_from_version(
+    bundle_latest_files = deliver_api._get_case_files_from_version(
         version=version, sample_ids=sample_ids
     )
 
@@ -92,7 +92,7 @@ def test_get_case_files_from_version(
     sample_ids: set[str] = {sample.internal_id for sample in samples}
 
     # WHEN fetching the case files
-    case_files = deliver_api.get_case_files_from_version(version=version, sample_ids=sample_ids)
+    case_files = deliver_api._get_case_files_from_version(version=version, sample_ids=sample_ids)
 
     # THEN we should only get the case specific files back
     nr_files: int = 0
@@ -129,7 +129,7 @@ def test_get_sample_files_from_version(
     assert len(version.files) == 2
 
     # WHEN fetching the sample specific files
-    sample_files = deliver_api.get_sample_files_from_version(version_obj=version, sample_id="ADM1")
+    sample_files = deliver_api._get_sample_files_from_version(version_obj=version, sample_id="ADM1")
 
     # THEN assert that only the sample specific file was returned
     nr_files: int = 0
