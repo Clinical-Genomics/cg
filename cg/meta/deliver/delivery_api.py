@@ -65,24 +65,15 @@ class DeliveryAPI:
 
     def deliver_files(self, case: Case, pipeline: str):
         """Deliver all files for a case."""
-        last_version: Version = self.hk_api.last_version(case.internal_id)
-        skip_missing_bundle: bool = (
-            pipeline in constants.SKIP_MISSING or self.ignore_missing_bundles
-        )
-
-        case_tags: list[set[str]] = get_case_tags_for_pipeline(pipeline)
-        if not last_version:
-            if not case_tags:
-                LOG.info(f"Could not find any version for {case.internal_id}")
-            elif not skip_missing_bundle:
-                raise SyntaxError(f"Could not find any version for {case.internal_id}")
+        if not self._case_is_deliverable(case=case, pipeline=pipeline):
+            return
         links: list[CaseSample] = self.store.get_case_samples_by_case_id(case.internal_id)
         if not links:
             LOG.warning(f"Could not find any samples linked to case {case.internal_id}")
             return
         samples: list[Sample] = [link.sample for link in links]
         sample_ids: set[str] = {sample.internal_id for sample in samples}
-        if case_tags:
+        if get_case_tags_for_pipeline(pipeline):
             self._deliver_case_files(
                 case=case,
                 sample_ids=sample_ids,
@@ -99,10 +90,12 @@ class DeliveryAPI:
                 sample_id: str = link.sample.internal_id
                 sample_name: str = link.sample.name
                 LOG.debug(f"Fetch last version for sample bundle {sample_id}")
+                last_version = self.hk_api.last_version(case.internal_id)
                 if pipeline == DataDelivery.FASTQ:
                     last_version: Version = self.hk_api.last_version(sample_id)
                 if not last_version:
-                    if skip_missing_bundle:
+                    skip_missing = pipeline in constants.SKIP_MISSING or self.ignore_missing_bundles
+                    if skip_missing:
                         LOG.info(f"Could not find any version for {sample_id}")
                         continue
                     raise SyntaxError(f"Could not find any version for {sample_id}")
@@ -322,3 +315,16 @@ class DeliveryAPI:
     def set_ignore_missing_bundles(self, ignore_missing_bundles: bool):
         """Set the ignore missing bundles flag."""
         self.ignore_missing_bundles = ignore_missing_bundles
+
+    def _case_is_deliverable(self, case: Case, pipeline: str) -> bool:
+        last_version = self.hk_api.last_version(case.internal_id)
+        skip_missing = pipeline in constants.SKIP_MISSING or self.ignore_missing_bundles
+        case_tags = get_case_tags_for_pipeline(pipeline)
+
+        if not last_version:
+            if not case_tags:
+                LOG.info(f"Could not find any version for {case.internal_id}")
+            elif not skip_missing:
+                raise SyntaxError(f"Could not find any version for {case.internal_id}")
+            return False
+        return True
