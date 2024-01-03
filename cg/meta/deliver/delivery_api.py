@@ -80,8 +80,7 @@ class DeliveryAPI:
         if not get_sample_tags_for_pipeline(pipeline):
             return
 
-        link: CaseSample
-        links = self.store.get_case_samples_by_case_id(case.internal_id)
+        links: list[CaseSample] = self.store.get_case_samples_by_case_id(case.internal_id)
         for link in links:
             if self._sample_is_deliverable(link=link, case=case, pipeline=pipeline):
                 self._deliver_sample_files(
