@@ -69,16 +69,23 @@ def test_create_manifest_files_false(
         assert not manifest_file.exists()
 
 
-def test_create_manifest_files_true_nanopore_data(cli_runner, nanopore_flow_cells_dir: Path):
+def test_create_manifest_files_true_nanopore_data(
+    cli_runner, nanopore_flow_cells_dir: Path, tmp_path
+):
     """Test that manifest files are created for flow cells where the sequencing is complete."""
     # GIVEN a Nanopore run with two samples
+    tmp_nanopore_directory = Path(
+        shutil.copytree(
+            nanopore_flow_cells_dir, Path(tmp_path, nanopore_flow_cells_dir.name).as_posix()
+        )
+    )
     sample_directories: list[Path] = list(Path(nanopore_flow_cells_dir).glob("*/*/*"))
     assert len(sample_directories) == 2
 
     # WHEN creating manifest files
     cli_runner.invoke(
         cli=create_manifest_files,
-        args=["--source-directory", f"{nanopore_flow_cells_dir}/*/*"],
+        args=["--source-directory", f"{tmp_nanopore_directory}/*/*"],
     )
 
     for sample_directory in sample_directories:
