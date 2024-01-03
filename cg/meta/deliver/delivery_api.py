@@ -12,7 +12,11 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
 from cg.exc import MissingFilesError
-from cg.meta.deliver.utils import create_delivery_dir_path
+from cg.meta.deliver.utils import (
+    create_delivery_dir_path,
+    get_case_tags_for_pipeline,
+    get_sample_tags_for_pipeline,
+)
 from cg.store import Store
 from cg.store.models import Case, CaseSample, Sample
 
@@ -26,10 +30,8 @@ class DeliveryAPI:
         self,
         store: Store,
         hk_api: HousekeeperAPI,
-        case_tags: list[set[str]],
-        sample_tags: list[set[str]],
         project_base_path: Path,
-        delivery_type: str,
+        pipeline: str,
         force_all: bool = False,
         ignore_missing_bundles: bool = False,
     ):
@@ -45,11 +47,11 @@ class DeliveryAPI:
         self.store = store
         self.hk_api = hk_api
         self.project_base_path: Path = project_base_path
-        self.case_tags: list[set[str]] = case_tags
-        self.all_case_tags: set[str] = {tag for tags in case_tags for tag in tags}
-        self.sample_tags: list[set[str]] = sample_tags
+        self.case_tags: list[set[str]] = get_case_tags_for_pipeline(pipeline)
+        self.all_case_tags: set[str] = {tag for tags in self.case_tags for tag in tags}
+        self.sample_tags: list[set[str]] = get_sample_tags_for_pipeline(pipeline)
         self.dry_run = False
-        self.delivery_type: str = delivery_type
+        self.delivery_type: str = pipeline
         self.skip_missing_bundle: bool = (
             self.delivery_type in constants.SKIP_MISSING or ignore_missing_bundles
         )

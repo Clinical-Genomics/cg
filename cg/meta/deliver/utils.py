@@ -1,5 +1,6 @@
 from pathlib import Path
 from cg.constants import delivery as constants
+from cg.constants.constants import Pipeline
 
 
 def get_delivery_scope(delivery_arguments: set[str]) -> tuple[bool, bool]:
@@ -34,3 +35,11 @@ def create_delivery_dir_path(
     if sample_name:
         delivery_path = delivery_path / sample_name
     return delivery_path
+
+
+def get_case_tags_for_pipeline(pipeline: Pipeline) -> list[set[str]]:
+    return constants.PIPELINE_ANALYSIS_TAG_MAP[pipeline]["case_tags"]
+
+
+def get_sample_tags_for_pipeline(pipeline: Pipeline) -> list[set[str]]:
+    return constants.PIPELINE_ANALYSIS_TAG_MAP[pipeline]["sample_tags"]

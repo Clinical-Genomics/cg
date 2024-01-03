@@ -17,19 +17,9 @@ from tests.store.conftest import case_obj
 from tests.store_helpers import StoreHelpers
 
 
-def test_get_delivery_path(
-    base_store: Store, real_housekeeper_api: HousekeeperAPI, project_dir: Path, case_id: str
-):
+def test_get_delivery_path(project_dir: Path, case_id: str):
     """Test to create the delivery path."""
-    # GIVEN a deliver api
-    deliver_api = DeliveryAPI(
-        store=base_store,
-        hk_api=real_housekeeper_api,
-        case_tags=["case-tag"],
-        sample_tags=["sample-tag"],
-        project_base_path=project_dir,
-        delivery_type="balsamic",
-    )
+    # GIVEN a ticket and customer id
     customer_id = "cust000"
     ticket = "1234"
 
@@ -76,27 +66,24 @@ def test_get_case_files_from_version(
     helpers=StoreHelpers,
 ):
     # GIVEN a store with a case
-    case_obj = analysis_store.get_case_by_internal_id(internal_id=case_id)
-    assert case_obj.internal_id == case_id
+
     # GIVEN a delivery api
     deliver_api = DeliveryAPI(
         store=analysis_store,
         hk_api=real_housekeeper_api,
-        case_tags=[{"case-tag"}],
-        sample_tags=[{"sample-tag"}],
         project_base_path=project_dir,
-        delivery_type="balsamic",
+        pipeline="balsamic",
     )
 
     # GIVEN a housekeeper db populated with a bundle including a case specific file and a sample specific file
     case_hk_bundle_no_files["files"] = [
-        {"path": bed_file.as_posix(), "archive": False, "tags": ["case-tag"]},
-        {"path": str(vcf_file), "archive": False, "tags": ["sample-tag", "ADM1"]},
+        {"path": bed_file.as_posix(), "archive": False, "tags": ["delivery-report"]},
+        {"path": str(vcf_file), "archive": False, "tags": ["cram"]},
     ]
     helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=case_hk_bundle_no_files)
 
     # GIVEN a version object where two file exists
-    version: Version = real_housekeeper_api.last_version(bundle=case_id)
+    version: Version = real_housekeeper_api.last_version(case_id)
     assert len(version.files) == 2
 
     # GIVEN the sample ids of the samples
@@ -193,7 +180,6 @@ def test_get_delivery_scope_case_and_sample():
 
 
 def test_deliver_files_enough_reads(
-    caplog,
     case_id: str,
     deliver_api: DeliveryAPI,
     deliver_api_destination_path: Path,
@@ -217,7 +203,6 @@ def test_deliver_files_enough_reads(
 
 
 def test_deliver_files_not_enough_reads(
-    caplog,
     case_id: str,
     deliver_api: DeliveryAPI,
     deliver_api_destination_path: Path,
@@ -244,7 +229,6 @@ def test_deliver_files_not_enough_reads(
 
 
 def test_deliver_files_not_enough_reads_force(
-    caplog,
     case_id: str,
     deliver_api: DeliveryAPI,
     deliver_api_destination_path: Path,

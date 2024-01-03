@@ -21,15 +21,12 @@ def deliver_api(
     The fixture will return a delivery api where the store is populated with a case with three individuals.
     The housekeeper database is empty
     """
-    _deliver_api = DeliveryAPI(
+    yield DeliveryAPI(
         store=analysis_store,
         hk_api=real_housekeeper_api,
-        case_tags=[{"case-tag"}],
-        sample_tags=[{AlignmentFileTag.CRAM}],
         project_base_path=project_dir,
-        delivery_type="balsamic",
+        pipeline="balsamic",
     )
-    yield _deliver_api
 
 
 @pytest.fixture(name="delivery_hk_api")
@@ -49,15 +46,12 @@ def populated_deliver_api(
     analysis_store: Store, delivery_hk_api: HousekeeperAPI, project_dir: Path
 ) -> DeliveryAPI:
     """Return a delivery api where housekeeper is populated with some files"""
-    _deliver_api = DeliveryAPI(
+    return DeliveryAPI(
         store=analysis_store,
         hk_api=delivery_hk_api,
-        case_tags=[{"case-tag"}],
-        sample_tags=[{AlignmentFileTag.CRAM}],
         project_base_path=project_dir,
-        delivery_type="balsamic",
+        pipeline="balsamic",
     )
-    return _deliver_api
 
 
 @pytest.fixture(name="dummy_file_name")

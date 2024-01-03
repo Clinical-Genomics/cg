@@ -83,32 +83,30 @@ def deliver_analysis(
 
     status_db: Store = context.status_db
     for delivery in delivery_type:
-        deliver_api = DeliveryAPI(
+        delivery_api = DeliveryAPI(
             store=status_db,
             hk_api=context.housekeeper_api,
-            case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["case_tags"],
-            sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"],
             project_base_path=Path(inbox),
-            delivery_type=delivery,
+            pipeline=delivery,
             force_all=force_all,
             ignore_missing_bundles=ignore_missing_bundles,
         )
-        deliver_api.set_dry_run(dry_run)
+        delivery_api.set_dry_run(dry_run)
         cases: list[Case] = []
         if case_id:
-            case_obj: Case = status_db.get_case_by_internal_id(case_id)
-            if not case_obj:
+            case: Case = status_db.get_case_by_internal_id(case_id)
+            if not case:
                 LOG.warning(f"Could not find case {case_id}")
                 return
-            cases.append(case_obj)
+            cases.append(case)
         else:
             cases: list[Case] = status_db.get_cases_by_ticket_id(ticket)
             if not cases:
                 LOG.warning(f"Could not find cases for ticket {ticket}")
                 return
 
-        for case_obj in cases:
-            deliver_api.deliver_files(case_obj)
+        for case in cases:
+            delivery_api.deliver_files(case)
 
 
 @deliver.command(name="rsync")

@@ -203,9 +203,7 @@ def fastq_context(
     base_context.meta_apis["delivery_api"] = DeliveryAPI(
         store=base_context.status_db,
         hk_api=base_context.housekeeper_api,
-        case_tags=PIPELINE_ANALYSIS_TAG_MAP[Pipeline.FASTQ]["case_tags"],
-        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[Pipeline.FASTQ]["sample_tags"],
-        delivery_type="fastq",
+        pipeline="fastq",
         project_base_path=Path(base_context.delivery_path),
     )
     base_context.meta_apis["rsync_api"] = RsyncAPI(cg_context)
