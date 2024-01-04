@@ -19,6 +19,8 @@ from cg.utils.files import (
 
 LOG = logging.getLogger(__name__)
 
+NANOPORE_SEQUENCING_SUMMARY_PATTERN: str = r"final_summary_*.txt"
+
 
 def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
     """
@@ -256,9 +258,12 @@ def is_manifest_file_required(flow_cell_dir: Path) -> bool:
     illumina_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST)
     custom_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)
     copy_complete_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE)
+    sequencing_finished: bool = copy_complete_file.exists() or is_nanopore_sequencing_complete(
+        flow_cell_dir
+    )
     return (
         not any((illumina_manifest_file.exists(), custom_manifest_file.exists()))
-        and copy_complete_file.exists()
+        and sequencing_finished
     )
 
 
@@ -283,3 +288,17 @@ def create_manifest_file(flow_cell_dir_name: Path) -> Path:
 
 def is_flow_cell_sync_confirmed(target_flow_cell_dir: Path) -> bool:
     return Path(target_flow_cell_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE).exists()
+
+
+def get_nanopore_summary_file(flow_cell_directory: Path) -> bool | None:
+    """Returns the summary file for a Nanopore run if found."""
+    try:
+        file = Path(next(flow_cell_directory.glob(NANOPORE_SEQUENCING_SUMMARY_PATTERN)))
+    except StopIteration:
+        file = None
+    return file
+
+
+def is_nanopore_sequencing_complete(flow_cell_directory: Path) -> bool:
+    """Returns whether the sequencing is complete for a Nanopore run."""
+    return bool(get_nanopore_summary_file(flow_cell_directory))
