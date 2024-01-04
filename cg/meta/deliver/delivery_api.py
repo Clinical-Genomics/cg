@@ -104,7 +104,10 @@ class DeliveryAPI:
             LOG.warning(f"No version found for case {case.internal_id}")
             return
 
-        delivery_base: Path = self._create_delivery_directory(case)
+        delivery_dir: Path = self._create_delivery_directory(case)
+        self._link_case_files(case=case, version=version, pipeline=pipeline, delivery_dir=delivery_dir)
+
+    def _link_case_files(self, case: Case, version: Version, pipeline: str, delivery_dir: Path):
         file_path: Path
         number_linked_files: int = 0
         links = self.store.get_case_samples_by_case_id(case.internal_id)
@@ -115,7 +118,7 @@ class DeliveryAPI:
         )
         for file_path in files:
             # Out path should include customer names
-            out_path: Path = delivery_base / file_path.name.replace(case.internal_id, case.name)
+            out_path: Path = delivery_dir / file_path.name.replace(case.internal_id, case.name)
             if out_path.exists():
                 LOG.warning(f"File {out_path} already exists!")
                 continue
@@ -131,7 +134,6 @@ class DeliveryAPI:
             except FileExistsError:
                 LOG.info(f"Path {out_path} exists, skipping")
 
-        LOG.info(f"Linked {number_linked_files} files for case {case.internal_id}")
 
     def _create_delivery_directory(self, case: Case) -> Path:
         delivery_base = get_delivery_dir_path(
