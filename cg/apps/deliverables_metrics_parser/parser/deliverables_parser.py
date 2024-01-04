@@ -5,7 +5,7 @@ from pathlib import Path
 from cg.apps.deliverables_metrics_parser.models.pipeline_metrics_deliverables import (
     MIPDNAMetricsDeliverables,
 )
-from cg.apps.deliverables_metrics_parser.models.supporting_models import ReadInformation
+
 from cg.constants.constants import FileFormat
 from cg.constants.pipeline import Pipeline
 from cg.io.controller import ReadFile
@@ -74,47 +74,12 @@ class MetricsDeliverablesParser:
             if entry[MetricsParserConstants.ID] == sample_id
         )
 
-    @staticmethod
-    def get_flow_cell_name_from_input(input_field: str) -> str:
-        """
-        Return the flow cell name from an input field of the metrics deliverables file.
-            Expects the following format:
-                sampleid_lane_flowcellname_xxx
-        """
-        return input_field.split(
-            sep="_",
-        )[2]
-
-    @staticmethod
-    def get_lane_from_input(input_field: str) -> str:
-        """
-        Return the lane from an input field from the metrics deliverables file.
-            Expects the following format:
-                sampleid_lane_flowcellname_xxx
-        """
-        return input_field.split(sep="_")[1]
-
-    @staticmethod
-    def get_entries_with_name_from_metrics(metrics: list[dict], name: str) -> list[dict]:
-        """
-        Return the metrics with the specified name.
-        """
-        return [metric for metric in metrics if metrics[MetricsParserConstants.NAME] == name]
-
-    def format_read_information(self, metrics: list[dict]) -> list[ReadInformation]:
-        """Format the read information per flow cell."""
-        # Get the unique flow cells
-
-        # make a read information class per flow cell
-        # return formatted read information
-        pass
-
     def _order_metrics_per_sample(self, metrics: list[dict]):
         """Reformat the metrics content per sample id."""
         sample_ids: set[str] = self._get_unique_sample_ids_in_content(metrics)
         sample_metrics: dict = {}
         for sample_id in sample_ids:
-            # get readinfo
+            # get read info
             sample_metrics[sample_id] = self.extract_name_value_pairs(
                 metrics=metrics, sample_id=sample_id
             )
