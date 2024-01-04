@@ -77,7 +77,7 @@ def deliver_analysis(
     delivery_api: DeliveryAPI = context.delivery_api
 
     delivery_api.set_dry_run(dry_run)
-    delivery_api.set_force_all(force_all)
+    delivery_api.set_deliver_failed_samples(force_all)
     delivery_api.set_ignore_missing_bundles(ignore_missing_bundles)
 
     for delivery in delivery_type:

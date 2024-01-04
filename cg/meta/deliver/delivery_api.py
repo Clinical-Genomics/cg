@@ -1,7 +1,6 @@
 """Module for deliveries of workflow files"""
 
 import logging
-import os
 from pathlib import Path
 from typing import Iterable
 
@@ -46,6 +45,18 @@ class DeliveryAPI:
         self.ignore_missing_bundles = ignore_missing_bundles
         self.deliver_failed_samples = force_all
         self.dry_run = dry_run
+
+    def set_dry_run(self, dry_run: bool):
+        """Set the dry run flag."""
+        self.dry_run = dry_run
+
+    def set_deliver_failed_samples(self, deliver_failed_samples: bool):
+        """Set the force all flag."""
+        self.deliver_failed_samples = deliver_failed_samples
+
+    def set_ignore_missing_bundles(self, ignore_missing_bundles: bool):
+        """Set the ignore missing bundles flag."""
+        self.ignore_missing_bundles = ignore_missing_bundles
 
     def deliver(self, ticket: str | None, case_id: str | None, pipeline: str) -> None:
         if ticket:
@@ -200,18 +211,6 @@ class DeliveryAPI:
                 continue
             yield Path(file_obj.full_path)
 
-    def set_dry_run(self, dry_run: bool):
-        """Set the dry run flag."""
-        self.dry_run = dry_run
-
-    def set_force_all(self, force_all: bool):
-        """Set the force all flag."""
-        self.deliver_failed_samples = force_all
-
-    def set_ignore_missing_bundles(self, ignore_missing_bundles: bool):
-        """Set the ignore missing bundles flag."""
-        self.ignore_missing_bundles = ignore_missing_bundles
-
     def _case_is_deliverable(self, case: Case, pipeline: str) -> bool:
         last_version = self.hk_api.last_version(case.internal_id)
         if not last_version:
@@ -222,9 +221,9 @@ class DeliveryAPI:
             elif not skip_missing:
                 raise SyntaxError(f"Could not find any version for {case.internal_id}")
             return False
-        return self._samples_are_deliverable(case)
+        return self._case_has_samples(case)
 
-    def _samples_are_deliverable(self, case: Case) -> bool:
+    def _case_has_samples(self, case: Case) -> bool:
         if self.store.get_case_samples_by_case_id(case.internal_id):
             return True
         LOG.warning(f"Could not find any samples linked to case {case.internal_id}")
