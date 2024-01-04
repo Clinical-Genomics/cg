@@ -49,3 +49,11 @@ ONGOING_JOB_STATUSES: list[str] = [
     JobStatus.ON_VALIDATION,
     JobStatus.RUNNING,
 ]
+
+
+class MetadataFields(StrEnum):
+    CUSTOMER_NAME: str = "customer_name"
+    PREP_CATEGORY: str = "prep_category"
+    SAMPLE_NAME: str = "sample_name"
+    SEQUENCED_AT: str = "sequenced_at"
+    TICKET_NUMBER: str = "ticket_number"
