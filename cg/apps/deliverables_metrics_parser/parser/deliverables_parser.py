@@ -5,6 +5,7 @@ from pathlib import Path
 from cg.apps.deliverables_metrics_parser.models.pipeline_metrics_deliverables import (
     MIPDNAMetricsDeliverables,
 )
+from cg.apps.deliverables_metrics_parser.models.supporting_models import ReadInformation
 from cg.constants.constants import FileFormat
 from cg.constants.pipeline import Pipeline
 from cg.io.controller import ReadFile
@@ -15,6 +16,9 @@ class MetricsParserConstants(Enum):
     VALUE: str = "value"
     ID: str = "id"
     METRICS: str = "metrics"
+
+
+READ_INFORMATION_FIELDS = ["reads_mapped", "raw_total_sequences", "percentage_mapped_reads"]
 
 
 class MetricsDeliverablesParser:
@@ -59,29 +63,62 @@ class MetricsDeliverablesParser:
     def extract_name_value_pairs(metrics: list[dict], sample_id: str):
         """
         Extract the name value pairs for all metrics and a given sample id.
-            The YAML file contains unwanted fields here we extract only the name and value fields for each metric
+            The YAML file contains unwanted fields here we extract only the name and value fields for each metric.
         """
         extracted_name_value_pairs: list[dict] = []
         return (
             extracted_name_value_pairs.append(
-                {entry[MetricsParserConstants.name]: entry[MetricsParserConstants.VALUE]}
+                {entry[MetricsParserConstants.NAME]: entry[MetricsParserConstants.VALUE]}
             )
             for entry in metrics
             if entry[MetricsParserConstants.ID] == sample_id
         )
 
-    def _format_metrics(self, metrics: list[dict]):
+    @staticmethod
+    def get_flow_cell_name_from_input(input_field: str) -> str:
+        """
+        Return the flow cell name from an input field of the metrics deliverables file.
+            Expects the following format:
+                sampleid_lane_flowcellname_xxx
+        """
+        return input_field.split(
+            sep="_",
+        )[2]
+
+    @staticmethod
+    def get_lane_from_input(input_field: str) -> str:
+        """
+        Return the lane from an input field from the metrics deliverables file.
+            Expects the following format:
+                sampleid_lane_flowcellname_xxx
+        """
+        return input_field.split(sep="_")[1]
+
+    @staticmethod
+    def get_entries_with_name_from_metrics(metrics: list[dict], name: str) -> list[dict]:
+        """
+        Return the metrics with the specified name.
+        """
+        return [metric for metric in metrics if metrics[MetricsParserConstants.NAME] == name]
+
+    def format_read_information(self, metrics: list[dict]) -> list[ReadInformation]:
+        """Format the read information per flow cell."""
+        # Get the unique flow cells
+
+        # make a read information class per flow cell
+        # return formatted read information
+        pass
+
+    def _order_metrics_per_sample(self, metrics: list[dict]):
         """Reformat the metrics content per sample id."""
         sample_ids: set[str] = self._get_unique_sample_ids_in_content(metrics)
         sample_metrics: dict = {}
         for sample_id in sample_ids:
+            # get readinfo
             sample_metrics[sample_id] = self.extract_name_value_pairs(
                 metrics=metrics, sample_id=sample_id
             )
         return sample_metrics
-
-    def _summarise_lane_metrics(self, pipeline: str):
-        """Summarise lane metrics."""
 
     def parse_metrics_deliverables_file(self) -> None:
         """Parse the metrics deliverables file."""
@@ -90,7 +127,8 @@ class MetricsDeliverablesParser:
         )
         content: list[dict[list[dict]]] = self._read_metrics_deliverables(file_path)
         metrics: list[dict] = self._get_metrics_from_content(content)
+        metrics_per_sample: dict[list[dict]] = self.order_metrics_per_sample(metrics)
 
-        reformatted_metrics: list[dict] = self._format_metrics(metrics)
+        reformatted_metrics: list[dict] = self._order_metrics_per_sample(metrics)
 
         return None

@@ -1,194 +1,196 @@
 ---
 metrics:
   - header: ~
-    id: test_sample
-    input: test_sample_lanes_345678_sorted_md_sex
+    id: testsample
+    input: testsample_lanes_345678_sorted_md_sex
     name: gender
     step: chanjo_sexcheck
     value: female
   - header: pair
-    id: test_sample
-    input: test_sample_lanes_345678_sorted_md_collectmultiplemetrics
+    id: testsample
+    input: testsample_lanes_345678_sorted_md_collectmultiplemetrics
     name: PCT_PF_READS_IMPROPER_PAIRS
     step: collectmultiplemetrics
     value: '0.020751'
   - header: second_of_pair
-    id: test_sample
-    input: test_sample_lanes_345678_sorted_md_collectmultiplemetrics
+    id: testsample
+    input: testsample_lanes_345678_sorted_md_collectmultiplemetrics
     name: PCT_PF_READS_IMPROPER_PAIRS
     step: collectmultiplemetrics
     value: '0.020287'
   - header: first_of_pair
-    id: test_sample
-    input: test_sample_lanes_345678_sorted_md_collectmultiplemetrics
+    id: testsample
+    input: testsample_lanes_345678_sorted_md_collectmultiplemetrics
     name: PCT_PF_READS_IMPROPER_PAIRS
     step: collectmultiplemetrics
     value: '0.021214'
   - header: data
-    id: test_sample
-    input: test_sample_lanes_345678_sorted_md_collecthsmetrics
+    id: testsample
+    input: testsample_lanes_345678_sorted_md_collecthsmetrics
     name: MEAN_TARGET_COVERAGE
     step: collecthsmetrics
     value: '7.419272'
   - header: data
-    id: test_sample
-    input: test_sample_lanes_345678_sorted_md_collecthsmetrics
+    id: testsample
+    input: testsample_lanes_345678_sorted_md_collecthsmetrics
     name: AT_DROPOUT
     step: collecthsmetrics
     value: '3.262416'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane4_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane4_sorted
     name: raw_total_sequences
     step: bamstats
     value: '44084328'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane5_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane5_sorted
     name: raw_total_sequences
     step: bamstats
     value: '43867358'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane3_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane3_sorted
     name: raw_total_sequences
     step: bamstats
     value: '47627900'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane7_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane7_sorted
     name: raw_total_sequences
     step: bamstats
     value: '42947730'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane8_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane8_sorted
     name: raw_total_sequences
     step: bamstats
     value: '39223200'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane6_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane6_sorted
     name: raw_total_sequences
     step: bamstats
     value: '37692516'
   - header: ~
-    id: test_sample
-    input: test_sample_lanes_345678_sorted_md
+    id: testsample
+    input: testsample_lanes_345678_sorted_md
     name: fraction_duplicates
     step: markduplicates
     value: '0.0622516777959427'
   - header: data
-    id: test_sample
-    input: test_sample_lanes_345678_sorted_md_collecthsmetrics
+    id: testsample
+    input: testsample_lanes_345678_sorted_md_collecthsmetrics
     name: MEDIAN_TARGET_COVERAGE
     step: collecthsmetrics
     value: '7'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane4_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane4_sorted
     name: percentage_mapped_reads
     step: bamstats
     value: '99.9000143543075'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane5_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane5_sorted
     name: percentage_mapped_reads
     step: bamstats
     value: '99.9066595257458'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane3_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane3_sorted
     name: percentage_mapped_reads
     step: bamstats
     value: '99.8855607742521'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane7_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane7_sorted
     name: percentage_mapped_reads
     step: bamstats
     value: '99.9062441716943'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane8_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane8_sorted
     name: percentage_mapped_reads
     step: bamstats
     value: '99.9088422158315'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane6_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane6_sorted
     name: percentage_mapped_reads
     step: bamstats
     value: '99.9085176484372'
   - header: data
-    id: test_sample
-    input: test_sample_lanes_345678_sorted_md_collecthsmetrics
+    id: testsample
+    input: testsample_lanes_345678_sorted_md_collecthsmetrics
     name: PCT_TARGET_BASES_10X
     step: collecthsmetrics
     value: '0.236983'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane4_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane4_sorted
     name: reads_mapped
     step: bamstats
     value: '44040250'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane5_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane5_sorted
     name: reads_mapped
     step: bamstats
     value: '43826412'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane3_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane3_sorted
     name: reads_mapped
     step: bamstats
     value: '47573395'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane7_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane7_sorted
     name: reads_mapped
     step: bamstats
     value: '42907464'
+    flow_cell: 22
+    lane:
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane8_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane8_sorted
     name: reads_mapped
     step: bamstats
     value: '39187445'
   - header: ~
-    id: test_sample
-    input: test_sample_171015_22F52VLT3_XXXXXX_lane6_sorted
+    id: testsample
+    input: testsample_171015_22F52VLT3_XXXXXX_lane6_sorted
     name: reads_mapped
     step: bamstats
     value: '37658034'
   - header: data
-    id: test_sample
-    input: test_sample_lanes_345678_sorted_md_collecthsmetrics
+    id: testsample
+    input: testsample_lanes_345678_sorted_md_collecthsmetrics
     name: GC_DROPOUT
     step: collecthsmetrics
     value: '0.344749'
   - header: data
-    id: test_sample
-    input: test_sample_lanes_345678_sorted_md_collectmultiplemetrics
+    id: testsample
+    input: testsample_lanes_345678_sorted_md_collectmultiplemetrics
     name: MEAN_INSERT_SIZE
     step: collectmultiplemetricsinsertsize
     value: '191.836369'
   - header: data
-    id: test_sample
-    input: test_sample_lanes_345678_sorted_md_collecthsmetrics
+    id: testsample
+    input: testsample_lanes_345678_sorted_md_collecthsmetrics
     name: PCT_OFF_BAIT
     step: collecthsmetrics
     value: '0.933011'
   - header: data
-    id: test_sample
-    input: test_sample_lanes_345678_sorted_md_collecthsmetrics
+    id: testsample
+    input: testsample_lanes_345678_sorted_md_collecthsmetrics
     name: PCT_TARGET_BASES_20X
     step: collecthsmetrics
     value: '0.000844'
   - header: data
-    id: test_sample
-    input: test_sample_lanes_345678_sorted_md_collecthsmetrics
+    id: testsample
+    input: testsample_lanes_345678_sorted_md_collecthsmetrics
     name: FOLD_80_BASE_PENALTY
     step: collecthsmetrics
     value: '1.483854'
