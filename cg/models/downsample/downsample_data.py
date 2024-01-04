@@ -42,7 +42,8 @@ class DownsampleData:
         self,
     ) -> str:
         """Return a new sample name with the number of reads to which it is down sampled in millions appended."""
-        return f"{self.sample_id}-{self.number_of_reads}M"
+        number_of_reads: str = str(self.number_of_reads).replace(".", "C")
+        return f"{self.sample_id}D{number_of_reads}M"
 
     @property
     def downsampled_case_name(
