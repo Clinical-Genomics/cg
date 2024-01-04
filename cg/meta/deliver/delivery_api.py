@@ -97,11 +97,14 @@ class DeliveryAPI:
                 number_linked_files += 1
 
     def _get_out_path(self, out_dir: Path, file: Path, case: Case) -> Path:
-        out_file_name: str = self._get_out_file_name(file=file, case=case)
+        out_file_name: str = self._get_case_out_file_name(file=file, case=case)
         return Path(out_dir, out_file_name)
 
-    def _get_out_file_name(self, file: Path, case: Case) -> str:
+    def _get_case_out_file_name(self, file: Path, case: Case) -> str:
         return file.name.replace(case.internal_id, case.name)
+
+    def _get_sample_out_file_name(self, file: Path, sample: Sample) -> str:
+        return file.name.replace(sample.internal_id, sample.name)
 
     def _get_sample_ids_for_case(self, case: Case) -> set[str]:
         links = self.store.get_case_samples_by_case_id(case.internal_id)
@@ -134,24 +137,15 @@ class DeliveryAPI:
         return delivery_base
 
     def _deliver_sample_files(self, case: Case, pipeline: str) -> None:
-        """Deliver files on sample level."""
         if not get_sample_tags_for_pipeline(pipeline):
             return
 
-        case_name: str | None = get_delivery_case_name(case=case, pipeline=pipeline)
-
-        deliverable_samples = filter(
-            lambda link: self._sample_is_deliverable(link=link, case=case, pipeline=pipeline),
-            self.store.get_case_samples_by_case_id(case.internal_id),
-        )
+        deliverable_samples = self._get_deliverable_samples(case=case, pipeline=pipeline)
 
         for link in deliverable_samples:
             sample_id = link.sample.internal_id
             sample_name = link.sample.name
-            if pipeline == DataDelivery.FASTQ:
-                version: Version = self.hk_api.last_version(sample_id)
-            else:
-                version: Version = self.hk_api.last_version(case.internal_id)
+            case_name: str | None = get_delivery_case_name(case=case, pipeline=pipeline)
             delivery_base: Path = get_delivery_dir_path(
                 case_name=case_name,
                 sample_name=sample_name,
@@ -165,11 +159,14 @@ class DeliveryAPI:
             file_path: Path
             number_linked_files_now: int = 0
             number_previously_linked_files: int = 0
-            for file_path in self._get_sample_files_from_version(
+            version: Version = self._get_version_for_sample(
+                sample=link.sample, case=case, pipeline=pipeline
+            )
+            files: list[Path] = self._get_sample_files_from_version(
                 version=version, sample_id=sample_id, pipeline=pipeline
-            ):
-                # Out path should include customer names
-                file_name: str = file_path.name.replace(sample_id, sample_name)
+            )
+            for file_path in files:
+                file_name: str = self._get_sample_out_file_name(file=file_path, sample=link.sample)
                 if case_name:
                     file_name: str = file_name.replace(case.internal_id, case.name)
                 out_path: Path = delivery_base / file_name
@@ -192,6 +189,16 @@ class DeliveryAPI:
             LOG.info(
                 f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case.internal_id}"
             )
+
+    def _get_deliverable_samples(self, case: Case, pipeline: str) -> Iterable[CaseSample]:
+        return filter(
+            lambda link: self._sample_is_deliverable(link=link, case=case, pipeline=pipeline),
+            self.store.get_case_samples_by_case_id(case.internal_id),
+        )
+
+    def _get_version_for_sample(self, sample: Sample, case: Case, pipeline: str) -> Version:
+        bundle: str = sample.internal_id if pipeline == DataDelivery.FASTQ else case.internal_id
+        return self.hk_api.last_version(bundle)
 
     def _get_case_files_from_version(
         self, version: Version, sample_ids: set[str], pipeline: str
