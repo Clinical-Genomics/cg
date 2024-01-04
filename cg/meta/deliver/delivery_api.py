@@ -47,15 +47,12 @@ class DeliveryAPI:
         self.dry_run = dry_run
 
     def set_dry_run(self, dry_run: bool):
-        """Set the dry run flag."""
         self.dry_run = dry_run
 
     def set_deliver_failed_samples(self, deliver_failed_samples: bool):
-        """Set the force all flag."""
         self.deliver_failed_samples = deliver_failed_samples
 
     def set_ignore_missing_bundles(self, ignore_missing_bundles: bool):
-        """Set the ignore missing bundles flag."""
         self.ignore_missing_bundles = ignore_missing_bundles
 
     def deliver(self, ticket: str | None, case_id: str | None, pipeline: str) -> None:
