@@ -1,4 +1,5 @@
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSampleBCLConvert
+from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 
 
 def test_get_non_pooled_samples_when_no_samples():
@@ -14,8 +15,8 @@ def test_get_non_pooled_samples_when_no_samples():
 
 def test_get_non_pooled_samples_when_multiple_samples_same_lane():
     # GIVEN a sample sheet with multiple samples on the same lane
-    sample1 = FlowCellSample(lane=1, sample_id="ACC123", index="A")
-    sample2 = FlowCellSample(lane=1, sample_id="ACC456", index="A")
+    sample1 = FlowCellSampleBCLConvert(lane=1, sample_id="ACC123", index="A")
+    sample2 = FlowCellSampleBCLConvert(lane=1, sample_id="ACC456", index="A")
     sample_sheet = SampleSheet(samples=[sample1, sample2])
 
     # WHEN retrieving any non pooled samples
@@ -27,7 +28,7 @@ def test_get_non_pooled_samples_when_multiple_samples_same_lane():
 
 def test_get_non_pooled_samples_when_single_sample_one_lane():
     # GIVEN a sample sheet with a single sample on one lane
-    non_pooled_sample = FlowCellSample(lane=1, sample_id="ACC123", index="A")
+    non_pooled_sample = FlowCellSampleBCLConvert(lane=1, sample_id="ACC123", index="A")
     sample_sheet = SampleSheet(samples=[non_pooled_sample])
 
     # WHEN retrieving any non pooled samples
@@ -39,9 +40,9 @@ def test_get_non_pooled_samples_when_single_sample_one_lane():
 
 def test_get_non_pooled_samples_when_multiple_lanes_one_single():
     # GIVEN a sample sheet with multiple lanes and a single sample in one lane
-    sample1 = FlowCellSample(lane=1, sample_id="ACC123", index="A")
-    sample2 = FlowCellSample(lane=1, sample_id="ACC456", index="A")
-    non_pooled_sample = FlowCellSample(lane=2, sample_id="ACC789", index="A")
+    sample1 = FlowCellSampleBCLConvert(lane=1, sample_id="ACC123", index="A")
+    sample2 = FlowCellSampleBCLConvert(lane=1, sample_id="ACC456", index="A")
+    non_pooled_sample = FlowCellSampleBCLConvert(lane=2, sample_id="ACC789", index="A")
     sample_sheet = SampleSheet(samples=[sample1, sample2, non_pooled_sample])
 
     # WHEN retrieving any non pooled samples
