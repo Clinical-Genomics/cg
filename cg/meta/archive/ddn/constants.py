@@ -57,3 +57,7 @@ class MetadataFields(StrEnum):
     SAMPLE_NAME: str = "sample_name"
     SEQUENCED_AT: str = "sequenced_at"
     TICKET_NUMBER: str = "ticket_number"
+
+
+METADATA_FIELD_NAME = "metadataName"
+METADATA_FIELD_VALUE = "value"
