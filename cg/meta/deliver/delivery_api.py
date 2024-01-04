@@ -2,7 +2,6 @@
 
 import logging
 import os
-from copy import deepcopy
 from pathlib import Path
 from typing import Iterable
 
@@ -13,10 +12,15 @@ from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
 from cg.exc import MissingFilesError
 from cg.meta.deliver.utils import (
+    create_link,
     get_delivery_case_name,
     get_delivery_dir_path,
     get_case_tags_for_pipeline,
+    get_out_path,
+    get_sample_out_file_name,
     get_sample_tags_for_pipeline,
+    include_file_case,
+    include_file_sample,
 )
 from cg.store import Store
 from cg.store.models import Case, CaseSample, Sample
@@ -87,37 +91,15 @@ class DeliveryAPI:
             version=version, sample_ids=sample_ids, pipeline=pipeline
         )
         for file_path in files:
-            out_path: Path = self._get_out_path(out_dir=out_dir, file=file_path, case=case)
-            if self._create_link(source=file_path, destination=out_path):
+            out_path: Path = get_out_path(out_dir=out_dir, file=file_path, case=case)
+            if create_link(source=file_path, destination=out_path, dry_run=self.dry_run):
                 number_linked_files += 1
-
-    def _get_out_path(self, out_dir: Path, file: Path, case: Case) -> Path:
-        out_file_name: str = self._get_case_out_file_name(file=file, case=case)
-        return Path(out_dir, out_file_name)
-
-    def _get_case_out_file_name(self, file: Path, case: Case) -> str:
-        return file.name.replace(case.internal_id, case.name)
-
-    def _get_sample_out_file_name(self, file: Path, sample: Sample) -> str:
-        return file.name.replace(sample.internal_id, sample.name)
 
     def _get_sample_ids_for_case(self, case: Case) -> set[str]:
         links = self.store.get_case_samples_by_case_id(case.internal_id)
         samples: list[Sample] = [link.sample for link in links]
         sample_ids: set[str] = {sample.internal_id for sample in samples}
         return sample_ids
-
-    def _create_link(self, source: Path, destination: Path) -> bool:
-        if self.dry_run:
-            LOG.info(f"Would hard link file {source} to {destination}")
-            return True
-        try:
-            os.link(source, destination)
-            LOG.info(f"Hard link file {source} to {destination}")
-            return True
-        except FileExistsError:
-            LOG.info(f"Path {destination} exists, skipping")
-            return False
 
     def _create_delivery_directory(self, case: Case) -> Path:
         delivery_base = get_delivery_dir_path(
@@ -151,11 +133,11 @@ class DeliveryAPI:
                 version=version, sample_id=sample_id, pipeline=pipeline
             )
             for file_path in files:
-                file_name: str = self._get_sample_out_file_name(file=file_path, sample=link.sample)
+                file_name: str = get_sample_out_file_name(file=file_path, sample=link.sample)
                 if case_name:
                     file_name: str = file_name.replace(case.internal_id, case.name)
-                out_path: Path = delivery_base / file_name
-                if self._create_link(source=file_path, destination=out_path):
+                out_path = Path(delivery_base, file_name)
+                if create_link(source=file_path, destination=out_path, dry_run=self.dry_run):
                     number_linked_files += 1
 
             if not files and number_linked_files == 0:
@@ -200,9 +182,7 @@ class DeliveryAPI:
 
         version_file: File
         for version_file in version.files:
-            if not self._include_file_case(
-                file=version_file, sample_ids=sample_ids, pipeline=pipeline
-            ):
+            if not include_file_case(file=version_file, sample_ids=sample_ids, pipeline=pipeline):
                 LOG.debug(f"Skipping file {version_file.path}")
                 continue
             yield Path(version_file.full_path)
@@ -216,59 +196,9 @@ class DeliveryAPI:
         """Fetch files for a sample from a version that are tagged with sample tags."""
         file_obj: File
         for file_obj in version.files:
-            if not self._include_file_sample(file=file_obj, sample_id=sample_id, pipeline=pipeline):
+            if not include_file_sample(file=file_obj, sample_id=sample_id, pipeline=pipeline):
                 continue
             yield Path(file_obj.full_path)
-
-    def _include_file_case(self, file: File, sample_ids: set[str], pipeline: str) -> bool:
-        """Check if file should be included in case bundle.
-
-        At least one tag should match between file and tags.
-        Do not include files with sample tags.
-        """
-        file_tags = {tag.name for tag in file.tags}
-        case_tags = get_case_tags_for_pipeline(pipeline)
-        all_case_tags: set[str] = {tag for tags in case_tags for tag in tags}
-        if all_case_tags.isdisjoint(file_tags):
-            LOG.debug("No tags are matching")
-            return False
-
-        LOG.debug(f"Found file tags {', '.join(file_tags)}")
-
-        # Check if any of the sample tags exist
-        if sample_ids.intersection(file_tags):
-            LOG.debug(f"Found sample tag, skipping {file.path}")
-            return False
-
-        # Check if any of the file tags matches the case tags
-        tags: set[str]
-        for tags in case_tags:
-            LOG.debug(f"check if {tags} is a subset of {file_tags}")
-            if tags.issubset(file_tags):
-                return True
-        LOG.debug(f"Could not find any tags matching file {file.path} with tags {file_tags}")
-
-        return False
-
-    def _include_file_sample(self, file: File, sample_id: str, pipeline: str) -> bool:
-        """Check if file should be included in sample bundle.
-
-        At least one tag should match between file and tags.
-        Only include files with sample tag.
-
-        For fastq delivery we know that we want to deliver all files of bundle.
-        """
-        file_tags = {tag.name for tag in file.tags}
-        tags: set[str]
-        # Check if any of the file tags matches the sample tags
-        sample_tags = get_sample_tags_for_pipeline(pipeline)
-        for tags in sample_tags:
-            working_copy = deepcopy(tags)
-            if pipeline != "fastq":
-                working_copy.add(sample_id)
-            if working_copy.issubset(file_tags):
-                return True
-        return False
 
     def set_dry_run(self, dry_run: bool):
         """Set the dry run flag."""
