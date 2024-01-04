@@ -69,31 +69,7 @@ class DeliveryAPI:
         self._deliver_case_files(case=case, pipeline=pipeline)
         self._deliver_sample_files(case=case, pipeline=pipeline)
 
-    def _sample_is_deliverable(self, link: CaseSample, case: Case, pipeline: str) -> bool:
-        sample_is_external: bool = link.sample.application_version.application.is_external
-        deliver_failed_samples: bool = self.deliver_failed_samples
-        sample_passes_qc: bool = link.sample.sequencing_qc
-        sample_is_deliverable: bool = (
-            sample_passes_qc or deliver_failed_samples or sample_is_external
-        )
-        last_version: Version = self.hk_api.last_version(case.internal_id)
-        if pipeline == DataDelivery.FASTQ:
-            last_version = self.hk_api.last_version(link.sample.internal_id)
-        if not last_version:
-            skip_missing = pipeline in constants.SKIP_MISSING or self.ignore_missing_bundles
-            if skip_missing:
-                LOG.info(f"Could not find any version for {link.sample.internal_id}")
-                return False
-            raise SyntaxError(f"Could not find any version for {link.sample.internal_id}")
-        if not sample_is_deliverable:
-            LOG.warning(f"Sample {link.sample.internal_id} is not deliverable.")
-        return sample_is_deliverable
-
-    def _deliver_case_files(
-        self,
-        case: Case,
-        pipeline: str,
-    ) -> None:
+    def _deliver_case_files(self, case: Case, pipeline: str) -> None:
         LOG.debug(f"Deliver case files for {case.internal_id}")
 
         if not get_case_tags_for_pipeline(pipeline):
@@ -104,37 +80,45 @@ class DeliveryAPI:
             LOG.warning(f"No version found for case {case.internal_id}")
             return
 
-        delivery_dir: Path = self._create_delivery_directory(case)
-        self._link_case_files(
-            case=case, version=version, pipeline=pipeline, delivery_dir=delivery_dir
-        )
+        out_dir: Path = self._create_delivery_directory(case)
+        self._link_case_files(case=case, version=version, pipeline=pipeline, out_dir=out_dir)
 
-    def _link_case_files(self, case: Case, version: Version, pipeline: str, delivery_dir: Path):
+    def _link_case_files(self, case: Case, version: Version, pipeline: str, out_dir: Path):
         file_path: Path
         number_linked_files: int = 0
-        links = self.store.get_case_samples_by_case_id(case.internal_id)
-        samples: list[Sample] = [link.sample for link in links]
-        sample_ids: set[str] = {sample.internal_id for sample in samples}
+        sample_ids: set[str] = self._get_sample_ids_for_case(case)
         files: list[Path] = self._get_case_files_from_version(
             version=version, sample_ids=sample_ids, pipeline=pipeline
         )
         for file_path in files:
-            # Out path should include customer names
-            out_path: Path = delivery_dir / file_path.name.replace(case.internal_id, case.name)
-            if out_path.exists():
-                LOG.warning(f"File {out_path} already exists!")
-                continue
+            out_path: Path = self._get_out_path(out_dir=out_dir, file=file_path, case=case)
+            if self._create_link(source=file_path, destination=out_path):
+                number_linked_files += 1
 
-            if self.dry_run:
-                LOG.info(f"Would hard link file {file_path} to {out_path}")
-                number_linked_files += 1
-                continue
-            LOG.info(f"Hard link file {file_path} to {out_path}")
-            try:
-                os.link(file_path, out_path)
-                number_linked_files += 1
-            except FileExistsError:
-                LOG.info(f"Path {out_path} exists, skipping")
+    def _get_out_path(self, out_dir: Path, file: Path, case: Case) -> Path:
+        out_file_name: str = self._get_out_file_name(file=file, case=case)
+        return Path(out_dir, out_file_name)
+
+    def _get_out_file_name(self, file: Path, case: Case) -> str:
+        return file.name.replace(case.internal_id, case.name)
+
+    def _get_sample_ids_for_case(self, case: Case) -> set[str]:
+        links = self.store.get_case_samples_by_case_id(case.internal_id)
+        samples: list[Sample] = [link.sample for link in links]
+        sample_ids: set[str] = {sample.internal_id for sample in samples}
+        return sample_ids
+
+    def _create_link(self, source: Path, destination: Path) -> bool:
+        if self.dry_run:
+            LOG.info(f"Would hard link file {source} to {destination}")
+            return True
+        try:
+            os.link(source, destination)
+            LOG.info(f"Hard link file {source} to {destination}")
+            return True
+        except FileExistsError:
+            LOG.info(f"Path {destination} exists, skipping")
+            return False
 
     def _create_delivery_directory(self, case: Case) -> Path:
         delivery_base = get_delivery_dir_path(
@@ -148,11 +132,7 @@ class DeliveryAPI:
             delivery_base.mkdir(parents=True, exist_ok=True)
         return delivery_base
 
-    def _deliver_sample_files(
-        self,
-        case: Case,
-        pipeline: str,
-    ) -> None:
+    def _deliver_sample_files(self, case: Case, pipeline: str) -> None:
         """Deliver files on sample level."""
         if not get_sample_tags_for_pipeline(pipeline):
             return
@@ -217,10 +197,7 @@ class DeliveryAPI:
             )
 
     def _get_case_files_from_version(
-        self,
-        version: Version,
-        sample_ids: set[str],
-        pipeline: str,
+        self, version: Version, sample_ids: set[str], pipeline: str
     ) -> Iterable[Path]:
         """Fetch all case files from a version that are tagged with any of the case tags."""
 
@@ -335,3 +312,23 @@ class DeliveryAPI:
             return True
         LOG.warning(f"Could not find any samples linked to case {case.internal_id}")
         return False
+
+    def _sample_is_deliverable(self, link: CaseSample, case: Case, pipeline: str) -> bool:
+        sample_is_external: bool = link.sample.application_version.application.is_external
+        deliver_failed_samples: bool = self.deliver_failed_samples
+        sample_passes_qc: bool = link.sample.sequencing_qc
+        sample_is_deliverable: bool = (
+            sample_passes_qc or deliver_failed_samples or sample_is_external
+        )
+        last_version: Version = self.hk_api.last_version(case.internal_id)
+        if pipeline == DataDelivery.FASTQ:
+            last_version = self.hk_api.last_version(link.sample.internal_id)
+        if not last_version:
+            skip_missing = pipeline in constants.SKIP_MISSING or self.ignore_missing_bundles
+            if skip_missing:
+                LOG.info(f"Could not find any version for {link.sample.internal_id}")
+                return False
+            raise SyntaxError(f"Could not find any version for {link.sample.internal_id}")
+        if not sample_is_deliverable:
+            LOG.warning(f"Sample {link.sample.internal_id} is not deliverable.")
+        return sample_is_deliverable
