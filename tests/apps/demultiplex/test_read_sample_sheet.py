@@ -3,12 +3,6 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSample,
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-    SampleSheet,
-)
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_raw_samples,
     get_sample_sheet_from_file,
@@ -17,6 +11,12 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_validated_sample_sheet,
     validate_samples_are_unique,
 )
+from cg.apps.demultiplex.sample_sheet.sample_models import (
+    FlowCellSample,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
+)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 from cg.exc import SampleSheetError
 

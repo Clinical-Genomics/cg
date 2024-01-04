@@ -208,6 +208,7 @@ class AddHandler(BaseHandler):
         cohorts: list[str] | None = None,
         priority: Priority | None = Priority.standard,
         synopsis: str | None = None,
+        customer_id: int | None = None,
     ) -> Case:
         """Build a new Case record."""
 
@@ -222,6 +223,7 @@ class AddHandler(BaseHandler):
             priority=priority,
             synopsis=synopsis,
             tickets=ticket,
+            customer_id=customer_id,
         )
 
     def relate_sample(
