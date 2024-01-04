@@ -105,7 +105,9 @@ class DeliveryAPI:
             return
 
         delivery_dir: Path = self._create_delivery_directory(case)
-        self._link_case_files(case=case, version=version, pipeline=pipeline, delivery_dir=delivery_dir)
+        self._link_case_files(
+            case=case, version=version, pipeline=pipeline, delivery_dir=delivery_dir
+        )
 
     def _link_case_files(self, case: Case, version: Version, pipeline: str, delivery_dir: Path):
         file_path: Path
@@ -133,7 +135,6 @@ class DeliveryAPI:
                 number_linked_files += 1
             except FileExistsError:
                 LOG.info(f"Path {out_path} exists, skipping")
-
 
     def _create_delivery_directory(self, case: Case) -> Path:
         delivery_base = get_delivery_dir_path(
