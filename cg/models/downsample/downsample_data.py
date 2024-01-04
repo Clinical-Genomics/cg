@@ -41,8 +41,10 @@ class DownsampleData:
     def downsampled_sample_name(
         self,
     ) -> str:
-        """Return a new sample name with the number of reads to which it is down sampled in millions appended."""
-        return f"{self.sample_id}_{self.number_of_reads}M"
+        """Return a new sample name with the number of reads to which it is down sampled in millions
+        appended. DS stands for downsampled. The number of reads is converted to a string and the
+        decimal point is replaced with a C."""
+        return f"{self.sample_id}DS{self.convert_number_of_reads_to_string}M"
 
     @property
     def downsampled_case_name(
@@ -50,6 +52,11 @@ class DownsampleData:
     ) -> str:
         """Return a case name with _downsampled appended."""
         return f"{self.case_name}_downsampled"
+
+    @property
+    def convert_number_of_reads_to_string(self) -> str:
+        """Convert the number of reads to a string."""
+        return str(self.number_of_reads).replace(".", "C")
 
     def get_sample_to_downsample(self) -> Sample:
         """
